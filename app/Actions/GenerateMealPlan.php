@@ -10,6 +10,7 @@ use App\Models\User;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Prism;
 use Prism\Prism\Schema\ArraySchema;
+use Prism\Prism\Schema\EnumSchema;
 use Prism\Prism\Schema\NumberSchema;
 use Prism\Prism\Schema\ObjectSchema;
 use Prism\Prism\Schema\StringSchema;
@@ -30,6 +31,10 @@ final readonly class GenerateMealPlan
             ->using(Provider::Gemini, $model->value)
             ->withPrompt($prompt)
             ->withSchema($schema)
+            ->withMaxTokens(32000)
+            ->withClientOptions([
+                'timeout' => 180,
+            ])
             ->asStructured();
 
         /** @var array<string, mixed> $structuredData */
@@ -44,9 +49,10 @@ final readonly class GenerateMealPlan
             name: 'meal_plan',
             description: 'A comprehensive personalized meal plan with detailed meals',
             properties: [
-                new StringSchema(
+                new EnumSchema(
                     name: 'type',
-                    description: 'The type of meal plan (weekly, monthly, or custom)'
+                    description: 'The type of meal plan',
+                    options: ['weekly', 'monthly', 'custom']
                 ),
                 new StringSchema(
                     name: 'name',
@@ -85,9 +91,10 @@ final readonly class GenerateMealPlan
                                 name: 'day_number',
                                 description: 'The day number in the plan (1-based)'
                             ),
-                            new StringSchema(
+                            new EnumSchema(
                                 name: 'type',
-                                description: 'The meal type: breakfast, lunch, dinner, or snack'
+                                description: 'The meal type',
+                                options: ['breakfast', 'lunch', 'dinner', 'snack']
                             ),
                             new StringSchema(
                                 name: 'name',

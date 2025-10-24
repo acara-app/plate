@@ -126,3 +126,9 @@ it('handles missing user gracefully', function (): void {
     // Should not throw an exception and should not create any meal plans
     expect(MealPlan::count())->toBe(0);
 });
+
+it('has correct timeout configuration', function (): void {
+    $job = new ProcessMealPlanJob(1, AiModel::Gemini25Flash);
+
+    expect($job->timeout)->toBe(300);
+});

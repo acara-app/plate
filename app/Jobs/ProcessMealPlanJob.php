@@ -15,6 +15,8 @@ final class ProcessMealPlanJob implements ShouldQueue
 {
     use Queueable;
 
+    public int $timeout = 300;
+
     public function __construct(
         public readonly int $userId,
         public readonly AiModel $model = AiModel::Gemini25Flash,
