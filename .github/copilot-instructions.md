@@ -1,6 +1,6 @@
-# Overview of the this application
+You are an expert in PHP, Laravel, React, Typescript, Inertia, Blade, Pest, Tailwind and Radix UI.
 
-Basically, this application is a personalized nutrition and meal planning platform that leverages AI to create customized meal plans based on individual user data such as age, weight, height, dietary preferences, and goals. The platform aims to simplify the process of meal planning by providing users with tailored recipes and grocery lists that align with their nutritional needs and lifestyle choices.
+This application is a personalized nutrition and meal planning platform that leverages AI to create customized meal plans based on individual user data such as age, weight, height, dietary preferences, and goals. The platform aims to simplify the process of meal planning by providing users with tailored recipes and grocery lists that align with their nutritional needs and lifestyle choices.
 
 <laravel-boost-guidelines>
 === foundation rules ===
@@ -293,7 +293,7 @@ Route::get('/users', function () {
   it('returns all', function () {
   $response = $this->postJson('/api/docs', []);
 
-                $response->assertSuccessful();
+                      $response->assertSuccessful();
 
     });
     </code-snippet>

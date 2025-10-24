@@ -1,7 +1,11 @@
 import onboarding from '@/routes/onboarding';
 import { LifeStyle, Profile } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { Form, Head } from '@inertiajs/react';
+import { LoaderCircle } from 'lucide-react';
+
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface Props {
     profile?: Profile;
@@ -9,15 +13,6 @@ interface Props {
 }
 
 export default function LifeStylePage({ profile, lifestyles }: Props) {
-    const { data, setData, post, processing, errors } = useForm({
-        lifestyle_id: profile?.lifestyle_id || '',
-    });
-
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-        post(onboarding.lifestyle.store.url());
-    };
-
     return (
         <>
             <Head title="Lifestyle - Step 3 of 5" />
@@ -43,69 +38,74 @@ export default function LifeStylePage({ profile, lifestyles }: Props) {
                             your daily calorie needs
                         </p>
 
-                        <form onSubmit={submit} className="space-y-4">
-                            <div className="space-y-3">
-                                {lifestyles.map((lifestyle) => (
-                                    <label
-                                        key={lifestyle.id}
-                                        className="flex cursor-pointer flex-col rounded-lg border border-gray-300 p-4 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
-                                    >
-                                        <div className="flex items-start">
-                                            <input
-                                                type="radio"
-                                                name="lifestyle_id"
-                                                value={lifestyle.id}
-                                                checked={
-                                                    data.lifestyle_id ===
-                                                    lifestyle.id
-                                                }
-                                                onChange={(e) =>
-                                                    setData(
-                                                        'lifestyle_id',
-                                                        parseInt(
-                                                            e.target.value,
-                                                        ),
-                                                    )
-                                                }
-                                                className="mt-1 h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                                            />
-                                            <div className="ml-3 flex-1">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="font-medium text-gray-900 dark:text-white">
-                                                        {lifestyle.name}
-                                                    </span>
-                                                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                                                        {
-                                                            lifestyle.activity_multiplier
+                        <Form
+                            {...onboarding.lifestyle.store.form()}
+                            disableWhileProcessing
+                            className="space-y-4"
+                        >
+                            {({ processing, errors }) => (
+                                <>
+                                    <div className="space-y-3">
+                                        {lifestyles.map((lifestyle) => (
+                                            <label
+                                                key={lifestyle.id}
+                                                className={cn(
+                                                    'flex cursor-pointer flex-col rounded-lg border p-4 transition-colors',
+                                                    'hover:bg-gray-50 dark:hover:bg-gray-700',
+                                                    'border-gray-300 dark:border-gray-600',
+                                                )}
+                                            >
+                                                <div className="flex items-start">
+                                                    <input
+                                                        type="radio"
+                                                        name="lifestyle_id"
+                                                        value={lifestyle.id}
+                                                        defaultChecked={
+                                                            profile?.lifestyle_id ===
+                                                            lifestyle.id
                                                         }
-                                                        x multiplier
-                                                    </span>
+                                                        className="mt-1 h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                    <div className="ml-3 flex-1">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="font-medium text-gray-900 dark:text-white">
+                                                                {lifestyle.name}
+                                                            </span>
+                                                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                                {
+                                                                    lifestyle.activity_multiplier
+                                                                }
+                                                                x multiplier
+                                                            </span>
+                                                        </div>
+                                                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                                                            {
+                                                                lifestyle.description
+                                                            }
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                                                    {lifestyle.description}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </label>
-                                ))}
-                            </div>
-                            {errors.lifestyle_id && (
-                                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                    {errors.lifestyle_id}
-                                </p>
-                            )}
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <InputError message={errors.lifestyle_id} />
 
-                            {/* Submit Button */}
-                            <div className="flex justify-end pt-4">
-                                <button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="inline-flex items-center rounded-md bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
-                                >
-                                    Continue to Dietary Preferences
-                                </button>
-                            </div>
-                        </form>
+                                    {/* Submit Button */}
+                                    <div className="flex justify-end pt-4">
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="w-full sm:w-auto"
+                                        >
+                                            {processing && (
+                                                <LoaderCircle className="h-4 w-4 animate-spin" />
+                                            )}
+                                            Continue to Dietary Preferences
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
+                        </Form>
                     </div>
                 </div>
             </div>

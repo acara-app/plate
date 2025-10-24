@@ -1,7 +1,19 @@
 import onboarding from '@/routes/onboarding';
 import { Profile, SexOption } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { Form, Head } from '@inertiajs/react';
+import { LoaderCircle } from 'lucide-react';
+
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 interface Props {
     profile: Profile;
@@ -9,18 +21,6 @@ interface Props {
 }
 
 export default function Biometrics({ profile, sexOptions }: Props) {
-    const { data, setData, post, processing, errors } = useForm({
-        age: profile?.age || '',
-        height: profile?.height || '',
-        weight: profile?.weight || '',
-        sex: profile?.sex || '',
-    });
-
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-        post(onboarding.biometrics.store.url());
-    };
-
     return (
         <>
             <Head title="Biometrics - Step 1 of 5" />
@@ -46,143 +46,114 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                             nutritional needs
                         </p>
 
-                        <form onSubmit={submit} className="space-y-6">
-                            {/* Age */}
-                            <div>
-                                <label
-                                    htmlFor="age"
-                                    className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-                                >
-                                    Age
-                                </label>
-                                <input
-                                    id="age"
-                                    type="number"
-                                    value={data.age}
-                                    onChange={(e) =>
-                                        setData('age', e.target.value)
-                                    }
-                                    min="13"
-                                    max="120"
-                                    required
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                    placeholder="Enter your age"
-                                />
-                                {errors.age && (
-                                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                        {errors.age}
-                                    </p>
-                                )}
-                            </div>
+                        <Form
+                            {...onboarding.biometrics.store.form()}
+                            disableWhileProcessing
+                            className="space-y-6"
+                        >
+                            {({ processing, errors }) => (
+                                <>
+                                    {/* Age */}
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="age">Age</Label>
+                                        <Input
+                                            id="age"
+                                            type="number"
+                                            name="age"
+                                            defaultValue={profile?.age || ''}
+                                            min="13"
+                                            max="120"
+                                            required
+                                            placeholder="Enter your age"
+                                        />
+                                        <InputError message={errors.age} />
+                                    </div>
 
-                            {/* Height */}
-                            <div>
-                                <label
-                                    htmlFor="height"
-                                    className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-                                >
-                                    Height (cm)
-                                </label>
-                                <input
-                                    id="height"
-                                    type="number"
-                                    step="0.01"
-                                    value={data.height}
-                                    onChange={(e) =>
-                                        setData('height', e.target.value)
-                                    }
-                                    min="50"
-                                    max="300"
-                                    required
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                    placeholder="Enter your height in centimeters"
-                                />
-                                {errors.height && (
-                                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                        {errors.height}
-                                    </p>
-                                )}
-                            </div>
+                                    {/* Height */}
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="height">
+                                            Height (cm)
+                                        </Label>
+                                        <Input
+                                            id="height"
+                                            type="number"
+                                            name="height"
+                                            defaultValue={profile?.height || ''}
+                                            step="0.01"
+                                            min="50"
+                                            max="300"
+                                            required
+                                            placeholder="Enter your height in centimeters"
+                                        />
+                                        <InputError message={errors.height} />
+                                    </div>
 
-                            {/* Weight */}
-                            <div>
-                                <label
-                                    htmlFor="weight"
-                                    className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-                                >
-                                    Weight (kg)
-                                </label>
-                                <input
-                                    id="weight"
-                                    type="number"
-                                    step="0.01"
-                                    value={data.weight}
-                                    onChange={(e) =>
-                                        setData('weight', e.target.value)
-                                    }
-                                    min="20"
-                                    max="500"
-                                    required
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                    placeholder="Enter your weight in kilograms"
-                                />
-                                {errors.weight && (
-                                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                        {errors.weight}
-                                    </p>
-                                )}
-                            </div>
+                                    {/* Weight */}
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="weight">
+                                            Weight (kg)
+                                        </Label>
+                                        <Input
+                                            id="weight"
+                                            type="number"
+                                            name="weight"
+                                            defaultValue={profile?.weight || ''}
+                                            step="0.01"
+                                            min="20"
+                                            max="500"
+                                            required
+                                            placeholder="Enter your weight in kilograms"
+                                        />
+                                        <InputError message={errors.weight} />
+                                    </div>
 
-                            {/* Sex */}
-                            <div>
-                                <label
-                                    htmlFor="sex"
-                                    className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-                                >
-                                    Biological Sex
-                                </label>
-                                <select
-                                    id="sex"
-                                    value={data.sex}
-                                    onChange={(e) =>
-                                        setData('sex', e.target.value)
-                                    }
-                                    required
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                >
-                                    <option value="">
-                                        Select your biological sex
-                                    </option>
-                                    {sexOptions.map((option) => (
-                                        <option
-                                            key={option.value}
-                                            value={option.value}
+                                    {/* Sex */}
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="sex">
+                                            Biological Sex
+                                        </Label>
+                                        <Select
+                                            name="sex"
+                                            defaultValue={profile?.sex || ''}
+                                            required
                                         >
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.sex && (
-                                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                        {errors.sex}
-                                    </p>
-                                )}
-                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                    Used for accurate calorie calculations
-                                </p>
-                            </div>
+                                            <SelectTrigger id="sex">
+                                                <SelectValue placeholder="Select your biological sex" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {sexOptions.map((option) => (
+                                                    <SelectItem
+                                                        key={option.value}
+                                                        value={option.value}
+                                                    >
+                                                        {option.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <InputError message={errors.sex} />
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            Used for accurate calorie
+                                            calculations
+                                        </p>
+                                    </div>
 
-                            {/* Submit Button */}
-                            <div className="flex justify-end">
-                                <button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="inline-flex items-center rounded-md bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
-                                >
-                                    Continue to Goals
-                                </button>
-                            </div>
-                        </form>
+                                    {/* Submit Button */}
+                                    <div className="flex justify-end">
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="w-full sm:w-auto"
+                                        >
+                                            {processing && (
+                                                <LoaderCircle className="h-4 w-4 animate-spin" />
+                                            )}
+                                            Continue to Goals
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
+                        </Form>
                     </div>
                 </div>
             </div>
