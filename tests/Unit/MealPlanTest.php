@@ -129,7 +129,7 @@ it('cascades delete to meals when deleted', function (): void {
 
     $mealPlan->delete();
 
-    expect(Meal::find($meal->id))->toBeNull();
+    expect(Meal::query()->find($meal->id))->toBeNull();
 });
 
 it('can create weekly meal plan using factory state', function (): void {

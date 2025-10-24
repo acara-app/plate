@@ -29,9 +29,9 @@ it('cascades delete meal plans when user is deleted', function (): void {
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();
 
-    expect(MealPlan::find($mealPlan->id))->not->toBeNull();
+    expect(MealPlan::query()->find($mealPlan->id))->not->toBeNull();
 
     $user->delete();
 
-    expect(MealPlan::find($mealPlan->id))->toBeNull();
+    expect(MealPlan::query()->find($mealPlan->id))->toBeNull();
 });
