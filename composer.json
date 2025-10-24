@@ -15,7 +15,8 @@
         "laravel/framework": "^12.35.1",
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.12",
-        "nunomaduro/essentials": "^1.0.1"
+        "nunomaduro/essentials": "^1.0.1",
+        "prism-php/prism": "^0.96.1"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.1.1",
