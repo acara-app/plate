@@ -9,14 +9,12 @@ use App\Models\HealthCondition;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Support\Collection;
-use RuntimeException;
 
 final readonly class CreateWeeklyMealPlan
 {
     public function handle(User $user): string
     {
-        // Load all necessary relationships
-        $user->load([
+        $user->loadMissing([
             'profile.goal',
             'profile.lifestyle',
             'profile.dietaryPreferences',
@@ -26,10 +24,6 @@ final readonly class CreateWeeklyMealPlan
         /** @var UserProfile|null $profile */
         $profile = $user->profile;
 
-        // If the user doesn't have a profile, return empty string or throw exception
-        throw_unless($profile, RuntimeException::class, 'User profile is required to generate a meal plan.');
-
-        // Collect all context data
         $context = [
             // Physical metrics
             'age' => $profile->age,
