@@ -27,7 +27,7 @@ final class ProcessMealPlanJob implements ShouldQueue
     public function handle(GenerateMealPlan $generateMealPlan, StoreMealPlan $storeMealPlan): void
     {
         /** @var User|null $user */
-        $user = User::find($this->userId);
+        $user = User::query()->find($this->userId);
 
         if (! $user) {
             return;

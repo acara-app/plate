@@ -176,7 +176,7 @@ final readonly class OnboardingController
         ]);
 
         // Dispatch job to generate and store the meal plan
-        ProcessMealPlanJob::dispatch($user->id, AiModel::Gemini25Flash);
+        dispatch(new ProcessMealPlanJob($user->id, AiModel::Gemini25Flash));
 
         return to_route('onboarding.completion.show');
     }

@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\MealPlanType;
+use App\Models\Meal;
 use App\Models\MealPlan;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,22 +21,21 @@ final class ShowWeeklyMeanPlansController
      */
     public function __invoke(Request $request): Response
     {
+        /** @var \App\Models\User $user */
         $user = $request->user();
 
-        // Get the requested day number (1-7) or default to current day of week
-        $currentDayNumber = $request->integer('day', Carbon::now()->dayOfWeekIso);
+        $currentDayNumber = $request->integer('day', CarbonImmutable::now()->dayOfWeekIso);
 
-        // Ensure day is between 1 and 7
         $currentDayNumber = max(1, min(7, $currentDayNumber));
 
-        // Get the latest weekly meal plan
         $mealPlan = MealPlan::query()
             ->where('user_id', $user->id)
             ->where('type', MealPlanType::Weekly)
-            ->with(['meals' => function ($query) use ($currentDayNumber): void {
+            ->with(['meals' => function (mixed $query) use ($currentDayNumber): void {
+                /** @var HasMany<Meal, MealPlan> $query */
                 $query->where('day_number', $currentDayNumber)
                     ->orderBy('sort_order')
-                    ->orderBy('created_at');
+                    ->oldest();
             }])
             ->latest()
             ->first();
@@ -46,7 +48,7 @@ final class ShowWeeklyMeanPlansController
             ]);
         }
 
-        // Get meals for the current day
+        /** @var Collection<int, Meal> $dayMeals */
         $dayMeals = $mealPlan->meals;
 
         // Calculate daily stats for current day
@@ -62,9 +64,9 @@ final class ShowWeeklyMeanPlansController
         if ($mealPlan->macronutrient_ratios) {
             $avgMacros = $mealPlan->macronutrient_ratios;
         } elseif ($dayMeals->whereNotNull('protein_grams')->isNotEmpty()) {
-            $totalProteinCals = $dayMeals->sum(fn ($m) => ($m->protein_grams ?? 0) * 4);
-            $totalCarbsCals = $dayMeals->sum(fn ($m) => ($m->carbs_grams ?? 0) * 4);
-            $totalFatCals = $dayMeals->sum(fn ($m) => ($m->fat_grams ?? 0) * 9);
+            $totalProteinCals = $dayMeals->sum(fn (Meal $m): float => ($m->protein_grams ?? 0) * 4);
+            $totalCarbsCals = $dayMeals->sum(fn (Meal $m): float => ($m->carbs_grams ?? 0) * 4);
+            $totalFatCals = $dayMeals->sum(fn (Meal $m): float => ($m->fat_grams ?? 0) * 9);
             $totalMacroCals = $totalProteinCals + $totalCarbsCals + $totalFatCals;
 
             if ($totalMacroCals > 0) {
@@ -93,7 +95,7 @@ final class ShowWeeklyMeanPlansController
         $currentDay = [
             'day_number' => $currentDayNumber,
             'day_name' => $dayName,
-            'meals' => $dayMeals->map(fn ($meal) => [
+            'meals' => $dayMeals->map(fn (Meal $meal): array => [
                 'id' => $meal->id,
                 'type' => $meal->type->value,
                 'name' => $meal->name,

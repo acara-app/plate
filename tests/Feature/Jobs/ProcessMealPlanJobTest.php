@@ -22,12 +22,10 @@ it('dispatches meal plan generation job', function (): void {
 
     $user = User::factory()->create();
 
-    ProcessMealPlanJob::dispatch($user->id, AiModel::Gemini25Flash);
+    dispatch(new ProcessMealPlanJob($user->id, AiModel::Gemini25Flash));
 
-    Queue::assertPushed(ProcessMealPlanJob::class, function ($job) use ($user): bool {
-        return $job->userId === $user->id
-            && $job->model === AiModel::Gemini25Flash;
-    });
+    Queue::assertPushed(ProcessMealPlanJob::class, fn ($job): bool => $job->userId === $user->id
+        && $job->model === AiModel::Gemini25Flash);
 });
 
 it('generates and stores meal plan when job is processed', function (): void {
@@ -91,9 +89,9 @@ it('generates and stores meal plan when job is processed', function (): void {
     $job = new ProcessMealPlanJob($user->id, AiModel::Gemini25Flash);
     $job->handle(app(App\Actions\GenerateMealPlan::class), app(App\Actions\StoreMealPlan::class));
 
-    expect(MealPlan::where('user_id', $user->id)->count())->toBe(1);
+    expect(MealPlan::query()->where('user_id', $user->id)->count())->toBe(1);
 
-    $mealPlan = MealPlan::where('user_id', $user->id)->first();
+    $mealPlan = MealPlan::query()->where('user_id', $user->id)->first();
     expect($mealPlan)
         ->type->toBe(MealPlanType::Weekly)
         ->name->toBe('Test Weekly Plan')
@@ -124,7 +122,7 @@ it('handles missing user gracefully', function (): void {
     $job->handle(app(App\Actions\GenerateMealPlan::class), app(App\Actions\StoreMealPlan::class));
 
     // Should not throw an exception and should not create any meal plans
-    expect(MealPlan::count())->toBe(0);
+    expect(MealPlan::query()->count())->toBe(0);
 });
 
 it('has correct timeout configuration', function (): void {

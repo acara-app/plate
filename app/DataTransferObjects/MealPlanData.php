@@ -34,7 +34,7 @@ final readonly class MealPlanData
         $mealsData = $data['meals'] ?? [];
 
         $meals = array_map(
-            fn (array $meal): MealData => MealData::fromArray($meal),
+            MealData::fromArray(...),
             $mealsData
         );
 

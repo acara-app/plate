@@ -494,9 +494,7 @@ it('may store health conditions', function (): void {
         ->toBe('Managing with medication');
 
     // Assert job was dispatched
-    Queue::assertPushed(ProcessMealPlanJob::class, function ($job) use ($user): bool {
-        return $job->userId === $user->id;
-    });
+    Queue::assertPushed(ProcessMealPlanJob::class, fn ($job): bool => $job->userId === $user->id);
 });
 
 it('allows empty health conditions', function (): void {
@@ -515,9 +513,7 @@ it('allows empty health conditions', function (): void {
         ->onboarding_completed->toBeTrue();
 
     // Assert job was dispatched
-    Queue::assertPushed(ProcessMealPlanJob::class, function ($job) use ($user): bool {
-        return $job->userId === $user->id;
-    });
+    Queue::assertPushed(ProcessMealPlanJob::class, fn ($job): bool => $job->userId === $user->id);
 });
 
 it('requires valid health condition ids', function (): void {
