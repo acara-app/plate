@@ -14,15 +14,18 @@ use App\Models\DietaryPreference;
 use App\Models\Goal;
 use App\Models\HealthCondition;
 use App\Models\Lifestyle;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 final class OnboardingController extends Controller
 {
+    public function __construct(#[CurrentUser] private readonly \App\Models\User $user) {}
+
     public function showQuestionnaire(): Response|RedirectResponse
     {
-        $user = auth()->user();
+        $user = $this->user;
 
         if ($user->profile?->onboarding_completed) {
             return redirect()->route('dashboard');
@@ -33,7 +36,7 @@ final class OnboardingController extends Controller
 
     public function showBiometrics(): Response
     {
-        $profile = auth()->user()->profile;
+        $profile = $this->user->profile;
 
         return Inertia::render('onboarding/biometrics', [
             'profile' => $profile,
@@ -46,7 +49,7 @@ final class OnboardingController extends Controller
 
     public function storeBiometrics(StoreBiometricsRequest $request): RedirectResponse
     {
-        $user = auth()->user();
+        $user = $this->user;
 
         $user->profile()->updateOrCreate(
             ['user_id' => $user->id],
@@ -58,7 +61,7 @@ final class OnboardingController extends Controller
 
     public function showGoals(): Response
     {
-        $profile = auth()->user()->profile;
+        $profile = $this->user->profile;
 
         return Inertia::render('onboarding/goals', [
             'profile' => $profile,
@@ -68,7 +71,7 @@ final class OnboardingController extends Controller
 
     public function storeGoals(StoreGoalsRequest $request): RedirectResponse
     {
-        $user = auth()->user();
+        $user = $this->user;
 
         $user->profile()->updateOrCreate(
             ['user_id' => $user->id],
@@ -80,7 +83,7 @@ final class OnboardingController extends Controller
 
     public function showLifestyle(): Response
     {
-        $profile = auth()->user()->profile;
+        $profile = $this->user->profile;
 
         return Inertia::render('onboarding/lifestyle', [
             'profile' => $profile,
@@ -90,7 +93,7 @@ final class OnboardingController extends Controller
 
     public function storeLifestyle(StoreLifestyleRequest $request): RedirectResponse
     {
-        $user = auth()->user();
+        $user = $this->user;
 
         $user->profile()->updateOrCreate(
             ['user_id' => $user->id],
@@ -102,7 +105,7 @@ final class OnboardingController extends Controller
 
     public function showDietaryPreferences(): Response
     {
-        $profile = auth()->user()->profile;
+        $profile = $this->user->profile;
 
         $preferences = DietaryPreference::all()->groupBy('type');
 
@@ -115,7 +118,7 @@ final class OnboardingController extends Controller
 
     public function storeDietaryPreferences(StoreDietaryPreferencesRequest $request): RedirectResponse
     {
-        $user = auth()->user();
+        $user = $this->user;
 
         $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
 
@@ -126,7 +129,7 @@ final class OnboardingController extends Controller
 
     public function showHealthConditions(): Response
     {
-        $profile = auth()->user()->profile;
+        $profile = $this->user->profile;
 
         return Inertia::render('onboarding/health-conditions', [
             'profile' => $profile,
@@ -137,7 +140,7 @@ final class OnboardingController extends Controller
 
     public function storeHealthConditions(StoreHealthConditionsRequest $request): RedirectResponse
     {
-        $user = auth()->user();
+        $user = $this->user;
 
         $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
 
