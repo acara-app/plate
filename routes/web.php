@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\ShowWeeklyMeanPlansController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserEmailResetNotification;
 use App\Http\Controllers\UserEmailVerification;
@@ -18,6 +19,8 @@ Route::get('/', fn () => Inertia::render('welcome'))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', fn () => Inertia::render('dashboard'))->name('dashboard');
+
+    Route::get('meal-plans/weekly', ShowWeeklyMeanPlansController::class)->name('meal-plans.weekly');
 });
 
 Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(function (): void {

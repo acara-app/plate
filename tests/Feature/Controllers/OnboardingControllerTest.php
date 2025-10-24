@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use App\Enums\Sex;
+use App\Jobs\ProcessMealPlanJob;
 use App\Models\DietaryPreference;
 use App\Models\Goal;
 use App\Models\HealthCondition;
 use App\Models\Lifestyle;
 use App\Models\User;
+use Illuminate\Support\Facades\Queue;
 
 // Questionnaire Tests
 it('renders questionnaire page', function (): void {
@@ -463,6 +465,8 @@ it('renders health conditions page', function (): void {
 });
 
 it('may store health conditions', function (): void {
+    Queue::fake();
+
     $user = User::factory()->create();
     $user->profile()->create([]);
 
@@ -488,9 +492,14 @@ it('may store health conditions', function (): void {
 
     expect($profile->healthConditions->first()->pivot->notes)
         ->toBe('Managing with medication');
+
+    // Assert job was dispatched
+    Queue::assertPushed(ProcessMealPlanJob::class, fn ($job): bool => $job->userId === $user->id);
 });
 
 it('allows empty health conditions', function (): void {
+    Queue::fake();
+
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
@@ -502,6 +511,9 @@ it('allows empty health conditions', function (): void {
 
     expect($profile)->not->toBeNull()
         ->onboarding_completed->toBeTrue();
+
+    // Assert job was dispatched
+    Queue::assertPushed(ProcessMealPlanJob::class, fn ($job): bool => $job->userId === $user->id);
 });
 
 it('requires valid health condition ids', function (): void {

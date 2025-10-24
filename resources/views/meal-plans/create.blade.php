@@ -98,7 +98,7 @@ Based on the user's goals, aim for the following macronutrient distribution:
 
 ## Task
 
-Create a comprehensive 7-day meal plan (Monday through Sunday) that:
+Create a comprehensive and personalized 7-day meal plan that:
 
 1. **Meets caloric targets**: Each day should be close to {{ $context['dailyCalorieTarget'] ?? $context['tdee'] ?? 'the calculated' }} calories
 2. **Respects dietary preferences**: Only include foods that align with the user's dietary restrictions and preferences
