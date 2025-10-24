@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\AiModel;
 use App\Enums\Sex;
 use App\Http\Requests\StoreBiometricsRequest;
 use App\Http\Requests\StoreDietaryPreferencesRequest;
 use App\Http\Requests\StoreGoalsRequest;
 use App\Http\Requests\StoreHealthConditionsRequest;
 use App\Http\Requests\StoreLifestyleRequest;
+use App\Jobs\ProcessMealPlanJob;
 use App\Models\DietaryPreference;
 use App\Models\Goal;
 use App\Models\HealthCondition;
@@ -23,7 +25,7 @@ use Inertia\Response;
 final readonly class OnboardingController
 {
     public function __construct(
-        #[CurrentUser] private \App\Models\User $user
+        #[CurrentUser] private \App\Models\User $user,
     ) {
         //
     }
@@ -172,6 +174,9 @@ final readonly class OnboardingController
             'onboarding_completed' => true,
             'onboarding_completed_at' => now(),
         ]);
+
+        // Dispatch job to generate and store the meal plan
+        ProcessMealPlanJob::dispatch($user->id, AiModel::Gemini25Flash);
 
         return to_route('onboarding.completion.show');
     }
