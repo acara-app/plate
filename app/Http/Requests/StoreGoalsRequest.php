@@ -8,11 +8,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class StoreGoalsRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     /**
      * @return array<string, array<int, mixed>>
      */

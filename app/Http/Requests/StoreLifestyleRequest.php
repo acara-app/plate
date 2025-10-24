@@ -8,11 +8,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class StoreLifestyleRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     /**
      * @return array<string, array<int, mixed>>
      */

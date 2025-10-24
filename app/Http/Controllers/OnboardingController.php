@@ -21,7 +21,7 @@ use Inertia\Response;
 
 final readonly class OnboardingController
 {
-    public function __construct(#[CurrentUser] private readonly \App\Models\User $user) {}
+    public function __construct(#[CurrentUser] private \App\Models\User $user) {}
 
     public function showQuestionnaire(): Response|RedirectResponse
     {

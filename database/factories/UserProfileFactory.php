@@ -19,7 +19,17 @@ final class UserProfileFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'user_id' => \App\Models\User::factory(),
+            'age' => fake()->numberBetween(18, 80),
+            'height' => fake()->randomFloat(2, 150, 200),
+            'weight' => fake()->randomFloat(2, 50, 120),
+            'sex' => fake()->randomElement([\App\Enums\Sex::Male, \App\Enums\Sex::Female]),
+            'goal_id' => \App\Models\Goal::factory(),
+            'target_weight' => fake()->randomFloat(2, 50, 100),
+            'additional_goals' => fake()->optional()->sentence(),
+            'lifestyle_id' => \App\Models\Lifestyle::factory(),
+            'onboarding_completed' => false,
+            'onboarding_completed_at' => null,
         ];
     }
 }

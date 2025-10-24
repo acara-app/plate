@@ -19,7 +19,14 @@ final class GoalFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => fake()->randomElement([
+                'Lose Weight',
+                'Gain Muscle',
+                'Maintain Weight',
+                'Improve Health',
+                'Build Strength',
+                'Increase Energy',
+            ]),
         ];
     }
 }
