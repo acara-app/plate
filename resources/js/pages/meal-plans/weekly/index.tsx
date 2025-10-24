@@ -1,3 +1,4 @@
+import { JobProcessingStatus } from '@/components/job-processing-status';
 import { MealCard } from '@/components/meal-plans/meal-card';
 import { NutritionStats } from '@/components/meal-plans/nutrition-stats';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -7,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import mealPlans from '@/routes/meal-plans';
-import { type BreadcrumbItem } from '@/types';
+import { JobTracking, type BreadcrumbItem } from '@/types';
 import { CurrentDay, MealPlan, Navigation } from '@/types/meal-plan';
 import { Head, Link } from '@inertiajs/react';
 import {
@@ -22,6 +23,7 @@ interface WeeklyMealPlansProps {
     mealPlan: MealPlan | null;
     currentDay: CurrentDay | null;
     navigation: Navigation | null;
+    jobTracking: JobTracking | null;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -49,12 +51,16 @@ export default function WeeklyMealPlans({
     mealPlan,
     currentDay,
     navigation,
+    jobTracking,
 }: WeeklyMealPlansProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Weekly Meal Plans" />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
+                {jobTracking && (
+                    <JobProcessingStatus jobTracking={jobTracking} />
+                )}
                 {/* Empty State */}
                 {!mealPlan && (
                     <>
@@ -191,8 +197,6 @@ export default function WeeklyMealPlans({
                                 </AlertDescription>
                             </Alert>
                         )}
-
-                        <Separator />
 
                         {/* Meals for Current Day */}
                         <div className="space-y-3">

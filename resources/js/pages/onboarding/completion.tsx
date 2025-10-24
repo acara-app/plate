@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 
 import { Button } from '@/components/ui/button';
+import mealPlans from '@/routes/meal-plans';
 
 export default function Completion() {
     return (
@@ -16,9 +17,8 @@ export default function Completion() {
                         You're All Set!
                     </h1>
                     <p className="mb-8 text-lg text-gray-600 sm:text-xl dark:text-gray-300">
-                        Your personalized nutrition journey starts now. We've
-                        got everything we need to create amazing meal plans just
-                        for you!
+                        Your personalized nutrition journey starts now. We're
+                        creating your meal plan right now!
                     </p>
 
                     {/* Decorative Confetti Emojis */}
@@ -36,16 +36,16 @@ export default function Completion() {
                         </h2>
                         <div className="space-y-4">
                             <div>
-                                <Link href="/dashboard">
+                                <Link href={mealPlans.weekly().url}>
                                     <Button className="w-full" size="lg">
-                                        Go to Dashboard
+                                        View Your Meal Plan
                                     </Button>
                                 </Link>
                             </div>
 
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Explore your personalized dashboard and start
-                                planning your meals
+                                Your personalized meal plan will be ready in a
+                                few moments
                             </p>
                         </div>
                     </div>

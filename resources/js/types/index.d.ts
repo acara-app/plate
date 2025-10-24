@@ -82,3 +82,9 @@ export interface LifeStyle extends Row {
     description: string;
     activity_multiplier: number;
 }
+
+export interface JobTracking {
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+    progress: number;
+    message: string | null;
+}

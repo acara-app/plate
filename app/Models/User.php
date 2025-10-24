@@ -29,6 +29,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read CarbonInterface $updated_at
  * @property-read UserProfile|null $profile
  * @property-read Collection<int, MealPlan> $mealPlans
+ * @property-read Collection<int, JobTracking> $jobTrackings
  */
 final class User extends Authenticatable implements MustVerifyEmail
 {
@@ -81,5 +82,13 @@ final class User extends Authenticatable implements MustVerifyEmail
     public function mealPlans(): HasMany
     {
         return $this->hasMany(MealPlan::class)->latest();
+    }
+
+    /**
+     * @return HasMany<JobTracking, $this>
+     */
+    public function jobTrackings(): HasMany
+    {
+        return $this->hasMany(JobTracking::class)->latest();
     }
 }

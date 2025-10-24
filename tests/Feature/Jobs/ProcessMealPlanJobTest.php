@@ -130,3 +130,49 @@ it('has correct timeout configuration', function (): void {
 
     expect($job->timeout)->toBe(300);
 });
+
+it('handles exceptions and marks tracking as failed', function (): void {
+    $user = User::factory()->create();
+    $goal = Goal::factory()->create(['name' => 'Weight Loss']);
+    $lifestyle = Lifestyle::factory()->create([
+        'name' => 'Active',
+        'activity_level' => 'moderate',
+        'activity_multiplier' => 1.5,
+    ]);
+
+    $user->profile()->create([
+        'age' => 30,
+        'height' => 175.0,
+        'weight' => 80.0,
+        'sex' => Sex::Male,
+        'goal_id' => $goal->id,
+        'lifestyle_id' => $lifestyle->id,
+        'target_weight' => 75.0,
+    ]);
+
+    // Fake a failure by not setting up any Prism fake response
+    // This will cause an exception when trying to generate the meal plan
+    Prism::fake([]);
+
+    $job = new ProcessMealPlanJob($user->id, AiModel::Gemini25Flash);
+
+    try {
+        $job->handle(
+            app(App\Actions\GenerateMealPlan::class),
+            app(App\Actions\StoreMealPlan::class)
+        );
+        $this->fail('Expected an exception to be thrown');
+    } catch (Throwable $e) {
+        // Exception was thrown as expected
+        expect($e)->toBeInstanceOf(Throwable::class);
+    }
+
+    // Verify that the tracking was marked as failed
+    $user->refresh();
+    $tracking = $user->jobTrackings()->where('job_type', ProcessMealPlanJob::JOB_TYPE)->first();
+
+    expect($tracking)
+        ->not->toBeNull()
+        ->status->toBe(App\Enums\JobStatus::Failed)
+        ->and($tracking->message)->toContain('Failed to generate meal plan');
+});

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\MealPlanType;
+use App\Jobs\ProcessMealPlanJob;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use Carbon\CarbonImmutable;
@@ -40,11 +41,19 @@ final class ShowWeeklyMeanPlansController
             ->latest()
             ->first();
 
+        /** @var \App\Models\JobTracking|null $latestJobTracking */
+        $latestJobTracking = $user->jobTrackings()
+            ->where('job_type', ProcessMealPlanJob::JOB_TYPE)
+            ->latest()
+            ->first();
+
         if (! $mealPlan) {
+
             return Inertia::render('meal-plans/weekly/index', [
                 'mealPlan' => null,
                 'currentDay' => null,
                 'navigation' => null,
+                'jobTracking' => $this->formatJobTracking($latestJobTracking),
             ]);
         }
 
@@ -127,6 +136,26 @@ final class ShowWeeklyMeanPlansController
             'mealPlan' => $formattedMealPlan,
             'currentDay' => $currentDay,
             'navigation' => $navigation,
+            'jobTracking' => $this->formatJobTracking($latestJobTracking),
         ]);
+    }
+
+    /**
+     * Format job tracking data for the frontend
+     *
+     * @param  \App\Models\JobTracking|null  $jobTracking
+     * @return array{status: string, progress: int, message: string|null}|null
+     */
+    private function formatJobTracking(mixed $jobTracking): ?array
+    {
+        if (! $jobTracking) {
+            return null;
+        }
+
+        return [
+            'status' => $jobTracking->status->value,
+            'progress' => (int) $jobTracking->progress,
+            'message' => $jobTracking->message,
+        ];
     }
 }
