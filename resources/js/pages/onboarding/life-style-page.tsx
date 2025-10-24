@@ -1,25 +1,14 @@
 import onboarding from '@/routes/onboarding';
+import { LifeStyle, Profile } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-interface Lifestyle {
-    id: number;
-    name: string;
-    activity_level: string;
-    description: string;
-    activity_multiplier: number;
-}
-
-interface Profile {
-    lifestyle_id?: number;
-}
-
-interface LifestyleProps {
+interface Props {
     profile?: Profile;
-    lifestyles: Lifestyle[];
+    lifestyles: LifeStyle[];
 }
 
-export default function Lifestyle({ profile, lifestyles }: LifestyleProps) {
+export default function LifeStylePage({ profile, lifestyles }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         lifestyle_id: profile?.lifestyle_id || '',
     });

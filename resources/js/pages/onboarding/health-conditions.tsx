@@ -1,19 +1,9 @@
 import onboarding from '@/routes/onboarding';
+import { HealthCondition, Profile } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
 
-interface HealthCondition {
-    id: number;
-    name: string;
-    description: string;
-    nutritional_impact: string;
-}
-
-interface Profile {
-    id?: number;
-}
-
-interface HealthConditionsProps {
+interface Props {
     profile?: Profile;
     selectedConditions: number[];
     healthConditions: HealthCondition[];
@@ -22,7 +12,7 @@ interface HealthConditionsProps {
 export default function HealthConditions({
     selectedConditions,
     healthConditions,
-}: HealthConditionsProps) {
+}: Props) {
     const [notes, setNotes] = useState<Record<number, string>>({});
     const [expandedId, setExpandedId] = useState<number | null>(null);
 

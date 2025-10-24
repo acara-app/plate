@@ -1,24 +1,14 @@
 import onboarding from '@/routes/onboarding';
+import { Goal, Profile } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-interface Goal {
-    id: number;
-    name: string;
-}
-
-interface Profile {
-    goal_id?: number;
-    target_weight?: number;
-    additional_goals?: string;
-}
-
-interface GoalsProps {
-    profile?: Profile;
+interface Props {
     goals: Goal[];
+    profile?: Profile;
 }
 
-export default function Goals({ profile, goals }: GoalsProps) {
+export default function Goals({ profile, goals }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         goal_id: profile?.goal_id || '',
         target_weight: profile?.target_weight || '',

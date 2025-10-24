@@ -1,25 +1,14 @@
 import onboarding from '@/routes/onboarding';
+import { Profile, SexOption } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-interface SexOption {
-    value: string;
-    label: string;
-}
-
-interface Profile {
-    age?: number;
-    height?: number;
-    weight?: number;
-    sex?: string;
-}
-
-interface BiometricsProps {
-    profile?: Profile;
+interface Props {
+    profile: Profile;
     sexOptions: SexOption[];
 }
 
-export default function Biometrics({ profile, sexOptions }: BiometricsProps) {
+export default function Biometrics({ profile, sexOptions }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         age: profile?.age || '',
         height: profile?.height || '',

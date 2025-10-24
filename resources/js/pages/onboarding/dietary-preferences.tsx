@@ -1,19 +1,9 @@
 import onboarding from '@/routes/onboarding';
+import { DietaryPreference, Profile } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-interface DietaryPreference {
-    id: number;
-    name: string;
-    type: string;
-    description: string;
-}
-
-interface Profile {
-    id?: number;
-}
-
-interface DietaryPreferencesProps {
+interface Props {
     profile?: Profile;
     selectedPreferences: number[];
     preferences: {
@@ -27,7 +17,7 @@ interface DietaryPreferencesProps {
 export default function DietaryPreferences({
     selectedPreferences,
     preferences,
-}: DietaryPreferencesProps) {
+}: Props) {
     const { data, setData, post, processing, errors } = useForm({
         dietary_preference_ids: selectedPreferences || [],
     });
@@ -51,7 +41,9 @@ export default function DietaryPreferences({
         title: string,
         items: DietaryPreference[] | undefined,
     ) => {
-        if (!items || items.length === 0) return null;
+        if (!items || items.length === 0) {
+            return null;
+        }
 
         return (
             <div>
