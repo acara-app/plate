@@ -37,6 +37,8 @@ Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(fu
 
     Route::get('/health-conditions', [OnboardingController::class, 'showHealthConditions'])->name('health-conditions.show');
     Route::post('/health-conditions', [OnboardingController::class, 'storeHealthConditions'])->name('health-conditions.store');
+
+    Route::get('/completion', [OnboardingController::class, 'showCompletion'])->name('completion.show');
 });
 
 Route::middleware('auth')->group(function (): void {

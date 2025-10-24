@@ -349,7 +349,7 @@ it('renders lifestyle page', function (): void {
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('onboarding/lifestyle')
+            ->component('onboarding/life-style-page')
             ->has('profile')
             ->has('lifestyles'));
 });
@@ -475,8 +475,7 @@ it('may store health conditions', function (): void {
             'notes' => ['Managing with medication', 'Controlled with diet'],
         ]);
 
-    $response->assertRedirectToRoute('dashboard')
-        ->assertSessionHas('success');
+    $response->assertRedirectToRoute('onboarding.completion.show');
 
     $profile = $user->profile()->first();
 
@@ -497,7 +496,7 @@ it('allows empty health conditions', function (): void {
     $response = $this->actingAs($user)
         ->post(route('onboarding.health-conditions.store'), []);
 
-    $response->assertRedirectToRoute('dashboard');
+    $response->assertRedirectToRoute('onboarding.completion.show');
 
     $profile = $user->profile()->first();
 
@@ -527,4 +526,28 @@ it('requires notes to be at most 500 characters', function (): void {
         ]);
 
     $response->assertSessionHasErrors('notes.0');
+});
+
+// Completion Tests
+it('renders completion page', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'onboarding_completed' => true,
+        'onboarding_completed_at' => now(),
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('onboarding.completion.show'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page->component('onboarding/completion'));
+});
+
+it('redirects to questionnaire if completion page accessed without completing onboarding', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->get(route('onboarding.completion.show'));
+
+    $response->assertRedirectToRoute('onboarding.questionnaire.show');
 });

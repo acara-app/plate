@@ -22,7 +22,11 @@ use Inertia\Response;
 
 final readonly class OnboardingController
 {
-    public function __construct(#[CurrentUser] private \App\Models\User $user) {}
+    public function __construct(
+        #[CurrentUser] private \App\Models\User $user
+    ) {
+        //
+    }
 
     public function showQuestionnaire(): Response|RedirectResponse
     {
@@ -169,6 +173,17 @@ final readonly class OnboardingController
             'onboarding_completed_at' => now(),
         ]);
 
-        return to_route('dashboard')->with('success', 'Onboarding completed successfully!');
+        return to_route('onboarding.completion.show');
+    }
+
+    public function showCompletion(): Response|RedirectResponse
+    {
+        $user = $this->user;
+
+        if (! $user->profile?->onboarding_completed) {
+            return to_route('onboarding.questionnaire.show');
+        }
+
+        return Inertia::render('onboarding/completion');
     }
 }
