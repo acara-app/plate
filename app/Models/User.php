@@ -8,9 +8,11 @@ use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
 /**
@@ -26,6 +28,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read UserProfile|null $profile
+ * @property-read Collection<int, MealPlan> $mealPlans
  */
 final class User extends Authenticatable implements MustVerifyEmail
 {
@@ -70,5 +73,13 @@ final class User extends Authenticatable implements MustVerifyEmail
     public function profile(): HasOne
     {
         return $this->hasOne(UserProfile::class);
+    }
+
+    /**
+     * @return HasMany<MealPlan, $this>
+     */
+    public function mealPlans(): HasMany
+    {
+        return $this->hasMany(MealPlan::class)->latest();
     }
 }
