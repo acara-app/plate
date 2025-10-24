@@ -10,10 +10,10 @@ it('may verify email', function (): void {
         'email_verified_at' => null,
     ]);
 
-    $verificationUrl = URL::temporarySignedRoute(
+    $verificationUrl = URL::signedRoute(
         'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->getKey(), 'hash' => sha1($user->email)]
+        ['id' => $user->getKey(), 'hash' => sha1($user->email)],
+        absolute: false
     );
 
     $response = $this->actingAs($user)
@@ -30,10 +30,10 @@ it('redirects to dashboard if already verified', function (): void {
         'email_verified_at' => now(),
     ]);
 
-    $verificationUrl = URL::temporarySignedRoute(
+    $verificationUrl = URL::signedRoute(
         'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->getKey(), 'hash' => sha1($user->email)]
+        ['id' => $user->getKey(), 'hash' => sha1($user->email)],
+        absolute: false
     );
 
     $response = $this->actingAs($user)
