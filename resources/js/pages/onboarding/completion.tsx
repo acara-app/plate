@@ -34,12 +34,14 @@ export default function Completion() {
                         <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
                             What's Next?
                         </h2>
-                        <div className="space-y-3">
-                            <Link href="/dashboard">
-                                <Button className="w-full" size="lg">
-                                    Go to Dashboard
-                                </Button>
-                            </Link>
+                        <div className="space-y-4">
+                            <div>
+                                <Link href="/dashboard">
+                                    <Button className="w-full" size="lg">
+                                        Go to Dashboard
+                                    </Button>
+                                </Link>
+                            </div>
 
                             <p className="text-sm text-gray-500 dark:text-gray-400">
                                 Explore your personalized dashboard and start
