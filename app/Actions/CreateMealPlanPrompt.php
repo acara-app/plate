@@ -11,7 +11,7 @@ use App\Models\UserProfile;
 use Illuminate\Support\Collection;
 use RuntimeException;
 
-final readonly class CreateMealPlan
+final readonly class CreateMealPlanPrompt
 {
     public function handle(User $user): string
     {
@@ -24,9 +24,7 @@ final readonly class CreateMealPlan
 
         $profile = $user->profile;
 
-        if (! $profile instanceof UserProfile) {
-            throw new RuntimeException('User profile is required to create a meal plan.');
-        }
+        throw_unless($profile instanceof UserProfile, RuntimeException::class, 'User profile is required to create a meal plan.');
 
         $context = [
             // Physical metrics
