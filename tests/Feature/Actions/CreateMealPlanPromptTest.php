@@ -50,7 +50,6 @@ test('it generates meal plan context for user with complete profile', function (
 
     expect($result)
         ->toBeString()
-        ->toContain('personalized meal planning assistant')
         ->toContain('Age')
         ->toContain('30 years')
         ->toContain('Weight Loss')
@@ -80,7 +79,6 @@ test('it handles user with minimal profile data', function (): void {
 
     expect($result)
         ->toBeString()
-        ->toContain('personalized meal planning assistant')
         ->toContain('Not specified');
 });
 
@@ -292,8 +290,7 @@ test('it returns null calorie target when tdee cannot be calculated', function (
     $result = $action->handle($user);
 
     expect($result)
-        ->toBeString()
-        ->toContain('personalized meal planning assistant');
+        ->toBeString();
 });
 
 test('it uses default macronutrient ratios when no goal is set', function (): void {

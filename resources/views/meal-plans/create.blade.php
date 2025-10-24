@@ -1,6 +1,3 @@
-
-You are a personalized meal planning assistant.
-
 ## User Profile
 
 - **Age**: {{ $context['age'] ?? 'Not specified' }} years
@@ -116,3 +113,14 @@ For each day, provide:
 - **Daily total** (total calories and macro breakdown)
 
 Include brief preparation instructions and portion sizes for each meal.
+
+## Output Format
+
+- Set `type` to `weekly`, `duration_days` to `7`, and align `target_daily_calories` with the goal-adjusted target above (fall back to TDEE if the target is missing).
+- Keep `macronutrient_ratios` aligned with the percentages provided in the context.
+- Populate the `meals` array with every eating occasion for all 7 days. Use `day_number` values from 1 through 7, `sort_order` values that reflect the chronological order (Breakfast `1`, morning snack `2`, Lunch `3`, afternoon snack `4`, Dinner `5`).
+- Set the `type` field on each meal to one of `breakfast`, `lunch`, `dinner`, or `snack`. Create separate snack entries when multiple snacks are required for the day.
+- Provide concise meal names, vivid descriptions, newline-separated ingredient lists (`Ingredient – quantity`), practical preparation instructions, precise portion sizes, estimated calories, and macro grams for each meal.
+- Supply realistic `preparation_time_minutes` values (integer minutes) for every meal.
+
+Return only the structured data that follows these instructions.

@@ -52,6 +52,10 @@ export interface MealPlan {
     duration_days: number;
     target_daily_calories: number | null;
     macronutrient_ratios: MacronutrientRatios | null;
+    metadata: {
+        preparation_notes?: string;
+        [key: string]: unknown;
+    } | null;
     created_at: string;
 }
 

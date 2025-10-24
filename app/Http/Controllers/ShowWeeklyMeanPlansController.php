@@ -89,6 +89,7 @@ final class ShowWeeklyMeanPlansController
             'duration_days' => $mealPlan->duration_days,
             'target_daily_calories' => $mealPlan->target_daily_calories,
             'macronutrient_ratios' => $avgMacros,
+            'metadata' => $mealPlan->metadata,
             'created_at' => $mealPlan->created_at->toISOString(),
         ];
 

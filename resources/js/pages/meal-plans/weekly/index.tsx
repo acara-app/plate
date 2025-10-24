@@ -179,6 +179,19 @@ export default function WeeklyMealPlans({
                             />
                         </div>
 
+                        {/* Preparation Notes */}
+                        {mealPlan.metadata?.preparation_notes && (
+                            <Alert>
+                                <Info className="h-4 w-4" />
+                                <AlertDescription>
+                                    <strong className="font-semibold">
+                                        Preparation Tips:
+                                    </strong>{' '}
+                                    {mealPlan.metadata.preparation_notes}
+                                </AlertDescription>
+                            </Alert>
+                        )}
+
                         <Separator />
 
                         {/* Meals for Current Day */}

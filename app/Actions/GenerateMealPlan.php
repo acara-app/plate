@@ -29,6 +29,7 @@ final readonly class GenerateMealPlan
 
         $response = Prism::structured()
             ->using(Provider::Gemini, $model->value)
+            ->withSystemPrompt('You are a professional nutritionist and dietitian specializing in creating personalized meal plans.')
             ->withPrompt($prompt)
             ->withSchema($schema)
             ->withMaxTokens(32000)
@@ -157,6 +158,16 @@ final readonly class GenerateMealPlan
                             'sort_order',
                         ]
                     )
+                ),
+                new ObjectSchema(
+                    name: 'metadata',
+                    description: 'Supplemental information aggregated across the plan',
+                    properties: [
+                        new StringSchema(
+                            name: 'preparation_notes',
+                            description: 'High-level batch cooking, storage, or substitution guidance'
+                        ),
+                    ]
                 ),
             ],
             requiredFields: [

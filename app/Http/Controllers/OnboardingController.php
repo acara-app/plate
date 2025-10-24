@@ -175,7 +175,6 @@ final readonly class OnboardingController
             'onboarding_completed_at' => now(),
         ]);
 
-        // Dispatch job to generate and store the meal plan
         dispatch(new ProcessMealPlanJob($user->id, AiModel::Gemini25Flash));
 
         return to_route('onboarding.completion.show');

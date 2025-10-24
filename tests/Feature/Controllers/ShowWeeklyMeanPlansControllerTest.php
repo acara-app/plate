@@ -325,6 +325,10 @@ it('includes meal plan metadata', function (): void {
             'name' => 'My Custom Plan',
             'description' => 'A great plan',
             'target_daily_calories' => 2000,
+            'metadata' => [
+                'preparation_notes' => 'Batch cook proteins on Sunday. Store in airtight containers.',
+                'bmi' => 22.5,
+            ],
         ]);
 
     $response = $this->actingAs($user)
@@ -337,6 +341,8 @@ it('includes meal plan metadata', function (): void {
             ->where('mealPlan.target_daily_calories', '2000.00')
             ->where('mealPlan.type', 'weekly')
             ->where('mealPlan.duration_days', 7)
+            ->where('mealPlan.metadata.preparation_notes', 'Batch cook proteins on Sunday. Store in airtight containers.')
+            ->where('mealPlan.metadata.bmi', 22.5)
             ->has('mealPlan.created_at'));
 });
 
