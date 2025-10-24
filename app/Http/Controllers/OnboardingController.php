@@ -40,7 +40,7 @@ final class OnboardingController extends Controller
 
         return Inertia::render('onboarding/biometrics', [
             'profile' => $profile,
-            'sexOptions' => collect(Sex::cases())->map(fn ($sex) => [
+            'sexOptions' => collect(Sex::cases())->map(fn (Sex $sex): array => [
                 'value' => $sex->value,
                 'label' => ucfirst($sex->value),
             ]),
