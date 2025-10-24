@@ -13,8 +13,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string $name
  * @property-read string|null $description
  * @property-read string|null $nutritional_impact
- * @property-read array|null $recommended_nutrients
- * @property-read array|null $nutrients_to_limit
+ * @property-read array<int, string>|null $recommended_nutrients
+ * @property-read array<int, string>|null $nutrients_to_limit
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  */

@@ -14,6 +14,7 @@ use App\Models\DietaryPreference;
 use App\Models\Goal;
 use App\Models\HealthCondition;
 use App\Models\Lifestyle;
+use App\Models\UserProfile;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -120,9 +121,12 @@ final readonly class OnboardingController
     {
         $user = $this->user;
 
+        /** @var UserProfile $profile */
         $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
 
-        $profile->dietaryPreferences()->sync($request->validated('dietary_preference_ids') ?? []);
+        /** @var array<int, int> $preferenceIds */
+        $preferenceIds = $request->validated('dietary_preference_ids') ?? [];
+        $profile->dietaryPreferences()->sync($preferenceIds);
 
         return to_route('onboarding.health-conditions.show');
     }
@@ -142,9 +146,12 @@ final readonly class OnboardingController
     {
         $user = $this->user;
 
+        /** @var UserProfile $profile */
         $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
 
+        /** @var array<int, int> $conditionIds */
         $conditionIds = $request->validated('health_condition_ids') ?? [];
+        /** @var array<int, string|null> $notes */
         $notes = $request->validated('notes') ?? [];
 
         $syncData = [];

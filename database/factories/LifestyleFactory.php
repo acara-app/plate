@@ -24,6 +24,7 @@ final class LifestyleFactory extends Factory
             ['name' => 'Extremely Active', 'multiplier' => 1.9],
         ];
 
+        /** @var array<string, mixed> $activity */
         $activity = fake()->randomElement($activityLevels);
 
         return [

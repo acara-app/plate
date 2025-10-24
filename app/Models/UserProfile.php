@@ -58,21 +58,33 @@ final class UserProfile extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<Goal, $this>
+     */
     public function goal(): BelongsTo
     {
         return $this->belongsTo(Goal::class);
     }
 
+    /**
+     * @return BelongsTo<Lifestyle, $this>
+     */
     public function lifestyle(): BelongsTo
     {
         return $this->belongsTo(Lifestyle::class);
     }
 
+    /**
+     * @return BelongsToMany<DietaryPreference, $this>
+     */
     public function dietaryPreferences(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -81,6 +93,9 @@ final class UserProfile extends Model
         )->withTimestamps();
     }
 
+    /**
+     * @return BelongsToMany<HealthCondition, $this>
+     */
     public function healthConditions(): BelongsToMany
     {
         return $this->belongsToMany(

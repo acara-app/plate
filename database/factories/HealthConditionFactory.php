@@ -35,6 +35,7 @@ final class HealthConditionFactory extends Factory
             ],
         ];
 
+        /** @var string $name */
         $name = fake()->randomElement(array_keys($conditions));
 
         return [

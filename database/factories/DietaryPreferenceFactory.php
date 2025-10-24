@@ -17,6 +17,7 @@ final class DietaryPreferenceFactory extends Factory
     public function definition(): array
     {
         $types = ['allergy', 'intolerance', 'pattern', 'dislike'];
+        /** @var string $type */
         $type = fake()->randomElement($types);
 
         $preferences = [
