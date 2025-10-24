@@ -38,6 +38,11 @@ return [
     */
 
     'mailers' => [
+        'mailcoach' => [
+            'transport' => 'mailcoach',
+            'domain' => 'onelink.mailcoach.app',
+            'token' => env('MAILCOACH_TOKEN'),
+        ],
 
         'smtp' => [
             'transport' => 'smtp',
