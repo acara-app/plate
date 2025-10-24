@@ -86,7 +86,7 @@ final readonly class OnboardingController
     {
         $profile = $this->user->profile;
 
-        return Inertia::render('onboarding/lifestyle', [
+        return Inertia::render('onboarding/life-style-page', [
             'profile' => $profile,
             'lifestyles' => Lifestyle::all(),
         ]);

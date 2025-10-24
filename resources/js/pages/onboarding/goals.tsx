@@ -1,35 +1,20 @@
 import onboarding from '@/routes/onboarding';
-import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { Goal, Profile } from '@/types';
+import { Form, Head } from '@inertiajs/react';
+import { LoaderCircle } from 'lucide-react';
 
-interface Goal {
-    id: number;
-    name: string;
-}
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
-interface Profile {
-    goal_id?: number;
-    target_weight?: number;
-    additional_goals?: string;
-}
-
-interface GoalsProps {
-    profile?: Profile;
+interface Props {
     goals: Goal[];
+    profile?: Profile;
 }
 
-export default function Goals({ profile, goals }: GoalsProps) {
-    const { data, setData, post, processing, errors } = useForm({
-        goal_id: profile?.goal_id || '',
-        target_weight: profile?.target_weight || '',
-        additional_goals: profile?.additional_goals || '',
-    });
-
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-        post(onboarding.goals.store.url());
-    };
-
+export default function Goals({ profile, goals }: Props) {
     return (
         <>
             <Head title="Goals - Step 2 of 5" />
@@ -54,116 +39,110 @@ export default function Goals({ profile, goals }: GoalsProps) {
                             Select your primary nutrition goal
                         </p>
 
-                        <form onSubmit={submit} className="space-y-6">
-                            {/* Goal Selection */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                                    Primary Goal
-                                </label>
-                                <div className="mt-2 space-y-2">
-                                    {goals.map((goal) => (
-                                        <label
-                                            key={goal.id}
-                                            className="flex cursor-pointer items-center rounded-lg border border-gray-300 p-4 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+                        <Form
+                            {...onboarding.goals.store.form()}
+                            disableWhileProcessing
+                            className="space-y-6"
+                        >
+                            {({ processing, errors }) => (
+                                <>
+                                    {/* Goal Selection */}
+                                    <div className="grid gap-2">
+                                        <Label>Primary Goal</Label>
+                                        <div className="space-y-2">
+                                            {goals.map((goal) => (
+                                                <label
+                                                    key={goal.id}
+                                                    className={cn(
+                                                        'flex cursor-pointer items-center rounded-lg border p-4 transition-colors',
+                                                        'hover:bg-gray-50 dark:hover:bg-gray-700',
+                                                        'border-gray-300 dark:border-gray-600',
+                                                    )}
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        name="goal_id"
+                                                        value={goal.id}
+                                                        defaultChecked={
+                                                            profile?.goal_id ===
+                                                            goal.id
+                                                        }
+                                                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                    <span className="ml-3 text-gray-900 dark:text-white">
+                                                        {goal.name}
+                                                    </span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                        <InputError message={errors.goal_id} />
+                                    </div>
+
+                                    {/* Target Weight (Optional) */}
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="target_weight">
+                                            Target Weight (kg) - Optional
+                                        </Label>
+                                        <Input
+                                            id="target_weight"
+                                            type="number"
+                                            name="target_weight"
+                                            defaultValue={
+                                                profile?.target_weight || ''
+                                            }
+                                            step="0.01"
+                                            min="20"
+                                            max="500"
+                                            placeholder="Enter your target weight"
+                                        />
+                                        <InputError
+                                            message={errors.target_weight}
+                                        />
+                                    </div>
+
+                                    {/* Additional Goals (Optional) */}
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="additional_goals">
+                                            Additional Goals - Optional
+                                        </Label>
+                                        <textarea
+                                            id="additional_goals"
+                                            name="additional_goals"
+                                            defaultValue={
+                                                profile?.additional_goals || ''
+                                            }
+                                            rows={4}
+                                            maxLength={1000}
+                                            className={cn(
+                                                'flex min-h-20 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm shadow-xs transition-colors',
+                                                'placeholder:text-gray-500 dark:placeholder:text-gray-400',
+                                                'focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/50 focus-visible:outline-none',
+                                                'disabled:cursor-not-allowed disabled:opacity-50',
+                                                'dark:border-gray-600 dark:bg-gray-700 dark:text-white',
+                                            )}
+                                            placeholder="Tell us about any other goals or specific needs..."
+                                        />
+                                        <InputError
+                                            message={errors.additional_goals}
+                                        />
+                                    </div>
+
+                                    {/* Submit Button */}
+                                    <div className="flex justify-end">
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="w-full sm:w-auto"
                                         >
-                                            <input
-                                                type="radio"
-                                                name="goal_id"
-                                                value={goal.id}
-                                                checked={
-                                                    data.goal_id === goal.id
-                                                }
-                                                onChange={(e) =>
-                                                    setData(
-                                                        'goal_id',
-                                                        parseInt(
-                                                            e.target.value,
-                                                        ),
-                                                    )
-                                                }
-                                                className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                                            />
-                                            <span className="ml-3 text-gray-900 dark:text-white">
-                                                {goal.name}
-                                            </span>
-                                        </label>
-                                    ))}
-                                </div>
-                                {errors.goal_id && (
-                                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                        {errors.goal_id}
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Target Weight (Optional) */}
-                            <div>
-                                <label
-                                    htmlFor="target_weight"
-                                    className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-                                >
-                                    Target Weight (kg) - Optional
-                                </label>
-                                <input
-                                    id="target_weight"
-                                    type="number"
-                                    step="0.01"
-                                    value={data.target_weight}
-                                    onChange={(e) =>
-                                        setData('target_weight', e.target.value)
-                                    }
-                                    min="20"
-                                    max="500"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                    placeholder="Enter your target weight"
-                                />
-                                {errors.target_weight && (
-                                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                        {errors.target_weight}
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Additional Goals (Optional) */}
-                            <div>
-                                <label
-                                    htmlFor="additional_goals"
-                                    className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-                                >
-                                    Additional Goals - Optional
-                                </label>
-                                <textarea
-                                    id="additional_goals"
-                                    value={data.additional_goals}
-                                    onChange={(e) =>
-                                        setData(
-                                            'additional_goals',
-                                            e.target.value,
-                                        )
-                                    }
-                                    rows={4}
-                                    maxLength={1000}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                    placeholder="Tell us about any other goals or specific needs..."
-                                />
-                                {errors.additional_goals && (
-                                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                        {errors.additional_goals}
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Submit Button */}
-                            <div className="flex justify-end">
-                                <button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="inline-flex items-center rounded-md bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
-                                >
-                                    Continue to Lifestyle
-                                </button>
-                            </div>
-                        </form>
+                                            {processing && (
+                                                <LoaderCircle className="h-4 w-4 animate-spin" />
+                                            )}
+                                            Continue to Lifestyle
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
+                        </Form>
                     </div>
                 </div>
             </div>

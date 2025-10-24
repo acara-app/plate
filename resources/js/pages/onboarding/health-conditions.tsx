@@ -1,19 +1,15 @@
 import onboarding from '@/routes/onboarding';
-import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler, useState } from 'react';
+import { HealthCondition, Profile } from '@/types';
+import { Form, Head } from '@inertiajs/react';
+import { LoaderCircle } from 'lucide-react';
+import { useState } from 'react';
 
-interface HealthCondition {
-    id: number;
-    name: string;
-    description: string;
-    nutritional_impact: string;
-}
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 
-interface Profile {
-    id?: number;
-}
-
-interface HealthConditionsProps {
+interface Props {
     profile?: Profile;
     selectedConditions: number[];
     healthConditions: HealthCondition[];
@@ -22,44 +18,27 @@ interface HealthConditionsProps {
 export default function HealthConditions({
     selectedConditions,
     healthConditions,
-}: HealthConditionsProps) {
+}: Props) {
+    const [selectedIds, setSelectedIds] = useState<number[]>(
+        selectedConditions || [],
+    );
     const [notes, setNotes] = useState<Record<number, string>>({});
     const [expandedId, setExpandedId] = useState<number | null>(null);
 
-    const { data, setData, post, processing, errors } = useForm({
-        health_condition_ids: selectedConditions || [],
-        notes: [] as string[],
-    });
-
     const toggleCondition = (id: number) => {
-        const current = data.health_condition_ids;
-        if (current.includes(id)) {
+        if (selectedIds.includes(id)) {
             // Remove note when unchecking
             const newNotes = { ...notes };
             delete newNotes[id];
             setNotes(newNotes);
-            setData(
-                'health_condition_ids',
-                current.filter((c) => c !== id),
-            );
+            setSelectedIds((current) => current.filter((c) => c !== id));
         } else {
-            setData('health_condition_ids', [...current, id]);
+            setSelectedIds((current) => [...current, id]);
         }
     };
 
     const updateNote = (id: number, value: string) => {
         setNotes((prev) => ({ ...prev, [id]: value }));
-    };
-
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-
-        const notesArray = data.health_condition_ids.map(
-            (id) => notes[id] || '',
-        );
-        setData('notes', notesArray);
-
-        post(onboarding.healthConditions.store.url());
     };
 
     return (
@@ -87,130 +66,180 @@ export default function HealthConditions({
                             nutritional needs
                         </p>
 
-                        <form onSubmit={submit} className="space-y-4">
-                            <div className="space-y-3">
-                                {healthConditions.map((condition) => (
-                                    <div
-                                        key={condition.id}
-                                        className={`rounded-lg border p-4 transition-colors ${
-                                            data.health_condition_ids.includes(
-                                                condition.id,
-                                            )
-                                                ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
-                                                : 'border-gray-300 dark:border-gray-600'
-                                        }`}
-                                    >
-                                        <label className="flex cursor-pointer items-start">
-                                            <input
-                                                type="checkbox"
-                                                checked={data.health_condition_ids.includes(
-                                                    condition.id,
-                                                )}
-                                                onChange={() =>
-                                                    toggleCondition(
-                                                        condition.id,
-                                                    )
-                                                }
-                                                className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                            />
-                                            <div className="ml-3 flex-1">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="font-medium text-gray-900 dark:text-white">
-                                                        {condition.name}
-                                                    </span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            setExpandedId(
-                                                                expandedId ===
-                                                                    condition.id
-                                                                    ? null
-                                                                    : condition.id,
-                                                            );
-                                                        }}
-                                                        className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
-                                                    >
-                                                        {expandedId ===
-                                                        condition.id
-                                                            ? 'Hide'
-                                                            : 'Info'}
-                                                    </button>
-                                                </div>
-                                                <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                    {condition.description}
-                                                </p>
+                        <Form
+                            {...onboarding.healthConditions.store.form()}
+                            disableWhileProcessing
+                            className="space-y-4"
+                        >
+                            {({ processing, errors }) => (
+                                <>
+                                    {/* Hidden inputs for selected IDs */}
+                                    {selectedIds.map((id) => (
+                                        <input
+                                            key={`id-${id}`}
+                                            type="hidden"
+                                            name="health_condition_ids[]"
+                                            value={id}
+                                        />
+                                    ))}
 
-                                                {expandedId ===
-                                                    condition.id && (
-                                                    <div className="mt-2 rounded-md bg-blue-50 p-3 text-sm text-gray-700 dark:bg-blue-900/30 dark:text-gray-300">
-                                                        <p className="font-medium">
-                                                            Nutritional Impact:
-                                                        </p>
-                                                        <p className="mt-1">
-                                                            {
-                                                                condition.nutritional_impact
-                                                            }
-                                                        </p>
-                                                    </div>
-                                                )}
+                                    {/* Hidden inputs for notes */}
+                                    {selectedIds.map((id) => (
+                                        <input
+                                            key={`note-${id}`}
+                                            type="hidden"
+                                            name="notes[]"
+                                            value={notes[id] || ''}
+                                        />
+                                    ))}
 
-                                                {data.health_condition_ids.includes(
+                                    <div className="space-y-3">
+                                        {healthConditions.map((condition) => {
+                                            const isSelected =
+                                                selectedIds.includes(
                                                     condition.id,
-                                                ) && (
-                                                    <div className="mt-3">
-                                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                            Additional notes
-                                                            (optional)
-                                                        </label>
-                                                        <textarea
-                                                            value={
-                                                                notes[
-                                                                    condition.id
-                                                                ] || ''
-                                                            }
-                                                            onChange={(e) =>
-                                                                updateNote(
+                                                );
+                                            return (
+                                                <div
+                                                    key={condition.id}
+                                                    className={cn(
+                                                        'rounded-lg border p-4 transition-colors',
+                                                        isSelected
+                                                            ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
+                                                            : 'border-gray-300 dark:border-gray-600',
+                                                    )}
+                                                >
+                                                    <label className="flex cursor-pointer items-start">
+                                                        <Checkbox
+                                                            checked={isSelected}
+                                                            onCheckedChange={() =>
+                                                                toggleCondition(
                                                                     condition.id,
-                                                                    e.target
-                                                                        .value,
                                                                 )
                                                             }
-                                                            rows={2}
-                                                            maxLength={500}
-                                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                                            placeholder="Any specific details about this condition..."
+                                                            className="mt-1"
                                                         />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </label>
+                                                        <div className="ml-3 flex-1">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="font-medium text-gray-900 dark:text-white">
+                                                                    {
+                                                                        condition.name
+                                                                    }
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={(
+                                                                        e,
+                                                                    ) => {
+                                                                        e.preventDefault();
+                                                                        setExpandedId(
+                                                                            expandedId ===
+                                                                                condition.id
+                                                                                ? null
+                                                                                : condition.id,
+                                                                        );
+                                                                    }}
+                                                                    className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                                                                >
+                                                                    {expandedId ===
+                                                                    condition.id
+                                                                        ? 'Hide'
+                                                                        : 'Info'}
+                                                                </button>
+                                                            </div>
+                                                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                                {
+                                                                    condition.description
+                                                                }
+                                                            </p>
+
+                                                            {expandedId ===
+                                                                condition.id && (
+                                                                <div className="mt-2 rounded-md bg-blue-50 p-3 text-sm text-gray-700 dark:bg-blue-900/30 dark:text-gray-300">
+                                                                    <p className="font-medium">
+                                                                        Nutritional
+                                                                        Impact:
+                                                                    </p>
+                                                                    <p className="mt-1">
+                                                                        {
+                                                                            condition.nutritional_impact
+                                                                        }
+                                                                    </p>
+                                                                </div>
+                                                            )}
+
+                                                            {isSelected && (
+                                                                <div className="mt-3">
+                                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                                        Additional
+                                                                        notes
+                                                                        (optional)
+                                                                    </label>
+                                                                    <textarea
+                                                                        value={
+                                                                            notes[
+                                                                                condition
+                                                                                    .id
+                                                                            ] ||
+                                                                            ''
+                                                                        }
+                                                                        onChange={(
+                                                                            e,
+                                                                        ) =>
+                                                                            updateNote(
+                                                                                condition.id,
+                                                                                e
+                                                                                    .target
+                                                                                    .value,
+                                                                            )
+                                                                        }
+                                                                        rows={2}
+                                                                        maxLength={
+                                                                            500
+                                                                        }
+                                                                        className={cn(
+                                                                            'mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-xs transition-colors',
+                                                                            'placeholder:text-gray-500 dark:placeholder:text-gray-400',
+                                                                            'focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/50 focus-visible:outline-none',
+                                                                            'disabled:cursor-not-allowed disabled:opacity-50',
+                                                                            'dark:border-gray-600 dark:bg-gray-700 dark:text-white',
+                                                                        )}
+                                                                        placeholder="Any specific details about this condition..."
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
-                                ))}
-                            </div>
 
-                            {errors.health_condition_ids && (
-                                <p className="text-sm text-red-600 dark:text-red-400">
-                                    {errors.health_condition_ids}
-                                </p>
+                                    <InputError
+                                        message={errors.health_condition_ids}
+                                    />
+
+                                    {/* Submit Button */}
+                                    <div className="flex items-center justify-between border-t pt-6 dark:border-gray-700">
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            {selectedIds.length > 0
+                                                ? `${selectedIds.length} condition${selectedIds.length !== 1 ? 's' : ''} selected`
+                                                : "No conditions selected - that's perfectly fine!"}
+                                        </p>
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="w-auto"
+                                        >
+                                            {processing && (
+                                                <LoaderCircle className="h-4 w-4 animate-spin" />
+                                            )}
+                                            Complete Onboarding
+                                        </Button>
+                                    </div>
+                                </>
                             )}
-
-                            {/* Submit Button */}
-                            <div className="flex items-center justify-between border-t pt-6 dark:border-gray-700">
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    {data.health_condition_ids.length > 0
-                                        ? `${data.health_condition_ids.length} condition${data.health_condition_ids.length !== 1 ? 's' : ''} selected`
-                                        : "No conditions selected - that's perfectly fine!"}
-                                </p>
-                                <button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="inline-flex items-center rounded-md bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
-                                >
-                                    Complete Onboarding
-                                </button>
-                            </div>
-                        </form>
+                        </Form>
                     </div>
                 </div>
             </div>

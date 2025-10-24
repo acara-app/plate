@@ -1,19 +1,15 @@
 import onboarding from '@/routes/onboarding';
-import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { DietaryPreference, Profile } from '@/types';
+import { Form, Head } from '@inertiajs/react';
+import { LoaderCircle } from 'lucide-react';
+import { useState } from 'react';
 
-interface DietaryPreference {
-    id: number;
-    name: string;
-    type: string;
-    description: string;
-}
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 
-interface Profile {
-    id?: number;
-}
-
-interface DietaryPreferencesProps {
+interface Props {
     profile?: Profile;
     selectedPreferences: number[];
     preferences: {
@@ -27,31 +23,26 @@ interface DietaryPreferencesProps {
 export default function DietaryPreferences({
     selectedPreferences,
     preferences,
-}: DietaryPreferencesProps) {
-    const { data, setData, post, processing, errors } = useForm({
-        dietary_preference_ids: selectedPreferences || [],
-    });
+}: Props) {
+    const [selectedIds, setSelectedIds] = useState<number[]>(
+        selectedPreferences || [],
+    );
 
     const togglePreference = (id: number) => {
-        const current = data.dietary_preference_ids;
-        setData(
-            'dietary_preference_ids',
+        setSelectedIds((current) =>
             current.includes(id)
                 ? current.filter((p) => p !== id)
                 : [...current, id],
         );
     };
 
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-        post(onboarding.dietaryPreferences.store.url());
-    };
-
     const renderPreferenceGroup = (
         title: string,
         items: DietaryPreference[] | undefined,
     ) => {
-        if (!items || items.length === 0) return null;
+        if (!items || items.length === 0) {
+            return null;
+        }
 
         return (
             <div>
@@ -59,35 +50,36 @@ export default function DietaryPreferences({
                     {title}
                 </h3>
                 <div className="grid gap-2 sm:grid-cols-2">
-                    {items.map((preference) => (
-                        <label
-                            key={preference.id}
-                            className={`flex cursor-pointer items-start rounded-lg border p-3 transition-colors ${
-                                data.dietary_preference_ids.includes(
-                                    preference.id,
-                                )
-                                    ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
-                                    : 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'
-                            }`}
-                        >
-                            <input
-                                type="checkbox"
-                                checked={data.dietary_preference_ids.includes(
-                                    preference.id,
+                    {items.map((preference) => {
+                        const isChecked = selectedIds.includes(preference.id);
+                        return (
+                            <label
+                                key={preference.id}
+                                className={cn(
+                                    'flex cursor-pointer items-start rounded-lg border p-3 transition-colors',
+                                    isChecked
+                                        ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
+                                        : 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700',
                                 )}
-                                onChange={() => togglePreference(preference.id)}
-                                className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <div className="ml-3">
-                                <span className="block font-medium text-gray-900 dark:text-white">
-                                    {preference.name}
-                                </span>
-                                <span className="text-sm text-gray-600 dark:text-gray-300">
-                                    {preference.description}
-                                </span>
-                            </div>
-                        </label>
-                    ))}
+                            >
+                                <Checkbox
+                                    checked={isChecked}
+                                    onCheckedChange={() =>
+                                        togglePreference(preference.id)
+                                    }
+                                    className="mt-1"
+                                />
+                                <div className="ml-3">
+                                    <span className="block font-medium text-gray-900 dark:text-white">
+                                        {preference.name}
+                                    </span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                                        {preference.description}
+                                    </span>
+                                </div>
+                            </label>
+                        );
+                    })}
                 </div>
             </div>
         );
@@ -118,49 +110,67 @@ export default function DietaryPreferences({
                             intolerances, or food dislikes
                         </p>
 
-                        <form onSubmit={submit} className="space-y-8">
-                            {renderPreferenceGroup(
-                                'Dietary Patterns',
-                                preferences.pattern,
-                            )}
-                            {renderPreferenceGroup(
-                                'Allergies',
-                                preferences.allergy,
-                            )}
-                            {renderPreferenceGroup(
-                                'Intolerances',
-                                preferences.intolerance,
-                            )}
-                            {renderPreferenceGroup(
-                                'Food Dislikes',
-                                preferences.dislike,
-                            )}
+                        <Form
+                            {...onboarding.dietaryPreferences.store.form()}
+                            disableWhileProcessing
+                            className="space-y-8"
+                        >
+                            {({ processing, errors }) => (
+                                <>
+                                    {/* Hidden inputs for selected IDs */}
+                                    {selectedIds.map((id) => (
+                                        <input
+                                            key={id}
+                                            type="hidden"
+                                            name="dietary_preference_ids[]"
+                                            value={id}
+                                        />
+                                    ))}
 
-                            {errors.dietary_preference_ids && (
-                                <p className="text-sm text-red-600 dark:text-red-400">
-                                    {errors.dietary_preference_ids}
-                                </p>
-                            )}
+                                    {renderPreferenceGroup(
+                                        'Dietary Patterns',
+                                        preferences.pattern,
+                                    )}
+                                    {renderPreferenceGroup(
+                                        'Allergies',
+                                        preferences.allergy,
+                                    )}
+                                    {renderPreferenceGroup(
+                                        'Intolerances',
+                                        preferences.intolerance,
+                                    )}
+                                    {renderPreferenceGroup(
+                                        'Food Dislikes',
+                                        preferences.dislike,
+                                    )}
 
-                            {/* Submit Button */}
-                            <div className="flex items-center justify-between border-t pt-6 dark:border-gray-700">
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    {data.dietary_preference_ids.length}{' '}
-                                    preference
-                                    {data.dietary_preference_ids.length !== 1
-                                        ? 's'
-                                        : ''}{' '}
-                                    selected
-                                </p>
-                                <button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="inline-flex items-center rounded-md bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
-                                >
-                                    Continue to Health Conditions
-                                </button>
-                            </div>
-                        </form>
+                                    <InputError
+                                        message={errors.dietary_preference_ids}
+                                    />
+
+                                    {/* Submit Button */}
+                                    <div className="flex items-center justify-between border-t pt-6 dark:border-gray-700">
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            {selectedIds.length} preference
+                                            {selectedIds.length !== 1
+                                                ? 's'
+                                                : ''}{' '}
+                                            selected
+                                        </p>
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="w-auto"
+                                        >
+                                            {processing && (
+                                                <LoaderCircle className="h-4 w-4 animate-spin" />
+                                            )}
+                                            Continue to Health Conditions
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
+                        </Form>
                     </div>
                 </div>
             </div>
