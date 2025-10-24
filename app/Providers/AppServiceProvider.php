@@ -45,11 +45,15 @@ final class AppServiceProvider extends ServiceProvider
     private function bootVerificationDefaults(): void
     {
         VerifyEmail::createUrlUsing(function (object $notifiable): string {
-            return URL::signedRoute(
+            // Generate the relative signed URL first (for signature calculation)
+            $relativeUrl = URL::signedRoute(
                 'verification.verify',
                 ['id' => $notifiable->getKey(), 'hash' => sha1($notifiable->getEmailForVerification())],
                 absolute: false
             );
+
+            // Convert to absolute URL for email links
+            return url($relativeUrl);
         });
     }
 }
