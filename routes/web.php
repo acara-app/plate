@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserEmailResetNotification;
@@ -17,6 +18,25 @@ Route::get('/', fn () => Inertia::render('welcome'))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', fn () => Inertia::render('dashboard'))->name('dashboard');
+});
+
+Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(function (): void {
+    Route::get('/', [OnboardingController::class, 'showQuestionnaire'])->name('questionnaire.show');
+
+    Route::get('/biometrics', [OnboardingController::class, 'showBiometrics'])->name('biometrics.show');
+    Route::post('/biometrics', [OnboardingController::class, 'storeBiometrics'])->name('biometrics.store');
+
+    Route::get('/goals', [OnboardingController::class, 'showGoals'])->name('goals.show');
+    Route::post('/goals', [OnboardingController::class, 'storeGoals'])->name('goals.store');
+
+    Route::get('/lifestyle', [OnboardingController::class, 'showLifestyle'])->name('lifestyle.show');
+    Route::post('/lifestyle', [OnboardingController::class, 'storeLifestyle'])->name('lifestyle.store');
+
+    Route::get('/dietary-preferences', [OnboardingController::class, 'showDietaryPreferences'])->name('dietary-preferences.show');
+    Route::post('/dietary-preferences', [OnboardingController::class, 'storeDietaryPreferences'])->name('dietary-preferences.store');
+
+    Route::get('/health-conditions', [OnboardingController::class, 'showHealthConditions'])->name('health-conditions.show');
+    Route::post('/health-conditions', [OnboardingController::class, 'storeHealthConditions'])->name('health-conditions.store');
 });
 
 Route::middleware('auth')->group(function (): void {
