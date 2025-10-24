@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read array<int, string>|null $nutrients_to_limit
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read UserProfileHealthCondition|null $pivot
  */
 final class HealthCondition extends Model
 {

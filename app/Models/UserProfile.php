@@ -94,14 +94,14 @@ final class UserProfile extends Model
     }
 
     /**
-     * @return BelongsToMany<HealthCondition, $this>
+     * @return BelongsToMany<HealthCondition, $this, UserProfileHealthCondition>
      */
     public function healthConditions(): BelongsToMany
     {
         return $this->belongsToMany(
             HealthCondition::class,
             'user_profile_health_condition'
-        )->withPivot('notes')->withTimestamps();
+        )->using(UserProfileHealthCondition::class)->withPivot('notes')->withTimestamps();
     }
 
     public function calculateBMI(): ?float

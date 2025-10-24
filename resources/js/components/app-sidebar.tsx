@@ -14,7 +14,7 @@ import { dashboard } from '@/routes';
 import biometrics from '@/routes/onboarding/biometrics';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Folder, HeartIcon, LeafIcon } from 'lucide-react';
+import { CalendarHeartIcon, Folder, HeartIcon, LeafIcon } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -24,7 +24,12 @@ const mainNavItems: NavItem[] = [
         icon: HeartIcon,
     },
     {
-        title: 'Update Meal Plans',
+        title: 'Weekly Meal Plans',
+        href: '/meal-plans/weekly',
+        icon: CalendarHeartIcon,
+    },
+    {
+        title: 'Update Your Info',
         href: biometrics.show(),
         icon: LeafIcon,
     },
