@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -19,6 +20,18 @@ final class AppServiceProvider extends ServiceProvider
     {
         $this->bootModelsDefaults();
         $this->bootPasswordDefaults();
+        $this->configureUrl();
+    }
+
+    /**
+     * Configure the application's URL.
+     * reminder: it is not should be public and just for rector cleanups
+     */
+    public function configureUrl(): void
+    {
+        if (app()->isProduction()) {
+            URL::forceScheme('https');
+        }
     }
 
     private function bootModelsDefaults(): void
