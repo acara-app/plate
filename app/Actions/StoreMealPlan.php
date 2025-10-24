@@ -15,6 +15,9 @@ final readonly class StoreMealPlan
     public function handle(User $user, MealPlanData $mealPlanData): MealPlan
     {
         return DB::transaction(function () use ($user, $mealPlanData): MealPlan {
+            // Delete old meal plans of the same type
+            $this->deleteOldMealPlans($user, $mealPlanData->type);
+
             /** @var MealPlan $mealPlan */
             $mealPlan = $user->mealPlans()->create([
                 'type' => $mealPlanData->type,
@@ -32,6 +35,16 @@ final readonly class StoreMealPlan
 
             return $mealPlan->load('meals');
         });
+    }
+
+    /**
+     * Delete all existing meal plans of the given type for the user
+     */
+    private function deleteOldMealPlans(User $user, \App\Enums\MealPlanType $type): void
+    {
+        $user->mealPlans()
+            ->where('type', $type)
+            ->delete();
     }
 
     private function storeMeal(MealPlan $mealPlan, MealData $mealData): void
