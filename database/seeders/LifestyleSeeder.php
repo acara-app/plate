@@ -55,7 +55,7 @@ final class LifestyleSeeder extends Seeder
         ];
 
         foreach ($lifestyles as $lifestyle) {
-            Lifestyle::create($lifestyle);
+            Lifestyle::query()->create($lifestyle);
         }
     }
 }

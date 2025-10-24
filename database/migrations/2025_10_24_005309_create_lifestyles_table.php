@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('lifestyles', function (Blueprint $table) {
+        Schema::create('lifestyles', function (Blueprint $table): void {
             $table->id();
             $table->string('name')->unique();
             $table->string('activity_level');

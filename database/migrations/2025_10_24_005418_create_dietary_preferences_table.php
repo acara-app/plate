@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('dietary_preferences', function (Blueprint $table) {
+        Schema::create('dietary_preferences', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
             $table->string('type');

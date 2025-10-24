@@ -58,7 +58,7 @@ final class DietaryPreferenceSeeder extends Seeder
         ];
 
         foreach ($preferences as $preference) {
-            DietaryPreference::create($preference);
+            DietaryPreference::query()->create($preference);
         }
     }
 }

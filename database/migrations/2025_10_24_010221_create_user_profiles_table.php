@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('user_profiles', function (Blueprint $table) {
+        Schema::create('user_profiles', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
 
@@ -36,7 +36,7 @@ return new class extends Migration
         });
 
         // Pivot table for dietary preferences (many-to-many)
-        Schema::create('user_profile_dietary_preference', function (Blueprint $table) {
+        Schema::create('user_profile_dietary_preference', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('user_profile_id')->constrained()->cascadeOnDelete();
             $table->foreignId('dietary_preference_id')->constrained()->cascadeOnDelete();
@@ -46,7 +46,7 @@ return new class extends Migration
         });
 
         // Pivot table for health conditions (many-to-many)
-        Schema::create('user_profile_health_condition', function (Blueprint $table) {
+        Schema::create('user_profile_health_condition', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('user_profile_id')->constrained()->cascadeOnDelete();
             $table->foreignId('health_condition_id')->constrained()->cascadeOnDelete();

@@ -19,7 +19,7 @@ use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
-final class OnboardingController extends Controller
+final readonly class OnboardingController
 {
     public function __construct(#[CurrentUser] private readonly \App\Models\User $user) {}
 
@@ -28,7 +28,7 @@ final class OnboardingController extends Controller
         $user = $this->user;
 
         if ($user->profile?->onboarding_completed) {
-            return redirect()->route('dashboard');
+            return to_route('dashboard');
         }
 
         return Inertia::render('onboarding/questionnaire');
@@ -56,7 +56,7 @@ final class OnboardingController extends Controller
             $request->validated()
         );
 
-        return redirect()->route('onboarding.goals.show');
+        return to_route('onboarding.goals.show');
     }
 
     public function showGoals(): Response
@@ -78,7 +78,7 @@ final class OnboardingController extends Controller
             $request->validated()
         );
 
-        return redirect()->route('onboarding.lifestyle.show');
+        return to_route('onboarding.lifestyle.show');
     }
 
     public function showLifestyle(): Response
@@ -100,7 +100,7 @@ final class OnboardingController extends Controller
             $request->validated()
         );
 
-        return redirect()->route('onboarding.dietary-preferences.show');
+        return to_route('onboarding.dietary-preferences.show');
     }
 
     public function showDietaryPreferences(): Response
@@ -124,7 +124,7 @@ final class OnboardingController extends Controller
 
         $profile->dietaryPreferences()->sync($request->validated('dietary_preference_ids') ?? []);
 
-        return redirect()->route('onboarding.health-conditions.show');
+        return to_route('onboarding.health-conditions.show');
     }
 
     public function showHealthConditions(): Response
@@ -162,6 +162,6 @@ final class OnboardingController extends Controller
             'onboarding_completed_at' => now(),
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Onboarding completed successfully!');
+        return to_route('dashboard')->with('success', 'Onboarding completed successfully!');
     }
 }

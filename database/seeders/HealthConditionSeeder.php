@@ -120,7 +120,7 @@ final class HealthConditionSeeder extends Seeder
         ];
 
         foreach ($conditions as $condition) {
-            HealthCondition::create($condition);
+            HealthCondition::query()->create($condition);
         }
     }
 }
