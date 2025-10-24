@@ -14,14 +14,14 @@ import { dashboard } from '@/routes';
 import biometrics from '@/routes/onboarding/biometrics';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Folder, LayoutGrid, LeafIcon } from 'lucide-react';
+import { Folder, HeartIcon, LeafIcon } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
-        icon: LayoutGrid,
+        icon: HeartIcon,
     },
     {
         title: 'Update Meal Plans',
