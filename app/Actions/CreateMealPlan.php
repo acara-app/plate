@@ -9,8 +9,9 @@ use App\Models\HealthCondition;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Support\Collection;
+use RuntimeException;
 
-final readonly class CreateWeeklyMealPlan
+final readonly class CreateMealPlan
 {
     public function handle(User $user): string
     {
@@ -21,8 +22,11 @@ final readonly class CreateWeeklyMealPlan
             'profile.healthConditions',
         ]);
 
-        /** @var UserProfile|null $profile */
         $profile = $user->profile;
+
+        if (! $profile instanceof UserProfile) {
+            throw new RuntimeException('User profile is required to create a meal plan.');
+        }
 
         $context = [
             // Physical metrics
@@ -77,7 +81,7 @@ final readonly class CreateWeeklyMealPlan
             'macronutrientRatios' => $this->calculateMacronutrientRatios($profile),
         ];
 
-        return view('meal-plans.weekly.create', [
+        return view('meal-plans.create', [
             'context' => $context,
         ])->render();
     }

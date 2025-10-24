@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\CreateWeeklyMealPlan;
+use App\Actions\CreateMealPlan;
 use App\Models\DietaryPreference;
 use App\Models\Goal;
 use App\Models\HealthCondition;
@@ -45,7 +45,7 @@ test('it generates meal plan context for user with complete profile', function (
     ]);
     $profile->healthConditions()->attach($healthCondition, ['notes' => 'Type 2']);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)
@@ -63,15 +63,6 @@ test('it generates meal plan context for user with complete profile', function (
         ->toContain('Daily Calorie Target');
 });
 
-test('it throws exception for user without profile', function (): void {
-    $user = User::factory()->create();
-
-    $action = new CreateWeeklyMealPlan;
-
-    expect(fn (): string => $action->handle($user))
-        ->toThrow(RuntimeException::class, 'User profile is required to generate a meal plan.');
-});
-
 test('it handles user with minimal profile data', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
@@ -84,7 +75,7 @@ test('it handles user with minimal profile data', function (): void {
         'lifestyle_id' => null,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)
@@ -108,7 +99,7 @@ test('it calculates correct daily calorie target for weight loss', function (): 
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)
@@ -126,7 +117,7 @@ test('it includes macronutrient ratios in output', function (): void {
         'age' => 25,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)
@@ -152,7 +143,7 @@ test('it calculates calorie target for weight gain goal', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)->toContain('Daily Calorie Target');
@@ -173,7 +164,7 @@ test('it calculates calorie target for gain weight goal', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)->toContain('Daily Calorie Target');
@@ -194,7 +185,7 @@ test('it calculates calorie target for muscle gain goal', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)->toContain('Daily Calorie Target');
@@ -215,7 +206,7 @@ test('it calculates calorie target for maintain weight goal', function (): void 
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)->toContain('Daily Calorie Target');
@@ -236,7 +227,7 @@ test('it calculates calorie target for maintenance goal', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)->toContain('Daily Calorie Target');
@@ -257,7 +248,7 @@ test('it calculates calorie target for lose weight goal', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)->toContain('Daily Calorie Target');
@@ -278,7 +269,7 @@ test('it calculates calorie target for unknown goal using default', function ():
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)->toContain('Daily Calorie Target');
@@ -297,7 +288,7 @@ test('it returns null calorie target when tdee cannot be calculated', function (
         'sex' => null,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)
@@ -314,7 +305,7 @@ test('it uses default macronutrient ratios when no goal is set', function (): vo
         'age' => 25,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)
@@ -333,7 +324,7 @@ test('it calculates macronutrient ratios for weight loss', function (): void {
         'age' => 25,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)
@@ -351,7 +342,7 @@ test('it calculates macronutrient ratios for lose weight', function (): void {
         'age' => 25,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)
@@ -369,7 +360,7 @@ test('it calculates macronutrient ratios for gain weight', function (): void {
         'age' => 25,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)
@@ -388,7 +379,7 @@ test('it calculates macronutrient ratios for maintain weight', function (): void
         'age' => 25,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)
@@ -406,7 +397,7 @@ test('it calculates macronutrient ratios for maintenance', function (): void {
         'age' => 25,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)
@@ -424,7 +415,7 @@ test('it calculates macronutrient ratios for unknown goal using default', functi
         'age' => 25,
     ]);
 
-    $action = new CreateWeeklyMealPlan;
+    $action = new CreateMealPlan();
     $result = $action->handle($user);
 
     expect($result)

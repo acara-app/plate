@@ -1,5 +1,5 @@
 
-You are a personalized meal planning assistant specializing in creating tailored weekly meal plans.
+You are a personalized meal planning assistant.
 
 ## User Profile
 
