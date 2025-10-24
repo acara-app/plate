@@ -109,30 +109,19 @@ export default function WeeklyMealPlans({
 
                             {/* Day Navigation */}
                             <div className="flex items-center gap-2">
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    disabled={!navigation.has_previous}
-                                    asChild={navigation.has_previous}
-                                >
-                                    {navigation.has_previous ? (
-                                        <Link
-                                            href={
-                                                mealPlans.weekly({
-                                                    query: {
-                                                        day: navigation.previous_day!,
-                                                    },
-                                                }).url
-                                            }
-                                            preserveScroll
-                                        >
-                                            <ChevronLeft className="h-4 w-4" />
-                                        </Link>
-                                    ) : (
-                                        <span>
-                                            <ChevronLeft className="h-4 w-4" />
-                                        </span>
-                                    )}
+                                <Button variant="outline" size="icon" asChild>
+                                    <Link
+                                        href={
+                                            mealPlans.weekly({
+                                                query: {
+                                                    day: navigation.previous_day,
+                                                },
+                                            }).url
+                                        }
+                                        preserveScroll
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Link>
                                 </Button>
 
                                 <div className="min-w-[120px] text-center">
@@ -142,30 +131,19 @@ export default function WeeklyMealPlans({
                                     </div>
                                 </div>
 
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    disabled={!navigation.has_next}
-                                    asChild={navigation.has_next}
-                                >
-                                    {navigation.has_next ? (
-                                        <Link
-                                            href={
-                                                mealPlans.weekly({
-                                                    query: {
-                                                        day: navigation.next_day!,
-                                                    },
-                                                }).url
-                                            }
-                                            preserveScroll
-                                        >
-                                            <ChevronRight className="h-4 w-4" />
-                                        </Link>
-                                    ) : (
-                                        <span>
-                                            <ChevronRight className="h-4 w-4" />
-                                        </span>
-                                    )}
+                                <Button variant="outline" size="icon" asChild>
+                                    <Link
+                                        href={
+                                            mealPlans.weekly({
+                                                query: {
+                                                    day: navigation.next_day,
+                                                },
+                                            }).url
+                                        }
+                                        preserveScroll
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Link>
                                 </Button>
                             </div>
                         </div>

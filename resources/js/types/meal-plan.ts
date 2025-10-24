@@ -58,7 +58,7 @@ export interface MealPlan {
 export interface Navigation {
     has_previous: boolean;
     has_next: boolean;
-    previous_day: number | null;
-    next_day: number | null;
+    previous_day: number;
+    next_day: number;
     total_days: number;
 }

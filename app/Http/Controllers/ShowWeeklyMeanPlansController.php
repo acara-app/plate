@@ -111,12 +111,12 @@ final class ShowWeeklyMeanPlansController
             'daily_stats' => $dailyStats,
         ];
 
-        // Navigation info
+        // Navigation info with looping
         $navigation = [
-            'has_previous' => $currentDayNumber > 1,
-            'has_next' => $currentDayNumber < $mealPlan->duration_days,
-            'previous_day' => $currentDayNumber > 1 ? $currentDayNumber - 1 : null,
-            'next_day' => $currentDayNumber < $mealPlan->duration_days ? $currentDayNumber + 1 : null,
+            'has_previous' => true, // Always enabled with looping
+            'has_next' => true, // Always enabled with looping
+            'previous_day' => $currentDayNumber > 1 ? $currentDayNumber - 1 : $mealPlan->duration_days,
+            'next_day' => $currentDayNumber < $mealPlan->duration_days ? $currentDayNumber + 1 : 1,
             'total_days' => $mealPlan->duration_days,
         ];
 
