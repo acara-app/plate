@@ -200,7 +200,7 @@ if (! function_exists('revertFlattenedValue')) {
 if (! function_exists('isNotNull')) {
     function isNotNull(mixed $value): bool
     {
-        return !in_array($value, [null, '', '0'], true);
+        return ! in_array($value, [null, '', '0'], true);
     }
 }
 

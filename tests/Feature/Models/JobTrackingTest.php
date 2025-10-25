@@ -10,7 +10,7 @@ use App\Models\User;
 it('generates uuid automatically when creating', function (): void {
     $user = User::factory()->create();
 
-    $jobTracking = \App\Models\JobTracking::query()->create([
+    $jobTracking = JobTracking::query()->create([
         'user_id' => $user->id,
         'job_type' => ProcessMealPlanJob::JOB_TYPE,
         'status' => JobStatus::Pending,
