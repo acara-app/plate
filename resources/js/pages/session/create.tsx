@@ -1,4 +1,4 @@
-import SessionController from '@/actions/App/Http/Controllers/SessionController';
+import SessionController from '@/actions/App/Http/Controllers/Auth/SessionController';
 import GoogleOAuthButton from '@/components/google-oauth-button';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';

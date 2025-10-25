@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\SessionController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FoodLogController;
 use App\Http\Controllers\OnboardingController;
-use App\Http\Controllers\SessionController;
 use App\Http\Controllers\ShowWeeklyMeanPlansController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserEmailResetNotification;
