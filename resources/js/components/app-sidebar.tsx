@@ -10,12 +10,18 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { dashboard, privacy, terms } from '@/routes';
 import mealPlans from '@/routes/meal-plans';
 import biometrics from '@/routes/onboarding/biometrics';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { CalendarHeartIcon, Folder, HeartIcon, LeafIcon } from 'lucide-react';
+import {
+    CalendarHeartIcon,
+    FileText,
+    HeartIcon,
+    LeafIcon,
+    ShieldCheck,
+} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -38,9 +44,14 @@ const mainNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Webfluss',
-        href: 'https://webfluss.com',
-        icon: Folder,
+        title: 'Terms of Service',
+        href: terms.url(),
+        icon: FileText,
+    },
+    {
+        title: 'Privacy Policy',
+        href: privacy.url(),
+        icon: ShieldCheck,
     },
 ];
 

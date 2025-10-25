@@ -1,6 +1,6 @@
 import UserController from '@/actions/App/Http/Controllers/UserController';
 import GoogleOAuthButton from '@/components/google-oauth-button';
-import { login } from '@/routes';
+import { login, privacy, terms } from '@/routes';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
@@ -103,6 +103,29 @@ export default function Register() {
                                     message={errors.password_confirmation}
                                 />
                             </div>
+
+                            <p className="text-xs text-muted-foreground">
+                                By signing up, I confirm that I am at least 18
+                                years old and accept the{' '}
+                                <a
+                                    href={terms.url()}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline underline-offset-4 hover:text-foreground"
+                                >
+                                    Terms of Service
+                                </a>{' '}
+                                and{' '}
+                                <a
+                                    href={privacy.url()}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline underline-offset-4 hover:text-foreground"
+                                >
+                                    Privacy Policy
+                                </a>
+                                .
+                            </p>
 
                             <Button
                                 type="submit"

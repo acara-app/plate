@@ -16,7 +16,10 @@ use App\Http\Controllers\UserTwoFactorAuthenticationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn (): Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View => view('welcome'))->name('home');
+Route::view('/', 'welcome')->name('home');
+Route::view('/privacy-policy', 'privacy-policy')->name('privacy');
+Route::view('/terms-of-service', 'terms-of-service')->name('terms');
+Route::view('/support', 'support')->name('support');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', fn () => Inertia::render('dashboard'))->name('dashboard');

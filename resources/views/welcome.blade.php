@@ -1,6 +1,6 @@
 <x-default-layout>
     <div
-        class="relative flex min-h-screen flex-col items-center overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-4 text-slate-900 lg:justify-center lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950 dark:text-slate-50">
+        class="relative flex min-h-screen flex-col items-center overflow-hidden from-emerald-50 via-white to-teal-50 p-4 text-slate-900 lg:justify-center lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950 dark:text-slate-50">
         
         {{-- Animated background elements --}}
         <div class="pointer-events-none absolute inset-0 overflow-hidden">
@@ -172,6 +172,7 @@
             </main>
         </div>
     </div>
+    <x-footer />
 
     <style>
         @keyframes float {
