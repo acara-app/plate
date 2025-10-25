@@ -20,7 +20,7 @@ it('renders weekly meal plans page for authenticated user', function (): void {
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('meal-plans/weekly/index')
+            ->component('meal-plans/weekly/show-weekly-plan')
             ->has('mealPlan')
             ->has('currentDay')
             ->has('navigation'));
@@ -34,7 +34,7 @@ it('shows empty state when user has no meal plans', function (): void {
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('meal-plans/weekly/index')
+            ->component('meal-plans/weekly/show-weekly-plan')
             ->where('mealPlan', null)
             ->where('currentDay', null)
             ->where('navigation', null));

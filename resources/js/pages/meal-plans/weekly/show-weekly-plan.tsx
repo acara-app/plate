@@ -1,10 +1,12 @@
 import { JobProcessingStatus } from '@/components/job-processing-status';
 import { MealCard } from '@/components/meal-plans/meal-card';
 import { NutritionStats } from '@/components/meal-plans/nutrition-stats';
+import { OnboardingBanner } from '@/components/onboarding-banner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import mealPlans from '@/routes/meal-plans';
@@ -53,11 +55,14 @@ export default function WeeklyMealPlans({
     navigation,
     jobTracking,
 }: WeeklyMealPlansProps) {
+    const { user } = useSharedProps();
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Weekly Meal Plans" />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
+                {!user.is_onboarded && <OnboardingBanner />}
                 {jobTracking && (
                     <JobProcessingStatus jobTracking={jobTracking} />
                 )}

@@ -17,5 +17,7 @@ test('to array', function (): void {
             'created_at',
             'updated_at',
             'google_id',
+            'is_onboarded',
+            'profile',
         ]);
 });

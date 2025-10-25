@@ -59,14 +59,6 @@ final class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * Get the user's "onboarding_completed" attribute.
-     */
-    public function getIsOnboardedAttribute(): bool
-    {
-        return $this->profile?->onboarding_completed ?? false;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -109,5 +101,13 @@ final class User extends Authenticatable implements MustVerifyEmail
     public function jobTrackings(): HasMany
     {
         return $this->hasMany(JobTracking::class)->latest();
+    }
+
+    /**
+     * Get the user's "onboarding_completed" attribute.
+     */
+    protected function getIsOnboardedAttribute(): bool
+    {
+        return $this->profile->onboarding_completed ?? false;
     }
 }
