@@ -22,13 +22,6 @@ if (! function_exists('isLocal')) {
     }
 }
 
-if (! function_exists('enumValues')) {
-    function enumValues($enumStr): Illuminate\Support\Collection
-    {
-        return collect($enumStr::cases())->map->value;
-    }
-}
-
 if (! function_exists('paginateFromRequest')) {
     function paginateFromRequest(
         Builder $query,
@@ -52,10 +45,10 @@ if (! function_exists('appendUniqueIdToFilename')) {
         $extension = $file->getClientOriginalExtension();
 
         return str($filename)
-            ->when($extension, fn ($str) => $str->replaceLast(".{$extension}", ''))
+            ->when($extension, fn (Illuminate\Support\Stringable $str): Illuminate\Support\Stringable => $str->replaceLast(".{$extension}", ''))
             ->slug('_')
             ->append('_'.Str::random(8))
-            ->when($extension, fn ($str) => $str->append(".{$extension}"))
+            ->when($extension, fn (Illuminate\Support\Stringable $str): Illuminate\Support\Stringable => $str->append(".{$extension}"))
             ->toString();
     }
 }
@@ -72,10 +65,10 @@ if (! function_exists('makeFilenameUniqueFromUrl')) {
         $filename = basename($remoteUrl);
 
         return str($filename)
-            ->when($extension, fn ($str) => $str->replaceLast(".{$extension}", ''))
+            ->when($extension, fn (Illuminate\Support\Stringable $str): Illuminate\Support\Stringable => $str->replaceLast(".{$extension}", ''))
             ->slug('_')
             ->append('_'.Str::random(8))
-            ->when($extension, fn ($str) => $str->append(".{$extension}"))
+            ->when($extension, fn (Illuminate\Support\Stringable $str): Illuminate\Support\Stringable => $str->append(".{$extension}"))
             ->toString();
     }
 }
@@ -88,9 +81,9 @@ if (! function_exists('extensionFromUrl')) {
 }
 
 if (! function_exists('removeHyphenAndCapitalize')) {
-    function removeHyphenAndCapitalize($string): string
+    function removeHyphenAndCapitalize(string $string): string
     {
-        return ucwords(str_replace('-', ' ', (string) $string));
+        return ucwords(str_replace('-', ' ', $string));
     }
 }
 
@@ -197,7 +190,7 @@ if (! function_exists('flattenValue')) {
 if (! function_exists('revertFlattenedValue')) {
     function revertFlattenedValue(array $target): array
     {
-        return array_map(fn ($item): array => ['value' => $item], $target);
+        return array_map(fn (mixed $item): array => ['value' => $item], $target);
     }
 }
 
@@ -217,7 +210,7 @@ if (! function_exists('enumToValueLabelArray')) {
      */
     function enumToValueLabelArray(array $options): array
     {
-        return array_map(fn ($value, $key): array => [
+        return array_map(fn (mixed $value, mixed $key): array => [
             'label' => $value,
             'value' => $key,
         ], $options, array_keys($options));
@@ -255,6 +248,6 @@ if (! function_exists('filteredParams')) {
      */
     function filteredParams(Request $request, array $filtersValue): array
     {
-        return array_filter($request->query(), fn ($value, $key): bool => in_array($key, $filtersValue), ARRAY_FILTER_USE_BOTH);
+        return array_filter($request->query(), fn (mixed $value, mixed $key): bool => in_array($key, $filtersValue, true), ARRAY_FILTER_USE_BOTH);
     }
 }

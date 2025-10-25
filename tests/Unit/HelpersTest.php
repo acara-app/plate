@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\Sex;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 
@@ -28,14 +27,6 @@ it('returns false when app is not in local', function (): void {
     app()->detectEnvironment(fn () => 'production');
 
     expect(isLocal())->toBeFalse();
-});
-
-it('returns enum values as collection', function (): void {
-    $values = enumValues(Sex::class);
-
-    expect($values)
-        ->toBeInstanceOf(Illuminate\Support\Collection::class)
-        ->and($values->toArray())->toBe(['male', 'female', 'other']);
 });
 
 it('paginates query from request with default per page', function (): void {
