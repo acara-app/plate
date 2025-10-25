@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
-import { dashboard } from '@/routes';
 import mealPlans from '@/routes/meal-plans';
 import { JobTracking, type BreadcrumbItem } from '@/types';
 import { CurrentDay, MealPlan, Navigation } from '@/types/meal-plan';
@@ -29,10 +28,6 @@ interface WeeklyMealPlansProps {
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard().url,
-    },
     {
         title: 'Weekly Meal Plans',
         href: mealPlans.weekly().url,

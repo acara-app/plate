@@ -1,10 +1,20 @@
 import { OnboardingBanner } from '@/components/onboarding-banner';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
+import chat from '@/routes/chat';
+import foodLog from '@/routes/food-log';
+import mealPlans from '@/routes/meal-plans';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -19,21 +29,68 @@ export default function Dashboard() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-6">
                 {!currentUser?.is_onboarded && <OnboardingBanner />}
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {/* Weekly Meal Plans Card */}
+                    <Card className="flex flex-col transition-shadow hover:shadow-md">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <span className="text-2xl">🍽️</span>
+                                Weekly Meal Plans
+                            </CardTitle>
+                            <CardDescription>
+                                View and manage your personalized weekly meal
+                                plans
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="mt-auto">
+                            <Link href={mealPlans.weekly().url}>
+                                <Button className="w-full">
+                                    View Meal Plans
+                                </Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
+
+                    {/* Chat Card */}
+                    <Card className="flex flex-col transition-shadow hover:shadow-md">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <span className="text-2xl">💬</span>
+                                Nutrition Chat
+                            </CardTitle>
+                            <CardDescription>
+                                Get personalized nutrition advice and answers to
+                                your questions
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="mt-auto">
+                            <Link href={chat.create().url}>
+                                <Button className="w-full">Start Chat</Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
+
+                    {/* Food Log Card */}
+                    <Card className="flex flex-col transition-shadow hover:shadow-md">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <span className="text-2xl">📝</span>
+                                Food Log
+                            </CardTitle>
+                            <CardDescription>
+                                Track your daily food intake and monitor your
+                                progress
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="mt-auto">
+                            <Link href={foodLog.create().url}>
+                                <Button className="w-full">Log Food</Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </AppLayout>

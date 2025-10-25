@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FoodLogController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\ShowWeeklyMeanPlansController;
@@ -26,6 +28,10 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', [DashboardController::class, 'show'])->name('dashboard');
 
     Route::get('meal-plans/weekly', ShowWeeklyMeanPlansController::class)->name('meal-plans.weekly');
+
+    Route::get('chat/create', [ChatController::class, 'create'])->name('chat.create');
+
+    Route::get('ongoing-tracking/food-log/create', [FoodLogController::class, 'create'])->name('food-log.create');
 });
 
 Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(function (): void {
