@@ -40,7 +40,7 @@ it('boots password defaults in production environment', function (): void {
 });
 
 it('boots url defaults in production', function (): void {
-    app()->detectEnvironment(fn () => 'production');
+    app()->detectEnvironment(fn (): string => 'production');
 
     $provider = new AppServiceProvider(app());
     $provider->boot();
@@ -50,7 +50,7 @@ it('boots url defaults in production', function (): void {
 });
 
 it('does not force https scheme in non-production', function (): void {
-    app()->detectEnvironment(fn () => 'local');
+    app()->detectEnvironment(fn (): string => 'local');
 
     $provider = new AppServiceProvider(app());
     $provider->boot();

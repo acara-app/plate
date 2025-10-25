@@ -200,7 +200,7 @@ if (! function_exists('revertFlattenedValue')) {
 if (! function_exists('isNotNull')) {
     function isNotNull(mixed $value): bool
     {
-        return $value !== null && $value !== '' && $value !== '0';
+        return !in_array($value, [null, '', '0'], true);
     }
 }
 
@@ -225,7 +225,7 @@ if (! function_exists('clearFilters')) {
      * @param  array  $fieldsToRemove  Fields to remove from the parameters (empty array means remove all filter fields)
      * @return string route url with the filter fields removed
      */
-    function clearFilters(Request $request, array $fieldsToRemove = []): ?string
+    function clearFilters(Request $request, array $fieldsToRemove = []): string
     {
 
         $query = $request->query();

@@ -6,25 +6,25 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 
 it('returns true when app is in production', function (): void {
-    app()->detectEnvironment(fn () => 'production');
+    app()->detectEnvironment(fn (): string => 'production');
 
     expect(isProduction())->toBeTrue();
 });
 
 it('returns false when app is not in production', function (): void {
-    app()->detectEnvironment(fn () => 'local');
+    app()->detectEnvironment(fn (): string => 'local');
 
     expect(isProduction())->toBeFalse();
 });
 
 it('returns true when app is in local', function (): void {
-    app()->detectEnvironment(fn () => 'local');
+    app()->detectEnvironment(fn (): string => 'local');
 
     expect(isLocal())->toBeTrue();
 });
 
 it('returns false when app is not in local', function (): void {
-    app()->detectEnvironment(fn () => 'production');
+    app()->detectEnvironment(fn (): string => 'production');
 
     expect(isLocal())->toBeFalse();
 });

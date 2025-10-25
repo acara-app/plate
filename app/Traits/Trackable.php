@@ -13,7 +13,7 @@ trait Trackable
 
     public function initializeTracking(int $userId, string $jobType): JobTracking
     {
-        $this->tracking = JobTracking::create([
+        $this->tracking = \App\Models\JobTracking::query()->create([
             'user_id' => $userId,
             'job_type' => $jobType,
             'status' => JobStatus::Pending,
