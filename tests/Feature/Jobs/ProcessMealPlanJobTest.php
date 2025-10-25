@@ -11,11 +11,11 @@ use App\Models\Lifestyle;
 use App\Models\MealPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
-use Prism\Prism\DataObjects\Meta;
-use Prism\Prism\DataObjects\Usage;
 use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Prism;
 use Prism\Prism\Testing\StructuredResponseFake;
+use Prism\Prism\ValueObjects\Meta;
+use Prism\Prism\ValueObjects\Usage;
 
 it('dispatches meal plan generation job', function (): void {
     Queue::fake();
