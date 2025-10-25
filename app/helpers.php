@@ -5,10 +5,8 @@ declare(strict_types=1);
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
-use Inertia\Support\Header;
 
 if (! function_exists('isProduction')) {
     function isProduction(): bool
@@ -93,47 +91,6 @@ if (! function_exists('removeHyphenAndCapitalize')) {
     function removeHyphenAndCapitalize($string): string
     {
         return ucwords(str_replace('-', ' ', (string) $string));
-    }
-}
-
-if (! function_exists('getJsonStringify')) {
-    function getJsonStringify(string $string): string
-    {
-        return (string) (
-            str($string)
-                ->explode("\n")
-                ->first(fn ($line) => str($line)->startsWith('{'))
-        );
-    }
-}
-
-if (! function_exists('parseUrl')) {
-    function parseUrl(string $content): string
-    {
-        return (string) preg_replace_callback(
-            '/((https?:\/\/)?((localhost)|((?:\d{1,3}\.){3}\d{1,3})|[\w\-._@:%\+~#=]{1,256}(\.[a-zA-Z]{2,})+)(:\d+)?(\/[\w\-._@:%\+~#=\/]*)?(\?[\w\-._@:%\+~#=\/&]*)?)|((\+?\d{1,3}[\s.-]?)?(\(?\d{1,4}\)?[\s.-]?)?\d{1,4}[\\s.-]?\d{1,4}[\s.-]?\d{1,9})|([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/',
-            function (array $matches): string {
-                $url = preg_match('/^https?:\/\//', $matches[0]) ? $matches[0] : 'https://'.$matches[0];
-                $humanUrl = (string) preg_replace('/^https?:\/\//', '', $matches[0]);
-                $isMail = preg_match('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $humanUrl);
-                $isPhone = preg_match('/^(?:\+?(\d{1,3})[\s.-]?)?(?:\(?\d{1,4}\)?[\s.-]?)?\d{1,4}[\s.-]?\d{1,4}[\s.-]?\d{1,9}$/', $matches[0]);
-
-                if ($isMail) {
-                    $url = 'mailto:'.$humanUrl;
-                } elseif ($isPhone) {
-                    // Remove non-digit characters for a standardized phone link
-                    $phone = preg_replace('/[^\d+]/', '', $matches[0]);
-                    $url = 'tel:'.$phone;
-                }
-
-                if (mb_substr($humanUrl, -1) === '/') {
-                    $humanUrl = mb_substr($humanUrl, 0, -1);
-                }
-
-                return $url;
-            },
-            str_replace('&amp;', '&', $content)
-        );
     }
 }
 
@@ -254,27 +211,6 @@ if (! function_exists('isNotNull')) {
     }
 }
 
-if (! function_exists('resolvePartialProperties')) {
-    function resolvePartialProperties(): array
-    {
-        $props = [];
-
-        $only = array_filter(explode(',', request()->header(Header::PARTIAL_ONLY, '')));
-
-        if ($only !== []) {
-            $newProps = [];
-
-            foreach ($only as $key) {
-                Arr::set($newProps, $key, Arr::get($props, $key));
-            }
-
-            $props = $newProps;
-        }
-
-        return $props;
-    }
-}
-
 if (! function_exists('enumToValueLabelArray')) {
     /**
      * Converts enum cases to an array of value-label pairs.
@@ -320,38 +256,5 @@ if (! function_exists('filteredParams')) {
     function filteredParams(Request $request, array $filtersValue): array
     {
         return array_filter($request->query(), fn ($value, $key): bool => in_array($key, $filtersValue), ARRAY_FILTER_USE_BOTH);
-    }
-}
-
-if (! function_exists('convertUsdToMnt')) {
-    /**
-     * Converts USD amount to MNT (Mongolian Tugrik).
-     * 1 USD = 3,593 MNT
-     */
-    function convertUsdToMnt(float $usdAmount): float
-    {
-        return $usdAmount * 3593;
-    }
-}
-
-if (! function_exists('formatMnt')) {
-    /**
-     * Formats MNT amount with currency symbol and proper number formatting.
-     */
-    function formatMnt(float $mntAmount): string
-    {
-        return '₮'.number_format($mntAmount, 0, '.', ',');
-    }
-}
-
-if (! function_exists('convertAndFormatUsdToMnt')) {
-    /**
-     * Converts USD to MNT and formats it with currency symbol.
-     */
-    function convertAndFormatUsdToMnt(float $usdAmount): string
-    {
-        $mntAmount = convertUsdToMnt($usdAmount);
-
-        return formatMnt($mntAmount);
     }
 }
