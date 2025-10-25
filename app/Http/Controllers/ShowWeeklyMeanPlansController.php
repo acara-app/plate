@@ -49,7 +49,7 @@ final class ShowWeeklyMeanPlansController
 
         if (! $mealPlan) {
 
-            return Inertia::render('meal-plans/weekly/index', [
+            return Inertia::render('meal-plans/weekly/show-weekly-plan', [
                 'mealPlan' => null,
                 'currentDay' => null,
                 'navigation' => null,
@@ -132,7 +132,7 @@ final class ShowWeeklyMeanPlansController
             'total_days' => $mealPlan->duration_days,
         ];
 
-        return Inertia::render('meal-plans/weekly/index', [
+        return Inertia::render('meal-plans/weekly/show-weekly-plan', [
             'mealPlan' => $formattedMealPlan,
             'currentDay' => $currentDay,
             'navigation' => $navigation,

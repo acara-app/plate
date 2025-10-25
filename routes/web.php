@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\ShowWeeklyMeanPlansController;
@@ -22,7 +23,7 @@ Route::view('/terms-of-service', 'terms-of-service')->name('terms');
 Route::view('/support', 'support')->name('support');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
-    Route::get('dashboard', fn () => Inertia::render('dashboard'))->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'show'])->name('dashboard');
 
     Route::get('meal-plans/weekly', ShowWeeklyMeanPlansController::class)->name('meal-plans.weekly');
 });

@@ -39,6 +39,10 @@ final class User extends Authenticatable implements MustVerifyEmail
      */
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
+    protected $appends = [
+        'is_onboarded',
+    ];
+
     /**
      * @var list<string>
      */
@@ -53,6 +57,14 @@ final class User extends Authenticatable implements MustVerifyEmail
         'two_factor_secret',
         'two_factor_recovery_codes',
     ];
+
+    /**
+     * Get the user's "onboarding_completed" attribute.
+     */
+    public function getIsOnboardedAttribute(): bool
+    {
+        return $this->profile?->onboarding_completed ?? false;
+    }
 
     /**
      * @return array<string, string>
