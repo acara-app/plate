@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\DataTransferObjects\MealData;
-use App\DataTransferObjects\MealPlanData;
+use App\DataObjects\MealData;
+use App\DataObjects\MealPlanData;
 use App\Enums\MealPlanType;
 use App\Enums\MealType;
 

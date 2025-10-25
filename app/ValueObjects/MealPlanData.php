@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\DataTransferObjects;
+namespace App\DataObjects;
 
 use App\Enums\MealPlanType;
 use InvalidArgumentException;

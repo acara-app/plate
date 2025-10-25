@@ -9,11 +9,11 @@ use App\Enums\Sex;
 use App\Models\Goal;
 use App\Models\Lifestyle;
 use App\Models\User;
+use Prism\Prism\DataObjects\Meta;
+use Prism\Prism\DataObjects\Usage;
 use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Prism;
 use Prism\Prism\Testing\StructuredResponseFake;
-use Prism\Prism\ValueObjects\Meta;
-use Prism\Prism\ValueObjects\Usage;
 
 it('generates a meal plan using PrismPHP', function (): void {
     $user = User::factory()->create();

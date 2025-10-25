@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\StoreMealPlan;
-use App\DataTransferObjects\MealData;
-use App\DataTransferObjects\MealPlanData;
+use App\DataObjects\MealData;
+use App\DataObjects\MealPlanData;
 use App\Enums\MealPlanType;
 use App\Enums\MealType;
 use App\Models\Meal;

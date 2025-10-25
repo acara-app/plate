@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\DataTransferObjects\MealData;
+use App\DataObjects\MealData;
 use App\Enums\MealType;
 
 it('creates meal data from array with all fields', function (): void {

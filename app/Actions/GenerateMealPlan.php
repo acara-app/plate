@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\DataTransferObjects\MealPlanData;
+use App\DataObjects\MealPlanData;
 use App\Enums\AiModel;
 use App\Models\User;
 use Prism\Prism\Enums\Provider;
