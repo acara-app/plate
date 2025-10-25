@@ -7,6 +7,7 @@ import { useState } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -53,7 +54,10 @@ export default function HealthConditions({
                             <span>100%</span>
                         </div>
                         <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                            <div className="h-2 w-full rounded-full bg-blue-600"></div>
+                            <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary shadow-[0_0_12px_rgba(16,185,129,0.4)]">
+                                <div className="absolute inset-0 bg-linear-to-r from-white/30 via-transparent to-transparent"></div>
+                                <div className="absolute inset-0 bg-linear-to-l from-black/10 via-transparent to-white/10"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -105,7 +109,7 @@ export default function HealthConditions({
                                                     className={cn(
                                                         'rounded-lg border p-4 transition-colors',
                                                         isSelected
-                                                            ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
+                                                            ? 'border-primary bg-primary/10 dark:border-primary dark:bg-primary/20'
                                                             : 'border-gray-300 dark:border-gray-600',
                                                     )}
                                                 >
@@ -139,7 +143,7 @@ export default function HealthConditions({
                                                                                 : condition.id,
                                                                         );
                                                                     }}
-                                                                    className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                                                                    className="text-sm text-primary hover:text-primary/80"
                                                                 >
                                                                     {expandedId ===
                                                                     condition.id
@@ -155,7 +159,7 @@ export default function HealthConditions({
 
                                                             {expandedId ===
                                                                 condition.id && (
-                                                                <div className="mt-2 rounded-md bg-blue-50 p-3 text-sm text-gray-700 dark:bg-blue-900/30 dark:text-gray-300">
+                                                                <div className="mt-2 rounded-md bg-primary/10 p-3 text-sm text-gray-700 dark:bg-primary/20 dark:text-gray-300">
                                                                     <p className="font-medium">
                                                                         Nutritional
                                                                         Impact:
@@ -175,7 +179,7 @@ export default function HealthConditions({
                                                                         notes
                                                                         (optional)
                                                                     </label>
-                                                                    <textarea
+                                                                    <Textarea
                                                                         value={
                                                                             notes[
                                                                                 condition
@@ -197,13 +201,7 @@ export default function HealthConditions({
                                                                         maxLength={
                                                                             500
                                                                         }
-                                                                        className={cn(
-                                                                            'mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-xs transition-colors',
-                                                                            'placeholder:text-gray-500 dark:placeholder:text-gray-400',
-                                                                            'focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/50 focus-visible:outline-none',
-                                                                            'disabled:cursor-not-allowed disabled:opacity-50',
-                                                                            'dark:border-gray-600 dark:bg-gray-700 dark:text-white',
-                                                                        )}
+                                                                        className="mt-1"
                                                                         placeholder="Any specific details about this condition..."
                                                                     />
                                                                 </div>

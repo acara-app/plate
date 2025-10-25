@@ -24,7 +24,7 @@ export default function Questionnaire() {
 
                         <div className="space-y-4">
                             <div className="flex items-start">
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
                                     1
                                 </div>
                                 <div className="ml-4">
@@ -39,7 +39,7 @@ export default function Questionnaire() {
                             </div>
 
                             <div className="flex items-start">
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
                                     2
                                 </div>
                                 <div className="ml-4">
@@ -54,7 +54,7 @@ export default function Questionnaire() {
                             </div>
 
                             <div className="flex items-start">
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
                                     3
                                 </div>
                                 <div className="ml-4">
@@ -69,7 +69,7 @@ export default function Questionnaire() {
                             </div>
 
                             <div className="flex items-start">
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
                                     4
                                 </div>
                                 <div className="ml-4">
@@ -84,7 +84,7 @@ export default function Questionnaire() {
                             </div>
 
                             <div className="flex items-start">
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
                                     5
                                 </div>
                                 <div className="ml-4">
@@ -102,9 +102,11 @@ export default function Questionnaire() {
                         <div className="mt-8 flex justify-center">
                             <Link
                                 href={onboarding.biometrics.show.url()}
-                                className="inline-flex items-center rounded-md bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                                className="relative inline-flex items-center overflow-hidden rounded-md bg-primary px-6 py-3 text-base font-medium text-primary-foreground shadow-[0_0_20px_rgba(16,185,129,0.3),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.2)] transition-all before:absolute before:inset-0 before:bg-linear-to-br before:from-white/30 before:via-transparent before:to-transparent after:absolute after:inset-0 after:bg-linear-to-tl after:from-black/10 after:via-transparent after:to-white/10 hover:shadow-[0_0_30px_rgba(16,185,129,0.5),inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(0,0,0,0.2)] hover:brightness-110 focus:ring-[3px] focus:ring-primary/50 focus:outline-none active:brightness-95"
                             >
-                                Let's Get Started
+                                <span className="relative z-10">
+                                    Let's Get Started
+                                </span>
                             </Link>
                         </div>
                     </div>

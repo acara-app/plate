@@ -7,6 +7,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -27,7 +28,10 @@ export default function Goals({ profile, goals }: Props) {
                             <span>40%</span>
                         </div>
                         <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                            <div className="h-2 w-2/5 rounded-full bg-blue-600"></div>
+                            <div className="relative h-2 w-2/5 overflow-hidden rounded-full bg-primary shadow-[0_0_12px_rgba(16,185,129,0.4)]">
+                                <div className="absolute inset-0 bg-linear-to-r from-white/30 via-transparent to-transparent"></div>
+                                <div className="absolute inset-0 bg-linear-to-l from-black/10 via-transparent to-white/10"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -67,7 +71,7 @@ export default function Goals({ profile, goals }: Props) {
                                                             profile?.goal_id ===
                                                             goal.id
                                                         }
-                                                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                        className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                                                     />
                                                     <span className="ml-3 text-gray-900 dark:text-white">
                                                         {goal.name}
@@ -105,7 +109,7 @@ export default function Goals({ profile, goals }: Props) {
                                         <Label htmlFor="additional_goals">
                                             Additional Goals - Optional
                                         </Label>
-                                        <textarea
+                                        <Textarea
                                             id="additional_goals"
                                             name="additional_goals"
                                             defaultValue={
@@ -113,13 +117,6 @@ export default function Goals({ profile, goals }: Props) {
                                             }
                                             rows={4}
                                             maxLength={1000}
-                                            className={cn(
-                                                'flex min-h-20 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm shadow-xs transition-colors',
-                                                'placeholder:text-gray-500 dark:placeholder:text-gray-400',
-                                                'focus-visible:border-blue-500 focus-visible:ring-[3px] focus-visible:ring-blue-500/50 focus-visible:outline-none',
-                                                'disabled:cursor-not-allowed disabled:opacity-50',
-                                                'dark:border-gray-600 dark:bg-gray-700 dark:text-white',
-                                            )}
                                             placeholder="Tell us about any other goals or specific needs..."
                                         />
                                         <InputError

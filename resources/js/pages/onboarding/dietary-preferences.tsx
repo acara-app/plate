@@ -58,7 +58,7 @@ export default function DietaryPreferences({
                                 className={cn(
                                     'flex cursor-pointer items-start rounded-lg border p-3 transition-colors',
                                     isChecked
-                                        ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
+                                        ? 'border-primary bg-primary/10 dark:border-primary dark:bg-primary/20'
                                         : 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700',
                                 )}
                             >
@@ -97,7 +97,10 @@ export default function DietaryPreferences({
                             <span>80%</span>
                         </div>
                         <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                            <div className="h-2 w-4/5 rounded-full bg-blue-600"></div>
+                            <div className="relative h-2 w-4/5 overflow-hidden rounded-full bg-primary shadow-[0_0_12px_rgba(16,185,129,0.4)]">
+                                <div className="absolute inset-0 bg-linear-to-r from-white/30 via-transparent to-transparent"></div>
+                                <div className="absolute inset-0 bg-linear-to-l from-black/10 via-transparent to-white/10"></div>
+                            </div>
                         </div>
                     </div>
 
