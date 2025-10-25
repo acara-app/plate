@@ -23,6 +23,12 @@ if (! function_exists('isLocal')) {
 }
 
 if (! function_exists('paginateFromRequest')) {
+    /**
+     * @template TModel of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  Builder<TModel>  $query
+     * @return Illuminate\Pagination\LengthAwarePaginator<int, TModel>
+     */
     function paginateFromRequest(
         Builder $query,
         int $perPage = 25,
@@ -76,7 +82,9 @@ if (! function_exists('makeFilenameUniqueFromUrl')) {
 if (! function_exists('extensionFromUrl')) {
     function extensionFromUrl(string $url): string
     {
-        return pathinfo($url, PATHINFO_EXTENSION) !== [] && (pathinfo($url, PATHINFO_EXTENSION) !== '' && pathinfo($url, PATHINFO_EXTENSION) !== '0') ? pathinfo($url, PATHINFO_EXTENSION) : 'jpg';
+        $extension = pathinfo($url, PATHINFO_EXTENSION);
+
+        return $extension !== '' ? $extension : 'jpg';
     }
 }
 
@@ -166,6 +174,9 @@ if (! function_exists('getMimeType')) {
 }
 
 if (! function_exists('makeKey')) {
+    /**
+     * @param  string|array<int|string, mixed>  $key
+     */
     function makeKey(string|array $key): string
     {
         if (is_array($key)) {
@@ -181,13 +192,21 @@ if (! function_exists('makeKey')) {
 }
 
 if (! function_exists('flattenValue')) {
+    /**
+     * @param  array<int|string, array{value: mixed}>  $target
+     * @return array<int|string, mixed>
+     */
     function flattenValue(array $target): array
     {
-        return array_map(fn (array $item) => $item['value'], $target);
+        return array_map(fn (array $item): mixed => $item['value'], $target);
     }
 }
 
 if (! function_exists('revertFlattenedValue')) {
+    /**
+     * @param  array<int|string, mixed>  $target
+     * @return array<int|string, array{value: mixed}>
+     */
     function revertFlattenedValue(array $target): array
     {
         return array_map(fn (mixed $item): array => ['value' => $item], $target);
@@ -207,6 +226,9 @@ if (! function_exists('isNotNull')) {
 if (! function_exists('enumToValueLabelArray')) {
     /**
      * Converts enum cases to an array of value-label pairs.
+     *
+     * @param  array<int|string, mixed>  $options
+     * @return array<int, array{label: mixed, value: int|string}>
      */
     function enumToValueLabelArray(array $options): array
     {
@@ -222,7 +244,7 @@ if (! function_exists('clearFilters')) {
      * Removes specified filter fields from query parameters.
      *
      * @param  Request  $request  The query parameters to process
-     * @param  array  $fieldsToRemove  Fields to remove from the parameters (empty array means remove all filter fields)
+     * @param  array<int, string>  $fieldsToRemove  Fields to remove from the parameters (empty array means remove all filter fields)
      * @return string route url with the filter fields removed
      */
     function clearFilters(Request $request, array $fieldsToRemove = []): string
@@ -235,7 +257,9 @@ if (! function_exists('clearFilters')) {
         }
 
         foreach ($fieldsToRemove as $field) {
-            unset($query[$field]);
+            if (is_string($field)) {
+                unset($query[$field]);
+            }
         }
 
         return url(request()->path()).'?'.http_build_query($query);
@@ -245,6 +269,9 @@ if (! function_exists('clearFilters')) {
 if (! function_exists('filteredParams')) {
     /**
      * Get the filtered parameters from the request.
+     *
+     * @param  array<int, string>  $filtersValue
+     * @return array<string, mixed>
      */
     function filteredParams(Request $request, array $filtersValue): array
     {

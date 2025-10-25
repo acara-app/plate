@@ -45,9 +45,10 @@ final class AppServiceProvider extends ServiceProvider
     private function bootVerificationDefaults(): void
     {
         VerifyEmail::createUrlUsing(function (object $notifiable): string {
+            /** @var Model&\Illuminate\Contracts\Auth\MustVerifyEmail $notifiable */
             $relativeUrl = URL::signedRoute(
                 'verification.verify',
-                ['id' => $notifiable->getKey(), 'hash' => sha1($notifiable->getEmailForVerification())],
+                ['id' => $notifiable->getKey(), 'hash' => sha1((string) $notifiable->getEmailForVerification())],
                 absolute: false
             );
 
