@@ -17,10 +17,11 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 
 /**
  * @property-read int $id
+ * @property-read string|null $google_id
  * @property-read string $name
  * @property-read string $email
  * @property-read CarbonInterface|null $email_verified_at
- * @property-read string $password
+ * @property-read string|null $password
  * @property-read string|null $remember_token
  * @property-read string|null $two_factor_secret
  * @property-read string|null $two_factor_recovery_codes
@@ -41,6 +42,11 @@ final class User extends Authenticatable implements MustVerifyEmail
     /**
      * @var list<string>
      */
+    protected $guarded = [];
+
+    /**
+     * @var list<string>
+     */
     protected $hidden = [
         'password',
         'remember_token',
@@ -55,6 +61,7 @@ final class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'id' => 'integer',
+            'google_id' => 'string',
             'name' => 'string',
             'email' => 'string',
             'email_verified_at' => 'datetime',

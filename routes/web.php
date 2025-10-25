@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\ShowWeeklyMeanPlansController;
@@ -91,6 +92,10 @@ Route::middleware('guest')->group(function (): void {
         ->name('login');
     Route::post('login', [SessionController::class, 'store'])
         ->name('login.store');
+
+    // Socialite Authentication...
+    Route::get('/auth/google/redirect', [SocialiteController::class, 'redirect'])->name('auth.google.redirect');
+    Route::get('/auth/google/callback', [SocialiteController::class, 'callback'])->name('auth.google.callback');
 });
 
 Route::middleware('auth')->group(function (): void {
