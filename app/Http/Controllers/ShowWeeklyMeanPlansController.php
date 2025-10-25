@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\JobStatus;
 use App\Enums\MealPlanType;
 use App\Jobs\ProcessMealPlanJob;
 use App\Models\Meal;
@@ -44,6 +45,7 @@ final class ShowWeeklyMeanPlansController
         /** @var \App\Models\JobTracking|null $latestJobTracking */
         $latestJobTracking = $user->jobTrackings()
             ->where('job_type', ProcessMealPlanJob::JOB_TYPE)
+            ->whereIn('status', [JobStatus::Pending, JobStatus::Processing])
             ->latest()
             ->first();
 

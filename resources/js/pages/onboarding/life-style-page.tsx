@@ -97,8 +97,8 @@ export default function LifeStylePage({ profile, lifestyles }: Props) {
                                     <InputError message={errors.lifestyle_id} />
 
                                     {/* Submit Button */}
-                                    <div className="flex items-center justify-end gap-4 pt-4">
-                                        {currentUser.has_meal_plan && (
+                                    <div className="flex items-center justify-end gap-4">
+                                        {currentUser?.has_meal_plan && (
                                             <Link
                                                 href={dashboard.url()}
                                                 className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"

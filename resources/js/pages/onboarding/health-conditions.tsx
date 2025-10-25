@@ -228,7 +228,7 @@ export default function HealthConditions({
                                                 : "No conditions selected - that's perfectly fine!"}
                                         </p>
                                         <div className="flex items-center gap-4">
-                                            {currentUser.has_meal_plan && (
+                                            {currentUser?.has_meal_plan && (
                                                 <Link
                                                     href={dashboard.url()}
                                                     className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
