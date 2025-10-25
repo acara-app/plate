@@ -18,6 +18,7 @@ test('to array', function (): void {
             'updated_at',
             'google_id',
             'is_onboarded',
+            'has_meal_plan',
             'profile',
         ]);
 });

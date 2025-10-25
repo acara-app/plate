@@ -62,7 +62,7 @@
                                 <svg class="h-4 w-4 shrink-0 text-emerald-600 lg:h-5 lg:w-5 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                 </svg>
-                                <span class="text-xs font-medium text-slate-700 lg:text-sm dark:text-slate-300">Open Source</span>
+                                <span class="text-xs font-medium text-slate-700 lg:text-sm dark:text-slate-300">Open Source (coming soon)</span>
                             </div>
                             <div class="flex items-center gap-2 rounded-lg bg-teal-50/50 p-2.5 lg:gap-2.5 lg:p-3 dark:bg-teal-950/30">
                                 <svg class="h-4 w-4 shrink-0 text-teal-600 lg:h-5 lg:w-5 dark:text-teal-400" fill="currentColor" viewBox="0 0 20 20">

@@ -7,6 +7,7 @@ interface SharedProps {
             name: string;
             email: string;
             is_onboarded: boolean;
+            has_meal_plan: boolean;
         };
     };
 }
@@ -17,6 +18,6 @@ export default function useSharedProps() {
     const props = page.props as unknown as SharedProps;
 
     return {
-        user: props.auth.user,
+        currentUser: props.auth.user,
     };
 }

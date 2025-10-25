@@ -22,7 +22,7 @@ it('renders questionnaire page', function (): void {
         ->assertInertia(fn ($page) => $page->component('onboarding/questionnaire'));
 });
 
-it('redirects to dashboard if onboarding already completed', function (): void {
+it('allows users to view questionnaire even if onboarding already completed', function (): void {
     $user = User::factory()->create();
     $user->profile()->create([
         'onboarding_completed' => true,
@@ -32,7 +32,8 @@ it('redirects to dashboard if onboarding already completed', function (): void {
     $response = $this->actingAs($user)
         ->get(route('onboarding.questionnaire.show'));
 
-    $response->assertRedirectToRoute('dashboard');
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page->component('onboarding/questionnaire'));
 });
 
 // Biometrics Tests

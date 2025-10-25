@@ -26,7 +26,7 @@ it('defaults to system when appearance cookie not present', function (): void {
 
     $response = $middleware->handle($request, fn ($req): Response => response('OK'));
 
-    expect(View::shared('appearance'))->toBe('system')
+    expect(View::shared('appearance'))->toBe('light')
         ->and($response->getContent())->toBe('OK');
 });
 

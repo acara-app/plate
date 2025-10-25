@@ -1,6 +1,7 @@
+import { dashboard } from '@/routes';
 import onboarding from '@/routes/onboarding';
 import { Profile, SexOption } from '@/types';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
 import InputError from '@/components/input-error';
@@ -14,6 +15,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import useSharedProps from '@/hooks/use-shared-props';
 
 interface Props {
     profile: Profile;
@@ -21,6 +23,7 @@ interface Props {
 }
 
 export default function Biometrics({ profile, sexOptions }: Props) {
+    const { currentUser } = useSharedProps();
     return (
         <>
             <Head title="Biometrics - Step 1 of 5" />
@@ -142,11 +145,19 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                     </div>
 
                                     {/* Submit Button */}
-                                    <div className="flex justify-end">
+                                    <div className="flex items-center justify-end gap-4">
+                                        {currentUser.has_meal_plan && (
+                                            <Link
+                                                href={dashboard.url()}
+                                                className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                            >
+                                                Exit
+                                            </Link>
+                                        )}
                                         <Button
                                             type="submit"
                                             disabled={processing}
-                                            className="w-full sm:w-auto"
+                                            className="w-auto"
                                         >
                                             {processing && (
                                                 <LoaderCircle className="h-4 w-4 animate-spin" />

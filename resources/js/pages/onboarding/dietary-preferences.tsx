@@ -1,12 +1,14 @@
+import { dashboard } from '@/routes';
 import onboarding from '@/routes/onboarding';
 import { DietaryPreference, Profile } from '@/types';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -24,6 +26,7 @@ export default function DietaryPreferences({
     selectedPreferences,
     preferences,
 }: Props) {
+    const { currentUser } = useSharedProps();
     const [selectedIds, setSelectedIds] = useState<number[]>(
         selectedPreferences || [],
     );
@@ -160,16 +163,26 @@ export default function DietaryPreferences({
                                                 : ''}{' '}
                                             selected
                                         </p>
-                                        <Button
-                                            type="submit"
-                                            disabled={processing}
-                                            className="w-auto"
-                                        >
-                                            {processing && (
-                                                <LoaderCircle className="h-4 w-4 animate-spin" />
+                                        <div className="flex items-center gap-4">
+                                            {currentUser.has_meal_plan && (
+                                                <Link
+                                                    href={dashboard.url()}
+                                                    className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                                >
+                                                    Exit
+                                                </Link>
                                             )}
-                                            Continue to Health Conditions
-                                        </Button>
+                                            <Button
+                                                type="submit"
+                                                disabled={processing}
+                                                className="w-auto"
+                                            >
+                                                {processing && (
+                                                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                                                )}
+                                                Continue to Health Conditions
+                                            </Button>
+                                        </div>
                                     </div>
                                 </>
                             )}

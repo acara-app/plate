@@ -55,14 +55,14 @@ export default function WeeklyMealPlans({
     navigation,
     jobTracking,
 }: WeeklyMealPlansProps) {
-    const { user } = useSharedProps();
+    const { currentUser } = useSharedProps();
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Weekly Meal Plans" />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
-                {!user.is_onboarded && <OnboardingBanner />}
+                {!currentUser.is_onboarded && <OnboardingBanner />}
                 {jobTracking && (
                     <JobProcessingStatus jobTracking={jobTracking} />
                 )}

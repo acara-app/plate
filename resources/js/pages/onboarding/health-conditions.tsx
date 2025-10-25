@@ -1,6 +1,7 @@
+import { dashboard } from '@/routes';
 import onboarding from '@/routes/onboarding';
 import { HealthCondition, Profile } from '@/types';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 
@@ -8,6 +9,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
+import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -20,6 +22,7 @@ export default function HealthConditions({
     selectedConditions,
     healthConditions,
 }: Props) {
+    const { currentUser } = useSharedProps();
     const [selectedIds, setSelectedIds] = useState<number[]>(
         selectedConditions || [],
     );
@@ -224,16 +227,26 @@ export default function HealthConditions({
                                                 ? `${selectedIds.length} condition${selectedIds.length !== 1 ? 's' : ''} selected`
                                                 : "No conditions selected - that's perfectly fine!"}
                                         </p>
-                                        <Button
-                                            type="submit"
-                                            disabled={processing}
-                                            className="w-auto"
-                                        >
-                                            {processing && (
-                                                <LoaderCircle className="h-4 w-4 animate-spin" />
+                                        <div className="flex items-center gap-4">
+                                            {currentUser.has_meal_plan && (
+                                                <Link
+                                                    href={dashboard.url()}
+                                                    className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                                >
+                                                    Exit
+                                                </Link>
                                             )}
-                                            Complete Onboarding
-                                        </Button>
+                                            <Button
+                                                type="submit"
+                                                disabled={processing}
+                                                className="w-auto"
+                                            >
+                                                {processing && (
+                                                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                                                )}
+                                                Complete Onboarding
+                                            </Button>
+                                        </div>
                                     </div>
                                 </>
                             )}

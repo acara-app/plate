@@ -30,14 +30,8 @@ final readonly class OnboardingController
         //
     }
 
-    public function showQuestionnaire(): Response|RedirectResponse
+    public function showQuestionnaire(): Response
     {
-        $user = $this->user;
-
-        if ($user->profile?->onboarding_completed) {
-            return to_route('dashboard');
-        }
-
         return Inertia::render('onboarding/questionnaire');
     }
 
