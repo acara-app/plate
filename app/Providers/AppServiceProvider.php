@@ -21,7 +21,6 @@ final class AppServiceProvider extends ServiceProvider
     {
         $this->bootModelsDefaults();
         $this->bootPasswordDefaults();
-        $this->bootUrlDefaults();
         $this->bootVerificationDefaults();
     }
 
@@ -33,13 +32,6 @@ final class AppServiceProvider extends ServiceProvider
     private function bootPasswordDefaults(): void
     {
         Password::defaults(fn () => app()->isLocal() || app()->runningUnitTests() ? Password::min(12)->max(255) : Password::min(12)->max(255)->uncompromised());
-    }
-
-    private function bootUrlDefaults(): void
-    {
-        if (app()->isProduction()) {
-            URL::forceScheme('https');
-        }
     }
 
     private function bootVerificationDefaults(): void
