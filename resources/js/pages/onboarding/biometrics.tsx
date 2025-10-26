@@ -145,7 +145,7 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                     </div>
 
                                     {/* Submit Button */}
-                                    <div className="flex items-center justify-end gap-4">
+                                    <div className="flex items-center justify-between gap-4">
                                         {currentUser?.has_meal_plan && (
                                             <Link
                                                 href={dashboard.url()}

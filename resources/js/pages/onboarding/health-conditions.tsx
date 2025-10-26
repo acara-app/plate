@@ -221,32 +221,32 @@ export default function HealthConditions({
                                     />
 
                                     {/* Submit Button */}
-                                    <div className="flex items-center justify-between border-t pt-6 dark:border-gray-700">
+                                    <div className="flex items-center justify-between gap-4 border-t pt-6 dark:border-gray-700">
+                                        {currentUser?.has_meal_plan && (
+                                            <Link
+                                                href={dashboard.url()}
+                                                className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                            >
+                                                Exit
+                                            </Link>
+                                        )}
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="w-auto"
+                                        >
+                                            {processing && (
+                                                <LoaderCircle className="h-4 w-4 animate-spin" />
+                                            )}
+                                            Complete Onboarding
+                                        </Button>
+                                    </div>
+                                    <div>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">
                                             {selectedIds.length > 0
                                                 ? `${selectedIds.length} condition${selectedIds.length !== 1 ? 's' : ''} selected`
                                                 : "No conditions selected - that's perfectly fine!"}
                                         </p>
-                                        <div className="flex items-center gap-4">
-                                            {currentUser?.has_meal_plan && (
-                                                <Link
-                                                    href={dashboard.url()}
-                                                    className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
-                                                >
-                                                    Exit
-                                                </Link>
-                                            )}
-                                            <Button
-                                                type="submit"
-                                                disabled={processing}
-                                                className="w-auto"
-                                            >
-                                                {processing && (
-                                                    <LoaderCircle className="h-4 w-4 animate-spin" />
-                                                )}
-                                                Complete Onboarding
-                                            </Button>
-                                        </div>
                                     </div>
                                 </>
                             )}
