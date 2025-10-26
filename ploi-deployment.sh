@@ -37,7 +37,7 @@ php artisan optimize
 php artisan event:cache
 
 ## Stop SSR and run with zero downtime and SSR enabled
-php artisan inertia:stop-ssr
+# php artisan inertia:stop-ssr
 
 # Prepare Storage
 rm -rf ./public/storage
