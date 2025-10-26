@@ -26,7 +26,7 @@ export NODE_OPTIONS=--max-old-space-size=4096
 npm install
 npm run build
 
-# php artisan vite:publish
+php artisan vite:publish
 
 # Following line is for non-zero downtime deployment
 php artisan up
