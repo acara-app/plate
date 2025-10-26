@@ -1,5 +1,5 @@
 # Following line is for non-zero downtime deployment
-# php artisan down
+php artisan down
 
 composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
@@ -29,7 +29,7 @@ npm run build
 # php artisan vite:publish
 
 # Following line is for non-zero downtime deployment
-# php artisan up
+php artisan up
 
 # Cache
 php artisan optimize
