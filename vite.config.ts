@@ -5,7 +5,7 @@ import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-    base: process.env.ASSET_URL || '/',
+    base: 'https://build-plate-assets.acara.app',
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
@@ -20,15 +20,5 @@ export default defineConfig({
     ],
     esbuild: {
         jsx: 'automatic',
-    },
-    build: {
-        rollupOptions: {
-            output: {
-                // Ensure consistent chunk naming
-                chunkFileNames: 'assets/[name]-[hash].js',
-                entryFileNames: 'assets/[name]-[hash].js',
-                assetFileNames: 'assets/[name]-[hash].[ext]',
-            },
-        },
     },
 });
