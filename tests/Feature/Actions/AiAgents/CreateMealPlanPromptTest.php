@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\CreateMealPlanPrompt;
+use App\Actions\AiAgents\CreateMealPlanPrompt;
 use App\Models\DietaryPreference;
 use App\Models\Goal;
 use App\Models\HealthCondition;

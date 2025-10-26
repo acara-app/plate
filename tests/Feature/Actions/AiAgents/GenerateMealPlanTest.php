@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\GenerateMealPlan;
+use App\Actions\AiAgents\GenerateMealPlan;
 use App\Enums\AiModel;
 use App\Enums\MealPlanType;
 use App\Enums\Sex;

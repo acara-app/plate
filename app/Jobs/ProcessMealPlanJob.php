@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Actions\GenerateMealPlan;
+use App\Actions\AiAgents\GenerateMealPlan;
 use App\Actions\StoreMealPlan;
 use App\Enums\AiModel;
 use App\Models\User;

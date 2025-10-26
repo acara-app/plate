@@ -87,7 +87,10 @@ it('generates and stores meal plan when job is processed', function (): void {
     Prism::fake([$fakeResponse]);
 
     $job = new ProcessMealPlanJob($user->id, AiModel::Gemini25Flash);
-    $job->handle(app(App\Actions\GenerateMealPlan::class), app(App\Actions\StoreMealPlan::class));
+    $job->handle(
+        app(App\Actions\AiAgents\GenerateMealPlan::class),
+        app(App\Actions\StoreMealPlan::class)
+    );
 
     expect(MealPlan::query()->where('user_id', $user->id)->count())->toBe(1);
 
@@ -119,7 +122,10 @@ it('handles missing user gracefully', function (): void {
     Prism::fake([$fakeResponse]);
 
     $job = new ProcessMealPlanJob(99999, AiModel::Gemini25Flash);
-    $job->handle(app(App\Actions\GenerateMealPlan::class), app(App\Actions\StoreMealPlan::class));
+    $job->handle(
+        app(App\Actions\AiAgents\GenerateMealPlan::class),
+        app(App\Actions\StoreMealPlan::class)
+    );
 
     // Should not throw an exception and should not create any meal plans
     expect(MealPlan::query()->count())->toBe(0);
@@ -158,7 +164,7 @@ it('handles exceptions and marks tracking as failed', function (): void {
 
     try {
         $job->handle(
-            app(App\Actions\GenerateMealPlan::class),
+            app(App\Actions\AiAgents\GenerateMealPlan::class),
             app(App\Actions\StoreMealPlan::class)
         );
         $this->fail('Expected an exception to be thrown');

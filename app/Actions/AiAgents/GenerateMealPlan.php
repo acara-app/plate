@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions;
+namespace App\Actions\AiAgents;
 
 use App\DataObjects\MealPlanData;
 use App\Enums\AiModel;
