@@ -79,7 +79,7 @@ else
 fi
 
 # Check if the request was successful
-success=$(echo "$response" | grep -o '"success":true' || echo "")
+success=$(echo "$response" | grep -o '"success": *true' || echo "")
 
 if [ -n "$success" ]; then
     echo -e "${GREEN}✅ Cache purged successfully!${NC}"
