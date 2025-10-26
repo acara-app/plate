@@ -7,7 +7,6 @@ namespace App\Providers;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -24,22 +23,6 @@ final class AppServiceProvider extends ServiceProvider
         $this->bootPasswordDefaults();
         $this->bootUrlDefaults();
         $this->bootVerificationDefaults();
-        $this->bootViteDefaults();
-    }
-
-    private function bootViteDefaults(): void
-    {
-        // Vite::useCspNonce();
-
-        // if (config('app.asset_url')) {
-        //     Vite::useScriptTagAttributes([
-        //         'crossorigin' => 'anonymous',
-        //     ]);
-
-        //     Vite::useStyleTagAttributes([
-        //         'crossorigin' => 'anonymous',
-        //     ]);
-        // }
     }
 
     private function bootModelsDefaults(): void
