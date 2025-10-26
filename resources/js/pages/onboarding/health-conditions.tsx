@@ -113,7 +113,7 @@ export default function HealthConditions({
                                                         'rounded-lg border p-4 transition-colors',
                                                         isSelected
                                                             ? 'border-primary bg-primary/10 dark:border-primary dark:bg-primary/20'
-                                                            : 'border-gray-300 dark:border-gray-600',
+                                                            : 'border-gray-300 bg-white hover:bg-gray-50 dark:border-gray-500 dark:bg-gray-700/50 dark:hover:bg-gray-700',
                                                     )}
                                                 >
                                                     <label className="flex cursor-pointer items-start">

@@ -62,7 +62,7 @@ export default function DietaryPreferences({
                                     'flex cursor-pointer items-start rounded-lg border p-3 transition-colors',
                                     isChecked
                                         ? 'border-primary bg-primary/10 dark:border-primary dark:bg-primary/20'
-                                        : 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700',
+                                        : 'border-gray-300 bg-white hover:bg-gray-50 dark:border-gray-500 dark:bg-gray-700/50 dark:hover:bg-gray-700',
                                 )}
                             >
                                 <Checkbox
