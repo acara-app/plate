@@ -1,7 +1,6 @@
 # Following line is for non-zero downtime deployment
 # php artisan down
 
-git pull origin main
 composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
 echo "" | sudo -S service php8.4-fpm reload
@@ -28,9 +27,6 @@ npm install
 npm run build
 
 # php artisan vite:publish
-
-# Purge Cloudflare cache for asset bucket
-# bash scripts/purge-cloudflare-cache.sh || echo "⚠️  Cache purge skipped or failed"
 
 # Following line is for non-zero downtime deployment
 # php artisan up
