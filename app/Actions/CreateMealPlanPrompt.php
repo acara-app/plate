@@ -79,7 +79,7 @@ final readonly class CreateMealPlanPrompt
             'macronutrientRatios' => $this->calculateMacronutrientRatios($profile),
         ];
 
-        return view('meal-plans.create', [
+        return view('ai.agents.create-meal-plan', [
             'context' => $context,
         ])->render();
     }
