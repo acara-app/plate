@@ -124,7 +124,7 @@ export default function HealthConditions({
                                                                     condition.id,
                                                                 )
                                                             }
-                                                            className="mt-1"
+                                                            className="mt-1 dark:border-gray-500"
                                                         />
                                                         <div className="ml-3 flex-1">
                                                             <div className="flex items-center justify-between">

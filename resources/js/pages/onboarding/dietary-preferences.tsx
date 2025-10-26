@@ -70,7 +70,7 @@ export default function DietaryPreferences({
                                     onCheckedChange={() =>
                                         togglePreference(preference.id)
                                     }
-                                    className="mt-1"
+                                    className="mt-1 dark:border-gray-500"
                                 />
                                 <div className="ml-3">
                                     <span className="block font-medium text-gray-900 dark:text-white">
