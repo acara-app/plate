@@ -44,7 +44,7 @@
                         </h1>
                         
                         <p class="text-base leading-relaxed text-slate-600 lg:text-lg dark:text-slate-300">
-                            Discover CustomNutriAI, the open-source app that crafts tailored meal plans for your dietary restrictions and goals.
+                            Discover Acara Plate, the open-source app that crafts tailored meal plans for your dietary restrictions and goals.
                         </p>
 
                         <div class="pt-2 lg:pt-4">

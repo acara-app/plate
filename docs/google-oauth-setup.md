@@ -9,7 +9,7 @@ Follow these steps to set up Google OAuth for your application:
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Click on the project dropdown at the top
 3. Click "New Project"
-4. Enter your project name (e.g., "CustomNutriAI")
+4. Enter your project name (e.g., "Acara Plate")
 5. Click "Create"
 
 ### 2. Enable Google+ API
@@ -25,11 +25,11 @@ Follow these steps to set up Google OAuth for your application:
 2. Choose "External" user type (unless you have a Google Workspace)
 3. Click "Create"
 4. Fill in the required information:
-   - **App name**: CustomNutriAI
+   - **App name**: 
    - **User support email**: Your email address
    - **App logo**: (Optional) Upload your app logo
    - **App domain**: Your application domain
-   - **Authorized domains**: Add your domain (e.g., `customnutriai.com`)
+   - **Authorized domains**: Add your domain (e.g., `plate.acara.app`)
    - **Developer contact information**: Your email address
 5. Click "Save and Continue"
 6. **Scopes**: Click "Add or Remove Scopes"
@@ -47,14 +47,14 @@ Follow these steps to set up Google OAuth for your application:
 2. Click "Create Credentials" > "OAuth client ID"
 3. Choose "Web application" as the application type
 4. Configure the OAuth client:
-   - **Name**: CustomNutriAI Web Client
+   - **Name**: Plate Acara Web Client
    - **Authorized JavaScript origins**:
      - `http://localhost:8000` (for local development)
-     - `https://customnutriai.test` (for Laravel Herd)
+     - `https://plate.test` (for Laravel Herd)
      - `https://yourdomain.com` (for production)
    - **Authorized redirect URIs**:
      - `http://localhost:8000/auth/google/callback`
-     - `https://customnutriai.test/auth/google/callback`
+     - `https://plate.test/auth/google/callback`
      - `https://yourdomain.com/auth/google/callback`
 5. Click "Create"
 6. **Save your credentials**:

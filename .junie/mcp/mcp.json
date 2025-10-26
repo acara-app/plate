@@ -3,7 +3,7 @@
         "laravel-boost": {
             "command": "/Users/tuvshinjargal/Library/Application Support/Herd/bin/php",
             "args": [
-                "/Users/tuvshinjargal/Herd/customnutriai/artisan",
+                "/Users/tuvshinjargal/Herd/plate/artisan",
                 "boost:mcp"
             ]
         }

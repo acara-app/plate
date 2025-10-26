@@ -15,7 +15,7 @@
                     If you have any questions, concerns, or need assistance, please reach out to our support team:
                 </p>
                 <ul>
-                    <li><strong>Email:</strong> team@customnutriai.com</li>
+                    <li><strong>Email:</strong> team@acara.app</li>
                 </ul>
             </div>
         </div>

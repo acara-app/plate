@@ -13,7 +13,7 @@
                 <h1>Privacy Policy</h1>
                 <p><strong>Effective Date: October 25, 2025</strong></p>
                 <p>
-                    At CustomNutriAI, we value your privacy and are committed to protecting your personal data. This
+                    At Acara Plate, we value your privacy and are committed to protecting your personal data. This
                     Privacy Policy explains how we collect, use, store, and protect the information you provide through
                     our website, applications, and services (collectively, the “Services”), including our personalized
                     nutrition questionnaire. By using the Services, you agree to this Privacy Policy.
@@ -107,7 +107,7 @@
                 </ul>
                 <p>
                     To exercise these rights, contact us at <a
-                        href="mailto:team@customnutriai.com">team@customnutriai.com</a>. We will respond within 30 days,
+                        href="mailto:team@acara.app">team@acara.app</a>. We will respond within 30 days,
                     as required by GDPR.
                 </p>
 
@@ -124,7 +124,7 @@
 
                 <h2>10. Health and Nutrition Disclaimer</h2>
                 <p>
-                    CustomNutriAI is not a medical service. AI-generated meal plans and recommendations are for
+                    Acara Plate is not a medical service. AI-generated meal plans and recommendations are for
                     informational purposes only and should not replace professional medical or dietary advice. Consult a
                     healthcare professional before making dietary changes, especially if you have health conditions.
                 </p>
@@ -138,7 +138,7 @@
                 <h2>12. Contact Us</h2>
                 <p>
                     If you have questions about this Privacy Policy or your data, contact us at
-                    <a href="mailto:team@customnutriai.com">team@customnutriai.com</a>.
+                    <a href="mailto:team@acara.app">team@acara.app</a>.
                 </p>
             </div>
         </div>
