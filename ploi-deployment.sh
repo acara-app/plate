@@ -29,6 +29,9 @@ npm run build
 
 php artisan vite:publish
 
+# Purge Cloudflare cache for asset bucket
+bash scripts/purge-cloudflare-cache.sh || echo "⚠️  Cache purge skipped or failed"
+
 # Following line is for non-zero downtime deployment
 # php artisan up
 
