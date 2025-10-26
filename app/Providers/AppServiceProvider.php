@@ -29,17 +29,17 @@ final class AppServiceProvider extends ServiceProvider
 
     private function bootViteDefaults(): void
     {
-        Vite::useCspNonce();
+        // Vite::useCspNonce();
 
-        if (config('app.asset_url')) {
-            Vite::useScriptTagAttributes([
-                'crossorigin' => 'anonymous',
-            ]);
+        // if (config('app.asset_url')) {
+        //     Vite::useScriptTagAttributes([
+        //         'crossorigin' => 'anonymous',
+        //     ]);
 
-            Vite::useStyleTagAttributes([
-                'crossorigin' => 'anonymous',
-            ]);
-        }
+        //     Vite::useStyleTagAttributes([
+        //         'crossorigin' => 'anonymous',
+        //     ]);
+        // }
     }
 
     private function bootModelsDefaults(): void
