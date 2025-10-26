@@ -41,18 +41,6 @@ Your deployment script will automatically:
 - Chrome: `Cmd + Shift + R` (Mac) or `Ctrl + Shift + R` (Windows)
 - Or: DevTools → Right-click refresh → "Empty Cache and Hard Reload"
 
-**Verify the fix:**
-1. Open Chrome DevTools → Network tab
-2. Navigate to https://plate.acara.app/login
-3. Look for requests to `build-plate-assets.acara.app`
-4. Check Response Headers - should see `access-control-allow-origin: https://plate.acara.app`
-5. ✅ No CORS errors in console!
-
-**Run verification script:**
-```bash
-bash scripts/verify-cors.sh
-```
-
 ## Expected Behavior After Fix
 
 ### ✅ Before (curl test):
@@ -128,7 +116,6 @@ See full documentation:
 - `docs/cloudflare-cache-purging.md` - Cache purging setup
 
 Test scripts:
-- `scripts/verify-cors.sh` - Verify CORS configuration
 - `scripts/purge-cloudflare-cache.sh` - Manually purge cache
 
 ---

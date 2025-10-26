@@ -116,14 +116,6 @@ Check that:
 3. The API token is not expired
 4. The token has access to the specific zone (or all zones)
 
-### Verify CORS is Working
-
-After deployment, verify CORS headers:
-
-```bash
-bash scripts/verify-cors.sh
-```
-
 ## Alternative: Legacy API Key Method
 
 If you prefer using a Global API Key instead of an API Token:

@@ -72,7 +72,6 @@ Added automatic Cloudflare cache purging after deployments:
 - Added documentation in `docs/cloudflare-cache-purging.md`
 
 ### 4. Scripts Added
-- `scripts/verify-cors.sh` - Verify CORS configuration is working
 - `scripts/purge-cloudflare-cache.sh` - Purge Cloudflare cache manually or automatically
 
 ## Deployment Steps
@@ -107,12 +106,7 @@ Added automatic Cloudflare cache purging after deployments:
    - Hard Refresh: `Cmd + Shift + R` (macOS) or `Ctrl + Shift + R` (Windows)
    - Or DevTools → Right-click refresh → "Empty Cache and Hard Reload"
 
-2. **Verify CORS headers**:
-   ```bash
-   bash scripts/verify-cors.sh
-   ```
-
-3. **Check browser DevTools**:
+2. **Check browser DevTools**:
    - Network tab → Look for script requests
    - Should see `crossorigin` attribute in the HTML source
    - No more CORS errors in console
@@ -139,7 +133,6 @@ Browser → ✅ Success!
 - ✅ `ploi-deployment.sh` - Added cache purge step
 - ✅ `resources/views/app.blade.php` - **Added crossorigin attribute (critical fix)**
 - ✅ `scripts/purge-cloudflare-cache.sh` - New cache purge script
-- ✅ `scripts/verify-cors.sh` - New CORS verification script
 - ✅ `docs/cloudflare-cache-purging.md` - New documentation
 - ✅ `docs/cors-issue-resolution.md` - This document
 
