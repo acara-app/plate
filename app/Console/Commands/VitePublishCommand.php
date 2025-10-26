@@ -26,7 +26,7 @@ final class VitePublishCommand extends Command
             $this->publishDirectory($dir);
         }
 
-        $this->info('Vite assets published successfully');
+        $this->info('Vite assets published successfully!');
     }
 
     private function publishDirectory(string $directory): void
