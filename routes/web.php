@@ -2,20 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Auth\SessionController;
-use App\Http\Controllers\Auth\SocialiteController;
-use App\Http\Controllers\ChatController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\FoodLogController;
-use App\Http\Controllers\OnboardingController;
-use App\Http\Controllers\ShowWeeklyMeanPlansController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\UserEmailResetNotification;
-use App\Http\Controllers\UserEmailVerification;
-use App\Http\Controllers\UserEmailVerificationNotificationController;
-use App\Http\Controllers\UserPasswordController;
-use App\Http\Controllers\UserProfileController;
-use App\Http\Controllers\UserTwoFactorAuthenticationController;
+use App\Http\Controllers as Web;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -25,48 +12,48 @@ Route::view('/terms-of-service', 'terms-of-service')->name('terms');
 Route::view('/support', 'support')->name('support');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
-    Route::get('dashboard', [DashboardController::class, 'show'])->name('dashboard');
+    Route::get('dashboard', [Web\DashboardController::class, 'show'])->name('dashboard');
 
-    Route::get('meal-plans/weekly', ShowWeeklyMeanPlansController::class)->name('meal-plans.weekly');
+    Route::get('meal-plans/weekly', Web\ShowWeeklyMeanPlansController::class)->name('meal-plans.weekly');
 
-    Route::get('chat/create', [ChatController::class, 'create'])->name('chat.create');
+    Route::get('chat/create', [Web\ChatController::class, 'create'])->name('chat.create');
 
-    Route::get('ongoing-tracking/food-log/create', [FoodLogController::class, 'create'])->name('food-log.create');
+    Route::get('ongoing-tracking/food-log/create', [Web\FoodLogController::class, 'create'])->name('food-log.create');
 });
 
 Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(function (): void {
-    Route::get('/', [OnboardingController::class, 'showQuestionnaire'])->name('questionnaire.show');
+    Route::get('/', [Web\OnboardingController::class, 'showQuestionnaire'])->name('questionnaire.show');
 
-    Route::get('/biometrics', [OnboardingController::class, 'showBiometrics'])->name('biometrics.show');
-    Route::post('/biometrics', [OnboardingController::class, 'storeBiometrics'])->name('biometrics.store');
+    Route::get('/biometrics', [Web\OnboardingController::class, 'showBiometrics'])->name('biometrics.show');
+    Route::post('/biometrics', [Web\OnboardingController::class, 'storeBiometrics'])->name('biometrics.store');
 
-    Route::get('/goals', [OnboardingController::class, 'showGoals'])->name('goals.show');
-    Route::post('/goals', [OnboardingController::class, 'storeGoals'])->name('goals.store');
+    Route::get('/goals', [Web\OnboardingController::class, 'showGoals'])->name('goals.show');
+    Route::post('/goals', [Web\OnboardingController::class, 'storeGoals'])->name('goals.store');
 
-    Route::get('/lifestyle', [OnboardingController::class, 'showLifestyle'])->name('lifestyle.show');
-    Route::post('/lifestyle', [OnboardingController::class, 'storeLifestyle'])->name('lifestyle.store');
+    Route::get('/lifestyle', [Web\OnboardingController::class, 'showLifestyle'])->name('lifestyle.show');
+    Route::post('/lifestyle', [Web\OnboardingController::class, 'storeLifestyle'])->name('lifestyle.store');
 
-    Route::get('/dietary-preferences', [OnboardingController::class, 'showDietaryPreferences'])->name('dietary-preferences.show');
-    Route::post('/dietary-preferences', [OnboardingController::class, 'storeDietaryPreferences'])->name('dietary-preferences.store');
+    Route::get('/dietary-preferences', [Web\OnboardingController::class, 'showDietaryPreferences'])->name('dietary-preferences.show');
+    Route::post('/dietary-preferences', [Web\OnboardingController::class, 'storeDietaryPreferences'])->name('dietary-preferences.store');
 
-    Route::get('/health-conditions', [OnboardingController::class, 'showHealthConditions'])->name('health-conditions.show');
-    Route::post('/health-conditions', [OnboardingController::class, 'storeHealthConditions'])->name('health-conditions.store');
+    Route::get('/health-conditions', [Web\OnboardingController::class, 'showHealthConditions'])->name('health-conditions.show');
+    Route::post('/health-conditions', [Web\OnboardingController::class, 'storeHealthConditions'])->name('health-conditions.store');
 
-    Route::get('/completion', [OnboardingController::class, 'showCompletion'])->name('completion.show');
+    Route::get('/completion', [Web\OnboardingController::class, 'showCompletion'])->name('completion.show');
 });
 
 Route::middleware('auth')->group(function (): void {
     // User...
-    Route::delete('user', [UserController::class, 'destroy'])->name('user.destroy');
+    Route::delete('user', [Web\UserController::class, 'destroy'])->name('user.destroy');
 
     // User Profile...
     Route::redirect('settings', '/settings/profile');
-    Route::get('settings/profile', [UserProfileController::class, 'edit'])->name('user-profile.edit');
-    Route::patch('settings/profile', [UserProfileController::class, 'update'])->name('user-profile.update');
+    Route::get('settings/profile', [Web\UserProfileController::class, 'edit'])->name('user-profile.edit');
+    Route::patch('settings/profile', [Web\UserProfileController::class, 'update'])->name('user-profile.update');
 
     // User Password...
-    Route::get('settings/password', [UserPasswordController::class, 'edit'])->name('password.edit');
-    Route::put('settings/password', [UserPasswordController::class, 'update'])
+    Route::get('settings/password', [Web\UserPasswordController::class, 'edit'])->name('password.edit');
+    Route::put('settings/password', [Web\UserPasswordController::class, 'update'])
         ->middleware('throttle:6,1')
         ->name('password.update');
 
@@ -74,54 +61,54 @@ Route::middleware('auth')->group(function (): void {
     Route::get('settings/appearance', fn () => Inertia::render('appearance/update'))->name('appearance.edit');
 
     // User Two-Factor Authentication...
-    Route::get('settings/two-factor', [UserTwoFactorAuthenticationController::class, 'show'])
+    Route::get('settings/two-factor', [Web\UserTwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
 });
 
 Route::middleware('guest')->group(function (): void {
     // User...
-    Route::get('register', [UserController::class, 'create'])
+    Route::get('register', [Web\UserController::class, 'create'])
         ->name('register');
-    Route::post('register', [UserController::class, 'store'])
+    Route::post('register', [Web\UserController::class, 'store'])
         ->name('register.store');
 
     // User Password...
-    Route::get('reset-password/{token}', [UserPasswordController::class, 'create'])
+    Route::get('reset-password/{token}', [Web\UserPasswordController::class, 'create'])
         ->name('password.reset');
-    Route::post('reset-password', [UserPasswordController::class, 'store'])
+    Route::post('reset-password', [Web\UserPasswordController::class, 'store'])
         ->name('password.store');
 
     // User Email Reset Notification...
-    Route::get('forgot-password', [UserEmailResetNotification::class, 'create'])
+    Route::get('forgot-password', [Web\UserEmailResetNotification::class, 'create'])
         ->name('password.request');
-    Route::post('forgot-password', [UserEmailResetNotification::class, 'store'])
+    Route::post('forgot-password', [Web\UserEmailResetNotification::class, 'store'])
         ->name('password.email');
 
     // Session...
-    Route::get('login', [SessionController::class, 'create'])
+    Route::get('login', [Web\Auth\SessionController::class, 'create'])
         ->name('login');
-    Route::post('login', [SessionController::class, 'store'])
+    Route::post('login', [Web\Auth\SessionController::class, 'store'])
         ->name('login.store');
 
     // Socialite Authentication...
-    Route::get('/auth/google/redirect', [SocialiteController::class, 'redirect'])->name('auth.google.redirect');
-    Route::get('/auth/google/callback', [SocialiteController::class, 'callback'])->name('auth.google.callback');
+    Route::get('/auth/google/redirect', [Web\Auth\SocialiteController::class, 'redirect'])->name('auth.google.redirect');
+    Route::get('/auth/google/callback', [Web\Auth\SocialiteController::class, 'callback'])->name('auth.google.callback');
 });
 
 Route::middleware('auth')->group(function (): void {
     // User Email Verification...
-    Route::get('verify-email', [UserEmailVerificationNotificationController::class, 'create'])
+    Route::get('verify-email', [Web\UserEmailVerificationNotificationController::class, 'create'])
         ->name('verification.notice');
-    Route::post('email/verification-notification', [UserEmailVerificationNotificationController::class, 'store'])
+    Route::post('email/verification-notification', [Web\UserEmailVerificationNotificationController::class, 'store'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
 
     // User Email Verification...
-    Route::get('verify-email/{id}/{hash}', [UserEmailVerification::class, 'update'])
+    Route::get('verify-email/{id}/{hash}', [Web\UserEmailVerification::class, 'update'])
         ->middleware(['signed:relative', 'throttle:6,1'])
         ->name('verification.verify');
 
     // Session...
-    Route::post('logout', [SessionController::class, 'destroy'])
+    Route::post('logout', [Web\Auth\SessionController::class, 'destroy'])
         ->name('logout');
 });
