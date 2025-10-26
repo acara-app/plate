@@ -27,7 +27,7 @@ export NODE_OPTIONS=--max-old-space-size=4096
 npm install
 npm run build
 
-php artisan vite:publish
+# php artisan vite:publish
 
 # Purge Cloudflare cache for asset bucket
 # bash scripts/purge-cloudflare-cache.sh || echo "⚠️  Cache purge skipped or failed"
