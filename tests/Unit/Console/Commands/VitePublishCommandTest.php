@@ -16,7 +16,7 @@ it('publishes vite assets to cdn', function (): void {
     $this->artisan(VitePublishCommand::class)
         ->expectsOutput('Publishing assets to CDN')
         ->expectsOutput('Published asset into build directory')
-        ->expectsOutput('Vite assets published successfully')
+        ->expectsOutput('Vite assets published successfully!')
         ->assertSuccessful();
 });
 
