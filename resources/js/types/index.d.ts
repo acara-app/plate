@@ -9,6 +9,7 @@ export interface Row {
 
 export interface Auth {
     user: User;
+    subscribed: boolean;
 }
 
 export interface BreadcrumbItem {

@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Services\Contracts\StripeServiceInterface;
+use App\Services\StripeService;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Cashier\Cashier;
 
 final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        $this->app->bind(StripeServiceInterface::class, StripeService::class);
     }
 
     public function boot(): void
@@ -22,6 +26,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->bootModelsDefaults();
         $this->bootPasswordDefaults();
         $this->bootVerificationDefaults();
+        $this->bootCashierDefaults();
     }
 
     private function bootModelsDefaults(): void
@@ -46,5 +51,10 @@ final class AppServiceProvider extends ServiceProvider
 
             return url($relativeUrl);
         });
+    }
+
+    private function bootCashierDefaults(): void
+    {
+        Cashier::useCustomerModel(User::class);
     }
 }

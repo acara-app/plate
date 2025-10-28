@@ -11,7 +11,10 @@ arch()->preset()->security()->ignoring([
 // Apply strict preset but exclude protected method check for models with accessors
 arch('strict rules')
     ->preset()->strict()
-    ->ignoring(App\Models\User::class);
+    ->ignoring([
+        App\Models\User::class,
+        App\Models\SubscriptionProduct::class, // Has public accessor methods (getXxxAttribute)
+    ]);
 
 arch('controllers')
     ->expect('App\Http\Controllers')
