@@ -2,12 +2,13 @@ import { JobProcessingStatus } from '@/components/job-processing-status';
 import { MealCard } from '@/components/meal-plans/meal-card';
 import { NutritionStats } from '@/components/meal-plans/nutrition-stats';
 import { OnboardingBanner } from '@/components/onboarding-banner';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
+import checkout from '@/routes/checkout';
 import mealPlans from '@/routes/meal-plans';
 import { JobTracking, type BreadcrumbItem } from '@/types';
 import { CurrentDay, MealPlan, Navigation } from '@/types/meal-plan';
@@ -16,6 +17,7 @@ import {
     Calendar,
     ChevronLeft,
     ChevronRight,
+    CrownIcon,
     Info,
     Sparkles,
 } from 'lucide-react';
@@ -25,6 +27,7 @@ interface WeeklyMealPlansProps {
     currentDay: CurrentDay | null;
     navigation: Navigation | null;
     jobTracking: JobTracking | null;
+    requiresSubscription?: boolean;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -49,6 +52,7 @@ export default function WeeklyMealPlans({
     currentDay,
     navigation,
     jobTracking,
+    requiresSubscription = false,
 }: WeeklyMealPlansProps) {
     const { currentUser } = useSharedProps();
 
@@ -69,6 +73,41 @@ export default function WeeklyMealPlans({
                     <OnboardingBanner />
                 ) : isProcessingStatus(jobTracking) ? (
                     <JobProcessingStatus jobTracking={jobTracking} />
+                ) : requiresSubscription ? (
+                    <>
+                        <div className="space-y-2">
+                            <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
+                                <Calendar className="h-8 w-8 text-primary" />
+                                Your Weekly Meal Plans
+                            </h1>
+                            <p className="text-muted-foreground">
+                                View and manage your personalized weekly
+                                nutrition plans
+                            </p>
+                        </div>
+
+                        <Alert className="border-purple-300 bg-purple-50 dark:border-purple-700 dark:bg-purple-950/50">
+                            <CrownIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                            <AlertTitle className="text-lg text-purple-900 dark:text-purple-100">
+                                Unlock Personalized Meal Plans
+                            </AlertTitle>
+                            <AlertDescription className="space-y-3 text-purple-800 dark:text-purple-200">
+                                <p>
+                                    Subscribe to unlock AI-powered meal plans
+                                    tailored to your dietary needs, health
+                                    goals, and lifestyle. Get weekly meal plans
+                                    with detailed recipes, nutrition
+                                    information, and shopping lists.
+                                </p>
+                                <Button asChild size="sm">
+                                    <Link href={checkout.subscription().url}>
+                                        <CrownIcon className="mr-2 h-4 w-4" />
+                                        Upgrade Now
+                                    </Link>
+                                </Button>
+                            </AlertDescription>
+                        </Alert>
+                    </>
                 ) : !mealPlan ? (
                     <>
                         <div className="space-y-2">

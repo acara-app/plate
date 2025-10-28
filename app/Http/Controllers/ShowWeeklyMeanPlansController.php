@@ -18,9 +18,6 @@ use Inertia\Response;
 
 final class ShowWeeklyMeanPlansController
 {
-    /**
-     * Display the user's weekly meal plans for a specific day
-     */
     public function __invoke(Request $request): Response
     {
         /** @var \App\Models\User $user */
@@ -56,6 +53,7 @@ final class ShowWeeklyMeanPlansController
                 'currentDay' => null,
                 'navigation' => null,
                 'jobTracking' => $this->formatJobTracking($latestJobTracking),
+                'requiresSubscription' => false,
             ]);
         }
 
@@ -139,6 +137,7 @@ final class ShowWeeklyMeanPlansController
             'currentDay' => $currentDay,
             'navigation' => $navigation,
             'jobTracking' => $this->formatJobTracking($latestJobTracking),
+            'requiresSubscription' => ! $user->hasActiveSubscription(),
         ]);
     }
 
