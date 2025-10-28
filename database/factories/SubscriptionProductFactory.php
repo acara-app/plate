@@ -19,7 +19,7 @@ final class SubscriptionProductFactory extends Factory
     public function definition(): array
     {
         $price = fake()->randomFloat(2, 9.99, 99.99);
-        $yearlyPrice = (float) ($price * 10); // Discount for yearly
+        $yearlyPrice = $price * 10; // Discount for yearly
 
         return [
             'name' => fake()->randomElement([

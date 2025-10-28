@@ -82,9 +82,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/billing-portal', function (Illuminate\Http\Request $request) {
         $user = $request->user();
 
-        if ($user === null) {
-            abort(401);
-        }
+        abort_if($user === null, 401);
 
         return $user->redirectToBillingPortal(route('checkout.subscription'));
     })->name('billing.portal');

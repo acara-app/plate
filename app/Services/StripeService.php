@@ -39,9 +39,7 @@ final readonly class StripeService implements StripeServiceInterface
     {
         $apiKey = config('cashier.secret');
 
-        if (! is_string($apiKey)) {
-            throw new RuntimeException('Stripe API key is not configured properly');
-        }
+        throw_unless(is_string($apiKey), RuntimeException::class, 'Stripe API key is not configured properly');
 
         \Stripe\Stripe::setApiKey($apiKey); // @codeCoverageIgnore
 
@@ -78,7 +76,7 @@ final readonly class StripeService implements StripeServiceInterface
     {
         $latestPayment = $subscription->latestPayment();
 
-        if ($latestPayment === null) {
+        if (! $latestPayment instanceof \Laravel\Cashier\Payment) {
             return null;
         }
 
