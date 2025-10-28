@@ -69,7 +69,7 @@ export default function CashierSubscription({
     const [isSubscribing, setIsSubscribing] = useState(false);
     const [billingInterval, setBillingInterval] = useState<
         'monthly' | 'yearly'
-    >('yearly');
+    >('monthly');
 
     const formatSavings = (value: number) => `$${parseFloat(value.toFixed(2))}`;
 
