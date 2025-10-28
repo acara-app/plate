@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Laravel\Cashier\Billable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
 /**
@@ -39,7 +40,7 @@ final class User extends Authenticatable implements MustVerifyEmail
     /**
      * @use HasFactory<UserFactory>
      */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use Billable, HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     protected $appends = [
         'is_onboarded',
@@ -104,6 +105,40 @@ final class User extends Authenticatable implements MustVerifyEmail
     public function jobTrackings(): HasMany
     {
         return $this->hasMany(JobTracking::class)->latest();
+    }
+
+    /**
+     * Check if the user has any active subscription.
+     */
+    public function hasActiveSubscription(): bool
+    {
+        return $this->subscriptions()->whereStripeStatus('active')->exists();
+    }
+
+    /**
+     * Get the user's active subscription.
+     */
+    public function activeSubscription(): ?\Laravel\Cashier\Subscription
+    {
+        /** @var \Laravel\Cashier\Subscription|null $subscription */
+        $subscription = $this->subscriptions()->whereStripeStatus('active')->first();
+
+        return $subscription;
+    }
+
+    /**
+     * Get a user-friendly subscription type name.
+     */
+    public function subscriptionDisplayName(): ?string
+    {
+        $subscription = $this->activeSubscription();
+
+        if (! $subscription instanceof \Laravel\Cashier\Subscription) {
+            return null;
+        }
+
+        // Convert slug back to title case (e.g., 'premium-plan' -> 'Premium Plan')
+        return str($subscription->type)->title()->replace('-', ' ')->toString();
     }
 
     protected function getHasMealPlanAttribute(): bool

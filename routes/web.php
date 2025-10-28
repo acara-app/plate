@@ -40,6 +40,7 @@ Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(fu
     Route::post('/health-conditions', [Web\OnboardingController::class, 'storeHealthConditions'])->name('health-conditions.store');
 
     Route::get('/completion', [Web\OnboardingController::class, 'showCompletion'])->name('completion.show');
+
 });
 
 Route::middleware('auth')->group(function (): void {
@@ -50,6 +51,9 @@ Route::middleware('auth')->group(function (): void {
     Route::redirect('settings', '/settings/profile');
     Route::get('settings/profile', [Web\UserProfileController::class, 'edit'])->name('user-profile.edit');
     Route::patch('settings/profile', [Web\UserProfileController::class, 'update'])->name('user-profile.update');
+
+    // Billing History...
+    Route::get('settings/billing', [Web\BillingHistoryController::class, 'index'])->name('billing.index');
 
     // User Password...
     Route::get('settings/password', [Web\UserPasswordController::class, 'edit'])->name('password.edit');
@@ -63,6 +67,27 @@ Route::middleware('auth')->group(function (): void {
     // User Two-Factor Authentication...
     Route::get('settings/two-factor', [Web\UserTwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
+
+    // User Subscription Management...
+    Route::get('/checkout/subscription', Web\Checkout\CashierShowSubscriptionController::class)
+        ->name('checkout.subscription');
+    Route::post('/checkout/subscription', Web\Checkout\CashierSubscriptionController::class)
+        ->name('checkout.subscription.store');
+
+    Route::get('/checkout/success', Web\Checkout\CashierShowSubscriptionController::class)
+        ->name('checkout.success');
+    Route::get('/checkout/cancel', Web\Checkout\CashierShowSubscriptionController::class)
+        ->name('checkout.cancel');
+
+    Route::get('/billing-portal', function (Illuminate\Http\Request $request) {
+        $user = $request->user();
+
+        if ($user === null) {
+            abort(401);
+        }
+
+        return $user->redirectToBillingPortal(route('checkout.subscription'));
+    })->name('billing.portal');
 });
 
 Route::middleware('guest')->group(function (): void {

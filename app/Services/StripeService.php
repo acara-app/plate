@@ -1,0 +1,89 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services;
+
+use App\Models\User;
+use App\Services\Contracts\StripeServiceInterface;
+use RuntimeException;
+
+final readonly class StripeService implements StripeServiceInterface
+{
+    public function ensureStripeCustomer(User $user): void
+    {
+        if (! $user->stripe_id) {
+            $user->createAsStripeCustomer([
+                'name' => $user->name,
+                'email' => $user->email,
+            ]);
+        }
+    }
+
+    public function getBillingPortalUrl(User $user, string $returnUrl): string
+    {
+        return $user->billingPortalUrl($returnUrl);
+    }
+
+    public function hasIncompletePayment(User $user, string $subscriptionType): bool
+    {
+        return $user->hasIncompletePayment($subscriptionType);
+    }
+
+    public function hasActiveSubscription(User $user): bool
+    {
+        return $user->subscribed();
+    }
+
+    public function getPriceIdFromLookupKey(string $lookupKey): ?string
+    {
+        $apiKey = config('cashier.secret');
+
+        if (! is_string($apiKey)) {
+            throw new RuntimeException('Stripe API key is not configured properly');
+        }
+
+        \Stripe\Stripe::setApiKey($apiKey);
+
+        $prices = \Stripe\Price::all([
+            'lookup_keys' => [$lookupKey],
+            'limit' => 1,
+        ]);
+
+        return empty($prices->data) ? null : $prices->data[0]->id;
+    }
+
+    /**
+     * @param  array<string, string>  $metadata
+     */
+    public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = []): string
+    {
+        $checkout = $user->newSubscription($subscriptionType, $priceId)
+            ->checkout([
+                'success_url' => $successUrl,
+                'cancel_url' => $cancelUrl,
+                'metadata' => $metadata,
+            ]);
+
+        $url = $checkout->url ?? null;
+
+        if (! is_string($url)) {
+            throw new RuntimeException('Checkout URL is not available');
+        }
+
+        return $url;
+    }
+
+    public function getIncompletePaymentUrl(\Laravel\Cashier\Subscription $subscription): ?string
+    {
+        $latestPayment = $subscription->latestPayment();
+
+        if ($latestPayment === null) {
+            return null;
+        }
+
+        $url = $latestPayment->hosted_invoice_url ?? null;
+
+        return is_string($url) ? $url : null;
+    }
+}

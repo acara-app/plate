@@ -11,6 +11,7 @@
     "require": {
         "php": "^8.4.0",
         "inertiajs/inertia-laravel": "^2.0.10",
+        "laravel/cashier": "^16.0",
         "laravel/fortify": "^1.31.2",
         "laravel/framework": "^12.35.1",
         "laravel/socialite": "^5.23",
