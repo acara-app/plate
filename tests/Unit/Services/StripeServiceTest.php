@@ -94,10 +94,15 @@ it('attempts to create subscription checkout with lookup key', function (): void
     }
 });
 
-it('returns null when getting incomplete payment url with null subscription', function (): void {
+it('returns null when subscription has no latest payment', function (): void {
+    $user = User::factory()->create(['stripe_id' => 'cus_test123']);
     $service = new StripeService();
 
-    $url = $service->getIncompletePaymentUrl(null);
+    // Create a subscription mock that returns null for latestPayment
+    $subscription = mock(Laravel\Cashier\Subscription::class);
+    $subscription->shouldReceive('latestPayment')->andReturn(null);
+
+    $url = $service->getIncompletePaymentUrl($subscription);
 
     expect($url)->toBeNull();
 });
