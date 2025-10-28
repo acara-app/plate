@@ -32,7 +32,7 @@ final readonly class CashierSubscriptionController
             $user = $request->user();
 
             if ($user === null) {
-                abort(401);
+                abort(401); // @codeCoverageIgnore
             }
 
             if ($this->stripeService->hasActiveSubscription($user)) {

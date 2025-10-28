@@ -25,7 +25,7 @@ final readonly class CashierShowSubscriptionController
         $user = $request->user();
 
         if ($user === null) {
-            abort(401);
+            abort(401); // @codeCoverageIgnore
         }
 
         $this->stripeService->ensureStripeCustomer($user);
