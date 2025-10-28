@@ -7,10 +7,11 @@ import {
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
+import billing from '@/routes/billing';
 import { edit } from '@/routes/user-profile';
 import { type User } from '@/types';
 import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut, ReceiptTextIcon, Settings } from 'lucide-react';
 
 interface UserMenuContentProps {
     user: User;
@@ -43,6 +44,18 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                     >
                         <Settings className="mr-2" />
                         Settings
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link
+                        className="block w-full"
+                        href={billing.index()}
+                        as="button"
+                        prefetch
+                        onClick={cleanup}
+                    >
+                        <ReceiptTextIcon className="mr-2" />
+                        Billing
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>
