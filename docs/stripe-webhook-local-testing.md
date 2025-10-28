@@ -66,3 +66,28 @@ If you still see 403 errors after updating the secret:
 2. Run `php artisan config:clear` to clear any cached config
 3. Verify the secret is correctly set with: `php artisan tinker` then `config('cashier.webhook.secret')`
 4. Restart your `stripe listen` command and get a fresh secret
+
+### 🧪 Testing the Complete Flow
+
+Make sure you have both terminals running:
+
+Terminal 1:
+```
+stripe listen --forward-to http://plate.test/stripe/webhook
+```
+
+Terminal 2 (if needed):
+```
+php artisan queue:work
+```
+
+Then:
+```
+Go to http://plate.test/checkout/subscription
+Click on a subscription product
+Use Stripe test card: 4242 4242 4242 4242
+Any future date (e.g., 12/34)
+Any 3-digit CVC (e.g., 123)
+Complete the checkout
+```
+
