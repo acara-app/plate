@@ -22,6 +22,7 @@ test('to array', function (): void {
             'pm_type',
             'pm_last_four',
             'trial_ends_at',
+            'timezone',
             'is_onboarded',
             'has_meal_plan',
             'profile',

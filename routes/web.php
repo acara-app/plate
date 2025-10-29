@@ -11,6 +11,8 @@ Route::view('/privacy-policy', 'privacy-policy')->name('privacy');
 Route::view('/terms-of-service', 'terms-of-service')->name('terms');
 Route::view('/support', 'support')->name('support');
 
+Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])->name('profile.timezone.update');
+
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', [Web\DashboardController::class, 'show'])->name('dashboard');
 

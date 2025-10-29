@@ -23,7 +23,11 @@ final class ShowWeeklyMeanPlansController
         /** @var \App\Models\User $user */
         $user = $request->user();
 
-        $currentDayNumber = $request->integer('day', CarbonImmutable::now()->dayOfWeekIso);
+        /** @var string $timezone */
+        $timezone = $request->session()->get('timezone', 'UTC');
+        $now = CarbonImmutable::now($timezone);
+
+        $currentDayNumber = $request->integer('day', $now->dayOfWeekIso);
 
         $currentDayNumber = max(1, min(7, $currentDayNumber));
 

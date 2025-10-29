@@ -88,6 +88,33 @@ it('defaults to current day of week', function (): void {
             ->where('currentDay.day_number', $currentDayOfWeek));
 });
 
+it('uses session timezone when calculating current day', function (): void {
+    $user = User::factory()->create();
+
+    // Set timezone to Tokyo (UTC+9)
+    $timezone = 'Asia/Tokyo';
+    $currentDayInTokyo = now($timezone)->dayOfWeekIso;
+
+    $mealPlan = MealPlan::factory()
+        ->weekly()
+        ->for($user)
+        ->create();
+
+    Meal::factory()
+        ->breakfast()
+        ->for($mealPlan)
+        ->forDay($currentDayInTokyo)
+        ->create();
+
+    $response = $this->actingAs($user)
+        ->withSession(['timezone' => $timezone])
+        ->get(route('meal-plans.weekly'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('currentDay.day_number', $currentDayInTokyo));
+});
+
 it('displays meals for a specific day', function (): void {
     $user = User::factory()->create();
 
