@@ -18,7 +18,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Meal, MealType } from '@/types/meal-plan';
-import { Clock, Info } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { MacroBar } from './macro-bar';
 import { NutritionStats } from './nutrition-stats';
 
@@ -81,93 +81,6 @@ export function MealCard({ meal, className }: MealCardProps) {
                             </CardDescription>
                         )}
                     </div>
-
-                    {hasDetails && (
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 shrink-0"
-                                >
-                                    <Info className="h-4 w-4" />
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-h-[80vh] overflow-y-auto">
-                                <DialogHeader>
-                                    <DialogTitle className="flex items-center gap-2">
-                                        {config.emoji} {meal.name}
-                                    </DialogTitle>
-                                    <DialogDescription>
-                                        {config.label}
-                                        {meal.preparation_time_minutes &&
-                                            ` • ${meal.preparation_time_minutes} minutes`}
-                                    </DialogDescription>
-                                </DialogHeader>
-
-                                <div className="space-y-4">
-                                    {meal.description && (
-                                        <div>
-                                            <h4 className="mb-2 font-semibold">
-                                                Description
-                                            </h4>
-                                            <p className="text-sm text-muted-foreground">
-                                                {meal.description}
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {meal.ingredients && (
-                                        <div>
-                                            <h4 className="mb-2 font-semibold">
-                                                Ingredients
-                                            </h4>
-                                            <p className="text-sm whitespace-pre-line text-muted-foreground">
-                                                {meal.ingredients}
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {meal.preparation_instructions && (
-                                        <div>
-                                            <h4 className="mb-2 font-semibold">
-                                                Preparation Instructions
-                                            </h4>
-                                            <p className="text-sm whitespace-pre-line text-muted-foreground">
-                                                {meal.preparation_instructions}
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    <Separator />
-
-                                    <div>
-                                        <h4 className="mb-3 font-semibold">
-                                            Nutrition Information
-                                        </h4>
-                                        <NutritionStats
-                                            calories={meal.calories}
-                                            protein={meal.protein_grams}
-                                            carbs={meal.carbs_grams}
-                                            fat={meal.fat_grams}
-                                            size="lg"
-                                        />
-                                        {meal.protein_grams &&
-                                            meal.carbs_grams &&
-                                            meal.fat_grams && (
-                                                <MacroBar
-                                                    macros={
-                                                        meal.macro_percentages
-                                                    }
-                                                    showLegend
-                                                    className="mt-3"
-                                                />
-                                            )}
-                                    </div>
-                                </div>
-                            </DialogContent>
-                        </Dialog>
-                    )}
                 </div>
             </CardHeader>
 
@@ -182,6 +95,90 @@ export function MealCard({ meal, className }: MealCardProps) {
 
                 {meal.protein_grams && meal.carbs_grams && meal.fat_grams && (
                     <MacroBar macros={meal.macro_percentages} />
+                )}
+
+                {hasDetails && (
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                className="w-full justify-start px-0 text-sm font-normal text-muted-foreground hover:text-foreground"
+                            >
+                                View recipe details →
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-h-[80vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                    {config.emoji} {meal.name}
+                                </DialogTitle>
+                                <DialogDescription>
+                                    {config.label}
+                                    {meal.preparation_time_minutes &&
+                                        ` • ${meal.preparation_time_minutes} minutes`}
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="space-y-4">
+                                {meal.description && (
+                                    <div>
+                                        <h4 className="mb-2 font-semibold">
+                                            Description
+                                        </h4>
+                                        <p className="text-sm text-muted-foreground">
+                                            {meal.description}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {meal.ingredients && (
+                                    <div>
+                                        <h4 className="mb-2 font-semibold">
+                                            Ingredients
+                                        </h4>
+                                        <p className="text-sm whitespace-pre-line text-muted-foreground">
+                                            {meal.ingredients}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {meal.preparation_instructions && (
+                                    <div>
+                                        <h4 className="mb-2 font-semibold">
+                                            Preparation Instructions
+                                        </h4>
+                                        <p className="text-sm whitespace-pre-line text-muted-foreground">
+                                            {meal.preparation_instructions}
+                                        </p>
+                                    </div>
+                                )}
+
+                                <Separator />
+
+                                <div>
+                                    <h4 className="mb-3 font-semibold">
+                                        Nutrition Information
+                                    </h4>
+                                    <NutritionStats
+                                        calories={meal.calories}
+                                        protein={meal.protein_grams}
+                                        carbs={meal.carbs_grams}
+                                        fat={meal.fat_grams}
+                                        size="lg"
+                                    />
+                                    {meal.protein_grams &&
+                                        meal.carbs_grams &&
+                                        meal.fat_grams && (
+                                            <MacroBar
+                                                macros={meal.macro_percentages}
+                                                showLegend
+                                                className="mt-3"
+                                            />
+                                        )}
+                                </div>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                 )}
             </CardContent>
         </Card>
