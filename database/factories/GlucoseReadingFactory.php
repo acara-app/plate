@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\ReadingType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,12 +19,10 @@ final class GlucoseReadingFactory extends Factory
      */
     public function definition(): array
     {
-        $readingTypes = ['fasting', 'post-meal', 'random', 'before-meal'];
-
         return [
             'user_id' => \App\Models\User::factory(),
             'reading_value' => fake()->randomFloat(1, 70, 180), // Normal range: 70-180 mg/dL
-            'reading_type' => fake()->randomElement($readingTypes),
+            'reading_type' => fake()->randomElement(ReadingType::cases()),
             'measured_at' => fake()->dateTimeBetween('-30 days', 'now'),
             'notes' => fake()->optional(0.3)->sentence(),
         ];
@@ -35,7 +34,7 @@ final class GlucoseReadingFactory extends Factory
     public function fasting(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'reading_type' => 'fasting',
+            'reading_type' => ReadingType::Fasting,
             'reading_value' => fake()->randomFloat(1, 70, 100), // Typical fasting range
         ]);
     }
@@ -46,7 +45,7 @@ final class GlucoseReadingFactory extends Factory
     public function postMeal(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'reading_type' => 'post-meal',
+            'reading_type' => ReadingType::PostMeal,
             'reading_value' => fake()->randomFloat(1, 100, 140), // Typical post-meal range
         ]);
     }

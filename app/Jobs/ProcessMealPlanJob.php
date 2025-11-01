@@ -46,7 +46,7 @@ final class ProcessMealPlanJob implements ShouldQueue
 
             $this->updateTrackingProgress(50, 'Creating personalized plan...');
 
-            $mealPlanData = $generateMealPlan->handle($user, $this->model);
+            $mealPlanData = $generateMealPlan->generate($user, $this->model);
 
             $this->updateTrackingProgress(75, 'Saving meal plan...');
 
