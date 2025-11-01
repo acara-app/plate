@@ -1,6 +1,6 @@
 # Plate - Personalized Nutrition & Meal Planning Platform
 
-Plate is an AI-powered personalized nutrition and meal planning platform that creates customized meal plans based on individual user data such as age, weight, height, dietary preferences, and health goals. The platform simplifies meal planning by providing users with tailored recipes, nutritional information, and ... that align with their unique needs and lifestyle.
+Plate is an AI-powered personalized nutrition and meal planning platform that creates customized meal plans based on individual user data such as age, weight, height, dietary preferences, and health goals. The platform simplifies meal planning by providing users with tailored recipes, nutritional information, and glucose tracking capabilities that align with their unique needs and lifestyle.
 
 ## About
 
@@ -40,6 +40,7 @@ The platform provides detailed meal plans with:
 - **Radix UI** - Accessible component primitives
 - **shadcn/ui** - Beautiful, customizable components
 - **Lucide React** - Icon library
+- **Recharts** - Composable charting library for data visualization
 
 ### Development Tools
 - **Vite** - Fast build tool and dev server
@@ -72,59 +73,15 @@ The platform provides detailed meal plans with:
    - Detailed meal cards with preparation instructions
    - Grocery list generation capability
 
-4. **Subscription Features**
-   - Stripe integration via Laravel Cashier
-   - Subscription-based access to meal plans
-   - Multiple subscription tiers
-
-### Technical Features
-- **Queue-based Processing**: Meal plan generation runs asynchronously
-- **Job Tracking**: Real-time progress monitoring for long-running tasks
-- **Responsive Design**: Mobile-first approach with Tailwind CSS
-- **Dark Mode**: Full dark mode support
-- **Type Safety**: End-to-end TypeScript integration
-- **Testing**: Comprehensive test coverage with Pest (unit, feature, and browser tests)
-- **Action Pattern**: Business logic organized in reusable Action classes
-- **Form Requests**: Dedicated validation classes following Laravel best practices
-- **Wayfinder**: Type-safe routing for Inertia.js
-
-## Project Structure
-
-```
-app/
-├── Actions/              # Business logic actions
-│   ├── AiAgents/        # AI-related actions (meal plan generation)
-│   ├── CreateUser.php
-│   ├── StoreMealPlan.php
-│   └── ...
-├── DataObjects/         # DTOs for structured data
-├── Enums/               # Enums (AiModel, MealType, Sex, etc.)
-├── Http/
-│   ├── Controllers/     # HTTP controllers
-│   └── Requests/        # Form request validation classes
-├── Jobs/                # Queue jobs (ProcessMealPlanJob)
-├── Models/              # Eloquent models
-├── Services/            # Service classes
-└── Traits/              # Reusable traits
-
-resources/
-├── css/                 # Stylesheets
-├── js/
-│   ├── components/      # React components
-│   │   ├── ui/         # Radix UI components
-│   │   └── meal-plans/ # Meal plan specific components
-│   ├── pages/          # Inertia.js pages
-│   │   ├── onboarding/ # Onboarding flow
-│   │   ├── meal-plans/ # Meal plan views
-│   │   └── dashboard.tsx
-│   └── types/          # TypeScript type definitions
-└── views/              # Blade views (welcome, privacy, terms, AI prompts)
-
-tests/
-├── Feature/            # Feature tests
-├── Unit/               # Unit tests
-└── Browser/            # Browser tests (Pest v4)
-```
+4. **Glucose Tracking**
+   - Log blood glucose readings with timestamps
+   - Track reading types (Fasting, Before Meal, Post Meal, Random)
+   - Comprehensive analytics dashboard with visualizations
+   - Time-period filtering (7, 30, 90 days)
+   - Statistics: average, highest, lowest glucose levels
+   - Time-in-range metrics (70-140 mg/dL target)
+   - Interactive line chart with color-coded zones
+   - Reading management (create, edit, delete)
 
 ## Setup & Installation
 
@@ -281,87 +238,3 @@ vendor/bin/phpstan analyze
 # TypeScript type checking
 npm run test:types
 ```
-
-## Deployment
-
-The application includes a deployment script for Ploi:
-
-```bash
-./ploi-deployment.sh
-```
-
-### Production Build
-
-```bash
-npm run build
-```
-
-### Cloudflare Integration
-
-The application includes scripts for Cloudflare cache purging:
-```bash
-./scripts/purge-cloudflare-cache.sh
-```
-
-## Documentation
-
-Additional documentation is available in the `/docs` directory:
-
-- `cloudflare-cache-purging.md` - Cloudflare cache management
-- `cors-issue-resolution.md` - CORS configuration and troubleshooting
-- `google-oauth-setup.md` - Google OAuth setup guide
-- `search-queries.md` - SEO search query performance
-- `stripe-webhook-local-testing.md` - Testing Stripe webhooks locally
-- `testing-stripe-checkout-flow.md` - Stripe checkout testing guide
-- `wayfinder-routes.md` - Wayfinder routing documentation
-
-## Environment Variables
-
-Key environment variables:
-
-```bash
-# Application
-APP_NAME=Plate
-APP_ENV=production
-APP_URL=https://your-domain.com
-
-# Database
-DB_CONNECTION=sqlite  # or pgsql
-
-# Queue
-QUEUE_CONNECTION=database
-
-# Mail
-MAIL_MAILER=smtp
-MAIL_HOST=your-smtp-host
-MAIL_FROM_ADDRESS=hello@your-domain.com
-
-# AI
-GOOGLE_GEMINI_API_KEY=your_api_key
-
-# Stripe
-STRIPE_KEY=pk_live_...
-STRIPE_SECRET=sk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-
-# OAuth (Optional)
-GOOGLE_CLIENT_ID=your_client_id
-GOOGLE_CLIENT_SECRET=your_client_secret
-```
-
-## Contributing
-
-1. Follow Laravel and React best practices
-2. Use the Action pattern for business logic
-3. Write tests for all new features (aim for 100% coverage)
-4. Run `composer lint` before committing
-5. Ensure all tests pass with `composer test`
-6. Follow existing code conventions and structure
-
-## License
-
-This project is open-sourced software licensed under the MIT license.
-
-## Support
-
-For support and questions, visit the support page or contact the development team.
