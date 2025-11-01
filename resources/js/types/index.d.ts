@@ -1,6 +1,8 @@
 import { InertiaLinkProps } from '@inertiajs/react';
 import { LucideIcon } from 'lucide-react';
 
+export type Nullable<T> = T | null;
+
 export interface Row {
     id: number;
     created_at: string;

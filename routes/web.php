@@ -21,6 +21,12 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('chat/create', [Web\ChatController::class, 'create'])->name('chat.create');
 
     Route::get('ongoing-tracking/food-log/create', [Web\FoodLogController::class, 'create'])->name('food-log.create');
+
+    // Glucose Tracking...
+    Route::get('glucose', [Web\GlucoseReadingController::class, 'index'])->name('glucose.index');
+    Route::post('glucose', [Web\GlucoseReadingController::class, 'store'])->name('glucose.store');
+    Route::put('glucose/{glucoseReading}', [Web\GlucoseReadingController::class, 'update'])->name('glucose.update');
+    Route::delete('glucose/{glucoseReading}', [Web\GlucoseReadingController::class, 'destroy'])->name('glucose.destroy');
 });
 
 Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(function (): void {
