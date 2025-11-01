@@ -12,11 +12,13 @@ import {
 } from '@/components/ui/sidebar';
 import { UpgradeButton } from '@/components/upgrade-button';
 import { dashboard, privacy, terms } from '@/routes';
+import glucoseReading from '@/routes/glucose';
 import mealPlans from '@/routes/meal-plans';
 import biometrics from '@/routes/onboarding/biometrics';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
+    ActivityIcon,
     CalendarHeartIcon,
     FileText,
     HeartIcon,
@@ -35,6 +37,11 @@ const mainNavItems: NavItem[] = [
         title: 'Weekly Meal Plans',
         href: mealPlans.weekly(),
         icon: CalendarHeartIcon,
+    },
+    {
+        title: 'Glucose Dashboard',
+        href: glucoseReading.dashboard(),
+        icon: ActivityIcon,
     },
     {
         title: 'Update Your Info',

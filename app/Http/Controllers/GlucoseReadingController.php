@@ -44,6 +44,35 @@ final readonly class GlucoseReadingController
     }
 
     /**
+     * Display the glucose dashboard with visualizations and analytics.
+     */
+    public function dashboard(): Response
+    {
+        $user = $this->currentUser;
+
+        // Get all readings for visualization (not paginated)
+        $allReadings = $user->glucoseReadings()
+            ->orderBy('measured_at', 'desc')
+            ->get()
+            ->map(fn (GlucoseReading $reading): array => [
+                'id' => $reading->id,
+                'reading_value' => $reading->reading_value,
+                'reading_type' => $reading->reading_type->value,
+                'measured_at' => $reading->measured_at->toISOString(),
+                'notes' => $reading->notes,
+                'created_at' => $reading->created_at->toISOString(),
+            ]);
+
+        return Inertia::render('glucose/dashboard', [
+            'readings' => $allReadings,
+            'readingTypes' => collect(ReadingType::cases())->map(fn (ReadingType $type): array => [
+                'value' => $type->value,
+                'label' => $type->value,
+            ]),
+        ]);
+    }
+
+    /**
      * Store a newly created glucose reading.
      */
     public function store(StoreGlucoseReadingRequest $request): RedirectResponse

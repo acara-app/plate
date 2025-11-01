@@ -24,6 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
     // Glucose Tracking...
     Route::get('glucose', [Web\GlucoseReadingController::class, 'index'])->name('glucose.index');
+    Route::get('glucose/dashboard', [Web\GlucoseReadingController::class, 'dashboard'])->name('glucose.dashboard');
     Route::post('glucose', [Web\GlucoseReadingController::class, 'store'])->name('glucose.store');
     Route::put('glucose/{glucoseReading}', [Web\GlucoseReadingController::class, 'update'])->name('glucose.update');
     Route::delete('glucose/{glucoseReading}', [Web\GlucoseReadingController::class, 'destroy'])->name('glucose.destroy');

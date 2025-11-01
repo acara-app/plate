@@ -12,7 +12,7 @@ import useModalToggle, { useModalValueToggle } from '@/hooks/use-modal-toggle';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { BarChart3, Pencil, Plus, Trash2 } from 'lucide-react';
 import GlucoseReadingDialog from './glucose-reading-dialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -62,7 +62,7 @@ export default function GlucoseIndex({ readings, readingTypes }: Props) {
             <Head title="Glucose Tracking" />
             <AdminPageWrap variant="lg">
                 <div className="space-y-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight">
                                 Glucose Tracking
@@ -71,10 +71,22 @@ export default function GlucoseIndex({ readings, readingTypes }: Props) {
                                 Track and monitor your blood glucose levels
                             </p>
                         </div>
-                        <Button onClick={() => createModal.open()}>
-                            <Plus className="mr-2 size-4" />
-                            Add Reading
-                        </Button>
+                        <div className="flex gap-2">
+                            <Button variant="outline" asChild>
+                                <a
+                                    href={
+                                        GlucoseReadingController.dashboard().url
+                                    }
+                                >
+                                    <BarChart3 className="mr-2 size-4" />
+                                    View Dashboard
+                                </a>
+                            </Button>
+                            <Button onClick={() => createModal.open()}>
+                                <Plus className="mr-2 size-4" />
+                                Add Reading
+                            </Button>
+                        </div>
                     </div>
 
                     <GlucoseReadingDialog
