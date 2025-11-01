@@ -1,6 +1,4 @@
 import { JobProcessingStatus } from '@/components/job-processing-status';
-import { MealCard } from '@/components/meal-plans/meal-card';
-import { NutritionStats } from '@/components/meal-plans/nutrition-stats';
 import { OnboardingBanner } from '@/components/onboarding-banner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
+import { MealCard } from '@/pages/meal-plans/elements/meal-card';
+import { NutritionStats } from '@/pages/meal-plans/elements/nutrition-stats';
 import checkout from '@/routes/checkout';
 import mealPlans from '@/routes/meal-plans';
 import { JobTracking, type BreadcrumbItem } from '@/types';
