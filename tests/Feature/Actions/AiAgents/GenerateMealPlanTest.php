@@ -1,0 +1,131 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Actions\AiAgents\GenerateMealPlan;
+use App\Enums\AiModel;
+use App\Enums\MealPlanType;
+use App\Enums\Sex;
+use App\Models\Goal;
+use App\Models\Lifestyle;
+use App\Models\User;
+use Prism\Prism\Enums\FinishReason;
+use Prism\Prism\Prism;
+use Prism\Prism\Testing\StructuredResponseFake;
+use Prism\Prism\ValueObjects\Meta;
+use Prism\Prism\ValueObjects\Usage;
+
+it('generates a meal plan using PrismPHP', function (): void {
+    $user = User::factory()->create();
+    $goal = Goal::factory()->create(['name' => 'Weight Loss']);
+    $lifestyle = Lifestyle::factory()->create([
+        'name' => 'Active',
+        'activity_level' => 'moderate',
+        'activity_multiplier' => 1.5,
+    ]);
+
+    $user->profile()->create([
+        'age' => 30,
+        'height' => 175.0,
+        'weight' => 80.0,
+        'sex' => Sex::Male,
+        'goal_id' => $goal->id,
+        'lifestyle_id' => $lifestyle->id,
+        'target_weight' => 75.0,
+    ]);
+
+    $mockResponse = [
+        'type' => 'weekly',
+        'name' => 'Weight Loss Weekly Plan',
+        'description' => 'A balanced meal plan for weight loss',
+        'duration_days' => 7,
+        'target_daily_calories' => 1800.0,
+        'macronutrient_ratios' => [
+            'protein' => 35,
+            'carbs' => 30,
+            'fat' => 35,
+        ],
+        'meals' => [
+            [
+                'day_number' => 1,
+                'type' => 'breakfast',
+                'name' => 'Greek Yogurt Bowl',
+                'description' => 'High protein breakfast',
+                'preparation_instructions' => 'Mix yogurt with toppings',
+                'ingredients' => 'Greek yogurt, berries, nuts',
+                'portion_size' => '1 bowl',
+                'calories' => 350.0,
+                'protein_grams' => 25.0,
+                'carbs_grams' => 30.0,
+                'fat_grams' => 10.0,
+                'preparation_time_minutes' => 5,
+                'sort_order' => 1,
+            ],
+        ],
+    ];
+
+    $fakeResponse = StructuredResponseFake::make()
+        ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
+        ->withStructured($mockResponse)
+        ->withFinishReason(FinishReason::Stop)
+        ->withUsage(new Usage(100, 200))
+        ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
+
+    Prism::fake([$fakeResponse]);
+
+    $action = app(GenerateMealPlan::class);
+    $mealPlanData = $action->handle($user, AiModel::Gemini25Flash);
+
+    expect($mealPlanData)
+        ->type->toBe(MealPlanType::Weekly)
+        ->name->toBe('Weight Loss Weekly Plan')
+        ->durationDays->toBe(7)
+        ->targetDailyCalories->toBe(1800.0)
+        ->macronutrientRatios->toBe(['protein' => 35, 'carbs' => 30, 'fat' => 35])
+        ->meals->toHaveCount(1);
+
+    expect($mealPlanData->meals[0])
+        ->dayNumber->toBe(1)
+        ->name->toBe('Greek Yogurt Bowl')
+        ->calories->toBe(350.0);
+});
+
+it('uses the correct AI model from enum', function (): void {
+    $user = User::factory()->create();
+    $goal = Goal::factory()->create();
+    $lifestyle = Lifestyle::factory()->create();
+
+    $user->profile()->create([
+        'age' => 25,
+        'height' => 170.0,
+        'weight' => 65.0,
+        'sex' => Sex::Female,
+        'goal_id' => $goal->id,
+        'lifestyle_id' => $lifestyle->id,
+    ]);
+
+    $mockResponse = [
+        'type' => 'weekly',
+        'name' => 'Test Plan',
+        'description' => 'Test',
+        'duration_days' => 7,
+        'target_daily_calories' => 2000.0,
+        'macronutrient_ratios' => ['protein' => 30, 'carbs' => 40, 'fat' => 30],
+        'meals' => [],
+    ];
+
+    $fakeResponse = StructuredResponseFake::make()
+        ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
+        ->withStructured($mockResponse)
+        ->withFinishReason(FinishReason::Stop)
+        ->withUsage(new Usage(100, 200))
+        ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
+
+    Prism::fake([$fakeResponse]);
+
+    $action = app(GenerateMealPlan::class);
+    $result = $action->handle($user, AiModel::Gemini25Flash);
+
+    expect($result)->not->toBeNull();
+    expect(AiModel::Gemini25Flash->value)->toBe('gemini-2.5-flash');
+});
