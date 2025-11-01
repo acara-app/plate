@@ -20,76 +20,21 @@ The platform provides detailed meal plans with:
 - Portion sizes and preparation times
 - Nutritional information per meal
 
-## Tech Stack
+## Quick Start
 
-### Backend
-- **Laravel 12** - Modern PHP framework with streamlined file structure
-- **PHP 8.4** - Latest PHP version with performance improvements
-- **PrismPHP** - AI integration for structured data generation
-- **Google Gemini 2.5 Flash** - AI model for meal plan generation
-- **Laravel Cashier** - Stripe integration for subscription management
-- **Laravel Fortify** - Authentication scaffolding
-- **Laravel Socialite** - OAuth authentication (Google)
-- **SQLite/PostgreSQL** - Database support
-
-### Frontend
+### Prerequisites
+- **PHP 8.4+** with Laravel 12.x
+- **SQLite/PostgreSQL 17+** with pgvector extension
+- **Node.js 20+** - frontend development
 - **React 19** - Modern UI library
 - **TypeScript** - Type-safe JavaScript
 - **Inertia.js v2** - Modern monolith SPA framework
 - **Tailwind CSS 4** - Utility-first CSS framework
 - **Radix UI** - Accessible component primitives
-- **shadcn/ui** - Beautiful, customizable components
-- **Lucide React** - Icon library
-- **Recharts** - Composable charting library for data visualization
-
-### Development Tools
-- **Vite** - Fast build tool and dev server
-- **Pest 4** - Modern PHP testing framework with browser testing
-- **Laravel Pint** - Opinionated PHP code formatter
-- **Rector** - PHP automated refactoring tool
-- **Larastan (PHPStan)** - Static analysis for Laravel
-- **ESLint & Prettier** - JavaScript/TypeScript linting and formatting
-
-## Key Features
-
-### User Journey
-1. **Onboarding Questionnaire**
-   - Biometric information collection
-   - Goal selection
-   - Lifestyle assessment
-   - Dietary preference selection
-   - Health condition documentation
-
-2. **AI-Powered Meal Plan Generation**
-   - Personalized 7-day meal plans
-   - Weekly plan generation with queue processing
-   - Real-time job tracking with progress updates
-   - Structured data generation using PrismPHP
-
-3. **Meal Plan Management**
-   - View daily meals with nutritional breakdown
-   - Day-by-day navigation
-   - Macro bar visualizations
-   - Detailed meal cards with preparation instructions
-   - Grocery list generation capability
-
-4. **Glucose Tracking**
-   - Log blood glucose readings with timestamps
-   - Track reading types (Fasting, Before Meal, Post Meal, Random)
-   - Comprehensive analytics dashboard with visualizations
-   - Time-period filtering (7, 30, 90 days)
-   - Statistics: average, highest, lowest glucose levels
-   - Time-in-range metrics (70-140 mg/dL target)
-   - Interactive line chart with color-coded zones
-   - Reading management (create, edit, delete)
+- **OpenAI (or Gemini/Anthropic) API Key** - embedding generation and AI analysis
+- **PrismPHP** - LLM integration
 
 ## Setup & Installation
-
-### Prerequisites
-- PHP 8.4 or higher
-- Node.js 20+ and npm
-- Composer
-- SQLite or PostgreSQL
 
 ### Installation
 
@@ -117,7 +62,8 @@ This will:
 # Configure your database, mail, and API keys
 
 # Required API Keys
-GOOGLE_GEMINI_API_KEY=your_gemini_key
+GOOGLE_GEMINI_API_KEY=your_gemini_key # Or
+
 STRIPE_KEY=your_stripe_publishable_key
 STRIPE_SECRET=your_stripe_secret_key
 
@@ -193,3 +139,37 @@ This runs:
 - Laravel Pint (PHP code formatting)
 - ESLint (JavaScript/TypeScript)
 - Prettier (code formatting)
+
+
+## Key Features
+
+### User Journey
+1. **Onboarding Questionnaire**
+   - Biometric information collection
+   - Goal selection
+   - Lifestyle assessment
+   - Dietary preference selection
+   - Health condition documentation
+
+2. **AI-Powered Meal Plan Generation**
+   - Personalized 7-day meal plans
+   - Weekly plan generation with queue processing
+   - Real-time job tracking with progress updates
+   - Structured data generation using PrismPHP
+
+3. **Meal Plan Management**
+   - View daily meals with nutritional breakdown
+   - Day-by-day navigation
+   - Macro bar visualizations
+   - Detailed meal cards with preparation instructions
+   - Grocery list generation capability
+
+4. **Glucose Tracking**
+   - Log blood glucose readings with timestamps
+   - Track reading types (Fasting, Before Meal, Post Meal, Random)
+   - Comprehensive analytics dashboard with visualizations
+   - Time-period filtering (7, 30, 90 days)
+   - Statistics: average, highest, lowest glucose levels
+   - Time-in-range metrics (70-140 mg/dL target)
+   - Interactive line chart with color-coded zones
+   - Reading management (create, edit, delete)
