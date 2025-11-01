@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 use App\Actions\AiAgents\GenerateMealPlan;
 use App\Enums\AiModel;
+use App\Enums\JobStatus;
 use App\Enums\MealPlanType;
 use App\Enums\Sex;
+use App\Jobs\ProcessMealPlanJob;
 use App\Models\Goal;
 use App\Models\Lifestyle;
 use App\Models\User;
+use Illuminate\Support\Facades\Queue;
 use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Prism;
 use Prism\Prism\Testing\StructuredResponseFake;
@@ -74,7 +77,7 @@ it('generates a meal plan using PrismPHP', function (): void {
     Prism::fake([$fakeResponse]);
 
     $action = app(GenerateMealPlan::class);
-    $mealPlanData = $action->handle($user, AiModel::Gemini25Flash);
+    $mealPlanData = $action->generate($user, AiModel::Gemini25Flash);
 
     expect($mealPlanData)
         ->type->toBe(MealPlanType::Weekly)
@@ -124,8 +127,36 @@ it('uses the correct AI model from enum', function (): void {
     Prism::fake([$fakeResponse]);
 
     $action = app(GenerateMealPlan::class);
-    $result = $action->handle($user, AiModel::Gemini25Flash);
+    $result = $action->generate($user, AiModel::Gemini25Flash);
 
     expect($result)->not->toBeNull();
     expect(AiModel::Gemini25Flash->value)->toBe('gemini-2.5-flash');
+});
+
+it('dispatches a job and creates job tracking when handle is called', function (): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+    $goal = Goal::factory()->create();
+    $lifestyle = Lifestyle::factory()->create();
+
+    $user->profile()->create([
+        'age' => 30,
+        'height' => 175.0,
+        'weight' => 80.0,
+        'sex' => Sex::Male,
+        'goal_id' => $goal->id,
+        'lifestyle_id' => $lifestyle->id,
+    ]);
+
+    $action = app(GenerateMealPlan::class);
+    $tracking = $action->handle($user, AiModel::Gemini25Flash);
+
+    expect($tracking)
+        ->user_id->toBe($user->id)
+        ->job_type->toBe(ProcessMealPlanJob::JOB_TYPE)
+        ->status->toBe(JobStatus::Pending)
+        ->progress->toBe(0);
+
+    Queue::assertPushed(ProcessMealPlanJob::class, fn(ProcessMealPlanJob $job): bool => $job->userId === $user->id && $job->model === AiModel::Gemini25Flash);
 });

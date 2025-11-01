@@ -19,7 +19,7 @@ use Prism\Prism\Schema\NumberSchema;
 use Prism\Prism\Schema\ObjectSchema;
 use Prism\Prism\Schema\StringSchema;
 
-final readonly class GenerateMealPlan
+final class GenerateMealPlan
 {
     use Trackable;
 
