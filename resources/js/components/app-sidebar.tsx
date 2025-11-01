@@ -39,7 +39,7 @@ const mainNavItems: NavItem[] = [
         icon: CalendarHeartIcon,
     },
     {
-        title: 'Glucose Dashboard',
+        title: 'Glucose Tracking',
         href: glucoseReading.dashboard(),
         icon: ActivityIcon,
     },

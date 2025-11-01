@@ -219,3 +219,32 @@ it('validates required fields when updating glucose reading', function (): void 
 
     $response->assertSessionHasErrors(['reading_value', 'reading_type', 'measured_at']);
 });
+
+it('renders glucose dashboard for authenticated and verified user', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->get(route('glucose.dashboard'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('glucose/dashboard')
+            ->has('readings')
+            ->has('readingTypes'));
+});
+
+it('displays all user glucose readings on dashboard', function (): void {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    GlucoseReading::factory()->count(5)->create(['user_id' => $user->id]);
+    GlucoseReading::factory()->count(3)->create(['user_id' => $otherUser->id]);
+
+    $response = $this->actingAs($user)
+        ->get(route('glucose.dashboard'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('glucose/dashboard')
+            ->has('readings', 5));
+});

@@ -24,10 +24,6 @@ const breadcrumbs: BreadcrumbItem[] = [
         title: 'Glucose Tracking',
         href: GlucoseReadingController.index().url,
     },
-    {
-        title: 'Dashboard',
-        href: GlucoseReadingController.dashboard().url,
-    },
 ];
 
 interface ReadingType {

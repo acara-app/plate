@@ -63,7 +63,7 @@ final readonly class GlucoseReadingController
                 'created_at' => $reading->created_at->toISOString(),
             ]);
 
-        return Inertia::render('glucose/dashboard', [
+        return Inertia::render('glucose/tracking', [
             'readings' => $allReadings,
             'readingTypes' => collect(ReadingType::cases())->map(fn (ReadingType $type): array => [
                 'value' => $type->value,
