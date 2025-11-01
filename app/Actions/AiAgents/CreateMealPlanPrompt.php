@@ -13,6 +13,10 @@ use RuntimeException;
 
 final readonly class CreateMealPlanPrompt
 {
+    public function __construct(
+        private AnalyzeGlucoseDataAction $analyzeGlucoseData,
+    ) {}
+
     public function handle(User $user): string
     {
         $user->loadMissing([
@@ -77,6 +81,9 @@ final readonly class CreateMealPlanPrompt
             // Calculated values
             'dailyCalorieTarget' => $this->calculateDailyCalorieTarget($profile),
             'macronutrientRatios' => $this->calculateMacronutrientRatios($profile),
+
+            // Glucose data analysis
+            'glucoseAnalysis' => $this->analyzeGlucoseData->handle($user, 30),
         ];
 
         return view('ai.agents.create-meal-plan', [

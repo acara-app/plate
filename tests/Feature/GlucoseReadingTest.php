@@ -55,7 +55,7 @@ it('can store a new glucose reading', function (): void {
 
     $data = [
         'reading_value' => 120.5,
-        'reading_type' => 'Fasting',
+        'reading_type' => 'fasting',
         'measured_at' => now()->toDateTimeString(),
         'notes' => 'Morning reading after breakfast',
     ];
@@ -68,7 +68,7 @@ it('can store a new glucose reading', function (): void {
     $this->assertDatabaseHas('glucose_readings', [
         'user_id' => $user->id,
         'reading_value' => 120.5,
-        'reading_type' => 'Fasting',
+        'reading_type' => 'fasting',
         'notes' => 'Morning reading after breakfast',
     ]);
 });
@@ -89,7 +89,7 @@ it('validates reading value range', function (): void {
     $response = $this->actingAs($user)
         ->post(route('glucose.store'), [
             'reading_value' => 10, // Below minimum of 20
-            'reading_type' => 'Fasting',
+            'reading_type' => 'fasting',
             'measured_at' => now()->toDateTimeString(),
         ]);
 
@@ -99,7 +99,7 @@ it('validates reading value range', function (): void {
     $response = $this->actingAs($user)
         ->post(route('glucose.store'), [
             'reading_value' => 700, // Above maximum of 600
-            'reading_type' => 'Fasting',
+            'reading_type' => 'fasting',
             'measured_at' => now()->toDateTimeString(),
         ]);
 
@@ -153,7 +153,7 @@ it('stores glucose reading without notes', function (): void {
 
     $data = [
         'reading_value' => 95.0,
-        'reading_type' => 'PostMeal',
+        'reading_type' => 'post-meal',
         'measured_at' => now()->toDateTimeString(),
     ];
 
@@ -165,7 +165,7 @@ it('stores glucose reading without notes', function (): void {
     $this->assertDatabaseHas('glucose_readings', [
         'user_id' => $user->id,
         'reading_value' => 95.0,
-        'reading_type' => 'PostMeal',
+        'reading_type' => 'post-meal',
         'notes' => null,
     ]);
 });
@@ -176,7 +176,7 @@ it('can update own glucose reading', function (): void {
 
     $data = [
         'reading_value' => 130.0,
-        'reading_type' => 'Fasting',
+        'reading_type' => 'fasting',
         'measured_at' => now()->toDateTimeString(),
         'notes' => 'Updated notes',
     ];
@@ -200,7 +200,7 @@ it('cannot update another user glucose reading', function (): void {
 
     $data = [
         'reading_value' => 130.0,
-        'reading_type' => 'Fasting',
+        'reading_type' => 'fasting',
         'measured_at' => now()->toDateTimeString(),
     ];
 

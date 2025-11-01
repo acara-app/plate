@@ -93,6 +93,80 @@ Based on the user's goals, aim for the following macronutrient distribution:
 - No health conditions reported
 @endif
 
+## Glucose Monitoring Data
+
+@if($context['glucoseAnalysis']['hasData'])
+### Glucose Analysis Summary
+
+- **Total Readings**: {{ $context['glucoseAnalysis']['totalReadings'] }} readings
+- **Data Period**: {{ $context['glucoseAnalysis']['dateRange']['start'] }} to {{ $context['glucoseAnalysis']['dateRange']['end'] }}
+
+#### Average Glucose Levels (mg/dL)
+@if($context['glucoseAnalysis']['averages']['overall'])
+- **Overall Average**: {{ $context['glucoseAnalysis']['averages']['overall'] }} mg/dL
+@endif
+@if($context['glucoseAnalysis']['averages']['fasting'])
+- **Fasting**: {{ $context['glucoseAnalysis']['averages']['fasting'] }} mg/dL
+@endif
+@if($context['glucoseAnalysis']['averages']['beforeMeal'])
+- **Before Meal**: {{ $context['glucoseAnalysis']['averages']['beforeMeal'] }} mg/dL
+@endif
+@if($context['glucoseAnalysis']['averages']['postMeal'])
+- **Post-Meal**: {{ $context['glucoseAnalysis']['averages']['postMeal'] }} mg/dL
+@endif
+@if($context['glucoseAnalysis']['averages']['random'])
+- **Random**: {{ $context['glucoseAnalysis']['averages']['random'] }} mg/dL
+@endif
+
+#### Detected Patterns
+@if($context['glucoseAnalysis']['patterns']['consistentlyHigh'])
+- ⚠️ **Consistently High**: Glucose levels are consistently elevated
+@endif
+@if($context['glucoseAnalysis']['patterns']['consistentlyLow'])
+- ⚠️ **Consistently Low**: Glucose levels are consistently low
+@endif
+@if($context['glucoseAnalysis']['patterns']['highVariability'])
+- ⚠️ **High Variability**: Glucose levels show significant fluctuations
+@endif
+@if($context['glucoseAnalysis']['patterns']['postMealSpikes'])
+- ⚠️ **Post-Meal Spikes**: Frequent glucose spikes after meals
+@endif
+
+#### Key Insights
+@foreach($context['glucoseAnalysis']['insights'] as $insight)
+- {{ $insight }}
+@endforeach
+
+@if(count($context['glucoseAnalysis']['concerns']) > 0)
+#### Identified Concerns
+@foreach($context['glucoseAnalysis']['concerns'] as $concern)
+- ⚠️ {{ $concern }}
+@endforeach
+@endif
+
+@if($context['glucoseAnalysis']['glucoseGoals'])
+#### Glucose Management Goal
+- **Target**: {{ $context['glucoseAnalysis']['glucoseGoals']['target'] }}
+- **Reasoning**: {{ $context['glucoseAnalysis']['glucoseGoals']['reasoning'] }}
+@endif
+
+**CRITICAL INSTRUCTIONS FOR MEAL PLAN**:
+Based on the glucose data above, you MUST:
+1. Design meals that specifically address the identified concerns
+2. Work towards achieving the stated glucose management goal
+3. Consider the user's glucose patterns when selecting foods, portion sizes, and meal timing
+4. For high glucose: Prioritize low glycemic index foods, increase fiber, reduce simple carbs
+5. For post-meal spikes: Focus on complex carbohydrates paired with protein and healthy fats
+6. For high variability: Emphasize consistent meal timing and balanced macronutrient distribution
+7. For low glucose: Ensure adequate quality carbohydrate sources and regular meal intervals
+
+The meal plan should be specifically tailored to help the user achieve their glucose management goals while meeting their nutritional and lifestyle needs.
+
+@else
+- No glucose monitoring data available for this user
+- Generate a balanced meal plan without specific glucose considerations
+@endif
+
 ## Task
 
 Create a comprehensive and personalized 7-day meal plan that:

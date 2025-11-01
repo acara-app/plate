@@ -6,8 +6,8 @@ namespace App\Enums;
 
 enum ReadingType: string
 {
-    case Fasting = 'Fasting';
-    case BeforeMeal = 'BeforeMeal';
-    case PostMeal = 'PostMeal';
-    case Random = 'Random';
+    case Fasting = 'fasting';
+    case BeforeMeal = 'before-meal';
+    case PostMeal = 'post-meal';
+    case Random = 'random';
 }

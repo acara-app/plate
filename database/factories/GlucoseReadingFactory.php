@@ -18,7 +18,7 @@ final class GlucoseReadingFactory extends Factory
      */
     public function definition(): array
     {
-        $readingTypes = ['Fasting', 'PostMeal', 'Random', 'BeforeMeal'];
+        $readingTypes = ['fasting', 'post-meal', 'random', 'before-meal'];
 
         return [
             'user_id' => \App\Models\User::factory(),
@@ -35,7 +35,7 @@ final class GlucoseReadingFactory extends Factory
     public function fasting(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'reading_type' => 'Fasting',
+            'reading_type' => 'fasting',
             'reading_value' => fake()->randomFloat(1, 70, 100), // Typical fasting range
         ]);
     }
@@ -46,7 +46,7 @@ final class GlucoseReadingFactory extends Factory
     public function postMeal(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'reading_type' => 'PostMeal',
+            'reading_type' => 'post-meal',
             'reading_value' => fake()->randomFloat(1, 100, 140), // Typical post-meal range
         ]);
     }
