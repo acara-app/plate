@@ -30,7 +30,7 @@
         </header>
 
         <div
-            class="relative z-10 flex w-full items-center justify-center opacity-100 transition-opacity duration-700 lg:grow starting:opacity-0">
+            class="relative z-10 flex w-full flex-col items-center justify-center gap-6 opacity-100 transition-opacity duration-700 lg:grow lg:gap-8 starting:opacity-0">
             <main class="flex w-full max-w-[335px] flex-col-reverse gap-0 lg:max-w-5xl lg:flex-row lg:gap-8">
                 <div
                     class="group flex-1 rounded-b-2xl bg-white/90 p-5 shadow-2xl shadow-emerald-500/10 backdrop-blur-md transition-all duration-500 hover:shadow-emerald-500/20 lg:rounded-2xl lg:p-12 lg:pr-16 dark:bg-slate-900/90 dark:shadow-emerald-500/5 dark:hover:shadow-emerald-500/10">
@@ -47,6 +47,13 @@
                             Discover Acara Plate, the open-source app that crafts tailored meal plans for your dietary restrictions and goals.
                         </p>
 
+                        <div class="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-800 lg:text-sm dark:bg-amber-900/30 dark:text-amber-300">
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                            Beta Version
+                        </div>
+
                         <div class="pt-2 lg:pt-4">
                             <a href="{{ route('register') }}"
                                 class="group/btn inline-flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-emerald-600 to-teal-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/40 active:scale-100 lg:w-auto lg:px-8 lg:py-4 dark:shadow-emerald-500/20 dark:hover:shadow-emerald-500/30">
@@ -55,34 +62,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
                             </a>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-2.5 pt-2 text-sm lg:gap-4 lg:pt-4">
-                            <div class="flex items-center gap-2 rounded-lg bg-emerald-50/50 p-2.5 lg:gap-2.5 lg:p-3 dark:bg-emerald-950/30">
-                                <svg class="h-4 w-4 shrink-0 text-emerald-600 lg:h-5 lg:w-5 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                </svg>
-                                <span class="text-xs font-medium text-slate-700 lg:text-sm dark:text-slate-300">Open Source (coming soon)</span>
-                            </div>
-                            <div class="flex items-center gap-2 rounded-lg bg-teal-50/50 p-2.5 lg:gap-2.5 lg:p-3 dark:bg-teal-950/30">
-                                <svg class="h-4 w-4 shrink-0 text-teal-600 lg:h-5 lg:w-5 dark:text-teal-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M13 7H7v6h6V7z" />
-                                    <path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z" clip-rule="evenodd" />
-                                </svg>
-                                <span class="text-xs font-medium text-slate-700 lg:text-sm dark:text-slate-300">AI-Powered</span>
-                            </div>
-                            <div class="flex items-center gap-2 rounded-lg bg-cyan-50/50 p-2.5 lg:gap-2.5 lg:p-3 dark:bg-cyan-950/30">
-                                <svg class="h-4 w-4 shrink-0 text-cyan-600 lg:h-5 lg:w-5 dark:text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                </svg>
-                                <span class="text-xs font-medium text-slate-700 lg:text-sm dark:text-slate-300">Personalized</span>
-                            </div>
-                            <div class="flex items-center gap-2 rounded-lg bg-purple-50/50 p-2.5 lg:gap-2.5 lg:p-3 dark:bg-purple-950/30">
-                                <svg class="h-4 w-4 shrink-0 text-purple-600 lg:h-5 lg:w-5 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
-                                </svg>
-                                <span class="text-xs font-medium text-slate-700 lg:text-sm dark:text-slate-300">Privacy First</span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -175,6 +154,67 @@
                     </div>
                 </div>
             </main>
+
+            {{-- Features Section --}}
+            <section class="w-full max-w-[335px] lg:max-w-5xl">
+                <div class="space-y-4 lg:space-y-6">
+                    <div class="text-center">
+                        <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl dark:text-white">Key Features</h2>
+                        <p class="mt-2 text-sm text-slate-600 lg:text-base dark:text-slate-400">Everything you need for personalized nutrition</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-3 lg:grid-cols-4 lg:gap-4">
+                        <div class="group/card rounded-xl border border-emerald-200 bg-white/60 p-4 shadow-sm backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white hover:shadow-md dark:border-emerald-900/50 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="mb-3 rounded-lg bg-emerald-100 p-3 transition-transform duration-300 group-hover/card:scale-110 dark:bg-emerald-900/50">
+                                    <svg class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Weekly Meal Plans</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Get personalized 7-day meal plans tailored to your goals and preferences</p>
+                            </div>
+                        </div>
+
+                        <div class="group/card rounded-xl border border-teal-200 bg-white/60 p-4 shadow-sm backdrop-blur-sm transition-all duration-300 hover:border-teal-300 hover:bg-white hover:shadow-md dark:border-teal-900/50 dark:bg-slate-800/60 dark:hover:border-teal-800 dark:hover:bg-slate-800">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="mb-3 rounded-lg bg-teal-100 p-3 transition-transform duration-300 group-hover/card:scale-110 dark:bg-teal-900/50">
+                                    <svg class="h-6 w-6 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Glucose Tracking</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Monitor and log your blood glucose levels to optimize your nutrition</p>
+                            </div>
+                        </div>
+
+                        <div class="group/card rounded-xl border border-cyan-200 bg-white/60 p-4 shadow-sm backdrop-blur-sm transition-all duration-300 hover:border-cyan-300 hover:bg-white hover:shadow-md dark:border-cyan-900/50 dark:bg-slate-800/60 dark:hover:border-cyan-800 dark:hover:bg-slate-800">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="mb-3 rounded-lg bg-cyan-100 p-3 transition-transform duration-300 group-hover/card:scale-110 dark:bg-cyan-900/50">
+                                    <svg class="h-6 w-6 text-cyan-600 dark:text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M13 7H7v6h6V7z" />
+                                        <path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">AI-Powered Nutrition</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Smart recommendations based on your health data and dietary needs</p>
+                            </div>
+                        </div>
+
+                        <div class="group/card rounded-xl border border-purple-200 bg-white/60 p-4 shadow-sm backdrop-blur-sm transition-all duration-300 hover:border-purple-300 hover:bg-white hover:shadow-md dark:border-purple-900/50 dark:bg-slate-800/60 dark:hover:border-purple-800 dark:hover:bg-slate-800">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="mb-3 rounded-lg bg-purple-100 p-3 transition-transform duration-300 group-hover/card:scale-110 dark:bg-purple-900/50">
+                                    <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Privacy First</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Your health data is secure and never shared with third parties</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
     <x-footer />
