@@ -158,5 +158,5 @@ it('dispatches a job and creates job tracking when handle is called', function (
         ->status->toBe(JobStatus::Pending)
         ->progress->toBe(0);
 
-    Queue::assertPushed(ProcessMealPlanJob::class, fn(ProcessMealPlanJob $job): bool => $job->userId === $user->id && $job->model === AiModel::Gemini25Flash);
+    Queue::assertPushed(ProcessMealPlanJob::class, fn (ProcessMealPlanJob $job): bool => $job->userId === $user->id && $job->model === AiModel::Gemini25Flash);
 });
