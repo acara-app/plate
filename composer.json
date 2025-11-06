@@ -11,9 +11,9 @@
     "require": {
         "php": "^8.4.0",
         "inertiajs/inertia-laravel": "^2.0.10",
-        "laravel/cashier": "^16.0",
+        "laravel/cashier": "^16.0.3",
         "laravel/fortify": "^1.31.2",
-        "laravel/framework": "^12.35.1",
+        "laravel/framework": "^12.37.0",
         "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.12",
@@ -26,7 +26,7 @@
         "driftingly/rector-laravel": "^2.1.1",
         "fakerphp/faker": "^1.24.1",
         "larastan/larastan": "^3.7.2",
-        "laravel/boost": "^1.4.0",
+        "laravel/boost": "^1.7.1",
         "laravel/pail": "^1.2.3",
         "laravel/pint": "^1.25.1",
         "mockery/mockery": "^1.6.12",
@@ -73,7 +73,8 @@
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
             "@php artisan clear",
-            "@update:requirements"
+            "@update:requirements",
+            "@php artisan boost:update --ansi"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
