@@ -11,7 +11,7 @@
         <div class="mt-6">
             <div class="prose prose-slate dark:prose-invert mx-auto max-w-4xl">
                 <h1>Privacy Policy</h1>
-                <p><strong>Effective Date: October 25, 2025</strong></p>
+                <p><strong>Effective Date: November 19, 2025</strong></p>
                 <p>
                     At Acara Plate, we value your privacy and are committed to protecting your personal data. This
                     Privacy Policy explains how we collect, use, store, and protect the information you provide through
@@ -124,9 +124,7 @@
 
                 <h2>10. Health and Nutrition Disclaimer</h2>
                 <p>
-                    Acara Plate is not a medical service. AI-generated meal plans and recommendations are for
-                    informational purposes only and should not replace professional medical or dietary advice. Consult a
-                    healthcare professional before making dietary changes, especially if you have health conditions.
+                    Acara Plate is not a medical service. AI-generated meal plans, nutritional insights, and glucose tracking features are for informational and educational purposes only and should not replace professional medical or dietary advice. Consult a healthcare professional before making dietary changes, especially if you have health conditions.
                 </p>
 
                 <h2>11. Changes to This Privacy Policy</h2>

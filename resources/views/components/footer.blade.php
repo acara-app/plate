@@ -29,16 +29,7 @@
 
         <div class="mt-10 flex space-x-10 sm:justify-center">
             <a
-                href="#"
-                class="dark:text-slate-400 text-slate-500 dark:hover:text-slate-200 hover:text-slate-950"
-            >
-                <span class="sr-only">X</span>
-
-                <x-icons.twitter-x class="h-6 w-6" />
-            </a>
-
-            <a
-                href="#"
+                href="https://github.com/acara-app/plate"
                 class="dark:text-slate-400 text-slate-500 dark:hover:text-slate-200 hover:text-slate-950"
             >
                 <span class="sr-only">GitHub</span>
@@ -47,7 +38,12 @@
             </a>
         </div>
 
-        <p class="mt-10 text-xs leading-5 dark:text-slate-400 text-slate-500 sm:text-center">&copy; {{ date('Y') }} {{ config('app.name') }}.</p>
+        <div class="mt-8 border-t border-gray-200 dark:border-gray-800 pt-8 text-center">
+            <p class="text-xs leading-5 text-slate-500 dark:text-slate-400">
+                <span class="font-semibold">Disclaimer:</span> Plate is an AI-powered tool for informational purposes only and does not provide medical advice. Always consult a healthcare professional for medical concerns.
+            </p>
+            <p class="mt-4 text-xs leading-5 dark:text-slate-400 text-slate-500">&copy; {{ date('Y') }} Acara Plate.</p>
+        </div>
     </div>
 
     <livewire:views.create />
