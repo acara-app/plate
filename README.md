@@ -6,7 +6,7 @@
 Plate is an AI-powered personalized nutrition and meal planning platform that creates customized meal plans based on individual user data such as age, weight, height, dietary preferences, and health goals. The platform simplifies meal planning by providing users with tailored recipes, nutritional information, and glucose tracking capabilities that align with their unique needs and lifestyle.
 
 > [!IMPORTANT]
-> **Disclaimer:** Plate is an AI-powered tool for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. See the [Medical Disclaimer](#-medical-disclaimer) below.
+> **Disclaimer:** Plate is an AI-powered tool for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. See the [Medical Disclaimer](#medical-disclaimer) below.
 
 ## Contributing
 
@@ -170,7 +170,7 @@ composer lint
    - Interactive line chart with color-coded zones
    - Reading management (create, edit, delete)
 
-## ⚠️ Medical Disclaimer
+# ⚠️ Medical Disclaimer
 
 Plate is an open-source project designed for informational and educational purposes only.
 
