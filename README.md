@@ -15,7 +15,7 @@ Please review our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
 
 ## About
 
-Plate leverages advanced AI (Google Gemini) through PrismPHP to generate comprehensive 7-day meal plans that consider:
+Plate is AI-Powered through PrismPHP to generate comprehensive 7-day meal plans that consider:
 
 - **Biometric Data**: Age, height, weight, sex, BMI, BMR, and TDEE calculations
 - **Health Goals**: Weight loss, muscle gain, weight maintenance, health condition management, endurance improvement, flexibility enhancement
@@ -31,62 +31,54 @@ The platform provides detailed meal plans with:
 - Portion sizes and preparation times
 - Nutritional information per meal
 
-## Quick Start
+## Installation
 
-### Prerequisites
-- **PHP 8.4+** with Laravel 12.x
-- **SQLite/PostgreSQL 17+** with pgvector extension
-- **Node.js 20+** - frontend development
-- **React 19** - Modern UI library
-- **TypeScript** - Type-safe JavaScript
-- **Inertia.js v2** - Modern monolith SPA framework
-- **Tailwind CSS 4** - Utility-first CSS framework
-- **Radix UI** - Accessible component primitives
-- **OpenAI (or Gemini/Anthropic) API Key** - embedding generation and AI analysis
-- **PrismPHP** - LLM integration
+Plate is a regular Laravel application; it's built on top of Laravel 12 and uses Inertia (React) / Tailwind CSS for the frontend. If you are familiar with Laravel, you should feel right at home.
 
-## Setup & Installation
+In terms of local development, you can use the following requirements:
 
-### Installation
+- **PHP 8.4+**
+- **Node.js 20+**
+- **SQLite** or **PostgreSQL 17+** (with pgvector extension)
 
-1. **Clone the repository**
+If you have these requirements, you can start by cloning the repository and installing the dependencies:
+
 ```bash
-git clone <repository-url>
+git clone https://github.com/acara-app/plate.git
+
 cd plate
+
+git checkout -b feat/your-feature # or fix/your-fix
 ```
 
-2. **Install dependencies and setup**
+Don't push directly to the main branch. Instead, create a new branch and push it to your branch.
+
+Next, install the dependencies using Composer and NPM:
+
 ```bash
 composer setup
 ```
-This will:
-- Install Composer dependencies
-- Copy `.env.example` to `.env`
-- Generate application key
-- Run migrations
-- Install npm dependencies
-- Build frontend assets
 
-3. **Configure environment variables**
+> **Note**: The `composer setup` command is a shortcut that runs `composer install`, `npm install`, copies `.env.example` to `.env`, generates the app key, and runs migrations.
+
+### Configure Environment
+
+After setup, you may need to configure additional environment variables in your `.env` file:
+
 ```bash
-# Copy .env.example to .env (done by composer setup)
-# Configure your database, mail, and API keys
-
 # Required API Keys
-GOOGLE_GEMINI_API_KEY=your_gemini_key # Or
-
-STRIPE_KEY=your_stripe_publishable_key
-STRIPE_SECRET=your_stripe_secret_key
+GOOGLE_GEMINI_API_KEY=your_gemini_key
 
 # Optional: Google OAuth
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 ```
 
-4. **Seed the database** 
+### Database Seeding
+
+Optionally, you can seed the database with initial data:
 
 ```bash
-# Optional
 php artisan db:seed --class=GoalSeeder
 php artisan db:seed --class=LifestyleSeeder
 php artisan db:seed --class=DietaryPreferenceSeeder
@@ -101,55 +93,45 @@ php artisan db:seed --class=HealthConditionSeeder
 composer run dev
 ```
 
-## Testing
+## Testing & Code Quality
 
-### Run All Tests
+Plate maintains strict code quality standards to ensure reliability and maintainability. We use **Pest** as our testing framework, enforcing **100% test coverage** and **100% type coverage**.
+
+For static analysis, we rely on **PHPStan** and TypeScript checks. To keep our codebase clean and modern, we utilize **Laravel Pint** for styling and **Rector** for automated refactoring.
+
+### Running Tests
+
+You can run the full quality assurance suite with a single command:
+
 ```bash
 composer test
 ```
 
-This runs:
-- Type coverage check (must be 100%)
-- Unit and feature tests with coverage (must be exactly 100%)
-- Code style checks (Pint & Rector)
-- Static analysis (PHPStan & TypeScript)
+### Individual Tools
 
-### Individual Test Commands
+You can also run specific tools individually:
 
 ```bash
-# Pest tests with coverage
+# Run unit and feature tests (requires 100% coverage)
 composer test:unit
 
-# Type coverage
+# Check type coverage (requires 100%)
 composer test:type-coverage
 
-# Code style
+# Run code style checks (Pint, Rector, ESLint, Prettier)
 composer test:lint
 
-# Static analysis
+# Run static analysis (PHPStan, TypeScript)
 composer test:types
-
-# Run specific test file
-php artisan test tests/Feature/Actions/AiAgents/GenerateMealPlanTest.php
-
-# Run with filter
-php artisan test --filter=GenerateMealPlan
 ```
 
-## Code Quality
+### Fixing Code Style
 
-### Linting & Formatting
+To automatically fix code style issues:
 
 ```bash
-# Fix all code style issues
 composer lint
 ```
-
-This runs:
-- Rector (automated refactoring)
-- Laravel Pint (PHP code formatting)
-- ESLint (JavaScript/TypeScript)
-- Prettier (code formatting)
 
 
 ## Key Features
