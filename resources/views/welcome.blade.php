@@ -44,7 +44,7 @@
                         </h1>
                         
                         <p class="text-base leading-relaxed text-slate-600 lg:text-lg dark:text-slate-300">
-                            Discover Acara Plate, the open-source app that crafts tailored meal plans for your dietary restrictions and goals.
+                            Discover Plate, the open-source app that crafts tailored meal plans for your dietary restrictions and goals.
                         </p>
 
                         <div class="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-800 lg:text-sm dark:bg-amber-900/30 dark:text-amber-300">
