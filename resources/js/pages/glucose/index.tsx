@@ -122,9 +122,9 @@ export default function GlucoseIndex({ readings, readingTypes }: Props) {
                                     reading to get started.
                                 </div>
                             ) : (
-                                <div className="space-y-4">
+                                <ul className="space-y-4">
                                     {readings.data.map((reading) => (
-                                        <div
+                                        <li
                                             key={reading.id}
                                             className="flex items-start justify-between rounded-lg border p-4"
                                         >
@@ -140,11 +140,16 @@ export default function GlucoseIndex({ readings, readingTypes }: Props) {
                                                         {reading.reading_type}
                                                     </span>
                                                 </div>
-                                                <p className="text-sm text-muted-foreground">
+                                                <time
+                                                    className="block text-sm text-muted-foreground"
+                                                    dateTime={
+                                                        reading.measured_at
+                                                    }
+                                                >
                                                     {new Date(
                                                         reading.measured_at,
                                                     ).toLocaleString()}
-                                                </p>
+                                                </time>
                                                 {reading.notes && (
                                                     <p className="text-sm">
                                                         {reading.notes}
@@ -158,8 +163,12 @@ export default function GlucoseIndex({ readings, readingTypes }: Props) {
                                                     onClick={() =>
                                                         editModal.open(reading)
                                                     }
+                                                    aria-label={`Edit reading value ${reading.reading_value}`}
                                                 >
-                                                    <Pencil className="size-4" />
+                                                    <Pencil
+                                                        className="size-4"
+                                                        aria-hidden="true"
+                                                    />
                                                 </Button>
                                                 <Button
                                                     variant="ghost"
@@ -167,13 +176,17 @@ export default function GlucoseIndex({ readings, readingTypes }: Props) {
                                                     onClick={() =>
                                                         handleDelete(reading.id)
                                                     }
+                                                    aria-label={`Delete reading value ${reading.reading_value}`}
                                                 >
-                                                    <Trash2 className="size-4 text-red-500" />
+                                                    <Trash2
+                                                        className="size-4 text-red-500"
+                                                        aria-hidden="true"
+                                                    />
                                                 </Button>
                                             </div>
-                                        </div>
+                                        </li>
                                     ))}
-                                </div>
+                                </ul>
                             )}
                         </CardContent>
                     </Card>
