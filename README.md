@@ -170,7 +170,7 @@ composer lint
    - Interactive line chart with color-coded zones
    - Reading management (create, edit, delete)
 
-# ⚠️ Medical Disclaimer
+# Medical Disclaimer
 
 Plate is an open-source project designed for informational and educational purposes only.
 
