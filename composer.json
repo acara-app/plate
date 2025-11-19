@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "nunomaduro/laravel-starter-kit-inertia-react",
+    "name": "acara-app/plate",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "AI-powered personalized nutrition and meal planning platform.",
     "keywords": [
         "laravel",
         "framework"
