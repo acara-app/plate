@@ -10,13 +10,21 @@
         
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ url('/') }}">
         <meta property="og:title" content="Acara Plate - AI Nutrition for Diabetes">
         <meta property="og:description" content="AI-powered nutrition platform for diabetes management. Get personalized meal plans and track glucose levels to achieve your health goals.">
+        <meta property="og:image" content="{{ asset('banner-acara-plate.webp') }}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="Acara Plate - AI Nutrition for Diabetes Management">
         
         <!-- Twitter -->
         <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:url" content="{{ url('/') }}">
         <meta name="twitter:title" content="Acara Plate - AI Nutrition for Diabetes">
         <meta name="twitter:description" content="AI-powered nutrition platform for diabetes management. Get personalized meal plans and track glucose levels to achieve your health goals.">
+        <meta name="twitter:image" content="{{ asset('banner-acara-plate.webp') }}">
+        <meta name="twitter:image:alt" content="Acara Plate - AI Nutrition for Diabetes Management">
 
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
