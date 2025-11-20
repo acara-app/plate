@@ -1,4 +1,6 @@
-# Acara Plate - AI Nutrition for Diabetes
+![Acara Plate - Personalized Nutrition AI](public/banner-acara-plate.webp)
+
+# Acara Plate - Personalized Nutrition AI Agent
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Tests](https://github.com/acara-app/plate/actions/workflows/tests.yml/badge.svg)](https://github.com/acara-app/plate/actions/workflows/tests.yml)
