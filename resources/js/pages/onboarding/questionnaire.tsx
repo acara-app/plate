@@ -1,3 +1,4 @@
+import { privacy, terms } from '@/routes';
 import onboarding from '@/routes/onboarding';
 import { Head, Link } from '@inertiajs/react';
 
@@ -113,6 +114,25 @@ export default function Questionnaire() {
 
                     <p className="text-center text-sm text-gray-500 dark:text-gray-400">
                         This should take about 5-10 minutes to complete
+                    </p>
+
+                    <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                        By continuing, you confirm and guarantee that you have
+                        read, understood, and agreed to our{' '}
+                        <Link
+                            href={terms.url()}
+                            className="text-primary underline hover:text-primary/80"
+                        >
+                            Terms of Use
+                        </Link>{' '}
+                        and{' '}
+                        <Link
+                            href={privacy.url()}
+                            className="text-primary underline hover:text-primary/80"
+                        >
+                            Privacy Policy
+                        </Link>
+                        .
                     </p>
                 </div>
             </div>
