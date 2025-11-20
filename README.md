@@ -1,12 +1,12 @@
-# Plate - Personalized Nutrition & Meal Planning Platform
+# Acara Plate - AI Nutrition for Diabetes
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Tests](https://github.com/acara-app/plate/actions/workflows/tests.yml/badge.svg)](https://github.com/acara-app/plate/actions/workflows/tests.yml)
 
-Plate is an AI-powered personalized nutrition and meal planning platform that creates customized meal plans based on individual user data such as age, weight, height, dietary preferences, and health goals. The platform simplifies meal planning by providing users with tailored recipes, nutritional information, and glucose tracking capabilities that align with their unique needs and lifestyle.
+Acara Plate is an AI-powered personalized nutrition and meal planning platform that creates customized meal plans based on individual user data such as age, weight, height, dietary preferences, and health goals. The platform simplifies meal planning by providing users with tailored recipes, nutritional information, and glucose tracking capabilities that align with their unique needs and lifestyle.
 
 > [!IMPORTANT]
-> **Disclaimer:** Plate is an AI-powered tool for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. See the [Medical Disclaimer](#medical-disclaimer) below.
+> **Disclaimer:** Acara Plate is an AI-powered tool for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. See the [Medical Disclaimer](#medical-disclaimer) below.
 
 ## Contributing
 
@@ -18,7 +18,7 @@ Please review our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
 
 ## About
 
-Plate is AI-Powered through PrismPHP to generate comprehensive 7-day meal plans that consider:
+Acara Plate is AI-Powered through PrismPHP to generate comprehensive 7-day meal plans that consider:
 
 - **Biometric Data**: Age, height, weight, sex, BMI, BMR, and TDEE calculations
 - **Health Goals**: Weight loss, muscle gain, weight maintenance, health condition management, endurance improvement, flexibility enhancement
@@ -36,7 +36,7 @@ The platform provides detailed meal plans with:
 
 ## Installation
 
-Plate is a regular Laravel application; it's built on top of Laravel 12 and uses Inertia (React) / Tailwind CSS for the frontend. If you are familiar with Laravel, you should feel right at home.
+Acara Plate is a regular Laravel application; it's built on top of Laravel 12 and uses Inertia (React) / Tailwind CSS for the frontend. If you are familiar with Laravel, you should feel right at home.
 
 In terms of local development, you can use the following requirements:
 
@@ -98,7 +98,7 @@ composer run dev
 
 ## Testing & Code Quality
 
-Plate maintains strict code quality standards to ensure reliability and maintainability. We use **Pest** as our testing framework, enforcing **100% test coverage** and **100% type coverage**.
+Acara Plate maintains strict code quality standards to ensure reliability and maintainability. We use **Pest** as our testing framework, enforcing **100% test coverage** and **100% type coverage**.
 
 For static analysis, we rely on **PHPStan** and TypeScript checks. To keep our codebase clean and modern, we utilize **Laravel Pint** for styling and **Rector** for automated refactoring.
 
@@ -172,7 +172,7 @@ composer lint
 
 # Medical Disclaimer
 
-Plate is an open-source project designed for informational and educational purposes only.
+Acara Plate is an open-source project designed for informational and educational purposes only.
 
 **Not Medical Advice:** This software is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition, dietary changes, or blood glucose management.
 

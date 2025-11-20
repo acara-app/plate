@@ -4,19 +4,19 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Personalized Nutrition AI Agent | Custom Meal Plans - Plate</title>
-        <meta name="description" content="Achieve your health goals with our Personalized Nutrition AI Agent. Get a custom meal plan tailored to your diet, lifestyle, and objectives. Create your effective and sustainable plan today at Plate.">
-        <meta name="keywords" content="personalized nutrition, AI meal planner, custom meal plan, diet planning, nutrition assistant, health goals, sustainable meal planning">
+        <title>Acara Plate - AI Nutrition for Diabetes</title>
+        <meta name="description" content="Acara Plate is an AI-powered nutrition platform for diabetes management. Get personalized meal plans, track glucose levels, and achieve your health goals with tailored recipes and nutritional guidance.">
+        <meta name="keywords" content="diabetes nutrition, AI meal planner, glucose tracking, personalized meal plans, diabetes management, blood sugar tracking, diabetic meal planning, AI nutrition assistant">
         
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
-        <meta property="og:title" content="Personalized Nutrition AI Agent | Custom Meal Plans - Plate">
-        <meta property="og:description" content="Achieve your health goals with our Personalized Nutrition AI Agent. Get a custom meal plan tailored to your diet, lifestyle, and objectives.">
+        <meta property="og:title" content="Acara Plate - AI Nutrition for Diabetes">
+        <meta property="og:description" content="AI-powered nutrition platform for diabetes management. Get personalized meal plans and track glucose levels to achieve your health goals.">
         
         <!-- Twitter -->
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="Personalized Nutrition AI Agent | Custom Meal Plans - Plate">
-        <meta name="twitter:description" content="Achieve your health goals with our Personalized Nutrition AI Agent. Get a custom meal plan tailored to your diet, lifestyle, and objectives.">
+        <meta name="twitter:title" content="Acara Plate - AI Nutrition for Diabetes">
+        <meta name="twitter:description" content="AI-powered nutrition platform for diabetes management. Get personalized meal plans and track glucose levels to achieve your health goals.">
 
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">

@@ -2,7 +2,7 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "acara-app/plate",
     "type": "project",
-    "description": "AI-powered personalized nutrition and meal planning platform.",
+    "description": "Acara Plate - AI-powered personalized nutrition and meal planning platform for diabetes management.",
     "keywords": [
         "laravel",
         "framework"
