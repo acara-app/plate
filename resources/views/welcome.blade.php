@@ -18,7 +18,7 @@
         <header class="relative z-10 mb-4 w-full max-w-[335px] not-has-[nav]:hidden lg:mb-8 lg:max-w-5xl">
             <nav class="flex items-center justify-between">
                 <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80 dark:text-white">
-                    <span class="text-2xl">🍓</span>
+                    <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
                     Plate
                 </a>
                 <div class="flex items-center gap-2">
