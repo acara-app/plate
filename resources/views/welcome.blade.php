@@ -16,22 +16,28 @@
         </div>
 
         <header class="relative z-10 mb-4 w-full max-w-[335px] not-has-[nav]:hidden lg:mb-8 lg:max-w-5xl">
-            <nav class="flex items-center justify-end gap-2">
-                @auth
-                    <a href="{{ route('dashboard') }}"
-                        class="inline-flex items-center rounded-lg border border-emerald-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm backdrop-blur-sm transition-all duration-200 hover:border-emerald-300 hover:bg-white hover:shadow-md lg:px-6 lg:py-2.5 dark:border-emerald-900/50 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
-                        Dashboard
-                    </a>
-                @else
-                    <a href="{{ route('login') }}"
-                        class="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-white/60 hover:backdrop-blur-sm lg:px-6 lg:py-2.5 dark:text-slate-200 dark:hover:bg-slate-800/60">
-                        Log in
-                    </a>
-                    <a href="{{ route('register') }}"
-                        class="inline-flex items-center rounded-lg border border-emerald-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm backdrop-blur-sm transition-all duration-200 hover:border-emerald-300 hover:bg-white hover:shadow-md lg:px-6 lg:py-2.5 dark:border-emerald-900/50 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
-                        Register
-                    </a>
-                @endauth
+            <nav class="flex items-center justify-between">
+                <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80 dark:text-white">
+                    <span class="text-2xl">🍓</span>
+                    Plate
+                </a>
+                <div class="flex items-center gap-2">
+                    @auth
+                        <a href="{{ route('dashboard') }}"
+                            class="inline-flex items-center rounded-lg border border-emerald-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm backdrop-blur-sm transition-all duration-200 hover:border-emerald-300 hover:bg-white hover:shadow-md lg:px-6 lg:py-2.5 dark:border-emerald-900/50 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
+                            Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}"
+                            class="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-white/60 hover:backdrop-blur-sm lg:px-6 lg:py-2.5 dark:text-slate-200 dark:hover:bg-slate-800/60">
+                            Log in
+                        </a>
+                        <a href="{{ route('register') }}"
+                            class="inline-flex items-center rounded-lg border border-emerald-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm backdrop-blur-sm transition-all duration-200 hover:border-emerald-300 hover:bg-white hover:shadow-md lg:px-6 lg:py-2.5 dark:border-emerald-900/50 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
+                            Register
+                        </a>
+                    @endauth
+                </div>
             </nav>
         </header>
 
@@ -52,8 +58,7 @@
                         </h1>
 
                         <p class="text-base leading-relaxed text-slate-600 lg:text-lg dark:text-slate-300">
-                            Plate is the open-source AI agent that learns from your glucose logs to create the perfect
-                            meal plan for <strong>Type 2 Diabetes</strong> & <strong>Pre-diabetes</strong> management.
+                            Personalized meal plans that learn from your glucose logs — intended for adults with Type 2 diabetes or prediabetes as an informational tool.
                         </p>
 
                         <div
@@ -123,8 +128,12 @@
                                     </div>
                                     <div>
                                         <div
-                                            class="text-[10px] font-medium text-slate-500 lg:text-xs dark:text-slate-400">
-                                            Avg Glucose</div>
+                                            class="flex items-center gap-1 text-[10px] font-medium text-slate-500 lg:text-xs dark:text-slate-400">
+                                            Avg Glucose
+                                            <span title="Average calculated from your logged readings over the selected period. Consult your doctor for clinical targets." class="cursor-help text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">
+                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            </span>
+                                        </div>
                                         <div class="text-xs font-bold text-emerald-600 lg:text-sm dark:text-emerald-400">
                                             105 mg/dL</div>
                                     </div>
@@ -184,8 +193,12 @@
                                     </div>
                                     <div>
                                         <div
-                                            class="text-[10px] font-medium text-slate-500 lg:text-xs dark:text-slate-400">
-                                            Health Score</div>
+                                            class="flex items-center gap-1 text-[10px] font-medium text-slate-500 lg:text-xs dark:text-slate-400">
+                                            Health Score
+                                            <span title="A proprietary score based on your nutritional adherence and glucose stability. Not a clinical diagnostic tool." class="cursor-help text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">
+                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            </span>
+                                        </div>
                                         <div class="text-xs font-bold text-slate-900 lg:text-sm dark:text-white">92/100
                                         </div>
                                     </div>
@@ -243,6 +256,7 @@
                                     Meal Plans</h3>
                                 <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Get personalized
                                     7-day meal plans tailored to your goals and preferences</p>
+                                <p class="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">Set your preferences to generate your plan</p>
                             </div>
                         </div>
 
@@ -261,6 +275,7 @@
                                     Tracking</h3>
                                 <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Monitor and log
                                     your blood glucose levels to optimize your nutrition</p>
+                                <p class="mt-2 text-xs font-medium text-teal-600 dark:text-teal-400">Log your glucose or connect a device to get started</p>
                             </div>
                         </div>
 
@@ -281,6 +296,7 @@
                                     AI-Powered Nutrition</h3>
                                 <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Smart
                                     recommendations based on your health data and dietary needs</p>
+                                <p class="mt-2 text-xs font-medium text-cyan-600 dark:text-cyan-400">Get instant analysis of your meals</p>
                             </div>
                         </div>
 
@@ -290,16 +306,12 @@
                                 <div
                                     class="mb-3 rounded-lg bg-purple-100 p-3 transition-transform duration-300 group-hover/card:scale-110 dark:bg-purple-900/50">
                                     <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="currentColor"
-                                        viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                            clip-rule="evenodd" />
+                                        viewBox="0 0 24 24">
+                                        <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Privacy
-                                    First</h3>
-                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Your health data
-                                    is secure and never shared with third parties</p>
+                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Open Source</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Transparent, community-driven development. Inspect the code, contribute, and trust the platform.</p>
                             </div>
                         </div>
                     </div>
