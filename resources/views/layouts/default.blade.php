@@ -4,9 +4,11 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Acara Plate - AI Nutrition for Diabetes</title>
-        <meta name="description" content="Acara Plate is an AI-powered nutrition platform for diabetes management. Get personalized meal plans, track glucose levels, and achieve your health goals with tailored recipes and nutritional guidance.">
+        <title>Acara Plate - AI Diabetes Meal Planner & Glucose Tracker</title>
+        <meta name="description" content="Acara Plate is an AI-powered nutrition platform for diabetes management. Get personalized meal plans, track glucose levels, and achieve your health goals.">
         <meta name="keywords" content="diabetes nutrition, AI meal planner, glucose tracking, personalized meal plans, diabetes management, blood sugar tracking, diabetic meal planning, AI nutrition assistant">
+        <link rel="canonical" href="{{ url()->current() }}">
+        <meta name="robots" content="index, follow">
         
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
