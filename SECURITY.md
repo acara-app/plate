@@ -1,6 +1,6 @@
 # Security Policy
 
-We take the security of **Plate** and the privacy of our users' health data seriously. We appreciate the community's help in disclosing vulnerabilities responsibly.
+We take the security of **Acara Plate** and the privacy of our users' health data seriously. We appreciate the community's help in disclosing vulnerabilities responsibly.
 
 ## Supported Versions
 
@@ -16,7 +16,7 @@ As this project is under active development, we generally only support the lates
 
 **Please do NOT report security vulnerabilities via public GitHub issues.**
 
-If you have discovered a security vulnerability in Plate (e.g., XSS, SQL Injection, Authorization Bypass, or Data Leakage), please report it privately.
+If you have discovered a security vulnerability in Acara Plate (e.g., XSS, SQL Injection, Authorization Bypass, or Data Leakage), please report it privately.
 
 ### Preferred Method: GitHub Private Reporting
 We use GitHub's [Private Vulnerability Reporting](https://github.com/acara-app/plate/security/advisories/new) feature. This allows you to open a private advisory that only repository maintainers can see.
@@ -60,8 +60,8 @@ We are committed to addressing security issues promptly:
 
 ## A Note on Health Data
 
-Plate stores sensitive data (Blood Glucose Readings, Biometrics). While this is an open-source project often run locally, we treat the code architecture with high security standards to protect this data. We welcome audits specifically targeting the `GlucoseReading` and `User` models to ensure tenant isolation is strictly enforced.
+Acara Plate stores sensitive data (Blood Glucose Readings, Biometrics). While this is an open-source project often run locally, we treat the code architecture with high security standards to protect this data. We welcome audits specifically targeting the `GlucoseReading` and `User` models to ensure tenant isolation is strictly enforced.
 
 ---
 
-*Thank you for helping keep the Plate community safe.*
+*Thank you for helping keep the Acara Plate community safe.*

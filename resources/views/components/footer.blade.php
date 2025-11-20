@@ -40,7 +40,7 @@
 
         <div class="mt-8 border-t border-gray-200 dark:border-gray-800 pt-8 text-center">
             <p class="text-xs leading-5 text-slate-500 dark:text-slate-400">
-                <span class="font-semibold">Disclaimer:</span> Plate is an AI-powered tool for informational purposes only and does not provide medical advice. Always consult a healthcare professional for medical concerns.
+                <span class="font-semibold">Disclaimer:</span> Acara Plate is an AI-powered tool for informational purposes only and does not provide medical advice. Always consult a healthcare professional for medical concerns.
             </p>
             <p class="mt-4 text-xs leading-5 dark:text-slate-400 text-slate-500">&copy; {{ date('Y') }} Acara Plate.</p>
         </div>
