@@ -256,7 +256,6 @@
                                     Meal Plans</h3>
                                 <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Get personalized
                                     7-day meal plans tailored to your goals and preferences</p>
-                                <p class="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">Set your preferences to generate your plan</p>
                             </div>
                         </div>
 
@@ -275,7 +274,6 @@
                                     Tracking</h3>
                                 <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Monitor and log
                                     your blood glucose levels to optimize your nutrition</p>
-                                <p class="mt-2 text-xs font-medium text-teal-600 dark:text-teal-400">Log your glucose or connect a device to get started</p>
                             </div>
                         </div>
 
@@ -296,7 +294,6 @@
                                     AI-Powered Nutrition</h3>
                                 <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Smart
                                     recommendations based on your health data and dietary needs</p>
-                                <p class="mt-2 text-xs font-medium text-cyan-600 dark:text-cyan-400">Get instant analysis of your meals</p>
                             </div>
                         </div>
 
