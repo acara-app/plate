@@ -121,6 +121,7 @@ it('converts meal plan data to array', function (): void {
                 'preparation_time_minutes' => null,
                 'sort_order' => 1,
                 'metadata' => null,
+                'verification_metadata' => null,
             ],
         ],
         'metadata' => ['test' => 'data'],

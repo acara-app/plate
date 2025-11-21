@@ -10,7 +10,9 @@ use InvalidArgumentException;
 final readonly class MealData
 {
     /**
+     * @param  array<int, array{name: string, quantity: string}>|null  $ingredients
      * @param  array<string, mixed>|null  $metadata
+     * @param  array<string, mixed>|null  $verificationMetadata
      */
     public function __construct(
         public int $dayNumber,
@@ -18,7 +20,7 @@ final readonly class MealData
         public string $name,
         public ?string $description,
         public ?string $preparationInstructions,
-        public ?string $ingredients,
+        public ?array $ingredients,
         public ?string $portionSize,
         public float $calories,
         public ?float $proteinGrams,
@@ -27,6 +29,7 @@ final readonly class MealData
         public ?int $preparationTimeMinutes,
         public int $sortOrder,
         public ?array $metadata = null,
+        public ?array $verificationMetadata = null,
     ) {}
 
     /**
@@ -34,8 +37,14 @@ final readonly class MealData
      */
     public static function fromArray(array $data): self
     {
+        /** @var array<int, array{name: string, quantity: string}>|null $ingredients */
+        $ingredients = isset($data['ingredients']) && is_array($data['ingredients']) ? $data['ingredients'] : null;
+
         /** @var array<string, mixed>|null $metadata */
         $metadata = isset($data['metadata']) && is_array($data['metadata']) ? $data['metadata'] : null;
+
+        /** @var array<string, mixed>|null $verificationMetadata */
+        $verificationMetadata = isset($data['verification_metadata']) && is_array($data['verification_metadata']) ? $data['verification_metadata'] : null;
 
         return new self(
             dayNumber: self::ensureInt($data['day_number']),
@@ -43,7 +52,7 @@ final readonly class MealData
             name: self::ensureString($data['name']),
             description: isset($data['description']) ? self::ensureString($data['description']) : null,
             preparationInstructions: isset($data['preparation_instructions']) ? self::ensureString($data['preparation_instructions']) : null,
-            ingredients: isset($data['ingredients']) ? self::ensureString($data['ingredients']) : null,
+            ingredients: $ingredients,
             portionSize: isset($data['portion_size']) ? self::ensureString($data['portion_size']) : null,
             calories: self::ensureFloat($data['calories']),
             proteinGrams: isset($data['protein_grams']) ? self::ensureFloat($data['protein_grams']) : null,
@@ -52,6 +61,7 @@ final readonly class MealData
             preparationTimeMinutes: isset($data['preparation_time_minutes']) ? self::ensureInt($data['preparation_time_minutes']) : null,
             sortOrder: self::ensureInt($data['sort_order']),
             metadata: $metadata,
+            verificationMetadata: $verificationMetadata,
         );
     }
 
@@ -75,6 +85,7 @@ final readonly class MealData
             'preparation_time_minutes' => $this->preparationTimeMinutes,
             'sort_order' => $this->sortOrder,
             'metadata' => $this->metadata,
+            'verification_metadata' => $this->verificationMetadata,
         ];
     }
 

@@ -12,7 +12,7 @@ it('creates meal data from array with all fields', function (): void {
         'name' => 'Oatmeal',
         'description' => 'Healthy breakfast',
         'preparation_instructions' => 'Cook oats',
-        'ingredients' => 'Oats, milk',
+        'ingredients' => [['name' => 'Oats', 'quantity' => '50g'], ['name' => 'Milk', 'quantity' => '200ml']],
         'portion_size' => '1 cup',
         'calories' => 300.5,
         'protein_grams' => 10.5,
@@ -30,7 +30,7 @@ it('creates meal data from array with all fields', function (): void {
         ->and($mealData->name)->toBe('Oatmeal')
         ->and($mealData->description)->toBe('Healthy breakfast')
         ->and($mealData->preparationInstructions)->toBe('Cook oats')
-        ->and($mealData->ingredients)->toBe('Oats, milk')
+        ->and($mealData->ingredients)->toBe([['name' => 'Oats', 'quantity' => '50g'], ['name' => 'Milk', 'quantity' => '200ml']])
         ->and($mealData->portionSize)->toBe('1 cup')
         ->and($mealData->calories)->toBe(300.5)
         ->and($mealData->proteinGrams)->toBe(10.5)
@@ -75,7 +75,7 @@ it('converts meal data to array', function (): void {
         name: 'Chicken',
         description: 'Grilled chicken',
         preparationInstructions: 'Grill it',
-        ingredients: 'Chicken, spices',
+        ingredients: [['name' => 'Chicken', 'quantity' => '150g'], ['name' => 'Spices', 'quantity' => '5g']],
         portionSize: '200g',
         calories: 400.0,
         proteinGrams: 30.0,
@@ -94,7 +94,7 @@ it('converts meal data to array', function (): void {
         'name' => 'Chicken',
         'description' => 'Grilled chicken',
         'preparation_instructions' => 'Grill it',
-        'ingredients' => 'Chicken, spices',
+        'ingredients' => [['name' => 'Chicken', 'quantity' => '150g'], ['name' => 'Spices', 'quantity' => '5g']],
         'portion_size' => '200g',
         'calories' => 400.0,
         'protein_grams' => 30.0,
@@ -103,6 +103,7 @@ it('converts meal data to array', function (): void {
         'preparation_time_minutes' => 30,
         'sort_order' => 3,
         'metadata' => ['test' => 'data'],
+        'verification_metadata' => null,
     ]);
 });
 

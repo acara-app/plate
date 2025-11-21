@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\AiAgents;
 
+use App\Actions\CorrectMealNutrition;
+use App\Actions\VerifyIngredientNutrition;
 use App\DataObjects\MealPlanData;
 use App\Enums\AiModel;
 use App\Jobs\ProcessMealPlanJob;
@@ -26,6 +28,8 @@ final class GenerateMealPlan
     public function __construct(
         private readonly CreateMealPlanPrompt $createPrompt,
         private readonly Dispatcher $dispatcher,
+        private readonly VerifyIngredientNutrition $verifyIngredients,
+        private readonly CorrectMealNutrition $correctNutrition,
     ) {}
 
     public function handle(User $user, AiModel $model = AiModel::Gemini25Flash): JobTracking
@@ -56,7 +60,31 @@ final class GenerateMealPlan
         /** @var array<string, mixed> $structuredData */
         $structuredData = $response->structured;
 
-        return MealPlanData::fromArray($structuredData);
+        $mealPlanData = MealPlanData::fromArray($structuredData);
+
+        // Verify and correct meal nutrition using OpenFoodFacts
+        $verifiedMeals = [];
+        foreach ($mealPlanData->meals as $meal) {
+            if ($meal->ingredients !== null && $meal->ingredients !== []) {
+                $verificationData = $this->verifyIngredients->handle($meal->ingredients);
+                $correctedMeal = $this->correctNutrition->handle($meal, $verificationData);
+                $verifiedMeals[] = $correctedMeal;
+            } else {
+                // No ingredients to verify, keep original meal
+                $verifiedMeals[] = $meal;
+            }
+        }
+
+        return new MealPlanData(
+            type: $mealPlanData->type,
+            name: $mealPlanData->name,
+            description: $mealPlanData->description,
+            durationDays: $mealPlanData->durationDays,
+            targetDailyCalories: $mealPlanData->targetDailyCalories,
+            macronutrientRatios: $mealPlanData->macronutrientRatios,
+            meals: $verifiedMeals,
+            metadata: $mealPlanData->metadata,
+        );
     }
 
     private function buildSchema(): ObjectSchema
@@ -124,9 +152,24 @@ final class GenerateMealPlan
                                 name: 'preparation_instructions',
                                 description: 'Step-by-step instructions for preparing the meal'
                             ),
-                            new StringSchema(
+                            new ArraySchema(
                                 name: 'ingredients',
-                                description: 'List of ingredients with quantities'
+                                description: 'Array of ingredients with their quantities',
+                                items: new ObjectSchema(
+                                    name: 'ingredient',
+                                    description: 'A single ingredient with quantity',
+                                    properties: [
+                                        new StringSchema(
+                                            name: 'name',
+                                            description: 'The ingredient name (e.g., "Chicken breast", "Brown rice")'
+                                        ),
+                                        new StringSchema(
+                                            name: 'quantity',
+                                            description: 'The quantity with unit (e.g., "150g", "1 cup (185g)", "1 tablespoon (15ml)")'
+                                        ),
+                                    ],
+                                    requiredFields: ['name', 'quantity']
+                                )
                             ),
                             new StringSchema(
                                 name: 'portion_size',

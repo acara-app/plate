@@ -64,6 +64,7 @@ final readonly class StoreMealPlan
             'preparation_time_minutes' => $mealData->preparationTimeMinutes,
             'sort_order' => $mealData->sortOrder,
             'metadata' => $mealData->metadata,
+            'openfoodfacts_verification' => $mealData->verificationMetadata,
         ]);
     }
 }

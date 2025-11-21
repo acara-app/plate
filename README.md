@@ -36,6 +36,26 @@ The platform provides detailed meal plans with:
 - Portion sizes and preparation times
 - Nutritional information per meal
 
+### OpenFoodFacts Integration
+
+To address the challenge of accurate nutritional data, Acara Plate integrates with [OpenFoodFacts](https://world.openfoodfacts.org/), the world's largest open food database with over 3 million products contributed by users worldwide.
+
+**Why OpenFoodFacts?**
+- **Verified Data**: Access to real product nutritional information from food labels
+- **Crowdsourced Accuracy**: Community-driven database continuously updated and verified
+- **No Cost**: Free, open-source alternative to building and maintaining a proprietary food database
+- **Global Coverage**: Supports products from multiple countries and regions
+- **Transparency**: All data is open and auditable
+
+**How It Works:**
+1. **AI Generation**: Our AI creates personalized meal plans with ingredient lists
+2. **Automatic Verification**: Each ingredient is cross-referenced against OpenFoodFacts database
+3. **Nutrition Correction**: AI estimates are validated and corrected using verified data from real products
+4. **Quality Scoring**: Each meal receives a confidence score based on verification rate
+5. **Transparency**: Verification metadata shows which ingredients were matched and data sources used
+
+This hybrid approach combines the personalization power of AI with the accuracy of real-world product data, reducing nutritional estimation errors and hallucinations while maintaining meal plan customization.
+
 ## Installation
 
 Acara Plate is a regular Laravel application; it's built on top of Laravel 12 and uses Inertia (React) / Tailwind CSS for the frontend. If you are familiar with Laravel, you should feel right at home.
