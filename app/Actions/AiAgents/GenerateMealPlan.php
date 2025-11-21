@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\AiAgents;
 
-use App\Actions\CorrectMealNutrition;
-use App\Actions\VerifyIngredientNutrition;
 use App\DataObjects\MealPlanData;
 use App\Enums\AiModel;
 use App\Jobs\ProcessMealPlanJob;
@@ -28,8 +26,6 @@ final class GenerateMealPlan
     public function __construct(
         private readonly CreateMealPlanPrompt $createPrompt,
         private readonly Dispatcher $dispatcher,
-        private readonly VerifyIngredientNutrition $verifyIngredients,
-        private readonly CorrectMealNutrition $correctNutrition,
     ) {}
 
     public function handle(User $user, AiModel $model = AiModel::Gemini25Flash): JobTracking
@@ -60,31 +56,7 @@ final class GenerateMealPlan
         /** @var array<string, mixed> $structuredData */
         $structuredData = $response->structured;
 
-        $mealPlanData = MealPlanData::fromArray($structuredData);
-
-        // Verify and correct meal nutrition using OpenFoodFacts
-        $verifiedMeals = [];
-        foreach ($mealPlanData->meals as $meal) {
-            if ($meal->ingredients !== null && $meal->ingredients !== []) {
-                $verificationData = $this->verifyIngredients->handle($meal->ingredients);
-                $correctedMeal = $this->correctNutrition->handle($meal, $verificationData);
-                $verifiedMeals[] = $correctedMeal;
-            } else {
-                // No ingredients to verify, keep original meal
-                $verifiedMeals[] = $meal;
-            }
-        }
-
-        return new MealPlanData(
-            type: $mealPlanData->type,
-            name: $mealPlanData->name,
-            description: $mealPlanData->description,
-            durationDays: $mealPlanData->durationDays,
-            targetDailyCalories: $mealPlanData->targetDailyCalories,
-            macronutrientRatios: $mealPlanData->macronutrientRatios,
-            meals: $verifiedMeals,
-            metadata: $mealPlanData->metadata,
-        );
+        return MealPlanData::fromArray($structuredData);
     }
 
     private function buildSchema(): ObjectSchema

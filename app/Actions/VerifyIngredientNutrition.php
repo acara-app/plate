@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\DataObjects\NutritionData;
-use App\Services\OpenFoodFactsService;
+use App\Services\Contracts\FoodDataProviderInterface;
+use App\Services\FoodDataProviders\OpenFoodFactsProvider;
+use Illuminate\Container\Attributes\Give;
 
 final readonly class VerifyIngredientNutrition
 {
     public function __construct(
-        private OpenFoodFactsService $openFoodFacts,
+        #[Give(OpenFoodFactsProvider::class)]
+        private FoodDataProviderInterface $foodDataProvider,
     ) {}
 
     /**
@@ -51,32 +54,19 @@ final readonly class VerifyIngredientNutrition
 
     private function verifyIngredient(string $ingredientName): ?NutritionData
     {
-        $cleanName = $this->cleanIngredientName($ingredientName);
+        $searchResults = $this->foodDataProvider->search($ingredientName, 3);
 
-        $searchResults = $this->openFoodFacts->searchProduct($cleanName, 3);
-
-        if (! $searchResults instanceof \App\DataObjects\OpenFoodFactsSearchResultData || $searchResults->isEmpty()) {
+        if ($searchResults === null || $searchResults === []) {
             return null;
         }
 
-        $bestMatch = $searchResults->getBestMatch();
+        // Get the best match (first result, as providers should return sorted by relevance)
+        $bestMatch = $searchResults[0] ?? null;
 
-        if (! $bestMatch instanceof \App\DataObjects\OpenFoodFactsProductData) {
+        if ($bestMatch === null) {
             return null; // @codeCoverageIgnore
         }
 
-        return $this->openFoodFacts->extractNutritionPer100g($bestMatch);
-    }
-
-    private function cleanIngredientName(string $name): string
-    {
-        // Remove common cooking descriptors
-        $cleanName = preg_replace('/\b(fresh|organic|raw|cooked|grilled|baked|steamed|chopped|diced|sliced)\b/i', '', $name);
-        // Remove parentheses and their content
-        $cleanName = preg_replace('/\([^)]*\)/', '', $cleanName ?? $name);
-        // Normalize whitespace
-        $cleanName = preg_replace('/\s+/', ' ', $cleanName ?? $name);
-
-        return mb_trim($cleanName ?? $name);
+        return $bestMatch['nutrition_per_100g'];
     }
 }

@@ -1,0 +1,85 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Jobs;
+
+use App\Actions\CorrectMealNutrition;
+use App\Actions\VerifyIngredientNutrition;
+use App\DataObjects\MealData;
+use App\Models\MealPlan;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
+
+final class VerifyAndCorrectMealsJob implements ShouldQueue
+{
+    use Queueable;
+
+    public int $timeout = 300;
+
+    public int $tries = 3;
+
+    public function __construct(
+        public readonly int $mealPlanId,
+    ) {}
+
+    public function handle(
+        VerifyIngredientNutrition $verifyIngredients,
+        CorrectMealNutrition $correctNutrition,
+    ): void {
+        /** @var MealPlan|null $mealPlan */
+        $mealPlan = MealPlan::query()->find($this->mealPlanId);
+
+        if (! $mealPlan) {
+            return;
+        }
+
+        $meals = $mealPlan->meals()->get();
+
+        if ($meals->isEmpty()) {
+            return;
+        }
+
+        foreach ($meals as $meal) {
+            // Skip if already verified
+            if ($meal->openfoodfacts_verification !== null && isset($meal->openfoodfacts_verification['verified']) && $meal->openfoodfacts_verification['verified'] === true) {
+                continue;
+            }
+
+            $ingredients = $meal->ingredients ?? [];
+
+            if ($ingredients === []) {
+                continue;
+            }
+
+            $verificationData = $verifyIngredients->handle($ingredients);
+
+            $mealData = new MealData(
+                dayNumber: $meal->day_number,
+                type: $meal->type,
+                name: $meal->name,
+                description: $meal->description,
+                preparationInstructions: $meal->preparation_instructions,
+                ingredients: $meal->ingredients,
+                portionSize: $meal->portion_size,
+                calories: (float) $meal->calories,
+                proteinGrams: $meal->protein_grams !== null ? (float) $meal->protein_grams : null,
+                carbsGrams: $meal->carbs_grams !== null ? (float) $meal->carbs_grams : null,
+                fatGrams: $meal->fat_grams !== null ? (float) $meal->fat_grams : null,
+                preparationTimeMinutes: $meal->preparation_time_minutes,
+                sortOrder: $meal->sort_order,
+                metadata: $meal->metadata,
+            );
+
+            $correctedMeal = $correctNutrition->handle($mealData, $verificationData);
+
+            $meal->update([
+                'calories' => $correctedMeal->calories,
+                'protein_grams' => $correctedMeal->proteinGrams,
+                'carbs_grams' => $correctedMeal->carbsGrams,
+                'fat_grams' => $correctedMeal->fatGrams,
+                'openfoodfacts_verification' => $correctedMeal->verificationMetadata,
+            ]);
+        }
+    }
+}
