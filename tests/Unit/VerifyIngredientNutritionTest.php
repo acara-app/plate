@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Http;
 
 it('parses ingredients and verifies nutrition', function (): void {
     Http::fake([
-        'world.openfoodfacts.org/cgi/search.pl*' => Http::response([
+        'world.openfoodfacts.org/api/v2/search*' => Http::response([
             'products' => [
                 [
                     'product_name' => 'Chicken Breast',

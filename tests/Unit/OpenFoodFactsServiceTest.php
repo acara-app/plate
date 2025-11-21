@@ -13,9 +13,9 @@ beforeEach(function (): void {
     Cache::flush();
 });
 
-it('searches for products successfully', function (): void {
+it('searches for products successfully using v2 API', function (): void {
     Http::fake([
-        'world.openfoodfacts.org/cgi/search.pl*' => Http::response([
+        'world.openfoodfacts.org/api/v2/search*' => Http::response([
             'products' => [
                 [
                     'product_name' => 'Chicken Breast',
@@ -37,6 +37,10 @@ it('searches for products successfully', function (): void {
         ->toBeInstanceOf(OpenFoodFactsSearchResultData::class)
         ->and($result->products)->toHaveCount(1)
         ->and($result->products[0])->toBeInstanceOf(OpenFoodFactsProductData::class);
+
+    // Verify it uses v2 endpoint
+    Http::assertSent(fn ($request): bool => str_contains((string) $request->url(), '/api/v2/search')
+    );
 });
 
 it('extracts nutrition data per 100g', function (): void {
@@ -74,9 +78,9 @@ it('returns null for missing nutrition data', function (): void {
     expect($nutrition)->toBeNull();
 });
 
-it('caches search results', function (): void {
+it('caches search results for 30 days', function (): void {
     Http::fake([
-        'world.openfoodfacts.org/cgi/search.pl*' => Http::response([
+        'world.openfoodfacts.org/api/v2/search*' => Http::response([
             'products' => [['product_name' => 'Test Product']],
         ], 200),
     ]);
@@ -114,7 +118,7 @@ it('gets best match from search results', function (): void {
 
 it('returns null when API request fails', function (): void {
     Http::fake([
-        'world.openfoodfacts.org/cgi/search.pl*' => Http::response(null, 500),
+        'world.openfoodfacts.org/api/v2/search*' => Http::response(null, 500),
     ]);
 
     $service = app(OpenFoodFactsService::class);
@@ -125,7 +129,7 @@ it('returns null when API request fails', function (): void {
 
 it('returns empty result when search has no products', function (): void {
     Http::fake([
-        'world.openfoodfacts.org/cgi/search.pl*' => Http::response(['products' => []], 200),
+        'world.openfoodfacts.org/api/v2/search*' => Http::response(['products' => []], 200),
     ]);
 
     $service = app(OpenFoodFactsService::class);
@@ -273,4 +277,82 @@ it('converts product data to array', function (): void {
     $array = $product->toArray();
 
     expect($array)->toBe($rawData);
+});
+
+it('infers correct category from ingredient name', function (): void {
+    Http::fake([
+        'world.openfoodfacts.org/api/v2/search*' => Http::response([
+            'products' => [['product_name' => 'Test']],
+        ], 200),
+    ]);
+
+    $service = app(OpenFoodFactsService::class);
+    $service->searchProduct('chicken breast');
+
+    Http::assertSent(function ($request): bool {
+        $url = $request->url();
+
+        // Should use chicken-breasts category
+        return str_contains($url, 'categories_tags_en=chicken-breasts');
+    });
+});
+
+it('uses popularity sorting for search results', function (): void {
+    Http::fake([
+        'world.openfoodfacts.org/api/v2/search*' => Http::response([
+            'products' => [['product_name' => 'Test']],
+        ], 200),
+    ]);
+
+    $service = app(OpenFoodFactsService::class);
+    $service->searchProduct('rice');
+
+    Http::assertSent(function ($request): bool {
+        $url = $request->url();
+
+        // Should sort by unique scans (popularity)
+        return str_contains($url, 'sort_by=unique_scans_n');
+    });
+});
+
+it('respects rate limit for search requests', function (): void {
+    Http::fake([
+        'world.openfoodfacts.org/api/v2/search*' => Http::response([
+            'products' => [['product_name' => 'Test']],
+        ], 200),
+    ]);
+
+    $service = app(OpenFoodFactsService::class);
+
+    // Make 8 requests (at the limit)
+    for ($i = 0; $i < 8; $i++) {
+        $service->searchProduct("query{$i}");
+    }
+
+    // 9th request should be blocked by rate limit
+    $result = $service->searchProduct('query9');
+
+    // Should be null due to rate limit
+    expect($result)->toBeNull();
+
+    // Should have made exactly 8 API calls
+    Http::assertSentCount(8);
+});
+
+it('cleans ingredient names for better matching', function (): void {
+    Http::fake([
+        'world.openfoodfacts.org/api/v2/search*' => Http::response([
+            'products' => [['product_name' => 'Test']],
+        ], 200),
+    ]);
+
+    $service = app(OpenFoodFactsService::class);
+    // Should clean "fresh organic grilled" and still find chicken-breasts category
+    $service->searchProduct('fresh organic grilled chicken breast (boneless)');
+
+    Http::assertSent(function ($request): bool {
+        $url = $request->url();
+
+        return str_contains($url, 'categories_tags_en=chicken-breasts');
+    });
 });
