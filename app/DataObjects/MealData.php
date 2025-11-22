@@ -10,7 +10,7 @@ use InvalidArgumentException;
 final readonly class MealData
 {
     /**
-     * @param  array<int, array{name: string, quantity: string}>|null  $ingredients
+     * @param  array<int, array{name: string, quantity: string, specificity?: string, barcode?: string}>|null  $ingredients
      * @param  array<string, mixed>|null  $metadata
      * @param  array<string, mixed>|null  $verificationMetadata
      */
@@ -37,7 +37,7 @@ final readonly class MealData
      */
     public static function fromArray(array $data): self
     {
-        /** @var array<int, array{name: string, quantity: string}>|null $ingredients */
+        /** @var array<int, array{name: string, quantity: string, specificity?: string, barcode?: string}>|null $ingredients */
         $ingredients = isset($data['ingredients']) && is_array($data['ingredients']) ? $data['ingredients'] : null;
 
         /** @var array<string, mixed>|null $metadata */

@@ -9,10 +9,12 @@ use App\DataObjects\MealData;
 final readonly class CorrectMealNutrition
 {
     /**
-     * @param  array{verified_ingredients: array<int, array{name: string, quantity: string|null, nutrition_per_100g: array{calories: float|null, protein: float|null, carbs: float|null, fat: float|null, fiber: float|null, sugar: float|null, sodium: float|null}|null, matched: bool}>, total_verified: null, verification_success: bool, verification_rate: float}  $verificationData
+     * @param  array{verified_ingredients: array<int, array{name: string, quantity: string|null, specificity: string, nutrition_per_100g: array{calories: float|null, protein: float|null, carbs: float|null, fat: float|null, fiber: float|null, sugar: float|null, sodium: float|null, source: string}|null, matched: bool}>, total_verified: int, verification_success: bool, verification_rate: float, verified?: bool, source?: string}  $verificationData
      */
     public function handle(MealData $mealData, array $verificationData): MealData
     {
+        $source = $verificationData['source'] ?? 'unknown';
+
         if (! $verificationData['verification_success'] || $verificationData['verification_rate'] < 0.3) {
 
             return new MealData(
@@ -98,7 +100,7 @@ final readonly class CorrectMealNutrition
                 'verified' => true,
                 'verification_rate' => $verificationData['verification_rate'],
                 'confidence' => 'high',
-                'source' => 'openfoodfacts_verified',
+                'source' => $source.'_verified',
                 'original_ai_values' => [
                     'calories' => $mealData->calories,
                     'protein' => $mealData->proteinGrams,

@@ -57,7 +57,7 @@ it('verifies and corrects meals when job is processed', function (): void {
         'protein_grams' => 30.0,
         'carbs_grams' => 40.0,
         'fat_grams' => 5.0,
-        'openfoodfacts_verification' => null,
+        'food_data_verification' => null,
     ]);
 
     $job = new VerifyAndCorrectMealsJob($mealPlan->id);
@@ -67,7 +67,7 @@ it('verifies and corrects meals when job is processed', function (): void {
     );
 
     $meal = $mealPlan->meals()->first();
-    expect($meal->openfoodfacts_verification)->not->toBeNull();
+    expect($meal->food_data_verification)->not->toBeNull();
 });
 
 it('skips meals that are already verified', function (): void {
@@ -89,7 +89,7 @@ it('skips meals that are already verified', function (): void {
         'protein_grams' => 30.0,
         'carbs_grams' => 40.0,
         'fat_grams' => 5.0,
-        'openfoodfacts_verification' => [
+        'food_data_verification' => [
             'verified' => true,
             'verification_rate' => 1.0,
         ],
@@ -124,7 +124,7 @@ it('skips meals without ingredients', function (): void {
         'protein_grams' => 30.0,
         'carbs_grams' => 40.0,
         'fat_grams' => 5.0,
-        'openfoodfacts_verification' => null,
+        'food_data_verification' => null,
     ]);
 
     $job = new VerifyAndCorrectMealsJob($mealPlan->id);
@@ -134,7 +134,7 @@ it('skips meals without ingredients', function (): void {
     );
 
     $meal->refresh();
-    expect($meal->openfoodfacts_verification)->toBeNull();
+    expect($meal->food_data_verification)->toBeNull();
 });
 
 it('handles missing meal plan gracefully', function (): void {

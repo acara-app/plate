@@ -283,15 +283,20 @@ Include brief preparation instructions and portion sizes for each meal.
 Ingredients MUST be returned as a structured array of objects, NOT as text strings:
 ```json
 "ingredients": [
-  {"name": "Chicken breast", "quantity": "150g"},
-  {"name": "Brown rice", "quantity": "1 cup (185g)"},
-  {"name": "Olive oil", "quantity": "1 tablespoon (15ml)"}
+  {"name": "Chicken breast", "quantity": "150g", "specificity": "generic"},
+  {"name": "Brown rice", "quantity": "1 cup (185g)", "specificity": "generic"},
+  {"name": "Barilla Whole Grain Penne Pasta", "quantity": "85g", "specificity": "specific", "barcode": "076808501094"}
 ]
 ```
-- Each ingredient is an object with `name` and `quantity` fields
+- Each ingredient is an object with `name`, `quantity`, and `specificity` fields
+- **specificity**: MUST be either `"generic"` or `"specific"`
+  - Use `"generic"` for common ingredients (chicken, rice, olive oil, eggs, vegetables, fruits, etc.)
+  - Use `"specific"` ONLY when referring to a branded product (e.g., "Barilla Pasta", "Oikos Greek Yogurt")
+- **barcode**: Optional field, only include if you know the actual product barcode (EAN-13, UPC, etc.)
 - Include weight in grams or volume in ml/cups where possible
-- For items measured by count (eggs, slices), also include approximate weight: `{"name": "Eggs", "quantity": "2 large (100g)"}`
+- For items measured by count (eggs, slices), also include approximate weight: `{"name": "Eggs", "quantity": "2 large (100g)", "specificity": "generic"}`
 - Avoid vague quantities like "some", "a handful", "to taste"
+- **PREFER GENERIC INGREDIENTS**: Unless a specific brand is essential for the recipe or nutrition target, always use generic ingredient names
 
 ## Output Format
 

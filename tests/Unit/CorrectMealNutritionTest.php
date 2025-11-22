@@ -71,6 +71,7 @@ it('applies corrections when discrepancy exceeds threshold', function (): void {
                     'protein' => 31.0,
                     'carbs' => 0.0,
                     'fat' => 3.6,
+                    'source' => 'openfoodfacts',
                 ],
                 'matched' => true,
             ],
@@ -78,6 +79,7 @@ it('applies corrections when discrepancy exceeds threshold', function (): void {
         'total_verified' => null,
         'verification_success' => true,
         'verification_rate' => 1.0,
+        'source' => 'openfoodfacts',
     ];
 
     $action = app(CorrectMealNutrition::class);

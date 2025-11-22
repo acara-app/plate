@@ -4,28 +4,24 @@ declare(strict_types=1);
 
 namespace App\Services\Contracts;
 
-use App\DataObjects\NutritionData;
+use App\Enums\IngredientSpecificity;
 
 interface FoodDataProviderInterface
 {
     /**
-     * Search for food items by query string
-     *
-     * @param  string  $query  The search query
-     * @param  int  $limit  Maximum number of results to return
-     * @return array<int, array{id: string, name: string, brand: ?string, nutrition_per_100g: ?NutritionData}>|null
+     * @return array<int, array{id: string, name: string, brand: string|null, calories: float|null, protein: float|null, carbs: float|null, fat: float|null, fiber: float|null, sugar: float|null, sodium: float|null, source: string}>
      */
-    public function search(string $query, int $limit = 5): ?array;
+    public function search(string $ingredientName): array;
 
     /**
-     * Get detailed nutrition information for a specific food item
-     *
-     * @param  string  $itemId  The unique identifier for the food item
+     * @return array<int, array{id: string, name: string, brand: string|null, calories: float|null, protein: float|null, carbs: float|null, fat: float|null, fiber: float|null, sugar: float|null, sodium: float|null, source: string}>
      */
-    public function getNutritionData(string $itemId): ?NutritionData;
+    public function searchWithSpecificity(string $ingredientName, IngredientSpecificity $specificity, ?string $barcode = null): array;
 
     /**
-     * Clean and normalize ingredient name for better search results
+     * @return array{id: string, name: string, brand: string|null, calories: float|null, protein: float|null, carbs: float|null, fat: float|null, fiber: float|null, sugar: float|null, sodium: float|null, source: string}|null
      */
+    public function getNutritionData(string $productId): ?array;
+
     public function cleanIngredientName(string $name): string;
 }

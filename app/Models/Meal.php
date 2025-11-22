@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read string $name
  * @property-read string|null $description
  * @property-read string|null $preparation_instructions
- * @property-read array<int, array{name: string, quantity: string}>|null $ingredients
+ * @property-read array<int, array{name: string, quantity: string, specificity?: string, barcode?: string}>|null $ingredients
  * @property-read string|null $portion_size
  * @property-read float $calories
  * @property-read float|null $protein_grams
@@ -26,7 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read float|null $fat_grams
  * @property-read int|null $preparation_time_minutes
  * @property-read array<string, mixed>|null $metadata
- * @property-read array<string, mixed>|null $openfoodfacts_verification
+ * @property-read array<string, mixed>|null $food_data_verification
  * @property-read int $sort_order
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -58,7 +58,7 @@ final class Meal extends Model
             'fat_grams' => 'decimal:2',
             'preparation_time_minutes' => 'integer',
             'metadata' => 'array',
-            'openfoodfacts_verification' => 'array',
+            'food_data_verification' => 'array',
             'sort_order' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

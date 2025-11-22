@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\FoodDataProviders;
 
-use App\DataObjects\NutritionData;
+use App\Enums\IngredientSpecificity;
 use App\Services\Contracts\FoodDataProviderInterface;
 use App\Services\OpenFoodFactsService;
 
@@ -14,49 +14,80 @@ final readonly class OpenFoodFactsProvider implements FoodDataProviderInterface
         private OpenFoodFactsService $openFoodFacts,
     ) {}
 
-    public function search(string $query, int $limit = 5): ?array
+    public function search(string $ingredientName): array
     {
-        $cleanName = $this->cleanIngredientName($query);
+        $cleanName = $this->cleanIngredientName($ingredientName);
 
-        $searchResults = $this->openFoodFacts->searchProduct($cleanName, $limit);
+        $searchResults = $this->openFoodFacts->searchProduct($cleanName, 5);
 
         if (! $searchResults instanceof \App\DataObjects\OpenFoodFactsSearchResultData || $searchResults->isEmpty()) {
-            return null;
+            return [];
         }
 
         $products = [];
         foreach ($searchResults->products as $product) {
             $nutrition = $this->openFoodFacts->extractNutritionPer100g($product);
 
+            if (! $nutrition instanceof \App\DataObjects\NutritionData) {
+                continue;
+            }
+
             $products[] = [
                 'id' => $product->code ?? '',
                 'name' => $product->productName ?? 'Unknown',
                 'brand' => $product->brands,
-                'nutrition_per_100g' => $nutrition,
+                'calories' => $nutrition->calories,
+                'protein' => $nutrition->protein,
+                'carbs' => $nutrition->carbs,
+                'fat' => $nutrition->fat,
+                'fiber' => $nutrition->fiber,
+                'sugar' => $nutrition->sugar,
+                'sodium' => $nutrition->sodium,
+                'source' => 'openfoodfacts',
             ];
         }
 
-        return $products !== [] ? $products : null;
+        return $products;
     }
 
-    public function getNutritionData(string $itemId): ?NutritionData
+    public function searchWithSpecificity(string $ingredientName, IngredientSpecificity $specificity, ?string $barcode = null): array
     {
-        $product = $this->openFoodFacts->getProductByBarcode($itemId);
+        return $this->search($ingredientName);
+    }
+
+    public function getNutritionData(string $productId): ?array
+    {
+        $product = $this->openFoodFacts->getProductByBarcode($productId);
 
         if (! $product instanceof \App\DataObjects\OpenFoodFactsProductData) {
             return null; // @codeCoverageIgnore
         }
 
-        return $this->openFoodFacts->extractNutritionPer100g($product);
+        $nutrition = $this->openFoodFacts->extractNutritionPer100g($product);
+
+        if (! $nutrition instanceof \App\DataObjects\NutritionData) {
+            return null;
+        }
+
+        return [
+            'id' => $product->code ?? '',
+            'name' => $product->productName ?? 'Unknown',
+            'brand' => $product->brands,
+            'calories' => $nutrition->calories,
+            'protein' => $nutrition->protein,
+            'carbs' => $nutrition->carbs,
+            'fat' => $nutrition->fat,
+            'fiber' => $nutrition->fiber,
+            'sugar' => $nutrition->sugar,
+            'sodium' => $nutrition->sodium,
+            'source' => 'openfoodfacts',
+        ];
     }
 
     public function cleanIngredientName(string $name): string
     {
-        // Remove common cooking descriptors
         $cleanName = preg_replace('/\b(fresh|organic|raw|cooked|grilled|baked|steamed|chopped|diced|sliced)\b/i', '', $name);
-        // Remove parentheses and their content
         $cleanName = preg_replace('/\([^)]*\)/', '', $cleanName ?? $name);
-        // Normalize whitespace
         $cleanName = preg_replace('/\s+/', ' ', $cleanName ?? $name);
 
         return mb_trim($cleanName ?? $name);

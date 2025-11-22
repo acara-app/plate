@@ -42,7 +42,7 @@ final class VerifyAndCorrectMealsJob implements ShouldQueue
 
         foreach ($meals as $meal) {
             // Skip if already verified
-            if ($meal->openfoodfacts_verification !== null && isset($meal->openfoodfacts_verification['verified']) && $meal->openfoodfacts_verification['verified'] === true) {
+            if ($meal->food_data_verification !== null && isset($meal->food_data_verification['verified']) && $meal->food_data_verification['verified'] === true) {
                 continue;
             }
 
@@ -78,7 +78,7 @@ final class VerifyAndCorrectMealsJob implements ShouldQueue
                 'protein_grams' => $correctedMeal->proteinGrams,
                 'carbs_grams' => $correctedMeal->carbsGrams,
                 'fat_grams' => $correctedMeal->fatGrams,
-                'openfoodfacts_verification' => $correctedMeal->verificationMetadata,
+                'food_data_verification' => $correctedMeal->verificationMetadata,
             ]);
         }
     }
