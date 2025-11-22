@@ -104,7 +104,7 @@ it('handles floating point precision', function (): void {
         ->and($data->sodium)->toBe(74.555);
 });
 
-it('is readonly and immutable', function (): void {
+it('can be modified after creation', function (): void {
     $data = new NutritionData(
         calories: 100.0,
         protein: 10.0,
@@ -115,8 +115,10 @@ it('is readonly and immutable', function (): void {
         sodium: 50.0,
     );
 
-    expect(fn (): float => $data->calories = 200.0)
-        ->toThrow(Error::class);
+    // Laravel Data objects are mutable by default
+    $data->calories = 200.0;
+
+    expect($data->calories)->toBe(200.0);
 });
 
 it('creates nutrition data from array with all fields', function (): void {
@@ -130,7 +132,7 @@ it('creates nutrition data from array with all fields', function (): void {
         'sodium' => 74.0,
     ];
 
-    $data = NutritionData::fromArray($array);
+    $data = NutritionData::from($array);
 
     expect($data->calories)->toBe(165.0)
         ->and($data->protein)->toBe(31.0)
@@ -152,7 +154,7 @@ it('creates nutrition data from array with null values', function (): void {
         'sodium' => null,
     ];
 
-    $data = NutritionData::fromArray($array);
+    $data = NutritionData::from($array);
 
     expect($data->calories)->toBe(100.0)
         ->and($data->protein)->toBe(10.0)
@@ -174,7 +176,7 @@ it('creates nutrition data from array with mixed values', function (): void {
         'sodium' => 150.0,
     ];
 
-    $data = NutritionData::fromArray($array);
+    $data = NutritionData::from($array);
 
     expect($data->calories)->toBe(200.0)
         ->and($data->protein)->toBe(15.0)
@@ -245,7 +247,7 @@ it('round-trips through array conversion', function (): void {
     );
 
     $array = $original->toArray();
-    $recreated = NutritionData::fromArray($array);
+    $recreated = NutritionData::from($array);
 
     expect($recreated->calories)->toBe($original->calories)
         ->and($recreated->protein)->toBe($original->protein)

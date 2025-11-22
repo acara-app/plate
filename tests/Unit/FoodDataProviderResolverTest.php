@@ -80,6 +80,34 @@ it('routes specific ingredients with barcode to OpenFoodFacts', function (): voi
     Http::assertSent(fn ($request): bool => str_contains((string) $request->url(), 'world.openfoodfacts.org'));
 });
 
+it('falls back to search when barcode lookup returns null', function (): void {
+    Http::fake([
+        'world.openfoodfacts.org/api/v2/product/invalid-barcode*' => Http::response([
+            'status' => 0,
+        ], 200),
+        'world.openfoodfacts.org/api/v2/search*' => Http::response([
+            'products' => [
+                [
+                    'code' => '123456',
+                    'product_name' => 'Fallback Product',
+                    'nutriments' => [
+                        'energy-kcal_100g' => 200,
+                        'proteins_100g' => 10,
+                        'carbohydrates_100g' => 30,
+                        'fat_100g' => 5,
+                    ],
+                ],
+            ],
+        ], 200),
+    ]);
+
+    $resolver = app(FoodDataProviderResolver::class);
+    $results = $resolver->searchWithSpecificity('product', IngredientSpecificity::Specific, 'invalid-barcode');
+
+    expect($results)->toBeArray()
+        ->and($results[0]['source'])->toBe('openfoodfacts');
+});
+
 it('routes specific ingredients without barcode to OpenFoodFacts', function (): void {
     Http::fake([
         'world.openfoodfacts.org/api/v2/search*' => Http::response([
@@ -131,7 +159,7 @@ it('delegates search without specificity to OpenFoodFacts', function (): void {
     expect($results)->toBeArray();
 });
 
-it('delegates getNutritionData to OpenFoodFacts', function (): void {
+it('delegates getNutritionData to OpenFoodFacts for non-numeric IDs', function (): void {
     Http::fake([
         'world.openfoodfacts.org/api/v2/product/123456*' => Http::response([
             'status' => 1,
@@ -150,10 +178,10 @@ it('delegates getNutritionData to OpenFoodFacts', function (): void {
     ]);
 
     $resolver = app(FoodDataProviderResolver::class);
-    $nutrition = $resolver->getNutritionData('123456');
+    $nutrition = $resolver->getNutritionData('123456abc');
 
     expect($nutrition)->toBeArray()
-        ->and($nutrition['source'])->toBe('usda');
+        ->and($nutrition['source'])->toBe('openfoodfacts');
 });
 
 it('returns empty array when both providers return no results', function (): void {

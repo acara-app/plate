@@ -28,7 +28,7 @@ final readonly class UsdaFoodDataProvider implements FoodDataProviderInterface
             }
 
             $foodData = $this->usdaService->getFoodById($food->id);
-            if (! $foodData) {
+            if (! $foodData instanceof \App\DataObjects\UsdaFoodData) {
                 continue;
             }
 
@@ -60,7 +60,7 @@ final readonly class UsdaFoodDataProvider implements FoodDataProviderInterface
     public function getNutritionData(string $productId): ?array
     {
         $foodData = $this->usdaService->getFoodById($productId);
-        if (! $foodData) {
+        if (! $foodData instanceof \App\DataObjects\UsdaFoodData) {
             return null;
         }
 

@@ -4,24 +4,23 @@ declare(strict_types=1);
 
 use App\Actions\CorrectMealNutrition;
 use App\DataObjects\MealData;
-use App\Enums\MealType;
 
 it('keeps AI estimates when verification fails', function (): void {
     $mealData = MealData::from([
-        'day_number'=>1,
-        'type'=>'breakfast',
-        'name'=>'Test Meal',
-        'description'=>'Test description',
-        'preparation_instructions'=>'Test instructions',
-        'ingredients'=>[['name' => 'Test ingredient', 'quantity' => '100g']],
-        'portion_size'=>'1 serving',
-        'calories'=>500.0,
-        'protein_grams'=>30.0,
-        'carbs_grams'=>50.0,
-        'fat_grams'=>15.0,
-        'preparation_time_minutes'=>10,
-        'sort_order'=>1,
-        ]);
+        'day_number' => 1,
+        'type' => 'breakfast',
+        'name' => 'Test Meal',
+        'description' => 'Test description',
+        'preparation_instructions' => 'Test instructions',
+        'ingredients' => [['name' => 'Test ingredient', 'quantity' => '100g']],
+        'portion_size' => '1 serving',
+        'calories' => 500.0,
+        'protein_grams' => 30.0,
+        'carbs_grams' => 50.0,
+        'fat_grams' => 15.0,
+        'preparation_time_minutes' => 10,
+        'sort_order' => 1,
+    ]);
 
     $verificationData = [
         'verified_ingredients' => [],
@@ -46,20 +45,20 @@ it('keeps AI estimates when verification fails', function (): void {
 
 it('applies corrections when discrepancy exceeds threshold', function (): void {
     $mealData = MealData::from([
-        'day_number'=>1,
-        'type'=>'lunch',
-        'name'=>'Test Meal',
-        'description'=>'Test description',
-        'preparation_instructions'=>'Test instructions',
-        'ingredients'=>[['name' => 'Chicken breast', 'quantity' => '150g']],
-        'portion_size'=>'1 serving',
-        'calories'=>400.0,
-        'protein_grams'=>25.0,
-        'carbs_grams'=>40.0,
-        'fat_grams'=>10.0,
-        'preparation_time_minutes'=>15,
-        'sort_order'=>2,
-        ]);
+        'day_number' => 1,
+        'type' => 'lunch',
+        'name' => 'Test Meal',
+        'description' => 'Test description',
+        'preparation_instructions' => 'Test instructions',
+        'ingredients' => [['name' => 'Chicken breast', 'quantity' => '150g']],
+        'portion_size' => '1 serving',
+        'calories' => 400.0,
+        'protein_grams' => 25.0,
+        'carbs_grams' => 40.0,
+        'fat_grams' => 10.0,
+        'preparation_time_minutes' => 15,
+        'sort_order' => 2,
+    ]);
 
     $verificationData = [
         'verified_ingredients' => [
@@ -100,20 +99,20 @@ it('applies corrections when discrepancy exceeds threshold', function (): void {
 
 it('keeps AI estimates when discrepancy is below threshold', function (): void {
     $mealData = MealData::from([
-        'day_number'=>1,
-        'type'=>'dinner',
-        'name'=>'Test Meal',
-        'description'=>'Test description',
-        'preparation_instructions'=>'Test instructions',
-        'ingredients'=>[['name' => 'Salmon', 'quantity' => '150g']],
-        'portion_size'=>'1 serving',
-        'calories'=>300.0,
-        'protein_grams'=>30.0,
-        'carbs_grams'=>0.0,
-        'fat_grams'=>15.0,
-        'preparation_time_minutes'=>20,
-        'sort_order'=>3,
-        ]);
+        'day_number' => 1,
+        'type' => 'dinner',
+        'name' => 'Test Meal',
+        'description' => 'Test description',
+        'preparation_instructions' => 'Test instructions',
+        'ingredients' => [['name' => 'Salmon', 'quantity' => '150g']],
+        'portion_size' => '1 serving',
+        'calories' => 300.0,
+        'protein_grams' => 30.0,
+        'carbs_grams' => 0.0,
+        'fat_grams' => 15.0,
+        'preparation_time_minutes' => 20,
+        'sort_order' => 3,
+    ]);
 
     $verificationData = [
         'verified_ingredients' => [
@@ -145,20 +144,20 @@ it('keeps AI estimates when discrepancy is below threshold', function (): void {
 
 it('handles verification with no matched ingredients', function (): void {
     $mealData = MealData::from([
-        'day_number'=>1,
-        'type'=>'snack',
-        'name'=>'Test Meal',
-        'description'=>'Test description',
-        'preparation_instructions'=>'Test instructions',
-        'ingredients'=>[['name' => 'Unknown ingredient', 'quantity' => '100g']],
-        'portion_size'=>'1 serving',
-        'calories'=>200.0,
-        'protein_grams'=>10.0,
-        'carbs_grams'=>20.0,
-        'fat_grams'=>5.0,
-        'preparation_time_minutes'=>5,
-        'sort_order'=>4,
-        ]);
+        'day_number' => 1,
+        'type' => 'snack',
+        'name' => 'Test Meal',
+        'description' => 'Test description',
+        'preparation_instructions' => 'Test instructions',
+        'ingredients' => [['name' => 'Unknown ingredient', 'quantity' => '100g']],
+        'portion_size' => '1 serving',
+        'calories' => 200.0,
+        'protein_grams' => 10.0,
+        'carbs_grams' => 20.0,
+        'fat_grams' => 5.0,
+        'preparation_time_minutes' => 5,
+        'sort_order' => 4,
+    ]);
 
     $verificationData = [
         'verified_ingredients' => [
@@ -189,20 +188,20 @@ it('handles verification with no matched ingredients', function (): void {
 
 it('handles medium confidence verification', function (): void {
     $mealData = MealData::from([
-        'day_number'=>1,
-        'type'=>'lunch',
-        'name'=>'Test Meal',
-        'description'=>'Test description',
-        'preparation_instructions'=>'Test instructions',
-        'ingredients'=>[['name' => 'Mixed ingredients', 'quantity' => '200g']],
-        'portion_size'=>'1 serving',
-        'calories'=>350.0,
-        'protein_grams'=>20.0,
-        'carbs_grams'=>30.0,
-        'fat_grams'=>12.0,
-        'preparation_time_minutes'=>15,
-        'sort_order'=>2,
-        ]);
+        'day_number' => 1,
+        'type' => 'lunch',
+        'name' => 'Test Meal',
+        'description' => 'Test description',
+        'preparation_instructions' => 'Test instructions',
+        'ingredients' => [['name' => 'Mixed ingredients', 'quantity' => '200g']],
+        'portion_size' => '1 serving',
+        'calories' => 350.0,
+        'protein_grams' => 20.0,
+        'carbs_grams' => 30.0,
+        'fat_grams' => 12.0,
+        'preparation_time_minutes' => 15,
+        'sort_order' => 2,
+    ]);
 
     $verificationData = [
         'verified_ingredients' => [
@@ -233,20 +232,20 @@ it('handles medium confidence verification', function (): void {
 
 it('handles matched ingredients with null nutrition data', function (): void {
     $mealData = MealData::from([
-        'day_number'=>1,
-        'type'=>'snack',
-        'name'=>'Test Meal',
-        'description'=>'Test description',
-        'preparation_instructions'=>'Test instructions',
-        'ingredients'=>[['name' => 'Unknown branded item', 'quantity' => '1 pack']],
-        'portion_size'=>'1 serving',
-        'calories'=>150.0,
-        'protein_grams'=>5.0,
-        'carbs_grams'=>20.0,
-        'fat_grams'=>6.0,
-        'preparation_time_minutes'=>5,
-        'sort_order'=>4,
-        ]);
+        'day_number' => 1,
+        'type' => 'snack',
+        'name' => 'Test Meal',
+        'description' => 'Test description',
+        'preparation_instructions' => 'Test instructions',
+        'ingredients' => [['name' => 'Unknown branded item', 'quantity' => '1 pack']],
+        'portion_size' => '1 serving',
+        'calories' => 150.0,
+        'protein_grams' => 5.0,
+        'carbs_grams' => 20.0,
+        'fat_grams' => 6.0,
+        'preparation_time_minutes' => 5,
+        'sort_order' => 4,
+    ]);
 
     $verificationData = [
         'verified_ingredients' => [

@@ -145,7 +145,7 @@ final readonly class UsdaFoodDataService
             $nutrientMap[$nutrient['nutrient']['number']] = (float) $nutrient['amount'];
         }
 
-        return NutritionData::fromArray([
+        return NutritionData::from([
             'calories' => $nutrientMap['208'] ?? null, // @phpstan-ignore nullCoalesce.offset
             'protein' => $nutrientMap['203'] ?? null, // @phpstan-ignore nullCoalesce.offset
             'carbs' => $nutrientMap['205'] ?? null, // @phpstan-ignore nullCoalesce.offset

@@ -56,9 +56,7 @@ final class VerifyAndCorrectMealsJob implements ShouldQueue
 
             $verificationData = $verifyIngredients->handle($ingredients);
 
-            $ingredientsCollection = $meal->ingredients !== null
-                ? new DataCollection(IngredientData::class, $meal->ingredients)
-                : null;
+            $ingredientsCollection = new DataCollection(IngredientData::class, $meal->ingredients);
 
             $mealData = new MealData(
                 dayNumber: $meal->day_number,

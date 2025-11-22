@@ -52,6 +52,7 @@ it('verifies and corrects meals when job is processed', function (): void {
         'type' => MealType::Breakfast,
         'ingredients' => [
             ['name' => 'Test ingredient', 'quantity' => '150g'],
+            ['name' => 'Another ingredient', 'quantity' => '100g'],
         ],
         'calories' => 300.0,
         'protein_grams' => 30.0,
@@ -163,6 +164,36 @@ it('handles empty meal plan gracefully', function (): void {
 
     // Should not throw an exception
     expect(true)->toBeTrue();
+});
+
+it('skips meals with null ingredients', function (): void {
+    Http::fake();
+
+    $user = User::factory()->create();
+    $mealPlan = MealPlan::factory()->create([
+        'user_id' => $user->id,
+        'type' => MealPlanType::Weekly,
+    ]);
+
+    $meal = Meal::factory()->create([
+        'meal_plan_id' => $mealPlan->id,
+        'type' => MealType::Breakfast,
+        'ingredients' => null,
+        'calories' => 300.0,
+        'protein_grams' => 30.0,
+        'carbs_grams' => 40.0,
+        'fat_grams' => 5.0,
+        'food_data_verification' => null,
+    ]);
+
+    $job = new VerifyAndCorrectMealsJob($mealPlan->id);
+    $job->handle(
+        app(VerifyIngredientNutrition::class),
+        app(CorrectMealNutrition::class)
+    );
+
+    $meal->refresh();
+    expect($meal->food_data_verification)->toBeNull();
 });
 
 it('has correct timeout and retry configuration', function (): void {

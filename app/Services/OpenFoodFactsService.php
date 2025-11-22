@@ -121,7 +121,7 @@ final readonly class OpenFoodFactsService
         }
 
         /** @var array<string, mixed> $nutriments */
-        return NutritionData::fromArray([
+        return NutritionData::from([
             'calories' => $this->getNutriment($nutriments, 'energy-kcal_100g'),
             'protein' => $this->getNutriment($nutriments, 'proteins_100g'),
             'carbs' => $this->getNutriment($nutriments, 'carbohydrates_100g'),

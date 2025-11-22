@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\DataObjects\MealData;
 use App\DataObjects\MealPlanData;
 use App\Enums\MealPlanType;
-use App\Enums\MealType;
 
 it('creates meal plan data from array with all fields', function (): void {
     $data = [
@@ -69,21 +68,21 @@ it('creates meal plan data from array with minimal fields', function (): void {
 
 it('converts meal plan data to array', function (): void {
     $mealData = MealData::from([
-        'day_number'=>1,
-        'type'=>'breakfast',
-        'name'=>'Eggs',
-        'description'=>null,
-        'preparation_instructions'=>null,
-        'ingredients'=>null,
-        'portion_size'=>null,
-        'calories'=>200.0,
-        'protein_grams'=>null,
-        'carbs_grams'=>null,
-        'fat_grams'=>null,
-        'preparation_time_minutes'=>null,
-        'sort_order'=>1,
-        'metadata'=>null,
-        ]);
+        'day_number' => 1,
+        'type' => 'breakfast',
+        'name' => 'Eggs',
+        'description' => null,
+        'preparation_instructions' => null,
+        'ingredients' => null,
+        'portion_size' => null,
+        'calories' => 200.0,
+        'protein_grams' => null,
+        'carbs_grams' => null,
+        'fat_grams' => null,
+        'preparation_time_minutes' => null,
+        'sort_order' => 1,
+        'metadata' => null,
+    ]);
 
     $mealPlanData = new MealPlanData(
         type: MealPlanType::Custom,
