@@ -46,7 +46,7 @@ final readonly class CorrectMealNutrition
 
         $verifiedNutrition = $this->calculateAverageNutrition($verificationData);
 
-        if ($verifiedNutrition === null) {
+        if (! $verifiedNutrition instanceof NutritionData) {
             return new MealData(
                 dayNumber: $mealData->dayNumber,
                 type: $mealData->type,
@@ -83,17 +83,7 @@ final readonly class CorrectMealNutrition
             sodium: null,
         );
 
-        $verifiedData = new NutritionData(
-            calories: $verifiedNutrition['calories'],
-            protein: $verifiedNutrition['protein'],
-            carbs: $verifiedNutrition['carbs'],
-            fat: $verifiedNutrition['fat'],
-            fiber: null,
-            sugar: null,
-            sodium: null,
-        );
-
-        $correctedData = $this->applyCorrectionStrategy($aiEstimate, $verifiedData);
+        $correctedData = $this->applyCorrectionStrategy($aiEstimate, $verifiedNutrition);
 
         return new MealData(
             dayNumber: $mealData->dayNumber,
@@ -121,7 +111,7 @@ final readonly class CorrectMealNutrition
                     'carbs' => $mealData->carbsGrams,
                     'fat' => $mealData->fatGrams,
                 ],
-                'verified_values' => $verifiedNutrition,
+                'verified_values' => $verifiedNutrition->toArray(),
                 'corrections_applied' => array_map(
                     fn (NutritionCorrectionData $correction): array => $correction->toArray(),
                     $correctedData->correctionsApplied
@@ -131,10 +121,7 @@ final readonly class CorrectMealNutrition
         );
     }
 
-    /**
-     * @return array{calories: float, protein: float, carbs: float, fat: float}|null
-     */
-    private function calculateAverageNutrition(IngredientVerificationResultData $verificationData): ?array
+    private function calculateAverageNutrition(IngredientVerificationResultData $verificationData): ?NutritionData
     {
         $totals = ['calories' => 0.0, 'protein' => 0.0, 'carbs' => 0.0, 'fat' => 0.0];
         $count = 0;
@@ -159,12 +146,15 @@ final readonly class CorrectMealNutrition
             return null;
         }
 
-        return [
-            'calories' => $totals['calories'] / $count,
-            'protein' => $totals['protein'] / $count,
-            'carbs' => $totals['carbs'] / $count,
-            'fat' => $totals['fat'] / $count,
-        ];
+        return new NutritionData(
+            calories: $totals['calories'] / $count,
+            protein: $totals['protein'] / $count,
+            carbs: $totals['carbs'] / $count,
+            fat: $totals['fat'] / $count,
+            fiber: null,
+            sugar: null,
+            sodium: null,
+        );
     }
 
     private function applyCorrectionStrategy(NutritionData $aiEstimate, NutritionData $verifiedData): CorrectedNutritionData
