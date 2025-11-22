@@ -58,7 +58,7 @@ final readonly class VerifyIngredientNutrition
         $verified = $verificationRate > 0.5;
 
         $matchedIngredients = array_filter($verifiedIngredients, fn (VerifiedIngredientData $i): bool => $i->matched);
-        $sources = array_map(fn (VerifiedIngredientData $i): string => $i->nutritionPer100g?->source ?? '', $matchedIngredients);
+        $sources = array_map(fn (VerifiedIngredientData $i): string => $i->nutritionPer100g->source ?? '', $matchedIngredients);
         $sources = array_filter($sources);
         /** @var array<string, int<1, max>> $sourceCount */
         $sourceCount = array_count_values($sources);

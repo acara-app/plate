@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\DataObjects\CorrectedNutritionData;
 use App\DataObjects\IngredientVerificationResultData;
 use App\DataObjects\MealData;
+use App\DataObjects\NutritionCorrectionData;
+use App\DataObjects\NutritionData;
 use App\DataObjects\NutritionWithSourceData;
 
 final readonly class CorrectMealNutrition
@@ -70,15 +73,27 @@ final readonly class CorrectMealNutrition
             );
         }
 
-        $correctedData = $this->applyCorrectionStrategy(
-            [
-                'calories' => $mealData->calories,
-                'protein' => $mealData->proteinGrams,
-                'carbs' => $mealData->carbsGrams,
-                'fat' => $mealData->fatGrams,
-            ],
-            $verifiedNutrition
+        $aiEstimate = new NutritionData(
+            calories: $mealData->calories,
+            protein: $mealData->proteinGrams,
+            carbs: $mealData->carbsGrams,
+            fat: $mealData->fatGrams,
+            fiber: null,
+            sugar: null,
+            sodium: null,
         );
+
+        $verifiedData = new NutritionData(
+            calories: $verifiedNutrition['calories'],
+            protein: $verifiedNutrition['protein'],
+            carbs: $verifiedNutrition['carbs'],
+            fat: $verifiedNutrition['fat'],
+            fiber: null,
+            sugar: null,
+            sodium: null,
+        );
+
+        $correctedData = $this->applyCorrectionStrategy($aiEstimate, $verifiedData);
 
         return new MealData(
             dayNumber: $mealData->dayNumber,
@@ -88,10 +103,10 @@ final readonly class CorrectMealNutrition
             preparationInstructions: $mealData->preparationInstructions,
             ingredients: $mealData->ingredients,
             portionSize: $mealData->portionSize,
-            calories: $correctedData['calories'],
-            proteinGrams: $correctedData['protein'],
-            carbsGrams: $correctedData['carbs'],
-            fatGrams: $correctedData['fat'],
+            calories: $correctedData->calories,
+            proteinGrams: $correctedData->protein,
+            carbsGrams: $correctedData->carbs,
+            fatGrams: $correctedData->fat,
             preparationTimeMinutes: $mealData->preparationTimeMinutes,
             sortOrder: $mealData->sortOrder,
             metadata: $mealData->metadata,
@@ -107,7 +122,10 @@ final readonly class CorrectMealNutrition
                     'fat' => $mealData->fatGrams,
                 ],
                 'verified_values' => $verifiedNutrition,
-                'corrections_applied' => $correctedData['corrections_applied'],
+                'corrections_applied' => array_map(
+                    fn (NutritionCorrectionData $correction): array => $correction->toArray(),
+                    $correctedData->correctionsApplied
+                ),
                 'verified_ingredients' => $verificationData->verifiedIngredients->toArray(),
             ],
         );
@@ -149,29 +167,24 @@ final readonly class CorrectMealNutrition
         ];
     }
 
-    /**
-     * @param  array{calories: float, protein: float|null, carbs: float|null, fat: float|null}  $aiEstimate
-     * @param  array{calories: float, protein: float, carbs: float, fat: float}  $verifiedData
-     * @return array{calories: float, protein: float, carbs: float, fat: float, corrections_applied: array<string, array{original: float, verified: float, corrected: float, discrepancy_percent: float}>}
-     */
-    private function applyCorrectionStrategy(array $aiEstimate, array $verifiedData): array
+    private function applyCorrectionStrategy(NutritionData $aiEstimate, NutritionData $verifiedData): CorrectedNutritionData
     {
         $corrected = [];
         $corrections = [];
         $discrepancyThreshold = 15.0;
 
         foreach (['calories', 'protein', 'carbs', 'fat'] as $nutrient) {
-            $ai = $aiEstimate[$nutrient] ?? 0.0;
-            $verified = $verifiedData[$nutrient];
+            $ai = $aiEstimate->$nutrient ?? 0.0;
+            $verified = $verifiedData->$nutrient ?? 0.0;
 
             if ($ai <= 0) {
                 $corrected[$nutrient] = $verified;
-                $corrections[$nutrient] = [
-                    'original' => $ai,
-                    'verified' => $verified,
-                    'corrected' => $verified,
-                    'discrepancy_percent' => 100.0,
-                ];
+                $corrections[$nutrient] = new NutritionCorrectionData(
+                    original: $ai,
+                    verified: $verified,
+                    corrected: $verified,
+                    discrepancyPercent: 100.0,
+                );
 
                 continue;
             }
@@ -180,23 +193,23 @@ final readonly class CorrectMealNutrition
 
             if ($discrepancy > $discrepancyThreshold) {
                 $corrected[$nutrient] = round($ai * 0.7 + $verified * 0.3, 2);
-                $corrections[$nutrient] = [
-                    'original' => $ai,
-                    'verified' => $verified,
-                    'corrected' => $corrected[$nutrient],
-                    'discrepancy_percent' => round($discrepancy, 2),
-                ];
+                $corrections[$nutrient] = new NutritionCorrectionData(
+                    original: $ai,
+                    verified: $verified,
+                    corrected: $corrected[$nutrient],
+                    discrepancyPercent: round($discrepancy, 2),
+                );
             } else {
                 $corrected[$nutrient] = $ai;
             }
         }
 
-        return [
-            'calories' => $corrected['calories'],
-            'protein' => $corrected['protein'],
-            'carbs' => $corrected['carbs'],
-            'fat' => $corrected['fat'],
-            'corrections_applied' => $corrections,
-        ];
+        return new CorrectedNutritionData(
+            calories: $corrected['calories'],
+            protein: $corrected['protein'],
+            carbs: $corrected['carbs'],
+            fat: $corrected['fat'],
+            correctionsApplied: $corrections,
+        );
     }
 }
