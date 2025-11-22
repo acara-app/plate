@@ -362,13 +362,7 @@
                                 </svg>
                             </summary>
                             <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
-                                Acara Plate uses a hybrid verification system combining AI with <a
-                                    href="https://world.openfoodfacts.org/" target="_blank"
-                                    class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">OpenFoodFacts</a>,
-                                the world's largest open food database with over 3 million products. Each ingredient is
-                                automatically cross-referenced against verified product data, and nutritional estimates
-                                are corrected when discrepancies exceed 15%. Every meal includes verification metadata
-                                showing confidence scores and data sources.
+                                Acara Plate uses AI-generated meal plans with carefully selected ingredients from the USDA FoodData Central database. We strive for accuracy by leveraging established nutritional data sources. However, since meal plans are AI-generated, we recommend verifying key nutritional information and consulting with your healthcare provider for personalized dietary guidance.
                             </p>
                         </details>
 
@@ -384,11 +378,7 @@
                                 </svg>
                             </summary>
                             <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
-                                Yes, AI can occasionally hallucinate or estimate incorrectly. That's why we verify all
-                                ingredients against OpenFoodFacts' real product database. When AI generates a meal plan,
-                                we automatically validate each ingredient's nutritional values and apply corrections
-                                when needed. This reduces hallucination risk while maintaining meal personalization.
-                                Always verify ingredients for allergens and consult your healthcare provider.
+                                Yes, AI can occasionally hallucinate or generate incorrect information about food, ingredients, or nutritional values. This is a known limitation of language models. We recommend always verifying key ingredients for allergens and consulting your healthcare provider before making significant dietary changes based on meal plan suggestions.
                             </p>
                         </details>
 
@@ -437,28 +427,6 @@
                             class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
-                                <span>What is OpenFoodFacts and why do you use it?</span>
-                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </summary>
-                            <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
-                                <a href="https://world.openfoodfacts.org/" target="_blank"
-                                    class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">OpenFoodFacts</a>
-                                is a collaborative, free, and open database of food products from around the world,
-                                similar to Wikipedia for food. Instead of building our own nutrition database (which
-                                would require millions of products), we leverage this community-driven resource to
-                                verify AI-generated nutritional data. This gives you access to real product information
-                                while keeping the platform free and transparent.
-                            </p>
-                        </details>
-
-                        <details
-                            class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
-                            <summary
-                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
                                 <span>How do you ensure nutritional accuracy?</span>
                                 <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -467,9 +435,8 @@
                                 </svg>
                             </summary>
                             <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
-                                We use a dual-source verification system for maximum accuracy. For whole foods like bananas, chicken breast, and rice, we reference the <a href="https://fdc.nal.usda.gov/" target="_blank"
-                                    class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">USDA FoodData Central</a> database—the scientific gold standard for nutrition. For packaged products, we cross-reference <a href="https://world.openfoodfacts.org/" target="_blank"
-                                    class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">OpenFoodFacts</a>, a community-driven database with millions of products. This layered approach ensures your meal plans are built on verified, reliable nutritional data rather than estimates.
+                                We reference the <a href="https://fdc.nal.usda.gov/" target="_blank"
+                                    class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">USDA FoodData Central</a> database—the scientific gold standard for nutrition of whole foods like bananas, chicken breast, and rice. However, as meal plans are AI-generated, we recommend verifying nutritional information independently and consulting with your healthcare provider for personalized guidance.
                             </p>
                         </details>
 
