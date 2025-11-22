@@ -22,17 +22,17 @@ it('returns empty analysis when no glucose readings exist', function (): void {
     $result = $this->action->handle($this->user);
 
     expect($result)
-        ->toHaveKey('hasData', false)
-        ->toHaveKey('totalReadings', 0)
-        ->toHaveKey('daysAnalyzed', 30)
-        ->toHaveKey('averages.overall', null)
-        ->toHaveKey('timeInRange.percentage', 0.0)
-        ->toHaveKey('variability.stdDev', null)
-        ->toHaveKey('trend.direction', null)
-        ->and($result['insights'])->toContain('No glucose data recorded in the past 30 days')
-        ->and($result['concerns'])->toBeEmpty()
-        ->and($result['glucoseGoals']['target'])->toBe('Establish baseline glucose monitoring')
-        ->and($result['glucoseGoals']['reasoning'])->toBe('Insufficient data to determine specific glucose management goals');
+        ->hasData->toBeFalse()
+        ->totalReadings->toBe(0)
+        ->daysAnalyzed->toBe(30)
+        ->averages->overall->toBeNull()
+        ->timeInRange->percentage->toBe(0.0)
+        ->variability->stdDev->toBeNull()
+        ->trend->direction->toBeNull()
+        ->and($result->insights)->toContain('No glucose data recorded in the past 30 days')
+        ->and($result->concerns)->toBeEmpty()
+        ->and($result->glucoseGoals->target)->toBe('Establish baseline glucose monitoring')
+        ->and($result->glucoseGoals->reasoning)->toBe('Insufficient data to determine specific glucose management goals');
 });
 
 it('calculates average glucose levels correctly', function (): void {
@@ -62,11 +62,11 @@ it('calculates average glucose levels correctly', function (): void {
     $result = $this->action->handle($this->user);
 
     expect($result)
-        ->toHaveKey('hasData', true)
-        ->toHaveKey('totalReadings', 3)
-        ->and($result['averages']['fasting'])->toBe(100.0)
-        ->and($result['averages']['postMeal'])->toBe(140.0)
-        ->and($result['averages']['overall'])->toBe(113.3);
+        ->hasData->toBeTrue()
+        ->totalReadings->toBe(3)
+        ->and($result->averages->fasting)->toBe(100.0)
+        ->and($result->averages->postMeal)->toBe(140.0)
+        ->and($result->averages->overall)->toBe(113.3);
 });
 
 it('detects consistently high glucose pattern', function (): void {
@@ -82,22 +82,22 @@ it('detects consistently high glucose pattern', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['patterns']['consistentlyHigh'])->toBeTrue()
-        ->and($result['timeInRange']['abovePercentage'])->toBeGreaterThan(50)
-        ->and($result['patterns']['hyperglycemiaRisk'])->toBeIn(['moderate', 'high']);
+    expect($result->patterns->consistentlyHigh)->toBeTrue()
+        ->and($result->timeInRange->abovePercentage)->toBeGreaterThan(50)
+        ->and($result->patterns->hyperglycemiaRisk)->toBeIn(['moderate', 'high']);
 
     // With time in range < 50%, the goal should prioritize improving TIR
     // Otherwise it would be to lower average glucose
-    if ($result['timeInRange']['percentage'] < 50) {
-        expect($result['glucoseGoals']['target'])->toBe('Increase time in range to at least 70%');
+    if ($result->timeInRange->percentage < 50) {
+        expect($result->glucoseGoals->target)->toBe('Increase time in range to at least 70%');
     } else {
-        expect($result['glucoseGoals']['target'])->toBe('Lower average glucose to 70-100 mg/dL range');
+        expect($result->glucoseGoals->target)->toBe('Lower average glucose to 70-100 mg/dL range');
     }
 
     // Check concern message with null guard
     $concernFound = false;
-    foreach ($result['concerns'] as $concern) {
-        if (str_contains((string) $concern, 'Consistently elevated glucose levels') && str_contains((string) $concern, $result['averages']['overall'].' mg/dL')) {
+    foreach ($result->concerns as $concern) {
+        if (str_contains((string) $concern, 'Consistently elevated glucose levels') && str_contains((string) $concern, $result->averages->overall.' mg/dL')) {
             $concernFound = true;
             break;
         }
@@ -128,9 +128,9 @@ it('detects post-meal spikes pattern', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['patterns']['postMealSpikes'])->toBeTrue()
-        ->and($result['concerns'])->toContain('Frequent post-meal glucose spikes detected, suggesting sensitivity to certain carbohydrate sources')
-        ->and($result['glucoseGoals']['target'])->toBe('Reduce post-meal glucose spikes to below 140 mg/dL');
+    expect($result->patterns->postMealSpikes)->toBeTrue()
+        ->and($result->concerns)->toContain('Frequent post-meal glucose spikes detected, suggesting sensitivity to certain carbohydrate sources')
+        ->and($result->glucoseGoals->target)->toBe('Reduce post-meal glucose spikes to below 140 mg/dL');
 });
 
 it('detects high variability pattern', function (): void {
@@ -148,12 +148,12 @@ it('detects high variability pattern', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['patterns']['highVariability'])->toBeTrue()
-        ->and($result['variability']['stdDev'])->toBeGreaterThan(30);
+    expect($result->patterns->highVariability)->toBeTrue()
+        ->and($result->variability->stdDev)->toBeGreaterThan(30);
 
     // Check that variability insight exists
     $hasVariabilityInsight = false;
-    foreach ($result['insights'] as $insight) {
+    foreach ($result->insights as $insight) {
         if (str_contains((string) $insight, 'variability')) {
             $hasVariabilityInsight = true;
             break;
@@ -182,8 +182,8 @@ it('only analyzes readings within specified time period', function (): void {
     $result = $this->action->handle($this->user, 30);
 
     expect($result)
-        ->toHaveKey('totalReadings', 1)
-        ->and($result['averages']['fasting'])->toBe(120.0);
+        ->totalReadings->toBe(1)
+        ->and($result->averages->fasting)->toBe(120.0);
 });
 
 it('provides default recommendations when glucose is well controlled', function (): void {
@@ -199,8 +199,8 @@ it('provides default recommendations when glucose is well controlled', function 
 
     $result = $this->action->handle($this->user);
 
-    expect($result['glucoseGoals']['target'])->toBe('Maintain current glucose control within healthy ranges')
-        ->and($result['glucoseGoals']['reasoning'])->toContain('well-managed');
+    expect($result->glucoseGoals->target)->toBe('Maintain current glucose control')
+        ->and($result->glucoseGoals->reasoning)->toContain('good control');
 });
 
 it('detects consistently low glucose pattern', function (): void {
@@ -216,15 +216,15 @@ it('detects consistently low glucose pattern', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['patterns']['consistentlyLow'])->toBeTrue()
-        ->and($result['timeInRange']['belowPercentage'])->toBeGreaterThan(10)
-        ->and($result['patterns']['hypoglycemiaRisk'])->toBeIn(['moderate', 'high'])
-        ->and($result['glucoseGoals']['target'])->toBe('Maintain glucose levels above 70 mg/dL');
+    expect($result->patterns->consistentlyLow)->toBeTrue()
+        ->and($result->timeInRange->belowPercentage)->toBeGreaterThan(10)
+        ->and($result->patterns->hypoglycemiaRisk)->toBeIn(['moderate', 'high'])
+        ->and($result->glucoseGoals->target)->toBe('Maintain glucose levels above 70 mg/dL');
 
     // Check concern message exists with actual value
     $concernFound = false;
-    foreach ($result['concerns'] as $concern) {
-        if (str_contains((string) $concern, 'Consistently low glucose levels') && str_contains((string) $concern, $result['averages']['overall'].' mg/dL')) {
+    foreach ($result->concerns as $concern) {
+        if (str_contains((string) $concern, 'Consistently low glucose levels') && str_contains((string) $concern, $result->averages->overall.' mg/dL')) {
             $concernFound = true;
             break;
         }
@@ -250,8 +250,8 @@ it('classifies low fasting glucose correctly', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['averages']['fasting'])->toBe(62.5)
-        ->and($result['insights'])->toContain('Average fasting glucose: 62.5 mg/dL (low)');
+    expect($result->averages->fasting)->toBe(62.5)
+        ->and($result->insights)->toContain('Average fasting glucose: 62.5 mg/dL (low)');
 });
 
 it('identifies concern for high fasting glucose', function (): void {
@@ -267,7 +267,7 @@ it('identifies concern for high fasting glucose', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['concerns'])->toContain('Elevated fasting glucose ('.$result['averages']['fasting'].' mg/dL) may be influenced by evening eating patterns');
+    expect($result->concerns)->toContain('Elevated fasting glucose ('.$result->averages->fasting.' mg/dL) may be influenced by evening eating patterns');
 });
 
 it('classifies elevated fasting glucose correctly', function (): void {
@@ -288,7 +288,7 @@ it('classifies elevated fasting glucose correctly', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['insights'])->toContain('Average fasting glucose: 112.5 mg/dL (elevated)');
+    expect($result->insights)->toContain('Average fasting glucose: 112.5 mg/dL (elevated)');
 });
 
 it('classifies high fasting glucose correctly', function (): void {
@@ -309,11 +309,11 @@ it('classifies high fasting glucose correctly', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['averages']['fasting'])->toBe(135.0);
+    expect($result->averages->fasting)->toBe(135.0);
 
     // Check that high fasting glucose is detected
     $hasHighFastingInsight = false;
-    foreach ($result['insights'] as $insight) {
+    foreach ($result->insights as $insight) {
         if (str_contains((string) $insight, 'fasting') && str_contains((string) $insight, 'high')) {
             $hasHighFastingInsight = true;
             break;
@@ -341,11 +341,11 @@ it('classifies elevated post-meal glucose correctly', function (): void {
     $result = $this->action->handle($this->user);
 
     // Check that post-meal average is calculated and classified as elevated
-    expect($result['averages']['postMeal'])->toBe(155.0);
+    expect($result->averages->postMeal)->toBe(155.0);
 
     // Check that at least one insight mentions post-meal glucose
     $hasPostMealInsight = false;
-    foreach ($result['insights'] as $insight) {
+    foreach ($result->insights as $insight) {
         if (str_contains((string) $insight, 'post-meal') && str_contains((string) $insight, 'elevated')) {
             $hasPostMealInsight = true;
             break;
@@ -365,9 +365,9 @@ it('handles single glucose reading correctly', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['hasData'])->toBeTrue()
-        ->and($result['totalReadings'])->toBe(1)
-        ->and($result['patterns']['highVariability'])->toBeFalse(); // Should not have high variability with only 1 reading
+    expect($result->hasData)->toBeTrue()
+        ->and($result->totalReadings)->toBe(1)
+        ->and($result->patterns->highVariability)->toBeFalse(); // Should not have high variability with only 1 reading
 });
 
 // New tests for enhanced features
@@ -403,12 +403,12 @@ it('calculates time in range percentages correctly', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['timeInRange']['percentage'])->toBe(50.0)
-        ->and($result['timeInRange']['abovePercentage'])->toBe(30.0)
-        ->and($result['timeInRange']['belowPercentage'])->toBe(20.0)
-        ->and($result['timeInRange']['inRangeCount'])->toBe(5)
-        ->and($result['timeInRange']['aboveRangeCount'])->toBe(3)
-        ->and($result['timeInRange']['belowRangeCount'])->toBe(2);
+    expect($result->timeInRange->percentage)->toBe(50.0)
+        ->and($result->timeInRange->abovePercentage)->toBe(30.0)
+        ->and($result->timeInRange->belowPercentage)->toBe(20.0)
+        ->and($result->timeInRange->inRangeCount)->toBe(5)
+        ->and($result->timeInRange->aboveRangeCount)->toBe(3)
+        ->and($result->timeInRange->belowRangeCount)->toBe(2);
 });
 
 it('detects rising glucose trend', function (): void {
@@ -424,12 +424,12 @@ it('detects rising glucose trend', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['trend']['direction'])->toBe('rising')
-        ->and($result['trend']['slopePerWeek'])->toBeGreaterThan(0);
+    expect($result->trend->direction)->toBe('rising')
+        ->and($result->trend->slopePerWeek)->toBeGreaterThan(0);
 
     // Check for trending insight
     $hasTrendInsight = false;
-    foreach ($result['insights'] as $insight) {
+    foreach ($result->insights as $insight) {
         if (str_contains((string) $insight, 'rising')) {
             $hasTrendInsight = true;
             break;
@@ -451,8 +451,8 @@ it('detects falling glucose trend', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['trend']['direction'])->toBe('falling')
-        ->and($result['trend']['slopePerWeek'])->toBeLessThan(0);
+    expect($result->trend->direction)->toBe('falling')
+        ->and($result->trend->slopePerWeek)->toBeLessThan(0);
 });
 
 it('detects stable glucose trend', function (): void {
@@ -468,7 +468,7 @@ it('detects stable glucose trend', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['trend']['direction'])->toBe('stable');
+    expect($result->trend->direction)->toBe('stable');
 });
 
 it('analyzes time of day patterns correctly', function (): void {
@@ -512,12 +512,12 @@ it('analyzes time of day patterns correctly', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['timeOfDay']['morning']['count'])->toBe(2)
-        ->and($result['timeOfDay']['morning']['average'])->toBe(95.0)
-        ->and($result['timeOfDay']['afternoon']['count'])->toBe(1)
-        ->and($result['timeOfDay']['afternoon']['average'])->toBe(120.0)
-        ->and($result['timeOfDay']['evening']['count'])->toBe(1)
-        ->and($result['timeOfDay']['night']['count'])->toBe(1);
+    expect($result->timeOfDay->morning->count)->toBe(2)
+        ->and($result->timeOfDay->morning->average)->toBe(95.0)
+        ->and($result->timeOfDay->afternoon->count)->toBe(1)
+        ->and($result->timeOfDay->afternoon->average)->toBe(120.0)
+        ->and($result->timeOfDay->evening->count)->toBe(1)
+        ->and($result->timeOfDay->night->count)->toBe(1);
 });
 
 it('analyzes reading type frequency correctly', function (): void {
@@ -551,11 +551,11 @@ it('analyzes reading type frequency correctly', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['readingTypes'])->toHaveKey('fasting')
-        ->and($result['readingTypes']['fasting']['count'])->toBe(5)
-        ->and($result['readingTypes']['fasting']['percentage'])->toBe(50.0)
-        ->and($result['readingTypes']['post-meal']['count'])->toBe(3)
-        ->and($result['readingTypes']['post-meal']['percentage'])->toBe(30.0);
+    expect($result->readingTypes)->toHaveKey('fasting')
+        ->and($result->readingTypes['fasting']->count)->toBe(5)
+        ->and($result->readingTypes['fasting']->percentage)->toBe(50.0)
+        ->and($result->readingTypes['post-meal']->count)->toBe(3)
+        ->and($result->readingTypes['post-meal']->percentage)->toBe(30.0);
 });
 
 it('calculates coefficient of variation correctly', function (): void {
@@ -573,8 +573,8 @@ it('calculates coefficient of variation correctly', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['variability']['coefficientOfVariation'])->toBeGreaterThan(0)
-        ->and($result['variability']['classification'])->toBeIn(['stable', 'moderate', 'high']);
+    expect($result->variability->coefficientOfVariation)->toBeGreaterThan(0)
+        ->and($result->variability->classification)->toBeIn(['stable', 'moderate', 'high']);
 });
 
 it('classifies variability correctly', function (): void {
@@ -590,7 +590,7 @@ it('classifies variability correctly', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['variability']['classification'])->toBe('stable');
+    expect($result->variability->classification)->toBe('stable');
 });
 
 it('correctly identifies hypoglycemia risk levels', function (): void {
@@ -615,8 +615,8 @@ it('correctly identifies hypoglycemia risk levels', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['patterns']['hypoglycemiaRisk'])->toBe('high')
-        ->and($result['timeInRange']['belowPercentage'])->toBe(12.0);
+    expect($result->patterns->hypoglycemiaRisk)->toBe('high')
+        ->and($result->timeInRange->belowPercentage)->toBe(12.0);
 });
 
 it('uses actual days analyzed in insights', function (): void {
@@ -633,11 +633,11 @@ it('uses actual days analyzed in insights', function (): void {
     $result = $this->action->handle($this->user, 30);
 
     // Should mention actual days, not hard-coded "30 days"
-    expect($result['daysAnalyzed'])->toBeGreaterThan(0);
+    expect($result->daysAnalyzed)->toBeGreaterThan(0);
 
     $hasCorrectDaysInsight = false;
-    foreach ($result['insights'] as $insight) {
-        if (str_contains((string) $insight, $result['daysAnalyzed'].' day')) {
+    foreach ($result->insights as $insight) {
+        if (str_contains((string) $insight, $result->daysAnalyzed.' day')) {
             $hasCorrectDaysInsight = true;
             break;
         }
@@ -660,7 +660,7 @@ it('classifies moderate variability correctly', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['variability']['classification'])->toBe('moderate');
+    expect($result->variability->classification)->toBe('moderate');
 });
 
 it('classifies high variability correctly', function (): void {
@@ -678,7 +678,7 @@ it('classifies high variability correctly', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['variability']['classification'])->toBe('high');
+    expect($result->variability->classification)->toBe('high');
 });
 
 it('generates insight when coefficient of variation is null', function (): void {
@@ -692,7 +692,7 @@ it('generates insight when coefficient of variation is null', function (): void 
 
     $result = $this->action->handle($this->user);
 
-    expect($result['variability']['coefficientOfVariation'])->toBeNull();
+    expect($result->variability->coefficientOfVariation)->toBeNull();
 });
 
 it('includes moderate hypoglycemia risk in insights', function (): void {
@@ -717,10 +717,10 @@ it('includes moderate hypoglycemia risk in insights', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['patterns']['hypoglycemiaRisk'])->toBe('moderate');
+    expect($result->patterns->hypoglycemiaRisk)->toBe('moderate');
 
     $hasHypoglycemiaInsight = false;
-    foreach ($result['insights'] as $insight) {
+    foreach ($result->insights as $insight) {
         if (str_contains((string) $insight, 'Moderate') && str_contains((string) $insight, 'hypoglycemia')) {
             $hasHypoglycemiaInsight = true;
             break;
@@ -751,10 +751,10 @@ it('includes moderate hyperglycemia risk in insights', function (): void {
 
     $result = $this->action->handle($this->user);
 
-    expect($result['patterns']['hyperglycemiaRisk'])->toBe('moderate');
+    expect($result->patterns->hyperglycemiaRisk)->toBe('moderate');
 
     $hasHyperglycemiaInsight = false;
-    foreach ($result['insights'] as $insight) {
+    foreach ($result->insights as $insight) {
         if (str_contains((string) $insight, 'Moderate') && str_contains((string) $insight, 'hyperglycemia')) {
             $hasHyperglycemiaInsight = true;
             break;
@@ -786,7 +786,7 @@ it('generates concern for low time in range', function (): void {
     $result = $this->action->handle($this->user);
 
     $hasTIRConcern = false;
-    foreach ($result['concerns'] as $concern) {
+    foreach ($result->concerns as $concern) {
         if (str_contains((string) $concern, 'Low time in range')) {
             $hasTIRConcern = true;
             break;
@@ -809,10 +809,10 @@ it('generates insight for falling trend with absolute slope', function (): void 
 
     $result = $this->action->handle($this->user);
 
-    expect($result['trend']['direction'])->toBe('falling');
+    expect($result->trend->direction)->toBe('falling');
 
     $hasFallingInsight = false;
-    foreach ($result['insights'] as $insight) {
+    foreach ($result->insights as $insight) {
         if (str_contains((string) $insight, 'decreasing') && str_contains((string) $insight, 'per week')) {
             $hasFallingInsight = true;
             break;
@@ -845,7 +845,7 @@ it('generates goal for addressing post-meal spikes when postMeal average exists'
 
     $result = $this->action->handle($this->user);
 
-    expect($result['glucoseGoals']['target'])->toContain('post-meal');
+    expect($result->glucoseGoals->target)->toContain('post-meal');
 });
 
 it('generates goal for addressing rising trend when slope is significant', function (): void {
@@ -864,7 +864,7 @@ it('generates goal for addressing rising trend when slope is significant', funct
     $result = $this->action->handle($this->user);
 
     // Check if rising trend goal is present
-    expect($result['glucoseGoals']['target'])->toContain('rising');
+    expect($result->glucoseGoals->target)->toContain('rising');
 });
 
 it('generates well-controlled maintenance goal when glucose is optimal', function (): void {
@@ -881,6 +881,5 @@ it('generates well-controlled maintenance goal when glucose is optimal', functio
     $result = $this->action->handle($this->user);
 
     // With all readings at 100, we should get the maintenance goal
-    expect($result['glucoseGoals'])->toBeArray();
-    expect($result['glucoseGoals']['target'])->toContain('Maintain');
+    expect($result->glucoseGoals->target)->toContain('Maintain');
 });

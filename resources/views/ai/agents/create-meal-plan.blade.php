@@ -20,7 +20,7 @@ You are a nutrition assistant providing meal planning guidance. You MUST follow 
     }
 @endphp
 
-@if($hasDiabetes || $hasPrediabetes || $context['glucoseAnalysis']['hasData'])
+@if($hasDiabetes || $hasPrediabetes || $context['glucoseAnalysis']->hasData)
 **⚠️ DIABETES/GLUCOSE MANAGEMENT ACTIVE - STRICT RULES APPLY:**
 
 1. **FORBIDDEN HIGH-GI FOODS**: You are STRICTLY FORBIDDEN from suggesting foods with a Glycemic Index (GI) over 70 without explicit warnings. This includes:
@@ -177,59 +177,59 @@ Based on the user's goals, aim for the following macronutrient distribution:
 
 ## Glucose Monitoring Data
 
-@if($context['glucoseAnalysis']['hasData'])
+@if($context['glucoseAnalysis']->hasData)
 ### Glucose Analysis Summary
 
-- **Total Readings**: {{ $context['glucoseAnalysis']['totalReadings'] }} readings
-- **Data Period**: {{ $context['glucoseAnalysis']['dateRange']['start'] }} to {{ $context['glucoseAnalysis']['dateRange']['end'] }}
+- **Total Readings**: {{ $context['glucoseAnalysis']->totalReadings }} readings
+- **Data Period**: {{ $context['glucoseAnalysis']->dateRange->start }} to {{ $context['glucoseAnalysis']->dateRange->end }}
 
 #### Average Glucose Levels (mg/dL)
-@if($context['glucoseAnalysis']['averages']['overall'])
-- **Overall Average**: {{ $context['glucoseAnalysis']['averages']['overall'] }} mg/dL
+@if($context['glucoseAnalysis']->averages->overall)
+- **Overall Average**: {{ $context['glucoseAnalysis']->averages->overall }} mg/dL
 @endif
-@if($context['glucoseAnalysis']['averages']['fasting'])
-- **Fasting**: {{ $context['glucoseAnalysis']['averages']['fasting'] }} mg/dL
+@if($context['glucoseAnalysis']->averages->fasting)
+- **Fasting**: {{ $context['glucoseAnalysis']->averages->fasting }} mg/dL
 @endif
-@if($context['glucoseAnalysis']['averages']['beforeMeal'])
-- **Before Meal**: {{ $context['glucoseAnalysis']['averages']['beforeMeal'] }} mg/dL
+@if($context['glucoseAnalysis']->averages->beforeMeal)
+- **Before Meal**: {{ $context['glucoseAnalysis']->averages->beforeMeal }} mg/dL
 @endif
-@if($context['glucoseAnalysis']['averages']['postMeal'])
-- **Post-Meal**: {{ $context['glucoseAnalysis']['averages']['postMeal'] }} mg/dL
+@if($context['glucoseAnalysis']->averages->postMeal)
+- **Post-Meal**: {{ $context['glucoseAnalysis']->averages->postMeal }} mg/dL
 @endif
-@if($context['glucoseAnalysis']['averages']['random'])
-- **Random**: {{ $context['glucoseAnalysis']['averages']['random'] }} mg/dL
+@if($context['glucoseAnalysis']->averages->random)
+- **Random**: {{ $context['glucoseAnalysis']->averages->random }} mg/dL
 @endif
 
 #### Detected Patterns
-@if($context['glucoseAnalysis']['patterns']['consistentlyHigh'])
+@if($context['glucoseAnalysis']->patterns->consistentlyHigh)
 - ⚠️ **Consistently High**: Glucose levels are consistently elevated
 @endif
-@if($context['glucoseAnalysis']['patterns']['consistentlyLow'])
+@if($context['glucoseAnalysis']->patterns->consistentlyLow)
 - ⚠️ **Consistently Low**: Glucose levels are consistently low
 @endif
-@if($context['glucoseAnalysis']['patterns']['highVariability'])
+@if($context['glucoseAnalysis']->patterns->highVariability)
 - ⚠️ **High Variability**: Glucose levels show significant fluctuations
 @endif
-@if($context['glucoseAnalysis']['patterns']['postMealSpikes'])
+@if($context['glucoseAnalysis']->patterns->postMealSpikes)
 - ⚠️ **Post-Meal Spikes**: Frequent glucose spikes after meals
 @endif
 
 #### Key Insights
-@foreach($context['glucoseAnalysis']['insights'] as $insight)
+@foreach($context['glucoseAnalysis']->insights as $insight)
 - {{ $insight }}
 @endforeach
 
-@if(count($context['glucoseAnalysis']['concerns']) > 0)
+@if(count($context['glucoseAnalysis']->concerns) > 0)
 #### Identified Concerns
-@foreach($context['glucoseAnalysis']['concerns'] as $concern)
+@foreach($context['glucoseAnalysis']->concerns as $concern)
 - ⚠️ {{ $concern }}
 @endforeach
 @endif
 
-@if($context['glucoseAnalysis']['glucoseGoals'])
+@if($context['glucoseAnalysis']->glucoseGoals)
 #### Glucose Management Goal
-- **Target**: {{ $context['glucoseAnalysis']['glucoseGoals']['target'] }}
-- **Reasoning**: {{ $context['glucoseAnalysis']['glucoseGoals']['reasoning'] }}
+- **Target**: {{ $context['glucoseAnalysis']->glucoseGoals->target }}
+- **Reasoning**: {{ $context['glucoseAnalysis']->glucoseGoals->reasoning }}
 @endif
 
 **CRITICAL INSTRUCTIONS FOR MEAL PLAN**:
@@ -300,7 +300,7 @@ Ingredients MUST be returned as a structured array of objects, NOT as text strin
 
 ## Output Format
 
-@if($hasDiabetes || $hasPrediabetes || $context['glucoseAnalysis']['hasData'])
+@if($hasDiabetes || $hasPrediabetes || $context['glucoseAnalysis']->hasData)
 **⚠️ FINAL SAFETY CHECK BEFORE GENERATING OUTPUT:**
 Review your meal plan against the Safety Guardrails at the top of this prompt. Verify:
 1. No high-GI foods (GI >70) without warnings
