@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\DataObjects\IngredientData;
+use App\DataObjects\IngredientVerificationResultData;
+use App\DataObjects\NutritionWithSourceData;
+use App\DataObjects\VerifiedIngredientData;
 use App\Enums\IngredientSpecificity;
 use App\Services\Contracts\FoodDataProviderInterface;
 use App\Services\FoodDataProviders\FoodDataProviderResolver;
 use Illuminate\Container\Attributes\Give;
+use Spatie\LaravelData\DataCollection;
 
 final readonly class VerifyIngredientNutrition
 {
@@ -17,64 +22,60 @@ final readonly class VerifyIngredientNutrition
     ) {}
 
     /**
-     * @param  array<int, array{name: string, quantity: string, specificity?: string, barcode?: string}>  $ingredients
-     * @return array{verified_ingredients: array<int, array{name: string, quantity: string, specificity: string, nutrition_per_100g: array{calories: float|null, protein: float|null, carbs: float|null, fat: float|null, fiber: float|null, sugar: float|null, sodium: float|null, source: string}|null, matched: bool}>, total_verified: int, verification_success: bool, verification_rate: float, verified: bool, source: string}
+     * @param  DataCollection<int, IngredientData>  $ingredients
      */
-    public function handle(array $ingredients): array
+    public function handle(DataCollection $ingredients): IngredientVerificationResultData
     {
         $verifiedIngredients = [];
         $successCount = 0;
 
         foreach ($ingredients as $ingredient) {
-            $specificityValue = $ingredient['specificity'] ?? 'generic';
+            $specificityValue = $ingredient->specificity ?? 'generic';
             $specificity = IngredientSpecificity::tryFrom($specificityValue) ?? IngredientSpecificity::Generic;
-            $barcode = $ingredient['barcode'] ?? null;
+            $barcode = $ingredient->barcode ?? null;
 
             $verifiedData = $this->verifyIngredient(
-                $ingredient['name'],
+                $ingredient->name,
                 $specificity,
                 $barcode
             );
 
-            $verifiedIngredients[] = [
-                'name' => $ingredient['name'],
-                'quantity' => $ingredient['quantity'],
-                'specificity' => $specificity->value,
-                'nutrition_per_100g' => $verifiedData,
-                'matched' => $verifiedData !== null,
-            ];
+            $verifiedIngredients[] = new VerifiedIngredientData(
+                name: $ingredient->name,
+                quantity: $ingredient->quantity,
+                specificity: $specificity->value,
+                nutritionPer100g: $verifiedData,
+                matched: $verifiedData instanceof NutritionWithSourceData,
+            );
 
-            if ($verifiedData !== null) {
+            if ($verifiedData instanceof NutritionWithSourceData) {
                 $successCount++;
             }
         }
 
-        $verificationRate = count($ingredients) > 0 ? $successCount / count($ingredients) : 0.0;
+        $totalIngredients = count($verifiedIngredients);
+        $verificationRate = $totalIngredients > 0 ? $successCount / $totalIngredients : 0.0;
         $verified = $verificationRate > 0.5;
 
-        /** @var array<int, array{name: string, quantity: string, specificity: string, nutrition_per_100g: array{calories: float|null, protein: float|null, carbs: float|null, fat: float|null, fiber: float|null, sugar: float|null, sodium: float|null, source: string}|null, matched: bool}> $verifiedIngredients */
-        $matchedIngredients = array_filter($verifiedIngredients, fn (array $i): bool => $i['matched']);
-        $sources = array_column($matchedIngredients, 'nutrition_per_100g');
-        $sourcesFlattened = array_column($sources, 'source');
+        $matchedIngredients = array_filter($verifiedIngredients, fn (VerifiedIngredientData $i): bool => $i->matched);
+        $sources = array_map(fn (VerifiedIngredientData $i): string => $i->nutritionPer100g?->source ?? '', $matchedIngredients);
+        $sources = array_filter($sources);
         /** @var array<string, int<1, max>> $sourceCount */
-        $sourceCount = array_count_values($sourcesFlattened);
+        $sourceCount = array_count_values($sources);
         arsort($sourceCount);
         $primarySource = array_key_first($sourceCount) ?? 'mixed';
 
-        return [
-            'verified_ingredients' => $verifiedIngredients,
-            'total_verified' => $successCount,
-            'verification_success' => $verified,
-            'verification_rate' => $verificationRate,
-            'verified' => $verified,
-            'source' => $primarySource,
-        ];
+        return new IngredientVerificationResultData(
+            verifiedIngredients: VerifiedIngredientData::collect($verifiedIngredients, DataCollection::class),
+            totalVerified: $successCount,
+            verificationSuccess: $verified,
+            verificationRate: $verificationRate,
+            verified: $verified,
+            source: $primarySource,
+        );
     }
 
-    /**
-     * @return array{calories: float|null, protein: float|null, carbs: float|null, fat: float|null, fiber: float|null, sugar: float|null, sodium: float|null, source: string}|null
-     */
-    private function verifyIngredient(string $ingredientName, IngredientSpecificity $specificity, ?string $barcode): ?array
+    private function verifyIngredient(string $ingredientName, IngredientSpecificity $specificity, ?string $barcode): ?NutritionWithSourceData
     {
         $searchResults = $this->foodDataProvider->searchWithSpecificity($ingredientName, $specificity, $barcode);
 
@@ -88,15 +89,15 @@ final readonly class VerifyIngredientNutrition
             return null; // @codeCoverageIgnore
         }
 
-        return [
-            'calories' => $bestMatch['calories'],
-            'protein' => $bestMatch['protein'],
-            'carbs' => $bestMatch['carbs'],
-            'fat' => $bestMatch['fat'],
-            'fiber' => $bestMatch['fiber'],
-            'sugar' => $bestMatch['sugar'],
-            'sodium' => $bestMatch['sodium'],
-            'source' => $bestMatch['source'],
-        ];
+        return new NutritionWithSourceData(
+            calories: $bestMatch['calories'],
+            protein: $bestMatch['protein'],
+            carbs: $bestMatch['carbs'],
+            fat: $bestMatch['fat'],
+            fiber: $bestMatch['fiber'],
+            sugar: $bestMatch['sugar'],
+            sodium: $bestMatch['sodium'],
+            source: $bestMatch['source'],
+        );
     }
 }

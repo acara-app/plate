@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Actions\VerifyIngredientNutrition;
+use App\DataObjects\IngredientData;
 use Illuminate\Support\Facades\Http;
+use Spatie\LaravelData\DataCollection;
 
 it('parses ingredients and verifies nutrition', function (): void {
     Http::fake([
@@ -23,19 +25,19 @@ it('parses ingredients and verifies nutrition', function (): void {
         ], 200),
     ]);
 
-    $ingredients = [
+    $ingredients = IngredientData::collect([
         ['name' => 'Chicken breast', 'quantity' => '150g', 'specificity' => 'specific'],
         ['name' => 'Brown rice', 'quantity' => '1 cup (185g)', 'specificity' => 'generic'],
         ['name' => 'Olive oil', 'quantity' => '1 tablespoon (15ml)', 'specificity' => 'generic'],
-    ];
+    ], DataCollection::class);
 
     $action = app(VerifyIngredientNutrition::class);
     $result = $action->handle($ingredients);
 
-    expect($result)
-        ->toBeArray()
-        ->toHaveKeys(['verified_ingredients', 'total_verified', 'verification_success', 'verification_rate'])
-        ->and($result['verified_ingredients'])->toHaveCount(3);
+    expect($result->verifiedIngredients)->toHaveCount(3)
+        ->and($result->totalVerified)->toBeInt()
+        ->and($result->verificationSuccess)->toBeBool()
+        ->and($result->verificationRate)->toBeFloat();
 });
 
 it('handles ingredients without quantities', function (): void {
@@ -43,19 +45,17 @@ it('handles ingredients without quantities', function (): void {
         '*' => Http::response(['products' => []], 200),
     ]);
 
-    $ingredients = [
+    $ingredients = IngredientData::collect([
         ['name' => 'Chicken breast', 'quantity' => 'some', 'specificity' => 'specific'],
         ['name' => 'Brown rice', 'quantity' => 'a handful', 'specificity' => 'generic'],
         ['name' => 'Olive oil', 'quantity' => 'drizzle', 'specificity' => 'generic'],
-    ];
+    ], DataCollection::class);
 
     $action = app(VerifyIngredientNutrition::class);
     $result = $action->handle($ingredients);
 
-    expect($result)
-        ->toBeArray()
-        ->and($result['verified_ingredients'])->toHaveCount(3)
-        ->and($result['verified_ingredients'][0])->toHaveKeys(['name', 'quantity', 'nutrition_per_100g', 'matched']);
+    expect($result->verifiedIngredients)->toHaveCount(3)
+        ->and($result->verifiedIngredients[0])->toHaveProperties(['name', 'quantity', 'nutritionPer100g', 'matched']);
 });
 
 it('marks verification as unsuccessful when no ingredients match', function (): void {
@@ -63,16 +63,16 @@ it('marks verification as unsuccessful when no ingredients match', function (): 
         '*' => Http::response(['products' => []], 200),
     ]);
 
-    $ingredients = [
+    $ingredients = IngredientData::collect([
         ['name' => 'Ingredient 1', 'quantity' => '100g', 'specificity' => 'generic'],
         ['name' => 'Ingredient 2', 'quantity' => '200g', 'specificity' => 'generic'],
-    ];
+    ], DataCollection::class);
 
     $action = app(VerifyIngredientNutrition::class);
     $result = $action->handle($ingredients);
 
-    expect($result['verification_success'])->toBeFalse()
-        ->and($result['verification_rate'])->toBe(0);
+    expect($result->verificationSuccess)->toBeFalse()
+        ->and($result->verificationRate)->toBe(0.0);
 });
 
 it('cleans ingredient names before searching', function (): void {
@@ -93,25 +93,23 @@ it('cleans ingredient names before searching', function (): void {
         ], 200),
     ]);
 
-    $ingredients = [
+    $ingredients = IngredientData::collect([
         ['name' => 'Fresh organic grilled chicken breast (boneless)', 'quantity' => '150g', 'specificity' => 'specific'],
-    ];
+    ], DataCollection::class);
 
     $action = app(VerifyIngredientNutrition::class);
     $result = $action->handle($ingredients);
 
-    expect($result['verified_ingredients'][0]['matched'])->toBeTrue();
+    expect($result->verifiedIngredients[0]->matched)->toBeTrue();
 });
 
 it('handles empty ingredients text', function (): void {
     $action = app(VerifyIngredientNutrition::class);
-    $result = $action->handle([]);
+    $result = $action->handle(IngredientData::collect([], DataCollection::class));
 
-    expect($result)
-        ->toBeArray()
-        ->and($result['verified_ingredients'])->toBeEmpty()
-        ->and($result['verification_success'])->toBeFalse()
-        ->and($result['verification_rate'])->toBe(0.0);
+    expect($result->verifiedIngredients)->toBeEmpty()
+        ->and($result->verificationSuccess)->toBeFalse()
+        ->and($result->verificationRate)->toBe(0.0);
 });
 
 it('handles API errors gracefully', function (): void {
@@ -119,15 +117,13 @@ it('handles API errors gracefully', function (): void {
         '*' => Http::response(null, 500),
     ]);
 
-    $ingredients = [
+    $ingredients = IngredientData::collect([
         ['name' => 'Chicken breast', 'quantity' => '150g', 'specificity' => 'specific'],
-    ];
+    ], DataCollection::class);
 
     $action = app(VerifyIngredientNutrition::class);
     $result = $action->handle($ingredients);
 
-    expect($result)
-        ->toBeArray()
-        ->and($result['verified_ingredients'])->toHaveCount(1)
-        ->and($result['verified_ingredients'][0]['matched'])->toBeFalse();
+    expect($result->verifiedIngredients)->toHaveCount(1)
+        ->and($result->verifiedIngredients[0]->matched)->toBeFalse();
 });

@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\DataObjects\IngredientVerificationResultData;
 use App\DataObjects\MealData;
+use App\DataObjects\NutritionWithSourceData;
 
 final readonly class CorrectMealNutrition
 {
-    /**
-     * @param  array{verified_ingredients: array<int, array{name: string, quantity: string|null, specificity: string, nutrition_per_100g: array{calories: float|null, protein: float|null, carbs: float|null, fat: float|null, fiber: float|null, sugar: float|null, sodium: float|null, source: string}|null, matched: bool}>, total_verified: int, verification_success: bool, verification_rate: float, verified?: bool, source?: string}  $verificationData
-     */
-    public function handle(MealData $mealData, array $verificationData): MealData
+    public function handle(MealData $mealData, IngredientVerificationResultData $verificationData): MealData
     {
-        $source = $verificationData['source'] ?? 'unknown';
+        $source = $verificationData->source;
 
-        if (! $verificationData['verification_success'] || $verificationData['verification_rate'] < 0.3) {
+        if (! $verificationData->verificationSuccess || $verificationData->verificationRate < 0.3) {
 
             return new MealData(
                 dayNumber: $mealData->dayNumber,
@@ -34,15 +33,15 @@ final readonly class CorrectMealNutrition
                 metadata: $mealData->metadata,
                 verificationMetadata: [
                     'verified' => false,
-                    'verification_rate' => $verificationData['verification_rate'],
+                    'verification_rate' => $verificationData->verificationRate,
                     'confidence' => 'low',
                     'source' => 'ai_estimate',
-                    'verified_ingredients' => $verificationData['verified_ingredients'],
+                    'verified_ingredients' => $verificationData->verifiedIngredients->toArray(),
                 ],
             );
         }
 
-        $verifiedNutrition = $this->calculateAverageNutrition($verificationData['verified_ingredients']);
+        $verifiedNutrition = $this->calculateAverageNutrition($verificationData);
 
         if ($verifiedNutrition === null) {
             return new MealData(
@@ -62,11 +61,11 @@ final readonly class CorrectMealNutrition
                 metadata: $mealData->metadata,
                 verificationMetadata: [
                     'verified' => false,
-                    'verification_rate' => $verificationData['verification_rate'],
+                    'verification_rate' => $verificationData->verificationRate,
                     'confidence' => 'medium',
                     'source' => 'ai_estimate',
                     'note' => 'Ingredients matched but nutrition data incomplete',
-                    'verified_ingredients' => $verificationData['verified_ingredients'],
+                    'verified_ingredients' => $verificationData->verifiedIngredients->toArray(),
                 ],
             );
         }
@@ -98,7 +97,7 @@ final readonly class CorrectMealNutrition
             metadata: $mealData->metadata,
             verificationMetadata: [
                 'verified' => true,
-                'verification_rate' => $verificationData['verification_rate'],
+                'verification_rate' => $verificationData->verificationRate,
                 'confidence' => 'high',
                 'source' => $source.'_verified',
                 'original_ai_values' => [
@@ -109,34 +108,37 @@ final readonly class CorrectMealNutrition
                 ],
                 'verified_values' => $verifiedNutrition,
                 'corrections_applied' => $correctedData['corrections_applied'],
-                'verified_ingredients' => $verificationData['verified_ingredients'],
+                'verified_ingredients' => $verificationData->verifiedIngredients->toArray(),
             ],
         );
     }
 
     /**
-     * @param  array<int, array{name: string, quantity: string|null, nutrition_per_100g: array{calories: float|null, protein: float|null, carbs: float|null, fat: float|null, fiber: float|null, sugar: float|null, sodium: float|null}|null, matched: bool}>  $verifiedIngredients
      * @return array{calories: float, protein: float, carbs: float, fat: float}|null
      */
-    private function calculateAverageNutrition(array $verifiedIngredients): ?array
+    private function calculateAverageNutrition(IngredientVerificationResultData $verificationData): ?array
     {
-        $matchedIngredients = array_filter($verifiedIngredients, fn (array $ing): bool => $ing['matched'] && $ing['nutrition_per_100g'] !== null);
-
-        if ($matchedIngredients === []) {
-            return null;
-        }
-
         $totals = ['calories' => 0.0, 'protein' => 0.0, 'carbs' => 0.0, 'fat' => 0.0];
         $count = 0;
 
-        foreach ($matchedIngredients as $ingredient) {
-            $nutrition = $ingredient['nutrition_per_100g'];
+        foreach ($verificationData->verifiedIngredients as $ingredient) {
+            if (! $ingredient->matched) {
+                continue; // @codeCoverageIgnore
+            }
+            if (! $ingredient->nutritionPer100g instanceof NutritionWithSourceData) {
+                continue; // @codeCoverageIgnore
+            }
+            $nutrition = $ingredient->nutritionPer100g;
 
-            $totals['calories'] += $nutrition['calories'] ?? 0.0;
-            $totals['protein'] += $nutrition['protein'] ?? 0.0;
-            $totals['carbs'] += $nutrition['carbs'] ?? 0.0;
-            $totals['fat'] += $nutrition['fat'] ?? 0.0;
+            $totals['calories'] += $nutrition->calories ?? 0.0;
+            $totals['protein'] += $nutrition->protein ?? 0.0;
+            $totals['carbs'] += $nutrition->carbs ?? 0.0;
+            $totals['fat'] += $nutrition->fat ?? 0.0;
             $count++;
+        }
+
+        if ($count === 0) {
+            return null;
         }
 
         return [

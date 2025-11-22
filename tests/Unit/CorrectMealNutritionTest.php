@@ -3,7 +3,11 @@
 declare(strict_types=1);
 
 use App\Actions\CorrectMealNutrition;
+use App\DataObjects\IngredientVerificationResultData;
 use App\DataObjects\MealData;
+use App\DataObjects\NutritionWithSourceData;
+use App\DataObjects\VerifiedIngredientData;
+use Spatie\LaravelData\DataCollection;
 
 it('keeps AI estimates when verification fails', function (): void {
     $mealData = MealData::from([
@@ -22,12 +26,14 @@ it('keeps AI estimates when verification fails', function (): void {
         'sort_order' => 1,
     ]);
 
-    $verificationData = [
-        'verified_ingredients' => [],
-        'total_verified' => null,
-        'verification_success' => false,
-        'verification_rate' => 0.0,
-    ];
+    $verificationData = new IngredientVerificationResultData(
+        verifiedIngredients: VerifiedIngredientData::collect([], DataCollection::class),
+        totalVerified: 0,
+        verificationSuccess: false,
+        verificationRate: 0.0,
+        verified: false,
+        source: 'mixed',
+    );
 
     $action = app(CorrectMealNutrition::class);
     $result = $action->handle($mealData, $verificationData);
@@ -60,26 +66,31 @@ it('applies corrections when discrepancy exceeds threshold', function (): void {
         'sort_order' => 2,
     ]);
 
-    $verificationData = [
-        'verified_ingredients' => [
-            [
-                'name' => 'Chicken breast',
-                'quantity' => '150g',
-                'nutrition_per_100g' => [
-                    'calories' => 165.0,
-                    'protein' => 31.0,
-                    'carbs' => 0.0,
-                    'fat' => 3.6,
-                    'source' => 'openfoodfacts',
-                ],
-                'matched' => true,
-            ],
-        ],
-        'total_verified' => null,
-        'verification_success' => true,
-        'verification_rate' => 1.0,
-        'source' => 'openfoodfacts',
-    ];
+    $verificationData = new IngredientVerificationResultData(
+        verifiedIngredients: VerifiedIngredientData::collect([
+            new VerifiedIngredientData(
+                name: 'Chicken breast',
+                quantity: '150g',
+                specificity: 'specific',
+                nutritionPer100g: new NutritionWithSourceData(
+                    calories: 165.0,
+                    protein: 31.0,
+                    carbs: 0.0,
+                    fat: 3.6,
+                    fiber: null,
+                    sugar: null,
+                    sodium: null,
+                    source: 'openfoodfacts',
+                ),
+                matched: true,
+            ),
+        ], DataCollection::class),
+        totalVerified: 1,
+        verificationSuccess: true,
+        verificationRate: 1.0,
+        verified: true,
+        source: 'openfoodfacts',
+    );
 
     $action = app(CorrectMealNutrition::class);
     $result = $action->handle($mealData, $verificationData);
@@ -114,24 +125,31 @@ it('keeps AI estimates when discrepancy is below threshold', function (): void {
         'sort_order' => 3,
     ]);
 
-    $verificationData = [
-        'verified_ingredients' => [
-            [
-                'name' => 'Salmon',
-                'quantity' => '150g',
-                'nutrition_per_100g' => [
-                    'calories' => 206.0, // Close to AI estimate (300/1.5 = 200)
-                    'protein' => 22.0,
-                    'carbs' => 0.0,
-                    'fat' => 13.0,
-                ],
-                'matched' => true,
-            ],
-        ],
-        'total_verified' => null,
-        'verification_success' => true,
-        'verification_rate' => 1.0,
-    ];
+    $verificationData = new IngredientVerificationResultData(
+        verifiedIngredients: VerifiedIngredientData::collect([
+            new VerifiedIngredientData(
+                name: 'Salmon',
+                quantity: '150g',
+                specificity: 'specific',
+                nutritionPer100g: new NutritionWithSourceData(
+                    calories: 206.0,
+                    protein: 22.0,
+                    carbs: 0.0,
+                    fat: 13.0,
+                    fiber: null,
+                    sugar: null,
+                    sodium: null,
+                    source: 'openfoodfacts',
+                ),
+                matched: true,
+            ),
+        ], DataCollection::class),
+        totalVerified: 1,
+        verificationSuccess: true,
+        verificationRate: 1.0,
+        verified: true,
+        source: 'openfoodfacts',
+    );
 
     $action = app(CorrectMealNutrition::class);
     $result = $action->handle($mealData, $verificationData);
@@ -159,19 +177,22 @@ it('handles verification with no matched ingredients', function (): void {
         'sort_order' => 4,
     ]);
 
-    $verificationData = [
-        'verified_ingredients' => [
-            [
-                'name' => 'Unknown ingredient',
-                'quantity' => null,
-                'nutrition_per_100g' => null,
-                'matched' => false,
-            ],
-        ],
-        'total_verified' => null,
-        'verification_success' => false,
-        'verification_rate' => 0.0,
-    ];
+    $verificationData = new IngredientVerificationResultData(
+        verifiedIngredients: VerifiedIngredientData::collect([
+            new VerifiedIngredientData(
+                name: 'Unknown ingredient',
+                quantity: '100g',
+                specificity: 'generic',
+                nutritionPer100g: null,
+                matched: false,
+            ),
+        ], DataCollection::class),
+        totalVerified: 0,
+        verificationSuccess: false,
+        verificationRate: 0.0,
+        verified: false,
+        source: 'mixed',
+    );
 
     $action = app(CorrectMealNutrition::class);
     $result = $action->handle($mealData, $verificationData);
@@ -203,24 +224,31 @@ it('handles medium confidence verification', function (): void {
         'sort_order' => 2,
     ]);
 
-    $verificationData = [
-        'verified_ingredients' => [
-            [
-                'name' => 'Mixed ingredients',
-                'quantity' => '200g',
-                'nutrition_per_100g' => [
-                    'calories' => 150.0,
-                    'protein' => 15.0,
-                    'carbs' => 20.0,
-                    'fat' => 8.0,
-                ],
-                'matched' => true,
-            ],
-        ],
-        'total_verified' => null,
-        'verification_success' => true,
-        'verification_rate' => 0.6,
-    ];
+    $verificationData = new IngredientVerificationResultData(
+        verifiedIngredients: VerifiedIngredientData::collect([
+            new VerifiedIngredientData(
+                name: 'Mixed ingredients',
+                quantity: '200g',
+                specificity: 'generic',
+                nutritionPer100g: new NutritionWithSourceData(
+                    calories: 150.0,
+                    protein: 15.0,
+                    carbs: 20.0,
+                    fat: 8.0,
+                    fiber: null,
+                    sugar: null,
+                    sodium: null,
+                    source: 'openfoodfacts',
+                ),
+                matched: true,
+            ),
+        ], DataCollection::class),
+        totalVerified: 1,
+        verificationSuccess: true,
+        verificationRate: 0.6,
+        verified: true,
+        source: 'openfoodfacts',
+    );
 
     $action = app(CorrectMealNutrition::class);
     $result = $action->handle($mealData, $verificationData);
@@ -247,19 +275,22 @@ it('handles matched ingredients with null nutrition data', function (): void {
         'sort_order' => 4,
     ]);
 
-    $verificationData = [
-        'verified_ingredients' => [
-            [
-                'name' => 'Unknown branded item',
-                'quantity' => '1 pack',
-                'nutrition_per_100g' => null, // Matched but no nutrition data
-                'matched' => true,
-            ],
-        ],
-        'total_verified' => null,
-        'verification_success' => true,
-        'verification_rate' => 1.0,
-    ];
+    $verificationData = new IngredientVerificationResultData(
+        verifiedIngredients: VerifiedIngredientData::collect([
+            new VerifiedIngredientData(
+                name: 'Unknown branded item',
+                quantity: '1 pack',
+                specificity: 'generic',
+                nutritionPer100g: null,
+                matched: true,
+            ),
+        ], DataCollection::class),
+        totalVerified: 1,
+        verificationSuccess: true,
+        verificationRate: 1.0,
+        verified: true,
+        source: 'openfoodfacts',
+    );
 
     $action = app(CorrectMealNutrition::class);
     $result = $action->handle($mealData, $verificationData);
