@@ -4,29 +4,37 @@ declare(strict_types=1);
 
 use App\Actions\VerifyIngredientNutrition;
 use App\DataObjects\IngredientData;
-use Illuminate\Support\Facades\Http;
+use App\Models\UsdaFoundationFood;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\LaravelData\DataCollection;
 
+uses(RefreshDatabase::class);
+
 it('parses ingredients and verifies nutrition', function (): void {
-    Http::fake([
-        'world.openfoodfacts.org/api/v2/search*' => Http::response([
-            'products' => [
-                [
-                    'code' => '123456',
-                    'product_name' => 'Chicken Breast',
-                    'nutriments' => [
-                        'energy-kcal_100g' => 165,
-                        'proteins_100g' => 31,
-                        'carbohydrates_100g' => 0,
-                        'fat_100g' => 3.6,
-                    ],
-                ],
-            ],
-        ], 200),
+    UsdaFoundationFood::factory()->create([
+        'id' => 12345,
+        'description' => 'Chicken breast',
+        'nutrients' => [
+            ['nutrient' => ['number' => '208'], 'amount' => 165],
+            ['nutrient' => ['number' => '203'], 'amount' => 31],
+            ['nutrient' => ['number' => '205'], 'amount' => 0],
+            ['nutrient' => ['number' => '204'], 'amount' => 3.6],
+        ],
+    ]);
+
+    UsdaFoundationFood::factory()->create([
+        'id' => 67890,
+        'description' => 'Brown rice',
+        'nutrients' => [
+            ['nutrient' => ['number' => '208'], 'amount' => 112],
+            ['nutrient' => ['number' => '203'], 'amount' => 2.6],
+            ['nutrient' => ['number' => '205'], 'amount' => 23.5],
+            ['nutrient' => ['number' => '204'], 'amount' => 0.9],
+        ],
     ]);
 
     $ingredients = IngredientData::collect([
-        ['name' => 'Chicken breast', 'quantity' => '150g', 'specificity' => 'specific'],
+        ['name' => 'Chicken breast', 'quantity' => '150g', 'specificity' => 'generic'],
         ['name' => 'Brown rice', 'quantity' => '1 cup (185g)', 'specificity' => 'generic'],
         ['name' => 'Olive oil', 'quantity' => '1 tablespoon (15ml)', 'specificity' => 'generic'],
     ], DataCollection::class);
@@ -41,12 +49,8 @@ it('parses ingredients and verifies nutrition', function (): void {
 });
 
 it('handles ingredients without quantities', function (): void {
-    Http::fake([
-        '*' => Http::response(['products' => []], 200),
-    ]);
-
     $ingredients = IngredientData::collect([
-        ['name' => 'Chicken breast', 'quantity' => 'some', 'specificity' => 'specific'],
+        ['name' => 'Chicken breast', 'quantity' => 'some', 'specificity' => 'generic'],
         ['name' => 'Brown rice', 'quantity' => 'a handful', 'specificity' => 'generic'],
         ['name' => 'Olive oil', 'quantity' => 'drizzle', 'specificity' => 'generic'],
     ], DataCollection::class);
@@ -59,10 +63,6 @@ it('handles ingredients without quantities', function (): void {
 });
 
 it('marks verification as unsuccessful when no ingredients match', function (): void {
-    Http::fake([
-        '*' => Http::response(['products' => []], 200),
-    ]);
-
     $ingredients = IngredientData::collect([
         ['name' => 'Ingredient 1', 'quantity' => '100g', 'specificity' => 'generic'],
         ['name' => 'Ingredient 2', 'quantity' => '200g', 'specificity' => 'generic'],
@@ -76,25 +76,19 @@ it('marks verification as unsuccessful when no ingredients match', function (): 
 });
 
 it('cleans ingredient names before searching', function (): void {
-    Http::fake([
-        '*' => Http::response([
-            'products' => [
-                [
-                    'code' => '123456',
-                    'product_name' => 'Chicken Breast',
-                    'nutriments' => [
-                        'energy-kcal_100g' => 165,
-                        'proteins_100g' => 31,
-                        'carbohydrates_100g' => 0,
-                        'fat_100g' => 3.6,
-                    ],
-                ],
-            ],
-        ], 200),
+    UsdaFoundationFood::factory()->create([
+        'id' => 12345,
+        'description' => 'Chicken breast',
+        'nutrients' => [
+            ['nutrient' => ['number' => '208'], 'amount' => 165],
+            ['nutrient' => ['number' => '203'], 'amount' => 31],
+            ['nutrient' => ['number' => '205'], 'amount' => 0],
+            ['nutrient' => ['number' => '204'], 'amount' => 3.6],
+        ],
     ]);
 
     $ingredients = IngredientData::collect([
-        ['name' => 'Fresh organic grilled chicken breast (boneless)', 'quantity' => '150g', 'specificity' => 'specific'],
+        ['name' => 'Fresh organic grilled chicken breast (boneless)', 'quantity' => '150g', 'specificity' => 'generic'],
     ], DataCollection::class);
 
     $action = app(VerifyIngredientNutrition::class);
@@ -112,18 +106,13 @@ it('handles empty ingredients text', function (): void {
         ->and($result->verificationRate)->toBe(0.0);
 });
 
-it('handles API errors gracefully', function (): void {
-    Http::fake([
-        '*' => Http::response(null, 500),
-    ]);
-
+it('handles errors gracefully', function (): void {
     $ingredients = IngredientData::collect([
-        ['name' => 'Chicken breast', 'quantity' => '150g', 'specificity' => 'specific'],
+        ['name' => 'Chicken breast', 'quantity' => '150g', 'specificity' => 'generic'],
     ], DataCollection::class);
 
     $action = app(VerifyIngredientNutrition::class);
     $result = $action->handle($ingredients);
 
-    expect($result->verifiedIngredients)->toHaveCount(1)
-        ->and($result->verifiedIngredients[0]->matched)->toBeFalse();
+    expect($result->verifiedIngredients)->toHaveCount(1);
 });

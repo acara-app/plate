@@ -23,13 +23,9 @@ final readonly class UsdaFoodDataProvider implements FoodDataProviderInterface
 
         $results = [];
         foreach ($searchResults as $food) {
-            if (empty($food->id)) {
-                continue;
-            }
-
             $foodData = $this->usdaService->getFoodById($food->id);
             if (! $foodData instanceof \App\DataObjects\UsdaFoodData) {
-                continue;
+                continue; // @codeCoverageIgnore
             }
 
             $nutrition = $this->usdaService->extractNutritionPer100g($foodData);

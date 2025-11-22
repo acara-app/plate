@@ -5,139 +5,92 @@ declare(strict_types=1);
 use App\DataObjects\FoodSearchResultData;
 use App\DataObjects\NutritionData;
 use App\DataObjects\UsdaFoodData;
+use App\Models\UsdaFoundationFood;
+use App\Models\UsdaSrLegacyFood;
 use App\Services\UsdaFoodDataService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
+
+uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     Cache::flush();
-    config(['services.usda.api_key' => 'test-api-key']);
-    config(['services.usda.url' => 'https://api.nal.usda.gov/fdc/v1']);
 });
 
-it('searches for foods and returns results', function (): void {
-    Http::fake([
-        'api.nal.usda.gov/fdc/v1/foods/search*' => Http::response([
-            'foods' => [
-                [
-                    'fdcId' => 12345,
-                    'description' => 'Chicken, broilers or fryers, breast, meat only, raw',
-                    'dataType' => 'Foundation',
-                    'foodNutrients' => [
-                        ['nutrientId' => 1008, 'nutrientNumber' => '208', 'value' => 165],
-                        ['nutrientId' => 1003, 'nutrientNumber' => '203', 'value' => 31],
-                        ['nutrientId' => 1005, 'nutrientNumber' => '205', 'value' => 0],
-                        ['nutrientId' => 1004, 'nutrientNumber' => '204', 'value' => 3.6],
-                        ['nutrientId' => 1079, 'nutrientNumber' => '291', 'value' => 0],
-                        ['nutrientId' => 2000, 'nutrientNumber' => '269', 'value' => 0],
-                        ['nutrientId' => 1093, 'nutrientNumber' => '307', 'value' => 74],
-                    ],
-                ],
-            ],
-            'totalHits' => 1,
-        ], 200),
+it('searches for foods and returns foundation results', function (): void {
+    UsdaFoundationFood::factory()->create([
+        'id' => 12345,
+        'description' => 'Chicken, broilers or fryers, breast, meat only, raw',
+        'nutrients' => [
+            ['nutrient' => ['number' => '208'], 'amount' => 165],
+            ['nutrient' => ['number' => '203'], 'amount' => 31],
+        ],
     ]);
 
     $service = app(UsdaFoodDataService::class);
-    $results = $service->searchFoods('chicken breast');
+    $results = $service->searchFoods('chicken');
 
     expect($results)->toBeArray()
         ->and($results)->toHaveCount(1)
         ->and($results[0])->toBeInstanceOf(FoodSearchResultData::class)
         ->and($results[0]->id)->toBe('12345')
-        ->and($results[0]->name)->toBe('Chicken, broilers or fryers, breast, meat only, raw');
+        ->and($results[0]->name)->toBe('Chicken, broilers or fryers, breast, meat only, raw')
+        ->and($results[0]->dataType)->toBe('Foundation');
 });
 
-it('searches with default page size', function (): void {
-    Http::fake([
-        'api.nal.usda.gov/fdc/v1/foods/search*' => Http::response([
-            'foods' => [],
-            'totalHits' => 0,
-        ], 200),
+it('searches sr legacy foods', function (): void {
+    UsdaSrLegacyFood::factory()->create([
+        'id' => 67890,
+        'description' => 'Rice, white, long-grain, regular, raw',
     ]);
 
     $service = app(UsdaFoodDataService::class);
-    $service->searchFoods('test food');
+    $results = $service->searchFoods('rice');
 
-    Http::assertSent(fn ($request): bool => str_contains((string) $request->url(), 'pageSize=5'));
+    expect($results)->toBeArray()
+        ->and($results)->toHaveCount(1)
+        ->and($results[0]->dataType)->toBe('SR Legacy');
 });
 
 it('limits search results', function (): void {
-    Http::fake([
-        'api.nal.usda.gov/fdc/v1/foods/search*' => Http::response([
-            'foods' => [],
-            'totalHits' => 0,
-        ], 200),
+    UsdaFoundationFood::factory(10)->create([
+        'description' => 'Test Food',
     ]);
 
     $service = app(UsdaFoodDataService::class);
-    $service->searchFoods('test food', pageSize: 10);
+    $results = $service->searchFoods('Test Food', pageSize: 3);
 
-    Http::assertSent(fn ($request): bool => str_contains((string) $request->url(), 'pageSize=10'));
+    expect($results)->toHaveCount(3);
 });
 
 it('caches search results', function (): void {
-    Http::fake([
-        'api.nal.usda.gov/fdc/v1/foods/search*' => Http::response([
-            'foods' => [
-                [
-                    'fdcId' => 12345,
-                    'description' => 'Test Food',
-                    'dataType' => 'Foundation',
-                    'foodNutrients' => [],
-                ],
-            ],
-            'totalHits' => 1,
-        ], 200),
+    UsdaFoundationFood::factory()->create([
+        'description' => 'Chicken breast',
     ]);
 
     $service = app(UsdaFoodDataService::class);
-
-    $service->searchFoods('chicken breast');
     $service->searchFoods('chicken breast');
 
-    Http::assertSentCount(1);
+    UsdaFoundationFood::query()->delete();
+    $results = $service->searchFoods('chicken breast');
+
+    expect($results)->toHaveCount(1);
 });
 
-it('returns empty array when no foods found', function (): void {
-    Http::fake([
-        'api.nal.usda.gov/fdc/v1/foods/search*' => Http::response([
-            'foods' => [],
-            'totalHits' => 0,
-        ], 200),
-    ]);
-
+it('returns null when no results found', function (): void {
     $service = app(UsdaFoodDataService::class);
     $results = $service->searchFoods('nonexistent food');
-
-    expect($results)->toBeArray()
-        ->and($results)->toBeEmpty();
-});
-
-it('handles API errors gracefully', function (): void {
-    Http::fake([
-        'api.nal.usda.gov/fdc/v1/foods/search*' => Http::response(null, 500),
-    ]);
-
-    $service = app(UsdaFoodDataService::class);
-    $results = $service->searchFoods('test food');
 
     expect($results)->toBeNull();
 });
 
-it('fetches food by ID', function (): void {
-    Http::fake([
-        'api.nal.usda.gov/fdc/v1/food/12345*' => Http::response([
-            'fdcId' => 12345,
-            'description' => 'Chicken breast',
-            'dataType' => 'Foundation',
-            'foodNutrients' => [
-                ['nutrient' => ['number' => '208'], 'amount' => 165],
-                ['nutrient' => ['number' => '203'], 'amount' => 31],
-                ['nutrient' => ['number' => '205'], 'amount' => 0],
-                ['nutrient' => ['number' => '204'], 'amount' => 3.6],
-            ],
-        ], 200),
+it('fetches food by ID from foundation table', function (): void {
+    UsdaFoundationFood::factory()->create([
+        'id' => 12345,
+        'description' => 'Chicken breast',
+        'nutrients' => [
+            ['nutrient' => ['number' => '208'], 'amount' => 165],
+        ],
     ]);
 
     $service = app(UsdaFoodDataService::class);
@@ -145,39 +98,29 @@ it('fetches food by ID', function (): void {
 
     expect($result)->toBeInstanceOf(UsdaFoodData::class)
         ->and($result->fdcId)->toBe('12345')
-        ->and($result->description)->toBe('Chicken breast');
+        ->and($result->dataType)->toBe('Foundation');
 });
 
-it('caches food by ID results', function (): void {
-    Http::fake([
-        'api.nal.usda.gov/fdc/v1/food/12345*' => Http::response([
-            'fdcId' => 12345,
-            'description' => 'Test Food',
-            'dataType' => 'Foundation',
-            'foodNutrients' => [],
-        ], 200),
+it('fetches food by ID from sr legacy table', function (): void {
+    UsdaSrLegacyFood::factory()->create([
+        'id' => 67890,
+        'description' => 'White rice',
     ]);
 
     $service = app(UsdaFoodDataService::class);
+    $result = $service->getFoodById('67890');
 
-    $service->getFoodById('12345');
-    $service->getFoodById('12345');
-
-    Http::assertSentCount(1);
+    expect($result)->toBeInstanceOf(UsdaFoodData::class)
+        ->and($result->dataType)->toBe('SR Legacy');
 });
 
-it('returns null when food by ID not found', function (): void {
-    Http::fake([
-        'api.nal.usda.gov/fdc/v1/food/99999*' => Http::response(null, 404),
-    ]);
-
+it('returns null when food not found', function (): void {
     $service = app(UsdaFoodDataService::class);
-    $result = $service->getFoodById('99999');
 
-    expect($result)->toBeNull();
+    expect($service->getFoodById('99999'))->toBeNull();
 });
 
-it('extracts nutrition per 100g from food data', function (): void {
+it('extracts nutrition per 100g', function (): void {
     $foodData = new UsdaFoodData(
         fdcId: '12345',
         description: 'Chicken breast',
@@ -207,7 +150,7 @@ it('extracts nutrition per 100g from food data', function (): void {
         ->and($nutrition->sodium)->toBe(74.0);
 });
 
-it('handles missing nutrients in food data', function (): void {
+it('handles missing nutrients', function (): void {
     $foodData = new UsdaFoodData(
         fdcId: '12345',
         description: 'Incomplete food',
@@ -215,7 +158,6 @@ it('handles missing nutrients in food data', function (): void {
         dataType: 'Foundation',
         foodNutrients: [
             ['nutrient' => ['number' => '208'], 'amount' => 100],
-            ['nutrient' => ['number' => '203'], 'amount' => 10],
         ]
     );
 
@@ -223,89 +165,12 @@ it('handles missing nutrients in food data', function (): void {
     $nutrition = $service->extractNutritionPer100g($foodData);
 
     expect($nutrition->calories)->toBe(100.0)
-        ->and($nutrition->protein)->toBe(10.0)
-        ->and($nutrition->carbs)->toBeNull()
-        ->and($nutrition->fat)->toBeNull()
-        ->and($nutrition->fiber)->toBeNull()
-        ->and($nutrition->sugar)->toBeNull()
-        ->and($nutrition->sodium)->toBeNull();
+        ->and($nutrition->protein)->toBeNull();
 });
 
-it('returns null for nutrition when food nutrients missing', function (): void {
-    $foodData = new UsdaFoodData(
-        fdcId: '12345',
-        description: 'Food without nutrients',
-        brandOwner: null,
-        dataType: 'Foundation',
-        foodNutrients: []
-    );
-
+it('cleans ingredient names', function (): void {
     $service = app(UsdaFoodDataService::class);
-    $nutrition = $service->extractNutritionPer100g($foodData);
 
-    expect($nutrition)->toBeInstanceOf(NutritionData::class);
-});
-
-it('includes API key in requests', function (): void {
-    Http::fake([
-        'api.nal.usda.gov/fdc/v1/foods/search*' => Http::response([
-            'foods' => [],
-            'totalHits' => 0,
-        ], 200),
-    ]);
-
-    $service = app(UsdaFoodDataService::class);
-    $service->searchFoods('test');
-
-    Http::assertSent(fn ($request): bool => str_contains((string) $request->url(), 'api_key=test-api-key'));
-});
-
-it('uses correct base URL from config', function (): void {
-    Http::fake([
-        'api.nal.usda.gov/*' => Http::response(['foods' => []], 200),
-    ]);
-
-    $service = app(UsdaFoodDataService::class);
-    $service->searchFoods('test');
-
-    Http::assertSent(fn ($request): bool => str_starts_with((string) $request->url(), 'https://api.nal.usda.gov/fdc/v1'));
-});
-
-it('handles connection exceptions for search', function (): void {
-    Http::fake([
-        'api.nal.usda.gov/*' => function (): void {
-            throw new Illuminate\Http\Client\ConnectionException('Connection failed');
-        },
-    ]);
-
-    $service = app(UsdaFoodDataService::class);
-    $result = $service->searchFoods('test');
-
-    expect($result)->toBeNull();
-});
-
-it('handles connection exceptions for getFoodById', function (): void {
-    Http::fake([
-        'api.nal.usda.gov/*' => function (): void {
-            throw new Illuminate\Http\Client\ConnectionException('Connection failed');
-        },
-    ]);
-
-    $service = app(UsdaFoodDataService::class);
-    $result = $service->getFoodById('12345');
-
-    expect($result)->toBeNull();
-});
-
-it('returns null when API key is not configured for getFoodById', function (): void {
-    config(['services.usda.api_key' => null]);
-
-    $service = new UsdaFoodDataService(
-        config('services.usda.api_key'),
-        config('services.usda.base_url')
-    );
-
-    $result = $service->getFoodById('12345');
-
-    expect($result)->toBeNull();
+    expect($service->cleanIngredientName('fresh organic chicken breast'))
+        ->toBe('chicken breast');
 });

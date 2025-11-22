@@ -9,9 +9,12 @@ use App\Enums\MealType;
 use App\Jobs\VerifyAndCorrectMealsJob;
 use App\Models\Meal;
 use App\Models\MealPlan;
+use App\Models\UsdaFoundationFood;
 use App\Models\User;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
+
+uses(RefreshDatabase::class);
 
 it('dispatches verify and correct meals job', function (): void {
     Queue::fake();
@@ -24,21 +27,15 @@ it('dispatches verify and correct meals job', function (): void {
 });
 
 it('verifies and corrects meals when job is processed', function (): void {
-    Http::fake([
-        'world.openfoodfacts.org/api/v2/search*' => Http::response([
-            'products' => [
-                [
-                    'code' => '123456',
-                    'product_name' => 'Test Food',
-                    'nutriments' => [
-                        'energy-kcal_100g' => 150,
-                        'proteins_100g' => 20,
-                        'carbohydrates_100g' => 25,
-                        'fat_100g' => 3,
-                    ],
-                ],
-            ],
-        ], 200),
+    UsdaFoundationFood::factory()->create([
+        'id' => 12345,
+        'description' => 'Test Food',
+        'nutrients' => [
+            ['nutrient' => ['number' => '208'], 'amount' => 150],
+            ['nutrient' => ['number' => '203'], 'amount' => 20],
+            ['nutrient' => ['number' => '205'], 'amount' => 25],
+            ['nutrient' => ['number' => '204'], 'amount' => 3],
+        ],
     ]);
 
     $user = User::factory()->create();
@@ -72,8 +69,6 @@ it('verifies and corrects meals when job is processed', function (): void {
 });
 
 it('skips meals that are already verified', function (): void {
-    Http::fake();
-
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->create([
         'user_id' => $user->id,
@@ -109,8 +104,6 @@ it('skips meals that are already verified', function (): void {
 });
 
 it('skips meals without ingredients', function (): void {
-    Http::fake();
-
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->create([
         'user_id' => $user->id,
@@ -167,8 +160,6 @@ it('handles empty meal plan gracefully', function (): void {
 });
 
 it('skips meals with null ingredients', function (): void {
-    Http::fake();
-
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->create([
         'user_id' => $user->id,
