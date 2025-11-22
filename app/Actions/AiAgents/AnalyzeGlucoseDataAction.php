@@ -514,9 +514,11 @@ final readonly class AnalyzeGlucoseDataAction
         }
 
         // Fallback - shouldn't reach here with data
+        // @codeCoverageIgnoreStart
         return new GlucoseGoalsData(
             target: 'Establish glucose monitoring routine',
             reasoning: 'Consistent monitoring will help identify patterns and inform personalized goals',
         );
+        // @codeCoverageIgnoreEnd
     }
 }
