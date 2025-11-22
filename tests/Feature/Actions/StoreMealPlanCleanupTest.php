@@ -9,6 +9,7 @@ use App\Enums\MealPlanType;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
+use Spatie\LaravelData\DataCollection;
 
 it('deletes old meal plans of the same type when creating a new one', function (): void {
     $user = User::factory()->create();
@@ -31,7 +32,7 @@ it('deletes old meal plans of the same type when creating a new one', function (
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
+        meals: MealData::collect([
             MealData::from([
                 'day_number' => 1,
                 'type' => 'breakfast',
@@ -47,7 +48,7 @@ it('deletes old meal plans of the same type when creating a new one', function (
                 'preparation_time_minutes' => 10,
                 'sort_order' => 1,
             ]),
-        ],
+        ], DataCollection::class),
     );
 
     $action = app(StoreMealPlan::class);
@@ -92,7 +93,7 @@ it('only deletes meal plans of the same type', function (): void {
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
+        meals: MealData::collect([
             MealData::from([
                 'day_number' => 1,
                 'type' => 'breakfast',
@@ -108,7 +109,7 @@ it('only deletes meal plans of the same type', function (): void {
                 'preparation_time_minutes' => 5,
                 'sort_order' => 1,
             ]),
-        ],
+        ], DataCollection::class),
     );
 
     $action = app(StoreMealPlan::class);
@@ -159,7 +160,7 @@ it('deletes multiple old meal plans of the same type', function (): void {
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
+        meals: MealData::collect([
             MealData::from([
                 'day_number' => 1,
                 'type' => 'breakfast',
@@ -175,7 +176,7 @@ it('deletes multiple old meal plans of the same type', function (): void {
                 'preparation_time_minutes' => 3,
                 'sort_order' => 1,
             ]),
-        ],
+        ], DataCollection::class),
     );
 
     $action = app(StoreMealPlan::class);
@@ -222,7 +223,7 @@ it('does not delete other users meal plans', function (): void {
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
+        meals: MealData::collect([
             MealData::from([
                 'day_number' => 1,
                 'type' => 'breakfast',
@@ -238,7 +239,7 @@ it('does not delete other users meal plans', function (): void {
                 'preparation_time_minutes' => 2,
                 'sort_order' => 1,
             ]),
-        ],
+        ], DataCollection::class),
     );
 
     $action = app(StoreMealPlan::class);
@@ -269,7 +270,7 @@ it('handles creating first meal plan when no old plans exist', function (): void
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
+        meals: MealData::collect([
             MealData::from([
                 'day_number' => 1,
                 'type' => 'breakfast',
@@ -285,7 +286,7 @@ it('handles creating first meal plan when no old plans exist', function (): void
                 'preparation_time_minutes' => 5,
                 'sort_order' => 1,
             ]),
-        ],
+        ], DataCollection::class),
     );
 
     $action = app(StoreMealPlan::class);
@@ -327,7 +328,7 @@ it('cascades delete to meals when deleting old meal plans', function (): void {
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
+        meals: MealData::collect([
             MealData::from([
                 'day_number' => 1,
                 'type' => 'breakfast',
@@ -343,7 +344,7 @@ it('cascades delete to meals when deleting old meal plans', function (): void {
                 'preparation_time_minutes' => 15,
                 'sort_order' => 1,
             ]),
-        ],
+        ], DataCollection::class),
     );
 
     $action = app(StoreMealPlan::class);

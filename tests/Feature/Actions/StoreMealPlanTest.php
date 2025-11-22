@@ -8,6 +8,7 @@ use App\DataObjects\MealPlanData;
 use App\Enums\MealPlanType;
 use App\Enums\MealType;
 use App\Models\User;
+use Spatie\LaravelData\DataCollection;
 
 it('stores a meal plan with meals for a user', function (): void {
     $user = User::factory()->create();
@@ -19,7 +20,7 @@ it('stores a meal plan with meals for a user', function (): void {
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
+        meals: MealData::collect([
             MealData::from([
                 'day_number' => 1,
                 'type' => 'breakfast',
@@ -50,7 +51,7 @@ it('stores a meal plan with meals for a user', function (): void {
                 'preparation_time_minutes' => 20,
                 'sort_order' => 2,
             ]),
-        ],
+        ], DataCollection::class),
     );
 
     $action = app(StoreMealPlan::class);
@@ -88,7 +89,7 @@ it('loads meals relationship after storing', function (): void {
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
+        meals: MealData::collect([
             MealData::from([
                 'day_number' => 1,
                 'type' => 'breakfast',
@@ -104,7 +105,7 @@ it('loads meals relationship after storing', function (): void {
                 'preparation_time_minutes' => 10,
                 'sort_order' => 1,
             ]),
-        ],
+        ], DataCollection::class),
     );
 
     $action = app(StoreMealPlan::class);

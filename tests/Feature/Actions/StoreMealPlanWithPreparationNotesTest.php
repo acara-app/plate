@@ -7,6 +7,7 @@ use App\DataObjects\MealData;
 use App\DataObjects\MealPlanData;
 use App\Enums\MealPlanType;
 use App\Models\User;
+use Spatie\LaravelData\DataCollection;
 
 it('stores meal plan with preparation_notes in metadata', function (): void {
     $user = User::factory()->create();
@@ -18,7 +19,7 @@ it('stores meal plan with preparation_notes in metadata', function (): void {
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
+        meals: MealData::collect([
             MealData::from([
                 'day_number' => 1,
                 'type' => 'breakfast',
@@ -34,7 +35,7 @@ it('stores meal plan with preparation_notes in metadata', function (): void {
                 'preparation_time_minutes' => 10,
                 'sort_order' => 1,
             ]),
-        ],
+        ], DataCollection::class),
         metadata: [
             'preparation_notes' => 'Batch cook proteins on Sunday. Store in airtight containers. Use fresh vegetables within 3 days.',
         ],
@@ -63,7 +64,7 @@ it('stores meal plan without preparation_notes when not provided', function (): 
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
+        meals: MealData::collect([
             MealData::from([
                 'day_number' => 1,
                 'type' => 'breakfast',
@@ -79,7 +80,7 @@ it('stores meal plan without preparation_notes when not provided', function (): 
                 'preparation_time_minutes' => 10,
                 'sort_order' => 1,
             ]),
-        ],
+        ], DataCollection::class),
     );
 
     $action = app(StoreMealPlan::class);
@@ -98,7 +99,7 @@ it('stores meal plan with other metadata fields alongside preparation_notes', fu
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
+        meals: MealData::collect([
             MealData::from([
                 'day_number' => 1,
                 'type' => 'breakfast',
@@ -114,7 +115,7 @@ it('stores meal plan with other metadata fields alongside preparation_notes', fu
                 'preparation_time_minutes' => 10,
                 'sort_order' => 1,
             ]),
-        ],
+        ], DataCollection::class),
         metadata: [
             'preparation_notes' => 'Weekly meal prep on Sundays',
             'bmi' => 22.5,

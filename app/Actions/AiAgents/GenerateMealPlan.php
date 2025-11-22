@@ -56,7 +56,7 @@ final class GenerateMealPlan
         /** @var array<string, mixed> $structuredData */
         $structuredData = $response->structured;
 
-        return MealPlanData::fromArray($structuredData);
+        return MealPlanData::from($structuredData);
     }
 
     private function buildSchema(): ObjectSchema
