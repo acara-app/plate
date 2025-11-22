@@ -47,7 +47,7 @@ final class GenerateMealPlan
             ->withSystemPrompt('You are a professional nutritionist and dietitian specializing in creating personalized meal plans.')
             ->withPrompt($prompt)
             ->withSchema($schema)
-            ->withMaxTokens(32000)
+            ->withMaxTokens(70000)
             ->withClientOptions([
                 'timeout' => 180,
             ])
