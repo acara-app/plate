@@ -10,11 +10,11 @@ use Spatie\LaravelData\Data;
 final class UsdaFoodImportRowData extends Data
 {
     public function __construct(
-        public mixed $id,
+        public int|string $id,
         public ?string $description,
         public ?string $food_category,
         public ?string $publication_date,
-        public string|false $nutrients,
+        public string $nutrients,
         public Carbon $created_at,
         public Carbon $updated_at,
     ) {}

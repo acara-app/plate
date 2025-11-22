@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 final class ImportUsdaSrLegacyFoodDataCommand extends Command
 {
-    protected $signature = 'import:usda-sr-legacy-food-data';
+    protected $signature = 'import:usda-sr-legacy-food-data {--path= : Path to the SR Legacy Food JSON file}';
 
     protected $description = 'Import USDA SR Legacy Food data into the database';
 
@@ -21,7 +21,7 @@ final class ImportUsdaSrLegacyFoodDataCommand extends Command
 
     public function handle(): int
     {
-        $path = storage_path('sources/FoodData_Central_sr_legacy_food_json_2018-04.json');
+        $path = $this->option('path') ?: storage_path('sources/FoodData_Central_sr_legacy_food_json_2018-04.json');
         $table = 'usda_sr_legacy_foods';
 
         if (! file_exists($path)) {

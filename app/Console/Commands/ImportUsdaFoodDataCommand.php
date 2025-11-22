@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 final class ImportUsdaFoodDataCommand extends Command
 {
-    protected $signature = 'import:usda-food-foundation-data';
+    protected $signature = 'import:usda-food-foundation-data {--path= : Path to the Foundation Food JSON file}';
 
     protected $description = 'Import USDA Foundation Food data into the database';
 
@@ -21,7 +21,7 @@ final class ImportUsdaFoodDataCommand extends Command
 
     public function handle(): int
     {
-        $path = storage_path('sources/FoodData_Central_foundation_food_json_2025-04-24 3.json');
+        $path = $this->option('path') ?: storage_path('sources/FoodData_Central_foundation_food_json_2025-04-24 3.json');
         $table = 'usda_foundation_foods';
 
         if (! file_exists($path)) {

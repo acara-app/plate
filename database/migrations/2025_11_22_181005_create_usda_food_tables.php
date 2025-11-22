@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('usda_foundation_foods', function (Blueprint $table): void {
@@ -20,6 +18,11 @@ return new class extends Migration
             $table->date('publication_date')->nullable();
             $table->json('nutrients'); // Stores the entire foodNutrients array
             $table->timestamps();
+
+            // Fulltext index for better search performance (MySQL/PostgreSQL only)
+            if (in_array(DB::getDriverName(), ['mysql', 'pgsql'], true)) {
+                $table->fullText('description');
+            }
         });
 
         Schema::create('usda_sr_legacy_foods', function (Blueprint $table): void {
@@ -29,15 +32,11 @@ return new class extends Migration
             $table->date('publication_date')->nullable();
             $table->json('nutrients'); // Stores the entire foodNutrients array
             $table->timestamps();
-        });
-    }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('usda_foundation_foods');
-        Schema::dropIfExists('usda_sr_legacy_foods');
+            // Fulltext index for better search performance (MySQL/PostgreSQL only)
+            if (in_array(DB::getDriverName(), ['mysql', 'pgsql'], true)) {
+                $table->fullText('description');
+            }
+        });
     }
 };

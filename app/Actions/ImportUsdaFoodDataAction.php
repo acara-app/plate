@@ -52,7 +52,7 @@ final readonly class ImportUsdaFoodDataAction
             'description' => is_string($description) ? $description : null,
             'food_category' => is_array($foodCategory) && isset($foodCategory['description']) ? $foodCategory['description'] : null,
             'publication_date' => $this->parseDate(is_string($item['publicationDate'] ?? null) ? $item['publicationDate'] : null),
-            'nutrients' => json_encode($item['foodNutrients'] ?? []),
+            'nutrients' => json_encode($item['foodNutrients'] ?? []) ?: '[]',
             'created_at' => now(),
             'updated_at' => now(),
         ]);

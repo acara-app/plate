@@ -30,9 +30,11 @@ final readonly class UsdaFoodDataService
 
         /** @var list<FoodSearchResultData>|null $result */
         $result = Cache::remember($cacheKey, now()->addMinutes($this->cacheMinutes), function () use ($query, $pageSize): ?array {
+            $searchTerm = '%'.mb_strtolower($query).'%';
+
             // Search Foundation Foods first (preferred)
             $foundation = UsdaFoundationFood::query()
-                ->where('description', 'LIKE', "%{$query}%")
+                ->whereRaw('LOWER(description) LIKE ?', [$searchTerm])
                 ->limit($pageSize)
                 ->get(['id', 'description']);
 
@@ -51,7 +53,7 @@ final readonly class UsdaFoodDataService
             $remaining = $pageSize - count($results);
             if ($remaining > 0) {
                 $legacy = UsdaSrLegacyFood::query()
-                    ->where('description', 'LIKE', "%{$query}%")
+                    ->whereRaw('LOWER(description) LIKE ?', [$searchTerm])
                     ->limit($remaining)
                     ->get(['id', 'description']);
 
