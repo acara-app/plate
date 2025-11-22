@@ -43,4 +43,16 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'openfoodfacts' => [
+        'url' => env('OPENFOODFACTS_URL', 'https://world.openfoodfacts.org'),
+        'cache_minutes' => env('OPENFOODFACTS_CACHE_MINUTES', 10080), // 7 days
+        'user_agent' => env('OPENFOODFACTS_USER_AGENT', 'AcaraPlate/1.0 (https://github.com/acara-app/plate)'),
+    ],
+
+    'usda' => [
+        'api_key' => env('USDA_API_KEY'),
+        'url' => env('USDA_URL', 'https://api.nal.usda.gov/fdc/v1'),
+        'cache_minutes' => env('USDA_CACHE_MINUTES', 10080), // 7 days
+    ],
+
 ];

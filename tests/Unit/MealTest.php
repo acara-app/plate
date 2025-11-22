@@ -29,6 +29,18 @@ it('casts metadata to array', function (): void {
     expect($meal->metadata)->toBeArray();
 });
 
+it('casts food_data_verification to array', function (): void {
+    $verification = [
+        'verified_ingredients' => ['chicken', 'rice'],
+        'confidence_score' => 0.85,
+        'verified_at' => '2025-01-21T10:30:00Z',
+    ];
+    $meal = Meal::factory()->create(['food_data_verification' => $verification]);
+
+    expect($meal->food_data_verification)->toBe($verification);
+    expect($meal->food_data_verification)->toBeArray();
+});
+
 it('can calculate macro percentages', function (): void {
     $meal = Meal::factory()->create([
         'calories' => 400,

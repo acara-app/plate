@@ -6,8 +6,8 @@ use App\Actions\StoreMealPlan;
 use App\DataObjects\MealData;
 use App\DataObjects\MealPlanData;
 use App\Enums\MealPlanType;
-use App\Enums\MealType;
 use App\Models\User;
+use Spatie\LaravelData\DataCollection;
 
 it('stores meal plan with preparation_notes in metadata', function (): void {
     $user = User::factory()->create();
@@ -19,23 +19,23 @@ it('stores meal plan with preparation_notes in metadata', function (): void {
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
-            new MealData(
-                dayNumber: 1,
-                type: MealType::Breakfast,
-                name: 'Oatmeal',
-                description: 'Healthy breakfast',
-                preparationInstructions: 'Cook oats',
-                ingredients: 'Oats, milk',
-                portionSize: '1 bowl',
-                calories: 350.0,
-                proteinGrams: 10.0,
-                carbsGrams: 60.0,
-                fatGrams: 5.0,
-                preparationTimeMinutes: 10,
-                sortOrder: 1,
-            ),
-        ],
+        meals: MealData::collect([
+            MealData::from([
+                'day_number' => 1,
+                'type' => 'breakfast',
+                'name' => 'Oatmeal',
+                'description' => 'Healthy breakfast',
+                'preparation_instructions' => 'Cook oats',
+                'ingredients' => [['name' => 'Oats', 'quantity' => '50g'], ['name' => 'Milk', 'quantity' => '200ml']],
+                'portion_size' => '1 bowl',
+                'calories' => 350.0,
+                'protein_grams' => 10.0,
+                'carbs_grams' => 60.0,
+                'fat_grams' => 5.0,
+                'preparation_time_minutes' => 10,
+                'sort_order' => 1,
+            ]),
+        ], DataCollection::class),
         metadata: [
             'preparation_notes' => 'Batch cook proteins on Sunday. Store in airtight containers. Use fresh vegetables within 3 days.',
         ],
@@ -64,24 +64,23 @@ it('stores meal plan without preparation_notes when not provided', function (): 
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
-            new MealData(
-                dayNumber: 1,
-                type: MealType::Breakfast,
-                name: 'Oatmeal',
-                description: 'Healthy breakfast',
-                preparationInstructions: 'Cook oats',
-                ingredients: 'Oats, milk',
-                portionSize: '1 bowl',
-                calories: 350.0,
-                proteinGrams: 10.0,
-                carbsGrams: 60.0,
-                fatGrams: 5.0,
-                preparationTimeMinutes: 10,
-                sortOrder: 1,
-            ),
-        ],
-        metadata: null,
+        meals: MealData::collect([
+            MealData::from([
+                'day_number' => 1,
+                'type' => 'breakfast',
+                'name' => 'Oatmeal',
+                'description' => 'Healthy breakfast',
+                'preparation_instructions' => 'Cook oats',
+                'ingredients' => [['name' => 'Oats', 'quantity' => '50g'], ['name' => 'Milk', 'quantity' => '200ml']],
+                'portion_size' => '1 bowl',
+                'calories' => 350.0,
+                'protein_grams' => 10.0,
+                'carbs_grams' => 60.0,
+                'fat_grams' => 5.0,
+                'preparation_time_minutes' => 10,
+                'sort_order' => 1,
+            ]),
+        ], DataCollection::class),
     );
 
     $action = app(StoreMealPlan::class);
@@ -100,23 +99,23 @@ it('stores meal plan with other metadata fields alongside preparation_notes', fu
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
-            new MealData(
-                dayNumber: 1,
-                type: MealType::Breakfast,
-                name: 'Oatmeal',
-                description: 'Healthy breakfast',
-                preparationInstructions: 'Cook oats',
-                ingredients: 'Oats, milk',
-                portionSize: '1 bowl',
-                calories: 350.0,
-                proteinGrams: 10.0,
-                carbsGrams: 60.0,
-                fatGrams: 5.0,
-                preparationTimeMinutes: 10,
-                sortOrder: 1,
-            ),
-        ],
+        meals: MealData::collect([
+            MealData::from([
+                'day_number' => 1,
+                'type' => 'breakfast',
+                'name' => 'Oatmeal',
+                'description' => 'Healthy breakfast',
+                'preparation_instructions' => 'Cook oats',
+                'ingredients' => [['name' => 'Oats', 'quantity' => '50g'], ['name' => 'Milk', 'quantity' => '200ml']],
+                'portion_size' => '1 bowl',
+                'calories' => 350.0,
+                'protein_grams' => 10.0,
+                'carbs_grams' => 60.0,
+                'fat_grams' => 5.0,
+                'preparation_time_minutes' => 10,
+                'sort_order' => 1,
+            ]),
+        ], DataCollection::class),
         metadata: [
             'preparation_notes' => 'Weekly meal prep on Sundays',
             'bmi' => 22.5,

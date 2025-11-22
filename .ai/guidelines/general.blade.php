@@ -9,3 +9,8 @@ When you generate the routes, use `--with-form` so that `Wayfinder` can create f
 ```shell
 php artisan wayfinder:generate --with-form
 ```
+
+## Approach for writing tests
+
+ - Use a cleaner, more testable approach. Separate edge cases into their own methods or classes.
+ - Use data providers to test multiple scenarios in a single test method.

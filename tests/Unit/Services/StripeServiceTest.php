@@ -78,7 +78,7 @@ it('delegates to user subscribed method', function (): void {
 });
 
 it('throws exception when cashier secret is not configured', function (): void {
-    Config::set('cashier.secret', null);
+    Config::set('cashier.secret');
 
     $service = new StripeService();
 

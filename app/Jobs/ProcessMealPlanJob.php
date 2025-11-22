@@ -39,7 +39,6 @@ final class ProcessMealPlanJob implements ShouldQueue
                 return;
             }
 
-            // Initialize tracking only when the job actually runs
             $this->initializeTracking($this->userId, self::JOB_TYPE);
 
             $this->startTracking('Starting meal plan generation...');
@@ -50,7 +49,11 @@ final class ProcessMealPlanJob implements ShouldQueue
 
             $this->updateTrackingProgress(75, 'Saving meal plan...');
 
-            $storeMealPlan->handle($user, $mealPlanData);
+            $mealPlan = $storeMealPlan->handle($user, $mealPlanData);
+
+            $this->updateTrackingProgress(90, 'Verifying nutrition data...');
+
+            dispatch(new VerifyAndCorrectMealsJob($mealPlan->id));
 
             $this->completeTracking('Meal plan generated successfully!');
         } catch (Throwable $e) {

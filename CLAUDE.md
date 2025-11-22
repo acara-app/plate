@@ -1,4 +1,61 @@
 <laravel-boost-guidelines>
+=== .ai/app.actions rules ===
+
+# App/Actions guidelines
+
+- This application uses the Action pattern and prefers for much logic to live in reusable and composable Action classes.
+- Actions live in `app/Actions`, they are named based on what they do, with no suffix.
+- Actions will be called from many different places: jobs, commands, HTTP requests, API requests, MCP requests, and more.
+- Create dedicated Action classes for business logic with a single `handle()` method.
+- Inject dependencies via constructor using private properties.
+- Create new actions with `php artisan make:action "{name}" --no-interaction`
+- Wrap complex operations in `DB::transaction()` within actions when multiple models are involved.
+- Some actions won't require dependencies via `__construct` and they can use just the `handle()` method.
+
+<code-snippet name="Example action class" lang="php">
+
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions;
+
+final readonly class CreateFavorite
+{
+    public function __construct(private FavoriteService $favorites)
+    {
+        //
+    }
+
+    public function handle(User $user, string $favorite): bool
+    {
+        return $this->favorites->add($user, $favorite);
+    }
+}
+
+</code-snippet>
+
+
+=== .ai/general rules ===
+
+# General Guidelines
+
+- Don't include any superfluous PHP Annotations, except ones that start with `@` for typing variables.
+
+# Laravel Wayfinder Guidelines
+
+When you generate the routes, use `--with-form` so that `Wayfinder` can create form request classes for you, like so;
+
+```shell
+php artisan wayfinder:generate --with-form
+```
+
+## Approach for writing tests
+
+ - Use a cleaner, more testable approach. Separate edge cases into their own methods or classes.
+ - Use data providers to test multiple scenarios in a single test method.
+
+
 === foundation rules ===
 
 # Laravel Boost Guidelines
@@ -6,9 +63,9 @@
 The Laravel Boost guidelines are specifically curated by Laravel maintainers for this application. These guidelines should be followed closely to enhance the user's satisfaction building Laravel applications.
 
 ## Foundational Context
-This application is Acara Plate, a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
+This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
-- php - 8.4.14
+- php - 8.4.15
 - inertiajs/inertia-laravel (INERTIA) - v2
 - laravel/cashier (CASHIER) - v16
 - laravel/fortify (FORTIFY) - v1
@@ -128,6 +185,14 @@ protected function isAccessible(User $user, ?string $path = null): bool
 - You must not run any commands to make the site available via HTTP(s). It is _always_ available through Laravel Herd.
 
 
+=== tests rules ===
+
+## Test Enforcement
+
+- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
+- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test` with a specific filename or filter.
+
+
 === inertia-laravel/core rules ===
 
 ## Inertia Core
@@ -173,7 +238,7 @@ Route::get('/users', function () {
 ## Do Things the Laravel Way
 
 - Use `php artisan make:` commands to create new files (i.e. migrations, controllers, models, etc.). You can list available Artisan commands using the `list-artisan-commands` tool.
-- If you're creating a generic PHP class, use `artisan make:class`.
+- If you're creating a generic PHP class, use `php artisan make:class`.
 - Pass `--no-interaction` to all Artisan commands to ensure they work without user input. You should also pass the correct `--options` to ensure correct behavior.
 
 ### Database
@@ -208,7 +273,7 @@ Route::get('/users', function () {
 ### Testing
 - When creating models for tests, use the factories for the models. Check if the factory has custom states that can be used before manually setting up the model.
 - Faker: Use methods such as `$this->faker->word()` or `fake()->randomDigit()`. Follow existing conventions whether to use `$this->faker` or `fake()`.
-- When creating tests, make use of `php artisan make:test [options] <name>` to create a feature test, and pass `--unit` to create a unit test. Most tests should be feature tests.
+- When creating tests, make use of `php artisan make:test [options] {name}` to create a feature test, and pass `--unit` to create a unit test. Most tests should be feature tests.
 
 ### Vite Error
 - If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
@@ -246,7 +311,7 @@ Wayfinder generates TypeScript functions and types for Laravel controllers and r
 - Always use `search-docs` to check wayfinder correct usage before implementing any features.
 - Always Prefer named imports for tree-shaking (e.g., `import { show } from '@/actions/...'`)
 - Avoid default controller imports (prevents tree-shaking)
-- Run `wayfinder:generate` after route changes if Vite plugin isn't installed
+- Run `php artisan wayfinder:generate` after route changes if Vite plugin isn't installed
 
 ### Feature Overview
 - Form Support: Use `.form()` with `--with-form` flag for HTML form attributes — `<form {...store.form()}>` → `action="/posts" method="post"`
@@ -301,12 +366,11 @@ If your application uses the `<Form>` component from Inertia, you can use Wayfin
 === pest/core rules ===
 
 ## Pest
-
 ### Testing
 - If you need to verify a feature is working, write or update a Unit / Feature test.
 
 ### Pest Tests
-- All tests must be written using Pest. Use `php artisan make:test --pest <name>`.
+- All tests must be written using Pest. Use `php artisan make:test --pest {name}`.
 - You must not remove any tests or test files from the tests directory without approval. These are not temporary or helper files - these are core to the application.
 - Tests should test all of the happy paths, failure paths, and weird paths.
 - Tests live in the `tests/Feature` and `tests/Unit` directories.
@@ -514,58 +578,6 @@ export default () => (
 | overflow-ellipsis | text-ellipsis |
 | decoration-slice | box-decoration-slice |
 | decoration-clone | box-decoration-clone |
-
-
-=== tests rules ===
-
-## Test Enforcement
-
-- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
-- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test` with a specific filename or filter.
-
-
-=== .ai/app.actions rules ===
-
-# App/Actions guidelines
-
-- This application uses the Action pattern and prefers for much logic to live in reusable and composable Action classes.
-- Actions live in `app/Actions`, they are named based on what they do, with no suffix.
-- Actions will be called from many different places: jobs, commands, HTTP requests, API requests, MCP requests, and more.
-- Create dedicated Action classes for business logic with a single `handle()` method.
-- Inject dependencies via constructor using private properties.
-- Create new actions with `php artisan make:action "{name}" --no-interaction`
-- Wrap complex operations in `DB::transaction()` within actions when multiple models are involved.
-- Some actions won't require dependencies via `__construct` and they can use just the `handle()` method.
-
-<code-snippet name="Example action class" lang="php">
-
-<?php
-
-declare(strict_types=1);
-
-namespace App\Actions;
-
-final readonly class CreateFavorite
-{
-    public function __construct(private FavoriteService $favorites)
-    {
-        //
-    }
-
-    public function handle(User $user, string $favorite): bool
-    {
-        return $this->favorites->add($user, $favorite);
-    }
-}
-
-</code-snippet>
-
-
-=== .ai/general rules ===
-
-# General Guidelines
-
-- Don't include any superfluous PHP Annotations, except ones that start with `@` for typing variables.
 
 
 === laravel/fortify rules ===

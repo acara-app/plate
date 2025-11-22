@@ -123,6 +123,7 @@ final class ShowWeeklyMeanPlansController
                 'fat_grams' => $meal->fat_grams ? (float) $meal->fat_grams : null,
                 'preparation_time_minutes' => $meal->preparation_time_minutes,
                 'macro_percentages' => $meal->macroPercentages(),
+                'verification_metadata' => $meal->food_data_verification,
             ]),
             'daily_stats' => $dailyStats,
         ];

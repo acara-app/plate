@@ -56,7 +56,7 @@ final class GenerateMealPlan
         /** @var array<string, mixed> $structuredData */
         $structuredData = $response->structured;
 
-        return MealPlanData::fromArray($structuredData);
+        return MealPlanData::from($structuredData);
     }
 
     private function buildSchema(): ObjectSchema
@@ -124,9 +124,24 @@ final class GenerateMealPlan
                                 name: 'preparation_instructions',
                                 description: 'Step-by-step instructions for preparing the meal'
                             ),
-                            new StringSchema(
+                            new ArraySchema(
                                 name: 'ingredients',
-                                description: 'List of ingredients with quantities'
+                                description: 'Array of ingredients with their quantities',
+                                items: new ObjectSchema(
+                                    name: 'ingredient',
+                                    description: 'A single ingredient with quantity',
+                                    properties: [
+                                        new StringSchema(
+                                            name: 'name',
+                                            description: 'The ingredient name (e.g., "Chicken breast", "Brown rice")'
+                                        ),
+                                        new StringSchema(
+                                            name: 'quantity',
+                                            description: 'The quantity with unit (e.g., "150g", "1 cup (185g)", "1 tablespoon (15ml)")'
+                                        ),
+                                    ],
+                                    requiredFields: ['name', 'quantity']
+                                )
                             ),
                             new StringSchema(
                                 name: 'portion_size',

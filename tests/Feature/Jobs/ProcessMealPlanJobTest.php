@@ -65,7 +65,7 @@ it('generates and stores meal plan when job is processed', function (): void {
                 'name' => 'Test Meal',
                 'description' => 'Test',
                 'preparation_instructions' => 'Test instructions',
-                'ingredients' => 'Test ingredients',
+                'ingredients' => [['name' => 'Test ingredient', 'quantity' => '100g']],
                 'portion_size' => '1 serving',
                 'calories' => 350.0,
                 'protein_grams' => 25.0,

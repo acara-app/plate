@@ -8,6 +8,7 @@ use App\DataObjects\MealPlanData;
 use App\Enums\MealPlanType;
 use App\Enums\MealType;
 use App\Models\User;
+use Spatie\LaravelData\DataCollection;
 
 it('stores a meal plan with meals for a user', function (): void {
     $user = User::factory()->create();
@@ -19,38 +20,38 @@ it('stores a meal plan with meals for a user', function (): void {
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
-            new MealData(
-                dayNumber: 1,
-                type: MealType::Breakfast,
-                name: 'Oatmeal with Berries',
-                description: 'Healthy breakfast',
-                preparationInstructions: 'Cook oats, add berries',
-                ingredients: 'Oats, berries, milk',
-                portionSize: '1 bowl',
-                calories: 350.0,
-                proteinGrams: 10.0,
-                carbsGrams: 60.0,
-                fatGrams: 5.0,
-                preparationTimeMinutes: 10,
-                sortOrder: 1,
-            ),
-            new MealData(
-                dayNumber: 1,
-                type: MealType::Lunch,
-                name: 'Chicken Salad',
-                description: 'Protein-rich lunch',
-                preparationInstructions: 'Grill chicken, mix with greens',
-                ingredients: 'Chicken breast, mixed greens, olive oil',
-                portionSize: '1 plate',
-                calories: 450.0,
-                proteinGrams: 40.0,
-                carbsGrams: 20.0,
-                fatGrams: 15.0,
-                preparationTimeMinutes: 20,
-                sortOrder: 2,
-            ),
-        ],
+        meals: MealData::collect([
+            MealData::from([
+                'day_number' => 1,
+                'type' => 'breakfast',
+                'name' => 'Oatmeal with Berries',
+                'description' => 'Healthy breakfast',
+                'preparation_instructions' => 'Cook oats, add berries',
+                'ingredients' => [['name' => 'Oats', 'quantity' => '50g'], ['name' => 'Berries', 'quantity' => '100g'], ['name' => 'Milk', 'quantity' => '200ml']],
+                'portion_size' => '1 bowl',
+                'calories' => 350.0,
+                'protein_grams' => 10.0,
+                'carbs_grams' => 60.0,
+                'fat_grams' => 5.0,
+                'preparation_time_minutes' => 10,
+                'sort_order' => 1,
+            ]),
+            MealData::from([
+                'day_number' => 1,
+                'type' => 'lunch',
+                'name' => 'Chicken Salad',
+                'description' => 'Protein-rich lunch',
+                'preparation_instructions' => 'Grill chicken, mix with greens',
+                'ingredients' => [['name' => 'Chicken breast', 'quantity' => '150g'], ['name' => 'Mixed greens', 'quantity' => '100g'], ['name' => 'Olive oil', 'quantity' => '15ml']],
+                'portion_size' => '1 plate',
+                'calories' => 450.0,
+                'protein_grams' => 40.0,
+                'carbs_grams' => 20.0,
+                'fat_grams' => 15.0,
+                'preparation_time_minutes' => 20,
+                'sort_order' => 2,
+            ]),
+        ], DataCollection::class),
     );
 
     $action = app(StoreMealPlan::class);
@@ -88,23 +89,23 @@ it('loads meals relationship after storing', function (): void {
         durationDays: 7,
         targetDailyCalories: 2000.0,
         macronutrientRatios: ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        meals: [
-            new MealData(
-                dayNumber: 1,
-                type: MealType::Breakfast,
-                name: 'Meal 1',
-                description: 'Test',
-                preparationInstructions: 'Test',
-                ingredients: 'Test',
-                portionSize: '1 serving',
-                calories: 300.0,
-                proteinGrams: 10.0,
-                carbsGrams: 40.0,
-                fatGrams: 10.0,
-                preparationTimeMinutes: 10,
-                sortOrder: 1,
-            ),
-        ],
+        meals: MealData::collect([
+            MealData::from([
+                'day_number' => 1,
+                'type' => 'breakfast',
+                'name' => 'Meal 1',
+                'description' => 'Test',
+                'preparation_instructions' => 'Test',
+                'ingredients' => [['name' => 'Test ingredient', 'quantity' => '100g']],
+                'portion_size' => '1 serving',
+                'calories' => 300.0,
+                'protein_grams' => 10.0,
+                'carbs_grams' => 40.0,
+                'fat_grams' => 10.0,
+                'preparation_time_minutes' => 10,
+                'sort_order' => 1,
+            ]),
+        ], DataCollection::class),
     );
 
     $action = app(StoreMealPlan::class);
