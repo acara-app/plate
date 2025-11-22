@@ -4,49 +4,40 @@ declare(strict_types=1);
 
 namespace App\DataObjects;
 
-final readonly class OpenFoodFactsSearchResultData
+use Spatie\LaravelData\Attributes\DataCollectionOf;
+use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\DataCollection;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+
+#[MapInputName(SnakeCaseMapper::class)]
+final class OpenFoodFactsSearchResultData extends Data
 {
     /**
-     * @param  array<int, OpenFoodFactsProductData>  $products
+     * @param  DataCollection<int, OpenFoodFactsProductData>|array<int, array<string, mixed>>  $products
      */
     public function __construct(
-        public int $count,
-        public int $page,
-        public int $pageSize,
-        public array $products,
-    ) {}
-
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    public static function fromArray(array $data): self
-    {
-        $products = [];
-
-        if (isset($data['products']) && is_array($data['products'])) {
-            foreach ($data['products'] as $productData) {
-                if (is_array($productData)) {
-                    /** @var array<string, mixed> $productData */
-                    $products[] = OpenFoodFactsProductData::fromArray($productData);
-                }
-            }
+        public int $count = 0,
+        public int $page = 1,
+        public int $pageSize = 0,
+        #[DataCollectionOf(OpenFoodFactsProductData::class)]
+        public DataCollection|array $products = [],
+    ) {
+        if (is_array($this->products)) {
+            $this->products = OpenFoodFactsProductData::collect($this->products, DataCollection::class);
         }
-
-        return new self(
-            count: isset($data['count']) && is_int($data['count']) ? $data['count'] : 0,
-            page: isset($data['page']) && is_int($data['page']) ? $data['page'] : 1,
-            pageSize: isset($data['page_size']) && is_int($data['page_size']) ? $data['page_size'] : 0,
-            products: $products,
-        );
     }
 
     public function getBestMatch(): ?OpenFoodFactsProductData
     {
-        return $this->products[0] ?? null;
+        /** @var DataCollection<int, OpenFoodFactsProductData> $products */
+        $products = $this->products;
+
+        return $products[0] ?? null;
     }
 
     public function isEmpty(): bool
     {
-        return $this->products === [];
+        return count($this->products) === 0;
     }
 }

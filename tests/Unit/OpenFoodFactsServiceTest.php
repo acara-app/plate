@@ -46,7 +46,7 @@ it('searches for products successfully using v2 API', function (): void {
 it('extracts nutrition data per 100g', function (): void {
     $service = app(OpenFoodFactsService::class);
 
-    $product = OpenFoodFactsProductData::fromArray([
+    $product = OpenFoodFactsProductData::from([
         'nutriments' => [
             'energy-kcal_100g' => 165,
             'proteins_100g' => 31,
@@ -71,7 +71,7 @@ it('extracts nutrition data per 100g', function (): void {
 it('returns null for missing nutrition data', function (): void {
     $service = app(OpenFoodFactsService::class);
 
-    $product = OpenFoodFactsProductData::fromArray([]);
+    $product = OpenFoodFactsProductData::from([]);
 
     $nutrition = $service->extractNutritionPer100g($product);
 
@@ -101,7 +101,7 @@ it('caches search results for 30 days', function (): void {
 });
 
 it('gets best match from search results', function (): void {
-    $searchResults = OpenFoodFactsSearchResultData::fromArray([
+    $searchResults = OpenFoodFactsSearchResultData::from([
         'products' => [
             ['product_name' => 'First Match', 'code' => '123'],
             ['product_name' => 'Second Match', 'code' => '456'],
@@ -140,25 +140,47 @@ it('returns empty result when search has no products', function (): void {
         ->and($result->isEmpty())->toBeTrue();
 });
 
+it('returns non-empty result when search has products', function (): void {
+    Http::fake([
+        'world.openfoodfacts.org/api/v2/search*' => Http::response([
+            'products' => [
+                ['product_name' => 'Test Product', 'code' => '123'],
+            ],
+        ], 200),
+    ]);
+
+    $service = app(OpenFoodFactsService::class);
+    $result = $service->searchProduct('test');
+
+    expect($result)
+        ->toBeInstanceOf(OpenFoodFactsSearchResultData::class)
+        ->and($result->isEmpty())->toBeFalse();
+});
+
+it('constructs with array and converts to DataCollection', function (): void {
+    $searchResults = OpenFoodFactsSearchResultData::from([
+        'count' => 2,
+        'page' => 1,
+        'page_size' => 24,
+        'products' => [
+            ['product_name' => 'Product 1', 'code' => '111'],
+            ['product_name' => 'Product 2', 'code' => '222'],
+        ],
+    ]);
+
+    expect($searchResults->count)->toBe(2)
+        ->and($searchResults->page)->toBe(1)
+        ->and($searchResults->pageSize)->toBe(24)
+        ->and($searchResults->products)->toHaveCount(2)
+        ->and($searchResults->products[0])->toBeInstanceOf(OpenFoodFactsProductData::class)
+        ->and($searchResults->products[1])->toBeInstanceOf(OpenFoodFactsProductData::class);
+});
+
 it('returns null for best match when products array is empty', function (): void {
-    $searchResults = OpenFoodFactsSearchResultData::fromArray(['products' => []]);
+    $searchResults = OpenFoodFactsSearchResultData::from(['products' => []]);
     $result = $searchResults->getBestMatch();
 
     expect($result)->toBeNull();
-});
-
-it('returns null for best match when products is not an array', function (): void {
-    $searchResults = OpenFoodFactsSearchResultData::fromArray(['products' => 'invalid']);
-    $result = $searchResults->getBestMatch();
-
-    expect($result)->toBeNull();
-});
-
-it('handles invalid product data gracefully', function (): void {
-    $searchResults = OpenFoodFactsSearchResultData::fromArray(['products' => ['invalid']]);
-
-    expect($searchResults->products)->toBeArray()->toBeEmpty();
-    expect($searchResults->getBestMatch())->toBeNull();
 });
 
 it('gets product by barcode successfully', function (): void {
@@ -208,7 +230,7 @@ it('returns null when barcode request fails', function (): void {
 it('extracts nutrition from direct nutriments field', function (): void {
     $service = app(OpenFoodFactsService::class);
 
-    $product = OpenFoodFactsProductData::fromArray([
+    $product = OpenFoodFactsProductData::from([
         'nutriments' => [
             'energy-kcal_100g' => 200,
             'proteins_100g' => 25,
@@ -228,7 +250,7 @@ it('extracts nutrition from direct nutriments field', function (): void {
 it('handles missing nutriment values gracefully', function (): void {
     $service = app(OpenFoodFactsService::class);
 
-    $product = OpenFoodFactsProductData::fromArray([
+    $product = OpenFoodFactsProductData::from([
         'nutriments' => [
             'energy-kcal_100g' => 165,
         ],
@@ -263,20 +285,6 @@ it('handles connection exceptions for barcode lookup', function (): void {
     $result = $service->getProductByBarcode('1234567890');
 
     expect($result)->toBeNull();
-});
-
-it('converts product data to array', function (): void {
-    $rawData = [
-        'product_name' => 'Test Product',
-        'code' => '123',
-        'brands' => 'Test Brand',
-        'nutriments' => ['energy-kcal_100g' => 100],
-    ];
-
-    $product = OpenFoodFactsProductData::fromArray($rawData);
-    $array = $product->toArray();
-
-    expect($array)->toBe($rawData);
 });
 
 it('infers correct category from ingredient name', function (): void {

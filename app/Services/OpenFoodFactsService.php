@@ -58,7 +58,7 @@ final readonly class OpenFoodFactsService
                     /** @var array<string, mixed> $data */
                     $data = $response->json();
 
-                    return OpenFoodFactsSearchResultData::fromArray($data);
+                    return OpenFoodFactsSearchResultData::from($data);
                 }
 
                 Log::warning('OpenFoodFacts search failed', [
@@ -99,7 +99,7 @@ final readonly class OpenFoodFactsService
                         /** @var array<string, mixed> $productData */
                         $productData = $data['product'];
 
-                        return OpenFoodFactsProductData::fromArray($productData);
+                        return OpenFoodFactsProductData::from($productData);
                     }
                 }
 
@@ -114,7 +114,7 @@ final readonly class OpenFoodFactsService
 
     public function extractNutritionPer100g(OpenFoodFactsProductData $product): ?NutritionData
     {
-        $nutriments = $product->rawData['nutriments'] ?? null;
+        $nutriments = $product->nutriments;
 
         if (! is_array($nutriments)) {
             return null;

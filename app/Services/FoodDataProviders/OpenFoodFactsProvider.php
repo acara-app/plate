@@ -26,6 +26,7 @@ final readonly class OpenFoodFactsProvider implements FoodDataProviderInterface
 
         $products = [];
         foreach ($searchResults->products as $product) {
+            /** @var \App\DataObjects\OpenFoodFactsProductData $product */
             $nutrition = $this->openFoodFacts->extractNutritionPer100g($product);
 
             if (! $nutrition instanceof \App\DataObjects\NutritionData) {
