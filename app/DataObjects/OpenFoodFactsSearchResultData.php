@@ -14,26 +14,19 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 final class OpenFoodFactsSearchResultData extends Data
 {
     /**
-     * @param  DataCollection<int, OpenFoodFactsProductData>|array<int, array<string, mixed>>  $products
+     * @param  DataCollection<int, OpenFoodFactsProductData>  $products
      */
     public function __construct(
         public int $count = 0,
         public int $page = 1,
         public int $pageSize = 0,
         #[DataCollectionOf(OpenFoodFactsProductData::class)]
-        public DataCollection|array $products = [],
-    ) {
-        if (is_array($this->products)) {
-            $this->products = OpenFoodFactsProductData::collect($this->products, DataCollection::class);
-        }
-    }
+        public DataCollection $products = new DataCollection(OpenFoodFactsProductData::class, []),
+    ) {}
 
     public function getBestMatch(): ?OpenFoodFactsProductData
     {
-        /** @var DataCollection<int, OpenFoodFactsProductData> $products */
-        $products = $this->products;
-
-        return $products[0] ?? null;
+        return $this->products[0] ?? null;
     }
 
     public function isEmpty(): bool

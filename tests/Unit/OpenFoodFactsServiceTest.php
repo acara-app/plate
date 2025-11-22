@@ -176,6 +176,24 @@ it('constructs with array and converts to DataCollection', function (): void {
         ->and($searchResults->products[1])->toBeInstanceOf(OpenFoodFactsProductData::class);
 });
 
+it('constructs with DataCollection directly', function (): void {
+    $products = OpenFoodFactsProductData::collect([
+        ['product_name' => 'Product 1', 'code' => '111'],
+        ['product_name' => 'Product 2', 'code' => '222'],
+    ], Spatie\LaravelData\DataCollection::class);
+
+    $searchResults = new OpenFoodFactsSearchResultData(
+        count: 2,
+        page: 1,
+        pageSize: 24,
+        products: $products
+    );
+
+    expect($searchResults->count)->toBe(2)
+        ->and($searchResults->products)->toHaveCount(2)
+        ->and($searchResults->products[0])->toBeInstanceOf(OpenFoodFactsProductData::class);
+});
+
 it('returns null for best match when products array is empty', function (): void {
     $searchResults = OpenFoodFactsSearchResultData::from(['products' => []]);
     $result = $searchResults->getBestMatch();
