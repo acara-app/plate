@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\DataObjects\FoodSearchResultData;
 use App\DataObjects\NutritionData;
+use App\DataObjects\UsdaFoodData;
 use App\Services\UsdaFoodDataService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -41,9 +43,9 @@ it('searches for foods and returns results', function (): void {
 
     expect($results)->toBeArray()
         ->and($results)->toHaveCount(1)
-        ->and($results[0])->toHaveKeys(['id', 'name', 'brand', 'dataType'])
-        ->and($results[0]['id'])->toBe('12345')
-        ->and($results[0]['name'])->toBe('Chicken, broilers or fryers, breast, meat only, raw');
+        ->and($results[0])->toBeInstanceOf(FoodSearchResultData::class)
+        ->and($results[0]->id)->toBe('12345')
+        ->and($results[0]->name)->toBe('Chicken, broilers or fryers, breast, meat only, raw');
 });
 
 it('searches with default page size', function (): void {
@@ -141,9 +143,9 @@ it('fetches food by ID', function (): void {
     $service = app(UsdaFoodDataService::class);
     $result = $service->getFoodById('12345');
 
-    expect($result)->toBeArray()
-        ->and($result)->toHaveKey('fdcId')
-        ->and($result['fdcId'])->toBe(12345);
+    expect($result)->toBeInstanceOf(UsdaFoodData::class)
+        ->and($result->fdcId)->toBe('12345')
+        ->and($result->description)->toBe('Chicken breast');
 });
 
 it('caches food by ID results', function (): void {
@@ -176,10 +178,12 @@ it('returns null when food by ID not found', function (): void {
 });
 
 it('extracts nutrition per 100g from food data', function (): void {
-    $foodData = [
-        'fdcId' => 12345,
-        'description' => 'Chicken breast',
-        'foodNutrients' => [
+    $foodData = new UsdaFoodData(
+        fdcId: '12345',
+        description: 'Chicken breast',
+        brandOwner: null,
+        dataType: 'Foundation',
+        foodNutrients: [
             ['nutrient' => ['number' => '208'], 'amount' => 165],
             ['nutrient' => ['number' => '203'], 'amount' => 31],
             ['nutrient' => ['number' => '205'], 'amount' => 25],
@@ -187,8 +191,8 @@ it('extracts nutrition per 100g from food data', function (): void {
             ['nutrient' => ['number' => '291'], 'amount' => 2.5],
             ['nutrient' => ['number' => '269'], 'amount' => 1.2],
             ['nutrient' => ['number' => '307'], 'amount' => 74],
-        ],
-    ];
+        ]
+    );
 
     $service = app(UsdaFoodDataService::class);
     $nutrition = $service->extractNutritionPer100g($foodData);
@@ -204,14 +208,16 @@ it('extracts nutrition per 100g from food data', function (): void {
 });
 
 it('handles missing nutrients in food data', function (): void {
-    $foodData = [
-        'fdcId' => 12345,
-        'description' => 'Incomplete food',
-        'foodNutrients' => [
+    $foodData = new UsdaFoodData(
+        fdcId: '12345',
+        description: 'Incomplete food',
+        brandOwner: null,
+        dataType: 'Foundation',
+        foodNutrients: [
             ['nutrient' => ['number' => '208'], 'amount' => 100],
             ['nutrient' => ['number' => '203'], 'amount' => 10],
-        ],
-    ];
+        ]
+    );
 
     $service = app(UsdaFoodDataService::class);
     $nutrition = $service->extractNutritionPer100g($foodData);
@@ -226,15 +232,18 @@ it('handles missing nutrients in food data', function (): void {
 });
 
 it('returns null for nutrition when food nutrients missing', function (): void {
-    $foodData = [
-        'fdcId' => 12345,
-        'description' => 'Food without nutrients',
-    ];
+    $foodData = new UsdaFoodData(
+        fdcId: '12345',
+        description: 'Food without nutrients',
+        brandOwner: null,
+        dataType: 'Foundation',
+        foodNutrients: []
+    );
 
     $service = app(UsdaFoodDataService::class);
     $nutrition = $service->extractNutritionPer100g($foodData);
 
-    expect($nutrition)->toBeNull();
+    expect($nutrition)->toBeInstanceOf(NutritionData::class);
 });
 
 it('includes API key in requests', function (): void {

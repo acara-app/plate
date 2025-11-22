@@ -23,24 +23,21 @@ final readonly class UsdaFoodDataProvider implements FoodDataProviderInterface
 
         $results = [];
         foreach ($searchResults as $food) {
-            if (empty($food['id'])) {
+            if (empty($food->id)) {
                 continue;
             }
 
-            $foodData = $this->usdaService->getFoodById($food['id']);
+            $foodData = $this->usdaService->getFoodById($food->id);
             if (! $foodData) {
                 continue;
             }
 
             $nutrition = $this->usdaService->extractNutritionPer100g($foodData);
-            if (! $nutrition instanceof \App\DataObjects\NutritionData) {
-                continue;
-            }
 
             $results[] = [
-                'id' => $food['id'],
-                'name' => $food['name'],
-                'brand' => $food['brand'],
+                'id' => $food->id,
+                'name' => $food->name,
+                'brand' => $food->brand,
                 'calories' => $nutrition->calories,
                 'protein' => $nutrition->protein,
                 'carbs' => $nutrition->carbs,
@@ -68,14 +65,11 @@ final readonly class UsdaFoodDataProvider implements FoodDataProviderInterface
         }
 
         $nutrition = $this->usdaService->extractNutritionPer100g($foodData);
-        if (! $nutrition instanceof \App\DataObjects\NutritionData) {
-            return null;
-        }
 
         return [
             'id' => $productId,
-            'name' => is_string($foodData['description'] ?? null) ? $foodData['description'] : '',
-            'brand' => is_string($foodData['brandOwner'] ?? null) ? $foodData['brandOwner'] : null,
+            'name' => $foodData->description,
+            'brand' => $foodData->brandOwner,
             'calories' => $nutrition->calories,
             'protein' => $nutrition->protein,
             'carbs' => $nutrition->carbs,

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DataObjects\FoodSearchResultData;
 use App\DataObjects\NutritionData;
+use App\DataObjects\UsdaFoodData;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -30,7 +32,7 @@ final readonly class UsdaFoodDataService
     }
 
     /**
-     * @return array<int, array{id: string, name: string, brand: string|null, dataType: string}>|null
+     * @return list<FoodSearchResultData>|null
      */
     public function searchFoods(string $query, int $pageSize = 5): ?array
     {
@@ -42,7 +44,7 @@ final readonly class UsdaFoodDataService
 
         $cacheKey = "usda:search:v2:{$query}:{$pageSize}";
 
-        /** @var array<int, array{id: string, name: string, brand: string|null, dataType: string}>|null $result */
+        /** @var list<FoodSearchResultData>|null $result */
         $result = Cache::remember($cacheKey, now()->addMinutes($this->cacheMinutes), function () use ($query, $pageSize): ?array {
             try {
                 if (! $this->checkRateLimit()) {
@@ -70,12 +72,12 @@ final readonly class UsdaFoodDataService
                     /** @var array<int, array<string, mixed>> $foods */
                     $foods = $data['foods'];
 
-                    return array_map(fn (array $food): array => [
+                    return array_map(fn (array $food): FoodSearchResultData => FoodSearchResultData::from([
                         'id' => is_int($food['fdcId'] ?? null) || is_string($food['fdcId'] ?? null) ? (string) $food['fdcId'] : '',
                         'name' => is_string($food['description'] ?? null) ? $food['description'] : '',
                         'brand' => is_string($food['brandOwner'] ?? null) ? $food['brandOwner'] : null,
                         'dataType' => is_string($food['dataType'] ?? null) ? $food['dataType'] : '',
-                    ], $foods);
+                    ]), $foods);
                 }
 
                 return null;
@@ -87,10 +89,7 @@ final readonly class UsdaFoodDataService
         return $result;
     }
 
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getFoodById(string $fdcId): ?array
+    public function getFoodById(string $fdcId): ?UsdaFoodData
     {
         if ($this->apiKey === '' || $this->apiKey === '0') {
             return null;
@@ -98,8 +97,8 @@ final readonly class UsdaFoodDataService
 
         $cacheKey = "usda:food:{$fdcId}";
 
-        /** @var array<string, mixed>|null $result */
-        $result = Cache::remember($cacheKey, now()->addMinutes($this->cacheMinutes), function () use ($fdcId): ?array {
+        /** @var UsdaFoodData|null $result */
+        $result = Cache::remember($cacheKey, now()->addMinutes($this->cacheMinutes), function () use ($fdcId): ?UsdaFoodData {
             try {
                 $response = Http::timeout(10)
                     ->get("{$this->baseUrl}/food/{$fdcId}", [
@@ -110,7 +109,13 @@ final readonly class UsdaFoodDataService
                     /** @var array<string, mixed> $data */
                     $data = $response->json();
 
-                    return $data;
+                    return UsdaFoodData::from([
+                        'fdcId' => is_int($data['fdcId'] ?? null) || is_string($data['fdcId'] ?? null) ? (string) $data['fdcId'] : $fdcId,
+                        'description' => is_string($data['description'] ?? null) ? $data['description'] : '',
+                        'brandOwner' => is_string($data['brandOwner'] ?? null) ? $data['brandOwner'] : null,
+                        'dataType' => is_string($data['dataType'] ?? null) ? $data['dataType'] : '',
+                        'foodNutrients' => is_array($data['foodNutrients'] ?? null) ? $data['foodNutrients'] : [],
+                    ]);
                 }
 
                 return null;
@@ -122,27 +127,22 @@ final readonly class UsdaFoodDataService
         return $result;
     }
 
-    /**
-     * @param  array<string, mixed>  $foodData
-     */
-    public function extractNutritionPer100g(array $foodData): ?NutritionData
+    public function extractNutritionPer100g(UsdaFoodData $foodData): NutritionData
     {
-        if (! isset($foodData['foodNutrients']) || ! is_array($foodData['foodNutrients'])) {
-            return null;
-        }
-
-        /** @var array<int, array<string, mixed>> $nutrients */
-        $nutrients = $foodData['foodNutrients'];
+        $nutrients = $foodData->foodNutrients;
 
         $nutrientMap = [];
         foreach ($nutrients as $nutrient) {
             if (
-                is_array($nutrient['nutrient'] ?? null)
-                && is_string($nutrient['nutrient']['number'] ?? null)
-                && is_numeric($nutrient['amount'] ?? null)
+                ! is_array($nutrient)
+                || ! is_array($nutrient['nutrient'] ?? null)
+                || ! is_string($nutrient['nutrient']['number'] ?? null)
+                || ! is_numeric($nutrient['amount'] ?? null)
             ) {
-                $nutrientMap[$nutrient['nutrient']['number']] = (float) $nutrient['amount'];
+                continue; // @codeCoverageIgnore
             }
+
+            $nutrientMap[$nutrient['nutrient']['number']] = (float) $nutrient['amount'];
         }
 
         return NutritionData::fromArray([

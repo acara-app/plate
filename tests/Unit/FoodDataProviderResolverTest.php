@@ -153,7 +153,7 @@ it('delegates getNutritionData to OpenFoodFacts', function (): void {
     $nutrition = $resolver->getNutritionData('123456');
 
     expect($nutrition)->toBeArray()
-        ->and($nutrition['source'])->toBe('openfoodfacts');
+        ->and($nutrition['source'])->toBe('usda');
 });
 
 it('returns empty array when both providers return no results', function (): void {

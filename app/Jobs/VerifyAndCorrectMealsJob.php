@@ -6,10 +6,12 @@ namespace App\Jobs;
 
 use App\Actions\CorrectMealNutrition;
 use App\Actions\VerifyIngredientNutrition;
+use App\DataObjects\IngredientData;
 use App\DataObjects\MealData;
 use App\Models\MealPlan;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Spatie\LaravelData\DataCollection;
 
 final class VerifyAndCorrectMealsJob implements ShouldQueue
 {
@@ -54,13 +56,17 @@ final class VerifyAndCorrectMealsJob implements ShouldQueue
 
             $verificationData = $verifyIngredients->handle($ingredients);
 
+            $ingredientsCollection = $meal->ingredients !== null
+                ? new DataCollection(IngredientData::class, $meal->ingredients)
+                : null;
+
             $mealData = new MealData(
                 dayNumber: $meal->day_number,
                 type: $meal->type,
                 name: $meal->name,
                 description: $meal->description,
                 preparationInstructions: $meal->preparation_instructions,
-                ingredients: $meal->ingredients,
+                ingredients: $ingredientsCollection,
                 portionSize: $meal->portion_size,
                 calories: (float) $meal->calories,
                 proteinGrams: $meal->protein_grams !== null ? (float) $meal->protein_grams : null,

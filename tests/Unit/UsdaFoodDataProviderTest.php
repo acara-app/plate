@@ -295,7 +295,7 @@ it('skips foods when getFoodById returns null', function (): void {
         ->and($results[0]['id'])->toBe('2');
 });
 
-it('skips foods when nutrition extraction returns null', function (): void {
+it('includes foods even when nutrition data is empty', function (): void {
     Http::fake([
         'api.nal.usda.gov/fdc/v1/foods/search*' => Http::response([
             'foods' => [
@@ -316,7 +316,7 @@ it('skips foods when nutrition extraction returns null', function (): void {
             'fdcId' => 1,
             'description' => 'Food 1',
             'dataType' => 'Foundation',
-            // Missing foodNutrients - will cause extraction to return null
+            'foodNutrients' => [],
         ], 200),
         'api.nal.usda.gov/fdc/v1/food/2*' => Http::response([
             'fdcId' => 2,
@@ -334,9 +334,12 @@ it('skips foods when nutrition extraction returns null', function (): void {
     $provider = app(UsdaFoodDataProvider::class);
     $results = $provider->search('test');
 
-    // Should only have 1 result (skipped the one without nutrition)
-    expect($results)->toHaveCount(1)
-        ->and($results[0]['id'])->toBe('2');
+    // Both foods should be included (even with empty nutrition data)
+    expect($results)->toHaveCount(2)
+        ->and($results[0]['id'])->toBe('1')
+        ->and($results[0]['calories'])->toBeNull()
+        ->and($results[1]['id'])->toBe('2')
+        ->and($results[1]['calories'])->toBe(100.0);
 });
 
 it('searches with specificity delegates to search method', function (): void {

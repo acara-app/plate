@@ -68,22 +68,22 @@ it('creates meal plan data from array with minimal fields', function (): void {
 });
 
 it('converts meal plan data to array', function (): void {
-    $mealData = new MealData(
-        dayNumber: 1,
-        type: MealType::Breakfast,
-        name: 'Eggs',
-        description: null,
-        preparationInstructions: null,
-        ingredients: null,
-        portionSize: null,
-        calories: 200.0,
-        proteinGrams: null,
-        carbsGrams: null,
-        fatGrams: null,
-        preparationTimeMinutes: null,
-        sortOrder: 1,
-        metadata: null,
-    );
+    $mealData = MealData::from([
+        'day_number'=>1,
+        'type'=>'breakfast',
+        'name'=>'Eggs',
+        'description'=>null,
+        'preparation_instructions'=>null,
+        'ingredients'=>null,
+        'portion_size'=>null,
+        'calories'=>200.0,
+        'protein_grams'=>null,
+        'carbs_grams'=>null,
+        'fat_grams'=>null,
+        'preparation_time_minutes'=>null,
+        'sort_order'=>1,
+        'metadata'=>null,
+        ]);
 
     $mealPlanData = new MealPlanData(
         type: MealPlanType::Custom,
