@@ -57,7 +57,9 @@ const mealTypeConfig: Record<
 export function MealCard({ meal, className }: MealCardProps) {
     const config = mealTypeConfig[meal.type];
     const hasDetails =
-        meal.description || meal.preparation_instructions || meal.ingredients;
+        meal.description ||
+        meal.preparation_instructions ||
+        (meal.ingredients && meal.ingredients.length > 0);
 
     return (
         <Card className={cn('overflow-hidden', className)}>
@@ -133,16 +135,46 @@ export function MealCard({ meal, className }: MealCardProps) {
                                     </div>
                                 )}
 
-                                {meal.ingredients && (
-                                    <div>
-                                        <h4 className="mb-2 font-semibold">
-                                            Ingredients
-                                        </h4>
-                                        <p className="text-sm whitespace-pre-line text-muted-foreground">
-                                            {meal.ingredients}
-                                        </p>
-                                    </div>
-                                )}
+                                {meal.ingredients &&
+                                    meal.ingredients.length > 0 && (
+                                        <div>
+                                            <h4 className="mb-2 font-semibold">
+                                                Ingredients
+                                            </h4>
+                                            <ul className="space-y-1 text-sm text-muted-foreground">
+                                                {meal.ingredients.map(
+                                                    (ingredient, index) => (
+                                                        <li
+                                                            key={index}
+                                                            className="flex gap-2"
+                                                        >
+                                                            <span className="text-foreground">
+                                                                •
+                                                            </span>
+                                                            <span>
+                                                                {
+                                                                    ingredient.quantity
+                                                                }{' '}
+                                                                {
+                                                                    ingredient.name
+                                                                }
+                                                                {ingredient.specificity && (
+                                                                    <span className="text-xs">
+                                                                        {' '}
+                                                                        (
+                                                                        {
+                                                                            ingredient.specificity
+                                                                        }
+                                                                        )
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                        </li>
+                                                    ),
+                                                )}
+                                            </ul>
+                                        </div>
+                                    )}
 
                                 {meal.preparation_instructions && (
                                     <div>

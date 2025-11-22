@@ -14,6 +14,13 @@ export interface MacronutrientRatios {
     fat: number;
 }
 
+export interface Ingredient {
+    name: string;
+    quantity: string;
+    specificity?: string | null;
+    barcode?: string | null;
+}
+
 export interface OpenFoodFactsVerification {
     verified: boolean;
     verification_rate: number;
@@ -63,7 +70,7 @@ export interface Meal {
     name: string;
     description: string | null;
     preparation_instructions: string | null;
-    ingredients: string | null;
+    ingredients: Ingredient[] | null;
     portion_size: string | null;
     calories: number;
     protein_grams: number | null;
