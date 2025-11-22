@@ -30,7 +30,7 @@ it('creates meal data from array with all fields', function (): void {
         ->and($mealData->name)->toBe('Oatmeal')
         ->and($mealData->description)->toBe('Healthy breakfast')
         ->and($mealData->preparationInstructions)->toBe('Cook oats')
-        ->and($mealData->ingredients)->toBeInstanceOf(\Spatie\LaravelData\DataCollection::class)
+        ->and($mealData->ingredients)->toBeInstanceOf(Spatie\LaravelData\DataCollection::class)
         ->and($mealData->ingredients->toArray())->toHaveCount(2)
         ->and($mealData->portionSize)->toBe('1 cup')
         ->and($mealData->calories)->toBe(300.5)

@@ -253,7 +253,7 @@ it('handles meals with no ingredients', function (): void {
     $mealPlanData = $action->generate($user, AiModel::Gemini25Flash);
 
     expect($mealPlanData->meals)->toHaveCount(2);
-    expect($mealPlanData->meals[0]->ingredients)->toBeInstanceOf(\Spatie\LaravelData\DataCollection::class);
+    expect($mealPlanData->meals[0]->ingredients)->toBeInstanceOf(Spatie\LaravelData\DataCollection::class);
     expect($mealPlanData->meals[0]->ingredients->count())->toBe(0);
     expect($mealPlanData->meals[1]->ingredients)->toBeNull();
 });
