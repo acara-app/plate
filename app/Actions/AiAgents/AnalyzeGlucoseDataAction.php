@@ -46,17 +46,63 @@ final readonly class AnalyzeGlucoseDataAction
 
         // Calculate comprehensive statistics using the service
         $basicStats = $this->statistics->calculateBasicStats($readings);
-        $timeInRange = $this->statistics->calculateTimeInRange($readings);
+        $timeInRangeArray = $this->statistics->calculateTimeInRange($readings);
         $coefficientOfVariation = $this->statistics->calculateCoefficientOfVariation($readings);
-        $trend = $this->statistics->calculateTrend($readings);
+        $trendArray = $this->statistics->calculateTrend($readings);
         $timeOfDay = $this->statistics->analyzeTimeOfDay($readings);
         $readingTypes = $this->statistics->analyzeReadingTypeFrequency($readings);
 
         // Calculate type-specific averages
         $averages = $this->calculateAverages($readings);
 
+        // Convert arrays to DTOs
+        $ranges = new RangesData(
+            min: $basicStats['min'],
+            max: $basicStats['max'],
+        );
+
+        $timeInRange = new TimeInRangeData(
+            percentage: $timeInRangeArray['timeInRange'],
+            abovePercentage: $timeInRangeArray['timeAboveRange'],
+            belowPercentage: $timeInRangeArray['timeBelowRange'],
+            inRangeCount: $timeInRangeArray['inRangeCount'],
+            aboveRangeCount: $timeInRangeArray['aboveRangeCount'],
+            belowRangeCount: $timeInRangeArray['belowRangeCount'],
+        );
+
+        $variability = new VariabilityData(
+            stdDev: $basicStats['stdDev'],
+            coefficientOfVariation: $coefficientOfVariation,
+            classification: $this->classifyVariability($coefficientOfVariation),
+        );
+
+        $trend = new TrendData(
+            slopePerDay: $trendArray['slopePerDay'],
+            slopePerWeek: $trendArray['slopePerWeek'],
+            direction: $trendArray['direction'],
+            firstValue: $trendArray['firstValue'],
+            lastValue: $trendArray['lastValue'],
+        );
+
+        // Convert arrays to DTOs
+        $timeOfDayDto = new TimeOfDayData(
+            morning: new TimeOfDayPeriodData($timeOfDay['morning']['count'], $timeOfDay['morning']['average']),
+            afternoon: new TimeOfDayPeriodData($timeOfDay['afternoon']['count'], $timeOfDay['afternoon']['average']),
+            evening: new TimeOfDayPeriodData($timeOfDay['evening']['count'], $timeOfDay['evening']['average']),
+            night: new TimeOfDayPeriodData($timeOfDay['night']['count'], $timeOfDay['night']['average']),
+        );
+
+        $readingTypesDtos = [];
+        foreach ($readingTypes as $type => $stats) {
+            $readingTypesDtos[$type] = new ReadingTypeStatsData(
+                count: $stats['count'],
+                percentage: $stats['percentage'],
+                average: $stats['average']
+            );
+        }
+
         // Enhanced pattern detection
-        $patterns = $this->detectPatterns($readings, $basicStats, $timeInRange);
+        $patterns = $this->detectPatterns($readings, $timeInRange, $variability);
 
         // Generate insights with actual date range
         /** @var \App\Models\GlucoseReading $firstReading */
@@ -68,37 +114,19 @@ final readonly class AnalyzeGlucoseDataAction
 
         $insights = $this->generateInsights(
             $averages,
-            $basicStats,
+            $ranges,
             $patterns,
             $timeInRange,
             $trend,
-            $timeOfDay,
-            $readingTypes,
+            $variability,
+            $timeOfDayDto,
+            $readingTypesDtos,
             $readings->count(),
-            $actualDays,
-            $coefficientOfVariation
+            $actualDays
         );
 
         $concerns = $this->identifyConcerns($averages, $patterns, $timeInRange, $trend);
         $glucoseGoals = $this->determineGlucoseGoals($averages, $patterns, $timeInRange, $trend);
-
-        // Convert timeOfDay array to DTO
-        $timeOfDayDto = new TimeOfDayData(
-            morning: new TimeOfDayPeriodData($timeOfDay['morning']['count'], $timeOfDay['morning']['average']),
-            afternoon: new TimeOfDayPeriodData($timeOfDay['afternoon']['count'], $timeOfDay['afternoon']['average']),
-            evening: new TimeOfDayPeriodData($timeOfDay['evening']['count'], $timeOfDay['evening']['average']),
-            night: new TimeOfDayPeriodData($timeOfDay['night']['count'], $timeOfDay['night']['average']),
-        );
-
-        // Convert readingTypes to DTOs
-        $readingTypesDtos = [];
-        foreach ($readingTypes as $type => $stats) {
-            $readingTypesDtos[$type] = new ReadingTypeStatsData(
-                count: $stats['count'],
-                percentage: $stats['percentage'],
-                average: $stats['average']
-            );
-        }
 
         return new GlucoseAnalysisData(
             hasData: true,
@@ -109,30 +137,10 @@ final readonly class AnalyzeGlucoseDataAction
                 end: $firstReading->measured_at->toDateString(),
             ),
             averages: $averages,
-            ranges: new RangesData(
-                min: $basicStats['min'],
-                max: $basicStats['max'],
-            ),
-            timeInRange: new TimeInRangeData(
-                percentage: $timeInRange['timeInRange'],
-                abovePercentage: $timeInRange['timeAboveRange'],
-                belowPercentage: $timeInRange['timeBelowRange'],
-                inRangeCount: $timeInRange['inRangeCount'],
-                aboveRangeCount: $timeInRange['aboveRangeCount'],
-                belowRangeCount: $timeInRange['belowRangeCount'],
-            ),
-            variability: new VariabilityData(
-                stdDev: $basicStats['stdDev'],
-                coefficientOfVariation: $coefficientOfVariation,
-                classification: $this->classifyVariability($coefficientOfVariation),
-            ),
-            trend: new TrendData(
-                slopePerDay: $trend['slopePerDay'],
-                slopePerWeek: $trend['slopePerWeek'],
-                direction: $trend['direction'],
-                firstValue: $trend['firstValue'],
-                lastValue: $trend['lastValue'],
-            ),
+            ranges: $ranges,
+            timeInRange: $timeInRange,
+            variability: $variability,
+            trend: $trend,
             timeOfDay: $timeOfDayDto,
             readingTypes: $readingTypesDtos,
             patterns: $patterns,
@@ -206,6 +214,8 @@ final readonly class AnalyzeGlucoseDataAction
 
     /**
      * Calculate average glucose readings by type.
+     *
+     * @param  Collection<int, \App\Models\GlucoseReading>  $readings
      */
     private function calculateAverages(Collection $readings): AveragesData
     {
@@ -240,8 +250,10 @@ final readonly class AnalyzeGlucoseDataAction
 
     /**
      * Detect patterns in glucose readings with enhanced TIR-based analysis.
+     *
+     * @param  Collection<int, \App\Models\GlucoseReading>  $readings
      */
-    private function detectPatterns(Collection $readings, array $basicStats, array $timeInRange): PatternsData
+    private function detectPatterns(Collection $readings, TimeInRangeData $timeInRange, VariabilityData $variability): PatternsData
     {
         $postMealReadings = $readings->where('reading_type', ReadingType::PostMeal);
         $highPostMeal = $postMealReadings->filter(
@@ -250,24 +262,24 @@ final readonly class AnalyzeGlucoseDataAction
 
         // Determine hypoglycemia risk based on time-below-range
         $hypoglycemiaRisk = match (true) {
-            $timeInRange['timeBelowRange'] >= 10 => 'high',
-            $timeInRange['timeBelowRange'] >= 5 => 'moderate',
-            $timeInRange['timeBelowRange'] > 0 => 'low',
+            $timeInRange->belowPercentage >= 10 => 'high',
+            $timeInRange->belowPercentage >= 5 => 'moderate',
+            $timeInRange->belowPercentage > 0 => 'low',
             default => 'none',
         };
 
         // Determine hyperglycemia risk based on time-above-range
         $hyperglycemiaRisk = match (true) {
-            $timeInRange['timeAboveRange'] >= 50 => 'high',
-            $timeInRange['timeAboveRange'] >= 25 => 'moderate',
-            $timeInRange['timeAboveRange'] > 0 => 'low',
+            $timeInRange->abovePercentage >= 50 => 'high',
+            $timeInRange->abovePercentage >= 25 => 'moderate',
+            $timeInRange->abovePercentage > 0 => 'low',
             default => 'none',
         };
 
         return new PatternsData(
-            consistentlyHigh: $timeInRange['timeAboveRange'] > 50,
-            consistentlyLow: $timeInRange['timeBelowRange'] > 10,
-            highVariability: $basicStats['stdDev'] !== null && $basicStats['stdDev'] > GlucoseStatisticsService::HIGH_VARIABILITY_STDDEV,
+            consistentlyHigh: $timeInRange->abovePercentage > 50,
+            consistentlyLow: $timeInRange->belowPercentage > 10,
+            highVariability: $variability->stdDev !== null && $variability->stdDev > GlucoseStatisticsService::HIGH_VARIABILITY_STDDEV,
             postMealSpikes: $postMealReadings->isNotEmpty() && ($highPostMeal / $postMealReadings->count()) > 0.5,
             hypoglycemiaRisk: $hypoglycemiaRisk,
             hyperglycemiaRisk: $hyperglycemiaRisk,
@@ -293,20 +305,20 @@ final readonly class AnalyzeGlucoseDataAction
     /**
      * Generate comprehensive insights based on all available metrics.
      *
-     * @param  array<string, array{count: int, percentage: float, average: float|null}>  $readingTypes
+     * @param  array<string, ReadingTypeStatsData>  $readingTypes
      * @return array<int, string>
      */
     private function generateInsights(
         AveragesData $averages,
-        array $basicStats,
+        RangesData $ranges,
         PatternsData $patterns,
-        array $timeInRange,
-        array $trend,
-        array $timeOfDay,
+        TimeInRangeData $timeInRange,
+        TrendData $trend,
+        VariabilityData $variability,
+        TimeOfDayData $timeOfDay,
         array $readingTypes,
         int $readingsCount,
-        int $actualDays,
-        ?float $coefficientOfVariation
+        int $actualDays
     ): array {
         $insights = [];
 
@@ -319,17 +331,17 @@ final readonly class AnalyzeGlucoseDataAction
             $insights[] = "Average glucose level: {$averages->overall} mg/dL";
         }
 
-        if ($basicStats['min'] !== null && $basicStats['max'] !== null) {
-            $insights[] = "Glucose range: {$basicStats['min']}-{$basicStats['max']} mg/dL";
+        if ($ranges->min !== null && $ranges->max !== null) {
+            $insights[] = "Glucose range: {$ranges->min}-{$ranges->max} mg/dL";
         }
 
         // Time in range - critical metric
         $tirStatus = match (true) {
-            $timeInRange['timeInRange'] >= 70 => 'excellent',
-            $timeInRange['timeInRange'] >= 50 => 'good',
+            $timeInRange->percentage >= 70 => 'excellent',
+            $timeInRange->percentage >= 50 => 'good',
             default => 'needs improvement',
         };
-        $insights[] = "Time in range (70-140 mg/dL): {$timeInRange['timeInRange']}% ({$tirStatus})";
+        $insights[] = "Time in range (70-140 mg/dL): {$timeInRange->percentage}% ({$tirStatus})";
 
         // Fasting glucose
         if ($averages->fasting !== null) {
@@ -349,26 +361,32 @@ final readonly class AnalyzeGlucoseDataAction
         }
 
         // Variability analysis
-        if ($coefficientOfVariation !== null) {
-            $cvStatus = $this->classifyVariability($coefficientOfVariation);
-            $insights[] = "Glucose variability: {$cvStatus} (CV: {$coefficientOfVariation}%)";
+        if ($variability->coefficientOfVariation !== null) {
+            $cvStatus = $variability->classification;
+            $insights[] = "Glucose variability: {$cvStatus} (CV: {$variability->coefficientOfVariation}%)";
         }
 
         // Trend analysis
-        if ($trend['direction'] === 'rising' && $trend['slopePerWeek'] !== null) {
-            $insights[] = "Trend: glucose levels rising by approximately {$trend['slopePerWeek']} mg/dL per week";
-        } elseif ($trend['direction'] === 'falling' && $trend['slopePerWeek'] !== null) {
-            $absSlope = abs($trend['slopePerWeek']);
+        if ($trend->direction === 'rising' && $trend->slopePerWeek !== null) {
+            $insights[] = "Trend: glucose levels rising by approximately {$trend->slopePerWeek} mg/dL per week";
+        } elseif ($trend->direction === 'falling' && $trend->slopePerWeek !== null) {
+            $absSlope = abs($trend->slopePerWeek);
             $insights[] = "Trend: glucose levels decreasing by approximately {$absSlope} mg/dL per week";
-        } elseif ($trend['direction'] === 'stable') {
+        } elseif ($trend->direction === 'stable') {
             $insights[] = 'Trend: glucose levels are stable over the analysis period';
         }
 
         // Time of day patterns
         $timeOfDayInsights = [];
-        foreach ($timeOfDay as $period => $data) {
-            if ($data['count'] > 0 && $data['average'] !== null) {
-                $timeOfDayInsights[] = "{$period}: {$data['average']} mg/dL ({$data['count']} readings)";
+        $periods = [
+            'morning' => $timeOfDay->morning,
+            'afternoon' => $timeOfDay->afternoon,
+            'evening' => $timeOfDay->evening,
+            'night' => $timeOfDay->night,
+        ];
+        foreach ($periods as $period => $data) {
+            if ($data->count > 0 && $data->average !== null) {
+                $timeOfDayInsights[] = "{$period}: {$data->average} mg/dL ({$data->count} readings)";
             }
         }
         if ($timeOfDayInsights !== []) {
@@ -377,10 +395,10 @@ final readonly class AnalyzeGlucoseDataAction
 
         // Reading type frequency
         if ($readingTypes !== []) {
-            $mostCommon = collect($readingTypes)->sortByDesc('count')->first();
+            $mostCommon = collect($readingTypes)->sortByDesc(fn (ReadingTypeStatsData $stats): int => $stats->count)->first();
             if ($mostCommon !== null) {
                 $type = collect($readingTypes)->search($mostCommon);
-                $insights[] = "Most frequent reading type: {$type} ({$mostCommon['percentage']}%)";
+                $insights[] = "Most frequent reading type: {$type} ({$mostCommon->percentage}%)";
             }
         }
 
@@ -408,19 +426,19 @@ final readonly class AnalyzeGlucoseDataAction
     private function identifyConcerns(
         AveragesData $averages,
         PatternsData $patterns,
-        array $timeInRange,
-        array $trend
+        TimeInRangeData $timeInRange,
+        TrendData $trend
     ): array {
         $concerns = [];
 
         // Time in range concerns
-        if ($timeInRange['timeInRange'] < 50) {
-            $concerns[] = "Low time in range ({$timeInRange['timeInRange']}%) indicates poor glucose control requiring attention";
+        if ($timeInRange->percentage < 50) {
+            $concerns[] = "Low time in range ({$timeInRange->percentage}%) indicates poor glucose control requiring attention";
         }
 
         // Hyperglycemia concerns
         if ($patterns->consistentlyHigh && $averages->overall !== null) {
-            $concerns[] = "Consistently elevated glucose levels (average: {$averages->overall} mg/dL, {$timeInRange['timeAboveRange']}% time above range) may indicate need for dietary intervention";
+            $concerns[] = "Consistently elevated glucose levels (average: {$averages->overall} mg/dL, {$timeInRange->abovePercentage}% time above range) may indicate need for dietary intervention";
         }
 
         if ($patterns->postMealSpikes) {
@@ -429,7 +447,7 @@ final readonly class AnalyzeGlucoseDataAction
 
         // Hypoglycemia concerns
         if ($patterns->consistentlyLow && $averages->overall !== null) {
-            $concerns[] = "Consistently low glucose levels (average: {$averages->overall} mg/dL, {$timeInRange['timeBelowRange']}% time below range) may indicate insufficient carbohydrate intake";
+            $concerns[] = "Consistently low glucose levels (average: {$averages->overall} mg/dL, {$timeInRange->belowPercentage}% time below range) may indicate insufficient carbohydrate intake";
         }
 
         if ($patterns->hypoglycemiaRisk === 'high') {
@@ -449,8 +467,8 @@ final readonly class AnalyzeGlucoseDataAction
         }
 
         // Trend concerns
-        if ($trend['direction'] === 'rising' && $trend['slopePerWeek'] !== null && $trend['slopePerWeek'] > 5) {
-            $concerns[] = "Glucose levels are rising by {$trend['slopePerWeek']} mg/dL per week - early intervention recommended";
+        if ($trend->direction === 'rising' && $trend->slopePerWeek !== null && $trend->slopePerWeek > 5) {
+            $concerns[] = "Glucose levels are rising by {$trend->slopePerWeek} mg/dL per week - early intervention recommended";
         }
 
         return $concerns;
@@ -462,22 +480,22 @@ final readonly class AnalyzeGlucoseDataAction
     private function determineGlucoseGoals(
         AveragesData $averages,
         PatternsData $patterns,
-        array $timeInRange,
-        array $trend
+        TimeInRangeData $timeInRange,
+        TrendData $trend
     ): GlucoseGoalsData {
         // Priority 1: Address hypoglycemia risk
         if ($patterns->consistentlyLow && $averages->overall !== null) {
             return new GlucoseGoalsData(
                 target: 'Maintain glucose levels above 70 mg/dL',
-                reasoning: "Current average of {$averages->overall} mg/dL with {$timeInRange['timeBelowRange']}% time below range indicates need for increased carbohydrate intake",
+                reasoning: "Current average of {$averages->overall} mg/dL with {$timeInRange->belowPercentage}% time below range indicates need for increased carbohydrate intake",
             );
         }
 
         // Priority 2: Improve time in range if poor
-        if ($timeInRange['timeInRange'] < 50) {
+        if ($timeInRange->percentage < 50) {
             return new GlucoseGoalsData(
                 target: 'Increase time in range to at least 70%',
-                reasoning: "Current time in range of {$timeInRange['timeInRange']}% is below target; requires comprehensive meal planning",
+                reasoning: "Current time in range of {$timeInRange->percentage}% is below target; requires comprehensive meal planning",
             );
         }
 
@@ -498,10 +516,10 @@ final readonly class AnalyzeGlucoseDataAction
         }
 
         // Priority 5: Address rising trend
-        if ($trend['direction'] === 'rising' && $trend['slopePerWeek'] !== null && $trend['slopePerWeek'] > 3) {
+        if ($trend->direction === 'rising' && $trend->slopePerWeek !== null && $trend->slopePerWeek > 3) {
             return new GlucoseGoalsData(
                 target: 'Reverse rising glucose trend',
-                reasoning: "Levels are increasing by {$trend['slopePerWeek']} mg/dL per week; early intervention can prevent further elevation",
+                reasoning: "Levels are increasing by {$trend->slopePerWeek} mg/dL per week; early intervention can prevent further elevation",
             );
         }
 
@@ -509,7 +527,7 @@ final readonly class AnalyzeGlucoseDataAction
         if ($averages->overall !== null) {
             return new GlucoseGoalsData(
                 target: 'Maintain current glucose control',
-                reasoning: "Current average of {$averages->overall} mg/dL with {$timeInRange['timeInRange']}% time in range shows good control",
+                reasoning: "Current average of {$averages->overall} mg/dL with {$timeInRange->percentage}% time in range shows good control",
             );
         }
 
