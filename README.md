@@ -119,6 +119,42 @@ php artisan db:seed --class=DietaryPreferenceSeeder
 php artisan db:seed --class=HealthConditionSeeder
 ```
 
+### USDA Food Database Import
+
+Acara Plate uses the USDA FoodData Central database for accurate nutritional information. To import the food data:
+
+1. **Download USDA Food Data** from [FoodData Central](https://fdc.nal.usda.gov/download-datasets):
+   - Foundation Foods (JSON format)
+   - SR Legacy Foods (JSON format)
+
+2. **Place the downloaded files** in `storage/sources/` directory
+
+3. **Import the data** using the provided Artisan commands:
+
+```bash
+# Import Foundation Foods (default path)
+php artisan import:usda-food-foundation-data
+
+# Import SR Legacy Foods (default path)
+php artisan import:usda-sr-legacy-food-data
+
+# Or specify custom file paths
+php artisan import:usda-food-foundation-data --path=/path/to/foundation.json
+php artisan import:usda-sr-legacy-food-data --path=/path/to/legacy.json
+```
+
+**Performance Notes:**
+- The import uses streaming to handle large JSON files efficiently
+- Foundation Foods: ~1,200 entries (~2-5 seconds)
+- SR Legacy Foods: ~8,000+ entries (~10-30 seconds)
+- Imports use database transactions for data integrity
+- Progress is displayed in real-time during import
+
+**Database Optimization:**
+- Fulltext indexes are automatically created on the `description` column for fast searches
+- Indexes are only created on MySQL/PostgreSQL (skipped on SQLite for testing)
+- The service uses case-insensitive LIKE queries with proper parameter binding
+
 ## Development
 
 ### Running the Development Server

@@ -10,8 +10,9 @@ use App\Enums\Sex;
 use App\Jobs\ProcessMealPlanJob;
 use App\Models\Goal;
 use App\Models\Lifestyle;
+use App\Models\UsdaFoundationFood;
 use App\Models\User;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Prism;
@@ -19,21 +20,18 @@ use Prism\Prism\Testing\StructuredResponseFake;
 use Prism\Prism\ValueObjects\Meta;
 use Prism\Prism\ValueObjects\Usage;
 
+uses(RefreshDatabase::class);
+
 it('generates a meal plan using PrismPHP', function (): void {
-    Http::fake([
-        'world.openfoodfacts.org/*' => Http::response([
-            'products' => [
-                [
-                    'product_name' => 'Greek Yogurt',
-                    'nutriments' => [
-                        'energy-kcal_100g' => 59,
-                        'proteins_100g' => 10,
-                        'carbohydrates_100g' => 3.6,
-                        'fat_100g' => 0.4,
-                    ],
-                ],
-            ],
-        ], 200),
+    UsdaFoundationFood::factory()->create([
+        'id' => 12345,
+        'description' => 'Greek Yogurt',
+        'nutrients' => [
+            ['nutrient' => ['number' => '208'], 'amount' => 59],
+            ['nutrient' => ['number' => '203'], 'amount' => 10],
+            ['nutrient' => ['number' => '205'], 'amount' => 3.6],
+            ['nutrient' => ['number' => '204'], 'amount' => 0.4],
+        ],
     ]);
 
     $user = User::factory()->create();

@@ -7,27 +7,17 @@ namespace App\Services;
 use App\DataObjects\FoodSearchResultData;
 use App\DataObjects\NutritionData;
 use App\DataObjects\UsdaFoodData;
-use Illuminate\Http\Client\ConnectionException;
+use App\Models\UsdaFoundationFood;
+use App\Models\UsdaSrLegacyFood;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 final readonly class UsdaFoodDataService
 {
-    private string $apiKey;
-
-    private string $baseUrl;
-
     private int $cacheMinutes;
 
     public function __construct()
     {
-        $apiKey = config('services.usda.api_key');
-        $baseUrl = config('services.usda.url', 'https://api.nal.usda.gov/fdc/v1');
         $cacheMinutes = config('services.usda.cache_minutes', 10080);
-
-        $this->apiKey = is_string($apiKey) ? $apiKey : '';
-        $this->baseUrl = is_string($baseUrl) ? $baseUrl : 'https://api.nal.usda.gov/fdc/v1';
         $this->cacheMinutes = is_int($cacheMinutes) ? $cacheMinutes : 10080;
     }
 
@@ -36,54 +26,48 @@ final readonly class UsdaFoodDataService
      */
     public function searchFoods(string $query, int $pageSize = 5): ?array
     {
-        if ($this->apiKey === '' || $this->apiKey === '0') {
-            Log::warning('USDA API key not configured');
-
-            return null;
-        }
-
-        $cacheKey = "usda:search:v2:{$query}:{$pageSize}";
+        $cacheKey = "usda:search:v3:{$query}:{$pageSize}";
 
         /** @var list<FoodSearchResultData>|null $result */
         $result = Cache::remember($cacheKey, now()->addMinutes($this->cacheMinutes), function () use ($query, $pageSize): ?array {
-            try {
-                if (! $this->checkRateLimit()) {
-                    return null; // @codeCoverageIgnore
-                }
+            $searchTerm = '%'.mb_strtolower($query).'%';
 
-                $response = Http::timeout(10)
-                    ->get("{$this->baseUrl}/foods/search", [
-                        'api_key' => $this->apiKey,
-                        'query' => $query,
-                        'dataType' => ['Foundation', 'SR Legacy'],
-                        'pageSize' => $pageSize,
-                        'sortBy' => 'dataType.keyword',
-                        'sortOrder' => 'asc',
-                    ]);
+            // Search Foundation Foods first (preferred)
+            $foundation = UsdaFoundationFood::query()
+                ->whereRaw('LOWER(description) LIKE ?', [$searchTerm])
+                ->limit($pageSize)
+                ->get(['id', 'description']);
 
-                if ($response->successful()) {
-                    /** @var array<string, mixed> $data */
-                    $data = $response->json();
+            $results = [];
 
-                    if (! isset($data['foods']) || ! is_array($data['foods'])) {
-                        return null; // @codeCoverageIgnore
-                    }
-
-                    /** @var array<int, array<string, mixed>> $foods */
-                    $foods = $data['foods'];
-
-                    return array_map(fn (array $food): FoodSearchResultData => FoodSearchResultData::from([
-                        'id' => is_int($food['fdcId'] ?? null) || is_string($food['fdcId'] ?? null) ? (string) $food['fdcId'] : '',
-                        'name' => is_string($food['description'] ?? null) ? $food['description'] : '',
-                        'brand' => is_string($food['brandOwner'] ?? null) ? $food['brandOwner'] : null,
-                        'dataType' => is_string($food['dataType'] ?? null) ? $food['dataType'] : '',
-                    ]), $foods);
-                }
-
-                return null;
-            } catch (ConnectionException) {
-                return null; // @codeCoverageIgnore
+            foreach ($foundation as $food) {
+                $results[] = FoodSearchResultData::from([
+                    'id' => (string) $food->id,
+                    'name' => $food->description,
+                    'brand' => null,
+                    'dataType' => 'Foundation',
+                ]);
             }
+
+            // If we need more results, search SR Legacy
+            $remaining = $pageSize - count($results);
+            if ($remaining > 0) {
+                $legacy = UsdaSrLegacyFood::query()
+                    ->whereRaw('LOWER(description) LIKE ?', [$searchTerm])
+                    ->limit($remaining)
+                    ->get(['id', 'description']);
+
+                foreach ($legacy as $food) {
+                    $results[] = FoodSearchResultData::from([
+                        'id' => (string) $food->id,
+                        'name' => $food->description,
+                        'brand' => null,
+                        'dataType' => 'SR Legacy',
+                    ]);
+                }
+            }
+
+            return $results !== [] ? $results : null;
         });
 
         return $result;
@@ -91,37 +75,31 @@ final readonly class UsdaFoodDataService
 
     public function getFoodById(string $fdcId): ?UsdaFoodData
     {
-        if ($this->apiKey === '' || $this->apiKey === '0') {
-            return null;
-        }
-
-        $cacheKey = "usda:food:{$fdcId}";
+        $cacheKey = "usda:food:v2:{$fdcId}";
 
         /** @var UsdaFoodData|null $result */
         $result = Cache::remember($cacheKey, now()->addMinutes($this->cacheMinutes), function () use ($fdcId): ?UsdaFoodData {
-            try {
-                $response = Http::timeout(10)
-                    ->get("{$this->baseUrl}/food/{$fdcId}", [
-                        'api_key' => $this->apiKey,
-                    ]);
+            // Try Foundation Foods first
+            $food = UsdaFoundationFood::query()->find($fdcId);
+            $dataType = 'Foundation';
 
-                if ($response->successful()) {
-                    /** @var array<string, mixed> $data */
-                    $data = $response->json();
+            // If not found, try SR Legacy
+            if (! $food) {
+                $food = UsdaSrLegacyFood::query()->find($fdcId);
+                $dataType = 'SR Legacy';
+            }
 
-                    return UsdaFoodData::from([
-                        'fdcId' => is_int($data['fdcId'] ?? null) || is_string($data['fdcId'] ?? null) ? (string) $data['fdcId'] : $fdcId,
-                        'description' => is_string($data['description'] ?? null) ? $data['description'] : '',
-                        'brandOwner' => is_string($data['brandOwner'] ?? null) ? $data['brandOwner'] : null,
-                        'dataType' => is_string($data['dataType'] ?? null) ? $data['dataType'] : '',
-                        'foodNutrients' => is_array($data['foodNutrients'] ?? null) ? $data['foodNutrients'] : [],
-                    ]);
-                }
-
-                return null;
-            } catch (ConnectionException) {
+            if (! $food) {
                 return null;
             }
+
+            return UsdaFoodData::from([
+                'fdcId' => (string) $food->id,
+                'description' => $food->description,
+                'brandOwner' => null,
+                'dataType' => $dataType,
+                'foodNutrients' => $food->nutrients ?? [],
+            ]);
         });
 
         return $result;
@@ -177,19 +155,5 @@ final readonly class UsdaFoodDataService
         $cleaned = preg_replace('/\s+/', ' ', $cleaned) ?? $cleaned;
 
         return mb_trim($cleaned);
-    }
-
-    private function checkRateLimit(): bool
-    {
-        $key = 'usda:rate_limit:search';
-        $requests = Cache::get($key, 0);
-
-        if ($requests >= 800) { // @codeCoverageIgnore
-            return false; // @codeCoverageIgnore
-        } // @codeCoverageIgnore
-
-        Cache::put($key, is_int($requests) ? $requests + 1 : 1, now()->addHour());
-
-        return true;
     }
 }

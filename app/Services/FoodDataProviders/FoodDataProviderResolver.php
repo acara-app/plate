@@ -11,7 +11,6 @@ final readonly class FoodDataProviderResolver implements FoodDataProviderInterfa
 {
     public function __construct(
         private UsdaFoodDataProvider $usdaProvider,
-        private OpenFoodFactsProvider $offProvider,
     ) {}
 
     public function search(string $ingredientName): array
@@ -24,30 +23,13 @@ final readonly class FoodDataProviderResolver implements FoodDataProviderInterfa
      */
     public function searchWithSpecificity(string $ingredientName, IngredientSpecificity $specificity, ?string $barcode = null): array
     {
-        if ($barcode && $specificity === IngredientSpecificity::Specific) {
-            $result = $this->offProvider->getNutritionData($barcode);
-            if ($result) {
-                return [$result];
-            }
-        }
-
-        if ($specificity === IngredientSpecificity::Generic) {
-            return $this->usdaProvider->search($ingredientName);
-        }
-
-        return $this->offProvider->search($ingredientName);
+        // Always use USDA for all ingredient types
+        return $this->usdaProvider->search($ingredientName);
     }
 
     public function getNutritionData(string $productId): ?array
     {
-        if (is_numeric($productId)) {
-            $result = $this->usdaProvider->getNutritionData($productId);
-            if ($result) {
-                return $result;
-            }
-        }
-
-        return $this->offProvider->getNutritionData($productId);
+        return $this->usdaProvider->getNutritionData($productId);
     }
 
     public function cleanIngredientName(string $name): string
