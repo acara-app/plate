@@ -17,7 +17,8 @@
 
         <header class="relative z-10 mb-4 w-full max-w-[335px] not-has-[nav]:hidden lg:mb-8 lg:max-w-5xl">
             <nav class="flex items-center justify-between">
-                <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80 dark:text-white">
+                <a href="/"
+                    class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80 dark:text-white">
                     <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
                     Acare Plate
                 </a>
@@ -58,7 +59,8 @@
                         </h1>
 
                         <p class="text-base leading-relaxed text-slate-600 lg:text-lg dark:text-slate-300">
-                            Personalized meal plans that learn from your glucose logs — intended for adults with Type 2 diabetes or prediabetes as an informational tool.
+                            Personalized meal plans that learn from your glucose logs — intended for adults with Type 2
+                            diabetes or prediabetes as an informational tool.
                         </p>
 
                         <div
@@ -81,12 +83,14 @@
                                         d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
                             </a>
-                            
+
                             {{-- GitHub Trust Button --}}
                             <a href="https://github.com/acara-app/plate" target="_blank"
                                 class="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-700 transition-all duration-300 hover:border-slate-300 hover:bg-slate-50 sm:w-auto sm:px-4 sm:text-base lg:px-4 lg:py-3 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
                                 <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                                    <path fill-rule="evenodd"
+                                        d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                        clip-rule="evenodd" />
                                 </svg>
                                 Star on GitHub
                             </a>
@@ -130,11 +134,19 @@
                                         <div
                                             class="flex items-center gap-1 text-[10px] font-medium text-slate-500 lg:text-xs dark:text-slate-400">
                                             Avg Glucose
-                                            <span title="Average calculated from your logged readings over the selected period. Consult your doctor for clinical targets." class="cursor-help text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">
-                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <span
+                                                title="Average calculated from your logged readings over the selected period. Consult your doctor for clinical targets."
+                                                class="cursor-help text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">
+                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
                                             </span>
                                         </div>
-                                        <div class="text-xs font-bold text-emerald-600 lg:text-sm dark:text-emerald-400">
+                                        <div
+                                            class="text-xs font-bold text-emerald-600 lg:text-sm dark:text-emerald-400">
                                             105 mg/dL</div>
                                     </div>
                                 </div>
@@ -195,8 +207,15 @@
                                         <div
                                             class="flex items-center gap-1 text-[10px] font-medium text-slate-500 lg:text-xs dark:text-slate-400">
                                             Health Score
-                                            <span title="A proprietary score based on your nutritional adherence and glucose stability. Not a clinical diagnostic tool." class="cursor-help text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">
-                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <span
+                                                title="A proprietary score based on your nutritional adherence and glucose stability. Not a clinical diagnostic tool."
+                                                class="cursor-help text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">
+                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
                                             </span>
                                         </div>
                                         <div class="text-xs font-bold text-slate-900 lg:text-sm dark:text-white">92/100
@@ -304,11 +323,16 @@
                                     class="mb-3 rounded-lg bg-purple-100 p-3 transition-transform duration-300 group-hover/card:scale-110 dark:bg-purple-900/50">
                                     <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="currentColor"
                                         viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                                        <path fill-rule="evenodd"
+                                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                            clip-rule="evenodd" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Open Source</h3>
-                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Transparent, community-driven development. Inspect the code, contribute, and trust the platform.</p>
+                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Open
+                                    Source</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Transparent,
+                                    community-driven development. Inspect the code, contribute, and trust the platform.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -319,80 +343,153 @@
             <section class="w-full max-w-[335px] lg:max-w-5xl">
                 <div class="space-y-4 lg:space-y-6">
                     <div class="text-center">
-                        <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl dark:text-white">Frequently Asked Questions</h2>
-                        <p class="mt-2 text-sm text-slate-600 lg:text-base dark:text-slate-400">Common questions about Acara Plate</p>
+                        <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl dark:text-white">Frequently Asked
+                            Questions</h2>
+                        <p class="mt-2 text-sm text-slate-600 lg:text-base dark:text-slate-400">Common questions about
+                            Acara Plate</p>
                     </div>
 
                     <div class="space-y-3">
-                        <details class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
-                            <summary class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
+                        <details
+                            class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
+                            <summary
+                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
                                 <span>How accurate are the nutritional values in meal plans?</span>
-                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
                                 </svg>
                             </summary>
                             <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
-                                Acara Plate uses a hybrid verification system combining AI with <a href="https://world.openfoodfacts.org/" target="_blank" class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">OpenFoodFacts</a>, the world's largest open food database with over 3 million products. Each ingredient is automatically cross-referenced against verified product data, and nutritional estimates are corrected when discrepancies exceed 15%. Every meal includes verification metadata showing confidence scores and data sources.
+                                Acara Plate uses a hybrid verification system combining AI with <a
+                                    href="https://world.openfoodfacts.org/" target="_blank"
+                                    class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">OpenFoodFacts</a>,
+                                the world's largest open food database with over 3 million products. Each ingredient is
+                                automatically cross-referenced against verified product data, and nutritional estimates
+                                are corrected when discrepancies exceed 15%. Every meal includes verification metadata
+                                showing confidence scores and data sources.
                             </p>
                         </details>
 
-                        <details class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
-                            <summary class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
+                        <details
+                            class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
+                            <summary
+                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
                                 <span>Can AI hallucinate incorrect food information?</span>
-                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
                                 </svg>
                             </summary>
                             <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
-                                Yes, AI can occasionally hallucinate or estimate incorrectly. That's why we verify all ingredients against OpenFoodFacts' real product database. When AI generates a meal plan, we automatically validate each ingredient's nutritional values and apply corrections when needed. This reduces hallucination risk while maintaining meal personalization. Always verify ingredients for allergens and consult your healthcare provider.
+                                Yes, AI can occasionally hallucinate or estimate incorrectly. That's why we verify all
+                                ingredients against OpenFoodFacts' real product database. When AI generates a meal plan,
+                                we automatically validate each ingredient's nutritional values and apply corrections
+                                when needed. This reduces hallucination risk while maintaining meal personalization.
+                                Always verify ingredients for allergens and consult your healthcare provider.
                             </p>
                         </details>
 
-                        <details class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
-                            <summary class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
+                        <details
+                            class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
+                            <summary
+                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
                                 <span>Is this a medical app or diagnostic tool?</span>
-                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
                                 </svg>
                             </summary>
                             <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
-                                No. Acara Plate is an informational and educational tool, not a medical device. It does not diagnose, treat, or manage any medical condition. The glucose tracking feature helps you monitor trends, but all meal plans and health decisions should be discussed with your healthcare provider. This platform is intended for adults as a supplementary nutrition planning tool.
+                                No. Acara Plate is an informational and educational tool, not a medical device. It does
+                                not diagnose, treat, or manage any medical condition. The glucose tracking feature helps
+                                you monitor trends, but all meal plans and health decisions should be discussed with
+                                your healthcare provider. This platform is intended for adults as a supplementary
+                                nutrition planning tool.
                             </p>
                         </details>
 
-                        <details class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
-                            <summary class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
+                        <details
+                            class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
+                            <summary
+                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
                                 <span>Why is Acara Plate open source?</span>
-                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
                                 </svg>
                             </summary>
                             <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
-                                Transparency is crucial for health-related tools. Being open source allows healthcare professionals, developers, and users to inspect how meal plans are generated, how nutritional data is verified, and how AI is used. You can review the code on <a href="https://github.com/acara-app/plate" target="_blank" class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">GitHub</a>, contribute improvements, and verify that the platform operates as described.
+                                Transparency is crucial for health-related tools. Being open source allows healthcare
+                                professionals, developers, and users to inspect how meal plans are generated, how
+                                nutritional data is verified, and how AI is used. You can review the code on <a
+                                    href="https://github.com/acara-app/plate" target="_blank"
+                                    class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">GitHub</a>,
+                                contribute improvements, and verify that the platform operates as described.
                             </p>
                         </details>
 
-                        <details class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
-                            <summary class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
+                        <details
+                            class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
+                            <summary
+                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
                                 <span>What is OpenFoodFacts and why do you use it?</span>
-                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
                                 </svg>
                             </summary>
                             <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
-                                <a href="https://world.openfoodfacts.org/" target="_blank" class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">OpenFoodFacts</a> is a collaborative, free, and open database of food products from around the world, similar to Wikipedia for food. Instead of building our own nutrition database (which would require millions of products), we leverage this community-driven resource to verify AI-generated nutritional data. This gives you access to real product information while keeping the platform free and transparent.
+                                <a href="https://world.openfoodfacts.org/" target="_blank"
+                                    class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">OpenFoodFacts</a>
+                                is a collaborative, free, and open database of food products from around the world,
+                                similar to Wikipedia for food. Instead of building our own nutrition database (which
+                                would require millions of products), we leverage this community-driven resource to
+                                verify AI-generated nutritional data. This gives you access to real product information
+                                while keeping the platform free and transparent.
                             </p>
                         </details>
 
-                        <details class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
-                            <summary class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
-                                <span>Who should use Plate?</span>
-                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        <details
+                            class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
+                            <summary
+                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
+                                <span>How do you ensure nutritional accuracy?</span>
+                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
                                 </svg>
                             </summary>
                             <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
-                                Acara Plate is designed for adults seeking personalized meal planning guidance, particularly those managing Type 2 diabetes or prediabetes. It's useful for anyone wanting structured nutrition plans based on their goals, dietary preferences, and health conditions. However, it should complement—not replace—professional medical advice and supervision from your healthcare team.
+                                We use a dual-source verification system for maximum accuracy. For whole foods like bananas, chicken breast, and rice, we reference the <a href="https://fdc.nal.usda.gov/" target="_blank"
+                                    class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">USDA FoodData Central</a> database—the scientific gold standard for nutrition. For packaged products, we cross-reference <a href="https://world.openfoodfacts.org/" target="_blank"
+                                    class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">OpenFoodFacts</a>, a community-driven database with millions of products. This layered approach ensures your meal plans are built on verified, reliable nutritional data rather than estimates.
+                            </p>
+                        </details>
+
+                        <details
+                            class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
+                            <summary
+                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
+                                <span>Who should use Plate?</span>
+                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </summary>
+                            <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
+                                Acara Plate is designed for adults seeking personalized meal planning guidance,
+                                particularly those managing Type 2 diabetes or prediabetes. It's useful for anyone
+                                wanting structured nutrition plans based on their goals, dietary preferences, and health
+                                conditions. However, it should complement—not replace—professional medical advice and
+                                supervision from your healthcare team.
                             </p>
                         </details>
                     </div>
@@ -416,7 +513,8 @@
                             <h3 class="text-sm font-semibold text-amber-900 lg:text-base dark:text-amber-200">Medical
                                 Disclaimer</h3>
                             <p class="mt-1 text-xs leading-relaxed text-amber-800 lg:text-sm dark:text-amber-400">
-                                Acara Plate is an AI-powered tool designed for informational and educational purposes only.
+                                Acara Plate is an AI-powered tool designed for informational and educational purposes
+                                only.
                                 The meal plans, nutritional insights, and glucose tracking features are
                                 <strong>not</strong> a substitute for professional medical advice, diagnosis, or
                                 treatment. Always seek the advice of your physician or other qualified health provider
