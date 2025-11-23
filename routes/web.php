@@ -16,7 +16,7 @@ Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])-
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', [Web\DashboardController::class, 'show'])->name('dashboard');
 
-    Route::get('meal-plans/weekly', Web\ShowWeeklyMeanPlansController::class)->name('meal-plans.weekly');
+    Route::get('meal-plans', Web\ShowMealPlansController::class)->name('meal-plans.index');
 
     Route::get('chat/create', [Web\ChatController::class, 'create'])->name('chat.create');
 

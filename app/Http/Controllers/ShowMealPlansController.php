@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\JobStatus;
-use App\Enums\MealPlanType;
 use App\Jobs\ProcessMealPlanJob;
 use App\Models\Meal;
 use App\Models\MealPlan;
@@ -16,7 +15,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-final class ShowWeeklyMeanPlansController
+final class ShowMealPlansController
 {
     public function __invoke(Request $request): Response
     {
@@ -33,7 +32,6 @@ final class ShowWeeklyMeanPlansController
 
         $mealPlan = MealPlan::query()
             ->where('user_id', $user->id)
-            ->where('type', MealPlanType::Weekly)
             ->with(['meals' => function (mixed $query) use ($currentDayNumber): void {
                 /** @var HasMany<Meal, MealPlan> $query */
                 $query->where('day_number', $currentDayNumber)
@@ -52,7 +50,7 @@ final class ShowWeeklyMeanPlansController
 
         if (! $mealPlan) {
 
-            return Inertia::render('meal-plans/weekly/show-weekly-plan', [
+            return Inertia::render('meal-plans/show', [
                 'mealPlan' => null,
                 'currentDay' => null,
                 'navigation' => null,
@@ -123,7 +121,6 @@ final class ShowWeeklyMeanPlansController
                 'fat_grams' => $meal->fat_grams ? (float) $meal->fat_grams : null,
                 'preparation_time_minutes' => $meal->preparation_time_minutes,
                 'macro_percentages' => $meal->macroPercentages(),
-                'verification_metadata' => $meal->food_data_verification,
             ]),
             'daily_stats' => $dailyStats,
         ];
@@ -137,7 +134,7 @@ final class ShowWeeklyMeanPlansController
             'total_days' => $mealPlan->duration_days,
         ];
 
-        return Inertia::render('meal-plans/weekly/show-weekly-plan', [
+        return Inertia::render('meal-plans/show', [
             'mealPlan' => $formattedMealPlan,
             'currentDay' => $currentDay,
             'navigation' => $navigation,

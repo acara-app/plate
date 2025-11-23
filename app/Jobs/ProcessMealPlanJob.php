@@ -51,10 +51,6 @@ final class ProcessMealPlanJob implements ShouldQueue
 
             $mealPlan = $storeMealPlan->handle($user, $mealPlanData);
 
-            $this->updateTrackingProgress(90, 'Verifying nutrition data...');
-
-            dispatch(new VerifyAndCorrectMealsJob($mealPlan->id));
-
             $this->completeTracking('Meal plan generated successfully!');
         } catch (Throwable $e) {
             $this->failTracking('Failed to generate meal plan: '.$e->getMessage());

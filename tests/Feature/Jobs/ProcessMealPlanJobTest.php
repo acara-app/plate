@@ -13,7 +13,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Queue;
 use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Facades\Prism;
-use Prism\Prism\Testing\StructuredResponseFake;
+use Prism\Prism\Testing\TextResponseFake;
 use Prism\Prism\ValueObjects\Meta;
 use Prism\Prism\ValueObjects\Usage;
 
@@ -77,9 +77,8 @@ it('generates and stores meal plan when job is processed', function (): void {
         ],
     ];
 
-    $fakeResponse = StructuredResponseFake::make()
+    $fakeResponse = TextResponseFake::make()
         ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
-        ->withStructured($mockResponse)
         ->withFinishReason(FinishReason::Stop)
         ->withUsage(new Usage(100, 200))
         ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
@@ -112,9 +111,8 @@ it('handles missing user gracefully', function (): void {
         'meals' => [],
     ];
 
-    $fakeResponse = StructuredResponseFake::make()
+    $fakeResponse = TextResponseFake::make()
         ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
-        ->withStructured($mockResponse)
         ->withFinishReason(FinishReason::Stop)
         ->withUsage(new Usage(100, 200))
         ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));

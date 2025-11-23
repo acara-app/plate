@@ -16,7 +16,6 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { TrustBadge } from '@/components/ui/trust-badge';
 import { cn } from '@/lib/utils';
 import { Meal, MealType } from '@/types/meal-plan';
 import { Clock } from 'lucide-react';
@@ -84,7 +83,6 @@ export function MealCard({ meal, className }: MealCardProps) {
                             </CardDescription>
                         )}
                     </div>
-                    <TrustBadge verification={meal.verification_metadata} />
                 </div>
             </CardHeader>
 

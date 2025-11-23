@@ -36,7 +36,7 @@ export default function Completion() {
                         </h2>
                         <div className="space-y-4">
                             <div>
-                                <Link href={mealPlans.weekly().url}>
+                                <Link href={mealPlans.index().url}>
                                     <Button className="w-full" size="lg">
                                         View Your Meal Plan
                                     </Button>

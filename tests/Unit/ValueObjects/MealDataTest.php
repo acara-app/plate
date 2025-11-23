@@ -103,8 +103,7 @@ it('converts meal data to array', function (): void {
         ->and($array['fat_grams'])->toBe(20.0)
         ->and($array['preparation_time_minutes'])->toBe(30)
         ->and($array['sort_order'])->toBe(3)
-        ->and($array['metadata'])->toBe(['test' => 'data'])
-        ->and($array['verification_metadata'])->toBeNull();
+        ->and($array['metadata'])->toBe(['test' => 'data']);
 });
 
 it('handles float day_number by converting to int', function (): void {

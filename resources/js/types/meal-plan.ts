@@ -21,49 +21,6 @@ export interface Ingredient {
     barcode?: string | null;
 }
 
-export interface OpenFoodFactsVerification {
-    verified: boolean;
-    verification_rate: number;
-    confidence: 'low' | 'medium' | 'high';
-    source: 'ai_estimate' | 'openfoodfacts_verified';
-    note?: string;
-    original_ai_values?: {
-        calories: number;
-        protein: number;
-        carbs: number;
-        fat: number;
-    };
-    verified_values?: {
-        calories: number;
-        protein: number;
-        carbs: number;
-        fat: number;
-    };
-    corrections_applied?: Record<
-        string,
-        {
-            original: number;
-            verified: number;
-            corrected: number;
-            discrepancy_percent: number;
-        }
-    >;
-    verified_ingredients?: Array<{
-        name: string;
-        quantity: string | null;
-        nutrition_per_100g: {
-            calories: number | null;
-            protein: number | null;
-            carbs: number | null;
-            fat: number | null;
-            fiber: number | null;
-            sugar: number | null;
-            sodium: number | null;
-        } | null;
-        matched: boolean;
-    }>;
-}
-
 export interface Meal {
     id: number;
     type: MealType;
@@ -78,7 +35,6 @@ export interface Meal {
     fat_grams: number | null;
     preparation_time_minutes: number | null;
     macro_percentages: MacroPercentages;
-    verification_metadata: OpenFoodFactsVerification | null;
 }
 
 export interface DailyStats {

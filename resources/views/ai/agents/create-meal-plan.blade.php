@@ -274,23 +274,25 @@ You have access to a comprehensive database of USDA-verified whole food nutritio
 
 ## Task
 
-Create a comprehensive and personalized 7-day meal plan that:
+Create a comprehensive and personalized 3-day meal plan that:
 
-1. **Meets caloric targets**: Each day should be close to {{ $context['dailyCalorieTarget'] ?? $context['tdee'] ?? 'the calculated' }} calories
+1. **Meets caloric targets**: The day should be close to {{ $context['dailyCalorieTarget'] ?? $context['tdee'] ?? 'the calculated' }} calories
 2. **Respects dietary preferences**: Only include foods that align with the user's dietary restrictions and preferences
 3. **Addresses health conditions**: Consider nutritional impacts, recommended nutrients, and nutrients to limit
 4. **Fits lifestyle**: Consider activity level and daily routine
 5. **Achieves goals**: Support the user's primary goal of {{ $context['goal'] ?? 'maintaining health' }}
-6. **Provides variety**: Include diverse meals throughout the week
+6. **Provides variety**: Include diverse meals throughout the day
 7. **Is practical**: Use common ingredients and reasonable preparation times
 8. **Uses verified data**: Leverage the FoodData Central database to ensure accurate nutritional information
 
-For each day, provide:
+For each of the 3 days, provide:
 - **Breakfast** (with estimated calories and macros)
 - **Lunch** (with estimated calories and macros)
 - **Dinner** (with estimated calories and macros)
 - **Snacks** (1-2 snacks with estimated calories and macros)
 - **Daily total** (total calories and macro breakdown)
+
+Ensure variety across the 3 days - avoid repeating the same meals.
 
 Include brief preparation instructions and portion sizes for each meal.
 
@@ -327,11 +329,90 @@ Review your meal plan against the Safety Guardrails at the top of this prompt. V
 If any meal violates these rules, revise it immediately.
 @endif
 
-- Set `type` to `weekly`, `duration_days` to `7`, and align `target_daily_calories` with the goal-adjusted target above (fall back to TDEE if the target is missing).
-- Keep `macronutrient_ratios` aligned with the percentages provided in the context.
-- Populate the `meals` array with every eating occasion for all 7 days. Use `day_number` values from 1 through 7, `sort_order` values that reflect the chronological order (Breakfast `1`, morning snack `2`, Lunch `3`, afternoon snack `4`, Dinner `5`).
-- Set the `type` field on each meal to one of `breakfast`, `lunch`, `dinner`, or `snack`. Create separate snack entries when multiple snacks are required for the day.
-- Provide concise meal names, vivid descriptions, structured ingredient arrays (not strings), practical preparation instructions, precise portion sizes, estimated calories, and macro grams for each meal.
-- Supply realistic `preparation_time_minutes` values (integer minutes) for every meal.
+**CRITICAL: Return ONLY valid JSON. No markdown code blocks, no preambles like "Here is the JSON:", no explanations.**
+**Start directly with `{` and end with `}`. The response must be parseable by json_decode().**
 
-Return only the structured data that follows these instructions.
+### Required JSON Structure:
+
+```json
+{
+  "type": "custom",
+  "name": "<descriptive meal plan name>",
+  "description": "<brief description of the meal plan and its goals>",
+  "duration_days": 3,
+  "target_daily_calories": <number>,
+  "macronutrient_ratios": {
+    "protein": <number (percentage)>,
+    "carbs": <number (percentage)>,
+    "fat": <number (percentage)>
+  },
+  "meals": [
+    {
+      "day_number": 1,
+      "type": "breakfast|lunch|dinner|snack",
+      "name": "<meal name>",
+      "description": "<meal description>",
+      "preparation_instructions": "<step-by-step instructions>",
+      "ingredients": [
+        {
+          "name": "<ingredient name>",
+          "quantity": "<amount with unit, e.g., 150g or 1 cup (185g)>"
+        }
+      ],
+      "portion_size": "<recommended portion size>",
+      "calories": <number>,
+      "protein_grams": <number>,
+      "carbs_grams": <number>,
+      "fat_grams": <number>,
+      "preparation_time_minutes": <number>,
+      "sort_order": <number (1 for first meal, 2 for second, etc.)>
+    }
+  ],
+  "metadata": {
+    "preparation_notes": "<optional: batch cooking, storage, or substitution guidance>"
+  }
+}
+```
+
+### Field Requirements:
+
+**Top-level (REQUIRED):**
+- `type`: Must be "custom"
+- `name`: Descriptive meal plan name
+- `description`: Brief description of the plan and its goals
+- `duration_days`: Must be 3
+- `target_daily_calories`: Number (use {{ $context['dailyCalorieTarget'] ?? $context['tdee'] ?? 2000 }})
+- `macronutrient_ratios`: Object with `protein`, `carbs`, `fat` percentages (use {{ $context['macronutrientRatios']['protein'] }}, {{ $context['macronutrientRatios']['carbs'] }}, {{ $context['macronutrientRatios']['fat'] }})
+- `meals`: Array of meal objects
+
+**Each meal object (ALL REQUIRED):**
+- `day_number`: 1, 2, or 3 (indicates which day of the plan)
+- `type`: "breakfast", "lunch", "dinner", or "snack"
+- `name`: Meal name
+- `description`: Meal description
+- `preparation_instructions`: Step-by-step cooking instructions
+- `ingredients`: Array of ingredient objects, each with `name` and `quantity`
+- `portion_size`: Recommended serving size
+- `calories`: Total calories (number, not string)
+- `protein_grams`: Protein in grams (number, not string)
+- `carbs_grams`: Carbohydrates in grams (number, not string)
+- `fat_grams`: Fat in grams (number, not string)
+- `preparation_time_minutes`: Time in minutes (integer number)
+- `sort_order`: Order within the day (1 for breakfast, 2 for morning snack, 3 for lunch, etc.)
+
+**metadata (OPTIONAL):**
+- `preparation_notes`: High-level batch cooking, storage, or substitution guidance
+
+### Instructions:
+
+1. Create a complete 3-day meal plan with breakfast, lunch, dinner, and 1-2 snacks for each day
+2. Use `day_number: 1` for Day 1 meals, `day_number: 2` for Day 2 meals, and `day_number: 3` for Day 3 meals
+3. Set `sort_order` chronologically within each day (breakfast=1, morning snack=2, lunch=3, afternoon snack=4, dinner=5, evening snack=6)
+4. Ensure variety across the 3 days - different meals each day to prevent monotony
+4. Ensure daily totals approach the target calories ({{ $context['dailyCalorieTarget'] ?? $context['tdee'] ?? 2000 }} calories)
+5. Match macronutrient ratios ({{ $context['macronutrientRatios']['protein'] }}% protein, {{ $context['macronutrientRatios']['carbs'] }}% carbs, {{ $context['macronutrientRatios']['fat'] }}% fat)
+6. All numeric fields MUST be numbers, not strings
+7. Include USDA nutritional calculations in meal descriptions or preparation_instructions if helpful
+8. Use only ingredients found in the FoodData Central database
+
+**RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.**
