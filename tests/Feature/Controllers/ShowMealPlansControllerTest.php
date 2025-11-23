@@ -7,7 +7,7 @@ use App\Models\MealPlan;
 use App\Models\User;
 
 it('requires authentication', function (): void {
-    $response = $this->get(route('meal-plans.weekly'));
+    $response = $this->get(route('meal-plans.index'));
 
     $response->assertRedirectToRoute('login');
 });
@@ -16,11 +16,11 @@ it('renders weekly meal plans page for authenticated user', function (): void {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly'));
+        ->get(route('meal-plans.index'));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('meal-plans/weekly/show-weekly-plan')
+            ->component('meal-plans/show')
             ->has('mealPlan')
             ->has('currentDay')
             ->has('navigation'));
@@ -30,11 +30,11 @@ it('shows empty state when user has no meal plans', function (): void {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly'));
+        ->get(route('meal-plans.index'));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('meal-plans/weekly/show-weekly-plan')
+            ->component('meal-plans/show')
             ->where('mealPlan', null)
             ->where('currentDay', null)
             ->where('navigation', null));
@@ -58,7 +58,7 @@ it('displays the latest weekly meal plan by default', function (): void {
         ->create(['created_at' => now()]);
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly'));
+        ->get(route('meal-plans.index'));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -81,7 +81,7 @@ it('defaults to current day of week', function (): void {
         ->create();
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly'));
+        ->get(route('meal-plans.index'));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -108,7 +108,7 @@ it('uses session timezone when calculating current day', function (): void {
 
     $response = $this->actingAs($user)
         ->withSession(['timezone' => $timezone])
-        ->get(route('meal-plans.weekly'));
+        ->get(route('meal-plans.index'));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -137,7 +137,7 @@ it('displays meals for a specific day', function (): void {
         ->create(['name' => 'Day 5 Lunch']);
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 3]));
+        ->get(route('meal-plans.index', ['day' => 3]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -158,7 +158,7 @@ it('clamps day parameter to valid range', function (): void {
 
     // Test day < 1
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => -5]));
+        ->get(route('meal-plans.index', ['day' => -5]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -166,7 +166,7 @@ it('clamps day parameter to valid range', function (): void {
 
     // Test day > 7
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 100]));
+        ->get(route('meal-plans.index', ['day' => 100]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -203,7 +203,7 @@ it('calculates daily stats correctly', function (): void {
         ]);
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 1]));
+        ->get(route('meal-plans.index', ['day' => 1]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -223,7 +223,7 @@ it('provides navigation with looping for previous day', function (): void {
         ->create();
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 1]));
+        ->get(route('meal-plans.index', ['day' => 1]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -242,7 +242,7 @@ it('provides navigation with looping for next day', function (): void {
         ->create();
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 7]));
+        ->get(route('meal-plans.index', ['day' => 7]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -261,7 +261,7 @@ it('provides correct navigation for middle days', function (): void {
         ->create();
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 3]));
+        ->get(route('meal-plans.index', ['day' => 3]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -302,7 +302,7 @@ it('returns meals sorted by sort_order', function (): void {
         ->create(['name' => 'Dinner', 'sort_order' => 2]);
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 1]));
+        ->get(route('meal-plans.index', ['day' => 1]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -331,7 +331,7 @@ it('includes meal macro percentages', function (): void {
         ]);
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 1]));
+        ->get(route('meal-plans.index', ['day' => 1]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -359,7 +359,7 @@ it('includes meal plan metadata', function (): void {
         ]);
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 1]));
+        ->get(route('meal-plans.index', ['day' => 1]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -373,35 +373,35 @@ it('includes meal plan metadata', function (): void {
             ->has('mealPlan.created_at'));
 });
 
-it('only shows weekly meal plans not monthly or custom', function (): void {
+it('displays the latest meal plan regardless of type', function (): void {
     $user = User::factory()->create();
 
-    // Create non-weekly meal plans
+    // Create different types of meal plans with different timestamps
     MealPlan::factory()
         ->monthly()
         ->for($user)
         ->has(Meal::factory()->breakfast()->forDay(1), 'meals')
-        ->create();
+        ->create(['created_at' => now()->subDays(5)]);
 
     MealPlan::factory()
         ->custom(14)
         ->for($user)
         ->has(Meal::factory()->breakfast()->forDay(1), 'meals')
-        ->create();
+        ->create(['created_at' => now()->subDays(3)]);
 
-    // Create weekly meal plan
-    $weeklyPlan = MealPlan::factory()
+    // Create most recent weekly meal plan
+    $latestPlan = MealPlan::factory()
         ->weekly()
         ->for($user)
         ->has(Meal::factory()->breakfast()->forDay(1), 'meals')
-        ->create();
+        ->create(['created_at' => now()]);
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 1]));
+        ->get(route('meal-plans.index', ['day' => 1]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->where('mealPlan.id', $weeklyPlan->id)
+            ->where('mealPlan.id', $latestPlan->id)
             ->where('mealPlan.type', 'weekly'));
 });
 
@@ -417,7 +417,7 @@ it('does not show other users meal plans', function (): void {
         ->create();
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 1]));
+        ->get(route('meal-plans.index', ['day' => 1]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -445,7 +445,7 @@ it('calculates macronutrient ratios from meals when not set on plan', function (
         ]);
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 1]));
+        ->get(route('meal-plans.index', ['day' => 1]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -467,7 +467,7 @@ it('navigates between days with inertia', function (): void {
 
     // Navigate to day 2
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 2]));
+        ->get(route('meal-plans.index', ['day' => 2]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -492,7 +492,7 @@ it('includes job tracking data when available', function (): void {
     ]);
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 1]));
+        ->get(route('meal-plans.index', ['day' => 1]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -511,7 +511,7 @@ it('handles null job tracking gracefully', function (): void {
         ->create();
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.weekly', ['day' => 1]));
+        ->get(route('meal-plans.index', ['day' => 1]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page

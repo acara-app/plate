@@ -14,7 +14,6 @@ final class MealData extends Data
     /**
      * @param  DataCollection<int, IngredientData>|null  $ingredients
      * @param  array<string, mixed>|null  $metadata
-     * @param  array<string, mixed>|null  $verificationMetadata
      */
     public function __construct(
         public int $dayNumber,
@@ -32,6 +31,5 @@ final class MealData extends Data
         public ?int $preparationTimeMinutes,
         public int $sortOrder,
         public ?array $metadata = null,
-        public ?array $verificationMetadata = null,
     ) {}
 }

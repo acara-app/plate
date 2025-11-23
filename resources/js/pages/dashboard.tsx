@@ -67,7 +67,7 @@ export default function Dashboard() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="mt-auto">
-                            <Link href={mealPlans.weekly().url}>
+                            <Link href={mealPlans.index().url}>
                                 <Button className="w-full">
                                     View Meal Plans
                                 </Button>

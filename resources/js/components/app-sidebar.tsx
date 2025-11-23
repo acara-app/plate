@@ -34,8 +34,8 @@ const mainNavItems: NavItem[] = [
         icon: HeartIcon,
     },
     {
-        title: 'Weekly Meal Plans',
-        href: mealPlans.weekly(),
+        title: 'Meal Plans',
+        href: mealPlans.index(),
         icon: CalendarHeartIcon,
     },
     {

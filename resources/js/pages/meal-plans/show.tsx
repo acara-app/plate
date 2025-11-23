@@ -22,7 +22,7 @@ import {
     Sparkles,
 } from 'lucide-react';
 
-interface WeeklyMealPlansProps {
+interface MealPlansProps {
     mealPlan: MealPlan | null;
     currentDay: CurrentDay | null;
     navigation: Navigation | null;
@@ -32,8 +32,8 @@ interface WeeklyMealPlansProps {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Weekly Meal Plans',
-        href: mealPlans.weekly().url,
+        title: 'Meal Plans',
+        href: mealPlans.index().url,
     },
 ];
 
@@ -47,13 +47,13 @@ const dayEmojis: Record<string, string> = {
     Sunday: '☀️',
 };
 
-export default function WeeklyMealPlans({
+export default function MealPlans({
     mealPlan,
     currentDay,
     navigation,
     jobTracking,
     requiresSubscription = false,
-}: WeeklyMealPlansProps) {
+}: MealPlansProps) {
     const { currentUser } = useSharedProps();
 
     function isProcessingStatus(jobTracking: JobTracking | null): boolean {
@@ -66,7 +66,7 @@ export default function WeeklyMealPlans({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Weekly Meal Plans" />
+            <Head title="Meal Plans" />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
                 {!currentUser?.is_onboarded ? (
@@ -78,11 +78,11 @@ export default function WeeklyMealPlans({
                         <div className="space-y-2">
                             <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
                                 <Calendar className="h-8 w-8 text-primary" />
-                                Your Weekly Meal Plans
+                                Your Meal Plans
                             </h1>
                             <p className="text-muted-foreground">
-                                View and manage your personalized weekly
-                                nutrition plans
+                                View and manage your personalized nutrition
+                                plans
                             </p>
                         </div>
 
@@ -113,20 +113,20 @@ export default function WeeklyMealPlans({
                         <div className="space-y-2">
                             <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
                                 <Calendar className="h-8 w-8 text-primary" />
-                                Your Weekly Meal Plans
+                                Your Meal Plans
                             </h1>
                             <p className="text-muted-foreground">
-                                View and manage your personalized weekly
-                                nutrition plans
+                                View and manage your personalized nutrition
+                                plans
                             </p>
                         </div>
 
                         <Alert>
                             <Info className="h-4 w-4" />
                             <AlertDescription>
-                                You don't have any weekly meal plans yet.
-                                Complete your profile and preferences to
-                                generate your first personalized meal plan!
+                                You don't have any meal plans yet. Complete your
+                                profile and preferences to generate your first
+                                personalized meal plan!
                             </AlertDescription>
                         </Alert>
                     </>
@@ -150,7 +150,7 @@ export default function WeeklyMealPlans({
                                         </Badge>
                                     </div>
                                     <h1 className="text-3xl font-bold tracking-tight">
-                                        {mealPlan.name || 'Weekly Meal Plan'}
+                                        {mealPlan.name || 'Meal Plan'}
                                     </h1>
                                     {mealPlan.description && (
                                         <p className="text-muted-foreground">
@@ -168,7 +168,7 @@ export default function WeeklyMealPlans({
                                     >
                                         <Link
                                             href={
-                                                mealPlans.weekly({
+                                                mealPlans.index({
                                                     query: {
                                                         day: navigation.previous_day,
                                                     },
@@ -194,7 +194,7 @@ export default function WeeklyMealPlans({
                                     >
                                         <Link
                                             href={
-                                                mealPlans.weekly({
+                                                mealPlans.index({
                                                     query: {
                                                         day: navigation.next_day,
                                                     },

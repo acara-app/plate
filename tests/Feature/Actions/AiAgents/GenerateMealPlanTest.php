@@ -16,7 +16,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Facades\Prism;
-use Prism\Prism\Testing\StructuredResponseFake;
+use Prism\Prism\Testing\TextResponseFake;
 use Prism\Prism\ValueObjects\Meta;
 use Prism\Prism\ValueObjects\Usage;
 
@@ -86,9 +86,8 @@ it('generates a meal plan using PrismPHP', function (): void {
         ],
     ];
 
-    $fakeResponse = StructuredResponseFake::make()
+    $fakeResponse = TextResponseFake::make()
         ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
-        ->withStructured($mockResponse)
         ->withFinishReason(FinishReason::Stop)
         ->withUsage(new Usage(100, 200))
         ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
@@ -138,9 +137,8 @@ it('uses the correct AI model from enum', function (): void {
         'meals' => [],
     ];
 
-    $fakeResponse = StructuredResponseFake::make()
+    $fakeResponse = TextResponseFake::make()
         ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
-        ->withStructured($mockResponse)
         ->withFinishReason(FinishReason::Stop)
         ->withUsage(new Usage(100, 200))
         ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
@@ -238,9 +236,8 @@ it('handles meals with no ingredients', function (): void {
         ],
     ];
 
-    $fakeResponse = StructuredResponseFake::make()
+    $fakeResponse = TextResponseFake::make()
         ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
-        ->withStructured($mockResponse)
         ->withFinishReason(FinishReason::Stop)
         ->withUsage(new Usage(100, 200))
         ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
@@ -254,4 +251,88 @@ it('handles meals with no ingredients', function (): void {
     expect($mealPlanData->meals[0]->ingredients)->toBeInstanceOf(Spatie\LaravelData\DataCollection::class);
     expect($mealPlanData->meals[0]->ingredients->count())->toBe(0);
     expect($mealPlanData->meals[1]->ingredients)->toBeNull();
+});
+
+it('works without file search store configured', function (): void {
+    // Don't set any file search store setting
+    $user = User::factory()->create();
+    $goal = Goal::factory()->create();
+    $lifestyle = Lifestyle::factory()->create();
+
+    $user->profile()->create([
+        'age' => 30,
+        'height' => 175.0,
+        'weight' => 80.0,
+        'sex' => Sex::Male,
+        'goal_id' => $goal->id,
+        'lifestyle_id' => $lifestyle->id,
+    ]);
+
+    $mockResponse = [
+        'type' => 'weekly',
+        'name' => 'Test Plan',
+        'description' => 'A test meal plan',
+        'duration_days' => 7,
+        'target_daily_calories' => 2000.0,
+        'macronutrient_ratios' => ['protein' => 30, 'carbs' => 40, 'fat' => 30],
+        'meals' => [],
+    ];
+
+    $fakeResponse = TextResponseFake::make()
+        ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
+        ->withFinishReason(FinishReason::Stop)
+        ->withUsage(new Usage(100, 200))
+        ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
+
+    Prism::fake([$fakeResponse]);
+
+    $action = app(GenerateMealPlan::class);
+    $mealPlanData = $action->generate($user, AiModel::Gemini25Flash);
+
+    expect($mealPlanData)
+        ->type->toBe(MealPlanType::Weekly)
+        ->name->toBe('Test Plan');
+});
+
+it('uses file search store when configured', function (): void {
+    // Set the file search store setting
+    App\Models\Setting::set(App\Enums\SettingKey::GeminiFileSearchStoreName, 'test-store-name');
+
+    $user = User::factory()->create();
+    $goal = Goal::factory()->create();
+    $lifestyle = Lifestyle::factory()->create();
+
+    $user->profile()->create([
+        'age' => 30,
+        'height' => 175.0,
+        'weight' => 80.0,
+        'sex' => Sex::Male,
+        'goal_id' => $goal->id,
+        'lifestyle_id' => $lifestyle->id,
+    ]);
+
+    $mockResponse = [
+        'type' => 'weekly',
+        'name' => 'File Search Plan',
+        'description' => 'Plan using file search',
+        'duration_days' => 7,
+        'target_daily_calories' => 2000.0,
+        'macronutrient_ratios' => ['protein' => 30, 'carbs' => 40, 'fat' => 30],
+        'meals' => [],
+    ];
+
+    $fakeResponse = TextResponseFake::make()
+        ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
+        ->withFinishReason(FinishReason::Stop)
+        ->withUsage(new Usage(100, 200))
+        ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
+
+    Prism::fake([$fakeResponse]);
+
+    $action = app(GenerateMealPlan::class);
+    $mealPlanData = $action->generate($user, AiModel::Gemini25Flash);
+
+    expect($mealPlanData)
+        ->type->toBe(MealPlanType::Weekly)
+        ->name->toBe('File Search Plan');
 });
