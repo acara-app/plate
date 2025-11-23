@@ -258,6 +258,20 @@ The meal plan should be specifically tailored to help the user achieve their glu
 - Generate a balanced meal plan without specific glucose considerations
 @endif
 
+## Available Ingredients
+
+You have access to a comprehensive database of USDA-verified whole food nutrition data from FoodData Central. This database contains:
+- **Foundation Foods**: Nutrient profiles for common whole foods (fruits, vegetables, proteins, grains, dairy)
+- **Branded Products**: Nutritional information for thousands of packaged food products
+- **Nutritional Details**: Complete macronutrient, micronutrient, and calorie information
+
+**CRITICAL**: When selecting ingredients and calculating nutritional values:
+- Use the file search tool to query the FoodData Central database for accurate nutrition data
+- Verify calorie and macronutrient values for each ingredient before including in meal plans
+- Prioritize whole, minimally processed foods from the Foundation Foods dataset
+- For branded products, use actual product data when available
+- Cross-reference all nutritional calculations with the database to ensure accuracy
+
 ## Task
 
 Create a comprehensive and personalized 7-day meal plan that:
@@ -269,6 +283,7 @@ Create a comprehensive and personalized 7-day meal plan that:
 5. **Achieves goals**: Support the user's primary goal of {{ $context['goal'] ?? 'maintaining health' }}
 6. **Provides variety**: Include diverse meals throughout the week
 7. **Is practical**: Use common ingredients and reasonable preparation times
+8. **Uses verified data**: Leverage the FoodData Central database to ensure accurate nutritional information
 
 For each day, provide:
 - **Breakfast** (with estimated calories and macros)
