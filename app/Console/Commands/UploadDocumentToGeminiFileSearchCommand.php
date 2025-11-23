@@ -88,13 +88,23 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
         try {
             $metadata = json_encode(['file' => ['displayName' => $displayName]]);
             $fileContent = File::get($filePath);
+
+            // @phpstan-ignore-next-line
+            if (! is_string($fileContent)) {
+                $this->error('Failed to read file contents.');
+
+                return null;
+            }
+
+            /** @var string $fileName */
             $fileName = basename($filePath);
 
+            /** @var string $fileContent */
             $response = Http::withHeaders([
                 'x-goog-api-key' => $apiKey,
                 'X-Goog-Upload-Protocol' => 'multipart',
             ])
-                ->attach('metadata', $metadata, 'metadata', ['Content-Type' => 'application/json'])
+                ->attach('metadata', $metadata, 'metadata', ['Content-Type' => 'application/json']) // @phpstan-ignore-line
                 ->attach('file', $fileContent, $fileName, ['Content-Type' => 'application/json'])
                 ->post($uploadUrl);
 
@@ -106,18 +116,36 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
             $data = $response->json('file');
 
+            if (! is_array($data)) {
+                $this->error('Invalid response format from file upload.');
+
+                return null;
+            }
+
+            $name = $data['name'] ?? null;
+            $displayNameFromApi = $data['displayName'] ?? null;
+            $mimeType = $data['mimeType'] ?? null;
+            $sizeBytes = $data['sizeBytes'] ?? null;
+            $uri = $data['uri'] ?? null;
+
+            if (! is_string($name) || ! is_string($uri)) {
+                $this->error('Missing required fields in API response.');
+
+                return null;
+            }
+
             $this->info('File uploaded successfully.');
 
             return new GeminiUploadedFileData(
-                name: $data['name'],
-                displayName: $data['displayName'] ?? $displayName,
-                mimeType: $data['mimeType'] ?? 'application/json',
-                sizeBytes: (int) ($data['sizeBytes'] ?? mb_strlen($fileContent)),
-                uri: $data['uri']
+                name: $name,
+                displayName: is_string($displayNameFromApi) ? $displayNameFromApi : $displayName,
+                mimeType: is_string($mimeType) ? $mimeType : 'application/json',
+                sizeBytes: is_int($sizeBytes) ? $sizeBytes : (is_string($sizeBytes) ? (int) $sizeBytes : mb_strlen($fileContent)),
+                uri: $uri
             );
         } catch (Exception $e) {
             $this->error("File upload failed: {$e->getMessage()}");
-            $this->error('Exception class: '.get_class($e));
+            $this->error('Exception class: '.$e::class);
 
             return null;
         }
@@ -178,10 +206,10 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
         $data = $response->json();
 
         // Ensure optional fields are present
-        $data['activeDocumentsCount'] = $data['activeDocumentsCount'] ?? 0;
-        $data['pendingDocumentsCount'] = $data['pendingDocumentsCount'] ?? 0;
-        $data['failedDocumentsCount'] = $data['failedDocumentsCount'] ?? 0;
-        $data['sizeBytes'] = $data['sizeBytes'] ?? 0;
+        $data['activeDocumentsCount'] ??= 0;
+        $data['pendingDocumentsCount'] ??= 0;
+        $data['failedDocumentsCount'] ??= 0;
+        $data['sizeBytes'] ??= 0;
 
         return GeminiFileSearchStoreData::from($data);
     }

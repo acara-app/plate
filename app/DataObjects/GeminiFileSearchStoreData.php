@@ -12,11 +12,11 @@ final class GeminiFileSearchStoreData extends Data
         public string $name,
         public string $displayName,
         public int $activeDocumentsCount,
-        public int $pendingDocumentsCount,
-        public int $failedDocumentsCount,
         public int $sizeBytes,
         public string $createTime,
         public string $updateTime,
+        public int $pendingDocumentsCount = 0,
+        public int $failedDocumentsCount = 0,
     ) {}
 
     public function getSizeMB(): string
