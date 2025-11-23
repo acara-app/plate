@@ -6,8 +6,10 @@ namespace App\Actions\AiAgents;
 
 use App\DataObjects\MealPlanData;
 use App\Enums\AiModel;
+use App\Enums\SettingKey;
 use App\Jobs\ProcessMealPlanJob;
 use App\Models\JobTracking;
+use App\Models\Setting;
 use App\Models\User;
 use App\Traits\Trackable;
 use Illuminate\Contracts\Bus\Dispatcher;
@@ -18,6 +20,7 @@ use Prism\Prism\Schema\EnumSchema;
 use Prism\Prism\Schema\NumberSchema;
 use Prism\Prism\Schema\ObjectSchema;
 use Prism\Prism\Schema\StringSchema;
+use Prism\Prism\ValueObjects\ProviderTool;
 
 final class GenerateMealPlan
 {
@@ -42,21 +45,56 @@ final class GenerateMealPlan
 
         $schema = $this->buildSchema();
 
+        $storeNames = $this->getFileSearchStoreNames();
+
+        $providerTools = [];
+        if ($storeNames !== []) {
+            $providerTools[] = new ProviderTool(
+                type: 'file_search',
+                name: 'file_search',
+                options: [
+                    'file_search_store_names' => $storeNames,
+                ]
+            );
+        }
+
         $response = Prism::structured()
             ->using(Provider::Gemini, $model->value)
-            ->withSystemPrompt('You are a professional nutritionist and dietitian specializing in creating personalized meal plans.')
+            ->withSystemPrompt(
+                'You are an expert nutritionist and registered dietitian specializing in creating personalized, '
+                .'evidence-based meal plans using USDA-verified whole food nutrition data from FoodData Central. '
+                .'You have access to comprehensive nutritional information for thousands of whole foods, ingredients, '
+                .'and branded products. When creating meal plans, prioritize whole, minimally processed foods and '
+                .'use the nutritional database to ensure accurate calorie and macronutrient calculations. Always '
+                .'verify ingredient nutrition data using the available food database before making recommendations.'
+            )
             ->withPrompt($prompt)
             ->withSchema($schema)
             ->withMaxTokens(70000)
             ->withClientOptions([
                 'timeout' => 180,
             ])
+            ->withProviderTools($providerTools)
             ->asStructured();
 
         /** @var array<string, mixed> $structuredData */
         $structuredData = $response->structured;
 
         return MealPlanData::from($structuredData);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function getFileSearchStoreNames(): array
+    {
+        $storeName = Setting::get(SettingKey::GeminiFileSearchStoreName);
+
+        if (! $storeName || ! is_string($storeName)) {
+            return [];
+        }
+
+        return [$storeName];
     }
 
     private function buildSchema(): ObjectSchema
