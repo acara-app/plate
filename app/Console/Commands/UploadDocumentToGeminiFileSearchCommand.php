@@ -105,7 +105,8 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
-        ])->post("{$baseUrl}/fileSearchStores?key={$apiKey}", [
+            'x-goog-api-key' => $apiKey,
+        ])->post("{$baseUrl}/fileSearchStores", [
             'displayName' => 'FoodData Central Store',
         ]);
 
@@ -153,7 +154,8 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
-        ])->post("{$baseUrl}/{$storeName}:importFile?key={$apiKey}", [
+            'x-goog-api-key' => $apiKey,
+        ])->post("{$baseUrl}/{$storeName}:importFile", [
             'file_name' => $fileName,
         ]);
 
