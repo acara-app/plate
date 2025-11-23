@@ -14,6 +14,7 @@ arch('strict rules')
     ->ignoring([
         App\Models\User::class,
         App\Models\SubscriptionProduct::class, // Has public accessor methods (getXxxAttribute)
+        App\Console\Commands\UploadDocumentToGeminiFileSearchCommand::class, // Uses sleep() for API polling
     ]);
 
 arch('controllers')
