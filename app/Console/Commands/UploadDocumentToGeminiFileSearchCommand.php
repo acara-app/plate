@@ -17,13 +17,15 @@ use Illuminate\Support\Facades\Http;
 
 final class UploadDocumentToGeminiFileSearchCommand extends Command
 {
-    protected $signature = 'upload:document-to-gemini-file-search';
+    protected $signature = 'upload:document-to-gemini-file-search {--file-path= : Path to the file to upload}';
 
     protected $description = 'Upload document to Gemini File Search';
 
     public function handle(): void
     {
-        $filePath = storage_path('sources/FoodData_Central_foundation_food_json_2025-04-24 3.json');
+        $filePath = $this->option('file-path')
+            ?? config('gemini.default_upload_file_path')
+            ?? storage_path('sources/FoodData_Central_foundation_food_json_2025-04-24 3.json');
 
         if (! File::exists($filePath)) {
             $this->error("File not found: {$filePath}");
