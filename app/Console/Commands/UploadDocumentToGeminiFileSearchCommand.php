@@ -45,7 +45,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             return;
         }
 
-        $baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
+        $baseUrl = config('gemini.base_url') ?? 'https://generativelanguage.googleapis.com/v1beta';
 
         $storeName = $this->getOrCreateStore($apiKey, $baseUrl);
         if (! $storeName) {
