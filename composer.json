@@ -10,6 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.4.0",
+        "google-gemini-php/laravel": "^2.0.2",
         "inertiajs/inertia-laravel": "^2.0.10",
         "laravel/cashier": "^16.0.5",
         "laravel/fortify": "^1.32.0",
@@ -19,7 +20,7 @@
         "laravel/wayfinder": "^0.1.12",
         "league/flysystem-aws-s3-v3": "^3.30.1",
         "nunomaduro/essentials": "^1.0.1",
-        "prism-php/prism": "^0.96.1",
+        "prism-php/prism": "^0.98.5",
         "spatie/laravel-data": "^4.18",
         "spatie/laravel-mailcoach-mailer": "^1.5.3"
     },
