@@ -13,6 +13,10 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 
+/**
+ * This command is only temporarily needed to upload the FoodData Central JSON file
+ * TODO: Refactor or find a better way to handle initial document uploads
+ */
 final class UploadDocumentToGeminiFileSearchCommand extends Command
 {
     protected $signature = 'upload:document-to-gemini-file-search 
