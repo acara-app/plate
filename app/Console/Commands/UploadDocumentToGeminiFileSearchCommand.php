@@ -112,9 +112,10 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
-        ])->post("{$baseUrl}/fileSearchStores?key={$apiKey}", [
+            'x-goog-api-key' => $apiKey,
+        ])->post("{$baseUrl}/fileSearchStores", [
             'displayName' => $storeDisplayName,
-        ]);
+        ])
 
         if ($response->failed()) {
             $this->error("Failed to create File Search store: {$response->body()}");
@@ -160,7 +161,8 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
-        ])->post("{$baseUrl}/{$storeName}:importFile?key={$apiKey}", [
+            'x-goog-api-key' => $apiKey,
+        ])->post("{$baseUrl}/{$storeName}:importFile", [
             'file_name' => $fileName,
         ]);
 
