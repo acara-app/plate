@@ -26,6 +26,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
     public function handle(): void
     {
+        /** @var string $filePath */
         $filePath = $this->option('file-path')
             ?? config('gemini.default_upload_file_path', storage_path('sources/FoodData_Central_foundation_food_json_2025-04-24 3.json'));
 
@@ -47,6 +48,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             return;
         }
 
+        /** @var string $baseUrl */
         $baseUrl = config('gemini.base_url', 'https://generativelanguage.googleapis.com/v1beta');
 
         $storeName = $this->getOrCreateStore($apiKey, $baseUrl);
@@ -185,6 +187,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
     {
         $this->info('Waiting for import operation to complete...');
 
+        /** @var int $maxAttempts */
         $maxAttempts = config('gemini.max_polling_attempts', 60);
         $attempts = 0;
 
@@ -204,7 +207,9 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
             if (! $isDone) {
                 $this->info("Operation still in progress (attempt {$attempts}/{$maxAttempts})...");
-                \Illuminate\Support\Sleep::sleep(config('gemini.polling_interval', 10));
+                /** @var int $pollingInterval */
+                $pollingInterval = config('gemini.polling_interval', 10);
+                \Illuminate\Support\Sleep::sleep($pollingInterval);
 
                 continue;
             }
