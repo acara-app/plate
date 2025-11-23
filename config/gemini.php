@@ -43,11 +43,9 @@ return [
     |--------------------------------------------------------------------------
     |
     | Configuration for polling long-running operations like file imports.
-    | max_polling_attempts: Maximum number of polling attempts before timeout
     | polling_interval: Number of seconds to wait between polling attempts
     */
 
-    'max_polling_attempts' => env('GEMINI_MAX_POLLING_ATTEMPTS', 60),
     'polling_interval' => env('GEMINI_POLLING_INTERVAL', 10),
     'default_upload_file_path' => env('GEMINI_DEFAULT_UPLOAD_FILE_PATH'),
 ];

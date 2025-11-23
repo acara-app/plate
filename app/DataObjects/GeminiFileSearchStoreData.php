@@ -11,10 +11,10 @@ final class GeminiFileSearchStoreData extends Data
     public function __construct(
         public string $name,
         public string $displayName,
-        public int $activeDocumentsCount = 0,
-        public int $pendingDocumentsCount = 0,
-        public int $failedDocumentsCount = 0,
-        public int $sizeBytes = 0,
+        public int $activeDocumentsCount,
+        public int $pendingDocumentsCount,
+        public int $failedDocumentsCount,
+        public int $sizeBytes,
         public string $createTime,
         public string $updateTime,
     ) {}

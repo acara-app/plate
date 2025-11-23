@@ -9,8 +9,6 @@ use App\DataObjects\GeminiUploadedFileData;
 use App\Enums\SettingKey;
 use App\Models\Setting;
 use Exception;
-use Gemini\Enums\MimeType;
-use Gemini\Laravel\Facades\Gemini;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
@@ -96,9 +94,9 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
                 'x-goog-api-key' => $apiKey,
                 'X-Goog-Upload-Protocol' => 'multipart',
             ])
-            ->attach('metadata', $metadata, 'metadata', ['Content-Type' => 'application/json'])
-            ->attach('file', $fileContent, $fileName, ['Content-Type' => 'application/json'])
-            ->post($uploadUrl);
+                ->attach('metadata', $metadata, 'metadata', ['Content-Type' => 'application/json'])
+                ->attach('file', $fileContent, $fileName, ['Content-Type' => 'application/json'])
+                ->post($uploadUrl);
 
             if ($response->failed()) {
                 $this->error("File upload failed: {$response->status()} {$response->body()}");
@@ -114,7 +112,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
                 name: $data['name'],
                 displayName: $data['displayName'] ?? $displayName,
                 mimeType: $data['mimeType'] ?? 'application/json',
-                sizeBytes: (int) ($data['sizeBytes'] ?? strlen($fileContent)),
+                sizeBytes: (int) ($data['sizeBytes'] ?? mb_strlen($fileContent)),
                 uri: $data['uri']
             );
         } catch (Exception $e) {
@@ -219,11 +217,9 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
     {
         $this->info('Waiting for import operation to complete...');
 
-        /** @var int $maxAttempts */
-        $maxAttempts = config('gemini.max_polling_attempts', 60);
         $attempts = 0;
 
-        while ($attempts < $maxAttempts) {
+        while (true) {
             $attempts++;
             $response = Http::withHeaders([
                 'x-goog-api-key' => $apiKey,
@@ -238,7 +234,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             $isDone = $response->json('done', false);
 
             if (! $isDone) {
-                $this->info("Operation still in progress (attempt {$attempts}/{$maxAttempts})...");
+                $this->info("Operation still in progress (attempt {$attempts})...");
                 /** @var int $pollingInterval */
                 $pollingInterval = config('gemini.polling_interval', 10);
                 \Illuminate\Support\Sleep::sleep($pollingInterval);
@@ -258,10 +254,6 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
             return true;
         }
-
-        $this->error('Operation timed out after maximum attempts.');
-
-        return false;
     }
 
     private function verifyImport(string $apiKey, string $baseUrl, string $storeName): void
