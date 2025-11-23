@@ -12,7 +12,7 @@ use App\Models\MealPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
 use Prism\Prism\Enums\FinishReason;
-use Prism\Prism\Prism;
+use Prism\Prism\Facades\Prism;
 use Prism\Prism\Testing\StructuredResponseFake;
 use Prism\Prism\ValueObjects\Meta;
 use Prism\Prism\ValueObjects\Usage;

@@ -1,0 +1,232 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Console\Commands;
+
+use App\DataObjects\GeminiFileSearchStoreData;
+use App\DataObjects\GeminiUploadedFileData;
+use App\Enums\SettingKey;
+use App\Models\Setting;
+use Exception;
+use Gemini\Enums\MimeType;
+use Gemini\Laravel\Facades\Gemini;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
+
+final class UploadDocumentToGeminiFileSearchCommand extends Command
+{
+    protected $signature = 'upload:document-to-gemini-file-search';
+
+    protected $description = 'Upload document to Gemini File Search';
+
+    public function handle(): void
+    {
+        $filePath = storage_path('sources/FoodData_Central_foundation_food_json_2025-04-24 3.json');
+
+        if (! File::exists($filePath)) {
+            $this->error("File not found: {$filePath}");
+
+            return;
+        }
+
+        $file = $this->uploadFile($filePath);
+        if (! $file instanceof GeminiUploadedFileData) {
+            return;
+        }
+
+        $apiKey = config('gemini.api_key');
+        if (! is_string($apiKey)) {
+            $this->error('Invalid API key configuration.');
+
+            return;
+        }
+
+        $baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
+
+        $storeName = $this->getOrCreateStore($apiKey, $baseUrl);
+        if (! $storeName) {
+            return;
+        }
+
+        $this->info("Using File Search store: {$storeName}");
+
+        $storeData = $this->checkStoreStatus($apiKey, $baseUrl, $storeName);
+        if ($storeData && $storeData->hasDocuments()) {
+            $sizeMB = $storeData->getSizeMB();
+            $this->info("Store already contains documents: {$storeData->activeDocumentsCount} active, {$storeData->pendingDocumentsCount} pending ({$sizeMB} MB)");
+            $this->info('Skipping import.');
+
+            return;
+        }
+
+        if ($storeData && $storeData->failedDocumentsCount > 0) {
+            $this->warn("Store has {$storeData->failedDocumentsCount} failed document(s). Proceeding with import...");
+        }
+
+        if (! $this->importFile($apiKey, $baseUrl, $storeName, $file->name)) {
+            return;
+        }
+
+        $this->verifyImport($apiKey, $baseUrl, $storeName);
+    }
+
+    private function uploadFile(string $filePath): ?GeminiUploadedFileData
+    {
+        try {
+            $file = Gemini::files()->upload(
+                filename: $filePath,
+                mimeType: MimeType::APPLICATION_JSON,
+                displayName: 'FoodData Central Foundation Food'
+            );
+
+            $this->info('File uploaded successfully.');
+
+            return GeminiUploadedFileData::from($file);
+        } catch (Exception $e) {
+            $this->error("File upload failed: {$e->getMessage()}");
+
+            return null;
+        }
+    }
+
+    private function getOrCreateStore(string $apiKey, string $baseUrl): ?string
+    {
+        $storeName = Setting::get(SettingKey::GeminiFileSearchStoreName);
+
+        if ($storeName && is_string($storeName)) {
+            return $storeName;
+        }
+
+        $this->info('Creating File Search store...');
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post("{$baseUrl}/fileSearchStores?key={$apiKey}", [
+            'displayName' => 'FoodData Central Store',
+        ]);
+
+        if ($response->failed()) {
+            $this->error("Failed to create File Search store: {$response->body()}");
+
+            return null;
+        }
+
+        $storeName = $response->json('name');
+        if (! is_string($storeName)) {
+            $this->error('Invalid store name in response.');
+
+            return null;
+        }
+
+        Setting::set(SettingKey::GeminiFileSearchStoreName, $storeName);
+
+        $this->info("File Search store created: {$storeName}");
+
+        return $storeName;
+    }
+
+    private function checkStoreStatus(string $apiKey, string $baseUrl, string $storeName): ?GeminiFileSearchStoreData
+    {
+        $response = Http::withHeaders([
+            'x-goog-api-key' => $apiKey,
+        ])->get("{$baseUrl}/{$storeName}");
+
+        if ($response->failed()) {
+            $this->warn('Unable to check store status.');
+
+            return null;
+        }
+
+        /** @var array<string, mixed> $data */
+        $data = $response->json();
+
+        return GeminiFileSearchStoreData::from($data);
+    }
+
+    private function importFile(string $apiKey, string $baseUrl, string $storeName, string $fileName): bool
+    {
+        $this->info('Importing file into File Search store...');
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post("{$baseUrl}/{$storeName}:importFile?key={$apiKey}", [
+            'file_name' => $fileName,
+        ]);
+
+        if ($response->failed()) {
+            $this->error("Failed to import file: {$response->body()}");
+
+            return false;
+        }
+
+        $operationName = $response->json('name');
+        if (! is_string($operationName)) {
+            $this->error('Invalid operation name in response.');
+
+            return false;
+        }
+
+        return $this->waitForOperation($apiKey, $baseUrl, $operationName);
+    }
+
+    private function waitForOperation(string $apiKey, string $baseUrl, string $operationName): bool
+    {
+        $this->info('Waiting for import operation to complete...');
+
+        while (true) {
+            $response = Http::withHeaders([
+                'x-goog-api-key' => $apiKey,
+            ])->get("{$baseUrl}/{$operationName}");
+
+            if ($response->failed()) {
+                $this->error("Failed to check operation status: {$response->body()}");
+
+                return false;
+            }
+
+            $isDone = $response->json('done', false);
+
+            if (! $isDone) {
+                $this->info('Operation still in progress...');
+                \Illuminate\Support\Sleep::sleep(10);
+
+                continue;
+            }
+
+            $error = $response->json('error');
+
+            if ($error) {
+                $this->error('Import operation failed: '.json_encode($error));
+
+                return false;
+            }
+
+            $this->info('Import completed successfully!');
+
+            return true;
+        }
+    }
+
+    private function verifyImport(string $apiKey, string $baseUrl, string $storeName): void
+    {
+        $this->newLine();
+        $this->info('Verifying import...');
+
+        $storeData = $this->checkStoreStatus($apiKey, $baseUrl, $storeName);
+
+        if (! $storeData instanceof GeminiFileSearchStoreData) {
+            return;
+        }
+
+        if ($storeData->activeDocumentsCount === 0 && $storeData->pendingDocumentsCount === 0) {
+            $this->warn('⚠ Document count is still 0. This may take a few moments to update.');
+
+            return;
+        }
+
+        $sizeMB = $storeData->getSizeMB();
+        $this->info("✓ Verified: {$storeData->activeDocumentsCount} active, {$storeData->pendingDocumentsCount} pending ({$sizeMB} MB)");
+    }
+}
