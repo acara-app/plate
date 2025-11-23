@@ -17,8 +17,9 @@ final readonly class UsdaFoodDataService
 
     public function __construct()
     {
+        /** @var int $cacheMinutes */
         $cacheMinutes = config('services.usda.cache_minutes', 10080);
-        $this->cacheMinutes = is_int($cacheMinutes) ? $cacheMinutes : 10080;
+        $this->cacheMinutes = $cacheMinutes;
     }
 
     /**
