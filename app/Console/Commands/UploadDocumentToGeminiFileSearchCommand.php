@@ -17,7 +17,10 @@ use Illuminate\Support\Facades\Http;
 
 final class UploadDocumentToGeminiFileSearchCommand extends Command
 {
-    protected $signature = 'upload:document-to-gemini-file-search {--file-path= : Path to the file to upload}';
+    protected $signature = 'upload:document-to-gemini-file-search 
+        {--file-path= : Path to the file to upload}
+        {--display-name= : Display name for the uploaded file}
+        {--store-name= : Display name for the file search store}';
 
     protected $description = 'Upload document to Gemini File Search';
 
@@ -76,11 +79,13 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
     private function uploadFile(string $filePath): ?GeminiUploadedFileData
     {
+        $displayName = $this->option('display-name') ?? 'FoodData Central Foundation Food';
+
         try {
             $file = Gemini::files()->upload(
                 filename: $filePath,
                 mimeType: MimeType::APPLICATION_JSON,
-                displayName: 'FoodData Central Foundation Food'
+                displayName: $displayName
             );
 
             $this->info('File uploaded successfully.');
@@ -103,12 +108,14 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
         $this->info('Creating File Search store...');
 
+        $storeDisplayName = $this->option('store-name') ?? 'FoodData Central Store';
+
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'x-goog-api-key' => $apiKey,
         ])->post("{$baseUrl}/fileSearchStores", [
-            'displayName' => 'FoodData Central Store',
-        ]);
+            'displayName' => $storeDisplayName,
+        ])
 
         if ($response->failed()) {
             $this->error("Failed to create File Search store: {$response->body()}");
