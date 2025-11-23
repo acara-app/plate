@@ -25,19 +25,6 @@ final class Setting extends Model
     /** @var array<int, string> */
     protected $guarded = [];
 
-    /**
-     * @return array<string, string>
-     */
-    public function casts(): array
-    {
-        return [
-            'id' => 'integer',
-            'key' => 'string',
-            'value' => 'string',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-        ];
-    }
     public static function get(SettingKey|string $key, mixed $default = null): mixed
     {
         $keyValue = $key instanceof SettingKey ? $key->value : $key;
@@ -54,5 +41,19 @@ final class Setting extends Model
             ['key' => $keyValue],
             ['value' => $value]
         );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function casts(): array
+    {
+        return [
+            'id' => 'integer',
+            'key' => 'string',
+            'value' => 'string',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
     }
 }

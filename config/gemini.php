@@ -49,5 +49,5 @@ return [
 
     'max_polling_attempts' => env('GEMINI_MAX_POLLING_ATTEMPTS', 60),
     'polling_interval' => env('GEMINI_POLLING_INTERVAL', 10),
-    'default_upload_file_path' => env('GEMINI_DEFAULT_UPLOAD_FILE_PATH', null),
+    'default_upload_file_path' => env('GEMINI_DEFAULT_UPLOAD_FILE_PATH'),
 ];
