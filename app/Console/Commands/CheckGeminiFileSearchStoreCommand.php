@@ -34,7 +34,7 @@ final class CheckGeminiFileSearchStoreCommand extends Command
         }
 
         $apiKey = config('gemini.api_key');
-        $baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
+        $baseUrl = config('gemini.base_url') ?? 'https://generativelanguage.googleapis.com/v1beta';
 
         $this->info("Checking File Search store: {$storeName}");
 
