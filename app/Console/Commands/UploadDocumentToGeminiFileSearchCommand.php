@@ -27,8 +27,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
     public function handle(): void
     {
         $filePath = $this->option('file-path')
-            ?? config('gemini.default_upload_file_path')
-            ?? storage_path('sources/FoodData_Central_foundation_food_json_2025-04-24 3.json');
+            ?? config('gemini.default_upload_file_path', storage_path('sources/FoodData_Central_foundation_food_json_2025-04-24 3.json'));
 
         if (! File::exists($filePath)) {
             $this->error("File not found: {$filePath}");
@@ -48,7 +47,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             return;
         }
 
-        $baseUrl = config('gemini.base_url') ?? 'https://generativelanguage.googleapis.com/v1beta';
+        $baseUrl = config('gemini.base_url', 'https://generativelanguage.googleapis.com/v1beta');
 
         $storeName = $this->getOrCreateStore($apiKey, $baseUrl);
         if (! $storeName) {
@@ -115,7 +114,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             'x-goog-api-key' => $apiKey,
         ])->post("{$baseUrl}/fileSearchStores", [
             'displayName' => $storeDisplayName,
-        ])
+        ]);
 
         if ($response->failed()) {
             $this->error("Failed to create File Search store: {$response->body()}");
