@@ -22,22 +22,9 @@ final class ShowMealPlansController
         /** @var \App\Models\User $user */
         $user = $request->user();
 
-        /** @var string $timezone */
-        $timezone = $request->session()->get('timezone', 'UTC');
-        $now = CarbonImmutable::now($timezone);
-
-        $currentDayNumber = $request->integer('day', $now->dayOfWeekIso);
-
-        $currentDayNumber = max(1, min(7, $currentDayNumber));
-
+        // Get the latest meal plan first to determine duration
         $mealPlan = MealPlan::query()
             ->where('user_id', $user->id)
-            ->with(['meals' => function (mixed $query) use ($currentDayNumber): void {
-                /** @var HasMany<Meal, MealPlan> $query */
-                $query->where('day_number', $currentDayNumber)
-                    ->orderBy('sort_order')
-                    ->oldest();
-            }])
             ->latest()
             ->first();
 
@@ -49,7 +36,6 @@ final class ShowMealPlansController
             ->first();
 
         if (! $mealPlan) {
-
             return Inertia::render('meal-plans/show', [
                 'mealPlan' => null,
                 'currentDay' => null,
@@ -58,6 +44,26 @@ final class ShowMealPlansController
                 'requiresSubscription' => false,
             ]);
         }
+
+        // Determine current day based on meal plan duration
+        /** @var string $timezone */
+        $timezone = $request->session()->get('timezone', 'UTC');
+        $now = CarbonImmutable::now($timezone);
+
+        // Use day of week but constrain to meal plan duration
+        $dayOfWeek = $now->dayOfWeekIso;
+        $defaultDay = $dayOfWeek <= $mealPlan->duration_days ? $dayOfWeek : 1;
+
+        $currentDayNumber = $request->integer('day', $defaultDay);
+        $currentDayNumber = max(1, min($mealPlan->duration_days, $currentDayNumber));
+
+        // Load meals relationship
+        $mealPlan->load(['meals' => function (mixed $query) use ($currentDayNumber): void {
+            /** @var HasMany<Meal, MealPlan> $query */
+            $query->where('day_number', $currentDayNumber)
+                ->orderBy('sort_order')
+                ->oldest();
+        }]);
 
         /** @var Collection<int, Meal> $dayMeals */
         $dayMeals = $mealPlan->meals;

@@ -164,13 +164,73 @@ it('clamps day parameter to valid range', function (): void {
         ->assertInertia(fn ($page) => $page
             ->where('currentDay.day_number', 1));
 
-    // Test day > 7
+    // Test day > duration_days
     $response = $this->actingAs($user)
         ->get(route('meal-plans.index', ['day' => 100]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('currentDay.day_number', 7));
+});
+
+it('handles short duration meal plans correctly', function (): void {
+    $user = User::factory()->create();
+
+    // Create a 3-day meal plan
+    $mealPlan = MealPlan::factory()
+        ->custom(3)
+        ->for($user)
+        ->has(Meal::factory()->breakfast()->forDay(1), 'meals')
+        ->has(Meal::factory()->breakfast()->forDay(2), 'meals')
+        ->has(Meal::factory()->breakfast()->forDay(3), 'meals')
+        ->create();
+
+    // Test day parameter is clamped to 3
+    $response = $this->actingAs($user)
+        ->get(route('meal-plans.index', ['day' => 5]));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('currentDay.day_number', 3)
+            ->where('navigation.total_days', 3)
+            ->where('navigation.next_day', 1) // Loops back to day 1
+            ->where('navigation.previous_day', 2));
+
+    // Test day 1 loops back to day 3
+    $response = $this->actingAs($user)
+        ->get(route('meal-plans.index', ['day' => 1]));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('currentDay.day_number', 1)
+            ->where('navigation.previous_day', 3) // Loops back to day 3
+            ->where('navigation.next_day', 2));
+});
+
+it('defaults to day 1 when current day of week exceeds meal plan duration', function (): void {
+    $user = User::factory()->create();
+
+    // Create a 3-day meal plan
+    $mealPlan = MealPlan::factory()
+        ->custom(3)
+        ->for($user)
+        ->has(Meal::factory()->breakfast()->forDay(1), 'meals')
+        ->has(Meal::factory()->breakfast()->forDay(2), 'meals')
+        ->has(Meal::factory()->breakfast()->forDay(3), 'meals')
+        ->create();
+
+    // If today is Thursday (4), Friday (5), Saturday (6), or Sunday (7),
+    // it should default to day 1 instead of the current day of week
+    $currentDayOfWeek = now()->dayOfWeekIso;
+    $expectedDefaultDay = $currentDayOfWeek <= 3 ? $currentDayOfWeek : 1;
+
+    $response = $this->actingAs($user)
+        ->get(route('meal-plans.index'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('currentDay.day_number', $expectedDefaultDay)
+            ->where('navigation.total_days', 3));
 });
 
 it('calculates daily stats correctly', function (): void {
