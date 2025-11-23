@@ -82,24 +82,41 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
     {
         $displayName = $this->option('display-name') ?? 'FoodData Central Foundation Food';
 
+        $this->info('Uploading file...');
+
+        $apiKey = config('gemini.api_key');
+        $uploadUrl = 'https://generativelanguage.googleapis.com/upload/v1beta/files';
+
         try {
-            $file = Gemini::files()->upload(
-                filename: $filePath,
-                mimeType: MimeType::APPLICATION_JSON,
-                displayName: $displayName
-            );
+            $metadata = json_encode(['file' => ['displayName' => $displayName]]);
+            $fileContent = File::get($filePath);
+            $fileName = basename($filePath);
+
+            $response = Http::withHeaders([
+                'x-goog-api-key' => $apiKey,
+                'X-Goog-Upload-Protocol' => 'multipart',
+            ])
+            ->attach('metadata', $metadata, 'metadata', ['Content-Type' => 'application/json'])
+            ->attach('file', $fileContent, $fileName, ['Content-Type' => 'application/json'])
+            ->post($uploadUrl);
+
+            if ($response->failed()) {
+                $this->error("File upload failed: {$response->status()} {$response->body()}");
+
+                return null;
+            }
+
+            $data = $response->json('file');
 
             $this->info('File uploaded successfully.');
 
-            return GeminiUploadedFileData::fromMetadataResponse($file);
-        } catch (\Gemini\Exceptions\UnserializableResponse $e) {
-            $this->error("File upload failed with UnserializableResponse: {$e->getMessage()}");
-            $this->error('This usually means the Gemini API returned malformed JSON.');
-            if ($previous = $e->getPrevious()) {
-                $this->error("Previous exception: {$previous->getMessage()}");
-            }
-
-            return null;
+            return new GeminiUploadedFileData(
+                name: $data['name'],
+                displayName: $data['displayName'] ?? $displayName,
+                mimeType: $data['mimeType'] ?? 'application/json',
+                sizeBytes: (int) ($data['sizeBytes'] ?? strlen($fileContent)),
+                uri: $data['uri']
+            );
         } catch (Exception $e) {
             $this->error("File upload failed: {$e->getMessage()}");
             $this->error('Exception class: '.get_class($e));
@@ -161,6 +178,12 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
         /** @var array<string, mixed> $data */
         $data = $response->json();
+
+        // Ensure optional fields are present
+        $data['activeDocumentsCount'] = $data['activeDocumentsCount'] ?? 0;
+        $data['pendingDocumentsCount'] = $data['pendingDocumentsCount'] ?? 0;
+        $data['failedDocumentsCount'] = $data['failedDocumentsCount'] ?? 0;
+        $data['sizeBytes'] = $data['sizeBytes'] ?? 0;
 
         return GeminiFileSearchStoreData::from($data);
     }
