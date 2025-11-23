@@ -49,7 +49,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
         }
 
         /** @var string $baseUrl */
-        $baseUrl = config('gemini.base_url', 'https://generativelanguage.googleapis.com/v1beta');
+        $baseUrl = config('gemini.base_url');
 
         $storeName = $this->getOrCreateStore($apiKey, $baseUrl);
         if (! $storeName) {
@@ -91,9 +91,18 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
             $this->info('File uploaded successfully.');
 
-            return GeminiUploadedFileData::from($file);
+            return GeminiUploadedFileData::fromMetadataResponse($file);
+        } catch (\Gemini\Exceptions\UnserializableResponse $e) {
+            $this->error("File upload failed with UnserializableResponse: {$e->getMessage()}");
+            $this->error('This usually means the Gemini API returned malformed JSON.');
+            if ($previous = $e->getPrevious()) {
+                $this->error("Previous exception: {$previous->getMessage()}");
+            }
+
+            return null;
         } catch (Exception $e) {
             $this->error("File upload failed: {$e->getMessage()}");
+            $this->error('Exception class: '.get_class($e));
 
             return null;
         }

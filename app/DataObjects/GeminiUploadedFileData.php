@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataObjects;
 
+use Gemini\Responses\Files\MetadataResponse;
 use Spatie\LaravelData\Data;
 
 final class GeminiUploadedFileData extends Data
@@ -15,4 +16,15 @@ final class GeminiUploadedFileData extends Data
         public int $sizeBytes,
         public string $uri,
     ) {}
+
+    public static function fromMetadataResponse(MetadataResponse $response): self
+    {
+        return new self(
+            name: $response->name,
+            displayName: $response->displayName,
+            mimeType: $response->mimeType,
+            sizeBytes: (int) ($response->sizeBytes ?? 0),
+            uri: $response->uri,
+        );
+    }
 }
