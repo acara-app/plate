@@ -186,7 +186,11 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
     {
         $this->info('Waiting for import operation to complete...');
 
-        while (true) {
+        $maxAttempts = config('gemini.max_polling_attempts', 60);
+        $attempts = 0;
+
+        while ($attempts < $maxAttempts) {
+            $attempts++;
             $response = Http::withHeaders([
                 'x-goog-api-key' => $apiKey,
             ])->get("{$baseUrl}/{$operationName}");
@@ -200,8 +204,8 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             $isDone = $response->json('done', false);
 
             if (! $isDone) {
-                $this->info('Operation still in progress...');
-                \Illuminate\Support\Sleep::sleep(10);
+                $this->info("Operation still in progress (attempt {$attempts}/{$maxAttempts})...");
+                \Illuminate\Support\Sleep::sleep(config('gemini.polling_interval', 10));
 
                 continue;
             }
@@ -218,6 +222,10 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
             return true;
         }
+
+        $this->error('Operation timed out after maximum attempts.');
+
+        return false;
     }
 
     private function verifyImport(string $apiKey, string $baseUrl, string $storeName): void
