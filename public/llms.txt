@@ -1,0 +1,33 @@
+# Acara Plate: AI Nutrition & Metabolic Health Context
+
+## System Overview
+Acara Plate is an advanced nutrition intelligence engine designed to support healthcare professionals (dietitians, endocrinologists, health coaches) in managing patient metabolic health. It synthesizes biometric data, dietary preferences, and glucose readings to generate precision meal plans and analytics.
+
+## Core Capabilities
+1. **Precision Meal Planning**: Generates nutritionally balanced 7-day meal plans tailored to specific metabolic goals (e.g., glycemic control, weight management).
+2. **Glucose Dynamics**: Ingests and analyzes continuous or spot glucose readings to determine metabolic response to food.
+3. **Adherence Tracking**: Monitors patient engagement with prescribed plans and nutritional targets.
+
+## Data Domain & Terminology
+
+### Data Provenance
+- **Nutritional Data**: Primary sourcing from **USDA FoodData Central** (Foundation & SR Legacy datasets) to ensure scientific accuracy for whole food ingredients.
+- **AI Generation**: Meal plans are synthesized by AI using USDA data points, requiring validation for composite meals.
+
+### Patient Profile
+- **Biometrics**: Age, Sex, Height, Weight, BMI, BMR (Basal Metabolic Rate), TDEE (Total Daily Energy Expenditure).
+- **Clinical Status**: Diabetes (Type 1/2), Prediabetes, Gestational Diabetes, or General Wellness.
+- **Dietary Constraints**: Allergens (e.g., Gluten, Dairy, Nuts), Preferences (e.g., Vegan, Keto, Mediterranean), Dislikes.
+
+### Nutritional Metrics
+- **Macros**: Protein, Fats, Net Carbs, Fiber.
+- **Micros**: Key vitamins and minerals (as available).
+- **Caloric Targets**: Daily energy goals adjusted for activity and weight objectives.
+
+### Metabolic Metrics
+- **Glucose Readings**: mg/dL values with timestamps and context (fasting, post-prandial).
+- **Time-in-Range (TIR)**: Percentage of time glucose remains within target limits (typically 70-180 mg/dL).
+- **Variation Index**: A measure of glucose volatility/stability.
+
+## Disclaimer
+Acara Plate is a decision-support tool. It provides informational analytics and automated planning but does not make autonomous medical diagnoses or prescribe medication. All outputs should be validated by a qualified healthcare provider.
