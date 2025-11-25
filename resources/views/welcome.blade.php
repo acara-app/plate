@@ -50,17 +50,15 @@
                     <div class="space-y-4 lg:space-y-6">
                         <h1
                             class="text-3xl font-bold leading-tight tracking-tight text-slate-900 lg:text-5xl dark:text-white">
-                            Master Your
+                             Your Personalized AI Nutrition Agent for
                             <span
                                 class="bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-400">
-                                Glucose Levels
+                                Optimal Health
                             </span>
-                            with AI Nutrition
                         </h1>
 
                         <p class="text-base leading-relaxed text-slate-600 lg:text-lg dark:text-slate-300">
-                            Personalized meal plans that learn from your glucose logs — intended for adults with Type 2
-                            diabetes or prediabetes as an informational tool.
+                            Personalized meal plans that adapt to your glucose patterns — designed for adults with Type 2 diabetes or prediabetes as an informational tool.
                         </p>
 
                         <div
