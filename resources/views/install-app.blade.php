@@ -2,7 +2,7 @@
     <div class="mx-auto my-16 max-w-7xl px-6 lg:px-8">
         <a
             href="{{ url()->previous() === request()->url() ? '/' : url()->previous() }}"
-            class="-mt-10 mb-12 flex items-center dark:text-slate-400 text-slate-600 hover:underline z-50 relative"
+            class="-mt-10 mb-12 flex items-center text-slate-600 dark:text-slate-400 hover:underline z-50 relative"
         >
             <x-icons.chevron-left class="size-4" />
             <span>Back</span>
