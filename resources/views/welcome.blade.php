@@ -20,7 +20,7 @@
                 <a href="/"
                     class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80 dark:text-white">
                     <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
-                    Acare Plate
+                    Acara Plate
                 </a>
                 <div class="flex items-center gap-2">
                     @auth
