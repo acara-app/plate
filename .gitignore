@@ -4,6 +4,9 @@
 /public/build
 /public/hot
 /public/storage
+/public/sw.js
+/public/workbox-*.js
+/public/manifest.webmanifest
 /resources/js/actions
 /resources/js/routes
 /resources/js/wayfinder
