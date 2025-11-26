@@ -457,6 +457,22 @@
                                 supervision from your healthcare team.
                             </p>
                         </details>
+
+                        <details
+                            class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
+                            <summary
+                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
+                                <span>Is there a mobile app?</span>
+                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </summary>
+                            <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
+                                Yes! Acara Plate is a Progressive Web App (PWA), which means you can install it directly on your device without visiting an app store. Visit our <a href="{{ route('install-app') }}" class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">installation guide</a> to learn how to add it to your home screen for a native app-like experience.
+                            </p>
+                        </details>
                     </div>
                 </div>
             </section>
