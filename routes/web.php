@@ -10,6 +10,7 @@ Route::view('/', 'welcome')->name('home');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy');
 Route::view('/terms-of-service', 'terms-of-service')->name('terms');
 Route::view('/support', 'support')->name('support');
+Route::view('/install-app', 'install-app')->name('install-app');
 
 Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])->name('profile.timezone.update');
 

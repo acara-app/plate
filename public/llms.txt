@@ -7,6 +7,7 @@ Acara Plate is an advanced nutrition intelligence engine designed to support hea
 1. **Precision Meal Planning**: Generates nutritionally balanced 7-day meal plans tailored to specific metabolic goals (e.g., glycemic control, weight management).
 2. **Glucose Dynamics**: Ingests and analyzes continuous or spot glucose readings to determine metabolic response to food.
 3. **Adherence Tracking**: Monitors patient engagement with prescribed plans and nutritional targets.
+4. **Cross-Platform Accessibility**: Deployed as a Progressive Web App (PWA), enabling native-like installation and offline capabilities on iOS, Android, and desktop environments.
 
 ## Data Domain & Terminology
 
