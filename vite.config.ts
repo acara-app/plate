@@ -33,13 +33,14 @@ export default defineConfig({
             },
             manifest: {
                 name: 'Acara Plate',
-                short_name: 'Plate',
+                short_name: 'Acara Plate',
                 description:
                     'Personalized nutrition and meal planning platform',
                 theme_color: '#ffffff',
                 background_color: '#ffffff',
                 display: 'standalone',
                 orientation: 'portrait',
+                start_url: '/dashboard',
                 icons: [
                     {
                         src: '/favicons/favicon-16x16.png',
