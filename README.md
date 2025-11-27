@@ -9,66 +9,93 @@ Acara Plate is an AI-powered personalized nutrition and meal planning platform t
 
 > [!IMPORTANT]
 > **Disclaimer:** Acara Plate is an AI-powered tool for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. See the [Medical Disclaimer](#medical-disclaimer) below.
+## Table of Contents
+- [Acara Plate - Personalized Nutrition AI Agent](#acara-plate---personalized-nutrition-ai-agent)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Product Capabilities](#product-capabilities)
+    - [Personalization Inputs](#personalization-inputs)
+    - [Generated Outputs](#generated-outputs)
+    - [User Journey Highlights](#user-journey-highlights)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Project Setup](#project-setup)
+    - [Environment Configuration](#environment-configuration)
+    - [Running the Development Server](#running-the-development-server)
+    - [Testing \& Code Quality](#testing--code-quality)
+  - [Data Initialization](#data-initialization)
+    - [Database Seeding](#database-seeding)
+    - [USDA Food Database Import](#usda-food-database-import)
+  - [Deployment](#deployment)
+    - [Self-Hosting Options](#self-hosting-options)
+    - [Production Environment](#production-environment)
+    - [Future Enhancements](#future-enhancements)
+  - [Accessing Acara Plate](#accessing-acara-plate)
+    - [Progressive Web App](#progressive-web-app)
+  - [Contributing](#contributing)
+  - [Code of Conduct](#code-of-conduct)
+- [Medical Disclaimer](#medical-disclaimer)
 
-## Contributing
+## Overview
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+Acara Plate is a Laravel 12 application that pairs Inertia (React) with Tailwind CSS to deliver a seamless AI-assisted meal planning experience. Powered by PrismPHP, it generates seven-day meal plans that adapt to each user's biometric data, preferences, and goals while tracking key wellness metrics such as glucose readings.
 
-## Code of Conduct
+## Product Capabilities
 
-Please review our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
+### Personalization Inputs
+- **Biometrics:** Age, sex, height, weight, BMI, BMR, and TDEE calculations
+- **Goals:** Weight loss, muscle gain, maintenance, condition management, endurance, flexibility
+- **Lifestyle:** Activity level, occupation, sleep patterns
+- **Preferences:** Vegan, vegetarian, keto, paleo, gluten-free, lactose-free, allergen exclusions, dislikes
+- **Health Conditions:** Diabetes, hypertension, heart disease, and other nutrition-sensitive conditions
 
-## About
+### Generated Outputs
+- Calorie targets aligned with goals
+- Macronutrient distribution (protein, carbs, fat)
+- Meal-by-meal recipes with quantities, portions, and prep guidance
+- Nutritional information per meal and daily summaries
+- Grocery list generation and macro visualizations
+- Glucose tracking with analytics, trends, and time-in-range insights
 
-Acara Plate is AI-Powered through PrismPHP to generate comprehensive 7-day meal plans that consider:
+### User Journey Highlights
+1. **Onboarding Questionnaire:** Collects biometric data, goals, lifestyle factors, dietary preferences, and health conditions.
+2. **AI Meal Planning:** Uses PrismPHP-driven LLM workflows to build structured seven-day plans with queue-backed processing and progress tracking.
+3. **Meal Plan Management:** Offers day-by-day navigation, macro bars, detailed meal cards, and generated shopping support.
+4. **Glucose Monitoring:** Records readings, classifies context (fasting, pre-meal, post-meal, random), and surfaces analytics for recent periods.
 
-- **Biometric Data**: Age, height, weight, sex, BMI, BMR, and TDEE calculations
-- **Health Goals**: Weight loss, muscle gain, weight maintenance, health condition management, endurance improvement, flexibility enhancement
-- **Lifestyle Factors**: Activity level (sedentary to extremely active), occupation, sleep patterns
-- **Dietary Preferences**: Vegan, vegetarian, keto, paleo, gluten-free, lactose-free, allergen restrictions, and food dislikes
-- **Health Conditions**: Diabetes, hypertension, heart disease, and other conditions with nutritional impacts
+## Getting Started
 
-The platform provides detailed meal plans with:
-- Daily calorie targets aligned with user goals
-- Macronutrient ratios (protein, carbs, fat)
-- Complete recipes with preparation instructions
-- Ingredient lists with quantities
-- Portion sizes and preparation times
-- Nutritional information per meal
+### Prerequisites
+This application is built with:
 
-## Installation
-
-Acara Plate is a regular Laravel application; it's built on top of Laravel 12 and uses Inertia (React) / Tailwind CSS for the frontend. If you are familiar with Laravel, you should feel right at home.
-
-In terms of local development, you can use the following requirements:
-
-- **PHP 8.4+**
+- **PHP 8.4**
+- **Composer 2** — PHP dependency manager
 - **Node.js 20+**
-- **SQLite** or **PostgreSQL 17+** (with pgvector extension)
+- **Laravel 12** — backend API and frontend delivery
+- **React 19** — frontend UI layer
+- **Inertia.js** — bridges Laravel and React
+- **PostgreSQL 17+** (pgvector recommended for advanced features)
+- **Tailwind CSS** — utility-first styling
 
-If you have these requirements, you can start by cloning the repository and installing the dependencies:
+### Project Setup
 
 ```bash
 git clone https://github.com/acara-app/plate.git
-
 cd plate
-
 git checkout -b feat/your-feature # or fix/your-fix
 ```
 
-Don't push directly to the main branch. Instead, create a new branch and push it to your branch.
-
-Next, install the dependencies using Composer and NPM:
+Create a feature branch instead of committing directly to `main`, then install and bootstrap dependencies:
 
 ```bash
 composer setup
 ```
 
-> **Note**: The `composer setup` command is a shortcut that runs `composer install`, `npm install`, copies `.env.example` to `.env`, generates the app key, and runs migrations.
+`composer setup` runs Composer and NPM installs, copies `.env.example`, generates the app key, and executes migrations.
 
-### Configure Environment
+### Environment Configuration
 
-After setup, you may need to configure AI provider keys (set only those you will use) and optional OAuth variables in your `.env` file. Prism supports multiple LLM providers seamlessly:
+Configure the credentials you need in `.env`. Only the providers you enable in code require keys.
 
 ```bash
 # Optional AI Provider API Keys (choose any subset)
@@ -81,16 +108,40 @@ MISTRAL_API_KEY=your_mistral_key
 XAI_API_KEY=your_xai_key
 OLLAMA_URL=http://localhost:11434 # if using local Ollama
 
-# Optional: Google OAuth
+# Optional OAuth
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 ```
 
-Prism will use the provider(s) you reference in code; unused keys can be omitted.
+### Running the Development Server
+
+```bash
+composer run dev
+```
+
+Use `npm run build` and your Herd `.test` domain when validating PWA installability. Clear site data if the service worker appears stale.
+
+### Testing & Code Quality
+
+Run the full QA suite:
+
+```bash
+composer test
+```
+
+Targeted commands are also available:
+
+```bash
+composer test:unit         # Unit & feature tests (100% coverage enforced)
+composer test:type-coverage
+composer test:lint         # Pint, Rector, ESLint, Prettier
+composer test:types        # PHPStan + TypeScript
+composer lint              # Auto-fix styling issues
+```
+
+## Data Initialization
 
 ### Database Seeding
-
-Optionally, you can seed the database with initial data:
 
 ```bash
 php artisan db:seed --class=GoalSeeder
@@ -101,121 +152,72 @@ php artisan db:seed --class=HealthConditionSeeder
 
 ### USDA Food Database Import
 
-Acara Plate uses the USDA FoodData Central database for accurate nutritional information. To import the food data:
+Acara Plate relies on USDA FoodData Central for accurate nutrition data:
 
-1. **Download USDA Food Data** from [FoodData Central](https://fdc.nal.usda.gov/download-datasets):
-   - Foundation Foods (JSON format)
-   - SR Legacy Foods (JSON format)
-
-2. **Place the downloaded files** in `storage/sources/` directory
-
-3. **Import the data** using the provided Artisan commands:
+1. Download **Foundation Foods** and **SR Legacy Foods** (JSON) from [FoodData Central](https://fdc.nal.usda.gov/download-datasets).
+2. Place the files in `storage/sources/`.
+3. Import using the provided Artisan commands:
 
 ```bash
-# Import Foundation Foods (default path)
 php artisan import:usda-food-foundation-data
-
-# Import SR Legacy Foods (default path)
 php artisan import:usda-sr-legacy-food-data
 
-# Or specify custom file paths
+# Use custom paths if needed
 php artisan import:usda-food-foundation-data --path=/path/to/foundation.json
 php artisan import:usda-sr-legacy-food-data --path=/path/to/legacy.json
 ```
 
-**Performance Notes:**
-- The import uses streaming to handle large JSON files efficiently
-- Foundation Foods: ~1,200 entries (~2-5 seconds)
-- SR Legacy Foods: ~8,000+ entries (~10-30 seconds)
-- Imports use database transactions for data integrity
-- Progress is displayed in real-time during import
+**Performance & Indexing**
+- Streaming import efficiently handles large JSON payloads.
+- Foundation Foods (~1,200 entries) completes in ~2-5 seconds; SR Legacy (>8,000) in ~10-30 seconds.
+- Operations run within database transactions and surface progress in real time.
+- Full-text indexes on the `description` column accelerate search (created on MySQL/PostgreSQL, skipped on SQLite).
 
-**Database Optimization:**
-- Fulltext indexes are automatically created on the `description` column for fast searches
-- Indexes are only created on MySQL/PostgreSQL (skipped on SQLite for testing)
-- The service uses case-insensitive LIKE queries with proper parameter binding
+## Deployment
 
-## Development
+### Self-Hosting Options
+- **Laravel Forge:** Automated provisioning for VPS providers (DigitalOcean, Linode, Vultr, AWS).
+- **Ploi:** Laravel Forge–style GUI for provisioning, deployments, cron management, and queue supervision.
+- **Laravel Cloud:** Fully managed Laravel platform with zero server maintenance.
 
-### Running the Development Server
+### Production Environment
 
-```bash
-composer run dev
-```
+Our live deployment is hosted on [Hetzner](https://www.hetzner.com/) with [Ploi](https://ploi.io/) coordinating releases. We treat this setup as a practical template for similar self-managed installations. The current server runs Ubuntu 22.04 LTS with 2 vCPUs, 2 GB RAM, and 50 GB SSD storage.
 
-## Testing & Code Quality
+- **Database:** Dedicated PostgreSQL VM isolated from the application server
+- **Backups:** [pgBackRest](https://pgbackrest.org/) provides automated, incremental backups
 
-Acara Plate maintains strict code quality standards to ensure reliability and maintainability. We use **Pest** as our testing framework, enforcing **100% test coverage** and **100% type coverage**.
+### Future Enhancements
+- IndexedDB caching for limited offline PWA usage (recipes, recent plans)
+- Parallelized queue workers for faster meal plan generation
 
-For static analysis, we rely on **PHPStan** and TypeScript checks. To keep our codebase clean and modern, we utilize **Laravel Pint** for styling and **Rector** for automated refactoring.
+## Accessing Acara Plate
 
-### Running Tests
+The application is available as a regular responsive web app—open your configured domain in any modern browser to use it immediately. Installing the PWA is optional and simply delivers an app-like shell around the same experience.
 
-You can run the full quality assurance suite with a single command:
+### Progressive Web App
 
-```bash
-composer test
-```
+Acara Plate ships as an installable PWA for mobile and desktop:
 
-### Individual Tools
+- **Capabilities:** Home screen install, standalone window, responsive layout
+- **Current Limitation:** Offline mode is not yet available; an internet connection is required
 
-You can also run specific tools individually:
+**Installation**
+- **iOS/iPadOS (Safari):** Share → Add to Home Screen
+- **Android (Chrome):** Browser menu → Add to Home screen
+- **Desktop (Chrome/Edge):** Click the install icon in the address bar or choose Install from the menu
 
-```bash
-# Run unit and feature tests (requires 100% coverage)
-composer test:unit
+**Updates**
+- A new deployment becomes active after the service worker installs and the app performs a fresh reload
+- If an update appears stuck, complete a hard refresh or clear storage for the domain
 
-# Check type coverage (requires 100%)
-composer test:type-coverage
+## Contributing
 
-# Run code style checks (Pint, Rector, ESLint, Prettier)
-composer test:lint
+We welcome contributions! Review the [Contributing Guide](CONTRIBUTING.md) for workflows, coding standards, and issue triage details.
 
-# Run static analysis (PHPStan, TypeScript)
-composer test:types
-```
+## Code of Conduct
 
-### Fixing Code Style
-
-To automatically fix code style issues:
-
-```bash
-composer lint
-```
-
-
-## Key Features
-
-### User Journey
-1. **Onboarding Questionnaire**
-   - Biometric information collection
-   - Goal selection
-   - Lifestyle assessment
-   - Dietary preference selection
-   - Health condition documentation
-
-2. **AI-Powered Meal Plan Generation**
-   - Personalized 7-day meal plans
-   - Weekly plan generation with queue processing
-   - Real-time job tracking with progress updates
-   - Structured data generation using PrismPHP
-
-3. **Meal Plan Management**
-   - View daily meals with nutritional breakdown
-   - Day-by-day navigation
-   - Macro bar visualizations
-   - Detailed meal cards with preparation instructions
-   - Grocery list generation capability
-
-4. **Glucose Tracking**
-   - Log blood glucose readings with timestamps
-   - Track reading types (Fasting, Before Meal, Post Meal, Random)
-   - Comprehensive analytics dashboard with visualizations
-   - Time-period filtering (7, 30, 90 days)
-   - Statistics: average, highest, lowest glucose levels
-   - Time-in-range metrics (70-140 mg/dL target)
-   - Interactive line chart with color-coded zones
-   - Reading management (create, edit, delete)
+Please read the [Code of Conduct](CODE_OF_CONDUCT.md) before participating in the community.
 
 # Medical Disclaimer
 
@@ -223,10 +225,10 @@ Acara Plate is an open-source project designed for informational and educational
 
 **Not Medical Advice:** This software is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition, dietary changes, or blood glucose management.
 
-**AI Limitations:** The meal plans and nutritional data are generated by Artificial Intelligence via large language models (e.g., OpenAI, Anthropic Claude, Google Gemini, DeepSeek, Groq, Mistral) integrated through PrismPHP. While we strive for accuracy, LLMs can occasionally hallucinate or produce incorrect information regarding allergens, ingredients, or macronutrient values. Always verify ingredients and nutritional content independently.
+**AI Limitations:** Meal plans and nutritional data are generated by large language models (OpenAI, Anthropic Claude, Google Gemini, DeepSeek, Groq, Mistral, XAI, etc.) via PrismPHP. While we strive for accuracy, LLMs can misstate allergens, ingredients, or macro values. Verify critical information independently.
 
-**No Liability:** The authors and contributors of this software are not liable for any adverse effects, health complications, or damages resulting from the use of the application or reliance on the information provided.
+**No Liability:** Authors and contributors are not liable for adverse effects, health complications, or damages arising from use of the software or reliance on its information.
 
-**Emergency:** If you think you may have a medical emergency, call your doctor or emergency services immediately.
+**Emergency:** If you think you may have a medical emergency, contact your physician or emergency services immediately.
 
-By using this software, you acknowledge that you have read this disclaimer and agree to use the application at your own risk.
+By using this software, you acknowledge you have read this disclaimer and agree to use the application at your own risk.
