@@ -53,7 +53,7 @@
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicons/favicon-32x32.png" type="image/png">
         <link rel="apple-touch-icon" href="/apple-touch-icon/apple-touch-icon-180x180.png">
-        <link rel="manifest" href="/manifest.webmanifest">
+        <link rel="manifest" href="/build//manifest.webmanifest">
         <meta name="theme-color" content="#ffffff">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
