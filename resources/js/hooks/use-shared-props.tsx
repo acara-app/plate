@@ -1,17 +1,12 @@
+import { User } from '@/types';
 import { usePage } from '@inertiajs/react';
-
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    is_onboarded: boolean;
-    has_meal_plan: boolean;
-}
 
 interface SharedProps {
     auth: {
-        user: User | null;
+        user: User;
+        subscribed: boolean;
     };
+    sidebarOpen: boolean;
 }
 
 export default function useSharedProps() {
@@ -21,5 +16,6 @@ export default function useSharedProps() {
 
     return {
         currentUser: props.auth.user,
+        sidebarOpen: page.props.sidebarOpen as boolean,
     };
 }

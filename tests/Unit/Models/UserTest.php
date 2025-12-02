@@ -23,6 +23,7 @@ test('to array', function (): void {
             'pm_last_four',
             'trial_ends_at',
             'timezone',
+            'is_verified',
             'is_onboarded',
             'has_meal_plan',
             'profile',
@@ -63,4 +64,50 @@ test('subscription display name returns formatted name when subscription exists'
     ]);
 
     expect($user->fresh()->subscriptionDisplayName())->toBe('Premium Plan');
+});
+
+test('is_verified returns false when database value is null', function (): void {
+    $user = User::factory()->create(['is_verified' => null]);
+
+    expect($user->is_verified)->toBeFalse();
+});
+
+test('is_verified returns false when database value is false', function (): void {
+    $user = User::factory()->create(['is_verified' => false]);
+
+    expect($user->is_verified)->toBeFalse();
+});
+
+test('is_verified returns true when database value is true', function (): void {
+    $user = User::factory()->verified()->create();
+
+    expect($user->is_verified)->toBeTrue();
+});
+
+test('is_verified returns true for admin emails', function (): void {
+    config(['sponsors.admin_emails' => ['admin@example.com']]);
+
+    $user = User::factory()->create([
+        'email' => 'admin@example.com',
+        'is_verified' => false,
+    ]);
+
+    expect($user->is_verified)->toBeTrue();
+});
+
+test('is_verified returns true when user has active subscription', function (): void {
+    $user = User::factory()->create(['is_verified' => false]);
+
+    DB::table('subscriptions')->insert([
+        'user_id' => $user->id,
+        'type' => 'premium-plan',
+        'stripe_id' => 'sub_test123',
+        'stripe_status' => 'active',
+        'stripe_price' => 'price_test123',
+        'quantity' => 1,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    expect($user->fresh()->is_verified)->toBeTrue();
 });

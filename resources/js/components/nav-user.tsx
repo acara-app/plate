@@ -12,12 +12,11 @@ import {
 import { UserInfo } from '@/components/user-info';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { type SharedData } from '@/types';
-import { usePage } from '@inertiajs/react';
+import useSharedProps from '@/hooks/use-shared-props';
 import { ChevronsUpDown } from 'lucide-react';
 
 export function NavUser() {
-    const { auth } = usePage<SharedData>().props;
+    const { currentUser } = useSharedProps();
     const { state } = useSidebar();
     const isMobile = useIsMobile();
 
@@ -31,7 +30,7 @@ export function NavUser() {
                             className="group text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent"
                             data-test="sidebar-menu-button"
                         >
-                            <UserInfo user={auth.user} />
+                            <UserInfo user={currentUser} />
                             <ChevronsUpDown className="ml-auto size-4" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
@@ -46,7 +45,7 @@ export function NavUser() {
                                   : 'bottom'
                         }
                     >
-                        <UserMenuContent user={auth.user} />
+                        <UserMenuContent user={currentUser} />
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>
