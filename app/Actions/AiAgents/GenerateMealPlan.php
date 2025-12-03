@@ -12,6 +12,7 @@ use App\Models\JobTracking;
 use App\Models\Setting;
 use App\Models\User;
 use App\Traits\Trackable;
+use App\Utilities\JsonCleaner;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Facades\Prism;
@@ -40,7 +41,9 @@ final class GenerateMealPlan
 
         $jsonText = $this->generateMealPlanJson($prompt, $model);
 
-        $data = json_decode($jsonText, true, 512, JSON_THROW_ON_ERROR);
+        $cleanedJsonText = JsonCleaner::extractAndValidateJson($jsonText);
+
+        $data = json_decode($cleanedJsonText, true, 512, JSON_THROW_ON_ERROR);
 
         return MealPlanData::from($data);
     }
@@ -72,8 +75,14 @@ final class GenerateMealPlan
                 .'2. For each ingredient, retrieve its USDA nutrition values per 100g (protein, carbs, fat, calories)\n'
                 .'3. Create a meal plan using ONLY ingredients found in the database\n'
                 .'4. Calculate exact nutritional values based on ingredient quantities and USDA data per 100g\n\n'
-                .'CRITICAL: Return ONLY valid JSON. No markdown, no code blocks, no preambles.\n'
-                .'Start with { and end with }. The JSON must be parseable by json_decode().\n\n'
+                .'CRITICAL JSON FORMAT REQUIREMENTS:\n'
+                .'- Your response MUST be valid JSON and ONLY JSON\n'
+                .'- Start your response with { and end with }\n'
+                .'- Do NOT include markdown code blocks (no ```json)\n'
+                .'- Do NOT include explanatory text before or after the JSON\n'
+                .'- The JSON must be parseable by json_decode()\n'
+                .'- Use double quotes for all strings\n'
+                .'- Ensure all brackets and braces are properly closed\n\n'
                 .'Prioritize whole, minimally processed foods. Ensure all calculations are accurate and based on USDA data.'
             )
             ->withPrompt($prompt)
