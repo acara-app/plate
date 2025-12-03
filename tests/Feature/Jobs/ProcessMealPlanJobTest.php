@@ -2,33 +2,38 @@
 
 declare(strict_types=1);
 
+use App\DataObjects\DayMealsData;
+use App\DataObjects\SingleDayMealData;
 use App\Enums\AiModel;
 use App\Enums\MealPlanType;
+use App\Enums\MealType;
 use App\Enums\Sex;
 use App\Jobs\ProcessMealPlanJob;
 use App\Models\Goal;
 use App\Models\Lifestyle;
 use App\Models\MealPlan;
 use App\Models\User;
+use App\Workflows\CreateMealPlanActivity;
+use App\Workflows\GenerateDayMealsActivity;
+use App\Workflows\StoreDayMealsActivity;
 use Illuminate\Support\Facades\Queue;
-use Prism\Prism\Enums\FinishReason;
-use Prism\Prism\Facades\Prism;
-use Prism\Prism\Testing\TextResponseFake;
-use Prism\Prism\ValueObjects\Meta;
-use Prism\Prism\ValueObjects\Usage;
+use Spatie\LaravelData\DataCollection;
+use Workflow\WorkflowStub;
 
 it('dispatches meal plan generation job', function (): void {
     Queue::fake();
 
     $user = User::factory()->create();
 
-    dispatch(new ProcessMealPlanJob($user->id, AiModel::Gemini25Flash));
+    dispatch(new ProcessMealPlanJob($user, AiModel::Gemini25Flash));
 
-    Queue::assertPushed(ProcessMealPlanJob::class, fn ($job): bool => $job->userId === $user->id
-        && $job->model === AiModel::Gemini25Flash);
+    Queue::assertPushed(ProcessMealPlanJob::class, fn ($job): bool => $job->user->id === $user->id
+        && $job->aiModel === AiModel::Gemini25Flash);
 });
 
-it('generates and stores meal plan when job is processed', function (): void {
+it('generates and stores meal plan incrementally', function (): void {
+    WorkflowStub::fake();
+
     $user = User::factory()->create();
     $goal = Goal::factory()->create(['name' => 'Weight Loss']);
     $lifestyle = Lifestyle::factory()->create([
@@ -47,136 +52,82 @@ it('generates and stores meal plan when job is processed', function (): void {
         'target_weight' => 75.0,
     ]);
 
-    $mockResponse = [
-        'type' => 'weekly',
-        'name' => 'Test Weekly Plan',
-        'description' => 'Test plan from job',
-        'duration_days' => 7,
-        'target_daily_calories' => 1800.0,
-        'macronutrient_ratios' => [
-            'protein' => 35,
-            'carbs' => 30,
-            'fat' => 35,
-        ],
-        'meals' => [
-            [
-                'day_number' => 1,
-                'type' => 'breakfast',
-                'name' => 'Test Meal',
-                'description' => 'Test',
-                'preparation_instructions' => 'Test instructions',
-                'ingredients' => [['name' => 'Test ingredient', 'quantity' => '100g']],
-                'portion_size' => '1 serving',
-                'calories' => 350.0,
-                'protein_grams' => 25.0,
-                'carbs_grams' => 30.0,
-                'fat_grams' => 10.0,
-                'preparation_time_minutes' => 10,
-                'sort_order' => 1,
-            ],
-        ],
-    ];
+    // Mock CreateMealPlanActivity to create the meal plan
+    WorkflowStub::mock(CreateMealPlanActivity::class, function ($context, $activityUser, $totalDays) use ($user) {
+        return $user->mealPlans()->create([
+            'type' => App\Workflows\GenerateMealPlanWorkflow::getMealPlanType($totalDays),
+            'name' => "{$totalDays}-Day Test Plan",
+            'description' => 'Test plan',
+            'duration_days' => $totalDays,
+            'metadata' => ['status' => 'generating', 'days_completed' => 0],
+        ]);
+    });
 
-    $fakeResponse = TextResponseFake::make()
-        ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(100, 200))
-        ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
+    // Mock GenerateDayMealsActivity to return fake meal data
+    WorkflowStub::mock(GenerateDayMealsActivity::class, fn ($context, $activityUser, $dayNumber): DayMealsData => new DayMealsData(
+        meals: new DataCollection(SingleDayMealData::class, [
+            new SingleDayMealData(
+                type: MealType::Breakfast,
+                name: "Day {$dayNumber} Breakfast",
+                description: 'Test breakfast',
+                preparationInstructions: 'Test instructions',
+                ingredients: new DataCollection(App\DataObjects\IngredientData::class, [
+                    new App\DataObjects\IngredientData(name: 'Eggs', quantity: '2 large'),
+                ]),
+                portionSize: '1 serving',
+                calories: 350.0,
+                proteinGrams: 25.0,
+                carbsGrams: 10.0,
+                fatGrams: 20.0,
+                preparationTimeMinutes: 10,
+                sortOrder: 1,
+            ),
+        ]),
+    ));
 
-    Prism::fake([$fakeResponse]);
+    // Mock StoreDayMealsActivity to store meals for each day
+    WorkflowStub::mock(StoreDayMealsActivity::class, function ($context, $mealPlan, $dayMeals, $dayNumber) {
+        foreach ($dayMeals->meals as $singleDayMeal) {
+            $mealData = $singleDayMeal->toMealData($dayNumber);
+            $mealPlan->meals()->create([
+                'day_number' => $mealData->dayNumber,
+                'type' => $mealData->type,
+                'name' => $mealData->name,
+                'description' => $mealData->description,
+                'preparation_instructions' => $mealData->preparationInstructions,
+                'ingredients' => $mealData->ingredients,
+                'portion_size' => $mealData->portionSize,
+                'calories' => $mealData->calories,
+                'protein_grams' => $mealData->proteinGrams,
+                'carbs_grams' => $mealData->carbsGrams,
+                'fat_grams' => $mealData->fatGrams,
+                'preparation_time_minutes' => $mealData->preparationTimeMinutes,
+                'sort_order' => $mealData->sortOrder,
+            ]);
+        }
 
-    $job = new ProcessMealPlanJob($user->id, AiModel::Gemini25Flash);
-    $job->handle(
-        app(App\Actions\AiAgents\GenerateMealPlan::class),
-        app(App\Actions\StoreMealPlan::class)
-    );
+        return ['day_number' => $dayNumber, 'meals_count' => count($dayMeals->meals)];
+    });
+
+    $job = new ProcessMealPlanJob($user, AiModel::Gemini25Flash, totalDays: 7);
+    $job->handle();
 
     expect(MealPlan::query()->where('user_id', $user->id)->count())->toBe(1);
 
     $mealPlan = MealPlan::query()->where('user_id', $user->id)->first();
     expect($mealPlan)
         ->type->toBe(MealPlanType::Weekly)
-        ->name->toBe('Test Weekly Plan')
-        ->meals->toHaveCount(1);
-});
+        ->meals->toHaveCount(7); // 7 days × 1 meal per day
 
-it('handles missing user gracefully', function (): void {
-    $mockResponse = [
-        'type' => 'weekly',
-        'name' => 'Test Plan',
-        'description' => 'Test',
-        'duration_days' => 7,
-        'target_daily_calories' => 2000.0,
-        'macronutrient_ratios' => ['protein' => 30, 'carbs' => 40, 'fat' => 30],
-        'meals' => [],
-    ];
-
-    $fakeResponse = TextResponseFake::make()
-        ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(100, 200))
-        ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
-
-    Prism::fake([$fakeResponse]);
-
-    $job = new ProcessMealPlanJob(99999, AiModel::Gemini25Flash);
-    $job->handle(
-        app(App\Actions\AiAgents\GenerateMealPlan::class),
-        app(App\Actions\StoreMealPlan::class)
-    );
-
-    // Should not throw an exception and should not create any meal plans
-    expect(MealPlan::query()->count())->toBe(0);
+    // Verify activities were dispatched in order
+    WorkflowStub::assertDispatched(CreateMealPlanActivity::class, 1);
+    WorkflowStub::assertDispatched(GenerateDayMealsActivity::class, 7);
+    WorkflowStub::assertDispatched(StoreDayMealsActivity::class, 7);
 });
 
 it('has correct timeout configuration', function (): void {
-    $job = new ProcessMealPlanJob(1, AiModel::Gemini25Flash);
-
-    expect($job->timeout)->toBe(300);
-});
-
-it('handles exceptions and marks tracking as failed', function (): void {
     $user = User::factory()->create();
-    $goal = Goal::factory()->create(['name' => 'Weight Loss']);
-    $lifestyle = Lifestyle::factory()->create([
-        'name' => 'Active',
-        'activity_level' => 'moderate',
-        'activity_multiplier' => 1.5,
-    ]);
+    $job = new ProcessMealPlanJob($user, AiModel::Gemini25Flash);
 
-    $user->profile()->create([
-        'age' => 30,
-        'height' => 175.0,
-        'weight' => 80.0,
-        'sex' => Sex::Male,
-        'goal_id' => $goal->id,
-        'lifestyle_id' => $lifestyle->id,
-        'target_weight' => 75.0,
-    ]);
-
-    // Fake a failure by not setting up any Prism fake response
-    // This will cause an exception when trying to generate the meal plan
-    Prism::fake([]);
-
-    $job = new ProcessMealPlanJob($user->id, AiModel::Gemini25Flash);
-
-    try {
-        $job->handle(
-            app(App\Actions\AiAgents\GenerateMealPlan::class),
-            app(App\Actions\StoreMealPlan::class)
-        );
-        $this->fail('Expected an exception to be thrown');
-    } catch (Throwable $e) {
-        // Exception was thrown as expected
-        expect($e)->toBeInstanceOf(Throwable::class);
-    }
-
-    // Verify that the tracking was marked as failed
-    $user->refresh();
-    $tracking = $user->jobTrackings()->where('job_type', ProcessMealPlanJob::JOB_TYPE)->first();
-
-    expect($tracking)
-        ->not->toBeNull()
-        ->status->toBe(App\Enums\JobStatus::Failed)
-        ->and($tracking->message)->toContain('Failed to generate meal plan');
+    expect($job->timeout)->toBe(120); // 2 minutes to start workflow
 });

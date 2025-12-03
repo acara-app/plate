@@ -1,4 +1,3 @@
-import { JobProcessingStatus } from '@/components/job-processing-status';
 import { OnboardingBanner } from '@/components/onboarding-banner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +9,7 @@ import { MealCard } from '@/pages/meal-plans/elements/meal-card';
 import { NutritionStats } from '@/pages/meal-plans/elements/nutrition-stats';
 import checkout from '@/routes/checkout';
 import mealPlans from '@/routes/meal-plans';
-import { JobTracking, type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import { CurrentDay, MealPlan, Navigation } from '@/types/meal-plan';
 import { Head, Link } from '@inertiajs/react';
 import {
@@ -26,7 +25,6 @@ interface MealPlansProps {
     mealPlan: MealPlan | null;
     currentDay: CurrentDay | null;
     navigation: Navigation | null;
-    jobTracking: JobTracking | null;
     requiresSubscription?: boolean;
 }
 
@@ -51,18 +49,9 @@ export default function MealPlans({
     mealPlan,
     currentDay,
     navigation,
-    jobTracking,
     requiresSubscription = false,
 }: MealPlansProps) {
     const { currentUser } = useSharedProps();
-
-    function isProcessingStatus(jobTracking: JobTracking | null): boolean {
-        return (
-            jobTracking !== null &&
-            (jobTracking.status === 'pending' ||
-                jobTracking.status === 'processing')
-        );
-    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -71,8 +60,6 @@ export default function MealPlans({
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
                 {!currentUser?.is_onboarded ? (
                     <OnboardingBanner />
-                ) : isProcessingStatus(jobTracking) ? (
-                    <JobProcessingStatus jobTracking={jobTracking} />
                 ) : requiresSubscription ? (
                     <>
                         <div className="space-y-2">

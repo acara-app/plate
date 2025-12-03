@@ -169,7 +169,7 @@ final readonly class OnboardingController
             'onboarding_completed_at' => now(),
         ]);
 
-        dispatch(new ProcessMealPlanJob($user->id, AiModel::Gemini25Flash));
+        dispatch(new ProcessMealPlanJob($user, AiModel::Gemini25Flash, totalDays: 1));
 
         return to_route('onboarding.completion.show');
     }

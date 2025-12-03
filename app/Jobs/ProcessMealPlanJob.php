@@ -4,58 +4,34 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Actions\AiAgents\GenerateMealPlan;
-use App\Actions\StoreMealPlan;
 use App\Enums\AiModel;
 use App\Models\User;
-use App\Traits\Trackable;
+use App\Workflows\GenerateMealPlanWorkflow;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Throwable;
+use Workflow\WorkflowStub;
 
 final class ProcessMealPlanJob implements ShouldQueue
 {
     use Queueable;
-    use Trackable;
 
-    public const string JOB_TYPE = 'meal_plan_generation';
+    public int $timeout = 120;
 
-    public int $timeout = 300;
+    public int $tries = 1;
 
     public function __construct(
-        public readonly int $userId,
-        public readonly AiModel $model = AiModel::Gemini25Flash,
+        public readonly User $user,
+        public readonly AiModel $aiModel = AiModel::Gemini25Flash,
+        public readonly int $totalDays = 7,
     ) {
         //
     }
 
-    public function handle(GenerateMealPlan $generateMealPlan, StoreMealPlan $storeMealPlan): void
+    public function handle(): void
     {
-        try {
-            /** @var User|null $user */
-            $user = User::query()->find($this->userId);
 
-            if (! $user) {
-                return;
-            }
+        $workflow = WorkflowStub::make(GenerateMealPlanWorkflow::class);
 
-            $this->initializeTracking($this->userId, self::JOB_TYPE);
-
-            $this->startTracking('Starting meal plan generation...');
-
-            $this->updateTrackingProgress(50, 'Creating personalized plan...');
-
-            $mealPlanData = $generateMealPlan->generate($user, $this->model);
-
-            $this->updateTrackingProgress(75, 'Saving meal plan...');
-
-            $mealPlan = $storeMealPlan->handle($user, $mealPlanData);
-
-            $this->completeTracking('Meal plan generated successfully!');
-        } catch (Throwable $e) {
-            $this->failTracking('Failed to generate meal plan: '.$e->getMessage());
-
-            throw $e;
-        }
+        $workflow->start($this->user, $this->totalDays, $this->aiModel);
     }
 }

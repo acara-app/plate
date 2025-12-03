@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\AiAgents;
 
+use App\DataObjects\DayMealsData;
 use App\DataObjects\MealPlanData;
+use App\DataObjects\PreviousDayContext;
 use App\Enums\AiModel;
 use App\Enums\SettingKey;
 use App\Jobs\ProcessMealPlanJob;
@@ -35,6 +37,9 @@ final class GenerateMealPlan
         return $this->initializeTracking($user->id, ProcessMealPlanJob::JOB_TYPE);
     }
 
+    /**
+     * Generate a complete multi-day meal plan (legacy method).
+     */
     public function generate(User $user, AiModel $model): MealPlanData
     {
         $prompt = $this->createPrompt->handle($user);
@@ -46,6 +51,32 @@ final class GenerateMealPlan
         $data = json_decode($cleanedJsonText, true, 512, JSON_THROW_ON_ERROR);
 
         return MealPlanData::from($data);
+    }
+
+    /**
+     * Generate meals for a single day.
+     */
+    public function generateForDay(
+        User $user,
+        int $dayNumber,
+        AiModel $model,
+        int $totalDays = 7,
+        ?PreviousDayContext $previousDaysContext = null,
+    ): DayMealsData {
+        $prompt = $this->createPrompt->handleForDay(
+            $user,
+            $dayNumber,
+            $totalDays,
+            $previousDaysContext,
+        );
+
+        $jsonText = $this->generateMealPlanJson($prompt, $model);
+
+        $cleanedJsonText = JsonCleaner::extractAndValidateJson($jsonText);
+
+        $data = json_decode($cleanedJsonText, true, 512, JSON_THROW_ON_ERROR);
+
+        return DayMealsData::from($data);
     }
 
     /**

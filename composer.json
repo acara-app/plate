@@ -11,7 +11,8 @@
     "require": {
         "php": "^8.4.0",
         "inertiajs/inertia-laravel": "^2.0.10",
-        "laravel-workflow/laravel-workflow": "^1.0.42",
+        "laravel-workflow/laravel-workflow": "^1.0.47",
+        "laravel-workflow/waterline": "^1.0",
         "laravel/cashier": "^16.0.5",
         "laravel/fortify": "^1.32.0",
         "laravel/framework": "^12.39.0",
