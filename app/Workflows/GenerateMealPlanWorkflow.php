@@ -8,6 +8,7 @@ use App\DataObjects\DayMealsData;
 use App\DataObjects\MealData;
 use App\DataObjects\PreviousDayContext;
 use App\Enums\AiModel;
+use App\Enums\MealPlanGenerationStatus;
 use App\Enums\MealPlanType;
 use App\Models\MealPlan;
 use App\Models\User;
@@ -55,10 +56,15 @@ final class GenerateMealPlanWorkflow extends Workflow
      * Execute the workflow to generate a multi-day meal plan sequentially.
      * Each day's meals are stored immediately after generation for better UX.
      *
+     * @param  int  $initialDays  Number of days to generate initially (default 1 for on-demand generation)
      * @return array{user_id: int, total_days: int, status: string, meal_plan_id: int}
      */
-    public function execute(User $user, int $totalDays = 7, AiModel $model = AiModel::Gemini25Flash): Generator
-    {
+    public function execute(
+        User $user,
+        int $totalDays = 7,
+        AiModel $model = AiModel::Gemini25Flash,
+        int $initialDays = 1,
+    ): Generator {
         // Step 1: Create the meal plan record first (so user can see it immediately)
         /** @var MealPlan $mealPlan */
         $mealPlan = yield ActivityStub::make(
@@ -69,8 +75,10 @@ final class GenerateMealPlanWorkflow extends Workflow
 
         $previousDaysContext = new PreviousDayContext;
 
-        // Step 2: Generate and store each day's meals immediately
-        for ($dayNumber = 1; $dayNumber <= $totalDays; $dayNumber++) {
+        // Step 2: Generate only the initial days (remaining days generated on-demand)
+        $daysToGenerate = min($initialDays, $totalDays);
+
+        for ($dayNumber = 1; $dayNumber <= $daysToGenerate; $dayNumber++) {
             // Generate meals for this day
             /** @var DayMealsData $dayMeals */
             $dayMeals = yield ActivityStub::make(
@@ -95,18 +103,26 @@ final class GenerateMealPlanWorkflow extends Workflow
             $previousDaysContext->addDayMeals($dayNumber, $mealNames);
 
             // Update meal plan metadata with progress
+            $isCompleted = $dayNumber === $totalDays;
             $mealPlan->update([
                 'metadata' => array_merge($mealPlan->metadata ?? [], [
                     'days_completed' => $dayNumber,
-                    'status' => $dayNumber === $totalDays ? 'completed' : 'generating',
+                    'status' => $isCompleted
+                        ? MealPlanGenerationStatus::Completed->value
+                        : MealPlanGenerationStatus::Pending->value,
                 ]),
             ]);
         }
 
+        $finalStatus = $daysToGenerate >= $totalDays
+            ? MealPlanGenerationStatus::Completed->value
+            : MealPlanGenerationStatus::Pending->value;
+
         return [
             'user_id' => $user->id,
             'total_days' => $totalDays,
-            'status' => 'completed',
+            'days_generated' => $daysToGenerate,
+            'status' => $finalStatus,
             'meal_plan_id' => $mealPlan->id,
         ];
     }

@@ -23,6 +23,7 @@ final class ProcessMealPlanJob implements ShouldQueue
         public readonly User $user,
         public readonly AiModel $aiModel = AiModel::Gemini25Flash,
         public readonly int $totalDays = 7,
+        public readonly int $initialDays = 1,
     ) {
         //
     }
@@ -32,6 +33,6 @@ final class ProcessMealPlanJob implements ShouldQueue
 
         $workflow = WorkflowStub::make(GenerateMealPlanWorkflow::class);
 
-        $workflow->start($this->user, $this->totalDays, $this->aiModel);
+        $workflow->start($this->user, $this->totalDays, $this->aiModel, $this->initialDays);
     }
 }

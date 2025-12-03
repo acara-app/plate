@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Workflows;
 
+use App\Enums\MealPlanGenerationStatus;
 use App\Models\MealPlan;
 use App\Models\User;
 use Workflow\Activity;
@@ -37,7 +38,7 @@ final class CreateMealPlanActivity extends Activity
             'metadata' => [
                 'generated_at' => now()->toIso8601String(),
                 'generation_method' => 'workflow',
-                'status' => 'generating',
+                'status' => MealPlanGenerationStatus::Generating->value,
                 'days_completed' => 0,
             ],
         ]);

@@ -10,31 +10,22 @@ use App\DataObjects\PreviousDayContext;
 use App\Enums\AiModel;
 use App\Enums\SettingKey;
 use App\Jobs\ProcessMealPlanJob;
-use App\Models\JobTracking;
 use App\Models\Setting;
 use App\Models\User;
-use App\Traits\Trackable;
 use App\Utilities\JsonCleaner;
-use Illuminate\Contracts\Bus\Dispatcher;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Facades\Prism;
 use Prism\Prism\ValueObjects\ProviderTool;
 
 final class GenerateMealPlan
 {
-    use Trackable;
-
     public function __construct(
         private readonly CreateMealPlanPrompt $createPrompt,
-        private readonly Dispatcher $dispatcher,
     ) {}
 
-    public function handle(User $user, AiModel $model = AiModel::Gemini25Flash): JobTracking
+    public function handle(User $user, AiModel $model = AiModel::Gemini25Flash): void
     {
-        $job = new ProcessMealPlanJob($user->id, $model);
-        $this->dispatcher->dispatch($job);
-
-        return $this->initializeTracking($user->id, ProcessMealPlanJob::JOB_TYPE);
+        ProcessMealPlanJob::dispatch($user, $model);
     }
 
     /**

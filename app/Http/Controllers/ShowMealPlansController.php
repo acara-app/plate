@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\MealPlanGenerationStatus;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use Carbon\CarbonImmutable;
@@ -100,9 +101,15 @@ final class ShowMealPlansController
             'created_at' => $mealPlan->created_at->toISOString(),
         ];
 
+        // Check if current day needs generation
+        $dayNeedsGeneration = $dayMeals->isEmpty();
+        $dayStatus = $this->getDayStatus($mealPlan, $currentDayNumber, $dayMeals->isEmpty());
+
         $currentDay = [
             'day_number' => $currentDayNumber,
             'day_name' => $dayName,
+            'needs_generation' => $dayNeedsGeneration,
+            'status' => $dayStatus,
             'meals' => $dayMeals->map(fn (Meal $meal): array => [
                 'id' => $meal->id,
                 'type' => $meal->type->value,
@@ -134,7 +141,34 @@ final class ShowMealPlansController
             'mealPlan' => $formattedMealPlan,
             'currentDay' => $currentDay,
             'navigation' => $navigation,
-            'requiresSubscription' => ! $user->hasActiveSubscription(),
+            'requiresSubscription' => ! $user->is_verified,
         ]);
+    }
+
+    /**
+     * Get the generation status for a specific day.
+     */
+    private function getDayStatus(MealPlan $mealPlan, int $dayNumber, bool $isEmpty): string
+    {
+        $metadata = $mealPlan->metadata ?? [];
+
+        // Check day-specific status first
+        $dayStatusKey = "day_{$dayNumber}_status";
+        if (isset($metadata[$dayStatusKey])) {
+            return $metadata[$dayStatusKey];
+        }
+
+        // If meals exist, day is completed
+        if (! $isEmpty) {
+            return MealPlanGenerationStatus::Completed->value;
+        }
+
+        // Check if overall status is generating
+        if (($metadata['status'] ?? '') === MealPlanGenerationStatus::Generating->value) {
+            return MealPlanGenerationStatus::Generating->value;
+        }
+
+        // Day needs generation
+        return MealPlanGenerationStatus::Pending->value;
     }
 }

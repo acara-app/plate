@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\AiAgents\GenerateMealPlan;
 use App\Enums\AiModel;
-use App\Enums\JobStatus;
 use App\Enums\MealPlanType;
 use App\Enums\Sex;
 use App\Jobs\ProcessMealPlanJob;
@@ -152,7 +151,7 @@ it('uses the correct AI model from enum', function (): void {
     expect(AiModel::Gemini25Flash->value)->toBe('gemini-2.5-flash');
 });
 
-it('dispatches a job and creates job tracking when handle is called', function (): void {
+it('dispatches a job when handle is called', function (): void {
     Queue::fake();
 
     $user = User::factory()->create();
@@ -169,15 +168,9 @@ it('dispatches a job and creates job tracking when handle is called', function (
     ]);
 
     $action = app(GenerateMealPlan::class);
-    $tracking = $action->handle($user, AiModel::Gemini25Flash);
+    $action->handle($user, AiModel::Gemini25Flash);
 
-    expect($tracking)
-        ->user_id->toBe($user->id)
-        ->job_type->toBe(ProcessMealPlanJob::JOB_TYPE)
-        ->status->toBe(JobStatus::Pending)
-        ->progress->toBe(0);
-
-    Queue::assertPushed(ProcessMealPlanJob::class, fn (ProcessMealPlanJob $job): bool => $job->userId === $user->id && $job->model === AiModel::Gemini25Flash);
+    Queue::assertPushed(ProcessMealPlanJob::class, fn (ProcessMealPlanJob $job): bool => $job->user->id === $user->id && $job->aiModel === AiModel::Gemini25Flash);
 });
 
 it('handles meals with no ingredients', function (): void {
