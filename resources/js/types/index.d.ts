@@ -11,7 +11,6 @@ export interface Row {
 
 export interface Auth {
     user: User;
-    subscribed: boolean;
 }
 
 export interface BreadcrumbItem {
@@ -33,7 +32,6 @@ export interface NavItem {
 
 export interface SharedData {
     name: string;
-    quote: { message: string; author: string };
     auth: Auth;
     sidebarOpen: boolean;
     [key: string]: unknown;
@@ -45,6 +43,9 @@ export interface User extends Row {
     avatar?: string;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;
+    is_verified: boolean;
+    has_meal_plan?: boolean;
+    is_onboarded?: boolean;
 }
 
 export interface SexOption {

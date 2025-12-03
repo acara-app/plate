@@ -11,12 +11,13 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { UpgradeButton } from '@/components/upgrade-button';
+import useSharedProps from '@/hooks/use-shared-props';
 import { dashboard, privacy, terms } from '@/routes';
 import glucoseReading from '@/routes/glucose';
 import mealPlans from '@/routes/meal-plans';
 import biometrics from '@/routes/onboarding/biometrics';
-import { type NavItem, type SharedData } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
+import { type NavItem } from '@/types';
+import { Link } from '@inertiajs/react';
 import {
     ActivityIcon,
     CalendarHeartIcon,
@@ -64,8 +65,7 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { auth } = usePage<SharedData>().props;
-    const isSubscribed = auth.subscribed;
+    const { currentUser } = useSharedProps();
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -86,7 +86,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                {!isSubscribed && <UpgradeButton />}
+                {!currentUser?.is_verified && <UpgradeButton />}
                 <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>

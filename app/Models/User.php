@@ -29,6 +29,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read CarbonInterface|null $two_factor_confirmed_at
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read bool|null $is_verified
  * @property-read UserProfile|null $profile
  * @property-read Collection<int, MealPlan> $mealPlans
  * @property-read Collection<int, JobTracking> $jobTrackings
@@ -79,6 +80,7 @@ final class User extends Authenticatable implements MustVerifyEmail
             'two_factor_secret' => 'string',
             'two_factor_recovery_codes' => 'string',
             'two_factor_confirmed_at' => 'datetime',
+            'is_verified' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
@@ -148,6 +150,23 @@ final class User extends Authenticatable implements MustVerifyEmail
 
         // Convert slug back to title case (e.g., 'premium-plan' -> 'Premium Plan')
         return str($subscription->type)->title()->replace('-', ' ')->toString();
+    }
+
+    protected function getIsVerifiedAttribute(?bool $isVerified): bool
+    {
+        if (collect(config()->array('sponsors.admin_emails'))->contains($this->email)) {
+            return true;
+        }
+
+        if ($isVerified === null) {
+            return false;
+        }
+
+        if ($this->hasActiveSubscription()) {
+            return true;
+        }
+
+        return $isVerified;
     }
 
     protected function getHasMealPlanAttribute(): bool
