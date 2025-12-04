@@ -20,19 +20,14 @@ final readonly class GenerateMealDayController
         //
     }
 
-    /**
-     * Trigger generation for a specific day if not already generated or generating.
-     */
     public function __invoke(Request $request, MealPlan $mealPlan): JsonResponse
     {
-        // Ensure user owns this meal plan
         if ($mealPlan->user_id !== $this->user->id) {
             abort(403);
         }
 
         $dayNumber = $request->integer('day', 1);
 
-        // Validate day number
         if ($dayNumber < 1 || $dayNumber > $mealPlan->duration_days) {
             return response()->json([
                 'success' => false,
@@ -40,7 +35,6 @@ final readonly class GenerateMealDayController
             ], 422);
         }
 
-        // Check if day already has meals
         $existingMeals = $mealPlan->meals()
             ->where('day_number', $dayNumber)
             ->exists();
@@ -53,7 +47,6 @@ final readonly class GenerateMealDayController
             ]);
         }
 
-        // Check if day is currently generating
         $metadata = $mealPlan->metadata ?? [];
         $dayStatusKey = "day_{$dayNumber}_status";
 
@@ -65,7 +58,6 @@ final readonly class GenerateMealDayController
             ]);
         }
 
-        // Mark as generating and start workflow
         $mealPlan->update([
             'metadata' => array_merge($metadata, [
                 $dayStatusKey => MealPlanGenerationStatus::Generating->value,
