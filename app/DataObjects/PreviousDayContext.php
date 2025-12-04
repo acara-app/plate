@@ -6,9 +6,6 @@ namespace App\DataObjects;
 
 use Spatie\LaravelData\Data;
 
-/**
- * DTO for providing context about previous days' meals to ensure variety.
- */
 final class PreviousDayContext extends Data
 {
     /**
