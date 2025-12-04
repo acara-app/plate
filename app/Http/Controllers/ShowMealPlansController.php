@@ -7,12 +7,14 @@ namespace App\Http\Controllers;
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\Meal;
 use App\Models\MealPlan;
+use App\Workflows\GenerateSingleDayWorkflow;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Workflow\WorkflowStub;
 
 final class ShowMealPlansController
 {
@@ -101,9 +103,24 @@ final class ShowMealPlansController
             'created_at' => $mealPlan->created_at->toISOString(),
         ];
 
-        // Check if current day needs generation
+        // Check if current day needs generation and auto-trigger if pending
         $dayNeedsGeneration = $dayMeals->isEmpty();
         $dayStatus = $this->getDayStatus($mealPlan, $currentDayNumber, $dayMeals->isEmpty());
+
+        // Auto-trigger generation for pending days
+        if ($dayNeedsGeneration && $dayStatus === MealPlanGenerationStatus::Pending->value) {
+            // Update status before starting workflow
+            $mealPlan->update([
+                'metadata' => array_merge($mealPlan->metadata ?? [], [
+                    "day_{$currentDayNumber}_status" => MealPlanGenerationStatus::Generating->value,
+                ]),
+            ]);
+
+            WorkflowStub::make(GenerateSingleDayWorkflow::class)
+                ->start($mealPlan, $currentDayNumber);
+
+            $dayStatus = MealPlanGenerationStatus::Generating->value;
+        }
 
         $currentDay = [
             'day_number' => $currentDayNumber,

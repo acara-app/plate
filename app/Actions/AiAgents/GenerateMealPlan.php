@@ -9,13 +9,14 @@ use App\DataObjects\MealPlanData;
 use App\DataObjects\PreviousDayContext;
 use App\Enums\AiModel;
 use App\Enums\SettingKey;
-use App\Jobs\ProcessMealPlanJob;
 use App\Models\Setting;
 use App\Models\User;
 use App\Utilities\JsonCleaner;
+use App\Workflows\GenerateMealPlanWorkflow;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Facades\Prism;
 use Prism\Prism\ValueObjects\ProviderTool;
+use Workflow\WorkflowStub;
 
 final class GenerateMealPlan
 {
@@ -25,7 +26,8 @@ final class GenerateMealPlan
 
     public function handle(User $user, AiModel $model = AiModel::Gemini25Flash): void
     {
-        ProcessMealPlanJob::dispatch($user, $model);
+        WorkflowStub::make(GenerateMealPlanWorkflow::class)
+            ->start($user, totalDays: 7, model: $model, initialDays: 1);
     }
 
     /**

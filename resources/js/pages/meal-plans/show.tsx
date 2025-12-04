@@ -1,4 +1,3 @@
-import GenerateMealDayController from '@/actions/App/Http/Controllers/GenerateMealDayController';
 import { OnboardingBanner } from '@/components/onboarding-banner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +18,7 @@ import {
     MealPlanGenerationStatus,
     Navigation,
 } from '@/types/meal-plan';
-import { Head, Link, router, usePoll } from '@inertiajs/react';
+import { Head, Link, usePoll } from '@inertiajs/react';
 import {
     Calendar,
     ChevronLeft,
@@ -29,7 +28,6 @@ import {
     Loader2,
     Sparkles,
 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 
 interface MealPlansProps {
     mealPlan: MealPlan | null;
@@ -62,76 +60,18 @@ export default function MealPlans({
     requiresSubscription = false,
 }: MealPlansProps) {
     const { currentUser } = useSharedProps();
-    const [isTriggering, setIsTriggering] = useState(false);
 
-    // Determine if we should poll for updates
-    const shouldPoll =
-        currentDay?.needs_generation &&
-        currentDay?.status === GenerationStatus.Generating;
-
-    // Poll for updates when generating
-    const { stop, start } = usePoll(
+    // Poll for updates when generation is in progress
+    // Generation is auto-triggered by the backend when viewing a pending day
+    usePoll(
         2000,
-        {},
+        { only: ['currentDay'] },
         {
-            autoStart: shouldPoll,
+            autoStart:
+                currentDay?.needs_generation &&
+                currentDay?.status === GenerationStatus.Generating,
         },
     );
-
-    // Effect to manage polling based on status
-    useEffect(() => {
-        if (shouldPoll) {
-            start();
-        } else {
-            stop();
-        }
-    }, [shouldPoll, start, stop]);
-
-    // Trigger generation when navigating to a day that needs it
-    const triggerGeneration = useCallback(async () => {
-        if (!mealPlan || !currentDay?.needs_generation || isTriggering) return;
-        if (currentDay.status === GenerationStatus.Generating) return;
-
-        setIsTriggering(true);
-        try {
-            await fetch(
-                GenerateMealDayController.url(mealPlan.id, {
-                    query: { day: currentDay.day_number },
-                }),
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN':
-                            document
-                                .querySelector('meta[name="csrf-token"]')
-                                ?.getAttribute('content') || '',
-                    },
-                },
-            );
-            // Refresh the page to get updated status
-            router.reload({ only: ['currentDay'] });
-        } catch (error) {
-            console.error('Failed to trigger generation:', error);
-        } finally {
-            setIsTriggering(false);
-        }
-    }, [mealPlan, currentDay, isTriggering]);
-
-    // Auto-trigger generation when viewing a day that needs it
-    useEffect(() => {
-        if (
-            currentDay?.needs_generation &&
-            currentDay?.status === GenerationStatus.Pending &&
-            !isTriggering
-        ) {
-            triggerGeneration();
-        }
-    }, [
-        currentDay?.day_number,
-        currentDay?.needs_generation,
-        currentDay?.status,
-    ]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -333,7 +273,7 @@ export default function MealPlans({
                                 {currentDay.needs_generation ? (
                                     <GeneratingMealsState
                                         status={currentDay.status}
-                                        onRetry={triggerGeneration}
+                                        dayNumber={currentDay.day_number}
                                     />
                                 ) : currentDay.meals.length === 0 ? (
                                     <Alert>
@@ -407,10 +347,13 @@ function CalorieComparison({ actual, target }: CalorieComparisonProps) {
 
 interface GeneratingMealsStateProps {
     status: MealPlanGenerationStatus;
-    onRetry: () => void;
+    dayNumber: number;
 }
 
-function GeneratingMealsState({ status, onRetry }: GeneratingMealsStateProps) {
+function GeneratingMealsState({
+    status,
+    dayNumber,
+}: GeneratingMealsStateProps) {
     if (status === GenerationStatus.Failed) {
         return (
             <Alert variant="destructive">
@@ -421,8 +364,15 @@ function GeneratingMealsState({ status, onRetry }: GeneratingMealsStateProps) {
                         We couldn't generate meals for this day. This might be a
                         temporary issue.
                     </p>
-                    <Button variant="outline" size="sm" onClick={onRetry}>
-                        Try Again
+                    <Button variant="outline" size="sm" asChild>
+                        <Link
+                            href={
+                                mealPlans.index({ query: { day: dayNumber } })
+                                    .url
+                            }
+                        >
+                            Try Again
+                        </Link>
                     </Button>
                 </AlertDescription>
             </Alert>

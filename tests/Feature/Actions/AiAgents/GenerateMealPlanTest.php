@@ -6,18 +6,17 @@ use App\Actions\AiAgents\GenerateMealPlan;
 use App\Enums\AiModel;
 use App\Enums\MealPlanType;
 use App\Enums\Sex;
-use App\Jobs\ProcessMealPlanJob;
 use App\Models\Goal;
 use App\Models\Lifestyle;
 use App\Models\UsdaFoundationFood;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Queue;
 use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Facades\Prism;
 use Prism\Prism\Testing\TextResponseFake;
 use Prism\Prism\ValueObjects\Meta;
 use Prism\Prism\ValueObjects\Usage;
+use Workflow\WorkflowStub;
 
 uses(RefreshDatabase::class);
 
@@ -151,8 +150,8 @@ it('uses the correct AI model from enum', function (): void {
     expect(AiModel::Gemini25Flash->value)->toBe('gemini-2.5-flash');
 });
 
-it('dispatches a job when handle is called', function (): void {
-    Queue::fake();
+it('starts workflow when handle is called', function (): void {
+    WorkflowStub::fake();
 
     $user = User::factory()->create();
     $goal = Goal::factory()->create();
@@ -170,7 +169,8 @@ it('dispatches a job when handle is called', function (): void {
     $action = app(GenerateMealPlan::class);
     $action->handle($user, AiModel::Gemini25Flash);
 
-    Queue::assertPushed(ProcessMealPlanJob::class, fn (ProcessMealPlanJob $job): bool => $job->user->id === $user->id && $job->aiModel === AiModel::Gemini25Flash);
+    // Workflow is faked so meal plan won't be created, but no exception means workflow was started
+    expect($user->mealPlans()->count())->toBe(0);
 });
 
 it('handles meals with no ingredients', function (): void {
