@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-enum JobStatus: string
+enum MealPlanGenerationStatus: string
 {
     case Pending = 'pending';
-    case Processing = 'processing';
+    case Generating = 'generating';
     case Completed = 'completed';
     case Failed = 'failed';
+    case Paused = 'paused';
 }

@@ -2,6 +2,21 @@ export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
 export type MealPlanType = 'weekly' | 'monthly' | 'custom';
 
+export type MealPlanGenerationStatus =
+    | 'pending'
+    | 'generating'
+    | 'completed'
+    | 'failed'
+    | 'paused';
+
+export const GenerationStatus = {
+    Pending: 'pending',
+    Generating: 'generating',
+    Completed: 'completed',
+    Failed: 'failed',
+    Paused: 'paused',
+} as const satisfies Record<string, MealPlanGenerationStatus>;
+
 export interface MacroPercentages {
     protein: number;
     carbs: number;
@@ -47,6 +62,8 @@ export interface DailyStats {
 export interface CurrentDay {
     day_number: number;
     day_name: string;
+    needs_generation: boolean;
+    status: MealPlanGenerationStatus;
     meals: Meal[];
     daily_stats: DailyStats;
 }

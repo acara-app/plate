@@ -11,16 +11,17 @@ use App\Http\Requests\StoreDietaryPreferencesRequest;
 use App\Http\Requests\StoreGoalsRequest;
 use App\Http\Requests\StoreHealthConditionsRequest;
 use App\Http\Requests\StoreLifestyleRequest;
-use App\Jobs\ProcessMealPlanJob;
 use App\Models\DietaryPreference;
 use App\Models\Goal;
 use App\Models\HealthCondition;
 use App\Models\Lifestyle;
 use App\Models\UserProfile;
+use App\Workflows\GenerateMealPlanWorkflow;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Workflow\WorkflowStub;
 
 final readonly class OnboardingController
 {
@@ -169,7 +170,8 @@ final readonly class OnboardingController
             'onboarding_completed_at' => now(),
         ]);
 
-        dispatch(new ProcessMealPlanJob($user->id, AiModel::Gemini25Flash));
+        WorkflowStub::make(GenerateMealPlanWorkflow::class)
+            ->start($user, totalDays: 7, model: AiModel::Gemini25Flash, initialDays: 1);
 
         return to_route('onboarding.completion.show');
     }

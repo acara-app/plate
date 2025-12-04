@@ -4,37 +4,35 @@ declare(strict_types=1);
 
 namespace App\Actions\AiAgents;
 
+use App\DataObjects\DayMealsData;
 use App\DataObjects\MealPlanData;
+use App\DataObjects\PreviousDayContext;
 use App\Enums\AiModel;
 use App\Enums\SettingKey;
-use App\Jobs\ProcessMealPlanJob;
-use App\Models\JobTracking;
 use App\Models\Setting;
 use App\Models\User;
-use App\Traits\Trackable;
 use App\Utilities\JsonCleaner;
-use Illuminate\Contracts\Bus\Dispatcher;
+use App\Workflows\GenerateMealPlanWorkflow;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Facades\Prism;
 use Prism\Prism\ValueObjects\ProviderTool;
+use Workflow\WorkflowStub;
 
-final class GenerateMealPlan
+final readonly class GenerateMealPlan
 {
-    use Trackable;
-
     public function __construct(
-        private readonly CreateMealPlanPrompt $createPrompt,
-        private readonly Dispatcher $dispatcher,
+        private CreateMealPlanPrompt $createPrompt,
     ) {}
 
-    public function handle(User $user, AiModel $model = AiModel::Gemini25Flash): JobTracking
+    public function handle(User $user, AiModel $model = AiModel::Gemini25Flash): void
     {
-        $job = new ProcessMealPlanJob($user->id, $model);
-        $this->dispatcher->dispatch($job);
-
-        return $this->initializeTracking($user->id, ProcessMealPlanJob::JOB_TYPE);
+        WorkflowStub::make(GenerateMealPlanWorkflow::class)
+            ->start($user, totalDays: 7, model: $model, initialDays: 1);
     }
 
+    /**
+     * Generate a complete multi-day meal plan (legacy method).
+     */
     public function generate(User $user, AiModel $model): MealPlanData
     {
         $prompt = $this->createPrompt->handle($user);
@@ -46,6 +44,32 @@ final class GenerateMealPlan
         $data = json_decode($cleanedJsonText, true, 512, JSON_THROW_ON_ERROR);
 
         return MealPlanData::from($data);
+    }
+
+    /**
+     * Generate meals for a single day.
+     */
+    public function generateForDay(
+        User $user,
+        int $dayNumber,
+        AiModel $model,
+        int $totalDays = 7,
+        ?PreviousDayContext $previousDaysContext = null,
+    ): DayMealsData {
+        $prompt = $this->createPrompt->handleForDay(
+            $user,
+            $dayNumber,
+            $totalDays,
+            $previousDaysContext,
+        );
+
+        $jsonText = $this->generateMealPlanJson($prompt, $model);
+
+        $cleanedJsonText = JsonCleaner::extractAndValidateJson($jsonText);
+
+        $data = json_decode($cleanedJsonText, true, 512, JSON_THROW_ON_ERROR);
+
+        return DayMealsData::from($data);
     }
 
     /**

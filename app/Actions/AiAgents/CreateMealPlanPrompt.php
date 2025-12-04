@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\AiAgents;
 
+use App\DataObjects\PreviousDayContext;
 use App\Models\DietaryPreference;
 use App\Models\HealthCondition;
 use App\Models\User;
@@ -17,7 +18,43 @@ final readonly class CreateMealPlanPrompt
         private AnalyzeGlucoseDataAction $analyzeGlucoseData,
     ) {}
 
+    /**
+     * Generate a prompt for multi-day meal plan generation (legacy).
+     */
     public function handle(User $user): string
+    {
+        $context = $this->buildContext($user);
+
+        return view('ai.agents.create-meal-plan', [
+            'context' => $context,
+        ])->render();
+    }
+
+    /**
+     * Generate a prompt for single-day meal plan generation.
+     */
+    public function handleForDay(
+        User $user,
+        int $dayNumber,
+        int $totalDays = 7,
+        ?PreviousDayContext $previousDaysContext = null,
+    ): string {
+        $context = $this->buildContext($user);
+
+        return view('ai.agents.create-day-meal-plan', [
+            'context' => $context,
+            'dayNumber' => $dayNumber,
+            'totalDays' => $totalDays,
+            'previousDaysContext' => $previousDaysContext?->toPromptText(),
+        ])->render();
+    }
+
+    /**
+     * Build the context array from user profile.
+     *
+     * @return array<string, mixed>
+     */
+    private function buildContext(User $user): array
     {
         $user->loadMissing([
             'profile.goal',
@@ -30,7 +67,7 @@ final readonly class CreateMealPlanPrompt
 
         throw_unless($profile instanceof UserProfile, RuntimeException::class, 'User profile is required to create a meal plan.');
 
-        $context = [
+        return [
             // Physical metrics
             'age' => $profile->age,
             'height' => $profile->height, // in cm
@@ -85,10 +122,6 @@ final readonly class CreateMealPlanPrompt
             // Glucose data analysis
             'glucoseAnalysis' => $this->analyzeGlucoseData->handle($user, 30),
         ];
-
-        return view('ai.agents.create-meal-plan', [
-            'context' => $context,
-        ])->render();
     }
 
     /**

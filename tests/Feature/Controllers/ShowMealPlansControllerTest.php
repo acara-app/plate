@@ -534,46 +534,46 @@ it('navigates between days with inertia', function (): void {
             ->where('currentDay.day_number', 2));
 });
 
-it('includes job tracking data when available', function (): void {
+it('returns day-specific status from metadata when available', function (): void {
     $user = User::factory()->create();
 
     $mealPlan = MealPlan::factory()
         ->weekly()
         ->for($user)
-        ->has(Meal::factory()->breakfast()->forDay(1), 'meals')
-        ->create();
-
-    $jobTracking = App\Models\JobTracking::factory()->create([
-        'user_id' => $user->id,
-        'job_type' => App\Jobs\ProcessMealPlanJob::JOB_TYPE,
-        'status' => App\Enums\JobStatus::Processing,
-        'progress' => 50,
-        'message' => 'Generating your meal plan...',
-    ]);
+        ->create([
+            'metadata' => [
+                'day_3_status' => 'generating',
+            ],
+        ]);
 
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.index', ['day' => 1]));
+        ->get(route('meal-plans.index', ['day' => 3]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->where('jobTracking.status', 'processing')
-            ->where('jobTracking.progress', 50)
-            ->where('jobTracking.message', 'Generating your meal plan...'));
+            ->where('currentDay.day_number', 3)
+            ->where('currentDay.status', 'generating'));
 });
 
-it('handles null job tracking gracefully', function (): void {
+it('returns generating status when overall plan is generating and day is empty', function (): void {
     $user = User::factory()->create();
 
     $mealPlan = MealPlan::factory()
         ->weekly()
         ->for($user)
-        ->has(Meal::factory()->breakfast()->forDay(1), 'meals')
-        ->create();
+        ->create([
+            'metadata' => [
+                'status' => 'generating',
+            ],
+        ]);
 
+    // Day 2 has no meals and no day-specific status
     $response = $this->actingAs($user)
-        ->get(route('meal-plans.index', ['day' => 1]));
+        ->get(route('meal-plans.index', ['day' => 2]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->where('jobTracking', null));
+            ->where('currentDay.day_number', 2)
+            ->where('currentDay.status', 'generating')
+            ->where('currentDay.needs_generation', true));
 });

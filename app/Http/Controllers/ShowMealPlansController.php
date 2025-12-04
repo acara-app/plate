@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Enums\JobStatus;
-use App\Jobs\ProcessMealPlanJob;
+use App\Enums\MealPlanGenerationStatus;
 use App\Models\Meal;
 use App\Models\MealPlan;
+use App\Workflows\GenerateSingleDayWorkflow;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Workflow\WorkflowStub;
 
 final class ShowMealPlansController
 {
@@ -28,36 +29,25 @@ final class ShowMealPlansController
             ->latest()
             ->first();
 
-        /** @var \App\Models\JobTracking|null $latestJobTracking */
-        $latestJobTracking = $user->jobTrackings()
-            ->where('job_type', ProcessMealPlanJob::JOB_TYPE)
-            ->whereIn('status', [JobStatus::Pending, JobStatus::Processing])
-            ->latest()
-            ->first();
-
         if (! $mealPlan) {
             return Inertia::render('meal-plans/show', [
                 'mealPlan' => null,
                 'currentDay' => null,
                 'navigation' => null,
-                'jobTracking' => $this->formatJobTracking($latestJobTracking),
                 'requiresSubscription' => false,
             ]);
         }
 
-        // Determine current day based on meal plan duration
         /** @var string $timezone */
         $timezone = $request->session()->get('timezone', 'UTC');
         $now = CarbonImmutable::now($timezone);
 
-        // Use day of week but constrain to meal plan duration
         $dayOfWeek = $now->dayOfWeekIso;
         $defaultDay = $dayOfWeek <= $mealPlan->duration_days ? $dayOfWeek : 1;
 
         $currentDayNumber = $request->integer('day', $defaultDay);
         $currentDayNumber = max(1, min($mealPlan->duration_days, $currentDayNumber));
 
-        // Load meals relationship
         $mealPlan->load(['meals' => function (mixed $query) use ($currentDayNumber): void {
             /** @var HasMany<Meal, MealPlan> $query */
             $query->where('day_number', $currentDayNumber)
@@ -68,7 +58,6 @@ final class ShowMealPlansController
         /** @var Collection<int, Meal> $dayMeals */
         $dayMeals = $mealPlan->meals;
 
-        // Calculate daily stats for current day
         $dailyStats = [
             'total_calories' => $dayMeals->sum('calories'),
             'protein' => $dayMeals->sum('protein_grams'),
@@ -76,7 +65,6 @@ final class ShowMealPlansController
             'fat' => $dayMeals->sum('fat_grams'),
         ];
 
-        // Calculate average macros for the plan
         $avgMacros = null;
         if ($mealPlan->macronutrient_ratios) {
             $avgMacros = $mealPlan->macronutrient_ratios;
@@ -110,9 +98,29 @@ final class ShowMealPlansController
             'created_at' => $mealPlan->created_at->toISOString(),
         ];
 
+        // Check if current day needs generation and auto-trigger if pending
+        $dayNeedsGeneration = $dayMeals->isEmpty();
+        $dayStatus = $this->getDayStatus($mealPlan, $currentDayNumber, $dayMeals->isEmpty());
+
+        // Auto-trigger generation for pending days
+        if ($dayNeedsGeneration && $dayStatus === MealPlanGenerationStatus::Pending->value) {
+            $mealPlan->update([
+                'metadata' => array_merge($mealPlan->metadata ?? [], [
+                    "day_{$currentDayNumber}_status" => MealPlanGenerationStatus::Generating->value,
+                ]),
+            ]);
+
+            WorkflowStub::make(GenerateSingleDayWorkflow::class)
+                ->start($mealPlan, $currentDayNumber);
+
+            $dayStatus = MealPlanGenerationStatus::Generating->value;
+        }
+
         $currentDay = [
             'day_number' => $currentDayNumber,
             'day_name' => $dayName,
+            'needs_generation' => $dayNeedsGeneration,
+            'status' => $dayStatus,
             'meals' => $dayMeals->map(fn (Meal $meal): array => [
                 'id' => $meal->id,
                 'type' => $meal->type->value,
@@ -131,7 +139,6 @@ final class ShowMealPlansController
             'daily_stats' => $dailyStats,
         ];
 
-        // Navigation info with looping
         $navigation = [
             'has_previous' => true, // Always enabled with looping
             'has_next' => true, // Always enabled with looping
@@ -144,27 +151,31 @@ final class ShowMealPlansController
             'mealPlan' => $formattedMealPlan,
             'currentDay' => $currentDay,
             'navigation' => $navigation,
-            'jobTracking' => $this->formatJobTracking($latestJobTracking),
-            'requiresSubscription' => ! $user->hasActiveSubscription(),
+            'requiresSubscription' => ! $user->is_verified,
         ]);
     }
 
     /**
-     * Format job tracking data for the frontend
-     *
-     * @param  \App\Models\JobTracking|null  $jobTracking
-     * @return array{status: string, progress: int, message: string|null}|null
+     * Get the generation status for a specific day.
      */
-    private function formatJobTracking(mixed $jobTracking): ?array
+    private function getDayStatus(MealPlan $mealPlan, int $dayNumber, bool $isEmpty): string
     {
-        if (! $jobTracking) {
-            return null;
+        /** @var array<string, mixed> $metadata */
+        $metadata = $mealPlan->metadata ?? [];
+
+        $dayStatusKey = "day_{$dayNumber}_status";
+        if (isset($metadata[$dayStatusKey]) && is_string($metadata[$dayStatusKey])) {
+            return $metadata[$dayStatusKey];
         }
 
-        return [
-            'status' => $jobTracking->status->value,
-            'progress' => (int) $jobTracking->progress,
-            'message' => $jobTracking->message,
-        ];
+        if (! $isEmpty) {
+            return MealPlanGenerationStatus::Completed->value;
+        }
+
+        if (($metadata['status'] ?? '') === MealPlanGenerationStatus::Generating->value) {
+            return MealPlanGenerationStatus::Generating->value;
+        }
+
+        return MealPlanGenerationStatus::Pending->value;
     }
 }

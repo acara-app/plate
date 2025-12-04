@@ -1,24 +1,31 @@
-import { JobProcessingStatus } from '@/components/job-processing-status';
 import { OnboardingBanner } from '@/components/onboarding-banner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
 import { MealCard } from '@/pages/meal-plans/elements/meal-card';
 import { NutritionStats } from '@/pages/meal-plans/elements/nutrition-stats';
 import checkout from '@/routes/checkout';
 import mealPlans from '@/routes/meal-plans';
-import { JobTracking, type BreadcrumbItem } from '@/types';
-import { CurrentDay, MealPlan, Navigation } from '@/types/meal-plan';
-import { Head, Link } from '@inertiajs/react';
+import { type BreadcrumbItem } from '@/types';
+import {
+    CurrentDay,
+    GenerationStatus,
+    MealPlan,
+    MealPlanGenerationStatus,
+    Navigation,
+} from '@/types/meal-plan';
+import { Head, Link, usePoll } from '@inertiajs/react';
 import {
     Calendar,
     ChevronLeft,
     ChevronRight,
     CrownIcon,
     Info,
+    Loader2,
     Sparkles,
 } from 'lucide-react';
 
@@ -26,7 +33,6 @@ interface MealPlansProps {
     mealPlan: MealPlan | null;
     currentDay: CurrentDay | null;
     navigation: Navigation | null;
-    jobTracking: JobTracking | null;
     requiresSubscription?: boolean;
 }
 
@@ -51,18 +57,19 @@ export default function MealPlans({
     mealPlan,
     currentDay,
     navigation,
-    jobTracking,
     requiresSubscription = false,
 }: MealPlansProps) {
     const { currentUser } = useSharedProps();
 
-    function isProcessingStatus(jobTracking: JobTracking | null): boolean {
-        return (
-            jobTracking !== null &&
-            (jobTracking.status === 'pending' ||
-                jobTracking.status === 'processing')
-        );
-    }
+    usePoll(
+        2000,
+        { only: ['currentDay'] },
+        {
+            autoStart:
+                currentDay?.needs_generation &&
+                currentDay?.status === GenerationStatus.Generating,
+        },
+    );
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -71,8 +78,6 @@ export default function MealPlans({
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
                 {!currentUser?.is_onboarded ? (
                     <OnboardingBanner />
-                ) : isProcessingStatus(jobTracking) ? (
-                    <JobProcessingStatus jobTracking={jobTracking} />
                 ) : requiresSubscription ? (
                     <>
                         <div className="space-y-2">
@@ -263,7 +268,12 @@ export default function MealPlans({
                                     Today's Meals
                                 </h3>
 
-                                {currentDay.meals.length === 0 ? (
+                                {currentDay.needs_generation ? (
+                                    <GeneratingMealsState
+                                        status={currentDay.status}
+                                        dayNumber={currentDay.day_number}
+                                    />
+                                ) : currentDay.meals.length === 0 ? (
                                     <Alert>
                                         <Info className="h-4 w-4" />
                                         <AlertDescription>
@@ -328,6 +338,85 @@ function CalorieComparison({ actual, target }: CalorieComparisonProps) {
             <div className="text-xs text-muted-foreground">
                 {diff > 0 ? '+' : ''}
                 {percentage}% vs target
+            </div>
+        </div>
+    );
+}
+
+interface GeneratingMealsStateProps {
+    status: MealPlanGenerationStatus;
+    dayNumber: number;
+}
+
+function GeneratingMealsState({
+    status,
+    dayNumber,
+}: GeneratingMealsStateProps) {
+    if (status === GenerationStatus.Failed) {
+        return (
+            <Alert variant="destructive">
+                <Info className="h-4 w-4" />
+                <AlertTitle>Generation Failed</AlertTitle>
+                <AlertDescription className="space-y-3">
+                    <p>
+                        We couldn't generate meals for this day. This might be a
+                        temporary issue.
+                    </p>
+                    <Button variant="outline" size="sm" asChild>
+                        <Link
+                            href={
+                                mealPlans.index({ query: { day: dayNumber } })
+                                    .url
+                            }
+                        >
+                            Try Again
+                        </Link>
+                    </Button>
+                </AlertDescription>
+            </Alert>
+        );
+    }
+
+    return (
+        <div className="space-y-4">
+            <Alert className="border-primary/30 bg-primary/5">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <AlertTitle className="text-primary">
+                    Generating Your Meals
+                </AlertTitle>
+                <AlertDescription className="text-muted-foreground">
+                    Our AI is crafting personalized meals for this day based on
+                    your preferences and nutritional goals. This usually takes
+                    30-60 seconds.
+                </AlertDescription>
+            </Alert>
+
+            {/* Skeleton cards */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3, 4].map((i) => (
+                    <MealCardSkeleton key={i} />
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function MealCardSkeleton() {
+    return (
+        <div className="rounded-lg border bg-card p-4 shadow-sm">
+            <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <Skeleton className="h-5 w-20" />
+                    <Skeleton className="h-4 w-16" />
+                </div>
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+                <div className="flex gap-2 pt-2">
+                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-8 w-16" />
+                </div>
             </div>
         </div>
     );

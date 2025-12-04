@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c3ebcfbb5bbd45cc3067e32d64b81f43",
+    "content-hash": "17b5e8a4c65bc8405c60eee1a5045c57",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1544,16 +1544,16 @@
         },
         {
             "name": "laravel-workflow/laravel-workflow",
-            "version": "1.0.42",
+            "version": "1.0.47",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel-workflow/laravel-workflow.git",
-                "reference": "95a9967db6fadf78b3a3aa3fc3d77d47c2eae487"
+                "reference": "0ef988933326fa7538d3bcf6199674bdcc75eb63"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel-workflow/laravel-workflow/zipball/95a9967db6fadf78b3a3aa3fc3d77d47c2eae487",
-                "reference": "95a9967db6fadf78b3a3aa3fc3d77d47c2eae487",
+                "url": "https://api.github.com/repos/laravel-workflow/laravel-workflow/zipball/0ef988933326fa7538d3bcf6199674bdcc75eb63",
+                "reference": "0ef988933326fa7538d3bcf6199674bdcc75eb63",
                 "shasum": ""
             },
             "require": {
@@ -1593,9 +1593,68 @@
             "description": "Durable workflow engine that allows users to write long running persistent distributed workflows (orchestrations) in PHP powered by Laravel queues.",
             "support": {
                 "issues": "https://github.com/laravel-workflow/laravel-workflow/issues",
-                "source": "https://github.com/laravel-workflow/laravel-workflow/tree/1.0.42"
+                "source": "https://github.com/laravel-workflow/laravel-workflow/tree/1.0.47"
             },
-            "time": "2025-11-26T17:45:41+00:00"
+            "time": "2025-12-02T16:34:17+00:00"
+        },
+        {
+            "name": "laravel-workflow/waterline",
+            "version": "1.0.14",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel-workflow/waterline.git",
+                "reference": "03e60f83d73fd1edaa8c0d2f3d3d1511ce2f6a57"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel-workflow/waterline/zipball/03e60f83d73fd1edaa8c0d2f3d3d1511ce2f6a57",
+                "reference": "03e60f83d73fd1edaa8c0d2f3d3d1511ce2f6a57",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^9.0|^10.0|^11.0|^12.0",
+                "laravel-workflow/laravel-workflow": "^1.0",
+                "php": "^8.0.2"
+            },
+            "require-dev": {
+                "fakerphp/faker": "^1.9.1",
+                "mockery/mockery": "^1.4.4",
+                "orchestra/testbench": "^7.29",
+                "orchestra/workbench": "^7.29",
+                "phpunit/phpunit": "^9.5.10"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Waterline": "Waterline\\Waterline"
+                    },
+                    "providers": [
+                        "Waterline\\WaterlineServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Waterline\\": "app/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Richard McDaniel",
+                    "email": "richard.lee.mcdaniel@gmail.com"
+                }
+            ],
+            "description": "An elegant UI for monitoring Laravel Workflows.",
+            "support": {
+                "issues": "https://github.com/laravel-workflow/waterline/issues",
+                "source": "https://github.com/laravel-workflow/waterline/tree/1.0.14"
+            },
+            "time": "2025-10-27T04:40:59+00:00"
         },
         {
             "name": "laravel/cashier",
