@@ -111,3 +111,71 @@ test('is_verified returns true when user has active subscription', function (): 
 
     expect($user->fresh()->is_verified)->toBeTrue();
 });
+
+test('prunable returns users without verified email older than 30 days', function (): void {
+    $oldUnverifiedUser = User::factory()->create([
+        'email_verified_at' => null,
+        'created_at' => now()->subDays(31),
+    ]);
+
+    User::factory()->create([
+        'email_verified_at' => null,
+        'created_at' => now()->subDays(29),
+    ]);
+
+    User::factory()->create([
+        'email_verified_at' => now()->subDays(31),
+        'created_at' => now()->subDays(31),
+    ]);
+
+    $prunableUsers = new User()->prunable()->get();
+
+    expect($prunableUsers)
+        ->toHaveCount(1)
+        ->first()->id->toBe($oldUnverifiedUser->id);
+});
+
+test('prunable method returns correct query builder instance', function (): void {
+    $user = new User();
+
+    $prunableQuery = $user->prunable();
+
+    expect($prunableQuery)->toBeInstanceOf(Illuminate\Database\Eloquent\Builder::class);
+});
+
+test('prunable filters out verified users', function (): void {
+    User::factory()->create([
+        'email_verified_at' => null,
+        'created_at' => now()->subDays(31),
+    ]);
+
+    User::factory()->create([
+        'email_verified_at' => now()->subDay(),
+        'created_at' => now()->subDays(31),
+    ]);
+
+    $prunableUsers = new User()->prunable()->get();
+
+    expect($prunableUsers)->toHaveCount(1);
+});
+
+test('prunable filters out recent unverified users', function (): void {
+
+    $recentUser = User::factory()->create([
+        'email_verified_at' => null,
+        'created_at' => now()->subDays(29),
+    ]);
+
+    $oldUser = User::factory()->create([
+        'email_verified_at' => null,
+        'created_at' => now()->subDays(31),
+    ]);
+
+    $prunableUsers = new User()->prunable()->get();
+
+    $ourPrunableUsers = $prunableUsers->whereIn('id', [$recentUser->id, $oldUser->id]);
+
+    expect($ourPrunableUsers)
+        ->toHaveCount(1)
+        ->first()->id->toBe($oldUser->id);
+});
