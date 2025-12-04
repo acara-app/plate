@@ -15,14 +15,10 @@ final class CreateMealPlanActivity extends Activity
 
     public $timeout = 30;
 
-    /**
-     * Create an empty meal plan record that will be populated incrementally.
-     */
     public function execute(User $user, int $totalDays): MealPlan
     {
         $mealPlanType = GenerateMealPlanWorkflow::getMealPlanType($totalDays);
 
-        // Delete old meal plans of the same type
         $user->mealPlans()
             ->where('type', $mealPlanType)
             ->delete();
