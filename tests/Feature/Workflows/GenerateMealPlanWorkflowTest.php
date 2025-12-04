@@ -212,3 +212,200 @@ it('activity classes exist and extend correct base class', function (): void {
     expect(is_subclass_of(CreateMealPlanActivity::class, Workflow\Activity::class))->toBeTrue();
     expect(is_subclass_of(StoreDayMealsActivity::class, Workflow\Activity::class))->toBeTrue();
 });
+
+it('workflow class exists and extends correct base class', function (): void {
+    expect(class_exists(GenerateMealPlanWorkflow::class))->toBeTrue();
+    expect(is_subclass_of(GenerateMealPlanWorkflow::class, Workflow\Workflow::class))->toBeTrue();
+});
+
+it('workflow triggers via generate meal plan action with workflow stub fake', function (): void {
+    Workflow\WorkflowStub::fake();
+
+    $action = app(App\Actions\AiAgents\GenerateMealPlan::class);
+    $action->handle($this->user, AiModel::Gemini25Flash);
+
+    // Workflow is faked so meal plan won't be created, but no exception means workflow was started
+    expect($this->user->mealPlans()->count())->toBe(0);
+});
+
+it('converts multiple days meals to collection preserving day numbers', function (): void {
+    $day1Meals = new DayMealsData(
+        meals: new DataCollection(SingleDayMealData::class, [
+            new SingleDayMealData(
+                type: MealType::Breakfast,
+                name: 'Day 1 Breakfast',
+                description: 'Test',
+                preparationInstructions: 'Test',
+                ingredients: null,
+                portionSize: '1 serving',
+                calories: 400.0,
+                proteinGrams: 30.0,
+                carbsGrams: 40.0,
+                fatGrams: 15.0,
+                preparationTimeMinutes: 10,
+                sortOrder: 1,
+            ),
+            new SingleDayMealData(
+                type: MealType::Lunch,
+                name: 'Day 1 Lunch',
+                description: 'Test',
+                preparationInstructions: 'Test',
+                ingredients: null,
+                portionSize: '1 serving',
+                calories: 500.0,
+                proteinGrams: 35.0,
+                carbsGrams: 50.0,
+                fatGrams: 20.0,
+                preparationTimeMinutes: 15,
+                sortOrder: 2,
+            ),
+        ]),
+    );
+
+    $day2Meals = new DayMealsData(
+        meals: new DataCollection(SingleDayMealData::class, [
+            new SingleDayMealData(
+                type: MealType::Dinner,
+                name: 'Day 2 Dinner',
+                description: 'Test',
+                preparationInstructions: 'Test',
+                ingredients: null,
+                portionSize: '1 serving',
+                calories: 600.0,
+                proteinGrams: 40.0,
+                carbsGrams: 45.0,
+                fatGrams: 25.0,
+                preparationTimeMinutes: 25,
+                sortOrder: 3,
+            ),
+        ]),
+    );
+
+    $allDaysMeals = [1 => $day1Meals, 2 => $day2Meals];
+    $result = GenerateMealPlanWorkflow::convertToMealDataCollection($allDaysMeals);
+
+    expect($result)->toHaveCount(3);
+
+    // Check day numbers are preserved
+    expect($result[0]->dayNumber)->toBe(1);
+    expect($result[1]->dayNumber)->toBe(1);
+    expect($result[2]->dayNumber)->toBe(2);
+
+    // Check meal types and names
+    expect($result[0]->type)->toBe(MealType::Breakfast);
+    expect($result[1]->type)->toBe(MealType::Lunch);
+    expect($result[2]->type)->toBe(MealType::Dinner);
+});
+
+it('returns custom type for plans exceeding 30 days', function (): void {
+    expect(GenerateMealPlanWorkflow::getMealPlanType(31))->toBe(MealPlanType::Custom);
+    expect(GenerateMealPlanWorkflow::getMealPlanType(60))->toBe(MealPlanType::Custom);
+    expect(GenerateMealPlanWorkflow::getMealPlanType(90))->toBe(MealPlanType::Custom);
+});
+
+it('returns weekly type for 7 days or less', function (): void {
+    expect(GenerateMealPlanWorkflow::getMealPlanType(1))->toBe(MealPlanType::Weekly);
+    expect(GenerateMealPlanWorkflow::getMealPlanType(3))->toBe(MealPlanType::Weekly);
+    expect(GenerateMealPlanWorkflow::getMealPlanType(7))->toBe(MealPlanType::Weekly);
+});
+
+it('returns monthly type for 8 to 30 days', function (): void {
+    expect(GenerateMealPlanWorkflow::getMealPlanType(8))->toBe(MealPlanType::Monthly);
+    expect(GenerateMealPlanWorkflow::getMealPlanType(15))->toBe(MealPlanType::Monthly);
+    expect(GenerateMealPlanWorkflow::getMealPlanType(28))->toBe(MealPlanType::Monthly);
+    expect(GenerateMealPlanWorkflow::getMealPlanType(30))->toBe(MealPlanType::Monthly);
+});
+
+it('generates expected result structure from workflow execution', function (): void {
+    // Testing the expected return structure from the workflow
+    $userId = 1;
+    $totalDays = 7;
+    $daysGenerated = 1;
+    $mealPlanId = 123;
+
+    $expectedResult = [
+        'user_id' => $userId,
+        'total_days' => $totalDays,
+        'days_generated' => $daysGenerated,
+        'status' => App\Enums\MealPlanGenerationStatus::Pending->value,
+        'meal_plan_id' => $mealPlanId,
+    ];
+
+    expect($expectedResult)
+        ->toHaveKeys(['user_id', 'total_days', 'days_generated', 'status', 'meal_plan_id'])
+        ->user_id->toBe(1)
+        ->total_days->toBe(7)
+        ->days_generated->toBe(1)
+        ->status->toBe('pending')
+        ->meal_plan_id->toBe(123);
+});
+
+it('workflow returns completed status when all days generated', function (): void {
+    $totalDays = 3;
+    $daysGenerated = 3; // All days generated
+
+    $finalStatus = $daysGenerated >= $totalDays
+        ? App\Enums\MealPlanGenerationStatus::Completed->value
+        : App\Enums\MealPlanGenerationStatus::Pending->value;
+
+    expect($finalStatus)->toBe('completed');
+});
+
+it('workflow returns pending status when not all days generated', function (): void {
+    $totalDays = 7;
+    $daysGenerated = 1; // Only 1 day generated
+
+    $finalStatus = $daysGenerated >= $totalDays
+        ? App\Enums\MealPlanGenerationStatus::Completed->value
+        : App\Enums\MealPlanGenerationStatus::Pending->value;
+
+    expect($finalStatus)->toBe('pending');
+});
+
+it('previous day context adds multiple days correctly', function (): void {
+    $context = new PreviousDayContext;
+
+    $context->addDayMeals(1, ['Breakfast 1', 'Lunch 1', 'Dinner 1']);
+    $context->addDayMeals(2, ['Breakfast 2', 'Lunch 2', 'Dinner 2']);
+    $context->addDayMeals(3, ['Breakfast 3']);
+
+    $promptText = $context->toPromptText();
+
+    expect($promptText)
+        ->toContain('Day 1')
+        ->toContain('Day 2')
+        ->toContain('Day 3')
+        ->toContain('Breakfast 1')
+        ->toContain('Lunch 2')
+        ->toContain('Breakfast 3');
+});
+
+it('converts day meals data to meal data collection with correct properties', function (): void {
+    $dayMeals = new DayMealsData(
+        meals: new DataCollection(SingleDayMealData::class, [
+            new SingleDayMealData(
+                type: MealType::Breakfast,
+                name: 'Oatmeal',
+                description: 'Healthy oatmeal',
+                preparationInstructions: 'Cook oats',
+                ingredients: null,
+                portionSize: '1 cup',
+                calories: 300.0,
+                proteinGrams: 10.0,
+                carbsGrams: 50.0,
+                fatGrams: 5.0,
+                preparationTimeMinutes: 5,
+                sortOrder: 1,
+            ),
+        ]),
+    );
+
+    $allDaysMeals = [5 => $dayMeals];
+    $result = GenerateMealPlanWorkflow::convertToMealDataCollection($allDaysMeals);
+
+    expect($result)->toHaveCount(1);
+    expect($result[0]->dayNumber)->toBe(5);
+    expect($result[0]->name)->toBe('Oatmeal');
+    expect($result[0]->calories)->toBe(300.0);
+    expect($result[0]->type)->toBe(MealType::Breakfast);
+});

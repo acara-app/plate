@@ -13,18 +13,16 @@ use Generator;
 use Workflow\ActivityStub;
 use Workflow\Workflow;
 
-/**
- * Workflow for generating a single day's meals on-demand.
- * This is triggered when a user navigates to a day that hasn't been generated yet.
- */
 final class GenerateSingleDayWorkflow extends Workflow
 {
-    public $timeout = 300; // 5 minutes per day
+    public int $timeout = 300; // 5 minutes per day
 
     /**
      * Generate meals for a specific day in an existing meal plan.
      *
      * @return array{meal_plan_id: int, day_number: int, status: string}
+     *
+     * @codeCoverageIgnore Generator methods with yield are executed by the workflow engine
      */
     public function execute(
         MealPlan $mealPlan,

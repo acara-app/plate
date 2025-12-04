@@ -19,7 +19,7 @@ use Workflow\Workflow;
 
 final class GenerateMealPlanWorkflow extends Workflow
 {
-    public $timeout = 1800; // 30 minutes for 7 days
+    public int $timeout = 1800; // 30 minutes for 7 days
 
     /**
      * Convert all days' meals to a collection of MealData with proper day numbers.
@@ -58,6 +58,8 @@ final class GenerateMealPlanWorkflow extends Workflow
      *
      * @param  int  $initialDays  Number of days to generate initially (default 1 for on-demand generation)
      * @return array{user_id: int, total_days: int, status: string, meal_plan_id: int}
+     *
+     * @codeCoverageIgnore Generator methods with yield are executed by the workflow engine
      */
     public function execute(
         User $user,

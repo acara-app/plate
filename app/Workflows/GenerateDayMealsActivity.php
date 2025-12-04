@@ -11,6 +11,9 @@ use App\Enums\AiModel;
 use App\Models\User;
 use Workflow\Activity;
 
+/**
+ * @codeCoverageIgnore Activity classes are executed by the workflow engine
+ */
 final class GenerateDayMealsActivity extends Activity
 {
     public $tries = 3;

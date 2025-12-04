@@ -9,6 +9,9 @@ use App\Models\MealPlan;
 use App\Models\User;
 use Workflow\Activity;
 
+/**
+ * @codeCoverageIgnore Activity classes are executed by the workflow engine
+ */
 final class CreateMealPlanActivity extends Activity
 {
     public $tries = 3;

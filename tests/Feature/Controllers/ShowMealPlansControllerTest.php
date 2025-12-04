@@ -533,3 +533,47 @@ it('navigates between days with inertia', function (): void {
         ->assertInertia(fn ($page) => $page
             ->where('currentDay.day_number', 2));
 });
+
+it('returns day-specific status from metadata when available', function (): void {
+    $user = User::factory()->create();
+
+    $mealPlan = MealPlan::factory()
+        ->weekly()
+        ->for($user)
+        ->create([
+            'metadata' => [
+                'day_3_status' => 'generating',
+            ],
+        ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('meal-plans.index', ['day' => 3]));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('currentDay.day_number', 3)
+            ->where('currentDay.status', 'generating'));
+});
+
+it('returns generating status when overall plan is generating and day is empty', function (): void {
+    $user = User::factory()->create();
+
+    $mealPlan = MealPlan::factory()
+        ->weekly()
+        ->for($user)
+        ->create([
+            'metadata' => [
+                'status' => 'generating',
+            ],
+        ]);
+
+    // Day 2 has no meals and no day-specific status
+    $response = $this->actingAs($user)
+        ->get(route('meal-plans.index', ['day' => 2]));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('currentDay.day_number', 2)
+            ->where('currentDay.status', 'generating')
+            ->where('currentDay.needs_generation', true));
+});

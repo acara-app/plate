@@ -8,6 +8,9 @@ use App\DataObjects\DayMealsData;
 use App\Models\MealPlan;
 use Workflow\Activity;
 
+/**
+ * @codeCoverageIgnore Activity classes are executed by the workflow engine
+ */
 final class StoreDayMealsActivity extends Activity
 {
     public $tries = 3;

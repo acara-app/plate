@@ -61,8 +61,6 @@ export default function MealPlans({
 }: MealPlansProps) {
     const { currentUser } = useSharedProps();
 
-    // Poll for updates when generation is in progress
-    // Generation is auto-triggered by the backend when viewing a pending day
     usePoll(
         2000,
         { only: ['currentDay'] },

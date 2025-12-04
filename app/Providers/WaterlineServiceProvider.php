@@ -14,8 +14,8 @@ final class WaterlineServiceProvider extends WaterlineApplicationServiceProvider
      *
      * This gate determines who can access Waterline in non-local environments.
      */
-    protected function gate(): void
+    public function gate(): void
     {
-        Gate::define('viewWaterline', fn ($user): bool => in_array($user->email, config()->array('sponsors.admin_emails')));
+        Gate::define('viewWaterline', fn (\App\Models\User $user): bool => in_array($user->email, config()->array('sponsors.admin_emails')));
     }
 }
