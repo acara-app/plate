@@ -34,10 +34,8 @@ final class GenerateSingleDayWorkflow extends Workflow
         $user = $mealPlan->user;
         $totalDays = $mealPlan->duration_days;
 
-        // Build context from previously generated days
         $previousDaysContext = $this->buildPreviousDaysContext($mealPlan, $dayNumber);
 
-        // Generate meals for this day using the existing activity
         /** @var DayMealsData $dayMeals */
         $dayMeals = yield ActivityStub::make(
             GenerateDayMealsActivity::class,
@@ -48,7 +46,6 @@ final class GenerateSingleDayWorkflow extends Workflow
             $previousDaysContext,
         );
 
-        // Store meals using the existing activity
         yield ActivityStub::make(
             StoreDayMealsActivity::class,
             $mealPlan,
@@ -56,7 +53,6 @@ final class GenerateSingleDayWorkflow extends Workflow
             $dayNumber,
         );
 
-        // Update metadata
         $daysCompleted = max(
             $mealPlan->metadata['days_completed'] ?? 0,
             $dayNumber
@@ -85,14 +81,10 @@ final class GenerateSingleDayWorkflow extends Workflow
         ];
     }
 
-    /**
-     * Build context from previously generated days for meal variety.
-     */
     private function buildPreviousDaysContext(MealPlan $mealPlan, int $currentDay): PreviousDayContext
     {
         $context = new PreviousDayContext;
 
-        // Get meals from days before the current one
         $previousMeals = $mealPlan->meals()
             ->where('day_number', '<', $currentDay)
             ->orderBy('day_number')
