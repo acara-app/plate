@@ -9,9 +9,6 @@ use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 
-/**
- * DTO for a single meal without day_number (set programmatically by workflow).
- */
 final class SingleDayMealData extends Data
 {
     /**
