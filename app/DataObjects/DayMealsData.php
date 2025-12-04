@@ -10,10 +10,6 @@ use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 
-/**
- * DTO for single-day meals generation response from LLM.
- * Meals do not include day_number as it will be set programmatically.
- */
 #[MapInputName(SnakeCaseMapper::class)]
 final class DayMealsData extends Data
 {
