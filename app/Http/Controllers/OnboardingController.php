@@ -170,7 +170,6 @@ final readonly class OnboardingController
             'onboarding_completed_at' => now(),
         ]);
 
-        // Start meal plan generation workflow directly
         WorkflowStub::make(GenerateMealPlanWorkflow::class)
             ->start($user, totalDays: 7, model: AiModel::Gemini25Flash, initialDays: 1);
 
