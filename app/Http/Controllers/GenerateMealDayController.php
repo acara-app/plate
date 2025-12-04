@@ -22,9 +22,7 @@ final readonly class GenerateMealDayController
 
     public function __invoke(Request $request, MealPlan $mealPlan): JsonResponse
     {
-        if ($mealPlan->user_id !== $this->user->id) {
-            abort(403);
-        }
+        abort_if($mealPlan->user_id !== $this->user->id, 403);
 
         $dayNumber = $request->integer('day', 1);
 

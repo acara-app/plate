@@ -18,10 +18,10 @@ use Prism\Prism\Facades\Prism;
 use Prism\Prism\ValueObjects\ProviderTool;
 use Workflow\WorkflowStub;
 
-final class GenerateMealPlan
+final readonly class GenerateMealPlan
 {
     public function __construct(
-        private readonly CreateMealPlanPrompt $createPrompt,
+        private CreateMealPlanPrompt $createPrompt,
     ) {}
 
     public function handle(User $user, AiModel $model = AiModel::Gemini25Flash): void
