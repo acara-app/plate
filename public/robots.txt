@@ -1,2 +1,4 @@
 User-agent: *
 Disallow:
+
+Sitemap: https://plate.acara.app/sitemap.xml
