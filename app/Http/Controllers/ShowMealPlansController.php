@@ -160,10 +160,11 @@ final class ShowMealPlansController
      */
     private function getDayStatus(MealPlan $mealPlan, int $dayNumber, bool $isEmpty): string
     {
+        /** @var array<string, mixed> $metadata */
         $metadata = $mealPlan->metadata ?? [];
 
         $dayStatusKey = "day_{$dayNumber}_status";
-        if (isset($metadata[$dayStatusKey])) {
+        if (isset($metadata[$dayStatusKey]) && is_string($metadata[$dayStatusKey])) {
             return $metadata[$dayStatusKey];
         }
 

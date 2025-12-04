@@ -13,8 +13,10 @@ use Workflow\Activity;
  */
 final class StoreDayMealsActivity extends Activity
 {
+    /** @var int */
     public $tries = 3;
 
+    /** @var int */
     public $timeout = 30;
 
     /**

@@ -57,7 +57,6 @@ final class GenerateMealPlanWorkflow extends Workflow
      * Each day's meals are stored immediately after generation for better UX.
      *
      * @param  int  $initialDays  Number of days to generate initially (default 1 for on-demand generation)
-     * @return array{user_id: int, total_days: int, status: string, meal_plan_id: int}
      *
      * @codeCoverageIgnore Generator methods with yield are executed by the workflow engine
      */
@@ -101,6 +100,7 @@ final class GenerateMealPlanWorkflow extends Workflow
             );
 
             // Update context for next day's variety
+            /** @var array<string> $mealNames */
             $mealNames = $dayMeals->meals->toCollection()->pluck('name')->toArray();
             $previousDaysContext->addDayMeals($dayNumber, $mealNames);
 

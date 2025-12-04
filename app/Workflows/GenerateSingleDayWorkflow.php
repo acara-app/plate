@@ -20,8 +20,6 @@ final class GenerateSingleDayWorkflow extends Workflow
     /**
      * Generate meals for a specific day in an existing meal plan.
      *
-     * @return array{meal_plan_id: int, day_number: int, status: string}
-     *
      * @codeCoverageIgnore Generator methods with yield are executed by the workflow engine
      */
     public function execute(
@@ -58,7 +56,6 @@ final class GenerateSingleDayWorkflow extends Workflow
 
         $isCompleted = $daysCompleted >= $totalDays;
 
-        // Clear the day-specific generating status and update overall status
         $metadata = $mealPlan->metadata ?? [];
         unset($metadata["day_{$dayNumber}_status"]);
 
@@ -90,6 +87,7 @@ final class GenerateSingleDayWorkflow extends Workflow
             ->groupBy('day_number');
 
         foreach ($previousMeals as $dayNumber => $meals) {
+            /** @var array<string> $mealNames */
             $mealNames = $meals->pluck('name')->toArray();
             $context->addDayMeals($dayNumber, $mealNames);
         }

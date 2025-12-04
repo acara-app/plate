@@ -14,8 +14,10 @@ use Workflow\Activity;
  */
 final class CreateMealPlanActivity extends Activity
 {
+    /** @var int */
     public $tries = 3;
 
+    /** @var int */
     public $timeout = 30;
 
     public function execute(User $user, int $totalDays): MealPlan

@@ -16,8 +16,10 @@ use Workflow\Activity;
  */
 final class GenerateDayMealsActivity extends Activity
 {
+    /** @var int */
     public $tries = 3;
 
+    /** @var int */
     public $timeout = 300; // 5 minutes per day
 
     public function execute(
