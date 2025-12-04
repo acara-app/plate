@@ -32,6 +32,13 @@
                     >Install App</a
                 >
             </div>
+            <div class="pb-6">
+                <a
+                    href="{{ route('diabetes-log-book-info') }}"
+                    class="text-sm leading-6 dark:text-slate-400 text-slate-500 dark:hover:text-slate-200 hover:text-slate-950"
+                    >Diabetes Log Book</a
+                >
+            </div>
         </nav>
 
         <div class="mt-10 flex space-x-10 sm:justify-center">
