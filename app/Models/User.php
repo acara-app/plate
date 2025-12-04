@@ -8,6 +8,7 @@ use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -41,7 +42,7 @@ final class User extends Authenticatable implements MustVerifyEmail
     /**
      * @use HasFactory<UserFactory>
      */
-    use Billable, HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use Billable, HasFactory, Notifiable, Prunable, TwoFactorAuthenticatable;
 
     protected $appends = [
         'is_onboarded',
@@ -62,6 +63,14 @@ final class User extends Authenticatable implements MustVerifyEmail
         'two_factor_secret',
         'two_factor_recovery_codes',
     ];
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder<self>
+     */
+    public function prunable(): \Illuminate\Database\Eloquent\Builder
+    {
+        return $this->whereNull('email_verified_at')->where('created_at', '<=', now()->subDays(30));
+    }
 
     /**
      * @return array<string, string>
