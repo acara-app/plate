@@ -44,13 +44,14 @@
 
         <main
             class="relative z-10 flex w-full flex-col items-center justify-center gap-6 opacity-100 transition-opacity duration-700 lg:grow lg:gap-8 starting:opacity-0">
-            <section aria-label="Hero" class="flex w-full max-w-[380px] flex-col-reverse gap-0 lg:max-w-5xl lg:flex-row lg:gap-8">
+            <section aria-label="Hero"
+                class="flex w-full max-w-[380px] flex-col-reverse gap-0 lg:max-w-5xl lg:flex-row lg:gap-8">
                 <div
                     class="group flex-1 rounded-b-2xl bg-white/90 p-5 shadow-2xl shadow-emerald-500/10 backdrop-blur-md transition-all duration-500 hover:shadow-emerald-500/20 lg:rounded-2xl lg:p-12 lg:pr-16 dark:bg-slate-900/90 dark:shadow-emerald-500/5 dark:hover:shadow-emerald-500/10">
                     <div class="space-y-4 lg:space-y-6">
                         <h1
                             class="text-3xl font-bold leading-tight tracking-tight text-slate-900 lg:text-5xl dark:text-white">
-                             Your Personalized AI Nutrition Agent for
+                            Your Personalized AI Nutrition Agent for
                             <span
                                 class="bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-400">
                                 Optimal Health
@@ -58,7 +59,8 @@
                         </h1>
 
                         <p class="text-base leading-relaxed text-slate-600 lg:text-lg dark:text-slate-300">
-                            Personalized meal plans that adapt to your glucose patterns — designed for adults with Type 2 diabetes or prediabetes as an informational tool.
+                            Personalized meal plans that adapt to your glucose patterns — designed for adults with Type
+                            2 diabetes or prediabetes as an informational tool.
                         </p>
 
                         <div
@@ -96,7 +98,7 @@
                     </div>
                 </div>
 
-                <div
+                <div aria-hidden="true"
                     class="relative mb-0 aspect-4/3 w-full shrink-0 overflow-hidden rounded-t-2xl bg-linear-to-br from-emerald-100 via-teal-50 to-cyan-100 shadow-2xl shadow-emerald-500/10 lg:mb-0 lg:aspect-auto lg:w-[480px] lg:rounded-2xl dark:from-emerald-950 dark:via-teal-950 dark:to-cyan-950 dark:shadow-emerald-500/5">
                     {{-- Decorative circles --}}
                     <div
@@ -114,7 +116,7 @@
                     </div>
 
                     {{-- Floating nutrition elements --}}
-                    <div aria-hidden="true" class="absolute inset-0 flex items-center justify-center p-4 lg:p-8">
+                    <div class="absolute inset-0 flex items-center justify-center p-4 lg:p-8">
                         <div class="relative h-full w-full">
                             {{-- Animated floating cards - mobile optimized --}}
                             <div
@@ -352,15 +354,19 @@
                             class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
-                                <span>How accurate are the nutritional values in meal plans?</span>
-                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                <h3 class="inline">How accurate are the nutritional values in meal plans?</h3>
+                                <svg aria-hidden="true" class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
                                 </svg>
                             </summary>
                             <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
-                                Acara Plate uses AI-generated meal plans with carefully selected ingredients from the USDA FoodData Central database. We strive for accuracy by leveraging established nutritional data sources. However, since meal plans are AI-generated, we recommend verifying key nutritional information and consulting with your healthcare provider for personalized dietary guidance.
+                                Acara Plate uses AI-generated meal plans with carefully selected ingredients from the
+                                USDA FoodData Central database. We strive for accuracy by leveraging established
+                                nutritional data sources. However, since meal plans are AI-generated, we recommend
+                                verifying key nutritional information and consulting with your healthcare provider for
+                                personalized dietary guidance.
                             </p>
                         </details>
 
@@ -368,15 +374,18 @@
                             class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
-                                <span>Can AI hallucinate incorrect food information?</span>
-                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                <h3 class="inline">Can AI hallucinate incorrect food information?</h3>
+                                <svg aria-hidden="true" class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
                                 </svg>
                             </summary>
                             <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
-                                Yes, AI can occasionally hallucinate or generate incorrect information about food, ingredients, or nutritional values. This is a known limitation of language models. We recommend always verifying key ingredients for allergens and consulting your healthcare provider before making significant dietary changes based on meal plan suggestions.
+                                Yes, AI can occasionally hallucinate or generate incorrect information about food,
+                                ingredients, or nutritional values. This is a known limitation of language models. We
+                                recommend always verifying key ingredients for allergens and consulting your healthcare
+                                provider before making significant dietary changes based on meal plan suggestions.
                             </p>
                         </details>
 
@@ -384,8 +393,8 @@
                             class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
-                                <span>Is this a medical app or diagnostic tool?</span>
-                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                <h3 class="inline">Is this a medical app or diagnostic tool?</h3>
+                                <svg aria-hidden="true" class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
@@ -404,8 +413,8 @@
                             class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
-                                <span>Why is Acara Plate open source?</span>
-                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                <h3 class="inline">Why is Acara Plate open source?</h3>
+                                <svg aria-hidden="true" class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
@@ -425,8 +434,8 @@
                             class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
-                                <span>How do you ensure nutritional accuracy?</span>
-                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                <h3 class="inline">How do you ensure nutritional accuracy?</h3>
+                                <svg aria-hidden="true" class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
@@ -434,7 +443,11 @@
                             </summary>
                             <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
                                 We reference the <a href="https://fdc.nal.usda.gov/" target="_blank"
-                                    class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">USDA FoodData Central</a> database—the scientific gold standard for nutrition of whole foods like bananas, chicken breast, and rice. However, as meal plans are AI-generated, we recommend verifying nutritional information independently and consulting with your healthcare provider for personalized guidance.
+                                    class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">USDA
+                                    FoodData Central</a> database—the scientific gold standard for nutrition of whole
+                                foods like bananas, chicken breast, and rice. However, as meal plans are AI-generated,
+                                we recommend verifying nutritional information independently and consulting with your
+                                healthcare provider for personalized guidance.
                             </p>
                         </details>
 
@@ -442,8 +455,8 @@
                             class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
-                                <span>Who should use Plate?</span>
-                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                <h3 class="inline">Who should use Plate?</h3>
+                                <svg aria-hidden="true" class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
@@ -462,15 +475,20 @@
                             class="group rounded-xl border border-slate-200 bg-white/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-emerald-800 dark:hover:bg-slate-800">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
-                                <span>Is there a mobile app?</span>
-                                <svg class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
+                                <h3 class="inline">Is there a mobile app?</h3>
+                                <svg aria-hidden="true" class="mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
                                 </svg>
                             </summary>
                             <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
-                                Yes! Acara Plate is a Progressive Web App (PWA), which means you can install it directly on your device without visiting an app store. Visit our <a href="{{ route('install-app') }}" class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">installation guide</a> to learn how to add it to your home screen for a native app-like experience.
+                                Yes! Acara Plate is a Progressive Web App (PWA), which means you can install it directly
+                                on your device without visiting an app store. Visit our <a
+                                    href="{{ route('install-app') }}"
+                                    class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">installation
+                                    guide</a> to learn how to add it to your home screen for a native app-like
+                                experience.
                             </p>
                         </details>
                     </div>
