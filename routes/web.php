@@ -20,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', [Web\DashboardController::class, 'show'])->name('dashboard');
 
     Route::get('meal-plans', Web\ShowMealPlansController::class)->name('meal-plans.index');
+    Route::get('meal-plans/{mealPlan}/print', Web\PrintMealPlanController::class)->name('meal-plans.print');
     Route::post('meal-plans/{mealPlan}/generate-day', Web\GenerateMealDayController::class)->name('meal-plans.generate-day');
 
     Route::get('chat/create', [Web\ChatController::class, 'create'])->name('chat.create');
