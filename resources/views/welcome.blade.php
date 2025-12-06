@@ -3,7 +3,7 @@
         class="relative flex min-h-screen flex-col items-center overflow-hidden from-emerald-50 via-white to-teal-50 p-4 text-slate-900 lg:justify-center lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950 dark:text-slate-50">
 
         {{-- Animated background elements --}}
-        <div class="pointer-events-none absolute inset-0 overflow-hidden">
+        <div aria-hidden="true" class="pointer-events-none absolute inset-0 overflow-hidden">
             <div
                 class="absolute -left-4 top-0 h-72 w-72 animate-pulse rounded-full bg-emerald-300/20 blur-3xl dark:bg-emerald-500/10">
             </div>
@@ -42,9 +42,9 @@
             </nav>
         </header>
 
-        <div
+        <main
             class="relative z-10 flex w-full flex-col items-center justify-center gap-6 opacity-100 transition-opacity duration-700 lg:grow lg:gap-8 starting:opacity-0">
-            <main class="flex w-full max-w-[380px] flex-col-reverse gap-0 lg:max-w-5xl lg:flex-row lg:gap-8">
+            <section aria-label="Hero" class="flex w-full max-w-[380px] flex-col-reverse gap-0 lg:max-w-5xl lg:flex-row lg:gap-8">
                 <div
                     class="group flex-1 rounded-b-2xl bg-white/90 p-5 shadow-2xl shadow-emerald-500/10 backdrop-blur-md transition-all duration-500 hover:shadow-emerald-500/20 lg:rounded-2xl lg:p-12 lg:pr-16 dark:bg-slate-900/90 dark:shadow-emerald-500/5 dark:hover:shadow-emerald-500/10">
                     <div class="space-y-4 lg:space-y-6">
@@ -114,7 +114,7 @@
                     </div>
 
                     {{-- Floating nutrition elements --}}
-                    <div class="absolute inset-0 flex items-center justify-center p-4 lg:p-8">
+                    <div aria-hidden="true" class="absolute inset-0 flex items-center justify-center p-4 lg:p-8">
                         <div class="relative h-full w-full">
                             {{-- Animated floating cards - mobile optimized --}}
                             <div
@@ -246,7 +246,7 @@
                         </div>
                     </div>
                 </div>
-            </main>
+            </section>
 
             {{-- Features Section --}}
             <section class="w-full max-w-[335px] lg:max-w-5xl">
@@ -505,7 +505,7 @@
                     </div>
                 </div>
             </section>
-        </div>
+        </main>
     </div>
     <x-footer />
 
