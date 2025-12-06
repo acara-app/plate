@@ -26,6 +26,7 @@ import {
     CrownIcon,
     Info,
     Loader2,
+    Printer,
     Sparkles,
 } from 'lucide-react';
 
@@ -164,53 +165,61 @@ export default function MealPlans({
                                     )}
                                 </div>
 
-                                {/* Day Navigation */}
+                                {/* Actions */}
                                 <div className="flex items-center gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        asChild
-                                    >
-                                        <Link
+                                    <Button variant="outline" size="sm" asChild>
+                                        <a
                                             href={
-                                                mealPlans.index({
-                                                    query: {
-                                                        day: navigation.previous_day,
-                                                    },
-                                                }).url
+                                                mealPlans.print(mealPlan.id).url
                                             }
-                                            preserveScroll
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                         >
-                                            <ChevronLeft className="h-4 w-4" />
-                                        </Link>
-                                    </Button>
-
-                                    <div className="min-w-[120px] text-center">
-                                        <div className="text-xs text-muted-foreground">
-                                            Day {currentDay.day_number} of{' '}
-                                            {navigation.total_days}
-                                        </div>
-                                    </div>
-
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        asChild
-                                    >
-                                        <Link
-                                            href={
-                                                mealPlans.index({
-                                                    query: {
-                                                        day: navigation.next_day,
-                                                    },
-                                                }).url
-                                            }
-                                            preserveScroll
-                                        >
-                                            <ChevronRight className="h-4 w-4" />
-                                        </Link>
+                                            <Printer className="mr-2 h-4 w-4" />
+                                            Print
+                                        </a>
                                     </Button>
                                 </div>
+                            </div>
+
+                            {/* Day Navigation */}
+                            <div className="flex items-center justify-center gap-2">
+                                <Button variant="outline" size="icon" asChild>
+                                    <Link
+                                        href={
+                                            mealPlans.index({
+                                                query: {
+                                                    day: navigation.previous_day,
+                                                },
+                                            }).url
+                                        }
+                                        preserveScroll
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Link>
+                                </Button>
+
+                                <div className="min-w-[120px] text-center">
+                                    <div className="text-xs text-muted-foreground">
+                                        Day {currentDay.day_number} of{' '}
+                                        {navigation.total_days}
+                                    </div>
+                                </div>
+
+                                <Button variant="outline" size="icon" asChild>
+                                    <Link
+                                        href={
+                                            mealPlans.index({
+                                                query: {
+                                                    day: navigation.next_day,
+                                                },
+                                            }).url
+                                        }
+                                        preserveScroll
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Link>
+                                </Button>
                             </div>
 
                             <Separator />
