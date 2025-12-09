@@ -4,18 +4,12 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\DataObjects\MealPlanContext\DietaryPreferenceData;
-use App\DataObjects\MealPlanContext\HealthConditionData;
-use App\DataObjects\MealPlanContext\LifestyleData;
 use App\DataObjects\MealPlanContext\MacronutrientRatiosData;
 use App\DataObjects\MealPlanContext\MealPlanContextData;
 use App\DataObjects\PreviousDayContext;
-use App\Models\DietaryPreference;
-use App\Models\HealthCondition;
 use App\Models\User;
 use App\Models\UserProfile;
 use RuntimeException;
-use Spatie\LaravelData\DataCollection;
 
 final readonly class MealPlanPromptBuilder
 {
@@ -72,61 +66,15 @@ final readonly class MealPlanPromptBuilder
          */
         $profile = $user->profile;
 
-        return new MealPlanContextData(
-            // Physical metrics
-            age: $profile->age,
-            height: $profile->height,
-            weight: $profile->weight,
-            sex: $profile->sex?->value,
-            bmi: $profile->calculateBMI(),
-            bmr: $profile->calculateBMR(),
-            tdee: $profile->calculateTDEE(),
-
-            // Goals
-            goal: $profile->goal?->name,
-            targetWeight: $profile->target_weight,
-            additionalGoals: $profile->additional_goals,
-
-            // Lifestyle
-            lifestyle: $profile->lifestyle ? new LifestyleData(
-                name: $profile->lifestyle->name,
-                activityLevel: $profile->lifestyle->activity_level,
-                sleepHours: $profile->lifestyle->sleep_hours,
-                occupation: $profile->lifestyle->occupation,
-                description: $profile->lifestyle->description,
-                activityMultiplier: $profile->lifestyle->activity_multiplier,
-            ) : null,
-
-            // Dietary preferences
-            dietaryPreferences: new DataCollection(
-                DietaryPreferenceData::class,
-                $profile->dietaryPreferences->map(fn (DietaryPreference $pref): DietaryPreferenceData => new DietaryPreferenceData(
-                    name: $pref->name,
-                    type: $pref->type,
-                    description: $pref->description,
-                ))->toArray(),
-            ),
-
-            // Health conditions
-            healthConditions: new DataCollection(
-                HealthConditionData::class,
-                $profile->healthConditions->map(fn (HealthCondition $condition): HealthConditionData => new HealthConditionData(
-                    name: $condition->name,
-                    description: $condition->description,
-                    nutritionalImpact: $condition->nutritional_impact,
-                    recommendedNutrients: $condition->recommended_nutrients,
-                    nutrientsToLimit: $condition->nutrients_to_limit,
-                    notes: $condition->pivot?->notes,
-                ))->toArray(),
-            ),
-
-            // Calculated values
-            dailyCalorieTarget: $this->calculateDailyCalorieTarget($profile),
-            macronutrientRatios: $this->calculateMacronutrientRatios($profile),
-
-            // Glucose data analysis
-            glucoseAnalysis: $this->glucoseDataAnalyzer->handle($user, 30),
-        );
+        return MealPlanContextData::from([
+            ...$profile->toArray(),
+            'lifestyle' => $profile->lifestyle,
+            'dietary_preferences' => $profile->dietaryPreferences,
+            'health_conditions' => $profile->healthConditions,
+            'daily_calorie_target' => $this->calculateDailyCalorieTarget($profile),
+            'macronutrient_ratios' => $this->calculateMacronutrientRatios($profile),
+            'glucose_analysis' => $this->glucoseDataAnalyzer->handle($user, 30),
+        ]);
     }
 
     /**
@@ -134,7 +82,7 @@ final readonly class MealPlanPromptBuilder
      */
     private function calculateDailyCalorieTarget(UserProfile $profile): ?float
     {
-        $tdee = $profile->calculateTDEE();
+        $tdee = $profile->tdee;
 
         if (! $tdee || ! $profile->goal) {
             return null;

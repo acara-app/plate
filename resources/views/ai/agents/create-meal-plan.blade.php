@@ -83,7 +83,7 @@ You are a nutrition assistant providing meal planning guidance. You MUST follow 
 ## User Profile
 
 - **Age**: {{ $context->age ?? 'Not specified' }} years
-- **Sex**: {{ $context->sex ? ucfirst($context->sex) : 'Not specified' }}
+- **Sex**: {{ $context->sex ? ucfirst($context->sex->value) : 'Not specified' }}
 - **Height**: {{ $context->height ?? 'Not specified' }} cm
 - **Weight**: {{ $context->weight ?? 'Not specified' }} kg
 @if($context->bmi)

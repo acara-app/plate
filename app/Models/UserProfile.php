@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\Sex;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,11 +30,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property-read User $user
  * @property-read Goal|null $goal
  * @property-read Lifestyle|null $lifestyle
+ * @property-read string|null $goal_name
+ * @property-read float|null $bmi
+ * @property-read float|null $bmr
+ * @property-read float|null $tdee
  */
 final class UserProfile extends Model
 {
     /** @use HasFactory<\Database\Factories\UserProfileFactory> */
     use HasFactory;
+
+    /**
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'goal_name',
+        'bmi',
+        'bmr',
+        'tdee',
+    ];
 
     /**
      * @return array<string, string>
@@ -104,43 +119,64 @@ final class UserProfile extends Model
         )->using(UserProfileHealthCondition::class)->withPivot('notes')->withTimestamps();
     }
 
-    public function calculateBMI(): ?float
+    /**
+     * @return Attribute<string|null, never>
+     */
+    protected function goalName(): Attribute
     {
-        if ($this->height && $this->weight) {
-            $heightInMeters = $this->height / 100;
-
-            return round($this->weight / ($heightInMeters * $heightInMeters), 2);
-        }
-
-        return null;
+        return Attribute::get(fn (): ?string => $this->goal?->name);
     }
 
-    public function calculateBMR(): ?float
+    /**
+     * @return Attribute<float|null, never>
+     */
+    protected function bmi(): Attribute
     {
-        if (! $this->weight || ! $this->height || ! $this->age || ! $this->sex) {
+        return Attribute::get(function (): ?float {
+            if ($this->height && $this->weight) {
+                $heightInMeters = $this->height / 100;
+
+                return round($this->weight / ($heightInMeters * $heightInMeters), 2);
+            }
+
             return null;
-        }
-
-        // Mifflin-St Jeor Equation
-        $bmr = (10 * $this->weight) + (6.25 * $this->height) - (5 * $this->age);
-
-        if ($this->sex === Sex::Male) {
-            $bmr += 5;
-        } elseif ($this->sex === Sex::Female) {
-            $bmr -= 161;
-        }
-
-        return round($bmr, 2);
+        });
     }
 
-    public function calculateTDEE(): ?float
+    /**
+     * @return Attribute<float|null, never>
+     */
+    protected function bmr(): Attribute
     {
-        $bmr = $this->calculateBMR();
+        return Attribute::get(function (): ?float {
+            if (! $this->weight || ! $this->height || ! $this->age || ! $this->sex) {
+                return null;
+            }
 
-        if (! $bmr || ! $this->lifestyle) {
-            return null;
-        }
+            // Mifflin-St Jeor Equation
+            $bmr = (10 * $this->weight) + (6.25 * $this->height) - (5 * $this->age);
 
-        return round($bmr * $this->lifestyle->activity_multiplier, 2);
+            if ($this->sex === Sex::Male) {
+                $bmr += 5;
+            } elseif ($this->sex === Sex::Female) {
+                $bmr -= 161;
+            }
+
+            return round($bmr, 2);
+        });
+    }
+
+    /**
+     * @return Attribute<float|null, never>
+     */
+    protected function tdee(): Attribute
+    {
+        return Attribute::get(function (): ?float {
+            if (! $this->bmr || ! $this->lifestyle) {
+                return null;
+            }
+
+            return round($this->bmr * $this->lifestyle->activity_multiplier, 2);
+        });
     }
 }

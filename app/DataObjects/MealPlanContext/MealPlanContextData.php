@@ -5,30 +5,33 @@ declare(strict_types=1);
 namespace App\DataObjects\MealPlanContext;
 
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
-use Spatie\LaravelData\Attributes\DataCollectionOf;
+use App\Enums\Sex;
+use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\MapOutputName;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Mappers\CamelCaseMapper;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 
+#[MapInputName(SnakeCaseMapper::class)]
 #[MapOutputName(CamelCaseMapper::class)]
 final class MealPlanContextData extends Data
 {
     /**
-     * @param  DataCollection<int, DietaryPreferenceData>  $dietaryPreferences
-     * @param  DataCollection<int, HealthConditionData>  $healthConditions
+     * @param  array<DietaryPreferenceData>  $dietaryPreferences
+     * @param  array<HealthConditionData>  $healthConditions
      */
     public function __construct(
         // Physical metrics
         public ?int $age,
         public ?float $height,
         public ?float $weight,
-        public ?string $sex,
+        public ?Sex $sex,
         public ?float $bmi,
         public ?float $bmr,
         public ?float $tdee,
 
         // Goals
+        #[MapInputName('goal_name')]
         public ?string $goal,
         public ?float $targetWeight,
         public ?string $additionalGoals,
@@ -37,12 +40,10 @@ final class MealPlanContextData extends Data
         public ?LifestyleData $lifestyle,
 
         // Dietary preferences
-        #[DataCollectionOf(DietaryPreferenceData::class)]
-        public DataCollection $dietaryPreferences,
+        public array $dietaryPreferences,
 
         // Health conditions
-        #[DataCollectionOf(HealthConditionData::class)]
-        public DataCollection $healthConditions,
+        public array $healthConditions,
 
         // Calculated values
         public ?float $dailyCalorieTarget,
