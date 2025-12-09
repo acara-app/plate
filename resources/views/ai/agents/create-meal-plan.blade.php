@@ -20,7 +20,7 @@ You are a nutrition assistant providing meal planning guidance. You MUST follow 
     }
 @endphp
 
-@if($hasDiabetes || $hasPrediabetes || $context->glucoseAnalysis->hasData)
+@if($hasDiabetes || $hasPrediabetes || $context->glucoseAnalysis?->hasData)
 **⚠️ DIABETES/GLUCOSE MANAGEMENT ACTIVE - STRICT RULES APPLY:**
 
 1. **FORBIDDEN HIGH-GI FOODS**: You are STRICTLY FORBIDDEN from suggesting foods with a Glycemic Index (GI) over 70 without explicit warnings. This includes:
