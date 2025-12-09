@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Enums\AiModel;
 use App\Enums\Sex;
 use App\Http\Requests\StoreBiometricsRequest;
 use App\Http\Requests\StoreDietaryPreferencesRequest;
@@ -171,7 +170,7 @@ final readonly class OnboardingController
         ]);
 
         WorkflowStub::make(GenerateMealPlanWorkflow::class)
-            ->start($user, totalDays: 7, model: AiModel::Gemini25Flash, initialDays: 1);
+            ->start($user, totalDays: 7);
 
         return to_route('onboarding.completion.show');
     }

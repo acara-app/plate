@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Actions\AiAgents\GenerateMealPlan;
-use App\Enums\AiModel;
 use App\Enums\MealPlanType;
 use App\Enums\Sex;
 use App\Models\Goal;
@@ -93,7 +92,7 @@ it('generates a meal plan using PrismPHP', function (): void {
     Prism::fake([$fakeResponse]);
 
     $action = app(GenerateMealPlan::class);
-    $mealPlanData = $action->generate($user, AiModel::Gemini25Flash);
+    $mealPlanData = $action->generate($user);
 
     expect($mealPlanData)
         ->type->toBe(MealPlanType::Weekly)
@@ -144,10 +143,9 @@ it('uses the correct AI model from enum', function (): void {
     Prism::fake([$fakeResponse]);
 
     $action = app(GenerateMealPlan::class);
-    $result = $action->generate($user, AiModel::Gemini25Flash);
+    $result = $action->generate($user);
 
     expect($result)->not->toBeNull();
-    expect(AiModel::Gemini25Flash->value)->toBe('gemini-2.5-flash');
 });
 
 it('starts workflow when handle is called', function (): void {
@@ -167,7 +165,7 @@ it('starts workflow when handle is called', function (): void {
     ]);
 
     $action = app(GenerateMealPlan::class);
-    $action->handle($user, AiModel::Gemini25Flash);
+    $action->handle($user);
 
     // Workflow is faked so meal plan won't be created, but no exception means workflow was started
     expect($user->mealPlans()->count())->toBe(0);
@@ -238,7 +236,7 @@ it('handles meals with no ingredients', function (): void {
     Prism::fake([$fakeResponse]);
 
     $action = app(GenerateMealPlan::class);
-    $mealPlanData = $action->generate($user, AiModel::Gemini25Flash);
+    $mealPlanData = $action->generate($user);
 
     expect($mealPlanData->meals)->toHaveCount(2);
     expect($mealPlanData->meals[0]->ingredients)->toBeInstanceOf(Spatie\LaravelData\DataCollection::class);
@@ -280,7 +278,7 @@ it('works without file search store configured', function (): void {
     Prism::fake([$fakeResponse]);
 
     $action = app(GenerateMealPlan::class);
-    $mealPlanData = $action->generate($user, AiModel::Gemini25Flash);
+    $mealPlanData = $action->generate($user);
 
     expect($mealPlanData)
         ->type->toBe(MealPlanType::Weekly)
@@ -323,7 +321,7 @@ it('uses file search store when configured', function (): void {
     Prism::fake([$fakeResponse]);
 
     $action = app(GenerateMealPlan::class);
-    $mealPlanData = $action->generate($user, AiModel::Gemini25Flash);
+    $mealPlanData = $action->generate($user);
 
     expect($mealPlanData)
         ->type->toBe(MealPlanType::Weekly)

@@ -6,7 +6,6 @@ use App\DataObjects\DayMealsData;
 use App\DataObjects\MealData;
 use App\DataObjects\PreviousDayContext;
 use App\DataObjects\SingleDayMealData;
-use App\Enums\AiModel;
 use App\Enums\MealPlanType;
 use App\Enums\MealType;
 use App\Enums\Sex;
@@ -190,7 +189,6 @@ it('generates day meals using activity with mocked prism', function (): void {
     $result = $action->generateForDay(
         $this->user,
         dayNumber: 1,
-        model: AiModel::Gemini25Flash,
         totalDays: 7,
         previousDaysContext: new PreviousDayContext,
     );
@@ -222,7 +220,7 @@ it('workflow triggers via generate meal plan action with workflow stub fake', fu
     Workflow\WorkflowStub::fake();
 
     $action = app(App\Actions\AiAgents\GenerateMealPlan::class);
-    $action->handle($this->user, AiModel::Gemini25Flash);
+    $action->handle($this->user);
 
     // Workflow is faked so meal plan won't be created, but no exception means workflow was started
     expect($this->user->mealPlans()->count())->toBe(0);
