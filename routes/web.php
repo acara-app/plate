@@ -23,6 +23,12 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('meal-plans/{mealPlan}/print', Web\PrintMealPlanController::class)->name('meal-plans.print');
     Route::post('meal-plans/{mealPlan}/generate-day', Web\GenerateMealDayController::class)->name('meal-plans.generate-day');
 
+    // Grocery List...
+    Route::get('meal-plans/{mealPlan}/grocery-list', [Web\GroceryListController::class, 'show'])->name('meal-plans.grocery-list.show');
+    Route::post('meal-plans/{mealPlan}/grocery-list', [Web\GroceryListController::class, 'store'])->name('meal-plans.grocery-list.store');
+    Route::get('meal-plans/{mealPlan}/grocery-list/print', Web\PrintGroceryListController::class)->name('meal-plans.grocery-list.print');
+    Route::patch('grocery-items/{groceryItem}/toggle', [Web\GroceryListController::class, 'toggleItem'])->name('grocery-items.toggle');
+
     Route::get('chat/create', [Web\ChatController::class, 'create'])->name('chat.create');
 
     Route::get('ongoing-tracking/food-log/create', [Web\FoodLogController::class, 'create'])->name('food-log.create');
