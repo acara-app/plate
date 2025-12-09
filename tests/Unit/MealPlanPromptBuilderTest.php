@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\CreateMealPlanPrompt;
+use App\Ai\Agents\MealPlanPromptBuilder;
 use App\Enums\ReadingType;
 use App\Enums\Sex;
 use App\Models\GlucoseReading;
@@ -43,8 +43,8 @@ it('includes glucose analysis in the prompt when glucose data exists', function 
         'measured_at' => now()->subDays(2),
     ]);
 
-    $action = app(CreateMealPlanPrompt::class);
-    $prompt = $action->handle($user);
+    $builder = app(MealPlanPromptBuilder::class);
+    $prompt = $builder->handle($user);
 
     expect($prompt)
         ->toContain('Glucose Monitoring Data')
@@ -72,8 +72,8 @@ it('includes message when no glucose data exists', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $action = app(CreateMealPlanPrompt::class);
-    $prompt = $action->handle($user);
+    $builder = app(MealPlanPromptBuilder::class);
+    $prompt = $builder->handle($user);
 
     expect($prompt)
         ->toContain('Glucose Monitoring Data')
@@ -117,8 +117,8 @@ it('includes glucose concerns when post-meal spikes are detected', function (): 
         ]);
     }
 
-    $action = app(CreateMealPlanPrompt::class);
-    $prompt = $action->handle($user);
+    $builder = app(MealPlanPromptBuilder::class);
+    $prompt = $builder->handle($user);
 
     expect($prompt)
         ->toContain('Post-Meal Spikes')

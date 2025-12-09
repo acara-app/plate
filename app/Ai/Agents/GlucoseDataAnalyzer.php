@@ -21,7 +21,7 @@ use App\Models\User;
 use App\Services\GlucoseStatisticsService;
 use Illuminate\Support\Collection;
 
-final readonly class AnalyzeGlucoseDataAction
+final readonly class GlucoseDataAnalyzer
 {
     public function __construct(private GlucoseStatisticsService $statistics)
     {

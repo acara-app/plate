@@ -12,10 +12,10 @@ use App\Models\UserProfile;
 use Illuminate\Support\Collection;
 use RuntimeException;
 
-final readonly class CreateMealPlanPrompt
+final readonly class MealPlanPromptBuilder
 {
     public function __construct(
-        private AnalyzeGlucoseDataAction $analyzeGlucoseData,
+        private GlucoseDataAnalyzer $glucoseDataAnalyzer,
     ) {}
 
     /**
@@ -120,7 +120,7 @@ final readonly class CreateMealPlanPrompt
             'macronutrientRatios' => $this->calculateMacronutrientRatios($profile),
 
             // Glucose data analysis
-            'glucoseAnalysis' => $this->analyzeGlucoseData->handle($user, 30),
+            'glucoseAnalysis' => $this->glucoseDataAnalyzer->handle($user, 30),
         ];
     }
 

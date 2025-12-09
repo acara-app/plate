@@ -18,10 +18,10 @@ use Prism\Prism\Enums\Provider;
 use Prism\Prism\ValueObjects\ProviderTool;
 use Workflow\WorkflowStub;
 
-final class GenerateMealPlanAgent extends BaseAgent
+final class MealPlanGeneratorAgent extends BaseAgent
 {
     public function __construct(
-        private readonly CreateMealPlanPrompt $createPrompt,
+        private readonly MealPlanPromptBuilder $promptBuilder,
     ) {}
 
     public function provider(): Provider
@@ -111,7 +111,7 @@ final class GenerateMealPlanAgent extends BaseAgent
      */
     public function generate(User $user): MealPlanData
     {
-        $prompt = $this->createPrompt->handle($user);
+        $prompt = $this->promptBuilder->handle($user);
 
         $jsonText = $this->generateMealPlanJson($prompt);
 
@@ -131,7 +131,7 @@ final class GenerateMealPlanAgent extends BaseAgent
         int $totalDays = 7,
         ?PreviousDayContext $previousDaysContext = null,
     ): DayMealsData {
-        $prompt = $this->createPrompt->handleForDay(
+        $prompt = $this->promptBuilder->handleForDay(
             $user,
             $dayNumber,
             $totalDays,

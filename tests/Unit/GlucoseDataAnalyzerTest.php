@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\AnalyzeGlucoseDataAction;
+use App\Ai\Agents\GlucoseDataAnalyzer;
 use App\Enums\ReadingType;
 use App\Models\GlucoseReading;
 use App\Models\User;
@@ -15,11 +15,11 @@ beforeEach(function (): void {
     $user = User::factory()->create();
     $this->user = $user;
     actingAs($user);
-    $this->action = new AnalyzeGlucoseDataAction(new GlucoseStatisticsService);
+    $this->analyzer = new GlucoseDataAnalyzer(new GlucoseStatisticsService);
 });
 
 it('returns empty analysis when no glucose readings exist', function (): void {
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result)
         ->hasData->toBeFalse()
@@ -59,7 +59,7 @@ it('calculates average glucose levels correctly', function (): void {
         'measured_at' => now()->subDays(1),
     ]);
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result)
         ->hasData->toBeTrue()
@@ -80,7 +80,7 @@ it('detects consistently high glucose pattern', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->patterns->consistentlyHigh)->toBeTrue()
         ->and($result->timeInRange->abovePercentage)->toBeGreaterThan(50)
@@ -126,7 +126,7 @@ it('detects post-meal spikes pattern', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->patterns->postMealSpikes)->toBeTrue()
         ->and($result->concerns)->toContain('Frequent post-meal glucose spikes detected, suggesting sensitivity to certain carbohydrate sources')
@@ -146,7 +146,7 @@ it('detects high variability pattern', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->patterns->highVariability)->toBeTrue()
         ->and($result->variability->stdDev)->toBeGreaterThan(30);
@@ -179,7 +179,7 @@ it('only analyzes readings within specified time period', function (): void {
         'measured_at' => now()->subDays(5),
     ]);
 
-    $result = $this->action->handle($this->user, 30);
+    $result = $this->analyzer->handle($this->user, 30);
 
     expect($result)
         ->totalReadings->toBe(1)
@@ -197,7 +197,7 @@ it('provides default recommendations when glucose is well controlled', function 
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->glucoseGoals->target)->toBe('Maintain current glucose control')
         ->and($result->glucoseGoals->reasoning)->toContain('good control');
@@ -214,7 +214,7 @@ it('detects consistently low glucose pattern', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->patterns->consistentlyLow)->toBeTrue()
         ->and($result->timeInRange->belowPercentage)->toBeGreaterThan(10)
@@ -248,7 +248,7 @@ it('classifies low fasting glucose correctly', function (): void {
         'measured_at' => now()->subDays(2),
     ]);
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->averages->fasting)->toBe(62.5)
         ->and($result->insights)->toContain('Average fasting glucose: 62.5 mg/dL (low)');
@@ -265,7 +265,7 @@ it('identifies concern for high fasting glucose', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->concerns)->toContain('Elevated fasting glucose ('.$result->averages->fasting.' mg/dL) may be influenced by evening eating patterns');
 });
@@ -286,7 +286,7 @@ it('classifies elevated fasting glucose correctly', function (): void {
         'measured_at' => now()->subDays(2),
     ]);
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->insights)->toContain('Average fasting glucose: 112.5 mg/dL (elevated)');
 });
@@ -307,7 +307,7 @@ it('classifies high fasting glucose correctly', function (): void {
         'measured_at' => now()->subDays(2),
     ]);
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->averages->fasting)->toBe(135.0);
 
@@ -338,7 +338,7 @@ it('classifies elevated post-meal glucose correctly', function (): void {
         'measured_at' => now()->subDays(2),
     ]);
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     // Check that post-meal average is calculated and classified as elevated
     expect($result->averages->postMeal)->toBe(155.0);
@@ -363,7 +363,7 @@ it('handles single glucose reading correctly', function (): void {
         'measured_at' => now()->subDays(1),
     ]);
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->hasData)->toBeTrue()
         ->and($result->totalReadings)->toBe(1)
@@ -401,7 +401,7 @@ it('calculates time in range percentages correctly', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->timeInRange->percentage)->toBe(50.0)
         ->and($result->timeInRange->abovePercentage)->toBe(30.0)
@@ -422,7 +422,7 @@ it('detects rising glucose trend', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->trend->direction)->toBe('rising')
         ->and($result->trend->slopePerWeek)->toBeGreaterThan(0);
@@ -449,7 +449,7 @@ it('detects falling glucose trend', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->trend->direction)->toBe('falling')
         ->and($result->trend->slopePerWeek)->toBeLessThan(0);
@@ -466,7 +466,7 @@ it('detects stable glucose trend', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->trend->direction)->toBe('stable');
 });
@@ -510,7 +510,7 @@ it('analyzes time of day patterns correctly', function (): void {
         'measured_at' => now()->setTime(23, 0)->subDays(1),
     ]);
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->timeOfDay->morning->count)->toBe(2)
         ->and($result->timeOfDay->morning->average)->toBe(95.0)
@@ -549,7 +549,7 @@ it('analyzes reading type frequency correctly', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->readingTypes)->toHaveKey('fasting')
         ->and($result->readingTypes['fasting']->count)->toBe(5)
@@ -571,7 +571,7 @@ it('calculates coefficient of variation correctly', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->variability->coefficientOfVariation)->toBeGreaterThan(0)
         ->and($result->variability->classification)->toBeIn(['stable', 'moderate', 'high']);
@@ -588,7 +588,7 @@ it('classifies variability correctly', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->variability->classification)->toBe('stable');
 });
@@ -613,7 +613,7 @@ it('correctly identifies hypoglycemia risk levels', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->patterns->hypoglycemiaRisk)->toBe('high')
         ->and($result->timeInRange->belowPercentage)->toBe(12.0);
@@ -630,7 +630,7 @@ it('uses actual days analyzed in insights', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user, 30);
+    $result = $this->analyzer->handle($this->user, 30);
 
     // Should mention actual days, not hard-coded "30 days"
     expect($result->daysAnalyzed)->toBeGreaterThan(0);
@@ -658,7 +658,7 @@ it('classifies moderate variability correctly', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->variability->classification)->toBe('moderate');
 });
@@ -676,7 +676,7 @@ it('classifies high variability correctly', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->variability->classification)->toBe('high');
 });
@@ -690,7 +690,7 @@ it('generates insight when coefficient of variation is null', function (): void 
         'measured_at' => now()->subDays(1),
     ]);
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->variability->coefficientOfVariation)->toBeNull();
 });
@@ -715,7 +715,7 @@ it('includes moderate hypoglycemia risk in insights', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->patterns->hypoglycemiaRisk)->toBe('moderate');
 
@@ -749,7 +749,7 @@ it('includes moderate hyperglycemia risk in insights', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->patterns->hyperglycemiaRisk)->toBe('moderate');
 
@@ -783,7 +783,7 @@ it('generates concern for low time in range', function (): void {
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     $hasTIRConcern = false;
     foreach ($result->concerns as $concern) {
@@ -807,7 +807,7 @@ it('generates insight for falling trend with absolute slope', function (): void 
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->trend->direction)->toBe('falling');
 
@@ -843,7 +843,7 @@ it('generates goal for addressing post-meal spikes when postMeal average exists'
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     expect($result->glucoseGoals->target)->toContain('post-meal');
 });
@@ -861,7 +861,7 @@ it('generates goal for addressing rising trend when slope is significant', funct
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     // Check if rising trend goal is present
     expect($result->glucoseGoals->target)->toContain('rising');
@@ -878,7 +878,7 @@ it('generates well-controlled maintenance goal when glucose is optimal', functio
         ]);
     }
 
-    $result = $this->action->handle($this->user);
+    $result = $this->analyzer->handle($this->user);
 
     // With all readings at 100, we should get the maintenance goal
     expect($result->glucoseGoals->target)->toContain('Maintain');
