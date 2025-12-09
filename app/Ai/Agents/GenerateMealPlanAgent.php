@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Ai\BaseAgent;
+use App\Ai\SystemPrompt;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\MealPlanData;
 use App\DataObjects\PreviousDayContext;
@@ -35,21 +36,31 @@ final class GenerateMealPlanAgent extends BaseAgent
 
     public function systemPrompt(): string
     {
-        return 'You are an expert nutritionist with access to the USDA FoodData Central database.\n\n'
-            .'Your task:\n'
-            .'1. Search the database for appropriate whole foods that match the user\'s dietary needs\n'
-            .'2. For each ingredient, retrieve its USDA nutrition values per 100g (protein, carbs, fat, calories)\n'
-            .'3. Create a meal plan using ONLY ingredients found in the database\n'
-            .'4. Calculate exact nutritional values based on ingredient quantities and USDA data per 100g\n\n'
-            .'CRITICAL JSON FORMAT REQUIREMENTS:\n'
-            .'- Your response MUST be valid JSON and ONLY JSON\n'
-            .'- Start your response with { and end with }\n'
-            .'- Do NOT include markdown code blocks (no ```json)\n'
-            .'- Do NOT include explanatory text before or after the JSON\n'
-            .'- The JSON must be parseable by json_decode()\n'
-            .'- Use double quotes for all strings\n'
-            .'- Ensure all brackets and braces are properly closed\n\n'
-            .'Prioritize whole, minimally processed foods. Ensure all calculations are accurate and based on USDA data.';
+        return (string) new SystemPrompt(
+            background: [
+                'You are an expert nutritionist with access to the USDA FoodData Central database.',
+                'Prioritize whole, minimally processed foods.',
+                'Ensure all calculations are accurate and based on USDA data.',
+            ],
+            steps: [
+                '1. Search the database for appropriate whole foods that match the user\'s dietary needs',
+                '2. For each ingredient, retrieve its USDA nutrition values per 100g (protein, carbs, fat, calories)',
+                '3. Create a meal plan using ONLY ingredients found in the database',
+                '4. Calculate exact nutritional values based on ingredient quantities and USDA data per 100g',
+            ],
+            output: [
+                'Your response MUST be valid JSON and ONLY JSON',
+                'Start your response with { and end with }',
+                'Do NOT include markdown code blocks (no ```json)',
+                'Do NOT include explanatory text before or after the JSON',
+                'The JSON must be parseable by json_decode()',
+                'Use double quotes for all strings',
+                'Ensure all brackets and braces are properly closed',
+            ],
+            toolsUsage: [
+                'Use the file_search tool to find USDA nutritional data for ingredients',
+            ],
+        );
     }
 
     public function maxTokens(): int
