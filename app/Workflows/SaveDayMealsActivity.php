@@ -11,7 +11,7 @@ use Workflow\Activity;
 /**
  * @codeCoverageIgnore Activity classes are executed by the workflow engine
  */
-final class StoreDayMealsActivity extends Activity
+final class SaveDayMealsActivity extends Activity
 {
     /** @var int */
     public $tries = 3;

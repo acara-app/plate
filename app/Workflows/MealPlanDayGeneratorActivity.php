@@ -13,7 +13,7 @@ use Workflow\Activity;
 /**
  * @codeCoverageIgnore Activity classes are executed by the workflow engine
  */
-final class GenerateDayMealsActivity extends Activity
+final class MealPlanDayGeneratorActivity extends Activity
 {
     /** @var int */
     public $tries = 3;

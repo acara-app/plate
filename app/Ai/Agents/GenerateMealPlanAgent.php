@@ -13,7 +13,7 @@ use App\Enums\SettingKey;
 use App\Models\Setting;
 use App\Models\User;
 use App\Utilities\JsonCleaner;
-use App\Workflows\GenerateMealPlanWorkflow;
+use App\Workflows\MealPlanInitializeWorkflow;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\ValueObjects\ProviderTool;
 use Workflow\WorkflowStub;
@@ -102,7 +102,7 @@ final class GenerateMealPlanAgent extends BaseAgent
 
     public function handle(User $user): void
     {
-        WorkflowStub::make(GenerateMealPlanWorkflow::class)
+        WorkflowStub::make(MealPlanInitializeWorkflow::class)
             ->start($user, totalDays: 7);
     }
 

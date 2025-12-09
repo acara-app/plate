@@ -12,7 +12,7 @@ use Generator;
 use Workflow\ActivityStub;
 use Workflow\Workflow;
 
-final class GenerateSingleDayWorkflow extends Workflow
+final class MealPlanDayWorkflow extends Workflow
 {
     public int $timeout = 300; // 5 minutes per day
 
@@ -32,7 +32,7 @@ final class GenerateSingleDayWorkflow extends Workflow
 
         /** @var DayMealsData $dayMeals */
         $dayMeals = yield ActivityStub::make(
-            GenerateDayMealsActivity::class,
+            MealPlanDayGeneratorActivity::class,
             $user,
             $dayNumber,
             $totalDays,
@@ -40,7 +40,7 @@ final class GenerateSingleDayWorkflow extends Workflow
         );
 
         yield ActivityStub::make(
-            StoreDayMealsActivity::class,
+            SaveDayMealsActivity::class,
             $mealPlan,
             $dayMeals,
             $dayNumber,

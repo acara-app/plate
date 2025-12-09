@@ -12,7 +12,7 @@ use Workflow\Activity;
 /**
  * @codeCoverageIgnore Activity classes are executed by the workflow engine
  */
-final class CreateMealPlanActivity extends Activity
+final class InitializeMealPlanActivity extends Activity
 {
     /** @var int */
     public $tries = 3;
@@ -22,7 +22,7 @@ final class CreateMealPlanActivity extends Activity
 
     public function execute(User $user, int $totalDays): MealPlan
     {
-        $mealPlanType = GenerateMealPlanWorkflow::getMealPlanType($totalDays);
+        $mealPlanType = MealPlanInitializeWorkflow::getMealPlanType($totalDays);
 
         $user->mealPlans()
             ->where('type', $mealPlanType)

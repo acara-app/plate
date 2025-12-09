@@ -15,7 +15,7 @@ use App\Models\Goal;
 use App\Models\HealthCondition;
 use App\Models\Lifestyle;
 use App\Models\UserProfile;
-use App\Workflows\GenerateMealPlanWorkflow;
+use App\Workflows\MealPlanInitializeWorkflow;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -169,7 +169,7 @@ final readonly class OnboardingController
             'onboarding_completed_at' => now(),
         ]);
 
-        WorkflowStub::make(GenerateMealPlanWorkflow::class)
+        WorkflowStub::make(MealPlanInitializeWorkflow::class)
             ->start($user, totalDays: 7);
 
         return to_route('onboarding.completion.show');

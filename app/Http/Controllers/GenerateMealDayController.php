@@ -6,7 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\MealPlan;
-use App\Workflows\GenerateSingleDayWorkflow;
+use App\Workflows\MealPlanDayWorkflow;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -62,7 +62,7 @@ final readonly class GenerateMealDayController
             ]),
         ]);
 
-        WorkflowStub::make(GenerateSingleDayWorkflow::class)
+        WorkflowStub::make(MealPlanDayWorkflow::class)
             ->start($mealPlan, $dayNumber);
 
         return response()->json([

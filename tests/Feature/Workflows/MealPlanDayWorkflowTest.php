@@ -14,9 +14,9 @@ use App\Models\Lifestyle;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
-use App\Workflows\GenerateDayMealsActivity;
-use App\Workflows\GenerateSingleDayWorkflow;
-use App\Workflows\StoreDayMealsActivity;
+use App\Workflows\MealPlanDayGeneratorActivity;
+use App\Workflows\MealPlanDayWorkflow;
+use App\Workflows\SaveDayMealsActivity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\LaravelData\DataCollection;
 use Workflow\WorkflowStub;
@@ -44,15 +44,15 @@ beforeEach(function (): void {
 });
 
 it('workflow class exists and extends correct base class', function (): void {
-    expect(class_exists(GenerateSingleDayWorkflow::class))->toBeTrue();
-    expect(is_subclass_of(GenerateSingleDayWorkflow::class, Workflow\Workflow::class))->toBeTrue();
+    expect(class_exists(MealPlanDayWorkflow::class))->toBeTrue();
+    expect(is_subclass_of(MealPlanDayWorkflow::class, Workflow\Workflow::class))->toBeTrue();
 });
 
 it('activity classes for single day workflow exist', function (): void {
-    expect(class_exists(GenerateDayMealsActivity::class))->toBeTrue();
-    expect(class_exists(StoreDayMealsActivity::class))->toBeTrue();
-    expect(is_subclass_of(GenerateDayMealsActivity::class, Workflow\Activity::class))->toBeTrue();
-    expect(is_subclass_of(StoreDayMealsActivity::class, Workflow\Activity::class))->toBeTrue();
+    expect(class_exists(MealPlanDayGeneratorActivity::class))->toBeTrue();
+    expect(class_exists(SaveDayMealsActivity::class))->toBeTrue();
+    expect(is_subclass_of(MealPlanDayGeneratorActivity::class, Workflow\Activity::class))->toBeTrue();
+    expect(is_subclass_of(SaveDayMealsActivity::class, Workflow\Activity::class))->toBeTrue();
 });
 
 it('triggers workflow when navigating to day that needs generation', function (): void {

@@ -7,7 +7,7 @@ namespace App\Http\Controllers;
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\Meal;
 use App\Models\MealPlan;
-use App\Workflows\GenerateSingleDayWorkflow;
+use App\Workflows\MealPlanDayWorkflow;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -110,7 +110,7 @@ final class ShowMealPlansController
                 ]),
             ]);
 
-            WorkflowStub::make(GenerateSingleDayWorkflow::class)
+            WorkflowStub::make(MealPlanDayWorkflow::class)
                 ->start($mealPlan, $currentDayNumber);
 
             $dayStatus = MealPlanGenerationStatus::Generating->value;

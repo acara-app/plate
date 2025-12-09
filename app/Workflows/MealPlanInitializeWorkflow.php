@@ -16,7 +16,7 @@ use Spatie\LaravelData\DataCollection;
 use Workflow\ActivityStub;
 use Workflow\Workflow;
 
-final class GenerateMealPlanWorkflow extends Workflow
+final class MealPlanInitializeWorkflow extends Workflow
 {
     public int $timeout = 1800; // 30 minutes for 7 days
 
@@ -62,14 +62,14 @@ final class GenerateMealPlanWorkflow extends Workflow
     ): Generator {
         /** @var MealPlan $mealPlan */
         $mealPlan = yield ActivityStub::make(
-            CreateMealPlanActivity::class,
+            InitializeMealPlanActivity::class,
             $user,
             $totalDays,
         );
 
         /** @var DayMealsData $dayMeals */
         $dayMeals = yield ActivityStub::make(
-            GenerateDayMealsActivity::class,
+            MealPlanDayGeneratorActivity::class,
             $user,
             1,
             $totalDays,
@@ -77,7 +77,7 @@ final class GenerateMealPlanWorkflow extends Workflow
         );
 
         yield ActivityStub::make(
-            StoreDayMealsActivity::class,
+            SaveDayMealsActivity::class,
             $mealPlan,
             $dayMeals,
             1,
