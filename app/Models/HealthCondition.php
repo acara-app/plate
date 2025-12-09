@@ -55,6 +55,6 @@ final class HealthCondition extends Model
      */
     protected function notes(): Attribute
     {
-        return Attribute::get(fn (): ?string => $this->pivot?->notes);
+        return Attribute::get(fn (): ?string => $this->relationLoaded('pivot') ? $this->pivot?->notes : null);
     }
 }
