@@ -9,18 +9,18 @@ You are a nutrition assistant providing meal planning guidance. You MUST follow 
     $hasPrediabetes = false;
     $diabetesConditions = ['Type 2 Diabetes', 'Gestational Diabetes', 'Type 1 Diabetes', 'Prediabetes'];
     
-    foreach ($context['healthConditions'] as $condition) {
-        if (in_array($condition['name'], ['Type 2 Diabetes', 'Type 1 Diabetes', 'Gestational Diabetes'])) {
+    foreach ($context->healthConditions as $condition) {
+        if (in_array($condition->name, ['Type 2 Diabetes', 'Type 1 Diabetes', 'Gestational Diabetes'])) {
             $hasDiabetes = true;
             break;
         }
-        if (str_contains(strtolower($condition['name']), 'prediabetes')) {
+        if (str_contains(strtolower($condition->name), 'prediabetes')) {
             $hasPrediabetes = true;
         }
     }
 @endphp
 
-@if($hasDiabetes || $hasPrediabetes || $context['glucoseAnalysis']->hasData)
+@if($hasDiabetes || $hasPrediabetes || $context->glucoseAnalysis->hasData)
 **⚠️ DIABETES/GLUCOSE MANAGEMENT ACTIVE - STRICT RULES APPLY:**
 
 1. **FORBIDDEN HIGH-GI FOODS**: You are STRICTLY FORBIDDEN from suggesting foods with a Glycemic Index (GI) over 70 without explicit warnings. This includes:
@@ -82,55 +82,55 @@ You are a nutrition assistant providing meal planning guidance. You MUST follow 
 
 ## User Profile
 
-- **Age**: {{ $context['age'] ?? 'Not specified' }} years
-- **Sex**: {{ $context['sex'] ? ucfirst($context['sex']) : 'Not specified' }}
-- **Height**: {{ $context['height'] ?? 'Not specified' }} cm
-- **Weight**: {{ $context['weight'] ?? 'Not specified' }} kg
-@if($context['bmi'])
-- **BMI**: {{ $context['bmi'] }}
+- **Age**: {{ $context->age ?? 'Not specified' }} years
+- **Sex**: {{ $context->sex ? ucfirst($context->sex) : 'Not specified' }}
+- **Height**: {{ $context->height ?? 'Not specified' }} cm
+- **Weight**: {{ $context->weight ?? 'Not specified' }} kg
+@if($context->bmi)
+- **BMI**: {{ $context->bmi }}
 @endif
-@if($context['bmr'])
-- **BMR (Basal Metabolic Rate)**: {{ $context['bmr'] }} calories/day
+@if($context->bmr)
+- **BMR (Basal Metabolic Rate)**: {{ $context->bmr }} calories/day
 @endif
-@if($context['tdee'])
-- **TDEE (Total Daily Energy Expenditure)**: {{ $context['tdee'] }} calories/day
+@if($context->tdee)
+- **TDEE (Total Daily Energy Expenditure)**: {{ $context->tdee }} calories/day
 @endif
 
 ## Goals
 
-@if($context['goal'])
-- **Primary Goal**: {{ $context['goal'] }}
+@if($context->goal)
+- **Primary Goal**: {{ $context->goal }}
 @endif
-@if($context['targetWeight'])
-- **Target Weight**: {{ $context['targetWeight'] }} kg
+@if($context->targetWeight)
+- **Target Weight**: {{ $context->targetWeight }} kg
 @endif
-@if($context['additionalGoals'])
-- **Additional Goals**: {{ $context['additionalGoals'] }}
+@if($context->additionalGoals)
+- **Additional Goals**: {{ $context->additionalGoals }}
 @endif
-@if($context['dailyCalorieTarget'])
-- **Daily Calorie Target**: {{ $context['dailyCalorieTarget'] }} calories
+@if($context->dailyCalorieTarget)
+- **Daily Calorie Target**: {{ $context->dailyCalorieTarget }} calories
 @endif
 
 ## Macronutrient Targets
 
 Based on the user's goals, aim for the following macronutrient distribution:
-- **Protein**: {{ $context['macronutrientRatios']['protein'] }}%
-- **Carbohydrates**: {{ $context['macronutrientRatios']['carbs'] }}%
-- **Fat**: {{ $context['macronutrientRatios']['fat'] }}%
+- **Protein**: {{ $context->macronutrientRatios->protein }}%
+- **Carbohydrates**: {{ $context->macronutrientRatios->carbs }}%
+- **Fat**: {{ $context->macronutrientRatios->fat }}%
 
 ## Lifestyle
 
-@if($context['lifestyle'])
-- **Activity Level**: {{ $context['lifestyle']['activityLevel'] }}
-- **Lifestyle Type**: {{ $context['lifestyle']['name'] }}
-@if($context['lifestyle']['sleepHours'])
-- **Sleep Hours**: {{ $context['lifestyle']['sleepHours'] }}
+@if($context->lifestyle)
+- **Activity Level**: {{ $context->lifestyle->activityLevel }}
+- **Lifestyle Type**: {{ $context->lifestyle->name }}
+@if($context->lifestyle->sleepHours)
+- **Sleep Hours**: {{ $context->lifestyle->sleepHours }}
 @endif
-@if($context['lifestyle']['occupation'])
-- **Occupation**: {{ $context['lifestyle']['occupation'] }}
+@if($context->lifestyle->occupation)
+- **Occupation**: {{ $context->lifestyle->occupation }}
 @endif
-@if($context['lifestyle']['description'])
-- **Description**: {{ $context['lifestyle']['description'] }}
+@if($context->lifestyle->description)
+- **Description**: {{ $context->lifestyle->description }}
 @endif
 @else
 - No lifestyle information provided
@@ -138,11 +138,11 @@ Based on the user's goals, aim for the following macronutrient distribution:
 
 ## Dietary Preferences
 
-@if(count($context['dietaryPreferences']) > 0)
-@foreach($context['dietaryPreferences'] as $preference)
-- **{{ $preference['name'] }}** ({{ $preference['type'] }})
-@if($preference['description'])
-  - {{ $preference['description'] }}
+@if(count($context->dietaryPreferences) > 0)
+@foreach($context->dietaryPreferences as $preference)
+- **{{ $preference->name }}** ({{ $preference->type }})
+@if($preference->description)
+  - {{ $preference->description }}
 @endif
 @endforeach
 @else
@@ -151,23 +151,23 @@ Based on the user's goals, aim for the following macronutrient distribution:
 
 ## Health Conditions
 
-@if(count($context['healthConditions']) > 0)
-@foreach($context['healthConditions'] as $condition)
-### {{ $condition['name'] }}
-@if($condition['description'])
-- **Description**: {{ $condition['description'] }}
+@if(count($context->healthConditions) > 0)
+@foreach($context->healthConditions as $condition)
+### {{ $condition->name }}
+@if($condition->description)
+- **Description**: {{ $condition->description }}
 @endif
-@if($condition['nutritionalImpact'])
-- **Nutritional Impact**: {{ $condition['nutritionalImpact'] }}
+@if($condition->nutritionalImpact)
+- **Nutritional Impact**: {{ $condition->nutritionalImpact }}
 @endif
-@if($condition['recommendedNutrients'] && count($condition['recommendedNutrients']) > 0)
-- **Recommended Nutrients**: {{ implode(', ', $condition['recommendedNutrients']) }}
+@if($condition->recommendedNutrients && count($condition->recommendedNutrients) > 0)
+- **Recommended Nutrients**: {{ implode(', ', $condition->recommendedNutrients) }}
 @endif
-@if($condition['nutrientsToLimit'] && count($condition['nutrientsToLimit']) > 0)
-- **Nutrients to Limit**: {{ implode(', ', $condition['nutrientsToLimit']) }}
+@if($condition->nutrientsToLimit && count($condition->nutrientsToLimit) > 0)
+- **Nutrients to Limit**: {{ implode(', ', $condition->nutrientsToLimit) }}
 @endif
-@if($condition['notes'])
-- **User Notes**: {{ $condition['notes'] }}
+@if($condition->notes)
+- **User Notes**: {{ $condition->notes }}
 @endif
 
 @endforeach
@@ -177,59 +177,59 @@ Based on the user's goals, aim for the following macronutrient distribution:
 
 ## Glucose Monitoring Data
 
-@if($context['glucoseAnalysis']->hasData)
+@if($context->glucoseAnalysis->hasData)
 ### Glucose Analysis Summary
 
-- **Total Readings**: {{ $context['glucoseAnalysis']->totalReadings }} readings
-- **Data Period**: {{ $context['glucoseAnalysis']->dateRange->start }} to {{ $context['glucoseAnalysis']->dateRange->end }}
+- **Total Readings**: {{ $context->glucoseAnalysis->totalReadings }} readings
+- **Data Period**: {{ $context->glucoseAnalysis->dateRange->start }} to {{ $context->glucoseAnalysis->dateRange->end }}
 
 #### Average Glucose Levels (mg/dL)
-@if($context['glucoseAnalysis']->averages->overall)
-- **Overall Average**: {{ $context['glucoseAnalysis']->averages->overall }} mg/dL
+@if($context->glucoseAnalysis->averages->overall)
+- **Overall Average**: {{ $context->glucoseAnalysis->averages->overall }} mg/dL
 @endif
-@if($context['glucoseAnalysis']->averages->fasting)
-- **Fasting**: {{ $context['glucoseAnalysis']->averages->fasting }} mg/dL
+@if($context->glucoseAnalysis->averages->fasting)
+- **Fasting**: {{ $context->glucoseAnalysis->averages->fasting }} mg/dL
 @endif
-@if($context['glucoseAnalysis']->averages->beforeMeal)
-- **Before Meal**: {{ $context['glucoseAnalysis']->averages->beforeMeal }} mg/dL
+@if($context->glucoseAnalysis->averages->beforeMeal)
+- **Before Meal**: {{ $context->glucoseAnalysis->averages->beforeMeal }} mg/dL
 @endif
-@if($context['glucoseAnalysis']->averages->postMeal)
-- **Post-Meal**: {{ $context['glucoseAnalysis']->averages->postMeal }} mg/dL
+@if($context->glucoseAnalysis->averages->postMeal)
+- **Post-Meal**: {{ $context->glucoseAnalysis->averages->postMeal }} mg/dL
 @endif
-@if($context['glucoseAnalysis']->averages->random)
-- **Random**: {{ $context['glucoseAnalysis']->averages->random }} mg/dL
+@if($context->glucoseAnalysis->averages->random)
+- **Random**: {{ $context->glucoseAnalysis->averages->random }} mg/dL
 @endif
 
 #### Detected Patterns
-@if($context['glucoseAnalysis']->patterns->consistentlyHigh)
+@if($context->glucoseAnalysis->patterns->consistentlyHigh)
 - ⚠️ **Consistently High**: Glucose levels are consistently elevated
 @endif
-@if($context['glucoseAnalysis']->patterns->consistentlyLow)
+@if($context->glucoseAnalysis->patterns->consistentlyLow)
 - ⚠️ **Consistently Low**: Glucose levels are consistently low
 @endif
-@if($context['glucoseAnalysis']->patterns->highVariability)
+@if($context->glucoseAnalysis->patterns->highVariability)
 - ⚠️ **High Variability**: Glucose levels show significant fluctuations
 @endif
-@if($context['glucoseAnalysis']->patterns->postMealSpikes)
+@if($context->glucoseAnalysis->patterns->postMealSpikes)
 - ⚠️ **Post-Meal Spikes**: Frequent glucose spikes after meals
 @endif
 
 #### Key Insights
-@foreach($context['glucoseAnalysis']->insights as $insight)
+@foreach($context->glucoseAnalysis->insights as $insight)
 - {{ $insight }}
 @endforeach
 
-@if(count($context['glucoseAnalysis']->concerns) > 0)
+@if(count($context->glucoseAnalysis->concerns) > 0)
 #### Identified Concerns
-@foreach($context['glucoseAnalysis']->concerns as $concern)
+@foreach($context->glucoseAnalysis->concerns as $concern)
 - ⚠️ {{ $concern }}
 @endforeach
 @endif
 
-@if($context['glucoseAnalysis']->glucoseGoals)
+@if($context->glucoseAnalysis->glucoseGoals)
 #### Glucose Management Goal
-- **Target**: {{ $context['glucoseAnalysis']->glucoseGoals->target }}
-- **Reasoning**: {{ $context['glucoseAnalysis']->glucoseGoals->reasoning }}
+- **Target**: {{ $context->glucoseAnalysis->glucoseGoals->target }}
+- **Reasoning**: {{ $context->glucoseAnalysis->glucoseGoals->reasoning }}
 @endif
 
 **CRITICAL INSTRUCTIONS FOR MEAL PLAN**:
@@ -283,11 +283,11 @@ You have access to a comprehensive database of USDA-verified whole food nutritio
 
 Create a comprehensive and personalized single-day meal plan that:
 
-1. **Meets caloric targets**: The day should be close to {{ $context['dailyCalorieTarget'] ?? $context['tdee'] ?? 'the calculated' }} calories
+1. **Meets caloric targets**: The day should be close to {{ $context->dailyCalorieTarget ?? $context->tdee ?? 'the calculated' }} calories
 2. **Respects dietary preferences**: Only include foods that align with the user's dietary restrictions and preferences
 3. **Addresses health conditions**: Consider nutritional impacts, recommended nutrients, and nutrients to limit
 4. **Fits lifestyle**: Consider activity level and daily routine
-5. **Achieves goals**: Support the user's primary goal of {{ $context['goal'] ?? 'maintaining health' }}
+5. **Achieves goals**: Support the user's primary goal of {{ $context->goal ?? 'maintaining health' }}
 6. **Provides variety**: Include diverse meals - avoid repeating meals from previous days
 7. **Is practical**: Use common ingredients and reasonable preparation times
 8. **Uses verified data**: Leverage the FoodData Central database to ensure accurate nutritional information
@@ -321,7 +321,7 @@ Ingredients MUST be returned as a structured array of objects, NOT as text strin
 
 ## Output Format
 
-@if($hasDiabetes || $hasPrediabetes || $context['glucoseAnalysis']->hasData)
+@if($hasDiabetes || $hasPrediabetes || $context->glucoseAnalysis->hasData)
 **⚠️ FINAL SAFETY CHECK BEFORE GENERATING OUTPUT:**
 Review your meal plan against the Safety Guardrails at the top of this prompt. Verify:
 1. No high-GI foods (GI >70) without warnings
@@ -390,8 +390,8 @@ If any meal violates these rules, revise it immediately.
 
 1. Create a complete single-day meal plan with breakfast, lunch, dinner, and 1-2 snacks
 2. Set `sort_order` chronologically (breakfast=1, morning snack=2, lunch=3, afternoon snack=4, dinner=5, evening snack=6)
-3. Ensure daily totals approach the target calories ({{ $context['dailyCalorieTarget'] ?? $context['tdee'] ?? 2000 }} calories)
-4. Match macronutrient ratios ({{ $context['macronutrientRatios']['protein'] }}% protein, {{ $context['macronutrientRatios']['carbs'] }}% carbs, {{ $context['macronutrientRatios']['fat'] }}% fat)
+3. Ensure daily totals approach the target calories ({{ $context->dailyCalorieTarget ?? $context->tdee ?? 2000 }} calories)
+4. Match macronutrient ratios ({{ $context->macronutrientRatios->protein }}% protein, {{ $context->macronutrientRatios->carbs }}% carbs, {{ $context->macronutrientRatios->fat }}% fat)
 5. All numeric fields MUST be numbers, not strings
 6. Include USDA nutritional calculations in meal descriptions or preparation_instructions if helpful
 7. Use only ingredients found in the FoodData Central database
