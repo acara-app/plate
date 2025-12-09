@@ -321,7 +321,7 @@ Ingredients MUST be returned as a structured array of objects, NOT as text strin
 
 ## Output Format
 
-@if($hasDiabetes || $hasPrediabetes || $context->glucoseAnalysis->hasData)
+@if($hasDiabetes || $hasPrediabetes || $context->glucoseAnalysis?->hasData)
 **⚠️ FINAL SAFETY CHECK BEFORE GENERATING OUTPUT:**
 Review your meal plan against the Safety Guardrails at the top of this prompt. Verify:
 1. No high-GI foods (GI >70) without warnings
