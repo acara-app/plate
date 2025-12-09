@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Ai\SystemPrompt;
 
-it('generates prompt with only background', function () {
+it('generates prompt with only background', function (): void {
     $prompt = new SystemPrompt(
         background: [
             'You are an expert nutritionist.',
@@ -23,7 +23,7 @@ it('generates prompt with only background', function () {
         ->not->toContain('# TOOLS USAGE RULES');
 });
 
-it('generates prompt with all sections', function () {
+it('generates prompt with all sections', function (): void {
     $prompt = new SystemPrompt(
         background: ['You are an AI assistant.'],
         steps: ['1. Analyze the request', '2. Generate response'],
@@ -47,7 +47,7 @@ it('generates prompt with all sections', function () {
         ->toContain(' - Verify before using');
 });
 
-it('generates prompt with steps only', function () {
+it('generates prompt with steps only', function (): void {
     $prompt = new SystemPrompt(
         background: ['Background info.'],
         steps: ['Step 1', 'Step 2'],
@@ -64,7 +64,7 @@ it('generates prompt with steps only', function () {
         ->not->toContain('# TOOLS USAGE RULES');
 });
 
-it('generates prompt with output instructions only', function () {
+it('generates prompt with output instructions only', function (): void {
     $prompt = new SystemPrompt(
         background: ['Background info.'],
         output: ['Output rule 1', 'Output rule 2'],
@@ -81,7 +81,7 @@ it('generates prompt with output instructions only', function () {
         ->not->toContain('# TOOLS USAGE RULES');
 });
 
-it('generates prompt with tools usage only', function () {
+it('generates prompt with tools usage only', function (): void {
     $prompt = new SystemPrompt(
         background: ['Background info.'],
         toolsUsage: ['Tool rule 1', 'Tool rule 2'],
@@ -98,13 +98,13 @@ it('generates prompt with tools usage only', function () {
         ->not->toContain('# OUTPUT INSTRUCTIONS');
 });
 
-it('implements Stringable interface', function () {
+it('implements Stringable interface', function (): void {
     $prompt = new SystemPrompt(background: ['Test background.']);
 
     expect($prompt)->toBeInstanceOf(Stringable::class);
 });
 
-it('joins background items with newlines', function () {
+it('joins background items with newlines', function (): void {
     $prompt = new SystemPrompt(
         background: ['Line 1', 'Line 2', 'Line 3'],
     );
@@ -114,7 +114,7 @@ it('joins background items with newlines', function () {
     expect($result)->toContain("Line 1\nLine 2\nLine 3");
 });
 
-it('prefixes output items with dash', function () {
+it('prefixes output items with dash', function (): void {
     $prompt = new SystemPrompt(
         background: ['Background.'],
         output: ['First rule', 'Second rule'],
@@ -125,7 +125,7 @@ it('prefixes output items with dash', function () {
     expect($result)->toContain(" - First rule\n - Second rule");
 });
 
-it('prefixes tools usage items with dash', function () {
+it('prefixes tools usage items with dash', function (): void {
     $prompt = new SystemPrompt(
         background: ['Background.'],
         toolsUsage: ['First tool rule', 'Second tool rule'],
