@@ -177,7 +177,7 @@ Based on the user's goals, aim for the following macronutrient distribution:
 
 ## Glucose Monitoring Data
 
-@if($context->glucoseAnalysis->hasData)
+@if($context->glucoseAnalysis?->hasData)
 ### Glucose Analysis Summary
 
 - **Total Readings**: {{ $context->glucoseAnalysis->totalReadings }} readings
