@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\AiAgents\CreateMealPlanPrompt;
+use App\Ai\Agents\CreateMealPlanPrompt;
 use App\Enums\ReadingType;
 use App\Enums\Sex;
 use App\Models\GlucoseReading;
