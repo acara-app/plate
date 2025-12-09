@@ -17,6 +17,12 @@ use function implode;
  */
 final class SystemPrompt implements Stringable
 {
+    /**
+     * @param  array<int, string>  $background
+     * @param  array<int, string>  $steps
+     * @param  array<int, string>  $output
+     * @param  array<int, string>  $toolsUsage
+     */
     public function __construct(
         public array $background,
         public array $steps = [],
