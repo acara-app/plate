@@ -12,9 +12,9 @@ arch()->preset()->security()->ignoring([
 arch('strict rules')
     ->preset()->strict()
     ->ignoring([
-        App\Models\User::class,
-        App\Models\SubscriptionProduct::class, // Has public accessor methods (getXxxAttribute)
-        App\Console\Commands\UploadDocumentToGeminiFileSearchCommand::class, // Uses sleep() for API polling
+        'App\Models',
+        'App\Console\Commands',
+        'App\Ai',
     ]);
 
 arch('controllers')

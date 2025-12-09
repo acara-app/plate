@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Workflows;
 
-use App\Ai\Agents\GenerateMealPlan;
+use App\Ai\Agents\GenerateMealPlanAgent;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\PreviousDayContext;
 use App\Models\User;
@@ -27,8 +27,8 @@ final class GenerateDayMealsActivity extends Activity
         int $totalDays,
         PreviousDayContext $previousDaysContext,
     ): DayMealsData {
-        /** @var GenerateMealPlan $generateMealPlan */
-        $generateMealPlan = app(GenerateMealPlan::class);
+        /** @var GenerateMealPlanAgent $generateMealPlan */
+        $generateMealPlan = app(GenerateMealPlanAgent::class);
 
         return $generateMealPlan->generateForDay(
             $user,
