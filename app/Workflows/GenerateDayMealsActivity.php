@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Workflows;
 
-use App\Actions\AiAgents\GenerateMealPlan;
+use App\Ai\Agents\GenerateMealPlan;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\PreviousDayContext;
 use App\Models\User;

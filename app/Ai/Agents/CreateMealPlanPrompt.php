@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\AiAgents;
+namespace App\Ai\Agents;
 
 use App\DataObjects\PreviousDayContext;
 use App\Models\DietaryPreference;
