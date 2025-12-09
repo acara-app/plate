@@ -185,7 +185,7 @@ it('generates day meals using activity with mocked prism', function (): void {
     Prism::fake([$fakeResponse]);
 
     // Test using the action directly instead of activity instantiation
-    $action = app(App\Ai\Agents\GenerateMealPlan::class);
+    $action = app(App\Ai\Agents\GenerateMealPlanAgent::class);
     $result = $action->generateForDay(
         $this->user,
         dayNumber: 1,
@@ -219,7 +219,7 @@ it('workflow class exists and extends correct base class', function (): void {
 it('workflow triggers via generate meal plan action with workflow stub fake', function (): void {
     Workflow\WorkflowStub::fake();
 
-    $action = app(App\Ai\Agents\GenerateMealPlan::class);
+    $action = app(App\Ai\Agents\GenerateMealPlanAgent::class);
     $action->handle($this->user);
 
     // Workflow is faked so meal plan won't be created, but no exception means workflow was started
