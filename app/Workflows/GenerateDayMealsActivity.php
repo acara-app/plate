@@ -7,7 +7,6 @@ namespace App\Workflows;
 use App\Actions\AiAgents\GenerateMealPlan;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\PreviousDayContext;
-use App\Enums\AiModel;
 use App\Models\User;
 use Workflow\Activity;
 
@@ -26,7 +25,6 @@ final class GenerateDayMealsActivity extends Activity
         User $user,
         int $dayNumber,
         int $totalDays,
-        AiModel $model,
         PreviousDayContext $previousDaysContext,
     ): DayMealsData {
         /** @var GenerateMealPlan $generateMealPlan */
@@ -35,7 +33,6 @@ final class GenerateDayMealsActivity extends Activity
         return $generateMealPlan->generateForDay(
             $user,
             $dayNumber,
-            $model,
             $totalDays,
             $previousDaysContext,
         );

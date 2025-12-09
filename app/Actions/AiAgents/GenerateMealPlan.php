@@ -7,7 +7,6 @@ namespace App\Actions\AiAgents;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\MealPlanData;
 use App\DataObjects\PreviousDayContext;
-use App\Enums\AiModel;
 use App\Enums\SettingKey;
 use App\Models\Setting;
 use App\Models\User;
@@ -24,20 +23,20 @@ final readonly class GenerateMealPlan
         private CreateMealPlanPrompt $createPrompt,
     ) {}
 
-    public function handle(User $user, AiModel $model = AiModel::Gemini25Flash): void
+    public function handle(User $user): void
     {
         WorkflowStub::make(GenerateMealPlanWorkflow::class)
-            ->start($user, totalDays: 7, model: $model, initialDays: 1);
+            ->start($user, totalDays: 7);
     }
 
     /**
      * Generate a complete multi-day meal plan (legacy method).
      */
-    public function generate(User $user, AiModel $model): MealPlanData
+    public function generate(User $user): MealPlanData
     {
         $prompt = $this->createPrompt->handle($user);
 
-        $jsonText = $this->generateMealPlanJson($prompt, $model);
+        $jsonText = $this->generateMealPlanJson($prompt);
 
         $cleanedJsonText = JsonCleaner::extractAndValidateJson($jsonText);
 
@@ -52,7 +51,6 @@ final readonly class GenerateMealPlan
     public function generateForDay(
         User $user,
         int $dayNumber,
-        AiModel $model,
         int $totalDays = 7,
         ?PreviousDayContext $previousDaysContext = null,
     ): DayMealsData {
@@ -63,7 +61,7 @@ final readonly class GenerateMealPlan
             $previousDaysContext,
         );
 
-        $jsonText = $this->generateMealPlanJson($prompt, $model);
+        $jsonText = $this->generateMealPlanJson($prompt);
 
         $cleanedJsonText = JsonCleaner::extractAndValidateJson($jsonText);
 
@@ -75,7 +73,7 @@ final readonly class GenerateMealPlan
     /**
      * Generate meal plan as JSON using File Search for accurate USDA nutritional data
      */
-    private function generateMealPlanJson(string $prompt, AiModel $model): string
+    private function generateMealPlanJson(string $prompt): string
     {
         $storeNames = $this->getFileSearchStoreNames();
 
@@ -91,7 +89,7 @@ final readonly class GenerateMealPlan
         }
 
         $response = Prism::text()
-            ->using(Provider::Gemini, $model->value)
+            ->using(Provider::Gemini, 'gemini-2.5-flash')
             ->withSystemPrompt(
                 'You are an expert nutritionist with access to the USDA FoodData Central database.\n\n'
                 .'Your task:\n'

@@ -6,7 +6,6 @@ namespace App\Workflows;
 
 use App\DataObjects\DayMealsData;
 use App\DataObjects\PreviousDayContext;
-use App\Enums\AiModel;
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\MealPlan;
 use Generator;
@@ -25,7 +24,6 @@ final class GenerateSingleDayWorkflow extends Workflow
     public function execute(
         MealPlan $mealPlan,
         int $dayNumber,
-        AiModel $model = AiModel::Gemini25Flash,
     ): Generator {
         $user = $mealPlan->user;
         $totalDays = $mealPlan->duration_days;
@@ -38,7 +36,6 @@ final class GenerateSingleDayWorkflow extends Workflow
             $user,
             $dayNumber,
             $totalDays,
-            $model,
             $previousDaysContext,
         );
 
