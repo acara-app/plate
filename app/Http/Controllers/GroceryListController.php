@@ -52,7 +52,7 @@ final readonly class GroceryListController
                 'duration_days' => $mealPlan->duration_days,
             ],
             'groceryList' => $needsGeneration
-                ? Inertia::defer(fn () => $this->formatGroceryList(
+                ? Inertia::defer(fn (): array => $this->formatGroceryList(
                     $this->generateAction->generateItems($groceryList)
                 ))
                 : $this->formatGroceryList($groceryList),
@@ -74,7 +74,7 @@ final readonly class GroceryListController
                 'name' => $mealPlan->name,
                 'duration_days' => $mealPlan->duration_days,
             ],
-            'groceryList' => Inertia::defer(fn () => $this->formatGroceryList(
+            'groceryList' => Inertia::defer(fn (): array => $this->formatGroceryList(
                 $this->generateAction->generateItems($groceryList)
             )),
         ]);
@@ -119,15 +119,7 @@ final readonly class GroceryListController
             'name' => $groceryList->name,
             'status' => $groceryList->status->value,
             'metadata' => $groceryList->metadata,
-            'items_by_category' => $groceryList->itemsByCategory()->map(
-                fn ($items) => $items->map(fn (GroceryItem $item): array => [
-                    'id' => $item->id,
-                    'name' => $item->name,
-                    'quantity' => $item->quantity,
-                    'category' => $item->category,
-                    'is_checked' => $item->is_checked,
-                ])
-            ),
+            'items_by_category' => $groceryList->formattedItemsByCategory(),
             'total_items' => $groceryList->items->count(),
             'checked_items' => $groceryList->items->where('is_checked', true)->count(),
         ];

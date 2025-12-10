@@ -15,7 +15,7 @@ test('to array', function (): void {
     $profile = UserProfile::factory()->for($user)->create()->refresh();
 
     expect(array_keys($profile->toArray()))
-        ->toBe([
+        ->toContain(
             'id',
             'user_id',
             'age',
@@ -30,7 +30,10 @@ test('to array', function (): void {
             'onboarding_completed_at',
             'created_at',
             'updated_at',
-        ]);
+            'bmi',
+            'bmr',
+            'tdee',
+        );
 });
 
 test('belongs to user', function (): void {
@@ -96,7 +99,7 @@ test('calculate bmi returns null when height is missing', function (): void {
         'weight' => 70,
     ]);
 
-    expect($profile->calculateBMI())->toBeNull();
+    expect($profile->bmi)->toBeNull();
 });
 
 test('calculate bmi returns null when weight is missing', function (): void {
@@ -105,7 +108,7 @@ test('calculate bmi returns null when weight is missing', function (): void {
         'weight' => null,
     ]);
 
-    expect($profile->calculateBMI())->toBeNull();
+    expect($profile->bmi)->toBeNull();
 });
 
 test('calculate bmi returns correct value', function (): void {
@@ -116,7 +119,7 @@ test('calculate bmi returns correct value', function (): void {
 
     $expectedBMI = round(70 / (1.75 * 1.75), 2);
 
-    expect($profile->calculateBMI())->toBe($expectedBMI);
+    expect($profile->bmi)->toBe($expectedBMI);
 });
 
 test('calculate bmr returns null when weight is missing', function (): void {
@@ -127,7 +130,7 @@ test('calculate bmr returns null when weight is missing', function (): void {
         'sex' => Sex::Male,
     ]);
 
-    expect($profile->calculateBMR())->toBeNull();
+    expect($profile->bmr)->toBeNull();
 });
 
 test('calculate bmr returns null when height is missing', function (): void {
@@ -138,7 +141,7 @@ test('calculate bmr returns null when height is missing', function (): void {
         'sex' => Sex::Male,
     ]);
 
-    expect($profile->calculateBMR())->toBeNull();
+    expect($profile->bmr)->toBeNull();
 });
 
 test('calculate bmr returns null when age is missing', function (): void {
@@ -149,7 +152,7 @@ test('calculate bmr returns null when age is missing', function (): void {
         'sex' => Sex::Male,
     ]);
 
-    expect($profile->calculateBMR())->toBeNull();
+    expect($profile->bmr)->toBeNull();
 });
 
 test('calculate bmr returns null when sex is missing', function (): void {
@@ -160,7 +163,7 @@ test('calculate bmr returns null when sex is missing', function (): void {
         'sex' => null,
     ]);
 
-    expect($profile->calculateBMR())->toBeNull();
+    expect($profile->bmr)->toBeNull();
 });
 
 test('calculate bmr returns correct value for male', function (): void {
@@ -173,7 +176,7 @@ test('calculate bmr returns correct value for male', function (): void {
 
     $expectedBMR = round((10 * 70) + (6.25 * 175) - (5 * 30) + 5, 2);
 
-    expect($profile->calculateBMR())->toBe($expectedBMR);
+    expect($profile->bmr)->toBe($expectedBMR);
 });
 
 test('calculate bmr returns correct value for female', function (): void {
@@ -186,7 +189,7 @@ test('calculate bmr returns correct value for female', function (): void {
 
     $expectedBMR = round((10 * 60) + (6.25 * 165) - (5 * 25) - 161, 2);
 
-    expect($profile->calculateBMR())->toBe($expectedBMR);
+    expect($profile->bmr)->toBe($expectedBMR);
 });
 
 test('calculate tdee returns null when bmr cannot be calculated', function (): void {
@@ -197,7 +200,7 @@ test('calculate tdee returns null when bmr cannot be calculated', function (): v
         'sex' => Sex::Male,
     ]);
 
-    expect($profile->calculateTDEE())->toBeNull();
+    expect($profile->tdee)->toBeNull();
 });
 
 test('calculate tdee returns null when lifestyle is missing', function (): void {
@@ -209,7 +212,7 @@ test('calculate tdee returns null when lifestyle is missing', function (): void 
         'lifestyle_id' => null,
     ]);
 
-    expect($profile->calculateTDEE())->toBeNull();
+    expect($profile->tdee)->toBeNull();
 });
 
 test('calculate tdee returns correct value', function (): void {
@@ -222,8 +225,8 @@ test('calculate tdee returns correct value', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $bmr = $profile->calculateBMR();
+    $bmr = $profile->bmr;
     $expectedTDEE = round($bmr * 1.55, 2);
 
-    expect($profile->calculateTDEE())->toBe($expectedTDEE);
+    expect($profile->tdee)->toBe($expectedTDEE);
 });

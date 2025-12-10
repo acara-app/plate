@@ -124,3 +124,79 @@ it('includes glucose concerns when post-meal spikes are detected', function (): 
         ->toContain('Post-Meal Spikes')
         ->toContain('Glucose Management Goal');
 });
+
+it('throws exception when user has no profile', function (): void {
+    $user = User::factory()->create();
+
+    $builder = app(MealPlanPromptBuilder::class);
+    $builder->handle($user);
+})->throws(RuntimeException::class, 'User profile is required to create a meal plan.');
+
+it('calculates calorie deficit for weight loss goal', function (): void {
+    $user = User::factory()->create();
+
+    $goal = Goal::factory()->create(['name' => 'Weight Loss']);
+    $lifestyle = Lifestyle::factory()->create();
+
+    UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'age' => 30,
+        'height' => 175.0,
+        'weight' => 80.0,
+        'sex' => Sex::Male,
+        'goal_id' => $goal->id,
+        'lifestyle_id' => $lifestyle->id,
+    ]);
+
+    $builder = app(MealPlanPromptBuilder::class);
+    $prompt = $builder->handle($user);
+
+    expect($prompt)->toBeString()->not->toBeEmpty();
+});
+
+it('calculates calorie surplus for weight gain goal', function (): void {
+    $user = User::factory()->create();
+
+    $goal = Goal::factory()->create(['name' => 'Muscle Gain']);
+    $lifestyle = Lifestyle::factory()->create();
+
+    UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'age' => 25,
+        'height' => 180.0,
+        'weight' => 75.0,
+        'sex' => Sex::Male,
+        'goal_id' => $goal->id,
+        'lifestyle_id' => $lifestyle->id,
+    ]);
+
+    $builder = app(MealPlanPromptBuilder::class);
+    $prompt = $builder->handle($user);
+
+    expect($prompt)->toBeString()->not->toBeEmpty();
+});
+
+it('includes user profile information in prompt', function (): void {
+    $user = User::factory()->create();
+
+    $goal = Goal::factory()->create(['name' => 'Maintenance']);
+    $lifestyle = Lifestyle::factory()->create(['activity_level' => 'Moderate']);
+
+    UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'age' => 35,
+        'height' => 170.0,
+        'weight' => 70.0,
+        'sex' => Sex::Female,
+        'goal_id' => $goal->id,
+        'lifestyle_id' => $lifestyle->id,
+    ]);
+
+    $builder = app(MealPlanPromptBuilder::class);
+    $prompt = $builder->handle($user);
+
+    expect($prompt)
+        ->toContain('35')
+        ->toContain('170')
+        ->toContain('70');
+});

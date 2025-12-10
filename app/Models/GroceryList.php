@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\DataObjects\GroceryItemResponseData;
 use App\Enums\GroceryListStatus;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -35,7 +36,7 @@ final class GroceryList extends Model
      *
      * @var array<int, string>
      */
-    public const CATEGORY_ORDER = [
+    public const array CATEGORY_ORDER = [
         'Produce',
         'Meat & Seafood',
         'Dairy',
@@ -81,7 +82,7 @@ final class GroceryList extends Model
     {
         $grouped = $this->items->groupBy('category');
 
-        return $grouped->sortBy(function ($items, $category) {
+        return $grouped->sortBy(function (Collection $items, string $category): int {
             $index = array_search($category, self::CATEGORY_ORDER, true);
 
             return $index === false ? count(self::CATEGORY_ORDER) : $index;
@@ -89,9 +90,23 @@ final class GroceryList extends Model
     }
 
     /**
+     * Get items grouped by category with response data format.
+     *
+     * @return Collection<string, array<int, GroceryItemResponseData>>
+     */
+    public function formattedItemsByCategory(): Collection
+    {
+        return $this->itemsByCategory()->map(
+            fn (Collection $items): array => $items->map(
+                fn (GroceryItem $item): GroceryItemResponseData => $item->toResponseData()
+            )->values()->all()
+        );
+    }
+
+    /**
      * @return array<string, string>
      */
-    protected function casts(): array
+    public function casts(): array
     {
         return [
             'id' => 'integer',

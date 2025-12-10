@@ -21,10 +21,13 @@ final class GroceryListFactory extends Factory
      */
     public function definition(): array
     {
+        /** @var list<string> $words */
+        $words = fake()->words(3);
+
         return [
             'user_id' => User::factory(),
             'meal_plan_id' => MealPlan::factory(),
-            'name' => 'Grocery List for '.fake()->words(3, true),
+            'name' => 'Grocery List for '.implode(' ', $words),
             'status' => GroceryListStatus::Active,
             'metadata' => [
                 'generated_at' => now()->toIso8601String(),

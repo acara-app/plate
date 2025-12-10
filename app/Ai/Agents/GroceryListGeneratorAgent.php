@@ -6,6 +6,8 @@ namespace App\Ai\Agents;
 
 use App\Ai\BaseAgent;
 use App\Ai\SystemPrompt;
+use App\DataObjects\ExtractedIngredientData;
+use App\DataObjects\GroceryItemData;
 use App\DataObjects\GroceryListData;
 use App\DataObjects\IngredientData;
 use App\Models\MealPlan;
@@ -79,7 +81,7 @@ final class GroceryListGeneratorAgent extends BaseAgent
 
         if ($ingredients === []) {
             return new GroceryListData(
-                items: new DataCollection(GroceryListData::class, []),
+                items: new DataCollection(GroceryItemData::class, []),
             );
         }
 
@@ -96,7 +98,7 @@ final class GroceryListGeneratorAgent extends BaseAgent
     /**
      * Extract all ingredients from the meal plan's meals.
      *
-     * @return array<int, array{name: string, quantity: string, day: int, meal: string}>
+     * @return list<ExtractedIngredientData>
      */
     private function extractIngredients(MealPlan $mealPlan): array
     {
@@ -111,12 +113,12 @@ final class GroceryListGeneratorAgent extends BaseAgent
             }
             foreach ($meal->ingredients as $ingredient) {
                 $ingredientData = IngredientData::from($ingredient);
-                $ingredients[] = [
-                    'name' => $ingredientData->name,
-                    'quantity' => $ingredientData->quantity,
-                    'day' => $meal->day_number,
-                    'meal' => $meal->name,
-                ];
+                $ingredients[] = new ExtractedIngredientData(
+                    name: $ingredientData->name,
+                    quantity: $ingredientData->quantity,
+                    day: $meal->day_number,
+                    meal: $meal->name,
+                );
             }
         }
 
@@ -126,7 +128,7 @@ final class GroceryListGeneratorAgent extends BaseAgent
     /**
      * Build the prompt for the AI agent.
      *
-     * @param  array<int, array{name: string, quantity: string, day: int, meal: string}>  $ingredients
+     * @param  list<ExtractedIngredientData>  $ingredients
      */
     private function buildPrompt(array $ingredients, MealPlan $mealPlan): string
     {
@@ -134,10 +136,10 @@ final class GroceryListGeneratorAgent extends BaseAgent
         foreach ($ingredients as $ingredient) {
             $ingredientList .= sprintf(
                 "- %s: %s (Day %d, %s)\n",
-                $ingredient['name'],
-                $ingredient['quantity'],
-                $ingredient['day'],
-                $ingredient['meal'],
+                $ingredient->name,
+                $ingredient->quantity,
+                $ingredient->day,
+                $ingredient->meal,
             );
         }
 

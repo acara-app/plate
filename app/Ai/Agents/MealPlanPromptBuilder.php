@@ -68,6 +68,7 @@ final readonly class MealPlanPromptBuilder
 
         return MealPlanContextData::from([
             ...$profile->toArray(),
+            'goal_name' => $profile->goal?->name,
             'lifestyle' => $profile->lifestyle,
             'dietary_preferences' => $profile->dietaryPreferences,
             'health_conditions' => $profile->healthConditions,

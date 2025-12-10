@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\DataObjects\GroceryItemResponseData;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -35,9 +36,23 @@ final class GroceryItem extends Model
     }
 
     /**
+     * Convert the item to a response DTO.
+     */
+    public function toResponseData(): GroceryItemResponseData
+    {
+        return new GroceryItemResponseData(
+            id: $this->id,
+            name: $this->name,
+            quantity: $this->quantity,
+            category: $this->category,
+            is_checked: $this->is_checked,
+        );
+    }
+
+    /**
      * @return array<string, string>
      */
-    protected function casts(): array
+    public function casts(): array
     {
         return [
             'id' => 'integer',

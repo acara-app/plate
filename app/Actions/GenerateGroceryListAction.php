@@ -8,6 +8,7 @@ use App\Ai\Agents\GroceryListGeneratorAgent;
 use App\Enums\GroceryListStatus;
 use App\Models\GroceryList;
 use App\Models\MealPlan;
+use RuntimeException;
 use Throwable;
 
 final readonly class GenerateGroceryListAction
@@ -69,7 +70,15 @@ final readonly class GenerateGroceryListAction
             ]);
         }
 
-        return $groceryList->fresh(['items']);
+        $freshGroceryList = $groceryList->fresh(['items']);
+
+        if ($freshGroceryList === null) {
+            // @codeCoverageIgnoreStart
+            throw new RuntimeException('Failed to refresh grocery list after generation.');
+            // @codeCoverageIgnoreEnd
+        }
+
+        return $freshGroceryList;
     }
 
     /**

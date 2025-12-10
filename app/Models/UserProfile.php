@@ -30,7 +30,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property-read User $user
  * @property-read Goal|null $goal
  * @property-read Lifestyle|null $lifestyle
- * @property-read string|null $goal_name
  * @property-read float|null $bmi
  * @property-read float|null $bmr
  * @property-read float|null $tdee
@@ -41,10 +40,9 @@ final class UserProfile extends Model
     use HasFactory;
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $appends = [
-        'goal_name',
         'bmi',
         'bmr',
         'tdee',
@@ -117,14 +115,6 @@ final class UserProfile extends Model
             HealthCondition::class,
             'user_profile_health_condition'
         )->using(UserProfileHealthCondition::class)->withPivot('notes')->withTimestamps();
-    }
-
-    /**
-     * @return Attribute<string|null, never>
-     */
-    protected function goalName(): Attribute
-    {
-        return Attribute::get(fn (): ?string => $this->goal?->name);
     }
 
     /**

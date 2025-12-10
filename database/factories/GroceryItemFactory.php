@@ -41,6 +41,7 @@ final class GroceryItemFactory extends Factory
      */
     public function definition(): array
     {
+        /** @var string $category */
         $category = fake()->randomElement(self::CATEGORIES);
         $items = self::SAMPLE_ITEMS[$category] ?? ['Item'];
 
