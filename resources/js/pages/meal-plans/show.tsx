@@ -1,3 +1,4 @@
+import { show as showGroceryList } from '@/actions/App/Http/Controllers/GroceryListController';
 import { OnboardingBanner } from '@/components/onboarding-banner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,7 @@ import {
     Info,
     Loader2,
     Printer,
+    ShoppingCart,
     Sparkles,
 } from 'lucide-react';
 
@@ -167,6 +169,16 @@ export default function MealPlans({
 
                                 {/* Actions */}
                                 <div className="flex items-center gap-2">
+                                    <Button variant="outline" size="sm" asChild>
+                                        <Link
+                                            href={
+                                                showGroceryList(mealPlan.id).url
+                                            }
+                                        >
+                                            <ShoppingCart className="mr-2 h-4 w-4" />
+                                            Grocery List
+                                        </Link>
+                                    </Button>
                                     <Button variant="outline" size="sm" asChild>
                                         <a
                                             href={

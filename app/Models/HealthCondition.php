@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,11 +19,19 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read UserProfileHealthCondition|null $pivot
+ * @property-read string|null $notes
  */
 final class HealthCondition extends Model
 {
     /** @use HasFactory<\Database\Factories\HealthConditionFactory> */
     use HasFactory;
+
+    /**
+     * @var list<string>
+     */
+    protected $appends = [
+        'notes',
+    ];
 
     /**
      * @return array<string, string>
@@ -39,5 +48,13 @@ final class HealthCondition extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return Attribute<string|null, never>
+     */
+    protected function notes(): Attribute
+    {
+        return Attribute::get(fn (): ?string => $this->relationLoaded('pivot') ? $this->pivot?->notes : null);
     }
 }

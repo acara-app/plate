@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 
 /**
@@ -26,6 +27,7 @@ use Illuminate\Support\Collection;
  * @property-read CarbonInterface $updated_at
  * @property-read User $user
  * @property-read Collection<int, Meal> $meals
+ * @property-read GroceryList|null $groceryList
  */
 final class MealPlan extends Model
 {
@@ -66,6 +68,14 @@ final class MealPlan extends Model
     public function meals(): HasMany
     {
         return $this->hasMany(Meal::class)->orderBy('day_number')->orderBy('sort_order');
+    }
+
+    /**
+     * @return HasOne<GroceryList, $this>
+     */
+    public function groceryList(): HasOne
+    {
+        return $this->hasOne(GroceryList::class);
     }
 
     /**
