@@ -51,16 +51,15 @@
                     <div class="space-y-4 lg:space-y-6">
                         <h1
                             class="text-3xl font-bold leading-tight tracking-tight text-slate-900 lg:text-5xl dark:text-white">
-                            Your Personalized AI Nutrition Agent for
+                            Take Control of Your Blood Sugar
                             <span
                                 class="bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-400">
-                                Optimal Health
+                                with AI Nutrition
                             </span>
                         </h1>
 
                         <p class="text-base leading-relaxed text-slate-600 lg:text-lg dark:text-slate-300">
-                            Personalized meal plans that adapt to your glucose patterns — designed for adults with Type
-                            2 diabetes or prediabetes as an informational tool.
+                            Take control of your health with smart, adaptive nutrition. Our AI creates <strong class="text-slate-800 dark:text-slate-200">personalized meal plans</strong> that adapt dynamically to your unique glucose patterns — designed for adults with Type 2 diabetes or prediabetes.
                         </p>
 
                         <div
@@ -75,8 +74,8 @@
 
                         <div class="flex flex-col gap-3 pt-4 sm:flex-row">
                             <a href="{{ route('register') }}"
-                                class="group/btn inline-flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-emerald-600 to-teal-600 px-3 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/40 active:scale-100 sm:w-auto sm:px-5 sm:text-base lg:px-4 lg:py-3 dark:shadow-emerald-500/20 dark:hover:shadow-emerald-500/30">
-                                Start for Free
+                                class="group/btn inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-linear-to-r from-emerald-600 to-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/40 active:scale-100 sm:w-auto sm:text-base dark:shadow-emerald-500/20 dark:hover:shadow-emerald-500/30">
+                                Get Your AI Plan
                                 <svg class="h-5 w-5 transition-transform duration-300 group-hover/btn:translate-x-1"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -86,7 +85,7 @@
 
                             {{-- GitHub Trust Button --}}
                             <a href="https://github.com/acara-app/plate" target="_blank"
-                                class="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-700 transition-all duration-300 hover:border-slate-300 hover:bg-slate-50 sm:w-auto sm:px-4 sm:text-base lg:px-4 lg:py-3 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                                class="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-slate-300/50 bg-transparent px-4 py-3 text-sm font-medium text-slate-600 transition-all duration-300 hover:border-slate-400 hover:bg-slate-100 sm:w-auto sm:text-base dark:border-slate-600/50 dark:text-slate-400 dark:hover:border-slate-500 dark:hover:bg-slate-800/50">
                                 <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path fill-rule="evenodd"
                                         d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
@@ -234,14 +233,14 @@
                                             <svg class="h-6 w-6 lg:h-8 lg:w-8" fill="none" viewBox="0 0 24 24"
                                                 stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                             </svg>
                                         </div>
                                         <div
                                             class="text-[10px] font-medium text-slate-500 lg:text-xs dark:text-slate-400">
-                                            AI-Powered</div>
+                                            Data-Driven</div>
                                         <div class="text-base font-bold text-slate-900 lg:text-lg dark:text-white">
-                                            Analysis</div>
+                                            Glucose Control</div>
                                     </div>
                                 </div>
                             </div>
@@ -254,9 +253,8 @@
             <section class="w-full max-w-[335px] lg:max-w-5xl">
                 <div class="space-y-4 lg:space-y-6">
                     <div class="text-center">
-                        <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl dark:text-white">Key Features</h2>
-                        <p class="mt-2 text-sm text-slate-600 lg:text-base dark:text-slate-400">Everything you need for
-                            personalized nutrition</p>
+                        <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl dark:text-white">Data-Driven Glucose Control</h2>
+                        <p class="mt-2 text-sm text-slate-600 lg:text-base dark:text-slate-400">AI-powered precision for effortless diabetes diet management</p>
                     </div>
 
                     <div class="grid grid-cols-1 gap-3 lg:grid-cols-4 lg:gap-4">
@@ -268,13 +266,12 @@
                                     <svg class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Weekly
-                                    Meal Plans</h3>
-                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Get personalized
-                                    7-day meal plans tailored to your goals and preferences</p>
+                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Personalized
+                                    Precision</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Meal plans tailored to your glucose responses, not generic advice</p>
                             </div>
                         </div>
 
@@ -286,13 +283,12 @@
                                     <svg class="h-6 w-6 text-teal-600 dark:text-teal-400" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Glucose
-                                    Tracking</h3>
-                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Monitor and log
-                                    your blood glucose levels to optimize your nutrition</p>
+                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Effortless
+                                    Management</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Simplify daily dietary decisions with clear, actionable recommendations</p>
                             </div>
                         </div>
 
@@ -301,18 +297,15 @@
                             <div class="flex flex-col items-center text-center">
                                 <div
                                     class="mb-3 rounded-lg bg-cyan-100 p-3 transition-transform duration-300 group-hover/card:scale-110 dark:bg-cyan-900/50">
-                                    <svg class="h-6 w-6 text-cyan-600 dark:text-cyan-400" fill="currentColor"
-                                        viewBox="0 0 20 20">
-                                        <path d="M13 7H7v6h6V7z" />
-                                        <path fill-rule="evenodd"
-                                            d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z"
-                                            clip-rule="evenodd" />
+                                    <svg class="h-6 w-6 text-cyan-600 dark:text-cyan-400" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
                                 </div>
                                 <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
-                                    AI-Powered Nutrition</h3>
-                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Smart
-                                    recommendations based on your health data and dietary needs</p>
+                                    Proactive Health</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Make informed choices that actively support stable blood sugar and well-being</p>
                             </div>
                         </div>
 
@@ -321,17 +314,59 @@
                             <div class="flex flex-col items-center text-center">
                                 <div
                                     class="mb-3 rounded-lg bg-purple-100 p-3 transition-transform duration-300 group-hover/card:scale-110 dark:bg-purple-900/50">
-                                    <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd"
-                                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                                            clip-rule="evenodd" />
+                                    <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Open
-                                    Source</h3>
-                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Transparent,
-                                    community-driven development. Inspect the code, contribute, and trust the platform.
+                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Empowering
+                                    Knowledge</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Understand and navigate your health journey with confidence using data-driven insights</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {{-- How It Works Section --}}
+            <section class="w-full max-w-[335px] lg:max-w-5xl">
+                <div class="space-y-4 lg:space-y-6">
+                    <div class="text-center">
+                        <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl dark:text-white">How It Works</h2>
+                        <p class="mt-2 text-sm text-slate-600 lg:text-base dark:text-slate-400">Your AI-powered glucose navigator in three simple steps</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
+                        {{-- Step 1 --}}
+                        <div class="relative rounded-xl border border-slate-200 bg-white/80 p-5 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80">
+                            <div class="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">1</div>
+                            <div class="pt-2">
+                                <h3 class="text-base font-semibold text-slate-900 lg:text-lg dark:text-white">Build Your Profile</h3>
+                                <p class="mt-2 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
+                                    Log your glucose readings, set your health goals, and tell us your dietary preferences. Your data stays yours — we just use it to personalize your plan.
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- Step 2 --}}
+                        <div class="relative rounded-xl border border-slate-200 bg-white/80 p-5 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80">
+                            <div class="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-teal-600 text-sm font-bold text-white">2</div>
+                            <div class="pt-2">
+                                <h3 class="text-base font-semibold text-slate-900 lg:text-lg dark:text-white">AI Analyzes Patterns</h3>
+                                <p class="mt-2 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
+                                    Our AI identifies how your body responds to different foods and creates a nutrition strategy optimized for <strong class="text-slate-800 dark:text-slate-200">your</strong> glucose stability.
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- Step 3 --}}
+                        <div class="relative rounded-xl border border-slate-200 bg-white/80 p-5 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80">
+                            <div class="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-cyan-600 text-sm font-bold text-white">3</div>
+                            <div class="pt-2">
+                                <h3 class="text-base font-semibold text-slate-900 lg:text-lg dark:text-white">Eat, Track, Improve</h3>
+                                <p class="mt-2 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
+                                    Follow your personalized meal plan, log your glucose, and watch your plan adapt in real-time. <strong class="text-emerald-600 dark:text-emerald-400">See measurable results</strong>.
                                 </p>
                             </div>
                         </div>
@@ -343,10 +378,8 @@
             <section class="w-full max-w-[335px] lg:max-w-5xl">
                 <div class="space-y-4 lg:space-y-6">
                     <div class="text-center">
-                        <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl dark:text-white">Frequently Asked
-                            Questions</h2>
-                        <p class="mt-2 text-sm text-slate-600 lg:text-base dark:text-slate-400">Common questions about
-                            Acara Plate</p>
+                        <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl dark:text-white">Questions About AI Glucose Management</h2>
+                        <p class="mt-2 text-sm text-slate-600 lg:text-base dark:text-slate-400">Understand how Acara Plate helps you take control</p>
                     </div>
 
                     <div class="space-y-3">
