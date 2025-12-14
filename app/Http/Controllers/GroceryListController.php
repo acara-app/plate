@@ -35,10 +35,6 @@ final readonly class GroceryListController
         if (! $groceryList) {
             $groceryList = $this->generateAction->createPlaceholder($mealPlan);
             $needsGeneration = true;
-        } elseif ($groceryList->status === GroceryListStatus::Generating) {
-            if ($groceryList->items()->count() === 0) {
-                $needsGeneration = true;
-            }
         } elseif ($groceryList->status === GroceryListStatus::Failed) {
             $groceryList = $this->generateAction->createPlaceholder($mealPlan);
             $needsGeneration = true;
