@@ -3,12 +3,16 @@
 declare(strict_types=1);
 
 use App\Enums\GroceryListStatus;
+use App\Jobs\GenerateGroceryListJob;
 use App\Models\GroceryItem;
 use App\Models\GroceryList;
 use App\Models\MealPlan;
 use App\Models\User;
+use Illuminate\Support\Facades\Queue;
 
 it('creates placeholder when grocery list does not exist', function (): void {
+    Queue::fake();
+
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();
 
@@ -19,6 +23,8 @@ it('creates placeholder when grocery list does not exist', function (): void {
     $mealPlan->refresh();
     expect($mealPlan->groceryList)->not->toBeNull()
         ->and($mealPlan->groceryList->status)->toBe(GroceryListStatus::Generating);
+
+    Queue::assertPushed(GenerateGroceryListJob::class);
 });
 
 it('denies access to other users meal plan', function (): void {

@@ -9,12 +9,12 @@ use Spatie\LaravelData\Data;
 final class GroceryItemData extends Data
 {
     /**
-     * @param  array<int, int>|null  $days
+     * @param  array<int>  $days
      */
     public function __construct(
         public string $name,
         public string $quantity,
         public string $category,
-        public ?array $days = null,
+        public array $days = [],
     ) {}
 }

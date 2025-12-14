@@ -21,7 +21,7 @@ import {
     GroceryStatus,
     type MealPlanSummary,
 } from '@/types/grocery-list';
-import { Deferred, Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePoll } from '@inertiajs/react';
 import {
     ArrowLeft,
     CalendarDays,
@@ -36,7 +36,7 @@ import { useState } from 'react';
 
 interface GroceryListPageProps {
     mealPlan: MealPlanSummary;
-    groceryList?: GroceryList;
+    groceryList: GroceryList;
 }
 
 type ViewMode = 'category' | 'day';
@@ -47,6 +47,13 @@ export default function GroceryListPage({
 }: GroceryListPageProps) {
     const regenerateForm = useForm({});
     const [viewMode, setViewMode] = useState<ViewMode>('category');
+
+    const isGenerating = groceryList.status === GroceryStatus.Generating;
+
+    usePoll(2000, {
+        only: ['groceryList'],
+        keepAlive: isGenerating,
+    });
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -100,16 +107,21 @@ export default function GroceryListPage({
                             variant="outline"
                             size="sm"
                             onClick={handleRegenerate}
-                            disabled={regenerateForm.processing}
+                            disabled={regenerateForm.processing || isGenerating}
                         >
-                            {regenerateForm.processing ? (
+                            {regenerateForm.processing || isGenerating ? (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             ) : (
                                 <RefreshCw className="mr-2 h-4 w-4" />
                             )}
                             Regenerate
                         </Button>
-                        <Button variant="outline" size="sm" asChild>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            disabled={isGenerating}
+                        >
                             <a
                                 href={printGroceryList(mealPlan.id).url}
                                 target="_blank"
@@ -122,16 +134,18 @@ export default function GroceryListPage({
                     </div>
                 </div>
 
-                <Deferred data="groceryList" fallback={<GroceryListSkeleton />}>
+                {isGenerating ? (
+                    <GroceryListSkeleton />
+                ) : (
                     <GroceryListContent
-                        groceryList={groceryList!}
+                        groceryList={groceryList}
                         onToggleItem={handleToggleItem}
                         onRegenerate={handleRegenerate}
                         isRegenerating={regenerateForm.processing}
                         viewMode={viewMode}
                         onViewModeChange={setViewMode}
                     />
-                </Deferred>
+                )}
             </div>
         </AppLayout>
     );
