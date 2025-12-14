@@ -26,16 +26,16 @@ final class GenerateGroceryListJob implements ShouldQueue
     public function middleware(): array
     {
         return [
-            new WithoutOverlapping($this->groceryList->id),
+            new WithoutOverlapping((string) $this->groceryList->id),
         ];
     }
 
     /**
      * Get the unique ID for the job.
      */
-    public function uniqueId(): int
+    public function uniqueId(): string
     {
-        return $this->groceryList->id;
+        return (string) $this->groceryList->id;
     }
 
     public function handle(GenerateGroceryListAction $action): void

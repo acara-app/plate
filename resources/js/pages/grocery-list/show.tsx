@@ -50,10 +50,7 @@ export default function GroceryListPage({
 
     const isGenerating = groceryList.status === GroceryStatus.Generating;
 
-    usePoll(2000, {
-        only: ['groceryList'],
-        keepAlive: isGenerating,
-    });
+    usePoll(2000, { only: ['groceryList'] }, { keepAlive: isGenerating });
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -481,9 +478,8 @@ function GroceryItemRow({
     showDays,
     currentDay,
 }: GroceryItemRowProps) {
-    const otherDays = currentDay
-        ? item.days.filter((d) => d !== currentDay)
-        : [];
+    const days = item.days ?? [];
+    const otherDays = currentDay ? days.filter((d) => d !== currentDay) : [];
     const hasOtherDays = otherDays.length > 0;
 
     return (
@@ -503,9 +499,9 @@ function GroceryItemRow({
                 <span className="ml-2 text-muted-foreground">
                     {item.quantity}
                 </span>
-                {showDays && item.days.length > 1 && (
+                {showDays && days.length > 1 && (
                     <span className="ml-2 text-xs text-muted-foreground">
-                        (Day {item.days.join(', ')})
+                        (Day {days.join(', ')})
                     </span>
                 )}
                 {hasOtherDays && (

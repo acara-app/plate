@@ -45,7 +45,7 @@ it('can be converted to array', function (): void {
         'name' => 'Eggs',
         'quantity' => '12',
         'category' => 'Dairy',
-        'days' => null,
+        'days' => [],
     ]);
 });
 

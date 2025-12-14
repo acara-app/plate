@@ -76,3 +76,33 @@ it('uses without overlapping middleware', function (): void {
     expect($middleware)->toHaveCount(1)
         ->and($middleware[0])->toBeInstanceOf(Illuminate\Queue\Middleware\WithoutOverlapping::class);
 });
+
+it('returns grocery list id as unique id', function (): void {
+    $user = User::factory()->create();
+    $mealPlan = MealPlan::factory()->for($user)->create();
+    $groceryList = GroceryList::factory()
+        ->for($mealPlan)
+        ->for($user)
+        ->create(['status' => GroceryListStatus::Generating]);
+
+    $job = new GenerateGroceryListJob($groceryList);
+
+    expect($job->uniqueId())->toBe((string) $groceryList->id);
+});
+
+it('calls generate items on the action when handled', function (): void {
+    $user = User::factory()->create();
+    $mealPlan = MealPlan::factory()->for($user)->create();
+    $groceryList = GroceryList::factory()
+        ->for($mealPlan)
+        ->for($user)
+        ->create(['status' => GroceryListStatus::Generating]);
+
+    $job = new GenerateGroceryListJob($groceryList);
+
+    $action = app(App\Actions\GenerateGroceryListAction::class);
+    $job->handle($action);
+
+    $groceryList->refresh();
+    expect($groceryList->status)->toBe(GroceryListStatus::Active);
+});
