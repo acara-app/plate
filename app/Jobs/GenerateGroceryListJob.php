@@ -6,11 +6,12 @@ namespace App\Jobs;
 
 use App\Actions\GenerateGroceryListAction;
 use App\Models\GroceryList;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 
-final class GenerateGroceryListJob implements ShouldQueue
+final class GenerateGroceryListJob implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
