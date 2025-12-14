@@ -109,7 +109,7 @@ final class GroceryListGeneratorAgent extends BaseAgent
             if ($meal->ingredients === null) {
                 continue;
             }
-            if ($meal->ingredients === []) {
+            if (count($meal->ingredients) === 0) {
                 continue;
             }
             foreach ($meal->ingredients as $ingredient) {

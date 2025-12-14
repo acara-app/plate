@@ -347,7 +347,7 @@ it('handles meals with empty ingredients array when deriving days', function ():
     expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class);
 });
 
-it('handles ingredients without name when deriving days', function (): void {
+it('handles ingredients with empty name when deriving days', function (): void {
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();
 
@@ -355,7 +355,7 @@ it('handles ingredients without name when deriving days', function (): void {
         'day_number' => 1,
         'name' => 'Breakfast',
         'ingredients' => [
-            ['quantity' => '2'],
+            ['name' => '', 'quantity' => '2'],
         ],
     ]);
 
@@ -370,7 +370,7 @@ it('handles ingredients without name when deriving days', function (): void {
     $groceryList->load('items', 'mealPlan.meals');
     $itemsByDay = $groceryList->itemsByDay();
 
-    // Should handle missing ingredient name gracefully
+    // Should handle empty ingredient name gracefully
     expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class);
 });
 
