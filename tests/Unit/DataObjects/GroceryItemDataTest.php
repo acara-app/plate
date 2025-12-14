@@ -45,5 +45,39 @@ it('can be converted to array', function (): void {
         'name' => 'Eggs',
         'quantity' => '12',
         'category' => 'Dairy',
+        'days' => [],
+    ]);
+});
+
+it('can be created with days array', function (): void {
+    $itemData = new GroceryItemData(
+        name: 'Eggs',
+        quantity: '12',
+        category: 'Dairy',
+        days: [1, 3, 5],
+    );
+
+    expect($itemData)
+        ->name->toBe('Eggs')
+        ->quantity->toBe('12')
+        ->category->toBe('Dairy')
+        ->days->toBe([1, 3, 5]);
+});
+
+it('can be converted to array with days', function (): void {
+    $itemData = new GroceryItemData(
+        name: 'Eggs',
+        quantity: '12',
+        category: 'Dairy',
+        days: [1, 2, 3],
+    );
+
+    $array = $itemData->toArray();
+
+    expect($array)->toBe([
+        'name' => 'Eggs',
+        'quantity' => '12',
+        'category' => 'Dairy',
+        'days' => [1, 2, 3],
     ]);
 });

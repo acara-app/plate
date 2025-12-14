@@ -17,6 +17,7 @@ export interface GroceryItem {
     quantity: string;
     category: string;
     is_checked: boolean;
+    days: number[];
 }
 
 export interface GroceryListMetadata {
@@ -32,8 +33,10 @@ export interface GroceryList {
     status: GroceryListStatus;
     metadata: GroceryListMetadata | null;
     items_by_category: Record<string, GroceryItem[]>;
+    items_by_day: Record<number, GroceryItem[]>;
     total_items: number;
     checked_items: number;
+    duration_days: number;
 }
 
 export interface MealPlanSummary {

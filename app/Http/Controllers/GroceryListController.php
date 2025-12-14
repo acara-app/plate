@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\GenerateGroceryListAction;
 use App\Enums\GroceryListStatus;
+use App\Jobs\GenerateGroceryListJob;
 use App\Models\GroceryItem;
 use App\Models\GroceryList;
 use App\Models\MealPlan;
@@ -35,14 +36,16 @@ final readonly class GroceryListController
             $groceryList = $this->generateAction->createPlaceholder($mealPlan);
             $needsGeneration = true;
         } elseif ($groceryList->status === GroceryListStatus::Generating) {
-            // Still generating or never completed - check if items exist
             if ($groceryList->items()->count() === 0) {
                 $needsGeneration = true;
             }
         } elseif ($groceryList->status === GroceryListStatus::Failed) {
-            // Previous generation failed - retry
             $groceryList = $this->generateAction->createPlaceholder($mealPlan);
             $needsGeneration = true;
+        }
+
+        if ($needsGeneration) {
+            dispatch(new GenerateGroceryListJob($groceryList));
         }
 
         return Inertia::render('grocery-list/show', [
@@ -51,11 +54,7 @@ final readonly class GroceryListController
                 'name' => $mealPlan->name,
                 'duration_days' => $mealPlan->duration_days,
             ],
-            'groceryList' => $needsGeneration
-                ? Inertia::defer(fn (): array => $this->formatGroceryList(
-                    $this->generateAction->generateItems($groceryList)
-                ))
-                : $this->formatGroceryList($groceryList),
+            'groceryList' => $this->formatGroceryList($groceryList),
         ]);
     }
 
@@ -68,15 +67,15 @@ final readonly class GroceryListController
 
         $groceryList = $this->generateAction->createPlaceholder($mealPlan);
 
+        dispatch(new GenerateGroceryListJob($groceryList));
+
         return Inertia::render('grocery-list/show', [
             'mealPlan' => [
                 'id' => $mealPlan->id,
                 'name' => $mealPlan->name,
                 'duration_days' => $mealPlan->duration_days,
             ],
-            'groceryList' => Inertia::defer(fn (): array => $this->formatGroceryList(
-                $this->generateAction->generateItems($groceryList)
-            )),
+            'groceryList' => $this->formatGroceryList($groceryList),
         ]);
     }
 
@@ -112,7 +111,7 @@ final readonly class GroceryListController
      */
     private function formatGroceryList(GroceryList $groceryList): array
     {
-        $groceryList->load('items');
+        $groceryList->load('items', 'mealPlan.meals');
 
         return [
             'id' => $groceryList->id,
@@ -120,8 +119,10 @@ final readonly class GroceryListController
             'status' => $groceryList->status->value,
             'metadata' => $groceryList->metadata,
             'items_by_category' => $groceryList->formattedItemsByCategory(),
+            'items_by_day' => $groceryList->formattedItemsByDay(),
             'total_items' => $groceryList->items->count(),
             'checked_items' => $groceryList->items->where('is_checked', true)->count(),
+            'duration_days' => $groceryList->mealPlan->duration_days,
         ];
     }
 }

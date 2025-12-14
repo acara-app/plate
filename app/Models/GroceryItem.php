@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read string $quantity
  * @property-read string $category
  * @property-read bool $is_checked
+ * @property-read array<int, int>|null $days
  * @property-read int $sort_order
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -46,6 +47,7 @@ final class GroceryItem extends Model
             quantity: $this->quantity,
             category: $this->category,
             is_checked: $this->is_checked,
+            days: $this->days ?? [],
         );
     }
 
@@ -61,6 +63,7 @@ final class GroceryItem extends Model
             'quantity' => 'string',
             'category' => 'string',
             'is_checked' => 'boolean',
+            'days' => 'array',
             'sort_order' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
