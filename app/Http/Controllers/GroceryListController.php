@@ -112,7 +112,7 @@ final readonly class GroceryListController
      */
     private function formatGroceryList(GroceryList $groceryList): array
     {
-        $groceryList->load('items');
+        $groceryList->load('items', 'mealPlan.meals');
 
         return [
             'id' => $groceryList->id,
@@ -120,8 +120,10 @@ final readonly class GroceryListController
             'status' => $groceryList->status->value,
             'metadata' => $groceryList->metadata,
             'items_by_category' => $groceryList->formattedItemsByCategory(),
+            'items_by_day' => $groceryList->formattedItemsByDay(),
             'total_items' => $groceryList->items->count(),
             'checked_items' => $groceryList->items->where('is_checked', true)->count(),
+            'duration_days' => $groceryList->mealPlan->duration_days,
         ];
     }
 }

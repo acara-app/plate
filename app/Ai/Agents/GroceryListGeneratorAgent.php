@@ -51,7 +51,8 @@ final class GroceryListGeneratorAgent extends BaseAgent
                 'The JSON must be parseable by json_decode()',
                 'Use double quotes for all strings',
                 'Ensure all brackets and braces are properly closed',
-                'Return format: {"items": [{"name": "Item Name", "quantity": "Combined Quantity", "category": "Category Name"}]}',
+                'Return format: {"items": [{"name": "Item Name", "quantity": "Combined Quantity", "category": "Category Name", "days": [1, 2, 3]}]}',
+                'The "days" array must contain the day numbers (1-based) where the ingredient is used',
                 'Valid categories are: Produce, Dairy, Meat & Seafood, Pantry, Frozen, Bakery, Beverages, Condiments & Sauces, Herbs & Spices, Other',
             ],
         );
@@ -154,8 +155,10 @@ final class GroceryListGeneratorAgent extends BaseAgent
             2. Normalize ingredient names (e.g., "boneless skinless chicken breast" and "chicken breast" should be combined)
             3. Keep quantities practical (round to reasonable amounts)
             4. Categorize each item appropriately
+            5. Track which days each ingredient is used in the "days" array (use the Day numbers from above)
 
             Return a JSON object with an "items" array containing consolidated grocery items.
+            Each item must include a "days" array with the day numbers where it is used.
             PROMPT;
     }
 

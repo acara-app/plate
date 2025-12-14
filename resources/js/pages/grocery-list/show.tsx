@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import AppLayout from '@/layouts/app-layout';
 import mealPlans from '@/routes/meal-plans';
 import { type BreadcrumbItem } from '@/types';
@@ -23,23 +24,29 @@ import {
 import { Deferred, Head, Link, router, useForm } from '@inertiajs/react';
 import {
     ArrowLeft,
+    CalendarDays,
+    LayoutGrid,
     Loader2,
     Printer,
     RefreshCw,
     ShoppingCart,
     Sparkles,
 } from 'lucide-react';
+import { useState } from 'react';
 
 interface GroceryListPageProps {
     mealPlan: MealPlanSummary;
     groceryList?: GroceryList;
 }
 
+type ViewMode = 'category' | 'day';
+
 export default function GroceryListPage({
     mealPlan,
     groceryList,
 }: GroceryListPageProps) {
     const regenerateForm = useForm({});
+    const [viewMode, setViewMode] = useState<ViewMode>('category');
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -121,6 +128,8 @@ export default function GroceryListPage({
                         onToggleItem={handleToggleItem}
                         onRegenerate={handleRegenerate}
                         isRegenerating={regenerateForm.processing}
+                        viewMode={viewMode}
+                        onViewModeChange={setViewMode}
                     />
                 </Deferred>
             </div>
@@ -178,6 +187,8 @@ interface GroceryListContentProps {
     onToggleItem: (item: GroceryItem) => void;
     onRegenerate: () => void;
     isRegenerating: boolean;
+    viewMode: ViewMode;
+    onViewModeChange: (mode: ViewMode) => void;
 }
 
 function GroceryListContent({
@@ -185,6 +196,8 @@ function GroceryListContent({
     onToggleItem,
     onRegenerate,
     isRegenerating,
+    viewMode,
+    onViewModeChange,
 }: GroceryListContentProps) {
     const progress =
         groceryList.total_items > 0
@@ -192,6 +205,9 @@ function GroceryListContent({
             : 0;
 
     const categories = Object.keys(groceryList.items_by_category);
+    const days = Object.keys(groceryList.items_by_day || {})
+        .map(Number)
+        .sort((a, b) => a - b);
 
     return (
         <>
@@ -207,6 +223,38 @@ function GroceryListContent({
                     </span>
                 </div>
                 <Progress value={progress} className="h-2" />
+            </div>
+
+            {/* View Mode Toggle */}
+            <div className="flex items-center justify-between">
+                <ToggleGroup
+                    type="single"
+                    value={viewMode}
+                    onValueChange={(value) =>
+                        value && onViewModeChange(value as ViewMode)
+                    }
+                    variant="outline"
+                    size="sm"
+                >
+                    <ToggleGroupItem
+                        value="category"
+                        aria-label="View by category"
+                    >
+                        <LayoutGrid className="mr-2 h-4 w-4" />
+                        By Category
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="day" aria-label="View by day">
+                        <CalendarDays className="mr-2 h-4 w-4" />
+                        By Day
+                    </ToggleGroupItem>
+                </ToggleGroup>
+
+                {viewMode === 'day' && days.length > 0 && (
+                    <span className="text-sm text-muted-foreground">
+                        {days.length} day{days.length !== 1 ? 's' : ''} with
+                        items
+                    </span>
+                )}
             </div>
 
             {/* Status Alerts */}
@@ -235,66 +283,148 @@ function GroceryListContent({
             )}
 
             {/* Grocery Items by Category */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {categories.map((category) => {
-                    const items = groceryList.items_by_category[category];
-                    const checkedCount = items.filter(
-                        (item) => item.is_checked,
-                    ).length;
+            {viewMode === 'category' && (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {categories.map((category) => {
+                        const items = groceryList.items_by_category[category];
+                        const checkedCount = items.filter(
+                            (item) => item.is_checked,
+                        ).length;
 
-                    return (
-                        <Card key={category} className="overflow-hidden">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="flex items-center justify-between text-lg">
-                                    <span className="flex items-center gap-2">
-                                        {categoryEmojis[category] || '📦'}{' '}
-                                        {category}
-                                    </span>
+                        return (
+                            <Card key={category} className="overflow-hidden">
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="flex items-center justify-between text-lg">
+                                        <span className="flex items-center gap-2">
+                                            {categoryEmojis[category] || '📦'}{' '}
+                                            {category}
+                                        </span>
+                                        <Badge
+                                            variant="secondary"
+                                            className="font-normal"
+                                        >
+                                            {checkedCount}/{items.length}
+                                        </Badge>
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="pt-0">
+                                    <ul className="space-y-2">
+                                        {items.map((item) => (
+                                            <GroceryItemRow
+                                                key={item.id}
+                                                item={item}
+                                                onToggle={onToggleItem}
+                                                showDays
+                                            />
+                                        ))}
+                                    </ul>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Grocery Items by Day */}
+            {viewMode === 'day' && (
+                <div className="space-y-6">
+                    {days.map((day) => {
+                        const items = groceryList.items_by_day[day] || [];
+                        const checkedCount = items.filter(
+                            (item) => item.is_checked,
+                        ).length;
+
+                        // Group items by category within each day
+                        const itemsByCategory = items.reduce<
+                            Record<string, GroceryItem[]>
+                        >((acc, item) => {
+                            if (!acc[item.category]) {
+                                acc[item.category] = [];
+                            }
+                            acc[item.category].push(item);
+                            return acc;
+                        }, {});
+
+                        const dayCategories = Object.keys(itemsByCategory);
+
+                        return (
+                            <div key={day} className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="flex items-center gap-2 text-xl font-semibold">
+                                        <CalendarDays className="h-5 w-5 text-primary" />
+                                        Day {day}
+                                    </h3>
                                     <Badge
-                                        variant="secondary"
+                                        variant="outline"
                                         className="font-normal"
                                     >
-                                        {checkedCount}/{items.length}
+                                        {checkedCount}/{items.length} items
                                     </Badge>
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="pt-0">
-                                <ul className="space-y-2">
-                                    {items.map((item) => (
-                                        <li
-                                            key={item.id}
-                                            className="flex items-center gap-3"
-                                        >
-                                            <Checkbox
-                                                id={`item-${item.id}`}
-                                                checked={item.is_checked}
-                                                onCheckedChange={() =>
-                                                    onToggleItem(item)
-                                                }
-                                            />
-                                            <label
-                                                htmlFor={`item-${item.id}`}
-                                                className={`flex-1 cursor-pointer text-sm ${
-                                                    item.is_checked
-                                                        ? 'text-muted-foreground line-through'
-                                                        : ''
-                                                }`}
+                                </div>
+
+                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                    {dayCategories.map((category) => {
+                                        const categoryItems =
+                                            itemsByCategory[category];
+                                        const categoryCheckedCount =
+                                            categoryItems.filter(
+                                                (item) => item.is_checked,
+                                            ).length;
+
+                                        return (
+                                            <Card
+                                                key={`${day}-${category}`}
+                                                className="overflow-hidden"
                                             >
-                                                <span className="font-medium">
-                                                    {item.name}
-                                                </span>
-                                                <span className="ml-2 text-muted-foreground">
-                                                    {item.quantity}
-                                                </span>
-                                            </label>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </CardContent>
-                        </Card>
-                    );
-                })}
-            </div>
+                                                <CardHeader className="pb-3">
+                                                    <CardTitle className="flex items-center justify-between text-lg">
+                                                        <span className="flex items-center gap-2">
+                                                            {categoryEmojis[
+                                                                category
+                                                            ] || '📦'}{' '}
+                                                            {category}
+                                                        </span>
+                                                        <Badge
+                                                            variant="secondary"
+                                                            className="font-normal"
+                                                        >
+                                                            {
+                                                                categoryCheckedCount
+                                                            }
+                                                            /
+                                                            {
+                                                                categoryItems.length
+                                                            }
+                                                        </Badge>
+                                                    </CardTitle>
+                                                </CardHeader>
+                                                <CardContent className="pt-0">
+                                                    <ul className="space-y-2">
+                                                        {categoryItems.map(
+                                                            (item) => (
+                                                                <GroceryItemRow
+                                                                    key={`${day}-${item.id}`}
+                                                                    item={item}
+                                                                    onToggle={
+                                                                        onToggleItem
+                                                                    }
+                                                                    currentDay={
+                                                                        day
+                                                                    }
+                                                                />
+                                                            ),
+                                                        )}
+                                                    </ul>
+                                                </CardContent>
+                                            </Card>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             {/* Empty State */}
             {categories.length === 0 && (
@@ -321,5 +451,55 @@ function GroceryListContent({
                 </div>
             )}
         </>
+    );
+}
+
+interface GroceryItemRowProps {
+    item: GroceryItem;
+    onToggle: (item: GroceryItem) => void;
+    showDays?: boolean;
+    currentDay?: number;
+}
+
+function GroceryItemRow({
+    item,
+    onToggle,
+    showDays,
+    currentDay,
+}: GroceryItemRowProps) {
+    const otherDays = currentDay
+        ? item.days.filter((d) => d !== currentDay)
+        : [];
+    const hasOtherDays = otherDays.length > 0;
+
+    return (
+        <li className="flex items-center gap-3">
+            <Checkbox
+                id={`item-${item.id}${currentDay ? `-day-${currentDay}` : ''}`}
+                checked={item.is_checked}
+                onCheckedChange={() => onToggle(item)}
+            />
+            <label
+                htmlFor={`item-${item.id}${currentDay ? `-day-${currentDay}` : ''}`}
+                className={`flex-1 cursor-pointer text-sm ${
+                    item.is_checked ? 'text-muted-foreground line-through' : ''
+                }`}
+            >
+                <span className="font-medium">{item.name}</span>
+                <span className="ml-2 text-muted-foreground">
+                    {item.quantity}
+                </span>
+                {showDays && item.days.length > 1 && (
+                    <span className="ml-2 text-xs text-muted-foreground">
+                        (Day {item.days.join(', ')})
+                    </span>
+                )}
+                {hasOtherDays && (
+                    <span className="ml-2 text-xs text-muted-foreground">
+                        Also Day {otherDays.join(', ')}
+                    </span>
+                )}
+            </label>
+        </li>
     );
 }

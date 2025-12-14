@@ -50,6 +50,7 @@ final readonly class GenerateGroceryListAction
                     'category' => $item->category,
                     'is_checked' => false,
                     'sort_order' => $sortOrder++,
+                    'days' => $item->days,
                 ]);
             }
 

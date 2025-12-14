@@ -96,7 +96,47 @@ final class GroceryList extends Model
      */
     public function formattedItemsByCategory(): Collection
     {
+        $this->deriveItemDaysIfMissing();
+
         return $this->itemsByCategory()->map(
+            fn (Collection $items): array => $items->map(
+                fn (GroceryItem $item): GroceryItemResponseData => $item->toResponseData()
+            )->values()->all()
+        );
+    }
+
+    /**
+     * Get items grouped by day number.
+     *
+     * @return Collection<int, Collection<int, GroceryItem>>
+     */
+    public function itemsByDay(): Collection
+    {
+        $this->deriveItemDaysIfMissing();
+
+        $byDay = collect();
+
+        foreach ($this->items as $item) {
+            $days = $item->days ?? [];
+            foreach ($days as $day) {
+                if (! $byDay->has($day)) {
+                    $byDay->put($day, collect());
+                }
+                $byDay->get($day)->push($item);
+            }
+        }
+
+        return $byDay->sortKeys();
+    }
+
+    /**
+     * Get items grouped by day with response data format.
+     *
+     * @return Collection<int, array<int, GroceryItemResponseData>>
+     */
+    public function formattedItemsByDay(): Collection
+    {
+        return $this->itemsByDay()->map(
             fn (Collection $items): array => $items->map(
                 fn (GroceryItem $item): GroceryItemResponseData => $item->toResponseData()
             )->values()->all()
@@ -118,5 +158,108 @@ final class GroceryList extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Derive days from meal plan ingredients for items missing day data.
+     * This is a fallback for grocery lists generated before the days feature.
+     */
+    private function deriveItemDaysIfMissing(): void
+    {
+        $needsDerivation = $this->items->contains(fn (GroceryItem $item): bool => $item->days === null || $item->days === []);
+
+        if (! $needsDerivation) {
+            return;
+        }
+
+        $ingredientDayMap = $this->buildIngredientDayMap();
+
+        foreach ($this->items as $item) {
+            if ($item->days !== null && $item->days !== []) {
+                continue;
+            }
+
+            $normalizedName = $this->normalizeIngredientName($item->name);
+            $derivedDays = $ingredientDayMap[$normalizedName] ?? [];
+
+            if ($derivedDays === []) {
+                $derivedDays = $this->fuzzyMatchDays($item->name, $ingredientDayMap);
+            }
+
+            $item->days = array_values(array_unique($derivedDays));
+        }
+    }
+
+    /**
+     * Build a map of normalized ingredient names to day numbers.
+     *
+     * @return array<string, array<int, int>>
+     */
+    private function buildIngredientDayMap(): array
+    {
+        $mealPlan = $this->mealPlan;
+        $mealPlan->load('meals');
+
+        $map = [];
+
+        foreach ($mealPlan->meals as $meal) {
+            if ($meal->ingredients === null || $meal->ingredients === []) {
+                continue;
+            }
+
+            foreach ($meal->ingredients as $ingredient) {
+                $name = $this->normalizeIngredientName($ingredient['name'] ?? '');
+                if ($name === '') {
+                    continue;
+                }
+
+                if (! isset($map[$name])) {
+                    $map[$name] = [];
+                }
+                $map[$name][] = $meal->day_number;
+            }
+        }
+
+        foreach ($map as $name => $days) {
+            $map[$name] = array_values(array_unique($days));
+        }
+
+        return $map;
+    }
+
+    /**
+     * Normalize an ingredient name for matching.
+     */
+    private function normalizeIngredientName(string $name): string
+    {
+        $name = mb_strtolower(mb_trim($name));
+        $name = (string) preg_replace('/[^a-z0-9\s]/', '', $name);
+        $name = (string) preg_replace('/\s+/', ' ', $name);
+
+        return $name;
+    }
+
+    /**
+     * Fuzzy match an item name against ingredient day map.
+     *
+     * @param  array<string, array<int, int>>  $ingredientDayMap
+     * @return array<int, int>
+     */
+    private function fuzzyMatchDays(string $itemName, array $ingredientDayMap): array
+    {
+        $normalizedItem = $this->normalizeIngredientName($itemName);
+        $itemWords = explode(' ', $normalizedItem);
+        $matchedDays = [];
+
+        foreach ($ingredientDayMap as $ingredientName => $days) {
+            foreach ($itemWords as $word) {
+                if (mb_strlen($word) >= 3 && str_contains($ingredientName, $word)) {
+                    $matchedDays = array_merge($matchedDays, $days);
+                    break;
+                }
+            }
+        }
+
+        return array_values(array_unique($matchedDays));
     }
 }
