@@ -129,7 +129,7 @@ it('groups items by day', function (): void {
     $itemsByDay = $groceryList->itemsByDay();
 
     expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class)
-        ->and($itemsByDay->keys()->toArray())->toBe([1, 2, 3])
+        ->and($itemsByDay->keys()->all())->toBe([1, 2, 3])
         ->and($itemsByDay[1])->toHaveCount(2)
         ->and($itemsByDay[2])->toHaveCount(2)
         ->and($itemsByDay[3])->toHaveCount(1);
@@ -159,7 +159,7 @@ it('returns formatted items by day with response data', function (): void {
     $formatted = $groceryList->formattedItemsByDay();
 
     expect($formatted)->toBeInstanceOf(Illuminate\Support\Collection::class)
-        ->and($formatted->keys()->toArray())->toBe([1, 2])
+        ->and($formatted->keys()->all())->toBe([1, 2])
         ->and($formatted[1])->toBeArray()
         ->and($formatted[1])->toHaveCount(2)
         ->and($formatted[1][0])->toBeInstanceOf(GroceryItemResponseData::class)
@@ -218,7 +218,7 @@ it('derives days from meal plan for items without day data', function (): void {
 
     // Verify that days were derived
     expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class)
-        ->and($itemsByDay->keys()->toArray())->toContain(1, 2, 3);
+        ->and($itemsByDay->keys()->all())->toContain(1, 2, 3);
 });
 
 it('uses fuzzy matching when exact match is not found', function (): void {
@@ -294,7 +294,7 @@ it('skips derivation when all items have days', function (): void {
 
     // Should not trigger derivation since item already has days
     expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class)
-        ->and($itemsByDay->keys()->toArray())->toBe([1, 2]);
+        ->and($itemsByDay->keys()->all())->toBe([1, 2]);
 });
 
 it('handles meals with null ingredients when deriving days', function (): void {

@@ -203,10 +203,12 @@ final class GroceryList extends Model
         $map = [];
 
         foreach ($mealPlan->meals as $meal) {
-            if ($meal->ingredients === null || $meal->ingredients === []) {
+            if ($meal->ingredients === null) {
                 continue;
             }
-
+            if ($meal->ingredients === []) {
+                continue;
+            }
             foreach ($meal->ingredients as $ingredient) {
                 $name = $this->normalizeIngredientName($ingredient['name'] ?? '');
                 if ($name === '') {
@@ -234,9 +236,8 @@ final class GroceryList extends Model
     {
         $name = mb_strtolower(mb_trim($name));
         $name = (string) preg_replace('/[^a-z0-9\s]/', '', $name);
-        $name = (string) preg_replace('/\s+/', ' ', $name);
 
-        return $name;
+        return (string) preg_replace('/\s+/', ' ', $name);
     }
 
     /**

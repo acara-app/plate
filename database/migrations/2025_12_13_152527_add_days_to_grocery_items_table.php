@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('grocery_items', function (Blueprint $table) {
+        Schema::table('grocery_items', function (Blueprint $table): void {
             $table->json('days')->nullable();
         });
     }
