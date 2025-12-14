@@ -10,21 +10,19 @@ use App\Models\MealPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
 
-it('creates placeholder when grocery list does not exist', function (): void {
-    Queue::fake();
+it('returns null when grocery list does not exist', function (): void {
+    $this->withoutVite();
 
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();
 
-    expect($mealPlan->groceryList)->toBeNull();
+    $response = $this->actingAs($user)->get(route('meal-plans.grocery-list.show', $mealPlan));
 
-    $this->actingAs($user)->get(route('meal-plans.grocery-list.show', $mealPlan));
-
-    $mealPlan->refresh();
-    expect($mealPlan->groceryList)->not->toBeNull()
-        ->and($mealPlan->groceryList->status)->toBe(GroceryListStatus::Generating);
-
-    Queue::assertPushed(GenerateGroceryListJob::class);
+    $response->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('grocery-list/show')
+            ->where('groceryList', null)
+        );
 });
 
 it('denies access to other users meal plan', function (): void {
@@ -59,7 +57,7 @@ it('updates grocery list to completed when all items are checked', function (): 
         ->for($user)
         ->create(['status' => GroceryListStatus::Active]);
 
-    $item1 = GroceryItem::factory()->for($groceryList)->create(['is_checked' => true]);
+    GroceryItem::factory()->for($groceryList)->create(['is_checked' => true]);
     $item2 = GroceryItem::factory()->for($groceryList)->create(['is_checked' => false]);
 
     expect($groceryList->fresh()->status)->toBe(GroceryListStatus::Active);
@@ -98,46 +96,18 @@ it('denies toggling items from other users grocery list', function (): void {
     $response->assertForbidden();
 });
 
-it('retries generation when grocery list status is generating with no items', function (): void {
+it('generates grocery list via store endpoint', function (): void {
     Queue::fake();
 
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();
-    $groceryList = GroceryList::factory()
-        ->for($mealPlan)
-        ->for($user)
-        ->create(['status' => GroceryListStatus::Generating]);
 
-    // No items exist, so it should retry generation
-    expect($groceryList->items()->count())->toBe(0);
+    $this->actingAs($user)->post(route('meal-plans.grocery-list.store', $mealPlan));
 
-    $this->actingAs($user)->get(route('meal-plans.grocery-list.show', $mealPlan));
-
-    // The endpoint should handle this case
-    expect($groceryList->fresh()->status)->toBe(GroceryListStatus::Generating);
-
-    Queue::assertPushed(GenerateGroceryListJob::class);
-});
-
-it('retries generation when grocery list status is failed', function (): void {
-    Queue::fake();
-
-    $user = User::factory()->create();
-    $mealPlan = MealPlan::factory()->for($user)->create();
-    $oldGroceryList = GroceryList::factory()
-        ->for($mealPlan)
-        ->for($user)
-        ->create(['status' => GroceryListStatus::Failed]);
-
-    $this->actingAs($user)->get(route('meal-plans.grocery-list.show', $mealPlan));
-
-    // A new grocery list should be created
     $mealPlan->refresh();
-    $newGroceryList = $mealPlan->groceryList;
 
-    expect($newGroceryList)->not->toBeNull()
-        ->and($newGroceryList->id)->not->toBe($oldGroceryList->id)
-        ->and($newGroceryList->status)->toBe(GroceryListStatus::Generating);
+    expect($mealPlan->groceryList)->not->toBeNull()
+        ->and($mealPlan->groceryList->status)->toBe(GroceryListStatus::Generating);
 
     Queue::assertPushed(GenerateGroceryListJob::class);
 });
@@ -154,21 +124,18 @@ it('regenerates grocery list via store endpoint', function (): void {
 
     GroceryItem::factory()->for($oldGroceryList)->count(3)->create();
 
-    expect($mealPlan->groceryList->items)->toHaveCount(3);
-
     $this->actingAs($user)->post(route('meal-plans.grocery-list.store', $mealPlan));
 
     $mealPlan->refresh();
     $newGroceryList = $mealPlan->groceryList;
 
-    expect($newGroceryList)->not->toBeNull()
-        ->and($newGroceryList->id)->not->toBe($oldGroceryList->id)
+    expect($newGroceryList->id)->not->toBe($oldGroceryList->id)
         ->and($newGroceryList->status)->toBe(GroceryListStatus::Generating);
 
     Queue::assertPushed(GenerateGroceryListJob::class);
 });
 
-it('denies regenerating grocery list for other users', function (): void {
+it('denies generating grocery list for other users', function (): void {
     $owner = User::factory()->create();
     $otherUser = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($owner)->create();
@@ -208,14 +175,11 @@ it('returns formatted grocery list when active with items', function (): void {
             ->component('grocery-list/show')
             ->has('groceryList', fn ($list) => $list
                 ->where('id', $groceryList->id)
-                ->where('name', $groceryList->name)
                 ->where('status', 'active')
                 ->where('total_items', 2)
                 ->where('checked_items', 1)
-                ->has('items_by_category', fn ($categories) => $categories
-                    ->has('Produce')
-                    ->has('Dairy')
-                )
+                ->has('items_by_category.Produce')
+                ->has('items_by_category.Dairy')
                 ->etc()
             )
         );

@@ -32,11 +32,11 @@ import {
     ShoppingCart,
     Sparkles,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface GroceryListPageProps {
     mealPlan: MealPlanSummary;
-    groceryList: GroceryList;
+    groceryList: GroceryList | null;
 }
 
 type ViewMode = 'category' | 'day';
@@ -48,9 +48,21 @@ export default function GroceryListPage({
     const regenerateForm = useForm({});
     const [viewMode, setViewMode] = useState<ViewMode>('category');
 
-    const isGenerating = groceryList.status === GroceryStatus.Generating;
+    const isGenerating = groceryList?.status === GroceryStatus.Generating;
+    const hasNoList = !groceryList;
 
-    usePoll(2000, { only: ['groceryList'] }, { keepAlive: isGenerating });
+    const { stop } = usePoll(
+        4000,
+        { only: ['groceryList'] },
+        {
+            autoStart: isGenerating,
+        },
+    );
+    useEffect(() => {
+        if (!isGenerating) {
+            stop();
+        }
+    }, [isGenerating, stop]);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -111,27 +123,34 @@ export default function GroceryListPage({
                             ) : (
                                 <RefreshCw className="mr-2 h-4 w-4" />
                             )}
-                            Regenerate
+                            {hasNoList ? 'Generate' : 'Regenerate'}
                         </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            asChild
-                            disabled={isGenerating}
-                        >
-                            <a
-                                href={printGroceryList(mealPlan.id).url}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                        {groceryList && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                asChild
+                                disabled={isGenerating}
                             >
-                                <Printer className="mr-2 h-4 w-4" />
-                                Print
-                            </a>
-                        </Button>
+                                <a
+                                    href={printGroceryList(mealPlan.id).url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <Printer className="mr-2 h-4 w-4" />
+                                    Print
+                                </a>
+                            </Button>
+                        )}
                     </div>
                 </div>
 
-                {isGenerating ? (
+                {hasNoList ? (
+                    <EmptyGroceryListState
+                        onGenerate={handleRegenerate}
+                        isGenerating={regenerateForm.processing}
+                    />
+                ) : isGenerating ? (
                     <GroceryListSkeleton />
                 ) : (
                     <GroceryListContent
@@ -145,6 +164,40 @@ export default function GroceryListPage({
                 )}
             </div>
         </AppLayout>
+    );
+}
+
+interface EmptyGroceryListStateProps {
+    onGenerate: () => void;
+    isGenerating: boolean;
+}
+
+function EmptyGroceryListState({
+    onGenerate,
+    isGenerating,
+}: EmptyGroceryListStateProps) {
+    return (
+        <div className="flex flex-1 flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
+            <ShoppingCart className="mb-4 h-16 w-16 text-muted-foreground" />
+            <h3 className="text-xl font-semibold">No Grocery List Yet</h3>
+            <p className="mt-2 max-w-md text-muted-foreground">
+                Generate a grocery list from your meal plan. Our AI will
+                consolidate all ingredients and organize them by category for
+                easy shopping.
+            </p>
+            <Button
+                className="mt-6"
+                onClick={onGenerate}
+                disabled={isGenerating}
+            >
+                {isGenerating ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                )}
+                Generate Grocery List
+            </Button>
+        </div>
     );
 }
 

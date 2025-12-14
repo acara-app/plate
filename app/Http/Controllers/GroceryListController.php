@@ -30,19 +30,6 @@ final readonly class GroceryListController
         abort_if($mealPlan->user_id !== $this->user->id, 403);
 
         $groceryList = $mealPlan->groceryList;
-        $needsGeneration = false;
-
-        if (! $groceryList) {
-            $groceryList = $this->generateAction->createPlaceholder($mealPlan);
-            $needsGeneration = true;
-        } elseif ($groceryList->status === GroceryListStatus::Failed) {
-            $groceryList = $this->generateAction->createPlaceholder($mealPlan);
-            $needsGeneration = true;
-        }
-
-        if ($needsGeneration) {
-            dispatch(new GenerateGroceryListJob($groceryList));
-        }
 
         return Inertia::render('grocery-list/show', [
             'mealPlan' => [
@@ -50,7 +37,7 @@ final readonly class GroceryListController
                 'name' => $mealPlan->name,
                 'duration_days' => $mealPlan->duration_days,
             ],
-            'groceryList' => $this->formatGroceryList($groceryList),
+            'groceryList' => $groceryList ? $this->formatGroceryList($groceryList) : null,
         ]);
     }
 

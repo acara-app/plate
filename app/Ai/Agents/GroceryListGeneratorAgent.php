@@ -60,7 +60,7 @@ final class GroceryListGeneratorAgent extends BaseAgent
 
     public function maxTokens(): int
     {
-        return 16000;
+        return 67000;
     }
 
     /**
