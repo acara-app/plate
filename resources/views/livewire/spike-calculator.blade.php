@@ -1,3 +1,7 @@
+@section('title', 'Free Glucose Spike Predictor - Will This Food Spike My Blood Sugar? | Acara Plate')
+@section('meta_description', 'Use our free AI-powered glucose spike predictor to instantly check if a food will spike your blood sugar. Get personalized risk levels and smart alternatives - no registration required.')
+@section('meta_keywords', 'glucose spike predictor, blood sugar spike, glycemic index, food blood sugar impact, diabetes food checker, AI glucose predictor, will food spike blood sugar, free glucose tool')
+
 <div
     class="relative flex min-h-screen flex-col items-center overflow-hidden bg-linear-to-br from-slate-50 via-white to-emerald-50 p-4 text-slate-900 lg:justify-center lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950 dark:text-slate-50"
 >

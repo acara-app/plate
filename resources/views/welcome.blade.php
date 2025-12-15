@@ -249,6 +249,45 @@
                 </div>
             </section>
 
+            {{-- Spike Calculator Tool Promo --}}
+            <section class="w-full max-w-[335px] lg:max-w-5xl">
+                <div class="group relative overflow-hidden rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-6 shadow-lg transition-all duration-300 hover:shadow-xl lg:p-8 dark:border-orange-900/50 dark:from-orange-950/50 dark:via-amber-950/50 dark:to-yellow-950/50">
+                    {{-- Decorative background --}}
+                    <div class="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-orange-300/20 blur-2xl transition-transform duration-500 group-hover:scale-150 lg:h-48 lg:w-48 dark:bg-orange-500/10"></div>
+                    <div class="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-amber-300/20 blur-2xl transition-transform duration-500 group-hover:scale-150 lg:h-48 lg:w-48 dark:bg-amber-500/10"></div>
+
+                    <div class="relative flex flex-col items-center gap-4 lg:flex-row lg:gap-8">
+                        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/30 lg:h-20 lg:w-20">
+                            <svg class="h-8 w-8 lg:h-10 lg:w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="mb-2 inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-900/50 dark:text-orange-300">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75"></span>
+                                    <span class="relative inline-flex h-2 w-2 rounded-full bg-orange-500"></span>
+                                </span>
+                                Free Tool — No Registration Required
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900 lg:text-2xl dark:text-white">Will This Food Spike My Blood Sugar?</h3>
+                            <p class="mt-2 text-sm text-slate-600 lg:text-base dark:text-slate-400">
+                                Get an instant AI-powered glucose spike prediction for any food. Just type what you're about to eat and get your answer in seconds.
+                            </p>
+                        </div>
+
+                        <a href="{{ route('spike-calculator') }}"
+                            class="group/btn inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/40 active:scale-100 lg:w-auto lg:px-8 lg:text-base dark:shadow-orange-500/20 dark:hover:shadow-orange-500/30">
+                            Try Spike Calculator
+                            <svg class="h-5 w-5 transition-transform duration-300 group-hover/btn:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
             {{-- Features Section --}}
             <section class="w-full max-w-[335px] lg:max-w-5xl">
                 <div class="space-y-4 lg:space-y-6">
