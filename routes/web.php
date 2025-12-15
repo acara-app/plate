@@ -12,10 +12,9 @@ Route::view('/privacy-policy', 'privacy-policy')->name('privacy');
 Route::view('/terms-of-service', 'terms-of-service')->name('terms');
 Route::view('/support', 'support')->name('support');
 Route::view('/install-app', 'install-app')->name('install-app');
+
 Route::view('/diabetes-log-book', 'diabetes-log-book')->name('diabetes-log-book');
 Route::view('/diabetes-log-book-info', 'diabetes-log-book-info')->name('diabetes-log-book-info');
-
-// Spike Calculator (Public - no auth required)
 Route::get('/spike-calculator', SpikeCalculator::class)->name('spike-calculator');
 
 Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])->name('profile.timezone.update');
