@@ -41,7 +41,7 @@ it('returns system prompt with instructions', function (): void {
 });
 
 it('returns correct max tokens', function (): void {
-    expect($this->agent->maxTokens())->toBe(16000);
+    expect($this->agent->maxTokens())->toBe(67000);
 });
 
 it('returns client options with timeout', function (): void {
