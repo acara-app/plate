@@ -251,39 +251,112 @@
 
             {{-- Spike Calculator Tool Promo --}}
             <section class="w-full max-w-[335px] lg:max-w-5xl">
-                <div class="group relative overflow-hidden rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-6 shadow-lg transition-all duration-300 hover:shadow-xl lg:p-8 dark:border-orange-900/50 dark:from-orange-950/50 dark:via-amber-950/50 dark:to-yellow-950/50">
-                    {{-- Decorative background --}}
-                    <div class="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-orange-300/20 blur-2xl transition-transform duration-500 group-hover:scale-150 lg:h-48 lg:w-48 dark:bg-orange-500/10"></div>
-                    <div class="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-amber-300/20 blur-2xl transition-transform duration-500 group-hover:scale-150 lg:h-48 lg:w-48 dark:bg-amber-500/10"></div>
+                <div class="relative overflow-hidden rounded-3xl bg-slate-900 px-6 py-12 shadow-2xl sm:px-12 sm:py-16 lg:px-16">
+                    {{-- Background Effects --}}
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-orange-500/20 via-slate-900 to-slate-900"></div>
+                    <div class="absolute -left-12 -top-12 h-64 w-64 rounded-full bg-orange-500/10 blur-3xl"></div>
+                    <div class="absolute -bottom-12 -right-12 h-64 w-64 rounded-full bg-amber-500/10 blur-3xl"></div>
 
-                    <div class="relative flex flex-col items-center gap-4 lg:flex-row lg:gap-8">
-                        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/30 lg:h-20 lg:w-20">
-                            <svg class="h-8 w-8 lg:h-10 lg:w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </div>
-
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="mb-2 inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-900/50 dark:text-orange-300">
+                    <div class="relative grid gap-12 lg:grid-cols-2 lg:items-center">
+                        {{-- Content --}}
+                        <div class="space-y-8 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 rounded-full bg-orange-500/10 px-3 py-1 text-sm font-medium text-orange-400 ring-1 ring-inset ring-orange-500/20">
                                 <span class="relative flex h-2 w-2">
                                     <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75"></span>
                                     <span class="relative inline-flex h-2 w-2 rounded-full bg-orange-500"></span>
                                 </span>
                                 Free Tool — No Registration Required
                             </div>
-                            <h3 class="text-xl font-bold text-slate-900 lg:text-2xl dark:text-white">Will This Food Spike My Blood Sugar?</h3>
-                            <p class="mt-2 text-sm text-slate-600 lg:text-base dark:text-slate-400">
-                                Get an instant AI-powered glucose spike prediction for any food. Just type what you're about to eat and get your answer in seconds.
-                            </p>
+
+                            <div class="space-y-4">
+                                <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                                    Will this food spike your <span class="text-transparent bg-clip-text bg-linear-to-r from-orange-400 to-amber-400">blood sugar?</span>
+                                </h2>
+
+                                <p class="text-lg leading-relaxed text-slate-400">
+                                    Stop guessing. Our AI analyzes nutritional composition to predict glucose impact instantly. Just type a food and get your answer.
+                                </p>
+                            </div>
+
+                            <div class="flex flex-col gap-4 sm:flex-row sm:justify-center lg:justify-start">
+                                <a href="{{ route('spike-calculator') }}"
+                                   class="group inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-orange-500 to-amber-500 px-8 py-4 text-base font-bold text-white shadow-lg shadow-orange-500/25 transition-all hover:scale-105 hover:shadow-orange-500/40 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900">
+                                    Try Spike Calculator
+                                    <svg class="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                </a>
+                            </div>
                         </div>
 
-                        <a href="{{ route('spike-calculator') }}"
-                            class="group/btn inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/40 active:scale-100 lg:w-auto lg:px-8 lg:text-base dark:shadow-orange-500/20 dark:hover:shadow-orange-500/30">
-                            Try Spike Calculator
-                            <svg class="h-5 w-5 transition-transform duration-300 group-hover/btn:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                        </a>
+                        {{-- Visual/Interactive Element --}}
+                        <div class="relative mx-auto w-full max-w-md lg:mx-0">
+                            {{-- Mock Interface --}}
+                            <div class="relative rounded-2xl bg-slate-800/50 border border-slate-700/50 p-2 backdrop-blur-xl shadow-2xl">
+                                {{-- Floating Badges --}}
+                                <div class="absolute -top-6 -right-6 animate-bounce delay-700 duration-3000">
+                                    <div class="flex items-center gap-2 rounded-lg bg-slate-900/90 border border-red-500/30 px-4 py-2 text-sm font-semibold text-red-400 shadow-lg backdrop-blur-md">
+                                        <span class="h-2 w-2 rounded-full bg-red-500"></span>
+                                        High Spike
+                                    </div>
+                                </div>
+                                <div class="absolute -bottom-4 -left-4 animate-bounce delay-1000 duration-4000">
+                                    <div class="flex items-center gap-2 rounded-lg bg-slate-900/90 border border-emerald-500/30 px-4 py-2 text-sm font-semibold text-emerald-400 shadow-lg backdrop-blur-md">
+                                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                        Stable Glucose
+                                    </div>
+                                </div>
+
+                                {{-- Window Chrome --}}
+                                <div class="space-y-4 rounded-xl bg-slate-900/80 p-6 border border-slate-800">
+                                    <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+                                        <div class="flex gap-1.5">
+                                            <div class="h-3 w-3 rounded-full bg-slate-700"></div>
+                                            <div class="h-3 w-3 rounded-full bg-slate-700"></div>
+                                            <div class="h-3 w-3 rounded-full bg-slate-700"></div>
+                                        </div>
+                                        <div class="ml-auto text-xs font-medium text-slate-500">AI Analysis</div>
+                                    </div>
+
+                                    {{-- Chat/Input Area --}}
+                                    <div class="space-y-4">
+                                        {{-- User Message --}}
+                                        <div class="flex justify-end">
+                                            <div class="rounded-2xl rounded-tr-sm bg-orange-500 px-4 py-2 text-sm font-medium text-white">
+                                                Is a bagel healthy?
+                                            </div>
+                                        </div>
+
+                                        {{-- AI Response --}}
+                                        <div class="flex gap-3">
+                                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-orange-500 to-amber-500 text-white">
+                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                                </svg>
+                                            </div>
+                                            <div class="space-y-2">
+                                                <div class="rounded-2xl rounded-tl-sm bg-slate-800 px-4 py-3 text-sm text-slate-300">
+                                                    <p class="font-medium text-white mb-1">High Glucose Spike Risk ⚠️</p>
+                                                    <p class="text-xs leading-relaxed text-slate-400">Bagels are dense in refined carbs. Pair with protein or fat to reduce the spike.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- Input Field Mock --}}
+                                    <div class="relative mt-2">
+                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                            <svg class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                            </svg>
+                                        </div>
+                                        <div class="block w-full rounded-lg border border-slate-700 bg-slate-800 py-2.5 pl-10 pr-3 text-sm text-slate-400">
+                                            Type a food...
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
