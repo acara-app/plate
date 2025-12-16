@@ -271,6 +271,10 @@
             </div>
         </div>
 
+        <p class="text-center text-xs text-slate-400 dark:text-slate-500">
+            <span class="font-bold">Disclaimer:</span> Estimations only. Individual response varies based on insulin sensitivity and activity levels.
+        </p>
+
     </main>
 
     {{-- FAQ Section --}}
