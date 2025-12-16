@@ -39,6 +39,11 @@
 <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon/apple-touch-icon-180x180.png') }}" />
 
 @livewireStyles
+
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 
 @yield('head')
+
+@production
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="00659ffa-f13b-411a-81a7-76d2bd81d2c6"></script>
+@endproduction
