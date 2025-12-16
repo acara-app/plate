@@ -1,6 +1,6 @@
-@section('title', 'Free Glucose Spike Predictor - Will This Food Spike My Blood Sugar? | Acara Plate')
-@section('meta_description', 'Use our free AI-powered glucose spike predictor to instantly check if a food will spike your blood sugar. Get personalized risk levels and smart alternatives - no registration required.')
-@section('meta_keywords', 'glucose spike predictor, blood sugar spike, glycemic index, food blood sugar impact, diabetes food checker, AI glucose predictor, will food spike blood sugar, free glucose tool')
+@section('title', 'Free Glucose Spike Checker - Will This Food Raise My Blood Sugar? | Acara Plate')
+@section('meta_description', 'Type what you plan to eat and get a quick estimate of how likely it is to raise your blood sugar, plus a simple swap you can try. Free to use. No account needed.')
+@section('meta_keywords', 'glucose spike checker, blood sugar spike, glycemic index, food blood sugar impact, diabetes food checker, will food spike blood sugar, free glucose tool, blood sugar calculator')
 
 <div
     class="relative flex min-h-screen flex-col items-center overflow-hidden bg-linear-to-br from-slate-50 via-white to-emerald-50 p-4 text-slate-900 lg:justify-center lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950 dark:text-slate-50"
@@ -28,7 +28,7 @@
         <div class="text-center">
             <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl dark:bg-emerald-900/50">⚡️</div>
             <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Will It Spike?</h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400">AI Glucose Predictor</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Check any food in seconds</p>
         </div>
 
         {{-- Input Section --}}
@@ -77,7 +77,7 @@
                 
                 {{-- Spike Gauge Section --}}
                 <div class="bg-slate-50 p-6 text-center dark:bg-slate-800/50">
-                    <div class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Predicted Impact</div>
+                    <div class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Here's what we found</div>
                     
                     {{-- Gauge Bar --}}
                     <div class="relative mb-4 h-4 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
@@ -97,7 +97,7 @@
                         <span class="text-5xl font-black {{ $riskLevel->colorClass() }}">
                             {{ $riskLevel->label() }}
                         </span>
-                        <span class="mb-1 text-lg font-medium text-slate-400">SPIKE</span>
+                        <span class="mb-1 text-lg font-medium text-slate-400">risk</span>
                     </div>
                 </div>
 
@@ -107,7 +107,7 @@
                     <div class="flex items-start gap-3">
                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm dark:bg-slate-700">💡</span>
                         <div>
-                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Why?</h3>
+                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Here is why</h3>
                             <p class="text-sm text-slate-600 dark:text-slate-300">{{ $result['explanation'] }}</p>
                         </div>
                     </div>
@@ -116,8 +116,8 @@
                     <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-900/20">
                         <div class="flex items-center gap-2">
                             <span class="text-lg">✨</span>
-                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Smart Fix</span>
-                            <span class="rounded-full bg-emerald-200 px-2 py-0.5 text-xs font-bold text-emerald-800 dark:bg-emerald-800 dark:text-emerald-200">-{{ $result['spikeReductionPercentage'] }}% spike</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Try this instead</span>
+                            <span class="rounded-full bg-emerald-200 px-2 py-0.5 text-xs font-bold text-emerald-800 dark:bg-emerald-800 dark:text-emerald-200">about {{ $result['spikeReductionPercentage'] }}% lower</span>
                         </div>
                         <p class="mt-2 text-sm font-medium text-emerald-900 dark:text-emerald-100">{{ $result['smartFix'] }}</p>
                     </div>
@@ -127,7 +127,7 @@
                         href="{{ route('register') }}"
                         class="block w-full rounded-xl bg-slate-900 py-3 text-center text-sm font-bold text-white transition-transform hover:scale-[1.02] dark:bg-white dark:text-slate-900"
                     >
-                        🎯 Get My Personalized Meal Plan →
+                        Build your meal plan →
                     </a>
                 </div>
             </div>
@@ -136,7 +136,7 @@
         {{-- Empty State / Suggestions --}}
         @if (!$result && !$loading && !$error)
             <div class="text-center text-sm text-slate-500 dark:text-slate-400">
-                <p class="mb-3">Try these examples:</p>
+                <p class="mb-3">Not sure what to check? Pick one:</p>
                 <div class="flex flex-wrap justify-center gap-2">
                     <button 
                         type="button"
@@ -177,7 +177,7 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Analyzing your food...
+                Looking that up for you...
             </div>
         </div>
 
@@ -186,8 +186,17 @@
     {{-- Footer --}}
     <footer class="relative z-10 mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
         <p>
-            This tool provides estimates only. Always consult your healthcare provider.
+            This gives you an estimate, not medical advice. Got a health question? Talk to your doctor.
         </p>
+        <div class="mt-3 rounded-xl border border-slate-200/70 bg-white/60 p-3 text-left text-[11px] leading-5 dark:border-slate-700/70 dark:bg-slate-900/30">
+            <div class="font-semibold text-slate-600 dark:text-slate-300">Sources</div>
+            <div>
+                Glycemic index and diabetes, MedlinePlus Medical Encyclopedia (National Library of Medicine, NIH), October 11, 2024, https://medlineplus.gov/ency/patientinstructions/000941.htm
+            </div>
+            <div>
+                Blood Glucose, MedlinePlus (National Library of Medicine, NIH), March 6, 2024, https://medlineplus.gov/bloodglucose.html
+            </div>
+        </div>
         <p class="mt-2">
             <a href="{{ route('home') }}" class="underline hover:text-emerald-600">Back to Home</a>
             ·

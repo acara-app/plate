@@ -11,7 +11,7 @@ it('renders the spike calculator component', function (): void {
     Livewire::test(SpikeCalculator::class)
         ->assertStatus(200)
         ->assertSee('Will It Spike?')
-        ->assertSee('AI Glucose Predictor');
+        ->assertSee('Check any food in seconds');
 });
 
 it('has food input field', function (): void {
@@ -59,12 +59,12 @@ it('displays result after successful prediction', function (): void {
         ->assertSee('HIGH')
         ->assertSee('White rice is a refined carbohydrate.')
         ->assertSee('Try cauliflower rice instead.')
-        ->assertSee('-40% spike');
+        ->assertSee('about 40% lower');
 });
 
 it('shows example suggestions when no result', function (): void {
     Livewire::test(SpikeCalculator::class)
-        ->assertSee('Try these examples:')
+        ->assertSee('Not sure what to check? Pick one:')
         ->assertSee('White rice with chicken')
         ->assertSee('Overnight oats with berries')
         ->assertSee('Chocolate chip cookie')
