@@ -51,15 +51,15 @@
                     <div class="space-y-4 lg:space-y-6">
                         <h1
                             class="text-3xl font-bold leading-tight tracking-tight text-slate-900 lg:text-5xl dark:text-white">
-                            Take Control of Your Blood Sugar
+                            Manage Blood Sugar
                             <span
                                 class="bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-400">
-                                with AI Nutrition
+                                with AI Nutrition Specialist
                             </span>
                         </h1>
 
-                        <p class="text-base leading-relaxed text-slate-600 lg:text-lg dark:text-slate-300">
-                            Take control of your health with smart, adaptive nutrition. Our AI creates <strong class="text-slate-800 dark:text-slate-200">personalized meal plans</strong> that adapt dynamically to your unique glucose patterns — designed for adults with Type 2 diabetes or prediabetes.
+                       <p class="text-base leading-relaxed text-slate-600 lg:text-lg dark:text-slate-300">
+                            Eat better without guessing. We build <strong class="text-slate-800 dark:text-slate-200">meal plans</strong> that match your glucose levels. Designed for adults with Type 2 diabetes or prediabetes.
                         </p>
 
                         <div
@@ -75,7 +75,7 @@
                         <div class="flex flex-col gap-3 pt-4 sm:flex-row">
                             <a href="{{ route('register') }}"
                                 class="group/btn inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-linear-to-r from-emerald-600 to-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/40 active:scale-100 sm:w-auto sm:text-base dark:shadow-emerald-500/20 dark:hover:shadow-emerald-500/30">
-                                Get Your AI Plan
+                                Start Your Plan
                                 <svg class="h-5 w-5 transition-transform duration-300 group-hover/btn:translate-x-1"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -270,11 +270,11 @@
 
                             <div class="space-y-4">
                                 <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                                    Will this food spike your <span class="text-transparent bg-clip-text bg-linear-to-r from-orange-400 to-amber-400">blood sugar?</span>
+                                    Check if this food spikes your <span class="text-transparent bg-clip-text bg-linear-to-r from-orange-400 to-amber-400">blood sugar</span>
                                 </h2>
 
                                 <p class="text-lg leading-relaxed text-slate-400">
-                                    Stop guessing. Our AI analyzes nutritional composition to predict glucose impact instantly. Just type a food and get your answer.
+                                    Type a food name. We check the nutrition facts and tell you the likely glucose impact immediately.
                                 </p>
                             </div>
 
@@ -381,8 +381,7 @@
                                             d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Personalized
-                                    Precision</h3>
+                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Build For You</h3>
                                 <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Meal plans tailored to your glucose responses, not generic advice</p>
                             </div>
                         </div>
@@ -398,9 +397,9 @@
                                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Effortless
-                                    Management</h3>
-                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Simplify daily dietary decisions with clear, actionable recommendations</p>
+                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Simple
+                                    Choices</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Clear food suggestions help you decide what to eat daily</p>
                             </div>
                         </div>
 
@@ -415,9 +414,9 @@
                                             d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
-                                    Proactive Health</h3>
-                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Make informed choices that actively support stable blood sugar and well-being</p>
+                               <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">
+                                    Stay Ahead</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Pick foods that help keep your blood sugar stable</p>
                             </div>
                         </div>
 
@@ -432,9 +431,9 @@
                                             d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Empowering
-                                    Knowledge</h3>
-                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Understand and navigate your health journey with confidence using data-driven insights</p>
+                               <h3 class="text-sm font-semibold text-slate-900 lg:text-base dark:text-white">Know
+                                    More</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm dark:text-slate-400">Learn how food affects you so you can eat with confidence</p>
                             </div>
                         </div>
                     </div>
@@ -454,9 +453,9 @@
                         <div class="relative rounded-xl border border-slate-200 bg-white/80 p-5 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80">
                             <div class="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">1</div>
                             <div class="pt-2">
-                                <h3 class="text-base font-semibold text-slate-900 lg:text-lg dark:text-white">Build Your Profile</h3>
+                                <h3 class="text-base font-semibold text-slate-900 lg:text-lg dark:text-white">Set Up Your Profile</h3>
                                 <p class="mt-2 text-xs leading-relaxed text-slate-600 lg:text-sm dark:text-slate-400">
-                                    Log your glucose readings, set your health goals, and tell us your dietary preferences. Your data stays yours — we just use it to personalize your plan.
+                                    Tell us about your glucose readings, goals, and foods you like. We keep your data private and use it to build your plan.
                                 </p>
                             </div>
                         </div>
@@ -490,8 +489,8 @@
             <section class="w-full max-w-[335px] lg:max-w-5xl">
                 <div class="space-y-4 lg:space-y-6">
                     <div class="text-center">
-                        <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl dark:text-white">Questions About AI Glucose Management</h2>
-                        <p class="mt-2 text-sm text-slate-600 lg:text-base dark:text-slate-400">Understand how Acara Plate helps you take control</p>
+                        <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl dark:text-white">Common Questions</h2>
+                        <p class="mt-2 text-sm text-slate-600 lg:text-base dark:text-slate-400">Learn more about Acara Plate</p>
                     </div>
 
                     <div class="space-y-3">
