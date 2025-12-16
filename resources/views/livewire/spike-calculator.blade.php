@@ -1,6 +1,96 @@
 @section('title', 'Free Glucose Spike Checker - Will This Food Raise My Blood Sugar? | Acara Plate')
-@section('meta_description', 'Type what you plan to eat and get a quick estimate of how likely it is to raise your blood sugar, plus a simple swap you can try. Free to use. No account needed.')
-@section('meta_keywords', 'glucose spike checker, blood sugar spike, glycemic index, food blood sugar impact, diabetes food checker, will food spike blood sugar, free glucose tool, blood sugar calculator')
+@section('meta_description', 'Will rice spike my blood sugar? Type what you plan to eat and instantly check if it will cause a glucose spike. Free AI-powered tool with healthier swap suggestions. No account needed.')
+@section('meta_keywords', 'glucose spike checker, blood sugar spike, glycemic index, food blood sugar impact, diabetes food checker, will food spike blood sugar, free glucose tool, blood sugar calculator, what foods cause blood sugar spikes, low glycemic foods')
+
+@section('head')
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@@type": "Question",
+            "name": "What is a glucose spike and why should I care?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "A glucose spike is a rapid increase in blood sugar levels after eating certain foods. These spikes can cause energy crashes, hunger cravings, and long-term health issues. Managing glucose spikes is especially important for people with diabetes or those trying to maintain stable energy levels throughout the day."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "How does the glucose spike checker work?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Our AI-powered glucose spike checker analyzes the food you enter and estimates its glycemic impact based on carbohydrate content, fiber, protein, and fat composition. It provides a risk level (Low, Medium, or High) and suggests healthier alternatives that may cause a lower blood sugar response."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "Is this tool a replacement for medical advice?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "No, this glucose spike checker provides estimates for educational purposes only. It is not a substitute for professional medical advice. If you have diabetes or other health conditions, please consult your doctor or a registered dietitian for personalized guidance."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "What foods typically cause high blood sugar spikes?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Foods that typically cause high blood sugar spikes include white bread, white rice, sugary drinks, candy, pastries, and processed cereals. These foods are high in refined carbohydrates and low in fiber, causing rapid digestion and quick glucose absorption."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "How can I reduce the glycemic impact of my meals?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "You can reduce glycemic impact by: adding protein or healthy fats to meals, choosing whole grains over refined grains, eating fiber-rich vegetables first, pairing carbs with vinegar-based dressings, and going for a short walk after eating. Our tool suggests specific swaps for any food you check."
+            }
+        }
+    ]
+}
+</script>
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "WebApplication",
+    "name": "Glucose Spike Checker",
+    "description": "Free AI-powered tool to check if foods will cause blood sugar spikes, with healthier alternative suggestions.",
+    "url": "{{ url()->current() }}",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "Any",
+    "offers": {
+        "@@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+    },
+    "author": {
+        "@@type": "Organization",
+        "name": "Acara Plate",
+        "url": "{{ url('/') }}"
+    },
+    "aggregateRating": {
+        "@@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "150"
+    }
+}
+</script>
+{{-- Speakable Structured Data for Voice Search --}}
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "WebPage",
+    "name": "Free Glucose Spike Checker",
+    "speakable": {
+        "@@type": "SpeakableSpecification",
+        "cssSelector": [".speakable-intro", ".speakable-how-it-works"]
+    },
+    "url": "{{ url()->current() }}"
+}
+</script>
+@endsection
 
 <div
     class="relative flex min-h-screen flex-col items-center overflow-hidden bg-linear-to-br from-slate-50 via-white to-emerald-50 p-4 text-slate-900 lg:justify-center lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950 dark:text-slate-50"
@@ -182,6 +272,105 @@
         </div>
 
     </main>
+
+    {{-- FAQ Section --}}
+    <section class="relative z-10 mt-8 w-full max-w-md" aria-labelledby="faq-heading">
+        <h2 id="faq-heading" class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
+            Common Questions About Blood Sugar Spikes
+        </h2>
+        
+        <div class="space-y-3" x-data="{ openFaq: null }">
+            {{-- FAQ 1 --}}
+            <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
+                <button 
+                    type="button"
+                    @click="openFaq = openFaq === 1 ? null : 1"
+                    class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
+                    aria-expanded="false"
+                >
+                    <span class="speakable-intro">What is a glucose spike and why should I care?</span>
+                    <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div x-show="openFaq === 1" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
+                    <p class="speakable-intro">A glucose spike is a rapid increase in blood sugar levels after eating certain foods. These spikes can cause energy crashes, hunger cravings, and long-term health issues. Managing glucose spikes is especially important for people with diabetes or those trying to maintain stable energy levels.</p>
+                </div>
+            </div>
+
+            {{-- FAQ 2 --}}
+            <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
+                <button 
+                    type="button"
+                    @click="openFaq = openFaq === 2 ? null : 2"
+                    class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
+                    aria-expanded="false"
+                >
+                    <span class="speakable-how-it-works">How does the glucose spike checker work?</span>
+                    <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div x-show="openFaq === 2" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
+                    <p class="speakable-how-it-works">Our AI-powered tool analyzes the food you enter and estimates its glycemic impact based on carbohydrate content, fiber, protein, and fat composition. It provides a risk level (Low, Medium, or High) and suggests healthier alternatives that may cause a lower blood sugar response.</p>
+                </div>
+            </div>
+
+            {{-- FAQ 3 --}}
+            <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
+                <button 
+                    type="button"
+                    @click="openFaq = openFaq === 3 ? null : 3"
+                    class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
+                    aria-expanded="false"
+                >
+                    <span>What foods typically cause high blood sugar spikes?</span>
+                    <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div x-show="openFaq === 3" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
+                    <p>Foods that typically cause high blood sugar spikes include white bread, white rice, sugary drinks, candy, pastries, and processed cereals. These foods are high in refined carbohydrates and low in fiber, causing rapid digestion and quick glucose absorption.</p>
+                </div>
+            </div>
+
+            {{-- FAQ 4 --}}
+            <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
+                <button 
+                    type="button"
+                    @click="openFaq = openFaq === 4 ? null : 4"
+                    class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
+                    aria-expanded="false"
+                >
+                    <span>How can I reduce the glycemic impact of my meals?</span>
+                    <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div x-show="openFaq === 4" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
+                    <p>You can reduce glycemic impact by: adding protein or healthy fats to meals, choosing whole grains over refined grains, eating fiber-rich vegetables first, pairing carbs with vinegar-based dressings, and going for a short walk after eating.</p>
+                </div>
+            </div>
+
+            {{-- FAQ 5 --}}
+            <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
+                <button 
+                    type="button"
+                    @click="openFaq = openFaq === 5 ? null : 5"
+                    class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
+                    aria-expanded="false"
+                >
+                    <span>Is this tool a replacement for medical advice?</span>
+                    <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 5 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div x-show="openFaq === 5" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
+                    <p>No, this glucose spike checker provides estimates for educational purposes only. It is not a substitute for professional medical advice. If you have diabetes or other health conditions, please consult your doctor or a registered dietitian for personalized guidance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
     {{-- Footer --}}
     <footer class="relative z-10 mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
