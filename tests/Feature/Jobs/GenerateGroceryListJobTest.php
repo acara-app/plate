@@ -9,13 +9,13 @@ use App\Models\MealPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches generate grocery list job when visiting show endpoint', function (): void {
+it('dispatches generate grocery list job when creating via store endpoint', function (): void {
     Queue::fake();
 
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();
 
-    $this->actingAs($user)->get(route('meal-plans.grocery-list.show', $mealPlan));
+    $this->actingAs($user)->post(route('meal-plans.grocery-list.store', $mealPlan));
 
     Queue::assertPushed(GenerateGroceryListJob::class);
 });
