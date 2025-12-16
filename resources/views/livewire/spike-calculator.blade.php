@@ -188,15 +188,6 @@
         <p>
             This gives you an estimate, not medical advice. Got a health question? Talk to your doctor.
         </p>
-        <div class="mt-3 rounded-xl border border-slate-200/70 bg-white/60 p-3 text-left text-[11px] leading-5 dark:border-slate-700/70 dark:bg-slate-900/30">
-            <div class="font-semibold text-slate-600 dark:text-slate-300">Sources</div>
-            <div>
-                Glycemic index and diabetes, MedlinePlus Medical Encyclopedia (National Library of Medicine, NIH), October 11, 2024, https://medlineplus.gov/ency/patientinstructions/000941.htm
-            </div>
-            <div>
-                Blood Glucose, MedlinePlus (National Library of Medicine, NIH), March 6, 2024, https://medlineplus.gov/bloodglucose.html
-            </div>
-        </div>
         <p class="mt-2">
             <a href="{{ route('home') }}" class="underline hover:text-emerald-600">Back to Home</a>
             ·
