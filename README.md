@@ -2,7 +2,7 @@
 
 # Acara Plate - Personalized Nutrition AI Agent
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: O'Saasy](https://img.shields.io/badge/License-O'Saasy-blue.svg)](LICENSE)
 [![Tests](https://github.com/acara-app/plate/actions/workflows/tests.yml/badge.svg)](https://github.com/acara-app/plate/actions/workflows/tests.yml)
 
 Acara Plate is an AI-powered personalized nutrition and meal planning platform that creates customized meal plans based on individual user data such as age, weight, height, dietary preferences, and health goals. The platform simplifies meal planning by providing users with tailored recipes, nutritional information, and glucose tracking capabilities that align with their unique needs and lifestyle.
@@ -34,6 +34,7 @@ Acara Plate is an AI-powered personalized nutrition and meal planning platform t
     - [Progressive Web App](#progressive-web-app)
   - [Contributing](#contributing)
   - [Code of Conduct](#code-of-conduct)
+  - [License](#license)
 - [Medical Disclaimer](#medical-disclaimer)
 
 ## Overview
@@ -219,6 +220,10 @@ We welcome contributions! Review the [Contributing Guide](CONTRIBUTING.md) for w
 ## Code of Conduct
 
 Please read the [Code of Conduct](CODE_OF_CONDUCT.md) before participating in the community.
+
+## License
+
+Acara Plate is released under the [O'Saasy License](LICENSE).
 
 # Medical Disclaimer
 
