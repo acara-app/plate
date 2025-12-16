@@ -1,4 +1,4 @@
-@section('title', 'Free Glucose Spike Checker - Will This Food Raise My Blood Sugar? | Acara Plate')
+@section('title', 'Free Blood Sugar Spike Checker | Glycemic Index Predictor')
 @section('meta_description', 'Will rice spike my blood sugar? Type what you plan to eat and instantly check if it will cause a glucose spike. Free AI-powered tool with healthier swap suggestions. No account needed.')
 @section('meta_keywords', 'glucose spike checker, blood sugar spike, glycemic index, food blood sugar impact, diabetes food checker, will food spike blood sugar, free glucose tool, blood sugar calculator, what foods cause blood sugar spikes, low glycemic foods')
 
