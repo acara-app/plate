@@ -125,7 +125,7 @@
         <form wire:submit="predict" class="relative">
             <input 
                 type="text" 
-                wire:model="food"
+                wire:model.live.debounce.150ms="food"
                 placeholder="e.g. 2 slices of pepperoni pizza" 
                 class="w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-4 pr-14 text-lg font-medium outline-none transition-colors focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:focus:border-emerald-500 dark:focus:bg-slate-800"
                 @disabled($loading)
