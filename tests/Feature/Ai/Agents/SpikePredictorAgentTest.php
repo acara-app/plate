@@ -12,13 +12,13 @@ use Prism\Prism\Testing\TextResponseFake;
 it('uses gemini provider', function (): void {
     $agent = new SpikePredictorAgent;
 
-    expect($agent->provider())->toBe(Provider::Gemini);
+    expect($agent->provider())->toBe(Provider::OpenAI);
 });
 
 it('uses gemini-2.5-flash model', function (): void {
     $agent = new SpikePredictorAgent;
 
-    expect($agent->model())->toBe('gemini-2.5-flash');
+    expect($agent->model())->toBe('gpt-5-mini');
 });
 
 it('has proper max tokens', function (): void {

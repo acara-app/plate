@@ -7,20 +7,15 @@ namespace App\Ai\Agents;
 use App\Ai\BaseAgent;
 use App\Ai\SystemPrompt;
 use App\DataObjects\SpikePredictionData;
+use App\Enums\ModelName;
 use App\Enums\SpikeRiskLevel;
 use App\Utilities\JsonCleaner;
-use Prism\Prism\Enums\Provider;
 
 final class SpikePredictorAgent extends BaseAgent
 {
-    public function provider(): Provider
+    public function modelName(): ModelName
     {
-        return Provider::Gemini;
-    }
-
-    public function model(): string
-    {
-        return 'gemini-2.5-flash';
+        return ModelName::GPT_5_MINI;
     }
 
     public function systemPrompt(): string

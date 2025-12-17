@@ -14,7 +14,6 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Utilities\JsonCleaner;
 use App\Workflows\MealPlanInitializeWorkflow;
-use Prism\Prism\Enums\Provider;
 use Prism\Prism\ValueObjects\ProviderTool;
 use Workflow\WorkflowStub;
 
@@ -23,16 +22,6 @@ final class MealPlanGeneratorAgent extends BaseAgent
     public function __construct(
         private readonly MealPlanPromptBuilder $promptBuilder,
     ) {}
-
-    public function provider(): Provider
-    {
-        return Provider::Gemini;
-    }
-
-    public function model(): string
-    {
-        return 'gemini-2.5-flash';
-    }
 
     public function systemPrompt(): string
     {
