@@ -12,21 +12,10 @@ use App\DataObjects\GroceryListData;
 use App\DataObjects\IngredientData;
 use App\Models\MealPlan;
 use App\Utilities\JsonCleaner;
-use Prism\Prism\Enums\Provider;
 use Spatie\LaravelData\DataCollection;
 
 final class GroceryListGeneratorAgent extends BaseAgent
 {
-    public function provider(): Provider
-    {
-        return Provider::Gemini;
-    }
-
-    public function model(): string
-    {
-        return 'gemini-2.5-flash';
-    }
-
     public function systemPrompt(): string
     {
         return (string) new SystemPrompt(
