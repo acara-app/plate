@@ -1,4 +1,5 @@
 User-agent: *
-Disallow:
+Disallow: /cdn-cgi/
+Disallow: /profile/timezone
 
 Sitemap: https://plate.acara.app/sitemap.xml

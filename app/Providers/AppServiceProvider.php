@@ -27,6 +27,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->bootPasswordDefaults();
         $this->bootVerificationDefaults();
         $this->bootCashierDefaults();
+        $this->bootUrlDefaults();
     }
 
     private function bootModelsDefaults(): void
@@ -56,5 +57,12 @@ final class AppServiceProvider extends ServiceProvider
     private function bootCashierDefaults(): void
     {
         Cashier::useCustomerModel(User::class);
+    }
+
+    private function bootUrlDefaults(): void
+    {
+        if (app()->isProduction()) {
+            URL::forceScheme('https');
+        }
     }
 }
