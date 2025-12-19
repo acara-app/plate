@@ -17,7 +17,7 @@ abstract class BaseAgent implements AgentInterface
 
     public function modelName(): ModelName
     {
-        return ModelName::GEMINI_2_5_FLASH;
+        return ModelName::GEMINI_3_FLASH;
     }
 
     public function provider(): Provider
@@ -40,7 +40,7 @@ abstract class BaseAgent implements AgentInterface
 
     public function maxTokens(): int
     {
-        return 8000;
+        return max(8000, $this->modelName()->getMinMaxTokens());
     }
 
     /**
@@ -51,9 +51,43 @@ abstract class BaseAgent implements AgentInterface
         return [];
     }
 
+    /**
+     * Get the temperature for this agent.
+     */
+    public function temperature(): float
+    {
+        return $this->modelName()->getRecommendedTemperature();
+    }
+
+    /**
+     * Get provider-specific options for the model.
+     *
+     * @return array<string, mixed>
+     */
+    public function providerOptions(): array
+    {
+        $options = [];
+        $modelName = $this->modelName();
+
+        if ($modelName->requiresThinkingMode()) {
+            $thinkingBudget = $modelName->getThinkingBudget();
+
+            if ($thinkingBudget !== null) {
+                $options['thinkingBudget'] = $thinkingBudget;
+            }
+
+            if ($this->tools() !== []) {
+                $options['thoughtSignature'] = true;
+            }
+        }
+
+        return $options;
+    }
+
     public function text(): PendingRequest
     {
         $request = Prism::text()
+            ->usingTemperature($this->temperature())
             ->using($this->provider(), $this->model())
             ->withSystemPrompt($this->systemPrompt())
             ->withMaxTokens($this->maxTokens());
@@ -64,6 +98,12 @@ abstract class BaseAgent implements AgentInterface
 
         if ($this->clientOptions() !== []) {
             $request->withClientOptions($this->clientOptions());
+        }
+
+        $providerOptions = $this->providerOptions();
+
+        if ($providerOptions !== []) {
+            $request->withProviderOptions($providerOptions);
         }
 
         return $request;
