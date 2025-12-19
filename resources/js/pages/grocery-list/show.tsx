@@ -51,18 +51,21 @@ export default function GroceryListPage({
     const isGenerating = groceryList?.status === GroceryStatus.Generating;
     const hasNoList = !groceryList;
 
-    const { stop } = usePoll(
+    const { start, stop } = usePoll(
         4000,
         { only: ['groceryList'] },
         {
-            autoStart: isGenerating,
+            autoStart: false,
         },
     );
+
     useEffect(() => {
-        if (!isGenerating) {
+        if (isGenerating) {
+            start();
+        } else {
             stop();
         }
-    }, [isGenerating, stop]);
+    }, [isGenerating, start, stop]);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
