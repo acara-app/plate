@@ -14,7 +14,7 @@ it('updates a glucose reading', function (): void {
         'notes' => 'Original notes',
     ]);
 
-    $action = app(UpdateGlucoseReadingAction::class);
+    $action = resolve(UpdateGlucoseReadingAction::class);
 
     $updated = $action->handle($reading, [
         'reading_value' => 150,

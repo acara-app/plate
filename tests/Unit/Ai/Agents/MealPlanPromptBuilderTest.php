@@ -43,7 +43,7 @@ it('includes glucose analysis in the prompt when glucose data exists', function 
         'measured_at' => now()->subDays(2),
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)
@@ -72,7 +72,7 @@ it('includes message when no glucose data exists', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)
@@ -117,7 +117,7 @@ it('includes glucose concerns when post-meal spikes are detected', function (): 
         ]);
     }
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)

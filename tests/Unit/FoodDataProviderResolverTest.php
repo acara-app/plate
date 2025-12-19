@@ -19,7 +19,7 @@ it('routes generic ingredients to USDA provider', function (): void {
         ],
     ]);
 
-    $resolver = app(FoodDataProviderResolver::class);
+    $resolver = resolve(FoodDataProviderResolver::class);
     $results = $resolver->searchWithSpecificity('chicken breast', IngredientSpecificity::Generic);
 
     expect($results)->toBeArray()
@@ -39,7 +39,7 @@ it('routes specific ingredients to USDA provider', function (): void {
         ],
     ]);
 
-    $resolver = app(FoodDataProviderResolver::class);
+    $resolver = resolve(FoodDataProviderResolver::class);
     $results = $resolver->searchWithSpecificity('hazelnut spread', IngredientSpecificity::Specific);
 
     expect($results)->toBeArray()
@@ -58,7 +58,7 @@ it('returns results from USDA search', function (): void {
         ],
     ]);
 
-    $resolver = app(FoodDataProviderResolver::class);
+    $resolver = resolve(FoodDataProviderResolver::class);
     $results = $resolver->searchWithSpecificity('product', IngredientSpecificity::Specific);
 
     expect($results)->toBeArray()
@@ -77,7 +77,7 @@ it('routes all ingredients to USDA provider', function (): void {
         ],
     ]);
 
-    $resolver = app(FoodDataProviderResolver::class);
+    $resolver = resolve(FoodDataProviderResolver::class);
     $results = $resolver->searchWithSpecificity('brand product', IngredientSpecificity::Specific);
 
     expect($results)->toBeArray()
@@ -96,7 +96,7 @@ it('delegates search without specificity to USDA provider', function (): void {
         ],
     ]);
 
-    $resolver = app(FoodDataProviderResolver::class);
+    $resolver = resolve(FoodDataProviderResolver::class);
     $results = $resolver->search('test food');
 
     expect($results)->toBeArray()
@@ -104,14 +104,14 @@ it('delegates search without specificity to USDA provider', function (): void {
 });
 
 it('returns null for non-numeric IDs', function (): void {
-    $resolver = app(FoodDataProviderResolver::class);
+    $resolver = resolve(FoodDataProviderResolver::class);
     $nutrition = $resolver->getNutritionData('123456abc');
 
     expect($nutrition)->toBeNull();
 });
 
 it('returns empty array when USDA returns no results', function (): void {
-    $resolver = app(FoodDataProviderResolver::class);
+    $resolver = resolve(FoodDataProviderResolver::class);
     $results = $resolver->searchWithSpecificity('nonexistent', IngredientSpecificity::Generic);
 
     expect($results)->toBeArray()
@@ -130,7 +130,7 @@ it('delegates to correct provider based on specificity', function (): void {
         ],
     ]);
 
-    $resolver = app(FoodDataProviderResolver::class);
+    $resolver = resolve(FoodDataProviderResolver::class);
 
     // Generic should use USDA
     $results = $resolver->searchWithSpecificity('test', IngredientSpecificity::Generic);
@@ -149,7 +149,7 @@ it('gets nutrition data from USDA for numeric IDs', function (): void {
         ],
     ]);
 
-    $resolver = app(FoodDataProviderResolver::class);
+    $resolver = resolve(FoodDataProviderResolver::class);
     $nutrition = $resolver->getNutritionData('12345');
 
     expect($nutrition)->toBeArray()
@@ -157,7 +157,7 @@ it('gets nutrition data from USDA for numeric IDs', function (): void {
 });
 
 it('delegates cleanIngredientName to USDA provider', function (): void {
-    $resolver = app(FoodDataProviderResolver::class);
+    $resolver = resolve(FoodDataProviderResolver::class);
     $cleaned = $resolver->cleanIngredientName('chicken breast (boneless)');
 
     expect($cleaned)->toBe('chicken breast');

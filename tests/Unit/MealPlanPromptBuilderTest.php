@@ -43,7 +43,7 @@ it('includes glucose analysis in the prompt when glucose data exists', function 
         'measured_at' => now()->subDays(2),
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)
@@ -72,7 +72,7 @@ it('includes message when no glucose data exists', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)
@@ -117,7 +117,7 @@ it('includes glucose concerns when post-meal spikes are detected', function (): 
         ]);
     }
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)
@@ -128,7 +128,7 @@ it('includes glucose concerns when post-meal spikes are detected', function (): 
 it('throws exception when user has no profile', function (): void {
     $user = User::factory()->create();
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $builder->handle($user);
 })->throws(RuntimeException::class, 'User profile is required to create a meal plan.');
 
@@ -148,7 +148,7 @@ it('calculates calorie deficit for weight loss goal', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)->toBeString()->not->toBeEmpty();
@@ -170,7 +170,7 @@ it('calculates calorie surplus for weight gain goal', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)->toBeString()->not->toBeEmpty();
@@ -192,7 +192,7 @@ it('includes user profile information in prompt', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)

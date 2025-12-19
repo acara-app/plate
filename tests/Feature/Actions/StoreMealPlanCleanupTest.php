@@ -51,7 +51,7 @@ it('deletes old meal plans of the same type when creating a new one', function (
         ], DataCollection::class),
     );
 
-    $action = app(StoreMealPlan::class);
+    $action = resolve(StoreMealPlan::class);
     $newPlan = $action->handle($user, $mealPlanData);
 
     // Verify old plan was deleted
@@ -112,7 +112,7 @@ it('only deletes meal plans of the same type', function (): void {
         ], DataCollection::class),
     );
 
-    $action = app(StoreMealPlan::class);
+    $action = resolve(StoreMealPlan::class);
     $action->handle($user, $mealPlanData);
 
     // Verify weekly plan was replaced but monthly plan remains
@@ -179,7 +179,7 @@ it('deletes multiple old meal plans of the same type', function (): void {
         ], DataCollection::class),
     );
 
-    $action = app(StoreMealPlan::class);
+    $action = resolve(StoreMealPlan::class);
     $newPlan = $action->handle($user, $mealPlanData);
 
     // Verify all old plans were deleted
@@ -242,7 +242,7 @@ it('does not delete other users meal plans', function (): void {
         ], DataCollection::class),
     );
 
-    $action = app(StoreMealPlan::class);
+    $action = resolve(StoreMealPlan::class);
     $action->handle($user1, $mealPlanData);
 
     // Verify user 1's old plan was deleted but user 2's plan remains
@@ -289,7 +289,7 @@ it('handles creating first meal plan when no old plans exist', function (): void
         ], DataCollection::class),
     );
 
-    $action = app(StoreMealPlan::class);
+    $action = resolve(StoreMealPlan::class);
     $mealPlan = $action->handle($user, $mealPlanData);
 
     // Verify meal plan was created successfully
@@ -347,7 +347,7 @@ it('cascades delete to meals when deleting old meal plans', function (): void {
         ], DataCollection::class),
     );
 
-    $action = app(StoreMealPlan::class);
+    $action = resolve(StoreMealPlan::class);
     $newPlan = $action->handle($user, $mealPlanData);
 
     // Verify old plan and ALL its meals were deleted

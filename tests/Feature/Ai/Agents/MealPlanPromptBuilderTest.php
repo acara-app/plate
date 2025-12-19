@@ -45,7 +45,7 @@ test('it generates meal plan context for user with complete profile', function (
     ]);
     $profile->healthConditions()->attach($healthCondition, ['notes' => 'Type 2']);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)
@@ -74,7 +74,7 @@ test('it handles user with minimal profile data', function (): void {
         'lifestyle_id' => null,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)
@@ -97,7 +97,7 @@ test('it calculates correct daily calorie target for weight loss', function (): 
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)
@@ -115,7 +115,7 @@ test('it includes macronutrient ratios in output', function (): void {
         'age' => 25,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)
@@ -141,7 +141,7 @@ test('it calculates calorie target for weight gain goal', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)->toContain('Daily Calorie Target');
@@ -162,7 +162,7 @@ test('it calculates calorie target for gain weight goal', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)->toContain('Daily Calorie Target');
@@ -183,7 +183,7 @@ test('it calculates calorie target for muscle gain goal', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)->toContain('Daily Calorie Target');
@@ -204,7 +204,7 @@ test('it calculates calorie target for maintain weight goal', function (): void 
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)->toContain('Daily Calorie Target');
@@ -225,7 +225,7 @@ test('it calculates calorie target for maintenance goal', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)->toContain('Daily Calorie Target');
@@ -246,7 +246,7 @@ test('it calculates calorie target for lose weight goal', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)->toContain('Daily Calorie Target');
@@ -267,7 +267,7 @@ test('it calculates calorie target for unknown goal using default', function ():
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)->toContain('Daily Calorie Target');
@@ -286,7 +286,7 @@ test('it returns null calorie target when tdee cannot be calculated', function (
         'sex' => null,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)
@@ -302,7 +302,7 @@ test('it uses default macronutrient ratios when no goal is set', function (): vo
         'age' => 25,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)
@@ -321,7 +321,7 @@ test('it calculates macronutrient ratios for weight loss', function (): void {
         'age' => 25,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)
@@ -339,7 +339,7 @@ test('it calculates macronutrient ratios for lose weight', function (): void {
         'age' => 25,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)
@@ -357,7 +357,7 @@ test('it calculates macronutrient ratios for gain weight', function (): void {
         'age' => 25,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)
@@ -376,7 +376,7 @@ test('it calculates macronutrient ratios for maintain weight', function (): void
         'age' => 25,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)
@@ -394,7 +394,7 @@ test('it calculates macronutrient ratios for maintenance', function (): void {
         'age' => 25,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)
@@ -412,7 +412,7 @@ test('it calculates macronutrient ratios for unknown goal using default', functi
         'age' => 25,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
     expect($result)
@@ -423,6 +423,6 @@ test('it calculates macronutrient ratios for unknown goal using default', functi
 test('it throws exception when user has no profile', function (): void {
     $user = User::factory()->create();
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $builder->handle($user);
 })->throws(RuntimeException::class, 'User profile is required to create a meal plan.');

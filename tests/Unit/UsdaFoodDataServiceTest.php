@@ -27,7 +27,7 @@ it('searches for foods and returns foundation results', function (): void {
         ],
     ]);
 
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $results = $service->searchFoods('chicken');
 
     expect($results)->toBeArray()
@@ -44,7 +44,7 @@ it('searches sr legacy foods', function (): void {
         'description' => 'Rice, white, long-grain, regular, raw',
     ]);
 
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $results = $service->searchFoods('rice');
 
     expect($results)->toBeArray()
@@ -57,7 +57,7 @@ it('limits search results', function (): void {
         'description' => 'Test Food',
     ]);
 
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $results = $service->searchFoods('Test Food', pageSize: 3);
 
     expect($results)->toHaveCount(3);
@@ -68,7 +68,7 @@ it('caches search results', function (): void {
         'description' => 'Chicken breast',
     ]);
 
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $service->searchFoods('chicken breast');
 
     UsdaFoundationFood::query()->delete();
@@ -78,7 +78,7 @@ it('caches search results', function (): void {
 });
 
 it('returns null when no results found', function (): void {
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $results = $service->searchFoods('nonexistent food');
 
     expect($results)->toBeNull();
@@ -93,7 +93,7 @@ it('fetches food by ID from foundation table', function (): void {
         ],
     ]);
 
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $result = $service->getFoodById('12345');
 
     expect($result)->toBeInstanceOf(UsdaFoodData::class)
@@ -107,7 +107,7 @@ it('fetches food by ID from sr legacy table', function (): void {
         'description' => 'White rice',
     ]);
 
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $result = $service->getFoodById('67890');
 
     expect($result)->toBeInstanceOf(UsdaFoodData::class)
@@ -115,7 +115,7 @@ it('fetches food by ID from sr legacy table', function (): void {
 });
 
 it('returns null when food not found', function (): void {
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
 
     expect($service->getFoodById('99999'))->toBeNull();
 });
@@ -137,7 +137,7 @@ it('extracts nutrition per 100g', function (): void {
         ]
     );
 
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $nutrition = $service->extractNutritionPer100g($foodData);
 
     expect($nutrition)->toBeInstanceOf(NutritionData::class)
@@ -161,7 +161,7 @@ it('handles missing nutrients', function (): void {
         ]
     );
 
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $nutrition = $service->extractNutritionPer100g($foodData);
 
     expect($nutrition->calories)->toBe(100.0)
@@ -169,7 +169,7 @@ it('handles missing nutrients', function (): void {
 });
 
 it('cleans ingredient names', function (): void {
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
 
     expect($service->cleanIngredientName('fresh organic chicken breast'))
         ->toBe('chicken breast');

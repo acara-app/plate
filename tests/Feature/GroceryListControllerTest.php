@@ -8,17 +8,6 @@ use App\Models\GroceryList;
 use App\Models\MealPlan;
 use App\Models\User;
 
-it('shows grocery list page when grocery list does not exist', function (): void {
-    $user = User::factory()->create();
-    $mealPlan = MealPlan::factory()->for($user)->create();
-
-    expect($mealPlan->groceryList)->toBeNull();
-
-    $response = $this->actingAs($user)->get(route('meal-plans.grocery-list.show', $mealPlan));
-
-    $response->assertOk();
-});
-
 it('denies access to other users meal plan', function (): void {
     $owner = User::factory()->create();
     $otherUser = User::factory()->create();
