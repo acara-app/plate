@@ -54,7 +54,7 @@ it('stores a meal plan with meals for a user', function (): void {
         ], DataCollection::class),
     );
 
-    $action = app(StoreMealPlan::class);
+    $action = resolve(StoreMealPlan::class);
     $mealPlan = $action->handle($user, $mealPlanData);
 
     expect($mealPlan)
@@ -108,7 +108,7 @@ it('loads meals relationship after storing', function (): void {
         ], DataCollection::class),
     );
 
-    $action = app(StoreMealPlan::class);
+    $action = resolve(StoreMealPlan::class);
     $mealPlan = $action->handle($user, $mealPlanData);
 
     expect($mealPlan->relationLoaded('meals'))->toBeTrue();

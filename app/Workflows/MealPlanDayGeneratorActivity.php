@@ -28,7 +28,7 @@ final class MealPlanDayGeneratorActivity extends Activity
         PreviousDayContext $previousDaysContext,
     ): DayMealsData {
         /** @var MealPlanGeneratorAgent $generateMealPlan */
-        $generateMealPlan = app(MealPlanGeneratorAgent::class);
+        $generateMealPlan = resolve(MealPlanGeneratorAgent::class);
 
         return $generateMealPlan->generateForDay(
             $user,

@@ -91,7 +91,7 @@ it('generates a meal plan using PrismPHP', function (): void {
 
     Prism::fake([$fakeResponse]);
 
-    $action = app(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanGeneratorAgent::class);
     $mealPlanData = $action->generate($user);
 
     expect($mealPlanData)
@@ -142,7 +142,7 @@ it('uses the correct AI model from enum', function (): void {
 
     Prism::fake([$fakeResponse]);
 
-    $action = app(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanGeneratorAgent::class);
     $result = $action->generate($user);
 
     expect($result)->not->toBeNull();
@@ -164,7 +164,7 @@ it('starts workflow when handle is called', function (): void {
         'lifestyle_id' => $lifestyle->id,
     ]);
 
-    $action = app(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanGeneratorAgent::class);
     $action->handle($user);
 
     // Workflow is faked so meal plan won't be created, but no exception means workflow was started
@@ -235,7 +235,7 @@ it('handles meals with no ingredients', function (): void {
 
     Prism::fake([$fakeResponse]);
 
-    $action = app(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanGeneratorAgent::class);
     $mealPlanData = $action->generate($user);
 
     expect($mealPlanData->meals)->toHaveCount(2);
@@ -277,7 +277,7 @@ it('works without file search store configured', function (): void {
 
     Prism::fake([$fakeResponse]);
 
-    $action = app(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanGeneratorAgent::class);
     $mealPlanData = $action->generate($user);
 
     expect($mealPlanData)
@@ -320,7 +320,7 @@ it('uses file search store when configured', function (): void {
 
     Prism::fake([$fakeResponse]);
 
-    $action = app(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanGeneratorAgent::class);
     $mealPlanData = $action->generate($user);
 
     expect($mealPlanData)

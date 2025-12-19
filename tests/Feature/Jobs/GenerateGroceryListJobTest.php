@@ -100,7 +100,7 @@ it('calls generate items on the action when handled', function (): void {
 
     $job = new GenerateGroceryListJob($groceryList);
 
-    $action = app(App\Actions\GenerateGroceryListAction::class);
+    $action = resolve(App\Actions\GenerateGroceryListAction::class);
     $job->handle($action);
 
     $groceryList->refresh();

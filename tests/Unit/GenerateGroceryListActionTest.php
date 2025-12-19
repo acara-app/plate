@@ -16,7 +16,7 @@ it('creates a placeholder grocery list with generating status', function (): voi
         'duration_days' => 7,
     ]);
 
-    $agent = app(GroceryListGeneratorAgent::class);
+    $agent = resolve(GroceryListGeneratorAgent::class);
     $action = new GenerateGroceryListAction($agent);
 
     $groceryList = $action->createPlaceholder($mealPlan);
@@ -37,7 +37,7 @@ it('deletes existing grocery list before creating placeholder', function (): voi
     $mealPlan = MealPlan::factory()->for($user)->create();
     $existingGroceryList = GroceryList::factory()->for($mealPlan)->for($user)->create();
 
-    $agent = app(GroceryListGeneratorAgent::class);
+    $agent = resolve(GroceryListGeneratorAgent::class);
     $action = new GenerateGroceryListAction($agent);
 
     expect(GroceryList::query()->count())->toBe(1);
@@ -54,7 +54,7 @@ it('preserves metadata when creating placeholder', function (): void {
         'duration_days' => 14,
     ]);
 
-    $agent = app(GroceryListGeneratorAgent::class);
+    $agent = resolve(GroceryListGeneratorAgent::class);
     $action = new GenerateGroceryListAction($agent);
 
     $groceryList = $action->createPlaceholder($mealPlan);

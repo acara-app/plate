@@ -12,7 +12,7 @@ it('returns empty grocery list when meal plan has no meals', function (): void {
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();
 
-    $agent = app(GroceryListGeneratorAgent::class);
+    $agent = resolve(GroceryListGeneratorAgent::class);
     $result = $agent->generate($mealPlan);
 
     expect($result)
@@ -36,7 +36,7 @@ it('returns empty grocery list when meals have no ingredients', function (): voi
             'ingredients' => [],
         ]);
 
-    $agent = app(GroceryListGeneratorAgent::class);
+    $agent = resolve(GroceryListGeneratorAgent::class);
     $result = $agent->generate($mealPlan);
 
     expect($result)

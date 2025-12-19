@@ -20,7 +20,7 @@ it('includes diabetes safety guardrails when user has type 2 diabetes', function
     $user->profile->healthConditions()->attach($diabetes);
     $user->refresh(); // Reload the user with relationships
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     // Check for critical safety section
@@ -50,7 +50,7 @@ it('includes diabetes safety guardrails when user has glucose data', function ()
         'reading_value' => 140,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)->toContain('CRITICAL SAFETY GUARDRAILS')
@@ -70,7 +70,7 @@ it('includes diabetes safety guardrails for gestational diabetes', function (): 
     $user->profile->healthConditions()->attach($gestational);
     $user->refresh();
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)->toContain('DIABETES/GLUCOSE MANAGEMENT ACTIVE')
@@ -82,7 +82,7 @@ it('does not include diabetes-specific rules for healthy users', function (): vo
         ->has(UserProfile::factory(), 'profile')
         ->create();
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)->toContain('CRITICAL SAFETY GUARDRAILS')
@@ -95,7 +95,7 @@ it('includes general safety rules for all users', function (): void {
         ->has(UserProfile::factory(), 'profile')
         ->create();
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)->toContain('ALLERGEN AWARENESS')
@@ -116,7 +116,7 @@ it('includes meal composition requirements for diabetic users', function (): voi
     $user->profile->healthConditions()->attach($diabetes);
     $user->refresh();
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)->toContain('MEAL COMPOSITION')
@@ -137,7 +137,7 @@ it('includes GI food categories with specific examples', function (): void {
     $user->profile->healthConditions()->attach($diabetes);
     $user->refresh();
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     // High GI examples
@@ -165,7 +165,7 @@ it('reinforces safety rules in glucose monitoring section for users with glucose
         'reading_value' => 150,
     ]);
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)->toContain('VERIFICATION CHECKLIST')
@@ -186,7 +186,7 @@ it('includes final safety check before output for diabetic users', function (): 
     $user->profile->healthConditions()->attach($diabetes);
     $user->refresh();
 
-    $builder = app(MealPlanPromptBuilder::class);
+    $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
     expect($prompt)->toContain('FINAL SAFETY CHECK BEFORE GENERATING OUTPUT')

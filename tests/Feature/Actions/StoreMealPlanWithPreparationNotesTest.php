@@ -41,7 +41,7 @@ it('stores meal plan with preparation_notes in metadata', function (): void {
         ],
     );
 
-    $action = app(StoreMealPlan::class);
+    $action = resolve(StoreMealPlan::class);
     $mealPlan = $action->handle($user, $mealPlanData);
 
     expect($mealPlan)
@@ -83,7 +83,7 @@ it('stores meal plan without preparation_notes when not provided', function (): 
         ], DataCollection::class),
     );
 
-    $action = app(StoreMealPlan::class);
+    $action = resolve(StoreMealPlan::class);
     $mealPlan = $action->handle($user, $mealPlanData);
 
     expect($mealPlan->metadata)->toBeNull();
@@ -124,7 +124,7 @@ it('stores meal plan with other metadata fields alongside preparation_notes', fu
         ],
     );
 
-    $action = app(StoreMealPlan::class);
+    $action = resolve(StoreMealPlan::class);
     $mealPlan = $action->handle($user, $mealPlanData);
 
     expect($mealPlan->metadata)

@@ -27,7 +27,7 @@ beforeEach(function (): void {
 });
 
 it('creates a placeholder grocery list', function (): void {
-    $action = app(GenerateGroceryListAction::class);
+    $action = resolve(GenerateGroceryListAction::class);
 
     $groceryList = $action->createPlaceholder($this->mealPlan);
 
@@ -44,7 +44,7 @@ it('creates a placeholder grocery list', function (): void {
 it('deletes existing grocery list before creating placeholder', function (): void {
     $existingList = GroceryList::factory()->for($this->mealPlan)->for($this->user)->create();
 
-    $action = app(GenerateGroceryListAction::class);
+    $action = resolve(GenerateGroceryListAction::class);
     $groceryList = $action->createPlaceholder($this->mealPlan);
 
     expect(GroceryList::query()->find($existingList->id))->toBeNull()
@@ -72,7 +72,7 @@ it('generates items for grocery list successfully', function (): void {
         ->for($this->user)
         ->create(['status' => GroceryListStatus::Generating]);
 
-    $action = app(GenerateGroceryListAction::class);
+    $action = resolve(GenerateGroceryListAction::class);
     $result = $action->generateItems($groceryList);
 
     expect($result)->toBeInstanceOf(GroceryList::class)
@@ -104,7 +104,7 @@ it('generates items with no ingredients returns empty list', function (): void {
         ->for($this->user)
         ->create(['status' => GroceryListStatus::Generating]);
 
-    $action = app(GenerateGroceryListAction::class);
+    $action = resolve(GenerateGroceryListAction::class);
     $result = $action->generateItems($groceryList);
 
     expect($result)->toBeInstanceOf(GroceryList::class)
@@ -132,7 +132,7 @@ it('handles generation failure gracefully', function (): void {
         ->for($this->user)
         ->create(['status' => GroceryListStatus::Generating]);
 
-    $action = app(GenerateGroceryListAction::class);
+    $action = resolve(GenerateGroceryListAction::class);
     $result = $action->generateItems($groceryList);
 
     expect($result->status)->toBe(GroceryListStatus::Failed)
@@ -155,7 +155,7 @@ it('handles full generation with handle method', function (): void {
         ],
     ]);
 
-    $action = app(GenerateGroceryListAction::class);
+    $action = resolve(GenerateGroceryListAction::class);
     $result = $action->handle($this->mealPlan);
 
     expect($result)->toBeInstanceOf(GroceryList::class)

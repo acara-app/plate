@@ -22,7 +22,7 @@ it('searches for foods using local database', function (): void {
         ],
     ]);
 
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $provider = new UsdaFoodDataProvider($service);
     $results = $provider->search('brown rice');
 
@@ -36,7 +36,7 @@ it('searches for foods using local database', function (): void {
 });
 
 it('returns empty array when no results', function (): void {
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $provider = new UsdaFoodDataProvider($service);
 
     expect($provider->search('nonexistent'))->toBeEmpty();
@@ -52,7 +52,7 @@ it('gets nutrition data by product ID', function (): void {
         ],
     ]);
 
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $provider = new UsdaFoodDataProvider($service);
     $result = $provider->getNutritionData('12345');
 
@@ -63,7 +63,7 @@ it('gets nutrition data by product ID', function (): void {
 });
 
 it('returns null when product not found', function (): void {
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $provider = new UsdaFoodDataProvider($service);
 
     expect($provider->getNutritionData('99999'))->toBeNull();
@@ -78,7 +78,7 @@ it('delegates to search for searchWithSpecificity', function (): void {
         ],
     ]);
 
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $provider = new UsdaFoodDataProvider($service);
     $results = $provider->searchWithSpecificity('test', IngredientSpecificity::Generic);
 
@@ -104,7 +104,7 @@ it('filters out invalid search results', function (): void {
         ],
     ]);
 
-    $service = app(UsdaFoodDataService::class);
+    $service = resolve(UsdaFoodDataService::class);
     $provider = new UsdaFoodDataProvider($service);
     $results = $provider->search('food');
 
