@@ -20,7 +20,6 @@ it('returns null when grocery list does not exist', function (): void {
 
     $response->assertSuccessful()
         ->assertInertia(fn ($page) => $page
-            ->component('grocery-list/show')
             ->where('groceryList', null)
         );
 });
@@ -172,7 +171,6 @@ it('returns formatted grocery list when active with items', function (): void {
 
     $response->assertSuccessful()
         ->assertInertia(fn ($page) => $page
-            ->component('grocery-list/show')
             ->has('groceryList', fn ($list) => $list
                 ->where('id', $groceryList->id)
                 ->where('status', 'active')

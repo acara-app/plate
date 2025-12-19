@@ -14,7 +14,7 @@ it('shows grocery list page when grocery list does not exist', function (): void
 
     expect($mealPlan->groceryList)->toBeNull();
 
-    $response = $this->actingAs($user)->get("/meal-plans/{$mealPlan->id}/grocery-list");
+    $response = $this->actingAs($user)->get(route('meal-plans.grocery-list.show', $mealPlan));
 
     $response->assertOk();
 });
@@ -24,7 +24,7 @@ it('denies access to other users meal plan', function (): void {
     $otherUser = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($owner)->create();
 
-    $response = $this->actingAs($otherUser)->get("/meal-plans/{$mealPlan->id}/grocery-list");
+    $response = $this->actingAs($otherUser)->get(route('meal-plans.grocery-list.show', $mealPlan));
 
     $response->assertForbidden();
 });
@@ -37,7 +37,7 @@ it('toggles grocery item checked status', function (): void {
 
     expect($item->is_checked)->toBeFalse();
 
-    $this->actingAs($user)->patch("/grocery-items/{$item->id}/toggle");
+    $this->actingAs($user)->patch(route('grocery-items.toggle', $item));
 
     $item->refresh();
     expect($item->is_checked)->toBeTrue();
@@ -56,7 +56,7 @@ it('updates grocery list to completed when all items are checked', function (): 
 
     expect($groceryList->fresh()->status)->toBe(GroceryListStatus::Active);
 
-    $this->actingAs($user)->patch("/grocery-items/{$item2->id}/toggle");
+    $this->actingAs($user)->patch(route('grocery-items.toggle', $item2));
 
     expect($groceryList->fresh()->status)->toBe(GroceryListStatus::Completed);
 });
@@ -73,7 +73,7 @@ it('updates grocery list back to active when unchecking items', function (): voi
 
     expect($groceryList->fresh()->status)->toBe(GroceryListStatus::Completed);
 
-    $this->actingAs($user)->patch("/grocery-items/{$item->id}/toggle");
+    $this->actingAs($user)->patch(route('grocery-items.toggle', $item));
 
     expect($groceryList->fresh()->status)->toBe(GroceryListStatus::Active);
 });
@@ -85,7 +85,7 @@ it('denies toggling items from other users grocery list', function (): void {
     $groceryList = GroceryList::factory()->for($mealPlan)->for($owner)->create();
     $item = GroceryItem::factory()->for($groceryList)->create();
 
-    $response = $this->actingAs($otherUser)->patch("/grocery-items/{$item->id}/toggle");
+    $response = $this->actingAs($otherUser)->patch(route('grocery-items.toggle', $item));
 
     $response->assertForbidden();
 });

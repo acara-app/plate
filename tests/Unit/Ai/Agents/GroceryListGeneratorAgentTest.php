@@ -25,7 +25,7 @@ it('returns gemini as provider', function (): void {
 });
 
 it('returns correct model', function (): void {
-    expect($this->agent->model())->toBe('gemini-2.5-flash');
+    expect($this->agent->model())->toBe('gemini-3-flash-preview');
 });
 
 it('returns system prompt with instructions', function (): void {
@@ -56,7 +56,7 @@ it('generates grocery list from meal plan with ingredients', function (): void {
         ->withText('{"items": [{"name": "Chicken Breast", "quantity": "2 lbs", "category": "Meat & Seafood"}, {"name": "Olive Oil", "quantity": "2 tbsp", "category": "Condiments & Sauces"}]}')
         ->withFinishReason(FinishReason::Stop)
         ->withUsage(new Usage(100, 200))
-        ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
+        ->withMeta(new Meta('test-id', 'gemini-3-flash-preview'));
 
     Prism::fake([$fakeResponse]);
 
@@ -120,7 +120,7 @@ it('extracts ingredients from multiple meals', function (): void {
         ->withText('{"items": [{"name": "Eggs", "quantity": "18", "category": "Dairy"}, {"name": "Bread", "quantity": "1 loaf", "category": "Bakery"}]}')
         ->withFinishReason(FinishReason::Stop)
         ->withUsage(new Usage(150, 250))
-        ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
+        ->withMeta(new Meta('test-id', 'gemini-3-flash-preview'));
 
     Prism::fake([$fakeResponse]);
 
