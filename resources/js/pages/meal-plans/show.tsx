@@ -1,6 +1,17 @@
 import { show as showGroceryList } from '@/actions/App/Http/Controllers/GroceryListController';
 import { OnboardingBanner } from '@/components/onboarding-banner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -19,7 +30,7 @@ import {
     MealPlanGenerationStatus,
     Navigation,
 } from '@/types/meal-plan';
-import { Head, Link, usePoll } from '@inertiajs/react';
+import { Head, Link, useForm, usePoll } from '@inertiajs/react';
 import {
     Calendar,
     ChevronLeft,
@@ -28,6 +39,7 @@ import {
     Info,
     Loader2,
     Printer,
+    RefreshCw,
     ShoppingCart,
     Sparkles,
 } from 'lucide-react';
@@ -64,7 +76,7 @@ export default function MealPlans({
 }: MealPlansProps) {
     const { currentUser } = useSharedProps();
 
-    usePoll(
+    const { start: startPolling } = usePoll(
         2000,
         { only: ['currentDay'] },
         {
@@ -211,7 +223,7 @@ export default function MealPlans({
                                     </Link>
                                 </Button>
 
-                                <div className="min-w-[120px] text-center">
+                                <div className="min-w-30 text-center">
                                     <div className="text-xs text-muted-foreground">
                                         Day {currentDay.day_number} of{' '}
                                         {navigation.total_days}
@@ -314,18 +326,11 @@ export default function MealPlans({
                             </div>
 
                             {/* Plan Info Footer */}
-                            <div className="mt-8 rounded-lg bg-muted/30 p-4 text-sm text-muted-foreground">
-                                <p>
-                                    Created on{' '}
-                                    {new Date(
-                                        mealPlan.created_at,
-                                    ).toLocaleDateString('en-US', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric',
-                                    })}
-                                </p>
-                            </div>
+                            <PlanInfoFooter
+                                mealPlan={mealPlan}
+                                currentDay={currentDay}
+                                onRegenerateStart={startPolling}
+                            />
                         </>
                     )
                 )}
@@ -439,6 +444,81 @@ function MealCardSkeleton() {
                     <Skeleton className="h-8 w-16" />
                 </div>
             </div>
+        </div>
+    );
+}
+
+interface PlanInfoFooterProps {
+    mealPlan: MealPlan;
+    currentDay: CurrentDay;
+    onRegenerateStart: () => void;
+}
+
+function PlanInfoFooter({
+    mealPlan,
+    currentDay,
+    onRegenerateStart,
+}: PlanInfoFooterProps) {
+    const regenerateForm = useForm({
+        day: currentDay.day_number,
+    });
+
+    const isRegenerating = currentDay.needs_generation;
+
+    const handleRegenerate = () => {
+        regenerateForm.post(mealPlans.regenerateDay(mealPlan.id).url, {
+            onSuccess: () => {
+                onRegenerateStart();
+            },
+        });
+    };
+
+    return (
+        <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-lg bg-muted/30 p-4 text-sm text-muted-foreground sm:flex-row sm:items-center">
+            <p>
+                Created on{' '}
+                {new Date(mealPlan.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                })}
+            </p>
+
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={isRegenerating || regenerateForm.processing}
+                    >
+                        {regenerateForm.processing || isRegenerating ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                        )}
+                        Regenerate Day
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            Regenerate This Day?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will replace all meals for{' '}
+                            <strong>{currentDay.day_name}</strong> with newly
+                            generated meals based on your current preferences.
+                            This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleRegenerate}>
+                            Regenerate
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
