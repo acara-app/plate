@@ -165,26 +165,14 @@ it('redirects back after regeneration', function (): void {
     $response->assertRedirect(route('meal-plans.index', ['day' => 1]));
 });
 
-it('defaults to day 1 when no day parameter provided', function (): void {
-    WorkflowStub::fake();
-
+it('requires day parameter', function (): void {
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->weekly()->create([
         'user_id' => $user->id,
         'duration_days' => 7,
     ]);
 
-    Meal::factory()->count(2)->create([
-        'meal_plan_id' => $mealPlan->id,
-        'day_number' => 1,
-    ]);
-
     $this->actingAs($user)
-        ->post(route('meal-plans.regenerate-day', $mealPlan));
-
-    expect($mealPlan->meals()->where('day_number', 1)->count())->toBe(0);
-
-    $mealPlan->refresh();
-    expect($mealPlan->metadata['day_1_status'])
-        ->toBe(MealPlanGenerationStatus::Generating->value);
+        ->post(route('meal-plans.regenerate-day', $mealPlan))
+        ->assertSessionHasErrors('day');
 });
