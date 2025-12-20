@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Inertia\Inertia;
+
 if (! function_exists('getMimeType')) {
 
     function getMimeType(string $filename): string
@@ -95,5 +97,23 @@ if (! function_exists('makeKey')) {
         }
 
         return $key;
+    }
+}
+
+if (! function_exists('toast')) {
+    /**
+     * Flash a toast message to the session.
+     *
+     * @param  string  $message  The message to display
+     * @param  string  $type  The type of toast (e.g., 'success', 'error', 'info', 'warning')
+     */
+    function toast(string $message, string $type = 'success'): void
+    {
+        Inertia::flash([
+            'toast' => [
+                'message' => $message,
+                'type' => $type,
+            ],
+        ]);
     }
 }
