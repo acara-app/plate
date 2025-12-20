@@ -463,7 +463,10 @@ function PlanInfoFooter({
         day: currentDay.day_number,
     });
 
-    const isRegenerating = currentDay.needs_generation;
+    const isRegenerating = currentDay.status === GenerationStatus.Generating;
+    const canRegenerate =
+        currentDay.status === GenerationStatus.Completed ||
+        currentDay.status === GenerationStatus.Failed;
 
     const handleRegenerate = () => {
         regenerateForm.post(mealPlans.regenerateDay(mealPlan.id).url, {
@@ -484,41 +487,45 @@ function PlanInfoFooter({
                 })}
             </p>
 
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={isRegenerating || regenerateForm.processing}
-                    >
-                        {regenerateForm.processing || isRegenerating ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                            <RefreshCw className="mr-2 h-4 w-4" />
-                        )}
-                        Regenerate Day
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>
-                            Regenerate This Day?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This will replace all meals for{' '}
-                            <strong>{currentDay.day_name}</strong> with newly
-                            generated meals based on your current preferences.
-                            This action cannot be undone.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleRegenerate}>
-                            Regenerate
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            {canRegenerate && (
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={
+                                isRegenerating || regenerateForm.processing
+                            }
+                        >
+                            {regenerateForm.processing || isRegenerating ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <RefreshCw className="mr-2 h-4 w-4" />
+                            )}
+                            Regenerate Day
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                Regenerate This Day?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This will replace all meals for{' '}
+                                <strong>{currentDay.day_name}</strong> with
+                                newly generated meals based on your current
+                                preferences. This action cannot be undone.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleRegenerate}>
+                                Regenerate
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            )}
         </div>
     );
 }
