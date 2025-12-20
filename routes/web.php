@@ -25,6 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('meal-plans', Web\ShowMealPlansController::class)->name('meal-plans.index');
     Route::get('meal-plans/{mealPlan}/print', Web\PrintMealPlanController::class)->name('meal-plans.print');
     Route::post('meal-plans/{mealPlan}/generate-day', Web\GenerateMealDayController::class)->name('meal-plans.generate-day');
+    Route::post('meal-plans/{mealPlan}/regenerate-day', Web\RegenerateMealPlanDayController::class)->name('meal-plans.regenerate-day');
 
     // Grocery List...
     Route::get('meal-plans/{mealPlan}/grocery-list', [Web\GroceryListController::class, 'show'])->name('meal-plans.grocery-list.show');
