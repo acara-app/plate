@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers as Web;
+use App\Livewire\SnapToTrack;
 use App\Livewire\SpikeCalculator;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,6 +17,7 @@ Route::view('/install-app', 'install-app')->name('install-app');
 Route::view('/diabetes-log-book', 'diabetes-log-book')->name('diabetes-log-book');
 Route::view('/diabetes-log-book-info', 'diabetes-log-book-info')->name('diabetes-log-book-info');
 Route::get('/spike-calculator', SpikeCalculator::class)->name('spike-calculator');
+Route::get('/snap-to-track', SnapToTrack::class)->name('snap-to-track');
 
 Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])->name('profile.timezone.update');
 
