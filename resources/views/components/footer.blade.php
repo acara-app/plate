@@ -1,6 +1,6 @@
 <footer class="border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-slate-950 w-full" aria-labelledby="footer-heading">
     <h2 id="footer-heading" class="sr-only">Footer</h2>
-    <div class="mx-auto max-w-5xl px-6 py-12 lg:px-8">
+    <div class="mx-auto max-w-5xl py-12 px-6 lg:px-0">
         <div class="xl:grid xl:grid-cols-3 xl:gap-8">
             <div class="space-y-8">
                 <a href="{{ route('home') }}" class="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white">
@@ -20,7 +20,7 @@
             <div class="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
                 <div class="md:grid md:grid-cols-2 md:gap-8">
                     <div>
-                        <h3 class="text-sm font-semibold leading-6 text-slate-900 dark:text-white">Your Toolkit</h3>
+                        <h3 class="text-sm font-semibold leading-6 text-slate-900 dark:text-white">Your Free Toolkits</h3>
                         <ul role="list" class="mt-6 space-y-4">
                             <li>
                                 <a href="{{ route('spike-calculator') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Check glucose impact of foods">Spike Calculator</a>
