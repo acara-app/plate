@@ -1,5 +1,5 @@
 @section('title', 'Free Blood Sugar Spike Checker | Glycemic Index Predictor')
-@section('meta_description', 'Will rice spike my blood sugar? Type what you plan to eat and instantly check if it will cause a glucose spike. Free AI-powered tool with healthier swap suggestions. No account needed.')
+@section('meta_description', 'Will rice raise your blood sugar? Type in a food to check. We will tell you if a spike is likely and suggest better options. You do not need an account.')
 @section('meta_keywords', 'glucose spike checker, blood sugar spike, glycemic index, food blood sugar impact, diabetes food checker, will food spike blood sugar, free glucose tool, blood sugar calculator, what foods cause blood sugar spikes, low glycemic foods')
 
 @section('head')
@@ -30,7 +30,7 @@
             "name": "What is a glucose spike and why should I care?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "A glucose spike is a rapid increase in blood sugar levels after eating certain foods. These spikes can cause energy crashes, hunger cravings, and long-term health issues. Managing glucose spikes is especially important for people with diabetes or those trying to maintain stable energy levels throughout the day."
+                "text": "A spike happens when your blood sugar goes up fast after you eat. You might feel tired or hungry afterwards. Keeping your levels steady helps you feel better and stay healthy."
             }
         },
         {
@@ -38,7 +38,7 @@
             "name": "How does the glucose spike checker work?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Our AI-powered glucose spike checker analyzes the food you enter and estimates its glycemic impact based on carbohydrate content, fiber, protein, and fat composition. It provides a risk level (Low, Medium, or High) and suggests healthier alternatives that may cause a lower blood sugar response."
+                "text": "We look at the carbs, fiber, protein, and fat in the food. Then we give you a risk level: Low, Medium, or High. We also suggest foods that might be better for your blood sugar."
             }
         },
         {
@@ -46,7 +46,7 @@
             "name": "Is this tool a replacement for medical advice?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "No, this glucose spike checker provides estimates for educational purposes only. It is not a substitute for professional medical advice. If you have diabetes or other health conditions, please consult your doctor or a registered dietitian for personalized guidance."
+                "text": "No. This tool gives you estimates. It does not replace your doctor. Talk to a medical professional if you have health questions."
             }
         },
         {
@@ -54,7 +54,7 @@
             "name": "What foods typically cause high blood sugar spikes?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Foods that typically cause high blood sugar spikes include white bread, white rice, sugary drinks, candy, pastries, and processed cereals. These foods are high in refined carbohydrates and low in fiber, causing rapid digestion and quick glucose absorption."
+                "text": "White bread, white rice, and sugary drinks often cause spikes. Candy and pastries do too. These foods have lots of carbs but not much fiber. Your body digests them fast, which sends sugar into your blood quickly."
             }
         },
         {
@@ -62,7 +62,7 @@
             "name": "How can I reduce the glycemic impact of my meals?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "You can reduce glycemic impact by: adding protein or healthy fats to meals, choosing whole grains over refined grains, eating fiber-rich vegetables first, pairing carbs with vinegar-based dressings, and going for a short walk after eating. Our tool suggests specific swaps for any food you check."
+                "text": "Add protein or healthy fats to your meal. Choose whole grains instead of white ones. Eat vegetables first. A short walk after eating also helps."
             }
         }
     ]
@@ -73,7 +73,7 @@
     "@@context": "https://schema.org",
     "@@type": "WebApplication",
     "name": "Glucose Spike Checker",
-    "description": "Free AI-powered tool to check if foods will cause blood sugar spikes, with healthier alternative suggestions.",
+    "description": "Check if foods will raise your blood sugar. Get simple risk levels and better food ideas.",
     "url": "{{ url()->current() }}",
     "applicationCategory": "HealthApplication",
     "operatingSystem": "Any",
@@ -135,7 +135,7 @@
         <div class="text-center speakable-intro">
             <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl dark:bg-emerald-900/50">⚡️</div>
             <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Will It Spike?</h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Check any food in seconds</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Type in a food to check its impact.</p>
         </div>
 
         {{-- Input Section --}}
@@ -289,7 +289,7 @@
         </div>
 
         <p class="text-center text-xs text-slate-400 dark:text-slate-500">
-            <span class="font-bold">Disclaimer:</span> Estimations only. Individual response varies based on insulin sensitivity and activity levels.
+            <strong>Disclaimer:</strong> These are AI estimates. Everyone's body is different.
         </p>
 
     </main>
@@ -297,11 +297,11 @@
     {{-- How it Works Section --}}
     <section class="relative z-10 mt-8 w-full max-w-md">
         <h2 class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
-            How the Glucose Spike Predictor Works
+            How We Check for Spikes
         </h2>
         <div class="grid gap-4 text-sm text-slate-600 dark:text-slate-400">
             <div class="rounded-xl bg-white/50 p-4 backdrop-blur-sm dark:bg-slate-800/50">
-                <p class="speakable-how-it-works">The glucose spike checker uses AI to analyze the nutritional composition of your food. It evaluates the glycemic load by considering the balance of carbohydrates, fiber, protein, and fats. This allows it to predict how likely a food is to cause a rapid rise in blood sugar and suggest smarter alternatives to keep your levels stable.</p>
+                <p class="speakable-how-it-works">We look at the carbs, fiber, protein, and fat in the food you enter. This helps us guess how fast your body will digest it and if it might cause a sugar spike. Then we suggest better options to keep your energy steady.</p>
             </div>
         </div>
     </section>
@@ -309,7 +309,7 @@
     {{-- FAQ Section --}}
     <section class="relative z-10 mt-8 w-full max-w-md" aria-labelledby="faq-heading">
         <h2 id="faq-heading" class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
-            Common Questions About Blood Sugar Spikes
+            Common Questions
         </h2>
         
         <div class="space-y-3" x-data="{ openFaq: null }">
@@ -327,7 +327,7 @@
                     </svg>
                 </button>
                 <div x-show="openFaq === 1" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p class="speakable-intro">A glucose spike is a rapid increase in blood sugar levels after eating certain foods. These spikes can cause energy crashes, hunger cravings, and long-term health issues. Managing glucose spikes is especially important for people with diabetes or those trying to maintain stable energy levels.</p>
+                    <p class="speakable-intro">A spike happens when your blood sugar goes up fast after you eat. You might feel tired or hungry afterwards. Keeping your levels steady helps you feel better and stay healthy.</p>
                 </div>
             </div>
 
@@ -345,7 +345,7 @@
                     </svg>
                 </button>
                 <div x-show="openFaq === 2" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p class="speakable-how-it-works">Our AI-powered tool analyzes the food you enter and estimates its glycemic impact based on carbohydrate content, fiber, protein, and fat composition. It provides a risk level (Low, Medium, or High) and suggests healthier alternatives that may cause a lower blood sugar response.</p>
+                    <p class="speakable-how-it-works">We look at the carbs, fiber, protein, and fat in the food. Then we give you a risk level: Low, Medium, or High. We also suggest foods that might be better for your blood sugar.</p>
                 </div>
             </div>
 
@@ -363,7 +363,7 @@
                     </svg>
                 </button>
                 <div x-show="openFaq === 3" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>Foods that typically cause high blood sugar spikes include white bread, white rice, sugary drinks, candy, pastries, and processed cereals. These foods are high in refined carbohydrates and low in fiber, causing rapid digestion and quick glucose absorption.</p>
+                    <p>White bread, white rice, and sugary drinks often cause spikes. Candy and pastries do too. These foods have lots of carbs but not much fiber. Your body digests them fast, which sends sugar into your blood quickly.</p>
                 </div>
             </div>
 
@@ -381,7 +381,7 @@
                     </svg>
                 </button>
                 <div x-show="openFaq === 4" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>You can reduce glycemic impact by: adding protein or healthy fats to meals, choosing whole grains over refined grains, eating fiber-rich vegetables first, pairing carbs with vinegar-based dressings, and going for a short walk after eating.</p>
+                    <p>Add protein or healthy fats to your meal. Choose whole grains instead of white ones. Eat vegetables first. A short walk after eating also helps.</p>
                 </div>
             </div>
 
@@ -399,7 +399,7 @@
                     </svg>
                 </button>
                 <div x-show="openFaq === 5" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>No, this glucose spike checker provides estimates for educational purposes only. It is not a substitute for professional medical advice. If you have diabetes or other health conditions, please consult your doctor or a registered dietitian for personalized guidance.</p>
+                    <p>No. This tool gives you estimates. It does not replace your doctor. Talk to a medical professional if you have health questions.</p>
                 </div>
             </div>
         </div>
@@ -408,7 +408,7 @@
     {{-- Footer --}}
     <footer class="relative z-10 mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
         <p>
-            This gives you an estimate, not medical advice. Got a health question? Talk to your doctor.
+            <strong>Disclaimer:</strong> AI estimates are for guidance only, not medical advice. Got a health question? Talk to your doctor.
         </p>
         <p class="mt-2">
             <a href="{{ route('home') }}" class="underline hover:text-emerald-600">Back to Home</a>

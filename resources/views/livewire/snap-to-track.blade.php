@@ -1,4 +1,4 @@
-@section('title', 'Free AI Food Photo Calorie Counter | Nutrition Analyzer')
+@section('title', 'Snap to Track | Free AI Food Photo Calorie Counter')
 @section('meta_description', 'Snap a photo of your meal and get instant calorie and macro breakdown with AI. Free food photo analyzer - no account needed. Track protein, carbs, and fat automatically.')
 @section('meta_keywords', 'food photo calorie counter, snap to track calories, AI food recognition, meal photo analyzer, instant macro breakdown, calorie tracking app, food image analysis, nutrition scanner')
 
@@ -30,7 +30,7 @@
             "name": "How does the food photo analyzer work?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Our AI-powered food photo analyzer uses advanced image recognition to identify all food items in your photo. It then estimates portion sizes and calculates calories, protein, carbs, and fat for each item, giving you a complete nutritional breakdown of your meal."
+                "text": "The tool looks at your photo to find food items. It guesses how much food is there. Then, it calculates the calories, protein, carbs, and fat for you."
             }
         },
         {
@@ -38,7 +38,7 @@
             "name": "How accurate is the calorie estimation from photos?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Our AI provides estimates based on visual analysis. Accuracy depends on image quality and food visibility. For best results, take clear photos with good lighting and ensure all food items are visible. The confidence score indicates how reliable the estimate is."
+                "text": "Estimates work best when the photo is clear. Lighting matters. If we can see the food clearly, the numbers will be more accurate. The confidence score tells you how sure we are."
             }
         },
         {
@@ -46,7 +46,7 @@
             "name": "What types of food can the AI recognize?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Our AI can recognize a wide variety of foods including fruits, vegetables, meats, grains, prepared dishes, snacks, beverages, and more. It works best with common foods and clearly visible portions."
+                "text": "We recognize most common foods. This includes fruits, vegetables, meats, and grains. Snacks and drinks work too. Make sure the food is easy to see."
             }
         }
     ]
@@ -57,7 +57,7 @@
     "@@context": "https://schema.org",
     "@@type": "WebApplication",
     "name": "Snap to Track - Food Photo Calorie Counter",
-    "description": "Free AI-powered tool to analyze food photos and get instant calorie and macro breakdown.",
+    "description": "Analyze food photos to get instant calorie and macro breakdown.",
     "url": "{{ url()->current() }}",
     "applicationCategory": "HealthApplication",
     "operatingSystem": "Any",
@@ -326,22 +326,10 @@
         @endif
 
         <p class="text-center text-xs text-slate-400 dark:text-slate-500">
-            <span class="font-bold">Disclaimer:</span> AI estimates only. Actual nutrition may vary based on preparation and exact portions.
+            <strong>Disclaimer:</strong> These are AI estimates. Actual nutrition depends on how the food was made.
         </p>
 
     </main>
-
-    {{-- How it Works Section --}}
-    <section class="relative z-10 mt-8 w-full max-w-md">
-        <h2 class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
-            How Food Photo Analysis Works
-        </h2>
-        <div class="grid gap-4 text-sm text-slate-600 dark:text-slate-400">
-            <div class="rounded-xl bg-white/50 p-4 backdrop-blur-sm dark:bg-slate-800/50">
-                <p class="speakable-how-it-works">Our AI-powered food photo analyzer uses advanced computer vision to identify ingredients and dishes from your images. By analyzing the visual characteristics and context, it estimates portion sizes and provides a detailed nutritional breakdown including calories, protein, carbohydrates, and fats.</p>
-            </div>
-        </div>
-    </section>
 
     {{-- FAQ Section --}}
     <section class="relative z-10 mt-8 w-full max-w-md" aria-labelledby="faq-heading">
@@ -364,7 +352,7 @@
                     </svg>
                 </button>
                 <div x-show="openFaq === 1" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p class="speakable-how-it-works">Our AI uses advanced image recognition to identify food items in your photo, estimate portion sizes, and calculate nutritional values including calories, protein, carbs, and fat.</p>
+                    <p class="speakable-how-it-works">The tool looks at your photo to find food items. It guesses how much food is there. Then, it calculates the calories, protein, carbs, and fat for you.</p>
                 </div>
             </div>
 
@@ -382,7 +370,7 @@
                     </svg>
                 </button>
                 <div x-show="openFaq === 2" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>Accuracy depends on image quality and food visibility. The confidence score shows how certain the AI is. For best results, take clear photos with good lighting.</p>
+                    <p>Estimates work best when the photo is clear. Lighting matters. If we can see the food clearly, the numbers will be more accurate. The confidence score tells you how sure we are.</p>
                 </div>
             </div>
 
@@ -400,7 +388,7 @@
                     </svg>
                 </button>
                 <div x-show="openFaq === 3" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>Our AI can recognize most common foods including fruits, vegetables, meats, grains, prepared dishes, snacks, and beverages. It works best with clearly visible food items.</p>
+                    <p>We recognize most common foods. This includes fruits, vegetables, meats, and grains. Snacks and drinks work too. Make sure the food is easy to see.</p>
                 </div>
             </div>
 
@@ -418,7 +406,7 @@
                     </svg>
                 </button>
                 <div x-show="openFaq === 4" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>Yes! Your photos are processed securely and are not stored permanently. We use them only for analysis and they are deleted after processing.</p>
+                    <p>Yes. We process your photo to get the data, then we delete it. We do not keep your images.</p>
                 </div>
             </div>
         </div>
@@ -427,7 +415,7 @@
     {{-- Footer --}}
     <footer class="relative z-10 mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
         <p>
-            AI estimates are for guidance only, not medical advice.
+            <strong>Disclaimer:</strong> AI estimates are for guidance only, not medical advice.
         </p>
         <p class="mt-2">
             <a href="{{ route('home') }}" class="underline hover:text-orange-600">Back to Home</a>
