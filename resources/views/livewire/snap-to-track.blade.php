@@ -412,6 +412,25 @@
         </div>
     </section>
 
+    {{-- More Free Tools --}}
+    <section class="relative z-10 mt-8 w-full max-w-md">
+        <h2 class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
+            More Free Tools
+        </h2>
+        <div class="grid gap-4 sm:grid-cols-2">
+            <a href="{{ route('spike-calculator') }}" class="group flex flex-col items-center rounded-xl bg-white p-4 text-center shadow-sm transition-all hover:shadow-md dark:bg-slate-800">
+                <span class="mb-2 text-2xl">⚡️</span>
+                <h3 class="font-bold text-slate-900 dark:text-white">Spike Calculator</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Check if foods will spike your blood sugar</p>
+            </a>
+            <a href="{{ route('diabetes-log-book-info') }}" class="group flex flex-col items-center rounded-xl bg-white p-4 text-center shadow-sm transition-all hover:shadow-md dark:bg-slate-800">
+                <span class="mb-2 text-2xl">📖</span>
+                <h3 class="font-bold text-slate-900 dark:text-white">Diabetes Log Book</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Free printable log book to track your levels</p>
+            </a>
+        </div>
+    </section>
+
     {{-- Footer --}}
     <footer class="relative z-10 mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
         <p>
