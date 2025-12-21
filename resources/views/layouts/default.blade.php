@@ -40,6 +40,8 @@
         @endproduction
 
         @vite(['resources/css/app.css'])
+
+        @yield('head')
     </head>
 
     <body>

@@ -95,6 +95,22 @@
                         <strong>Important:</strong> This log book is a tool for tracking and does not replace medical advice. Always consult with your healthcare provider about your diabetes management plan.
                     </p>
                 </div>
+
+                <div class="not-prose mt-16 border-t border-slate-200 pt-12 dark:border-slate-700">
+                    <h2 class="text-center text-2xl font-bold text-slate-900 dark:text-white mb-8">Explore Our Other Free Tools</h2>
+                    <div class="grid gap-6 sm:grid-cols-2">
+                        <a href="{{ route('spike-calculator') }}" class="group flex flex-col items-center rounded-xl bg-white p-6 text-center shadow-sm ring-1 ring-slate-200 transition-all hover:shadow-md hover:ring-emerald-500 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-emerald-500">
+                            <span class="mb-3 text-4xl">⚡️</span>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Spike Calculator</h3>
+                            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Check if foods will spike your blood sugar and get better alternatives.</p>
+                        </a>
+                        <a href="{{ route('snap-to-track') }}" class="group flex flex-col items-center rounded-xl bg-white p-6 text-center shadow-sm ring-1 ring-slate-200 transition-all hover:shadow-md hover:ring-orange-500 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-orange-500">
+                            <span class="mb-3 text-4xl">📸</span>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Snap to Track</h3>
+                            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Snap a photo of your meal to get an instant calorie and macro breakdown.</p>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

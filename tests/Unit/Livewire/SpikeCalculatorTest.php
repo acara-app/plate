@@ -11,7 +11,7 @@ it('renders the spike calculator component', function (): void {
     Livewire::test(SpikeCalculator::class)
         ->assertStatus(200)
         ->assertSee('Will It Spike?')
-        ->assertSee('Check any food in seconds');
+        ->assertSee('Type in a food to check its impact.');
 });
 
 it('has food input field', function (): void {
