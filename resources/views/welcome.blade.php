@@ -45,7 +45,7 @@
             </div>
         </div>
 
-        <header class="relative z-10 mb-4 w-full max-w-[335px] not-has-[nav]:hidden lg:mb-8 lg:max-w-5xl">
+        <header class="relative z-10 mb-4 w-full max-w-83.75 not-has-[nav]:hidden lg:mb-8 lg:max-w-5xl">
             <nav class="flex items-center justify-between">
                 <a href="/"
                     class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80 dark:text-white">
@@ -75,7 +75,7 @@
         <main
             class="relative z-10 flex w-full flex-col items-center justify-center gap-6 opacity-100 transition-opacity duration-700 lg:grow lg:gap-8 starting:opacity-0">
             <section aria-label="Hero"
-                class="flex w-full max-w-[380px] flex-col-reverse gap-0 lg:max-w-5xl lg:flex-row lg:gap-8">
+                class="flex w-full max-w-95 flex-col-reverse gap-0 lg:max-w-5xl lg:flex-row lg:gap-8">
                 <div
                     class="group flex-1 rounded-b-2xl bg-white/90 p-5 shadow-2xl shadow-emerald-500/10 backdrop-blur-md transition-all duration-500 hover:shadow-emerald-500/20 lg:rounded-2xl lg:p-12 lg:pr-16 dark:bg-slate-900/90 dark:shadow-emerald-500/5 dark:hover:shadow-emerald-500/10">
                     <div class="space-y-4 lg:space-y-6">
@@ -128,7 +128,7 @@
                 </div>
 
                 <div aria-hidden="true"
-                    class="relative mb-0 aspect-4/3 w-full shrink-0 overflow-hidden rounded-t-2xl bg-linear-to-br from-emerald-100 via-teal-50 to-cyan-100 shadow-2xl shadow-emerald-500/10 lg:mb-0 lg:aspect-auto lg:w-[480px] lg:rounded-2xl dark:from-emerald-950 dark:via-teal-950 dark:to-cyan-950 dark:shadow-emerald-500/5">
+                    class="relative mb-0 aspect-4/3 w-full shrink-0 overflow-hidden rounded-t-2xl bg-linear-to-br from-emerald-100 via-teal-50 to-cyan-100 shadow-2xl shadow-emerald-500/10 lg:mb-0 lg:aspect-auto lg:w-120 lg:rounded-2xl dark:from-emerald-950 dark:via-teal-950 dark:to-cyan-950 dark:shadow-emerald-500/5">
                     {{-- Decorative circles --}}
                     <div
                         class="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-linear-to-br from-emerald-400 to-teal-500 opacity-20 lg:-right-12 lg:-top-12 lg:h-56 lg:w-56 dark:from-emerald-500 dark:to-teal-600 dark:opacity-15">
@@ -280,7 +280,7 @@
             </section>
 
             {{-- Spike Calculator Tool Promo --}}
-            <section class="w-full max-w-[335px] lg:max-w-5xl">
+            <section class="w-full max-w-83.75 lg:max-w-5xl">
                 <div class="relative overflow-hidden rounded-3xl bg-slate-900 px-6 py-12 shadow-2xl sm:px-12 sm:py-16 lg:px-16">
                     {{-- Background Effects --}}
                     <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-orange-500/20 via-slate-900 to-slate-900"></div>
@@ -392,7 +392,7 @@
             </section>
 
             {{-- Features Section --}}
-            <section class="w-full max-w-[335px] lg:max-w-5xl">
+            <section class="w-full max-w-83.75 lg:max-w-5xl">
                 <div class="space-y-4 lg:space-y-6">
                     <div class="text-center">
                         <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl dark:text-white">Data-Driven Glucose Control</h2>
@@ -471,7 +471,7 @@
             </section>
 
             {{-- How It Works Section --}}
-            <section class="w-full max-w-[335px] lg:max-w-5xl">
+            <section class="w-full max-w-83.75 lg:max-w-5xl">
                 <div class="space-y-4 lg:space-y-6">
                     <div class="text-center">
                         <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl dark:text-white">How It Works</h2>
@@ -515,8 +515,47 @@
                 </div>
             </section>
 
+            {{-- Open Source Section --}}
+            <section class="w-full max-w-83.75 lg:max-w-5xl">
+                <div class="relative overflow-hidden rounded-3xl bg-slate-900 px-6 py-12 shadow-2xl sm:px-12 sm:py-16 lg:px-16">
+                    {{-- Background Effects --}}
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-emerald-500/20 via-slate-900 to-slate-900"></div>
+                    <div class="absolute -left-12 -top-12 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl"></div>
+                    <div class="absolute -bottom-12 -right-12 h-64 w-64 rounded-full bg-teal-500/10 blur-3xl"></div>
+
+                    <div class="relative flex flex-col items-center text-center">
+                        {{-- Badge --}}
+                        <div class="mb-8 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                            <span class="relative flex h-2 w-2">
+                                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                            </span>
+                            One more thing...
+                        </div>
+
+                        {{-- Content --}}
+                        <h2 class="mb-6 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                            Acara Plate is <span class="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-teal-400">Open Source</span>
+                        </h2>
+
+                        <p class="mb-10 max-w-2xl text-lg leading-relaxed text-slate-400">
+                            Acara Plate is open source and 100% free to self-host. Whether you want to customize the platform for your specific needs or simply prefer running your own instance, the choice is yours. Have a feature in mind? We welcome pull requests to improve the product for everyone.
+                        </p>
+
+                        {{-- CTA Button --}}
+                        <a href="https://github.com/acara-app/plate" target="_blank"
+                           class="group inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-bold text-slate-900 shadow-lg shadow-emerald-500/10 transition-all hover:scale-105 hover:bg-emerald-50 hover:shadow-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-slate-900">
+                            <svg class="h-5 w-5 transition-transform duration-300 group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                            </svg>
+                            View on GitHub
+                        </a>
+                    </div>
+                </div>
+            </section>
+
             {{-- FAQ Section --}}
-            <section class="w-full max-w-[335px] lg:max-w-5xl">
+            <section class="w-full max-w-83.75 lg:max-w-5xl">
                 <div class="space-y-4 lg:space-y-6">
                     <div class="text-center">
                         <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl dark:text-white">Common Questions</h2>
@@ -670,7 +709,7 @@
             </section>
 
             {{-- Medical Disclaimer --}}
-            <section class="w-full max-w-[335px] lg:max-w-5xl">
+            <section class="w-full max-w-83.75 lg:max-w-5xl">
                 <div
                     class="rounded-xl border border-amber-200 bg-amber-50/80 p-4 backdrop-blur-sm lg:p-6 dark:border-amber-900/50 dark:bg-amber-950/30">
                     <div class="flex items-start gap-3 lg:gap-4">
