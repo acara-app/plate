@@ -1,6 +1,6 @@
 <footer class="border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-slate-950 w-full" aria-labelledby="footer-heading">
     <h2 id="footer-heading" class="sr-only">Footer</h2>
-    <div class="mx-auto max-w-5xl py-12 px-6 lg:px-0">
+    <div class="mx-auto max-w-6xl py-12 px-6 lg:px-0">
         <div class="xl:grid xl:grid-cols-3 xl:gap-8">
             <div class="space-y-8">
                 <a href="{{ route('home') }}" class="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white">
