@@ -1,5 +1,5 @@
-@section('title', 'Your Complete Guide to the Free Diabetes Log Book | Acara Plate')
-@section('meta_description', 'Discover how our free diabetes log book helps you take control of your health. Learn why tracking matters, what features make it effective, and how to use it to spot patterns and improve your diabetes management.')
+@section('title', 'How to Use a Diabetes Log Book | Blood Sugar Tracking Guide')
+@section('meta_description', 'Master your diabetes management with our comprehensive guide. Learn how to effectively use a log book to spot patterns and control blood sugar levels.')
 
 <x-default-layout>
     <div class="mx-auto my-16 max-w-7xl px-6 lg:px-8">

@@ -1,5 +1,5 @@
-@section('title', 'Snap to Track | Free AI Food Photo Calorie Counter')
-@section('meta_description', 'Snap a photo of your meal and get instant calorie and macro breakdown with AI. Free food photo analyzer - no account needed. Track protein, carbs, and fat automatically.')
+@section('title', 'AI Food Photo Calorie Counter | Snap & Track Macros for Free')
+@section('meta_description', 'Instantly analyze your meal\'s calories and macros by snapping a photo. Free AI food scanner for easy diabetes & nutrition tracking. Try it now!')
 @section('meta_keywords', 'food photo calorie counter, snap to track calories, AI food recognition, meal photo analyzer, instant macro breakdown, calorie tracking app, food image analysis, nutrition scanner')
 
 @section('head')
@@ -118,7 +118,7 @@
         {{-- Header Section --}}
         <div class="text-center speakable-intro">
             <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-2xl dark:bg-orange-900/50">📸</div>
-            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Snap to Track</h1>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Snap to Track: AI Food Calorie Counter</h1>
             <p class="text-sm text-slate-500 dark:text-slate-400">Instant macro breakdown with AI</p>
         </div>
 

@@ -1,5 +1,5 @@
-@section('title', 'Free Blood Sugar Spike Checker | Glycemic Index Predictor')
-@section('meta_description', 'Will rice raise your blood sugar? Type in a food to check. We will tell you if a spike is likely and suggest better options. You do not need an account.')
+@section('title', 'Free Glucose Spike Calculator | Predict Blood Sugar Impact Instantly')
+@section('meta_description', 'Check if foods will spike your blood sugar with our free AI calculator. Get instant glycemic risk analysis and smart food swaps. No sign-up required.')
 @section('meta_keywords', 'glucose spike checker, blood sugar spike, glycemic index, food blood sugar impact, diabetes food checker, will food spike blood sugar, free glucose tool, blood sugar calculator, what foods cause blood sugar spikes, low glycemic foods')
 
 @section('head')
@@ -134,7 +134,7 @@
         {{-- Header Section --}}
         <div class="text-center speakable-intro">
             <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl dark:bg-emerald-900/50">⚡️</div>
-            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Will It Spike?</h1>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Glucose Spike Calculator: Will It Spike?</h1>
             <p class="text-sm text-slate-500 dark:text-slate-400">Type in a food to check its impact.</p>
         </div>
 

@@ -1,3 +1,6 @@
+@section('title', 'AI Diabetes Meal Planner & Glucose Tracker | Personalized Nutrition')
+@section('meta_description', 'Manage Type 2 diabetes with Acara Plate\'s AI nutritionist. Get personalized meal plans that match your glucose levels. Start your free plan today!')
+
 <x-default-layout>
     @section('head')
     <script type="application/ld+json">

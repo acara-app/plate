@@ -1,5 +1,5 @@
-@section('title', 'Free Printable Diabetes Log Book - Track Blood Sugar Levels | Acara Plate')
-@section('meta_description', 'Download and print a free diabetes log book to track your daily blood sugar levels. Perfect 6" × 9" size for tracking glucose readings before and after meals.')
+@section('title', 'Free Printable Diabetes Log Book PDF | Track Blood Sugar Daily')
+@section('meta_description', 'Download our free printable diabetes log book (6"x9" PDF). Easily track daily blood sugar readings, meals, and insulin. Print your copy today!')
 
 <x-default-layout>
     <div class="mx-auto my-16 max-w-7xl px-6 lg:px-8">
