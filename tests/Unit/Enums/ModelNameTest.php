@@ -40,6 +40,13 @@ it('identifies models that require thinking mode', function (): void {
         ->and(ModelName::GPT_5_NANO->requiresThinkingMode())->toBeFalse();
 });
 
+it('identifies models that support temperature', function (): void {
+    expect(ModelName::GPT_5_MINI->supportsTemperature())->toBeFalse()
+        ->and(ModelName::GPT_5_NANO->supportsTemperature())->toBeFalse()
+        ->and(ModelName::GEMINI_2_5_FLASH->supportsTemperature())->toBeTrue()
+        ->and(ModelName::GEMINI_3_FLASH->supportsTemperature())->toBeTrue();
+});
+
 it('returns correct thinking budget for thinking models', function (): void {
     expect(ModelName::GEMINI_3_FLASH->getThinkingBudget())->toBe(8192)
         ->and(ModelName::GEMINI_2_5_FLASH->getThinkingBudget())->toBeNull()

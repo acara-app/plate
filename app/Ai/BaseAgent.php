@@ -87,10 +87,13 @@ abstract class BaseAgent implements AgentInterface
     public function text(): PendingRequest
     {
         $request = Prism::text()
-            ->usingTemperature($this->temperature())
             ->using($this->provider(), $this->model())
             ->withSystemPrompt($this->systemPrompt())
             ->withMaxTokens($this->maxTokens());
+
+        if ($this->modelName()->supportsTemperature()) {
+            $request->usingTemperature($this->temperature());
+        }
 
         if ($this->tools() !== []) {
             $request->withTools($this->tools());

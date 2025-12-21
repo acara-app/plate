@@ -76,6 +76,18 @@ enum ModelName: string
     }
 
     /**
+     * Check if this model supports the temperature parameter.
+     * GPT-5 models (reasoning models) do not support temperature.
+     */
+    public function supportsTemperature(): bool
+    {
+        return match ($this) {
+            self::GPT_5_MINI, self::GPT_5_NANO => false,
+            default => true,
+        };
+    }
+
+    /**
      * Get the recommended temperature for this model.
      * Gemini 3 models require temperature of 1.0.
      */
