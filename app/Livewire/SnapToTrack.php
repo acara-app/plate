@@ -52,12 +52,19 @@ final class SnapToTrack extends Component
             }
 
             $base64 = base64_encode($imageContent);
-            $mimeType = $this->photo->getMimeType() ?? 'image/jpeg';
+            $mimeType = $this->photo->getMimeType();
+
+            if ($mimeType === null) { // @phpstan-ignore-line
+                $mimeType = 'image/jpeg'; // @codeCoverageIgnore
+            }
 
             $analysis = $action->handle($base64, $mimeType);
 
+            /** @var array<int, array{name: string, calories: float, protein: float, carbs: float, fat: float, portion: string}> $items */
+            $items = $analysis->items->toArray();
+
             $this->result = [
-                'items' => $analysis->items->toArray(),
+                'items' => $items,
                 'totalCalories' => $analysis->totalCalories,
                 'totalProtein' => $analysis->totalProtein,
                 'totalCarbs' => $analysis->totalCarbs,

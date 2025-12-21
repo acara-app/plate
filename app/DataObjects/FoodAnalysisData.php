@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\DataObjects;
 
 use Spatie\LaravelData\Attributes\DataCollectionOf;
+use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 
+#[MapInputName(SnakeCaseMapper::class)]
 final class FoodAnalysisData extends Data
 {
     /**
@@ -22,16 +25,4 @@ final class FoodAnalysisData extends Data
         public float $totalFat,
         public int $confidence,
     ) {}
-
-    public static function fromArray(array $data): self
-    {
-        return new self(
-            items: FoodItemData::collect($data['items'], DataCollection::class),
-            totalCalories: $data['total_calories'],
-            totalProtein: $data['total_protein'],
-            totalCarbs: $data['total_carbs'],
-            totalFat: $data['total_fat'],
-            confidence: $data['confidence'],
-        );
-    }
 }

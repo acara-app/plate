@@ -38,7 +38,7 @@ it('can be created directly with constructor', function (): void {
     expect($analysisData->items->first()->name)->toBe('Grilled Chicken');
 });
 
-it('can be created from array using fromArray method', function (): void {
+it('can be created from array using from method', function (): void {
     $data = [
         'items' => [
             [
@@ -65,7 +65,7 @@ it('can be created from array using fromArray method', function (): void {
         'confidence' => 90,
     ];
 
-    $analysisData = FoodAnalysisData::fromArray($data);
+    $analysisData = FoodAnalysisData::from($data);
 
     expect($analysisData)
         ->totalCalories->toBe(295.0)
@@ -121,7 +121,7 @@ it('handles empty items array', function (): void {
         'confidence' => 0,
     ];
 
-    $analysisData = FoodAnalysisData::fromArray($data);
+    $analysisData = FoodAnalysisData::from($data);
 
     expect($analysisData)
         ->totalCalories->toBe(0.0)

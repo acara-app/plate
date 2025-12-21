@@ -77,6 +77,6 @@ final class FoodPhotoAnalyzerAgent extends BaseAgent
         /** @var array{items: array<int, array{name: string, calories: float, protein: float, carbs: float, fat: float, portion: string}>, total_calories: float, total_protein: float, total_carbs: float, total_fat: float, confidence: int} $data */
         $data = json_decode($cleanedJsonText, true, 512, JSON_THROW_ON_ERROR);
 
-        return FoodAnalysisData::fromArray($data);
+        return FoodAnalysisData::from($data);
     }
 }
