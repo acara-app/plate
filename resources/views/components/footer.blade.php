@@ -43,6 +43,7 @@
                 <a
                     href="{{ route('spike-calculator') }}"
                     class="text-sm leading-6 dark:text-slate-400 text-slate-500 dark:hover:text-slate-200 hover:text-slate-950"
+                    title="Check if food will spike your blood sugar with our AI Glucose Spike Calculator"
                     >Spike Calculator</a
                 >
             </div>
@@ -50,6 +51,7 @@
                 <a
                     href="{{ route('snap-to-track') }}"
                     class="text-sm leading-6 dark:text-slate-400 text-slate-500 dark:hover:text-slate-200 hover:text-slate-950"
+                    title="Analyze food photos for instant calorie and macro breakdown"
                     >Food Photo Analyzer</a
                 >
             </div>

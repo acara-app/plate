@@ -6,6 +6,23 @@
 <script type="application/ld+json">
 {
     "@@context": "https://schema.org",
+    "@@type": "BreadcrumbList",
+    "itemListElement": [{
+        "@@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "{{ url('/') }}"
+    },{
+        "@@type": "ListItem",
+        "position": 2,
+        "name": "Spike Calculator",
+        "item": "{{ url()->current() }}"
+    }]
+}
+</script>
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
     "@@type": "FAQPage",
     "mainEntity": [
         {
@@ -115,7 +132,7 @@
     <main class="relative z-10 w-full max-w-md space-y-6 rounded-3xl bg-white p-6 shadow-xl shadow-emerald-500/10 dark:bg-slate-800 dark:shadow-emerald-900/20">
 
         {{-- Header Section --}}
-        <div class="text-center">
+        <div class="text-center speakable-intro">
             <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl dark:bg-emerald-900/50">⚡️</div>
             <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Will It Spike?</h1>
             <p class="text-sm text-slate-500 dark:text-slate-400">Check any food in seconds</p>
@@ -276,6 +293,18 @@
         </p>
 
     </main>
+
+    {{-- How it Works Section --}}
+    <section class="relative z-10 mt-8 w-full max-w-md">
+        <h2 class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
+            How the Glucose Spike Predictor Works
+        </h2>
+        <div class="grid gap-4 text-sm text-slate-600 dark:text-slate-400">
+            <div class="rounded-xl bg-white/50 p-4 backdrop-blur-sm dark:bg-slate-800/50">
+                <p class="speakable-how-it-works">The glucose spike checker uses AI to analyze the nutritional composition of your food. It evaluates the glycemic load by considering the balance of carbohydrates, fiber, protein, and fats. This allows it to predict how likely a food is to cause a rapid rise in blood sugar and suggest smarter alternatives to keep your levels stable.</p>
+            </div>
+        </div>
+    </section>
 
     {{-- FAQ Section --}}
     <section class="relative z-10 mt-8 w-full max-w-md" aria-labelledby="faq-heading">

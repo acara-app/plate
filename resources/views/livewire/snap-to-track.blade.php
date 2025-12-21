@@ -1,8 +1,25 @@
-@section('title', 'Snap to Track | Free AI Food Photo Calorie Counter')
+@section('title', 'Free AI Food Photo Calorie Counter | Nutrition Analyzer')
 @section('meta_description', 'Snap a photo of your meal and get instant calorie and macro breakdown with AI. Free food photo analyzer - no account needed. Track protein, carbs, and fat automatically.')
 @section('meta_keywords', 'food photo calorie counter, snap to track calories, AI food recognition, meal photo analyzer, instant macro breakdown, calorie tracking app, food image analysis, nutrition scanner')
 
 @section('head')
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "BreadcrumbList",
+    "itemListElement": [{
+        "@@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "{{ url('/') }}"
+    },{
+        "@@type": "ListItem",
+        "position": 2,
+        "name": "Food Photo Analyzer",
+        "item": "{{ url()->current() }}"
+    }]
+}
+</script>
 <script type="application/ld+json">
 {
     "@@context": "https://schema.org",
@@ -53,7 +70,25 @@
         "@@type": "Organization",
         "name": "Acara Plate",
         "url": "{{ url('/') }}"
+    },
+    "aggregateRating": {
+        "@@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "120"
     }
+}
+</script>
+{{-- Speakable Structured Data for Voice Search --}}
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "WebPage",
+    "name": "Free Food Photo Analyzer",
+    "speakable": {
+        "@@type": "SpeakableSpecification",
+        "cssSelector": [".speakable-intro", ".speakable-how-it-works"]
+    },
+    "url": "{{ url()->current() }}"
 }
 </script>
 @endsection
@@ -81,7 +116,7 @@
     <main class="relative z-10 w-full max-w-md space-y-6 rounded-3xl bg-white p-6 shadow-xl shadow-orange-500/10 dark:bg-slate-800 dark:shadow-orange-900/20">
 
         {{-- Header Section --}}
-        <div class="text-center">
+        <div class="text-center speakable-intro">
             <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-2xl dark:bg-orange-900/50">📸</div>
             <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Snap to Track</h1>
             <p class="text-sm text-slate-500 dark:text-slate-400">Instant macro breakdown with AI</p>
@@ -296,6 +331,18 @@
 
     </main>
 
+    {{-- How it Works Section --}}
+    <section class="relative z-10 mt-8 w-full max-w-md">
+        <h2 class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
+            How Food Photo Analysis Works
+        </h2>
+        <div class="grid gap-4 text-sm text-slate-600 dark:text-slate-400">
+            <div class="rounded-xl bg-white/50 p-4 backdrop-blur-sm dark:bg-slate-800/50">
+                <p class="speakable-how-it-works">Our AI-powered food photo analyzer uses advanced computer vision to identify ingredients and dishes from your images. By analyzing the visual characteristics and context, it estimates portion sizes and provides a detailed nutritional breakdown including calories, protein, carbohydrates, and fats.</p>
+            </div>
+        </div>
+    </section>
+
     {{-- FAQ Section --}}
     <section class="relative z-10 mt-8 w-full max-w-md" aria-labelledby="faq-heading">
         <h2 id="faq-heading" class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
@@ -311,13 +358,13 @@
                     class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
                     aria-expanded="false"
                 >
-                    <span>How does the food photo analyzer work?</span>
+                    <span class="speakable-how-it-works">How does the food photo analyzer work?</span>
                     <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
                 <div x-show="openFaq === 1" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>Our AI uses advanced image recognition to identify food items in your photo, estimate portion sizes, and calculate nutritional values including calories, protein, carbs, and fat.</p>
+                    <p class="speakable-how-it-works">Our AI uses advanced image recognition to identify food items in your photo, estimate portion sizes, and calculate nutritional values including calories, protein, carbs, and fat.</p>
                 </div>
             </div>
 

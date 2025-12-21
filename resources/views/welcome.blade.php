@@ -1,4 +1,31 @@
 <x-default-layout>
+    @section('head')
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "WebSite",
+        "name": "Acara Plate",
+        "url": "{{ url('/') }}",
+        "potentialAction": {
+            "@@type": "SearchAction",
+            "target": "{{ url('/') }}/?s={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "Organization",
+        "name": "Acara Plate",
+        "url": "{{ url('/') }}",
+        "logo": "{{ asset('apple-touch-icon/apple-touch-icon-180x180.png') }}",
+        "sameAs": [
+            "https://github.com/acara-app/plate"
+        ]
+    }
+    </script>
+    @endsection
     <div
         class="relative flex min-h-screen flex-col items-center overflow-hidden from-emerald-50 via-white to-teal-50 p-4 text-slate-900 lg:justify-center lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950 dark:text-slate-50">
 
