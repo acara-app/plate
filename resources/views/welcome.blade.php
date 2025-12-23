@@ -75,11 +75,12 @@
                 
                 {{-- Screenshot Container --}}
                 <figure class="w-full">
-                    <div class="relative overflow-hidden rounded-2xl shadow-2xl shadow-slate-200 ring-1 ring-slate-900/5">
+                    <div class="relative overflow-hidden rounded-t-2xl shadow-2xl shadow-slate-200 ring-1 ring-slate-900/5">
                         <picture>
-                            <source srcset="/meal-plan.webp" type="image/webp">
-                            <img src="/meal-plan.webp" alt="AI-personalized meal planning dashboard showing personalized nutrition recommendations" class="w-full">
+                            <source srcset="{{ asset('meal-plan-hero-section.webp') }}" type="image/webp">
+                            <img src="{{ asset('meal-plan-hero-section.webp') }}" alt="AI-personalized meal planning dashboard showing personalized nutrition recommendations" class="w-full">
                         </picture>
+                        <div class="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-slate-900"></div>
                     </div>
                 </figure>
 

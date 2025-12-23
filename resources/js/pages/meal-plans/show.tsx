@@ -207,44 +207,10 @@ export default function MealPlans({
                             </div>
 
                             {/* Day Navigation */}
-                            <div className="flex items-center justify-center gap-2">
-                                <Button variant="outline" size="icon" asChild>
-                                    <Link
-                                        href={
-                                            mealPlans.index({
-                                                query: {
-                                                    day: navigation.previous_day,
-                                                },
-                                            }).url
-                                        }
-                                        preserveScroll
-                                    >
-                                        <ChevronLeft className="h-4 w-4" />
-                                    </Link>
-                                </Button>
-
-                                <div className="min-w-30 text-center">
-                                    <div className="text-xs text-muted-foreground">
-                                        Day {currentDay.day_number} of{' '}
-                                        {navigation.total_days}
-                                    </div>
-                                </div>
-
-                                <Button variant="outline" size="icon" asChild>
-                                    <Link
-                                        href={
-                                            mealPlans.index({
-                                                query: {
-                                                    day: navigation.next_day,
-                                                },
-                                            }).url
-                                        }
-                                        preserveScroll
-                                    >
-                                        <ChevronRight className="h-4 w-4" />
-                                    </Link>
-                                </Button>
-                            </div>
+                            <DayPagination
+                                currentDay={currentDay.day_number}
+                                totalDays={navigation.total_days}
+                            />
 
                             <Separator />
 
@@ -445,6 +411,83 @@ function MealCardSkeleton() {
                 </div>
             </div>
         </div>
+    );
+}
+
+interface DayPaginationProps {
+    currentDay: number;
+    totalDays: number;
+}
+
+function DayPagination({ currentDay, totalDays }: DayPaginationProps) {
+    const days = Array.from({ length: totalDays }, (_, i) => i + 1);
+
+    return (
+        <nav className="flex items-center justify-between border-t border-border px-4 sm:px-0">
+            {/* Previous */}
+            <div className="-mt-px flex w-0 flex-1">
+                <Link
+                    href={
+                        mealPlans.index({
+                            query: { day: Math.max(1, currentDay - 1) },
+                        }).url
+                    }
+                    preserveScroll
+                    className={`inline-flex items-center border-t-2 border-transparent pt-4 pr-1 text-sm font-medium text-muted-foreground hover:border-border hover:text-foreground ${
+                        currentDay === 1 ? 'pointer-events-none opacity-50' : ''
+                    }`}
+                >
+                    <ChevronLeft className="mr-2 h-4 w-4" />
+                    Previous
+                </Link>
+            </div>
+
+            {/* Day numbers - hidden on mobile */}
+            <div className="hidden md:-mt-px md:flex">
+                {days.map((day) => (
+                    <Link
+                        key={day}
+                        href={mealPlans.index({ query: { day } }).url}
+                        preserveScroll
+                        aria-current={day === currentDay ? 'page' : undefined}
+                        className={`inline-flex items-center border-t-2 px-4 pt-4 text-sm font-medium ${
+                            day === currentDay
+                                ? 'border-primary text-primary'
+                                : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground'
+                        }`}
+                    >
+                        {day}
+                    </Link>
+                ))}
+            </div>
+
+            {/* Mobile: show current day indicator */}
+            <div className="-mt-px flex items-center pt-4 md:hidden">
+                <span className="text-sm text-muted-foreground">
+                    Day {currentDay} of {totalDays}
+                </span>
+            </div>
+
+            {/* Next */}
+            <div className="-mt-px flex w-0 flex-1 justify-end">
+                <Link
+                    href={
+                        mealPlans.index({
+                            query: { day: Math.min(totalDays, currentDay + 1) },
+                        }).url
+                    }
+                    preserveScroll
+                    className={`inline-flex items-center border-t-2 border-transparent pt-4 pl-1 text-sm font-medium text-muted-foreground hover:border-border hover:text-foreground ${
+                        currentDay === totalDays
+                            ? 'pointer-events-none opacity-50'
+                            : ''
+                    }`}
+                >
+                    Next
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                </Link>
+            </div>
+        </nav>
     );
 }
 
