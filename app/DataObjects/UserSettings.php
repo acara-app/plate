@@ -24,14 +24,26 @@ final class UserSettings extends Data
      */
     public function effectiveLowThreshold(): int
     {
-        return $this->glucoseNotificationLowThreshold ?? config('glucose.hypoglycemia_threshold');
+        if ($this->glucoseNotificationLowThreshold !== null) {
+            return $this->glucoseNotificationLowThreshold;
+        }
+
+        $default = config('glucose.hypoglycemia_threshold');
+
+        return is_int($default) ? $default : 70;
     }
 
     /**
-     * Get the effective high threshold, using the user's setting or the global default.
+     * Get the effective high threshold - user's value or global default
      */
     public function effectiveHighThreshold(): int
     {
-        return $this->glucoseNotificationHighThreshold ?? config('glucose.hyperglycemia_threshold');
+        if ($this->glucoseNotificationHighThreshold !== null) {
+            return $this->glucoseNotificationHighThreshold;
+        }
+
+        $default = config('glucose.hyperglycemia_threshold');
+
+        return is_int($default) ? $default : 140;
     }
 }
