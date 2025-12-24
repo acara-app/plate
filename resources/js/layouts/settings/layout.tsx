@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editPassword } from '@/routes/password';
 import { show } from '@/routes/two-factor';
+import { edit as editNotifications } from '@/routes/user-notifications';
 import { edit } from '@/routes/user-profile';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
@@ -24,6 +25,11 @@ const sidebarNavItems: NavItem[] = [
     {
         title: 'Two-Factor Auth',
         href: show(),
+        icon: null,
+    },
+    {
+        title: 'Notifications',
+        href: editNotifications(),
         icon: null,
     },
     {

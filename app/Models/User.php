@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\DataObjects\UserSettings;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -31,6 +32,8 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read bool|null $is_verified
+ * @property array<string, mixed>|null $settings
+ * @property-read UserSettings $notification_settings
  * @property-read UserProfile|null $profile
  * @property-read Collection<int, MealPlan> $mealPlans
  * @property-read Collection<int, GlucoseReading> $glucoseReadings
@@ -89,6 +92,7 @@ final class User extends Authenticatable implements MustVerifyEmail
             'two_factor_recovery_codes' => 'string',
             'two_factor_confirmed_at' => 'datetime',
             'is_verified' => 'boolean',
+            'settings' => 'array',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
@@ -180,5 +184,13 @@ final class User extends Authenticatable implements MustVerifyEmail
     protected function getIsOnboardedAttribute(): bool
     {
         return $this->profile->onboarding_completed ?? false;
+    }
+
+    /**
+     * Get the user's notification settings as a DTO.
+     */
+    protected function getNotificationSettingsAttribute(): UserSettings
+    {
+        return UserSettings::from($this->settings ?? []);
     }
 }

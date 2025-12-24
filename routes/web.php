@@ -78,6 +78,10 @@ Route::middleware('auth')->group(function (): void {
     Route::get('settings/profile', [Web\UserProfileController::class, 'edit'])->name('user-profile.edit');
     Route::patch('settings/profile', [Web\UserProfileController::class, 'update'])->name('user-profile.update');
 
+    // User Notifications...
+    Route::get('settings/notifications', [Web\UserNotificationsController::class, 'edit'])->name('user-notifications.edit');
+    Route::patch('settings/notifications', [Web\UserNotificationsController::class, 'update'])->name('user-notifications.update');
+
     // Billing History...
     Route::get('settings/billing', [Web\BillingHistoryController::class, 'index'])->name('billing.index');
 
