@@ -24,6 +24,7 @@ test('to array', function (): void {
             'trial_ends_at',
             'timezone',
             'is_verified',
+            'settings',
             'is_onboarded',
             'has_meal_plan',
             'profile',

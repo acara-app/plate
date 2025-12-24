@@ -73,8 +73,7 @@ test('it uses config default for low threshold when null', function (): void {
 test('it uses config default for high threshold when null', function (): void {
     $settings = new UserSettings(
         glucoseNotificationsEnabled: true,
-        glucoseNotificationLowThreshold: 70,
-        glucoseNotificationHighThreshold: null
+        glucoseNotificationLowThreshold: 70
     );
 
     expect($settings->effectiveHighThreshold())->toBe(config('glucose.hyperglycemia_threshold'));
