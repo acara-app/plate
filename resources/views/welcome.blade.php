@@ -244,6 +244,107 @@
                 </div>
             </section>
 
+            {{-- Snap to Track Tool Promo --}}
+            <section class="w-full max-w-6xl">
+                <div class="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 px-6 py-12 shadow-2xl sm:px-12 sm:py-16 lg:px-16">
+                    {{-- Background Effects --}}
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,var(--tw-gradient-stops))] from-blue-500/20 via-slate-900 to-slate-900"></div>
+                    <div class="absolute -right-12 -top-12 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl"></div>
+                    <div class="absolute -bottom-12 -left-12 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl"></div>
+
+                    <div class="relative grid gap-12 lg:grid-cols-2 lg:items-center">
+                        {{-- Visual Element --}}
+                        <div class="order-last lg:order-first relative mx-auto w-full max-w-md lg:mx-0">
+                            {{-- Mock Interface --}}
+                            <div class="relative rounded-2xl bg-slate-800/50 border border-slate-700/50 p-2 backdrop-blur-xl shadow-2xl">
+                                {{-- Floating Badges --}}
+                                <div class="absolute -top-6 -left-6 animate-bounce delay-1000 duration-3000">
+                                    <div class="flex items-center gap-2 rounded-lg bg-slate-900/90 border border-blue-500/30 px-4 py-2 text-sm font-semibold text-blue-400 shadow-lg backdrop-blur-md">
+                                        <span class="text-base">📸</span>
+                                        Instant Scan
+                                    </div>
+                                </div>
+                                <div class="absolute -bottom-4 -right-4 animate-bounce delay-700 duration-4000">
+                                    <div class="flex items-center gap-2 rounded-lg bg-slate-900/90 border border-indigo-500/30 px-4 py-2 text-sm font-semibold text-indigo-400 shadow-lg backdrop-blur-md">
+                                        <span class="text-base">🥗</span>
+                                        Macro Breakdown
+                                    </div>
+                                </div>
+
+                                {{-- Window Chrome --}}
+                                <div class="space-y-4 rounded-xl bg-slate-900/80 p-6 border border-slate-800">
+                                    {{-- Camera/Image Area --}}
+                                    <div class="relative aspect-4/3 w-full overflow-hidden rounded-lg bg-slate-800 border-2 border-dashed border-slate-700 flex items-center justify-center group hover:border-blue-500/50 transition-colors">
+                                        <div class="text-center">
+                                            <div class="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-700/50 text-2xl">🥑</div>
+                                            <p class="text-xs text-slate-500">Scanning food...</p>
+                                        </div>
+                                        
+                                        {{-- Scan Overlay Animation --}}
+                                        <div class="absolute inset-0 bg-linear-to-b from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <div class="absolute inset-x-0 top-0 h-0.5 bg-blue-500/50 shadow-[0_0_10px_rgba(59,130,246,0.5)] animate-[scan_2s_ease-in-out_infinite]"></div>
+                                    </div>
+
+                                    {{-- Results Mock --}}
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                                            <div class="font-medium text-white">Avocado Toast</div>
+                                            <div class="text-emerald-400 font-bold">320 kcal</div>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                                            <div class="rounded bg-slate-800 p-2">
+                                                <div class="font-bold text-blue-400">12g</div>
+                                                <div class="text-slate-500">Protein</div>
+                                            </div>
+                                            <div class="rounded bg-slate-800 p-2">
+                                                <div class="font-bold text-amber-400">45g</div>
+                                                <div class="text-slate-500">Carbs</div>
+                                            </div>
+                                            <div class="rounded bg-slate-800 p-2">
+                                                <div class="font-bold text-rose-400">18g</div>
+                                                <div class="text-slate-500">Fat</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Content --}}
+                        <div class="space-y-8 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-3 py-1 text-sm font-medium text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
+                                    <span class="relative inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
+                                </span>
+                                New Free Tool
+                            </div>
+
+                            <div class="space-y-4">
+                                <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                                    Track calories with a <span class="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-indigo-400">single photo</span>
+                                </h2>
+
+                                <p class="text-lg leading-relaxed text-slate-400">
+                                    Stop searching through databases. Just snap a photo of your meal, and our AI will identify the food and calculate calories and macros instantly.
+                                </p>
+                            </div>
+
+                            <div class="flex flex-col gap-4 sm:flex-row sm:justify-center lg:justify-start">
+                                <a href="{{ route('snap-to-track') }}"
+                                   class="group inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-105 hover:shadow-blue-500/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900">
+                                    Try Snap to Track
+                                    <svg class="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {{-- Features Section --}}
             <section class="w-full max-w-6xl">
                 <div class="space-y-4 lg:space-y-6">
@@ -604,6 +705,13 @@
             50% {
                 transform: translateY(-20px);
             }
+        }
+
+        @keyframes scan {
+            0%, 100% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
         }
 
         .animate-float {

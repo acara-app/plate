@@ -412,6 +412,25 @@
         </div>
     </section>
 
+    {{-- Main App Promo --}}
+    <section class="relative z-10 mt-8 w-full max-w-md">
+        <div class="overflow-hidden rounded-2xl bg-slate-900 px-6 py-8 text-center shadow-xl shadow-slate-900/10 dark:bg-slate-800 dark:ring-1 dark:ring-white/10">
+            <div class="mb-4 flex justify-center">
+                <span class="text-4xl">🥗</span>
+            </div>
+            <h2 class="mb-3 text-xl font-bold text-white">
+                Need more than just tracking?
+            </h2>
+            <p class="mb-6 text-sm leading-relaxed text-slate-300">
+                Get personalized meal plans tailored to your glucose levels and taste preferences.
+            </p>
+            <a href="{{ route('register') }}"
+               class="inline-flex w-full items-center justify-center rounded-xl bg-white py-3.5 text-sm font-bold text-slate-900 transition-transform hover:scale-[1.02] hover:bg-slate-50">
+                Create Free Meal Plan
+            </a>
+        </div>
+    </section>
+
     {{-- More Free Tools --}}
     <section class="relative z-10 mt-8 w-full max-w-md">
         <h2 class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
