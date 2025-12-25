@@ -19,7 +19,6 @@ final readonly class GlucoseActionController
 
     public function show(): Response
     {
-        // Always run fresh analysis to get complete data
         $analysisResult = $this->analyzeAction->handle($this->user);
 
         return Inertia::render('glucose/action', [
