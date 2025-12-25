@@ -49,11 +49,6 @@ final class ProcessGlucoseNotificationsCommand extends Command
             if ($result->shouldNotify) {
                 $user->notify(new GlucoseReportNotification($result));
 
-                Log::info('Glucose report notification sent', [
-                    'user_id' => $user->id,
-                    'concerns_count' => count($result->concerns),
-                ]);
-
                 return true;
             }
 
