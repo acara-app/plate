@@ -18,6 +18,7 @@ final readonly class RegenerateDayMealsAction
      */
     public function handle(MealPlan $mealPlan, int $dayNumber): array
     {
+        /** @var int $deletedCount */
         $deletedCount = DB::transaction(fn (): int => $mealPlan->meals()
             ->where('day_number', $dayNumber)
             ->delete());

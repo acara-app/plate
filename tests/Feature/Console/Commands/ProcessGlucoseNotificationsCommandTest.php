@@ -159,26 +159,3 @@ test('it processes multiple users with concerns', function (): void {
         Notification::assertSentTo($user, GlucoseReportNotification::class);
     }
 });
-
-test('command outputs processing information', function (): void {
-    Notification::fake();
-
-    $user = User::factory()->create([
-        'email_verified_at' => now(),
-        'settings' => ['glucose_notifications_enabled' => true],
-    ]);
-
-    foreach (range(1, 15) as $i) {
-        GlucoseReading::factory()->create([
-            'user_id' => $user->id,
-            'reading_value' => 200,
-            'reading_type' => ReadingType::Random,
-            'measured_at' => now()->subDays($i % 7),
-        ]);
-    }
-
-    $this->artisan(ProcessGlucoseNotificationsCommand::class)
-        ->expectsOutput('Processing glucose notifications...')
-        ->expectsOutput('Processed 1 users, sent 1 notifications.')
-        ->assertSuccessful();
-});

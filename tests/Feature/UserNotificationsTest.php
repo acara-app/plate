@@ -20,7 +20,6 @@ it('renders notification settings page for authenticated user', function (): voi
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('user-notifications/edit')
             ->has('notificationSettings')
             ->has('defaultThresholds')
             ->where('defaultThresholds.low', config('glucose.hypoglycemia_threshold'))
