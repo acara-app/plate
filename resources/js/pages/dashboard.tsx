@@ -13,6 +13,7 @@ import { dashboard } from '@/routes';
 import chat from '@/routes/chat';
 import foodLog from '@/routes/food-log';
 import glucoseReading from '@/routes/glucose';
+import glucoseAction from '@/routes/glucose-action';
 import mealPlans from '@/routes/meal-plans';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -34,6 +35,27 @@ export default function Dashboard() {
                 {!currentUser?.is_onboarded && <OnboardingBanner />}
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {/* Glucose Insights Card */}
+                    <Card className="flex flex-col transition-shadow hover:shadow-md">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <span className="text-2xl">📊</span>
+                                Glucose Insights
+                            </CardTitle>
+                            <CardDescription>
+                                View your glucose analysis, trends, and
+                                personalized recommendations
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="mt-auto">
+                            <Link href={glucoseAction.show().url}>
+                                <Button className="w-full">
+                                    View Insights
+                                </Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
+
                     {/* Glucose Tracking Card */}
                     <Card className="flex flex-col transition-shadow hover:shadow-md">
                         <CardHeader>
