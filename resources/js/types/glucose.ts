@@ -1,15 +1,15 @@
 export interface GlucoseAnalysisData {
-    hasData: boolean;
-    totalReadings: number;
-    daysAnalyzed: number;
-    dateRange: {
+    has_data: boolean;
+    total_readings: number;
+    days_analyzed: number;
+    date_range: {
         start: string;
         end: string;
     };
     averages: {
         fasting: number | null;
-        beforeMeal: number | null;
-        postMeal: number | null;
+        before_meal: number | null;
+        post_meal: number | null;
         random: number | null;
         overall: number | null;
     };
@@ -17,27 +17,27 @@ export interface GlucoseAnalysisData {
         min: number;
         max: number;
     };
-    timeInRange: {
+    time_in_range: {
         percentage: number;
-        abovePercentage: number;
-        belowPercentage: number;
-        inRangeCount: number;
-        aboveRangeCount: number;
-        belowRangeCount: number;
+        above_percentage: number;
+        below_percentage: number;
+        in_range_count: number;
+        above_range_count: number;
+        below_range_count: number;
     };
     variability: {
-        stdDev: number;
-        coefficientOfVariation: number;
+        std_dev: number;
+        coefficient_of_variation: number;
         classification: string;
     };
     trend: {
-        slopePerDay: number | null;
-        slopePerWeek: number | null;
+        slope_per_day: number | null;
+        slope_per_week: number | null;
         direction: string | null;
-        firstValue: number | null;
-        lastValue: number | null;
+        first_value: number | null;
+        last_value: number | null;
     };
-    timeOfDay: {
+    time_of_day: {
         morning: {
             average: number | null;
             count: number;
@@ -55,32 +55,32 @@ export interface GlucoseAnalysisData {
             count: number;
         };
     };
-    readingTypes: Array<{
+    reading_types: Array<{
         type: string;
         count: number;
         average: number | null;
         percentage: number;
     }>;
     patterns: {
-        consistentlyHigh: boolean;
-        consistentlyLow: boolean;
-        highVariability: boolean;
-        postMealSpikes: boolean;
-        hypoglycemiaRisk: string;
-        hyperglycemiaRisk: string;
+        consistently_high: boolean;
+        consistently_low: boolean;
+        high_variability: boolean;
+        post_meal_spikes: boolean;
+        hypoglycemia_risk: string;
+        hyperglycemia_risk: string;
     };
     insights: string[];
     concerns: string[];
-    glucoseGoals: {
-        targetRange: {
+    glucose_goals: {
+        target_range: {
             min: number;
             max: number;
         };
-        fastingTarget: {
+        fasting_target: {
             min: number;
             max: number;
         };
-        postMealTarget: {
+        post_meal_target: {
             max: number;
         };
     };

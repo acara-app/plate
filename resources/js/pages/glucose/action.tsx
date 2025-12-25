@@ -79,11 +79,11 @@ export default function GlucoseAction({
                             </h1>
                             <p className="text-muted-foreground">
                                 Analysis from your past{' '}
-                                {glucoseAnalysis.daysAnalyzed} days
+                                {glucoseAnalysis.days_analyzed} days
                             </p>
                         </div>
 
-                        {!glucoseAnalysis.hasData ? (
+                        {!glucoseAnalysis.has_data ? (
                             <Alert>
                                 <AlertDescription>
                                     No glucose data available yet. Start
@@ -99,7 +99,7 @@ export default function GlucoseAction({
                                         <CardTitle>Glucose Overview</CardTitle>
                                         <CardDescription>
                                             Based on{' '}
-                                            {glucoseAnalysis.totalReadings}{' '}
+                                            {glucoseAnalysis.total_readings}{' '}
                                             readings
                                         </CardDescription>
                                     </CardHeader>
@@ -126,7 +126,7 @@ export default function GlucoseAction({
                                                     Time in Range
                                                 </p>
                                                 <p className="text-2xl font-bold text-green-600">
-                                                    {glucoseAnalysis.timeInRange.percentage.toFixed(
+                                                    {glucoseAnalysis.time_in_range.percentage.toFixed(
                                                         0,
                                                     )}
                                                     %
@@ -137,7 +137,7 @@ export default function GlucoseAction({
                                                     Above Range
                                                 </p>
                                                 <p className="text-2xl font-bold text-orange-600">
-                                                    {glucoseAnalysis.timeInRange.abovePercentage.toFixed(
+                                                    {glucoseAnalysis.time_in_range.above_percentage.toFixed(
                                                         0,
                                                     )}
                                                     %

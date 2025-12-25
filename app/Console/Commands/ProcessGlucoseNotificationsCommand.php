@@ -17,7 +17,6 @@ final class ProcessGlucoseNotificationsCommand extends Command
 
     public function handle(AnalyzeGlucoseForNotificationAction $action): int
     {
-        $this->info('Processing glucose notifications...');
 
         User::query()
             ->whereNotNull('settings')
