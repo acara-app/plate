@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\DataObjects\UserSettings;
+use App\DataObjects\UserSettingsData;
 
 test('it can be created with default values', function (): void {
-    $settings = new UserSettings();
+    $settings = new UserSettingsData();
 
     expect($settings->glucoseNotificationsEnabled)->toBeTrue()
         ->and($settings->glucoseNotificationLowThreshold)->toBeNull()
@@ -13,7 +13,7 @@ test('it can be created with default values', function (): void {
 });
 
 test('it can be created with custom values', function (): void {
-    $settings = new UserSettings(
+    $settings = new UserSettingsData(
         glucoseNotificationsEnabled: false,
         glucoseNotificationLowThreshold: 70,
         glucoseNotificationHighThreshold: 180
@@ -25,7 +25,7 @@ test('it can be created with custom values', function (): void {
 });
 
 test('it can be created from array', function (): void {
-    $settings = UserSettings::from([
+    $settings = UserSettingsData::from([
         'glucoseNotificationsEnabled' => true,
         'glucoseNotificationLowThreshold' => 80,
         'glucoseNotificationHighThreshold' => 200,
@@ -37,7 +37,7 @@ test('it can be created from array', function (): void {
 });
 
 test('it can be created from empty array with defaults', function (): void {
-    $settings = UserSettings::from([]);
+    $settings = UserSettingsData::from([]);
 
     expect($settings->glucoseNotificationsEnabled)->toBeTrue()
         ->and($settings->glucoseNotificationLowThreshold)->toBeNull()
@@ -45,7 +45,7 @@ test('it can be created from empty array with defaults', function (): void {
 });
 
 test('it can be converted to array', function (): void {
-    $settings = new UserSettings(
+    $settings = new UserSettingsData(
         glucoseNotificationsEnabled: false,
         glucoseNotificationLowThreshold: 70,
         glucoseNotificationHighThreshold: 180
@@ -61,7 +61,7 @@ test('it can be converted to array', function (): void {
 });
 
 test('it uses config default for low threshold when null', function (): void {
-    $settings = new UserSettings(
+    $settings = new UserSettingsData(
         glucoseNotificationsEnabled: true,
         glucoseNotificationLowThreshold: null,
         glucoseNotificationHighThreshold: 180
@@ -71,7 +71,7 @@ test('it uses config default for low threshold when null', function (): void {
 });
 
 test('it uses config default for high threshold when null', function (): void {
-    $settings = new UserSettings(
+    $settings = new UserSettingsData(
         glucoseNotificationsEnabled: true,
         glucoseNotificationLowThreshold: 70
     );
@@ -80,7 +80,7 @@ test('it uses config default for high threshold when null', function (): void {
 });
 
 test('it uses user override for low threshold when set', function (): void {
-    $settings = new UserSettings(
+    $settings = new UserSettingsData(
         glucoseNotificationsEnabled: true,
         glucoseNotificationLowThreshold: 80,
         glucoseNotificationHighThreshold: 180
@@ -90,7 +90,7 @@ test('it uses user override for low threshold when set', function (): void {
 });
 
 test('it uses user override for high threshold when set', function (): void {
-    $settings = new UserSettings(
+    $settings = new UserSettingsData(
         glucoseNotificationsEnabled: true,
         glucoseNotificationLowThreshold: 70,
         glucoseNotificationHighThreshold: 200

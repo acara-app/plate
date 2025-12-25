@@ -11,7 +11,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 
 #[MapInputName(SnakeCaseMapper::class)]
 #[MapOutputName(SnakeCaseMapper::class)]
-final class UserSettings extends Data
+final class UserSettingsData extends Data
 {
     public function __construct(
         public bool $glucoseNotificationsEnabled = true,
