@@ -14,6 +14,7 @@ import { UpgradeButton } from '@/components/upgrade-button';
 import useSharedProps from '@/hooks/use-shared-props';
 import { dashboard, privacy, terms } from '@/routes';
 import glucoseReading from '@/routes/glucose';
+import glucoseAction from '@/routes/glucose-action';
 import mealPlans from '@/routes/meal-plans';
 import biometrics from '@/routes/onboarding/biometrics';
 import { type NavItem } from '@/types';
@@ -25,6 +26,7 @@ import {
     HeartIcon,
     LeafIcon,
     ShieldCheck,
+    TrendingUp,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -38,6 +40,11 @@ const mainNavItems: NavItem[] = [
         title: 'Meal Plans',
         href: mealPlans.index(),
         icon: CalendarHeartIcon,
+    },
+    {
+        title: 'Glucose Insights',
+        href: glucoseAction.show(),
+        icon: TrendingUp,
     },
     {
         title: 'Glucose Tracking',

@@ -28,6 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('meal-plans/{mealPlan}/print', Web\PrintMealPlanController::class)->name('meal-plans.print');
     Route::post('meal-plans/{mealPlan}/generate-day', Web\GenerateMealDayController::class)->name('meal-plans.generate-day');
     Route::post('meal-plans/{mealPlan}/regenerate-day', Web\RegenerateMealPlanDayController::class)->name('meal-plans.regenerate-day');
+    Route::post('meal-plans/regenerate', [Web\RegenerateMealPlanController::class, 'store'])->name('meal-plans.regenerate');
 
     // Grocery List...
     Route::get('meal-plans/{mealPlan}/grocery-list', [Web\GroceryListController::class, 'show'])->name('meal-plans.grocery-list.show');
@@ -42,6 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     // Glucose Tracking...
     Route::get('glucose', [Web\GlucoseReadingController::class, 'index'])->name('glucose.index');
     Route::get('glucose/tracking', [Web\GlucoseReadingController::class, 'dashboard'])->name('glucose.dashboard');
+    Route::get('glucose/action', [Web\GlucoseActionController::class, 'show'])->name('glucose-action.show');
     Route::post('glucose', [Web\GlucoseReadingController::class, 'store'])->name('glucose.store');
     Route::put('glucose/{glucoseReading}', [Web\GlucoseReadingController::class, 'update'])->name('glucose.update');
     Route::delete('glucose/{glucoseReading}', [Web\GlucoseReadingController::class, 'destroy'])->name('glucose.destroy');
@@ -77,6 +79,10 @@ Route::middleware('auth')->group(function (): void {
     Route::redirect('settings', '/settings/profile');
     Route::get('settings/profile', [Web\UserProfileController::class, 'edit'])->name('user-profile.edit');
     Route::patch('settings/profile', [Web\UserProfileController::class, 'update'])->name('user-profile.update');
+
+    // User Notifications...
+    Route::get('settings/notifications', [Web\UserNotificationsController::class, 'edit'])->name('user-notifications.edit');
+    Route::patch('settings/notifications', [Web\UserNotificationsController::class, 'update'])->name('user-notifications.update');
 
     // Billing History...
     Route::get('settings/billing', [Web\BillingHistoryController::class, 'index'])->name('billing.index');

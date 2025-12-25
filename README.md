@@ -58,12 +58,13 @@ Acara Plate is a Laravel 12 application that pairs Inertia (React) with Tailwind
 - Grocery list generation and macro visualizations (coming soon)
 - Printable meal plans with semantic HTML for reading mode and PDF export
 - Glucose tracking with analytics, trends, and time-in-range insights
+- Automated glucose analysis notifications with actionable recommendations sent via email
 
 ### User Journey Highlights
 1. **Onboarding Questionnaire:** Collects biometric data, goals, lifestyle factors, dietary preferences, and health conditions.
 2. **AI Meal Planning:** Uses PrismPHP-driven LLM workflows to build structured seven-day plans with queue-backed processing and progress tracking.
 3. **Meal Plan Management:** Offers day-by-day navigation, macro bars, detailed meal cards, and generated shopping support.
-4. **Glucose Monitoring:** Records readings, classifies context (fasting, pre-meal, post-meal, random), and surfaces analytics for recent periods.
+4. **Glucose Monitoring:** Records readings, classifies context (fasting, pre-meal, post-meal, random), and surfaces analytics for recent periods. Automated email notifications analyze 7-day trends, identify patterns and concerns, and provide actionable insights for meal plan adjustments.
 
 ## Getting Started
 

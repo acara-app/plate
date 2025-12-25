@@ -97,7 +97,7 @@ export default function GlucoseDashboard({ readings, readingTypes }: Props) {
                                     <List className="size-4" />
                                 </Link>
                             </Button>
-                            <Button onClick={() => createModal.open()}>
+                            <Button onClick={createModal.open}>
                                 <Plus className="mr-2 size-4" />
                                 Add Reading
                             </Button>
