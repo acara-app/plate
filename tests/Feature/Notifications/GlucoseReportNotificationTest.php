@@ -170,14 +170,14 @@ test('mail notification has correct subject', function (): void {
     expect($mailMessage->subject)->toBe('Your Weekly Glucose Report');
 });
 
-test('mail notification contains action button to meal plans', function (): void {
+test('mail notification contains action button to glucose action page', function (): void {
     $analysisResult = createNotificationAnalysisData();
     $notification = new GlucoseReportNotification($analysisResult);
     $user = User::factory()->create();
 
     $mailMessage = $notification->toMail($user);
 
-    expect($mailMessage->viewData['mealPlanUrl'])->toContain('meal-plans');
+    expect($mailMessage->viewData['mealPlanUrl'])->toContain('glucose/action');
 });
 
 test('database notification contains correct structure', function (): void {

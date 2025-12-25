@@ -9,7 +9,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\URL;
 
 final class GlucoseReportNotification extends Notification implements ShouldQueue
 {
@@ -70,14 +69,10 @@ final class GlucoseReportNotification extends Notification implements ShouldQueu
     }
 
     /**
-     * Generate a signed URL for the meal plans page.
+     * Generate a URL for the glucose action page.
      */
     private function generateMealPlanUrl(): string
     {
-        return URL::signedRoute(
-            'meal-plans.index',
-            [],
-            now()->addWeek()
-        );
+        return route('glucose-action.show', absolute: true);
     }
 }
