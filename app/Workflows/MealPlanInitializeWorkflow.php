@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Workflows;
 
 use App\DataObjects\DayMealsData;
+use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\MealData;
 use App\DataObjects\PreviousDayContext;
 use App\Enums\MealPlanGenerationStatus;
@@ -59,6 +60,7 @@ final class MealPlanInitializeWorkflow extends Workflow
     public function execute(
         User $user,
         int $totalDays = 7,
+        ?GlucoseAnalysisData $glucoseAnalysis = null,
     ): Generator {
         /** @var MealPlan $mealPlan */
         $mealPlan = yield ActivityStub::make(
@@ -73,7 +75,9 @@ final class MealPlanInitializeWorkflow extends Workflow
             $user,
             1,
             $totalDays,
+
             new PreviousDayContext,
+            $glucoseAnalysis,
         );
 
         yield ActivityStub::make(

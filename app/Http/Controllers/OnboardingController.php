@@ -170,7 +170,7 @@ final readonly class OnboardingController
         ]);
 
         WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start($user, totalDays: 7);
+            ->start($user, 7);
 
         return to_route('onboarding.completion.show');
     }

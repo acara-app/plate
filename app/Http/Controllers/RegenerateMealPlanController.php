@@ -24,12 +24,10 @@ final readonly class RegenerateMealPlanController
     {
         $this->user->mealPlans()->delete();
 
-        $this->analyzeGlucose->handle($this->user); // $glucoseAnalysis
-
-        // TODO: Pass glucose analysis to workflow for AI optimization ($glucoseAnalysis)
+        $glucoseAnalysis = $this->analyzeGlucose->handle($this->user);
 
         WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start($this->user, totalDays: 7);
+            ->start($this->user, 7, $glucoseAnalysis->analysisData);
 
         return to_route('meal-plans.index')
             ->with('success', 'Your new glucose-optimized meal plan is being generated. This may take a few minutes.');
