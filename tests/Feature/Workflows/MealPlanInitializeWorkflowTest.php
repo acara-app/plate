@@ -12,7 +12,6 @@ use App\Enums\Sex;
 use App\Models\Goal;
 use App\Models\Lifestyle;
 use App\Models\User;
-use App\Workflows\InitializeMealPlanActivity;
 use App\Workflows\MealPlanDayGeneratorActivity;
 use App\Workflows\MealPlanInitializeWorkflow;
 use App\Workflows\SaveDayMealsActivity;
@@ -204,10 +203,8 @@ it('generates day meals using activity with mocked prism', function (): void {
 
 it('activity classes exist and extend correct base class', function (): void {
     expect(class_exists(MealPlanDayGeneratorActivity::class))->toBeTrue();
-    expect(class_exists(InitializeMealPlanActivity::class))->toBeTrue();
     expect(class_exists(SaveDayMealsActivity::class))->toBeTrue();
     expect(is_subclass_of(MealPlanDayGeneratorActivity::class, Workflow\Activity::class))->toBeTrue();
-    expect(is_subclass_of(InitializeMealPlanActivity::class, Workflow\Activity::class))->toBeTrue();
     expect(is_subclass_of(SaveDayMealsActivity::class, Workflow\Activity::class))->toBeTrue();
 });
 
@@ -222,8 +219,10 @@ it('workflow triggers via generate meal plan action with workflow stub fake', fu
     $action = resolve(App\Ai\Agents\MealPlanGeneratorAgent::class);
     $action->handle($this->user);
 
-    // Workflow is faked so meal plan won't be created, but no exception means workflow was started
-    expect($this->user->mealPlans()->count())->toBe(0);
+    // Meal plan is now created synchronously before workflow starts
+    $mealPlan = $this->user->mealPlans()->first();
+    expect($mealPlan)->not->toBeNull();
+    expect($mealPlan->metadata['status'])->toBe('generating');
 });
 
 it('converts multiple days meals to collection preserving day numbers', function (): void {

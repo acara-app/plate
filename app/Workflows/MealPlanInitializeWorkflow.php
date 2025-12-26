@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Workflows;
 
 use App\DataObjects\DayMealsData;
+use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\MealData;
 use App\DataObjects\PreviousDayContext;
 use App\Enums\MealPlanGenerationStatus;
@@ -40,7 +41,7 @@ final class MealPlanInitializeWorkflow extends Workflow
     }
 
     /**
-     * Get the default meal plan type.
+     * Get the meal plan type based on duration.
      */
     public static function getMealPlanType(int $totalDays): MealPlanType
     {
@@ -52,35 +53,61 @@ final class MealPlanInitializeWorkflow extends Workflow
     }
 
     /**
-     * Execute the workflow to generate a single day's meals for a meal plan.
+     * Create a meal plan with Generating status.
+     *
+     * This must be called synchronously before starting the workflow
+     * to ensure the user sees the "Generating" state immediately.
+     */
+    public static function createMealPlan(User $user, int $totalDays = 7): MealPlan
+    {
+        $mealPlanType = self::getMealPlanType($totalDays);
+
+        /** @var MealPlan $mealPlan */
+        $mealPlan = $user->mealPlans()->create([
+            'type' => $mealPlanType,
+            'name' => $totalDays.'-Day Personalized Meal Plan',
+            'description' => 'AI-generated meal plan tailored to your nutritional needs and preferences.',
+            'duration_days' => $totalDays,
+            'target_daily_calories' => null,
+            'macronutrient_ratios' => null,
+            'metadata' => [
+                'generated_at' => now()->toIso8601String(),
+                'generation_method' => 'workflow',
+                'status' => MealPlanGenerationStatus::Generating->value,
+                'days_completed' => 0,
+            ],
+        ]);
+
+        return $mealPlan;
+    }
+
+    /**
+     * Execute the workflow to generate and save day 1 meals for a meal plan.
      *
      * @codeCoverageIgnore Generator methods with yield are executed by the workflow engine
      */
     public function execute(
         User $user,
-        int $totalDays = 7,
+        MealPlan $mealPlan,
+        ?GlucoseAnalysisData $glucoseAnalysis = null,
     ): Generator {
-        /** @var MealPlan $mealPlan */
-        $mealPlan = yield ActivityStub::make(
-            InitializeMealPlanActivity::class,
-            $user,
-            $totalDays,
-        );
+        $totalDays = $mealPlan->duration_days;
 
         /** @var DayMealsData $dayMeals */
         $dayMeals = yield ActivityStub::make(
             MealPlanDayGeneratorActivity::class,
-            $user,
-            1,
-            $totalDays,
-            new PreviousDayContext,
+            $user,                   // user
+            1,                       // dayNumber
+            $totalDays,              // totalDays
+            new PreviousDayContext,  // previousDaysContext
+            $glucoseAnalysis,        // glucoseAnalysis
         );
 
         yield ActivityStub::make(
             SaveDayMealsActivity::class,
-            $mealPlan,
-            $dayMeals,
-            1,
+            $mealPlan,  // mealPlan
+            $dayMeals,  // dayMeals
+            1,          // dayNumber
         );
 
         $mealPlan->update([

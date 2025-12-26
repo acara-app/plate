@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Actions\AnalyzeGlucoseForNotificationAction;
 use App\Ai\BaseAgent;
 use App\Ai\SystemPrompt;
 use App\DataObjects\DayMealsData;
+use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\MealPlanData;
 use App\DataObjects\PreviousDayContext;
 use App\Enums\SettingKey;
@@ -21,6 +23,7 @@ final class MealPlanGeneratorAgent extends BaseAgent
 {
     public function __construct(
         private readonly MealPlanPromptBuilder $promptBuilder,
+        private readonly AnalyzeGlucoseForNotificationAction $analyzeGlucose,
     ) {}
 
     public function systemPrompt(): string
@@ -89,18 +92,22 @@ final class MealPlanGeneratorAgent extends BaseAgent
         ];
     }
 
-    public function handle(User $user): void
+    public function handle(User $user, int $totalDays = 7): void
     {
+        $glucoseAnalysis = $this->analyzeGlucose->handle($user);
+
+        $mealPlan = MealPlanInitializeWorkflow::createMealPlan($user, $totalDays);
+
         WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start($user, totalDays: 7);
+            ->start($user, $mealPlan, $glucoseAnalysis->analysisData);
     }
 
     /**
      * Generate a complete multi-day meal plan (legacy method).
      */
-    public function generate(User $user): MealPlanData
+    public function generate(User $user, ?GlucoseAnalysisData $glucoseAnalysis = null): MealPlanData
     {
-        $prompt = $this->promptBuilder->handle($user);
+        $prompt = $this->promptBuilder->handle($user, $glucoseAnalysis);
 
         $jsonText = $this->generateMealPlanJson($prompt);
 
@@ -119,12 +126,14 @@ final class MealPlanGeneratorAgent extends BaseAgent
         int $dayNumber,
         int $totalDays = 7,
         ?PreviousDayContext $previousDaysContext = null,
+        ?GlucoseAnalysisData $glucoseAnalysis = null,
     ): DayMealsData {
         $prompt = $this->promptBuilder->handleForDay(
             $user,
             $dayNumber,
             $totalDays,
             $previousDaysContext,
+            $glucoseAnalysis,
         );
 
         $jsonText = $this->generateMealPlanJson($prompt);

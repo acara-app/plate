@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\AnalyzeGlucoseForNotificationAction;
 use App\Enums\Sex;
 use App\Http\Requests\StoreBiometricsRequest;
 use App\Http\Requests\StoreDietaryPreferencesRequest;
@@ -14,6 +15,7 @@ use App\Models\DietaryPreference;
 use App\Models\Goal;
 use App\Models\HealthCondition;
 use App\Models\Lifestyle;
+use App\Models\User;
 use App\Models\UserProfile;
 use App\Workflows\MealPlanInitializeWorkflow;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -24,8 +26,11 @@ use Workflow\WorkflowStub;
 
 final readonly class OnboardingController
 {
+    private const int DEFAULT_DURATION_DAYS = 7;
+
     public function __construct(
-        #[CurrentUser] private \App\Models\User $user,
+        #[CurrentUser] private User $user,
+        private AnalyzeGlucoseForNotificationAction $analyzeGlucose,
     ) {
         //
     }
@@ -169,8 +174,15 @@ final readonly class OnboardingController
             'onboarding_completed_at' => now(),
         ]);
 
+        $glucoseAnalysis = $this->analyzeGlucose->handle($user);
+
+        $mealPlan = MealPlanInitializeWorkflow::createMealPlan(
+            $user,
+            self::DEFAULT_DURATION_DAYS,
+        );
+
         WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start($user, totalDays: 7);
+            ->start($user, $mealPlan, $glucoseAnalysis->analysisData);
 
         return to_route('onboarding.completion.show');
     }

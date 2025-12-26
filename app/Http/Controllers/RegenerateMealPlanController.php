@@ -13,6 +13,8 @@ use Workflow\WorkflowStub;
 
 final readonly class RegenerateMealPlanController
 {
+    private const int DEFAULT_DURATION_DAYS = 7;
+
     public function __construct(
         #[CurrentUser] private User $user,
         private AnalyzeGlucoseForNotificationAction $analyzeGlucose,
@@ -24,12 +26,15 @@ final readonly class RegenerateMealPlanController
     {
         $this->user->mealPlans()->delete();
 
-        $this->analyzeGlucose->handle($this->user); // $glucoseAnalysis
+        $glucoseAnalysis = $this->analyzeGlucose->handle($this->user);
 
-        // TODO: Pass glucose analysis to workflow for AI optimization ($glucoseAnalysis)
+        $mealPlan = MealPlanInitializeWorkflow::createMealPlan(
+            $this->user,
+            self::DEFAULT_DURATION_DAYS,
+        );
 
         WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start($this->user, totalDays: 7);
+            ->start($this->user, $mealPlan, $glucoseAnalysis->analysisData);
 
         return to_route('meal-plans.index')
             ->with('success', 'Your new glucose-optimized meal plan is being generated. This may take a few minutes.');

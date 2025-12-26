@@ -84,13 +84,16 @@ final readonly class AnalyzeGlucoseForNotificationAction
             );
         }
 
-        // Check for high variability
-        if ($analysisData->patterns->highVariability) {
+        // Check for high variability (only if combined with other concerning patterns)
+        if ($analysisData->patterns->highVariability &&
+            ($analysisData->patterns->consistentlyHigh || $analysisData->patterns->postMealSpikes || $analysisData->timeInRange->percentage < 70)) {
             $concerns[] = 'High glucose variability detected, indicating inconsistent blood sugar control.';
         }
 
-        // Check for post-meal spikes
-        if ($analysisData->patterns->postMealSpikes) {
+        // Check for post-meal spikes (only if average post-meal is concerning)
+        if ($analysisData->patterns->postMealSpikes &&
+            $analysisData->averages->postMeal !== null &&
+            $analysisData->averages->postMeal > $highThreshold) {
             $concerns[] = 'Frequent post-meal glucose spikes detected.';
         }
 

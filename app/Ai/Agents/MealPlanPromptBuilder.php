@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\MealPlanContext\MacronutrientRatiosData;
 use App\DataObjects\MealPlanContext\MealPlanContextData;
 use App\DataObjects\PreviousDayContext;
@@ -20,9 +21,9 @@ final readonly class MealPlanPromptBuilder
     /**
      * Generate a prompt for multi-day meal plan generation (legacy).
      */
-    public function handle(User $user): string
+    public function handle(User $user, ?GlucoseAnalysisData $glucoseAnalysis = null): string
     {
-        $context = $this->buildContext($user);
+        $context = $this->buildContext($user, $glucoseAnalysis);
 
         return view('ai.agents.create-meal-plan', [
             'context' => $context,
@@ -37,8 +38,9 @@ final readonly class MealPlanPromptBuilder
         int $dayNumber,
         int $totalDays = 7,
         ?PreviousDayContext $previousDaysContext = null,
+        ?GlucoseAnalysisData $glucoseAnalysis = null,
     ): string {
-        $context = $this->buildContext($user);
+        $context = $this->buildContext($user, $glucoseAnalysis);
 
         return view('ai.agents.create-day-meal-plan', [
             'context' => $context,
@@ -51,7 +53,7 @@ final readonly class MealPlanPromptBuilder
     /**
      * Build the context data object from user profile.
      */
-    private function buildContext(User $user): MealPlanContextData
+    private function buildContext(User $user, ?GlucoseAnalysisData $glucoseAnalysis = null): MealPlanContextData
     {
         $user->loadMissing([
             'profile.goal',
@@ -74,7 +76,7 @@ final readonly class MealPlanPromptBuilder
             'health_conditions' => $profile->healthConditions,
             'daily_calorie_target' => $this->calculateDailyCalorieTarget($profile),
             'macronutrient_ratios' => $this->calculateMacronutrientRatios($profile),
-            'glucose_analysis' => $this->glucoseDataAnalyzer->handle($user, 30),
+            'glucose_analysis' => $glucoseAnalysis ?? $this->glucoseDataAnalyzer->handle($user, 30),
         ]);
     }
 
