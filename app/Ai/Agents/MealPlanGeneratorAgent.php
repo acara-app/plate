@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Actions\AnalyzeGlucoseForNotificationAction;
 use App\Ai\BaseAgent;
 use App\Ai\SystemPrompt;
 use App\DataObjects\DayMealsData;
@@ -17,7 +18,6 @@ use App\Utilities\JsonCleaner;
 use App\Workflows\MealPlanInitializeWorkflow;
 use Prism\Prism\ValueObjects\ProviderTool;
 use Workflow\WorkflowStub;
-use App\Actions\AnalyzeGlucoseForNotificationAction;
 
 final class MealPlanGeneratorAgent extends BaseAgent
 {

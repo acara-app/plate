@@ -43,13 +43,15 @@ test('it returns should not notify when glucose is well controlled', function ()
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
 
-    // Create readings all within normal range (80-120)
-    foreach (range(1, 20) as $i) {
+    // Create readings all within normal range (85-115) with stable, non-trending values
+    $stableValues = [100, 98, 102, 99, 101, 100, 97, 103, 100, 99, 101, 98, 102, 100, 99, 101, 100, 98, 102, 100];
+
+    foreach ($stableValues as $i => $value) {
         GlucoseReading::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => fake()->randomFloat(1, 85, 115),
+            'reading_value' => $value,
             'reading_type' => ReadingType::Random,
-            'measured_at' => now()->subDays($i % 7),
+            'measured_at' => now()->subDays($i % 7)->subHours($i),
         ]);
     }
 
@@ -302,4 +304,84 @@ test('it preserves analysis data in result', function (): void {
         ->and($result->analysisData->totalReadings)->toBe(10)
         ->and($result->analysisData->averages)->not->toBeNull()
         ->and($result->analysisData->timeInRange)->not->toBeNull();
+});
+
+test('it does not trigger concern for high variability alone without other concerning patterns', function (): void {
+    $user = User::factory()->create([
+        'settings' => [
+            'glucose_notifications_enabled' => true,
+            'glucose_notification_high_threshold' => 180,
+            'glucose_notification_low_threshold' => 70,
+        ],
+    ]);
+
+    // Create variable readings that stay within acceptable range (70-180)
+    // This creates variability but good time in range (>70%) and no consistently high/low patterns
+    $normalValues = [85, 130, 90, 140, 95, 135, 100, 125, 105, 120, 110, 115];
+
+    foreach ($normalValues as $index => $value) {
+        GlucoseReading::factory()->create([
+            'user_id' => $user->id,
+            'reading_value' => $value,
+            'reading_type' => ReadingType::Random,
+            'measured_at' => now()->subDays($index % 7)->subHours($index),
+        ]);
+    }
+
+    $action = resolve(AnalyzeGlucoseForNotificationAction::class);
+    $result = $action->handle($user);
+
+    // High variability alone (without consistentlyHigh, postMealSpikes, or poor time in range)
+    // should NOT trigger a concern to reduce false positives
+    expect($result->analysisData->hasData)->toBeTrue()
+        ->and($result->analysisData->timeInRange->percentage)->toBeGreaterThanOrEqual(70)
+        ->and($result->shouldNotify)->toBeFalse()
+        ->and($result->concerns)->not->toContain('High glucose variability detected, indicating inconsistent blood sugar control.');
+});
+
+test('it does not trigger post-meal spikes concern when average post-meal is below threshold', function (): void {
+    $user = User::factory()->create([
+        'settings' => [
+            'glucose_notifications_enabled' => true,
+            'glucose_notification_high_threshold' => 180,
+        ],
+    ]);
+
+    // Create post-meal readings with average below the high threshold (180)
+    // Even if there are some individual spikes, the average should be below threshold
+    $postMealValues = [140, 150, 145, 155, 160, 148, 152, 158, 142, 165];
+
+    foreach ($postMealValues as $index => $value) {
+        GlucoseReading::factory()->create([
+            'user_id' => $user->id,
+            'reading_value' => $value,
+            'reading_type' => ReadingType::PostMeal,
+            'measured_at' => now()->subDays($index % 7)->subHours($index * 2),
+        ]);
+    }
+
+    // Add some fasting readings to establish baseline
+    foreach (range(1, 5) as $i) {
+        GlucoseReading::factory()->create([
+            'user_id' => $user->id,
+            'reading_value' => 95,
+            'reading_type' => ReadingType::Fasting,
+            'measured_at' => now()->subDays($i),
+        ]);
+    }
+
+    $action = resolve(AnalyzeGlucoseForNotificationAction::class);
+    $result = $action->handle($user);
+
+    // Post-meal readings with average below threshold should NOT trigger
+    // "Frequent post-meal glucose spikes" concern
+    expect($result->analysisData->hasData)->toBeTrue();
+
+    // Verify average post-meal is below threshold
+    if ($result->analysisData->averages->postMeal !== null) {
+        expect($result->analysisData->averages->postMeal)->toBeLessThanOrEqual(180);
+    }
+
+    // Should not contain the post-meal spikes concern message
+    expect($result->concerns)->not->toContain('Frequent post-meal glucose spikes detected.');
 });
