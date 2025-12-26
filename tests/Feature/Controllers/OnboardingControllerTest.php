@@ -493,8 +493,11 @@ it('may store health conditions', function (): void {
     expect($profile->healthConditions->first()->pivot->notes)
         ->toBe('Managing with medication');
 
-    // Meal plan generation workflow was triggered (WorkflowStub::fake() prevents actual execution)
-    expect($user->mealPlans()->count())->toBe(0); // Not created yet since workflow is faked
+    // Meal plan was created synchronously with Generating status for immediate UI feedback
+    $mealPlan = $user->mealPlans()->first();
+    expect($mealPlan)->not->toBeNull();
+    expect($mealPlan->metadata['status'])->toBe('generating');
+    expect($mealPlan->metadata['days_completed'])->toBe(0);
 });
 
 it('allows empty health conditions', function (): void {
@@ -512,8 +515,10 @@ it('allows empty health conditions', function (): void {
     expect($profile)->not->toBeNull()
         ->onboarding_completed->toBeTrue();
 
-    // Meal plan generation workflow was triggered (WorkflowStub::fake() prevents actual execution)
-    expect($user->mealPlans()->count())->toBe(0); // Not created yet since workflow is faked
+    // Meal plan was created synchronously with Generating status for immediate UI feedback
+    $mealPlan = $user->mealPlans()->first();
+    expect($mealPlan)->not->toBeNull();
+    expect($mealPlan->metadata['status'])->toBe('generating');
 });
 
 it('requires valid health condition ids', function (): void {

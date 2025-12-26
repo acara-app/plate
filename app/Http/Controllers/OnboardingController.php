@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\MealPlanGenerationStatus;
 use App\Enums\Sex;
 use App\Http\Requests\StoreBiometricsRequest;
 use App\Http\Requests\StoreDietaryPreferencesRequest;
@@ -14,6 +15,8 @@ use App\Models\DietaryPreference;
 use App\Models\Goal;
 use App\Models\HealthCondition;
 use App\Models\Lifestyle;
+use App\Models\MealPlan;
+use App\Models\User;
 use App\Models\UserProfile;
 use App\Workflows\MealPlanInitializeWorkflow;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -24,8 +27,10 @@ use Workflow\WorkflowStub;
 
 final readonly class OnboardingController
 {
+    private const int DEFAULT_DURATION_DAYS = 7;
+
     public function __construct(
-        #[CurrentUser] private \App\Models\User $user,
+        #[CurrentUser] private User $user,
     ) {
         //
     }
@@ -169,8 +174,11 @@ final readonly class OnboardingController
             'onboarding_completed_at' => now(),
         ]);
 
+        // Create meal plan synchronously with Generating status so users
+        $mealPlan = $this->createMealPlanWithGeneratingStatus($user);
+
         WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start($user, 7);
+            ->start($user, self::DEFAULT_DURATION_DAYS, null, $mealPlan);
 
         return to_route('onboarding.completion.show');
     }
@@ -184,5 +192,28 @@ final readonly class OnboardingController
         }
 
         return Inertia::render('onboarding/completion');
+    }
+
+    private function createMealPlanWithGeneratingStatus(User $user): MealPlan
+    {
+        $mealPlanType = MealPlanInitializeWorkflow::getMealPlanType(self::DEFAULT_DURATION_DAYS);
+
+        /** @var MealPlan $mealPlan */
+        $mealPlan = $user->mealPlans()->create([
+            'type' => $mealPlanType,
+            'name' => self::DEFAULT_DURATION_DAYS.'-Day Personalized Meal Plan',
+            'description' => 'AI-generated meal plan tailored to your nutritional needs and preferences.',
+            'duration_days' => self::DEFAULT_DURATION_DAYS,
+            'target_daily_calories' => null,
+            'macronutrient_ratios' => null,
+            'metadata' => [
+                'generated_at' => now()->toIso8601String(),
+                'generation_method' => 'workflow',
+                'status' => MealPlanGenerationStatus::Generating->value,
+                'days_completed' => 0,
+            ],
+        ]);
+
+        return $mealPlan;
     }
 }

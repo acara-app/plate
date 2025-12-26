@@ -61,13 +61,18 @@ final class MealPlanInitializeWorkflow extends Workflow
         User $user,
         int $totalDays = 7,
         ?GlucoseAnalysisData $glucoseAnalysis = null,
+        ?MealPlan $existingMealPlan = null,
     ): Generator {
-        /** @var MealPlan $mealPlan */
-        $mealPlan = yield ActivityStub::make(
-            InitializeMealPlanActivity::class,
-            $user,
-            $totalDays,
-        );
+        if ($existingMealPlan instanceof MealPlan) {
+            $mealPlan = $existingMealPlan;
+        } else {
+            /** @var MealPlan $mealPlan */
+            $mealPlan = yield ActivityStub::make(
+                InitializeMealPlanActivity::class,
+                $user,
+                $totalDays,
+            );
+        }
 
         /** @var DayMealsData $dayMeals */
         $dayMeals = yield ActivityStub::make(

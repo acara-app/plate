@@ -36,7 +36,7 @@ it('deletes existing meal plan', function (): void {
     expect(MealPlan::query()->find($mealPlan->id))->toBeNull();
 });
 
-it('starts meal plan workflow', function (): void {
+it('starts meal plan workflow and creates meal plan with generating status', function (): void {
     Queue::fake();
 
     $user = User::factory()->create();
@@ -48,9 +48,12 @@ it('starts meal plan workflow', function (): void {
 
     $response->assertRedirectToRoute('meal-plans.index');
 
-    // Verify workflow was started (this tests the workflow stub was called)
-    // The actual workflow execution is tested in workflow tests
-    expect($user->fresh()->mealPlans()->exists())->toBeFalse();
+    // Verify meal plan was created synchronously with Generating status
+    // This ensures users see the generating state immediately after redirect
+    $mealPlan = $user->fresh()->mealPlans()->first();
+    expect($mealPlan)->not->toBeNull();
+    expect($mealPlan->metadata['status'])->toBe('generating');
+    expect($mealPlan->metadata['days_completed'])->toBe(0);
 });
 
 it('redirects to meal plans index with success message', function (): void {
