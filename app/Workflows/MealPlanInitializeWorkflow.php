@@ -53,6 +53,32 @@ final class MealPlanInitializeWorkflow extends Workflow
     }
 
     /**
+     * Create a meal plan with Generating status for immediate UI feedback.
+     */
+    public static function createWithGeneratingStatus(User $user, int $totalDays = 7): MealPlan
+    {
+        $mealPlanType = self::getMealPlanType($totalDays);
+
+        /** @var MealPlan $mealPlan */
+        $mealPlan = $user->mealPlans()->create([
+            'type' => $mealPlanType,
+            'name' => $totalDays.'-Day Personalized Meal Plan',
+            'description' => 'AI-generated meal plan tailored to your nutritional needs and preferences.',
+            'duration_days' => $totalDays,
+            'target_daily_calories' => null,
+            'macronutrient_ratios' => null,
+            'metadata' => [
+                'generated_at' => now()->toIso8601String(),
+                'generation_method' => 'workflow',
+                'status' => MealPlanGenerationStatus::Generating->value,
+                'days_completed' => 0,
+            ],
+        ]);
+
+        return $mealPlan;
+    }
+
+    /**
      * Execute the workflow to generate a single day's meals for a meal plan.
      *
      * @codeCoverageIgnore Generator methods with yield are executed by the workflow engine

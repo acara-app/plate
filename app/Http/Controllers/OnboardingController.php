@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Enums\MealPlanGenerationStatus;
 use App\Enums\Sex;
 use App\Http\Requests\StoreBiometricsRequest;
 use App\Http\Requests\StoreDietaryPreferencesRequest;
@@ -15,7 +14,6 @@ use App\Models\DietaryPreference;
 use App\Models\Goal;
 use App\Models\HealthCondition;
 use App\Models\Lifestyle;
-use App\Models\MealPlan;
 use App\Models\User;
 use App\Models\UserProfile;
 use App\Workflows\MealPlanInitializeWorkflow;
@@ -174,8 +172,10 @@ final readonly class OnboardingController
             'onboarding_completed_at' => now(),
         ]);
 
-        // Create meal plan synchronously with Generating status so users
-        $mealPlan = $this->createMealPlanWithGeneratingStatus($user);
+        $mealPlan = MealPlanInitializeWorkflow::createWithGeneratingStatus(
+            $user,
+            self::DEFAULT_DURATION_DAYS,
+        );
 
         WorkflowStub::make(MealPlanInitializeWorkflow::class)
             ->start($user, self::DEFAULT_DURATION_DAYS, null, $mealPlan);
@@ -192,28 +192,5 @@ final readonly class OnboardingController
         }
 
         return Inertia::render('onboarding/completion');
-    }
-
-    private function createMealPlanWithGeneratingStatus(User $user): MealPlan
-    {
-        $mealPlanType = MealPlanInitializeWorkflow::getMealPlanType(self::DEFAULT_DURATION_DAYS);
-
-        /** @var MealPlan $mealPlan */
-        $mealPlan = $user->mealPlans()->create([
-            'type' => $mealPlanType,
-            'name' => self::DEFAULT_DURATION_DAYS.'-Day Personalized Meal Plan',
-            'description' => 'AI-generated meal plan tailored to your nutritional needs and preferences.',
-            'duration_days' => self::DEFAULT_DURATION_DAYS,
-            'target_daily_calories' => null,
-            'macronutrient_ratios' => null,
-            'metadata' => [
-                'generated_at' => now()->toIso8601String(),
-                'generation_method' => 'workflow',
-                'status' => MealPlanGenerationStatus::Generating->value,
-                'days_completed' => 0,
-            ],
-        ]);
-
-        return $mealPlan;
     }
 }
