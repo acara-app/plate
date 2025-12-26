@@ -322,11 +322,11 @@
 
                             <div class="space-y-4">
                                 <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                                    Track calories with a <span class="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-indigo-400">single photo</span>
+                                    Get nutrition facts from a <span class="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-indigo-400">single photo</span>
                                 </h2>
 
                                 <p class="text-lg leading-relaxed text-slate-400">
-                                    Stop searching through databases. Just snap a photo of your meal, and our AI will identify the food and calculate calories and macros instantly.
+                                    Manual logging fails because it takes too much time. Here is why you can stop typing. You take a photo of your meal. We match the image to food databases. Let's break it down. You see the calories and macros you need. You stay in control. Next steps? Test the scanner below.
                                 </p>
                             </div>
 
