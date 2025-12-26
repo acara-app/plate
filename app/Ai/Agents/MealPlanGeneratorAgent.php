@@ -17,12 +17,13 @@ use App\Utilities\JsonCleaner;
 use App\Workflows\MealPlanInitializeWorkflow;
 use Prism\Prism\ValueObjects\ProviderTool;
 use Workflow\WorkflowStub;
+use App\Actions\AnalyzeGlucoseForNotificationAction;
 
 final class MealPlanGeneratorAgent extends BaseAgent
 {
     public function __construct(
         private readonly MealPlanPromptBuilder $promptBuilder,
-        private readonly \App\Actions\AnalyzeGlucoseForNotificationAction $analyzeGlucose,
+        private readonly AnalyzeGlucoseForNotificationAction $analyzeGlucose,
     ) {}
 
     public function systemPrompt(): string
