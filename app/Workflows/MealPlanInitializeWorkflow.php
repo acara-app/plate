@@ -96,18 +96,18 @@ final class MealPlanInitializeWorkflow extends Workflow
         /** @var DayMealsData $dayMeals */
         $dayMeals = yield ActivityStub::make(
             MealPlanDayGeneratorActivity::class,
-            $user,
-            1,
-            $totalDays,
-            new PreviousDayContext,
-            $glucoseAnalysis,
+            $user,                   // user
+            1,                       // dayNumber
+            $totalDays,              // totalDays
+            new PreviousDayContext,  // previousDaysContext
+            $glucoseAnalysis,        // glucoseAnalysis
         );
 
         yield ActivityStub::make(
             SaveDayMealsActivity::class,
-            $mealPlan,
-            $dayMeals,
-            1,
+            $mealPlan,  // mealPlan
+            $dayMeals,  // dayMeals
+            1,          // dayNumber
         );
 
         $mealPlan->update([
