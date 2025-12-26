@@ -180,11 +180,10 @@ export default function GlucoseAction({
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             <p className="text-sm">
-                                                Our AI will create meals
-                                                tailored to your glucose
-                                                patterns, focusing on foods that
-                                                won&apos;t spike your blood
-                                                sugar.
+                                                Personalized meals tailored to
+                                                your glucose patterns, focusing
+                                                on foods that won&apos;t spike
+                                                your blood sugar.
                                             </p>
                                             <Button
                                                 asChild

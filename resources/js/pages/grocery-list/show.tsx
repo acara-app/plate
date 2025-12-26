@@ -184,9 +184,8 @@ function EmptyGroceryListState({
             <ShoppingCart className="mb-4 h-16 w-16 text-muted-foreground" />
             <h3 className="text-xl font-semibold">No Grocery List Yet</h3>
             <p className="mt-2 max-w-md text-muted-foreground">
-                Generate a grocery list from your meal plan. Our AI will
-                consolidate all ingredients and organize them by category for
-                easy shopping.
+                Generate a grocery list from your meal plan. Ingredients are
+                consolidated and organized by category for easy shopping.
             </p>
             <Button
                 className="mt-6"
