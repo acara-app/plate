@@ -167,8 +167,10 @@ it('starts workflow when handle is called', function (): void {
     $action = resolve(MealPlanGeneratorAgent::class);
     $action->handle($user);
 
-    // Workflow is faked so meal plan won't be created, but no exception means workflow was started
-    expect($user->mealPlans()->count())->toBe(0);
+    // Meal plan is created synchronously before workflow starts
+    $mealPlan = $user->mealPlans()->first();
+    expect($mealPlan)->not->toBeNull();
+    expect($mealPlan->metadata['status'])->toBe('generating');
 });
 
 it('handles meals with no ingredients', function (): void {

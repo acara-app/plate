@@ -90,10 +90,12 @@ final class MealPlanGeneratorAgent extends BaseAgent
         ];
     }
 
-    public function handle(User $user): void
+    public function handle(User $user, int $totalDays = 7): void
     {
+        $mealPlan = MealPlanInitializeWorkflow::createMealPlan($user, $totalDays);
+
         WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start($user, 7);
+            ->start($user, $mealPlan);
     }
 
     /**

@@ -172,13 +172,13 @@ final readonly class OnboardingController
             'onboarding_completed_at' => now(),
         ]);
 
-        $mealPlan = MealPlanInitializeWorkflow::createWithGeneratingStatus(
+        $mealPlan = MealPlanInitializeWorkflow::createMealPlan(
             $user,
             self::DEFAULT_DURATION_DAYS,
         );
 
         WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start($user, self::DEFAULT_DURATION_DAYS, null, $mealPlan);
+            ->start($user, $mealPlan);
 
         return to_route('onboarding.completion.show');
     }

@@ -41,7 +41,7 @@ final class MealPlanInitializeWorkflow extends Workflow
     }
 
     /**
-     * Get the default meal plan type.
+     * Get the meal plan type based on duration.
      */
     public static function getMealPlanType(int $totalDays): MealPlanType
     {
@@ -53,9 +53,12 @@ final class MealPlanInitializeWorkflow extends Workflow
     }
 
     /**
-     * Create a meal plan with Generating status for immediate UI feedback.
+     * Create a meal plan with Generating status.
+     *
+     * This must be called synchronously before starting the workflow
+     * to ensure the user sees the "Generating" state immediately.
      */
-    public static function createWithGeneratingStatus(User $user, int $totalDays = 7): MealPlan
+    public static function createMealPlan(User $user, int $totalDays = 7): MealPlan
     {
         $mealPlanType = self::getMealPlanType($totalDays);
 
@@ -79,26 +82,16 @@ final class MealPlanInitializeWorkflow extends Workflow
     }
 
     /**
-     * Execute the workflow to generate a single day's meals for a meal plan.
+     * Execute the workflow to generate meals for day 1 of a meal plan.
      *
      * @codeCoverageIgnore Generator methods with yield are executed by the workflow engine
      */
     public function execute(
         User $user,
-        int $totalDays = 7,
+        MealPlan $mealPlan,
         ?GlucoseAnalysisData $glucoseAnalysis = null,
-        ?MealPlan $existingMealPlan = null,
     ): Generator {
-        if ($existingMealPlan instanceof MealPlan) {
-            $mealPlan = $existingMealPlan;
-        } else {
-            /** @var MealPlan $mealPlan */
-            $mealPlan = yield ActivityStub::make(
-                InitializeMealPlanActivity::class,
-                $user,
-                $totalDays,
-            );
-        }
+        $totalDays = $mealPlan->duration_days;
 
         /** @var DayMealsData $dayMeals */
         $dayMeals = yield ActivityStub::make(
@@ -106,7 +99,6 @@ final class MealPlanInitializeWorkflow extends Workflow
             $user,
             1,
             $totalDays,
-
             new PreviousDayContext,
             $glucoseAnalysis,
         );
