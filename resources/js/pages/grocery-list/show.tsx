@@ -214,8 +214,7 @@ function GroceryListSkeleton() {
                     Generating Your Grocery List
                 </AlertTitle>
                 <AlertDescription className="text-muted-foreground">
-                    Our AI is consolidating ingredients from your meal plan.
-                    This usually takes a few seconds.
+                    Building your grocery list from your meal plan.
                 </AlertDescription>
             </Alert>
 

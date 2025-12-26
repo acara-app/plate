@@ -377,9 +377,9 @@ function GeneratingMealsState({
                     Generating Your Meals
                 </AlertTitle>
                 <AlertDescription className="text-muted-foreground">
-                    Our AI is crafting personalized meals for this day based on
-                    your preferences and nutritional goals. This usually takes
-                    30-60 seconds.
+                    Crafting personalized meals for this day based on your
+                    preferences and nutritional goals. This usually takes 30-60
+                    seconds.
                 </AlertDescription>
             </Alert>
 
