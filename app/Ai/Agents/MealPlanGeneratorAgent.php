@@ -22,6 +22,7 @@ final class MealPlanGeneratorAgent extends BaseAgent
 {
     public function __construct(
         private readonly MealPlanPromptBuilder $promptBuilder,
+        private readonly \App\Actions\AnalyzeGlucoseForNotificationAction $analyzeGlucose,
     ) {}
 
     public function systemPrompt(): string
@@ -92,10 +93,12 @@ final class MealPlanGeneratorAgent extends BaseAgent
 
     public function handle(User $user, int $totalDays = 7): void
     {
+        $glucoseAnalysis = $this->analyzeGlucose->handle($user);
+
         $mealPlan = MealPlanInitializeWorkflow::createMealPlan($user, $totalDays);
 
         WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start($user, $mealPlan);
+            ->start($user, $mealPlan, $glucoseAnalysis->analysisData);
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\AnalyzeGlucoseForNotificationAction;
 use App\Enums\Sex;
 use App\Http\Requests\StoreBiometricsRequest;
 use App\Http\Requests\StoreDietaryPreferencesRequest;
@@ -29,6 +30,7 @@ final readonly class OnboardingController
 
     public function __construct(
         #[CurrentUser] private User $user,
+        private AnalyzeGlucoseForNotificationAction $analyzeGlucose,
     ) {
         //
     }
@@ -172,13 +174,15 @@ final readonly class OnboardingController
             'onboarding_completed_at' => now(),
         ]);
 
+        $glucoseAnalysis = $this->analyzeGlucose->handle($user);
+
         $mealPlan = MealPlanInitializeWorkflow::createMealPlan(
             $user,
             self::DEFAULT_DURATION_DAYS,
         );
 
         WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start($user, $mealPlan);
+            ->start($user, $mealPlan, $glucoseAnalysis->analysisData);
 
         return to_route('onboarding.completion.show');
     }
