@@ -55,6 +55,53 @@ php artisan wayfinder:generate --with-form
  - Use a cleaner, more testable approach. Separate edge cases into their own methods or classes.
  - Use data providers to test multiple scenarios in a single test method.
 
+## Code Testability Guidelines
+
+- **Avoid inline closures in controller responses** - When returning data from controllers (especially with Inertia), don't use inline closures for data transformation as they are difficult to test.
+- **Extract formatting logic to models** - Instead of writing transformation closures in controllers, add dedicated methods to models (e.g., `toResponseData()`, `formattedItemsByCategory()`) that can be unit tested independently.
+- **Use DTOs for response data** - Instead of inline array type declarations like `@return array{id: int, name: string}`, create dedicated Data Transfer Objects (DTOs) in `app/DataObjects/` using Spatie Laravel Data.
+- **Keep controller methods thin** - Controllers should orchestrate, not transform. Move data formatting and business logic to models, actions, or dedicated service classes.
+
+### Bad Example (untestable closure with inline array type):
+```php
+// In Controller - hard to test, inline type declaration
+/**
+ * @return array{id: int, name: string}
+ */
+return [
+    'items' => $collection->map(fn ($item) => [
+        'id' => $item->id,
+        'name' => $item->name,
+    ]),
+];
+```
+
+### Good Example (testable method with DTO):
+```php
+// In DataObjects/ItemResponseData.php
+final class ItemResponseData extends Data
+{
+    public function __construct(
+        public int $id,
+        public string $name,
+    ) {}
+}
+
+// In Model
+public function toResponseData(): ItemResponseData
+{
+    return new ItemResponseData(
+        id: $this->id,
+        name: $this->name,
+    );
+}
+
+// In Controller
+return [
+    'items' => $collection->map(fn ($item) => $item->toResponseData()),
+];
+```
+
 
 === foundation rules ===
 
@@ -65,7 +112,7 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 ## Foundational Context
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
-- php - 8.4.15
+- php - 8.4.16
 - inertiajs/inertia-laravel (INERTIA) - v2
 - laravel/cashier (CASHIER) - v16
 - laravel/fortify (FORTIFY) - v1
@@ -73,6 +120,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - laravel/prompts (PROMPTS) - v0
 - laravel/socialite (SOCIALITE) - v5
 - laravel/wayfinder (WAYFINDER) - v0
+- livewire/livewire (LIVEWIRE) - v3
 - larastan/larastan (LARASTAN) - v3
 - laravel/mcp (MCP) - v0
 - laravel/pint (PINT) - v1
@@ -352,6 +400,89 @@ If your application uses the `<Form>` component from Inertia, you can use Wayfin
 
 <Form {...store.form()}><input name="title" /></Form>
 
+</code-snippet>
+
+
+=== livewire/core rules ===
+
+## Livewire Core
+- Use the `search-docs` tool to find exact version specific documentation for how to write Livewire & Livewire tests.
+- Use the `php artisan make:livewire [Posts\CreatePost]` artisan command to create new components
+- State should live on the server, with the UI reflecting it.
+- All Livewire requests hit the Laravel backend, they're like regular HTTP requests. Always validate form data, and run authorization checks in Livewire actions.
+
+## Livewire Best Practices
+- Livewire components require a single root element.
+- Use `wire:loading` and `wire:dirty` for delightful loading states.
+- Add `wire:key` in loops:
+
+    ```blade
+    @foreach ($items as $item)
+        <div wire:key="item-{{ $item->id }}">
+            {{ $item->name }}
+        </div>
+    @endforeach
+    ```
+
+- Prefer lifecycle hooks like `mount()`, `updatedFoo()` for initialization and reactive side effects:
+
+<code-snippet name="Lifecycle hook examples" lang="php">
+    public function mount(User $user) { $this->user = $user; }
+    public function updatedSearch() { $this->resetPage(); }
+</code-snippet>
+
+
+## Testing Livewire
+
+<code-snippet name="Example Livewire component test" lang="php">
+    Livewire::test(Counter::class)
+        ->assertSet('count', 0)
+        ->call('increment')
+        ->assertSet('count', 1)
+        ->assertSee(1)
+        ->assertStatus(200);
+</code-snippet>
+
+
+    <code-snippet name="Testing a Livewire component exists within a page" lang="php">
+        $this->get('/posts/create')
+        ->assertSeeLivewire(CreatePost::class);
+    </code-snippet>
+
+
+=== livewire/v3 rules ===
+
+## Livewire 3
+
+### Key Changes From Livewire 2
+- These things changed in Livewire 2, but may not have been updated in this application. Verify this application's setup to ensure you conform with application conventions.
+    - Use `wire:model.live` for real-time updates, `wire:model` is now deferred by default.
+    - Components now use the `App\Livewire` namespace (not `App\Http\Livewire`).
+    - Use `$this->dispatch()` to dispatch events (not `emit` or `dispatchBrowserEvent`).
+    - Use the `components.layouts.app` view as the typical layout path (not `layouts.app`).
+
+### New Directives
+- `wire:show`, `wire:transition`, `wire:cloak`, `wire:offline`, `wire:target` are available for use. Use the documentation to find usage examples.
+
+### Alpine
+- Alpine is now included with Livewire, don't manually include Alpine.js.
+- Plugins included with Alpine: persist, intersect, collapse, and focus.
+
+### Lifecycle Hooks
+- You can listen for `livewire:init` to hook into Livewire initialization, and `fail.status === 419` for the page expiring:
+
+<code-snippet name="livewire:load example" lang="js">
+document.addEventListener('livewire:init', function () {
+    Livewire.hook('request', ({ fail }) => {
+        if (fail && fail.status === 419) {
+            alert('Your session expired');
+        }
+    });
+
+    Livewire.hook('message.failed', (message, component) => {
+        console.error(message);
+    });
+});
 </code-snippet>
 
 

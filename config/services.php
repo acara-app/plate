@@ -55,4 +55,9 @@ return [
         'cache_minutes' => env('USDA_CACHE_MINUTES', 10080), // 7 days
     ],
 
+    'turnstile' => [
+        'key' => env('TURNSTILE_SITE_KEY'),
+        'secret' => env('TURNSTILE_SECRET_KEY'),
+    ],
+
 ];

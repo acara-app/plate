@@ -2,6 +2,9 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('layouts.components.head')
+        @if (App::environment(['production', 'testing']))
+            <x-turnstile.scripts />
+        @endif
     </head>
     <body
         class="bg-slate-950 bg-center bg-repeat font-sans text-slate-50 antialiased"

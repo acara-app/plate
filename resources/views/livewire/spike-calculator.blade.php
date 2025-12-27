@@ -165,6 +165,12 @@
                 </span>
             </button>
 
+            @if (App::environment(['production', 'testing']))
+                <div class="mt-4 flex justify-center">
+                    <x-turnstile wire:model="turnstileToken" data-theme="auto" />
+                </div>
+            @endif
+
             @error('food')
                 <p class="mt-2 text-sm text-red-500">{{ $message }}</p>
             @enderror

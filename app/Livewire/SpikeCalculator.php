@@ -10,6 +10,7 @@ use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 use Throwable;
 
 #[Layout('layouts.mini-app')]
@@ -17,6 +18,8 @@ final class SpikeCalculator extends Component
 {
     #[Validate('required|string|min:2|max:500')]
     public string $food = '';
+
+    public ?string $turnstileToken = null;
 
     public bool $loading = false;
 
@@ -30,7 +33,15 @@ final class SpikeCalculator extends Component
         $this->error = null;
         $this->result = null;
 
-        $this->validate();
+        $rules = [
+            'food' => 'required|string|min:2|max:500',
+        ];
+
+        if (app()->environment(['production', 'testing'])) {
+            $rules['turnstileToken'] = ['required', new Turnstile];
+        }
+
+        $this->validate($rules);
 
         $this->loading = true;
 
