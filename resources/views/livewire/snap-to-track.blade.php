@@ -170,12 +170,6 @@
                     </button>
                 </div>
 
-                @if (App::environment(['production', 'testing']))
-                    <div class="flex justify-center">
-                        <x-turnstile wire:model="turnstileToken" data-theme="auto" />
-                    </div>
-                @endif
-
                 {{-- Analyze Button --}}
                 <button 
                     type="submit"
@@ -196,6 +190,12 @@
                         Analyzing your meal...
                     </span>
                 </button>
+            @endif
+
+            @if (App::environment(['production', 'testing']))
+                <div class="flex justify-center">
+                    <x-turnstile wire:model="turnstileToken" data-theme="auto" />
+                </div>
             @endif
 
             @error('photo')
