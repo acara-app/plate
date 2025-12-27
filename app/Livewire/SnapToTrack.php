@@ -12,6 +12,7 @@ use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use RuntimeException;
+use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 use Throwable;
 
 #[Layout('layouts.mini-app')]
@@ -21,6 +22,8 @@ final class SnapToTrack extends Component
 
     #[Validate('required|image|max:10240')]
     public ?TemporaryUploadedFile $photo = null;
+
+    public ?string $turnstileToken = null;
 
     public bool $loading = false;
 
@@ -34,7 +37,15 @@ final class SnapToTrack extends Component
         $this->error = null;
         $this->result = null;
 
-        $this->validate();
+        $rules = [
+            'photo' => 'required|image|max:10240',
+        ];
+
+        if (app()->environment(['production', 'testing'])) {
+            $rules['turnstileToken'] = ['required', new Turnstile];
+        }
+
+        $this->validate($rules);
 
         if (! $this->photo instanceof TemporaryUploadedFile) {
             $this->error = 'Please select a photo to analyze.'; // @codeCoverageIgnore
