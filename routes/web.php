@@ -18,6 +18,7 @@ Route::view('/diabetes-log-book', 'diabetes-log-book')->name('diabetes-log-book'
 Route::view('/diabetes-log-book-info', 'diabetes-log-book-info')->name('diabetes-log-book-info');
 Route::get('/spike-calculator', SpikeCalculator::class)->name('spike-calculator');
 Route::get('/snap-to-track', SnapToTrack::class)->name('snap-to-track');
+Route::view('/10-day-meal-plan', '10-day-meal-plan')->name('10-day-meal-plan');
 
 Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])->name('profile.timezone.update');
 
