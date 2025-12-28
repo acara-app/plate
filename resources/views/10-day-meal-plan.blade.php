@@ -328,7 +328,7 @@
                         </svg>
                     </a>
                 </div>
-                <p class="mt-4 text-xs text-slate-500">Free to start • No credit card required • Open source</p>
+                <p class="mt-4 text-xs text-slate-500">Free to start • Open source</p>
             </div>
         </section>
 
