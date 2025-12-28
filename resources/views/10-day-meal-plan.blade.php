@@ -1,0 +1,480 @@
+@section('title', '10-Day Diabetes-Friendly Meal Plan | Free Download | Acara Plate')
+@section('meta_description', 'Get a complete 10-day meal plan with breakfast, lunch, dinner, and snacks. Designed for
+    Type 2 diabetes and prediabetes management. Start eating better today!')
+
+    <x-default-layout>
+    @section('head')
+        <script type="application/ld+json">
+        {
+            "@@context": "https://schema.org",
+            "@@type": "Article",
+            "headline": "10-Day Diabetes-Friendly Meal Plan",
+            "description": "A complete 10-day meal plan designed for managing Type 2 diabetes and prediabetes with breakfast, lunch, dinner, and snacks.",
+            "author": {
+                "@@type": "Organization",
+                "name": "Acara Plate"
+            }
+        }
+        </script>
+    @endsection
+
+    <div class="mx-auto my-8 max-w-4xl px-4 sm:px-6 lg:px-8">
+        {{-- Hero Section --}}
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                10-Day Meal Plan
+            </h1>
+            <p class="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">
+                A complete meal plan with breakfast, lunch, dinner, and snacks—designed to help you manage blood sugar
+                levels naturally.
+            </p>
+            <p class="mt-2 text-sm text-slate-500 max-w-xl mx-auto">
+                Based on Medical Nutrition Therapy (MNT) principles for diabetes management
+            </p>
+            <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <a href="{{ route('register') }}"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:bg-slate-800 hover:shadow-xl">
+                    Get Personalized Meal Plans
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+                <a href="{{ route('spike-calculator') }}"
+                    class="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Try Spike Calculator — Free
+                </a>
+            </div>
+        </header>
+
+        {{-- Day Navigation Tabs --}}
+        <nav class="mb-6" aria-label="Day navigation">
+            <div class="flex overflow-x-auto gap-2 pb-2 scrollbar-thin" id="day-tabs">
+                @for ($day = 1; $day <= 10; $day++)
+                    <button onclick="showDay({{ $day }})" id="tab-{{ $day }}"
+                        class="day-tab shrink-0 px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 {{ $day === 1 ? 'bg-slate-900 text-white shadow-md hover:bg-slate-800' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}"
+                        aria-selected="{{ $day === 1 ? 'true' : 'false' }}" role="tab">
+                        Day {{ $day }}
+                    </button>
+                @endfor
+            </div>
+        </nav>
+
+        {{-- Meal Plan Content --}}
+        <div class="space-y-4" id="meal-plan-content">
+            @php
+                $mealPlanData = [
+                    1 => [
+                        'breakfast' => ['High-fiber cereal with milk, topped with walnuts'],
+                        'morning_snack' => ['Apple slices with almond butter'],
+                        'lunch' => [
+                            'Roasted turkey or hummus sandwich (whole-grain bread)',
+                            'Garden Tomato Salad with olive oil dressing',
+                        ],
+                        'afternoon_snack' => ['Vegetable Soup with kidney beans'], 
+                        'dinner' => [
+                            'Herb-crusted Roasted Chicken',
+                            'Roasted Cauliflower Mash',
+                            'Steamed broccoli and carrots',
+                            'Berries',
+                        ], 
+                        'evening_snack' => ['Blueberry Oatmeal Muffin (low sugar)'],
+                    ],
+                    2 => [
+                        'breakfast' => ['Whole-grain English muffin with cottage cheese'], 
+                        'morning_snack' => ['Chai tea or chilled coffee made with milk'],
+                        'lunch' => ['Quinoa Salad with chickpeas', 'Hard-boiled egg'], 
+                        'afternoon_snack' => ['Chia Seed Pudding with vanilla'], 
+                        'dinner' => [
+                            'Grilled Fish Tacos with Cabbage Slaw',
+                            'Spinach Salad with vinaigrette',
+                            'Dark Chocolate square',
+                        ], 
+                        'evening_snack' => ['Pear with a slice of cheese'],
+                    ],
+                    3 => [
+                        'breakfast' => ['Scrambled egg made with spinach and peppers', 'Whole-grain Toast'],
+                        'morning_snack' => ['Homemade Oatmeal Cookie with seeds'],
+                        'lunch' => ['Turkey Noodle Soup (low sodium)', 'Open-faced tomato and bocconcini sandwich'],
+                        'afternoon_snack' => ['Pineapple Coleslaw with yogurt dressing'],
+                        'dinner' => [
+                            'Slow Cooker Pot Roast with carrots and potatoes',
+                            'Glass of milk',
+                            'Baked Apple with cinnamon',
+                        ],
+                        'evening_snack' => ['Air-popped Popcorn'],
+                    ],
+                    4 => [
+                        'breakfast' => ['Steel-cut oats with milk, topped with almonds'], 
+                        'morning_snack' => ['Orange segments'],
+                        'lunch' => [
+                            'Broccoli Cheese Soup',
+                            'Whole-grain crackers with hummus',
+                            'Cucumber and Celery sticks',
+                        ],
+                        'afternoon_snack' => ['Handful of mixed nuts and dried cranberries'],
+                        'dinner' => [
+                            'Vegetarian Three-Bean Chili',
+                            'Baked Sweet Potato Wedges',
+                            'Avocado Cacao Mousse',
+                        ], 
+                        'evening_snack' => ['Whole-grain waffle with berry compote', 'Herbal iced tea'],
+                    ],
+                    5 => [
+                        'breakfast' => ['Whole-grain toast with natural peanut butter', 'Glass of milk'],
+                        'morning_snack' => ['Greek-style yogurt with flaxseeds'],
+                        'lunch' => ['Beef Barley Soup', 'Whole-grain crackers and cheddar', 'Grapes'],
+                        'afternoon_snack' => ['Carrot sticks with tzatziki dip'], 
+                        'dinner' => [
+                            'Grilled Chicken Cobb Salad (avocado, egg, greens)',
+                            'Small whole-wheat bun',
+                            'Lemon yogurt parfait',
+                        ],
+                        'evening_snack' => ['Sparkling cranberry water'],
+                    ],
+                    6 => [
+                        'breakfast' => ['Overnight oats with chia seeds and Greek yogurt'],
+                        'morning_snack' => ['Rice crackers with hummus'],
+                        'lunch' => ['Poached egg', 'Sourdough Toast', 'Roasted Tomatoes', 'Melon slices'],
+                        'afternoon_snack' => ['Kefir or probiotic yogurt drink'],
+                        'dinner' => [
+                            'Homemade Vegetable Pizza on thin crust',
+                            'Caesar Salad with light dressing',
+                            'Raspberry Sorbet',
+                        ],
+                        'evening_snack' => ['Chamomile tea'],
+                    ],
+                    7 => [
+                        'breakfast' => [
+                            'Whole-wheat tortilla breakfast burrito (eggs, black beans, salsa)',
+                            'Grapefruit',
+                        ],
+                        'morning_snack' => ['Edamame beans'],
+                        'lunch' => ['Sushi rolls (brown rice) with avocado and salmon'],
+                        'afternoon_snack' => ['Slice of Zucchini Loaf (made with olive oil)'],
+                        'dinner' => ['Grilled Pork Chops', 'Grilled Asparagus and Peppers', 'Frozen Yogurt with nuts'], 
+                        'evening_snack' => ['Lemon-infused water or herbal tea'],
+                    ],
+                    8 => [
+                        'breakfast' => ['Avocado toast with feta cheese', 'Sliced peaches'],
+                        'morning_snack' => ['String cheese and almonds'],
+                        'lunch' => ['Salmon salad sandwich', 'Red Cabbage Slaw with vinaigrette'],
+                        'afternoon_snack' => ['Iced Green Tea with lemon'], 
+                        'dinner' => [
+                            'Deconstructed Taco Salad (beans, corn, lettuce, salsa)',
+                            'Glass of milk',
+                            'Mango slices with lime',
+                        ],
+                        'evening_snack' => ['Greek yogurt with a sprinkle of granola'], 
+                    ],
+                    9 => [
+                        'breakfast' => ['Banana Oat Pancakes (flourless) with almond butter'],
+                        'morning_snack' => ['10 pecans or 20 pistachios'],
+                        'lunch' => ['Lentil Spinach Soup', 'Whole-grain crackers', 'Bell pepper strips'],
+                        'afternoon_snack' => ['Kiwi fruit'],
+                        'dinner' => [
+                            'Spaghetti Squash with Marinara and Turkey Meatballs',
+                            'Green Salad',
+                            'Baked Pear with ginger',
+                        ],
+                        'evening_snack' => ['Turmeric Milk (Golden Milk)'],
+                    ],
+                    10 => [
+                        'breakfast' => ['Green Smoothie (Spinach, Avocado, Banana, Protein Powder)'],
+                        'morning_snack' => ['Hard-boiled egg'], 
+                        'lunch' => ['Natural Peanut butter and banana on whole-wheat', 'Roasted Pumpkin Soup'],
+                        'afternoon_snack' => ['Sparkling water with fresh lime'], 
+                        'dinner' => [
+                            'Chicken Souvlaki',
+                            'Whole-wheat pita',
+                            'Greek Salad (olives, feta, cucumber)',
+                            'Fresh figs',
+                        ],
+                        'evening_snack' => ['Low-sodium tomato juice'],
+                    ],
+                ];
+
+                 $mealTypes = [
+                    'breakfast' => ['label' => 'Breakfast', 'icon' => '🌅', 'color' => 'emerald'],
+                    'morning_snack' => ['label' => 'Morning Snack', 'icon' => '☀️', 'color' => 'amber'],
+                    'lunch' => ['label' => 'Lunch', 'icon' => '🍽️', 'color' => 'teal'],
+                    'afternoon_snack' => ['label' => 'Afternoon Snack', 'icon' => '🍎', 'color' => 'orange'],
+                    'dinner' => ['label' => 'Dinner', 'icon' => '🌙', 'color' => 'purple'],
+                    'evening_snack' => ['label' => 'Evening Snack', 'icon' => '🌜', 'color' => 'slate'],
+                ];
+            @endphp
+
+            @for ($day = 1; $day <= 10; $day++)
+                <div id="day-{{ $day }}" class="day-content {{ $day !== 1 ? 'hidden' : '' }}">
+                    <div class="space-y-3">
+                        @foreach ($mealTypes as $mealKey => $mealInfo)
+                            @php
+                                $colorClasses = [
+                                    'emerald' => 'border-l-emerald-500 bg-emerald-50/50',
+                                    'amber' => 'border-l-amber-500 bg-amber-50/50',
+                                    'teal' => 'border-l-teal-500 bg-teal-50/50',
+                                    'orange' => 'border-l-orange-500 bg-orange-50/50',
+                                    'purple' => 'border-l-purple-500 bg-purple-50/50',
+                                    'slate' => 'border-l-slate-400 bg-slate-50/50',
+                                ];
+                                $textColors = [
+                                    'emerald' => 'text-emerald-700',
+                                    'amber' => 'text-amber-700',
+                                    'teal' => 'text-teal-700',
+                                    'orange' => 'text-orange-700',
+                                    'purple' => 'text-purple-700',
+                                    'slate' => 'text-slate-700',
+                                ];
+                            @endphp
+                            <article
+                                class="rounded-xl border border-slate-200 border-l-4 {{ $colorClasses[$mealInfo['color']] }} p-4 shadow-sm transition-all duration-200 hover:shadow-md">
+                                <header class="flex items-center gap-2 mb-2">
+                                    <span class="text-lg" aria-hidden="true">{{ $mealInfo['icon'] }}</span>
+                                    <h2 class="font-semibold {{ $textColors[$mealInfo['color']] }}">
+                                        {{ $mealInfo['label'] }}</h2>
+                                </header>
+                                <ul class="space-y-1 pl-6 text-sm text-slate-700 list-disc list-inside">
+                                    @foreach ($mealPlanData[$day][$mealKey] as $item)
+                                        <li class="leading-relaxed">{{ $item }}</li>
+                                    @endforeach
+                                </ul>
+                            </article>
+                        @endforeach
+                    </div>
+
+                    {{-- Mid-page CTA (show after Day 5) --}}
+                    @if ($day === 5)
+                        <div
+                            class="mt-6 rounded-2xl bg-linear-to-r from-orange-500 to-amber-500 p-6 text-white shadow-lg">
+                            <div class="flex flex-col sm:flex-row items-center gap-4">
+                                <div class="flex-1 text-center sm:text-left">
+                                    <h3 class="text-lg font-bold">Wondering if a food will spike your blood sugar?</h3>
+                                    <p class="mt-1 text-orange-100 text-sm">Check any food instantly with our free Spike
+                                        Calculator.</p>
+                                </div>
+                                <a href="{{ route('spike-calculator') }}"
+                                    class="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-orange-600 shadow-md transition-all hover:bg-orange-50">
+                                    Try Spike Calculator
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @endfor
+        </div>
+
+        {{-- Snap to Track Promo --}}
+        <section class="mt-10 rounded-2xl bg-slate-900 p-6 text-white shadow-xl">
+            <div class="flex flex-col sm:flex-row items-center gap-6">
+                <div class="shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-blue-500/20">
+                    <svg class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
+                <div class="flex-1 text-center sm:text-left">
+                    <h2 class="text-xl font-bold">Track Your Meals Instantly</h2>
+                    <p class="mt-1 text-slate-400">Snap a photo of your food and get nutrition facts immediately—no
+                        typing required.</p>
+                </div>
+                <a href="{{ route('snap-to-track') }}"
+                    class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-blue-500">
+                    Try Snap to Track
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
+        </section>
+
+        {{-- Diabetes Log Book Link --}}
+        <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div class="flex-1">
+                    <h3 class="font-semibold text-slate-900">Need to track your glucose readings?</h3>
+                    <p class="mt-1 text-sm text-slate-600">Download our free printable <a
+                            href="{{ route('diabetes-log-book') }}"
+                            class="text-emerald-600 font-medium hover:underline">Diabetes Log Book</a> to monitor your
+                        blood sugar levels daily.</p>
+                </div>
+            </div>
+        </section>
+
+        {{-- Bottom CTA --}}
+        <section class="mt-10 text-center">
+            <div class="rounded-2xl bg-linear-to-br from-emerald-50 to-teal-50 border border-emerald-200 p-8">
+                <h2 class="text-2xl font-bold text-slate-900">Ready for Personalized Meal Plans?</h2>
+                <p class="mt-2 text-slate-600 max-w-xl mx-auto">
+                    Get AI-powered meal plans tailored to your glucose levels, dietary preferences, and health goals.
+                </p>
+                <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="{{ route('register') }}"
+                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-8 py-4 text-base font-bold text-white shadow-lg transition-all hover:bg-emerald-500 hover:shadow-xl">
+                        Start Your Free Plan
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
+                </div>
+                <p class="mt-4 text-xs text-slate-500">Free to start • No credit card required • Open source</p>
+            </div>
+        </section>
+
+        {{-- MNT Educational Section --}}
+        <section class="mt-10 rounded-xl border border-emerald-200 bg-emerald-50/30 p-6">
+            <h2 class="text-xl font-bold text-slate-900 mb-3">About Medical Nutrition Therapy (MNT) for Diabetes</h2>
+            <div class="prose prose-slate max-w-none text-sm text-slate-700 space-y-3">
+                <p>
+                    This 10-day meal plan is based on <strong>Medical Nutrition Therapy (MNT)</strong> principles, an evidence-based approach to managing diabetes through nutrition. MNT is recognized by the American Diabetes Association as a critical component of diabetes care.
+                </p>
+                <p>
+                    The meal plan focuses on:
+                </p>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                    <li>Balanced macronutrients to stabilize blood sugar levels</li>
+                    <li>Portion control and consistent meal timing</li>
+                    <li>High-fiber foods to improve glucose control</li>
+                    <li>Lean proteins and healthy fats</li>
+                    <li>Reduced refined carbohydrates and added sugars</li>
+                </ul>
+                <p class="text-xs text-slate-500 mt-4">
+                    <strong>Disclaimer:</strong> This meal plan is for educational purposes. Always consult with a registered dietitian or healthcare provider before making significant dietary changes, especially if you have diabetes or other health conditions.
+                </p>
+            </div>
+        </section>
+
+        {{-- Related Links --}}
+        <nav class="mt-10 border-t border-slate-200 pt-8" aria-label="Related tools">
+            <h3 class="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-4">Free Diabetes Tools</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <a href="{{ route('spike-calculator') }}"
+                    class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-orange-300 hover:bg-orange-50">
+                    <span
+                        class="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 text-orange-600 group-hover:bg-orange-200">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </span>
+                    <div>
+                        <span class="font-medium text-slate-900 group-hover:text-orange-700">Spike Calculator</span>
+                        <p class="text-xs text-slate-500">Check glucose impact</p>
+                    </div>
+                </a>
+                <a href="{{ route('snap-to-track') }}"
+                    class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-blue-300 hover:bg-blue-50">
+                    <span
+                        class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-200">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        </svg>
+                    </span>
+                    <div>
+                        <span class="font-medium text-slate-900 group-hover:text-blue-700">Snap to Track</span>
+                        <p class="text-xs text-slate-500">Photo food logging</p>
+                    </div>
+                </a>
+                <a href="{{ route('diabetes-log-book') }}"
+                    class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-emerald-300 hover:bg-emerald-50">
+                    <span
+                        class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 group-hover:bg-emerald-200">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </span>
+                    <div>
+                        <span class="font-medium text-slate-900 group-hover:text-emerald-700">Diabetes Log Book</span>
+                        <p class="text-xs text-slate-500">Track glucose levels</p>
+                    </div>
+                </a>
+            </div>
+        </nav>
+
+        {{-- MNT Educational Section --}}
+        <section class="mt-10 rounded-xl border border-emerald-200 bg-emerald-50/30 p-6">
+            <h2 class="text-xl font-bold text-slate-900 mb-3">About Medical Nutrition Therapy (MNT) for Diabetes</h2>
+            <div class="prose prose-slate max-w-none text-sm text-slate-700 space-y-3">
+                <p>
+                    This 10-day meal plan is based on <strong>Medical Nutrition Therapy (MNT)</strong> principles, an evidence-based approach to managing diabetes through nutrition. MNT is recognized by the American Diabetes Association as a critical component of diabetes care.
+                </p>
+                <p>
+                    The meal plan focuses on:
+                </p>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                    <li>Balanced macronutrients to stabilize blood sugar levels</li>
+                    <li>Portion control and consistent meal timing</li>
+                    <li>High-fiber foods to improve glucose control</li>
+                    <li>Lean proteins and healthy fats</li>
+                    <li>Reduced refined carbohydrates and added sugars</li>
+                </ul>
+                <p class="text-xs text-slate-500 mt-4">
+                    <strong>Disclaimer:</strong> This meal plan is for educational purposes. Always consult with a registered dietitian or healthcare provider before making significant dietary changes, especially if you have diabetes or other health conditions.
+                </p>
+            </div>
+        </section>
+    </div>
+
+    <x-footer />
+
+    <script>
+        function showDay(day) {
+            document.querySelectorAll('.day-content').forEach(el => {
+                el.classList.add('hidden');
+            });
+
+            document.getElementById('day-' + day).classList.remove('hidden');
+
+            document.querySelectorAll('.day-tab').forEach(tab => {
+                tab.classList.remove('bg-slate-900', 'text-white', 'shadow-md', 'hover:bg-slate-800');
+                tab.classList.add('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+                tab.setAttribute('aria-selected', 'false');
+            });
+
+            const activeTab = document.getElementById('tab-' + day);
+            activeTab.classList.remove('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+            activeTab.classList.add('bg-slate-900', 'text-white', 'shadow-md', 'hover:bg-slate-800');
+            activeTab.setAttribute('aria-selected', 'true');
+
+            activeTab.scrollIntoView({
+                behavior: 'smooth',
+                inline: 'center',
+                block: 'nearest'
+            });
+        }
+    </script>
+
+    <style>
+        /* Custom scrollbar for day tabs */
+        #day-tabs::-webkit-scrollbar {
+            height: 0.25rem;
+        }
+
+        #day-tabs::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #day-tabs::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 0.25rem;
+        }
+
+        #day-tabs {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+    </style>
+</x-default-layout>
