@@ -332,29 +332,6 @@
             </div>
         </section>
 
-        {{-- MNT Educational Section --}}
-        <section class="mt-10 rounded-xl border border-emerald-200 bg-emerald-50/30 p-6">
-            <h2 class="text-xl font-bold text-slate-900 mb-3">About Medical Nutrition Therapy (MNT) for Diabetes</h2>
-            <div class="prose prose-slate max-w-none text-sm text-slate-700 space-y-3">
-                <p>
-                    This 10-day meal plan is based on <strong>Medical Nutrition Therapy (MNT)</strong> principles, an evidence-based approach to managing diabetes through nutrition. MNT is recognized by the American Diabetes Association as a critical component of diabetes care.
-                </p>
-                <p>
-                    The meal plan focuses on:
-                </p>
-                <ul class="list-disc list-inside space-y-1 ml-4">
-                    <li>Balanced macronutrients to stabilize blood sugar levels</li>
-                    <li>Portion control and consistent meal timing</li>
-                    <li>High-fiber foods to improve glucose control</li>
-                    <li>Lean proteins and healthy fats</li>
-                    <li>Reduced refined carbohydrates and added sugars</li>
-                </ul>
-                <p class="text-xs text-slate-500 mt-4">
-                    <strong>Disclaimer:</strong> This meal plan is for educational purposes. Always consult with a registered dietitian or healthcare provider before making significant dietary changes, especially if you have diabetes or other health conditions.
-                </p>
-            </div>
-        </section>
-
         {{-- Related Links --}}
         <nav class="mt-10 border-t border-slate-200 pt-8" aria-label="Related tools">
             <h3 class="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-4">Free Diabetes Tools</h3>
