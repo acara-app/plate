@@ -1,7 +1,8 @@
 @section('title', '10-Day Diabetes-Friendly Meal Plan | Free Download | Acara Plate')
-@section('meta_description', 'Get a complete 10-day meal plan with breakfast, lunch, dinner, and snacks. Designed for Type 2 diabetes and prediabetes management. Start eating better today!')
+@section('meta_description', 'Get a complete 10-day meal plan with breakfast, lunch, dinner, and snacks. Designed for
+    Type 2 diabetes and prediabetes management. Start eating better today!')
 
-<x-default-layout>
+    <x-default-layout>
     @section('head')
         <script type="application/ld+json">
         {
@@ -24,20 +25,23 @@
                 10-Day Meal Plan
             </h1>
             <p class="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">
-                A complete meal plan with breakfast, lunch, dinner, and snacks—designed to help you manage blood sugar levels naturally.
+                A complete meal plan with breakfast, lunch, dinner, and snacks—designed to help you manage blood sugar
+                levels naturally.
             </p>
             <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <a href="{{ route('register') }}"
                     class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:bg-slate-800 hover:shadow-xl">
                     Get Personalized Meal Plans
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
                 <a href="{{ route('spike-calculator') }}"
                     class="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     Try Spike Calculator — Free
                 </a>
@@ -48,12 +52,9 @@
         <nav class="mb-6" aria-label="Day navigation">
             <div class="flex overflow-x-auto gap-2 pb-2 scrollbar-thin" id="day-tabs">
                 @for ($day = 1; $day <= 10; $day++)
-                    <button
-                        onclick="showDay({{ $day }})"
-                        id="tab-{{ $day }}"
+                    <button onclick="showDay({{ $day }})" id="tab-{{ $day }}"
                         class="day-tab shrink-0 px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 {{ $day === 1 ? 'bg-slate-900 text-white shadow-md hover:bg-slate-800' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}"
-                        aria-selected="{{ $day === 1 ? 'true' : 'false' }}"
-                        role="tab">
+                        aria-selected="{{ $day === 1 ? 'true' : 'false' }}" role="tab">
                         Day {{ $day }}
                     </button>
                 @endfor
@@ -65,88 +66,136 @@
             @php
                 $mealPlanData = [
                     1 => [
-                        'breakfast' => ['Cold cereal with milk, topped with nuts'],
-                        'morning_snack' => ['Fruit'],
-                        'lunch' => ['Fish, meat or cheese sandwich (whole-grain bread is a good choice)', 'Garden Tomato Salad'],
-                        'afternoon_snack' => ['Low-Calorie Vegetable Soup'],
-                        'dinner' => ['Shake-and-Bake Chicken', 'Low-Carb "Potato" Salad (Cauliflower)', 'Mixed vegetables', 'Fruit'],
-                        'evening_snack' => ['Blueberry Oatmeal Muffin'],
+                        'breakfast' => ['High-fiber cereal with milk, topped with walnuts'],
+                        'morning_snack' => ['Apple slices with almond butter'],
+                        'lunch' => [
+                            'Roasted turkey or hummus sandwich (whole-grain bread)',
+                            'Garden Tomato Salad with olive oil dressing',
+                        ],
+                        'afternoon_snack' => ['Vegetable Soup with kidney beans'], 
+                        'dinner' => [
+                            'Herb-crusted Roasted Chicken',
+                            'Roasted Cauliflower Mash',
+                            'Steamed broccoli and carrots',
+                            'Berries',
+                        ], 
+                        'evening_snack' => ['Blueberry Oatmeal Muffin (low sugar)'],
                     ],
                     2 => [
-                        'breakfast' => ['English muffin with cheese'],
+                        'breakfast' => ['Whole-grain English muffin with cottage cheese'], 
                         'morning_snack' => ['Chai tea or chilled coffee made with milk'],
-                        'lunch' => ['Quinoa Salad or Vermicelli Salad', 'Hard-boiled egg'],
-                        'afternoon_snack' => ['Sugar-free gelatin'],
-                        'dinner' => ['Fish Tacos', 'Poppy Seed Spinach Salad', 'Brownie'],
-                        'evening_snack' => ['Fruit'],
+                        'lunch' => ['Quinoa Salad with chickpeas', 'Hard-boiled egg'], 
+                        'afternoon_snack' => ['Chia Seed Pudding with vanilla'], 
+                        'dinner' => [
+                            'Grilled Fish Tacos with Cabbage Slaw',
+                            'Spinach Salad with vinaigrette',
+                            'Dark Chocolate square',
+                        ], 
+                        'evening_snack' => ['Pear with a slice of cheese'],
                     ],
                     3 => [
-                        'breakfast' => ['Scrambled egg made with added vegetables', 'Toast'],
-                        'morning_snack' => ['Peanut Butter Oatmeal Cookie'],
-                        'lunch' => ['Turkey Noodle Soup', 'Open-faced toasted tomato and cheese sandwich'],
-                        'afternoon_snack' => ['Pineapple Coleslaw'],
-                        'dinner' => ['Slow Cooker Pot Roast', 'Glass of milk', 'Apple Crumble'],
-                        'evening_snack' => ['Popcorn'],
+                        'breakfast' => ['Scrambled egg made with spinach and peppers', 'Whole-grain Toast'],
+                        'morning_snack' => ['Homemade Oatmeal Cookie with seeds'],
+                        'lunch' => ['Turkey Noodle Soup (low sodium)', 'Open-faced tomato and bocconcini sandwich'],
+                        'afternoon_snack' => ['Pineapple Coleslaw with yogurt dressing'],
+                        'dinner' => [
+                            'Slow Cooker Pot Roast with carrots and potatoes',
+                            'Glass of milk',
+                            'Baked Apple with cinnamon',
+                        ],
+                        'evening_snack' => ['Air-popped Popcorn'],
                     ],
                     4 => [
-                        'breakfast' => ['Hot cereal with milk, topped with nuts'],
-                        'morning_snack' => ['Fruit'],
-                        'lunch' => ['Broccoli Cheese Soup or Rutabaga Leek Soup', 'Crackers with hummus', 'Celery sticks'],
-                        'afternoon_snack' => ['2 Slim Bits or a protein bar'],
-                        'dinner' => ['Vegetarian Chili', 'Sweet Potato Fries', 'Avocado Chocolate Pudding'],
-                        'evening_snack' => ['Toasted waffle with reduced-sugar pancake syrup', 'Sugar-free iced tea'],
+                        'breakfast' => ['Steel-cut oats with milk, topped with almonds'], 
+                        'morning_snack' => ['Orange segments'],
+                        'lunch' => [
+                            'Broccoli Cheese Soup',
+                            'Whole-grain crackers with hummus',
+                            'Cucumber and Celery sticks',
+                        ],
+                        'afternoon_snack' => ['Handful of mixed nuts and dried cranberries'],
+                        'dinner' => [
+                            'Vegetarian Three-Bean Chili',
+                            'Baked Sweet Potato Wedges',
+                            'Avocado Cacao Mousse',
+                        ], 
+                        'evening_snack' => ['Whole-grain waffle with berry compote', 'Herbal iced tea'],
                     ],
                     5 => [
-                        'breakfast' => ['Toast with peanut butter', 'Glass of milk'],
-                        'morning_snack' => ['Greek-style yogurt'],
-                        'lunch' => ['Beef Barley Soup or Three Sisters Hamburger Soup', 'Crackers and cheese', 'Fruit'],
-                        'afternoon_snack' => ['Carrot sticks'],
-                        'dinner' => ['Chicken Cobb Salad', 'Small bun with butter', 'Slice of Crustless Lemon Meringue Pie'],
+                        'breakfast' => ['Whole-grain toast with natural peanut butter', 'Glass of milk'],
+                        'morning_snack' => ['Greek-style yogurt with flaxseeds'],
+                        'lunch' => ['Beef Barley Soup', 'Whole-grain crackers and cheddar', 'Grapes'],
+                        'afternoon_snack' => ['Carrot sticks with tzatziki dip'], 
+                        'dinner' => [
+                            'Grilled Chicken Cobb Salad (avocado, egg, greens)',
+                            'Small whole-wheat bun',
+                            'Lemon yogurt parfait',
+                        ],
                         'evening_snack' => ['Sparkling cranberry water'],
                     ],
                     6 => [
-                        'breakfast' => ['Oatmeal muesli with chia seeds and Greek yogurt'],
-                        'morning_snack' => ['Crackers with hummus'],
-                        'lunch' => ['Bacon and egg', 'Toast', 'Tomatoes', 'Fruit'],
-                        'afternoon_snack' => ['Small yogurt'],
-                        'dinner' => ['Pizza', 'Caesar Salad', 'Glass of wine or spritzer', 'Raspberry Cream'],
-                        'evening_snack' => ['Herbal tea'],
+                        'breakfast' => ['Overnight oats with chia seeds and Greek yogurt'],
+                        'morning_snack' => ['Rice crackers with hummus'],
+                        'lunch' => ['Poached egg', 'Sourdough Toast', 'Roasted Tomatoes', 'Melon slices'],
+                        'afternoon_snack' => ['Kefir or probiotic yogurt drink'],
+                        'dinner' => [
+                            'Homemade Vegetable Pizza on thin crust',
+                            'Caesar Salad with light dressing',
+                            'Raspberry Sorbet',
+                        ],
+                        'evening_snack' => ['Chamomile tea'],
                     ],
                     7 => [
-                        'breakfast' => ['Tortilla filled with scrambled egg and veggies', 'Fruit'],
-                        'morning_snack' => ['Low-Calorie Vegetable Soup'],
-                        'lunch' => ['Sushi rolls with sliced avocado and sliced sweet peppers'],
-                        'afternoon_snack' => ['Slice of Grandma\'s Zucchini Loaf'],
-                        'dinner' => ['Barbecue Pork Chops with Grilled Vegetables', 'Ice Cream Sundae'],
-                        'evening_snack' => ['Diet drink'],
+                        'breakfast' => [
+                            'Whole-wheat tortilla breakfast burrito (eggs, black beans, salsa)',
+                            'Grapefruit',
+                        ],
+                        'morning_snack' => ['Edamame beans'],
+                        'lunch' => ['Sushi rolls (brown rice) with avocado and salmon'],
+                        'afternoon_snack' => ['Slice of Zucchini Loaf (made with olive oil)'],
+                        'dinner' => ['Grilled Pork Chops', 'Grilled Asparagus and Peppers', 'Frozen Yogurt with nuts'], 
+                        'evening_snack' => ['Lemon-infused water or herbal tea'],
                     ],
                     8 => [
-                        'breakfast' => ['Piece of cold pizza', 'Sliced fruit'],
-                        'morning_snack' => ['Piece of cheese'],
-                        'lunch' => ['Tuna or salmon sandwich', 'Carl\'s Red Cabbage Slaw'],
-                        'afternoon_snack' => ['Sugar-free lemonade'],
-                        'dinner' => ['Taco Bean Salad', 'Glass of milk', 'Fruit with Lime Topping'],
-                        'evening_snack' => ['Small bowl of cold cereal with milk'],
+                        'breakfast' => ['Avocado toast with feta cheese', 'Sliced peaches'],
+                        'morning_snack' => ['String cheese and almonds'],
+                        'lunch' => ['Salmon salad sandwich', 'Red Cabbage Slaw with vinaigrette'],
+                        'afternoon_snack' => ['Iced Green Tea with lemon'], 
+                        'dinner' => [
+                            'Deconstructed Taco Salad (beans, corn, lettuce, salsa)',
+                            'Glass of milk',
+                            'Mango slices with lime',
+                        ],
+                        'evening_snack' => ['Greek yogurt with a sprinkle of granola'], 
                     ],
                     9 => [
-                        'breakfast' => ['Banana Oatmeal Pancake with peanut butter'],
+                        'breakfast' => ['Banana Oat Pancakes (flourless) with almond butter'],
                         'morning_snack' => ['10 pecans or 20 pistachios'],
-                        'lunch' => ['Split Pea Soup or Lentil Spinach Soup', 'Crackers', 'Raw veggies'],
-                        'afternoon_snack' => ['Fruit'],
-                        'dinner' => ['Spaghetti Squash Casserole', 'Everyday Salad', 'Slice of Ginger Pear Cake'],
-                        'evening_snack' => ['Cup of light hot chocolate'],
+                        'lunch' => ['Lentil Spinach Soup', 'Whole-grain crackers', 'Bell pepper strips'],
+                        'afternoon_snack' => ['Kiwi fruit'],
+                        'dinner' => [
+                            'Spaghetti Squash with Marinara and Turkey Meatballs',
+                            'Green Salad',
+                            'Baked Pear with ginger',
+                        ],
+                        'evening_snack' => ['Turmeric Milk (Golden Milk)'],
                     ],
                     10 => [
-                        'breakfast' => ['Avocado Spinach Smoothie'],
-                        'morning_snack' => ['Fruit'],
-                        'lunch' => ['Peanut butter and banana sandwich', 'Pumpkin Soup or Fall Tomato Cucumber Soup'],
-                        'afternoon_snack' => ['Diet soft drink'],
-                        'dinner' => ['Chicken Souvlaki with Tzatziki', 'Rice or pita', 'Greek Salad', 'Fresh fruit sprinkled with cinnamon'],
-                        'evening_snack' => ['Glass of tomato juice or tomato-vegetable cocktail juice'],
+                        'breakfast' => ['Green Smoothie (Spinach, Avocado, Banana, Protein Powder)'],
+                        'morning_snack' => ['Hard-boiled egg'], 
+                        'lunch' => ['Natural Peanut butter and banana on whole-wheat', 'Roasted Pumpkin Soup'],
+                        'afternoon_snack' => ['Sparkling water with fresh lime'], 
+                        'dinner' => [
+                            'Chicken Souvlaki',
+                            'Whole-wheat pita',
+                            'Greek Salad (olives, feta, cucumber)',
+                            'Fresh figs',
+                        ],
+                        'evening_snack' => ['Low-sodium tomato juice'],
                     ],
                 ];
 
-                $mealTypes = [
+                 $mealTypes = [
                     'breakfast' => ['label' => 'Breakfast', 'icon' => '🌅', 'color' => 'emerald'],
                     'morning_snack' => ['label' => 'Morning Snack', 'icon' => '☀️', 'color' => 'amber'],
                     'lunch' => ['label' => 'Lunch', 'icon' => '🍽️', 'color' => 'teal'],
@@ -178,17 +227,16 @@
                                     'slate' => 'text-slate-700',
                                 ];
                             @endphp
-                            <article class="rounded-xl border border-slate-200 border-l-4 {{ $colorClasses[$mealInfo['color']] }} p-4 shadow-sm transition-all duration-200 hover:shadow-md">
+                            <article
+                                class="rounded-xl border border-slate-200 border-l-4 {{ $colorClasses[$mealInfo['color']] }} p-4 shadow-sm transition-all duration-200 hover:shadow-md">
                                 <header class="flex items-center gap-2 mb-2">
                                     <span class="text-lg" aria-hidden="true">{{ $mealInfo['icon'] }}</span>
-                                    <h2 class="font-semibold {{ $textColors[$mealInfo['color']] }}">{{ $mealInfo['label'] }}</h2>
+                                    <h2 class="font-semibold {{ $textColors[$mealInfo['color']] }}">
+                                        {{ $mealInfo['label'] }}</h2>
                                 </header>
-                                <ul class="space-y-1 pl-7 text-sm text-slate-700">
+                                <ul class="space-y-1 pl-6 text-sm text-slate-700 list-disc list-inside">
                                     @foreach ($mealPlanData[$day][$mealKey] as $item)
-                                        <li class="flex items-start gap-2">
-                                            <span class="text-slate-400 mt-1.5 h-1 w-1 rounded-full bg-slate-400 shrink-0"></span>
-                                            <span>{{ $item }}</span>
-                                        </li>
+                                        <li class="leading-relaxed">{{ $item }}</li>
                                     @endforeach
                                 </ul>
                             </article>
@@ -197,17 +245,20 @@
 
                     {{-- Mid-page CTA (show after Day 5) --}}
                     @if ($day === 5)
-                        <div class="mt-6 rounded-2xl bg-linear-to-r from-orange-500 to-amber-500 p-6 text-white shadow-lg">
+                        <div
+                            class="mt-6 rounded-2xl bg-linear-to-r from-orange-500 to-amber-500 p-6 text-white shadow-lg">
                             <div class="flex flex-col sm:flex-row items-center gap-4">
                                 <div class="flex-1 text-center sm:text-left">
                                     <h3 class="text-lg font-bold">Wondering if a food will spike your blood sugar?</h3>
-                                    <p class="mt-1 text-orange-100 text-sm">Check any food instantly with our free Spike Calculator.</p>
+                                    <p class="mt-1 text-orange-100 text-sm">Check any food instantly with our free Spike
+                                        Calculator.</p>
                                 </div>
                                 <a href="{{ route('spike-calculator') }}"
                                     class="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-orange-600 shadow-md transition-all hover:bg-orange-50">
                                     Try Spike Calculator
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                     </svg>
                                 </a>
                             </div>
@@ -222,19 +273,23 @@
             <div class="flex flex-col sm:flex-row items-center gap-6">
                 <div class="shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-blue-500/20">
                     <svg class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                 </div>
                 <div class="flex-1 text-center sm:text-left">
                     <h2 class="text-xl font-bold">Track Your Meals Instantly</h2>
-                    <p class="mt-1 text-slate-400">Snap a photo of your food and get nutrition facts immediately—no typing required.</p>
+                    <p class="mt-1 text-slate-400">Snap a photo of your food and get nutrition facts immediately—no
+                        typing required.</p>
                 </div>
                 <a href="{{ route('snap-to-track') }}"
                     class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-blue-500">
                     Try Snap to Track
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
             </div>
@@ -245,7 +300,10 @@
             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div class="flex-1">
                     <h3 class="font-semibold text-slate-900">Need to track your glucose readings?</h3>
-                    <p class="mt-1 text-sm text-slate-600">Download our free printable <a href="{{ route('diabetes-log-book') }}" class="text-emerald-600 font-medium hover:underline">Diabetes Log Book</a> to monitor your blood sugar levels daily.</p>
+                    <p class="mt-1 text-sm text-slate-600">Download our free printable <a
+                            href="{{ route('diabetes-log-book') }}"
+                            class="text-emerald-600 font-medium hover:underline">Diabetes Log Book</a> to monitor your
+                        blood sugar levels daily.</p>
                 </div>
             </div>
         </section>
@@ -262,7 +320,8 @@
                         class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-8 py-4 text-base font-bold text-white shadow-lg transition-all hover:bg-emerald-500 hover:shadow-xl">
                         Start Your Free Plan
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 </div>
@@ -274,10 +333,13 @@
         <nav class="mt-10 border-t border-slate-200 pt-8" aria-label="Related tools">
             <h3 class="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-4">Free Diabetes Tools</h3>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <a href="{{ route('spike-calculator') }}" class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-orange-300 hover:bg-orange-50">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 text-orange-600 group-hover:bg-orange-200">
+                <a href="{{ route('spike-calculator') }}"
+                    class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-orange-300 hover:bg-orange-50">
+                    <span
+                        class="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 text-orange-600 group-hover:bg-orange-200">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </span>
                     <div>
@@ -285,10 +347,13 @@
                         <p class="text-xs text-slate-500">Check glucose impact</p>
                     </div>
                 </a>
-                <a href="{{ route('snap-to-track') }}" class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-blue-300 hover:bg-blue-50">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-200">
+                <a href="{{ route('snap-to-track') }}"
+                    class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-blue-300 hover:bg-blue-50">
+                    <span
+                        class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-200">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                         </svg>
                     </span>
                     <div>
@@ -296,10 +361,13 @@
                         <p class="text-xs text-slate-500">Photo food logging</p>
                     </div>
                 </a>
-                <a href="{{ route('diabetes-log-book') }}" class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-emerald-300 hover:bg-emerald-50">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 group-hover:bg-emerald-200">
+                <a href="{{ route('diabetes-log-book') }}"
+                    class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-emerald-300 hover:bg-emerald-50">
+                    <span
+                        class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 group-hover:bg-emerald-200">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </span>
                     <div>
@@ -332,7 +400,11 @@
             activeTab.classList.add('bg-slate-900', 'text-white', 'shadow-md', 'hover:bg-slate-800');
             activeTab.setAttribute('aria-selected', 'true');
 
-            activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            activeTab.scrollIntoView({
+                behavior: 'smooth',
+                inline: 'center',
+                block: 'nearest'
+            });
         }
     </script>
 
@@ -341,13 +413,16 @@
         #day-tabs::-webkit-scrollbar {
             height: 0.25rem;
         }
+
         #day-tabs::-webkit-scrollbar-track {
             background: transparent;
         }
+
         #day-tabs::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 0.25rem;
         }
+
         #day-tabs {
             scrollbar-width: thin;
             scrollbar-color: #cbd5e1 transparent;
