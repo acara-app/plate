@@ -1,4 +1,4 @@
-import GlucoseReadingController from '@/actions/App/Http/Controllers/GlucoseReadingController';
+import DiabetesLogController from '@/actions/App/Http/Controllers/DiabetesLogController';
 import AdminPageWrap from '@/components/sections/admin-page-wrap';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,15 +14,16 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { List, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import CorrelationChart from './correlation-chart';
+import DashboardSummaryCards from './dashboard-summary-cards';
+import DiabetesLogDialog from './diabetes-log-dialog';
 import GlucoseChart from './glucose-chart';
-import GlucoseReadingDialog from './glucose-reading-dialog';
-import GlucoseStatistics from './glucose-statistics';
 import TimePeriodFilter, { type TimePeriod } from './time-period-filter';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Glucose Tracking',
-        href: GlucoseReadingController.index().url,
+        title: 'Diabetes Log',
+        href: DiabetesLogController.index().url,
     },
 ];
 
@@ -31,24 +32,36 @@ interface ReadingType {
     label: string;
 }
 
-interface GlucoseReading {
+interface DiabetesLogEntry {
     id: number;
-    reading_value: number;
-    reading_type: string;
+    glucose_value: number | null;
+    glucose_reading_type: string | null;
     measured_at: string;
     notes: string | null;
+    insulin_units: number | null;
+    insulin_type: string | null;
+    medication_name: string | null;
+    medication_dosage: string | null;
+    weight: number | null;
+    blood_pressure_systolic: number | null;
+    blood_pressure_diastolic: number | null;
+    a1c_value: number | null;
+    carbs_grams: number | null;
+    exercise_type: string | null;
+    exercise_duration_minutes: number | null;
     created_at: string;
 }
 
 interface Props {
-    readings: GlucoseReading[];
-    readingTypes: ReadingType[];
+    logs: DiabetesLogEntry[];
+    glucoseReadingTypes: ReadingType[];
+    insulinTypes: ReadingType[];
 }
 
-function filterReadingsByPeriod(
-    readings: GlucoseReading[],
+function filterLogsByPeriod(
+    logs: DiabetesLogEntry[],
     period: TimePeriod,
-): GlucoseReading[] {
+): DiabetesLogEntry[] {
     const now = new Date();
     const daysMap: Record<TimePeriod, number> = {
         '7d': 7,
@@ -60,58 +73,86 @@ function filterReadingsByPeriod(
     const cutoffDate = new Date(now);
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
-    return readings.filter((reading) => {
-        const readingDate = new Date(reading.measured_at);
-        return readingDate >= cutoffDate;
+    return logs.filter((log) => {
+        const logDate = new Date(log.measured_at);
+        return logDate >= cutoffDate;
     });
 }
 
-export default function GlucoseDashboard({ readings, readingTypes }: Props) {
+export default function DiabetesLogDashboard({
+    logs,
+    glucoseReadingTypes,
+    insulinTypes,
+}: Props) {
     const [timePeriod, setTimePeriod] = useState<TimePeriod>('30d');
     const createModal = useModalToggle();
 
-    const filteredReadings = useMemo(
-        () => filterReadingsByPeriod(readings, timePeriod),
-        [readings, timePeriod],
+    const filteredLogs = useMemo(
+        () => filterLogsByPeriod(logs, timePeriod),
+        [logs, timePeriod],
     );
+
+    // Transform logs to format expected by GlucoseChart (for glucose data only)
+    const glucoseReadings = filteredLogs
+        .filter((log) => log.glucose_value !== null)
+        .map((log) => ({
+            id: log.id,
+            reading_value: log.glucose_value!,
+            reading_type: log.glucose_reading_type || 'random',
+            measured_at: log.measured_at,
+            notes: log.notes,
+            created_at: log.created_at,
+        }));
+
+    // Check what types of data we have
+    const hasGlucose = filteredLogs.some((log) => log.glucose_value !== null);
+    const hasInsulin = filteredLogs.some((log) => log.insulin_units !== null);
+    const hasCarbs = filteredLogs.some((log) => log.carbs_grams !== null);
+    const hasExercise = filteredLogs.some(
+        (log) => log.exercise_duration_minutes !== null,
+    );
+    const hasMultipleFactors =
+        [hasGlucose, hasInsulin, hasCarbs, hasExercise].filter(Boolean).length >
+        1;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Glucose Dashboard" />
+            <Head title="Diabetes Log Dashboard" />
             <AdminPageWrap variant="full">
                 <div className="space-y-6">
                     {/* Header */}
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight">
-                                Glucose Dashboard
+                                Diabetes Log Dashboard
                             </h1>
                             <p className="text-muted-foreground">
                                 Comprehensive analytics and trends for your
-                                blood glucose levels
+                                diabetes management
                             </p>
                         </div>
                         <div className="flex gap-2">
                             <Button variant="outline" size="icon" asChild>
-                                <Link href={GlucoseReadingController.index()}>
+                                <Link href={DiabetesLogController.index()}>
                                     <List className="size-4" />
                                 </Link>
                             </Button>
                             <Button onClick={createModal.open}>
                                 <Plus className="mr-2 size-4" />
-                                Add Reading
+                                Add Entry
                             </Button>
                         </div>
                     </div>
 
-                    {/* Add Reading Dialog */}
-                    <GlucoseReadingDialog
+                    {/* Add Entry Dialog */}
+                    <DiabetesLogDialog
                         mode="create"
                         open={createModal.isOpen}
                         onOpenChange={(open) =>
                             open ? createModal.open() : createModal.close()
                         }
-                        readingTypes={readingTypes}
+                        glucoseReadingTypes={glucoseReadingTypes}
+                        insulinTypes={insulinTypes}
                     />
 
                     {/* Time Period Filter */}
@@ -130,64 +171,70 @@ export default function GlucoseDashboard({ readings, readingTypes }: Props) {
                         </CardContent>
                     </Card>
 
-                    {/* Check if there are readings */}
-                    {readings.length === 0 ? (
+                    {/* Check if there are logs */}
+                    {logs.length === 0 ? (
                         <Card>
                             <CardContent className="py-16 text-center">
                                 <div className="mx-auto max-w-md space-y-4">
                                     <h3 className="text-lg font-semibold">
-                                        No glucose readings yet
+                                        No log entries yet
                                     </h3>
                                     <p className="text-muted-foreground">
-                                        Start tracking your blood glucose levels
-                                        to see comprehensive analytics and
-                                        insights.
+                                        Start tracking your diabetes data to see
+                                        comprehensive analytics and insights.
                                     </p>
                                     <Button onClick={() => createModal.open()}>
                                         <Plus className="mr-2 size-4" />
-                                        Add Your First Reading
+                                        Add Your First Entry
                                     </Button>
                                 </div>
                             </CardContent>
                         </Card>
-                    ) : filteredReadings.length === 0 ? (
+                    ) : filteredLogs.length === 0 ? (
                         <Card>
                             <CardContent className="py-16 text-center">
                                 <div className="mx-auto max-w-md space-y-4">
                                     <h3 className="text-lg font-semibold">
-                                        No readings in this period
+                                        No entries in this period
                                     </h3>
                                     <p className="text-muted-foreground">
                                         Try selecting a different time period or
-                                        add more readings.
+                                        add more entries.
                                     </p>
                                 </div>
                             </CardContent>
                         </Card>
                     ) : (
                         <>
-                            {/* Statistics Cards */}
-                            <GlucoseStatistics readings={filteredReadings} />
+                            {/* Summary Cards for All Metrics */}
+                            <DashboardSummaryCards logs={filteredLogs} />
 
-                            {/* Chart */}
-                            <GlucoseChart readings={filteredReadings} />
+                            {/* Correlation Chart (shows when we have multiple factors) */}
+                            {hasMultipleFactors && (
+                                <CorrelationChart logs={filteredLogs} />
+                            )}
 
-                            {/* Summary Card */}
+                            {/* Glucose Chart (if there are glucose readings) */}
+                            {glucoseReadings.length > 0 && (
+                                <GlucoseChart readings={glucoseReadings} />
+                            )}
+
+                            {/* Insights Card */}
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Summary</CardTitle>
+                                    <CardTitle>Summary & Tips</CardTitle>
                                     <CardDescription>
-                                        Key insights from your glucose readings
+                                        Key insights from your diabetes log
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-3 text-sm">
                                         <div className="flex justify-between border-b pb-2">
                                             <span className="text-muted-foreground">
-                                                Total Readings
+                                                Total Entries
                                             </span>
                                             <span className="font-medium">
-                                                {filteredReadings.length}
+                                                {filteredLogs.length}
                                             </span>
                                         </div>
                                         <div className="flex justify-between border-b pb-2">
@@ -204,26 +251,51 @@ export default function GlucoseDashboard({ readings, readingTypes }: Props) {
                                         </div>
                                         <div className="flex justify-between border-b pb-2">
                                             <span className="text-muted-foreground">
-                                                Reading Types
+                                                Data Types Logged
                                             </span>
                                             <span className="font-medium">
-                                                {
-                                                    new Set(
-                                                        filteredReadings.map(
-                                                            (r) =>
-                                                                r.reading_type,
-                                                        ),
-                                                    ).size
-                                                }
+                                                {[
+                                                    hasGlucose && 'Glucose',
+                                                    hasInsulin && 'Insulin',
+                                                    hasCarbs && 'Carbs',
+                                                    hasExercise && 'Exercise',
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(', ') || 'None'}
                                             </span>
                                         </div>
-                                        <div className="pt-2">
+                                        <div className="space-y-2 pt-2">
                                             <p className="text-xs text-muted-foreground">
-                                                💡 <strong>Tip:</strong> Aim for
-                                                at least 70% of readings within
-                                                the normal range (70-140 mg/dL)
-                                                for optimal glucose control.
+                                                💡 <strong>Tip:</strong> Log
+                                                multiple factors (glucose,
+                                                insulin, carbs, exercise) to see
+                                                correlations and understand how
+                                                they affect each other.
                                             </p>
+                                            {hasGlucose &&
+                                                !hasInsulin &&
+                                                !hasCarbs && (
+                                                    <p className="text-xs text-muted-foreground">
+                                                        📊{' '}
+                                                        <strong>
+                                                            Suggestion:
+                                                        </strong>{' '}
+                                                        Try logging your carb
+                                                        intake and insulin doses
+                                                        to see their impact on
+                                                        glucose levels.
+                                                    </p>
+                                                )}
+                                            {!hasExercise && (
+                                                <p className="text-xs text-muted-foreground">
+                                                    🏃{' '}
+                                                    <strong>Suggestion:</strong>{' '}
+                                                    Log your exercise sessions
+                                                    to see how physical activity
+                                                    affects your glucose
+                                                    control.
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 </CardContent>

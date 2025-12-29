@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Models\GlucoseReading;
+use App\Models\DiabetesLog;
 
-final readonly class RecordGlucoseReadingAction
+final readonly class RecordDiabetesLogAction
 {
     /**
      * @param  array<string, mixed>  $data
      */
     public function handle(
         array $data
-    ): GlucoseReading {
-        return GlucoseReading::query()->create($data);
+    ): DiabetesLog {
+        return DiabetesLog::query()->create($data);
     }
 }

@@ -11,9 +11,8 @@ import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import chat from '@/routes/chat';
+import diabetesLog from '@/routes/diabetes-log';
 import foodLog from '@/routes/food-log';
-import glucoseReading from '@/routes/glucose';
-import glucoseAction from '@/routes/glucose-action';
 import mealPlans from '@/routes/meal-plans';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -35,12 +34,12 @@ export default function Dashboard() {
                 {!currentUser?.is_onboarded && <OnboardingBanner />}
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {/* Glucose Insights Card */}
+                    {/* Diabetes Insights Card */}
                     <Card className="flex flex-col transition-shadow hover:shadow-md">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <span className="text-2xl">📊</span>
-                                Glucose Insights
+                                Diabetes Insights
                             </CardTitle>
                             <CardDescription>
                                 View your glucose analysis, trends, and
@@ -48,7 +47,7 @@ export default function Dashboard() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="mt-auto">
-                            <Link href={glucoseAction.show().url}>
+                            <Link href={diabetesLog.insights().url}>
                                 <Button className="w-full">
                                     View Insights
                                 </Button>
@@ -56,21 +55,22 @@ export default function Dashboard() {
                         </CardContent>
                     </Card>
 
-                    {/* Glucose Tracking Card */}
+                    {/* Diabetes Log Card */}
                     <Card className="flex flex-col transition-shadow hover:shadow-md">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <span className="text-2xl">🩸</span>
-                                Glucose Tracking
+                                Diabetes Log
                             </CardTitle>
                             <CardDescription>
-                                Monitor and track your blood glucose levels
+                                Track your glucose, insulin, medications, and
+                                more
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="mt-auto">
-                            <Link href={glucoseReading.dashboard().url}>
+                            <Link href={diabetesLog.dashboard().url}>
                                 <Button className="w-full">
-                                    Track Glucose
+                                    Track Diabetes
                                 </Button>
                             </Link>
                         </CardContent>

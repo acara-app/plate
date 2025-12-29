@@ -28,7 +28,7 @@ final readonly class GlucoseStatisticsService
     /**
      * Calculate time-in-range, time-above-range, and time-below-range percentages.
      *
-     * @param  Collection<int, \App\Models\GlucoseReading>  $readings
+     * @param  Collection<int, \App\Models\DiabetesLog>  $readings
      * @return array{
      *     timeInRange: float,
      *     timeAboveRange: float,
@@ -55,16 +55,16 @@ final readonly class GlucoseStatisticsService
 
         $total = $readings->count();
         $inRangeCount = $readings->filter(
-            fn (\App\Models\GlucoseReading $r): bool => $r->reading_value >= self::NORMAL_RANGE_MIN
-                && $r->reading_value <= self::NORMAL_RANGE_MAX
+            fn (\App\Models\DiabetesLog $r): bool => $r->glucose_value >= self::NORMAL_RANGE_MIN
+                && $r->glucose_value <= self::NORMAL_RANGE_MAX
         )->count();
 
         $belowRangeCount = $readings->filter(
-            fn (\App\Models\GlucoseReading $r): bool => $r->reading_value < self::HYPOGLYCEMIA_THRESHOLD
+            fn (\App\Models\DiabetesLog $r): bool => $r->glucose_value < self::HYPOGLYCEMIA_THRESHOLD
         )->count();
 
         $aboveRangeCount = $readings->filter(
-            fn (\App\Models\GlucoseReading $r): bool => $r->reading_value > self::HYPERGLYCEMIA_THRESHOLD
+            fn (\App\Models\DiabetesLog $r): bool => $r->glucose_value > self::HYPERGLYCEMIA_THRESHOLD
         )->count();
 
         return [
@@ -81,7 +81,7 @@ final readonly class GlucoseStatisticsService
     /**
      * Calculate min, max, average, and standard deviation.
      *
-     * @param  Collection<int, \App\Models\GlucoseReading>  $readings
+     * @param  Collection<int, \App\Models\DiabetesLog>  $readings
      * @return array{min: float|null, max: float|null, average: float|null, stdDev: float|null}
      */
     public function calculateBasicStats(Collection $readings): array
@@ -96,7 +96,7 @@ final readonly class GlucoseStatisticsService
         }
 
         /** @var Collection<int, float> $values */
-        $values = $readings->pluck('reading_value');
+        $values = $readings->pluck('glucose_value');
 
         $min = $values->min();
         $max = $values->max();
@@ -131,7 +131,7 @@ final readonly class GlucoseStatisticsService
      * Calculate coefficient of variation (CV) as percentage.
      * CV = (stdDev / mean) × 100
      *
-     * @param  Collection<int, \App\Models\GlucoseReading>  $readings
+     * @param  Collection<int, \App\Models\DiabetesLog>  $readings
      */
     public function calculateCoefficientOfVariation(Collection $readings): ?float
     {
@@ -140,7 +140,7 @@ final readonly class GlucoseStatisticsService
         }
 
         /** @var Collection<int, float> $values */
-        $values = $readings->pluck('reading_value');
+        $values = $readings->pluck('glucose_value');
         $mean = (float) $values->avg();
         $stdDev = $this->calculateStandardDeviation($values);
 
@@ -154,7 +154,7 @@ final readonly class GlucoseStatisticsService
     /**
      * Analyze time-of-day patterns.
      *
-     * @param  Collection<int, \App\Models\GlucoseReading>  $readings
+     * @param  Collection<int, \App\Models\DiabetesLog>  $readings
      * @return array{
      *     morning: array{count: int, average: float|null},
      *     afternoon: array{count: int, average: float|null},
@@ -164,7 +164,7 @@ final readonly class GlucoseStatisticsService
      */
     public function analyzeTimeOfDay(Collection $readings): array
     {
-        $grouped = $readings->groupBy(function (\App\Models\GlucoseReading $reading): string {
+        $grouped = $readings->groupBy(function (\App\Models\DiabetesLog $reading): string {
             $hour = (int) $reading->measured_at->format('H');
 
             return match (true) {
@@ -179,7 +179,7 @@ final readonly class GlucoseStatisticsService
         $result = [];
         foreach (['morning', 'afternoon', 'evening', 'night'] as $period) {
             $periodReadings = $grouped->get($period, collect());
-            $avg = $periodReadings->avg('reading_value');
+            $avg = $periodReadings->avg('glucose_value');
 
             $result[$period] = [
                 'count' => $periodReadings->count(),
@@ -193,7 +193,7 @@ final readonly class GlucoseStatisticsService
     /**
      * Analyze frequency by reading type.
      *
-     * @param  Collection<int, \App\Models\GlucoseReading>  $readings
+     * @param  Collection<int, \App\Models\DiabetesLog>  $readings
      * @return array<string, array{count: int, percentage: float, average: float|null}>
      */
     public function analyzeReadingTypeFrequency(Collection $readings): array
@@ -203,11 +203,11 @@ final readonly class GlucoseStatisticsService
         }
 
         $total = $readings->count();
-        $grouped = $readings->groupBy(fn (\App\Models\GlucoseReading $reading): string => $reading->reading_type->value);
+        $grouped = $readings->groupBy(fn (\App\Models\DiabetesLog $reading): string => $reading->glucose_reading_type?->value ?? 'random');
 
         $result = [];
         foreach ($grouped as $type => $typeReadings) {
-            $avg = $typeReadings->avg('reading_value');
+            $avg = $typeReadings->avg('glucose_value');
             $result[$type] = [
                 'count' => $typeReadings->count(),
                 'percentage' => round(($typeReadings->count() / $total) * 100, 1),
@@ -222,7 +222,7 @@ final readonly class GlucoseStatisticsService
      * Calculate linear trend over time (glucose change per day).
      * Uses simple linear regression: slope = sum((x - x_mean)(y - y_mean)) / sum((x - x_mean)^2)
      *
-     * @param  Collection<int, \App\Models\GlucoseReading>  $readings
+     * @param  Collection<int, \App\Models\DiabetesLog>  $readings
      * @return array{
      *     slopePerDay: float|null,
      *     slopePerWeek: float|null,
@@ -248,9 +248,9 @@ final readonly class GlucoseStatisticsService
         // Sort by measured_at to ensure proper ordering
         $sorted = $readings->sortBy('measured_at')->values();
 
-        /** @var \App\Models\GlucoseReading $first */
+        /** @var \App\Models\DiabetesLog $first */
         $first = $sorted->first();
-        /** @var \App\Models\GlucoseReading $last */
+        /** @var \App\Models\DiabetesLog $last */
         $last = $sorted->last();
 
         $firstTimestamp = (float) $first->measured_at->timestamp;
@@ -261,19 +261,19 @@ final readonly class GlucoseStatisticsService
                 'slopePerDay' => null,
                 'slopePerWeek' => null,
                 'direction' => 'stable',
-                'firstValue' => round($first->reading_value, 1),
-                'lastValue' => round($last->reading_value, 1),
+                'firstValue' => round($first->glucose_value, 1),
+                'lastValue' => round($last->glucose_value, 1),
                 'daysDifference' => 0,
             ];
         }
 
         // Convert timestamps to days from first reading
-        $points = $sorted->map(function (\App\Models\GlucoseReading $reading) use ($firstTimestamp): array {
+        $points = $sorted->map(function (\App\Models\DiabetesLog $reading) use ($firstTimestamp): array {
             $daysSinceFirst = ((float) $reading->measured_at->timestamp - $firstTimestamp) / 86400;
 
             return [
                 'x' => $daysSinceFirst,
-                'y' => $reading->reading_value,
+                'y' => $reading->glucose_value,
             ];
         });
 
@@ -299,8 +299,8 @@ final readonly class GlucoseStatisticsService
             'slopePerDay' => round($slopePerDay, 2),
             'slopePerWeek' => round($slopePerWeek, 1),
             'direction' => $direction,
-            'firstValue' => round($first->reading_value, 1),
-            'lastValue' => round($last->reading_value, 1),
+            'firstValue' => round($first->glucose_value, 1),
+            'lastValue' => round($last->glucose_value, 1),
             'daysDifference' => $daysDiff,
         ];
     }

@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Console\Commands\ProcessGlucoseNotificationsCommand;
-use App\Enums\ReadingType;
-use App\Models\GlucoseReading;
+use App\Enums\GlucoseReadingType;
+use App\Models\DiabetesLog;
 use App\Models\User;
 use App\Notifications\GlucoseReportNotification;
 use Illuminate\Support\Facades\Notification;
@@ -18,10 +18,10 @@ test('it processes users with glucose notifications enabled', function (): void 
     ]);
 
     foreach (range(1, 15) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $userWithNotifications->id,
-            'reading_value' => 200,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => 200,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i % 7),
         ]);
     }
@@ -32,10 +32,10 @@ test('it processes users with glucose notifications enabled', function (): void 
     ]);
 
     foreach (range(1, 15) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $userWithoutNotifications->id,
-            'reading_value' => 200,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => 200,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i % 7),
         ]);
     }
@@ -56,10 +56,10 @@ test('it does not notify users without verified email', function (): void {
     ]);
 
     foreach (range(1, 15) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $unverifiedUser->id,
-            'reading_value' => 200,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => 200,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i % 7),
         ]);
     }
@@ -93,10 +93,10 @@ test('it does not notify users with well-controlled glucose', function (): void 
     ]);
 
     foreach (range(1, 20) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $userWithGoodControl->id,
-            'reading_value' => 100,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => 100,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i % 7),
         ]);
     }
@@ -116,10 +116,10 @@ test('it does not process users with null settings', function (): void {
     ]);
 
     foreach (range(1, 15) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $userWithNullSettings->id,
-            'reading_value' => 200,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => 200,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i % 7),
         ]);
     }
@@ -141,10 +141,10 @@ test('it processes multiple users with concerns', function (): void {
         ]);
 
         foreach (range(1, 15) as $j) {
-            GlucoseReading::factory()->create([
+            DiabetesLog::factory()->create([
                 'user_id' => $user->id,
-                'reading_value' => 200,
-                'reading_type' => ReadingType::Random,
+                'glucose_value' => 200,
+                'glucose_reading_type' => GlucoseReadingType::Random,
                 'measured_at' => now()->subDays($j % 7),
             ]);
         }

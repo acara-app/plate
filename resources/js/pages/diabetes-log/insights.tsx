@@ -33,10 +33,10 @@ interface GlucoseActionProps {
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Glucose Insights', href: '#' },
+    { title: 'Diabetes Insights', href: '#' },
 ];
 
-export default function GlucoseAction({
+export default function DiabetesInsights({
     glucoseAnalysis,
     concerns,
     hasMealPlan,
@@ -52,7 +52,7 @@ export default function GlucoseAction({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Your Glucose Insights" />
+            <Head title="Diabetes Insights" />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-4 md:p-6">
                 {!currentUser?.is_onboarded ? (

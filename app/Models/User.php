@@ -36,7 +36,6 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read UserSettingsData $notification_settings
  * @property-read UserProfile|null $profile
  * @property-read Collection<int, MealPlan> $mealPlans
- * @property-read Collection<int, GlucoseReading> $glucoseReadings
  * @property-read bool $is_onboarded
  * @property-read bool $has_meal_plan
  */
@@ -114,12 +113,14 @@ final class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(MealPlan::class)->latest();
     }
 
+
+
     /**
-     * @return HasMany<GlucoseReading, $this>
+     * @return HasMany<DiabetesLog, $this>
      */
-    public function glucoseReadings(): HasMany
+    public function diabetesLogs(): HasMany
     {
-        return $this->hasMany(GlucoseReading::class)->latest('measured_at');
+        return $this->hasMany(DiabetesLog::class)->latest('measured_at');
     }
 
     /**

@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\AnalyzeGlucoseForNotificationAction;
-use App\Enums\ReadingType;
-use App\Models\GlucoseReading;
+use App\Enums\GlucoseReadingType;
+use App\Models\DiabetesLog;
 use App\Models\User;
 
 test('it returns should not notify when notifications are disabled', function (): void {
@@ -12,9 +12,9 @@ test('it returns should not notify when notifications are disabled', function ()
         'settings' => ['glucose_notifications_enabled' => false],
     ]);
 
-    GlucoseReading::factory()->count(10)->create([
+    DiabetesLog::factory()->count(10)->create([
         'user_id' => $user->id,
-        'reading_value' => 200,
+        'glucose_value' => 200,
         'measured_at' => now()->subDays(3),
     ]);
 
@@ -47,10 +47,10 @@ test('it returns should not notify when glucose is well controlled', function ()
     $stableValues = [100, 98, 102, 99, 101, 100, 97, 103, 100, 99, 101, 98, 102, 100, 99, 101, 100, 98, 102, 100];
 
     foreach ($stableValues as $i => $value) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => $value,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => $value,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i % 7)->subHours($i),
         ]);
     }
@@ -71,20 +71,20 @@ test('it returns should notify when high readings exceed trigger percentage', fu
 
     // Create 40% high readings (above 140)
     foreach (range(1, 6) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => 180,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => 180,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i),
         ]);
     }
 
     // Create 60% normal readings
     foreach (range(1, 9) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => 100,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => 100,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i),
         ]);
     }
@@ -106,20 +106,20 @@ test('it returns should notify when hypoglycemia risk is detected', function ():
 
     // Create multiple low readings to trigger hypoglycemia risk
     foreach (range(1, 8) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => 55,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => 55,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i),
         ]);
     }
 
     // Add some normal readings
     foreach (range(1, 5) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => 100,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => 100,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i),
         ]);
     }
@@ -137,10 +137,10 @@ test('it returns should notify when consistently high pattern is detected', func
 
     // Create all high readings
     foreach (range(1, 20) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => fake()->randomFloat(1, 180, 220),
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => fake()->randomFloat(1, 180, 220),
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i % 7),
         ]);
     }
@@ -158,10 +158,10 @@ test('it returns should notify when consistently low pattern is detected', funct
 
     // Create all low readings
     foreach (range(1, 20) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => fake()->randomFloat(1, 50, 65),
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => fake()->randomFloat(1, 50, 65),
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i % 7),
         ]);
     }
@@ -179,10 +179,10 @@ test('it returns should notify when high variability is detected', function (): 
 
     // Create highly variable readings (alternating very low and very high)
     foreach (range(1, 20) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => $i % 2 === 0 ? 60 : 220,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => $i % 2 === 0 ? 60 : 220,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i % 7),
         ]);
     }
@@ -200,20 +200,20 @@ test('it returns should notify when post-meal spikes are detected', function ():
 
     // Create post-meal spikes
     foreach (range(1, 15) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => 200,
-            'reading_type' => ReadingType::PostMeal,
+            'glucose_value' => 200,
+            'glucose_reading_type' => GlucoseReadingType::PostMeal,
             'measured_at' => now()->subDays($i % 7),
         ]);
     }
 
     // Add some fasting readings for comparison
     foreach (range(1, 5) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => 90,
-            'reading_type' => ReadingType::Fasting,
+            'glucose_value' => 90,
+            'glucose_reading_type' => GlucoseReadingType::Fasting,
             'measured_at' => now()->subDays($i),
         ]);
     }
@@ -231,20 +231,20 @@ test('it uses custom analysis window days parameter', function (): void {
 
     // Create readings only in the last 5 days
     foreach (range(1, 5) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => 100,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => 100,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i),
         ]);
     }
 
     // Create old readings that should be excluded with 7 day window
     foreach (range(10, 15) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => 250,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => 250,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i),
         ]);
     }
@@ -268,10 +268,10 @@ test('it uses user custom thresholds when set', function (): void {
 
     // Readings at 180 - above default 140 but below user's 200
     foreach (range(1, 15) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => 180,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => 180,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i % 7),
         ]);
     }
@@ -289,10 +289,10 @@ test('it preserves analysis data in result', function (): void {
     ]);
 
     foreach (range(1, 10) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => 100,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => 100,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($i),
         ]);
     }
@@ -320,10 +320,10 @@ test('it does not trigger concern for high variability alone without other conce
     $normalValues = [85, 130, 90, 140, 95, 135, 100, 125, 105, 120, 110, 115];
 
     foreach ($normalValues as $index => $value) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => $value,
-            'reading_type' => ReadingType::Random,
+            'glucose_value' => $value,
+            'glucose_reading_type' => GlucoseReadingType::Random,
             'measured_at' => now()->subDays($index % 7)->subHours($index),
         ]);
     }
@@ -352,20 +352,20 @@ test('it does not trigger post-meal spikes concern when average post-meal is bel
     $postMealValues = [140, 150, 145, 155, 160, 148, 152, 158, 142, 165];
 
     foreach ($postMealValues as $index => $value) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => $value,
-            'reading_type' => ReadingType::PostMeal,
+            'glucose_value' => $value,
+            'glucose_reading_type' => GlucoseReadingType::PostMeal,
             'measured_at' => now()->subDays($index % 7)->subHours($index * 2),
         ]);
     }
 
     // Add some fasting readings to establish baseline
     foreach (range(1, 5) as $i) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => 95,
-            'reading_type' => ReadingType::Fasting,
+            'glucose_value' => 95,
+            'glucose_reading_type' => GlucoseReadingType::Fasting,
             'measured_at' => now()->subDays($i),
         ]);
     }
