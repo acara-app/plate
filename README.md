@@ -11,32 +11,34 @@ Acara Plate is an AI-powered personalized nutrition and meal planning platform t
 
 > [!IMPORTANT]
 > **Disclaimer:** Acara Plate is an AI-powered tool for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. See the [Medical Disclaimer](#medical-disclaimer) below.
+
 ## Table of Contents
+
 - [Acara Plate - Personalized Nutrition AI Agent](#acara-plate---personalized-nutrition-ai-agent)
-  - [Table of Contents](#table-of-contents)
-  - [Overview](#overview)
-  - [Product Capabilities](#product-capabilities)
-    - [Personalization Inputs](#personalization-inputs)
-    - [Generated Outputs](#generated-outputs)
-    - [User Journey Highlights](#user-journey-highlights)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Project Setup](#project-setup)
-    - [Environment Configuration](#environment-configuration)
-    - [Running the Development Server](#running-the-development-server)
-    - [Testing \& Code Quality](#testing--code-quality)
-  - [Data Initialization](#data-initialization)
-    - [Database Seeding](#database-seeding)
-    - [USDA Food Database Import](#usda-food-database-import)
-  - [Deployment](#deployment)
-    - [Self-Hosting Options](#self-hosting-options)
-    - [Production Environment](#production-environment)
-    - [Future Enhancements](#future-enhancements)
-  - [Accessing Acara Plate](#accessing-acara-plate)
-    - [Progressive Web App](#progressive-web-app)
-  - [Contributing](#contributing)
-  - [Code of Conduct](#code-of-conduct)
-  - [License](#license)
+    - [Table of Contents](#table-of-contents)
+    - [Overview](#overview)
+    - [Product Capabilities](#product-capabilities)
+        - [Personalization Inputs](#personalization-inputs)
+        - [Generated Outputs](#generated-outputs)
+        - [User Journey Highlights](#user-journey-highlights)
+    - [Getting Started](#getting-started)
+        - [Prerequisites](#prerequisites)
+        - [Project Setup](#project-setup)
+        - [Environment Configuration](#environment-configuration)
+        - [Running the Development Server](#running-the-development-server)
+        - [Testing \& Code Quality](#testing--code-quality)
+    - [Data Initialization](#data-initialization)
+        - [Database Seeding](#database-seeding)
+        - [USDA Food Database Import](#usda-food-database-import)
+    - [Deployment](#deployment)
+        - [Self-Hosting Options](#self-hosting-options)
+        - [Production Environment](#production-environment)
+        - [Future Enhancements](#future-enhancements)
+    - [Accessing Acara Plate](#accessing-acara-plate)
+        - [Progressive Web App](#progressive-web-app)
+    - [Contributing](#contributing)
+    - [Code of Conduct](#code-of-conduct)
+    - [License](#license)
 - [Medical Disclaimer](#medical-disclaimer)
 
 ## Overview
@@ -46,31 +48,42 @@ Acara Plate is a Laravel 12 application that pairs Inertia (React) with Tailwind
 ## Product Capabilities
 
 ### Personalization Inputs
+
 - **Biometrics:** Age, sex, height, weight, BMI, BMR, and TDEE calculations
 - **Goals:** Weight loss, muscle gain, maintenance, condition management, endurance, flexibility
 - **Lifestyle:** Activity level, occupation, sleep patterns
 - **Preferences:** Vegan, vegetarian, keto, paleo, gluten-free, lactose-free, allergen exclusions, dislikes
-- **Health Conditions:** Diabetes, hypertension, heart disease, and other nutrition-sensitive conditions
+- **Health Conditions:** Diabetes (Type 1 & 2), hypertension, heart disease, and other nutrition-sensitive conditions
 
-### Generated Outputs
-- Calorie targets aligned with goals
-- Macronutrient distribution (protein, carbs, fat)
-- Meal-by-meal recipes with quantities, portions, and prep guidance
-- Nutritional information per meal and daily summaries
-- Grocery list generation and macro visualizations
-- Printable meal plans with semantic HTML for reading mode and PDF export
-- Glucose tracking with analytics, trends, and time-in-range insights
-- Automated glucose analysis notifications with actionable recommendations sent via email
+### Core Functionality
+
+- **Smart Meal Planning:**
+    - Calorie targets aligned with goals
+    - Macronutrient distribution (protein, carbs, fat)
+    - Meal-by-meal recipes with quantities, portions, and prep guidance
+    - Grocery list generation and macro visualizations
+    - Printable meal plans with semantic HTML and PDF export
+- **Diabetes Management Logbook:**
+    - **Glucose:** Tracking with context (fasting, pre/post-meal) and analytics
+    - **Insulin:** Logging for units and types to correlate with glucose trends
+    - **Carbs & Food:** Manual carbohydrate logging to track intake vs. goals
+    - **Meds & Vitals:** Tracking for medication adherence, blood pressure, weight, and A1C
+    - **Exercise:** Activity logging to monitor impact on blood sugar levels
+- **Automated Intelligence:**
+    - Time-in-range insights and trend visualization
+    - Automated analysis notifications with actionable recommendations via email
 
 ### User Journey Highlights
+
 1. **Onboarding Questionnaire:** Collects biometric data, goals, lifestyle factors, dietary preferences, and health conditions.
 2. **AI Meal Planning:** Uses PrismPHP-driven LLM workflows to build structured seven-day plans with queue-backed processing and progress tracking.
 3. **Meal Plan Management:** Offers day-by-day navigation, macro bars, detailed meal cards, and generated shopping support.
-4. **Glucose Monitoring:** Records readings, classifies context (fasting, pre-meal, post-meal, random), and surfaces analytics for recent periods. Automated email notifications analyze 7-day trends, identify patterns and concerns, and provide actionable insights for meal plan adjustments.
+4. **Comprehensive Diabetes Tracking:** A unified logbook interface for manually recording glucose, insulin, carb intake, medications, vitals, and exercise. The system correlates these logs to provide 7-day trend analysis, identifying patterns (e.g., insulin sensitivity or exercise impact) and offering data-driven insights.
 
 ## Getting Started
 
 ### Prerequisites
+
 This application is built with:
 
 - **PHP 8.4**
@@ -173,6 +186,7 @@ php artisan import:usda-sr-legacy-food-data --path=/path/to/legacy.json
 ```
 
 **Performance & Indexing**
+
 - Streaming import efficiently handles large JSON payloads.
 - Foundation Foods (~1,200 entries) completes in ~2-5 seconds; SR Legacy (>8,000) in ~10-30 seconds.
 - Operations run within database transactions and surface progress in real time.
@@ -181,6 +195,7 @@ php artisan import:usda-sr-legacy-food-data --path=/path/to/legacy.json
 ## Deployment
 
 ### Self-Hosting Options
+
 - **Laravel Forge:** Automated provisioning for VPS providers (DigitalOcean, Linode, Vultr, AWS).
 - **Ploi:** Laravel Forge–style GUI for provisioning, deployments, cron management, and queue supervision.
 - **Laravel Cloud:** Fully managed Laravel platform with zero server maintenance.
@@ -193,6 +208,7 @@ Our live deployment is hosted on [Hetzner](https://www.hetzner.com/) with [Ploi]
 - **Backups:** [pgBackRest](https://pgbackrest.org/) provides automated, incremental backups
 
 ### Future Enhancements
+
 - IndexedDB caching for limited offline PWA usage (recipes, recent plans)
 - Parallelized queue workers for faster meal plan generation
 
@@ -208,11 +224,13 @@ Acara Plate ships as an installable PWA for mobile and desktop:
 - **Current Limitation:** Offline mode is not yet available; an internet connection is required
 
 **Installation**
+
 - **iOS/iPadOS (Safari):** Share → Add to Home Screen
 - **Android (Chrome):** Browser menu → Add to Home screen
 - **Desktop (Chrome/Edge):** Click the install icon in the address bar or choose Install from the menu
 
 **Updates**
+
 - A new deployment becomes active after the service worker installs and the app performs a fresh reload
 - If an update appears stuck, complete a hard refresh or clear storage for the domain
 
