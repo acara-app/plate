@@ -203,7 +203,7 @@ final readonly class GlucoseStatisticsService
         }
 
         $total = $readings->count();
-        $grouped = $readings->groupBy(fn (\App\Models\DiabetesLog $reading): string => $reading->glucose_reading_type?->value ?? 'random');
+        $grouped = $readings->groupBy(fn (\App\Models\DiabetesLog $reading): string => $reading->glucose_reading_type->value ?? \App\Enums\GlucoseReadingType::Random->value);
 
         $result = [];
         foreach ($grouped as $type => $typeReadings) {
@@ -261,8 +261,8 @@ final readonly class GlucoseStatisticsService
                 'slopePerDay' => null,
                 'slopePerWeek' => null,
                 'direction' => 'stable',
-                'firstValue' => round($first->glucose_value, 1),
-                'lastValue' => round($last->glucose_value, 1),
+                'firstValue' => round((float) $first->glucose_value, 1),
+                'lastValue' => round((float) $last->glucose_value, 1),
                 'daysDifference' => 0,
             ];
         }
@@ -299,8 +299,8 @@ final readonly class GlucoseStatisticsService
             'slopePerDay' => round($slopePerDay, 2),
             'slopePerWeek' => round($slopePerWeek, 1),
             'direction' => $direction,
-            'firstValue' => round($first->glucose_value, 1),
-            'lastValue' => round($last->glucose_value, 1),
+            'firstValue' => round((float) $first->glucose_value, 1),
+            'lastValue' => round((float) $last->glucose_value, 1),
             'daysDifference' => $daysDiff,
         ];
     }

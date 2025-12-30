@@ -221,7 +221,7 @@ final readonly class GlucoseDataAnalyzer
      */
     private function calculateAverages(Collection $readings): AveragesData
     {
-        $grouped = $readings->groupBy(fn (\App\Models\DiabetesLog $reading): string => $reading->glucose_reading_type?->value ?? 'random');
+        $grouped = $readings->groupBy(fn (\App\Models\DiabetesLog $reading): string => $reading->glucose_reading_type->value ?? GlucoseReadingType::Random->value);
 
         $overallAvg = $readings->avg('glucose_value');
 
