@@ -49,36 +49,36 @@ Acara Plate is a Laravel 12 application that pairs Inertia (React) with Tailwind
 
 ### Personalization Inputs
 
-- **Biometrics:** Age, sex, height, weight, BMI, BMR, and TDEE calculations
-- **Goals:** Weight loss, muscle gain, maintenance, condition management, endurance, flexibility
-- **Lifestyle:** Activity level, occupation, sleep patterns
-- **Preferences:** Vegan, vegetarian, keto, paleo, gluten-free, lactose-free, allergen exclusions, dislikes
-- **Health Conditions:** Diabetes (Type 1 & 2), hypertension, heart disease, and other nutrition-sensitive conditions
+- **Biometrics:** Age, sex, height, weight, BMI, BMR, and TDEE calculations.
+- **Goals:** Weight loss, muscle gain, maintenance, metabolic health, endurance, flexibility.
+- **Lifestyle:** Activity level, occupation, and sleep patterns.
+- **Preferences:** Vegan, vegetarian, keto, paleo, gluten-free, lactose-free, allergen exclusions, and dislikes.
+- **Health Conditions:** Type 2 Diabetes, Pre-diabetes, Hypertension, Heart Disease, and other nutrition-sensitive conditions.
 
-### Core Functionality
+### Generated Outputs
 
 - **Smart Meal Planning:**
-    - Calorie targets aligned with goals
-    - Macronutrient distribution (protein, carbs, fat)
-    - Meal-by-meal recipes with quantities, portions, and prep guidance
-    - Grocery list generation and macro visualizations
-    - Printable meal plans with semantic HTML and PDF export
+    - Calorie targets strictly aligned with user goals.
+    - Precise Macronutrient distribution (protein, carbs, fat).
+    - Meal-by-meal recipes with quantities, portions, and prep guidance.
+    - Grocery list generation (USDA-verified) with macro visualizations.
+    - Printable meal plans with semantic HTML and PDF export.
 - **Diabetes Management Logbook:**
-    - **Glucose:** Tracking with context (fasting, pre/post-meal) and analytics
-    - **Insulin:** Logging for units and types to correlate with glucose trends
-    - **Carbs & Food:** Manual carbohydrate logging to track intake vs. goals
-    - **Meds & Vitals:** Tracking for medication adherence, blood pressure, weight, and A1C
-    - **Exercise:** Activity logging to monitor impact on blood sugar levels
-- **Automated Intelligence:**
-    - Time-in-range insights and trend visualization
-    - Automated analysis notifications with actionable recommendations via email
+    - **Glucose:** Tracking with context (fasting, pre/post-meal) and trend analytics.
+    - **Insulin:** Logging for units and types (Bolus/Basal) to correlate doses with glucose outcomes.
+    - **Carbs & Food:** Manual carbohydrate logging to track real-world intake vs. planned goals.
+    - **Meds & Vitals:** Tracking for medication adherence, blood pressure, weight, and A1C.
+    - **Exercise:** Activity logging to monitor the impact of movement on blood sugar levels.
+- **Analytics & Insights:**
+    - "Time-in-Range" visualization and glucose variability trends.
+    - Automated analysis notifications with actionable recommendations via email.
 
 ### User Journey Highlights
 
-1. **Onboarding Questionnaire:** Collects biometric data, goals, lifestyle factors, dietary preferences, and health conditions.
+1. **Onboarding Questionnaire:** Collects deep biometric data, goals, lifestyle factors, dietary preferences, and health constraints to build a user profile.
 2. **AI Meal Planning:** Uses PrismPHP-driven LLM workflows to build structured seven-day plans with queue-backed processing and progress tracking.
-3. **Meal Plan Management:** Offers day-by-day navigation, macro bars, detailed meal cards, and generated shopping support.
-4. **Comprehensive Diabetes Tracking:** A unified logbook interface for manually recording glucose, insulin, carb intake, medications, vitals, and exercise. The system correlates these logs to provide 7-day trend analysis, identifying patterns (e.g., insulin sensitivity or exercise impact) and offering data-driven insights.
+3. **Meal Plan Management:** Offers day-by-day navigation, macro bars, detailed meal cards, and instant grocery list generation.
+4. **Comprehensive Diabetes Tracking:** A unified logbook interface for recording glucose, insulin, carb intake, medications, vitals, and exercise. The system correlates these separate logs to provide 7-day trend analysis, helping users identify patterns (e.g., insulin sensitivity or exercise impact) and improve their Time-in-Range.
 
 ## Getting Started
 
