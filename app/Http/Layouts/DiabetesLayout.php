@@ -216,8 +216,8 @@ final readonly class DiabetesLayout
         return [
             'count' => $values->count(),
             'avg' => round((float) ($values->avg()), 1),
-            'min' => round((float) ($values->min()), 1), // @phpstan-ignore argument.type
-            'max' => round((float) ($values->max()), 1), // @phpstan-ignore argument.type
+            'min' => round((float) ($values->min()), 1), // @phpstan-ignore-line
+            'max' => round((float) ($values->max()), 1), // @phpstan-ignore-line
         ];
     }
 
@@ -233,7 +233,7 @@ final readonly class DiabetesLayout
 
         return [
             'count' => $insulinLogs->count(),
-            'total' => round((float) ($insulinLogs->sum('insulin_units')), 1), // @phpstan-ignore argument.type
+            'total' => round((float) ($insulinLogs->sum('insulin_units')), 1), // @phpstan-ignore-line
             'bolusCount' => $insulinLogs->filter(fn (DiabetesLog $log): bool => $log->insulin_type === InsulinType::Bolus)->count(),
             'basalCount' => $insulinLogs->filter(fn (DiabetesLog $log): bool => $log->insulin_type === InsulinType::Basal)->count(),
         ];
@@ -251,7 +251,7 @@ final readonly class DiabetesLayout
         $total = $carbLogs->sum('carbs_grams');
         $uniqueDays = $carbLogs->map(fn (DiabetesLog $log) => $log->measured_at->toDateString())->unique()->count();
 
-        $totalFloat = (float) $total; // @phpstan-ignore argument.type
+        $totalFloat = (float) $total; // @phpstan-ignore-line
 
         return [
             'count' => $carbLogs->count(),
@@ -276,7 +276,7 @@ final readonly class DiabetesLayout
 
         return [
             'count' => $exerciseLogs->count(),
-            'totalMinutes' => (int) ($exerciseLogs->sum('exercise_duration_minutes')), // @phpstan-ignore argument.type
+            'totalMinutes' => (int) ($exerciseLogs->sum('exercise_duration_minutes')), // @phpstan-ignore-line
             'types' => $types,
         ];
     }
