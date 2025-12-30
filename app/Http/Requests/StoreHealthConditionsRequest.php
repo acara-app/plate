@@ -20,7 +20,7 @@ final class StoreHealthConditionsRequest extends FormRequest
             'health_condition_ids.*' => ['integer', 'exists:health_conditions,id'],
             'notes' => ['nullable', 'array'],
             'notes.*' => ['nullable', 'string', 'max:500'],
-            'glucose_unit' => ['nullable', new Enum(GlucoseUnit::class)],
+            'units_preference' => ['nullable', new Enum(GlucoseUnit::class)],
         ];
     }
 

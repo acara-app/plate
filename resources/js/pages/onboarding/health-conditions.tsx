@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
+import { GlucoseUnit, type GlucoseUnitType } from '@/types/glucose';
 
 interface GlucoseUnitOption {
     value: string;
@@ -38,8 +39,8 @@ export default function HealthConditions({
     );
     const [notes, setNotes] = useState<Record<number, string>>({});
     const [expandedId, setExpandedId] = useState<number | null>(null);
-    const [glucoseUnit, setGlucoseUnit] = useState<string>(
-        selectedGlucoseUnit || 'mg/dL',
+    const [glucoseUnit, setGlucoseUnit] = useState<GlucoseUnitType>(
+        (selectedGlucoseUnit as GlucoseUnitType) || GlucoseUnit.MmolL,
     );
 
     const toggleCondition = (id: number) => {
@@ -245,7 +246,7 @@ export default function HealthConditions({
 
                                         <input
                                             type="hidden"
-                                            name="glucose_unit"
+                                            name="units_preference"
                                             value={glucoseUnit}
                                         />
 
@@ -253,7 +254,10 @@ export default function HealthConditions({
                                             type="single"
                                             value={glucoseUnit}
                                             onValueChange={(value) =>
-                                                value && setGlucoseUnit(value)
+                                                value &&
+                                                setGlucoseUnit(
+                                                    value as GlucoseUnitType,
+                                                )
                                             }
                                             className="justify-start gap-2"
                                         >

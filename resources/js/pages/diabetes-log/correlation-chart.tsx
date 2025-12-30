@@ -6,6 +6,11 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import {
+    GlucoseUnit,
+    type GlucoseUnitType,
+    MGDL_TO_MMOL_FACTOR,
+} from '@/types/glucose';
+import {
     Bar,
     CartesianGrid,
     ComposedChart,
@@ -41,12 +46,14 @@ interface DiabetesLogEntry {
 
 interface Props {
     logs: DiabetesLogEntry[];
+    glucoseUnit: GlucoseUnitType;
 }
 
 interface ChartDataPoint {
     date: string;
     dateLabel: string;
     glucose: number | null;
+    glucoseDisplay: number | null; // Converted for display
     insulin: number | null;
     insulinType: string | null;
     carbs: number | null;
@@ -58,7 +65,17 @@ interface ChartDataPoint {
 const NORMAL_RANGE_MIN = 70;
 const NORMAL_RANGE_MAX = 140;
 
-function prepareChartData(logs: DiabetesLogEntry[]): ChartDataPoint[] {
+function convertGlucose(mgdl: number, targetUnit: GlucoseUnitType): number {
+    if (targetUnit === GlucoseUnit.MmolL) {
+        return Math.round((mgdl / MGDL_TO_MMOL_FACTOR) * 10) / 10;
+    }
+    return Math.round(mgdl);
+}
+
+function prepareChartData(
+    logs: DiabetesLogEntry[],
+    glucoseUnit: GlucoseUnitType,
+): ChartDataPoint[] {
     // Group logs by date
     const groupedByDate = new Map<string, DiabetesLogEntry[]>();
 
@@ -125,6 +142,10 @@ function prepareChartData(logs: DiabetesLogEntry[]): ChartDataPoint[] {
                 day: 'numeric',
             }),
             glucose: avgGlucose,
+            glucoseDisplay:
+                avgGlucose !== null
+                    ? convertGlucose(avgGlucose, glucoseUnit)
+                    : null,
             insulin: insulinTotal > 0 ? insulinTotal : null,
             insulinType: insulinTypes.join(', ') || null,
             carbs: carbsTotal > 0 ? carbsTotal : null,
@@ -143,25 +164,27 @@ interface TooltipProps {
     active?: boolean;
     payload?: Array<{ dataKey: string; value: number; color: string }>;
     label?: string;
+    glucoseUnit: GlucoseUnitType;
 }
 
-function CustomTooltip({ active, payload, label }: TooltipProps) {
+function CustomTooltip({ active, payload, label, glucoseUnit }: TooltipProps) {
     if (active && payload && payload.length) {
         return (
             <div className="rounded-lg border bg-background p-3 shadow-lg">
                 <p className="mb-2 text-sm font-semibold">{label}</p>
                 <div className="space-y-1">
                     {payload.map((entry, index) => {
-                        if (entry.value === null || entry.value === 0)
+                        if (entry.value === null || entry.value === 0) {
                             return null;
+                        }
                         const labels: Record<string, string> = {
-                            glucose: 'Glucose',
+                            glucoseDisplay: 'Glucose',
                             insulin: 'Insulin',
                             carbs: 'Carbs',
                             exercise: 'Exercise',
                         };
                         const units: Record<string, string> = {
-                            glucose: 'mg/dL',
+                            glucoseDisplay: glucoseUnit,
                             insulin: 'units',
                             carbs: 'g',
                             exercise: 'min',
@@ -191,8 +214,8 @@ function CustomTooltip({ active, payload, label }: TooltipProps) {
     return null;
 }
 
-export default function CorrelationChart({ logs }: Props) {
-    const chartData = prepareChartData(logs);
+export default function CorrelationChart({ logs, glucoseUnit }: Props) {
+    const chartData = prepareChartData(logs, glucoseUnit);
 
     // Check if we have any meaningful data
     const hasGlucose = chartData.some((d) => d.glucose !== null);
@@ -218,16 +241,45 @@ export default function CorrelationChart({ logs }: Props) {
         );
     }
 
-    // Calculate Y-axis domains
-    const glucoseValues = chartData
-        .filter((d) => d.glucose !== null)
-        .map((d) => d.glucose!);
+    // Calculate Y-axis domains using display values
+    const glucoseDisplayValues = chartData
+        .filter((d) => d.glucoseDisplay !== null)
+        .map((d) => d.glucoseDisplay!);
     const glucoseMin =
-        glucoseValues.length > 0 ? Math.min(...glucoseValues) : 0;
+        glucoseDisplayValues.length > 0 ? Math.min(...glucoseDisplayValues) : 0;
     const glucoseMax =
-        glucoseValues.length > 0 ? Math.max(...glucoseValues) : 200;
-    const yGlucoseMin = Math.max(0, glucoseMin - 20);
-    const yGlucoseMax = glucoseMax + 20;
+        glucoseDisplayValues.length > 0
+            ? Math.max(...glucoseDisplayValues)
+            : glucoseUnit === GlucoseUnit.MmolL
+              ? 11
+              : 200;
+    const padding = glucoseUnit === GlucoseUnit.MmolL ? 1 : 20;
+    const yGlucoseMin = Math.max(0, glucoseMin - padding);
+    const yGlucoseMax = glucoseMax + padding;
+
+    // Convert reference lines to display unit
+    const normalRangeMinDisplay = convertGlucose(NORMAL_RANGE_MIN, glucoseUnit);
+    const normalRangeMaxDisplay = convertGlucose(NORMAL_RANGE_MAX, glucoseUnit);
+
+    const insulinValues = chartData
+        .filter((d) => d.insulin !== null)
+        .map((d) => d.insulin!);
+    const carbValues = chartData
+        .filter((d) => d.carbs !== null)
+        .map((d) => d.carbs!);
+    const exerciseValues = chartData
+        .filter((d) => d.exercise !== null)
+        .map((d) => d.exercise!);
+
+    const allSecondaryValues = [
+        ...insulinValues,
+        ...carbValues,
+        ...exerciseValues,
+    ];
+    const secondaryMax =
+        allSecondaryValues.length > 0 ? Math.max(...allSecondaryValues) : 100;
+    // Add 20% padding to max value
+    const ySecondaryMax = Math.ceil(secondaryMax * 1.2);
 
     return (
         <Card>
@@ -239,14 +291,164 @@ export default function CorrelationChart({ logs }: Props) {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-6">
+                    {/* Glucose Chart - Top */}
+                    <div>
+                        <p className="mb-2 text-sm font-medium text-muted-foreground">
+                            Glucose Levels ({glucoseUnit})
+                        </p>
+                        <ResponsiveContainer width="100%" height={200}>
+                            <ComposedChart
+                                data={chartData}
+                                margin={{
+                                    top: 10,
+                                    right: 10,
+                                    left: 0,
+                                    bottom: 0,
+                                }}
+                            >
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    className="stroke-muted"
+                                />
+                                <XAxis dataKey="dateLabel" hide />
+                                <YAxis
+                                    domain={[yGlucoseMin, yGlucoseMax]}
+                                    className="text-xs"
+                                    tick={{
+                                        fill: 'hsl(var(--muted-foreground))',
+                                    }}
+                                    width={50}
+                                />
+                                <Tooltip
+                                    content={
+                                        <CustomTooltip
+                                            glucoseUnit={glucoseUnit}
+                                        />
+                                    }
+                                />
+
+                                {/* Reference lines for glucose range */}
+                                <ReferenceLine
+                                    y={normalRangeMaxDisplay}
+                                    stroke="#ef4444"
+                                    strokeDasharray="3 3"
+                                    strokeOpacity={0.5}
+                                />
+                                <ReferenceLine
+                                    y={normalRangeMinDisplay}
+                                    stroke="#f97316"
+                                    strokeDasharray="3 3"
+                                    strokeOpacity={0.5}
+                                />
+
+                                {/* Glucose line - using display values */}
+                                {hasGlucose && (
+                                    <Line
+                                        type="monotone"
+                                        dataKey="glucoseDisplay"
+                                        stroke="#3b82f6"
+                                        strokeWidth={2}
+                                        dot={{
+                                            fill: '#3b82f6',
+                                            stroke: 'white',
+                                            strokeWidth: 2,
+                                            r: 4,
+                                        }}
+                                        name="Glucose"
+                                        connectNulls
+                                    />
+                                )}
+                            </ComposedChart>
+                        </ResponsiveContainer>
+                    </div>
+
+                    {/* Insulin/Carbs/Exercise Chart - Bottom */}
+                    {(hasInsulin || hasCarbs || hasExercise) && (
+                        <div>
+                            <p className="mb-2 text-sm font-medium text-muted-foreground">
+                                Factors (Insulin units / Carbs g / Exercise min)
+                            </p>
+                            <ResponsiveContainer width="100%" height={180}>
+                                <ComposedChart
+                                    data={chartData}
+                                    margin={{
+                                        top: 10,
+                                        right: 10,
+                                        left: 0,
+                                        bottom: 5,
+                                    }}
+                                >
+                                    <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        className="stroke-muted"
+                                    />
+                                    <XAxis
+                                        dataKey="dateLabel"
+                                        className="text-xs"
+                                        tick={{
+                                            fill: 'hsl(var(--muted-foreground))',
+                                        }}
+                                    />
+                                    <YAxis
+                                        domain={[0, ySecondaryMax]}
+                                        className="text-xs"
+                                        tick={{
+                                            fill: 'hsl(var(--muted-foreground))',
+                                        }}
+                                        width={50}
+                                    />
+                                    <Tooltip
+                                        content={
+                                            <CustomTooltip
+                                                glucoseUnit={glucoseUnit}
+                                            />
+                                        }
+                                    />
+                                    <Legend />
+
+                                    {/* Insulin bars */}
+                                    {hasInsulin && (
+                                        <Bar
+                                            dataKey="insulin"
+                                            fill="#a855f7"
+                                            opacity={0.8}
+                                            name="Insulin"
+                                            barSize={20}
+                                        />
+                                    )}
+
+                                    {/* Carbs bars */}
+                                    {hasCarbs && (
+                                        <Bar
+                                            dataKey="carbs"
+                                            fill="#f59e0b"
+                                            opacity={0.6}
+                                            name="Carbs"
+                                            barSize={20}
+                                        />
+                                    )}
+
+                                    {/* Exercise scatter points */}
+                                    {hasExercise && (
+                                        <Scatter
+                                            dataKey="exercise"
+                                            fill="#22c55e"
+                                            name="Exercise"
+                                        />
+                                    )}
+                                </ComposedChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
+
                     {/* Legend */}
-                    <div className="flex flex-wrap items-center gap-4 text-sm">
+                    <div className="flex flex-wrap items-center gap-4 border-t pt-4 text-sm">
                         {hasGlucose && (
                             <div className="flex items-center gap-2">
                                 <div className="size-3 rounded-full bg-blue-500" />
                                 <span className="text-muted-foreground">
-                                    Glucose (mg/dL)
+                                    Glucose ({glucoseUnit})
                                 </span>
                             </div>
                         )}
@@ -275,123 +477,6 @@ export default function CorrelationChart({ logs }: Props) {
                             </div>
                         )}
                     </div>
-
-                    {/* Chart */}
-                    <ResponsiveContainer width="100%" height={400}>
-                        <ComposedChart
-                            data={chartData}
-                            margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-                        >
-                            <CartesianGrid
-                                strokeDasharray="3 3"
-                                className="stroke-muted"
-                            />
-                            <XAxis
-                                dataKey="dateLabel"
-                                className="text-xs"
-                                tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                            />
-                            <YAxis
-                                yAxisId="glucose"
-                                domain={[yGlucoseMin, yGlucoseMax]}
-                                className="text-xs"
-                                tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                                label={{
-                                    value: 'Glucose (mg/dL)',
-                                    angle: -90,
-                                    position: 'insideLeft',
-                                    style: {
-                                        fill: 'hsl(var(--muted-foreground))',
-                                        fontSize: '12px',
-                                    },
-                                }}
-                            />
-                            <YAxis
-                                yAxisId="other"
-                                orientation="right"
-                                className="text-xs"
-                                tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                                label={{
-                                    value: 'Units / Grams / Min',
-                                    angle: 90,
-                                    position: 'insideRight',
-                                    style: {
-                                        fill: 'hsl(var(--muted-foreground))',
-                                        fontSize: '12px',
-                                    },
-                                }}
-                            />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Legend />
-
-                            {/* Reference lines for glucose range */}
-                            <ReferenceLine
-                                yAxisId="glucose"
-                                y={NORMAL_RANGE_MAX}
-                                stroke="#ef4444"
-                                strokeDasharray="3 3"
-                                strokeOpacity={0.5}
-                            />
-                            <ReferenceLine
-                                yAxisId="glucose"
-                                y={NORMAL_RANGE_MIN}
-                                stroke="#f97316"
-                                strokeDasharray="3 3"
-                                strokeOpacity={0.5}
-                            />
-
-                            {/* Glucose line */}
-                            {hasGlucose && (
-                                <Line
-                                    yAxisId="glucose"
-                                    type="monotone"
-                                    dataKey="glucose"
-                                    stroke="#3b82f6"
-                                    strokeWidth={2}
-                                    dot={{
-                                        fill: '#3b82f6',
-                                        stroke: 'white',
-                                        strokeWidth: 2,
-                                        r: 4,
-                                    }}
-                                    name="Glucose"
-                                    connectNulls
-                                />
-                            )}
-
-                            {/* Insulin bars */}
-                            {hasInsulin && (
-                                <Bar
-                                    yAxisId="other"
-                                    dataKey="insulin"
-                                    fill="#a855f7"
-                                    opacity={0.7}
-                                    name="Insulin"
-                                />
-                            )}
-
-                            {/* Carbs bars */}
-                            {hasCarbs && (
-                                <Bar
-                                    yAxisId="other"
-                                    dataKey="carbs"
-                                    fill="#f59e0b"
-                                    opacity={0.5}
-                                    name="Carbs"
-                                />
-                            )}
-
-                            {/* Exercise scatter points */}
-                            {hasExercise && (
-                                <Scatter
-                                    yAxisId="other"
-                                    dataKey="exercise"
-                                    fill="#22c55e"
-                                    name="Exercise"
-                                />
-                            )}
-                        </ComposedChart>
-                    </ResponsiveContainer>
 
                     {/* Insights */}
                     <div className="border-t pt-4">

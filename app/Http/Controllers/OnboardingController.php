@@ -149,7 +149,7 @@ final readonly class OnboardingController
                 'value' => $unit->value,
                 'label' => $unit->label(),
             ]),
-            'selectedGlucoseUnit' => $profile?->glucose_unit?->value,
+            'selectedGlucoseUnit' => $profile?->units_preference?->value,
         ]);
     }
 
@@ -176,9 +176,9 @@ final readonly class OnboardingController
 
         // Save glucose unit preference
         /** @var string|null $glucoseUnit */
-        $glucoseUnit = $request->validated('glucose_unit');
+        $glucoseUnit = $request->validated('units_preference');
         if ($glucoseUnit !== null) {
-            $profile->update(['glucose_unit' => $glucoseUnit]);
+            $profile->update(['units_preference' => $glucoseUnit]);
         }
 
         // Mark onboarding as completed

@@ -11,6 +11,7 @@ import {
 import useModalToggle from '@/hooks/use-modal-toggle';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
+import { type GlucoseUnitType } from '@/types/glucose';
 import { Head, Link } from '@inertiajs/react';
 import { List, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -76,7 +77,7 @@ interface Props {
     logs: DiabetesLogEntry[];
     glucoseReadingTypes: ReadingType[];
     insulinTypes: ReadingType[];
-    glucoseUnit: string;
+    glucoseUnit: GlucoseUnitType;
     recentMedications: RecentMedication[];
     recentInsulins: RecentInsulin[];
     todaysMeals: TodaysMeal[];
@@ -239,16 +240,25 @@ export default function DiabetesLogDashboard({
                     ) : (
                         <>
                             {/* Summary Cards for All Metrics */}
-                            <DashboardSummaryCards logs={filteredLogs} />
+                            <DashboardSummaryCards
+                                logs={filteredLogs}
+                                glucoseUnit={glucoseUnit}
+                            />
 
                             {/* Correlation Chart (shows when we have multiple factors) */}
                             {hasMultipleFactors && (
-                                <CorrelationChart logs={filteredLogs} />
+                                <CorrelationChart
+                                    logs={filteredLogs}
+                                    glucoseUnit={glucoseUnit}
+                                />
                             )}
 
                             {/* Glucose Chart (if there are glucose readings) */}
                             {glucoseReadings.length > 0 && (
-                                <GlucoseChart readings={glucoseReadings} />
+                                <GlucoseChart
+                                    readings={glucoseReadings}
+                                    glucoseUnit={glucoseUnit}
+                                />
                             )}
 
                             {/* Insights Card */}

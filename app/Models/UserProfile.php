@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property-read float|null $target_weight
  * @property-read string|null $additional_goals
  * @property-read int|null $lifestyle_id
- * @property-read GlucoseUnit|null $glucose_unit
+ * @property-read GlucoseUnit|null $units_preference
  * @property-read bool $onboarding_completed
  * @property-read CarbonInterface|null $onboarding_completed_at
  * @property-read CarbonInterface $created_at
@@ -66,7 +66,7 @@ final class UserProfile extends Model
             'target_weight' => 'float',
             'additional_goals' => 'string',
             'lifestyle_id' => 'integer',
-            'glucose_unit' => GlucoseUnit::class,
+            'units_preference' => GlucoseUnit::class,
             'onboarding_completed' => 'boolean',
             'onboarding_completed_at' => 'datetime',
             'created_at' => 'datetime',

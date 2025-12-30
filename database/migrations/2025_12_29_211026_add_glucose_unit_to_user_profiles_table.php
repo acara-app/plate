@@ -14,7 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('user_profiles', function (Blueprint $table) {
-            $table->string('glucose_unit')->nullable()->after('lifestyle_id');
+            $table->string('units_preference')->nullable()->after('lifestyle_id');
         });
     }
 

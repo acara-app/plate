@@ -1,7 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+    GlucoseUnit,
+    type GlucoseUnitType,
+    InsulinType,
+    MGDL_TO_MMOL_FACTOR,
+} from '@/types/glucose';
+import {
     Activity,
     Droplet,
+    Flame,
     Heart,
     Pill,
     Scale,
@@ -33,6 +40,7 @@ interface DiabetesLogEntry {
 
 interface Props {
     logs: DiabetesLogEntry[];
+    glucoseUnit: GlucoseUnitType;
 }
 
 interface StatCardProps {
@@ -43,6 +51,72 @@ interface StatCardProps {
     trend?: 'up' | 'down' | 'stable';
     trendValue?: string;
     colorClass?: string;
+}
+
+// Conversion helper: mg/dL to mmol/L
+function convertGlucose(
+    value: number,
+    targetUnit: GlucoseUnitType,
+): { value: number; unit: GlucoseUnitType } {
+    if (targetUnit === GlucoseUnit.MmolL) {
+        return {
+            value: Math.round((value / MGDL_TO_MMOL_FACTOR) * 10) / 10,
+            unit: GlucoseUnit.MmolL,
+        };
+    }
+    return { value: Math.round(value), unit: GlucoseUnit.MgDl };
+}
+
+// Calculate current logging streak (consecutive days)
+function calculateStreak(logs: DiabetesLogEntry[]): {
+    currentStreak: number;
+    activeDays: number;
+} {
+    if (logs.length === 0) {
+        return { currentStreak: 0, activeDays: 0 };
+    }
+
+    // Get unique dates with logs
+    const uniqueDates = [
+        ...new Set(
+            logs.map(
+                (log) => new Date(log.measured_at).toISOString().split('T')[0],
+            ),
+        ),
+    ].sort((a, b) => b.localeCompare(a)); // Sort descending (newest first)
+
+    const activeDays = uniqueDates.length;
+
+    // Calculate streak from today/yesterday
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 86400000)
+        .toISOString()
+        .split('T')[0];
+
+    let streak = 0;
+    let checkDate = new Date();
+
+    // Start from today or yesterday if today has no logs
+    if (!uniqueDates.includes(today)) {
+        if (!uniqueDates.includes(yesterday)) {
+            // No recent logs, streak is 0
+            return { currentStreak: 0, activeDays };
+        }
+        checkDate = new Date(Date.now() - 86400000);
+    }
+
+    // Count consecutive days backwards
+    for (let i = 0; i < 365; i++) {
+        const dateStr = checkDate.toISOString().split('T')[0];
+        if (uniqueDates.includes(dateStr)) {
+            streak++;
+            checkDate = new Date(checkDate.getTime() - 86400000);
+        } else {
+            break;
+        }
+    }
+
+    return { currentStreak: streak, activeDays };
 }
 
 function StatCard({
@@ -90,21 +164,24 @@ function StatCard({
     );
 }
 
-export default function DashboardSummaryCards({ logs }: Props) {
-    // Calculate glucose statistics
+export default function DashboardSummaryCards({ logs, glucoseUnit }: Props) {
     const glucoseLogs = logs.filter((log) => log.glucose_value !== null);
     const glucoseValues = glucoseLogs.map((log) => log.glucose_value!);
-    const avgGlucose =
+    const avgGlucoseRaw =
         glucoseValues.length > 0
-            ? Math.round(
-                  glucoseValues.reduce((a, b) => a + b, 0) /
-                      glucoseValues.length,
-              )
+            ? glucoseValues.reduce((a, b) => a + b, 0) / glucoseValues.length
             : 0;
-    const minGlucose =
+    const minGlucoseRaw =
         glucoseValues.length > 0 ? Math.min(...glucoseValues) : 0;
-    const maxGlucose =
+    const maxGlucoseRaw =
         glucoseValues.length > 0 ? Math.max(...glucoseValues) : 0;
+
+    // Convert to user's preferred unit
+    const avgGlucose = convertGlucose(avgGlucoseRaw, glucoseUnit);
+    const minGlucose = convertGlucose(minGlucoseRaw, glucoseUnit);
+    const maxGlucose = convertGlucose(maxGlucoseRaw, glucoseUnit);
+
+    const { currentStreak, activeDays } = calculateStreak(logs);
 
     // Calculate insulin statistics
     const insulinLogs = logs.filter((log) => log.insulin_units !== null);
@@ -113,20 +190,24 @@ export default function DashboardSummaryCards({ logs }: Props) {
         0,
     );
     const bolusCount = insulinLogs.filter(
-        (log) => log.insulin_type === 'bolus',
+        (log) => log.insulin_type === InsulinType.Bolus,
     ).length;
     const basalCount = insulinLogs.filter(
-        (log) => log.insulin_type === 'basal',
+        (log) => log.insulin_type === InsulinType.Basal,
     ).length;
 
-    // Calculate carbs statistics
     const carbLogs = logs.filter((log) => log.carbs_grams !== null);
     const totalCarbs = carbLogs.reduce(
         (sum, log) => sum + (log.carbs_grams || 0),
         0,
     );
-    const avgCarbs =
-        carbLogs.length > 0 ? Math.round(totalCarbs / carbLogs.length) : 0;
+    // Calculate unique days with carb logs
+    const uniqueCarbDays = new Set(
+        carbLogs.map((log) => new Date(log.measured_at).toDateString()),
+    ).size;
+    // Daily average is more useful than per-entry average
+    const avgCarbsPerDay =
+        uniqueCarbDays > 0 ? Math.round(totalCarbs / uniqueCarbDays) : 0;
 
     // Calculate exercise statistics
     const exerciseLogs = logs.filter(
@@ -197,20 +278,30 @@ export default function DashboardSummaryCards({ logs }: Props) {
 
     return (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {/* Glucose Card */}
+            <StatCard
+                title="Logging Streak"
+                value={
+                    currentStreak > 0
+                        ? `🔥 ${currentStreak} days`
+                        : 'Start today!'
+                }
+                subtitle={`${activeDays} active days in this period`}
+                icon={<Flame className="size-4" />}
+                colorClass="text-orange-500"
+            />
+
             <StatCard
                 title="Glucose Readings"
                 value={glucoseLogs.length}
                 subtitle={
                     glucoseLogs.length > 0
-                        ? `Avg: ${avgGlucose} mg/dL (${minGlucose}-${maxGlucose})`
+                        ? `Avg: ${avgGlucose.value} ${glucoseUnit} (${minGlucose.value}-${maxGlucose.value})`
                         : 'No readings'
                 }
                 icon={<Droplet className="size-4" />}
                 colorClass="text-blue-500"
             />
 
-            {/* Insulin Card */}
             <StatCard
                 title="Insulin Doses"
                 value={insulinLogs.length}
@@ -223,20 +314,18 @@ export default function DashboardSummaryCards({ logs }: Props) {
                 colorClass="text-purple-500"
             />
 
-            {/* Carbs Card */}
             <StatCard
-                title="Carbs Logged"
-                value={carbLogs.length > 0 ? `${totalCarbs}g` : '—'}
+                title="Daily Carbs"
+                value={carbLogs.length > 0 ? `${avgCarbsPerDay}g/day` : '—'}
                 subtitle={
                     carbLogs.length > 0
-                        ? `${carbLogs.length} entries, avg ${avgCarbs}g each`
+                        ? `${totalCarbs}g total over ${uniqueCarbDays} days`
                         : 'No carbs logged'
                 }
                 icon={<Utensils className="size-4" />}
                 colorClass="text-amber-500"
             />
 
-            {/* Exercise Card */}
             <StatCard
                 title="Exercise"
                 value={
@@ -253,7 +342,6 @@ export default function DashboardSummaryCards({ logs }: Props) {
                 colorClass="text-green-500"
             />
 
-            {/* Weight Card */}
             <StatCard
                 title="Weight"
                 value={latestWeight ? `${latestWeight} lbs` : '—'}
@@ -268,7 +356,6 @@ export default function DashboardSummaryCards({ logs }: Props) {
                 colorClass="text-cyan-500"
             />
 
-            {/* Blood Pressure Card */}
             <StatCard
                 title="Blood Pressure"
                 value={
@@ -285,7 +372,6 @@ export default function DashboardSummaryCards({ logs }: Props) {
                 colorClass="text-red-500"
             />
 
-            {/* Medication Card */}
             <StatCard
                 title="Medications"
                 value={medicationLogs.length}
@@ -298,7 +384,6 @@ export default function DashboardSummaryCards({ logs }: Props) {
                 colorClass="text-pink-500"
             />
 
-            {/* A1C Card */}
             {latestA1c && (
                 <StatCard
                     title="Latest A1C"
