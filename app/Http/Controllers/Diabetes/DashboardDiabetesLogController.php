@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Diabetes;
 
 use App\Http\Layouts\DiabetesLayout;
-use App\Models\DiabetesLog;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Inertia\Inertia;

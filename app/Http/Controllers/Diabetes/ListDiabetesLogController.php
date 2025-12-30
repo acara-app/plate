@@ -21,7 +21,7 @@ final readonly class ListDiabetesLogController
     public function __invoke(): Response
     {
         return Inertia::render('diabetes-log/index', [
-            'logs' => Inertia::scroll(fn () => $this->getUserDiabetesLogs->handle($this->currentUser)),
+            'logs' => Inertia::scroll(fn (): \Illuminate\Contracts\Pagination\LengthAwarePaginator => $this->getUserDiabetesLogs->handle($this->currentUser)),
             ...DiabetesLayout::props($this->currentUser),
         ]);
     }
