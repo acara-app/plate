@@ -5,53 +5,15 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    DiabetesLogEntry,
+    ReadingType,
+    RecentInsulin,
+    RecentMedication,
+    TodaysMeal,
+} from '@/types/diabetes';
 import EditDiabetesLogForm from './edit-form';
 import CreateDiabetesLogForm from './form';
-
-interface ReadingType {
-    value: string;
-    label: string;
-}
-
-interface DiabetesLogEntry {
-    id: number;
-    glucose_value: number | null;
-    glucose_reading_type: string | null;
-    measured_at: string;
-    notes: string | null;
-    insulin_units: number | null;
-    insulin_type: string | null;
-    medication_name: string | null;
-    medication_dosage: string | null;
-    weight: number | null;
-    blood_pressure_systolic: number | null;
-    blood_pressure_diastolic: number | null;
-    a1c_value: number | null;
-    carbs_grams: number | null;
-    exercise_type: string | null;
-    exercise_duration_minutes: number | null;
-    created_at: string;
-}
-
-interface RecentMedication {
-    name: string;
-    dosage: string;
-    label: string;
-}
-
-interface RecentInsulin {
-    units: number;
-    type: string;
-    label: string;
-}
-
-interface TodaysMeal {
-    id: number;
-    name: string;
-    type: string;
-    carbs: number;
-    label: string;
-}
 
 interface DialogProps {
     mode: 'create' | 'edit';

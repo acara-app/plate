@@ -13,6 +13,13 @@ import {
 import useModalToggle, { useModalValueToggle } from '@/hooks/use-modal-toggle';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
+import {
+    DiabetesLogEntry,
+    ReadingType,
+    RecentInsulin,
+    RecentMedication,
+    TodaysMeal,
+} from '@/types/diabetes';
 import { Head, InfiniteScroll, Link, router } from '@inertiajs/react';
 import { BarChart3, Pencil, Plus, Trash2 } from 'lucide-react';
 import DiabetesLogDialog from './diabetes-log-dialog';
@@ -23,51 +30,6 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: ListDiabetesLogController().url,
     },
 ];
-
-interface ReadingType {
-    value: string;
-    label: string;
-}
-
-interface DiabetesLogEntry {
-    id: number;
-    glucose_value: number | null;
-    glucose_reading_type: string | null;
-    measured_at: string;
-    notes: string | null;
-    insulin_units: number | null;
-    insulin_type: string | null;
-    medication_name: string | null;
-    medication_dosage: string | null;
-    weight: number | null;
-    blood_pressure_systolic: number | null;
-    blood_pressure_diastolic: number | null;
-    a1c_value: number | null;
-    carbs_grams: number | null;
-    exercise_type: string | null;
-    exercise_duration_minutes: number | null;
-    created_at: string;
-}
-
-interface RecentMedication {
-    name: string;
-    dosage: string;
-    label: string;
-}
-
-interface RecentInsulin {
-    units: number;
-    type: string;
-    label: string;
-}
-
-interface TodaysMeal {
-    id: number;
-    name: string;
-    type: string;
-    carbs: number;
-    label: string;
-}
 
 interface Props {
     logs: {

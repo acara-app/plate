@@ -13,7 +13,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { GlucoseUnit } from '@/types/diabetes';
+import {
+    GlucoseUnit,
+    LogType,
+    ReadingType,
+    RecentInsulin,
+    RecentMedication,
+    TodaysMeal,
+} from '@/types/diabetes';
 import { Form } from '@inertiajs/react';
 import {
     Activity,
@@ -24,31 +31,6 @@ import {
     Utensils,
 } from 'lucide-react';
 import { useState } from 'react';
-
-interface ReadingType {
-    value: string;
-    label: string;
-}
-
-interface RecentMedication {
-    name: string;
-    dosage: string;
-    label: string;
-}
-
-interface RecentInsulin {
-    units: number;
-    type: string;
-    label: string;
-}
-
-interface TodaysMeal {
-    id: number;
-    name: string;
-    type: string;
-    carbs: number;
-    label: string;
-}
 
 interface CreateDiabetesLogFormProps {
     glucoseReadingTypes: ReadingType[];
@@ -99,10 +81,10 @@ export default function CreateDiabetesLogForm({
         >
             {({ processing, errors }) => (
                 <>
-                    <Tabs defaultValue="glucose" className="w-full">
+                    <Tabs defaultValue={LogType.Glucose} className="w-full">
                         <TabsList className="grid w-full grid-cols-6">
                             <TabsTrigger
-                                value="glucose"
+                                value={LogType.Glucose}
                                 className="flex items-center gap-1"
                             >
                                 <Droplet className="size-3.5" />
@@ -111,14 +93,14 @@ export default function CreateDiabetesLogForm({
                                 </span>
                             </TabsTrigger>
                             <TabsTrigger
-                                value="food"
+                                value={LogType.Food}
                                 className="flex items-center gap-1"
                             >
                                 <Utensils className="size-3.5" />
                                 <span className="hidden sm:inline">Food</span>
                             </TabsTrigger>
                             <TabsTrigger
-                                value="insulin"
+                                value={LogType.Insulin}
                                 className="flex items-center gap-1"
                             >
                                 <Syringe className="size-3.5" />
@@ -127,21 +109,21 @@ export default function CreateDiabetesLogForm({
                                 </span>
                             </TabsTrigger>
                             <TabsTrigger
-                                value="meds"
+                                value={LogType.Meds}
                                 className="flex items-center gap-1"
                             >
                                 <Pill className="size-3.5" />
                                 <span className="hidden sm:inline">Meds</span>
                             </TabsTrigger>
                             <TabsTrigger
-                                value="vitals"
+                                value={LogType.Vitals}
                                 className="flex items-center gap-1"
                             >
                                 <HeartPulse className="size-3.5" />
                                 <span className="hidden sm:inline">Vitals</span>
                             </TabsTrigger>
                             <TabsTrigger
-                                value="exercise"
+                                value={LogType.Exercise}
                                 className="flex items-center gap-1"
                             >
                                 <Activity className="size-3.5" />
@@ -152,7 +134,10 @@ export default function CreateDiabetesLogForm({
                         </TabsList>
 
                         {/* Glucose Tab */}
-                        <TabsContent value="glucose" className="space-y-4 pt-4">
+                        <TabsContent
+                            value={LogType.Glucose}
+                            className="space-y-4 pt-4"
+                        >
                             <div className="space-y-2">
                                 <Label htmlFor="glucose_value">
                                     Glucose ({glucoseUnit})
@@ -200,7 +185,10 @@ export default function CreateDiabetesLogForm({
                         </TabsContent>
 
                         {/* Food Tab */}
-                        <TabsContent value="food" className="space-y-4 pt-4">
+                        <TabsContent
+                            value={LogType.Food}
+                            className="space-y-4 pt-4"
+                        >
                             {todaysMeals.length > 0 && (
                                 <div className="space-y-2">
                                     <Label className="text-xs text-muted-foreground">
@@ -245,7 +233,10 @@ export default function CreateDiabetesLogForm({
                         </TabsContent>
 
                         {/* Insulin Tab */}
-                        <TabsContent value="insulin" className="space-y-4 pt-4">
+                        <TabsContent
+                            value={LogType.Insulin}
+                            className="space-y-4 pt-4"
+                        >
                             {recentInsulins.length > 0 && (
                                 <div className="space-y-2">
                                     <Label className="text-xs text-muted-foreground">
@@ -314,7 +305,10 @@ export default function CreateDiabetesLogForm({
                         </TabsContent>
 
                         {/* Medication Tab */}
-                        <TabsContent value="meds" className="space-y-4 pt-4">
+                        <TabsContent
+                            value={LogType.Meds}
+                            className="space-y-4 pt-4"
+                        >
                             {recentMedications.length > 0 && (
                                 <div className="space-y-2">
                                     <Label className="text-xs text-muted-foreground">
@@ -381,7 +375,10 @@ export default function CreateDiabetesLogForm({
                         </TabsContent>
 
                         {/* Vitals Tab */}
-                        <TabsContent value="vitals" className="space-y-4 pt-4">
+                        <TabsContent
+                            value={LogType.Vitals}
+                            className="space-y-4 pt-4"
+                        >
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="weight">Weight (lbs)</Label>
@@ -442,7 +439,7 @@ export default function CreateDiabetesLogForm({
 
                         {/* Exercise Tab */}
                         <TabsContent
-                            value="exercise"
+                            value={LogType.Exercise}
                             className="space-y-4 pt-4"
                         >
                             <div className="grid gap-4 md:grid-cols-2">
