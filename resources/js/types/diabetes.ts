@@ -54,6 +54,18 @@ export const InsulinType = {
 
 export type InsulinTypeValue = (typeof InsulinType)[keyof typeof InsulinType];
 
+// Log Type constants for tabs
+export const LogType = {
+    Glucose: 'glucose',
+    Food: 'food',
+    Insulin: 'insulin',
+    Meds: 'meds',
+    Vitals: 'vitals',
+    Exercise: 'exercise',
+} as const;
+
+export type LogTypeValue = (typeof LogType)[keyof typeof LogType];
+
 // =============================================================================
 // Glucose Analysis Types
 // =============================================================================
