@@ -10,7 +10,7 @@ import {
     GlucoseUnit,
     type GlucoseUnitType,
     MGDL_TO_MMOL_FACTOR,
-} from '@/types/glucose';
+} from '@/types/diabetes';
 import {
     CartesianGrid,
     Line,

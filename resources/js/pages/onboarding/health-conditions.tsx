@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
-import { GlucoseUnit, type GlucoseUnitType } from '@/types/glucose';
+import { GlucoseUnit, type GlucoseUnitType } from '@/types/diabetes';
 
 interface GlucoseUnitOption {
     value: string;

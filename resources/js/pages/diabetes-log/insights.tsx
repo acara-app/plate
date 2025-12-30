@@ -14,7 +14,7 @@ import AppLayout from '@/layouts/app-layout';
 import { index as mealPlansIndex } from '@/routes/meal-plans';
 import onboarding from '@/routes/onboarding';
 import { type BreadcrumbItem } from '@/types';
-import { type GlucoseAnalysisData } from '@/types/glucose';
+import { type GlucoseAnalysisData } from '@/types/diabetes';
 import { type MealPlan } from '@/types/meal-plan';
 import { Head, Link, useForm } from '@inertiajs/react';
 import {

@@ -13,7 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { GlucoseUnit } from '@/types/glucose';
+import { GlucoseUnit } from '@/types/diabetes';
 import { Form } from '@inertiajs/react';
 import {
     Activity,

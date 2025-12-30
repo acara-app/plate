@@ -6,10 +6,13 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import {
+    type DiabetesLogEntry,
+    type DiabetesTrackingPageProps,
     GlucoseUnit,
     type GlucoseUnitType,
     MGDL_TO_MMOL_FACTOR,
-} from '@/types/glucose';
+} from '@/types/diabetes';
+import { usePage } from '@inertiajs/react';
 import {
     Bar,
     CartesianGrid,
@@ -23,31 +26,6 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
-
-interface DiabetesLogEntry {
-    id: number;
-    glucose_value: number | null;
-    glucose_reading_type: string | null;
-    measured_at: string;
-    notes: string | null;
-    insulin_units: number | null;
-    insulin_type: string | null;
-    medication_name: string | null;
-    medication_dosage: string | null;
-    weight: number | null;
-    blood_pressure_systolic: number | null;
-    blood_pressure_diastolic: number | null;
-    a1c_value: number | null;
-    carbs_grams: number | null;
-    exercise_type: string | null;
-    exercise_duration_minutes: number | null;
-    created_at: string;
-}
-
-interface Props {
-    logs: DiabetesLogEntry[];
-    glucoseUnit: GlucoseUnitType;
-}
 
 interface ChartDataPoint {
     date: string;
@@ -214,7 +192,11 @@ function CustomTooltip({ active, payload, label, glucoseUnit }: TooltipProps) {
     return null;
 }
 
-export default function CorrelationChart({ logs, glucoseUnit }: Props) {
+export default function CorrelationChart() {
+    const { logs, glucoseUnit, summary } =
+        usePage<DiabetesTrackingPageProps>().props;
+
+    const { dataTypes } = summary;
     const chartData = prepareChartData(logs, glucoseUnit);
 
     // Check if we have any meaningful data
@@ -484,32 +466,35 @@ export default function CorrelationChart({ logs, glucoseUnit }: Props) {
                             Correlation Insights
                         </p>
                         <div className="space-y-2 text-xs text-muted-foreground">
-                            {hasInsulin && hasGlucose && (
+                            {dataTypes.hasInsulin && dataTypes.hasGlucose && (
                                 <p>
                                     💉 <strong>Insulin:</strong> Track how your
                                     insulin doses affect glucose levels over
                                     time.
                                 </p>
                             )}
-                            {hasCarbs && hasGlucose && (
+                            {dataTypes.hasCarbs && dataTypes.hasGlucose && (
                                 <p>
                                     🍞 <strong>Carbs:</strong> Notice patterns
                                     between carb intake and glucose spikes.
                                 </p>
                             )}
-                            {hasExercise && hasGlucose && (
+                            {dataTypes.hasExercise && dataTypes.hasGlucose && (
                                 <p>
                                     🏃 <strong>Exercise:</strong> See how
                                     physical activity impacts your glucose
                                     control.
                                 </p>
                             )}
-                            {!hasInsulin && !hasCarbs && !hasExercise && (
-                                <p>
-                                    💡 Log insulin, carbs, or exercise to see
-                                    how they correlate with your glucose levels.
-                                </p>
-                            )}
+                            {!dataTypes.hasInsulin &&
+                                !dataTypes.hasCarbs &&
+                                !dataTypes.hasExercise && (
+                                    <p>
+                                        💡 Log insulin, carbs, or exercise to
+                                        see how they correlate with your glucose
+                                        levels.
+                                    </p>
+                                )}
                         </div>
                     </div>
                 </div>
