@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\GlucoseReading;
+use App\Models\DiabetesLog;
 use App\Models\User;
 use App\Services\GlucoseStatisticsService;
 
@@ -29,7 +29,7 @@ it('returns null stats for empty basic stats', function (): void {
 
 it('returns null for standard deviation with single reading', function (): void {
     $readings = collect([
-        GlucoseReading::factory()->make(['reading_value' => 100.0]),
+        DiabetesLog::factory()->make(['glucose_value' => 100.0]),
     ]);
 
     $stdDev = $this->service->calculateStandardDeviation(collect([100.0]));
@@ -45,7 +45,7 @@ it('returns null for coefficient of variation with empty readings', function ():
 
 it('returns null for coefficient of variation when mean is zero', function (): void {
     $readings = collect([
-        GlucoseReading::factory()->make(['reading_value' => 0.0]),
+        DiabetesLog::factory()->make(['glucose_value' => 0.0]),
     ]);
 
     $cv = $this->service->calculateCoefficientOfVariation($readings);
@@ -55,20 +55,20 @@ it('returns null for coefficient of variation when mean is zero', function (): v
 
 it('calculates time of day for all periods', function (): void {
     $readings = collect([
-        GlucoseReading::factory()->make([
-            'reading_value' => 90.0,
+        DiabetesLog::factory()->make([
+            'glucose_value' => 90.0,
             'measured_at' => now()->setTime(8, 0),
         ]),
-        GlucoseReading::factory()->make([
-            'reading_value' => 100.0,
+        DiabetesLog::factory()->make([
+            'glucose_value' => 100.0,
             'measured_at' => now()->setTime(14, 0),
         ]),
-        GlucoseReading::factory()->make([
-            'reading_value' => 110.0,
+        DiabetesLog::factory()->make([
+            'glucose_value' => 110.0,
             'measured_at' => now()->setTime(19, 0),
         ]),
-        GlucoseReading::factory()->make([
-            'reading_value' => 85.0,
+        DiabetesLog::factory()->make([
+            'glucose_value' => 85.0,
             'measured_at' => now()->setTime(23, 0),
         ]),
     ]);
@@ -90,8 +90,8 @@ it('returns empty frequency for empty readings', function (): void {
 
 it('returns null trend for less than 2 readings', function (): void {
     $readings = collect([
-        GlucoseReading::factory()->make([
-            'reading_value' => 100.0,
+        DiabetesLog::factory()->make([
+            'glucose_value' => 100.0,
             'measured_at' => now(),
         ]),
     ]);
@@ -105,12 +105,12 @@ it('returns null trend for less than 2 readings', function (): void {
 it('detects stable trend when days difference is zero', function (): void {
     $now = now();
     $readings = collect([
-        GlucoseReading::factory()->make([
-            'reading_value' => 100.0,
+        DiabetesLog::factory()->make([
+            'glucose_value' => 100.0,
             'measured_at' => $now,
         ]),
-        GlucoseReading::factory()->make([
-            'reading_value' => 105.0,
+        DiabetesLog::factory()->make([
+            'glucose_value' => 105.0,
             'measured_at' => $now,
         ]),
     ]);
@@ -125,12 +125,12 @@ it('handles zero denominator in trend calculation', function (): void {
     $now = now();
     // All readings at same time with same value - should return stable with null slope
     $readings = collect([
-        GlucoseReading::factory()->make([
-            'reading_value' => 100.0,
+        DiabetesLog::factory()->make([
+            'glucose_value' => 100.0,
             'measured_at' => $now,
         ]),
-        GlucoseReading::factory()->make([
-            'reading_value' => 100.0,
+        DiabetesLog::factory()->make([
+            'glucose_value' => 100.0,
             'measured_at' => $now,
         ]),
     ]);

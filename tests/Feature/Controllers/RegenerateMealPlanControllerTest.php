@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\GlucoseReading;
+use App\Models\DiabetesLog;
 use App\Models\MealPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
@@ -42,7 +42,7 @@ it('starts meal plan workflow and creates meal plan with generating status', fun
     $user = User::factory()->create();
 
     // Create some glucose data for analysis
-    GlucoseReading::factory()->count(5)->for($user)->create();
+    DiabetesLog::factory()->count(5)->for($user)->create();
 
     $response = actingAs($user)->post(route('meal-plans.regenerate'));
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\GlucoseUnit;
 use App\Enums\Sex;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -23,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property-read float|null $target_weight
  * @property-read string|null $additional_goals
  * @property-read int|null $lifestyle_id
+ * @property-read GlucoseUnit|null $units_preference
  * @property-read bool $onboarding_completed
  * @property-read CarbonInterface|null $onboarding_completed_at
  * @property-read CarbonInterface $created_at
@@ -64,6 +66,7 @@ final class UserProfile extends Model
             'target_weight' => 'float',
             'additional_goals' => 'string',
             'lifestyle_id' => 'integer',
+            'units_preference' => GlucoseUnit::class,
             'onboarding_completed' => 'boolean',
             'onboarding_completed_at' => 'datetime',
             'created_at' => 'datetime',

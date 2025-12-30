@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\MealPlanPromptBuilder;
-use App\Enums\ReadingType;
+use App\Enums\GlucoseReadingType;
 use App\Enums\Sex;
-use App\Models\GlucoseReading;
+use App\Models\DiabetesLog;
 use App\Models\Goal;
 use App\Models\Lifestyle;
 use App\Models\User;
@@ -29,17 +29,17 @@ it('includes glucose analysis in the prompt when glucose data exists', function 
     ]);
 
     // Create some glucose readings
-    GlucoseReading::factory()->create([
+    DiabetesLog::factory()->create([
         'user_id' => $user->id,
-        'reading_value' => 150.0,
-        'reading_type' => ReadingType::PostMeal,
+        'glucose_value' => 150.0,
+        'glucose_reading_type' => GlucoseReadingType::PostMeal,
         'measured_at' => now()->subDays(1),
     ]);
 
-    GlucoseReading::factory()->create([
+    DiabetesLog::factory()->create([
         'user_id' => $user->id,
-        'reading_value' => 155.0,
-        'reading_type' => ReadingType::PostMeal,
+        'glucose_value' => 155.0,
+        'glucose_reading_type' => GlucoseReadingType::PostMeal,
         'measured_at' => now()->subDays(2),
     ]);
 
@@ -100,19 +100,19 @@ it('includes glucose concerns when post-meal spikes are detected', function (): 
 
     // Create normal fasting and high post-meal readings to trigger spike detection without consistentlyHigh
     for ($i = 0; $i < 5; $i++) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => 90.0,
-            'reading_type' => ReadingType::Fasting,
+            'glucose_value' => 90.0,
+            'glucose_reading_type' => GlucoseReadingType::Fasting,
             'measured_at' => now()->subDays($i * 2),
         ]);
     }
 
     for ($i = 0; $i < 5; $i++) {
-        GlucoseReading::factory()->create([
+        DiabetesLog::factory()->create([
             'user_id' => $user->id,
-            'reading_value' => 160.0,
-            'reading_type' => ReadingType::PostMeal,
+            'glucose_value' => 160.0,
+            'glucose_reading_type' => GlucoseReadingType::PostMeal,
             'measured_at' => now()->subDays($i * 2 + 1),
         ]);
     }

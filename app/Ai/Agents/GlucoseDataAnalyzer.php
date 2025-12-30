@@ -16,7 +16,7 @@ use App\DataObjects\GlucoseAnalysis\TimeOfDayData;
 use App\DataObjects\GlucoseAnalysis\TimeOfDayPeriodData;
 use App\DataObjects\GlucoseAnalysis\TrendData;
 use App\DataObjects\GlucoseAnalysis\VariabilityData;
-use App\Enums\ReadingType;
+use App\Enums\GlucoseReadingType;
 use App\Models\User;
 use App\Services\GlucoseStatisticsService;
 use Illuminate\Support\Collection;
@@ -35,7 +35,9 @@ final readonly class GlucoseDataAnalyzer
     {
         $cutoffDate = \Illuminate\Support\Facades\Date::now()->subDays($daysBack);
 
-        $readings = $user->glucoseReadings()
+        // Use diabetesLogs and filter for entries with glucose data
+        $readings = $user->diabetesLogs()
+            ->whereNotNull('glucose_value')
             ->where('measured_at', '>=', $cutoffDate)
             ->latest('measured_at')
             ->get();
@@ -105,9 +107,9 @@ final readonly class GlucoseDataAnalyzer
         $patterns = $this->detectPatterns($readings, $timeInRange, $variability);
 
         // Generate insights with actual date range
-        /** @var \App\Models\GlucoseReading $firstReading */
+        /** @var \App\Models\DiabetesLog $firstReading */
         $firstReading = $readings->first();
-        /** @var \App\Models\GlucoseReading $lastReading */
+        /** @var \App\Models\DiabetesLog $lastReading */
         $lastReading = $readings->last();
 
         $actualDays = (int) $lastReading->measured_at->diffInDays($firstReading->measured_at) + 1;
@@ -215,19 +217,19 @@ final readonly class GlucoseDataAnalyzer
     /**
      * Calculate average glucose readings by type.
      *
-     * @param  Collection<int, \App\Models\GlucoseReading>  $readings
+     * @param  Collection<int, \App\Models\DiabetesLog>  $readings
      */
     private function calculateAverages(Collection $readings): AveragesData
     {
-        $grouped = $readings->groupBy(fn (\App\Models\GlucoseReading $reading): string => $reading->reading_type->value);
+        $grouped = $readings->groupBy(fn (\App\Models\DiabetesLog $reading): string => $reading->glucose_reading_type->value ?? GlucoseReadingType::Random->value);
 
-        $overallAvg = $readings->avg('reading_value');
+        $overallAvg = $readings->avg('glucose_value');
 
         return new AveragesData(
-            fasting: $this->calculateAverage($grouped->get(ReadingType::Fasting->value)),
-            beforeMeal: $this->calculateAverage($grouped->get(ReadingType::BeforeMeal->value)),
-            postMeal: $this->calculateAverage($grouped->get(ReadingType::PostMeal->value)),
-            random: $this->calculateAverage($grouped->get(ReadingType::Random->value)),
+            fasting: $this->calculateAverage($grouped->get(GlucoseReadingType::Fasting->value)),
+            beforeMeal: $this->calculateAverage($grouped->get(GlucoseReadingType::BeforeMeal->value)),
+            postMeal: $this->calculateAverage($grouped->get(GlucoseReadingType::PostMeal->value)),
+            random: $this->calculateAverage($grouped->get(GlucoseReadingType::Random->value)),
             overall: is_numeric($overallAvg) ? round((float) $overallAvg, 1) : null,
         );
     }
@@ -235,7 +237,7 @@ final readonly class GlucoseDataAnalyzer
     /**
      * Calculate average for a collection of readings.
      *
-     * @param  Collection<int, \App\Models\GlucoseReading>|null  $readings
+     * @param  Collection<int, \App\Models\DiabetesLog>|null  $readings
      */
     private function calculateAverage(?Collection $readings): ?float
     {
@@ -243,7 +245,7 @@ final readonly class GlucoseDataAnalyzer
             return null;
         }
 
-        $avg = $readings->avg('reading_value');
+        $avg = $readings->avg('glucose_value');
 
         return is_numeric($avg) ? round((float) $avg, 1) : null;
     }
@@ -251,13 +253,13 @@ final readonly class GlucoseDataAnalyzer
     /**
      * Detect patterns in glucose readings with enhanced TIR-based analysis.
      *
-     * @param  Collection<int, \App\Models\GlucoseReading>  $readings
+     * @param  Collection<int, \App\Models\DiabetesLog>  $readings
      */
     private function detectPatterns(Collection $readings, TimeInRangeData $timeInRange, VariabilityData $variability): PatternsData
     {
-        $postMealReadings = $readings->where('reading_type', ReadingType::PostMeal);
+        $postMealReadings = $readings->where('glucose_reading_type', GlucoseReadingType::PostMeal);
         $highPostMeal = $postMealReadings->filter(
-            fn (\App\Models\GlucoseReading $r): bool => $r->reading_value > GlucoseStatisticsService::POST_MEAL_SPIKE_THRESHOLD
+            fn (\App\Models\DiabetesLog $r): bool => $r->glucose_value > GlucoseStatisticsService::POST_MEAL_SPIKE_THRESHOLD
         )->count();
 
         // Determine hypoglycemia risk based on time-below-range

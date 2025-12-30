@@ -1,3 +1,4 @@
+import DashboardDiabetesLogController from '@/actions/App/Http/Controllers/Diabetes/DashboardDiabetesLogController';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -13,8 +14,7 @@ import {
 import { UpgradeButton } from '@/components/upgrade-button';
 import useSharedProps from '@/hooks/use-shared-props';
 import { dashboard, privacy, terms } from '@/routes';
-import glucoseReading from '@/routes/glucose';
-import glucoseAction from '@/routes/glucose-action';
+import diabetesLog from '@/routes/diabetes-log';
 import mealPlans from '@/routes/meal-plans';
 import biometrics from '@/routes/onboarding/biometrics';
 import { type NavItem } from '@/types';
@@ -42,13 +42,13 @@ const mainNavItems: NavItem[] = [
         icon: CalendarHeartIcon,
     },
     {
-        title: 'Glucose Insights',
-        href: glucoseAction.show(),
+        title: 'Diabetes Insights',
+        href: diabetesLog.insights(),
         icon: TrendingUp,
     },
     {
-        title: 'Glucose Tracking',
-        href: glucoseReading.dashboard(),
+        title: 'Diabetes Log',
+        href: DashboardDiabetesLogController().url,
         icon: ActivityIcon,
     },
     {

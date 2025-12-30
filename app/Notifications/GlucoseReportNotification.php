@@ -69,10 +69,10 @@ final class GlucoseReportNotification extends Notification implements ShouldQueu
     }
 
     /**
-     * Generate a URL for the glucose action page.
+     * Generate a URL for the diabetes insights page.
      */
     private function generateMealPlanUrl(): string
     {
-        return route('glucose-action.show', absolute: true);
+        return route('diabetes-log.insights', absolute: true);
     }
 }

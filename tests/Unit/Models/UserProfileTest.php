@@ -33,6 +33,7 @@ test('to array', function (): void {
             'bmi',
             'bmr',
             'tdee',
+            'units_preference'
         );
 });
 

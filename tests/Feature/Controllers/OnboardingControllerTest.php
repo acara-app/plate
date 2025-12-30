@@ -532,6 +532,22 @@ it('requires valid health condition ids', function (): void {
     $response->assertSessionHasErrors('health_condition_ids.0');
 });
 
+it('stores units_preference when provided', function (): void {
+    WorkflowStub::fake();
+
+    $user = User::factory()->create();
+    $user->profile()->create([]);
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.health-conditions.store'), [
+            'units_preference' => 'mmol/L',
+        ]);
+
+    $response->assertRedirectToRoute('onboarding.completion.show');
+
+    expect($user->profile->fresh()->units_preference->value)->toBe('mmol/L');
+});
+
 it('requires notes to be at most 500 characters', function (): void {
     $user = User::factory()->create();
     $condition = HealthCondition::factory()->create();
