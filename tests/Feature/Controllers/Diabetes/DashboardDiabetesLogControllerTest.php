@@ -105,4 +105,3 @@ it('includes todays meals from meal plan on dashboard', function (): void {
     $response->assertOk()
         ->assertInertia(fn ($page) => $page->has('todaysMeals'));
 });
-
