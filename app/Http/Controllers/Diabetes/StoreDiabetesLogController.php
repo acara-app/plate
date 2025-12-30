@@ -19,12 +19,10 @@ final readonly class StoreDiabetesLogController
 
     public function __invoke(StoreDiabetesLogRequest $request): RedirectResponse
     {
-        $user = $this->currentUser;
-
         $data = $request->validated();
 
         $this->recordDiabetesLog->handle(
-            $data + ['user_id' => $user->id]
+            $data + ['user_id' => $this->currentUser->id]
         );
 
         return back()->with('success', 'Diabetes log entry recorded successfully.');
