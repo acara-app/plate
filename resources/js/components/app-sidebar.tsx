@@ -1,3 +1,4 @@
+import DashboardDiabetesLogController from '@/actions/App/Http/Controllers/Diabetes/DashboardDiabetesLogController';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -47,7 +48,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Diabetes Log',
-        href: diabetesLog.dashboard(),
+        href: DashboardDiabetesLogController().url,
         icon: ActivityIcon,
     },
     {

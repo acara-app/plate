@@ -1,4 +1,4 @@
-import DiabetesLogController from '@/actions/App/Http/Controllers/DiabetesLogController';
+import UpdateDiabetesLogController from '@/actions/App/Http/Controllers/Diabetes/UpdateDiabetesLogController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -140,7 +140,7 @@ export default function EditDiabetesLogForm({
 
     return (
         <Form
-            {...DiabetesLogController.update.form(logEntry.id)}
+            {...UpdateDiabetesLogController.form(logEntry.id)}
             disableWhileProcessing
             onSuccess={onCancel}
             className="space-y-4"

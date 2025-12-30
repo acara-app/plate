@@ -2,65 +2,25 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Diabetes;
 
-use App\Actions\AnalyzeGlucoseForNotificationAction;
-use App\Actions\DeleteDiabetesLogAction;
-use App\Actions\GetUserDiabetesLogsAction;
-use App\Actions\RecordDiabetesLogAction;
-use App\Actions\UpdateDiabetesLogAction;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\InsulinType;
-use App\Http\Requests\StoreDiabetesLogRequest;
-use App\Http\Requests\UpdateDiabetesLogRequest;
 use App\Models\DiabetesLog;
 use App\Models\Meal;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-final readonly class DiabetesLogController
+final readonly class DashboardDiabetesLogController
 {
     public function __construct(
-        private RecordDiabetesLogAction $recordDiabetesLog,
-        private GetUserDiabetesLogsAction $getUserDiabetesLogs,
-        private UpdateDiabetesLogAction $updateDiabetesLog,
-        private DeleteDiabetesLogAction $deleteDiabetesLog,
-        private AnalyzeGlucoseForNotificationAction $analyzeAction,
         #[CurrentUser()] private User $currentUser,
     ) {}
 
-    public function index(): Response
-    {
-        $user = $this->currentUser;
-
-        $logs = $this->getUserDiabetesLogs->handle($user);
-
-        return Inertia::render('diabetes-log/index', [
-            'logs' => $logs,
-            'glucoseReadingTypes' => collect(GlucoseReadingType::cases())->map(fn (GlucoseReadingType $type): array => [
-                'value' => $type->value,
-                'label' => $type->value,
-            ]),
-            'insulinTypes' => collect(InsulinType::cases())->map(fn (InsulinType $type): array => [
-                'value' => $type->value,
-                'label' => ucfirst($type->value),
-            ]),
-            'glucoseUnit' => $user->profile?->units_preference->value ?? GlucoseUnit::MmolL->value,
-            'recentMedications' => $this->getRecentMedications($user),
-            'recentInsulins' => $this->getRecentInsulins($user),
-            'todaysMeals' => $this->getTodaysMeals($user),
-        ]);
-    }
-
-    /**
-     * Display the diabetes log dashboard with visualizations and analytics.
-     */
-    public function dashboard(): Response
+    public function __invoke(): Response
     {
         $user = $this->currentUser;
 
@@ -103,67 +63,6 @@ final readonly class DiabetesLogController
             'recentInsulins' => $this->getRecentInsulins($user),
             'todaysMeals' => $this->getTodaysMeals($user),
         ]);
-    }
-
-    /**
-     * Display the diabetes insights (merged from glucose action).
-     */
-    public function insights(): Response
-    {
-        $analysisResult = $this->analyzeAction->handle($this->currentUser);
-
-        return Inertia::render('diabetes-log/insights', [
-            'glucoseAnalysis' => $analysisResult->analysisData,
-            'concerns' => $analysisResult->concerns,
-            'hasMealPlan' => $this->currentUser->has_meal_plan,
-            'mealPlan' => $this->currentUser->mealPlans()->latest()->first(),
-        ]);
-    }
-
-    /**
-     * Store a newly created diabetes log.
-     */
-    public function store(StoreDiabetesLogRequest $request): RedirectResponse
-    {
-        $user = $this->currentUser;
-
-        $data = $request->validated();
-
-        $this->recordDiabetesLog->handle(
-            $data + ['user_id' => $user->id]
-        );
-
-        return back()->with('success', 'Diabetes log entry recorded successfully.');
-    }
-
-    /**
-     * Update the specified diabetes log.
-     */
-    public function update(UpdateDiabetesLogRequest $request, DiabetesLog $diabetesLog): RedirectResponse
-    {
-        // Ensure the user owns this log
-        abort_if($diabetesLog->user_id !== $this->currentUser->id, 403);
-
-        $data = $request->validated();
-
-        $this->updateDiabetesLog->handle($diabetesLog, $data);
-
-        return back()->with('success', 'Diabetes log entry updated successfully.');
-    }
-
-    /**
-     * Remove the specified diabetes log.
-     */
-    public function destroy(Request $request, DiabetesLog $diabetesLog): RedirectResponse
-    {
-        $user = $request->user();
-
-        // Ensure the user owns this log
-        abort_if($diabetesLog->user_id !== $user?->id, 403);
-
-        $this->deleteDiabetesLog->handle($diabetesLog);
-
-        return back()->with('success', 'Diabetes log entry deleted successfully.');
     }
 
     /**

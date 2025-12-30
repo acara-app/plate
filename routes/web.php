@@ -42,12 +42,12 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('ongoing-tracking/food-log/create', [Web\FoodLogController::class, 'create'])->name('food-log.create');
 
     // Diabetes Log Tracking (formerly Glucose Tracking)...
-    Route::get('diabetes-log', [Web\DiabetesLogController::class, 'index'])->name('diabetes-log.index');
-    Route::get('diabetes-log/tracking', [Web\DiabetesLogController::class, 'dashboard'])->name('diabetes-log.dashboard');
-    Route::get('diabetes-log/insights', [Web\DiabetesLogController::class, 'insights'])->name('diabetes-log.insights');
-    Route::post('diabetes-log', [Web\DiabetesLogController::class, 'store'])->name('diabetes-log.store');
-    Route::put('diabetes-log/{diabetesLog}', [Web\DiabetesLogController::class, 'update'])->name('diabetes-log.update');
-    Route::delete('diabetes-log/{diabetesLog}', [Web\DiabetesLogController::class, 'destroy'])->name('diabetes-log.destroy');
+    Route::get('diabetes-log', Web\Diabetes\ListDiabetesLogController::class)->name('diabetes-log.index');
+    Route::get('diabetes-log/tracking', Web\Diabetes\DashboardDiabetesLogController::class)->name('diabetes-log.dashboard');
+    Route::get('diabetes-log/insights', Web\Diabetes\InsightsDiabetesLogController::class)->name('diabetes-log.insights');
+    Route::post('diabetes-log', Web\Diabetes\StoreDiabetesLogController::class)->name('diabetes-log.store');
+    Route::put('diabetes-log/{diabetesLog}', Web\Diabetes\UpdateDiabetesLogController::class)->name('diabetes-log.update');
+    Route::delete('diabetes-log/{diabetesLog}', Web\Diabetes\DestroyDiabetesLogController::class)->name('diabetes-log.destroy');
 });
 
 Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(function (): void {

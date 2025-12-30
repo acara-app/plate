@@ -1,4 +1,6 @@
-import DiabetesLogController from '@/actions/App/Http/Controllers/DiabetesLogController';
+import DashboardDiabetesLogController from '@/actions/App/Http/Controllers/Diabetes/DashboardDiabetesLogController';
+import DestroyDiabetesLogController from '@/actions/App/Http/Controllers/Diabetes/DestroyDiabetesLogController';
+import ListDiabetesLogController from '@/actions/App/Http/Controllers/Diabetes/ListDiabetesLogController';
 import AdminPageWrap from '@/components/sections/admin-page-wrap';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,7 +20,7 @@ import DiabetesLogDialog from './diabetes-log-dialog';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Diabetes Log',
-        href: DiabetesLogController.index().url,
+        href: ListDiabetesLogController().url,
     },
 ];
 
@@ -97,7 +99,7 @@ export default function DiabetesLogIndex({
 
     const handleDelete = (id: number) => {
         if (confirm('Are you sure you want to delete this entry?')) {
-            router.delete(DiabetesLogController.destroy(id).url, {
+            router.delete(DestroyDiabetesLogController(id).url, {
                 preserveScroll: true,
             });
         }
@@ -119,7 +121,9 @@ export default function DiabetesLogIndex({
                         </div>
                         <div className="flex gap-2">
                             <Button variant="outline" asChild>
-                                <Link href={DiabetesLogController.dashboard()}>
+                                <Link
+                                    href={DashboardDiabetesLogController().url}
+                                >
                                     <BarChart3 className="mr-2 size-4" />
                                     View Dashboard
                                 </Link>

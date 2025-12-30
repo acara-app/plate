@@ -1,4 +1,4 @@
-import DiabetesLogController from '@/actions/App/Http/Controllers/DiabetesLogController';
+import ListDiabetesLogController from '@/actions/App/Http/Controllers/Diabetes/ListDiabetesLogController';
 import AdminPageWrap from '@/components/sections/admin-page-wrap';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +24,7 @@ import TimePeriodFilter, { type TimePeriod } from './time-period-filter';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Diabetes Log',
-        href: DiabetesLogController.index().url,
+        href: ListDiabetesLogController().url,
     },
 ];
 
@@ -162,7 +162,7 @@ export default function DiabetesLogDashboard({
                         </div>
                         <div className="flex gap-2">
                             <Button variant="outline" size="icon" asChild>
-                                <Link href={DiabetesLogController.index()}>
+                                <Link href={ListDiabetesLogController().url}>
                                     <List className="size-4" />
                                 </Link>
                             </Button>
