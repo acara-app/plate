@@ -13,6 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { GlucoseUnit } from '@/types/glucose';
 import { Form } from '@inertiajs/react';
 import {
     Activity,
@@ -126,7 +127,7 @@ export default function EditDiabetesLogForm({
     );
 
     const glucosePlaceholder =
-        glucoseUnit === 'mmol/L' ? 'e.g., 6.7' : 'e.g., 120';
+        glucoseUnit === GlucoseUnit.MmolL ? 'e.g., 6.7' : 'e.g., 120';
 
     const handleMedicationChipClick = (med: RecentMedication) => {
         setMedicationName(med.name);

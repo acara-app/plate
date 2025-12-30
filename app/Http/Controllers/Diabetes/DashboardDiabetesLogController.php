@@ -18,16 +18,13 @@ final readonly class DashboardDiabetesLogController
 
     public function __invoke(): Response
     {
-        $user = $this->currentUser;
-
-        // Get all logs for visualization (not paginated)
-        $allLogs = $user->diabetesLogs()
+        $allLogs = $this->currentUser->diabetesLogs()
             ->latest('measured_at')
             ->get();
 
         return Inertia::render('diabetes-log/tracking', [
             'logs' => $allLogs,
-            ...DiabetesLayout::props($user),
+            ...DiabetesLayout::props($this->currentUser),
         ]);
     }
 }
