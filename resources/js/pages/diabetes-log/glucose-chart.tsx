@@ -69,7 +69,9 @@ function calculateMovingAverage(
     const end = Math.min(values.length, index + Math.ceil(window / 2));
     const windowValues = values.slice(start, end);
 
-    if (windowValues.length < 2) return null;
+    if (windowValues.length < 2) {
+        return null;
+    }
 
     return (
         Math.round(
