@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\GlucoseUnit;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -30,6 +31,7 @@ final class UserProfileFactory extends Factory
             'lifestyle_id' => \App\Models\Lifestyle::factory(),
             'onboarding_completed' => false,
             'onboarding_completed_at' => null,
+            'units_preference' => fake()->randomElement(GlucoseUnit::cases()),
         ];
     }
 }
