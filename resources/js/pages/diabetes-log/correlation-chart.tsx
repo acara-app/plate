@@ -5,12 +5,12 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { convertGlucoseValue } from '@/lib/utils';
 import {
     type DiabetesLogEntry,
     type DiabetesTrackingPageProps,
     GlucoseUnit,
     type GlucoseUnitType,
-    MGDL_TO_MMOL_FACTOR,
 } from '@/types/diabetes';
 import { usePage } from '@inertiajs/react';
 import {
@@ -42,13 +42,6 @@ interface ChartDataPoint {
 
 const NORMAL_RANGE_MIN = 70;
 const NORMAL_RANGE_MAX = 140;
-
-function convertGlucose(mgdl: number, targetUnit: GlucoseUnitType): number {
-    if (targetUnit === GlucoseUnit.MmolL) {
-        return Math.round((mgdl / MGDL_TO_MMOL_FACTOR) * 10) / 10;
-    }
-    return Math.round(mgdl);
-}
 
 function prepareChartData(
     logs: DiabetesLogEntry[],
@@ -122,7 +115,7 @@ function prepareChartData(
             glucose: avgGlucose,
             glucoseDisplay:
                 avgGlucose !== null
-                    ? convertGlucose(avgGlucose, glucoseUnit)
+                    ? convertGlucoseValue(avgGlucose, glucoseUnit)
                     : null,
             insulin: insulinTotal > 0 ? insulinTotal : null,
             insulinType: insulinTypes.join(', ') || null,
@@ -240,8 +233,14 @@ export default function CorrelationChart() {
     const yGlucoseMax = glucoseMax + padding;
 
     // Convert reference lines to display unit
-    const normalRangeMinDisplay = convertGlucose(NORMAL_RANGE_MIN, glucoseUnit);
-    const normalRangeMaxDisplay = convertGlucose(NORMAL_RANGE_MAX, glucoseUnit);
+    const normalRangeMinDisplay = convertGlucoseValue(
+        NORMAL_RANGE_MIN,
+        glucoseUnit,
+    );
+    const normalRangeMaxDisplay = convertGlucoseValue(
+        NORMAL_RANGE_MAX,
+        glucoseUnit,
+    );
 
     const insulinValues = chartData
         .filter((d) => d.insulin !== null)

@@ -1,10 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    type DiabetesTrackingPageProps,
-    GlucoseUnit,
-    type GlucoseUnitType,
-    MGDL_TO_MMOL_FACTOR,
-} from '@/types/diabetes';
+import { convertGlucoseValue } from '@/lib/utils';
+import { type DiabetesTrackingPageProps } from '@/types/diabetes';
 import { usePage } from '@inertiajs/react';
 import {
     Activity,
@@ -27,20 +23,6 @@ interface StatCardProps {
     trend?: 'up' | 'down' | 'stable';
     trendValue?: string;
     colorClass?: string;
-}
-
-// Conversion helper: mg/dL to mmol/L
-function convertGlucose(
-    value: number,
-    targetUnit: GlucoseUnitType,
-): { value: number; unit: GlucoseUnitType } {
-    if (targetUnit === GlucoseUnit.MmolL) {
-        return {
-            value: Math.round((value / MGDL_TO_MMOL_FACTOR) * 10) / 10,
-            unit: GlucoseUnit.MmolL,
-        };
-    }
-    return { value: Math.round(value), unit: GlucoseUnit.MgDl };
 }
 
 function StatCard({
@@ -104,9 +86,9 @@ export default function DashboardSummaryCards() {
     } = summary;
 
     // Convert glucose values to user's preferred unit
-    const avgGlucose = convertGlucose(glucoseStats.avg, glucoseUnit);
-    const minGlucose = convertGlucose(glucoseStats.min, glucoseUnit);
-    const maxGlucose = convertGlucose(glucoseStats.max, glucoseUnit);
+    const avgGlucose = convertGlucoseValue(glucoseStats.avg, glucoseUnit);
+    const minGlucose = convertGlucoseValue(glucoseStats.min, glucoseUnit);
+    const maxGlucose = convertGlucoseValue(glucoseStats.max, glucoseUnit);
 
     return (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -127,7 +109,7 @@ export default function DashboardSummaryCards() {
                 value={glucoseStats.count}
                 subtitle={
                     glucoseStats.count > 0
-                        ? `Avg: ${avgGlucose.value} ${glucoseUnit} (${minGlucose.value}-${maxGlucose.value})`
+                        ? `Avg: ${avgGlucose} ${glucoseUnit} (${minGlucose}-${maxGlucose})`
                         : 'No readings'
                 }
                 icon={<Droplet className="size-4" />}

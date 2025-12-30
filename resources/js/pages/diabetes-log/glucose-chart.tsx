@@ -5,11 +5,11 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { convertGlucoseValue } from '@/lib/utils';
 import {
     GlucoseThresholds,
     GlucoseUnit,
     type GlucoseUnitType,
-    MGDL_TO_MMOL_FACTOR,
 } from '@/types/diabetes';
 import {
     CartesianGrid,
@@ -59,13 +59,6 @@ const POSTMEAL_THRESHOLDS_MGDL = {
     normalMax: 180,
     high: 200,
 };
-
-function convertGlucose(mgdl: number, targetUnit: GlucoseUnitType): number {
-    if (targetUnit === GlucoseUnit.MmolL) {
-        return Math.round((mgdl / MGDL_TO_MMOL_FACTOR) * 10) / 10;
-    }
-    return Math.round(mgdl);
-}
 
 function calculateMovingAverage(
     values: number[],
@@ -117,12 +110,15 @@ function prepareChartData(
                 minute: '2-digit',
             }),
             value: reading.reading_value,
-            displayValue: convertGlucose(reading.reading_value, glucoseUnit),
+            displayValue: convertGlucoseValue(
+                reading.reading_value,
+                glucoseUnit,
+            ),
             type: reading.reading_type,
             fullDate: date,
             isFasting,
             movingAvg: movingAvgRaw
-                ? convertGlucose(movingAvgRaw, glucoseUnit)
+                ? convertGlucoseValue(movingAvgRaw, glucoseUnit)
                 : null,
         };
     });
@@ -226,9 +222,9 @@ export default function GlucoseChart({ readings, glucoseUnit }: Props) {
     const postMealThresholds = GlucoseThresholds.postMeal[glucoseUnit];
 
     // Convert thresholds for display
-    const lowThreshold = convertGlucose(70, glucoseUnit);
-    const fastingTarget = convertGlucose(100, glucoseUnit);
-    const postMealTarget = convertGlucose(180, glucoseUnit);
+    const lowThreshold = convertGlucoseValue(70, glucoseUnit);
+    const fastingTarget = convertGlucoseValue(100, glucoseUnit);
+    const postMealTarget = convertGlucoseValue(180, glucoseUnit);
 
     if (readings.length === 0) {
         return (
