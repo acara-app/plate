@@ -29,5 +29,4 @@ final readonly class StoreDiabetesLogController
 
         return back()->with('success', 'Diabetes log entry recorded successfully.');
     }
-
 }

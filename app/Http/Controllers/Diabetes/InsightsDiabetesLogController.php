@@ -17,8 +17,6 @@ final readonly class InsightsDiabetesLogController
         #[CurrentUser()] private User $currentUser,
     ) {}
 
-   
-
     public function __invoke(): Response
     {
         $analysisResult = $this->analyzeAction->handle($this->currentUser);
@@ -30,5 +28,4 @@ final readonly class InsightsDiabetesLogController
             'mealPlan' => $this->currentUser->mealPlans()->latest()->first(),
         ]);
     }
-
 }

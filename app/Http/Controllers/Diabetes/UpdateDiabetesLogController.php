@@ -9,7 +9,7 @@ use App\Http\Requests\UpdateDiabetesLogRequest;
 use App\Models\DiabetesLog;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
-use Illuminate\Http\RedirectResponse;   
+use Illuminate\Http\RedirectResponse;
 
 final readonly class UpdateDiabetesLogController
 {
@@ -18,7 +18,6 @@ final readonly class UpdateDiabetesLogController
         #[CurrentUser()] private User $currentUser,
     ) {}
 
-  
     public function __invoke(UpdateDiabetesLogRequest $request, DiabetesLog $diabetesLog): RedirectResponse
     {
         abort_if($diabetesLog->user_id !== $this->currentUser->id, 403);
@@ -29,5 +28,4 @@ final readonly class UpdateDiabetesLogController
 
         return back()->with('success', 'Diabetes log entry updated successfully.');
     }
-
 }
