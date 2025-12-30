@@ -41,7 +41,6 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
     Route::get('ongoing-tracking/food-log/create', [Web\FoodLogController::class, 'create'])->name('food-log.create');
 
-    // Diabetes Log Tracking (formerly Glucose Tracking)...
     Route::get('diabetes-log', Web\Diabetes\ListDiabetesLogController::class)->name('diabetes-log.index');
     Route::get('diabetes-log/tracking', Web\Diabetes\DashboardDiabetesLogController::class)->name('diabetes-log.dashboard');
     Route::get('diabetes-log/insights', Web\Diabetes\InsightsDiabetesLogController::class)->name('diabetes-log.insights');
