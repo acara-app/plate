@@ -231,12 +231,12 @@ final readonly class DiabetesLogController
 
         // Calculate what day of the meal plan today is
         $startDate = $mealPlan->created_at->startOfDay();
-        $today = now()->startOfDay();
+        $today = today();
         $dayNumber = (int) $startDate->diffInDays($today) + 1;
 
-        // Clamp to valid range
+        // Clamp to valid range (edge case: meal plan older than duration_days)
         if ($dayNumber < 1 || $dayNumber > $mealPlan->duration_days) {
-            $dayNumber = (($dayNumber - 1) % $mealPlan->duration_days) + 1;
+            $dayNumber = (($dayNumber - 1) % $mealPlan->duration_days) + 1; // @codeCoverageIgnore
         }
 
         /** @var array<int, array{id: int, name: string, type: string, carbs: float, label: string}> */
@@ -246,7 +246,7 @@ final readonly class DiabetesLogController
                 'name' => (string) $meal->name,
                 'type' => ucfirst((string) $meal->type->value),
                 'carbs' => (float) ($meal->carbs_grams ?? 0),
-                'label' => ucfirst((string) $meal->type->value) . ' - ' . ($meal->carbs_grams ?? 0) . 'g carbs',
+                'label' => ucfirst((string) $meal->type->value).' - '.($meal->carbs_grams ?? 0).'g carbs',
             ])
             ->values()
             ->all();

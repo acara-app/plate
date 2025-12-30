@@ -267,3 +267,31 @@ it('renders diabetes insights page', function (): void {
             ->has('hasMealPlan')
             ->has('mealPlan'));
 });
+
+it('includes todays meals from meal plan on dashboard', function (): void {
+    $user = User::factory()->create();
+    $mealPlan = App\Models\MealPlan::factory()->create(['user_id' => $user->id]);
+    App\Models\Meal::factory()->count(3)->create(['meal_plan_id' => $mealPlan->id, 'day_number' => 1]);
+
+    $response = $this->actingAs($user)
+        ->get(route('diabetes-log.dashboard'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('diabetes-log/tracking')
+            ->has('todaysMeals'));
+});
+
+it('includes todays meals on index page', function (): void {
+    $user = User::factory()->create();
+    $mealPlan = App\Models\MealPlan::factory()->create(['user_id' => $user->id]);
+    App\Models\Meal::factory()->count(2)->create(['meal_plan_id' => $mealPlan->id, 'day_number' => 1]);
+
+    $response = $this->actingAs($user)
+        ->get(route('diabetes-log.index'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('diabetes-log/index')
+            ->has('todaysMeals'));
+});

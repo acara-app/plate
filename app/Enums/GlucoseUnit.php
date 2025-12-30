@@ -15,6 +15,22 @@ enum GlucoseUnit: string
     case MmolL = 'mmol/L';
 
     /**
+     * Convert a value from mg/dL to mmol/L
+     */
+    public static function mgDlToMmolL(float $value): float
+    {
+        return round($value / 18.0182, 1);
+    }
+
+    /**
+     * Convert a value from mmol/L to mg/dL
+     */
+    public static function mmolLToMgDl(float $value): float
+    {
+        return round($value * 18.0182, 0);
+    }
+
+    /**
      * Get the placeholder value for the glucose input.
      */
     public function placeholder(): string
@@ -31,21 +47,5 @@ enum GlucoseUnit: string
     public function label(): string
     {
         return $this->value;
-    }
-
-    /**
-     * Convert a value from mg/dL to mmol/L
-     */
-    public static function mgDlToMmolL(float $value): float
-    {
-        return round($value / 18.0182, 1);
-    }
-
-    /**
-     * Convert a value from mmol/L to mg/dL
-     */
-    public static function mmolLToMgDl(float $value): float
-    {
-        return round($value * 18.0182, 0);
     }
 }

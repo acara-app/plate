@@ -13,10 +13,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('user_profiles', function (Blueprint $table) {
+        Schema::table('user_profiles', function (Blueprint $table): void {
             $table->string('units_preference')->nullable()->after('lifestyle_id');
         });
     }
-
 };
-

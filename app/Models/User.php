@@ -113,8 +113,6 @@ final class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(MealPlan::class)->latest();
     }
 
-
-
     /**
      * @return HasMany<DiabetesLog, $this>
      */
