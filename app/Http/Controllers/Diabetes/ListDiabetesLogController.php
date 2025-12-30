@@ -22,7 +22,7 @@ final readonly class ListDiabetesLogController
     {
         $user = $this->currentUser;
 
-        $logs = $this->getUserDiabetesLogs->handle($user);
+        $logs = Inertia::scroll(fn () => $this->getUserDiabetesLogs->handle($user));
 
         return Inertia::render('diabetes-log/index', [
             'logs' => $logs,

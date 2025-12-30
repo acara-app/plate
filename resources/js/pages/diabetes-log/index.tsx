@@ -13,7 +13,7 @@ import {
 import useModalToggle, { useModalValueToggle } from '@/hooks/use-modal-toggle';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, InfiniteScroll, Link, router } from '@inertiajs/react';
 import { BarChart3, Pencil, Plus, Trash2 } from 'lucide-react';
 import DiabetesLogDialog from './diabetes-log-dialog';
 
@@ -180,103 +180,118 @@ export default function DiabetesLogIndex({
                                     get started.
                                 </div>
                             ) : (
-                                <ul className="space-y-4">
-                                    {logs.data.map((log) => (
-                                        <li
-                                            key={log.id}
-                                            className="flex items-start justify-between rounded-lg border p-4"
-                                        >
-                                            <div className="space-y-1">
-                                                <div className="flex flex-wrap items-center gap-2">
-                                                    {log.glucose_value && (
-                                                        <>
-                                                            <span className="text-2xl font-bold">
-                                                                {
-                                                                    log.glucose_value
-                                                                }
-                                                            </span>
-                                                            <span className="text-sm text-muted-foreground">
-                                                                {glucoseUnit}
-                                                            </span>
-                                                            {log.glucose_reading_type && (
-                                                                <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                                <InfiniteScroll
+                                    data="logs"
+                                    preserveUrl
+                                    onlyNext
+                                >
+                                    <ul className="space-y-4">
+                                        {logs.data.map((log) => (
+                                            <li
+                                                key={log.id}
+                                                className="flex items-start justify-between rounded-lg border p-4"
+                                            >
+                                                <div className="space-y-1">
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        {log.glucose_value && (
+                                                            <>
+                                                                <span className="text-2xl font-bold">
                                                                     {
-                                                                        log.glucose_reading_type
+                                                                        log.glucose_value
                                                                     }
                                                                 </span>
-                                                            )}
-                                                        </>
-                                                    )}
-                                                    {log.insulin_units && (
-                                                        <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
-                                                            {log.insulin_units}u{' '}
-                                                            {log.insulin_type}
-                                                        </span>
-                                                    )}
-                                                    {log.weight && (
-                                                        <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">
-                                                            {log.weight} lbs
-                                                        </span>
-                                                    )}
-                                                    {log.blood_pressure_systolic &&
-                                                        log.blood_pressure_diastolic && (
-                                                            <span className="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-700">
+                                                                <span className="text-sm text-muted-foreground">
+                                                                    {
+                                                                        glucoseUnit
+                                                                    }
+                                                                </span>
+                                                                {log.glucose_reading_type && (
+                                                                    <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                                                                        {
+                                                                            log.glucose_reading_type
+                                                                        }
+                                                                    </span>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                        {log.insulin_units && (
+                                                            <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
                                                                 {
-                                                                    log.blood_pressure_systolic
+                                                                    log.insulin_units
                                                                 }
-                                                                /
+                                                                u{' '}
                                                                 {
-                                                                    log.blood_pressure_diastolic
-                                                                }{' '}
-                                                                BP
+                                                                    log.insulin_type
+                                                                }
                                                             </span>
                                                         )}
+                                                        {log.weight && (
+                                                            <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">
+                                                                {log.weight} lbs
+                                                            </span>
+                                                        )}
+                                                        {log.blood_pressure_systolic &&
+                                                            log.blood_pressure_diastolic && (
+                                                                <span className="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-700">
+                                                                    {
+                                                                        log.blood_pressure_systolic
+                                                                    }
+                                                                    /
+                                                                    {
+                                                                        log.blood_pressure_diastolic
+                                                                    }{' '}
+                                                                    BP
+                                                                </span>
+                                                            )}
+                                                    </div>
+                                                    <time
+                                                        className="block text-sm text-muted-foreground"
+                                                        dateTime={
+                                                            log.measured_at
+                                                        }
+                                                    >
+                                                        {new Date(
+                                                            log.measured_at,
+                                                        ).toLocaleString()}
+                                                    </time>
+                                                    {log.notes && (
+                                                        <p className="text-sm">
+                                                            {log.notes}
+                                                        </p>
+                                                    )}
                                                 </div>
-                                                <time
-                                                    className="block text-sm text-muted-foreground"
-                                                    dateTime={log.measured_at}
-                                                >
-                                                    {new Date(
-                                                        log.measured_at,
-                                                    ).toLocaleString()}
-                                                </time>
-                                                {log.notes && (
-                                                    <p className="text-sm">
-                                                        {log.notes}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() =>
-                                                        editModal.open(log)
-                                                    }
-                                                    aria-label={`Edit log entry`}
-                                                >
-                                                    <Pencil
-                                                        className="size-4"
-                                                        aria-hidden="true"
-                                                    />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() =>
-                                                        handleDelete(log.id)
-                                                    }
-                                                    aria-label={`Delete log entry`}
-                                                >
-                                                    <Trash2
-                                                        className="size-4 text-red-500"
-                                                        aria-hidden="true"
-                                                    />
-                                                </Button>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                            editModal.open(log)
+                                                        }
+                                                        aria-label={`Edit log entry`}
+                                                    >
+                                                        <Pencil
+                                                            className="size-4"
+                                                            aria-hidden="true"
+                                                        />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                            handleDelete(log.id)
+                                                        }
+                                                        aria-label={`Delete log entry`}
+                                                    >
+                                                        <Trash2
+                                                            className="size-4 text-red-500"
+                                                            aria-hidden="true"
+                                                        />
+                                                    </Button>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </InfiniteScroll>
                             )}
                         </CardContent>
                     </Card>
