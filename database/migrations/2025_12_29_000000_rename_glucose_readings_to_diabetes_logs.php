@@ -44,31 +44,4 @@ return new class extends Migration
             $table->unsignedSmallInteger('exercise_duration_minutes')->nullable()->after('exercise_type');
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::table('diabetes_logs', function (Blueprint $table): void {
-            $table->dropColumn([
-                'insulin_units',
-                'insulin_type',
-                'medication_name',
-                'medication_dosage',
-                'weight',
-                'blood_pressure_systolic',
-                'blood_pressure_diastolic',
-                'a1c_value',
-                'carbs_grams',
-                'exercise_type',
-                'exercise_duration_minutes',
-            ]);
-
-            $table->renameColumn('glucose_value', 'reading_value');
-            $table->renameColumn('glucose_reading_type', 'reading_type');
-        });
-
-        Schema::rename('diabetes_logs', 'glucose_readings');
-    }
 };

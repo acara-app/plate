@@ -52,10 +52,34 @@ interface DiabetesLogEntry {
     created_at: string;
 }
 
+interface RecentMedication {
+    name: string;
+    dosage: string;
+    label: string;
+}
+
+interface RecentInsulin {
+    units: number;
+    type: string;
+    label: string;
+}
+
+interface TodaysMeal {
+    id: number;
+    name: string;
+    type: string;
+    carbs: number;
+    label: string;
+}
+
 interface Props {
     logs: DiabetesLogEntry[];
     glucoseReadingTypes: ReadingType[];
     insulinTypes: ReadingType[];
+    glucoseUnit: string;
+    recentMedications: RecentMedication[];
+    recentInsulins: RecentInsulin[];
+    todaysMeals: TodaysMeal[];
 }
 
 function filterLogsByPeriod(
@@ -83,6 +107,10 @@ export default function DiabetesLogDashboard({
     logs,
     glucoseReadingTypes,
     insulinTypes,
+    glucoseUnit,
+    recentMedications,
+    recentInsulins,
+    todaysMeals,
 }: Props) {
     const [timePeriod, setTimePeriod] = useState<TimePeriod>('30d');
     const createModal = useModalToggle();
@@ -153,6 +181,10 @@ export default function DiabetesLogDashboard({
                         }
                         glucoseReadingTypes={glucoseReadingTypes}
                         insulinTypes={insulinTypes}
+                        glucoseUnit={glucoseUnit}
+                        recentMedications={recentMedications}
+                        recentInsulins={recentInsulins}
+                        todaysMeals={todaysMeals}
                     />
 
                     {/* Time Period Filter */}

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\AnalyzeGlucoseForNotificationAction;
+use App\Enums\GlucoseUnit;
 use App\Enums\Sex;
 use App\Http\Requests\StoreBiometricsRequest;
 use App\Http\Requests\StoreDietaryPreferencesRequest;
@@ -144,6 +145,11 @@ final readonly class OnboardingController
             'profile' => $profile,
             'selectedConditions' => $profile?->healthConditions->pluck('id')->toArray() ?? [],
             'healthConditions' => HealthCondition::all(),
+            'glucoseUnitOptions' => collect(GlucoseUnit::cases())->map(fn (GlucoseUnit $unit): array => [
+                'value' => $unit->value,
+                'label' => $unit->label(),
+            ]),
+            'selectedGlucoseUnit' => $profile?->glucose_unit?->value,
         ]);
     }
 
@@ -167,6 +173,13 @@ final readonly class OnboardingController
         }
 
         $profile->healthConditions()->sync($syncData);
+
+        // Save glucose unit preference
+        /** @var string|null $glucoseUnit */
+        $glucoseUnit = $request->validated('glucose_unit');
+        if ($glucoseUnit !== null) {
+            $profile->update(['glucose_unit' => $glucoseUnit]);
+        }
 
         // Mark onboarding as completed
         $profile->update([

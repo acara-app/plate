@@ -18,15 +18,4 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::table('diabetes_logs', function (Blueprint $table) {
-            // Revert to not nullable (this may fail if there are null values)
-            $table->decimal('glucose_value', 5, 1)->nullable(false)->change();
-            $table->string('glucose_reading_type')->nullable(false)->change();
-        });
-    }
 };

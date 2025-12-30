@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Enums\GlucoseUnit;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 final class StoreHealthConditionsRequest extends FormRequest
 {
@@ -18,6 +20,7 @@ final class StoreHealthConditionsRequest extends FormRequest
             'health_condition_ids.*' => ['integer', 'exists:health_conditions,id'],
             'notes' => ['nullable', 'array'],
             'notes.*' => ['nullable', 'string', 'max:500'],
+            'glucose_unit' => ['nullable', new Enum(GlucoseUnit::class)],
         ];
     }
 

@@ -1,11 +1,6 @@
 import DiabetesLogController from '@/actions/App/Http/Controllers/DiabetesLogController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -15,9 +10,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Form } from '@inertiajs/react';
-import { ChevronDown } from 'lucide-react';
+import {
+    Activity,
+    Droplet,
+    HeartPulse,
+    Pill,
+    Syringe,
+    Utensils,
+} from 'lucide-react';
 import { useState } from 'react';
 
 interface ReadingType {
@@ -45,32 +49,94 @@ interface DiabetesLogEntry {
     created_at: string;
 }
 
+interface RecentMedication {
+    name: string;
+    dosage: string;
+    label: string;
+}
+
+interface RecentInsulin {
+    units: number;
+    type: string;
+    label: string;
+}
+
+interface TodaysMeal {
+    id: number;
+    name: string;
+    type: string;
+    carbs: number;
+    label: string;
+}
+
 interface EditDiabetesLogFormProps {
     glucoseReadingTypes: ReadingType[];
     insulinTypes: ReadingType[];
+    glucoseUnit: string;
     logEntry: DiabetesLogEntry;
+    recentMedications?: RecentMedication[];
+    recentInsulins?: RecentInsulin[];
+    todaysMeals?: TodaysMeal[];
     onCancel: () => void;
+}
+
+function getDefaultTab(logEntry: DiabetesLogEntry): string {
+    if (logEntry.glucose_value) return 'glucose';
+    if (logEntry.carbs_grams) return 'food';
+    if (logEntry.insulin_units) return 'insulin';
+    if (logEntry.medication_name) return 'meds';
+    if (
+        logEntry.weight ||
+        logEntry.blood_pressure_systolic ||
+        logEntry.a1c_value
+    )
+        return 'vitals';
+    if (logEntry.exercise_type) return 'exercise';
+    return 'glucose';
 }
 
 export default function EditDiabetesLogForm({
     glucoseReadingTypes,
     insulinTypes,
+    glucoseUnit,
     logEntry,
+    recentMedications = [],
+    recentInsulins = [],
+    todaysMeals = [],
     onCancel,
 }: EditDiabetesLogFormProps) {
     const measuredAt = new Date(logEntry.measured_at)
         .toISOString()
         .slice(0, 16);
-    const [showInsulin, setShowInsulin] = useState(!!logEntry.insulin_units);
-    const [showMedication, setShowMedication] = useState(
-        !!logEntry.medication_name,
+    const [readingType, setReadingType] = useState<string>(
+        logEntry.glucose_reading_type ?? '',
     );
-    const [showVitals, setShowVitals] = useState(
-        !!logEntry.weight ||
-            !!logEntry.blood_pressure_systolic ||
-            !!logEntry.a1c_value,
+    const [medicationName, setMedicationName] = useState(
+        logEntry.medication_name ?? '',
     );
-    const [showExercise, setShowExercise] = useState(!!logEntry.exercise_type);
+    const [medicationDosage, setMedicationDosage] = useState(
+        logEntry.medication_dosage ?? '',
+    );
+    const [insulinUnits, setInsulinUnits] = useState(
+        logEntry.insulin_units ? String(logEntry.insulin_units) : '',
+    );
+    const [insulinType, setInsulinType] = useState(logEntry.insulin_type ?? '');
+    const [carbsGrams, setCarbsGrams] = useState(
+        logEntry.carbs_grams ? String(logEntry.carbs_grams) : '',
+    );
+
+    const glucosePlaceholder =
+        glucoseUnit === 'mmol/L' ? 'e.g., 6.7' : 'e.g., 120';
+
+    const handleMedicationChipClick = (med: RecentMedication) => {
+        setMedicationName(med.name);
+        setMedicationDosage(med.dosage);
+    };
+
+    const handleInsulinChipClick = (ins: RecentInsulin) => {
+        setInsulinUnits(String(ins.units));
+        setInsulinType(ins.type);
+    };
 
     return (
         <Form
@@ -81,85 +147,180 @@ export default function EditDiabetesLogForm({
         >
             {({ processing, errors }) => (
                 <>
-                    {/* Primary: Glucose Reading */}
-                    <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                            <Label htmlFor="glucose_value">
-                                Glucose (mg/dL)
-                            </Label>
-                            <Input
-                                id="glucose_value"
-                                type="number"
-                                name="glucose_value"
-                                step="0.1"
-                                defaultValue={logEntry.glucose_value ?? ''}
-                            />
-                            <InputError message={errors.glucose_value} />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="glucose_reading_type">
-                                Reading Type
-                            </Label>
-                            <Select
-                                name="glucose_reading_type"
-                                defaultValue={
-                                    logEntry.glucose_reading_type ?? undefined
-                                }
+                    <Tabs
+                        defaultValue={getDefaultTab(logEntry)}
+                        className="w-full"
+                    >
+                        <TabsList className="grid w-full grid-cols-6">
+                            <TabsTrigger
+                                value="glucose"
+                                className="flex items-center gap-1"
                             >
-                                <SelectTrigger id="glucose_reading_type">
-                                    <SelectValue placeholder="Select type" />
-                                </SelectTrigger>
-                                <SelectContent>
+                                <Droplet className="size-3.5" />
+                                <span className="hidden sm:inline">
+                                    Glucose
+                                </span>
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="food"
+                                className="flex items-center gap-1"
+                            >
+                                <Utensils className="size-3.5" />
+                                <span className="hidden sm:inline">Food</span>
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="insulin"
+                                className="flex items-center gap-1"
+                            >
+                                <Syringe className="size-3.5" />
+                                <span className="hidden sm:inline">
+                                    Insulin
+                                </span>
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="meds"
+                                className="flex items-center gap-1"
+                            >
+                                <Pill className="size-3.5" />
+                                <span className="hidden sm:inline">Meds</span>
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="vitals"
+                                className="flex items-center gap-1"
+                            >
+                                <HeartPulse className="size-3.5" />
+                                <span className="hidden sm:inline">Vitals</span>
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="exercise"
+                                className="flex items-center gap-1"
+                            >
+                                <Activity className="size-3.5" />
+                                <span className="hidden sm:inline">
+                                    Exercise
+                                </span>
+                            </TabsTrigger>
+                        </TabsList>
+
+                        {/* Glucose Tab */}
+                        <TabsContent value="glucose" className="space-y-4 pt-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="glucose_value">
+                                    Glucose ({glucoseUnit})
+                                </Label>
+                                <Input
+                                    id="glucose_value"
+                                    type="number"
+                                    name="glucose_value"
+                                    step="0.1"
+                                    placeholder={glucosePlaceholder}
+                                    defaultValue={logEntry.glucose_value ?? ''}
+                                />
+                                <InputError message={errors.glucose_value} />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Reading Context</Label>
+                                <input
+                                    type="hidden"
+                                    name="glucose_reading_type"
+                                    value={readingType}
+                                />
+                                <ToggleGroup
+                                    type="single"
+                                    value={readingType}
+                                    onValueChange={(value) =>
+                                        value && setReadingType(value)
+                                    }
+                                    className="flex flex-wrap justify-start gap-2"
+                                >
                                     {glucoseReadingTypes.map((type) => (
-                                        <SelectItem
+                                        <ToggleGroupItem
                                             key={type.value}
                                             value={type.value}
+                                            variant="outline"
+                                            className="capitalize"
                                         >
-                                            {type.label}
-                                        </SelectItem>
+                                            {type.label.replace('-', ' ')}
+                                        </ToggleGroupItem>
                                     ))}
-                                </SelectContent>
-                            </Select>
-                            <InputError message={errors.glucose_reading_type} />
-                        </div>
+                                </ToggleGroup>
+                                <InputError
+                                    message={errors.glucose_reading_type}
+                                />
+                            </div>
+                        </TabsContent>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="measured_at">Date & Time</Label>
-                            <Input
-                                id="measured_at"
-                                type="datetime-local"
-                                name="measured_at"
-                                defaultValue={measuredAt}
-                                required
-                            />
-                            <InputError message={errors.measured_at} />
-                        </div>
+                        {/* Food Tab */}
+                        <TabsContent value="food" className="space-y-4 pt-4">
+                            {todaysMeals.length > 0 && (
+                                <div className="space-y-2">
+                                    <Label className="text-xs text-muted-foreground">
+                                        Import from Today's Plan
+                                    </Label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {todaysMeals.map((meal) => (
+                                            <Button
+                                                key={meal.id}
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setCarbsGrams(
+                                                        String(meal.carbs),
+                                                    )
+                                                }
+                                            >
+                                                🍽️ {meal.label}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
-                        <div className="space-y-2">
-                            <Label htmlFor="carbs_grams">Carbs (grams)</Label>
-                            <Input
-                                id="carbs_grams"
-                                type="number"
-                                name="carbs_grams"
-                                defaultValue={logEntry.carbs_grams ?? ''}
-                            />
-                            <InputError message={errors.carbs_grams} />
-                        </div>
-                    </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="carbs_grams">
+                                    Carbohydrates (grams)
+                                </Label>
+                                <Input
+                                    id="carbs_grams"
+                                    type="number"
+                                    name="carbs_grams"
+                                    placeholder="e.g., 45"
+                                    value={carbsGrams}
+                                    onChange={(e) =>
+                                        setCarbsGrams(e.target.value)
+                                    }
+                                />
+                                <InputError message={errors.carbs_grams} />
+                            </div>
+                        </TabsContent>
 
-                    {/* Insulin Section */}
-                    <Collapsible
-                        open={showInsulin}
-                        onOpenChange={setShowInsulin}
-                    >
-                        <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium hover:text-primary">
-                            <ChevronDown
-                                className={`size-4 transition-transform ${showInsulin ? 'rotate-180' : ''}`}
-                            />
-                            Insulin
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="pt-2">
+                        {/* Insulin Tab */}
+                        <TabsContent value="insulin" className="space-y-4 pt-4">
+                            {recentInsulins.length > 0 && (
+                                <div className="space-y-2">
+                                    <Label className="text-xs text-muted-foreground">
+                                        Quick Add
+                                    </Label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {recentInsulins.map((ins) => (
+                                            <Button
+                                                key={ins.label}
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    handleInsulinChipClick(ins)
+                                                }
+                                            >
+                                                + {ins.label}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="insulin_units">Units</Label>
@@ -168,8 +329,10 @@ export default function EditDiabetesLogForm({
                                         type="number"
                                         name="insulin_units"
                                         step="0.5"
-                                        defaultValue={
-                                            logEntry.insulin_units ?? ''
+                                        placeholder="e.g., 10"
+                                        value={insulinUnits}
+                                        onChange={(e) =>
+                                            setInsulinUnits(e.target.value)
                                         }
                                     />
                                     <InputError
@@ -180,9 +343,8 @@ export default function EditDiabetesLogForm({
                                     <Label htmlFor="insulin_type">Type</Label>
                                     <Select
                                         name="insulin_type"
-                                        defaultValue={
-                                            logEntry.insulin_type ?? undefined
-                                        }
+                                        value={insulinType}
+                                        onValueChange={setInsulinType}
                                     >
                                         <SelectTrigger id="insulin_type">
                                             <SelectValue placeholder="Select type" />
@@ -201,21 +363,35 @@ export default function EditDiabetesLogForm({
                                     <InputError message={errors.insulin_type} />
                                 </div>
                             </div>
-                        </CollapsibleContent>
-                    </Collapsible>
+                        </TabsContent>
 
-                    {/* Medication Section */}
-                    <Collapsible
-                        open={showMedication}
-                        onOpenChange={setShowMedication}
-                    >
-                        <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium hover:text-primary">
-                            <ChevronDown
-                                className={`size-4 transition-transform ${showMedication ? 'rotate-180' : ''}`}
-                            />
-                            Medication
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="pt-2">
+                        {/* Medication Tab */}
+                        <TabsContent value="meds" className="space-y-4 pt-4">
+                            {recentMedications.length > 0 && (
+                                <div className="space-y-2">
+                                    <Label className="text-xs text-muted-foreground">
+                                        Quick Add
+                                    </Label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {recentMedications.map((med) => (
+                                            <Button
+                                                key={med.label}
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    handleMedicationChipClick(
+                                                        med,
+                                                    )
+                                                }
+                                            >
+                                                + {med.label}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="medication_name">
@@ -225,8 +401,10 @@ export default function EditDiabetesLogForm({
                                         id="medication_name"
                                         type="text"
                                         name="medication_name"
-                                        defaultValue={
-                                            logEntry.medication_name ?? ''
+                                        placeholder="e.g., Metformin"
+                                        value={medicationName}
+                                        onChange={(e) =>
+                                            setMedicationName(e.target.value)
                                         }
                                     />
                                     <InputError
@@ -241,8 +419,10 @@ export default function EditDiabetesLogForm({
                                         id="medication_dosage"
                                         type="text"
                                         name="medication_dosage"
-                                        defaultValue={
-                                            logEntry.medication_dosage ?? ''
+                                        placeholder="e.g., 500mg"
+                                        value={medicationDosage}
+                                        onChange={(e) =>
+                                            setMedicationDosage(e.target.value)
                                         }
                                     />
                                     <InputError
@@ -250,19 +430,11 @@ export default function EditDiabetesLogForm({
                                     />
                                 </div>
                             </div>
-                        </CollapsibleContent>
-                    </Collapsible>
+                        </TabsContent>
 
-                    {/* Vitals Section */}
-                    <Collapsible open={showVitals} onOpenChange={setShowVitals}>
-                        <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium hover:text-primary">
-                            <ChevronDown
-                                className={`size-4 transition-transform ${showVitals ? 'rotate-180' : ''}`}
-                            />
-                            Vitals
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="pt-2">
-                            <div className="grid gap-4 md:grid-cols-3">
+                        {/* Vitals Tab */}
+                        <TabsContent value="vitals" className="space-y-4 pt-4">
+                            <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="weight">Weight (lbs)</Label>
                                     <Input
@@ -270,10 +442,25 @@ export default function EditDiabetesLogForm({
                                         type="number"
                                         name="weight"
                                         step="0.1"
+                                        placeholder="e.g., 165"
                                         defaultValue={logEntry.weight ?? ''}
                                     />
                                     <InputError message={errors.weight} />
                                 </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="a1c_value">A1C (%)</Label>
+                                    <Input
+                                        id="a1c_value"
+                                        type="number"
+                                        name="a1c_value"
+                                        step="0.1"
+                                        placeholder="e.g., 6.5"
+                                        defaultValue={logEntry.a1c_value ?? ''}
+                                    />
+                                    <InputError message={errors.a1c_value} />
+                                </div>
+                            </div>
+                            <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="blood_pressure_systolic">
                                         Systolic BP
@@ -282,6 +469,7 @@ export default function EditDiabetesLogForm({
                                         id="blood_pressure_systolic"
                                         type="number"
                                         name="blood_pressure_systolic"
+                                        placeholder="e.g., 120"
                                         defaultValue={
                                             logEntry.blood_pressure_systolic ??
                                             ''
@@ -299,6 +487,7 @@ export default function EditDiabetesLogForm({
                                         id="blood_pressure_diastolic"
                                         type="number"
                                         name="blood_pressure_diastolic"
+                                        placeholder="e.g., 80"
                                         defaultValue={
                                             logEntry.blood_pressure_diastolic ??
                                             ''
@@ -310,33 +499,14 @@ export default function EditDiabetesLogForm({
                                         }
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="a1c_value">A1C (%)</Label>
-                                    <Input
-                                        id="a1c_value"
-                                        type="number"
-                                        name="a1c_value"
-                                        step="0.1"
-                                        defaultValue={logEntry.a1c_value ?? ''}
-                                    />
-                                    <InputError message={errors.a1c_value} />
-                                </div>
                             </div>
-                        </CollapsibleContent>
-                    </Collapsible>
+                        </TabsContent>
 
-                    {/* Exercise Section */}
-                    <Collapsible
-                        open={showExercise}
-                        onOpenChange={setShowExercise}
-                    >
-                        <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium hover:text-primary">
-                            <ChevronDown
-                                className={`size-4 transition-transform ${showExercise ? 'rotate-180' : ''}`}
-                            />
-                            Exercise
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="pt-2">
+                        {/* Exercise Tab */}
+                        <TabsContent
+                            value="exercise"
+                            className="space-y-4 pt-4"
+                        >
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="exercise_type">
@@ -346,6 +516,7 @@ export default function EditDiabetesLogForm({
                                         id="exercise_type"
                                         type="text"
                                         name="exercise_type"
+                                        placeholder="e.g., Walking, Running"
                                         defaultValue={
                                             logEntry.exercise_type ?? ''
                                         }
@@ -362,6 +533,7 @@ export default function EditDiabetesLogForm({
                                         id="exercise_duration_minutes"
                                         type="number"
                                         name="exercise_duration_minutes"
+                                        placeholder="e.g., 30"
                                         defaultValue={
                                             logEntry.exercise_duration_minutes ??
                                             ''
@@ -374,31 +546,46 @@ export default function EditDiabetesLogForm({
                                     />
                                 </div>
                             </div>
-                        </CollapsibleContent>
-                    </Collapsible>
+                        </TabsContent>
+                    </Tabs>
 
                     <div className="space-y-2">
                         <Label htmlFor="notes">Notes (Optional)</Label>
                         <Textarea
                             id="notes"
                             name="notes"
+                            placeholder="Any additional notes..."
                             defaultValue={logEntry.notes ?? ''}
                             maxLength={500}
                         />
                         <InputError message={errors.notes} />
                     </div>
 
-                    <div className="flex justify-end gap-2">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={onCancel}
-                        >
-                            Cancel
-                        </Button>
-                        <Button type="submit" disabled={processing}>
-                            Update
-                        </Button>
+                    {/* Date & Time and Actions */}
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                        <div className="space-y-2 sm:flex-1">
+                            <Label htmlFor="measured_at">Date & Time</Label>
+                            <Input
+                                id="measured_at"
+                                type="datetime-local"
+                                name="measured_at"
+                                defaultValue={measuredAt}
+                                required
+                            />
+                            <InputError message={errors.measured_at} />
+                        </div>
+                        <div className="flex justify-end gap-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={onCancel}
+                            >
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={processing}>
+                                Update
+                            </Button>
+                        </div>
                     </div>
                 </>
             )}

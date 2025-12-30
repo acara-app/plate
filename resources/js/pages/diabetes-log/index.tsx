@@ -47,6 +47,26 @@ interface DiabetesLogEntry {
     created_at: string;
 }
 
+interface RecentMedication {
+    name: string;
+    dosage: string;
+    label: string;
+}
+
+interface RecentInsulin {
+    units: number;
+    type: string;
+    label: string;
+}
+
+interface TodaysMeal {
+    id: number;
+    name: string;
+    type: string;
+    carbs: number;
+    label: string;
+}
+
 interface Props {
     logs: {
         data: DiabetesLogEntry[];
@@ -57,12 +77,20 @@ interface Props {
     };
     glucoseReadingTypes: ReadingType[];
     insulinTypes: ReadingType[];
+    glucoseUnit: string;
+    recentMedications: RecentMedication[];
+    recentInsulins: RecentInsulin[];
+    todaysMeals: TodaysMeal[];
 }
 
 export default function DiabetesLogIndex({
     logs,
     glucoseReadingTypes,
     insulinTypes,
+    glucoseUnit,
+    recentMedications,
+    recentInsulins,
+    todaysMeals,
 }: Props) {
     const createModal = useModalToggle();
     const editModal = useModalValueToggle<DiabetesLogEntry>();
@@ -111,6 +139,10 @@ export default function DiabetesLogIndex({
                         }
                         glucoseReadingTypes={glucoseReadingTypes}
                         insulinTypes={insulinTypes}
+                        glucoseUnit={glucoseUnit}
+                        recentMedications={recentMedications}
+                        recentInsulins={recentInsulins}
+                        todaysMeals={todaysMeals}
                     />
 
                     <DiabetesLogDialog
@@ -123,6 +155,10 @@ export default function DiabetesLogIndex({
                         }
                         glucoseReadingTypes={glucoseReadingTypes}
                         insulinTypes={insulinTypes}
+                        glucoseUnit={glucoseUnit}
+                        recentMedications={recentMedications}
+                        recentInsulins={recentInsulins}
+                        todaysMeals={todaysMeals}
                         logEntry={editModal.state ?? undefined}
                     />
 
@@ -156,7 +192,7 @@ export default function DiabetesLogIndex({
                                                                 }
                                                             </span>
                                                             <span className="text-sm text-muted-foreground">
-                                                                mg/dL
+                                                                {glucoseUnit}
                                                             </span>
                                                             {log.glucose_reading_type && (
                                                                 <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">

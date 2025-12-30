@@ -33,12 +33,36 @@ interface DiabetesLogEntry {
     created_at: string;
 }
 
+interface RecentMedication {
+    name: string;
+    dosage: string;
+    label: string;
+}
+
+interface RecentInsulin {
+    units: number;
+    type: string;
+    label: string;
+}
+
+interface TodaysMeal {
+    id: number;
+    name: string;
+    type: string;
+    carbs: number;
+    label: string;
+}
+
 interface DialogProps {
     mode: 'create' | 'edit';
     open: boolean;
     onOpenChange: (open: boolean) => void;
     glucoseReadingTypes: ReadingType[];
     insulinTypes: ReadingType[];
+    glucoseUnit: string;
+    recentMedications?: RecentMedication[];
+    recentInsulins?: RecentInsulin[];
+    todaysMeals?: TodaysMeal[];
     logEntry?: DiabetesLogEntry;
 }
 
@@ -48,6 +72,10 @@ export default function DiabetesLogDialog({
     onOpenChange,
     glucoseReadingTypes,
     insulinTypes,
+    glucoseUnit,
+    recentMedications = [],
+    recentInsulins = [],
+    todaysMeals = [],
     logEntry,
 }: DialogProps) {
     return (
@@ -61,7 +89,7 @@ export default function DiabetesLogDialog({
                     </DialogTitle>
                     <DialogDescription>
                         {mode === 'create'
-                            ? 'Record a new diabetes log entry with any combination of glucose, insulin, medications, vitals, or exercise.'
+                            ? 'Record a new entry. Use the tabs to log different types of data.'
                             : 'Update your diabetes log entry.'}
                     </DialogDescription>
                 </DialogHeader>
@@ -69,6 +97,10 @@ export default function DiabetesLogDialog({
                     <CreateDiabetesLogForm
                         glucoseReadingTypes={glucoseReadingTypes}
                         insulinTypes={insulinTypes}
+                        glucoseUnit={glucoseUnit}
+                        recentMedications={recentMedications}
+                        recentInsulins={recentInsulins}
+                        todaysMeals={todaysMeals}
                         onCancel={() => onOpenChange(false)}
                     />
                 ) : (
@@ -76,7 +108,11 @@ export default function DiabetesLogDialog({
                         <EditDiabetesLogForm
                             glucoseReadingTypes={glucoseReadingTypes}
                             insulinTypes={insulinTypes}
+                            glucoseUnit={glucoseUnit}
                             logEntry={logEntry}
+                            recentMedications={recentMedications}
+                            recentInsulins={recentInsulins}
+                            todaysMeals={todaysMeals}
                             onCancel={() => onOpenChange(false)}
                         />
                     )

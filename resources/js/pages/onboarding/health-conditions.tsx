@@ -9,18 +9,28 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
+
+interface GlucoseUnitOption {
+    value: string;
+    label: string;
+}
 
 interface Props {
     profile?: Profile;
     selectedConditions: number[];
     healthConditions: HealthCondition[];
+    glucoseUnitOptions: GlucoseUnitOption[];
+    selectedGlucoseUnit?: string | null;
 }
 
 export default function HealthConditions({
     selectedConditions,
     healthConditions,
+    glucoseUnitOptions,
+    selectedGlucoseUnit,
 }: Props) {
     const { currentUser } = useSharedProps();
     const [selectedIds, setSelectedIds] = useState<number[]>(
@@ -28,6 +38,9 @@ export default function HealthConditions({
     );
     const [notes, setNotes] = useState<Record<number, string>>({});
     const [expandedId, setExpandedId] = useState<number | null>(null);
+    const [glucoseUnit, setGlucoseUnit] = useState<string>(
+        selectedGlucoseUnit || 'mg/dL',
+    );
 
     const toggleCondition = (id: number) => {
         if (selectedIds.includes(id)) {
@@ -219,6 +232,50 @@ export default function HealthConditions({
                                     <InputError
                                         message={errors.health_condition_ids}
                                     />
+
+                                    {/* Glucose Unit Preference Section */}
+                                    <div className="mt-6 rounded-lg border border-primary/30 bg-primary/5 p-4 dark:border-primary/50 dark:bg-primary/10">
+                                        <h3 className="mb-2 font-semibold text-gray-900 dark:text-white">
+                                            Glucose Measurement Preference
+                                        </h3>
+                                        <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+                                            If you track blood glucose, which
+                                            unit do you prefer?
+                                        </p>
+
+                                        <input
+                                            type="hidden"
+                                            name="glucose_unit"
+                                            value={glucoseUnit}
+                                        />
+
+                                        <ToggleGroup
+                                            type="single"
+                                            value={glucoseUnit}
+                                            onValueChange={(value) =>
+                                                value && setGlucoseUnit(value)
+                                            }
+                                            className="justify-start gap-2"
+                                        >
+                                            {glucoseUnitOptions.map(
+                                                (option) => (
+                                                    <ToggleGroupItem
+                                                        key={option.value}
+                                                        value={option.value}
+                                                        variant="outline"
+                                                        className="px-4"
+                                                    >
+                                                        {option.label}
+                                                    </ToggleGroupItem>
+                                                ),
+                                            )}
+                                        </ToggleGroup>
+
+                                        <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                                            💡 You can change this later in
+                                            settings
+                                        </p>
+                                    </div>
 
                                     {/* Submit Button */}
                                     <div className="flex items-center justify-between gap-4 border-t pt-6 dark:border-gray-700">
