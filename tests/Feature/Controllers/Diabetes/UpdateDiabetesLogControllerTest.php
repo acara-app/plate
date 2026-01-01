@@ -46,3 +46,16 @@ it('cannot update another user diabetes log', function (): void {
 
     $response->assertForbidden();
 });
+
+it('prevents empty vitals log submission when updating', function (): void {
+    $user = User::factory()->create();
+    $log = DiabetesLog::factory()->create(['user_id' => $user->id]);
+
+    $response = $this->actingAs($user)
+        ->put(route('diabetes-log.update', $log), [
+            'log_type' => 'vitals',
+            'measured_at' => now()->toDateTimeString(),
+        ]);
+
+    $response->assertSessionHasErrors(['vitals']);
+});

@@ -86,9 +86,9 @@ final class StoreDiabetesLogRequest extends FormRequest
     /**
      * Configure the validator instance.
      */
-    public function withValidator($validator): void
+    public function withValidator(\Illuminate\Validation\Validator $validator): void
     {
-        $validator->after(function ($validator): void {
+        $validator->after(function (\Illuminate\Validation\Validator $validator): void {
             $logType = $this->input('log_type');
 
             // For vitals, ensure at least one vital field is provided
