@@ -21,9 +21,10 @@ final readonly class StoreDiabetesLogController
     {
         $data = $request->validated();
 
-        $this->recordDiabetesLog->handle(
-            collect($data + ['user_id' => $this->currentUser->id])->except('log_type')->toArray(),
-        );
+        /** @var array<string, mixed> $recordData */
+        $recordData = collect($data + ['user_id' => $this->currentUser->id])->except('log_type')->toArray();
+
+        $this->recordDiabetesLog->handle($recordData);
 
         return back()->with('success', 'Diabetes log entry recorded successfully.');
     }
