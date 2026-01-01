@@ -85,6 +85,10 @@ export default function EditDiabetesLogForm({
     const measuredAt = new Date(logEntry.measured_at)
         .toISOString()
         .slice(0, 16);
+    const [activeTab, setActiveTab] = useState<string>(getDefaultTab(logEntry));
+    /**
+     * Form State for filling inputs via label chips
+     */
     const [readingType, setReadingType] = useState<string>(
         logEntry.glucose_reading_type ?? '',
     );
@@ -124,8 +128,10 @@ export default function EditDiabetesLogForm({
         >
             {({ processing, errors }) => (
                 <>
+                    <input type="hidden" name="log_type" value={activeTab} />
                     <Tabs
                         defaultValue={getDefaultTab(logEntry)}
+                        onValueChange={setActiveTab}
                         className="w-full"
                     >
                         <TabsList className="grid w-full grid-cols-6">

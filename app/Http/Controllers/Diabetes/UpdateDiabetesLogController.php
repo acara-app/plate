@@ -24,7 +24,13 @@ final readonly class UpdateDiabetesLogController
 
         $data = $request->validated();
 
-        $this->updateDiabetesLog->handle($diabetesLog, $data);
+        /** @var array<string, mixed> $updateData */
+        $updateData = collect($data)->except('log_type')->toArray();
+
+        $this->updateDiabetesLog->handle(
+            diabetesLog: $diabetesLog,
+            data: $updateData
+        );
 
         return back()->with('success', 'Diabetes log entry updated successfully.');
     }
