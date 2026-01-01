@@ -90,7 +90,7 @@ final class UpdateDiabetesLogRequest extends FormRequest
      */
     public function withValidator($validator): void
     {
-        $validator->after(function ($validator) {
+        $validator->after(function ($validator): void {
             $logType = $this->input('log_type');
 
             // For vitals, ensure at least one vital field is provided

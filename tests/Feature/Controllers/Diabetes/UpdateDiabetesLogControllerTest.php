@@ -10,6 +10,7 @@ it('can update own diabetes log', function (): void {
     $log = DiabetesLog::factory()->create(['user_id' => $user->id]);
 
     $data = [
+        'log_type' => 'glucose',
         'glucose_value' => 130.0,
         'glucose_reading_type' => 'fasting',
         'measured_at' => now()->toDateTimeString(),
@@ -34,6 +35,7 @@ it('cannot update another user diabetes log', function (): void {
     $log = DiabetesLog::factory()->create(['user_id' => $otherUser->id]);
 
     $data = [
+        'log_type' => 'glucose',
         'glucose_value' => 130.0,
         'glucose_reading_type' => 'fasting',
         'measured_at' => now()->toDateTimeString(),

@@ -20,7 +20,6 @@ final class StoreDiabetesLogRequest extends FormRequest
         $logType = $this->input('log_type');
 
         return [
-            // Log type to determine which fields are required
             'log_type' => ['required', Rule::enum(DiabeteLogType::class)],
 
             // Glucose tracking
@@ -36,7 +35,6 @@ final class StoreDiabetesLogRequest extends FormRequest
                 Rule::enum(GlucoseReadingType::class),
             ],
 
-            // Required fields
             'measured_at' => ['required', 'date'],
             'notes' => ['nullable', 'string', 'max:500'],
 
@@ -90,7 +88,7 @@ final class StoreDiabetesLogRequest extends FormRequest
      */
     public function withValidator($validator): void
     {
-        $validator->after(function ($validator) {
+        $validator->after(function ($validator): void {
             $logType = $this->input('log_type');
 
             // For vitals, ensure at least one vital field is provided
