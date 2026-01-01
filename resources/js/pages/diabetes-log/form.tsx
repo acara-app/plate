@@ -52,6 +52,7 @@ export default function CreateDiabetesLogForm({
     onCancel,
 }: CreateDiabetesLogFormProps) {
     const defaultMeasuredAt = new Date().toISOString().slice(0, 16);
+    const [activeTab, setActiveTab] = useState<string>(LogType.Glucose);
     const [readingType, setReadingType] = useState<string>('');
     const [medicationName, setMedicationName] = useState('');
     const [medicationDosage, setMedicationDosage] = useState('');
@@ -81,7 +82,12 @@ export default function CreateDiabetesLogForm({
         >
             {({ processing, errors }) => (
                 <>
-                    <Tabs defaultValue={LogType.Glucose} className="w-full">
+                    <input type="hidden" name="log_type" value={activeTab} />
+                    <Tabs
+                        defaultValue={LogType.Glucose}
+                        onValueChange={setActiveTab}
+                        className="w-full"
+                    >
                         <TabsList className="grid w-full grid-cols-6">
                             <TabsTrigger
                                 value={LogType.Glucose}
