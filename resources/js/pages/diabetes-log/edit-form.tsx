@@ -86,6 +86,9 @@ export default function EditDiabetesLogForm({
         .toISOString()
         .slice(0, 16);
     const [activeTab, setActiveTab] = useState<string>(getDefaultTab(logEntry));
+    /**
+     * Form State for filling inputs via label chips
+     */
     const [readingType, setReadingType] = useState<string>(
         logEntry.glucose_reading_type ?? '',
     );

@@ -12,8 +12,8 @@ import {
     RecentMedication,
     TodaysMeal,
 } from '@/types/diabetes';
+import CreateDiabetesLogForm from './add-form';
 import EditDiabetesLogForm from './edit-form';
-import CreateDiabetesLogForm from './form';
 
 interface DialogProps {
     mode: 'create' | 'edit';

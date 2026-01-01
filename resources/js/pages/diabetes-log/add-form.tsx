@@ -53,6 +53,9 @@ export default function CreateDiabetesLogForm({
 }: CreateDiabetesLogFormProps) {
     const defaultMeasuredAt = new Date().toISOString().slice(0, 16);
     const [activeTab, setActiveTab] = useState<string>(LogType.Glucose);
+    /**
+     * Form State for filling inputs via label chips
+     */
     const [readingType, setReadingType] = useState<string>('');
     const [medicationName, setMedicationName] = useState('');
     const [medicationDosage, setMedicationDosage] = useState('');
