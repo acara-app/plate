@@ -266,6 +266,33 @@ Acara Plate welcomes translation contributions! The application uses a dual tran
 3. Translate the array values while keeping the keys unchanged
 4. Test your translations by switching the app locale
 
+**Usage in React Components:**
+
+```tsx
+import { useTranslation } from 'react-i18next';
+
+export default function MyComponent() {
+    const { t } = useTranslation('common'); // Specify namespace
+    return <h1>{t('welcome')}</h1>;
+}
+```
+
+**Usage in Laravel:**
+
+```php
+// In controllers or Blade templates
+__('common.welcome');
+__('auth.throttle', ['seconds' => 60]); // With parameters
+```
+
+**Translation Namespaces:**
+
+- `auth` - Authentication-related strings
+- `common` - Common UI elements and general translations
+- `validation` - Form validation messages
+- `passwords` - Password reset and management
+- `pagination` - Pagination controls
+
 Contributions for new languages are highly encouraged! See the [Contributing Guide](CONTRIBUTING.md) for submission guidelines.
 
 ## Contributing
