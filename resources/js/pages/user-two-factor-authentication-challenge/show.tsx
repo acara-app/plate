@@ -37,7 +37,7 @@ export default function Show() {
             description: t('two_factor_challenge.code_description'),
             toggleText: t('two_factor_challenge.use_recovery_code'),
         };
-    }, [showRecoveryInput]);
+    }, [showRecoveryInput, t]);
 
     const toggleRecoveryMode = (clearErrors: () => void): void => {
         setShowRecoveryInput(!showRecoveryInput);
