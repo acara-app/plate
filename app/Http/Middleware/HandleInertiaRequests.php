@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Inertia\Middleware;
 
 final class HandleInertiaRequests extends Middleware
@@ -31,6 +32,8 @@ final class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $locale = app()->getLocale();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -39,7 +42,28 @@ final class HandleInertiaRequests extends Middleware
                 'subscribed' => $request->user()?->hasActiveSubscription() ?? false,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'locale' => app()->getLocale(),
+            'locale' => $locale,
+            'translations' => $this->getTranslations($locale),
         ];
+    }
+
+    /**
+     * Load all translations for the given locale.
+     *
+     * @return array<string, mixed>
+     */
+    private function getTranslations(string $locale): array
+    {
+        $translations = [];
+        $langPath = lang_path($locale);
+
+        if (File::isDirectory($langPath)) {
+            foreach (File::files($langPath) as $file) {
+                $namespace = $file->getFilenameWithoutExtension();
+                $translations[$namespace] = require $file->getPathname();
+            }
+        }
+
+        return $translations;
     }
 }

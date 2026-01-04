@@ -6,7 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { I18nextProvider } from 'react-i18next';
 import { registerSW } from 'virtual:pwa-register';
 import { initializeTheme } from './hooks/use-appearance';
-import i18n from './i18n';
+import i18n, { loadTranslations } from './i18n';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -22,10 +22,11 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        // Initialize i18n with locale from shared data
-        const locale: string =
-            (props.initialPage.props.locale as string) || 'en';
-        i18n.changeLanguage(locale);
+        const locale = (props.initialPage.props.locale as string) || 'en';
+        const translations =
+            (props.initialPage.props.translations as Record<string, unknown>) ||
+            {};
+        loadTranslations(locale, translations);
 
         root.render(
             <I18nextProvider i18n={i18n}>

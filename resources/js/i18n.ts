@@ -1,37 +1,33 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// Import translation files
-import authEn from './locales/en/auth.json';
-import commonEn from './locales/en/common.json';
-import authMn from './locales/mn/auth.json';
-import commonMn from './locales/mn/common.json';
-
-// Translation resources
-const resources = {
-    en: {
-        auth: authEn,
-        common: commonEn,
-    },
-    mn: {
-        auth: authMn,
-        common: commonMn,
-    },
-};
-
-// Initialize i18next
 i18n.use(initReactI18next).init({
-    resources,
+    resources: {},
     lng: 'en', // Default language
     fallbackLng: 'en',
-    ns: ['auth', 'common'], // Namespaces
+    ns: ['auth', 'common'],
     defaultNS: 'common',
     interpolation: {
-        escapeValue: false, // React already escapes values
+        escapeValue: false,
     },
     react: {
         useSuspense: false, // Disable suspense for SSR compatibility
     },
 });
+
+/**
+ * Load translations from Laravel into i18next.
+ * Called on app initialization with translations from Inertia shared data.
+ */
+export const loadTranslations = (
+    locale: string,
+    translations: Record<string, unknown>,
+): void => {
+    Object.entries(translations).forEach(([namespace, resources]) => {
+        i18n.addResourceBundle(locale, namespace, resources, true, true);
+    });
+
+    i18n.changeLanguage(locale);
+};
 
 export default i18n;

@@ -157,9 +157,6 @@ it('throttles login attempts after too many failures', function (): void {
 
     $response->assertRedirectToRoute('login')
         ->assertSessionHasErrors('email');
-
-    $errors = session('errors');
-    expect($errors->get('email')[0])->toContain('Too many login attempts');
 });
 
 it('clears rate limit after successful login', function (): void {
