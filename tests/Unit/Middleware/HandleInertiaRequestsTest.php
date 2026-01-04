@@ -91,3 +91,47 @@ it('includes parent shared data', function (): void {
     // Parent Inertia middleware shares 'errors' by default
     expect($shared)->toHaveKey('errors');
 });
+
+it('shares current locale', function (): void {
+    $middleware = new HandleInertiaRequests();
+
+    $request = Request::create('/', 'GET');
+
+    $shared = $middleware->share($request);
+
+    expect($shared)->toHaveKey('locale')
+        ->and($shared['locale'])->toBe(app()->getLocale());
+});
+
+it('shares translations for current locale', function (): void {
+    $middleware = new HandleInertiaRequests();
+
+    $request = Request::create('/', 'GET');
+
+    $shared = $middleware->share($request);
+
+    expect($shared)->toHaveKey('translations')
+        ->and($shared['translations'])->toBeArray();
+});
+
+it('loads auth translations', function (): void {
+    $middleware = new HandleInertiaRequests();
+
+    $request = Request::create('/', 'GET');
+
+    $shared = $middleware->share($request);
+
+    expect($shared['translations'])->toHaveKey('auth')
+        ->and($shared['translations']['auth'])->toHaveKey('login');
+});
+
+it('loads common translations', function (): void {
+    $middleware = new HandleInertiaRequests();
+
+    $request = Request::create('/', 'GET');
+
+    $shared = $middleware->share($request);
+
+    expect($shared['translations'])->toHaveKey('common')
+        ->and($shared['translations']['common'])->toBeArray();
+});

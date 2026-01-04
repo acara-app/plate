@@ -34,6 +34,8 @@ export interface SharedData {
     name: string;
     auth: Auth;
     sidebarOpen: boolean;
+    locale: string;
+    translations: Record<string, unknown>;
     [key: string]: unknown;
 }
 
