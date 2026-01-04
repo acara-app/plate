@@ -39,6 +39,7 @@ final class HandleInertiaRequests extends Middleware
                 'subscribed' => $request->user()?->hasActiveSubscription() ?? false,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'locale' => app()->getLocale(),
         ];
     }
 }
