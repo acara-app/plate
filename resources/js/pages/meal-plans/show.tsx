@@ -43,6 +43,7 @@ import {
     ShoppingCart,
     Sparkles,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface MealPlansProps {
     mealPlan: MealPlan | null;
@@ -51,9 +52,9 @@ interface MealPlansProps {
     requiresSubscription?: boolean;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
+const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
-        title: 'Meal Plans',
+        title: t('meal_plans.title'),
         href: mealPlans.index().url,
     },
 ];
@@ -75,6 +76,7 @@ export default function MealPlans({
     requiresSubscription = false,
 }: MealPlansProps) {
     const { currentUser } = useSharedProps();
+    const { t } = useTranslation('common');
 
     const { start: startPolling } = usePoll(
         2000,
@@ -87,8 +89,8 @@ export default function MealPlans({
     );
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Meal Plans" />
+        <AppLayout breadcrumbs={getBreadcrumbs(t)}>
+            <Head title={t('meal_plans.title')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
                 {!currentUser?.is_onboarded ? (
@@ -98,31 +100,24 @@ export default function MealPlans({
                         <div className="space-y-2">
                             <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
                                 <Calendar className="h-8 w-8 text-primary" />
-                                Your Meal Plans
+                                {t('meal_plans.your_meal_plans')}
                             </h1>
                             <p className="text-muted-foreground">
-                                View and manage your personalized nutrition
-                                plans
+                                {t('meal_plans.description')}
                             </p>
                         </div>
 
                         <Alert className="border-purple-300 bg-purple-50 dark:border-purple-700 dark:bg-purple-950/50">
                             <CrownIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                             <AlertTitle className="text-lg text-purple-900 dark:text-purple-100">
-                                Unlock Personalized Meal Plans
+                                {t('meal_plans.unlock_title')}
                             </AlertTitle>
                             <AlertDescription className="space-y-3 text-purple-800 dark:text-purple-200">
-                                <p>
-                                    Subscribe to unlock AI-powered meal plans
-                                    tailored to your dietary needs, health
-                                    goals, and lifestyle. Get weekly meal plans
-                                    with detailed recipes, nutrition
-                                    information, and shopping lists.
-                                </p>
+                                <p>{t('meal_plans.unlock_description')}</p>
                                 <Button asChild size="sm">
                                     <Link href={checkout.subscription().url}>
                                         <CrownIcon className="mr-2 h-4 w-4" />
-                                        Upgrade Now
+                                        {t('meal_plans.upgrade_now')}
                                     </Link>
                                 </Button>
                             </AlertDescription>
@@ -133,20 +128,17 @@ export default function MealPlans({
                         <div className="space-y-2">
                             <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
                                 <Calendar className="h-8 w-8 text-primary" />
-                                Your Meal Plans
+                                {t('meal_plans.your_meal_plans')}
                             </h1>
                             <p className="text-muted-foreground">
-                                View and manage your personalized nutrition
-                                plans
+                                {t('meal_plans.description')}
                             </p>
                         </div>
 
                         <Alert>
                             <Info className="h-4 w-4" />
                             <AlertDescription>
-                                You don't have any meal plans yet. Complete your
-                                profile and preferences to generate your first
-                                personalized meal plan!
+                                {t('meal_plans.no_plans')}
                             </AlertDescription>
                         </Alert>
                     </>
@@ -166,7 +158,8 @@ export default function MealPlans({
                                             📅 {mealPlan.type}
                                         </Badge>
                                         <Badge variant="outline">
-                                            {mealPlan.duration_days} days
+                                            {mealPlan.duration_days}{' '}
+                                            {t('meal_plans.days')}
                                         </Badge>
                                     </div>
                                     <h1 className="text-3xl font-bold tracking-tight">
@@ -188,7 +181,7 @@ export default function MealPlans({
                                             }
                                         >
                                             <ShoppingCart className="mr-2 h-4 w-4" />
-                                            Grocery List
+                                            {t('meal_plans.grocery_list')}
                                         </Link>
                                     </Button>
                                     <Button variant="outline" size="sm" asChild>
@@ -200,7 +193,7 @@ export default function MealPlans({
                                             rel="noopener noreferrer"
                                         >
                                             <Printer className="mr-2 h-4 w-4" />
-                                            Print
+                                            {t('meal_plans.print')}
                                         </a>
                                     </Button>
                                 </div>
@@ -264,7 +257,7 @@ export default function MealPlans({
                             <div className="space-y-3">
                                 <h3 className="flex items-center gap-2 text-lg font-semibold">
                                     <Sparkles className="h-5 w-5 text-primary" />
-                                    Today's Meals
+                                    {t('meal_plans.todays_meals')}
                                 </h3>
 
                                 {currentDay.needs_generation ? (
@@ -276,7 +269,7 @@ export default function MealPlans({
                                     <Alert>
                                         <Info className="h-4 w-4" />
                                         <AlertDescription>
-                                            No meals planned for this day.
+                                            {t('meal_plans.no_meals')}
                                         </AlertDescription>
                                     </Alert>
                                 ) : (
@@ -314,6 +307,7 @@ function CalorieComparison({ actual, target }: CalorieComparisonProps) {
     const diff = actual - target;
     const percentage = ((diff / target) * 100).toFixed(0);
     const isWithinRange = Math.abs(diff) <= 50;
+    const { t } = useTranslation('common');
 
     return (
         <div className="text-right">
@@ -325,11 +319,11 @@ function CalorieComparison({ actual, target }: CalorieComparisonProps) {
                 }
             >
                 {diff > 0 ? '+' : ''}
-                {Math.round(diff)} cal
+                {Math.round(diff)} {t('meal_plans.cal')}
             </div>
             <div className="text-xs text-muted-foreground">
                 {diff > 0 ? '+' : ''}
-                {percentage}% vs target
+                {percentage}% {t('meal_plans.vs_target')}
             </div>
         </div>
     );
@@ -344,16 +338,16 @@ function GeneratingMealsState({
     status,
     dayNumber,
 }: GeneratingMealsStateProps) {
+    const { t } = useTranslation('common');
     if (status === GenerationStatus.Failed) {
         return (
             <Alert variant="destructive">
                 <Info className="h-4 w-4" />
-                <AlertTitle>Generation Failed</AlertTitle>
+                <AlertTitle>
+                    {t('meal_plans.generation.failed_title')}
+                </AlertTitle>
                 <AlertDescription className="space-y-3">
-                    <p>
-                        We couldn't generate meals for this day. This might be a
-                        temporary issue.
-                    </p>
+                    <p>{t('meal_plans.generation.failed_description')}</p>
                     <Button variant="outline" size="sm" asChild>
                         <Link
                             href={
@@ -361,7 +355,7 @@ function GeneratingMealsState({
                                     .url
                             }
                         >
-                            Try Again
+                            {t('meal_plans.generation.try_again')}
                         </Link>
                     </Button>
                 </AlertDescription>
@@ -374,12 +368,10 @@ function GeneratingMealsState({
             <Alert className="border-primary/30 bg-primary/5">
                 <Loader2 className="h-4 w-4 animate-spin text-primary" />
                 <AlertTitle className="text-primary">
-                    Generating Your Meals
+                    {t('meal_plans.generation.generating_title')}
                 </AlertTitle>
                 <AlertDescription className="text-muted-foreground">
-                    Crafting personalized meals for this day based on your
-                    preferences and nutritional goals. This usually takes 30-60
-                    seconds.
+                    {t('meal_plans.generation.generating_description')}
                 </AlertDescription>
             </Alert>
 
@@ -421,6 +413,7 @@ interface DayPaginationProps {
 
 function DayPagination({ currentDay, totalDays }: DayPaginationProps) {
     const days = Array.from({ length: totalDays }, (_, i) => i + 1);
+    const { t } = useTranslation('common');
 
     return (
         <nav className="flex items-center justify-between border-t border-border px-4 sm:px-0">
@@ -438,7 +431,7 @@ function DayPagination({ currentDay, totalDays }: DayPaginationProps) {
                     }`}
                 >
                     <ChevronLeft className="mr-2 h-4 w-4" />
-                    Previous
+                    {t('meal_plans.previous')}
                 </Link>
             </div>
 
@@ -464,7 +457,10 @@ function DayPagination({ currentDay, totalDays }: DayPaginationProps) {
             {/* Mobile: show current day indicator */}
             <div className="-mt-px flex items-center pt-4 md:hidden">
                 <span className="text-sm text-muted-foreground">
-                    Day {currentDay} of {totalDays}
+                    {t('meal_plans.day_of', {
+                        current: currentDay,
+                        total: totalDays,
+                    })}
                 </span>
             </div>
 
@@ -483,7 +479,7 @@ function DayPagination({ currentDay, totalDays }: DayPaginationProps) {
                             : ''
                     }`}
                 >
-                    Next
+                    {t('meal_plans.next')}
                     <ChevronRight className="ml-2 h-4 w-4" />
                 </Link>
             </div>
@@ -502,6 +498,7 @@ function PlanInfoFooter({
     currentDay,
     onRegenerateStart,
 }: PlanInfoFooterProps) {
+    const { t } = useTranslation('common');
     const regenerateForm = useForm({
         day: currentDay.day_number,
     });
@@ -522,7 +519,7 @@ function PlanInfoFooter({
     return (
         <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-lg bg-muted/30 p-4 text-sm text-muted-foreground sm:flex-row sm:items-center">
             <p>
-                Created on{' '}
+                {t('meal_plans.created_on')}{' '}
                 {new Date(mealPlan.created_at).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
@@ -545,25 +542,29 @@ function PlanInfoFooter({
                             ) : (
                                 <RefreshCw className="mr-2 h-4 w-4" />
                             )}
-                            Regenerate Day
+                            {t('meal_plans.regenerate_day')}
                         </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle>
-                                Regenerate This Day?
+                                {t('meal_plans.regenerate_title')}
                             </AlertDialogTitle>
-                            <AlertDialogDescription>
-                                This will replace all meals for{' '}
-                                <strong>{currentDay.day_name}</strong> with
-                                newly generated meals based on your current
-                                preferences. This action cannot be undone.
-                            </AlertDialogDescription>
+                            <AlertDialogDescription
+                                dangerouslySetInnerHTML={{
+                                    __html: t(
+                                        'meal_plans.regenerate_description',
+                                        { dayName: currentDay.day_name },
+                                    ),
+                                }}
+                            />
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>
+                                {t('meal_plans.cancel')}
+                            </AlertDialogCancel>
                             <AlertDialogAction onClick={handleRegenerate}>
-                                Regenerate
+                                {t('meal_plans.regenerate')}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>

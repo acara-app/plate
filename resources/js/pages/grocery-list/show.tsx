@@ -33,6 +33,7 @@ import {
     Sparkles,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface GroceryListPageProps {
     mealPlan: MealPlanSummary;
@@ -47,6 +48,7 @@ export default function GroceryListPage({
 }: GroceryListPageProps) {
     const regenerateForm = useForm({});
     const [viewMode, setViewMode] = useState<ViewMode>('category');
+    const { t } = useTranslation('common');
 
     const isGenerating = groceryList?.status === GroceryStatus.Generating;
     const hasNoList = !groceryList;
@@ -69,11 +71,11 @@ export default function GroceryListPage({
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Meal Plans',
+            title: t('meal_plans.title'),
             href: mealPlans.index().url,
         },
         {
-            title: 'Grocery List',
+            title: t('grocery_list.title'),
             href: showGroceryList(mealPlan.id).url,
         },
     ];
@@ -88,7 +90,7 @@ export default function GroceryListPage({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Grocery List" />
+            <Head title={t('grocery_list.title')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
                 {/* Header */}
@@ -102,14 +104,16 @@ export default function GroceryListPage({
                             </Button>
                             <Badge variant="default">
                                 <ShoppingCart className="mr-1 h-3 w-3" />
-                                Grocery List
+                                {t('grocery_list.title')}
                             </Badge>
                         </div>
                         <h1 className="text-3xl font-bold tracking-tight">
-                            Grocery List
+                            {t('grocery_list.title')}
                         </h1>
                         <p className="text-muted-foreground">
-                            {mealPlan.duration_days}-day meal plan
+                            {t('grocery_list.day_meal_plan', {
+                                days: mealPlan.duration_days,
+                            })}
                         </p>
                     </div>
 
@@ -126,7 +130,9 @@ export default function GroceryListPage({
                             ) : (
                                 <RefreshCw className="mr-2 h-4 w-4" />
                             )}
-                            {hasNoList ? 'Generate' : 'Regenerate'}
+                            {hasNoList
+                                ? t('grocery_list.generate')
+                                : t('grocery_list.regenerate')}
                         </Button>
                         {groceryList && (
                             <Button
@@ -141,7 +147,7 @@ export default function GroceryListPage({
                                     rel="noopener noreferrer"
                                 >
                                     <Printer className="mr-2 h-4 w-4" />
-                                    Print
+                                    {t('grocery_list.print')}
                                 </a>
                             </Button>
                         )}
@@ -179,13 +185,15 @@ function EmptyGroceryListState({
     onGenerate,
     isGenerating,
 }: EmptyGroceryListStateProps) {
+    const { t } = useTranslation('common');
     return (
         <div className="flex flex-1 flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
             <ShoppingCart className="mb-4 h-16 w-16 text-muted-foreground" />
-            <h3 className="text-xl font-semibold">No Grocery List Yet</h3>
+            <h3 className="text-xl font-semibold">
+                {t('grocery_list.empty.title')}
+            </h3>
             <p className="mt-2 max-w-md text-muted-foreground">
-                Generate a grocery list from your meal plan. Ingredients are
-                consolidated and organized by category for easy shopping.
+                {t('grocery_list.empty.description')}
             </p>
             <Button
                 className="mt-6"
@@ -197,23 +205,24 @@ function EmptyGroceryListState({
                 ) : (
                     <ShoppingCart className="mr-2 h-4 w-4" />
                 )}
-                Generate Grocery List
+                {t('grocery_list.empty.button')}
             </Button>
         </div>
     );
 }
 
 function GroceryListSkeleton() {
+    const { t } = useTranslation('common');
     return (
         <div className="space-y-6">
             {/* Loading Alert */}
             <Alert className="border-primary/30 bg-primary/5">
                 <Loader2 className="h-4 w-4 animate-spin text-primary" />
                 <AlertTitle className="text-primary">
-                    Generating Your Grocery List
+                    {t('grocery_list.generating.title')}
                 </AlertTitle>
                 <AlertDescription className="text-muted-foreground">
-                    Building your grocery list from your meal plan.
+                    {t('grocery_list.generating.description')}
                 </AlertDescription>
             </Alert>
 
@@ -264,6 +273,7 @@ function GroceryListContent({
     viewMode,
     onViewModeChange,
 }: GroceryListContentProps) {
+    const { t } = useTranslation('common');
     const progress =
         groceryList.total_items > 0
             ? (groceryList.checked_items / groceryList.total_items) * 100
@@ -280,11 +290,11 @@ function GroceryListContent({
             <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">
-                        Shopping progress
+                        {t('grocery_list.progress')}
                     </span>
                     <span className="font-medium">
-                        {groceryList.checked_items} of {groceryList.total_items}{' '}
-                        items
+                        {groceryList.checked_items} {t('grocery_list.of')}{' '}
+                        {groceryList.total_items} {t('grocery_list.items')}
                     </span>
                 </div>
                 <Progress value={progress} className="h-2" />
@@ -306,18 +316,24 @@ function GroceryListContent({
                         aria-label="View by category"
                     >
                         <LayoutGrid className="mr-2 h-4 w-4" />
-                        By Category
+                        {t('grocery_list.view_modes.by_category')}
                     </ToggleGroupItem>
                     <ToggleGroupItem value="day" aria-label="View by day">
                         <CalendarDays className="mr-2 h-4 w-4" />
-                        By Day
+                        {t('grocery_list.view_modes.by_day')}
                     </ToggleGroupItem>
                 </ToggleGroup>
 
                 {viewMode === 'day' && days.length > 0 && (
                     <span className="text-sm text-muted-foreground">
-                        {days.length} day{days.length !== 1 ? 's' : ''} with
-                        items
+                        {days.length === 1
+                            ? t('grocery_list.view_modes.days_with_items', {
+                                  count: days.length,
+                              })
+                            : t(
+                                  'grocery_list.view_modes.days_with_items_plural',
+                                  { count: days.length },
+                              )}
                     </span>
                 )}
             </div>
@@ -327,10 +343,10 @@ function GroceryListContent({
                 <Alert className="border-green-500/30 bg-green-500/5">
                     <Sparkles className="h-4 w-4 text-green-600" />
                     <AlertTitle className="text-green-700 dark:text-green-400">
-                        Shopping Complete! 🎉
+                        {t('grocery_list.status.complete_title')}
                     </AlertTitle>
                     <AlertDescription className="text-green-600 dark:text-green-300">
-                        You've checked off all items on your grocery list.
+                        {t('grocery_list.status.complete_description')}
                     </AlertDescription>
                 </Alert>
             )}
@@ -338,11 +354,10 @@ function GroceryListContent({
             {groceryList.status === GroceryStatus.Failed && (
                 <Alert className="border-red-500/30 bg-red-500/5">
                     <AlertTitle className="text-red-700 dark:text-red-400">
-                        Generation Failed
+                        {t('grocery_list.status.failed_title')}
                     </AlertTitle>
                     <AlertDescription className="text-red-600 dark:text-red-300">
-                        Something went wrong while generating your grocery list.
-                        Please try regenerating.
+                        {t('grocery_list.status.failed_description')}
                     </AlertDescription>
                 </Alert>
             )}
@@ -417,13 +432,14 @@ function GroceryListContent({
                                 <div className="flex items-center justify-between">
                                     <h3 className="flex items-center gap-2 text-xl font-semibold">
                                         <CalendarDays className="h-5 w-5 text-primary" />
-                                        Day {day}
+                                        {t('grocery_list.day', { number: day })}
                                     </h3>
                                     <Badge
                                         variant="outline"
                                         className="font-normal"
                                     >
-                                        {checkedCount}/{items.length} items
+                                        {checkedCount}/{items.length}{' '}
+                                        {t('grocery_list.items')}
                                     </Badge>
                                 </div>
 
@@ -495,10 +511,11 @@ function GroceryListContent({
             {categories.length === 0 && (
                 <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
                     <ShoppingCart className="mb-4 h-12 w-12 text-muted-foreground" />
-                    <h3 className="text-lg font-semibold">No Items Yet</h3>
+                    <h3 className="text-lg font-semibold">
+                        {t('grocery_list.empty_items.title')}
+                    </h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        Your grocery list is empty. This might happen if your
-                        meal plan doesn't have any ingredients yet.
+                        {t('grocery_list.empty_items.description')}
                     </p>
                     <Button
                         variant="outline"
@@ -511,7 +528,7 @@ function GroceryListContent({
                         ) : (
                             <RefreshCw className="mr-2 h-4 w-4" />
                         )}
-                        Try Regenerating
+                        {t('grocery_list.empty_items.button')}
                     </Button>
                 </div>
             )}
@@ -535,7 +552,7 @@ function GroceryItemRow({
     const days = item.days ?? [];
     const otherDays = currentDay ? days.filter((d) => d !== currentDay) : [];
     const hasOtherDays = otherDays.length > 0;
-
+    const { t } = useTranslation('common');
     return (
         <li className="flex items-center gap-3">
             <Checkbox
@@ -560,7 +577,9 @@ function GroceryItemRow({
                 )}
                 {hasOtherDays && (
                     <span className="ml-2 text-xs text-muted-foreground">
-                        Also Day {otherDays.join(', ')}
+                        {t('grocery_list.also_day', {
+                            days: otherDays.join(', '),
+                        })}
                     </span>
                 )}
             </label>

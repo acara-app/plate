@@ -13,6 +13,7 @@ import {
     type GlucoseUnitType,
 } from '@/types/diabetes';
 import { usePage } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
     Bar,
     CartesianGrid,
@@ -139,6 +140,7 @@ interface TooltipProps {
 }
 
 function CustomTooltip({ active, payload, label, glucoseUnit }: TooltipProps) {
+    const { t } = useTranslation('common');
     if (active && payload && payload.length) {
         return (
             <div className="rounded-lg border bg-background p-3 shadow-lg">
@@ -149,16 +151,30 @@ function CustomTooltip({ active, payload, label, glucoseUnit }: TooltipProps) {
                             return null;
                         }
                         const labels: Record<string, string> = {
-                            glucoseDisplay: 'Glucose',
-                            insulin: 'Insulin',
-                            carbs: 'Carbs',
-                            exercise: 'Exercise',
+                            glucoseDisplay: t(
+                                'diabetes_log.correlation_chart.tooltip.glucose',
+                            ),
+                            insulin: t(
+                                'diabetes_log.correlation_chart.tooltip.insulin',
+                            ),
+                            carbs: t(
+                                'diabetes_log.correlation_chart.tooltip.carbs',
+                            ),
+                            exercise: t(
+                                'diabetes_log.correlation_chart.tooltip.exercise',
+                            ),
                         };
                         const units: Record<string, string> = {
                             glucoseDisplay: glucoseUnit,
-                            insulin: 'units',
-                            carbs: 'g',
-                            exercise: 'min',
+                            insulin: t(
+                                'diabetes_log.correlation_chart.tooltip.units',
+                            ),
+                            carbs: t(
+                                'diabetes_log.correlation_chart.tooltip.grams',
+                            ),
+                            exercise: t(
+                                'diabetes_log.correlation_chart.tooltip.minutes',
+                            ),
                         };
                         return (
                             <div
@@ -186,6 +202,7 @@ function CustomTooltip({ active, payload, label, glucoseUnit }: TooltipProps) {
 }
 
 export default function CorrelationChart() {
+    const { t } = useTranslation('common');
     const { logs, glucoseUnit, summary } =
         usePage<DiabetesTrackingPageProps>().props;
 
@@ -202,14 +219,16 @@ export default function CorrelationChart() {
         return (
             <Card>
                 <CardHeader>
-                    <CardTitle>Glucose & Factor Correlation</CardTitle>
+                    <CardTitle>
+                        {t('diabetes_log.correlation_chart.title')}
+                    </CardTitle>
                     <CardDescription>
-                        See how insulin, carbs, and exercise affect your glucose
+                        {t('diabetes_log.correlation_chart.description')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="flex h-[400px] items-center justify-center text-muted-foreground">
-                        No data available. Add log entries to see correlations.
+                        {t('diabetes_log.correlation_chart.no_data')}
                     </div>
                 </CardContent>
             </Card>
@@ -265,10 +284,11 @@ export default function CorrelationChart() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Glucose & Factor Correlation</CardTitle>
+                <CardTitle>
+                    {t('diabetes_log.correlation_chart.title')}
+                </CardTitle>
                 <CardDescription>
-                    Daily averages showing how insulin, carbs, and exercise
-                    correlate with glucose levels
+                    {t('diabetes_log.correlation_chart.description')}
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -276,7 +296,10 @@ export default function CorrelationChart() {
                     {/* Glucose Chart - Top */}
                     <div>
                         <p className="mb-2 text-sm font-medium text-muted-foreground">
-                            Glucose Levels ({glucoseUnit})
+                            {t(
+                                'diabetes_log.correlation_chart.glucose_levels',
+                                { unit: glucoseUnit },
+                            )}
                         </p>
                         <ResponsiveContainer width="100%" height={200}>
                             <ComposedChart
@@ -348,7 +371,7 @@ export default function CorrelationChart() {
                     {(hasInsulin || hasCarbs || hasExercise) && (
                         <div>
                             <p className="mb-2 text-sm font-medium text-muted-foreground">
-                                Factors (Insulin units / Carbs g / Exercise min)
+                                {t('diabetes_log.correlation_chart.factors')}
                             </p>
                             <ResponsiveContainer width="100%" height={180}>
                                 <ComposedChart
@@ -429,7 +452,10 @@ export default function CorrelationChart() {
                             <div className="flex items-center gap-2">
                                 <div className="size-3 rounded-full bg-blue-500" />
                                 <span className="text-muted-foreground">
-                                    Glucose ({glucoseUnit})
+                                    {t(
+                                        'diabetes_log.correlation_chart.legend.glucose',
+                                        { unit: glucoseUnit },
+                                    )}
                                 </span>
                             </div>
                         )}
@@ -437,7 +463,9 @@ export default function CorrelationChart() {
                             <div className="flex items-center gap-2">
                                 <div className="size-3 rounded bg-purple-500" />
                                 <span className="text-muted-foreground">
-                                    Insulin (units)
+                                    {t(
+                                        'diabetes_log.correlation_chart.legend.insulin',
+                                    )}
                                 </span>
                             </div>
                         )}
@@ -445,7 +473,9 @@ export default function CorrelationChart() {
                             <div className="flex items-center gap-2">
                                 <div className="size-3 rounded bg-amber-500" />
                                 <span className="text-muted-foreground">
-                                    Carbs (g)
+                                    {t(
+                                        'diabetes_log.correlation_chart.legend.carbs',
+                                    )}
                                 </span>
                             </div>
                         )}
@@ -453,7 +483,9 @@ export default function CorrelationChart() {
                             <div className="flex items-center gap-2">
                                 <div className="size-3 rounded-full bg-green-500" />
                                 <span className="text-muted-foreground">
-                                    Exercise (min)
+                                    {t(
+                                        'diabetes_log.correlation_chart.legend.exercise',
+                                    )}
                                 </span>
                             </div>
                         )}
@@ -462,37 +494,46 @@ export default function CorrelationChart() {
                     {/* Insights */}
                     <div className="border-t pt-4">
                         <p className="mb-2 text-sm font-medium">
-                            Correlation Insights
+                            {t('diabetes_log.correlation_chart.insights.title')}
                         </p>
                         <div className="space-y-2 text-xs text-muted-foreground">
                             {dataTypes.hasInsulin && dataTypes.hasGlucose && (
-                                <p>
-                                    💉 <strong>Insulin:</strong> Track how your
-                                    insulin doses affect glucose levels over
-                                    time.
-                                </p>
+                                <p
+                                    dangerouslySetInnerHTML={{
+                                        __html: t(
+                                            'diabetes_log.correlation_chart.insights.insulin',
+                                        ),
+                                    }}
+                                />
                             )}
                             {dataTypes.hasCarbs && dataTypes.hasGlucose && (
-                                <p>
-                                    🍞 <strong>Carbs:</strong> Notice patterns
-                                    between carb intake and glucose spikes.
-                                </p>
+                                <p
+                                    dangerouslySetInnerHTML={{
+                                        __html: t(
+                                            'diabetes_log.correlation_chart.insights.carbs',
+                                        ),
+                                    }}
+                                />
                             )}
                             {dataTypes.hasExercise && dataTypes.hasGlucose && (
-                                <p>
-                                    🏃 <strong>Exercise:</strong> See how
-                                    physical activity impacts your glucose
-                                    control.
-                                </p>
+                                <p
+                                    dangerouslySetInnerHTML={{
+                                        __html: t(
+                                            'diabetes_log.correlation_chart.insights.exercise',
+                                        ),
+                                    }}
+                                />
                             )}
                             {!dataTypes.hasInsulin &&
                                 !dataTypes.hasCarbs &&
                                 !dataTypes.hasExercise && (
-                                    <p>
-                                        💡 Log insulin, carbs, or exercise to
-                                        see how they correlate with your glucose
-                                        levels.
-                                    </p>
+                                    <p
+                                        dangerouslySetInnerHTML={{
+                                            __html: t(
+                                                'diabetes_log.correlation_chart.insights.no_factors',
+                                            ),
+                                        }}
+                                    />
                                 )}
                         </div>
                     </div>

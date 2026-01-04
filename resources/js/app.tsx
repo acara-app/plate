@@ -8,7 +8,7 @@ import { registerSW } from 'virtual:pwa-register';
 import { initializeTheme } from './hooks/use-appearance';
 import i18n, { loadTranslations } from './i18n';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Acara Plate';
 
 registerSW({ immediate: true });
 

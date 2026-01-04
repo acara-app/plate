@@ -1,6 +1,7 @@
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
 
 import HeadingSmall from '@/components/heading-small';
 import AppLayout from '@/layouts/app-layout';
@@ -19,29 +20,30 @@ interface Props {
     billingHistory: Invoice[];
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
+const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
-        title: 'Billing history',
+        title: t('billing.title'),
         href: billing.index().url,
     },
 ];
 
 export default function Index({ billingHistory }: Props) {
+    const { t } = useTranslation('common');
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Billing history" />
+        <AppLayout breadcrumbs={getBreadcrumbs(t)}>
+            <Head title={t('billing.title')} />
 
             <SettingsLayout>
                 <div className="space-y-6">
                     <HeadingSmall
-                        title="Billing history"
-                        description="View and download your past invoices"
+                        title={t('billing.title')}
+                        description={t('billing.description')}
                     />
 
                     {billingHistory.length === 0 ? (
                         <div className="rounded-lg border border-dashed border-gray-300 p-12 text-center">
                             <p className="text-sm text-muted-foreground">
-                                No billing history available yet.
+                                {t('billing.no_history')}
                             </p>
                         </div>
                     ) : (
@@ -50,16 +52,16 @@ export default function Index({ billingHistory }: Props) {
                                 <thead className="bg-gray-50">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                                            Date
+                                            {t('billing.table.date')}
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                                            Amount
+                                            {t('billing.table.amount')}
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                                            Status
+                                            {t('billing.table.status')}
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                                            Actions
+                                            {t('billing.table.actions')}
                                         </th>
                                     </tr>
                                 </thead>
@@ -92,7 +94,9 @@ export default function Index({ billingHistory }: Props) {
                                                     rel="noopener noreferrer"
                                                     className="text-blue-600 hover:text-blue-900"
                                                 >
-                                                    Download
+                                                    {t(
+                                                        'billing.table.download',
+                                                    )}
                                                 </a>
                                             </td>
                                         </tr>

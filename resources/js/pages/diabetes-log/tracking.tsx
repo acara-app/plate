@@ -14,15 +14,16 @@ import { type BreadcrumbItem } from '@/types';
 import type { DiabetesTrackingPageProps } from '@/types/diabetes';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { List, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import CorrelationChart from './correlation-chart';
 import DashboardSummaryCards from './dashboard-summary-cards';
 import DiabetesLogDialog from './diabetes-log-dialog';
 import GlucoseChart from './glucose-chart';
 import TimePeriodFilter from './time-period-filter';
 
-const breadcrumbs: BreadcrumbItem[] = [
+const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
-        title: 'Diabetes Log',
+        title: t('diabetes_log.index_page.title'),
         href: ListDiabetesLogController().url,
     },
 ];
@@ -40,6 +41,7 @@ export default function DiabetesLogDashboard() {
         todaysMeals,
     } = usePage<DiabetesTrackingPageProps>().props;
 
+    const { t } = useTranslation('common');
     const createModal = useModalToggle();
 
     // Transform logs to format expected by GlucoseChart (for glucose data only)
@@ -57,19 +59,18 @@ export default function DiabetesLogDashboard() {
     const { dataTypes } = summary;
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Diabetes Log Dashboard" />
+        <AppLayout breadcrumbs={getBreadcrumbs(t)}>
+            <Head title={t('diabetes_log.tracking_page.title')} />
             <AdminPageWrap variant="full">
                 <div className="space-y-6">
                     {/* Header */}
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight">
-                                Diabetes Log Dashboard
+                                {t('diabetes_log.tracking_page.title')}
                             </h1>
                             <p className="text-muted-foreground">
-                                Comprehensive analytics and trends for your
-                                diabetes management
+                                {t('diabetes_log.tracking_page.description')}
                             </p>
                         </div>
                         <div className="flex gap-2">
@@ -80,7 +81,7 @@ export default function DiabetesLogDashboard() {
                             </Button>
                             <Button onClick={createModal.open}>
                                 <Plus className="mr-2 size-4" />
-                                Add Entry
+                                {t('diabetes_log.tracking_page.add_entry')}
                             </Button>
                         </div>
                     </div>
@@ -103,9 +104,15 @@ export default function DiabetesLogDashboard() {
                     {/* Time Period Filter */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Time Period</CardTitle>
+                            <CardTitle>
+                                {t(
+                                    'diabetes_log.tracking_page.time_period_title',
+                                )}
+                            </CardTitle>
                             <CardDescription>
-                                Select the time range for your analytics
+                                {t(
+                                    'diabetes_log.tracking_page.time_period_description',
+                                )}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -119,15 +126,20 @@ export default function DiabetesLogDashboard() {
                             <CardContent className="py-16 text-center">
                                 <div className="mx-auto max-w-md space-y-4">
                                     <h3 className="text-lg font-semibold">
-                                        No entries in this period
+                                        {t(
+                                            'diabetes_log.tracking_page.no_entries_title',
+                                        )}
                                     </h3>
                                     <p className="text-muted-foreground">
-                                        Try selecting a different time period or
-                                        add more entries to see analytics.
+                                        {t(
+                                            'diabetes_log.tracking_page.no_entries_description',
+                                        )}
                                     </p>
                                     <Button onClick={() => createModal.open()}>
                                         <Plus className="mr-2 size-4" />
-                                        Add Your First Entry
+                                        {t(
+                                            'diabetes_log.tracking_page.add_first_entry',
+                                        )}
                                     </Button>
                                 </div>
                             </CardContent>
@@ -153,16 +165,24 @@ export default function DiabetesLogDashboard() {
                             {/* Insights Card */}
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Summary & Tips</CardTitle>
+                                    <CardTitle>
+                                        {t(
+                                            'diabetes_log.tracking_page.summary_tips_title',
+                                        )}
+                                    </CardTitle>
                                     <CardDescription>
-                                        Key insights from your diabetes log
+                                        {t(
+                                            'diabetes_log.tracking_page.summary_tips_description',
+                                        )}
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-3 text-sm">
                                         <div className="flex justify-between border-b pb-2">
                                             <span className="text-muted-foreground">
-                                                Total Entries
+                                                {t(
+                                                    'diabetes_log.tracking_page.total_entries',
+                                                )}
                                             </span>
                                             <span className="font-medium">
                                                 {logs.length}
@@ -170,66 +190,78 @@ export default function DiabetesLogDashboard() {
                                         </div>
                                         <div className="flex justify-between border-b pb-2">
                                             <span className="text-muted-foreground">
-                                                Time Period
+                                                {t(
+                                                    'diabetes_log.tracking_page.time_period_label',
+                                                )}
                                             </span>
                                             <span className="font-medium">
-                                                {timePeriod === '7d'
-                                                    ? 'Last 7 Days'
-                                                    : timePeriod === '30d'
-                                                      ? 'Last 30 Days'
-                                                      : 'Last 90 Days'}
+                                                {t(
+                                                    `diabetes_log.tracking_page.time_periods.${timePeriod}`,
+                                                )}
                                             </span>
                                         </div>
                                         <div className="flex justify-between border-b pb-2">
                                             <span className="text-muted-foreground">
-                                                Data Types Logged
+                                                {t(
+                                                    'diabetes_log.tracking_page.data_types_logged',
+                                                )}
                                             </span>
                                             <span className="font-medium">
                                                 {[
                                                     dataTypes.hasGlucose &&
-                                                        'Glucose',
+                                                        t(
+                                                            'diabetes_log.tracking_page.data_types.glucose',
+                                                        ),
                                                     dataTypes.hasInsulin &&
-                                                        'Insulin',
+                                                        t(
+                                                            'diabetes_log.tracking_page.data_types.insulin',
+                                                        ),
                                                     dataTypes.hasCarbs &&
-                                                        'Carbs',
+                                                        t(
+                                                            'diabetes_log.tracking_page.data_types.carbs',
+                                                        ),
                                                     dataTypes.hasExercise &&
-                                                        'Exercise',
+                                                        t(
+                                                            'diabetes_log.tracking_page.data_types.exercise',
+                                                        ),
                                                 ]
                                                     .filter(Boolean)
-                                                    .join(', ') || 'None'}
+                                                    .join(', ') ||
+                                                    t(
+                                                        'diabetes_log.tracking_page.data_types.none',
+                                                    )}
                                             </span>
                                         </div>
                                         <div className="space-y-2 pt-2">
-                                            <p className="text-xs text-muted-foreground">
-                                                💡 <strong>Tip:</strong> Log
-                                                multiple factors (glucose,
-                                                insulin, carbs, exercise) to see
-                                                correlations and understand how
-                                                they affect each other.
-                                            </p>
+                                            <p
+                                                className="text-xs text-muted-foreground"
+                                                dangerouslySetInnerHTML={{
+                                                    __html: t(
+                                                        'diabetes_log.tracking_page.tips.general',
+                                                    ),
+                                                }}
+                                            />
                                             {dataTypes.hasGlucose &&
                                                 !dataTypes.hasInsulin &&
                                                 !dataTypes.hasCarbs && (
-                                                    <p className="text-xs text-muted-foreground">
-                                                        📊{' '}
-                                                        <strong>
-                                                            Suggestion:
-                                                        </strong>{' '}
-                                                        Try logging your carb
-                                                        intake and insulin doses
-                                                        to see their impact on
-                                                        glucose levels.
-                                                    </p>
+                                                    <p
+                                                        className="text-xs text-muted-foreground"
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: t(
+                                                                'diabetes_log.tracking_page.tips.log_carbs_insulin',
+                                                            ),
+                                                        }}
+                                                    />
                                                 )}
                                             {!dataTypes.hasExercise && (
-                                                <p className="text-xs text-muted-foreground">
-                                                    🏃{' '}
-                                                    <strong>Suggestion:</strong>{' '}
-                                                    Log your exercise sessions
-                                                    to see how physical activity
-                                                    affects your glucose
-                                                    control.
-                                                </p>
+                                                <p
+                                                    className="text-xs text-muted-foreground"
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: t(
+                                                            'diabetes_log.tracking_page.tips.log_exercise',
+                                                        ),
+                                                    }}
+                                                />
                                             )}
                                         </div>
                                     </div>

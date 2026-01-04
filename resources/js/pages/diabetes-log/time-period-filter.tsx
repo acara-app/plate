@@ -3,19 +3,36 @@ import { Button } from '@/components/ui/button';
 import type { DiabetesTrackingPageProps, TimePeriod } from '@/types/diabetes';
 import { Link, usePage } from '@inertiajs/react';
 import { Calendar, CalendarDays, CalendarRange } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const periods: Array<{
+const getPeriods = (
+    t: (key: string) => string,
+): Array<{
     value: TimePeriod;
     label: string;
     icon: typeof Calendar;
-}> = [
-    { value: '7d', label: 'Last 7 Days', icon: Calendar },
-    { value: '30d', label: 'Last 30 Days', icon: CalendarDays },
-    { value: '90d', label: 'Last 90 Days', icon: CalendarRange },
+}> => [
+    {
+        value: '7d',
+        label: t('diabetes_log.tracking_page.time_periods.7d'),
+        icon: Calendar,
+    },
+    {
+        value: '30d',
+        label: t('diabetes_log.tracking_page.time_periods.30d'),
+        icon: CalendarDays,
+    },
+    {
+        value: '90d',
+        label: t('diabetes_log.tracking_page.time_periods.90d'),
+        icon: CalendarRange,
+    },
 ];
 
 export default function TimePeriodFilter() {
     const { timePeriod } = usePage<DiabetesTrackingPageProps>().props;
+    const { t } = useTranslation('common');
+    const periods = getPeriods(t);
 
     return (
         <div className="flex flex-wrap gap-2">

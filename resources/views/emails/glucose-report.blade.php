@@ -1,24 +1,24 @@
 <x-mail::message>
-# Your Weekly Glucose Report
+# {{ __('common.glucose_report_email.subject') }}
 
-Hello! Here's your glucose summary for the past {{ $daysAnalyzed }} days:
+{{ __('common.glucose_report_email.greeting', ['days' => $daysAnalyzed]) }}
 
-## Glucose Overview
+## {{ __('common.glucose_report_email.glucose_overview') }}
 
 @if($averageGlucose)
-**Average Glucose:** {{ $averageGlucose }} mg/dL
+**{{ __('common.glucose_report_email.average_glucose') }}** {{ $averageGlucose }} mg/dL
 @endif
 
-**Time in Range:** {{ $timeInRangePercentage }}%
-- Above range: {{ $aboveRangePercentage }}%
-- Below range: {{ $belowRangePercentage }}%
+**{{ __('common.glucose_report_email.time_in_range') }}** {{ $timeInRangePercentage }}%
+- {{ __('common.glucose_report_email.above_range') }} {{ $aboveRangePercentage }}%
+- {{ __('common.glucose_report_email.below_range') }} {{ $belowRangePercentage }}%
 
-**Total Readings:** {{ $totalReadings }}
+**{{ __('common.glucose_report_email.total_readings') }}** {{ $totalReadings }}
 
 @if(count($concerns) > 0)
 ---
 
-## Areas of Attention
+## {{ __('common.glucose_report_email.areas_of_attention') }}
 
 @foreach($concerns as $concern)
 - {{ $concern }}
@@ -27,14 +27,14 @@ Hello! Here's your glucose summary for the past {{ $daysAnalyzed }} days:
 
 ---
 
-Consider reviewing your meal plan to help improve your glucose levels.
+{{ __('common.glucose_report_email.review_meal_plan') }}
 
 <x-mail::button :url="$mealPlanUrl">
-View Meal Plans
+{{ __('common.glucose_report_email.view_meal_plans') }}
 </x-mail::button>
 
-Stay healthy!
+{{ __('common.glucose_report_email.stay_healthy') }}
 
-Thanks,<br>
+{{ __('common.glucose_report_email.thanks') }}<br>
 {{ config('app.name') }}
 </x-mail::message>

@@ -14,26 +14,28 @@ import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import userProfile from '@/routes/user-profile';
+import { useTranslation } from 'react-i18next';
 
-const breadcrumbs: BreadcrumbItem[] = [
+const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
-        title: 'Profile settings',
+        title: t('user_profile.title'),
         href: userProfile.edit().url,
     },
 ];
 
 export default function Edit({ status }: { status?: string }) {
     const { currentUser } = useSharedProps();
+    const { t } = useTranslation('common');
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Profile settings" />
+        <AppLayout breadcrumbs={getBreadcrumbs(t)}>
+            <Head title={t('user_profile.title')} />
 
             <SettingsLayout>
                 <div className="space-y-6">
                     <HeadingSmall
-                        title="Profile information"
-                        description="Update your name and email address"
+                        title={t('user_profile.heading')}
+                        description={t('user_profile.description')}
                     />
 
                     <Form
@@ -46,7 +48,9 @@ export default function Edit({ status }: { status?: string }) {
                         {({ processing, recentlySuccessful, errors }) => (
                             <>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="name">Name</Label>
+                                    <Label htmlFor="name">
+                                        {t('user_profile.name_label')}
+                                    </Label>
 
                                     <Input
                                         id="name"
@@ -55,7 +59,9 @@ export default function Edit({ status }: { status?: string }) {
                                         name="name"
                                         required
                                         autoComplete="name"
-                                        placeholder="Full name"
+                                        placeholder={t(
+                                            'user_profile.name_placeholder',
+                                        )}
                                     />
 
                                     <InputError
@@ -65,7 +71,9 @@ export default function Edit({ status }: { status?: string }) {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="email">Email address</Label>
+                                    <Label htmlFor="email">
+                                        {t('user_profile.email_label')}
+                                    </Label>
 
                                     <Input
                                         id="email"
@@ -75,7 +83,9 @@ export default function Edit({ status }: { status?: string }) {
                                         name="email"
                                         required
                                         autoComplete="username"
-                                        placeholder="Email address"
+                                        placeholder={t(
+                                            'user_profile.email_placeholder',
+                                        )}
                                     />
 
                                     <InputError
@@ -87,22 +97,24 @@ export default function Edit({ status }: { status?: string }) {
                                 {currentUser.email_verified_at === null && (
                                     <div>
                                         <p className="-mt-4 text-sm text-muted-foreground">
-                                            Your email address is unverified.{' '}
+                                            {t('user_profile.email_unverified')}{' '}
                                             <Link
                                                 href={send()}
                                                 as="button"
                                                 className="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
                                             >
-                                                Click here to resend the
-                                                verification email.
+                                                {t(
+                                                    'user_profile.resend_verification',
+                                                )}
                                             </Link>
                                         </p>
 
                                         {status ===
                                             'verification-link-sent' && (
                                             <div className="mt-2 text-sm font-medium text-green-600">
-                                                A new verification link has been
-                                                sent to your email address.
+                                                {t(
+                                                    'user_profile.verification_sent',
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -113,7 +125,7 @@ export default function Edit({ status }: { status?: string }) {
                                         disabled={processing}
                                         data-test="update-profile-button"
                                     >
-                                        Save
+                                        {t('user_profile.save_button')}
                                     </Button>
 
                                     <Transition
@@ -124,7 +136,7 @@ export default function Edit({ status }: { status?: string }) {
                                         leaveTo="opacity-0"
                                     >
                                         <p className="text-sm text-neutral-600">
-                                            Saved
+                                            {t('user_profile.saved')}
                                         </p>
                                     </Transition>
                                 </div>

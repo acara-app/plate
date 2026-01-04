@@ -16,6 +16,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import useSharedProps from '@/hooks/use-shared-props';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     profile: Profile;
@@ -23,16 +24,22 @@ interface Props {
 }
 
 export default function Biometrics({ profile, sexOptions }: Props) {
+    const { t } = useTranslation('common');
     const { currentUser } = useSharedProps();
     return (
         <>
-            <Head title="Biometrics - Step 1 of 5" />
+            <Head title={t('onboarding.biometrics.title')} />
             <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900">
                 <div className="w-full max-w-md">
                     {/* Progress Bar */}
                     <div className="mb-8">
                         <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
-                            <span>Step 1 of 5</span>
+                            <span>
+                                {t('onboarding.biometrics.step', {
+                                    current: 1,
+                                    total: 5,
+                                })}
+                            </span>
                             <span>20%</span>
                         </div>
                         <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
@@ -45,11 +52,10 @@ export default function Biometrics({ profile, sexOptions }: Props) {
 
                     <div className="rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
                         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
-                            Tell us about yourself
+                            {t('onboarding.biometrics.heading')}
                         </h1>
                         <p className="mb-6 text-gray-600 dark:text-gray-300">
-                            We'll use this information to calculate your
-                            nutritional needs
+                            {t('onboarding.biometrics.description')}
                         </p>
 
                         <Form
@@ -61,7 +67,9 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                 <>
                                     {/* Age */}
                                     <div className="grid gap-2">
-                                        <Label htmlFor="age">Age</Label>
+                                        <Label htmlFor="age">
+                                            {t('onboarding.biometrics.age')}
+                                        </Label>
                                         <Input
                                             id="age"
                                             type="number"
@@ -70,7 +78,9 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                             min="13"
                                             max="120"
                                             required
-                                            placeholder="Enter your age"
+                                            placeholder={t(
+                                                'onboarding.biometrics.age_placeholder',
+                                            )}
                                         />
                                         <InputError message={errors.age} />
                                     </div>
@@ -78,7 +88,7 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                     {/* Height */}
                                     <div className="grid gap-2">
                                         <Label htmlFor="height">
-                                            Height (cm)
+                                            {t('onboarding.biometrics.height')}
                                         </Label>
                                         <Input
                                             id="height"
@@ -89,7 +99,9 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                             min="50"
                                             max="300"
                                             required
-                                            placeholder="Enter your height in centimeters"
+                                            placeholder={t(
+                                                'onboarding.biometrics.height_placeholder',
+                                            )}
                                         />
                                         <InputError message={errors.height} />
                                     </div>
@@ -97,7 +109,7 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                     {/* Weight */}
                                     <div className="grid gap-2">
                                         <Label htmlFor="weight">
-                                            Weight (kg)
+                                            {t('onboarding.biometrics.weight')}
                                         </Label>
                                         <Input
                                             id="weight"
@@ -108,7 +120,9 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                             min="20"
                                             max="500"
                                             required
-                                            placeholder="Enter your weight in kilograms"
+                                            placeholder={t(
+                                                'onboarding.biometrics.weight_placeholder',
+                                            )}
                                         />
                                         <InputError message={errors.weight} />
                                     </div>
@@ -116,7 +130,7 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                     {/* Sex */}
                                     <div className="grid gap-2">
                                         <Label htmlFor="sex">
-                                            Biological Sex
+                                            {t('onboarding.biometrics.sex')}
                                         </Label>
                                         <Select
                                             name="sex"
@@ -124,7 +138,11 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                             required
                                         >
                                             <SelectTrigger id="sex">
-                                                <SelectValue placeholder="Select your biological sex" />
+                                                <SelectValue
+                                                    placeholder={t(
+                                                        'onboarding.biometrics.sex_placeholder',
+                                                    )}
+                                                />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {sexOptions.map((option) => (
@@ -139,8 +157,9 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                         </Select>
                                         <InputError message={errors.sex} />
                                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                                            Used for accurate calorie
-                                            calculations
+                                            {t(
+                                                'onboarding.biometrics.sex_help',
+                                            )}
                                         </p>
                                     </div>
 
@@ -151,7 +170,9 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                                 href={dashboard.url()}
                                                 className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
                                             >
-                                                Exit
+                                                {t(
+                                                    'onboarding.biometrics.exit',
+                                                )}
                                             </Link>
                                         )}
                                         <Button
@@ -162,7 +183,9 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                             {processing && (
                                                 <LoaderCircle className="h-4 w-4 animate-spin" />
                                             )}
-                                            Continue to Goals
+                                            {t(
+                                                'onboarding.biometrics.continue',
+                                            )}
                                         </Button>
                                     </div>
                                 </>

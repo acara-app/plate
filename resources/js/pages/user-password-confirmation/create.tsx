@@ -6,25 +6,31 @@ import AuthLayout from '@/layouts/auth-layout';
 import { store } from '@/routes/password/confirm';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function Create() {
+    const { t } = useTranslation('auth');
     return (
         <AuthLayout
-            title="Confirm your password"
-            description="This is a secure area of the application. Please confirm your password before continuing."
+            title={t('password_confirmation.title')}
+            description={t('password_confirmation.description')}
         >
-            <Head title="Confirm password" />
+            <Head title={t('password_confirmation.page_title')} />
 
             <Form {...store.form()} resetOnSuccess={['password']}>
                 {({ processing, errors }) => (
                     <div className="space-y-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">
+                                {t('password_confirmation.password_label')}
+                            </Label>
                             <Input
                                 id="password"
                                 type="password"
                                 name="password"
-                                placeholder="Password"
+                                placeholder={t(
+                                    'password_confirmation.password_placeholder',
+                                )}
                                 autoComplete="current-password"
                                 autoFocus
                             />
@@ -41,7 +47,7 @@ export default function Create() {
                                 {processing && (
                                     <LoaderCircle className="h-4 w-4 animate-spin" />
                                 )}
-                                Confirm password
+                                {t('password_confirmation.confirm_button')}
                             </Button>
                         </div>
                     </div>

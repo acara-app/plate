@@ -19,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Meal, MealType } from '@/types/meal-plan';
 import { Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { MacroBar } from './macro-bar';
 import { NutritionStats } from './nutrition-stats';
 
@@ -27,34 +28,34 @@ interface MealCardProps {
     className?: string;
 }
 
-const mealTypeConfig: Record<
-    MealType,
-    { emoji: string; color: string; label: string }
-> = {
+const getMealTypeConfig = (
+    t: (key: string) => string,
+): Record<MealType, { emoji: string; color: string; label: string }> => ({
     breakfast: {
         emoji: '🌅',
         color: 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300',
-        label: 'Breakfast',
+        label: t('meal_plans.meal_types.breakfast'),
     },
     lunch: {
         emoji: '☀️',
         color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300',
-        label: 'Lunch',
+        label: t('meal_plans.meal_types.lunch'),
     },
     dinner: {
         emoji: '🌙',
         color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300',
-        label: 'Dinner',
+        label: t('meal_plans.meal_types.dinner'),
     },
     snack: {
         emoji: '🍎',
         color: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',
-        label: 'Snack',
+        label: t('meal_plans.meal_types.snack'),
     },
-};
+});
 
 export function MealCard({ meal, className }: MealCardProps) {
-    const config = mealTypeConfig[meal.type];
+    const { t } = useTranslation('common');
+    const config = getMealTypeConfig(t)[meal.type];
     const hasDetails =
         meal.description ||
         meal.preparation_instructions ||
@@ -72,14 +73,17 @@ export function MealCard({ meal, className }: MealCardProps) {
                             {meal.preparation_time_minutes && (
                                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                     <Clock className="h-3 w-3" />
-                                    {meal.preparation_time_minutes} min
+                                    {meal.preparation_time_minutes}{' '}
+                                    {t('meal_plans.meal_card.min')}
                                 </div>
                             )}
                         </div>
                         <CardTitle className="text-lg">{meal.name}</CardTitle>
                         {meal.portion_size && (
                             <CardDescription>
-                                Portion: {meal.portion_size}
+                                {t('meal_plans.meal_card.portion', {
+                                    size: meal.portion_size,
+                                })}
                             </CardDescription>
                         )}
                     </div>
@@ -106,7 +110,7 @@ export function MealCard({ meal, className }: MealCardProps) {
                                 variant="ghost"
                                 className="w-full justify-start px-0 text-sm font-normal text-muted-foreground hover:text-foreground"
                             >
-                                View recipe details →
+                                {t('meal_plans.meal_card.view_recipe')}
                             </Button>
                         </DialogTrigger>
                         <DialogContent className="max-h-[80vh] overflow-y-auto">
@@ -125,7 +129,9 @@ export function MealCard({ meal, className }: MealCardProps) {
                                 {meal.description && (
                                     <div>
                                         <h4 className="mb-2 font-semibold">
-                                            Description
+                                            {t(
+                                                'meal_plans.meal_card.description',
+                                            )}
                                         </h4>
                                         <p className="text-sm text-muted-foreground">
                                             {meal.description}
@@ -137,7 +143,9 @@ export function MealCard({ meal, className }: MealCardProps) {
                                     meal.ingredients.length > 0 && (
                                         <div>
                                             <h4 className="mb-2 font-semibold">
-                                                Ingredients
+                                                {t(
+                                                    'meal_plans.meal_card.ingredients',
+                                                )}
                                             </h4>
                                             <ul className="space-y-1 text-sm text-muted-foreground">
                                                 {meal.ingredients.map(
@@ -177,7 +185,9 @@ export function MealCard({ meal, className }: MealCardProps) {
                                 {meal.preparation_instructions && (
                                     <div>
                                         <h4 className="mb-2 font-semibold">
-                                            Preparation Instructions
+                                            {t(
+                                                'meal_plans.meal_card.preparation_instructions',
+                                            )}
                                         </h4>
                                         <p className="text-sm whitespace-pre-line text-muted-foreground">
                                             {meal.preparation_instructions}
@@ -189,7 +199,9 @@ export function MealCard({ meal, className }: MealCardProps) {
 
                                 <div>
                                     <h4 className="mb-3 font-semibold">
-                                        Nutrition Information
+                                        {t(
+                                            'meal_plans.meal_card.nutrition_information',
+                                        )}
                                     </h4>
                                     <NutritionStats
                                         calories={meal.calories}

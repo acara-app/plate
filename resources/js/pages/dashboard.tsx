@@ -16,20 +16,25 @@ import foodLog from '@/routes/food-log';
 import mealPlans from '@/routes/meal-plans';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 
-const breadcrumbs: BreadcrumbItem[] = [
+// Breadcrumbs will be set dynamically using translation
+const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
-        title: 'Home',
+        title: t('home'),
         href: dashboard().url,
     },
 ];
 
 export default function Dashboard() {
+    const { t } = useTranslation('common');
+    const breadcrumbs = getBreadcrumbs(t);
+
     const { currentUser } = useSharedProps();
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
+            <Head title={t('dashboard')} />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-6">
                 {!currentUser?.is_onboarded && <OnboardingBanner />}
 
@@ -39,17 +44,20 @@ export default function Dashboard() {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <span className="text-2xl">📊</span>
-                                Diabetes Insights
+                                {t('dashboard_cards.diabetes_insights.title')}
                             </CardTitle>
                             <CardDescription>
-                                View your glucose analysis, trends, and
-                                personalized recommendations
+                                {t(
+                                    'dashboard_cards.diabetes_insights.description',
+                                )}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="mt-auto">
                             <Link href={diabetesLog.insights().url}>
                                 <Button className="w-full">
-                                    View Insights
+                                    {t(
+                                        'dashboard_cards.diabetes_insights.button',
+                                    )}
                                 </Button>
                             </Link>
                         </CardContent>
@@ -60,17 +68,16 @@ export default function Dashboard() {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <span className="text-2xl">🩸</span>
-                                Diabetes Log
+                                {t('dashboard_cards.diabetes_log.title')}
                             </CardTitle>
                             <CardDescription>
-                                Track your glucose, insulin, medications, and
-                                more
+                                {t('dashboard_cards.diabetes_log.description')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="mt-auto">
                             <Link href={diabetesLog.dashboard().url}>
                                 <Button className="w-full">
-                                    Track Diabetes
+                                    {t('dashboard_cards.diabetes_log.button')}
                                 </Button>
                             </Link>
                         </CardContent>
@@ -81,17 +88,16 @@ export default function Dashboard() {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <span className="text-2xl">🍽️</span>
-                                Weekly Meal Plans
+                                {t('dashboard_cards.meal_plans.title')}
                             </CardTitle>
                             <CardDescription>
-                                View and manage your personalized weekly meal
-                                plans
+                                {t('dashboard_cards.meal_plans.description')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="mt-auto">
                             <Link href={mealPlans.index().url}>
                                 <Button className="w-full">
-                                    View Meal Plans
+                                    {t('dashboard_cards.meal_plans.button')}
                                 </Button>
                             </Link>
                         </CardContent>
@@ -102,16 +108,17 @@ export default function Dashboard() {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <span className="text-2xl">💬</span>
-                                Nutrition Chat
+                                {t('dashboard_cards.chat.title')}
                             </CardTitle>
                             <CardDescription>
-                                Get personalized nutrition advice and answers to
-                                your questions
+                                {t('dashboard_cards.chat.description')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="mt-auto">
                             <Link href={chat.create().url}>
-                                <Button className="w-full">Start Chat</Button>
+                                <Button className="w-full">
+                                    {t('dashboard_cards.chat.button')}
+                                </Button>
                             </Link>
                         </CardContent>
                     </Card>
@@ -121,16 +128,17 @@ export default function Dashboard() {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <span className="text-2xl">📝</span>
-                                Food Log
+                                {t('dashboard_cards.food_log.title')}
                             </CardTitle>
                             <CardDescription>
-                                Track your daily food intake and monitor your
-                                progress
+                                {t('dashboard_cards.food_log.description')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="mt-auto">
                             <Link href={foodLog.create().url}>
-                                <Button className="w-full">Log Food</Button>
+                                <Button className="w-full">
+                                    {t('dashboard_cards.food_log.button')}
+                                </Button>
                             </Link>
                         </CardContent>
                     </Card>

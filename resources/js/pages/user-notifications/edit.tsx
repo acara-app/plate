@@ -13,10 +13,12 @@ import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import userNotifications from '@/routes/user-notifications';
+import { useTranslation } from 'react-i18next';
 
-const breadcrumbs: BreadcrumbItem[] = [
+// Breadcrumbs will be set dynamically using translation
+const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
-        title: 'Notification settings',
+        title: t('notifications.title'),
         href: userNotifications.edit().url,
     },
 ];
@@ -39,19 +41,22 @@ export default function Edit({
     notificationSettings,
     defaultThresholds,
 }: EditProps) {
+    const { t } = useTranslation('common');
+    const breadcrumbs = getBreadcrumbs(t);
+
     const [notificationsEnabled, setNotificationsEnabled] = useState(
         notificationSettings.glucose_notifications_enabled,
     );
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Notification settings" />
+            <Head title={t('notifications.title')} />
 
             <SettingsLayout>
                 <div className="space-y-6">
                     <HeadingSmall
-                        title="Notification preferences"
-                        description="Manage how you receive glucose notifications"
+                        title={t('notifications.preferences')}
+                        description={t('notifications.preferences_description')}
                     />
 
                     <Form
@@ -67,11 +72,14 @@ export default function Edit({
                                 <div className="flex items-center justify-between space-x-4">
                                     <div className="flex-1 space-y-1">
                                         <Label htmlFor="glucoseNotificationsEnabled">
-                                            Glucose notifications
+                                            {t(
+                                                'notifications.glucose_notifications',
+                                            )}
                                         </Label>
                                         <p className="text-sm text-muted-foreground">
-                                            Receive notifications about your
-                                            glucose levels
+                                            {t(
+                                                'notifications.glucose_notifications_description',
+                                            )}
                                         </p>
                                     </div>
                                     <input
@@ -99,7 +107,9 @@ export default function Edit({
                                     <>
                                         <div className="grid gap-2">
                                             <Label htmlFor="glucoseNotificationLowThreshold">
-                                                Low threshold (mg/dL)
+                                                {t(
+                                                    'notifications.low_threshold',
+                                                )}
                                             </Label>
                                             <Input
                                                 id="glucoseNotificationLowThreshold"
@@ -107,7 +117,12 @@ export default function Edit({
                                                 type="number"
                                                 min={40}
                                                 max={150}
-                                                placeholder={`Default: ${defaultThresholds.low} mg/dL`}
+                                                placeholder={t(
+                                                    'notifications.default_placeholder',
+                                                    {
+                                                        value: defaultThresholds.low,
+                                                    },
+                                                )}
                                                 defaultValue={
                                                     notificationSettings.glucose_notification_low_threshold ??
                                                     defaultThresholds.low ??
@@ -115,10 +130,13 @@ export default function Edit({
                                                 }
                                             />
                                             <p className="text-sm text-muted-foreground">
-                                                Get notified when glucose falls
-                                                below this level (leave empty to
-                                                use default:{' '}
-                                                {defaultThresholds.low} mg/dL)
+                                                {t(
+                                                    'notifications.low_threshold_description',
+                                                    {
+                                                        default:
+                                                            defaultThresholds.low,
+                                                    },
+                                                )}
                                             </p>
                                             <InputError
                                                 message={
@@ -128,7 +146,9 @@ export default function Edit({
                                         </div>
                                         <div className="grid gap-2">
                                             <Label htmlFor="glucoseNotificationHighThreshold">
-                                                High threshold (mg/dL)
+                                                {t(
+                                                    'notifications.high_threshold',
+                                                )}
                                             </Label>
                                             <Input
                                                 id="glucoseNotificationHighThreshold"
@@ -136,7 +156,12 @@ export default function Edit({
                                                 type="number"
                                                 min={100}
                                                 max={400}
-                                                placeholder={`Default: ${defaultThresholds.high} mg/dL`}
+                                                placeholder={t(
+                                                    'notifications.default_placeholder',
+                                                    {
+                                                        value: defaultThresholds.high,
+                                                    },
+                                                )}
                                                 defaultValue={
                                                     notificationSettings.glucose_notification_high_threshold ??
                                                     defaultThresholds.high ??
@@ -144,10 +169,13 @@ export default function Edit({
                                                 }
                                             />
                                             <p className="text-sm text-muted-foreground">
-                                                Get notified when glucose rises
-                                                above this level (leave empty to
-                                                use default:{' '}
-                                                {defaultThresholds.high} mg/dL)
+                                                {t(
+                                                    'notifications.high_threshold_description',
+                                                    {
+                                                        default:
+                                                            defaultThresholds.high,
+                                                    },
+                                                )}
                                             </p>
                                             <InputError
                                                 message={
@@ -159,7 +187,7 @@ export default function Edit({
                                 )}
                                 <div className="flex items-center gap-4">
                                     <Button type="submit" disabled={processing}>
-                                        Save preferences
+                                        {t('notifications.save_preferences')}
                                     </Button>
 
                                     <Transition
@@ -170,7 +198,7 @@ export default function Edit({
                                         leaveTo="opacity-0"
                                     >
                                         <p className="text-sm text-muted-foreground">
-                                            Saved.
+                                            {t('saved')}.
                                         </p>
                                     </Transition>
                                 </div>

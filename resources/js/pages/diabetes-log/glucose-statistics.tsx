@@ -6,6 +6,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Activity, ArrowDown, ArrowUp, Target } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface GlucoseReading {
     id: number;
@@ -62,42 +63,46 @@ function calculateStatistics(readings: GlucoseReading[]): Statistics {
     };
 }
 
-function getGlucoseLevel(value: number): {
+function getGlucoseLevel(
+    value: number,
+    t: (key: string) => string,
+): {
     label: string;
     color: string;
     bgColor: string;
 } {
     if (value < NORMAL_RANGE_MIN) {
         return {
-            label: 'Low',
+            label: t('diabetes_log.glucose_statistics.status.low'),
             color: 'text-orange-600',
             bgColor: 'bg-orange-50',
         };
     }
     if (value > NORMAL_RANGE_MAX) {
         return {
-            label: 'High',
+            label: t('diabetes_log.glucose_statistics.status.high'),
             color: 'text-red-600',
             bgColor: 'bg-red-50',
         };
     }
     return {
-        label: 'Normal',
+        label: t('diabetes_log.glucose_statistics.status.normal'),
         color: 'text-green-600',
         bgColor: 'bg-green-50',
     };
 }
 
 export default function GlucoseStatistics({ readings }: Props) {
+    const { t } = useTranslation('common');
     const stats = calculateStatistics(readings);
-    const avgLevel = getGlucoseLevel(stats.average);
+    const avgLevel = getGlucoseLevel(stats.average, t);
 
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
-                        Average Glucose
+                        {t('diabetes_log.glucose_statistics.average_title')}
                     </CardTitle>
                     <Activity className="size-4 text-muted-foreground" />
                 </CardHeader>
@@ -106,11 +111,20 @@ export default function GlucoseStatistics({ readings }: Props) {
                         {stats.average} mg/dL
                     </div>
                     <p className={`text-xs font-medium ${avgLevel.color} mt-1`}>
-                        {avgLevel.label} Range
+                        {t('diabetes_log.glucose_statistics.average_range', {
+                            label: avgLevel.label,
+                        })}
                     </p>
                     <CardDescription className="mt-1">
-                        Based on {stats.totalReadings} reading
-                        {stats.totalReadings !== 1 ? 's' : ''}
+                        {stats.totalReadings === 1
+                            ? t(
+                                  'diabetes_log.glucose_statistics.based_on_readings',
+                                  { count: stats.totalReadings },
+                              )
+                            : t(
+                                  'diabetes_log.glucose_statistics.based_on_readings_plural',
+                                  { count: stats.totalReadings },
+                              )}
                     </CardDescription>
                 </CardContent>
             </Card>
@@ -118,7 +132,7 @@ export default function GlucoseStatistics({ readings }: Props) {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
-                        Highest Reading
+                        {t('diabetes_log.glucose_statistics.highest_title')}
                     </CardTitle>
                     <ArrowUp className="size-4 text-red-500" />
                 </CardHeader>
@@ -127,12 +141,14 @@ export default function GlucoseStatistics({ readings }: Props) {
                         {stats.highest} mg/dL
                     </div>
                     <p
-                        className={`text-xs font-medium ${getGlucoseLevel(stats.highest).color} mt-1`}
+                        className={`text-xs font-medium ${getGlucoseLevel(stats.highest, t).color} mt-1`}
                     >
-                        {getGlucoseLevel(stats.highest).label}
+                        {getGlucoseLevel(stats.highest, t).label}
                     </p>
                     <CardDescription className="mt-1">
-                        Peak glucose level
+                        {t(
+                            'diabetes_log.glucose_statistics.highest_description',
+                        )}
                     </CardDescription>
                 </CardContent>
             </Card>
@@ -140,7 +156,7 @@ export default function GlucoseStatistics({ readings }: Props) {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
-                        Lowest Reading
+                        {t('diabetes_log.glucose_statistics.lowest_title')}
                     </CardTitle>
                     <ArrowDown className="size-4 text-blue-500" />
                 </CardHeader>
@@ -149,12 +165,14 @@ export default function GlucoseStatistics({ readings }: Props) {
                         {stats.lowest} mg/dL
                     </div>
                     <p
-                        className={`text-xs font-medium ${getGlucoseLevel(stats.lowest).color} mt-1`}
+                        className={`text-xs font-medium ${getGlucoseLevel(stats.lowest, t).color} mt-1`}
                     >
-                        {getGlucoseLevel(stats.lowest).label}
+                        {getGlucoseLevel(stats.lowest, t).label}
                     </p>
                     <CardDescription className="mt-1">
-                        Minimum glucose level
+                        {t(
+                            'diabetes_log.glucose_statistics.lowest_description',
+                        )}
                     </CardDescription>
                 </CardContent>
             </Card>
@@ -162,7 +180,9 @@ export default function GlucoseStatistics({ readings }: Props) {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
-                        Time in Range
+                        {t(
+                            'diabetes_log.glucose_statistics.time_in_range_title',
+                        )}
                     </CardTitle>
                     <Target className="size-4 text-muted-foreground" />
                 </CardHeader>
@@ -180,13 +200,19 @@ export default function GlucoseStatistics({ readings }: Props) {
                         } mt-1`}
                     >
                         {stats.timeInRange >= 70
-                            ? 'Excellent'
+                            ? t(
+                                  'diabetes_log.glucose_statistics.status.excellent',
+                              )
                             : stats.timeInRange >= 50
-                              ? 'Good'
-                              : 'Needs Improvement'}
+                              ? t('diabetes_log.glucose_statistics.status.good')
+                              : t(
+                                    'diabetes_log.glucose_statistics.status.needs_improvement',
+                                )}
                     </p>
                     <CardDescription className="mt-1">
-                        Target: 70-140 mg/dL
+                        {t(
+                            'diabetes_log.glucose_statistics.time_in_range_target',
+                        )}
                     </CardDescription>
                 </CardContent>
             </Card>
