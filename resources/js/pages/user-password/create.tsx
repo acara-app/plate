@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
+import { useTranslation } from 'react-i18next';
 
 interface ResetPasswordProps {
     token: string;
@@ -14,12 +15,14 @@ interface ResetPasswordProps {
 }
 
 export default function ResetPassword({ token, email }: ResetPasswordProps) {
+    const { t } = useTranslation('auth');
+
     return (
         <AuthLayout
-            title="Reset password"
-            description="Please enter your new password below"
+            title={t('password_reset.reset_title')}
+            description={t('password_reset.reset_description')}
         >
-            <Head title="Reset password" />
+            <Head title={t('password_reset.reset_title')} />
 
             <Form
                 {...UserPasswordController.store.form()}
@@ -29,7 +32,9 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                 {({ processing, errors }) => (
                     <div className="grid gap-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="email">Email</Label>
+                            <Label htmlFor="email">
+                                {t('password_reset.email')}
+                            </Label>
                             <Input
                                 id="email"
                                 type="email"
@@ -46,7 +51,9 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">
+                                {t('password_reset.password')}
+                            </Label>
                             <Input
                                 id="password"
                                 type="password"
@@ -54,14 +61,16 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                                 autoComplete="new-password"
                                 className="mt-1 block w-full"
                                 autoFocus
-                                placeholder="Password"
+                                placeholder={t(
+                                    'password_reset.password_placeholder',
+                                )}
                             />
                             <InputError message={errors.password} />
                         </div>
 
                         <div className="grid gap-2">
                             <Label htmlFor="password_confirmation">
-                                Confirm password
+                                {t('password_reset.password_confirmation')}
                             </Label>
                             <Input
                                 id="password_confirmation"
@@ -69,7 +78,9 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                                 name="password_confirmation"
                                 autoComplete="new-password"
                                 className="mt-1 block w-full"
-                                placeholder="Confirm password"
+                                placeholder={t(
+                                    'password_reset.password_confirmation_placeholder',
+                                )}
                             />
                             <InputError
                                 message={errors.password_confirmation}
@@ -86,7 +97,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                             {processing && (
                                 <LoaderCircle className="h-4 w-4 animate-spin" />
                             )}
-                            Reset password
+                            {t('password_reset.reset_submit')}
                         </Button>
                     </div>
                 )}

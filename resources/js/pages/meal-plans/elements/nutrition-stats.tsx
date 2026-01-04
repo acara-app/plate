@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface NutritionStatsProps {
     calories: number;
@@ -17,6 +18,7 @@ export function NutritionStats({
     className,
     size = 'md',
 }: NutritionStatsProps) {
+    const { t } = useTranslation('common');
     const sizeClasses = {
         sm: 'text-xs',
         md: 'text-sm',
@@ -48,7 +50,7 @@ export function NutritionStats({
                 <span
                     className={cn('text-muted-foreground', sizeClasses[size])}
                 >
-                    🔥 Calories
+                    🔥 {t('meal_plans.nutrition.calories')}
                 </span>
             </div>
 
@@ -64,7 +66,7 @@ export function NutritionStats({
                 <span
                     className={cn('text-muted-foreground', sizeClasses[size])}
                 >
-                    💪 Protein
+                    💪 {t('meal_plans.nutrition.protein')}
                 </span>
             </div>
 
@@ -80,7 +82,7 @@ export function NutritionStats({
                 <span
                     className={cn('text-muted-foreground', sizeClasses[size])}
                 >
-                    🌾 Carbs
+                    🌾 {t('meal_plans.nutrition.carbs')}
                 </span>
             </div>
 
@@ -96,7 +98,7 @@ export function NutritionStats({
                 <span
                     className={cn('text-muted-foreground', sizeClasses[size])}
                 >
-                    🥑 Fat
+                    🥑 {t('meal_plans.nutrition.fat')}
                 </span>
             </div>
         </div>

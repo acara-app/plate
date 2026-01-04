@@ -11,6 +11,7 @@ import {
     GlucoseUnit,
     type GlucoseUnitType,
 } from '@/types/diabetes';
+import { useTranslation } from 'react-i18next';
 import {
     CartesianGrid,
     Line,
@@ -133,6 +134,7 @@ interface TooltipProps {
 }
 
 function CustomTooltip({ active, payload, glucoseUnit }: TooltipProps) {
+    const { t } = useTranslation('common');
     if (active && payload && payload.length) {
         const data = payload[0].payload;
         const value = data.value;
@@ -141,18 +143,18 @@ function CustomTooltip({ active, payload, glucoseUnit }: TooltipProps) {
             ? FASTING_THRESHOLDS_MGDL
             : POSTMEAL_THRESHOLDS_MGDL;
 
-        let status = 'Normal';
+        let status = t('diabetes_log.glucose_chart.status.normal');
         let statusColor = 'text-green-600';
         let contextNote = '';
 
         if (value < thresholds.low) {
-            status = 'Low';
+            status = t('diabetes_log.glucose_chart.status.low');
             statusColor = 'text-orange-600';
         } else if (value > thresholds.high) {
-            status = 'High';
+            status = t('diabetes_log.glucose_chart.status.high');
             statusColor = 'text-red-600';
         } else if (value > thresholds.normalMax) {
-            status = 'Elevated';
+            status = t('diabetes_log.glucose_chart.status.elevated');
             statusColor = 'text-yellow-600';
         }
 
@@ -162,9 +164,15 @@ function CustomTooltip({ active, payload, glucoseUnit }: TooltipProps) {
             : GlucoseThresholds.postMeal[glucoseUnit];
 
         if (data.isFasting) {
-            contextNote = `Fasting target: ${thresholdConfig.normal} ${glucoseUnit}`;
+            contextNote = t('diabetes_log.glucose_chart.targets.fasting', {
+                target: thresholdConfig.normal,
+                unit: glucoseUnit,
+            });
         } else {
-            contextNote = `Post-meal target: ${thresholdConfig.normal} ${glucoseUnit} (2hr)`;
+            contextNote = t('diabetes_log.glucose_chart.targets.post_meal', {
+                target: thresholdConfig.normal,
+                unit: glucoseUnit,
+            });
         }
 
         return (
@@ -217,6 +225,7 @@ function getDataPointColor(value: number, isFasting: boolean): string {
 }
 
 export default function GlucoseChart({ readings, glucoseUnit }: Props) {
+    const { t } = useTranslation('common');
     const chartData = prepareChartData(readings, glucoseUnit);
 
     // Get thresholds for the current unit
@@ -232,14 +241,16 @@ export default function GlucoseChart({ readings, glucoseUnit }: Props) {
         return (
             <Card>
                 <CardHeader>
-                    <CardTitle>Glucose Trends</CardTitle>
+                    <CardTitle>
+                        {t('diabetes_log.glucose_chart.title')}
+                    </CardTitle>
                     <CardDescription>
-                        Track your glucose levels over time
+                        {t('diabetes_log.glucose_chart.description')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="flex h-[400px] items-center justify-center text-muted-foreground">
-                        No data available. Add glucose readings to see trends.
+                        {t('diabetes_log.glucose_chart.no_data')}
                     </div>
                 </CardContent>
             </Card>
@@ -274,10 +285,11 @@ export default function GlucoseChart({ readings, glucoseUnit }: Props) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Glucose Trends</CardTitle>
+                <CardTitle>{t('diabetes_log.glucose_chart.title')}</CardTitle>
                 <CardDescription>
-                    Track your glucose levels ({glucoseUnit}) with context-aware
-                    target zones
+                    {t('diabetes_log.glucose_chart.description_with_unit', {
+                        unit: glucoseUnit,
+                    })}
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -289,8 +301,10 @@ export default function GlucoseChart({ readings, glucoseUnit }: Props) {
                                 <div className="flex items-center gap-2">
                                     <div className="size-3 rotate-45 bg-green-500" />
                                     <span className="text-muted-foreground">
-                                        Fasting Normal (
-                                        {fastingThresholds.normal})
+                                        {t(
+                                            'diabetes_log.glucose_chart.legend.fasting_normal',
+                                            { range: fastingThresholds.normal },
+                                        )}
                                     </span>
                                 </div>
                             </>
@@ -300,8 +314,12 @@ export default function GlucoseChart({ readings, glucoseUnit }: Props) {
                                 <div className="flex items-center gap-2">
                                     <div className="size-3 rounded-full bg-green-500" />
                                     <span className="text-muted-foreground">
-                                        Post-meal Normal (
-                                        {postMealThresholds.normal})
+                                        {t(
+                                            'diabetes_log.glucose_chart.legend.post_meal_normal',
+                                            {
+                                                range: postMealThresholds.normal,
+                                            },
+                                        )}
                                     </span>
                                 </div>
                             </>
@@ -309,14 +327,18 @@ export default function GlucoseChart({ readings, glucoseUnit }: Props) {
                         <div className="flex items-center gap-2">
                             <div className="size-3 rounded-full bg-orange-500" />
                             <span className="text-muted-foreground">
-                                Low (&lt;{fastingThresholds.low})
+                                {t('diabetes_log.glucose_chart.legend.low', {
+                                    threshold: fastingThresholds.low,
+                                })}
                             </span>
                         </div>
                         {isSparse && hasMovingAvg && (
                             <div className="flex items-center gap-2">
                                 <div className="h-0.5 w-4 bg-purple-400" />
                                 <span className="text-muted-foreground">
-                                    Trend (5-pt avg)
+                                    {t(
+                                        'diabetes_log.glucose_chart.legend.trend',
+                                    )}
                                 </span>
                             </div>
                         )}
@@ -324,11 +346,14 @@ export default function GlucoseChart({ readings, glucoseUnit }: Props) {
 
                     {/* Info banner for mixed types */}
                     {hasMixedTypes && (
-                        <div className="rounded-md bg-blue-50 p-3 text-xs text-blue-800 dark:bg-blue-950 dark:text-blue-200">
-                            💡 <strong>Context matters:</strong> Post-meal
-                            readings have a higher target than fasting. Diamonds
-                            = fasting, circles = post-meal.
-                        </div>
+                        <div
+                            className="rounded-md bg-blue-50 p-3 text-xs text-blue-800 dark:bg-blue-950 dark:text-blue-200"
+                            dangerouslySetInnerHTML={{
+                                __html: t(
+                                    'diabetes_log.glucose_chart.context_banner',
+                                ),
+                            }}
+                        />
                     )}
 
                     {/* Chart */}
@@ -394,7 +419,9 @@ export default function GlucoseChart({ readings, glucoseUnit }: Props) {
                                     strokeDasharray="3 3"
                                     strokeOpacity={0.5}
                                     label={{
-                                        value: 'Post-meal',
+                                        value: t(
+                                            'diabetes_log.glucose_chart.reference_labels.post_meal',
+                                        ),
                                         position: 'right',
                                         fill: '#eab308',
                                         fontSize: 10,
@@ -408,7 +435,9 @@ export default function GlucoseChart({ readings, glucoseUnit }: Props) {
                                     strokeDasharray="3 3"
                                     strokeOpacity={0.5}
                                     label={{
-                                        value: 'Fasting',
+                                        value: t(
+                                            'diabetes_log.glucose_chart.reference_labels.fasting',
+                                        ),
                                         position: 'right',
                                         fill: '#10b981',
                                         fontSize: 10,
@@ -421,7 +450,9 @@ export default function GlucoseChart({ readings, glucoseUnit }: Props) {
                                 strokeDasharray="3 3"
                                 strokeOpacity={0.5}
                                 label={{
-                                    value: 'Low',
+                                    value: t(
+                                        'diabetes_log.glucose_chart.reference_labels.low',
+                                    ),
                                     position: 'right',
                                     fill: '#f97316',
                                     fontSize: 10,
@@ -495,7 +526,9 @@ export default function GlucoseChart({ readings, glucoseUnit }: Props) {
                     {/* Reading type indicators */}
                     <div className="border-t pt-4">
                         <p className="mb-2 text-sm font-medium">
-                            Reading Types
+                            {t(
+                                'diabetes_log.glucose_chart.reading_types_title',
+                            )}
                         </p>
                         <div className="flex flex-wrap gap-2">
                             {Array.from(

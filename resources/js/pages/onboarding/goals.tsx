@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     goals: Goal[];
@@ -18,16 +19,22 @@ interface Props {
 }
 
 export default function Goals({ profile, goals }: Props) {
+    const { t } = useTranslation('common');
     const { currentUser } = useSharedProps();
     return (
         <>
-            <Head title="Goals - Step 2 of 5" />
+            <Head title={t('onboarding.goals.title')} />
             <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900">
                 <div className="w-full max-w-md">
                     {/* Progress Bar */}
                     <div className="mb-8">
                         <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
-                            <span>Step 2 of 5</span>
+                            <span>
+                                {t('onboarding.biometrics.step', {
+                                    current: 2,
+                                    total: 5,
+                                })}
+                            </span>
                             <span>40%</span>
                         </div>
                         <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
@@ -40,10 +47,10 @@ export default function Goals({ profile, goals }: Props) {
 
                     <div className="rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
                         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
-                            What are your goals?
+                            {t('onboarding.goals.heading')}
                         </h1>
                         <p className="mb-6 text-gray-600 dark:text-gray-300">
-                            Select your primary nutrition goal
+                            {t('onboarding.goals.description')}
                         </p>
 
                         <Form
@@ -55,7 +62,9 @@ export default function Goals({ profile, goals }: Props) {
                                 <>
                                     {/* Goal Selection */}
                                     <div className="grid gap-2">
-                                        <Label>Primary Goal</Label>
+                                        <Label>
+                                            {t('onboarding.goals.primary_goal')}
+                                        </Label>
                                         <div className="space-y-2">
                                             {goals.map((goal) => (
                                                 <label
@@ -88,7 +97,9 @@ export default function Goals({ profile, goals }: Props) {
                                     {/* Target Weight (Optional) */}
                                     <div className="grid gap-2">
                                         <Label htmlFor="target_weight">
-                                            Target Weight (kg) - Optional
+                                            {t(
+                                                'onboarding.goals.target_weight',
+                                            )}
                                         </Label>
                                         <Input
                                             id="target_weight"
@@ -100,7 +111,9 @@ export default function Goals({ profile, goals }: Props) {
                                             step="0.01"
                                             min="20"
                                             max="500"
-                                            placeholder="Enter your target weight"
+                                            placeholder={t(
+                                                'onboarding.goals.target_weight_placeholder',
+                                            )}
                                         />
                                         <InputError
                                             message={errors.target_weight}
@@ -110,7 +123,9 @@ export default function Goals({ profile, goals }: Props) {
                                     {/* Additional Goals (Optional) */}
                                     <div className="grid gap-2">
                                         <Label htmlFor="additional_goals">
-                                            Additional Goals - Optional
+                                            {t(
+                                                'onboarding.goals.additional_goals',
+                                            )}
                                         </Label>
                                         <Textarea
                                             id="additional_goals"
@@ -120,7 +135,9 @@ export default function Goals({ profile, goals }: Props) {
                                             }
                                             rows={4}
                                             maxLength={1000}
-                                            placeholder="Tell us about any other goals or specific needs..."
+                                            placeholder={t(
+                                                'onboarding.goals.additional_goals_placeholder',
+                                            )}
                                         />
                                         <InputError
                                             message={errors.additional_goals}
@@ -134,7 +151,7 @@ export default function Goals({ profile, goals }: Props) {
                                                 href={dashboard.url()}
                                                 className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
                                             >
-                                                Exit
+                                                {t('onboarding.goals.exit')}
                                             </Link>
                                         )}
                                         <Button
@@ -145,7 +162,7 @@ export default function Goals({ profile, goals }: Props) {
                                             {processing && (
                                                 <LoaderCircle className="h-4 w-4 animate-spin" />
                                             )}
-                                            Continue to Lifestyle
+                                            {t('onboarding.goals.continue')}
                                         </Button>
                                     </div>
                                 </>

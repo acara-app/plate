@@ -9,6 +9,8 @@
 
 Acara Plate is an AI-powered personalized nutrition and meal planning platform that creates customized meal plans based on individual user data such as age, weight, height, dietary preferences, and health goals. The platform simplifies meal planning by providing users with tailored recipes, nutritional information, and glucose tracking capabilities that align with their unique needs and lifestyle.
 
+**Multi-Language Support:** Acara Plate is fully internationalized, making personalized nutrition accessible to users worldwide in their preferred language.
+
 > [!IMPORTANT]
 > **Disclaimer:** Acara Plate is an AI-powered tool for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. See the [Medical Disclaimer](#medical-disclaimer) below.
 
@@ -45,6 +47,8 @@ Acara Plate is an AI-powered personalized nutrition and meal planning platform t
 
 Acara Plate is a Laravel 12 application that pairs Inertia (React) with Tailwind CSS to deliver a seamless AI-assisted meal planning experience. Powered by PrismPHP, it generates seven-day meal plans that adapt to each user's biometric data, preferences, and goals while tracking key wellness metrics such as glucose readings.
 
+**Internationalization:** The application features comprehensive multi-language support with translations across all user-facing interfaces, including React components (via react-i18next), Laravel Blade templates, and email notifications.
+
 ## Product Capabilities
 
 ### Personalization Inputs
@@ -72,6 +76,11 @@ Acara Plate is a Laravel 12 application that pairs Inertia (React) with Tailwind
 - **Analytics & Insights:**
     - "Time-in-Range" visualization and glucose variability trends.
     - Automated analysis notifications with actionable recommendations via email.
+- **Internationalization:**
+    - Full multi-language support with extensible translation framework.
+    - Seamless language switching across all interfaces.
+    - Localized email notifications and printable documents.
+    - Easy to add new languages via translation files.
 
 ### User Journey Highlights
 
@@ -233,6 +242,58 @@ Acara Plate ships as an installable PWA for mobile and desktop:
 
 - A new deployment becomes active after the service worker installs and the app performs a fresh reload
 - If an update appears stuck, complete a hard refresh or clear storage for the domain
+
+## Adding New Translations
+
+Acara Plate welcomes translation contributions! The application uses a dual translation system:
+
+**Backend (Laravel):**
+
+- Translation files are located in `lang/{locale}/` (e.g., `lang/fr/`, `lang/es/`)
+- Copy an existing locale directory (e.g., `lang/en/`) and translate the PHP array values
+- Key files: `common.php`, `auth.php`, `validation.php`, `passwords.php`, `pagination.php`
+
+**Frontend (React):**
+
+- Translations are loaded from Laravel backend via Inertia.js
+- React components use `react-i18next` with the `useTranslation()` hook
+- No separate frontend translation files needed—all translations come from Laravel
+
+**To add a new language:**
+
+1. Create a new directory in `lang/` with the locale code (e.g., `lang/es/` for Spanish)
+2. Copy all PHP files from `lang/en/` to your new locale directory
+3. Translate the array values while keeping the keys unchanged
+4. Test your translations by switching the app locale
+
+**Usage in React Components:**
+
+```tsx
+import { useTranslation } from 'react-i18next';
+
+export default function MyComponent() {
+    const { t } = useTranslation('common'); // Specify namespace
+    return <h1>{t('welcome')}</h1>;
+}
+```
+
+**Usage in Laravel:**
+
+```php
+// In controllers or Blade templates
+__('common.welcome');
+__('auth.throttle', ['seconds' => 60]); // With parameters
+```
+
+**Translation Namespaces:**
+
+- `auth` - Authentication-related strings
+- `common` - Common UI elements and general translations
+- `validation` - Form validation messages
+- `passwords` - Password reset and management
+- `pagination` - Pagination controls
+
+Contributions for new languages are highly encouraged! See the [Contributing Guide](CONTRIBUTING.md) for submission guidelines.
 
 ## Contributing
 

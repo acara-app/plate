@@ -28,44 +28,45 @@ import {
     ShieldCheck,
     TrendingUp,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+const getMainNavItems = (t: (key: string) => string): NavItem[] => [
     {
-        title: 'Home',
+        title: t('sidebar.nav.home'),
         href: dashboard(),
         icon: HeartIcon,
     },
     {
-        title: 'Meal Plans',
+        title: t('sidebar.nav.meal_plans'),
         href: mealPlans.index(),
         icon: CalendarHeartIcon,
     },
     {
-        title: 'Diabetes Insights',
+        title: t('sidebar.nav.diabetes_insights'),
         href: diabetesLog.insights(),
         icon: TrendingUp,
     },
     {
-        title: 'Diabetes Log',
+        title: t('sidebar.nav.diabetes_log'),
         href: DashboardDiabetesLogController().url,
         icon: ActivityIcon,
     },
     {
-        title: 'Update Your Info',
+        title: t('sidebar.nav.update_info'),
         href: biometrics.show(),
         icon: LeafIcon,
     },
 ];
 
-const footerNavItems: NavItem[] = [
+const getFooterNavItems = (t: (key: string) => string): NavItem[] => [
     {
-        title: 'Terms of Service',
+        title: t('sidebar.nav.terms'),
         href: terms.url(),
         icon: FileText,
     },
     {
-        title: 'Privacy Policy',
+        title: t('sidebar.nav.privacy'),
         href: privacy.url(),
         icon: ShieldCheck,
     },
@@ -73,6 +74,9 @@ const footerNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const { currentUser } = useSharedProps();
+    const { t } = useTranslation('common');
+    const mainNavItems = getMainNavItems(t);
+    const footerNavItems = getFooterNavItems(t);
 
     return (
         <Sidebar collapsible="icon" variant="inset">

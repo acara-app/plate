@@ -7,24 +7,26 @@ import { type BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { edit as editAppearance } from '@/routes/appearance';
+import { useTranslation } from 'react-i18next';
 
-const breadcrumbs: BreadcrumbItem[] = [
+const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
-        title: 'Appearance settings',
+        title: t('appearance.title'),
         href: editAppearance().url,
     },
 ];
 
 export default function Update() {
+    const { t } = useTranslation('common');
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Appearance settings" />
+        <AppLayout breadcrumbs={getBreadcrumbs(t)}>
+            <Head title={t('appearance.title')} />
 
             <SettingsLayout>
                 <div className="space-y-6">
                     <HeadingSmall
-                        title="Appearance settings"
-                        description="Update your account's appearance settings"
+                        title={t('appearance.title')}
+                        description={t('appearance.description')}
                     />
                     <AppearanceTabs />
                 </div>

@@ -33,6 +33,7 @@ import {
     Utensils,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface EditDiabetesLogFormProps {
     glucoseReadingTypes: ReadingType[];
@@ -82,6 +83,7 @@ export default function EditDiabetesLogForm({
     todaysMeals = [],
     onCancel,
 }: EditDiabetesLogFormProps) {
+    const { t } = useTranslation('common');
     const measuredAt = new Date(logEntry.measured_at)
         .toISOString()
         .slice(0, 16);
@@ -141,7 +143,7 @@ export default function EditDiabetesLogForm({
                             >
                                 <Droplet className="size-3.5" />
                                 <span className="hidden sm:inline">
-                                    Glucose
+                                    {t('diabetes_log.tabs.glucose')}
                                 </span>
                             </TabsTrigger>
                             <TabsTrigger
@@ -149,7 +151,9 @@ export default function EditDiabetesLogForm({
                                 className="flex items-center gap-1"
                             >
                                 <Utensils className="size-3.5" />
-                                <span className="hidden sm:inline">Food</span>
+                                <span className="hidden sm:inline">
+                                    {t('diabetes_log.tabs.food')}
+                                </span>
                             </TabsTrigger>
                             <TabsTrigger
                                 value={LogType.Insulin}
@@ -157,7 +161,7 @@ export default function EditDiabetesLogForm({
                             >
                                 <Syringe className="size-3.5" />
                                 <span className="hidden sm:inline">
-                                    Insulin
+                                    {t('diabetes_log.tabs.insulin')}
                                 </span>
                             </TabsTrigger>
                             <TabsTrigger
@@ -165,14 +169,18 @@ export default function EditDiabetesLogForm({
                                 className="flex items-center gap-1"
                             >
                                 <Pill className="size-3.5" />
-                                <span className="hidden sm:inline">Meds</span>
+                                <span className="hidden sm:inline">
+                                    {t('diabetes_log.tabs.meds')}
+                                </span>
                             </TabsTrigger>
                             <TabsTrigger
                                 value={LogType.Vitals}
                                 className="flex items-center gap-1"
                             >
                                 <HeartPulse className="size-3.5" />
-                                <span className="hidden sm:inline">Vitals</span>
+                                <span className="hidden sm:inline">
+                                    {t('diabetes_log.tabs.vitals')}
+                                </span>
                             </TabsTrigger>
                             <TabsTrigger
                                 value={LogType.Exercise}
@@ -180,7 +188,7 @@ export default function EditDiabetesLogForm({
                             >
                                 <Activity className="size-3.5" />
                                 <span className="hidden sm:inline">
-                                    Exercise
+                                    {t('diabetes_log.tabs.exercise')}
                                 </span>
                             </TabsTrigger>
                         </TabsList>
@@ -192,7 +200,9 @@ export default function EditDiabetesLogForm({
                         >
                             <div className="space-y-2">
                                 <Label htmlFor="glucose_value">
-                                    Glucose ({glucoseUnit})
+                                    {t('diabetes_log.glucose.label', {
+                                        unit: glucoseUnit,
+                                    })}
                                 </Label>
                                 <Input
                                     id="glucose_value"
@@ -206,7 +216,9 @@ export default function EditDiabetesLogForm({
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Reading Context</Label>
+                                <Label>
+                                    {t('diabetes_log.glucose.reading_context')}
+                                </Label>
                                 <input
                                     type="hidden"
                                     name="glucose_reading_type"
@@ -245,7 +257,9 @@ export default function EditDiabetesLogForm({
                             {todaysMeals.length > 0 && (
                                 <div className="space-y-2">
                                     <Label className="text-xs text-muted-foreground">
-                                        Import from Today's Plan
+                                        {t(
+                                            'diabetes_log.food.import_from_plan',
+                                        )}
                                     </Label>
                                     <div className="flex flex-wrap gap-2">
                                         {todaysMeals.map((meal) => (
@@ -269,13 +283,15 @@ export default function EditDiabetesLogForm({
 
                             <div className="space-y-2">
                                 <Label htmlFor="carbs_grams">
-                                    Carbohydrates (grams)
+                                    {t('diabetes_log.food.carbs_label')}
                                 </Label>
                                 <Input
                                     id="carbs_grams"
                                     type="number"
                                     name="carbs_grams"
-                                    placeholder="e.g., 45"
+                                    placeholder={t(
+                                        'diabetes_log.food.carbs_placeholder',
+                                    )}
                                     value={carbsGrams}
                                     onChange={(e) =>
                                         setCarbsGrams(e.target.value)
@@ -315,13 +331,17 @@ export default function EditDiabetesLogForm({
 
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="insulin_units">Units</Label>
+                                    <Label htmlFor="insulin_units">
+                                        {t('diabetes_log.insulin.units_label')}
+                                    </Label>
                                     <Input
                                         id="insulin_units"
                                         type="number"
                                         name="insulin_units"
                                         step="0.5"
-                                        placeholder="e.g., 10"
+                                        placeholder={t(
+                                            'diabetes_log.insulin.units_placeholder',
+                                        )}
                                         value={insulinUnits}
                                         onChange={(e) =>
                                             setInsulinUnits(e.target.value)
@@ -332,14 +352,20 @@ export default function EditDiabetesLogForm({
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="insulin_type">Type</Label>
+                                    <Label htmlFor="insulin_type">
+                                        {t('diabetes_log.insulin.type_label')}
+                                    </Label>
                                     <Select
                                         name="insulin_type"
                                         value={insulinType}
                                         onValueChange={setInsulinType}
                                     >
                                         <SelectTrigger id="insulin_type">
-                                            <SelectValue placeholder="Select type" />
+                                            <SelectValue
+                                                placeholder={t(
+                                                    'diabetes_log.insulin.type_placeholder',
+                                                )}
+                                            />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {insulinTypes.map((type) => (
@@ -390,13 +416,17 @@ export default function EditDiabetesLogForm({
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="medication_name">
-                                        Medication Name
+                                        {t(
+                                            'diabetes_log.medication.name_label',
+                                        )}
                                     </Label>
                                     <Input
                                         id="medication_name"
                                         type="text"
                                         name="medication_name"
-                                        placeholder="e.g., Metformin"
+                                        placeholder={t(
+                                            'diabetes_log.medication.name_placeholder',
+                                        )}
                                         value={medicationName}
                                         onChange={(e) =>
                                             setMedicationName(e.target.value)
@@ -408,13 +438,17 @@ export default function EditDiabetesLogForm({
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="medication_dosage">
-                                        Dosage
+                                        {t(
+                                            'diabetes_log.medication.dosage_label',
+                                        )}
                                     </Label>
                                     <Input
                                         id="medication_dosage"
                                         type="text"
                                         name="medication_dosage"
-                                        placeholder="e.g., 500mg"
+                                        placeholder={t(
+                                            'diabetes_log.medication.dosage_placeholder',
+                                        )}
                                         value={medicationDosage}
                                         onChange={(e) =>
                                             setMedicationDosage(e.target.value)
@@ -434,25 +468,33 @@ export default function EditDiabetesLogForm({
                         >
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="weight">Weight (lbs)</Label>
+                                    <Label htmlFor="weight">
+                                        {t('diabetes_log.vitals.weight_label')}
+                                    </Label>
                                     <Input
                                         id="weight"
                                         type="number"
                                         name="weight"
                                         step="0.1"
-                                        placeholder="e.g., 165"
+                                        placeholder={t(
+                                            'diabetes_log.vitals.weight_placeholder',
+                                        )}
                                         defaultValue={logEntry.weight ?? ''}
                                     />
                                     <InputError message={errors.weight} />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="a1c_value">A1C (%)</Label>
+                                    <Label htmlFor="a1c_value">
+                                        {t('diabetes_log.vitals.a1c_label')}
+                                    </Label>
                                     <Input
                                         id="a1c_value"
                                         type="number"
                                         name="a1c_value"
                                         step="0.1"
-                                        placeholder="e.g., 6.5"
+                                        placeholder={t(
+                                            'diabetes_log.vitals.a1c_placeholder',
+                                        )}
                                         defaultValue={logEntry.a1c_value ?? ''}
                                     />
                                     <InputError message={errors.a1c_value} />
@@ -461,13 +503,17 @@ export default function EditDiabetesLogForm({
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="blood_pressure_systolic">
-                                        Systolic BP
+                                        {t(
+                                            'diabetes_log.vitals.systolic_label',
+                                        )}
                                     </Label>
                                     <Input
                                         id="blood_pressure_systolic"
                                         type="number"
                                         name="blood_pressure_systolic"
-                                        placeholder="e.g., 120"
+                                        placeholder={t(
+                                            'diabetes_log.vitals.systolic_placeholder',
+                                        )}
                                         defaultValue={
                                             logEntry.blood_pressure_systolic ??
                                             ''
@@ -479,13 +525,17 @@ export default function EditDiabetesLogForm({
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="blood_pressure_diastolic">
-                                        Diastolic BP
+                                        {t(
+                                            'diabetes_log.vitals.diastolic_label',
+                                        )}
                                     </Label>
                                     <Input
                                         id="blood_pressure_diastolic"
                                         type="number"
                                         name="blood_pressure_diastolic"
-                                        placeholder="e.g., 80"
+                                        placeholder={t(
+                                            'diabetes_log.vitals.diastolic_placeholder',
+                                        )}
                                         defaultValue={
                                             logEntry.blood_pressure_diastolic ??
                                             ''
@@ -508,13 +558,15 @@ export default function EditDiabetesLogForm({
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="exercise_type">
-                                        Exercise Type
+                                        {t('diabetes_log.exercise.type_label')}
                                     </Label>
                                     <Input
                                         id="exercise_type"
                                         type="text"
                                         name="exercise_type"
-                                        placeholder="e.g., Walking, Running"
+                                        placeholder={t(
+                                            'diabetes_log.exercise.type_placeholder',
+                                        )}
                                         defaultValue={
                                             logEntry.exercise_type ?? ''
                                         }
@@ -525,13 +577,17 @@ export default function EditDiabetesLogForm({
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="exercise_duration_minutes">
-                                        Duration (minutes)
+                                        {t(
+                                            'diabetes_log.exercise.duration_label',
+                                        )}
                                     </Label>
                                     <Input
                                         id="exercise_duration_minutes"
                                         type="number"
                                         name="exercise_duration_minutes"
-                                        placeholder="e.g., 30"
+                                        placeholder={t(
+                                            'diabetes_log.exercise.duration_placeholder',
+                                        )}
                                         defaultValue={
                                             logEntry.exercise_duration_minutes ??
                                             ''
@@ -548,11 +604,15 @@ export default function EditDiabetesLogForm({
                     </Tabs>
 
                     <div className="space-y-2">
-                        <Label htmlFor="notes">Notes (Optional)</Label>
+                        <Label htmlFor="notes">
+                            {t('diabetes_log.common.notes_label')}
+                        </Label>
                         <Textarea
                             id="notes"
                             name="notes"
-                            placeholder="Any additional notes..."
+                            placeholder={t(
+                                'diabetes_log.common.notes_placeholder',
+                            )}
                             defaultValue={logEntry.notes ?? ''}
                             maxLength={500}
                         />
@@ -562,7 +622,9 @@ export default function EditDiabetesLogForm({
                     {/* Date & Time and Actions */}
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div className="space-y-2 sm:flex-1">
-                            <Label htmlFor="measured_at">Date & Time</Label>
+                            <Label htmlFor="measured_at">
+                                {t('diabetes_log.common.date_time_label')}
+                            </Label>
                             <Input
                                 id="measured_at"
                                 type="datetime-local"
@@ -578,10 +640,10 @@ export default function EditDiabetesLogForm({
                                 variant="outline"
                                 onClick={onCancel}
                             >
-                                Cancel
+                                {t('diabetes_log.common.cancel')}
                             </Button>
                             <Button type="submit" disabled={processing}>
-                                Update
+                                {t('diabetes_log.common.update')}
                             </Button>
                         </div>
                     </div>

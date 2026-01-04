@@ -24,6 +24,7 @@ import {
     Sparkles,
     TrendingUp,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface GlucoseActionProps {
     glucoseAnalysis: GlucoseAnalysisData;
@@ -32,8 +33,8 @@ interface GlucoseActionProps {
     mealPlan: MealPlan | null;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Diabetes Insights', href: '#' },
+const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
+    { title: t('diabetes_log.insights_page.breadcrumb'), href: '#' },
 ];
 
 export default function DiabetesInsights({
@@ -43,6 +44,7 @@ export default function DiabetesInsights({
     mealPlan,
 }: GlucoseActionProps) {
     const { currentUser } = useSharedProps();
+    const { t } = useTranslation('common');
 
     const regenerateForm = useForm({});
 
@@ -51,8 +53,8 @@ export default function DiabetesInsights({
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Diabetes Insights" />
+        <AppLayout breadcrumbs={getBreadcrumbs(t)}>
+            <Head title={t('diabetes_log.insights_page.title')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-4 md:p-6">
                 {!currentUser?.is_onboarded ? (
@@ -60,11 +62,14 @@ export default function DiabetesInsights({
                         <div className="space-y-2">
                             <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
                                 <Activity className="h-8 w-8 text-primary" />
-                                Your Glucose Insights
+                                {t(
+                                    'diabetes_log.insights_page.your_glucose_insights',
+                                )}
                             </h1>
                             <p className="text-muted-foreground">
-                                Complete your profile to get personalized meal
-                                recommendations
+                                {t(
+                                    'diabetes_log.insights_page.complete_profile',
+                                )}
                             </p>
                         </div>
                         <OnboardingBanner />
@@ -75,20 +80,22 @@ export default function DiabetesInsights({
                         <div className="space-y-2">
                             <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
                                 <Activity className="h-8 w-8 text-primary" />
-                                Your Glucose Insights
+                                {t(
+                                    'diabetes_log.insights_page.your_glucose_insights',
+                                )}
                             </h1>
                             <p className="text-muted-foreground">
-                                Analysis from your past{' '}
-                                {glucoseAnalysis.days_analyzed} days
+                                {t(
+                                    'diabetes_log.insights_page.analysis_from_days',
+                                    { days: glucoseAnalysis.days_analyzed },
+                                )}
                             </p>
                         </div>
 
                         {!glucoseAnalysis.has_data ? (
                             <Alert>
                                 <AlertDescription>
-                                    No glucose data available yet. Start
-                                    tracking your glucose readings to get
-                                    personalized insights.
+                                    {t('diabetes_log.insights_page.no_data')}
                                 </AlertDescription>
                             </Alert>
                         ) : (
@@ -96,34 +103,50 @@ export default function DiabetesInsights({
                                 {/* Glucose Summary Card */}
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle>Glucose Overview</CardTitle>
+                                        <CardTitle>
+                                            {t(
+                                                'diabetes_log.insights_page.glucose_overview.title',
+                                            )}
+                                        </CardTitle>
                                         <CardDescription>
-                                            Based on{' '}
-                                            {glucoseAnalysis.total_readings}{' '}
-                                            readings
+                                            {t(
+                                                'diabetes_log.insights_page.glucose_overview.based_on_readings',
+                                                {
+                                                    count: glucoseAnalysis.total_readings,
+                                                },
+                                            )}
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="grid gap-4 md:grid-cols-3">
                                             <div className="space-y-1">
                                                 <p className="text-sm text-muted-foreground">
-                                                    Average Glucose
+                                                    {t(
+                                                        'diabetes_log.insights_page.glucose_overview.average_glucose',
+                                                    )}
                                                 </p>
                                                 <p className="text-2xl font-bold">
                                                     {glucoseAnalysis.averages.overall?.toFixed(
                                                         1,
-                                                    ) ?? 'N/A'}{' '}
+                                                    ) ??
+                                                        t(
+                                                            'diabetes_log.insights_page.glucose_overview.na',
+                                                        )}{' '}
                                                     {glucoseAnalysis.averages
                                                         .overall && (
                                                         <span className="text-sm font-normal">
-                                                            mg/dL
+                                                            {t(
+                                                                'diabetes_log.insights_page.glucose_overview.mg_dl',
+                                                            )}
                                                         </span>
                                                     )}
                                                 </p>
                                             </div>
                                             <div className="space-y-1">
                                                 <p className="text-sm text-muted-foreground">
-                                                    Time in Range
+                                                    {t(
+                                                        'diabetes_log.insights_page.glucose_overview.time_in_range',
+                                                    )}
                                                 </p>
                                                 <p className="text-2xl font-bold text-green-600">
                                                     {glucoseAnalysis.time_in_range.percentage.toFixed(
@@ -134,7 +157,9 @@ export default function DiabetesInsights({
                                             </div>
                                             <div className="space-y-1">
                                                 <p className="text-sm text-muted-foreground">
-                                                    Above Range
+                                                    {t(
+                                                        'diabetes_log.insights_page.glucose_overview.above_range',
+                                                    )}
                                                 </p>
                                                 <p className="text-2xl font-bold text-orange-600">
                                                     {glucoseAnalysis.time_in_range.above_percentage.toFixed(
@@ -152,7 +177,9 @@ export default function DiabetesInsights({
                                     <Alert variant="destructive">
                                         <AlertTriangle className="h-4 w-4" />
                                         <AlertTitle>
-                                            Areas Needing Attention
+                                            {t(
+                                                'diabetes_log.insights_page.concerns.title',
+                                            )}
                                         </AlertTitle>
                                         <AlertDescription>
                                             <ul className="mt-2 list-inside list-disc space-y-1">
@@ -170,20 +197,21 @@ export default function DiabetesInsights({
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2">
                                                 <TrendingUp className="h-5 w-5" />
-                                                Improve Your Glucose Control
+                                                {t(
+                                                    'diabetes_log.insights_page.improve_control.title',
+                                                )}
                                             </CardTitle>
                                             <CardDescription>
-                                                Generate a personalized meal
-                                                plan designed to help stabilize
-                                                your blood sugar levels
+                                                {t(
+                                                    'diabetes_log.insights_page.improve_control.description',
+                                                )}
                                             </CardDescription>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             <p className="text-sm">
-                                                Personalized meals tailored to
-                                                your glucose patterns, focusing
-                                                on foods that won&apos;t spike
-                                                your blood sugar.
+                                                {t(
+                                                    'diabetes_log.insights_page.improve_control.details',
+                                                )}
                                             </p>
                                             <Button
                                                 asChild
@@ -197,7 +225,9 @@ export default function DiabetesInsights({
                                                     }
                                                 >
                                                     <Sparkles className="mr-2 h-4 w-4" />
-                                                    Generate Optimized Meal Plan
+                                                    {t(
+                                                        'diabetes_log.insights_page.improve_control.generate_button',
+                                                    )}
                                                 </Link>
                                             </Button>
                                         </CardContent>
@@ -205,20 +235,25 @@ export default function DiabetesInsights({
                                 ) : (
                                     <div className="space-y-4">
                                         <h2 className="text-xl font-semibold">
-                                            Recommended Actions
+                                            {t(
+                                                'diabetes_log.insights_page.recommended_actions.title',
+                                            )}
                                         </h2>
                                         <div className="grid gap-4 md:grid-cols-2">
                                             <Card>
                                                 <CardHeader>
                                                     <CardTitle className="text-lg">
-                                                        View Current Plan
+                                                        {t(
+                                                            'diabetes_log.insights_page.recommended_actions.view_plan.title',
+                                                        )}
                                                     </CardTitle>
                                                     <CardDescription>
-                                                        Review your existing{' '}
-                                                        {
-                                                            mealPlan?.duration_days
-                                                        }
-                                                        -day meal plan
+                                                        {t(
+                                                            'diabetes_log.insights_page.recommended_actions.view_plan.description',
+                                                            {
+                                                                days: mealPlan?.duration_days,
+                                                            },
+                                                        )}
                                                     </CardDescription>
                                                 </CardHeader>
                                                 <CardContent>
@@ -233,7 +268,9 @@ export default function DiabetesInsights({
                                                                     .url
                                                             }
                                                         >
-                                                            Go to Meal Plans
+                                                            {t(
+                                                                'diabetes_log.insights_page.recommended_actions.view_plan.button',
+                                                            )}
                                                         </Link>
                                                     </Button>
                                                 </CardContent>
@@ -242,13 +279,14 @@ export default function DiabetesInsights({
                                             <Card className="border-primary/30">
                                                 <CardHeader>
                                                     <CardTitle className="text-lg">
-                                                        Regenerate with Glucose
-                                                        Focus
+                                                        {t(
+                                                            'diabetes_log.insights_page.recommended_actions.regenerate.title',
+                                                        )}
                                                     </CardTitle>
                                                     <CardDescription>
-                                                        Create a new meal plan
-                                                        optimized for your
-                                                        current glucose patterns
+                                                        {t(
+                                                            'diabetes_log.insights_page.recommended_actions.regenerate.description',
+                                                        )}
                                                     </CardDescription>
                                                 </CardHeader>
                                                 <CardContent>
@@ -265,8 +303,12 @@ export default function DiabetesInsights({
                                                             className={`mr-2 h-4 w-4 ${regenerateForm.processing ? 'animate-spin' : ''}`}
                                                         />
                                                         {regenerateForm.processing
-                                                            ? 'Generating...'
-                                                            : 'Regenerate Entire Plan'}
+                                                            ? t(
+                                                                  'diabetes_log.insights_page.recommended_actions.regenerate.generating',
+                                                              )
+                                                            : t(
+                                                                  'diabetes_log.insights_page.recommended_actions.regenerate.button',
+                                                              )}
                                                     </Button>
                                                 </CardContent>
                                             </Card>
@@ -277,14 +319,14 @@ export default function DiabetesInsights({
                                 {/* Educational Footer */}
                                 <Card className="bg-muted/30">
                                     <CardContent className="pt-6">
-                                        <p className="text-sm text-muted-foreground">
-                                            💡 <strong>Tip:</strong> Consistent
-                                            meal timing and balanced
-                                            macronutrients can help reduce
-                                            glucose variability. Your
-                                            personalized meal plan takes these
-                                            factors into account.
-                                        </p>
+                                        <p
+                                            className="text-sm text-muted-foreground"
+                                            dangerouslySetInnerHTML={{
+                                                __html: t(
+                                                    'diabetes_log.insights_page.tip',
+                                                ),
+                                            }}
+                                        />
                                     </CardContent>
                                 </Card>
                             </>

@@ -8,6 +8,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import clsx from 'clsx';
 import { CreditCardIcon, ReceiptIcon, TriangleIcon } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface BillingProduct {
     id: number;
@@ -52,9 +53,9 @@ interface Props {
     incompletePaymentUrl: string | null;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
+const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
-        title: 'Subscription',
+        title: t('checkout_subscription.breadcrumb'),
         href: checkout.subscription().url,
     },
 ];
@@ -70,6 +71,7 @@ export default function CashierSubscription({
     const [billingInterval, setBillingInterval] = useState<
         'monthly' | 'yearly'
     >('monthly');
+    const { t } = useTranslation('common');
 
     const formatSavings = (value: number) => `$${parseFloat(value.toFixed(2))}`;
 
@@ -92,8 +94,8 @@ export default function CashierSubscription({
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Subscription Management (Cashier)" />
+        <AppLayout breadcrumbs={getBreadcrumbs(t)}>
+            <Head title={t('checkout_subscription.title')} />
 
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <div className="space-y-8">
@@ -105,12 +107,15 @@ export default function CashierSubscription({
                                 </div>
                                 <div className="ml-3 flex-1">
                                     <h3 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
-                                        Payment Required
+                                        {t(
+                                            'checkout_subscription.payment_required',
+                                        )}
                                     </h3>
                                     <div className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
                                         <p>
-                                            Your subscription requires
-                                            additional payment confirmation.
+                                            {t(
+                                                'checkout_subscription.payment_required_description',
+                                            )}
                                         </p>
                                     </div>
                                     <div className="mt-4">
@@ -120,7 +125,9 @@ export default function CashierSubscription({
                                             className="bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-700 dark:hover:bg-yellow-800"
                                         >
                                             <a href={incompletePaymentUrl}>
-                                                Complete Payment
+                                                {t(
+                                                    'checkout_subscription.complete_payment',
+                                                )}
                                             </a>
                                         </Button>
                                     </div>
@@ -133,7 +140,9 @@ export default function CashierSubscription({
                         <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
                             <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-800 dark:bg-gray-950">
                                 <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                    Current Subscription
+                                    {t(
+                                        'checkout_subscription.current_subscription',
+                                    )}
                                 </h2>
                             </div>
                             <div className="px-6 py-6">
@@ -147,19 +156,29 @@ export default function CashierSubscription({
                                         {currentSubscription.product_name && (
                                             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                                                 {currentSubscription.is_yearly
-                                                    ? 'Yearly Plan'
-                                                    : 'Monthly Plan'}
+                                                    ? t(
+                                                          'checkout_subscription.yearly_plan',
+                                                      )
+                                                    : t(
+                                                          'checkout_subscription.monthly_plan',
+                                                      )}
                                             </p>
                                         )}
                                         <p className="mt-2 text-sm text-gray-500 dark:text-gray-500">
-                                            Status:{' '}
+                                            {t('checkout_subscription.status')}:{' '}
                                             <span className="font-medium text-gray-900 dark:text-gray-100">
                                                 {currentSubscription.on_trial
-                                                    ? 'Trial'
+                                                    ? t(
+                                                          'checkout_subscription.trial',
+                                                      )
                                                     : currentSubscription.cancelled
-                                                      ? 'Cancelled'
+                                                      ? t(
+                                                            'checkout_subscription.cancelled',
+                                                        )
                                                       : currentSubscription.active
-                                                        ? 'Active'
+                                                        ? t(
+                                                              'checkout_subscription.active',
+                                                          )
                                                         : currentSubscription.stripe_status}
                                             </span>
                                         </p>
@@ -177,11 +196,15 @@ export default function CashierSubscription({
                                         )}
                                     >
                                         {currentSubscription.on_trial
-                                            ? 'Trial'
+                                            ? t('checkout_subscription.trial')
                                             : currentSubscription.cancelled
-                                              ? 'Cancelled'
+                                              ? t(
+                                                    'checkout_subscription.cancelled',
+                                                )
                                               : currentSubscription.active
-                                                ? 'Active'
+                                                ? t(
+                                                      'checkout_subscription.active',
+                                                  )
                                                 : currentSubscription.stripe_status}
                                     </span>
                                 </div>
@@ -192,7 +215,9 @@ export default function CashierSubscription({
                                         {currentSubscription.trial_ends_at && (
                                             <div>
                                                 <p className="text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
-                                                    Trial Ends
+                                                    {t(
+                                                        'checkout_subscription.trial_ends',
+                                                    )}
                                                 </p>
                                                 <p className="mt-1 font-semibold text-gray-900 dark:text-gray-100">
                                                     {new Date(
@@ -204,7 +229,9 @@ export default function CashierSubscription({
                                         {currentSubscription.ends_at && (
                                             <div>
                                                 <p className="text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
-                                                    Ends At
+                                                    {t(
+                                                        'checkout_subscription.ends_at',
+                                                    )}
                                                 </p>
                                                 <p className="mt-1 font-semibold text-gray-900 dark:text-gray-100">
                                                     {new Date(
@@ -225,8 +252,10 @@ export default function CashierSubscription({
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                 <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                                     {currentSubscription
-                                        ? 'Change Plan'
-                                        : 'Choose Your Plan'}
+                                        ? t('checkout_subscription.change_plan')
+                                        : t(
+                                              'checkout_subscription.choose_plan',
+                                          )}
                                 </h2>
 
                                 {/* Billing Interval Toggle */}
@@ -242,7 +271,7 @@ export default function CashierSubscription({
                                                 : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
                                         )}
                                     >
-                                        Monthly
+                                        {t('checkout_subscription.monthly')}
                                     </button>
                                     <button
                                         onClick={() =>
@@ -255,9 +284,9 @@ export default function CashierSubscription({
                                                 : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
                                         )}
                                     >
-                                        Yearly
+                                        {t('checkout_subscription.yearly')}
                                         <span className="ml-1 text-xs font-semibold text-green-600 dark:text-green-400">
-                                            Save{' '}
+                                            {t('checkout_subscription.save')}{' '}
                                             {products[0]
                                                 ?.yearly_savings_percentage ||
                                                 17}
@@ -282,7 +311,9 @@ export default function CashierSubscription({
                                         {product.popular && (
                                             <div className="absolute -top-3 left-1/2 -translate-x-1/2 transform">
                                                 <span className="rounded-full bg-blue-500 px-3 py-1 text-xs font-semibold text-white dark:bg-blue-600">
-                                                    Most Popular
+                                                    {t(
+                                                        'checkout_subscription.most_popular',
+                                                    )}
                                                 </span>
                                             </div>
                                         )}
@@ -295,11 +326,14 @@ export default function CashierSubscription({
                                                 {product.coming_soon ? (
                                                     <div>
                                                         <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                                                            Custom Pricing
+                                                            {t(
+                                                                'checkout_subscription.custom_pricing',
+                                                            )}
                                                         </div>
                                                         <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                                                            Contact us for
-                                                            details
+                                                            {t(
+                                                                'checkout_subscription.contact_us',
+                                                            )}
                                                         </div>
                                                     </div>
                                                 ) : billingInterval ===
@@ -309,7 +343,9 @@ export default function CashierSubscription({
                                                             product.formatted_price
                                                         }
                                                         <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                                                            /month
+                                                            {t(
+                                                                'checkout_subscription.per_month',
+                                                            )}
                                                         </span>
                                                     </div>
                                                 ) : (
@@ -319,19 +355,22 @@ export default function CashierSubscription({
                                                                 product.formatted_yearly_price
                                                             }
                                                             <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                                                                /year
+                                                                {t(
+                                                                    'checkout_subscription.per_year',
+                                                                )}
                                                             </span>
                                                         </div>
                                                         <div className="text-sm font-medium text-green-600 dark:text-green-400">
-                                                            Save{' '}
-                                                            {formatSavings(
-                                                                product.yearly_savings,
-                                                            )}{' '}
-                                                            (
-                                                            {
-                                                                product.yearly_savings_percentage
-                                                            }
-                                                            %) annually
+                                                            {t(
+                                                                'checkout_subscription.save_amount',
+                                                                {
+                                                                    amount: formatSavings(
+                                                                        product.yearly_savings,
+                                                                    ),
+                                                                    percentage:
+                                                                        product.yearly_savings_percentage,
+                                                                },
+                                                            )}
                                                         </div>
                                                     </div>
                                                 )}
@@ -365,7 +404,9 @@ export default function CashierSubscription({
                                                         className="w-full"
                                                     >
                                                         <a href={support().url}>
-                                                            Contact Sales
+                                                            {t(
+                                                                'checkout_subscription.contact_sales',
+                                                            )}
                                                         </a>
                                                     </Button>
                                                 ) : (
@@ -391,8 +432,12 @@ export default function CashierSubscription({
                                                             }
                                                         >
                                                             {isSubscribing
-                                                                ? 'Processing...'
-                                                                : 'Choose Plan'}
+                                                                ? t(
+                                                                      'checkout_subscription.processing',
+                                                                  )
+                                                                : t(
+                                                                      'checkout_subscription.choose_plan_button',
+                                                                  )}
                                                         </Button>
 
                                                         {((billingInterval ===
@@ -402,8 +447,9 @@ export default function CashierSubscription({
                                                                 'yearly' &&
                                                                 !product.yearly_stripe_price_id)) && (
                                                             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                                Stripe Price ID
-                                                                required
+                                                                {t(
+                                                                    'checkout_subscription.stripe_price_required',
+                                                                )}
                                                             </p>
                                                         )}
                                                     </>
@@ -426,13 +472,17 @@ export default function CashierSubscription({
                                     rel="noopener noreferrer"
                                 >
                                     <CreditCardIcon className="mr-2 h-4 w-4" />
-                                    Manage Subscription
+                                    {t(
+                                        'checkout_subscription.manage_subscription',
+                                    )}
                                 </a>
                             </Button>
                             <Button asChild variant="outline">
                                 <Link href={billing.index().url}>
                                     <ReceiptIcon className="mr-2 h-4 w-4" />
-                                    View Billing History
+                                    {t(
+                                        'checkout_subscription.view_billing_history',
+                                    )}
                                 </Link>
                             </Button>
                         </div>

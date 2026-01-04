@@ -8,6 +8,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     profile?: Profile;
@@ -15,16 +16,22 @@ interface Props {
 }
 
 export default function LifeStylePage({ profile, lifestyles }: Props) {
+    const { t } = useTranslation('common');
     const { currentUser } = useSharedProps();
     return (
         <>
-            <Head title="Lifestyle - Step 3 of 5" />
+            <Head title={t('onboarding.lifestyle.title')} />
             <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900">
                 <div className="w-full max-w-2xl">
                     {/* Progress Bar */}
                     <div className="mb-8">
                         <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
-                            <span>Step 3 of 5</span>
+                            <span>
+                                {t('onboarding.biometrics.step', {
+                                    current: 3,
+                                    total: 5,
+                                })}
+                            </span>
                             <span>60%</span>
                         </div>
                         <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
@@ -37,11 +44,10 @@ export default function LifeStylePage({ profile, lifestyles }: Props) {
 
                     <div className="rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
                         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
-                            What's your lifestyle like?
+                            {t('onboarding.lifestyle.heading')}
                         </h1>
                         <p className="mb-6 text-gray-600 dark:text-gray-300">
-                            Help us understand your activity level to calculate
-                            your daily calorie needs
+                            {t('onboarding.lifestyle.description')}
                         </p>
 
                         <Form
@@ -78,10 +84,12 @@ export default function LifeStylePage({ profile, lifestyles }: Props) {
                                                                 {lifestyle.name}
                                                             </span>
                                                             <span className="text-sm text-gray-500 dark:text-gray-400">
-                                                                {
-                                                                    lifestyle.activity_multiplier
-                                                                }
-                                                                x multiplier
+                                                                {t(
+                                                                    'onboarding.lifestyle.multiplier',
+                                                                    {
+                                                                        value: lifestyle.activity_multiplier,
+                                                                    },
+                                                                )}
                                                             </span>
                                                         </div>
                                                         <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
@@ -103,7 +111,7 @@ export default function LifeStylePage({ profile, lifestyles }: Props) {
                                                 href={dashboard.url()}
                                                 className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
                                             >
-                                                Exit
+                                                {t('onboarding.lifestyle.exit')}
                                             </Link>
                                         )}
                                         <Button
@@ -114,7 +122,7 @@ export default function LifeStylePage({ profile, lifestyles }: Props) {
                                             {processing && (
                                                 <LoaderCircle className="h-4 w-4 animate-spin" />
                                             )}
-                                            Continue to Dietary Preferences
+                                            {t('onboarding.lifestyle.continue')}
                                         </Button>
                                     </div>
                                 </>

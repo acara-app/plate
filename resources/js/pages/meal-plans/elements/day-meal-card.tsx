@@ -8,6 +8,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { DailyStats, Meal } from '@/types/meal-plan';
+import { useTranslation } from 'react-i18next';
 import { MealCard } from './meal-card';
 import { NutritionStats } from './nutrition-stats';
 
@@ -38,6 +39,7 @@ export function DayMealCard({
     targetCalories,
     className,
 }: DayMealCardProps) {
+    const { t } = useTranslation('common');
     const dayEmoji = dayEmojis[dayName] || '📅';
     const caloriesDiff = targetCalories
         ? dailyStats.total_calories - targetCalories
@@ -63,7 +65,11 @@ export function DayMealCard({
                         <CardTitle className="flex items-center gap-2 text-xl">
                             {dayEmoji} {dayName}
                         </CardTitle>
-                        <CardDescription>Day {dayNumber}</CardDescription>
+                        <CardDescription>
+                            {t('meal_plans.day_card.day', {
+                                number: dayNumber,
+                            })}
+                        </CardDescription>
                     </div>
 
                     {targetCalories && caloriesDiff !== null && (
@@ -80,7 +86,7 @@ export function DayMealCard({
                                 {Math.round(caloriesDiff)} cal
                             </div>
                             <div className="text-xs text-muted-foreground">
-                                vs target
+                                {t('meal_plans.vs_target')}
                             </div>
                         </div>
                     )}
@@ -105,7 +111,7 @@ export function DayMealCard({
 
                     {meals.length === 0 && (
                         <div className="py-8 text-center text-sm text-muted-foreground">
-                            No meals planned for this day
+                            {t('meal_plans.day_card.no_meals')}
                         </div>
                     )}
                 </div>

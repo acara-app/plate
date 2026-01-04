@@ -22,11 +22,12 @@ import {
 } from '@/types/diabetes';
 import { Head, InfiniteScroll, Link, router } from '@inertiajs/react';
 import { BarChart3, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import DiabetesLogDialog from './diabetes-log-dialog';
 
-const breadcrumbs: BreadcrumbItem[] = [
+const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
-        title: 'Diabetes Log',
+        title: t('diabetes_log.index_page.title'),
         href: ListDiabetesLogController().url,
     },
 ];
@@ -56,11 +57,12 @@ export default function DiabetesLogIndex({
     recentInsulins,
     todaysMeals,
 }: Props) {
+    const { t } = useTranslation('common');
     const createModal = useModalToggle();
     const editModal = useModalValueToggle<DiabetesLogEntry>();
 
     const handleDelete = (id: number) => {
-        if (confirm('Are you sure you want to delete this entry?')) {
+        if (confirm(t('diabetes_log.index_page.delete_confirm'))) {
             router.delete(DestroyDiabetesLogController(id).url, {
                 preserveScroll: true,
             });
@@ -68,17 +70,17 @@ export default function DiabetesLogIndex({
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Diabetes Log" />
+        <AppLayout breadcrumbs={getBreadcrumbs(t)}>
+            <Head title={t('diabetes_log.index_page.title')} />
             <AdminPageWrap variant="lg">
                 <div className="space-y-6">
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight">
-                                Diabetes Log
+                                {t('diabetes_log.index_page.title')}
                             </h1>
                             <p className="text-muted-foreground">
-                                Track and monitor your diabetes management
+                                {t('diabetes_log.index_page.description')}
                             </p>
                         </div>
                         <div className="flex gap-2">
@@ -87,12 +89,14 @@ export default function DiabetesLogIndex({
                                     href={DashboardDiabetesLogController().url}
                                 >
                                     <BarChart3 className="mr-2 size-4" />
-                                    View Dashboard
+                                    {t(
+                                        'diabetes_log.index_page.view_dashboard',
+                                    )}
                                 </Link>
                             </Button>
                             <Button onClick={() => createModal.open()}>
                                 <Plus className="mr-2 size-4" />
-                                Add Entry
+                                {t('diabetes_log.index_page.add_entry')}
                             </Button>
                         </div>
                     </div>
@@ -130,16 +134,17 @@ export default function DiabetesLogIndex({
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Your Log Entries</CardTitle>
+                            <CardTitle>
+                                {t('diabetes_log.index_page.your_log_entries')}
+                            </CardTitle>
                             <CardDescription>
-                                Recent diabetes log entries
+                                {t('diabetes_log.index_page.recent_entries')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
                             {logs.data.length === 0 ? (
                                 <div className="py-8 text-center text-muted-foreground">
-                                    No log entries yet. Add your first entry to
-                                    get started.
+                                    {t('diabetes_log.index_page.no_entries')}
                                 </div>
                             ) : (
                                 <InfiniteScroll
@@ -181,7 +186,9 @@ export default function DiabetesLogIndex({
                                                                 {
                                                                     log.insulin_units
                                                                 }
-                                                                u{' '}
+                                                                {t(
+                                                                    'diabetes_log.index_page.units_label',
+                                                                )}{' '}
                                                                 {
                                                                     log.insulin_type
                                                                 }
@@ -189,7 +196,10 @@ export default function DiabetesLogIndex({
                                                         )}
                                                         {log.weight && (
                                                             <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">
-                                                                {log.weight} lbs
+                                                                {log.weight}{' '}
+                                                                {t(
+                                                                    'diabetes_log.index_page.lbs_label',
+                                                                )}
                                                             </span>
                                                         )}
                                                         {log.blood_pressure_systolic &&
@@ -202,7 +212,9 @@ export default function DiabetesLogIndex({
                                                                     {
                                                                         log.blood_pressure_diastolic
                                                                     }{' '}
-                                                                    BP
+                                                                    {t(
+                                                                        'diabetes_log.index_page.bp_label',
+                                                                    )}
                                                                 </span>
                                                             )}
                                                     </div>
@@ -229,7 +241,9 @@ export default function DiabetesLogIndex({
                                                         onClick={() =>
                                                             editModal.open(log)
                                                         }
-                                                        aria-label={`Edit log entry`}
+                                                        aria-label={t(
+                                                            'diabetes_log.index_page.edit_aria_label',
+                                                        )}
                                                     >
                                                         <Pencil
                                                             className="size-4"
@@ -242,7 +256,9 @@ export default function DiabetesLogIndex({
                                                         onClick={() =>
                                                             handleDelete(log.id)
                                                         }
-                                                        aria-label={`Delete log entry`}
+                                                        aria-label={t(
+                                                            'diabetes_log.index_page.delete_aria_label',
+                                                        )}
                                                     >
                                                         <Trash2
                                                             className="size-4 text-red-500"

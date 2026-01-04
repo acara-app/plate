@@ -2,11 +2,14 @@ import { Head, Link } from '@inertiajs/react';
 
 import { Button } from '@/components/ui/button';
 import mealPlans from '@/routes/meal-plans';
+import { useTranslation } from 'react-i18next';
 
 export default function Completion() {
+    const { t } = useTranslation('common');
+
     return (
         <>
-            <Head title="Welcome Aboard!" />
+            <Head title={t('onboarding.completion.title')} />
             <div className="flex min-h-screen flex-col items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100 px-4 py-12 sm:px-6 lg:px-8 dark:from-gray-900 dark:to-gray-800">
                 <div className="w-full max-w-2xl text-center">
                     {/* Confetti Animation */}
@@ -14,11 +17,10 @@ export default function Completion() {
 
                     {/* Success Message */}
                     <h1 className="mb-4 text-4xl font-bold text-gray-900 sm:text-5xl dark:text-white">
-                        You're All Set!
+                        {t('onboarding.completion.heading')}
                     </h1>
                     <p className="mb-8 text-lg text-gray-600 sm:text-xl dark:text-gray-300">
-                        Your personalized nutrition journey starts now. We're
-                        creating your meal plan right now!
+                        {t('onboarding.completion.description')}
                     </p>
 
                     {/* Decorative Confetti Emojis */}
@@ -32,28 +34,28 @@ export default function Completion() {
                     {/* Next Steps Card */}
                     <div className="mx-auto mb-8 max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
                         <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
-                            What's Next?
+                            {t('onboarding.completion.whats_next')}
                         </h2>
                         <div className="space-y-4">
                             <div>
                                 <Link href={mealPlans.index().url}>
                                     <Button className="w-full" size="lg">
-                                        View Your Meal Plan
+                                        {t(
+                                            'onboarding.completion.view_meal_plan',
+                                        )}
                                     </Button>
                                 </Link>
                             </div>
 
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Your personalized meal plan will be ready in a
-                                few moments
+                                {t('onboarding.completion.meal_plan_ready')}
                             </p>
                         </div>
                     </div>
 
                     {/* Additional Info */}
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        You can always update your preferences and profile
-                        information in your settings.
+                        {t('onboarding.completion.update_preferences')}
                     </p>
                 </div>
             </div>

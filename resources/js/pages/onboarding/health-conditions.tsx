@@ -13,6 +13,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
 import { GlucoseUnit, type GlucoseUnitType } from '@/types/diabetes';
+import { useTranslation } from 'react-i18next';
 
 interface GlucoseUnitOption {
     value: string;
@@ -33,6 +34,7 @@ export default function HealthConditions({
     glucoseUnitOptions,
     selectedGlucoseUnit,
 }: Props) {
+    const { t } = useTranslation('common');
     const { currentUser } = useSharedProps();
     const [selectedIds, setSelectedIds] = useState<number[]>(
         selectedConditions || [],
@@ -61,13 +63,18 @@ export default function HealthConditions({
 
     return (
         <>
-            <Head title="Health Conditions - Step 5 of 5" />
+            <Head title={t('onboarding.health_conditions.title')} />
             <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900">
                 <div className="w-full max-w-4xl">
                     {/* Progress Bar */}
                     <div className="mb-8">
                         <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
-                            <span>Step 5 of 5</span>
+                            <span>
+                                {t('onboarding.biometrics.step', {
+                                    current: 5,
+                                    total: 5,
+                                })}
+                            </span>
                             <span>100%</span>
                         </div>
                         <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
@@ -80,11 +87,10 @@ export default function HealthConditions({
 
                     <div className="rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
                         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
-                            Health conditions
+                            {t('onboarding.health_conditions.heading')}
                         </h1>
                         <p className="mb-6 text-gray-600 dark:text-gray-300">
-                            Select any health conditions that may affect your
-                            nutritional needs
+                            {t('onboarding.health_conditions.description')}
                         </p>
 
                         <Form
@@ -164,8 +170,12 @@ export default function HealthConditions({
                                                                 >
                                                                     {expandedId ===
                                                                     condition.id
-                                                                        ? 'Hide'
-                                                                        : 'Info'}
+                                                                        ? t(
+                                                                              'onboarding.health_conditions.hide',
+                                                                          )
+                                                                        : t(
+                                                                              'onboarding.health_conditions.info',
+                                                                          )}
                                                                 </button>
                                                             </div>
                                                             <p className="text-sm text-gray-600 dark:text-gray-300">
@@ -178,8 +188,9 @@ export default function HealthConditions({
                                                                 condition.id && (
                                                                 <div className="mt-2 rounded-md bg-primary/10 p-3 text-sm text-gray-700 dark:bg-primary/20 dark:text-gray-300">
                                                                     <p className="font-medium">
-                                                                        Nutritional
-                                                                        Impact:
+                                                                        {t(
+                                                                            'onboarding.health_conditions.nutritional_impact',
+                                                                        )}
                                                                     </p>
                                                                     <p className="mt-1">
                                                                         {
@@ -192,9 +203,9 @@ export default function HealthConditions({
                                                             {isSelected && (
                                                                 <div className="mt-3">
                                                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                                        Additional
-                                                                        notes
-                                                                        (optional)
+                                                                        {t(
+                                                                            'onboarding.health_conditions.additional_notes',
+                                                                        )}
                                                                     </label>
                                                                     <Textarea
                                                                         value={
@@ -219,7 +230,9 @@ export default function HealthConditions({
                                                                             500
                                                                         }
                                                                         className="mt-1"
-                                                                        placeholder="Any specific details about this condition..."
+                                                                        placeholder={t(
+                                                                            'onboarding.health_conditions.notes_placeholder',
+                                                                        )}
                                                                     />
                                                                 </div>
                                                             )}
@@ -237,11 +250,14 @@ export default function HealthConditions({
                                     {/* Glucose Unit Preference Section */}
                                     <div className="mt-6 rounded-lg border border-primary/30 bg-primary/5 p-4 dark:border-primary/50 dark:bg-primary/10">
                                         <h3 className="mb-2 font-semibold text-gray-900 dark:text-white">
-                                            Glucose Measurement Preference
+                                            {t(
+                                                'onboarding.health_conditions.glucose_preference_heading',
+                                            )}
                                         </h3>
                                         <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
-                                            If you track blood glucose, which
-                                            unit do you prefer?
+                                            {t(
+                                                'onboarding.health_conditions.glucose_preference_description',
+                                            )}
                                         </p>
 
                                         <input
@@ -276,8 +292,9 @@ export default function HealthConditions({
                                         </ToggleGroup>
 
                                         <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                                            💡 You can change this later in
-                                            settings
+                                            {t(
+                                                'onboarding.health_conditions.glucose_preference_hint',
+                                            )}
                                         </p>
                                     </div>
 
@@ -288,7 +305,9 @@ export default function HealthConditions({
                                                 href={dashboard.url()}
                                                 className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
                                             >
-                                                Exit
+                                                {t(
+                                                    'onboarding.health_conditions.exit',
+                                                )}
                                             </Link>
                                         )}
                                         <Button
@@ -299,14 +318,23 @@ export default function HealthConditions({
                                             {processing && (
                                                 <LoaderCircle className="h-4 w-4 animate-spin" />
                                             )}
-                                            Complete Onboarding
+                                            {t(
+                                                'onboarding.health_conditions.complete',
+                                            )}
                                         </Button>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">
                                             {selectedIds.length > 0
-                                                ? `${selectedIds.length} condition${selectedIds.length !== 1 ? 's' : ''} selected`
-                                                : "No conditions selected - that's perfectly fine!"}
+                                                ? t(
+                                                      'onboarding.health_conditions.selected',
+                                                      {
+                                                          count: selectedIds.length,
+                                                      },
+                                                  )
+                                                : t(
+                                                      'onboarding.health_conditions.no_conditions',
+                                                  )}
                                         </p>
                                     </div>
                                 </>

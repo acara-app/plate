@@ -1,6 +1,9 @@
 import google from '@/routes/auth/google';
+import { useTranslation } from 'react-i18next';
 
 export default function GoogleOAuthButton() {
+    const { t } = useTranslation('common');
+
     return (
         <a
             type="button"
@@ -25,7 +28,7 @@ export default function GoogleOAuthButton() {
                     fill="#EA4335"
                 />
             </svg>
-            Continue with Google
+            {t('continue_with_google')}
         </a>
     );
 }

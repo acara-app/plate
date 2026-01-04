@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     profile?: Profile;
@@ -26,6 +27,7 @@ export default function DietaryPreferences({
     selectedPreferences,
     preferences,
 }: Props) {
+    const { t } = useTranslation('common');
     const { currentUser } = useSharedProps();
     const [selectedIds, setSelectedIds] = useState<number[]>(
         selectedPreferences || [],
@@ -90,13 +92,18 @@ export default function DietaryPreferences({
 
     return (
         <>
-            <Head title="Dietary Preferences - Step 4 of 5" />
+            <Head title={t('onboarding.dietary_preferences.title')} />
             <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900">
                 <div className="w-full max-w-4xl">
                     {/* Progress Bar */}
                     <div className="mb-8">
                         <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
-                            <span>Step 4 of 5</span>
+                            <span>
+                                {t('onboarding.biometrics.step', {
+                                    current: 4,
+                                    total: 5,
+                                })}
+                            </span>
                             <span>80%</span>
                         </div>
                         <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
@@ -109,11 +116,10 @@ export default function DietaryPreferences({
 
                     <div className="rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
                         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
-                            Dietary preferences
+                            {t('onboarding.dietary_preferences.heading')}
                         </h1>
                         <p className="mb-6 text-gray-600 dark:text-gray-300">
-                            Select any dietary patterns, allergies,
-                            intolerances, or food dislikes
+                            {t('onboarding.dietary_preferences.description')}
                         </p>
 
                         <Form
@@ -134,19 +140,27 @@ export default function DietaryPreferences({
                                     ))}
 
                                     {renderPreferenceGroup(
-                                        'Dietary Patterns',
+                                        t(
+                                            'onboarding.dietary_preferences.patterns',
+                                        ),
                                         preferences.pattern,
                                     )}
                                     {renderPreferenceGroup(
-                                        'Allergies',
+                                        t(
+                                            'onboarding.dietary_preferences.allergies',
+                                        ),
                                         preferences.allergy,
                                     )}
                                     {renderPreferenceGroup(
-                                        'Intolerances',
+                                        t(
+                                            'onboarding.dietary_preferences.intolerances',
+                                        ),
                                         preferences.intolerance,
                                     )}
                                     {renderPreferenceGroup(
-                                        'Food Dislikes',
+                                        t(
+                                            'onboarding.dietary_preferences.dislikes',
+                                        ),
                                         preferences.dislike,
                                     )}
 
@@ -161,7 +175,9 @@ export default function DietaryPreferences({
                                                 href={dashboard.url()}
                                                 className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
                                             >
-                                                Exit
+                                                {t(
+                                                    'onboarding.dietary_preferences.exit',
+                                                )}
                                             </Link>
                                         )}
                                         <Button
@@ -172,16 +188,17 @@ export default function DietaryPreferences({
                                             {processing && (
                                                 <LoaderCircle className="h-4 w-4 animate-spin" />
                                             )}
-                                            Continue to Health Conditions
+                                            {t(
+                                                'onboarding.dietary_preferences.continue',
+                                            )}
                                         </Button>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                                            {selectedIds.length} preference
-                                            {selectedIds.length !== 1
-                                                ? 's'
-                                                : ''}{' '}
-                                            selected
+                                            {t(
+                                                'onboarding.dietary_preferences.selected',
+                                                { count: selectedIds.length },
+                                            )}
                                         </p>
                                     </div>
                                 </>

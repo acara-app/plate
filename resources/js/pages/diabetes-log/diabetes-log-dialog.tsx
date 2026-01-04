@@ -12,6 +12,7 @@ import {
     RecentMedication,
     TodaysMeal,
 } from '@/types/diabetes';
+import { useTranslation } from 'react-i18next';
 import CreateDiabetesLogForm from './add-form';
 import EditDiabetesLogForm from './edit-form';
 
@@ -40,19 +41,20 @@ export default function DiabetesLogDialog({
     todaysMeals = [],
     logEntry,
 }: DialogProps) {
+    const { t } = useTranslation('common');
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
                         {mode === 'create'
-                            ? 'Add Diabetes Log Entry'
-                            : 'Edit Diabetes Log Entry'}
+                            ? t('diabetes_log.dialog.add_title')
+                            : t('diabetes_log.dialog.edit_title')}
                     </DialogTitle>
                     <DialogDescription>
                         {mode === 'create'
-                            ? 'Record a new entry. Use the tabs to log different types of data.'
-                            : 'Update your diabetes log entry.'}
+                            ? t('diabetes_log.dialog.add_description')
+                            : t('diabetes_log.dialog.edit_description')}
                     </DialogDescription>
                 </DialogHeader>
                 {mode === 'create' ? (

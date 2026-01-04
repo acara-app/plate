@@ -14,6 +14,7 @@ import {
     TrendingUp,
     Utensils,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface StatCardProps {
     title: string;
@@ -71,6 +72,7 @@ function StatCard({
 }
 
 export default function DashboardSummaryCards() {
+    const { t } = useTranslation('common');
     const { summary, glucoseUnit } = usePage<DiabetesTrackingPageProps>().props;
 
     const {
@@ -93,89 +95,139 @@ export default function DashboardSummaryCards() {
     return (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <StatCard
-                title="Logging Streak"
+                title={t('diabetes_log.summary_cards.logging_streak.title')}
                 value={
                     streakStats.currentStreak > 0
-                        ? `🔥 ${streakStats.currentStreak} days`
-                        : 'Start today!'
+                        ? t('diabetes_log.summary_cards.logging_streak.days', {
+                              count: streakStats.currentStreak,
+                          })
+                        : t(
+                              'diabetes_log.summary_cards.logging_streak.start_today',
+                          )
                 }
-                subtitle={`${streakStats.activeDays} active days in this period`}
+                subtitle={t(
+                    'diabetes_log.summary_cards.logging_streak.active_days',
+                    { count: streakStats.activeDays },
+                )}
                 icon={<Flame className="size-4" />}
                 colorClass="text-orange-500"
             />
 
             <StatCard
-                title="Glucose Readings"
+                title={t('diabetes_log.summary_cards.glucose.title')}
                 value={glucoseStats.count}
                 subtitle={
                     glucoseStats.count > 0
-                        ? `Avg: ${avgGlucose} ${glucoseUnit} (${minGlucose}-${maxGlucose})`
-                        : 'No readings'
+                        ? t('diabetes_log.summary_cards.glucose.avg_range', {
+                              avg: avgGlucose,
+                              unit: glucoseUnit,
+                              min: minGlucose,
+                              max: maxGlucose,
+                          })
+                        : t('diabetes_log.summary_cards.glucose.no_readings')
                 }
                 icon={<Droplet className="size-4" />}
                 colorClass="text-blue-500"
             />
 
             <StatCard
-                title="Insulin Doses"
+                title={t('diabetes_log.summary_cards.insulin.title')}
                 value={insulinStats.count}
                 subtitle={
                     insulinStats.count > 0
-                        ? `Total: ${insulinStats.total}u (${insulinStats.bolusCount} bolus, ${insulinStats.basalCount} basal)`
-                        : 'No doses logged'
+                        ? t('diabetes_log.summary_cards.insulin.total', {
+                              total: insulinStats.total,
+                              bolus: insulinStats.bolusCount,
+                              basal: insulinStats.basalCount,
+                          })
+                        : t('diabetes_log.summary_cards.insulin.no_doses')
                 }
                 icon={<Syringe className="size-4" />}
                 colorClass="text-purple-500"
             />
 
             <StatCard
-                title="Daily Carbs"
+                title={t('diabetes_log.summary_cards.carbs.title')}
                 value={
-                    carbStats.count > 0 ? `${carbStats.avgPerDay}g/day` : '—'
+                    carbStats.count > 0
+                        ? t('diabetes_log.summary_cards.carbs.per_day', {
+                              avg: carbStats.avgPerDay,
+                          })
+                        : '—'
                 }
                 subtitle={
                     carbStats.count > 0
-                        ? `${carbStats.total}g total over ${carbStats.uniqueDays} days`
-                        : 'No carbs logged'
+                        ? t('diabetes_log.summary_cards.carbs.total_days', {
+                              total: carbStats.total,
+                              days: carbStats.uniqueDays,
+                          })
+                        : t('diabetes_log.summary_cards.carbs.no_carbs')
                 }
                 icon={<Utensils className="size-4" />}
                 colorClass="text-amber-500"
             />
 
             <StatCard
-                title="Exercise"
+                title={t('diabetes_log.summary_cards.exercise.title')}
                 value={
                     exerciseStats.count > 0
-                        ? `${exerciseStats.totalMinutes} min`
+                        ? t('diabetes_log.summary_cards.exercise.minutes', {
+                              count: exerciseStats.totalMinutes,
+                          })
                         : '—'
                 }
                 subtitle={
                     exerciseStats.count > 0
-                        ? `${exerciseStats.count} sessions${exerciseStats.types.length > 0 ? `: ${exerciseStats.types.slice(0, 2).join(', ')}` : ''}`
-                        : 'No exercise logged'
+                        ? exerciseStats.types.length > 0
+                            ? t(
+                                  'diabetes_log.summary_cards.exercise.sessions_with_types',
+                                  {
+                                      count: exerciseStats.count,
+                                      types: exerciseStats.types
+                                          .slice(0, 2)
+                                          .join(', '),
+                                  },
+                              )
+                            : t(
+                                  'diabetes_log.summary_cards.exercise.sessions',
+                                  { count: exerciseStats.count },
+                              )
+                        : t('diabetes_log.summary_cards.exercise.no_exercise')
                 }
                 icon={<Activity className="size-4" />}
                 colorClass="text-green-500"
             />
 
             <StatCard
-                title="Weight"
-                value={weightStats.latest ? `${weightStats.latest} lbs` : '—'}
+                title={t('diabetes_log.summary_cards.weight.title')}
+                value={
+                    weightStats.latest
+                        ? t('diabetes_log.summary_cards.weight.lbs', {
+                              value: weightStats.latest,
+                          })
+                        : '—'
+                }
                 subtitle={
                     weightStats.count > 0
-                        ? `${weightStats.count} entries`
-                        : 'No weight logged'
+                        ? t('diabetes_log.summary_cards.weight.entries', {
+                              count: weightStats.count,
+                          })
+                        : t('diabetes_log.summary_cards.weight.no_weight')
                 }
                 icon={<Scale className="size-4" />}
                 trend={weightStats.trend ?? undefined}
                 trendValue={
-                    weightStats.diff ? `${weightStats.diff} lbs` : undefined
+                    weightStats.diff
+                        ? t('diabetes_log.summary_cards.weight.lbs', {
+                              value: weightStats.diff,
+                          })
+                        : undefined
                 }
                 colorClass="text-cyan-500"
             />
 
             <StatCard
-                title="Blood Pressure"
+                title={t('diabetes_log.summary_cards.blood_pressure.title')}
                 value={
                     bpStats.latestSystolic && bpStats.latestDiastolic
                         ? `${bpStats.latestSystolic}/${bpStats.latestDiastolic}`
@@ -183,22 +235,27 @@ export default function DashboardSummaryCards() {
                 }
                 subtitle={
                     bpStats.count > 0
-                        ? `${bpStats.count} readings`
-                        : 'No BP logged'
+                        ? t(
+                              'diabetes_log.summary_cards.blood_pressure.readings',
+                              { count: bpStats.count },
+                          )
+                        : t('diabetes_log.summary_cards.blood_pressure.no_bp')
                 }
                 icon={<Heart className="size-4" />}
                 colorClass="text-red-500"
             />
 
             <StatCard
-                title="Medications"
+                title={t('diabetes_log.summary_cards.medications.title')}
                 value={medicationStats.count}
                 subtitle={
                     medicationStats.uniqueMedications.length > 0
                         ? medicationStats.uniqueMedications
                               .slice(0, 2)
                               .join(', ')
-                        : 'No medications logged'
+                        : t(
+                              'diabetes_log.summary_cards.medications.no_medications',
+                          )
                 }
                 icon={<Pill className="size-4" />}
                 colorClass="text-pink-500"
@@ -206,9 +263,13 @@ export default function DashboardSummaryCards() {
 
             {a1cStats.latest && (
                 <StatCard
-                    title="Latest A1C"
-                    value={`${a1cStats.latest}%`}
-                    subtitle={`${a1cStats.count} readings`}
+                    title={t('diabetes_log.summary_cards.a1c.title')}
+                    value={t('diabetes_log.summary_cards.a1c.percent', {
+                        value: a1cStats.latest,
+                    })}
+                    subtitle={t('diabetes_log.summary_cards.a1c.readings', {
+                        count: a1cStats.count,
+                    })}
                     icon={<Droplet className="size-4" />}
                     colorClass="text-indigo-500"
                 />
