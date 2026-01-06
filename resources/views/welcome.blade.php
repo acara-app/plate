@@ -717,7 +717,7 @@
                             class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-emerald-500 hover:bg-slate-50">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
-                                <h3 class="inline">Who should use Plate?</h3>
+                                <h3 class="inline">Who should use Acara Plate?</h3>
                                 <svg aria-hidden="true"
                                     class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
