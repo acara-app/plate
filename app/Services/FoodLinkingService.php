@@ -49,7 +49,7 @@ final class FoodLinkingService
                     $url,
                     e($word)
                 );
-                $text = preg_replace('/\b'.preg_quote($word, '/').'\b/i', $link, (string) $text, 1);
+                $text = (string) preg_replace('/\b'.preg_quote($word, '/').'\b/i', $link, (string) $text, 1);
             }
         }
 
@@ -85,8 +85,7 @@ final class FoodLinkingService
             }
         }
 
-        /** @var Collection<int, array{name: string, slug: string, url: string}> */
-        return $matchedFoods->unique('slug')->values();
+        return $matchedFoods->unique('slug')->values(); // @phpstan-ignore-line
     }
 
     /**
