@@ -234,33 +234,6 @@
                         </div>
                         <p class="mt-2 text-sm font-medium text-emerald-900 dark:text-emerald-100">{{ $result['smartFix'] }}</p>
                     </div>
-
-                    {{-- Related Food Pages --}}
-                    @php
-                        $linkedFoods = app(\App\Services\FoodLinkingService::class)->getFoodsWithPages($result['food']);
-                    @endphp
-                    @if($linkedFoods->isNotEmpty())
-                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-lg">📚</span>
-                                <span class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Learn more about</span>
-                            </div>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach($linkedFoods as $linkedFood)
-                                    <a 
-                                        href="{{ $linkedFood['url'] }}"
-                                        class="inline-flex items-center px-3 py-1.5 rounded-full bg-white dark:bg-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 hover:border-primary hover:text-primary transition-colors"
-                                        wire:navigate
-                                    >
-                                        {{ $linkedFood['name'] }}
-                                        <svg class="ml-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
                     
                     {{-- CTA Button --}}
                     <a 
