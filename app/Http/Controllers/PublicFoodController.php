@@ -73,9 +73,9 @@ final class PublicFoodController
             ->filter()
             ->sortBy(fn (FoodCategory $cat): int => $cat->order());
 
-        // Group by category when no filters applied
+        // Group by category when no filters applied and on first page
         $foodsByCategory = null;
-        if (! $request->hasAny(['search', 'assessment', 'category'])) {
+        if (! $request->hasAny(['search', 'assessment', 'category', 'page'])) {
             $allFoods = Content::food()
                 ->published()
                 ->orderBy('category')

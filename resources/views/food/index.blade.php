@@ -105,7 +105,7 @@
                     {{-- Filter Row --}}
                     <div class="flex flex-wrap gap-4 items-center">
                         {{-- Glycemic Impact Filter --}}
-                        <div class="flex-1 min-w-[200px]">
+                        <div class="flex-1 min-w-50">
                             <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Glycemic Impact</label>
                             <div class="flex flex-wrap gap-2">
                                 <button type="submit" name="assessment" value="" 
@@ -132,7 +132,7 @@
 
                         {{-- Category Filter --}}
                         @if($categories->isNotEmpty())
-                        <div class="min-w-[180px]">
+                        <div class="min-w-45">
                             <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Category</label>
                             <select 
                                 name="category" 
@@ -269,8 +269,8 @@
                 </div>
             @endif
 
-            {{-- Pagination --}}
-            @if($foods->hasPages())
+            {{-- Pagination (only shown for filtered/paginated view, not grouped category view) --}}
+            @if($foods->hasPages() && !$foodsByCategory)
                 <div class="mt-8">
                     {{ $foods->links() }}
                 </div>

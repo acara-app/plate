@@ -97,3 +97,17 @@ it('groups food by category when no filters applied', function (): void {
     $response->assertOk();
     $response->assertViewHas('foodsByCategory');
 });
+
+it('does not group food by category when page parameter is present', function (): void {
+    Content::factory()->count(15)->sequence(
+        fn ($sequence): array => [
+            'slug' => 'food-'.$sequence->index.'-'.Str::uuid()->toString(),
+            'category' => FoodCategory::Fruits,
+        ]
+    )->create();
+
+    $response = $this->get(route('food.index', ['page' => 2]));
+
+    $response->assertOk();
+    $response->assertViewHas('foodsByCategory', null);
+});
