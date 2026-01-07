@@ -25,7 +25,7 @@ afterEach(function (): void {
 
 it('generates a sitemap for published food pages', function (): void {
     Content::factory()->create([
-        'slug' => 'test-banana-' . Str::uuid()->toString(),
+        'slug' => 'test-banana-'.Str::uuid()->toString(),
         'is_published' => true,
     ]);
 
@@ -44,7 +44,7 @@ it('warns when no published food pages found', function (): void {
 
 it('generates sitemap to custom output path', function (): void {
     Content::factory()->create([
-        'slug' => 'test-apple-' . Str::uuid()->toString(),
+        'slug' => 'test-apple-'.Str::uuid()->toString(),
         'is_published' => true,
     ]);
 

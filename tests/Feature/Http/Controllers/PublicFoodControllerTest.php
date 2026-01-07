@@ -16,7 +16,7 @@ it('displays the food index page', function (): void {
 
 it('displays a single food page', function (): void {
     $content = Content::factory()->create([
-        'slug' => 'test-food-' . Str::uuid()->toString(),
+        'slug' => 'test-food-'.Str::uuid()->toString(),
         'is_published' => true,
     ]);
 
@@ -32,7 +32,7 @@ it('returns 404 for non-existent food', function (): void {
 
 it('returns 404 for unpublished food', function (): void {
     $content = Content::factory()->unpublished()->create([
-        'slug' => 'unpublished-food-' . Str::uuid()->toString(),
+        'slug' => 'unpublished-food-'.Str::uuid()->toString(),
     ]);
 
     $this->get(route('food.show', $content->slug))
@@ -43,7 +43,7 @@ it('returns 404 for unpublished food', function (): void {
 
 it('filters food by glycemic assessment', function (): void {
     Content::factory()->create([
-        'slug' => 'low-gi-food-' . Str::uuid()->toString(),
+        'slug' => 'low-gi-food-'.Str::uuid()->toString(),
         'body' => ['glycemic_assessment' => 'low'],
     ]);
 
@@ -54,7 +54,7 @@ it('filters food by glycemic assessment', function (): void {
 
 it('filters food by category', function (): void {
     Content::factory()->create([
-        'slug' => 'fruits-food-' . Str::uuid()->toString(),
+        'slug' => 'fruits-food-'.Str::uuid()->toString(),
         'category' => FoodCategory::Fruits,
     ]);
 
@@ -73,7 +73,7 @@ it('ignores invalid category filter', function (): void {
 
 it('generates canonical url with page parameter', function (): void {
     Content::factory()->count(20)->sequence(
-        fn ($sequence) => ['slug' => 'food-' . $sequence->index . '-' . Str::uuid()->toString()]
+        fn ($sequence) => ['slug' => 'food-'.$sequence->index.'-'.Str::uuid()->toString()]
     )->create();
 
     $response = $this->get(route('food.index', ['page' => 2]));
@@ -84,11 +84,11 @@ it('generates canonical url with page parameter', function (): void {
 
 it('groups food by category when no filters applied', function (): void {
     Content::factory()->create([
-        'slug' => 'fruit-food-' . Str::uuid()->toString(),
+        'slug' => 'fruit-food-'.Str::uuid()->toString(),
         'category' => FoodCategory::Fruits,
     ]);
     Content::factory()->create([
-        'slug' => 'veggie-food-' . Str::uuid()->toString(),
+        'slug' => 'veggie-food-'.Str::uuid()->toString(),
         'category' => FoodCategory::Vegetables,
     ]);
 
