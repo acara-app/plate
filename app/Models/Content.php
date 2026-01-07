@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ContentType;
+use App\Enums\FoodCategory;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string $meta_title
  * @property-read string $meta_description
  * @property-read array<string, mixed> $body
+ * @property-read FoodCategory|null $category
  * @property-read string|null $image_path
  * @property-read bool $is_published
  * @property-read CarbonInterface $created_at
@@ -39,6 +41,7 @@ final class Content extends Model
         return [
             'id' => 'integer',
             'type' => ContentType::class,
+            'category' => FoodCategory::class,
             'slug' => 'string',
             'title' => 'string',
             'meta_title' => 'string',
@@ -78,6 +81,15 @@ final class Content extends Model
         $query->ofType(ContentType::Food);
     }
 
+    /**
+     * @param  Builder<Content>  $query
+     */
+    #[Scope]
+    protected function inCategory(Builder $query, FoodCategory $category): void
+    {
+        $query->where('category', $category);
+    }
+
     protected function getImageUrlAttribute(): ?string
     {
         if (! $this->image_path) {
@@ -113,5 +125,13 @@ final class Content extends Model
     protected function getGlycemicLoadAttribute(): ?string
     {
         return $this->body['glycemic_load'] ?? null;
+    }
+
+    /**
+     * Get the category label for display.
+     */
+    protected function getCategoryLabelAttribute(): string
+    {
+        return $this->category?->label() ?? 'Uncategorized';
     }
 }

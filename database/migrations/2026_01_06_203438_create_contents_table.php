@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('contents', function (Blueprint $table): void {
             $table->id();
+            
             $table->string('type')->index();
             $table->string('slug')->unique();
             $table->string('title');
@@ -23,6 +24,7 @@ return new class extends Migration
             $table->json('body');
             $table->string('image_path')->nullable();
             $table->boolean('is_published')->default(true);
+            $table->string('category')->nullable();
             $table->timestamps();
 
             $table->index(['type', 'is_published']);
