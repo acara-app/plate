@@ -70,6 +70,7 @@ final class FoodLinkingService
         }
 
         $words = $this->extractPotentialFoods($text);
+        /** @var Collection<int, array{name: string, slug: string, url: string}> $matchedFoods */
         $matchedFoods = collect();
 
         foreach ($words as $word) {
@@ -84,6 +85,7 @@ final class FoodLinkingService
             }
         }
 
+        /** @var Collection<int, array{name: string, slug: string, url: string}> */
         return $matchedFoods->unique('slug')->values();
     }
 
@@ -141,10 +143,12 @@ final class FoodLinkingService
     private function getAvailableSlugs(): Collection
     {
         if (! self::$availableSlugs instanceof Collection) {
-            self::$availableSlugs = Content::query()
+            /** @var Collection<int, string> $slugs */
+            $slugs = Content::query()
                 ->where('type', ContentType::Food)
                 ->where('is_published', true)
                 ->pluck('slug');
+            self::$availableSlugs = $slugs;
         }
 
         return self::$availableSlugs;
