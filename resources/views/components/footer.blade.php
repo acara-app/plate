@@ -23,6 +23,9 @@
                         <h3 class="text-sm font-semibold leading-6 text-slate-900 dark:text-white">Your Free Toolkits</h3>
                         <ul role="list" class="mt-6 space-y-4">
                             <li>
+                                <a href="{{ route('food.index') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Search for foods">Glycemic Food Index</a>
+                            </li>
+                            <li>
                                 <a href="{{ route('spike-calculator') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Check glucose impact of foods">Spike Calculator</a>
                             </li>
                             <li>
