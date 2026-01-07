@@ -6,9 +6,7 @@
             <x-turnstile.scripts />
         @endif
     </head>
-    <body
-        class="bg-slate-950 bg-center bg-repeat font-sans text-slate-50 antialiased"
-    >
+    <body>
         <livewire:flash-messages.show />
 
         <div class="flex min-h-screen flex-col">

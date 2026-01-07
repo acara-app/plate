@@ -60,7 +60,7 @@
 </script>
 @endsection
 
-<x-default-layout>
+<x-mini-app-layout>
     <div class="mx-auto my-16 max-w-7xl px-6 lg:px-8">
         {{-- Breadcrumb --}}
         <a
@@ -327,4 +327,5 @@
             </div>
         </div>
     </div>
-</x-default-layout>
+    <x-footer />
+</x-mini-app-layout>
