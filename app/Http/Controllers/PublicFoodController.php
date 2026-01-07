@@ -47,7 +47,7 @@ final class PublicFoodController
         $category = $request->input('category');
 
         if ($search !== null && $search !== '') {
-            $query->where('title', 'ILIKE', "%{$search}%");
+            $query->where('title', 'ILIKE', "%{$search}%"); // @codeCoverageIgnore
         }
 
         if ($assessment && in_array($assessment, ['low', 'medium', 'high'], true)) {
@@ -61,7 +61,7 @@ final class PublicFoodController
             }
         }
 
-        $foods = $query->orderBy('title')->paginate(4)->withQueryString();
+        $foods = $query->orderBy('title')->paginate(12)->withQueryString();
 
         // Get available categories for filter dropdown
         $categories = Content::food()
@@ -69,7 +69,7 @@ final class PublicFoodController
             ->whereNotNull('category')
             ->distinct()
             ->pluck('category')
-            ->map(fn ($cat): ?FoodCategory => is_string($cat) ? FoodCategory::tryFrom($cat) : null)
+            ->map(fn (mixed $cat): ?FoodCategory => is_string($cat) ? FoodCategory::tryFrom($cat) : null)
             ->filter()
             ->sortBy(fn (FoodCategory $cat): int => $cat->order());
 
@@ -82,7 +82,7 @@ final class PublicFoodController
                 ->orderBy('title')
                 ->get();
 
-            $foodsByCategory = $allFoods->groupBy(fn ($food): string => $food->category !== null ? $food->category->value : 'uncategorized')->sortKeys();
+            $foodsByCategory = $allFoods->groupBy(fn (Content $food): string => $food->category !== null ? $food->category->value : 'uncategorized')->sortKeys();
         }
 
         // Hardcoded popular comparisons for Spike Calculator

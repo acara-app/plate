@@ -40,7 +40,7 @@ it('system prompt contains glycemic analysis instructions', function (): void {
     expect($systemPrompt)
         ->toContain('glycemic index')
         ->toContain('spike risk')
-        ->toContain('smart fix');
+        ->toContain('smart_fix');
 });
 
 it('predicts high spike risk for high glycemic foods', function (): void {

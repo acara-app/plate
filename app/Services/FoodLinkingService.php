@@ -102,7 +102,7 @@ final class FoodLinkingService
         $parts = preg_split('/[\s,;:()]+/', $text);
 
         if ($parts === false) {
-            return [];
+            return []; // @codeCoverageIgnore
         }
 
         foreach ($parts as $part) {
