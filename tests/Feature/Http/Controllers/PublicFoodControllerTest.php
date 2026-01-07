@@ -73,7 +73,7 @@ it('ignores invalid category filter', function (): void {
 
 it('generates canonical url with page parameter', function (): void {
     Content::factory()->count(20)->sequence(
-        fn ($sequence) => ['slug' => 'food-'.$sequence->index.'-'.Str::uuid()->toString()]
+        fn ($sequence): array => ['slug' => 'food-'.$sequence->index.'-'.Str::uuid()->toString()]
     )->create();
 
     $response = $this->get(route('food.index', ['page' => 2]));
