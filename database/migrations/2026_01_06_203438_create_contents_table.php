@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('contents', function (Blueprint $table): void {
             $table->id();
-            
+
             $table->string('type')->index();
             $table->string('slug')->unique();
             $table->string('title');

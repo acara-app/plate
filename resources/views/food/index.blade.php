@@ -289,14 +289,14 @@
                 <div class="flex flex-wrap gap-3">
                     @foreach($comparisons as $comparison)
                         <a 
-                            href="{{ route('food.show', $comparison['slug1']) }}"
-                            class="group px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-primary dark:hover:border-primary hover:shadow-md transition-all flex items-center gap-2"
+                            href="{{ route('spike-calculator', ['compare' => $comparison['name1'] . ' vs ' . $comparison['name2']]) }}"
+                            class="group px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-emerald-500 dark:hover:border-emerald-500 hover:shadow-md transition-all flex items-center gap-2"
                         >
-                            <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-primary transition-colors">{{ $comparison['name1'] }}</span>
+                            <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{ $comparison['name1'] }}</span>
                             <span class="text-slate-400 text-sm">vs</span>
-                            <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-primary transition-colors">{{ $comparison['name2'] }}</span>
-                            <svg class="size-4 text-slate-400 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{ $comparison['name2'] }}</span>
+                            <svg class="size-4 text-slate-400 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
                         </a>
                     @endforeach

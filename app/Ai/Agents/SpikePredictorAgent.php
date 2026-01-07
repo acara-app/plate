@@ -23,31 +23,37 @@ final class SpikePredictorAgent extends BaseAgent
         return (string) new SystemPrompt(
             background: [
                 'You are an expert nutritionist and glycemic index specialist.',
-                'Your task is to predict the blood glucose spike risk for a given food or meal.',
+                'Your task is to predict the blood glucose spike risk for foods.',
                 'You analyze foods based on their glycemic index, glycemic load, and nutritional composition.',
                 'You identify buffers (protein, fat, fiber) that may moderate glucose absorption.',
-                'You provide practical "smart fixes" to reduce glucose spikes.',
+                'You provide practical advice to help people make better food choices.',
             ],
             steps: [
-                '1. Identify the main ingredients in the food/meal',
-                '2. Analyze the glycemic index (GI) and glycemic load (GL) of each component',
-                '3. Consider portion size and typical serving amounts',
-                '4. Identify "buffers" - protein, fat, fiber content that may slow glucose absorption',
-                '5. Calculate an overall spike risk level (low, medium, high)',
-                '6. Provide a clear explanation of WHY this food causes the predicted spike',
-                '7. Suggest a practical "smart fix" to reduce the glucose impact',
+                '1. If the query contains "vs", "versus", or "compared to", treat it as a COMPARISON and analyze BOTH foods',
+                '2. For comparisons: Determine which food is BETTER for blood sugar and explain why',
+                '3. Analyze the glycemic index (GI) and glycemic load (GL) of each food',
+                '4. Consider portion size and typical serving amounts',
+                '5. Identify "buffers" - protein, fat, fiber that slow glucose absorption',
+                '6. Calculate an overall spike risk level (low, medium, high)',
+                '7. For comparisons: smart_fix should recommend the WINNER and why',
+                '8. For single foods: smart_fix should be a practical tip to reduce spike',
             ],
             output: [
                 'Your response MUST be valid JSON and ONLY JSON',
                 'Start your response with { and end with }',
                 'Do NOT include markdown code blocks (no ```json)',
-                'Do NOT include explanatory text before or after the JSON',
-                'Return format: {"risk_level": "low|medium|high", "estimated_gl": number, "explanation": "string", "smart_fix": "string", "spike_reduction_percentage": number}',
+                '',
+                'Return format:',
+                '{',
+                '  "risk_level": "low|medium|high",',
+                '  "estimated_gl": number (0-100),',
+                '  "explanation": "string explaining WHY (for comparisons: compare both foods)",',
+                '  "smart_fix": "string (for comparisons: recommend the winner; for single: practical tip)",',
+                '  "spike_reduction_percentage": number (10-60)',
+                '}',
+                '',
+                'For COMPARISONS: explanation should compare both foods GI/GL, smart_fix should clearly state which is better',
                 'risk_level must be exactly one of: "low", "medium", or "high"',
-                'estimated_gl is the estimated glycemic load (0-100 scale)',
-                'explanation should be 1-2 sentences explaining WHY (mention key ingredients)',
-                'smart_fix should be a practical, actionable suggestion (1-2 sentences)',
-                'spike_reduction_percentage is the estimated reduction if the smart_fix is followed (10-40)',
                 'Keep responses concise but informative',
             ],
         );
@@ -70,7 +76,7 @@ final class SpikePredictorAgent extends BaseAgent
 
     public function predict(string $food): SpikePredictionData
     {
-        $prompt = "Analyze this food/meal for glucose spike risk: \"{$food}\"";
+        $prompt = "Analyze this food for glucose spike risk: \"{$food}\"";
 
         $response = $this->text()
             ->withPrompt($prompt)

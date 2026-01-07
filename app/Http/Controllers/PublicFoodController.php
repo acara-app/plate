@@ -68,7 +68,7 @@ final class PublicFoodController
             ->pluck('category')
             ->map(fn ($cat) => FoodCategory::tryFrom($cat))
             ->filter()
-            ->sortBy(fn (FoodCategory $cat) => $cat->order());
+            ->sortBy(fn (FoodCategory $cat): int => $cat->order());
 
         // Group by category when no filters applied
         $foodsByCategory = null;
@@ -79,16 +79,16 @@ final class PublicFoodController
                 ->orderBy('title')
                 ->get();
 
-            $foodsByCategory = $allFoods->groupBy(function ($food) {
-                return $food->category?->value ?? 'uncategorized';
-            })->sortKeys();
+            $foodsByCategory = $allFoods->groupBy(fn ($food) => $food->category?->value ?? 'uncategorized')->sortKeys();
         }
 
-        // Hardcoded popular comparisons for SEO internal linking
+        // Hardcoded popular comparisons for Spike Calculator
         $comparisons = [
-            ['slug1' => 'brown-rice', 'name1' => 'Brown Rice', 'slug2' => 'white-rice', 'name2' => 'White Rice'],
-            ['slug1' => 'apple', 'name1' => 'Apple', 'slug2' => 'banana', 'name2' => 'Banana'],
-            ['slug1' => 'unsweetened-almond-milk', 'name1' => 'Almond Milk', 'slug2' => 'whole-milk', 'name2' => 'Cow Milk'],
+            ['name1' => 'Brown Rice', 'name2' => 'White Rice'],
+            ['name1' => 'Apple', 'name2' => 'Banana'],
+            ['name1' => 'Almond Milk', 'name2' => 'Cow Milk'],
+            ['name1' => 'Oatmeal', 'name2' => 'Cereal'],
+            ['name1' => 'Sweet Potato', 'name2' => 'Regular Potato'],
         ];
 
         return view('food.index', [

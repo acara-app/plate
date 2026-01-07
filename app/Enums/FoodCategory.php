@@ -17,6 +17,21 @@ enum FoodCategory: string
     case SnacksSweets = 'snacks_sweets';
     case Other = 'other';
 
+    /**
+     * Get all categories as options for forms/filters.
+     *
+     * @return array<string, string>
+     */
+    public static function options(): array
+    {
+        $options = [];
+        foreach (self::cases() as $case) {
+            $options[$case->value] = $case->label();
+        }
+
+        return $options;
+    }
+
     public function label(): string
     {
         return match ($this) {
@@ -50,20 +65,5 @@ enum FoodCategory: string
             self::SnacksSweets => 9,
             self::Other => 99,
         };
-    }
-
-    /**
-     * Get all categories as options for forms/filters.
-     *
-     * @return array<string, string>
-     */
-    public static function options(): array
-    {
-        $options = [];
-        foreach (self::cases() as $case) {
-            $options[$case->value] = $case->label();
-        }
-
-        return $options;
     }
 }

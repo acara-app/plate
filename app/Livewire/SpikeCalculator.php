@@ -8,6 +8,7 @@ use App\Actions\PredictGlucoseSpikeAction;
 use App\Enums\SpikeRiskLevel;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
@@ -16,8 +17,13 @@ use Throwable;
 #[Layout('layouts.mini-app')]
 final class SpikeCalculator extends Component
 {
+    #[Url]
     #[Validate('required|string|min:2|max:500')]
     public string $food = '';
+
+    /** @var string|null Compare mode query param (e.g., "Brown Rice vs White Rice") */
+    #[Url(as: 'compare')]
+    public ?string $compare = null;
 
     public ?string $turnstileToken = null;
 
@@ -27,6 +33,14 @@ final class SpikeCalculator extends Component
     public ?array $result = null;
 
     public ?string $error = null;
+
+    public function mount(): void
+    {
+        // If compare param is set, use it for the food input
+        if ($this->compare && ($this->food === '' || $this->food === '0')) {
+            $this->food = $this->compare;
+        }
+    }
 
     public function predict(PredictGlucoseSpikeAction $action): void
     {
