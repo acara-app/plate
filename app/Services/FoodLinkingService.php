@@ -66,6 +66,7 @@ final class FoodLinkingService
         $availableSlugs = $this->getAvailableSlugs();
 
         if ($availableSlugs->isEmpty()) {
+            /** @var Collection<int, array{name: string, slug: string, url: string}> */
             return collect();
         }
 
@@ -85,7 +86,7 @@ final class FoodLinkingService
             }
         }
 
-        return $matchedFoods->unique('slug')->values(); // @phpstan-ignore-line
+        return $matchedFoods->unique('slug')->values();
     }
 
     /**
