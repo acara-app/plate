@@ -39,11 +39,14 @@ final class PublicFoodController
             ->food()
             ->published();
 
+        /** @var string|null $search */
         $search = $request->input('search');
+        /** @var string|null $assessment */
         $assessment = $request->input('assessment');
+        /** @var string|null $category */
         $category = $request->input('category');
 
-        if ($search) {
+        if ($search !== null && $search !== '') {
             $query->where('title', 'ILIKE', "%{$search}%");
         }
 
@@ -51,7 +54,7 @@ final class PublicFoodController
             $query->whereRaw("body->>'glycemic_assessment' = ?", [$assessment]);
         }
 
-        if ($category) {
+        if ($category !== null && $category !== '') {
             $categoryEnum = FoodCategory::tryFrom($category);
             if ($categoryEnum) {
                 $query->inCategory($categoryEnum);
@@ -66,7 +69,7 @@ final class PublicFoodController
             ->whereNotNull('category')
             ->distinct()
             ->pluck('category')
-            ->map(fn ($cat) => FoodCategory::tryFrom($cat))
+            ->map(fn ($cat): ?FoodCategory => is_string($cat) ? FoodCategory::tryFrom($cat) : null)
             ->filter()
             ->sortBy(fn (FoodCategory $cat): int => $cat->order());
 
@@ -79,7 +82,7 @@ final class PublicFoodController
                 ->orderBy('title')
                 ->get();
 
-            $foodsByCategory = $allFoods->groupBy(fn ($food) => $food->category?->value ?? 'uncategorized')->sortKeys();
+            $foodsByCategory = $allFoods->groupBy(fn ($food): string => $food->category !== null ? $food->category->value : 'uncategorized')->sortKeys();
         }
 
         // Hardcoded popular comparisons for Spike Calculator
@@ -109,7 +112,7 @@ final class PublicFoodController
      */
     private function getCanonicalUrl(Request $request): string
     {
-        $page = (int) $request->input('page', 1);
+        $page = $request->integer('page', 1);
 
         if ($page > 1) {
             return route('food.index', ['page' => $page]);

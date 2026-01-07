@@ -101,12 +101,18 @@ final class Content extends Model
 
     protected function getDisplayNameAttribute(): string
     {
-        return $this->body['display_name'] ?? $this->title;
+        /** @var string $displayName */
+        $displayName = $this->body['display_name'] ?? $this->title;
+
+        return $displayName;
     }
 
     protected function getDiabeticInsightAttribute(): ?string
     {
-        return $this->body['diabetic_insight'] ?? null;
+        /** @var string|null $insight */
+        $insight = $this->body['diabetic_insight'] ?? null;
+
+        return $insight;
     }
 
     /**
@@ -114,17 +120,26 @@ final class Content extends Model
      */
     protected function getNutritionAttribute(): array
     {
-        return $this->body['nutrition'] ?? [];
+        /** @var array<string, float|int|null> $nutrition */
+        $nutrition = $this->body['nutrition'] ?? [];
+
+        return $nutrition;
     }
 
     protected function getGlycemicAssessmentAttribute(): ?string
     {
-        return $this->body['glycemic_assessment'] ?? null;
+        /** @var string|null $assessment */
+        $assessment = $this->body['glycemic_assessment'] ?? null;
+
+        return $assessment;
     }
 
     protected function getGlycemicLoadAttribute(): ?string
     {
-        return $this->body['glycemic_load'] ?? null;
+        /** @var string|null $load */
+        $load = $this->body['glycemic_load'] ?? null;
+
+        return $load;
     }
 
     /**
