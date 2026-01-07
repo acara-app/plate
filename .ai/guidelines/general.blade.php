@@ -61,3 +61,15 @@ return [
     'items' => $collection->map(fn ($item) => $item->toResponseData()),
 ];
 ```
+
+## When you want to use local model `scope`, use the Scope Attribute in Laravel 12.
+
+<code-snippet name="Laravel 12 Local Model Scope Example" lang="php">
+use Illuminate\Database\Eloquent\Attributes\Scope;
+ 
+#[Scope]
+protected function popular(Builder $query): void
+{
+    $query->where('votes', '>', 100);
+}
+</code-snippet>

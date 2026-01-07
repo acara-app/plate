@@ -7,6 +7,7 @@
 /public/sw.js
 /public/workbox-*.js
 /public/manifest.webmanifest
+/public/food_sitemap.xml
 /resources/js/actions
 /resources/js/routes
 /resources/js/wayfinder
