@@ -9,7 +9,7 @@
 <title>@yield('title', 'Acara Plate - AI Diabetes Meal Planner & Glucose Tracker')</title>
 <meta name="description" content="@yield('meta_description', 'Acara Plate is an AI-powered nutrition platform for diabetes management. Get personalized meal plans, track glucose levels, and achieve your health goals.')" data-rh="true" />
 <meta name="keywords" content="@yield('meta_keywords', 'diabetes nutrition, AI meal planner, glucose tracking, personalized meal plans, diabetes management')" />
-<link rel="canonical" href="{{ url()->current() }}" />
+<link rel="canonical" href="@yield('canonical_url', url()->current())" />
 
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="Acara Plate" />

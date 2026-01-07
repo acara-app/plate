@@ -3,7 +3,7 @@
     <div class="mx-auto max-w-6xl py-12 px-6 lg:px-0">
         <div class="xl:grid xl:grid-cols-3 xl:gap-8">
             <div class="space-y-8">
-                <a href="{{ route('home') }}" class="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white">
+                <a href="{{ route('home') }}" class="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white" title="Acara Plate - AI Nutritionist & Diabetes Management Home">
                     <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
                     Acara Plate
                 </a>
@@ -20,10 +20,10 @@
             <div class="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
                 <div class="md:grid md:grid-cols-2 md:gap-8">
                     <div>
-                        <h3 class="text-sm font-semibold leading-6 text-slate-900 dark:text-white">Your Free Toolkits</h3>
+                        <h3 class="text-sm font-semibold leading-6 text-slate-900 dark:text-white">Free Diabetes Tools</h3>
                         <ul role="list" class="mt-6 space-y-4">
                             <li>
-                                <a href="{{ route('food.index') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Search for foods">Glycemic Food Index</a>
+                                <a href="{{ route('food.index') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Search for foods">Diabetic Food Database</a>
                             </li>
                             <li>
                                 <a href="{{ route('spike-calculator') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Check glucose impact of foods">Spike Calculator</a>
@@ -67,10 +67,10 @@
             </div>
         </div>
         <div class="mt-16 border-t border-gray-900/10 pt-8 sm:mt-20 lg:mt-24 dark:border-white/10">
-            <p class="text-xs leading-5 text-slate-500 dark:text-slate-400">
+            <small class="block text-xs leading-5 text-slate-500 dark:text-slate-400">
                 <span class="font-semibold">Disclaimer:</span> Acara Plate is an AI-powered tool for informational purposes only and does not provide medical advice. Always consult a healthcare professional for medical concerns.
-            </p>
-            <p class="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">&copy; {{ date('Y') }} Acara Plate. All rights reserved.</p>
+            </small>
+            <small class="block mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">&copy; {{ date('Y') }} Acara Plate. All rights reserved.</small>
         </div>
     </div>
 </footer>

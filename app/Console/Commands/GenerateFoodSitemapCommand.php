@@ -49,6 +49,7 @@ final class GenerateFoodSitemapCommand extends Command
             );
         }
 
+        /** @var string $outputPath */
         $outputPath = $this->option('output');
         $sitemap->writeToFile(base_path($outputPath));
 

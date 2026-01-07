@@ -1,10 +1,9 @@
 @section('title', 'Food Database - Glycemic Index & Nutrition for Diabetics | Acara Plate')
-@section('meta_description', "Have a look through our food list to see what's actually safe for your blood sugar, with all the nutrition facts you probably need.")
+@section('meta_description', "Explore our comprehensive diabetic food list and glycemic index database. Find safe foods for your blood sugar, nutrition facts, and detailed insulin spike predictions.")
 @section('meta_keywords', 'food database, glycemic index database, diabetes food list, nutrition facts, diabetic food guide, blood sugar friendly foods, low glycemic foods list')
 @section('canonical_url', $canonicalUrl)
 
 @section('head')
-{{-- Add noindex for filtered views to prevent duplicate content --}}
 @if(request()->hasAny(['search', 'assessment', 'category']))
 <meta name="robots" content="noindex, follow">
 @endif
@@ -63,22 +62,25 @@
 <x-mini-app-layout>
     <div class="mx-auto my-16 max-w-7xl px-6 lg:px-8">
         {{-- Breadcrumb --}}
-        <a
-            href="{{ url('/') }}"
-            class="-mt-10 mb-12 flex items-center dark:text-slate-400 text-slate-600 hover:underline z-50 relative"
-            wire:navigate
-        >
-            <x-icons.chevron-left class="size-4" />
-            <span>Home</span>
-        </a>
+        {{-- Breadcrumb --}}
+        <nav aria-label="Breadcrumb" class="-mt-10 mb-12 relative z-50">
+            <a
+                href="{{ url('/') }}"
+                class="flex items-center dark:text-slate-400 text-slate-600 hover:underline"
+                wire:navigate
+            >
+                <x-icons.chevron-left class="size-4" />
+                <span>Home</span>
+            </a>
+        </nav>
 
         {{-- Hero Section --}}
         <div class="mt-6">
             <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-                So, What Can I Actually Eat?
+                Diabetic Food Database & Glycemic Index
             </h1>
             <p class="text-lg text-slate-600 dark:text-slate-300 mb-8 max-w-3xl">
-                It’s pretty tough figuring out what to eat, right? We’ve built a USDA-verified database containing proper nutrition info and safety checks—so you can instantly spot what triggers a spike without all the guesswork.
+                So, what can you actually eat? We’ve built a USDA-verified database containing proper nutrition info and safety checks—so you can instantly spot what triggers a spike without all the guesswork.
             </p>
 
             {{-- ======================= --}}
@@ -105,7 +107,7 @@
                     {{-- Filter Row --}}
                     <div class="flex flex-wrap gap-4 items-center">
                         {{-- Glycemic Impact Filter --}}
-                        <div class="flex-1 min-w-[200px]">
+                        <div class="flex-1 min-w-50">
                             <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Glycemic Impact</label>
                             <div class="flex flex-wrap gap-2">
                                 <button type="submit" name="assessment" value="" 
@@ -132,7 +134,7 @@
 
                         {{-- Category Filter --}}
                         @if($categories->isNotEmpty())
-                        <div class="min-w-[180px]">
+                        <div class="min-w-45">
                             <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Category</label>
                             <select 
                                 name="category" 
@@ -269,8 +271,8 @@
                 </div>
             @endif
 
-            {{-- Pagination --}}
-            @if($foods->hasPages())
+            {{-- Pagination (only shown for filtered/paginated view, not grouped category view) --}}
+            @if($foods->hasPages() && !$foodsByCategory)
                 <div class="mt-8">
                     {{ $foods->links() }}
                 </div>

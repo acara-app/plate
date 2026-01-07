@@ -21,6 +21,7 @@ final class ContentFactory extends Factory
      */
     public function definition(): array
     {
+        /** @var string $foodName */
         $foodName = fake()->randomElement([
             'Banana',
             'Apple',
@@ -67,8 +68,11 @@ final class ContentFactory extends Factory
 
     public function withImage(): static
     {
-        return $this->state(fn (array $attributes): array => [
-            'image_path' => 'food-images/'.Str::slug($attributes['body']['display_name'] ?? 'food').'.png',
-        ]);
+        return $this->state(function (array $attributes): array {
+            $body = is_array($attributes['body']) ? $attributes['body'] : [];
+            $displayName = is_string($body['display_name'] ?? null) ? $body['display_name'] : 'food';
+
+            return ['image_path' => 'food-images/'.Str::slug($displayName).'.png'];
+        });
     }
 }

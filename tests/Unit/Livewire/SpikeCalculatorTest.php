@@ -152,3 +152,8 @@ it('validates turnstile token with failed verification', function (): void {
         ->call('predict')
         ->assertHasErrors(['turnstileToken']);
 });
+
+it('populates food input from compare param on mount', function (): void {
+    Livewire::test(SpikeCalculator::class, ['compare' => 'Brown Rice vs White Rice'])
+        ->assertSet('food', 'Brown Rice vs White Rice');
+});
