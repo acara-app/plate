@@ -2,5 +2,10 @@ User-agent: *
 Disallow: /cdn-cgi/
 Disallow: /profile/timezone
 
+# Prevent crawling of filtered/search food URLs (duplicate content)
+Disallow: /food?search=
+Disallow: /food?assessment=
+Disallow: /food?category=
+
 Sitemap: https://plate.acara.app/sitemap.xml
 Sitemap: https://plate.acara.app/food_sitemap.xml
