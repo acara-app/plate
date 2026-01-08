@@ -231,7 +231,7 @@
                         <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-3">
                             <span class="w-1.5 h-8 bg-linear-to-b from-primary to-primary/60 rounded-full"></span>
                             {{ $categoryLabel }}
-                            <span class="text-sm font-normal text-slate-400">({{ $categoryFoods->count() }})</span>
+                            <span class="text-sm font-normal text-slate-400">({{ $categoryCounts[$categoryValue] ?? $categoryFoods->count() }})</span>
                         </h2>
                         <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             @foreach($categoryFoods as $food)
