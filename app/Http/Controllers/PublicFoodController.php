@@ -74,7 +74,9 @@ final class PublicFoodController
             ->sortBy(fn (FoodCategory $cat): int => $cat->order());
 
         // Group by category when no filters applied and on first page
+        // Limit to 16 items per category for performance
         $foodsByCategory = null;
+        $itemsPerCategory = 16;
         if (! $request->hasAny(['search', 'assessment', 'category', 'page'])) {
             $allFoods = Content::food()
                 ->published()
@@ -82,7 +84,10 @@ final class PublicFoodController
                 ->orderBy('title')
                 ->get();
 
-            $foodsByCategory = $allFoods->groupBy(fn (Content $food): string => $food->category !== null ? $food->category->value : 'uncategorized')->sortKeys();
+            $foodsByCategory = $allFoods
+                ->groupBy(fn (Content $food): string => $food->category !== null ? $food->category->value : 'uncategorized')
+                ->map(fn (\Illuminate\Support\Collection $foods) => $foods->take($itemsPerCategory))
+                ->sortKeys();
         }
 
         // Hardcoded popular comparisons for Spike Calculator
