@@ -44,7 +44,7 @@
     "@@context": "https://schema.org",
     "@@type": "ItemList",
     "name": "Diabetic Food Database",
-    "numberOfItems": {{ $foods->total() }},
+    "numberOfItems": {{ $foods->count() }},
     "itemListElement": [
         @foreach($foods as $food)
         {
