@@ -245,7 +245,7 @@
                         @if($totalInCategory > $displayedCount)
                             <div class="mt-6 text-center">
                                 <a 
-                                    href="{{ route('food.index', ['category' => $categoryValue]) }}"
+                                    href="{{ route('food.category', ['category' => $categoryValue]) }}"
                                     class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-primary hover:text-primary/80 bg-primary/5 hover:bg-primary/10 rounded-xl transition-all"
                                 >
                                     View all {{ $totalInCategory }} {{ $categoryLabel }} foods

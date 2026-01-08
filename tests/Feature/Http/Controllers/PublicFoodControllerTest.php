@@ -111,3 +111,87 @@ it('does not group food by category when page parameter is present', function ()
     $response->assertOk();
     $response->assertViewHas('foodsByCategory', null);
 });
+
+it('displays category page with clean URL', function (): void {
+    Content::factory()->create([
+        'slug' => 'fruit-food-'.Str::uuid()->toString(),
+        'category' => FoodCategory::Fruits,
+    ]);
+
+    $response = $this->get(route('food.category', ['category' => 'fruits']));
+
+    $response->assertOk();
+    $response->assertViewIs('food.index');
+    $response->assertViewHas('currentCategory', 'fruits');
+});
+
+it('returns 404 for invalid category in clean URL', function (): void {
+    $this->get(route('food.category', ['category' => 'invalid_category']))
+        ->assertNotFound();
+});
+
+it('filters category page by glycemic assessment', function (): void {
+    Content::factory()->create([
+        'slug' => 'low-gi-fruit-'.Str::uuid()->toString(),
+        'category' => FoodCategory::Fruits,
+        'body' => ['glycemic_assessment' => 'low'],
+    ]);
+
+    $response = $this->get(route('food.category', ['category' => 'fruits', 'assessment' => 'low']));
+
+    $response->assertOk();
+    $response->assertViewIs('food.index');
+});
+
+it('generates self-referencing canonical for category page', function (): void {
+    Content::factory()->create([
+        'slug' => 'fruit-'.Str::uuid()->toString(),
+        'category' => FoodCategory::Fruits,
+    ]);
+
+    $response = $this->get(route('food.category', ['category' => 'fruits']));
+
+    $response->assertOk();
+    $response->assertViewHas('canonicalUrl', route('food.category', ['category' => 'fruits']));
+});
+
+it('generates canonical with page for category page', function (): void {
+    Content::factory()->count(20)->sequence(
+        fn ($sequence): array => [
+            'slug' => 'fruit-'.$sequence->index.'-'.Str::uuid()->toString(),
+            'category' => FoodCategory::Fruits,
+        ]
+    )->create();
+
+    $response = $this->get(route('food.category', ['category' => 'fruits', 'page' => 2]));
+
+    $response->assertOk();
+    $response->assertViewHas('canonicalUrl', route('food.category', ['category' => 'fruits', 'page' => 2]));
+});
+
+it('generates canonical pointing to clean URL when using category query param', function (): void {
+    Content::factory()->create([
+        'slug' => 'fruit-'.Str::uuid()->toString(),
+        'category' => FoodCategory::Fruits,
+    ]);
+
+    $response = $this->get(route('food.index', ['category' => 'fruits']));
+
+    $response->assertOk();
+    // When using query param, canonical should point to clean URL
+    $response->assertViewHas('canonicalUrl', route('food.category', ['category' => 'fruits']));
+});
+
+it('generates canonical with page when using category query param with pagination', function (): void {
+    Content::factory()->count(20)->sequence(
+        fn ($sequence): array => [
+            'slug' => 'fruit-'.$sequence->index.'-'.Str::uuid()->toString(),
+            'category' => FoodCategory::Fruits,
+        ]
+    )->create();
+
+    $response = $this->get(route('food.index', ['category' => 'fruits', 'page' => 2]));
+
+    $response->assertOk();
+    $response->assertViewHas('canonicalUrl', route('food.category', ['category' => 'fruits', 'page' => 2]));
+});
