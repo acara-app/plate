@@ -238,6 +238,23 @@
                                 @include('food._card', ['food' => $food])
                             @endforeach
                         </div>
+                        @php
+                            $totalInCategory = $categoryCounts[$categoryValue] ?? $categoryFoods->count();
+                            $displayedCount = $categoryFoods->count();
+                        @endphp
+                        @if($totalInCategory > $displayedCount)
+                            <div class="mt-6 text-center">
+                                <a 
+                                    href="{{ route('food.index', ['category' => $categoryValue]) }}"
+                                    class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-primary hover:text-primary/80 bg-primary/5 hover:bg-primary/10 rounded-xl transition-all"
+                                >
+                                    View all {{ $totalInCategory }} {{ $categoryLabel }} foods
+                                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                </a>
+                            </div>
+                        @endif
                     </div>
                 @endforeach
             @else
