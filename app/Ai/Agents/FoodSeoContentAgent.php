@@ -7,6 +7,7 @@ namespace App\Ai\Agents;
 use App\Ai\BaseAgent;
 use App\Ai\SystemPrompt;
 use App\Enums\FoodCategory;
+use App\Enums\ModelName;
 use App\Enums\SettingKey;
 use App\Models\Setting;
 use App\Utilities\JsonCleaner;
@@ -122,7 +123,17 @@ final class FoodSeoContentAgent extends BaseAgent
             ->withProviderTools($this->providerTools())
             ->asText();
 
+        \Illuminate\Support\Facades\Log::debug('FoodSeoContentAgent raw response', [
+            'food_name' => $foodName,
+            'response_length' => strlen($response->text),
+            'response_preview' => substr($response->text, 0, 500),
+        ]);
+
         $cleanedJson = JsonCleaner::extractAndValidateJson($response->text);
+
+        \Illuminate\Support\Facades\Log::debug('FoodSeoContentAgent cleaned JSON', [
+            'cleaned_json_preview' => substr($cleanedJson, 0, 500),
+        ]);
 
         /** @var array{display_name: string, h1_title: string, meta_title: string, meta_description: string, diabetic_insight: string, glycemic_assessment: string, glycemic_load: string, category: string, nutrition: array{calories: int|float, protein: int|float, carbs: int|float, fat: int|float, fiber: int|float, sugar: int|float}} $decoded */
         $decoded = json_decode($cleanedJson, true, 512, JSON_THROW_ON_ERROR);

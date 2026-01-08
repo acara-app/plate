@@ -203,7 +203,11 @@ final class GenerateFoodSeoContentCommand extends Command
                 } catch (Throwable $e) {
                     $batchFailed++;
                     $this->newLine();
-                    $this->error("Failed '{$foodName}': " . Str::limit($e->getMessage(), 80));
+                    $this->error("Failed '{$foodName}': " . $e->getMessage());
+                    \Illuminate\Support\Facades\Log::error("Food SEO generation failed for '{$foodName}'", [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
                 }
 
                 $progress->advance();

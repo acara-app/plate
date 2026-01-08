@@ -17,33 +17,82 @@ final class JsonCleaner
     {
         $originalResponse = $response;
 
-        $response = preg_replace('/```(?:json)?\s*(.*?)\s*```/s', '$1', $response) ?? $response;
+        // Remove markdown code blocks
+        $response = preg_replace('/```(?:json)?\\s*(.*?)\\s*```/s', '$1', $response) ?? $response;
 
         $response = mb_trim($response);
 
+        // Try to find and validate JSON
         if (! str_starts_with($response, '{') && ! str_starts_with($response, '[')) {
-            if (preg_match('/(\{.*\}|\[.*\])/s', $response, $matches)) {
-                $response = $matches[1];
+            $response = self::extractLastValidJson($response) ?? $response;
+        }
+
+        // If still not valid JSON or there are multiple JSON blocks, try to extract the last valid one
+        try {
+            json_decode($response, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            $extractedJson = self::extractLastValidJson($response);
+            if ($extractedJson !== null) {
+                $response = $extractedJson;
             } else {
-                Log::error('No valid JSON found in AI response', [
+                Log::error('Invalid JSON in AI response', [
                     'original_response' => $originalResponse,
                     'cleaned_response' => $response,
+                    'json_error' => 'Syntax error',
                 ]);
-                throw new InvalidArgumentException('No valid JSON found in AI response');
+                throw new JsonException('Syntax error');
             }
         }
 
-        try {
-            json_decode($response, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
-            Log::error('Invalid JSON in AI response', [
-                'original_response' => $originalResponse,
-                'cleaned_response' => $response,
-                'json_error' => $e->getMessage(),
-            ]);
-            throw $e;
+        return $response;
+    }
+
+    /**
+     * Extract the last valid JSON object from a string that may contain multiple JSON blocks.
+     *
+     * This is useful when AI returns multiple JSON objects (like tool call simulations
+     * followed by the actual result).
+     */
+    private static function extractLastValidJson(string $response): ?string
+    {
+        // Find all potential JSON object boundaries
+        preg_match_all('/\\{(?:[^{}]|(?R))*\\}/s', $response, $matches);
+
+        if (empty($matches[0])) {
+            return null;
         }
 
-        return $response;
+        // Try each match from last to first, return the first valid one with expected keys
+        $blocks = $matches[0];
+
+        foreach (array_reverse($blocks) as $block) {
+            try {
+                $decoded = json_decode($block, true, 512, JSON_THROW_ON_ERROR);
+
+                // Prefer blocks that have typical SEO content keys
+                if (is_array($decoded) && (
+                    isset($decoded['display_name']) ||
+                    isset($decoded['h1_title']) ||
+                    isset($decoded['meta_title'])
+                )) {
+                    return $block;
+                }
+            } catch (JsonException) {
+                continue;
+            }
+        }
+
+        // If no SEO block found, just return the last valid JSON
+        foreach (array_reverse($blocks) as $block) {
+            try {
+                json_decode($block, true, 512, JSON_THROW_ON_ERROR);
+
+                return $block;
+            } catch (JsonException) {
+                continue;
+            }
+        }
+
+        return null;
     }
 }

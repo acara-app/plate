@@ -20,7 +20,7 @@ final class FoodImageGeneratorAgent
         $prompt = $this->buildPrompt($foodName, $nutrition);
 
         $response = Prism::image()
-            ->using(Provider::Gemini, 'gemini-3-pro-image-preview')
+            ->using(Provider::Gemini, 'gemini-2.5-flash-image')
             ->withPrompt($prompt)
             ->generate();
 
