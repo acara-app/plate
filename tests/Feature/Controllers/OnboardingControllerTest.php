@@ -408,6 +408,38 @@ it('renders dietary preferences page', function (): void {
             ->has('preferences'));
 });
 
+it('renders dietary preferences page with existing preferences', function (): void {
+    $user = User::factory()->create();
+    $profile = $user->profile()->create([]);
+
+    $pref1 = DietaryPreference::factory()->create(['name' => 'Peanuts', 'type' => 'allergy']);
+    $pref2 = DietaryPreference::factory()->create(['name' => 'Lactose', 'type' => 'intolerance']);
+
+    $profile->dietaryPreferences()->attach($pref1->id, [
+        'severity' => 'severe',
+        'notes' => 'EpiPen required',
+    ]);
+    $profile->dietaryPreferences()->attach($pref2->id, [
+        'severity' => 'moderate',
+        'notes' => 'Causes discomfort',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('onboarding.dietary-preferences.show'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('onboarding/dietary-preferences')
+            ->has('profile')
+            ->has('selectedPreferences', 2)
+            ->has('selectedPreferencesData')
+            ->where('selectedPreferencesData.'.$pref1->id.'.severity', 'severe')
+            ->where('selectedPreferencesData.'.$pref1->id.'.notes', 'EpiPen required')
+            ->where('selectedPreferencesData.'.$pref2->id.'.severity', 'moderate')
+            ->where('selectedPreferencesData.'.$pref2->id.'.notes', 'Causes discomfort')
+            ->has('preferences'));
+});
+
 it('may store dietary preferences', function (): void {
     $user = User::factory()->create();
     $user->profile()->create([]);
