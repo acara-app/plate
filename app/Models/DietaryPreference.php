@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string|null $description
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Relations\Pivot|null $pivot
  */
 final class DietaryPreference extends Model
 {

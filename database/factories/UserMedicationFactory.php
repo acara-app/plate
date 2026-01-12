@@ -29,6 +29,7 @@ final class UserMedicationFactory extends Factory
             ['name' => 'Amlodipine', 'dosage' => '5mg', 'purpose' => 'Blood pressure'],
         ];
 
+        /** @var array{name: string, dosage: string, purpose: string} $medication */
         $medication = fake()->randomElement($medications);
 
         return [

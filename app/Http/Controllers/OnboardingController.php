@@ -120,9 +120,11 @@ final readonly class OnboardingController
         $selectedPreferencesData = [];
         if ($profile) {
             foreach ($profile->dietaryPreferences as $preference) {
+                /** @var object{severity: string|null, notes: string|null} $pivot */
+                $pivot = $preference->pivot;
                 $selectedPreferencesData[$preference->id] = [
-                    'severity' => $preference->pivot->severity,
-                    'notes' => $preference->pivot->notes,
+                    'severity' => $pivot->severity,
+                    'notes' => $pivot->notes,
                 ];
             }
         }
@@ -220,7 +222,7 @@ final readonly class OnboardingController
 
         return Inertia::render('onboarding/medications', [
             'profile' => $profile,
-            'medications' => $profile?->medications ?? [],
+            'medications' => $profile->medications ?? [],
         ]);
     }
 
