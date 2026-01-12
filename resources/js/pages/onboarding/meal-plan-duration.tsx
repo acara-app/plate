@@ -23,8 +23,8 @@ export default function MealPlanDuration() {
                         <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
                             <span>
                                 {t('onboarding.biometrics.step', {
-                                    current: 6,
-                                    total: 6,
+                                    current: 7,
+                                    total: 7,
                                 })}
                             </span>
                             <span>100%</span>

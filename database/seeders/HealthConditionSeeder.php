@@ -13,11 +13,25 @@ final class HealthConditionSeeder extends Seeder
     {
         $conditions = [
             [
+                'name' => 'Type 1 Diabetes',
+                'description' => 'Autoimmune condition where the pancreas produces little or no insulin.',
+                'nutritional_impact' => 'Requires precise carbohydrate counting and insulin matching. Focus on consistent carbohydrate intake, fiber-rich foods, and blood sugar monitoring throughout the day.',
+                'recommended_nutrients' => ['Fiber', 'Chromium', 'Magnesium', 'Vitamin D', 'Omega-3 Fatty Acids'],
+                'nutrients_to_limit' => ['Simple Carbohydrates', 'Added Sugars', 'Saturated Fat', 'Trans Fat'],
+            ],
+            [
                 'name' => 'Type 2 Diabetes',
                 'description' => 'Chronic condition affecting how the body processes blood sugar (glucose).',
                 'nutritional_impact' => 'Requires careful carbohydrate management and blood sugar monitoring. Focus on complex carbohydrates, fiber, and portion control to maintain stable glucose levels.',
                 'recommended_nutrients' => ['Fiber', 'Chromium', 'Magnesium', 'Vitamin D', 'Omega-3 Fatty Acids'],
                 'nutrients_to_limit' => ['Simple Carbohydrates', 'Added Sugars', 'Saturated Fat', 'Trans Fat', 'Sodium'],
+            ],
+            [
+                'name' => 'Pre-diabetes',
+                'description' => 'Blood sugar levels higher than normal but not yet high enough to be diagnosed as Type 2 diabetes.',
+                'nutritional_impact' => 'Focus on weight management and blood sugar control through diet modifications. Emphasize whole grains, fiber, and regular meal timing to prevent progression to Type 2 diabetes.',
+                'recommended_nutrients' => ['Fiber', 'Magnesium', 'Chromium', 'Whole Grains', 'Lean Protein'],
+                'nutrients_to_limit' => ['Added Sugars', 'Refined Carbohydrates', 'Saturated Fat', 'Processed Foods'],
             ],
             [
                 'name' => 'Hypertension (High Blood Pressure)',
@@ -32,6 +46,13 @@ final class HealthConditionSeeder extends Seeder
                 'nutritional_impact' => 'Focus on heart-healthy fats, lean proteins, and plant-based foods. Reduce saturated and trans fats while increasing omega-3 fatty acids.',
                 'recommended_nutrients' => ['Omega-3 Fatty Acids', 'Fiber', 'Antioxidants', 'Potassium', 'Magnesium'],
                 'nutrients_to_limit' => ['Saturated Fat', 'Trans Fat', 'Cholesterol', 'Sodium', 'Added Sugars'],
+            ],
+            [
+                'name' => 'High Cholesterol (Hyperlipidemia)',
+                'description' => 'Elevated levels of cholesterol and/or triglycerides in the blood.',
+                'nutritional_impact' => 'Focus on reducing saturated fat and dietary cholesterol while increasing soluble fiber. Plant sterols and omega-3 fatty acids can help improve lipid profiles.',
+                'recommended_nutrients' => ['Soluble Fiber', 'Omega-3 Fatty Acids', 'Plant Sterols', 'Monounsaturated Fats', 'Whole Grains'],
+                'nutrients_to_limit' => ['Saturated Fat', 'Trans Fat', 'Dietary Cholesterol', 'Refined Carbohydrates', 'Added Sugars'],
             ],
             [
                 'name' => 'Celiac Disease',
@@ -117,10 +138,20 @@ final class HealthConditionSeeder extends Seeder
                 'recommended_nutrients' => ['Omega-3 Fatty Acids', 'Fiber', 'Antioxidants', 'Vitamin E', 'Whole Grains'],
                 'nutrients_to_limit' => ['Added Sugars', 'Fructose', 'Refined Carbohydrates', 'Saturated Fat', 'Alcohol'],
             ],
+            [
+                'name' => 'Acid Reflux (GERD)',
+                'description' => 'Chronic digestive disease where stomach acid flows back into the esophagus.',
+                'nutritional_impact' => 'Avoid trigger foods and eating patterns that increase acid production or relax the lower esophageal sphincter. Smaller, more frequent meals and avoiding late-night eating can help.',
+                'recommended_nutrients' => ['Fiber', 'Lean Proteins', 'Non-Citrus Fruits', 'Vegetables', 'Whole Grains'],
+                'nutrients_to_limit' => ['Acidic Foods', 'Caffeine', 'Alcohol', 'Chocolate', 'Fatty Foods', 'Spicy Foods', 'Citrus', 'Tomatoes'],
+            ],
         ];
 
         foreach ($conditions as $condition) {
-            HealthCondition::query()->create($condition);
+            HealthCondition::query()->updateOrCreate(
+                ['name' => $condition['name']],
+                $condition
+            );
         }
     }
 }

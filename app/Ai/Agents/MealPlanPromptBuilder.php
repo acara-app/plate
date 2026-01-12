@@ -60,6 +60,7 @@ final readonly class MealPlanPromptBuilder
             'profile.lifestyle',
             'profile.dietaryPreferences',
             'profile.healthConditions',
+            'profile.medications',
         ]);
 
         throw_unless($user->profile instanceof UserProfile, RuntimeException::class, 'User profile is required to create a meal plan.');
@@ -74,6 +75,7 @@ final readonly class MealPlanPromptBuilder
             'lifestyle' => $profile->lifestyle,
             'dietary_preferences' => $profile->dietaryPreferences,
             'health_conditions' => $profile->healthConditions,
+            'medications' => $profile->medications,
             'daily_calorie_target' => $this->calculateDailyCalorieTarget($profile),
             'macronutrient_ratios' => $this->calculateMacronutrientRatios($profile),
             'glucose_analysis' => $glucoseAnalysis ?? $this->glucoseDataAnalyzer->handle($user, 30),

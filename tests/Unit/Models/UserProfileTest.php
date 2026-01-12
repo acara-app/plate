@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\DietaryPreferenceType;
 use App\Enums\Sex;
 use App\Models\DietaryPreference;
 use App\Models\Goal;
@@ -67,9 +68,9 @@ test('belongs to lifestyle', function (): void {
 test('belongs to many dietary preferences', function (): void {
     $profile = UserProfile::factory()->create();
 
-    $pref1 = DietaryPreference::factory()->create(['name' => 'Peanuts', 'type' => 'allergy']);
-    $pref2 = DietaryPreference::factory()->create(['name' => 'Gluten', 'type' => 'intolerance']);
-    $pref3 = DietaryPreference::factory()->create(['name' => 'Vegan', 'type' => 'pattern']);
+    $pref1 = DietaryPreference::factory()->create(['name' => 'Peanuts', 'type' => DietaryPreferenceType::Allergy->value]);
+    $pref2 = DietaryPreference::factory()->create(['name' => 'Gluten', 'type' => DietaryPreferenceType::Intolerance->value]);
+    $pref3 = DietaryPreference::factory()->create(['name' => 'Vegan', 'type' => DietaryPreferenceType::Pattern->value]);
 
     $profile->dietaryPreferences()->attach([$pref1->id, $pref2->id, $pref3->id]);
 

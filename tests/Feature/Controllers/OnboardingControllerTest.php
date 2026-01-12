@@ -477,7 +477,7 @@ it('may store health conditions', function (): void {
             'notes' => ['Managing with medication', 'Controlled with diet'],
         ]);
 
-    $response->assertRedirectToRoute('onboarding.meal-plan-duration.show');
+    $response->assertRedirectToRoute('onboarding.medications.show');
 
     $profile = $user->profile()->first();
 
@@ -498,7 +498,7 @@ it('allows empty health conditions', function (): void {
     $response = $this->actingAs($user)
         ->post(route('onboarding.health-conditions.store'), []);
 
-    $response->assertRedirectToRoute('onboarding.meal-plan-duration.show');
+    $response->assertRedirectToRoute('onboarding.medications.show');
 
     $profile = $user->profile()->first();
 
@@ -527,7 +527,7 @@ it('stores units_preference when provided', function (): void {
             'units_preference' => 'mmol/L',
         ]);
 
-    $response->assertRedirectToRoute('onboarding.meal-plan-duration.show');
+    $response->assertRedirectToRoute('onboarding.medications.show');
 
     expect($user->profile->fresh()->units_preference->value)->toBe('mmol/L');
 });
@@ -543,6 +543,83 @@ it('requires notes to be at most 500 characters', function (): void {
         ]);
 
     $response->assertSessionHasErrors('notes.0');
+});
+
+// Medications Tests
+it('renders medications page', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->get(route('onboarding.medications.show'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page->component('onboarding/medications'));
+});
+
+it('may store medications', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([]);
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.medications.store'), [
+            'medications' => [
+                [
+                    'name' => 'Metformin',
+                    'dosage' => '500mg',
+                    'frequency' => 'twice daily',
+                    'purpose' => 'Diabetes management',
+                ],
+                [
+                    'name' => 'Lisinopril',
+                    'dosage' => '10mg',
+                    'frequency' => 'once daily',
+                    'purpose' => 'Blood pressure',
+                ],
+            ],
+        ]);
+
+    $response->assertRedirectToRoute('onboarding.meal-plan-duration.show');
+
+    $profile = $user->profile()->first();
+
+    expect($profile->medications)
+        ->toHaveCount(2);
+
+    expect($profile->medications->first())
+        ->name->toBe('Metformin')
+        ->dosage->toBe('500mg')
+        ->frequency->toBe('twice daily')
+        ->purpose->toBe('Diabetes management');
+});
+
+it('allows skipping medications (empty submission)', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([]);
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.medications.store'), []);
+
+    $response->assertRedirectToRoute('onboarding.meal-plan-duration.show');
+
+    $profile = $user->profile()->first();
+
+    expect($profile->medications)
+        ->toHaveCount(0);
+});
+
+it('requires medication name when other fields are provided', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.medications.store'), [
+            'medications' => [
+                [
+                    'dosage' => '500mg',
+                ],
+            ],
+        ]);
+
+    $response->assertSessionHasErrors('medications.0.name');
 });
 
 // Meal Plan Duration Tests

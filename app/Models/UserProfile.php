@@ -8,10 +8,12 @@ use App\Enums\GlucoseUnit;
 use App\Enums\Sex;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property-read int $id
@@ -35,6 +37,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property-read float|null $bmi
  * @property-read float|null $bmr
  * @property-read float|null $tdee
+ * @property-read Collection<int, UserMedication> $medications
  */
 final class UserProfile extends Model
 {
@@ -106,7 +109,15 @@ final class UserProfile extends Model
         return $this->belongsToMany(
             DietaryPreference::class,
             'user_profile_dietary_preference'
-        )->withTimestamps();
+        )->withPivot(['severity', 'notes'])->withTimestamps();
+    }
+
+    /**
+     * @return HasMany<UserMedication, $this>
+     */
+    public function medications(): HasMany
+    {
+        return $this->hasMany(UserMedication::class);
     }
 
     /**

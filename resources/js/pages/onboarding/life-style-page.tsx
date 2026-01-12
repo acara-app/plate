@@ -29,13 +29,13 @@ export default function LifeStylePage({ profile, lifestyles }: Props) {
                             <span>
                                 {t('onboarding.biometrics.step', {
                                     current: 3,
-                                    total: 6,
+                                    total: 7,
                                 })}
                             </span>
-                            <span>60%</span>
+                            <span>43%</span>
                         </div>
                         <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                            <div className="relative h-2 w-3/5 overflow-hidden rounded-full bg-primary shadow-[0_0_12px_rgba(16,185,129,0.4)]">
+                            <div className="relative h-2 w-[43%] overflow-hidden rounded-full bg-primary shadow-[0_0_12px_rgba(16,185,129,0.4)]">
                                 <div className="absolute inset-0 bg-linear-to-r from-white/30 via-transparent to-transparent"></div>
                                 <div className="absolute inset-0 bg-linear-to-l from-black/10 via-transparent to-white/10"></div>
                             </div>
