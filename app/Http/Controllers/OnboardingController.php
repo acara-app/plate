@@ -176,7 +176,7 @@ final readonly class OnboardingController
         return Inertia::render('onboarding/health-conditions', [
             'profile' => $profile,
             'selectedConditions' => $profile?->healthConditions->pluck('id')->toArray() ?? [],
-            'healthConditions' => HealthCondition::all(),
+            'healthConditions' => HealthCondition::orderBy('order')->get(),
             'glucoseUnitOptions' => collect(GlucoseUnit::cases())->map(fn (GlucoseUnit $unit): array => [
                 'value' => $unit->value,
                 'label' => $unit->label(),

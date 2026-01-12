@@ -496,6 +496,25 @@ it('renders health conditions page', function (): void {
             ->has('healthConditions'));
 });
 
+it('renders health conditions ordered by order column', function (): void {
+    $user = User::factory()->create();
+
+    HealthCondition::factory()->create(['name' => 'Third', 'order' => 3]);
+    HealthCondition::factory()->create(['name' => 'First', 'order' => 1]);
+    HealthCondition::factory()->create(['name' => 'Second', 'order' => 2]);
+
+    $response = $this->actingAs($user)
+        ->get(route('onboarding.health-conditions.show'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('onboarding/health-conditions')
+            ->has('healthConditions', 3)
+            ->where('healthConditions.0.name', 'First')
+            ->where('healthConditions.1.name', 'Second')
+            ->where('healthConditions.2.name', 'Third'));
+});
+
 it('may store health conditions', function (): void {
     $user = User::factory()->create();
     $user->profile()->create([]);
