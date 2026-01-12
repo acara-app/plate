@@ -465,8 +465,6 @@ it('renders health conditions page', function (): void {
 });
 
 it('may store health conditions', function (): void {
-    WorkflowStub::fake();
-
     $user = User::factory()->create();
     $user->profile()->create([]);
 
@@ -479,46 +477,34 @@ it('may store health conditions', function (): void {
             'notes' => ['Managing with medication', 'Controlled with diet'],
         ]);
 
-    $response->assertRedirectToRoute('onboarding.completion.show');
+    $response->assertRedirectToRoute('onboarding.meal-plan-duration.show');
 
     $profile = $user->profile()->first();
 
+    // Onboarding should NOT be completed yet
     expect($profile)->not->toBeNull()
-        ->onboarding_completed->toBeTrue()
-        ->onboarding_completed_at->not->toBeNull();
+        ->onboarding_completed->toBeFalsy();
 
     expect($profile->healthConditions)
         ->toHaveCount(2);
 
     expect($profile->healthConditions->first()->pivot->notes)
         ->toBe('Managing with medication');
-
-    // Meal plan was created synchronously with Generating status for immediate UI feedback
-    $mealPlan = $user->mealPlans()->first();
-    expect($mealPlan)->not->toBeNull();
-    expect($mealPlan->metadata['status'])->toBe('generating');
-    expect($mealPlan->metadata['days_completed'])->toBe(0);
 });
 
 it('allows empty health conditions', function (): void {
-    WorkflowStub::fake();
-
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
         ->post(route('onboarding.health-conditions.store'), []);
 
-    $response->assertRedirectToRoute('onboarding.completion.show');
+    $response->assertRedirectToRoute('onboarding.meal-plan-duration.show');
 
     $profile = $user->profile()->first();
 
+    // Onboarding should NOT be completed yet
     expect($profile)->not->toBeNull()
-        ->onboarding_completed->toBeTrue();
-
-    // Meal plan was created synchronously with Generating status for immediate UI feedback
-    $mealPlan = $user->mealPlans()->first();
-    expect($mealPlan)->not->toBeNull();
-    expect($mealPlan->metadata['status'])->toBe('generating');
+        ->onboarding_completed->toBeFalsy();
 });
 
 it('requires valid health condition ids', function (): void {
@@ -533,8 +519,6 @@ it('requires valid health condition ids', function (): void {
 });
 
 it('stores units_preference when provided', function (): void {
-    WorkflowStub::fake();
-
     $user = User::factory()->create();
     $user->profile()->create([]);
 
@@ -543,7 +527,7 @@ it('stores units_preference when provided', function (): void {
             'units_preference' => 'mmol/L',
         ]);
 
-    $response->assertRedirectToRoute('onboarding.completion.show');
+    $response->assertRedirectToRoute('onboarding.meal-plan-duration.show');
 
     expect($user->profile->fresh()->units_preference->value)->toBe('mmol/L');
 });
@@ -559,6 +543,73 @@ it('requires notes to be at most 500 characters', function (): void {
         ]);
 
     $response->assertSessionHasErrors('notes.0');
+});
+
+// Meal Plan Duration Tests
+it('renders meal plan duration page', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->get(route('onboarding.meal-plan-duration.show'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page->component('onboarding/meal-plan-duration'));
+});
+
+it('may store meal plan duration and complete onboarding', function (): void {
+    WorkflowStub::fake();
+
+    $user = User::factory()->create();
+    $user->profile()->create([]);
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.meal-plan-duration.store'), [
+            'meal_plan_days' => 5,
+        ]);
+
+    $response->assertRedirectToRoute('onboarding.completion.show');
+
+    $profile = $user->profile()->first();
+
+    expect($profile)->not->toBeNull()
+        ->onboarding_completed->toBeTrue()
+        ->onboarding_completed_at->not->toBeNull();
+
+    // Meal plan was created with selected duration
+    $mealPlan = $user->mealPlans()->first();
+    expect($mealPlan)->not->toBeNull();
+    expect($mealPlan->metadata['status'])->toBe('generating');
+});
+
+it('requires meal_plan_days', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.meal-plan-duration.store'), []);
+
+    $response->assertSessionHasErrors('meal_plan_days');
+});
+
+it('requires meal_plan_days to be at least 1', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.meal-plan-duration.store'), [
+            'meal_plan_days' => 0,
+        ]);
+
+    $response->assertSessionHasErrors('meal_plan_days');
+});
+
+it('requires meal_plan_days to be at most 7', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.meal-plan-duration.store'), [
+            'meal_plan_days' => 8,
+        ]);
+
+    $response->assertSessionHasErrors('meal_plan_days');
 });
 
 // Completion Tests

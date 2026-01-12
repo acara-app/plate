@@ -12,6 +12,7 @@ use App\Http\Requests\StoreDietaryPreferencesRequest;
 use App\Http\Requests\StoreGoalsRequest;
 use App\Http\Requests\StoreHealthConditionsRequest;
 use App\Http\Requests\StoreLifestyleRequest;
+use App\Http\Requests\StoreMealPlanDurationRequest;
 use App\Models\DietaryPreference;
 use App\Models\Goal;
 use App\Models\HealthCondition;
@@ -27,8 +28,6 @@ use Workflow\WorkflowStub;
 
 final readonly class OnboardingController
 {
-    private const int DEFAULT_DURATION_DAYS = 7;
-
     public function __construct(
         #[CurrentUser] private User $user,
         private AnalyzeGlucoseForNotificationAction $analyzeGlucose,
@@ -181,6 +180,21 @@ final readonly class OnboardingController
             $profile->update(['units_preference' => $glucoseUnit]);
         }
 
+        return to_route('onboarding.meal-plan-duration.show');
+    }
+
+    public function showMealPlanDuration(): Response
+    {
+        return Inertia::render('onboarding/meal-plan-duration');
+    }
+
+    public function storeMealPlanDuration(StoreMealPlanDurationRequest $request): RedirectResponse
+    {
+        $user = $this->user;
+
+        /** @var UserProfile $profile */
+        $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
+
         // Mark onboarding as completed
         $profile->update([
             'onboarding_completed' => true,
@@ -189,9 +203,11 @@ final readonly class OnboardingController
 
         $glucoseAnalysis = $this->analyzeGlucose->handle($user);
 
+        $durationDays = $request->integer('meal_plan_days');
+
         $mealPlan = MealPlanInitializeWorkflow::createMealPlan(
             $user,
-            self::DEFAULT_DURATION_DAYS,
+            $durationDays,
         );
 
         WorkflowStub::make(MealPlanInitializeWorkflow::class)

@@ -183,7 +183,7 @@ return [
     // Onboarding
     'onboarding' => [
         'biometrics' => [
-            'title' => 'Biométrie - Étape 1 sur 5',
+            'title' => 'Biométrie - Étape 1 sur 6',
             'step' => 'Étape {{current}} sur {{total}}',
             'heading' => 'Parlez-nous de vous',
             'description' => 'Nous utiliserons ces informations pour calculer vos besoins nutritionnels',
@@ -209,7 +209,7 @@ return [
             'update_preferences' => 'Vous pouvez toujours mettre à jour vos préférences et informations de profil dans vos paramètres.',
         ],
         'dietary_preferences' => [
-            'title' => 'Préférences alimentaires - Étape 4 sur 5',
+            'title' => 'Préférences alimentaires - Étape 4 sur 6',
             'heading' => 'Préférences alimentaires',
             'description' => 'Sélectionnez vos habitudes alimentaires, allergies, intolérances ou aversions alimentaires',
             'patterns' => 'Habitudes alimentaires',
@@ -222,7 +222,7 @@ return [
             'selected_plural' => '{{count}} préférences sélectionnées',
         ],
         'goals' => [
-            'title' => 'Objectifs - Étape 2 sur 5',
+            'title' => 'Objectifs - Étape 2 sur 6',
             'heading' => 'Quels sont vos objectifs ?',
             'description' => 'Sélectionnez votre objectif nutritionnel principal',
             'primary_goal' => 'Objectif principal',
@@ -234,7 +234,7 @@ return [
             'continue' => 'Continuer vers le mode de vie',
         ],
         'health_conditions' => [
-            'title' => 'Conditions de santé - Étape 5 sur 5',
+            'title' => 'Conditions de santé - Étape 5 sur 6',
             'heading' => 'Conditions de santé',
             'description' => 'Sélectionnez les conditions de santé qui peuvent affecter vos besoins nutritionnels',
             'info' => 'Info',
@@ -246,13 +246,13 @@ return [
             'glucose_preference_description' => 'Si vous suivez votre glycémie, quelle unité préférez-vous ?',
             'glucose_preference_hint' => '💡 Vous pouvez modifier cela plus tard dans les paramètres',
             'exit' => 'Quitter',
-            'complete' => 'Terminer l\'intégration',
+            'complete' => 'Continuer vers le plan de repas',
             'selected' => '{{count}} condition sélectionnée',
             'selected_plural' => '{{count}} conditions sélectionnées',
             'no_conditions' => 'Aucune condition sélectionnée - c\'est parfaitement bien !',
         ],
         'lifestyle' => [
-            'title' => 'Mode de vie - Étape 3 sur 5',
+            'title' => 'Mode de vie - Étape 3 sur 6',
             'heading' => 'Quel est votre mode de vie ?',
             'description' => 'Aidez-nous à comprendre votre niveau d\'activité pour calculer vos besoins caloriques quotidiens',
             'multiplier' => 'Multiplicateur {{value}}x',
@@ -274,12 +274,26 @@ return [
             'step4_description' => 'Informez-nous de vos allergies, intolérances et préférences alimentaires',
             'step5_title' => 'Conditions de santé',
             'step5_description' => 'Partagez les conditions de santé qui affectent votre nutrition',
+            'step6_title' => 'Durée du plan de repas',
+            'step6_description' => 'Choisissez combien de jours de repas personnalisés à générer',
             'get_started' => 'Commencer',
             'time_estimate' => 'Cela devrait prendre environ 5 à 10 minutes',
             'terms_agreement' => 'En continuant, vous confirmez et garantissez que vous avez lu, compris et accepté nos',
             'terms_of_use' => 'Conditions d\'utilisation',
             'and' => 'et',
             'privacy_policy' => 'Politique de confidentialité',
+        ],
+        'meal_plan_duration' => [
+            'title' => 'Durée du plan de repas - Étape 6 sur 6',
+            'heading' => 'Combien de jours de repas ?',
+            'description' => 'Choisissez combien de jours de repas personnalisés vous souhaitez que nous générions',
+            'days_label' => 'Nombre de jours',
+            'days_hint' => '💡 Nous recommandons de commencer avec 7 jours pour la meilleure expérience de planification de repas',
+            'exit' => 'Quitter',
+            'complete' => 'Générer mon plan de repas',
+            'day' => 'jour',
+            'days' => 'jours',
+            'summary' => 'Nous créerons {{count}} jours de repas personnalisés pour vous',
         ],
     ],
 

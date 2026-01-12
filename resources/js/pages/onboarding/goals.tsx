@@ -32,7 +32,7 @@ export default function Goals({ profile, goals }: Props) {
                             <span>
                                 {t('onboarding.biometrics.step', {
                                     current: 2,
-                                    total: 5,
+                                    total: 6,
                                 })}
                             </span>
                             <span>40%</span>

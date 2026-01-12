@@ -71,6 +71,9 @@ Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(fu
     Route::get('/health-conditions', [Web\OnboardingController::class, 'showHealthConditions'])->name('health-conditions.show');
     Route::post('/health-conditions', [Web\OnboardingController::class, 'storeHealthConditions'])->name('health-conditions.store');
 
+    Route::get('/meal-plan-duration', [Web\OnboardingController::class, 'showMealPlanDuration'])->name('meal-plan-duration.show');
+    Route::post('/meal-plan-duration', [Web\OnboardingController::class, 'storeMealPlanDuration'])->name('meal-plan-duration.store');
+
     Route::get('/completion', [Web\OnboardingController::class, 'showCompletion'])->name('completion.show');
 
 });

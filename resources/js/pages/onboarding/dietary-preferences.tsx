@@ -101,7 +101,7 @@ export default function DietaryPreferences({
                             <span>
                                 {t('onboarding.biometrics.step', {
                                     current: 4,
-                                    total: 5,
+                                    total: 6,
                                 })}
                             </span>
                             <span>80%</span>

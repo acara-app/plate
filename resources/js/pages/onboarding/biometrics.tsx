@@ -37,7 +37,7 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                             <span>
                                 {t('onboarding.biometrics.step', {
                                     current: 1,
-                                    total: 5,
+                                    total: 6,
                                 })}
                             </span>
                             <span>20%</span>

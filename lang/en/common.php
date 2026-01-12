@@ -183,7 +183,7 @@ return [
     // Onboarding
     'onboarding' => [
         'biometrics' => [
-            'title' => 'Biometrics - Step 1 of 5',
+            'title' => 'Biometrics - Step 1 of 6',
             'step' => 'Step {{current}} of {{total}}',
             'heading' => 'Tell us about yourself',
             'description' => 'We\'ll use this information to calculate your nutritional needs',
@@ -209,7 +209,7 @@ return [
             'update_preferences' => 'You can always update your preferences and profile information in your settings.',
         ],
         'dietary_preferences' => [
-            'title' => 'Dietary Preferences - Step 4 of 5',
+            'title' => 'Dietary Preferences - Step 4 of 6',
             'heading' => 'Dietary preferences',
             'description' => 'Select any dietary patterns, allergies, intolerances, or food dislikes',
             'patterns' => 'Dietary Patterns',
@@ -222,7 +222,7 @@ return [
             'selected_plural' => '{{count}} preferences selected',
         ],
         'goals' => [
-            'title' => 'Goals - Step 2 of 5',
+            'title' => 'Goals - Step 2 of 6',
             'heading' => 'What are your goals?',
             'description' => 'Select your primary nutrition goal',
             'primary_goal' => 'Primary Goal',
@@ -234,7 +234,7 @@ return [
             'continue' => 'Continue to Lifestyle',
         ],
         'health_conditions' => [
-            'title' => 'Health Conditions - Step 5 of 5',
+            'title' => 'Health Conditions - Step 5 of 6',
             'heading' => 'Health conditions',
             'description' => 'Select any health conditions that may affect your nutritional needs',
             'info' => 'Info',
@@ -246,13 +246,13 @@ return [
             'glucose_preference_description' => 'If you track blood glucose, which unit do you prefer?',
             'glucose_preference_hint' => '💡 You can change this later in settings',
             'exit' => 'Exit',
-            'complete' => 'Complete Onboarding',
+            'complete' => 'Continue to Meal Plan',
             'selected' => '{{count}} condition selected',
             'selected_plural' => '{{count}} conditions selected',
             'no_conditions' => 'No conditions selected - that\'s perfectly fine!',
         ],
         'lifestyle' => [
-            'title' => 'Lifestyle - Step 3 of 5',
+            'title' => 'Lifestyle - Step 3 of 6',
             'heading' => 'What\'s your lifestyle like?',
             'description' => 'Help us understand your activity level to calculate your daily calorie needs',
             'multiplier' => '{{value}}x multiplier',
@@ -274,12 +274,26 @@ return [
             'step4_description' => 'Let us know about allergies, intolerances, and food preferences',
             'step5_title' => 'Health Conditions',
             'step5_description' => 'Share any health conditions that affect your nutrition',
+            'step6_title' => 'Meal Plan Duration',
+            'step6_description' => 'Choose how many days of personalized meals to generate',
             'get_started' => 'Let\'s Get Started',
             'time_estimate' => 'This should take about 5-10 minutes to complete',
             'terms_agreement' => 'By continuing, you confirm and guarantee that you have read, understood, and agreed to our',
             'terms_of_use' => 'Terms of Use',
             'and' => 'and',
             'privacy_policy' => 'Privacy Policy',
+        ],
+        'meal_plan_duration' => [
+            'title' => 'Meal Plan Duration - Step 6 of 6',
+            'heading' => 'How many days of meals?',
+            'description' => 'Choose how many days of personalized meals you want us to generate',
+            'days_label' => 'Number of days',
+            'days_hint' => '💡 We recommend starting with 7 days for the best meal planning experience',
+            'exit' => 'Exit',
+            'complete' => 'Generate My Meal Plan',
+            'day' => 'day',
+            'days' => 'days',
+            'summary' => 'We\'ll create {{count}} days of personalized meals for you',
         ],
     ],
 

@@ -29,7 +29,7 @@ export default function LifeStylePage({ profile, lifestyles }: Props) {
                             <span>
                                 {t('onboarding.biometrics.step', {
                                     current: 3,
-                                    total: 5,
+                                    total: 6,
                                 })}
                             </span>
                             <span>60%</span>
