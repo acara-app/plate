@@ -70,10 +70,6 @@ export default function Goals({ profile, goals }: Props) {
                                                 <p className="text-sm text-amber-800 dark:text-amber-200">
                                                     {t(
                                                         'onboarding.goals.no_goals_available',
-                                                        {
-                                                            defaultValue:
-                                                                'Goal options are currently unavailable!',
-                                                        },
                                                     )}
                                                 </p>
                                             </div>
