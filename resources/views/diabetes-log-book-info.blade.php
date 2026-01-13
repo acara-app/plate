@@ -1,5 +1,5 @@
-@section('title', 'Smart Diabetes Log Book | Digital Tracker & Free Printable PDF')
-@section('meta_description', 'Track blood sugar, insulin, and A1C with Acara Plate. Download our free printable log book or use the smart digital tracker to predict trends and spot spikes.')
+@section('title', 'Free Printable Diabetes Log Book (PDF Download) | Digital Tracker')
+@section('meta_description', 'Don\'t wait for mail—download and print your free diabetes log book instantly. Track blood sugar, insulin, and A1C with our printable PDF or smart digital tracker.')
 
 <x-default-layout>
     <div class="mx-auto my-16 max-w-7xl px-6 lg:px-8">
@@ -15,10 +15,10 @@
 
         <div class="mt-6">
             <div class="prose prose-slate dark:prose-invert mx-auto max-w-4xl">
-                <h1>The Ultimate Diabetes Log Book: Digital & Printable</h1>
+                <h1>Free Diabetes Log Book: Instant PDF Download</h1>
                 
                 <p class="lead">
-                    Tracking your numbers is the first step. Understanding them is the goal.
+                    Don't wait for mail. Download and print your log book instantly—100% free.
                 </p>
 
                 <p>

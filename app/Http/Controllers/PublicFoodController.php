@@ -7,12 +7,15 @@ namespace App\Http\Controllers;
 use App\Enums\ContentType;
 use App\Enums\FoodCategory;
 use App\Models\Content;
+use App\Services\SeoLinkManager;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-final class PublicFoodController
+final readonly class PublicFoodController
 {
+    public function __construct(private SeoLinkManager $seoLinkManager) {}
+
     public function show(Request $request, string $slug): View
     {
         $content = Content::query()
@@ -23,6 +26,18 @@ final class PublicFoodController
 
         throw_unless($content, NotFoundHttpException::class, 'Food not found');
 
+        $comparisonLinks = $this->seoLinkManager->getComparisonsFor($slug);
+
+        $relatedFoods = $content->category
+            ? Content::query()
+                ->food()
+                ->published()
+                ->where('id', '!=', $content->id)
+                ->inCategory($content->category)
+                ->limit(3)
+                ->get()
+            : collect();
+
         return view('food.show', [
             'content' => $content,
             'nutrition' => $content->nutrition,
@@ -30,6 +45,8 @@ final class PublicFoodController
             'diabeticInsight' => $content->diabetic_insight,
             'glycemicAssessment' => $content->glycemic_assessment,
             'glycemicLoad' => $content->glycemic_load,
+            'comparisonLinks' => $comparisonLinks,
+            'relatedFoods' => $relatedFoods,
         ]);
     }
 

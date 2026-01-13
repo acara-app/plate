@@ -491,6 +491,33 @@
                 </div>
             </section>
 
+            {{-- Trending Low-GI Foods Section (SEO Internal Links) --}}
+            @if(isset($featuredFoods) && $featuredFoods->count() > 0)
+            <section class="w-full max-w-6xl">
+                <div class="space-y-4 lg:space-y-6">
+                    <div class="text-center">
+                        <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl">Trending Glycemic Data</h2>
+                        <p class="mt-2 text-sm text-slate-600 lg:text-base">See the spike risk and USDA profiles for the most frequently analyzed foods this week</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+                        @foreach($featuredFoods as $food)
+                            @include('food._card', ['food' => $food])
+                        @endforeach
+                    </div>
+
+                    <div class="text-center">
+                        <a href="{{ route('food.index') }}" class="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+                            Search the Full 300+ USDA Database
+                            <svg class="ml-1 size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </section>
+            @endif
+
             {{-- How It Works Section --}}
             <section class="w-full max-w-6xl">
                 <div class="space-y-4 lg:space-y-6">

@@ -227,6 +227,38 @@
                 </p>
             </div>
 
+            {{-- Compare With Section (SEO Cross-Links) --}}
+            @if(isset($comparisonLinks) && count($comparisonLinks) > 0)
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 mb-10">
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                    Compare With Similar Foods
+                </h2>
+                <div class="space-y-3">
+                    @foreach($comparisonLinks as $link)
+                        @if($link['content'])
+                        <p class="text-slate-600 dark:text-slate-300">
+                            <x-food-link :slug="$link['slug']" :anchor="$link['anchor']" />
+                        </p>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            {{-- Related Foods Section --}}
+            @if(isset($relatedFoods) && $relatedFoods->count() > 0)
+            <div class="mb-10">
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                    More {{ $content->category?->label() ?? 'Foods' }} to Explore
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    @foreach($relatedFoods as $relatedFood)
+                        @include('food._card', ['food' => $relatedFood])
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             {{-- CTA Section --}}
             <div class="bg-linear-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-2xl p-8 mb-10">
                 <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">
