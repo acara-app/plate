@@ -267,6 +267,15 @@ it('allows optional goal_id', function (): void {
     $response->assertRedirectToRoute('onboarding.lifestyle.show');
 });
 
+it('allows skipping goals step with empty request', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.goals.store'), []);
+
+    $response->assertRedirectToRoute('onboarding.lifestyle.show');
+});
+
 it('requires valid goal_id', function (): void {
     $user = User::factory()->create();
 
