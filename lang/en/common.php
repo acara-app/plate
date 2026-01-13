@@ -241,6 +241,7 @@ return [
             'target_weight_placeholder' => 'Enter your target weight',
             'additional_goals' => 'Additional Goals - Optional',
             'additional_goals_placeholder' => 'Tell us about any other goals or specific needs...',
+            'no_goals_available' => 'Goal options are currently unavailable',
             'exit' => 'Exit',
             'continue' => 'Continue to Lifestyle',
         ],

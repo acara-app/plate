@@ -241,6 +241,7 @@ return [
             'target_weight_placeholder' => 'Entrez votre poids cible',
             'additional_goals' => 'Objectifs supplémentaires - Optionnel',
             'additional_goals_placeholder' => 'Parlez-nous de vos autres objectifs ou besoins spécifiques...',
+            'no_goals_available' => 'Les options d\'objectifs ne sont pas disponibles actuellement',
             'exit' => 'Quitter',
             'continue' => 'Continuer vers le mode de vie',
         ],

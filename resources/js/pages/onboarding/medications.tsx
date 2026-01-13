@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import useSharedProps from '@/hooks/use-shared-props';
+import { generateUUID } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 
 interface MedicationInput {
@@ -33,7 +34,7 @@ export default function Medications({ medications }: Props) {
     const initialMedications: MedicationInput[] =
         medications.length > 0
             ? medications.map((med) => ({
-                  id: crypto.randomUUID(),
+                  id: generateUUID(),
                   name: med.name,
                   dosage: med.dosage || '',
                   frequency: med.frequency || '',
@@ -49,7 +50,7 @@ export default function Medications({ medications }: Props) {
         setMedicationsList([
             ...medicationsList,
             {
-                id: crypto.randomUUID(),
+                id: generateUUID(),
                 name: '',
                 dosage: '',
                 frequency: '',

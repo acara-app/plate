@@ -256,7 +256,7 @@ it('may store goals data', function (): void {
         ->additional_goals->toBe('Build muscle and improve endurance');
 });
 
-it('requires goal_id', function (): void {
+it('allows optional goal_id', function (): void {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
@@ -264,7 +264,7 @@ it('requires goal_id', function (): void {
             'target_weight' => 65,
         ]);
 
-    $response->assertSessionHasErrors('goal_id');
+    $response->assertRedirectToRoute('onboarding.lifestyle.show');
 });
 
 it('requires valid goal_id', function (): void {
