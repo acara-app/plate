@@ -1,7 +1,7 @@
 import { dashboard } from '@/routes';
 import onboarding from '@/routes/onboarding';
 import { Goal, Profile } from '@/types';
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head, Link, router } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
 import InputError from '@/components/input-error';
@@ -65,32 +65,42 @@ export default function Goals({ profile, goals }: Props) {
                                         <Label>
                                             {t('onboarding.goals.primary_goal')}
                                         </Label>
-                                        <div className="space-y-2">
-                                            {goals.map((goal) => (
-                                                <label
-                                                    key={goal.id}
-                                                    className={cn(
-                                                        'flex cursor-pointer items-center rounded-lg border p-4 transition-colors',
-                                                        'hover:bg-gray-50 dark:hover:bg-gray-700',
-                                                        'border-gray-300 dark:border-gray-600',
+                                        {goals.length === 0 ? (
+                                            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
+                                                <p className="text-sm text-amber-800 dark:text-amber-200">
+                                                    {t(
+                                                        'onboarding.goals.no_goals_available',
                                                     )}
-                                                >
-                                                    <input
-                                                        type="radio"
-                                                        name="goal_id"
-                                                        value={goal.id}
-                                                        defaultChecked={
-                                                            profile?.goal_id ===
-                                                            goal.id
-                                                        }
-                                                        className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
-                                                    />
-                                                    <span className="ml-3 text-gray-900 dark:text-white">
-                                                        {goal.name}
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-2">
+                                                {goals.map((goal) => (
+                                                    <label
+                                                        key={goal.id}
+                                                        className={cn(
+                                                            'flex cursor-pointer items-center rounded-lg border p-4 transition-colors',
+                                                            'hover:bg-gray-50 dark:hover:bg-gray-700',
+                                                            'border-gray-300 dark:border-gray-600',
+                                                        )}
+                                                    >
+                                                        <input
+                                                            type="radio"
+                                                            name="goal_id"
+                                                            value={goal.id}
+                                                            defaultChecked={
+                                                                profile?.goal_id ===
+                                                                goal.id
+                                                            }
+                                                            className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+                                                        />
+                                                        <span className="ml-3 text-gray-900 dark:text-white">
+                                                            {goal.name}
+                                                        </span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        )}
                                         <InputError message={errors.goal_id} />
                                     </div>
 
@@ -144,7 +154,7 @@ export default function Goals({ profile, goals }: Props) {
                                         />
                                     </div>
 
-                                    {/* Submit Button */}
+                                    {/* Action Buttons */}
                                     <div className="flex items-center justify-between gap-4">
                                         {currentUser?.has_meal_plan && (
                                             <Link
@@ -154,16 +164,32 @@ export default function Goals({ profile, goals }: Props) {
                                                 {t('onboarding.goals.exit')}
                                             </Link>
                                         )}
-                                        <Button
-                                            type="submit"
-                                            disabled={processing}
-                                            className="w-auto"
-                                        >
-                                            {processing && (
-                                                <LoaderCircle className="h-4 w-4 animate-spin" />
-                                            )}
-                                            {t('onboarding.goals.continue')}
-                                        </Button>
+                                        <div className="flex gap-3">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                disabled={processing}
+                                                onClick={() => {
+                                                    router.post(
+                                                        onboarding.goals.store.url(),
+                                                        {},
+                                                    );
+                                                }}
+                                            >
+                                                {t('onboarding.goals.skip', {
+                                                    defaultValue: 'Skip',
+                                                })}
+                                            </Button>
+                                            <Button
+                                                type="submit"
+                                                disabled={processing}
+                                            >
+                                                {processing && (
+                                                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                                                )}
+                                                {t('onboarding.goals.continue')}
+                                            </Button>
+                                        </div>
                                     </div>
                                 </>
                             )}

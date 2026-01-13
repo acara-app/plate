@@ -14,7 +14,7 @@ final class StoreGoalsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'goal_id' => ['required', 'integer', 'exists:goals,id'],
+            'goal_id' => ['nullable', 'integer', 'exists:goals,id'],
             'target_weight' => ['nullable', 'numeric', 'min:20', 'max:500'],
             'additional_goals' => ['nullable', 'string', 'max:1000'],
         ];
