@@ -808,6 +808,11 @@ return [
         'stripe_price_required' => 'ID de prix Stripe requis',
         'manage_subscription' => 'Gérer l\'abonnement',
         'view_billing_history' => 'Voir l\'historique de facturation',
+        'trial_info_title' => '🌱 Pourquoi nous facturons un petit abonnement',
+        'trial_info_description' => 'Acara Plate est 100% open source, mais générer des plans de repas IA personnalisés nous coûte de l\'argent réel en jetons API. Votre abonnement garantit que le projet reste durable et indépendant.',
+        'trial_refund_note' => 'Essayez gratuitement pendant 7 jours. Annulez à tout moment—sans poser de questions.',
+        'one_time' => 'unique',
+        'full_access' => 'Accès complet',
     ],
     'grocery_list_print' => [
         'title' => 'Liste d\'épicerie',

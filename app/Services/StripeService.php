@@ -54,14 +54,21 @@ final readonly class StripeService implements StripeServiceInterface
     /**
      * @param  array<string, string>  $metadata
      */
-    public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = []): string
+    public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string
     {
-        $checkout = $user->newSubscription($subscriptionType, $priceId)
-            ->checkout([
-                'success_url' => $successUrl,
-                'cancel_url' => $cancelUrl,
-                'metadata' => $metadata,
-            ]);
+        $subscription = $user->newSubscription($subscriptionType, $priceId);
+
+        // @codeCoverageIgnoreStart
+        if ($trialDays !== null && $trialDays > 0) {
+            $subscription->trialDays($trialDays);
+        }
+        // @codeCoverageIgnoreEnd
+
+        $checkout = $subscription->checkout([
+            'success_url' => $successUrl,
+            'cancel_url' => $cancelUrl,
+            'metadata' => $metadata,
+        ]);
 
         $url = $checkout->url ?? null; // @codeCoverageIgnore
 

@@ -808,6 +808,11 @@ return [
         'stripe_price_required' => 'Stripe Price ID required',
         'manage_subscription' => 'Manage Subscription',
         'view_billing_history' => 'View Billing History',
+        'trial_info_title' => '🌱 Why we charge a small subscription fee',
+        'trial_info_description' => 'Acara Plate is 100% open source, but generating personalized AI meal plans costs us real money in API tokens. Your subscription ensures the project stays sustainable and independent.',
+        'trial_refund_note' => 'Try it free for 7 days. Cancel anytime—no questions asked.',
+        'one_time' => 'one-time',
+        'full_access' => 'Full Access',
     ],
     'grocery_list_print' => [
         'title' => 'Grocery List',
