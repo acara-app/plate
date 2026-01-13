@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('health_conditions', function (Blueprint $table) {
+        Schema::table('health_conditions', function (Blueprint $table): void {
             $table->unsignedInteger('order')->default(0)->after('id');
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('health_conditions', function (Blueprint $table) {
+        Schema::table('health_conditions', function (Blueprint $table): void {
             $table->dropColumn('order');
         });
     }
