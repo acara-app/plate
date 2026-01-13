@@ -8,7 +8,7 @@ use App\Livewire\SpikeCalculator;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', Web\HomeController::class)->name('home');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy');
 Route::view('/terms-of-service', 'terms-of-service')->name('terms');
 Route::view('/support', 'support')->name('support');

@@ -39,6 +39,40 @@ it('returns 404 for unpublished food', function (): void {
         ->assertNotFound();
 });
 
+it('displays food without category without related foods', function (): void {
+    $content = Content::factory()->create([
+        'slug' => 'test-food-'.Str::uuid()->toString(),
+        'is_published' => true,
+        'category' => null,
+    ]);
+
+    $response = $this->get(route('food.show', $content->slug));
+
+    $response->assertOk()
+        ->assertViewIs('food.show')
+        ->assertViewHas('relatedFoods', fn ($relatedFoods) => $relatedFoods->isEmpty());
+});
+
+it('displays food with category and shows related foods', function (): void {
+    $mainFood = Content::factory()->create([
+        'slug' => 'main-food-'.Str::uuid()->toString(),
+        'is_published' => true,
+        'category' => FoodCategory::Fruits,
+    ]);
+
+    $relatedFood = Content::factory()->create([
+        'slug' => 'related-food-'.Str::uuid()->toString(),
+        'is_published' => true,
+        'category' => FoodCategory::Fruits,
+    ]);
+
+    $response = $this->get(route('food.show', $mainFood->slug));
+
+    $response->assertOk()
+        ->assertViewIs('food.show')
+        ->assertViewHas('relatedFoods', fn ($relatedFoods): bool => $relatedFoods->isNotEmpty() && $relatedFoods->contains('id', $relatedFood->id));
+});
+
 // Search filter uses ILIKE which is PostgreSQL-specific, tested in production
 
 it('filters food by glycemic assessment', function (): void {

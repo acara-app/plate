@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read array<string, mixed> $body
  * @property-read FoodCategory|null $category
  * @property-read string|null $image_path
+ * @property-read array<string, mixed>|null $seo_metadata
  * @property-read bool $is_published
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -47,6 +48,7 @@ final class Content extends Model
             'meta_title' => 'string',
             'meta_description' => 'string',
             'body' => 'array',
+            'seo_metadata' => 'array',
             'image_path' => 'string',
             'is_published' => 'boolean',
             'created_at' => 'datetime',
@@ -148,5 +150,16 @@ final class Content extends Model
     protected function getCategoryLabelAttribute(): string
     {
         return $this->category?->label() ?? 'Uncategorized';
+    }
+
+    /**
+     * @return array<int, array{slug: string, anchor: string}>
+     */
+    protected function getManualLinksAttribute(): array
+    {
+        /** @var array<int, array{slug: string, anchor: string}> $links */
+        $links = $this->seo_metadata['manual_links'] ?? [];
+
+        return $links;
     }
 }
