@@ -40,6 +40,7 @@ final class HealthConditionFactory extends Factory
 
         return [
             'name' => $name,
+            'order' => fake()->numberBetween(1, 100),
             'description' => fake()->sentence(),
             'nutritional_impact' => fake()->paragraph(),
             'recommended_nutrients' => $conditions[$name]['recommended'],

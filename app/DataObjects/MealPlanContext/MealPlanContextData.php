@@ -19,6 +19,7 @@ final class MealPlanContextData extends Data
     /**
      * @param  array<DietaryPreferenceData>  $dietaryPreferences
      * @param  array<HealthConditionData>  $healthConditions
+     * @param  array<MedicationData>  $medications
      */
     public function __construct(
         // Physical metrics
@@ -44,6 +45,9 @@ final class MealPlanContextData extends Data
 
         // Health conditions
         public array $healthConditions,
+
+        // Medications
+        public array $medications,
 
         // Calculated values
         public ?float $dailyCalorieTarget,

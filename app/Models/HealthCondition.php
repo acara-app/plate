@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property-read int $id
+ * @property-read int $order
  * @property-read string $name
  * @property-read string|null $description
  * @property-read string|null $nutritional_impact
@@ -40,6 +41,7 @@ final class HealthCondition extends Model
     {
         return [
             'id' => 'integer',
+            'order' => 'integer',
             'name' => 'string',
             'description' => 'string',
             'nutritional_impact' => 'string',

@@ -115,6 +115,24 @@ export default function Questionnaire() {
                                     </p>
                                 </div>
                             </div>
+
+                            <div className="flex items-start">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
+                                    6
+                                </div>
+                                <div className="ml-4">
+                                    <h3 className="font-medium text-gray-900 dark:text-white">
+                                        {t(
+                                            'onboarding.questionnaire.step6_title',
+                                        )}
+                                    </h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                                        {t(
+                                            'onboarding.questionnaire.step6_description',
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="mt-8 flex justify-center">

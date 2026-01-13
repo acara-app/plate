@@ -88,3 +88,12 @@ export interface LifeStyle extends Row {
     description: string;
     activity_multiplier: number;
 }
+
+export interface UserMedication extends Row {
+    user_profile_id: number;
+    name: string;
+    dosage: string | null;
+    frequency: string | null;
+    purpose: string | null;
+    started_at: string | null;
+}

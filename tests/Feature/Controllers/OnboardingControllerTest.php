@@ -408,6 +408,38 @@ it('renders dietary preferences page', function (): void {
             ->has('preferences'));
 });
 
+it('renders dietary preferences page with existing preferences', function (): void {
+    $user = User::factory()->create();
+    $profile = $user->profile()->create([]);
+
+    $pref1 = DietaryPreference::factory()->create(['name' => 'Peanuts', 'type' => 'allergy']);
+    $pref2 = DietaryPreference::factory()->create(['name' => 'Lactose', 'type' => 'intolerance']);
+
+    $profile->dietaryPreferences()->attach($pref1->id, [
+        'severity' => 'severe',
+        'notes' => 'EpiPen required',
+    ]);
+    $profile->dietaryPreferences()->attach($pref2->id, [
+        'severity' => 'moderate',
+        'notes' => 'Causes discomfort',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('onboarding.dietary-preferences.show'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('onboarding/dietary-preferences')
+            ->has('profile')
+            ->has('selectedPreferences', 2)
+            ->has('selectedPreferencesData')
+            ->where('selectedPreferencesData.'.$pref1->id.'.severity', 'severe')
+            ->where('selectedPreferencesData.'.$pref1->id.'.notes', 'EpiPen required')
+            ->where('selectedPreferencesData.'.$pref2->id.'.severity', 'moderate')
+            ->where('selectedPreferencesData.'.$pref2->id.'.notes', 'Causes discomfort')
+            ->has('preferences'));
+});
+
 it('may store dietary preferences', function (): void {
     $user = User::factory()->create();
     $user->profile()->create([]);
@@ -464,9 +496,26 @@ it('renders health conditions page', function (): void {
             ->has('healthConditions'));
 });
 
-it('may store health conditions', function (): void {
-    WorkflowStub::fake();
+it('renders health conditions ordered by order column', function (): void {
+    $user = User::factory()->create();
 
+    HealthCondition::factory()->create(['name' => 'Third', 'order' => 3]);
+    HealthCondition::factory()->create(['name' => 'First', 'order' => 1]);
+    HealthCondition::factory()->create(['name' => 'Second', 'order' => 2]);
+
+    $response = $this->actingAs($user)
+        ->get(route('onboarding.health-conditions.show'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('onboarding/health-conditions')
+            ->has('healthConditions', 3)
+            ->where('healthConditions.0.name', 'First')
+            ->where('healthConditions.1.name', 'Second')
+            ->where('healthConditions.2.name', 'Third'));
+});
+
+it('may store health conditions', function (): void {
     $user = User::factory()->create();
     $user->profile()->create([]);
 
@@ -479,46 +528,34 @@ it('may store health conditions', function (): void {
             'notes' => ['Managing with medication', 'Controlled with diet'],
         ]);
 
-    $response->assertRedirectToRoute('onboarding.completion.show');
+    $response->assertRedirectToRoute('onboarding.medications.show');
 
     $profile = $user->profile()->first();
 
+    // Onboarding should NOT be completed yet
     expect($profile)->not->toBeNull()
-        ->onboarding_completed->toBeTrue()
-        ->onboarding_completed_at->not->toBeNull();
+        ->onboarding_completed->toBeFalsy();
 
     expect($profile->healthConditions)
         ->toHaveCount(2);
 
     expect($profile->healthConditions->first()->pivot->notes)
         ->toBe('Managing with medication');
-
-    // Meal plan was created synchronously with Generating status for immediate UI feedback
-    $mealPlan = $user->mealPlans()->first();
-    expect($mealPlan)->not->toBeNull();
-    expect($mealPlan->metadata['status'])->toBe('generating');
-    expect($mealPlan->metadata['days_completed'])->toBe(0);
 });
 
 it('allows empty health conditions', function (): void {
-    WorkflowStub::fake();
-
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
         ->post(route('onboarding.health-conditions.store'), []);
 
-    $response->assertRedirectToRoute('onboarding.completion.show');
+    $response->assertRedirectToRoute('onboarding.medications.show');
 
     $profile = $user->profile()->first();
 
+    // Onboarding should NOT be completed yet
     expect($profile)->not->toBeNull()
-        ->onboarding_completed->toBeTrue();
-
-    // Meal plan was created synchronously with Generating status for immediate UI feedback
-    $mealPlan = $user->mealPlans()->first();
-    expect($mealPlan)->not->toBeNull();
-    expect($mealPlan->metadata['status'])->toBe('generating');
+        ->onboarding_completed->toBeFalsy();
 });
 
 it('requires valid health condition ids', function (): void {
@@ -533,8 +570,6 @@ it('requires valid health condition ids', function (): void {
 });
 
 it('stores units_preference when provided', function (): void {
-    WorkflowStub::fake();
-
     $user = User::factory()->create();
     $user->profile()->create([]);
 
@@ -543,7 +578,7 @@ it('stores units_preference when provided', function (): void {
             'units_preference' => 'mmol/L',
         ]);
 
-    $response->assertRedirectToRoute('onboarding.completion.show');
+    $response->assertRedirectToRoute('onboarding.medications.show');
 
     expect($user->profile->fresh()->units_preference->value)->toBe('mmol/L');
 });
@@ -559,6 +594,150 @@ it('requires notes to be at most 500 characters', function (): void {
         ]);
 
     $response->assertSessionHasErrors('notes.0');
+});
+
+// Medications Tests
+it('renders medications page', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->get(route('onboarding.medications.show'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page->component('onboarding/medications'));
+});
+
+it('may store medications', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([]);
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.medications.store'), [
+            'medications' => [
+                [
+                    'name' => 'Metformin',
+                    'dosage' => '500mg',
+                    'frequency' => 'twice daily',
+                    'purpose' => 'Diabetes management',
+                ],
+                [
+                    'name' => 'Lisinopril',
+                    'dosage' => '10mg',
+                    'frequency' => 'once daily',
+                    'purpose' => 'Blood pressure',
+                ],
+            ],
+        ]);
+
+    $response->assertRedirectToRoute('onboarding.meal-plan-duration.show');
+
+    $profile = $user->profile()->first();
+
+    expect($profile->medications)
+        ->toHaveCount(2);
+
+    expect($profile->medications->first())
+        ->name->toBe('Metformin')
+        ->dosage->toBe('500mg')
+        ->frequency->toBe('twice daily')
+        ->purpose->toBe('Diabetes management');
+});
+
+it('allows skipping medications (empty submission)', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([]);
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.medications.store'), []);
+
+    $response->assertRedirectToRoute('onboarding.meal-plan-duration.show');
+
+    $profile = $user->profile()->first();
+
+    expect($profile->medications)
+        ->toHaveCount(0);
+});
+
+it('requires medication name when other fields are provided', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.medications.store'), [
+            'medications' => [
+                [
+                    'dosage' => '500mg',
+                ],
+            ],
+        ]);
+
+    $response->assertSessionHasErrors('medications.0.name');
+});
+
+// Meal Plan Duration Tests
+it('renders meal plan duration page', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->get(route('onboarding.meal-plan-duration.show'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page->component('onboarding/meal-plan-duration'));
+});
+
+it('may store meal plan duration and complete onboarding', function (): void {
+    WorkflowStub::fake();
+
+    $user = User::factory()->create();
+    $user->profile()->create([]);
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.meal-plan-duration.store'), [
+            'meal_plan_days' => 5,
+        ]);
+
+    $response->assertRedirectToRoute('onboarding.completion.show');
+
+    $profile = $user->profile()->first();
+
+    expect($profile)->not->toBeNull()
+        ->onboarding_completed->toBeTrue()
+        ->onboarding_completed_at->not->toBeNull();
+
+    // Meal plan was created with selected duration
+    $mealPlan = $user->mealPlans()->first();
+    expect($mealPlan)->not->toBeNull();
+    expect($mealPlan->metadata['status'])->toBe('generating');
+});
+
+it('requires meal_plan_days', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.meal-plan-duration.store'), []);
+
+    $response->assertSessionHasErrors('meal_plan_days');
+});
+
+it('requires meal_plan_days to be at least 1', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.meal-plan-duration.store'), [
+            'meal_plan_days' => 0,
+        ]);
+
+    $response->assertSessionHasErrors('meal_plan_days');
+});
+
+it('requires meal_plan_days to be at most 7', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.meal-plan-duration.store'), [
+            'meal_plan_days' => 8,
+        ]);
+
+    $response->assertSessionHasErrors('meal_plan_days');
 });
 
 // Completion Tests
