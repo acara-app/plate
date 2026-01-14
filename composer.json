@@ -78,7 +78,7 @@
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
-            "@php artisan clear",
+            "@php artisan optimize:clear --ansi",
             "@update:requirements",
             "@php artisan boost:update --ansi"
         ],
