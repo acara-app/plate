@@ -3,12 +3,20 @@
 declare(strict_types=1);
 
 use App\Actions\AnalyzeFoodPhotoAction;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
-new class extends Component {
+new
+#[Layout('layouts.mini-app', [
+    'metaDescription' => "Instantly analyze your meal's calories and macros by snapping a photo. Free AI food scanner for easy diabetes & nutrition tracking. Try it now!",
+    'metaKeywords' => 'food photo calorie counter, snap to track calories, AI food recognition, meal photo analyzer, instant macro breakdown, calorie tracking app, food image analysis, nutrition scanner',
+])]
+#[Title('AI Food Photo Calorie Counter | Snap & Track Macros for Free')]
+class extends Component {
     use WithFileUploads;
 
     public ?TemporaryUploadedFile $photo = null;
@@ -89,11 +97,7 @@ new class extends Component {
 };
 ?>
 
-@section('title', 'AI Food Photo Calorie Counter | Snap & Track Macros for Free')
-@section('meta_description', 'Instantly analyze your meal\'s calories and macros by snapping a photo. Free AI food scanner for easy diabetes & nutrition tracking. Try it now!')
-@section('meta_keywords', 'food photo calorie counter, snap to track calories, AI food recognition, meal photo analyzer, instant macro breakdown, calorie tracking app, food image analysis, nutrition scanner')
-
-@section('head')
+@push('head')
 <script type="application/ld+json">
 {
     "@@context": "https://schema.org",
@@ -182,7 +186,7 @@ new class extends Component {
     "url": "{{ url()->current() }}"
 }
 </script>
-@endsection
+@endpush
 
 <div
     class="relative flex min-h-screen flex-col items-center overflow-hidden bg-linear-to-br from-slate-50 via-white to-orange-50 p-4 text-slate-900 lg:justify-center lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-orange-950 dark:text-slate-50"

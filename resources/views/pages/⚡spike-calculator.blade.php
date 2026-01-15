@@ -4,10 +4,18 @@ declare(strict_types=1);
 
 use App\Actions\PredictGlucoseSpikeAction;
 use App\Enums\SpikeRiskLevel;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
-new class extends Component {
+new
+#[Layout('layouts.mini-app', [
+    'metaDescription' => 'Check if foods will spike your blood sugar with our free AI calculator. Get instant glycemic risk analysis and smart food swaps. No sign-up required.',
+    'metaKeywords' => 'glucose spike checker, blood sugar spike, glycemic index, food blood sugar impact, diabetes food checker, will food spike blood sugar, free glucose tool, blood sugar calculator, what foods cause blood sugar spikes, low glycemic foods',
+])]
+#[Title('Free Glucose Spike Calculator | Predict Blood Sugar Impact Instantly')]
+class extends Component {
 
     public string $food = '';
 
@@ -81,11 +89,7 @@ new class extends Component {
 };
 ?>
 
-@section('title', 'Free Glucose Spike Calculator | Predict Blood Sugar Impact Instantly')
-@section('meta_description', 'Check if foods will spike your blood sugar with our free AI calculator. Get instant glycemic risk analysis and smart food swaps. No sign-up required.')
-@section('meta_keywords', 'glucose spike checker, blood sugar spike, glycemic index, food blood sugar impact, diabetes food checker, will food spike blood sugar, free glucose tool, blood sugar calculator, what foods cause blood sugar spikes, low glycemic foods')
-
-@section('head')
+@push('head')
 <script type="application/ld+json">
 {
     "@@context": "https://schema.org",
@@ -190,7 +194,7 @@ new class extends Component {
     "url": "{{ url()->current() }}"
 }
 </script>
-@endsection
+@endpush
 
 <div
     class="relative flex min-h-screen flex-col items-center overflow-hidden bg-linear-to-br from-slate-50 via-white to-emerald-50 p-4 text-slate-900 lg:justify-center lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950 dark:text-slate-50"
