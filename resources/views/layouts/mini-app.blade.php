@@ -5,6 +5,7 @@
         @if (App::environment(['production', 'testing']))
             <x-turnstile.scripts />
         @endif
+        {{ $jsonLd ?? '' }}
     </head>
     <body>
         <livewire:flash-messages.show />
