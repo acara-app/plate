@@ -66,11 +66,6 @@
         "@@type": "Organization",
         "name": "Acara Plate",
         "url": "{{ $url }}"
-    },
-    "aggregateRating": {
-        "@@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "ratingCount": "120"
     }
 }
 </script>
