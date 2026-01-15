@@ -382,13 +382,22 @@ it('may store lifestyle data', function (): void {
         ->lifestyle_id->toBe($lifestyle->id);
 });
 
-it('requires lifestyle_id', function (): void {
+it('allows optional lifestyle_id', function (): void {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
         ->post(route('onboarding.lifestyle.store'), []);
 
-    $response->assertSessionHasErrors('lifestyle_id');
+    $response->assertRedirectToRoute('onboarding.dietary-preferences.show');
+});
+
+it('allows skipping lifestyle step with empty request', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.lifestyle.store'), []);
+
+    $response->assertRedirectToRoute('onboarding.dietary-preferences.show');
 });
 
 it('requires valid lifestyle_id', function (): void {

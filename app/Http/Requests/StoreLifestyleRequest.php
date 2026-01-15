@@ -14,7 +14,7 @@ final class StoreLifestyleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'lifestyle_id' => ['required', 'integer', 'exists:lifestyles,id'],
+            'lifestyle_id' => ['nullable', 'integer', 'exists:lifestyles,id'],
         ];
     }
 
