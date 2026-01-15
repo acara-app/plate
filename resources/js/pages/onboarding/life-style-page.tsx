@@ -1,7 +1,7 @@
 import { dashboard } from '@/routes';
 import onboarding from '@/routes/onboarding';
 import { LifeStyle, Profile } from '@/types';
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head, Link, router } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
 import InputError from '@/components/input-error';
@@ -104,7 +104,7 @@ export default function LifeStylePage({ profile, lifestyles }: Props) {
                                     </div>
                                     <InputError message={errors.lifestyle_id} />
 
-                                    {/* Submit Button */}
+                                    {/* Action Buttons */}
                                     <div className="flex items-center justify-between gap-4">
                                         {currentUser?.has_meal_plan && (
                                             <Link
@@ -114,16 +114,37 @@ export default function LifeStylePage({ profile, lifestyles }: Props) {
                                                 {t('onboarding.lifestyle.exit')}
                                             </Link>
                                         )}
-                                        <Button
-                                            type="submit"
-                                            disabled={processing}
-                                            className="w-auto"
-                                        >
-                                            {processing && (
-                                                <LoaderCircle className="h-4 w-4 animate-spin" />
-                                            )}
-                                            {t('onboarding.lifestyle.continue')}
-                                        </Button>
+                                        <div className="flex gap-3">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                disabled={processing}
+                                                onClick={() => {
+                                                    router.post(
+                                                        onboarding.lifestyle.store.url(),
+                                                        {},
+                                                    );
+                                                }}
+                                            >
+                                                {t(
+                                                    'onboarding.lifestyle.skip',
+                                                    {
+                                                        defaultValue: 'Skip',
+                                                    },
+                                                )}
+                                            </Button>
+                                            <Button
+                                                type="submit"
+                                                disabled={processing}
+                                            >
+                                                {processing && (
+                                                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                                                )}
+                                                {t(
+                                                    'onboarding.lifestyle.continue',
+                                                )}
+                                            </Button>
+                                        </div>
                                     </div>
                                 </>
                             )}
