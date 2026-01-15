@@ -1,3 +1,86 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Actions\PredictGlucoseSpikeAction;
+use App\Enums\SpikeRiskLevel;
+use Livewire\Component;
+use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
+
+new class extends Component {
+
+    public string $food = '';
+
+    public ?string $compare = null;
+
+    public ?string $turnstileToken = null;
+
+    public bool $loading = false;
+
+    /** @var array{food: string, riskLevel: string, estimatedGlycemicLoad: int, explanation: string, smartFix: string, spikeReductionPercentage: int}|null */
+    public ?array $result = null;
+
+    public ?string $error = null;
+
+    public function mount(): void
+    {
+        // If compare param is set, use it for the food input
+        if ($this->compare && ($this->food === '' || $this->food === '0')) {
+            $this->food = $this->compare;
+        }
+    }
+
+    public function predict(PredictGlucoseSpikeAction $action): void
+    {
+        $this->error = null;
+        $this->result = null;
+
+        $rules = [
+            'food' => 'required|string|min:2|max:500',
+        ];
+
+        if (app()->environment(['production', 'testing'])) {
+            $rules['turnstileToken'] = ['required', new Turnstile];
+        }
+
+        $this->validate($rules);
+
+        $this->loading = true;
+
+        try {
+            $prediction = $action->handle($this->food);
+            $this->result = [
+                'food' => $prediction->food,
+                'riskLevel' => $prediction->riskLevel->value,
+                'estimatedGlycemicLoad' => $prediction->estimatedGlycemicLoad,
+                'explanation' => $prediction->explanation,
+                'smartFix' => $prediction->smartFix,
+                'spikeReductionPercentage' => $prediction->spikeReductionPercentage,
+            ];
+        } catch (Throwable $e) {
+            $this->error = 'Something went wrong. Please try again.';
+            report($e);
+        } finally {
+            $this->loading = false;
+        }
+    }
+
+    public function setExample(string $example): void
+    {
+        $this->food = $example;
+    }
+
+    public function getRiskLevel(): ?SpikeRiskLevel
+    {
+        if ($this->result === null) {
+            return null;
+        }
+
+        return SpikeRiskLevel::from($this->result['riskLevel']);
+    }
+};
+?>
+
 @section('title', 'Free Glucose Spike Calculator | Predict Blood Sugar Impact Instantly')
 @section('meta_description', 'Check if foods will spike your blood sugar with our free AI calculator. Get instant glycemic risk analysis and smart food swaps. No sign-up required.')
 @section('meta_keywords', 'glucose spike checker, blood sugar spike, glycemic index, food blood sugar impact, diabetes food checker, will food spike blood sugar, free glucose tool, blood sugar calculator, what foods cause blood sugar spikes, low glycemic foods')

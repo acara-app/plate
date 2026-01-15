@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Livewire\SnapToTrack;
 use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 use Prism\Prism\Facades\Prism;
@@ -18,15 +17,15 @@ function fakeTurnstileForSnapToTrack(bool $success = true): void
     }
 }
 
-it('renders the snap to track component', function (): void {
-    Livewire::test(SnapToTrack::class)
+it('renders the snap to track page', function (): void {
+    Livewire::test('pages::snap-to-track')
         ->assertStatus(200)
         ->assertSee('Snap to Track')
         ->assertSee('Instant macro breakdown with AI');
 });
 
 it('shows upload area when no photo is selected', function (): void {
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->assertSee('Tap to take photo or upload')
         ->assertSee('JPG, PNG up to 10MB');
 });
@@ -34,25 +33,10 @@ it('shows upload area when no photo is selected', function (): void {
 it('validates photo is required', function (): void {
     fakeTurnstileForSnapToTrack();
 
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->set('turnstileToken', Turnstile::dummy())
         ->call('analyze')
         ->assertHasErrors(['photo' => 'required']);
-});
-
-it('validates photo is an image type', function (): void {
-    fakeTurnstileForSnapToTrack();
-
-    Livewire::test(SnapToTrack::class)
-        ->set('photo')
-        ->set('turnstileToken', Turnstile::dummy())
-        ->call('analyze')
-        ->assertHasErrors(['photo' => 'required']);
-
-    // Image validation is enforced by the #[Validate] attribute
-    // which checks for image type - this is covered by Livewire's
-    // file upload validation. The validation rule 'image' ensures
-    // only image files are accepted.
 });
 
 it('validates photo max size', function (): void {
@@ -60,7 +44,7 @@ it('validates photo max size', function (): void {
 
     $file = UploadedFile::fake()->image('large-image.jpg')->size(11000);
 
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->set('photo', $file)
         ->set('turnstileToken', Turnstile::dummy())
         ->call('analyze')
@@ -70,7 +54,7 @@ it('validates photo max size', function (): void {
 it('shows photo preview after upload', function (): void {
     $file = UploadedFile::fake()->image('food.jpg');
 
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->set('photo', $file)
         ->assertSee('Analyze Food')
         ->assertDontSee('Tap to take photo or upload');
@@ -79,7 +63,7 @@ it('shows photo preview after upload', function (): void {
 it('can clear photo and reset state', function (): void {
     $file = UploadedFile::fake()->image('food.jpg');
 
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->set('photo', $file)
         ->call('clearPhoto')
         ->assertSet('photo', null)
@@ -97,7 +81,7 @@ it('displays result after successful analysis', function (): void {
 
     $file = UploadedFile::fake()->image('food.jpg');
 
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->set('photo', $file)
         ->set('turnstileToken', Turnstile::dummy())
         ->call('analyze')
@@ -121,7 +105,7 @@ it('displays multiple food items in result', function (): void {
 
     $file = UploadedFile::fake()->image('food.jpg');
 
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->set('photo', $file)
         ->set('turnstileToken', Turnstile::dummy())
         ->call('analyze')
@@ -141,7 +125,7 @@ it('displays error when analysis fails', function (): void {
 
     $file = UploadedFile::fake()->image('food.jpg');
 
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->set('photo', $file)
         ->set('turnstileToken', Turnstile::dummy())
         ->call('analyze')
@@ -150,20 +134,20 @@ it('displays error when analysis fails', function (): void {
 });
 
 it('shows tips for best results when no photo is selected', function (): void {
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->assertSee('Tips for best results')
         ->assertSee('Take photo in good lighting')
         ->assertSee('Make sure all food is visible');
 });
 
 it('shows disclaimer about AI estimates', function (): void {
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->assertSee('Disclaimer')
         ->assertSee('AI estimates are for guidance only');
 });
 
 it('shows faq section', function (): void {
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->assertSee('Frequently Asked Questions')
         ->assertSee('How does the food photo analyzer work?')
         ->assertSee('How accurate are the calorie estimates?');
@@ -179,7 +163,7 @@ it('shows cta to register after result', function (): void {
 
     $file = UploadedFile::fake()->image('food.jpg');
 
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->set('photo', $file)
         ->set('turnstileToken', Turnstile::dummy())
         ->call('analyze')
@@ -197,7 +181,7 @@ it('handles empty food detection gracefully', function (): void {
 
     $file = UploadedFile::fake()->image('empty.jpg');
 
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->set('photo', $file)
         ->set('turnstileToken', Turnstile::dummy())
         ->call('analyze')
@@ -210,7 +194,7 @@ it('validates turnstile token is required in testing environment', function (): 
 
     $file = UploadedFile::fake()->image('food.jpg');
 
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->set('photo', $file)
         ->call('analyze')
         ->assertHasErrors(['turnstileToken' => 'required']);
@@ -221,7 +205,7 @@ it('validates turnstile token with failed verification', function (): void {
 
     $file = UploadedFile::fake()->image('food.jpg');
 
-    Livewire::test(SnapToTrack::class)
+    Livewire::test('pages::snap-to-track')
         ->set('photo', $file)
         ->set('turnstileToken', Turnstile::dummy())
         ->call('analyze')
