@@ -88,7 +88,6 @@ it('includes parent shared data', function (): void {
 
     $shared = $middleware->share($request);
 
-    // Parent Inertia middleware shares 'errors' by default
     expect($shared)->toHaveKey('errors');
 });
 
@@ -111,7 +110,10 @@ it('shares translations for current locale', function (): void {
     $shared = $middleware->share($request);
 
     expect($shared)->toHaveKey('translations')
-        ->and($shared['translations'])->toBeArray();
+        ->and($shared['translations'])->toBeInstanceOf(Inertia\OnceProp::class);
+
+    $translations = $shared['translations']();
+    expect($translations)->toBeArray();
 });
 
 it('loads auth translations', function (): void {
@@ -121,8 +123,10 @@ it('loads auth translations', function (): void {
 
     $shared = $middleware->share($request);
 
-    expect($shared['translations'])->toHaveKey('auth')
-        ->and($shared['translations']['auth'])->toHaveKey('login');
+    $translations = $shared['translations']();
+
+    expect($translations)->toHaveKey('auth')
+        ->and($translations['auth'])->toHaveKey('login');
 });
 
 it('loads common translations', function (): void {
@@ -132,6 +136,8 @@ it('loads common translations', function (): void {
 
     $shared = $middleware->share($request);
 
-    expect($shared['translations'])->toHaveKey('common')
-        ->and($shared['translations']['common'])->toBeArray();
+    $translations = $shared['translations']();
+
+    expect($translations)->toHaveKey('common')
+        ->and($translations['common'])->toBeArray();
 });

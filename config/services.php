@@ -60,4 +60,10 @@ return [
         'secret' => env('TURNSTILE_SECRET_KEY'),
     ],
 
+    'indexnow' => [
+        'key' => env('INDEXNOW_KEY'),
+        'host' => env('INDEXNOW_HOST'),
+        'key_location' => env('INDEXNOW_KEY_LOCATION'),
+    ],
+
 ];
