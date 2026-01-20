@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\ContentType;
 use App\Models\Content;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -53,10 +54,12 @@ class extends Component {
     #[Computed]
     public function servingSizes(): \Illuminate\Database\Eloquent\Collection
     {
-        return Content::query()
-            ->ofType(ContentType::UsdaDailyServingSize)
-            ->published()
-            ->get();
+        return Cache::remember('usda-daily-serving-sizes', 3600, fn () =>
+            Content::query()
+                ->ofType(ContentType::UsdaDailyServingSize)
+                ->published()
+                ->get()
+        );
     }
 
     /**
@@ -65,10 +68,12 @@ class extends Component {
     #[Computed]
     public function sugarLimits(): \Illuminate\Database\Eloquent\Collection
     {
-        return Content::query()
-            ->ofType(ContentType::UsdaSugarLimit)
-            ->published()
-            ->get();
+        return Cache::remember('usda-sugar-limits', 3600, fn () =>
+            Content::query()
+                ->ofType(ContentType::UsdaSugarLimit)
+                ->published()
+                ->get()
+        );
     }
 
     /**
@@ -191,9 +196,9 @@ class extends Component {
     {
         return match ($group) {
             'Protein Foods' => 'oz-eq',
-            'Dairy' => 'cups',
-            'Vegetables' => 'cups',
-            'Fruits' => 'cups',
+            'Dairy' => 'cup-eq',
+            'Vegetables' => 'cup-eq',
+            'Fruits' => 'cup-eq',
             'Whole Grains' => 'oz-eq',
             'Healthy Fats' => 'tsp',
             default => 'servings',
@@ -297,9 +302,9 @@ class extends Component {
         </div>
 
         {{-- Bento Box Grid --}}
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" wire:loading.class="opacity-50" wire:target="calories, lowCarbMode">
             @foreach ($this->foodGroupData as $groupName => $group)
-                <div class="relative overflow-hidden rounded-2xl bg-white p-5 shadow-lg transition-all hover:shadow-xl dark:bg-slate-800 {{ $group['adjusted'] ? 'ring-2 ring-emerald-500' : '' }}">
+                <div wire:key="food-group-{{ Str::slug($groupName) }}" class="relative overflow-hidden rounded-2xl bg-white p-5 shadow-lg transition-all hover:shadow-xl dark:bg-slate-800 {{ $group['adjusted'] ? 'ring-2 ring-emerald-500' : '' }}">
                     @if ($group['adjusted'])
                         <div class="absolute right-2 top-2">
                             <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">
@@ -312,7 +317,7 @@ class extends Component {
                     <div class="mb-3 flex items-center gap-3">
                         <span class="text-3xl">{{ $group['icon'] }}</span>
                         <div>
-                            <h3 class="font-bold text-slate-900 dark:text-white">{{ $groupName }}</h3>
+                            <h3 class="font-bold text-slate-900 dark:text-white">{{ $groupName === 'Whole Grains' ? 'Carbs & Grains' : $groupName }}</h3>
                             <p class="text-lg font-semibold text-emerald-600 dark:text-emerald-400">
                                 @if ($group['min'] === $group['max'])
                                     {{ $group['min'] }} {{ $group['unit'] }}
@@ -335,7 +340,7 @@ class extends Component {
 
                     {{-- Serving Examples --}}
                     <p class="text-xs text-slate-500 dark:text-slate-400">
-                        <span class="font-medium">1 serving =</span>
+                        <span class="font-medium">1 {{ $group['unit'] }} =</span>
                         {{ implode(', ', array_slice($group['examples'], 0, 2)) }}
                     </p>
 
@@ -359,9 +364,9 @@ class extends Component {
                 </div>
             </div>
 
-            <div class="space-y-3">
+            <div class="space-y-3" wire:loading.class="opacity-50" wire:target="calories">
                 @foreach ($this->sugarLimitData as $category => $limit)
-                    <div class="rounded-xl bg-slate-50 p-3 dark:bg-slate-700/50">
+                    <div wire:key="sugar-limit-{{ Str::slug($category) }}" class="rounded-xl bg-slate-50 p-3 dark:bg-slate-700/50">
                         <div class="mb-2 flex items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <span class="text-lg">{{ $limit['icon'] }}</span>
@@ -374,7 +379,7 @@ class extends Component {
                         {{-- Sugar Gauge --}}
                         <div class="relative h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
                             {{-- Gradient background --}}
-                            <div class="absolute inset-0 bg-gradient-to-r from-emerald-400 via-amber-400 to-red-400"></div>
+                            <div class="absolute inset-0 bg-linear-to-r from-emerald-400 via-amber-400 to-red-400"></div>
                             {{-- Red line marker --}}
                             <div
                                 class="absolute top-0 h-full w-0.5 bg-red-600"
@@ -442,7 +447,7 @@ class extends Component {
                         type="button"
                         @click="openFaq = openFaq === 1 ? null : 1"
                         class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-100 dark:text-white dark:hover:bg-slate-700"
-                        aria-expanded="false"
+                        :aria-expanded="openFaq === 1 ? 'true' : 'false'"
                     >
                         <span>What are the USDA 2025-2030 Dietary Guidelines?</span>
                         <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -460,7 +465,7 @@ class extends Component {
                         type="button"
                         @click="openFaq = openFaq === 2 ? null : 2"
                         class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-100 dark:text-white dark:hover:bg-slate-700"
-                        aria-expanded="false"
+                        :aria-expanded="openFaq === 2 ? 'true' : 'false'"
                     >
                         <span>How do I know how many calories I need?</span>
                         <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -478,7 +483,7 @@ class extends Component {
                         type="button"
                         @click="openFaq = openFaq === 3 ? null : 3"
                         class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-100 dark:text-white dark:hover:bg-slate-700"
-                        aria-expanded="false"
+                        :aria-expanded="openFaq === 3 ? 'true' : 'false'"
                     >
                         <span>What is the Low-Carb Diabetic mode?</span>
                         <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -496,7 +501,7 @@ class extends Component {
                         type="button"
                         @click="openFaq = openFaq === 4 ? null : 4"
                         class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-100 dark:text-white dark:hover:bg-slate-700"
-                        aria-expanded="false"
+                        :aria-expanded="openFaq === 4 ? 'true' : 'false'"
                     >
                         <span>What do the FDA sugar limits mean?</span>
                         <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -540,7 +545,7 @@ class extends Component {
                 <a href="{{ route('register') }}" class="underline hover:text-emerald-600">Create Free Account</a>
             </p>
             <p class="mt-2 text-slate-400">
-                Source: <a href="https://www.dietaryguidelines.gov/" target="_blank" rel="noopener" class="underline">Dietary Guidelines for Americans, 2025-2030</a>
+                Source: <a href="https://realfood.gov" target="_blank" rel="noopener" class="underline">Dietary Guidelines for Americans, 2025-2030</a>
             </p>
         </footer>
 
