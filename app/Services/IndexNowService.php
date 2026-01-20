@@ -19,9 +19,17 @@ final readonly class IndexNowService implements IndexNowServiceInterface
 
     public function __construct()
     {
-        $this->host = config('services.indexnow.host', parse_url((string) config('app.url'), PHP_URL_HOST));
-        $this->key = (string) config('services.indexnow.key');
-        $this->keyLocation = config('services.indexnow.key_location');
+        /** @var string|null $configHost */
+        $configHost = config('services.indexnow.host');
+        /** @var string $appUrl */
+        $appUrl = config('app.url');
+        $this->host = $configHost ?? (string) parse_url($appUrl, PHP_URL_HOST);
+        /** @var string $key */
+        $key = config('services.indexnow.key');
+        $this->key = $key;
+        /** @var string|null $keyLocation */
+        $keyLocation = config('services.indexnow.key_location');
+        $this->keyLocation = $keyLocation;
     }
 
     /**
