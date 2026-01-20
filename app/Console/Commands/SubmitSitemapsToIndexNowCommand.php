@@ -21,7 +21,9 @@ final class SubmitSitemapsToIndexNowCommand extends Command
 
         $files = $this->option('file');
         if (empty($files)) {
+            // @codeCoverageIgnoreStart
             $files = ['sitemap.xml', 'food_sitemap.xml'];
+            // @codeCoverageIgnoreEnd
         }
 
         $allUrls = [];

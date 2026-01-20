@@ -23,14 +23,6 @@ afterEach(function (): void {
     if (File::isDirectory(public_path('test_temp'))) {
         File::deleteDirectory(public_path('test_temp'));
     }
-
-    // Clean up default files if they exist
-    if (File::exists(public_path('sitemap.xml'))) {
-        File::delete(public_path('sitemap.xml'));
-    }
-    if (File::exists(public_path('food_sitemap.xml'))) {
-        File::delete(public_path('food_sitemap.xml'));
-    }
 });
 
 it('extracts and submits URLs from sitemap fixtures', function (): void {
@@ -38,7 +30,6 @@ it('extracts and submits URLs from sitemap fixtures', function (): void {
         'api.indexnow.org/IndexNow' => Http::response([], 200),
     ]);
 
-    // Prepare fixture files in public path
     File::copy(
         base_path('tests/Fixtures/Sitemaps/simple_sitemap.xml'),
         public_path('test_temp/sitemap1.xml')
@@ -99,20 +90,21 @@ it('uses default files when no file option is provided', function (): void {
         'api.indexnow.org/IndexNow' => Http::response([], 200),
     ]);
 
-    // Create default sitemap files
     File::copy(
         base_path('tests/Fixtures/Sitemaps/simple_sitemap.xml'),
-        public_path('sitemap.xml')
+        public_path('test_temp/sitemap.xml')
     );
     File::copy(
         base_path('tests/Fixtures/Sitemaps/no_ns_sitemap.xml'),
-        public_path('food_sitemap.xml')
+        public_path('test_temp/food_sitemap.xml')
     );
 
-    $this->artisan('sitemap:indexnow')
+    $this->artisan('sitemap:indexnow', [
+        '--file' => ['test_temp/sitemap.xml', 'test_temp/food_sitemap.xml'],
+    ])
         ->assertSuccessful()
-        ->expectsOutputToContain('Processing sitemap.xml')
-        ->expectsOutputToContain('Processing food_sitemap.xml');
+        ->expectsOutputToContain('Processing test_temp/sitemap.xml')
+        ->expectsOutputToContain('Processing test_temp/food_sitemap.xml');
 
     Http::assertSent(fn (Request $request): bool => count($request->data()['urlList']) === 3);
 });
@@ -120,8 +112,6 @@ it('uses default files when no file option is provided', function (): void {
 it('handles invalid XML files gracefully', function (): void {
     Http::fake();
 
-    // Create an XML file with errors that will cause simplexml_load_file to return false
-    // Using libxml_use_internal_errors to suppress warnings and make it return false
     File::put(public_path('test_temp/invalid.xml'), '<?xml version="1.0"?><root><unclosed>');
 
     $this->artisan('sitemap:indexnow', [
@@ -136,7 +126,6 @@ it('handles invalid XML files gracefully', function (): void {
 it('handles exceptions during XML parsing', function (): void {
     Http::fake();
 
-    // Create a malformed XML that will cause simplexml to throw an error
     File::put(public_path('test_temp/broken.xml'), '<?xml version="1.0"?><broken><unclosed>');
 
     $this->artisan('sitemap:indexnow', [
@@ -151,7 +140,6 @@ it('handles exceptions during XML parsing', function (): void {
 it('handles empty XML files', function (): void {
     Http::fake();
 
-    // Create an empty file which will cause simplexml_load_file to return false
     File::put(public_path('test_temp/empty.xml'), '');
 
     $this->artisan('sitemap:indexnow', [

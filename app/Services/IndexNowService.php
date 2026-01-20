@@ -13,7 +13,7 @@ final readonly class IndexNowService implements IndexNowServiceInterface
 {
     private string $host;
 
-    private string $key;
+    private ?string $key;
 
     private ?string $keyLocation;
 
@@ -24,7 +24,7 @@ final readonly class IndexNowService implements IndexNowServiceInterface
         /** @var string $appUrl */
         $appUrl = config('app.url');
         $this->host = $configHost ?? (string) parse_url($appUrl, PHP_URL_HOST);
-        /** @var string $key */
+        /** @var string|null $key */
         $key = config('services.indexnow.key');
         $this->key = $key;
         /** @var string|null $keyLocation */
@@ -39,7 +39,7 @@ final readonly class IndexNowService implements IndexNowServiceInterface
      */
     public function submit(array $urls): bool
     {
-        if ($this->key === '' || $this->key === '0') {
+        if ($this->key === null || $this->key === '') {
             Log::warning('IndexNow: No key configured. Skipping submission.');
 
             return false;
