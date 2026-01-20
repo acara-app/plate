@@ -21,7 +21,7 @@
     "@@context": "https://schema.org",
     "@@type": "CollectionPage",
     "name": "Free Diabetes & Nutrition Tools",
-    "description": "Science-based tools to help you manage blood sugar, make smarter food choices, and live healthier. No sign-up required.",
+    "description": "Science-based tools to help you manage blood sugar, make smarter food choices, and live healthier.",
     "url": "{{ $currentUrl }}",
     "mainEntity": {
         "@@type": "ItemList",

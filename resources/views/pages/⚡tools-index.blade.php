@@ -8,7 +8,7 @@ use Livewire\Component;
 
 new
 #[Layout('layouts.mini-app', [
-    'metaDescription' => 'Free diabetes and nutrition tools: glucose spike calculator, food photo analyzer, USDA daily servings calculator, diabetes log book, and more. No sign-up required.',
+    'metaDescription' => 'Free diabetes and nutrition tools: glucose spike calculator, food photo analyzer, USDA daily servings calculator, diabetes log book, and more.',
     'metaKeywords' => 'diabetes tools, free nutrition calculator, glucose spike checker, food analyzer, USDA dietary guidelines, diabetes management, blood sugar tools',
 ])]
 #[Title('Free Diabetes & Nutrition Tools | Acara Plate')]
@@ -129,7 +129,7 @@ class extends Component {
             <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-3xl dark:bg-emerald-900/50">🛠️</div>
             <h1 class="text-3xl font-bold text-slate-900 dark:text-white lg:text-4xl">Free Diabetes & Nutrition Tools</h1>
             <p class="mx-auto mt-3 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
-                Science-based tools to help you manage blood sugar, make smarter food choices, and live healthier. No sign-up required.
+                Science-based tools to help you manage blood sugar, make smarter food choices, and live healthier.
             </p>
         </div>
 
