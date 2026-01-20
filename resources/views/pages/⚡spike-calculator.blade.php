@@ -11,7 +11,7 @@ use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
 new
 #[Layout('layouts.mini-app', [
-    'metaDescription' => 'Check if foods will spike your blood sugar with our free AI calculator. Get instant glycemic risk analysis and smart food swaps. No sign-up required.',
+    'metaDescription' => 'Check if foods will spike your blood sugar with our free AI calculator. Get instant glycemic risk analysis and smart food swaps.',
     'metaKeywords' => 'glucose spike checker, blood sugar spike, glycemic index, food blood sugar impact, diabetes food checker, will food spike blood sugar, free glucose tool, blood sugar calculator, what foods cause blood sugar spikes, low glycemic foods',
 ])]
 #[Title('Free Glucose Spike Calculator | Predict Blood Sugar Impact Instantly')]

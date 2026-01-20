@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Models\User;
+use App\Services\Contracts\IndexNowServiceInterface;
 use App\Services\Contracts\StripeServiceInterface;
+use App\Services\IndexNowService;
 use App\Services\StripeService;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +21,7 @@ final class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(StripeServiceInterface::class, StripeService::class);
+        $this->app->bind(IndexNowServiceInterface::class, IndexNowService::class);
     }
 
     public function boot(): void

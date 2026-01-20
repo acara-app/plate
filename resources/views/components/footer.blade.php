@@ -23,6 +23,9 @@
                         <h3 class="text-sm font-semibold leading-6 text-slate-900 dark:text-white">Free Diabetes Tools</h3>
                         <ul role="list" class="mt-6 space-y-4">
                             <li>
+                                <a href="{{ route('tools.index') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-medium" title="View all free diabetes tools">All Tools</a>
+                            </li>
+                            <li>
                                 <a href="{{ route('food.index') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Search for foods">Diabetic Food Database</a>
                             </li>
                             <li>
@@ -30,6 +33,9 @@
                             </li>
                             <li>
                                 <a href="{{ route('snap-to-track') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Analyze food photos with AI">Food Photo Analyzer</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('usda-servings-calculator') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="USDA 2025-2030 daily serving calculator">Daily Servings Calculator</a>
                             </li>
                             <li>
                                 <a href="{{ route('diabetes-log-book-info') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Track your diabetes management">Diabetes Log Book</a>
