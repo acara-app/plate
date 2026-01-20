@@ -24,7 +24,7 @@ class extends Component {
                 'name' => 'Glucose Spike Calculator',
                 'description' => 'Check if foods will spike your blood sugar. Get instant risk analysis and smart food swap suggestions.',
                 'icon' => '⚡',
-                'route' => 'spike-calculator',
+                'route' => route('spike-calculator'),
                 'badge' => 'AI Powered',
                 'features' => [
                     'Instant glucose impact prediction',
@@ -36,7 +36,7 @@ class extends Component {
                 'name' => 'Food Photo Analyzer',
                 'description' => 'Snap a photo of your meal and get instant macro breakdown with AI-powered nutrition analysis.',
                 'icon' => '📸',
-                'route' => 'snap-to-track',
+                'route' => route('snap-to-track'),
                 'badge' => 'AI Powered',
                 'features' => [
                     'Photo-to-nutrition analysis',
@@ -48,7 +48,7 @@ class extends Component {
                 'name' => 'USDA Daily Servings Calculator',
                 'description' => 'Calculate your daily food servings based on official USDA 2025-2030 Dietary Guidelines. Includes diabetic-friendly adjustments.',
                 'icon' => '🥗',
-                'route' => 'usda-servings-calculator',
+                'route' => route('usda-servings-calculator'),
                 'badge' => 'New',
                 'features' => [
                     'Calorie-based serving recommendations',
@@ -60,7 +60,7 @@ class extends Component {
                 'name' => 'Diabetic Food Database',
                 'description' => 'Search our database of foods with glycemic index, glycemic load, and diabetic-friendly ratings.',
                 'icon' => '🔍',
-                'route' => 'food.index',
+                'route' => route('food.index'),
                 'badge' => null,
                 'features' => [
                     'Glycemic index & load data',
@@ -72,7 +72,7 @@ class extends Component {
                 'name' => 'Diabetes Log Book',
                 'description' => 'Free printable diabetes log book to track your blood sugar, meals, medications, and more.',
                 'icon' => '📖',
-                'route' => 'diabetes-log-book-info',
+                'route' => route('diabetes-log-book-info'),
                 'badge' => 'Printable',
                 'features' => [
                     'Blood sugar tracking',
@@ -84,7 +84,7 @@ class extends Component {
                 'name' => '10-Day Meal Plan',
                 'description' => 'A free 10-day diabetic-friendly meal plan with recipes and shopping lists.',
                 'icon' => '📅',
-                'route' => '10-day-meal-plan',
+                'route' => route('10-day-meal-plan'),
                 'badge' => 'Free Download',
                 'features' => [
                     'Diabetic-friendly recipes',
@@ -133,11 +133,11 @@ class extends Component {
             </p>
         </div>
 
-        {{-- Tools Grid --}}
+        {{-- Tools Grid --}}    
         <div class="grid gap-6 md:grid-cols-2">
             @foreach ($this->getTools() as $tool)
                 <a 
-                    href="{{ route($tool['route']) }}" 
+                    href="{{ $tool['route'] }}" 
                     class="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-lg transition-all hover:shadow-xl hover:ring-2 hover:ring-emerald-500 dark:bg-slate-800"
                 >
                     {{-- Badge --}}
