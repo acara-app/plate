@@ -55,13 +55,21 @@ final class SubmitSitemapsToIndexNowCommand extends Command
 
         $this->info('Submitting '.count($allUrls).' unique URLs to IndexNow...');
 
-        if ($indexNowService->submit($allUrls)) {
-            $this->info('✓ Successfully submitted URLs to IndexNow.');
-        } else {
-            $this->error('Failed to submit URLs to IndexNow. Check logs for details.');
+        $result = $indexNowService->submit($allUrls);
+
+        if ($result->success) {
+            $this->info("✓ {$result->message}");
+
+            return self::SUCCESS;
         }
 
-        return self::SUCCESS;
+        $this->error($result->message);
+
+        foreach ($result->errors as $error) {
+            $this->error("  - {$error}");
+        }
+
+        return self::FAILURE;
     }
 
     /**

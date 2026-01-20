@@ -26,7 +26,9 @@ it('submits URLs successfully', function (): void {
     $service = new IndexNowService();
     $result = $service->submit(['https://www.example.org/url1']);
 
-    expect($result)->toBeTrue();
+    expect($result->success)->toBeTrue();
+    expect($result->urlsSubmitted)->toBe(1);
+    expect($result->message)->toContain('Successfully submitted 1 URLs');
 
     Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.indexnow.org/IndexNow' &&
            $request->data()['host'] === 'www.example.org' &&
@@ -45,7 +47,8 @@ it('handles submission failure', function (): void {
     $service = new IndexNowService();
     $result = $service->submit(['https://www.example.org/url1']);
 
-    expect($result)->toBeFalse();
+    expect($result->success)->toBeFalse();
+    expect($result->errors)->not->toBeEmpty();
 });
 
 it('skips submission if key is missing', function (): void {
@@ -56,17 +59,19 @@ it('skips submission if key is missing', function (): void {
     $service = new IndexNowService();
     $result = $service->submit(['https://www.example.org/url1']);
 
-    expect($result)->toBeFalse();
+    expect($result->success)->toBeFalse();
+    expect($result->message)->toContain('key is not configured');
     Http::assertNothingSent();
 });
 
-it('returns true for empty URL list', function (): void {
+it('returns success for empty URL list', function (): void {
     Log::shouldReceive('info')->once()->with('IndexNow: No URLs to submit.');
 
     $service = new IndexNowService();
     $result = $service->submit([]);
 
-    expect($result)->toBeTrue();
+    expect($result->success)->toBeTrue();
+    expect($result->message)->toBe('No URLs to submit.');
     Http::assertNothingSent();
 });
 
@@ -78,7 +83,10 @@ it('chunks large URL lists', function (): void {
     $urls = array_map(fn ($i): string => "https://www.example.org/url{$i}", range(1, 10005));
 
     $service = new IndexNowService();
-    $service->submit($urls);
+    $result = $service->submit($urls);
+
+    expect($result->success)->toBeTrue();
+    expect($result->urlsSubmitted)->toBe(10005);
 
     Http::assertSentCount(2);
 
@@ -97,7 +105,7 @@ it('submits without keyLocation when not configured', function (): void {
     $service = new IndexNowService();
     $result = $service->submit(['https://www.example.org/url1']);
 
-    expect($result)->toBeTrue();
+    expect($result->success)->toBeTrue();
 
     Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.indexnow.org/IndexNow' &&
            $request->data()['host'] === 'www.example.org' &&
@@ -116,5 +124,6 @@ it('handles exceptions during submission', function (): void {
     $service = new IndexNowService();
     $result = $service->submit(['https://www.example.org/url1']);
 
-    expect($result)->toBeFalse();
+    expect($result->success)->toBeFalse();
+    expect($result->errors)->not->toBeEmpty();
 });

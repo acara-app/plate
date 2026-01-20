@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DataObjects\IndexNowResult;
 use App\Services\Contracts\IndexNowServiceInterface;
 use Exception;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 final readonly class IndexNowService implements IndexNowServiceInterface
 {
+    private const int TIMEOUT_SECONDS = 30;
+
+    private const int MAX_URLS_PER_REQUEST = 10000;
+
     private string $host;
 
     private ?string $key;
@@ -37,25 +43,25 @@ final readonly class IndexNowService implements IndexNowServiceInterface
      *
      * @param  array<int, string>  $urls
      */
-    public function submit(array $urls): bool
+    public function submit(array $urls): IndexNowResult
     {
         if ($this->key === null || $this->key === '') {
             Log::warning('IndexNow: No key configured. Skipping submission.');
 
-            return false;
+            return IndexNowResult::noKey();
         }
 
         if ($urls === []) {
             Log::info('IndexNow: No URLs to submit.');
 
-            return true;
+            return IndexNowResult::noUrls();
         }
 
-        // IndexNow allows maximum 10,000 URLs per request
-        $chunks = array_chunk($urls, 10000);
-        $allSuccessful = true;
+        $chunks = array_chunk($urls, self::MAX_URLS_PER_REQUEST);
+        $errors = [];
+        $totalSubmitted = 0;
 
-        foreach ($chunks as $chunk) {
+        foreach ($chunks as $index => $chunk) {
             $payload = [
                 'host' => $this->host,
                 'key' => $this->key,
@@ -67,20 +73,42 @@ final readonly class IndexNowService implements IndexNowServiceInterface
             }
 
             try {
-                $response = Http::post('https://api.indexnow.org/IndexNow', $payload);
+                $response = Http::timeout(self::TIMEOUT_SECONDS)
+                    ->post('https://api.indexnow.org/IndexNow', $payload);
 
                 if ($response->successful()) {
+                    $totalSubmitted += count($chunk);
                     Log::info('IndexNow: Successfully submitted '.count($chunk).' URLs.');
                 } else {
+                    $errorMessage = 'Chunk '.($index + 1).": HTTP {$response->status()} - {$response->body()}";
+                    $errors[] = $errorMessage;
                     Log::error("IndexNow: Failed to submit URLs. Status: {$response->status()}, Body: {$response->body()}");
-                    $allSuccessful = false;
                 }
+            } catch (ConnectionException $e) {
+                $errorMessage = 'Chunk '.($index + 1).': Connection timeout - the request took too long to complete.';
+                $errors[] = $errorMessage;
+                Log::error("IndexNow: Connection timeout during submission: {$e->getMessage()}");
             } catch (Exception $e) {
+                $errorMessage = 'Chunk '.($index + 1).": {$e->getMessage()}";
+                $errors[] = $errorMessage;
                 Log::error("IndexNow: Exception during submission: {$e->getMessage()}");
-                $allSuccessful = false;
             }
         }
 
-        return $allSuccessful;
+        if ($errors === []) {
+            return IndexNowResult::success($totalSubmitted);
+        }
+
+        if ($totalSubmitted > 0) {
+            return IndexNowResult::failure(
+                "Partially submitted {$totalSubmitted} URLs with some errors.",
+                $errors
+            );
+        }
+
+        return IndexNowResult::failure(
+            'Failed to submit URLs to IndexNow.',
+            $errors
+        );
     }
 }

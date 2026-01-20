@@ -46,7 +46,7 @@ it('extracts and submits URLs from sitemap fixtures', function (): void {
         ->expectsOutputToContain('Found 2 URLs in test_temp/sitemap1.xml')
         ->expectsOutputToContain('Found 1 URLs in test_temp/sitemap2.xml')
         ->expectsOutputToContain('Submitting 3 unique URLs to IndexNow')
-        ->expectsOutputToContain('Successfully submitted URLs to IndexNow');
+        ->expectsOutputToContain('Successfully submitted 3 URLs to IndexNow');
 
     Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.indexnow.org/IndexNow' &&
            count($request->data()['urlList']) === 3 &&
@@ -81,7 +81,7 @@ it('handles submission errors', function (): void {
     $this->artisan('sitemap:indexnow', [
         '--file' => ['test_temp/sitemap.xml'],
     ])
-        ->assertSuccessful()
+        ->assertFailed()
         ->expectsOutputToContain('Failed to submit URLs to IndexNow');
 });
 
@@ -147,6 +147,23 @@ it('handles empty XML files', function (): void {
     ])
         ->assertSuccessful()
         ->expectsOutputToContain('No URLs found to submit');
+
+    Http::assertNothingSent();
+});
+
+it('shows detailed error when key is not configured', function (): void {
+    Config::set('services.indexnow.key', null);
+
+    File::copy(
+        base_path('tests/Fixtures/Sitemaps/simple_sitemap.xml'),
+        public_path('test_temp/sitemap.xml')
+    );
+
+    $this->artisan('sitemap:indexnow', [
+        '--file' => ['test_temp/sitemap.xml'],
+    ])
+        ->assertFailed()
+        ->expectsOutputToContain('key is not configured');
 
     Http::assertNothingSent();
 });
