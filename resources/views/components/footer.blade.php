@@ -32,6 +32,9 @@
                                 <a href="{{ route('snap-to-track') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Analyze food photos with AI">Food Photo Analyzer</a>
                             </li>
                             <li>
+                                <a href="{{ route('usda-servings-calculator') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="USDA 2025-2030 daily serving calculator">Daily Servings Calculator</a>
+                            </li>
+                            <li>
                                 <a href="{{ route('diabetes-log-book-info') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Track your diabetes management">Diabetes Log Book</a>
                             </li>
                             <li>
