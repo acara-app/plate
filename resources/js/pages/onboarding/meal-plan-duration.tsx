@@ -1,9 +1,11 @@
+import { dashboard } from '@/routes';
 import onboarding from '@/routes/onboarding';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 
@@ -11,7 +13,8 @@ const DAY_OPTIONS = [1, 2, 3, 4, 5, 6, 7] as const;
 
 export default function MealPlanDuration() {
     const { t } = useTranslation('common');
-    const [selectedDays, setSelectedDays] = useState<number>(7);
+    const { currentUser } = useSharedProps();
+    const [selectedDays, setSelectedDays] = useState<number>(3);
 
     return (
         <>
@@ -131,12 +134,13 @@ export default function MealPlanDuration() {
                                         </p>
                                     </div>
 
-                                    {/* Submit Button */}
-                                    <div className="flex justify-end border-t pt-6 dark:border-gray-700">
+                                    {/* Footer Section */}
+                                    <div className="flex flex-col items-center gap-4 border-t pt-6 dark:border-gray-700">
+                                        {/* Action Button */}
                                         <Button
                                             type="submit"
                                             disabled={processing}
-                                            className="relative inline-flex items-center overflow-hidden rounded-md bg-primary px-6 py-3 text-base font-medium text-primary-foreground shadow-[0_0_20px_rgba(16,185,129,0.3),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.2)] transition-all before:absolute before:inset-0 before:bg-linear-to-br before:from-white/30 before:via-transparent before:to-transparent after:absolute after:inset-0 after:bg-linear-to-tl after:from-black/10 after:via-transparent after:to-white/10 hover:shadow-[0_0_30px_rgba(16,185,129,0.5),inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(0,0,0,0.2)] hover:brightness-110 focus:ring-[3px] focus:ring-primary/50 focus:outline-none active:brightness-95"
+                                            className="relative inline-flex min-w-[160px] items-center justify-center overflow-hidden rounded-md bg-primary px-6 py-3 text-base font-medium text-primary-foreground shadow-[0_0_20px_rgba(16,185,129,0.3),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_2px_rgba(0,0,0,0.2)] transition-all before:absolute before:inset-0 before:bg-linear-to-br before:from-white/30 before:via-transparent before:to-transparent after:absolute after:inset-0 after:bg-linear-to-tl after:from-black/10 after:via-transparent after:to-white/10 hover:shadow-[0_0_30px_rgba(16,185,129,0.5),inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(0,0,0,0.2)] hover:brightness-110 focus:ring-[3px] focus:ring-primary/50 focus:outline-none active:brightness-95"
                                         >
                                             {processing && (
                                                 <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
@@ -147,6 +151,19 @@ export default function MealPlanDuration() {
                                                 )}
                                             </span>
                                         </Button>
+
+                                        {/* Exit Link - Centered Below */}
+                                        {currentUser?.has_meal_plan && (
+                                            <Link
+                                                href={dashboard.url()}
+                                                className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                            >
+                                                {t(
+                                                    'onboarding.meal_plan_duration.exit',
+                                                    { defaultValue: 'Exit' },
+                                                )}
+                                            </Link>
+                                        )}
                                     </div>
                                 </>
                             )}

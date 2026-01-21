@@ -1,7 +1,7 @@
 import { dashboard } from '@/routes';
 import onboarding from '@/routes/onboarding';
 import { DietaryPreference, Profile } from '@/types';
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head, Link, router } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 
@@ -294,8 +294,52 @@ export default function DietaryPreferences({
                                         message={errors.dietary_preference_ids}
                                     />
 
-                                    {/* Submit Button */}
-                                    <div className="flex items-center justify-between gap-4 border-t pt-6 dark:border-gray-700">
+                                    {/* Selected Count */}
+                                    <div>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            {t(
+                                                'onboarding.dietary_preferences.selected',
+                                                { count: selectedIds.length },
+                                            )}
+                                        </p>
+                                    </div>
+
+                                    {/* Footer Section */}
+                                    <div className="flex flex-col items-center gap-4 border-t pt-6 dark:border-gray-700">
+                                        {/* Action Buttons Row */}
+                                        <div className="flex justify-center gap-3">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                disabled={processing}
+                                                onClick={() => {
+                                                    router.post(
+                                                        onboarding.dietaryPreferences.store.url(),
+                                                        {},
+                                                    );
+                                                }}
+                                                className="min-w-[100px]"
+                                            >
+                                                {t(
+                                                    'onboarding.dietary_preferences.skip',
+                                                    { defaultValue: 'Skip' },
+                                                )}
+                                            </Button>
+                                            <Button
+                                                type="submit"
+                                                disabled={processing}
+                                                className="min-w-[120px]"
+                                            >
+                                                {processing && (
+                                                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                                                )}
+                                                {t(
+                                                    'onboarding.dietary_preferences.continue',
+                                                )}
+                                            </Button>
+                                        </div>
+
+                                        {/* Exit Link - Centered Below */}
                                         {currentUser?.has_meal_plan && (
                                             <Link
                                                 href={dashboard.url()}
@@ -306,26 +350,6 @@ export default function DietaryPreferences({
                                                 )}
                                             </Link>
                                         )}
-                                        <Button
-                                            type="submit"
-                                            disabled={processing}
-                                            className="w-auto"
-                                        >
-                                            {processing && (
-                                                <LoaderCircle className="h-4 w-4 animate-spin" />
-                                            )}
-                                            {t(
-                                                'onboarding.dietary_preferences.continue',
-                                            )}
-                                        </Button>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                                            {t(
-                                                'onboarding.dietary_preferences.selected',
-                                                { count: selectedIds.length },
-                                            )}
-                                        </p>
                                     </div>
                                 </>
                             )}

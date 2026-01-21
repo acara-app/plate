@@ -147,10 +147,6 @@ export default function Questionnaire() {
                         </div>
                     </div>
 
-                    <p className="text-center text-sm text-gray-500 dark:text-gray-400">
-                        {t('onboarding.questionnaire.time_estimate')}
-                    </p>
-
                     <p className="text-center text-sm text-gray-600 dark:text-gray-400">
                         {t('onboarding.questionnaire.terms_agreement')}{' '}
                         <Link

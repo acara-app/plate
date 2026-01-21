@@ -154,17 +154,10 @@ export default function Goals({ profile, goals }: Props) {
                                         />
                                     </div>
 
-                                    {/* Action Buttons */}
-                                    <div className="flex items-center justify-between gap-4">
-                                        {currentUser?.has_meal_plan && (
-                                            <Link
-                                                href={dashboard.url()}
-                                                className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
-                                            >
-                                                {t('onboarding.goals.exit')}
-                                            </Link>
-                                        )}
-                                        <div className="flex gap-3">
+                                    {/* Footer Section */}
+                                    <div className="flex flex-col items-center gap-4">
+                                        {/* Action Buttons Row */}
+                                        <div className="flex justify-center gap-3">
                                             <Button
                                                 type="button"
                                                 variant="outline"
@@ -175,6 +168,7 @@ export default function Goals({ profile, goals }: Props) {
                                                         {},
                                                     );
                                                 }}
+                                                className="min-w-[100px]"
                                             >
                                                 {t('onboarding.goals.skip', {
                                                     defaultValue: 'Skip',
@@ -183,6 +177,7 @@ export default function Goals({ profile, goals }: Props) {
                                             <Button
                                                 type="submit"
                                                 disabled={processing}
+                                                className="min-w-[120px]"
                                             >
                                                 {processing && (
                                                     <LoaderCircle className="h-4 w-4 animate-spin" />
@@ -190,6 +185,16 @@ export default function Goals({ profile, goals }: Props) {
                                                 {t('onboarding.goals.continue')}
                                             </Button>
                                         </div>
+
+                                        {/* Exit Link - Centered Below */}
+                                        {currentUser?.has_meal_plan && (
+                                            <Link
+                                                href={dashboard.url()}
+                                                className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                            >
+                                                {t('onboarding.goals.exit')}
+                                            </Link>
+                                        )}
                                     </div>
                                 </>
                             )}
