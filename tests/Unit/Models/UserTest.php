@@ -180,3 +180,58 @@ test('prunable filters out recent unverified users', function (): void {
         ->toHaveCount(1)
         ->first()->id->toBe($oldUser->id);
 });
+
+test('has active subscription returns true when subscription is trialing', function (): void {
+    $user = User::factory()->create();
+
+    DB::table('subscriptions')->insert([
+        'user_id' => $user->id,
+        'type' => 'premium-plan',
+        'stripe_id' => 'sub_trial123',
+        'stripe_status' => 'trialing',
+        'stripe_price' => 'price_test123',
+        'quantity' => 1,
+        'trial_ends_at' => now()->addDays(7),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    expect($user->fresh()->hasActiveSubscription())->toBeTrue();
+});
+
+test('is_verified returns true when user has trialing subscription', function (): void {
+    $user = User::factory()->create(['is_verified' => false]);
+
+    DB::table('subscriptions')->insert([
+        'user_id' => $user->id,
+        'type' => 'premium-plan',
+        'stripe_id' => 'sub_trial123',
+        'stripe_status' => 'trialing',
+        'stripe_price' => 'price_test123',
+        'quantity' => 1,
+        'trial_ends_at' => now()->addDays(7),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    expect($user->fresh()->is_verified)->toBeTrue();
+});
+
+test('active subscription returns trialing subscription', function (): void {
+    $user = User::factory()->create();
+
+    DB::table('subscriptions')->insert([
+        'user_id' => $user->id,
+        'type' => 'premium-plan',
+        'stripe_id' => 'sub_trial123',
+        'stripe_status' => 'trialing',
+        'stripe_price' => 'price_test123',
+        'quantity' => 1,
+        'trial_ends_at' => now()->addDays(7),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    expect($user->fresh()->activeSubscription())->not->toBeNull()
+        ->and($user->fresh()->activeSubscription()->stripe_status)->toBe('trialing');
+});
