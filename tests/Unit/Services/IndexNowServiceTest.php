@@ -127,3 +127,39 @@ it('handles exceptions during submission', function (): void {
     expect($result->success)->toBeFalse();
     expect($result->errors)->not->toBeEmpty();
 });
+
+it('handles connection timeout during submission', function (): void {
+    Http::fake(function (): void {
+        throw new \Illuminate\Http\Client\ConnectionException('Connection timeout');
+    });
+
+    $service = new IndexNowService();
+    $result = $service->submit(['https://www.example.org/url1']);
+
+    expect($result->success)->toBeFalse();
+    expect($result->errors[0])->toContain('Connection timeout');
+});
+
+it('handles partial success when some chunks fail', function (): void {
+    $requestCount = 0;
+
+    Http::fake(function () use (&$requestCount) {
+        $requestCount++;
+        // First request succeeds, second fails
+        if ($requestCount === 1) {
+            return Http::response([], 200);
+        }
+
+        return Http::response(['error' => 'rate limited'], 429);
+    });
+
+    // Create URLs that will be chunked (10,005 URLs = 2 chunks)
+    $urls = array_map(fn (int $i): string => "https://www.example.org/url{$i}", range(1, 10005));
+
+    $service = new IndexNowService();
+    $result = $service->submit($urls);
+
+    expect($result->success)->toBeFalse();
+    expect($result->urlsSubmitted)->toBe(10000);
+    expect($result->message)->toContain('Partially submitted');
+});

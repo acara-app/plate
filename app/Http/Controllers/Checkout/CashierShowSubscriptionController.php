@@ -33,7 +33,8 @@ final readonly class CashierShowSubscriptionController
         $products = SubscriptionProduct::all();
 
         /** @var \Laravel\Cashier\Subscription|null $currentSubscription */
-        $currentSubscription = $user->subscriptions()->get()->first(fn ($subscription) => $subscription->valid());
+        /** @phpstan-ignore-next-line argument.type */
+        $currentSubscription = $user->subscriptions()->get()->first(fn (\Laravel\Cashier\Subscription $subscription): bool => $subscription->valid());
 
         // Find the current product from local database using subscription_items
         $currentProduct = null;

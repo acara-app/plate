@@ -126,7 +126,7 @@ final class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasActiveSubscription(): bool
     {
-        return $this->subscriptions()->get()->contains(fn ($subscription) => $subscription->valid());
+        return $this->subscriptions()->get()->contains(fn (\Laravel\Cashier\Subscription $subscription): bool => $subscription->valid()); // @phpstan-ignore-line
     }
 
     /**
@@ -135,7 +135,7 @@ final class User extends Authenticatable implements MustVerifyEmail
     public function activeSubscription(): ?\Laravel\Cashier\Subscription
     {
         /** @var \Laravel\Cashier\Subscription|null $subscription */
-        $subscription = $this->subscriptions()->get()->first(fn ($subscription) => $subscription->valid());
+        $subscription = $this->subscriptions()->get()->first(fn (\Laravel\Cashier\Subscription $subscription): bool => $subscription->valid()); // @phpstan-ignore-line
 
         return $subscription;
     }

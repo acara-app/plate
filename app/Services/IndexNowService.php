@@ -102,7 +102,8 @@ final readonly class IndexNowService implements IndexNowServiceInterface
         if ($totalSubmitted > 0) {
             return IndexNowResult::failure(
                 "Partially submitted {$totalSubmitted} URLs with some errors.",
-                $errors
+                $errors,
+                $totalSubmitted
             );
         }
 

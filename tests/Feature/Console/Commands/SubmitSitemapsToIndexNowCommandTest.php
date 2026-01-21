@@ -152,7 +152,7 @@ it('handles empty XML files', function (): void {
 });
 
 it('shows detailed error when key is not configured', function (): void {
-    Config::set('services.indexnow.key', null);
+    Config::set('services.indexnow.key');
 
     File::copy(
         base_path('tests/Fixtures/Sitemaps/simple_sitemap.xml'),

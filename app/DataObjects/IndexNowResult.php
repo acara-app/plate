@@ -44,10 +44,11 @@ final readonly class IndexNowResult
     /**
      * @param  array<int, string>  $errors
      */
-    public static function failure(string $message, array $errors = []): self
+    public static function failure(string $message, array $errors = [], int $urlsSubmitted = 0): self
     {
         return new self(
             success: false,
+            urlsSubmitted: $urlsSubmitted,
             message: $message,
             errors: $errors,
         );
