@@ -161,12 +161,12 @@ final class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
-        if ($isVerified === null) {
-            return false;
-        }
-
         if ($this->hasActiveSubscription()) {
             return true;
+        }
+
+        if ($isVerified === null) {
+            return false;
         }
 
         return $isVerified;

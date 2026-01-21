@@ -73,6 +73,24 @@ test('is_verified returns false when database value is null', function (): void 
     expect($user->is_verified)->toBeFalse();
 });
 
+test('is_verified returns true when database value is null but user has trialing subscription', function (): void {
+    $user = User::factory()->create(['is_verified' => null]);
+
+    DB::table('subscriptions')->insert([
+        'user_id' => $user->id,
+        'type' => 'premium-plan',
+        'stripe_id' => 'sub_trial_null123',
+        'stripe_status' => 'trialing',
+        'stripe_price' => 'price_test123',
+        'quantity' => 1,
+        'trial_ends_at' => now()->addDays(7),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    expect($user->fresh()->is_verified)->toBeTrue();
+});
+
 test('is_verified returns false when database value is false', function (): void {
     $user = User::factory()->create(['is_verified' => false]);
 
