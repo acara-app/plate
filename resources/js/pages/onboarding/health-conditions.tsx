@@ -1,7 +1,7 @@
 import { dashboard } from '@/routes';
 import onboarding from '@/routes/onboarding';
 import { HealthCondition, Profile } from '@/types';
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head, Link, router } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 
@@ -298,31 +298,7 @@ export default function HealthConditions({
                                         </p>
                                     </div>
 
-                                    {/* Submit Button */}
-                                    <div className="flex items-center justify-between gap-4 border-t pt-6 dark:border-gray-700">
-                                        {currentUser?.has_meal_plan && (
-                                            <Link
-                                                href={dashboard.url()}
-                                                className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
-                                            >
-                                                {t(
-                                                    'onboarding.health_conditions.exit',
-                                                )}
-                                            </Link>
-                                        )}
-                                        <Button
-                                            type="submit"
-                                            disabled={processing}
-                                            className="w-auto"
-                                        >
-                                            {processing && (
-                                                <LoaderCircle className="h-4 w-4 animate-spin" />
-                                            )}
-                                            {t(
-                                                'onboarding.health_conditions.complete',
-                                            )}
-                                        </Button>
-                                    </div>
+                                    {/* Selected Count */}
                                     <div>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">
                                             {selectedIds.length > 0
@@ -336,6 +312,54 @@ export default function HealthConditions({
                                                       'onboarding.health_conditions.no_conditions',
                                                   )}
                                         </p>
+                                    </div>
+
+                                    {/* Footer Section */}
+                                    <div className="flex flex-col items-center gap-4 border-t pt-6 dark:border-gray-700">
+                                        {/* Action Buttons Row */}
+                                        <div className="flex justify-center gap-3">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                disabled={processing}
+                                                onClick={() => {
+                                                    router.post(
+                                                        onboarding.healthConditions.store.url(),
+                                                        {},
+                                                    );
+                                                }}
+                                                className="min-w-[100px]"
+                                            >
+                                                {t(
+                                                    'onboarding.health_conditions.skip',
+                                                    { defaultValue: 'Skip' },
+                                                )}
+                                            </Button>
+                                            <Button
+                                                type="submit"
+                                                disabled={processing}
+                                                className="min-w-[120px]"
+                                            >
+                                                {processing && (
+                                                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                                                )}
+                                                {t(
+                                                    'onboarding.health_conditions.continue',
+                                                )}
+                                            </Button>
+                                        </div>
+
+                                        {/* Exit Link - Centered Below */}
+                                        {currentUser?.has_meal_plan && (
+                                            <Link
+                                                href={dashboard.url()}
+                                                className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                            >
+                                                {t(
+                                                    'onboarding.health_conditions.exit',
+                                                )}
+                                            </Link>
+                                        )}
                                     </div>
                                 </>
                             )}

@@ -163,8 +163,23 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                         </p>
                                     </div>
 
-                                    {/* Submit Button */}
-                                    <div className="flex items-center justify-between gap-4">
+                                    {/* Footer Section */}
+                                    <div className="flex flex-col items-center gap-4">
+                                        {/* Action Buttons */}
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="min-w-[120px]"
+                                        >
+                                            {processing && (
+                                                <LoaderCircle className="h-4 w-4 animate-spin" />
+                                            )}
+                                            {t(
+                                                'onboarding.biometrics.continue',
+                                            )}
+                                        </Button>
+
+                                        {/* Exit Link - Centered Below */}
                                         {currentUser?.has_meal_plan && (
                                             <Link
                                                 href={dashboard.url()}
@@ -175,18 +190,6 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                                 )}
                                             </Link>
                                         )}
-                                        <Button
-                                            type="submit"
-                                            disabled={processing}
-                                            className="w-auto"
-                                        >
-                                            {processing && (
-                                                <LoaderCircle className="h-4 w-4 animate-spin" />
-                                            )}
-                                            {t(
-                                                'onboarding.biometrics.continue',
-                                            )}
-                                        </Button>
                                     </div>
                                 </>
                             )}

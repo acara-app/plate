@@ -385,8 +385,35 @@ export default function Medications({ medications }: Props) {
                                         </p>
                                     </div>
 
-                                    {/* Submit Button */}
-                                    <div className="flex items-center justify-between gap-4 border-t pt-6 dark:border-gray-700">
+                                    {/* Footer Section */}
+                                    <div className="flex flex-col items-center gap-4 border-t pt-6 dark:border-gray-700">
+                                        {/* Action Buttons Row */}
+                                        <div className="flex justify-center gap-3">
+                                            <Button
+                                                type="submit"
+                                                variant="outline"
+                                                disabled={processing}
+                                                className="min-w-[100px]"
+                                            >
+                                                {t(
+                                                    'onboarding.medications.skip',
+                                                )}
+                                            </Button>
+                                            <Button
+                                                type="submit"
+                                                disabled={processing}
+                                                className="min-w-[120px]"
+                                            >
+                                                {processing && (
+                                                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                                                )}
+                                                {t(
+                                                    'onboarding.medications.continue',
+                                                )}
+                                            </Button>
+                                        </div>
+
+                                        {/* Exit Link - Centered Below */}
                                         {currentUser?.has_meal_plan && (
                                             <Link
                                                 href={dashboard.url()}
@@ -397,28 +424,6 @@ export default function Medications({ medications }: Props) {
                                                 )}
                                             </Link>
                                         )}
-                                        <div className="flex gap-3">
-                                            <Button
-                                                type="submit"
-                                                variant="outline"
-                                                disabled={processing}
-                                            >
-                                                {t(
-                                                    'onboarding.medications.skip',
-                                                )}
-                                            </Button>
-                                            <Button
-                                                type="submit"
-                                                disabled={processing}
-                                            >
-                                                {processing && (
-                                                    <LoaderCircle className="h-4 w-4 animate-spin" />
-                                                )}
-                                                {t(
-                                                    'onboarding.medications.continue',
-                                                )}
-                                            </Button>
-                                        </div>
                                     </div>
                                 </>
                             )}
