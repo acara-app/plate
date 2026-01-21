@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataObjects;
 
-final readonly class IndexNowResult
+final readonly class IndexNowResultData
 {
     /**
      * @param  array<int, string>  $errors

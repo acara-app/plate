@@ -54,8 +54,6 @@ it('handles submission failure', function (): void {
 it('skips submission if key is missing', function (): void {
     Config::set('services.indexnow.key');
 
-    Log::shouldReceive('warning')->once()->with('IndexNow: No key configured. Skipping submission.');
-
     $service = new IndexNowService();
     $result = $service->submit(['https://www.example.org/url1']);
 
@@ -65,7 +63,6 @@ it('skips submission if key is missing', function (): void {
 });
 
 it('returns success for empty URL list', function (): void {
-    Log::shouldReceive('info')->once()->with('IndexNow: No URLs to submit.');
 
     $service = new IndexNowService();
     $result = $service->submit([]);
