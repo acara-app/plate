@@ -66,4 +66,26 @@ enum FoodCategory: string
             self::Other => 99,
         };
     }
+
+    /**
+     * Get average glycemic index for the food category.
+     *
+     * These are approximate category averages based on published GI data.
+     * Used to calculate glycemic load when exact GI is not available.
+     */
+    public function averageGlycemicIndex(): int
+    {
+        return match ($this) {
+            self::Fruits => 40,             // Most fruits are low-medium GI
+            self::Vegetables => 15,         // Non-starchy vegetables are very low
+            self::GrainsStarches => 65,     // Grains/starches tend to be medium-high
+            self::DairyAlternatives => 35,  // Dairy products are generally low GI
+            self::ProteinsLegumes => 30,    // Legumes are low GI, proteins minimal
+            self::NutsSeeds => 15,          // Nuts and seeds are very low GI
+            self::Beverages => 50,          // Varies widely, use moderate default
+            self::CondimentsSauces => 30,   // Typically low due to small portions
+            self::SnacksSweets => 70,       // Snacks/sweets tend to be high GI
+            self::Other => 50,              // Default moderate value
+        };
+    }
 }

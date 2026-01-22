@@ -141,7 +141,29 @@ final class Content extends Model
         /** @var string|null $load */
         $load = $this->body['glycemic_load'] ?? null;
 
-        return $load;
+        if ($load !== null) {
+            return $load;
+        }
+
+        // Calculate GL on-the-fly if not stored in database
+        // Formula: GL = (GI * Net Carbs) / 100
+        // Net Carbs = Total Carbs - Fiber
+        $nutrition = $this->nutrition;
+        $carbs = (float) ($nutrition['carbs'] ?? 0);
+        $fiber = (float) ($nutrition['fiber'] ?? 0);
+        $netCarbs = max(0, $carbs - $fiber);
+
+        // Use category-average GI, or default to 50 if no category
+        $gi = $this->category?->averageGlycemicIndex() ?? 50;
+
+        $calculatedGL = ($gi * $netCarbs) / 100;
+
+        // Classify: Low (0-10), Medium (11-19), High (20+)
+        return match (true) {
+            $calculatedGL <= 10 => 'low',
+            $calculatedGL <= 19 => 'medium',
+            default => 'high',
+        };
     }
 
     /**

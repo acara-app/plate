@@ -88,7 +88,7 @@
             "name": "What is the glycemic load of {{ $displayName }}?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "{{ $displayName }} has a {{ $glycemicLoad ?? 'not yet calculated' }} glycemic load (GL). Glycemic Load accounts for both the quality (GI) and quantity of carbohydrates, making it a more accurate predictor of blood sugar response than GI alone. Low GL is 0-10, Medium is 11-19, and High is 20+."
+                "text": "{{ $displayName }} has a {{ $glycemicLoad }} glycemic load (GL). Per 100g serving, it contains {{ $nutrition['carbs'] ?? 0 }}g of carbohydrates with {{ $nutrition['fiber'] ?? 0 }}g of fiber, resulting in {{ number_format(($nutrition['carbs'] ?? 0) - ($nutrition['fiber'] ?? 0), 1) }}g of net carbs. Glycemic Load accounts for both the quality (GI) and quantity of carbohydrates, making it a more accurate predictor of blood sugar response than GI alone. Low GL is 0-10, Medium is 11-19, and High is 20+."
             }
         },
         {
