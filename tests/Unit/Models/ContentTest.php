@@ -140,10 +140,28 @@ it('returns glycemic load from body', function (): void {
     expect($content->glycemic_load)->toBe('15');
 });
 
-it('returns null when no glycemic load', function (): void {
+it('calculates low glycemic load when no stored value', function (): void {
     $content = Content::factory()->create(['slug' => Str::uuid()->toString(), 'body' => []]);
 
-    expect($content->glycemic_load)->toBeNull();
+    expect($content->glycemic_load)->toBe('low');
+});
+
+it('calculates glycemic load from nutrition and category', function (): void {
+    // Category: Fruits (GI ~40)
+    // Carbs: 50g, Fiber: 0g -> Net Carbs: 50g
+    // GL = (40 * 50) / 100 = 20 -> High (>= 20)
+    $content = Content::factory()->create([
+        'slug' => Str::uuid()->toString(),
+        'category' => FoodCategory::Fruits,
+        'body' => [
+            'nutrition' => [
+                'carbs' => 50,
+                'fiber' => 0,
+            ],
+        ],
+    ]);
+
+    expect($content->glycemic_load)->toBe('high');
 });
 
 it('returns category label from category enum', function (): void {

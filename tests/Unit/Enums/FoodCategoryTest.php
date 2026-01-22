@@ -50,3 +50,18 @@ it('returns correct order for all categories', function (FoodCategory $category,
     'Snacks & Sweets' => [FoodCategory::SnacksSweets, 9],
     'Other' => [FoodCategory::Other, 99],
 ]);
+
+it('returns correct average glycemic index for all categories', function (FoodCategory $category, int $index): void {
+    expect($category->averageGlycemicIndex())->toBe($index);
+})->with([
+    'Fruits' => [FoodCategory::Fruits, 40],
+    'Vegetables' => [FoodCategory::Vegetables, 15],
+    'Grains & Starches' => [FoodCategory::GrainsStarches, 65],
+    'Dairy & Alternatives' => [FoodCategory::DairyAlternatives, 35],
+    'Proteins & Legumes' => [FoodCategory::ProteinsLegumes, 30],
+    'Nuts & Seeds' => [FoodCategory::NutsSeeds, 15],
+    'Beverages' => [FoodCategory::Beverages, 50],
+    'Condiments & Sauces' => [FoodCategory::CondimentsSauces, 30],
+    'Snacks & Sweets' => [FoodCategory::SnacksSweets, 70],
+    'Other' => [FoodCategory::Other, 50],
+]);
