@@ -9,14 +9,14 @@ use App\Services\Contracts\IndexNowServiceInterface;
 use App\Services\Contracts\StripeServiceInterface;
 use App\Services\IndexNowService;
 use App\Services\StripeService;
+use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Cashier\Cashier;
-use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\Date;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -72,7 +72,7 @@ final class AppServiceProvider extends ServiceProvider
         }
     }
 
-      /**
+    /**
      * Configure the dates.
      */
     private function configureDates(): void

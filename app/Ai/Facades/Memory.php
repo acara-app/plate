@@ -44,14 +44,14 @@ use BadMethodCallException;
  * @method static int archive(array $memoryIds)
  * @method static int restore(array $memoryIds)
  */
-class Memory
+final class Memory
 {
     /**
      * Map method names to their tool contracts.
      *
      * @var array<string, class-string>
      */
-    protected static array $tools = [
+    private static array $tools = [
         'store' => StoreMemoryTool::class,
         'search' => SearchMemoryTool::class,
         'get' => GetMemoryTool::class,
@@ -75,9 +75,9 @@ class Memory
      */
     public static function __callStatic(string $method, array $arguments): mixed
     {
-        throw_unless(isset(static::$tools[$method]), BadMethodCallException::class, "Method Memory::{$method}() does not exist.");
+        throw_unless(isset(self::$tools[$method]), BadMethodCallException::class, "Method Memory::{$method}() does not exist.");
 
-        $tool = resolve(static::$tools[$method]);
+        $tool = resolve(self::$tools[$method]);
 
         return $tool(...$arguments);
     }
