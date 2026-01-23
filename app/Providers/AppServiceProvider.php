@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Cashier\Cashier;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Date;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -31,6 +33,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->bootVerificationDefaults();
         $this->bootCashierDefaults();
         $this->bootUrlDefaults();
+        $this->configureDates();
     }
 
     private function bootModelsDefaults(): void
@@ -67,5 +70,13 @@ final class AppServiceProvider extends ServiceProvider
         if (app()->isProduction()) {
             URL::forceScheme('https');
         }
+    }
+
+      /**
+     * Configure the dates.
+     */
+    private function configureDates(): void
+    {
+        Date::use(CarbonImmutable::class);
     }
 }
