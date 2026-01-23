@@ -21,7 +21,7 @@ interface UpdateMemoryTool
      * @throws MemoryNotFoundException When the memory ID does not exist.
      * @throws MemoryStorageException When the update operation fails.
      */
-    public function __invoke(
+    public function execute(
         string $memoryId,
         ?string $content = null,
         ?array $metadata = null,

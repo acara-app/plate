@@ -18,5 +18,5 @@ interface GetMemoryTool
      *
      * @throws MemoryNotFoundException When the memory ID does not exist.
      */
-    public function __invoke(string $memoryId, bool $includeArchived = false): MemoryData;
+    public function execute(string $memoryId, bool $includeArchived = false): MemoryData;
 }

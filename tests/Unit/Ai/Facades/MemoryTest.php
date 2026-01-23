@@ -13,7 +13,7 @@ it('resolves and invokes the correct tool', function (): void {
     // Create a fake tool using anonymous class
     $fakeTool = new class implements StoreMemoryTool
     {
-        public function __invoke(
+        public function execute(
             string $content,
             array $metadata = [],
             ?array $vector = null,

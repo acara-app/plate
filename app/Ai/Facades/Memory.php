@@ -79,6 +79,6 @@ final class Memory
 
         $tool = resolve(self::$tools[$method]);
 
-        return $tool(...$arguments);
+        return $tool->execute(...$arguments);
     }
 }

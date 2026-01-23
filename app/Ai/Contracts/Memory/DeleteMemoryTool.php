@@ -22,5 +22,5 @@ interface DeleteMemoryTool
      * @throws InvalidMemoryFilterException When both $memoryId is null and $filter is empty.
      * @throws MemoryNotFoundException When $memoryId is provided but does not exist.
      */
-    public function __invoke(?string $memoryId = null, array $filter = []): int;
+    public function execute(?string $memoryId = null, array $filter = []): int;
 }

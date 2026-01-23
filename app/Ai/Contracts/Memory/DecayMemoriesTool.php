@@ -27,7 +27,7 @@ interface DecayMemoriesTool
      *     avg_importance_after: float
      * }
      */
-    public function __invoke(
+    public function execute(
         int $ageThresholdDays = 30,
         float $decayFactor = 0.9,
         int $minImportance = 1,

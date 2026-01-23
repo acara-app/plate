@@ -28,7 +28,7 @@ interface LinkMemoriesTool
      * @throws MemoryNotFoundException When any memory ID does not exist.
      * @throws MemoryStorageException When the linking operation fails.
      */
-    public function __invoke(
+    public function execute(
         array $memoryIds,
         string $relationship = 'related',
         bool $bidirectional = true,

@@ -21,7 +21,7 @@ interface SearchMemoryTool
      * @param  bool  $includeArchived  Whether to include archived memories in search.
      * @return array<int, MemorySearchResultData> Ordered by relevance score descending.
      */
-    public function __invoke(
+    public function execute(
         string $query,
         int $limit = 5,
         float $minRelevance = 0.7,

@@ -22,5 +22,5 @@ interface ValidateMemoryTool
      *
      * @throws MemoryNotFoundException When the memory ID does not exist.
      */
-    public function __invoke(string $memoryId, ?string $context = null): MemoryValidationResultData;
+    public function execute(string $memoryId, ?string $context = null): MemoryValidationResultData;
 }

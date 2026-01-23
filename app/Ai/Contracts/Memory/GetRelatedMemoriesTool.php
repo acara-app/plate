@@ -23,7 +23,7 @@ interface GetRelatedMemoriesTool
      *
      * @throws MemoryNotFoundException When the starting memory ID does not exist.
      */
-    public function __invoke(
+    public function execute(
         string $memoryId,
         int $depth = 1,
         array $relationships = [],

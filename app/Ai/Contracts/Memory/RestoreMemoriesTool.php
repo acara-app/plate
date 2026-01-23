@@ -21,5 +21,5 @@ interface RestoreMemoriesTool
      * @throws MemoryNotFoundException When any memory ID does not exist.
      * @throws MemoryStorageException When the restore operation fails.
      */
-    public function __invoke(array $memoryIds): int;
+    public function execute(array $memoryIds): int;
 }

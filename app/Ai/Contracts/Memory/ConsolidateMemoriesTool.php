@@ -25,7 +25,7 @@ interface ConsolidateMemoriesTool
      * @throws MemoryNotFoundException When any of the memory IDs do not exist.
      * @throws MemoryStorageException When the consolidation operation fails.
      */
-    public function __invoke(
+    public function execute(
         array $memoryIds,
         string $synthesizedContent,
         ?array $metadata = null,

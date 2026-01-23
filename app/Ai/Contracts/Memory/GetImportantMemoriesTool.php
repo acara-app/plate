@@ -19,7 +19,7 @@ interface GetImportantMemoriesTool
      * @param  bool  $includeArchived  Whether to include archived memories.
      * @return array<int, MemoryData> List of important memories.
      */
-    public function __invoke(
+    public function execute(
         int $threshold = 8,
         int $limit = 10,
         array $categories = [],

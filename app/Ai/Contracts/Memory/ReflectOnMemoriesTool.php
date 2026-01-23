@@ -20,7 +20,7 @@ interface ReflectOnMemoriesTool
      * @param  array<string>  $categories  Only reflect on memories in these categories (empty = all).
      * @return array<string> List of new insights generated from reflection.
      */
-    public function __invoke(
+    public function execute(
         int $lookbackWindow = 50,
         ?string $context = null,
         array $categories = [],

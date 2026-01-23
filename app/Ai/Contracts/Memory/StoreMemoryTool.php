@@ -25,7 +25,7 @@ interface StoreMemoryTool
      *
      * @throws MemoryStorageException When the storage operation fails.
      */
-    public function __invoke(
+    public function execute(
         string $content,
         array $metadata = [],
         ?array $vector = null,

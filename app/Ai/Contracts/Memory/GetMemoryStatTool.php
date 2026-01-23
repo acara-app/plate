@@ -20,5 +20,5 @@ interface GetMemoryStatTool
      *
      * @return MemoryStatsData Statistics about the memory store.
      */
-    public function __invoke(): MemoryStatsData;
+    public function execute(): MemoryStatsData;
 }
