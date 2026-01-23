@@ -20,6 +20,11 @@ use App\Ai\Contracts\Memory\SearchMemoryTool;
 use App\Ai\Contracts\Memory\StoreMemoryTool;
 use App\Ai\Contracts\Memory\UpdateMemoryTool;
 use App\Ai\Contracts\Memory\ValidateMemoryTool;
+use App\DataObjects\Memory\MemoryData;
+use App\DataObjects\Memory\MemorySearchResultData;
+use App\DataObjects\Memory\MemoryStatsData;
+use App\DataObjects\Memory\MemoryValidationResultData;
+use App\DataObjects\Memory\RelatedMemoryData;
 use BadMethodCallException;
 
 /**
@@ -27,22 +32,22 @@ use BadMethodCallException;
  *
  * Resolves the appropriate tool contract from the container and invokes it.
  *
- * @method static string store(string $content, array $metadata = [], ?array $vector = null, int $importance = 1, array $categories = [], ?\DateTimeInterface $expiresAt = null)
- * @method static array search(string $query, int $limit = 5, float $minRelevance = 0.7, array $filter = [], bool $includeArchived = false)
- * @method static \App\DataObjects\Memory\MemoryData get(string $memoryId, bool $includeArchived = false)
- * @method static bool update(string $memoryId, ?string $content = null, ?array $metadata = null, ?int $importance = null)
- * @method static int delete(?string $memoryId = null, array $filter = [])
- * @method static array categorize(array $memoryIds, bool $persistCategories = true)
- * @method static string consolidate(array $memoryIds, string $synthesizedContent, ?array $metadata = null, ?int $importance = null, bool $deleteOriginals = true)
- * @method static array reflect(int $lookbackWindow = 50, ?string $context = null, array $categories = [])
- * @method static array getImportant(int $threshold = 8, int $limit = 10, array $categories = [], bool $includeArchived = false)
- * @method static \App\DataObjects\Memory\MemoryStatsData getStats()
- * @method static bool link(array $memoryIds, string $relationship = 'related', bool $bidirectional = true)
- * @method static array getRelated(string $memoryId, int $depth = 1, array $relationships = [], bool $includeArchived = false)
- * @method static array decay(int $ageThresholdDays = 30, float $decayFactor = 0.9, int $minImportance = 1, bool $archiveDecayed = true)
- * @method static \App\DataObjects\Memory\MemoryValidationResultData validate(string $memoryId, ?string $context = null)
- * @method static int archive(array $memoryIds)
- * @method static int restore(array $memoryIds)
+ * @method static string store(string $content, array<string, mixed> $metadata = [], array<float>|null $vector = null, int $importance = 1, array<string> $categories = [], \DateTimeInterface|null $expiresAt = null)
+ * @method static array<int, MemorySearchResultData> search(string $query, int $limit = 5, float $minRelevance = 0.7, array<string, mixed> $filter = [], bool $includeArchived = false)
+ * @method static MemoryData get(string $memoryId, bool $includeArchived = false)
+ * @method static bool update(string $memoryId, string|null $content = null, array<string, mixed>|null $metadata = null, int|null $importance = null)
+ * @method static int delete(string|null $memoryId = null, array<string, mixed> $filter = [])
+ * @method static array<string, array<string>|null> categorize(array<string> $memoryIds, bool $persistCategories = true)
+ * @method static string consolidate(array<string> $memoryIds, string $synthesizedContent, array<string, mixed>|null $metadata = null, int|null $importance = null, bool $deleteOriginals = true)
+ * @method static array<string> reflect(int $lookbackWindow = 50, string|null $context = null, array<string> $categories = [])
+ * @method static array<int, MemoryData> getImportant(int $threshold = 8, int $limit = 10, array<string> $categories = [], bool $includeArchived = false)
+ * @method static MemoryStatsData getStats()
+ * @method static bool link(array<string> $memoryIds, string $relationship = 'related', bool $bidirectional = true)
+ * @method static array<int, RelatedMemoryData> getRelated(string $memoryId, int $depth = 1, array<string> $relationships = [], bool $includeArchived = false)
+ * @method static array{decayed_count: int, archived_count: int, avg_importance_before: float, avg_importance_after: float} decay(int $ageThresholdDays = 30, float $decayFactor = 0.9, int $minImportance = 1, bool $archiveDecayed = true)
+ * @method static MemoryValidationResultData validate(string $memoryId, string|null $context = null)
+ * @method static int archive(array<string> $memoryIds)
+ * @method static int restore(array<string> $memoryIds)
  */
 final class Memory
 {
@@ -77,8 +82,10 @@ final class Memory
     {
         throw_unless(isset(self::$tools[$method]), BadMethodCallException::class, "Method Memory::{$method}() does not exist.");
 
+        /** @var object $tool */
         $tool = resolve(self::$tools[$method]);
 
+        /** @phpstan-ignore-next-line */
         return $tool->execute(...$arguments);
     }
 }
