@@ -136,7 +136,7 @@ final class Content extends Model
         return $assessment;
     }
 
-    protected function getGlycemicLoadAttribute(): ?string
+    protected function getGlycemicLoadAttribute(): string
     {
         /** @var string|null $load */
         $load = $this->body['glycemic_load'] ?? null;
