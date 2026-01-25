@@ -13,73 +13,85 @@ import {
     Profile,
 } from '@/types';
 
-const GOAL_OPTIONS = [
-    {
-        value: GoalChoice.Spikes,
-        label: 'Control Spikes',
-        description: 'Focus: Stable Blood Sugar',
-    },
-    {
-        value: GoalChoice.WeightLoss,
-        label: 'Deep Weight Loss',
-        description: 'Focus: Burning Fat',
-    },
-    {
-        value: GoalChoice.HeartHealth,
-        label: 'Heart Health',
-        description: 'Focus: Cholesterol/BP',
-    },
-    {
-        value: GoalChoice.BuildMuscle,
-        label: 'Build Muscle',
-        description: 'Focus: Strength & Hypertrophy',
-    },
-    {
-        value: GoalChoice.HealthyEating,
-        label: 'Just Healthy Eating',
-        description: 'Maintenance / No specific goal',
-    },
-];
-
-const ANIMAL_PRODUCT_OPTIONS = [
-    {
-        value: AnimalProductChoice.Omnivore,
-        label: 'I love meat/fish.',
-    },
-    {
-        value: AnimalProductChoice.Pescatarian,
-        label: 'I prefer plants, but eat fish/eggs.',
-    },
-    {
-        value: AnimalProductChoice.Vegan,
-        label: 'Strictly plants only.',
-    },
-];
-
-const INTENSITY_OPTIONS = [
-    {
-        value: IntensityChoice.Balanced,
-        label: 'Balanced (Sustainable)',
-    },
-    {
-        value: IntensityChoice.Aggressive,
-        label: 'Aggressive (Fast Results)',
-    },
-];
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     profile?: Profile;
 }
 
 export default function Identity({ profile }: Props) {
+    const { t } = useTranslation('common');
+
+    const GOAL_OPTIONS = [
+        {
+            value: GoalChoice.Spikes,
+            label: t('onboarding.identity.options.goals.spikes'),
+            description: t('onboarding.identity.options.goals.spikes_desc'),
+        },
+        {
+            value: GoalChoice.WeightLoss,
+            label: t('onboarding.identity.options.goals.weight_loss'),
+            description: t(
+                'onboarding.identity.options.goals.weight_loss_desc',
+            ),
+        },
+        {
+            value: GoalChoice.HeartHealth,
+            label: t('onboarding.identity.options.goals.heart_health'),
+            description: t(
+                'onboarding.identity.options.goals.heart_health_desc',
+            ),
+        },
+        {
+            value: GoalChoice.BuildMuscle,
+            label: t('onboarding.identity.options.goals.build_muscle'),
+            description: t(
+                'onboarding.identity.options.goals.build_muscle_desc',
+            ),
+        },
+        {
+            value: GoalChoice.HealthyEating,
+            label: t('onboarding.identity.options.goals.healthy_eating'),
+            description: t(
+                'onboarding.identity.options.goals.healthy_eating_desc',
+            ),
+        },
+    ];
+
+    const ANIMAL_PRODUCT_OPTIONS = [
+        {
+            value: AnimalProductChoice.Omnivore,
+            label: t('onboarding.identity.options.animal_products.omnivore'),
+        },
+        {
+            value: AnimalProductChoice.Pescatarian,
+            label: t('onboarding.identity.options.animal_products.pescatarian'),
+        },
+        {
+            value: AnimalProductChoice.Vegan,
+            label: t('onboarding.identity.options.animal_products.vegan'),
+        },
+    ];
+
+    const INTENSITY_OPTIONS = [
+        {
+            value: IntensityChoice.Balanced,
+            label: t('onboarding.identity.options.intensity.balanced'),
+        },
+        {
+            value: IntensityChoice.Aggressive,
+            label: t('onboarding.identity.options.intensity.aggressive'),
+        },
+    ];
+
     return (
         <>
-            <Head title="Let's Create Your Perfect Plan" />
+            <Head title={t('onboarding.identity.title')} />
             <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900">
                 <div className="w-full max-w-2xl">
                     <div className="mb-8">
                         <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
-                            <span>Step 2 of 3</span>
+                            <span>{t('onboarding.identity.step')}</span>
                             <span>66%</span>
                         </div>
                         <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
@@ -92,11 +104,10 @@ export default function Identity({ profile }: Props) {
 
                     <div className="rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
                         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
-                            Let's Create Your Perfect Plan
+                            {t('onboarding.identity.heading')}
                         </h1>
                         <p className="mb-6 text-gray-600 dark:text-gray-300">
-                            Answer 3 quick questions to generate your
-                            personalized meal plan.
+                            {t('onboarding.identity.description')}
                         </p>
 
                         <Form
@@ -108,7 +119,9 @@ export default function Identity({ profile }: Props) {
                                 <>
                                     <div>
                                         <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
-                                            1. What is your primary mission?
+                                            {t(
+                                                'onboarding.identity.questions.mission',
+                                            )}
                                         </h2>
                                         <div className="space-y-3">
                                             {GOAL_OPTIONS.map((option) => (
@@ -149,8 +162,9 @@ export default function Identity({ profile }: Props) {
 
                                     <div>
                                         <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
-                                            2. How do you feel about animal
-                                            products?
+                                            {t(
+                                                'onboarding.identity.questions.animal_products',
+                                            )}
                                         </h2>
                                         <div className="space-y-3">
                                             {ANIMAL_PRODUCT_OPTIONS.map(
@@ -190,8 +204,9 @@ export default function Identity({ profile }: Props) {
 
                                     <div>
                                         <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
-                                            3. Do you want a balanced lifestyle
-                                            or an aggressive reset?
+                                            {t(
+                                                'onboarding.identity.questions.intensity',
+                                            )}
                                         </h2>
                                         <div className="space-y-3">
                                             {INTENSITY_OPTIONS.map((option) => (
@@ -233,7 +248,7 @@ export default function Identity({ profile }: Props) {
                                         {processing && (
                                             <LoaderCircle className="h-4 w-4 animate-spin" />
                                         )}
-                                        Generate My Meal Plan
+                                        {t('onboarding.identity.submit')}
                                     </Button>
                                 </>
                             )}

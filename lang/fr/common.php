@@ -206,6 +206,41 @@ return [
             'meal_plan_ready' => 'Votre plan de repas personnalisé sera prêt dans quelques instants',
             'update_preferences' => 'Vous pouvez toujours mettre à jour vos préférences et informations de profil dans vos paramètres.',
         ],
+        'identity' => [
+            'title' => 'Créons votre plan parfait',
+            'step' => 'Étape 2 sur 3',
+            'heading' => 'Créons votre plan parfait',
+            'description' => 'Répondez à 3 questions rapides pour nous aider à concevoir un plan de repas adapté à votre vie.',
+            'questions' => [
+                'mission' => '1. Quelle est votre mission principale ?',
+                'animal_products' => '2. Que pensez-vous des produits d\'origine animale ?',
+                'intensity' => '3. Quel est votre rythme préféré ?',
+            ],
+            'options' => [
+                'goals' => [
+                    'spikes' => 'Contrôler les pics',
+                    'spikes_desc' => 'Focus : Glycémie stable',
+                    'weight_loss' => 'Perte de poids profonde',
+                    'weight_loss_desc' => 'Focus : Brûler les graisses',
+                    'heart_health' => 'Santé cardiaque',
+                    'heart_health_desc' => 'Focus : Cholestérol/Tension',
+                    'build_muscle' => 'Prendre du muscle',
+                    'build_muscle_desc' => 'Focus : Force et hypertrophie',
+                    'healthy_eating' => 'Manger sainement',
+                    'healthy_eating_desc' => 'Maintenance / Pas d\'objectif spécifique',
+                ],
+                'animal_products' => [
+                    'omnivore' => 'J\'aime la viande et le poisson',
+                    'pescatarian' => 'Je préfère les plantes, mais mange du poisson et des œufs',
+                    'vegan' => 'Strictement végétal uniquement',
+                ],
+                'intensity' => [
+                    'balanced' => 'Équilibré (Durable)',
+                    'aggressive' => 'Agressif (Résultats rapides)',
+                ],
+            ],
+            'submit' => 'Compléter le profil',
+        ],
         'dietary_preferences' => [
             'title' => 'Préférences alimentaires - Étape 4 sur 7',
             'heading' => 'Préférences alimentaires',

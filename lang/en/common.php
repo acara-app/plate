@@ -340,6 +340,41 @@ return [
             'days' => 'days',
             'summary' => 'We\'ll create {{count}} days of personalized meals for you',
         ],
+        'identity' => [
+            'title' => 'Let\'s Create Your Perfect Plan',
+            'step' => 'Step 2 of 3',
+            'heading' => 'Let\'s Create Your Perfect Plan',
+            'description' => 'Answer 3 quick questions to help us design a meal plan that fits your life.',
+            'questions' => [
+                'mission' => '1. What is your primary mission?',
+                'animal_products' => '2. How do you feel about animal products?',
+                'intensity' => '3. What\'s your preferred pace?',
+            ],
+            'options' => [
+                'goals' => [
+                    'spikes' => 'Control Spikes',
+                    'spikes_desc' => 'Focus: Stable Blood Sugar',
+                    'weight_loss' => 'Deep Weight Loss',
+                    'weight_loss_desc' => 'Focus: Burning Fat',
+                    'heart_health' => 'Heart Health',
+                    'heart_health_desc' => 'Focus: Cholesterol/BP',
+                    'build_muscle' => 'Build Muscle',
+                    'build_muscle_desc' => 'Focus: Strength & Hypertrophy',
+                    'healthy_eating' => 'Just Healthy Eating',
+                    'healthy_eating_desc' => 'Maintenance / No specific goal',
+                ],
+                'animal_products' => [
+                    'omnivore' => 'I love meat & fish',
+                    'pescatarian' => 'I prefer plants, but eat fish & eggs',
+                    'vegan' => 'Strictly plants only',
+                ],
+                'intensity' => [
+                    'balanced' => 'Balanced (Sustainable)',
+                    'aggressive' => 'Aggressive (Fast Results)',
+                ],
+            ],
+            'submit' => 'Complete Profile',
+        ],
     ],
 
     // Diabetes Log
