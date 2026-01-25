@@ -60,10 +60,8 @@ export interface Profile {
     height?: number;
     weight?: number;
     sex?: string;
-    goal_id?: number;
     target_weight?: number;
     additional_goals?: string;
-    lifestyle_id?: number;
     goal_choice?: string;
     animal_product_choice?: string;
     intensity_choice?: string;
