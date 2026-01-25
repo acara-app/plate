@@ -58,6 +58,27 @@ export default function Dashboard() {
                             </Link>
                         </CardContent>
                     </Card>
+
+                    {/* Meal Plans Card */}
+                    <Card className="flex flex-col transition-shadow hover:shadow-md">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <span className="text-2xl">🍽️</span>
+                                {t('dashboard_cards.meal_plans.title')}
+                            </CardTitle>
+                            <CardDescription>
+                                {t('dashboard_cards.meal_plans.description')}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="mt-auto">
+                            <Link href={mealPlans.index().url}>
+                                <Button className="w-full">
+                                    {t('dashboard_cards.meal_plans.button')}
+                                </Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
+
                     {/* Diabetes Insights Card */}
                     <Card className="flex flex-col transition-shadow hover:shadow-md">
                         <CardHeader>
@@ -97,26 +118,6 @@ export default function Dashboard() {
                             <Link href={diabetesLog.dashboard().url}>
                                 <Button className="w-full">
                                     {t('dashboard_cards.diabetes_log.button')}
-                                </Button>
-                            </Link>
-                        </CardContent>
-                    </Card>
-
-                    {/* Weekly Meal Plans Card */}
-                    <Card className="flex flex-col transition-shadow hover:shadow-md">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <span className="text-2xl">🍽️</span>
-                                {t('dashboard_cards.meal_plans.title')}
-                            </CardTitle>
-                            <CardDescription>
-                                {t('dashboard_cards.meal_plans.description')}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="mt-auto">
-                            <Link href={mealPlans.index().url}>
-                                <Button className="w-full">
-                                    {t('dashboard_cards.meal_plans.button')}
                                 </Button>
                             </Link>
                         </CardContent>
