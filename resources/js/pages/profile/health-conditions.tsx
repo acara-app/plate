@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { GlucoseUnit, type GlucoseUnitType } from '@/types/diabetes';
 import { useTranslation } from 'react-i18next';
@@ -58,7 +59,7 @@ export default function HealthConditions({
     };
 
     return (
-        <>
+        <AppLayout>
             <Head title={t('onboarding.health_conditions.title')} />
             <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
                 <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
@@ -278,6 +279,6 @@ export default function HealthConditions({
                     )}
                 </Form>
             </div>
-        </>
+        </AppLayout>
     );
 }

@@ -8,6 +8,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
 import { generateUUID } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 
@@ -87,7 +88,7 @@ export default function Medications({ medications }: Props) {
     ];
 
     return (
-        <>
+        <AppLayout>
             <Head title={t('onboarding.medications.title')} />
             <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
                 <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
@@ -333,6 +334,6 @@ export default function Medications({ medications }: Props) {
                     )}
                 </Form>
             </div>
-        </>
+        </AppLayout>
     );
 }
