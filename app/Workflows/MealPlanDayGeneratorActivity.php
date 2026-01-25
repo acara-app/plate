@@ -8,6 +8,7 @@ use App\Ai\Agents\MealPlanGeneratorAgent;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\PreviousDayContext;
+use App\Models\MealPlan;
 use App\Models\User;
 use Workflow\Activity;
 
@@ -22,6 +23,7 @@ final class MealPlanDayGeneratorActivity extends Activity
         int $totalDays,
         PreviousDayContext $previousDaysContext,
         ?GlucoseAnalysisData $glucoseAnalysis = null,
+        ?MealPlan $mealPlan = null,
     ): DayMealsData {
         /** @var MealPlanGeneratorAgent $generateMealPlan */
         $generateMealPlan = resolve(MealPlanGeneratorAgent::class);
@@ -32,6 +34,7 @@ final class MealPlanDayGeneratorActivity extends Activity
             $totalDays,
             $previousDaysContext,
             $glucoseAnalysis,
+            $mealPlan,
         );
     }
 }

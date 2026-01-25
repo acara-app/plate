@@ -35,6 +35,8 @@ Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])-
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', [Web\DashboardController::class, 'show'])->name('dashboard');
 
+    Route::get('meal-plans/create', Web\CreateMealPlanController::class)->name('meal-plans.create');
+    Route::post('meal-plans', Web\StoreMealPlanController::class)->name('meal-plans.store');
     Route::get('meal-plans', Web\ShowMealPlansController::class)->name('meal-plans.index');
     Route::get('meal-plans/{mealPlan}/print', Web\PrintMealPlanController::class)->name('meal-plans.print');
     Route::post('meal-plans/{mealPlan}/generate-day', Web\GenerateMealDayController::class)->name('meal-plans.generate-day');
@@ -48,8 +50,6 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::patch('grocery-items/{groceryItem}/toggle', [Web\GroceryListController::class, 'toggleItem'])->name('grocery-items.toggle');
 
     Route::get('chat/create', [Web\ChatController::class, 'create'])->name('chat.create');
-
-    Route::get('ongoing-tracking/food-log/create', [Web\FoodLogController::class, 'create'])->name('food-log.create');
 
     Route::get('diabetes-log', Web\Diabetes\ListDiabetesLogController::class)->name('diabetes-log.index');
     Route::get('diabetes-log/tracking', Web\Diabetes\DashboardDiabetesLogController::class)->name('diabetes-log.dashboard');
@@ -65,23 +65,8 @@ Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(fu
     Route::get('/biometrics', [Web\OnboardingController::class, 'showBiometrics'])->name('biometrics.show');
     Route::post('/biometrics', [Web\OnboardingController::class, 'storeBiometrics'])->name('biometrics.store');
 
-    Route::get('/goals', [Web\OnboardingController::class, 'showGoals'])->name('goals.show');
-    Route::post('/goals', [Web\OnboardingController::class, 'storeGoals'])->name('goals.store');
-
-    Route::get('/lifestyle', [Web\OnboardingController::class, 'showLifestyle'])->name('lifestyle.show');
-    Route::post('/lifestyle', [Web\OnboardingController::class, 'storeLifestyle'])->name('lifestyle.store');
-
-    Route::get('/dietary-preferences', [Web\OnboardingController::class, 'showDietaryPreferences'])->name('dietary-preferences.show');
-    Route::post('/dietary-preferences', [Web\OnboardingController::class, 'storeDietaryPreferences'])->name('dietary-preferences.store');
-
-    Route::get('/health-conditions', [Web\OnboardingController::class, 'showHealthConditions'])->name('health-conditions.show');
-    Route::post('/health-conditions', [Web\OnboardingController::class, 'storeHealthConditions'])->name('health-conditions.store');
-
-    Route::get('/medications', [Web\OnboardingController::class, 'showMedications'])->name('medications.show');
-    Route::post('/medications', [Web\OnboardingController::class, 'storeMedications'])->name('medications.store');
-
-    Route::get('/meal-plan-duration', [Web\OnboardingController::class, 'showMealPlanDuration'])->name('meal-plan-duration.show');
-    Route::post('/meal-plan-duration', [Web\OnboardingController::class, 'storeMealPlanDuration'])->name('meal-plan-duration.store');
+    Route::get('/identity', [Web\OnboardingController::class, 'showIdentity'])->name('identity.show');
+    Route::post('/identity', [Web\OnboardingController::class, 'storeIdentity'])->name('identity.store');
 
     Route::get('/completion', [Web\OnboardingController::class, 'showCompletion'])->name('completion.show');
 
@@ -90,6 +75,16 @@ Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(fu
 Route::middleware('auth')->group(function (): void {
     // User...
     Route::delete('user', [Web\UserController::class, 'destroy'])->name('user.destroy');
+
+    // Profile Settings...
+    Route::get('profile/dietary-preferences', [Web\ProfileController::class, 'showDietaryPreferences'])->name('profile.dietary-preferences.show');
+    Route::post('profile/dietary-preferences', [Web\ProfileController::class, 'storeDietaryPreferences'])->name('profile.dietary-preferences.store');
+
+    Route::get('profile/health-conditions', [Web\ProfileController::class, 'showHealthConditions'])->name('profile.health-conditions.show');
+    Route::post('profile/health-conditions', [Web\ProfileController::class, 'storeHealthConditions'])->name('profile.health-conditions.store');
+
+    Route::get('profile/medications', [Web\ProfileController::class, 'showMedications'])->name('profile.medications.show');
+    Route::post('profile/medications', [Web\ProfileController::class, 'storeMedications'])->name('profile.medications.store');
 
     // User Profile...
     Route::redirect('settings', '/settings/profile');

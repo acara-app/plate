@@ -124,21 +124,9 @@ Based on the user's goals, aim for the following macronutrient distribution:
 
 ## Lifestyle
 
-@if($context->lifestyle)
-- **Activity Level**: {{ $context->lifestyle->activityLevel }}
-- **Lifestyle Type**: {{ $context->lifestyle->name }}
-@if($context->lifestyle->sleepHours)
-- **Sleep Hours**: {{ $context->lifestyle->sleepHours }}
-@endif
-@if($context->lifestyle->occupation)
-- **Occupation**: {{ $context->lifestyle->occupation }}
-@endif
-@if($context->lifestyle->description)
-- **Description**: {{ $context->lifestyle->description }}
-@endif
-@else
-- No lifestyle information provided
-@endif
+## Activity and Lifestyle
+- Activity multiplier calculated based on diet goals and intensity settings
+- No detailed lifestyle tracking required for meal planning
 
 ## Dietary Preferences
 

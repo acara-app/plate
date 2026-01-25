@@ -5,9 +5,7 @@ declare(strict_types=1);
 use App\Enums\DietaryPreferenceType;
 use App\Enums\Sex;
 use App\Models\DietaryPreference;
-use App\Models\Goal;
 use App\Models\HealthCondition;
-use App\Models\Lifestyle;
 use App\Models\User;
 use App\Models\UserProfile;
 
@@ -23,10 +21,9 @@ test('to array', function (): void {
             'height',
             'weight',
             'sex',
-            'goal_id',
+            'goal_choice',
             'target_weight',
             'additional_goals',
-            'lifestyle_id',
             'onboarding_completed',
             'onboarding_completed_at',
             'created_at',
@@ -45,24 +42,6 @@ test('belongs to user', function (): void {
     expect($profile->user)
         ->toBeInstanceOf(User::class)
         ->id->toBe($user->id);
-});
-
-test('belongs to goal', function (): void {
-    $goal = Goal::factory()->create();
-    $profile = UserProfile::factory()->for($goal)->create();
-
-    expect($profile->goal)
-        ->toBeInstanceOf(Goal::class)
-        ->id->toBe($goal->id);
-});
-
-test('belongs to lifestyle', function (): void {
-    $lifestyle = Lifestyle::factory()->create();
-    $profile = UserProfile::factory()->for($lifestyle)->create();
-
-    expect($profile->lifestyle)
-        ->toBeInstanceOf(Lifestyle::class)
-        ->id->toBe($lifestyle->id);
 });
 
 test('belongs to many dietary preferences', function (): void {
@@ -205,26 +184,13 @@ test('calculate tdee returns null when bmr cannot be calculated', function (): v
     expect($profile->tdee)->toBeNull();
 });
 
-test('calculate tdee returns null when lifestyle is missing', function (): void {
-    $profile = UserProfile::factory()->create([
-        'weight' => 70,
-        'height' => 175,
-        'age' => 30,
-        'sex' => Sex::Male,
-        'lifestyle_id' => null,
-    ]);
-
-    expect($profile->tdee)->toBeNull();
-});
-
 test('calculate tdee returns correct value', function (): void {
-    $lifestyle = Lifestyle::factory()->create(['activity_multiplier' => 1.55]);
     $profile = UserProfile::factory()->create([
         'weight' => 70,
         'height' => 175,
         'age' => 30,
         'sex' => Sex::Male,
-        'lifestyle_id' => $lifestyle->id,
+        'derived_activity_multiplier' => 1.55,
     ]);
 
     $bmr = $profile->bmr;

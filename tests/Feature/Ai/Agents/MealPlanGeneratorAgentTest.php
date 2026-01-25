@@ -3,10 +3,9 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\MealPlanGeneratorAgent;
+use App\Enums\GoalChoice;
 use App\Enums\MealPlanType;
 use App\Enums\Sex;
-use App\Models\Goal;
-use App\Models\Lifestyle;
 use App\Models\UsdaFoundationFood;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,20 +31,14 @@ it('generates a meal plan using PrismPHP', function (): void {
     ]);
 
     $user = User::factory()->create();
-    $goal = Goal::factory()->create(['name' => 'Weight Loss']);
-    $lifestyle = Lifestyle::factory()->create([
-        'name' => 'Active',
-        'activity_level' => 'moderate',
-        'activity_multiplier' => 1.5,
-    ]);
 
     $user->profile()->create([
         'age' => 30,
         'height' => 175.0,
         'weight' => 80.0,
         'sex' => Sex::Male,
-        'goal_id' => $goal->id,
-        'lifestyle_id' => $lifestyle->id,
+        'goal_choice' => GoalChoice::WeightLoss->value,
+        'derived_activity_multiplier' => 1.5,
         'target_weight' => 75.0,
     ]);
 
@@ -106,22 +99,19 @@ it('generates a meal plan using PrismPHP', function (): void {
         ->dayNumber->toBe(1)
         ->name->toBe('Greek Yogurt Bowl');
 
-    // Note: calories may be adjusted by nutrition verification/correction
     expect($mealPlanData->meals[0]->calories)->toBeGreaterThan(0);
 });
 
 it('uses the correct AI model from enum', function (): void {
     $user = User::factory()->create();
-    $goal = Goal::factory()->create();
-    $lifestyle = Lifestyle::factory()->create();
 
     $user->profile()->create([
         'age' => 25,
         'height' => 170.0,
         'weight' => 65.0,
         'sex' => Sex::Female,
-        'goal_id' => $goal->id,
-        'lifestyle_id' => $lifestyle->id,
+        'goal_choice' => GoalChoice::WeightLoss->value,
+        'derived_activity_multiplier' => 1.3,
     ]);
 
     $mockResponse = [
@@ -152,40 +142,34 @@ it('starts workflow when handle is called', function (): void {
     WorkflowStub::fake();
 
     $user = User::factory()->create();
-    $goal = Goal::factory()->create();
-    $lifestyle = Lifestyle::factory()->create();
 
     $user->profile()->create([
         'age' => 30,
         'height' => 175.0,
         'weight' => 80.0,
         'sex' => Sex::Male,
-        'goal_id' => $goal->id,
-        'lifestyle_id' => $lifestyle->id,
+        'goal_choice' => GoalChoice::WeightLoss->value,
+        'derived_activity_multiplier' => 1.5,
     ]);
 
     $action = resolve(MealPlanGeneratorAgent::class);
     $action->handle($user);
 
-    // Meal plan is created synchronously before workflow starts
     $mealPlan = $user->mealPlans()->first();
     expect($mealPlan)->not->toBeNull();
     expect($mealPlan->metadata['status'])->toBe('generating');
 });
 
 it('handles meals with no ingredients', function (): void {
-    // No HTTP mock needed since meals have no ingredients to verify
     $user = User::factory()->create();
-    $goal = Goal::factory()->create();
-    $lifestyle = Lifestyle::factory()->create();
 
     $user->profile()->create([
         'age' => 30,
         'height' => 175.0,
         'weight' => 80.0,
         'sex' => Sex::Male,
-        'goal_id' => $goal->id,
-        'lifestyle_id' => $lifestyle->id,
+        'goal_choice' => GoalChoice::WeightLoss->value,
+        'derived_activity_multiplier' => 1.5,
     ]);
 
     $mockResponse = [
@@ -202,7 +186,7 @@ it('handles meals with no ingredients', function (): void {
                 'name' => 'Simple Meal',
                 'description' => 'No ingredients specified',
                 'preparation_instructions' => 'Quick prep',
-                'ingredients' => [], // Empty ingredients array
+                'ingredients' => [],
                 'portion_size' => '1 serving',
                 'calories' => 300.0,
                 'protein_grams' => 20.0,
@@ -217,7 +201,7 @@ it('handles meals with no ingredients', function (): void {
                 'name' => 'Another Meal',
                 'description' => 'Null ingredients',
                 'preparation_instructions' => 'Simple',
-                'ingredients' => null, // Null ingredients
+                'ingredients' => null,
                 'portion_size' => '1 serving',
                 'calories' => 400.0,
                 'protein_grams' => 25.0,
@@ -247,18 +231,15 @@ it('handles meals with no ingredients', function (): void {
 });
 
 it('works without file search store configured', function (): void {
-    // Don't set any file search store setting
     $user = User::factory()->create();
-    $goal = Goal::factory()->create();
-    $lifestyle = Lifestyle::factory()->create();
 
     $user->profile()->create([
         'age' => 30,
         'height' => 175.0,
         'weight' => 80.0,
         'sex' => Sex::Male,
-        'goal_id' => $goal->id,
-        'lifestyle_id' => $lifestyle->id,
+        'goal_choice' => GoalChoice::WeightLoss->value,
+        'derived_activity_multiplier' => 1.5,
     ]);
 
     $mockResponse = [
@@ -288,20 +269,17 @@ it('works without file search store configured', function (): void {
 });
 
 it('uses file search store when configured', function (): void {
-    // Set the file search store setting
     App\Models\Setting::set(App\Enums\SettingKey::GeminiFileSearchStoreName, 'test-store-name');
 
     $user = User::factory()->create();
-    $goal = Goal::factory()->create();
-    $lifestyle = Lifestyle::factory()->create();
 
     $user->profile()->create([
         'age' => 30,
         'height' => 175.0,
         'weight' => 80.0,
         'sex' => Sex::Male,
-        'goal_id' => $goal->id,
-        'lifestyle_id' => $lifestyle->id,
+        'goal_choice' => GoalChoice::HealthyEating->value,
+        'derived_activity_multiplier' => 1.3,
     ]);
 
     $mockResponse = [

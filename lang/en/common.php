@@ -117,7 +117,6 @@ return [
     'show_less' => 'Show less',
     'expand' => 'Expand',
     'collapse' => 'Collapse',
-
     // OAuth
     'continue_with_google' => 'Continue with Google',
     'sign_in_with_google' => 'Sign in with Google',
@@ -154,29 +153,27 @@ return [
     // Dashboard
     'dashboard_cards' => [
         'diabetes_insights' => [
-            'title' => 'Diabetes Insights',
-            'description' => 'View your glucose analysis, trends, and personalized recommendations',
-            'button' => 'View Insights',
+            'title' => 'My Trends',
+            'description' => 'See how your choices are affecting your health.',
+            'button' => 'Check Trends',
         ],
         'diabetes_log' => [
-            'title' => 'Diabetes Log',
-            'description' => 'Track your glucose, insulin, medications, and more',
-            'button' => 'Track Diabetes',
+            'title' => 'Logbook',
+            'description' => 'Log your vitals, food, and meds in seconds.',
+            'button' => 'Log Entry',
         ],
         'meal_plans' => [
-            'title' => 'Weekly Meal Plans',
-            'description' => 'View and manage your personalized weekly meal plans',
-            'button' => 'View Meal Plans',
+            'title' => 'My Menu',
+            'description' => 'See what\'s on the menu.',
+            'button' => 'View Menu',
+            'create' => 'Plan My Meals',
+            'create_txt' => 'Get a fresh custom menu designed just for you.',
+            'create_button' => 'Create Menu',
         ],
         'chat' => [
-            'title' => 'Nutrition Chat',
-            'description' => 'Get personalized nutrition advice and answers to your questions',
-            'button' => 'Start Chat',
-        ],
-        'food_log' => [
-            'title' => 'Food Log',
-            'description' => 'Track your daily food intake and monitor your progress',
-            'button' => 'Log Food',
+            'title' => 'Ask a Nutritionist',
+            'description' => 'Have questions? Get instant expert advice.',
+            'button' => 'Chat Now',
         ],
     ],
 
@@ -325,7 +322,7 @@ return [
             'no_medications' => 'No medications added yet',
             'add_another' => 'Add Another Medication',
             'select_frequency' => 'Select frequency',
-            'medication_number' => 'Medication #:number',
+            'medication_number' => 'Medication #{{number}}',
             'info' => 'This information helps us avoid recommending foods that may interact with your medications and ensures your meal plan supports your health goals.',
             'exit' => 'Exit',
             'skip' => 'Skip',
@@ -342,6 +339,41 @@ return [
             'day' => 'day',
             'days' => 'days',
             'summary' => 'We\'ll create {{count}} days of personalized meals for you',
+        ],
+        'identity' => [
+            'title' => 'Let\'s Create Your Perfect Plan',
+            'step' => 'Step 2 of 3',
+            'heading' => 'Let\'s Create Your Perfect Plan',
+            'description' => 'Answer 3 quick questions to help us design a meal plan that fits your life.',
+            'questions' => [
+                'mission' => '1. What is your primary mission?',
+                'animal_products' => '2. How do you feel about animal products?',
+                'intensity' => '3. What\'s your preferred pace?',
+            ],
+            'options' => [
+                'goals' => [
+                    'spikes' => 'Control Spikes',
+                    'spikes_desc' => 'Focus: Stable Blood Sugar',
+                    'weight_loss' => 'Deep Weight Loss',
+                    'weight_loss_desc' => 'Focus: Burning Fat',
+                    'heart_health' => 'Heart Health',
+                    'heart_health_desc' => 'Focus: Cholesterol/BP',
+                    'build_muscle' => 'Build Muscle',
+                    'build_muscle_desc' => 'Focus: Strength & Hypertrophy',
+                    'healthy_eating' => 'Just Healthy Eating',
+                    'healthy_eating_desc' => 'Maintenance / No specific goal',
+                ],
+                'animal_products' => [
+                    'omnivore' => 'I love meat & fish',
+                    'pescatarian' => 'I prefer plants, but eat fish & eggs',
+                    'vegan' => 'Strictly plants only',
+                ],
+                'intensity' => [
+                    'balanced' => 'Balanced (Sustainable)',
+                    'aggressive' => 'Aggressive (Fast Results)',
+                ],
+            ],
+            'submit' => 'Complete Profile',
         ],
     ],
 
@@ -403,6 +435,7 @@ return [
             'cancel' => 'Cancel',
             'create' => 'Create',
             'update' => 'Update',
+            'save' => 'Save',
         ],
         'correlation_chart' => [
             'title' => 'Glucose & Factor Correlation',
@@ -629,13 +662,18 @@ return [
         ],
     ],
     'sidebar' => [
-        'group_label' => 'Planning',
+        'group_label' => 'Start Here',
         'nav' => [
+            'planning' => 'My Wellness',
+            'context' => 'My Profile',
             'home' => 'Home',
-            'meal_plans' => 'Meal Plans',
-            'diabetes_insights' => 'Diabetes Insights',
-            'diabetes_log' => 'Diabetes Log',
-            'update_info' => 'Update Your Info',
+            'meal_plans' => 'My Menu',
+            'diabetes_insights' => 'Health Patterns',
+            'diabetes_log' => 'Logbook',
+            'update_info' => 'Personal Details',
+            'dietary_preferences' => 'Food Preferences',
+            'health_conditions' => 'Health Conditions',
+            'medications' => 'Medications',
             'terms' => 'Terms of Service',
             'privacy' => 'Privacy Policy',
         ],
@@ -702,6 +740,15 @@ return [
         'day_card' => [
             'day' => 'Day {{number}}',
             'no_meals' => 'No meals planned for this day',
+        ],
+        'create' => [
+            'title' => 'Create Your Meal Plan',
+            'description' => 'Your personalized 3-day meal plan with AI-powered customization',
+            'prompt_label' => 'Any special requests? (Optional)',
+            'prompt_placeholder' => 'e.g., I love spicy food, prefer chicken over beef, avoid onions, allergic to peanuts, need vegetarian options on Mondays...',
+            'prompt_hint' => 'Add any dietary preferences, restrictions, or requests for your AI meal plan assistant',
+            'note' => 'Note: Your meal plan will be 3 days by default with recipes and grocery list',
+            'button' => 'Generate My Meal Plan',
         ],
     ],
     'grocery_list' => [

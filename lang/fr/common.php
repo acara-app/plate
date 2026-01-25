@@ -167,16 +167,14 @@ return [
             'title' => 'Plans de repas hebdomadaires',
             'description' => 'Consultez et gérez vos plans de repas hebdomadaires personnalisés',
             'button' => 'Voir les plans de repas',
+            'create' => 'Créer un plan de repas',
+            'create_txt' => 'Générez un nouveau plan de repas personnalisé',
+            'create_button' => 'Commencer',
         ],
         'chat' => [
             'title' => 'Chat nutrition',
             'description' => 'Obtenez des conseils nutritionnels personnalisés et des réponses à vos questions',
             'button' => 'Démarrer le chat',
-        ],
-        'food_log' => [
-            'title' => 'Journal alimentaire',
-            'description' => 'Suivez votre consommation alimentaire quotidienne et surveillez vos progrès',
-            'button' => 'Enregistrer un aliment',
         ],
     ],
 
@@ -207,6 +205,41 @@ return [
             'view_meal_plan' => 'Voir votre plan de repas',
             'meal_plan_ready' => 'Votre plan de repas personnalisé sera prêt dans quelques instants',
             'update_preferences' => 'Vous pouvez toujours mettre à jour vos préférences et informations de profil dans vos paramètres.',
+        ],
+        'identity' => [
+            'title' => 'Créons votre plan parfait',
+            'step' => 'Étape 2 sur 3',
+            'heading' => 'Créons votre plan parfait',
+            'description' => 'Répondez à 3 questions rapides pour nous aider à concevoir un plan de repas adapté à votre vie.',
+            'questions' => [
+                'mission' => '1. Quelle est votre mission principale ?',
+                'animal_products' => '2. Que pensez-vous des produits d\'origine animale ?',
+                'intensity' => '3. Quel est votre rythme préféré ?',
+            ],
+            'options' => [
+                'goals' => [
+                    'spikes' => 'Contrôler les pics',
+                    'spikes_desc' => 'Focus : Glycémie stable',
+                    'weight_loss' => 'Perte de poids profonde',
+                    'weight_loss_desc' => 'Focus : Brûler les graisses',
+                    'heart_health' => 'Santé cardiaque',
+                    'heart_health_desc' => 'Focus : Cholestérol/Tension',
+                    'build_muscle' => 'Prendre du muscle',
+                    'build_muscle_desc' => 'Focus : Force et hypertrophie',
+                    'healthy_eating' => 'Manger sainement',
+                    'healthy_eating_desc' => 'Maintenance / Pas d\'objectif spécifique',
+                ],
+                'animal_products' => [
+                    'omnivore' => 'J\'aime la viande et le poisson',
+                    'pescatarian' => 'Je préfère les plantes, mais mange du poisson et des œufs',
+                    'vegan' => 'Strictement végétal uniquement',
+                ],
+                'intensity' => [
+                    'balanced' => 'Équilibré (Durable)',
+                    'aggressive' => 'Agressif (Résultats rapides)',
+                ],
+            ],
+            'submit' => 'Compléter le profil',
         ],
         'dietary_preferences' => [
             'title' => 'Préférences alimentaires - Étape 4 sur 7',
@@ -325,7 +358,7 @@ return [
             'no_medications' => 'Aucun médicament ajouté',
             'add_another' => 'Ajouter un autre médicament',
             'select_frequency' => 'Sélectionner la fréquence',
-            'medication_number' => 'Médicament #:number',
+            'medication_number' => 'Médicament #{{number}}',
             'info' => 'Ces informations nous aident à éviter de recommander des aliments qui pourraient interagir avec vos médicaments et garantissent que votre plan de repas soutient vos objectifs de santé.',
             'exit' => 'Quitter',
             'skip' => 'Passer',
@@ -631,11 +664,16 @@ return [
     'sidebar' => [
         'group_label' => 'Planification',
         'nav' => [
+            'planning' => 'Planification',
+            'context' => 'Contexte',
             'home' => 'Accueil',
             'meal_plans' => 'Plans de repas',
             'diabetes_insights' => 'Informations sur le diabète',
             'diabetes_log' => 'Journal du diabète',
             'update_info' => 'Mettre à jour vos informations',
+            'dietary_preferences' => 'Préférences alimentaires',
+            'health_conditions' => 'Conditions de santé',
+            'medications' => 'Médicaments',
             'terms' => 'Conditions d\'utilisation',
             'privacy' => 'Politique de confidentialité',
         ],
@@ -702,6 +740,15 @@ return [
         'day_card' => [
             'day' => 'Jour {{number}}',
             'no_meals' => 'Aucun repas prévu pour ce jour',
+        ],
+        'create' => [
+            'title' => 'Créer votre plan de repas',
+            'description' => 'Votre plan de repas personnalisé de 3 jours avec personnalisation par IA',
+            'prompt_label' => 'Demandes spéciales ? (Optionnel)',
+            'prompt_placeholder' => 'ex. J\'aime les aliments épicés, je préfère le poulet au bœuf, éviter les oignons, allergie aux arachides, options végétariennes les lundis...',
+            'prompt_hint' => 'Ajouter des préférences alimentaires, restrictions ou demandes pour votre assistant de plan de repas IA',
+            'note' => 'Remarque : Votre plan de repas sera de 3 jours par défaut avec des recettes et une liste de courses',
+            'button' => 'Générer mon plan de repas',
         ],
     ],
     'grocery_list' => [

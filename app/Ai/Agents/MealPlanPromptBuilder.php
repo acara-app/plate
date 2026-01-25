@@ -8,8 +8,11 @@ use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\MealPlanContext\MacronutrientRatiosData;
 use App\DataObjects\MealPlanContext\MealPlanContextData;
 use App\DataObjects\PreviousDayContext;
+use App\Enums\DietType;
+use App\Enums\GoalChoice;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Services\DietMapper;
 use RuntimeException;
 
 final readonly class MealPlanPromptBuilder
@@ -19,7 +22,7 @@ final readonly class MealPlanPromptBuilder
     ) {}
 
     /**
-     * Generate a prompt for multi-day meal plan generation (legacy).
+     * Generate a prompt for multi-day meal plan generation.
      */
     public function handle(User $user, ?GlucoseAnalysisData $glucoseAnalysis = null): string
     {
@@ -39,6 +42,7 @@ final readonly class MealPlanPromptBuilder
         int $totalDays = 7,
         ?PreviousDayContext $previousDaysContext = null,
         ?GlucoseAnalysisData $glucoseAnalysis = null,
+        ?string $customPrompt = null,
     ): string {
         $context = $this->buildContext($user, $glucoseAnalysis);
 
@@ -47,6 +51,7 @@ final readonly class MealPlanPromptBuilder
             'dayNumber' => $dayNumber,
             'totalDays' => $totalDays,
             'previousDaysContext' => $previousDaysContext?->toPromptText(),
+            'prompt' => $customPrompt,
         ])->render();
     }
 
@@ -56,8 +61,6 @@ final readonly class MealPlanPromptBuilder
     private function buildContext(User $user, ?GlucoseAnalysisData $glucoseAnalysis = null): MealPlanContextData
     {
         $user->loadMissing([
-            'profile.goal',
-            'profile.lifestyle',
             'profile.dietaryPreferences',
             'profile.healthConditions',
             'profile.medications',
@@ -69,17 +72,38 @@ final readonly class MealPlanPromptBuilder
          */
         $profile = $user->profile;
 
+        $dietType = $this->calculateDietType($profile);
+        $macroTargets = $dietType->macroTargets();
+
         return MealPlanContextData::from([
             ...$profile->toArray(),
-            'goal_name' => $profile->goal?->name,
-            'lifestyle' => $profile->lifestyle,
+            'goal' => $profile->goal_choice ? GoalChoice::tryFrom($profile->goal_choice)?->label() : null,
             'dietary_preferences' => $profile->dietaryPreferences,
             'health_conditions' => $profile->healthConditions,
             'medications' => $profile->medications,
             'daily_calorie_target' => $this->calculateDailyCalorieTarget($profile),
-            'macronutrient_ratios' => $this->calculateMacronutrientRatios($profile),
+            'macronutrient_ratios' => new MacronutrientRatiosData(
+                protein: $macroTargets['protein'],
+                carbs: $macroTargets['carbs'],
+                fat: $macroTargets['fat'],
+            ),
+            'diet_type' => $dietType,
+            'diet_type_label' => $dietType->label(),
+            'diet_type_focus' => $dietType->focus(),
             'glucose_analysis' => $glucoseAnalysis ?? $this->glucoseDataAnalyzer->handle($user, 30),
         ]);
+    }
+
+    /**
+     * Calculate the DietType based on user profile choices.
+     */
+    private function calculateDietType(UserProfile $profile): DietType
+    {
+        $goal = GoalChoice::tryFrom($profile->goal_choice ?? '');
+        $animalProductChoice = \App\Enums\AnimalProductChoice::tryFrom($profile->animal_product_choice ?? '');
+        $intensityChoice = \App\Enums\IntensityChoice::tryFrom($profile->intensity_choice ?? '');
+
+        return DietMapper::map($goal ?? GoalChoice::HealthyEating, $animalProductChoice ?? \App\Enums\AnimalProductChoice::Omnivore, $intensityChoice ?? \App\Enums\IntensityChoice::Balanced);
     }
 
     /**
@@ -89,35 +113,20 @@ final readonly class MealPlanPromptBuilder
     {
         $tdee = $profile->tdee;
 
-        if (! $tdee || ! $profile->goal) {
+        if (! $tdee || ! $profile->goal_choice) {
             return null;
         }
 
-        // Adjust calories based on goal
-        return match ($profile->goal->name) {
-            'Weight Loss', 'Lose Weight' => round($tdee - 500, 2), // 500 calorie deficit
-            'Weight Gain', 'Gain Weight', 'Muscle Gain' => round($tdee + 300, 2), // 300 calorie surplus
-            'Maintain Weight', 'Maintenance' => round($tdee, 2),
-            default => round($tdee, 2),
-        };
-    }
+        $goal = GoalChoice::tryFrom($profile->goal_choice);
 
-    /**
-     * Calculate macronutrient ratios based on goal and health conditions
-     */
-    private function calculateMacronutrientRatios(UserProfile $profile): MacronutrientRatiosData
-    {
-        if (! $profile->goal) {
-            // Default balanced ratio
-            return new MacronutrientRatiosData(protein: 30, carbs: 40, fat: 30);
+        if (! $goal) {
+            return $tdee;
         }
 
-        // Adjust based on goal
-        return match ($profile->goal->name) {
-            'Weight Loss', 'Lose Weight' => new MacronutrientRatiosData(protein: 35, carbs: 30, fat: 35),
-            'Muscle Gain', 'Gain Weight' => new MacronutrientRatiosData(protein: 30, carbs: 45, fat: 25),
-            'Maintain Weight', 'Maintenance' => new MacronutrientRatiosData(protein: 30, carbs: 40, fat: 30),
-            default => new MacronutrientRatiosData(protein: 30, carbs: 40, fat: 30),
+        return match ($goal) {
+            GoalChoice::WeightLoss => round($tdee - 500, 2),
+            GoalChoice::BuildMuscle => round($tdee + 300, 2),
+            GoalChoice::Spikes, GoalChoice::HeartHealth, GoalChoice::HealthyEating => round($tdee - 300, 2),
         };
     }
 }

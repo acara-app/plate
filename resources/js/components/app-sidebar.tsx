@@ -17,6 +17,9 @@ import { dashboard, privacy, terms } from '@/routes';
 import diabetesLog from '@/routes/diabetes-log';
 import mealPlans from '@/routes/meal-plans';
 import biometrics from '@/routes/onboarding/biometrics';
+import profileDietaryPreferences from '@/routes/profile/dietary-preferences';
+import profileHealthConditions from '@/routes/profile/health-conditions';
+import profileMedications from '@/routes/profile/medications';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
@@ -27,9 +30,11 @@ import {
     LeafIcon,
     ShieldCheck,
     TrendingUp,
+    UserPen,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AppLogo from './app-logo';
+import { Separator } from './ui/separator';
 
 const getMainNavItems = (t: (key: string) => string): NavItem[] => [
     {
@@ -42,6 +47,29 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
         href: mealPlans.index(),
         icon: CalendarHeartIcon,
     },
+];
+
+const getProfileNavItems = (t: (key: string) => string): NavItem[] => [
+    {
+        title: t('sidebar.nav.update_info'),
+        href: biometrics.show(),
+        icon: UserPen,
+    },
+    {
+        title: t('sidebar.nav.dietary_preferences'),
+        href: profileDietaryPreferences.show.url(),
+        icon: LeafIcon,
+    },
+    {
+        title: t('sidebar.nav.health_conditions'),
+        href: profileHealthConditions.show.url(),
+        icon: ShieldCheck,
+    },
+    {
+        title: t('sidebar.nav.medications'),
+        href: profileMedications.show.url(),
+        icon: ActivityIcon,
+    },
     {
         title: t('sidebar.nav.diabetes_insights'),
         href: diabetesLog.insights(),
@@ -51,11 +79,6 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
         title: t('sidebar.nav.diabetes_log'),
         href: DashboardDiabetesLogController().url,
         icon: ActivityIcon,
-    },
-    {
-        title: t('sidebar.nav.update_info'),
-        href: biometrics.show(),
-        icon: LeafIcon,
     },
 ];
 
@@ -76,6 +99,7 @@ export function AppSidebar() {
     const { currentUser } = useSharedProps();
     const { t } = useTranslation('common');
     const mainNavItems = getMainNavItems(t);
+    const profileNavItems = getProfileNavItems(t);
     const footerNavItems = getFooterNavItems(t);
 
     return (
@@ -93,7 +117,15 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain
+                    items={mainNavItems}
+                    label={t('sidebar.nav.planning')}
+                />
+                <Separator />
+                <NavMain
+                    items={profileNavItems}
+                    label={t('sidebar.nav.context')}
+                />
             </SidebarContent>
 
             <SidebarFooter>
