@@ -168,7 +168,7 @@ return [
             'button' => 'View Meal Plans',
             'create' => 'Create Meal Plan',
             'create_txt' => 'Generate a new personalized meal plan',
-            'create_button' => 'Generate',
+            'create_button' => 'Start Meal Plan',
         ],
         'chat' => [
             'title' => 'Nutrition Chat',
@@ -629,6 +629,8 @@ return [
     'sidebar' => [
         'group_label' => 'Planning',
         'nav' => [
+            'planning' => 'Plan',
+            'context' => 'Context',
             'home' => 'Home',
             'meal_plans' => 'Meal Plans',
             'diabetes_insights' => 'Diabetes Insights',

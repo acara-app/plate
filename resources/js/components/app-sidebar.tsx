@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AppLogo from './app-logo';
+import { Separator } from './ui/separator';
 
 const getMainNavItems = (t: (key: string) => string): NavItem[] => [
     {
@@ -45,16 +46,9 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
         href: mealPlans.index(),
         icon: CalendarHeartIcon,
     },
-    {
-        title: t('sidebar.nav.diabetes_insights'),
-        href: diabetesLog.insights(),
-        icon: TrendingUp,
-    },
-    {
-        title: t('sidebar.nav.diabetes_log'),
-        href: DashboardDiabetesLogController().url,
-        icon: ActivityIcon,
-    },
+];
+
+const getProfileNavItems = (t: (key: string) => string): NavItem[] => [
     {
         title: t('sidebar.nav.update_info'),
         href: biometrics.show(),
@@ -73,6 +67,16 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
     {
         title: t('sidebar.nav.medications'),
         href: profileMedications.show.url(),
+        icon: ActivityIcon,
+    },
+    {
+        title: t('sidebar.nav.diabetes_insights'),
+        href: diabetesLog.insights(),
+        icon: TrendingUp,
+    },
+    {
+        title: t('sidebar.nav.diabetes_log'),
+        href: DashboardDiabetesLogController().url,
         icon: ActivityIcon,
     },
 ];
@@ -94,6 +98,7 @@ export function AppSidebar() {
     const { currentUser } = useSharedProps();
     const { t } = useTranslation('common');
     const mainNavItems = getMainNavItems(t);
+    const profileNavItems = getProfileNavItems(t);
     const footerNavItems = getFooterNavItems(t);
 
     return (
@@ -111,7 +116,15 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain
+                    items={mainNavItems}
+                    label={t('sidebar.nav.planning')}
+                />
+                <Separator />
+                <NavMain
+                    items={profileNavItems}
+                    label={t('sidebar.nav.context')}
+                />
             </SidebarContent>
 
             <SidebarFooter>

@@ -169,7 +169,7 @@ return [
             'button' => 'Voir les plans de repas',
             'create' => 'Créer un plan de repas',
             'create_txt' => 'Générez un nouveau plan de repas personnalisé',
-            'create_button' => 'Générez',
+            'create_button' => 'Commencer',
         ],
         'chat' => [
             'title' => 'Chat nutrition',
@@ -629,6 +629,8 @@ return [
     'sidebar' => [
         'group_label' => 'Planification',
         'nav' => [
+            'planning' => 'Planification',
+            'context' => 'Contexte',
             'home' => 'Accueil',
             'meal_plans' => 'Plans de repas',
             'diabetes_insights' => 'Informations sur le diabète',

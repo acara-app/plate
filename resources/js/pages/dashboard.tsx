@@ -17,7 +17,6 @@ import { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 
-// Breadcrumbs will be set dynamically using translation
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
         title: t('home'),
@@ -38,6 +37,27 @@ export default function Dashboard() {
                 {!currentUser?.is_onboarded && <OnboardingBanner />}
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {/* Meal Plan */}
+                    <Card className="flex flex-col transition-shadow hover:shadow-md">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <span className="text-2xl">📝</span>
+                                {t('dashboard_cards.meal_plans.create')}
+                            </CardTitle>
+                            <CardDescription>
+                                {t('dashboard_cards.meal_plans.create_txt')}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="mt-auto">
+                            <Link href={mealPlans.create().url}>
+                                <Button className="w-full">
+                                    {t(
+                                        'dashboard_cards.meal_plans.create_button',
+                                    )}
+                                </Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
                     {/* Diabetes Insights Card */}
                     <Card className="flex flex-col transition-shadow hover:shadow-md">
                         <CardHeader>
@@ -117,28 +137,6 @@ export default function Dashboard() {
                             <Link href={chat.create().url}>
                                 <Button className="w-full">
                                     {t('dashboard_cards.chat.button')}
-                                </Button>
-                            </Link>
-                        </CardContent>
-                    </Card>
-
-                    {/* Meal Plan */}
-                    <Card className="flex flex-col transition-shadow hover:shadow-md">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <span className="text-2xl">📝</span>
-                                {t('dashboard_cards.meal_plans.create')}
-                            </CardTitle>
-                            <CardDescription>
-                                {t('dashboard_cards.meal_plans.create_txt')}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="mt-auto">
-                            <Link href={mealPlans.create().url}>
-                                <Button className="w-full">
-                                    {t(
-                                        'dashboard_cards.meal_plans.create_button',
-                                    )}
                                 </Button>
                             </Link>
                         </CardContent>
