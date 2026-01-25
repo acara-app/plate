@@ -169,7 +169,7 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                         <Button
                                             type="submit"
                                             disabled={processing}
-                                            className="min-w-[120px]"
+                                            className="min-w-30"
                                         >
                                             {processing && (
                                                 <LoaderCircle className="h-4 w-4 animate-spin" />
