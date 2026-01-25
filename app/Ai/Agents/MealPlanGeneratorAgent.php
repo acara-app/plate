@@ -132,6 +132,7 @@ final class MealPlanGeneratorAgent extends BaseAgent
         ?GlucoseAnalysisData $glucoseAnalysis = null,
         ?MealPlan $mealPlan = null,
     ): DayMealsData {
+        /** @var string|null $customPrompt */
         $customPrompt = $mealPlan?->metadata['custom_prompt'] ?? null;
 
         $prompt = $this->promptBuilder->handleForDay(

@@ -37,9 +37,6 @@ final class MealPlanContextData extends Data
         public ?float $targetWeight,
         public ?string $additionalGoals,
 
-        // Lifestyle
-        public ?LifestyleData $lifestyle,
-
         // Dietary preferences
         public array $dietaryPreferences,
 

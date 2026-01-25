@@ -126,9 +126,7 @@ final readonly class MealPlanPromptBuilder
         return match ($goal) {
             GoalChoice::WeightLoss => round($tdee - 500, 2),
             GoalChoice::BuildMuscle => round($tdee + 300, 2),
-            GoalChoice::Spikes, GoalChoice::HeartHealth => round($tdee - 300, 2),
-            GoalChoice::HealthyEating => round($tdee, 2),
-            default => round($tdee, 2),
+            GoalChoice::Spikes, GoalChoice::HeartHealth, GoalChoice::HealthyEating => round($tdee - 300, 2),
         };
     }
 }

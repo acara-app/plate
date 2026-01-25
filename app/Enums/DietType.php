@@ -51,7 +51,7 @@ enum DietType: string
      * Default macronutrient split targets (Carb / Protein / Fat).
      * These sum to 100% and reflect clinical realities.
      *
-     * * @return array{carbs: int, protein: int, fat: int}
+     * @return array{carbs: int, protein: int, fat: int}
      */
     public function macroTargets(): array
     {

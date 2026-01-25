@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\AnalyzeGlucoseForNotificationAction;
 use App\Enums\Sex;
 use App\Http\Requests\StoreBiometricsRequest;
 use App\Models\User;
@@ -17,7 +16,6 @@ final readonly class OnboardingController
 {
     public function __construct(
         #[CurrentUser] private User $user,
-        private AnalyzeGlucoseForNotificationAction $analyzeGlucose,
     ) {
         //
     }
@@ -60,9 +58,16 @@ final readonly class OnboardingController
     public function storeIdentity(\App\Http\Requests\StoreIdentityRequest $request): RedirectResponse
     {
         $user = $this->user;
-        $goalChoice = \App\Enums\GoalChoice::from($request->validated('goal_choice'));
-        $animalProductChoice = \App\Enums\AnimalProductChoice::from($request->validated('animal_product_choice'));
-        $intensityChoice = \App\Enums\IntensityChoice::from($request->validated('intensity_choice'));
+        /** @var string $goalChoiceValue */
+        $goalChoiceValue = $request->validated('goal_choice');
+        /** @var string $animalProductChoiceValue */
+        $animalProductChoiceValue = $request->validated('animal_product_choice');
+        /** @var string $intensityChoiceValue */
+        $intensityChoiceValue = $request->validated('intensity_choice');
+
+        $goalChoice = \App\Enums\GoalChoice::from($goalChoiceValue);
+        $animalProductChoice = \App\Enums\AnimalProductChoice::from($animalProductChoiceValue);
+        $intensityChoice = \App\Enums\IntensityChoice::from($intensityChoiceValue);
 
         $dietType = \App\Services\DietMapper::map($goalChoice, $animalProductChoice, $intensityChoice);
         $activityMultiplier = \App\Services\DietMapper::getActivityMultiplier($goalChoice, $intensityChoice);
