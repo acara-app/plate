@@ -79,11 +79,11 @@ export default function Identity({ profile }: Props) {
                 <div className="w-full max-w-2xl">
                     <div className="mb-8">
                         <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
-                            <span>Step 3 of 3</span>
-                            <span>100%</span>
+                            <span>Step 2 of 3</span>
+                            <span>66%</span>
                         </div>
                         <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                            <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary shadow-[0_0_12px_rgba(16,185,129,0.4)]">
+                            <div className="relative h-2 w-[66%] overflow-hidden rounded-full bg-primary shadow-[0_0_12px_rgba(16,185,129,0.4)]">
                                 <div className="absolute inset-0 bg-linear-to-r from-white/30 via-transparent to-transparent"></div>
                                 <div className="absolute inset-0 bg-linear-to-l from-black/10 via-transparent to-white/10"></div>
                             </div>
