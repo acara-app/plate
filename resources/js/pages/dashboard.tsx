@@ -12,9 +12,8 @@ import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import chat from '@/routes/chat';
 import diabetesLog from '@/routes/diabetes-log';
-import foodLog from '@/routes/food-log';
 import mealPlans from '@/routes/meal-plans';
-import { type BreadcrumbItem } from '@/types';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 
@@ -123,21 +122,23 @@ export default function Dashboard() {
                         </CardContent>
                     </Card>
 
-                    {/* Food Log Card */}
+                    {/* Meal Plan */}
                     <Card className="flex flex-col transition-shadow hover:shadow-md">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <span className="text-2xl">📝</span>
-                                {t('dashboard_cards.food_log.title')}
+                                {t('dashboard_cards.meal_plans.create')}
                             </CardTitle>
                             <CardDescription>
-                                {t('dashboard_cards.food_log.description')}
+                                {t('dashboard_cards.meal_plans.create_txt')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="mt-auto">
-                            <Link href={foodLog.create().url}>
+                            <Link href={mealPlans.create().url}>
                                 <Button className="w-full">
-                                    {t('dashboard_cards.food_log.button')}
+                                    {t(
+                                        'dashboard_cards.meal_plans.create_button',
+                                    )}
                                 </Button>
                             </Link>
                         </CardContent>

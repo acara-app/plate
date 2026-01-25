@@ -117,7 +117,6 @@ return [
     'show_less' => 'Show less',
     'expand' => 'Expand',
     'collapse' => 'Collapse',
-
     // OAuth
     'continue_with_google' => 'Continue with Google',
     'sign_in_with_google' => 'Sign in with Google',
@@ -167,16 +166,14 @@ return [
             'title' => 'Weekly Meal Plans',
             'description' => 'View and manage your personalized weekly meal plans',
             'button' => 'View Meal Plans',
+            'create' => 'Create Meal Plan',
+            'create_txt' => 'Generate a new personalized meal plan',
+            'create_button' => 'Generate',
         ],
         'chat' => [
             'title' => 'Nutrition Chat',
             'description' => 'Get personalized nutrition advice and answers to your questions',
             'button' => 'Start Chat',
-        ],
-        'food_log' => [
-            'title' => 'Food Log',
-            'description' => 'Track your daily food intake and monitor your progress',
-            'button' => 'Log Food',
         ],
     ],
 
@@ -325,7 +322,7 @@ return [
             'no_medications' => 'No medications added yet',
             'add_another' => 'Add Another Medication',
             'select_frequency' => 'Select frequency',
-            'medication_number' => 'Medication #:number',
+            'medication_number' => 'Medication #{{number}}',
             'info' => 'This information helps us avoid recommending foods that may interact with your medications and ensures your meal plan supports your health goals.',
             'exit' => 'Exit',
             'skip' => 'Skip',
@@ -403,6 +400,7 @@ return [
             'cancel' => 'Cancel',
             'create' => 'Create',
             'update' => 'Update',
+            'save' => 'Save',
         ],
         'correlation_chart' => [
             'title' => 'Glucose & Factor Correlation',
@@ -636,6 +634,9 @@ return [
             'diabetes_insights' => 'Diabetes Insights',
             'diabetes_log' => 'Diabetes Log',
             'update_info' => 'Update Your Info',
+            'dietary_preferences' => 'Dietary Preferences',
+            'health_conditions' => 'Health Conditions',
+            'medications' => 'Medications',
             'terms' => 'Terms of Service',
             'privacy' => 'Privacy Policy',
         ],
@@ -702,6 +703,15 @@ return [
         'day_card' => [
             'day' => 'Day {{number}}',
             'no_meals' => 'No meals planned for this day',
+        ],
+        'create' => [
+            'title' => 'Create Your Meal Plan',
+            'description' => 'Your personalized 3-day meal plan with AI-powered customization',
+            'prompt_label' => 'Any special requests? (Optional)',
+            'prompt_placeholder' => 'e.g., I love spicy food, prefer chicken over beef, avoid onions, allergic to peanuts, need vegetarian options on Mondays...',
+            'prompt_hint' => 'Add any dietary preferences, restrictions, or requests for your AI meal plan assistant',
+            'note' => 'Note: Your meal plan will be 3 days by default with recipes and grocery list',
+            'button' => 'Generate My Meal Plan',
         ],
     ],
     'grocery_list' => [

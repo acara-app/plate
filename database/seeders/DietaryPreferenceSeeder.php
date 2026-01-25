@@ -13,21 +13,6 @@ final class DietaryPreferenceSeeder extends Seeder
     public function run(): void
     {
         $preferences = [
-            // Dietary Patterns
-            ['name' => 'Vegan', 'type' => DietaryPreferenceType::Pattern->value, 'description' => 'Plant-based diet excluding all animal products including meat, dairy, eggs, and honey.'],
-            ['name' => 'Vegetarian', 'type' => DietaryPreferenceType::Pattern->value, 'description' => 'Diet excluding meat and fish but may include dairy and eggs.'],
-            ['name' => 'Pescatarian', 'type' => DietaryPreferenceType::Pattern->value, 'description' => 'Vegetarian diet that includes fish and seafood.'],
-            ['name' => 'Keto', 'type' => DietaryPreferenceType::Pattern->value, 'description' => 'Very low-carb, high-fat diet aimed at achieving ketosis for fat burning.'],
-            ['name' => 'Paleo', 'type' => DietaryPreferenceType::Pattern->value, 'description' => 'Diet based on foods presumed to have been eaten during the Paleolithic era.'],
-            ['name' => 'Mediterranean', 'type' => DietaryPreferenceType::Pattern->value, 'description' => 'Diet rich in fruits, vegetables, whole grains, legumes, and healthy fats like olive oil.'],
-            ['name' => 'Low-Carb', 'type' => DietaryPreferenceType::Pattern->value, 'description' => 'Diet that restricts carbohydrate consumption to promote weight loss and blood sugar control.'],
-            ['name' => 'High-Protein', 'type' => DietaryPreferenceType::Pattern->value, 'description' => 'Diet emphasizing protein-rich foods for muscle building and satiety.'],
-            ['name' => 'Intermittent Fasting', 'type' => DietaryPreferenceType::Pattern->value, 'description' => 'Eating pattern that cycles between periods of fasting and eating.'],
-            ['name' => 'DASH', 'type' => DietaryPreferenceType::Pattern->value, 'description' => 'Dietary Approaches to Stop Hypertension - diet rich in fruits, vegetables, and low-fat dairy.'],
-            ['name' => 'Whole30', 'type' => DietaryPreferenceType::Pattern->value, 'description' => '30-day elimination diet removing sugar, alcohol, grains, legumes, soy, and dairy.'],
-            ['name' => 'Flexitarian', 'type' => DietaryPreferenceType::Pattern->value, 'description' => 'Primarily plant-based diet with occasional meat and fish consumption.'],
-            ['name' => 'Anti-Inflammatory', 'type' => DietaryPreferenceType::Pattern->value, 'description' => 'Diet focused on reducing inflammation through omega-3s, antioxidants, and whole foods while avoiding processed foods.'],
-
             // Common Allergies
             ['name' => 'Peanuts', 'type' => DietaryPreferenceType::Allergy->value, 'description' => 'Severe allergic reaction to peanuts and peanut-containing products.'],
             ['name' => 'Tree Nuts', 'type' => DietaryPreferenceType::Allergy->value, 'description' => 'Allergic to almonds, walnuts, cashews, pecans, and other tree nuts.'],

@@ -6,11 +6,10 @@ use App\DataObjects\DayMealsData;
 use App\DataObjects\IngredientData;
 use App\DataObjects\PreviousDayContext;
 use App\DataObjects\SingleDayMealData;
+use App\Enums\GoalChoice;
 use App\Enums\MealPlanGenerationStatus;
 use App\Enums\MealType;
 use App\Enums\Sex;
-use App\Models\Goal;
-use App\Models\Lifestyle;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
@@ -24,21 +23,14 @@ use Workflow\WorkflowStub;
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
-    $goal = Goal::factory()->create(['name' => 'Weight Loss']);
-    $lifestyle = Lifestyle::factory()->create([
-        'name' => 'Active',
-        'activity_level' => 'moderate',
-        'activity_multiplier' => 1.5,
-    ]);
-
     $this->user = User::factory()->create();
     $this->user->profile()->create([
         'age' => 30,
         'height' => 175.0,
         'weight' => 80.0,
         'sex' => Sex::Male,
-        'goal_id' => $goal->id,
-        'lifestyle_id' => $lifestyle->id,
+        'goal_choice' => GoalChoice::WeightLoss->value,
+        'derived_activity_multiplier' => 1.55,
         'target_weight' => 75.0,
     ]);
 });

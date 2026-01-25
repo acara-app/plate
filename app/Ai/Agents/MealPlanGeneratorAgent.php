@@ -12,6 +12,7 @@ use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\MealPlanData;
 use App\DataObjects\PreviousDayContext;
 use App\Enums\SettingKey;
+use App\Models\MealPlan;
 use App\Models\Setting;
 use App\Models\User;
 use App\Utilities\JsonCleaner;
@@ -33,12 +34,14 @@ final class MealPlanGeneratorAgent extends BaseAgent
                 'You are an expert nutritionist with access to the USDA FoodData Central database.',
                 'Prioritize whole, minimally processed foods.',
                 'Ensure all calculations are accurate and based on USDA data.',
+                'Respect the user\'s calculated diet type and macronutrient targets.',
             ],
             steps: [
-                '1. Search the database for appropriate whole foods that match the user\'s dietary needs',
+                '1. Search the database for appropriate whole foods that match the user\'s dietary needs and diet type',
                 '2. For each ingredient, retrieve its USDA nutrition values per 100g (protein, carbs, fat, calories)',
                 '3. Create a meal plan using ONLY ingredients found in the database',
                 '4. Calculate exact nutritional values based on ingredient quantities and USDA data per 100g',
+                '5. Ensure meals align with the specified diet type (e.g., Keto, Mediterranean, Paleo, etc.)',
             ],
             output: [
                 'Your response MUST be valid JSON and ONLY JSON',
@@ -103,7 +106,7 @@ final class MealPlanGeneratorAgent extends BaseAgent
     }
 
     /**
-     * Generate a complete multi-day meal plan (legacy method).
+     * Generate a complete multi-day meal plan.
      */
     public function generate(User $user, ?GlucoseAnalysisData $glucoseAnalysis = null): MealPlanData
     {
@@ -127,13 +130,17 @@ final class MealPlanGeneratorAgent extends BaseAgent
         int $totalDays = 7,
         ?PreviousDayContext $previousDaysContext = null,
         ?GlucoseAnalysisData $glucoseAnalysis = null,
+        ?MealPlan $mealPlan = null,
     ): DayMealsData {
+        $customPrompt = $mealPlan?->metadata['custom_prompt'] ?? null;
+
         $prompt = $this->promptBuilder->handleForDay(
             $user,
             $dayNumber,
             $totalDays,
             $previousDaysContext,
             $glucoseAnalysis,
+            $customPrompt,
         );
 
         $jsonText = $this->generateMealPlanJson($prompt);

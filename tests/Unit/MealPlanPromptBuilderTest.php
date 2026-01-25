@@ -4,28 +4,23 @@ declare(strict_types=1);
 
 use App\Ai\Agents\MealPlanPromptBuilder;
 use App\Enums\GlucoseReadingType;
+use App\Enums\GoalChoice;
 use App\Enums\Sex;
 use App\Models\DiabetesLog;
-use App\Models\Goal;
-use App\Models\Lifestyle;
 use App\Models\User;
 use App\Models\UserProfile;
 
 it('includes glucose analysis in the prompt when glucose data exists', function (): void {
     /** @var User $user */
     $user = User::factory()->create();
-
-    $goal = Goal::factory()->create(['name' => 'Weight Loss']);
-    $lifestyle = Lifestyle::factory()->create(['activity_level' => 'Moderate']);
-
     UserProfile::factory()->create([
         'user_id' => $user->id,
         'age' => 30,
         'height' => 175.0,
         'weight' => 80.0,
         'sex' => Sex::Male,
-        'goal_id' => $goal->id,
-        'lifestyle_id' => $lifestyle->id,
+        'goal_choice' => GoalChoice::WeightLoss->value,
+        'derived_activity_multiplier' => 1.55,
     ]);
 
     // Create some glucose readings
@@ -58,18 +53,14 @@ it('includes glucose analysis in the prompt when glucose data exists', function 
 it('includes message when no glucose data exists', function (): void {
     /** @var User $user */
     $user = User::factory()->create();
-
-    $goal = Goal::factory()->create(['name' => 'Maintenance']);
-    $lifestyle = Lifestyle::factory()->create(['activity_level' => 'Moderate']);
-
     UserProfile::factory()->create([
         'user_id' => $user->id,
         'age' => 25,
         'height' => 170.0,
         'weight' => 70.0,
         'sex' => Sex::Female,
-        'goal_id' => $goal->id,
-        'lifestyle_id' => $lifestyle->id,
+        'goal_choice' => GoalChoice::HealthyEating->value,
+        'derived_activity_multiplier' => 1.55,
     ]);
 
     $builder = resolve(MealPlanPromptBuilder::class);
@@ -84,18 +75,14 @@ it('includes message when no glucose data exists', function (): void {
 it('includes glucose concerns when post-meal spikes are detected', function (): void {
     /** @var User $user */
     $user = User::factory()->create();
-
-    $goal = Goal::factory()->create(['name' => 'Weight Loss']);
-    $lifestyle = Lifestyle::factory()->create(['activity_level' => 'Low']);
-
     UserProfile::factory()->create([
         'user_id' => $user->id,
         'age' => 40,
         'height' => 180.0,
         'weight' => 95.0,
         'sex' => Sex::Male,
-        'goal_id' => $goal->id,
-        'lifestyle_id' => $lifestyle->id,
+        'goal_choice' => GoalChoice::WeightLoss->value,
+        'derived_activity_multiplier' => 1.55,
     ]);
 
     // Create normal fasting and high post-meal readings to trigger spike detection without consistentlyHigh
@@ -134,18 +121,14 @@ it('throws exception when user has no profile', function (): void {
 
 it('calculates calorie deficit for weight loss goal', function (): void {
     $user = User::factory()->create();
-
-    $goal = Goal::factory()->create(['name' => 'Weight Loss']);
-    $lifestyle = Lifestyle::factory()->create();
-
     UserProfile::factory()->create([
         'user_id' => $user->id,
         'age' => 30,
         'height' => 175.0,
         'weight' => 80.0,
         'sex' => Sex::Male,
-        'goal_id' => $goal->id,
-        'lifestyle_id' => $lifestyle->id,
+        'goal_choice' => GoalChoice::WeightLoss->value,
+        'derived_activity_multiplier' => 1.55,
     ]);
 
     $builder = resolve(MealPlanPromptBuilder::class);
@@ -156,18 +139,14 @@ it('calculates calorie deficit for weight loss goal', function (): void {
 
 it('calculates calorie surplus for weight gain goal', function (): void {
     $user = User::factory()->create();
-
-    $goal = Goal::factory()->create(['name' => 'Muscle Gain']);
-    $lifestyle = Lifestyle::factory()->create();
-
     UserProfile::factory()->create([
         'user_id' => $user->id,
         'age' => 25,
         'height' => 180.0,
         'weight' => 75.0,
         'sex' => Sex::Male,
-        'goal_id' => $goal->id,
-        'lifestyle_id' => $lifestyle->id,
+        'goal_choice' => GoalChoice::BuildMuscle->value,
+        'derived_activity_multiplier' => 1.55,
     ]);
 
     $builder = resolve(MealPlanPromptBuilder::class);
@@ -178,18 +157,14 @@ it('calculates calorie surplus for weight gain goal', function (): void {
 
 it('includes user profile information in prompt', function (): void {
     $user = User::factory()->create();
-
-    $goal = Goal::factory()->create(['name' => 'Maintenance']);
-    $lifestyle = Lifestyle::factory()->create(['activity_level' => 'Moderate']);
-
     UserProfile::factory()->create([
         'user_id' => $user->id,
         'age' => 35,
         'height' => 170.0,
         'weight' => 70.0,
         'sex' => Sex::Female,
-        'goal_id' => $goal->id,
-        'lifestyle_id' => $lifestyle->id,
+        'goal_choice' => GoalChoice::HealthyEating->value,
+        'derived_activity_multiplier' => 1.55,
     ]);
 
     $builder = resolve(MealPlanPromptBuilder::class);

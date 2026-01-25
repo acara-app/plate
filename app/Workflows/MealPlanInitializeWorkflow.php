@@ -101,6 +101,7 @@ final class MealPlanInitializeWorkflow extends Workflow
             $totalDays,              // totalDays
             new PreviousDayContext,  // previousDaysContext
             $glucoseAnalysis,        // glucoseAnalysis
+            $mealPlan,               // mealPlan
         );
 
         yield ActivityStub::make(

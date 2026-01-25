@@ -17,6 +17,9 @@ import { dashboard, privacy, terms } from '@/routes';
 import diabetesLog from '@/routes/diabetes-log';
 import mealPlans from '@/routes/meal-plans';
 import biometrics from '@/routes/onboarding/biometrics';
+import profileDietaryPreferences from '@/routes/profile/dietary-preferences';
+import profileHealthConditions from '@/routes/profile/health-conditions';
+import profileMedications from '@/routes/profile/medications';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
@@ -56,6 +59,21 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
         title: t('sidebar.nav.update_info'),
         href: biometrics.show(),
         icon: LeafIcon,
+    },
+    {
+        title: t('sidebar.nav.dietary_preferences'),
+        href: profileDietaryPreferences.show.url(),
+        icon: LeafIcon,
+    },
+    {
+        title: t('sidebar.nav.health_conditions'),
+        href: profileHealthConditions.show.url(),
+        icon: ShieldCheck,
+    },
+    {
+        title: t('sidebar.nav.medications'),
+        href: profileMedications.show.url(),
+        icon: ActivityIcon,
     },
 ];
 

@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use App\Models\HealthCondition;
+use App\Models\User;
 use App\Models\UserProfile;
 
 test('to array', function (): void {
-    $profile = UserProfile::factory()->create();
+    $user = User::factory()->create();
+    $profile = UserProfile::factory()->for($user)->create();
     $condition = HealthCondition::factory()->create();
 
     $profile->healthConditions()->attach($condition->id, ['notes' => 'Test notes']);
@@ -24,7 +26,8 @@ test('to array', function (): void {
 });
 
 test('has correct table name', function (): void {
-    $profile = UserProfile::factory()->create();
+    $user = User::factory()->create();
+    $profile = UserProfile::factory()->for($user)->create();
     $condition = HealthCondition::factory()->create();
 
     $profile->healthConditions()->attach($condition->id);
@@ -35,7 +38,8 @@ test('has correct table name', function (): void {
 });
 
 test('belongs to user profile', function (): void {
-    $profile = UserProfile::factory()->create();
+    $user = User::factory()->create();
+    $profile = UserProfile::factory()->for($user)->create();
     $condition = HealthCondition::factory()->create();
 
     $profile->healthConditions()->attach($condition->id);
@@ -48,7 +52,8 @@ test('belongs to user profile', function (): void {
 });
 
 test('belongs to health condition', function (): void {
-    $profile = UserProfile::factory()->create();
+    $user = User::factory()->create();
+    $profile = UserProfile::factory()->for($user)->create();
     $condition = HealthCondition::factory()->create();
 
     $profile->healthConditions()->attach($condition->id);
@@ -61,7 +66,8 @@ test('belongs to health condition', function (): void {
 });
 
 test('can store notes', function (): void {
-    $profile = UserProfile::factory()->create();
+    $user = User::factory()->create();
+    $profile = UserProfile::factory()->for($user)->create();
     $condition = HealthCondition::factory()->create();
 
     $profile->healthConditions()->attach($condition->id, ['notes' => 'Patient has severe reaction']);
@@ -72,7 +78,8 @@ test('can store notes', function (): void {
 });
 
 test('notes can be null', function (): void {
-    $profile = UserProfile::factory()->create();
+    $user = User::factory()->create();
+    $profile = UserProfile::factory()->for($user)->create();
     $condition = HealthCondition::factory()->create();
 
     $profile->healthConditions()->attach($condition->id);

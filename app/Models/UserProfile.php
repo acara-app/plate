@@ -22,18 +22,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read float|null $height
  * @property-read float|null $weight
  * @property-read Sex|null $sex
- * @property-read int|null $goal_id
+ * @property-read string|null $goal_choice
+ * @property-read string|null $animal_product_choice
+ * @property-read string|null $intensity_choice
+ * @property-read string|null $calculated_diet_type
+ * @property-read float|null $derived_activity_multiplier
+ * @property-read bool $needs_re_onboarding
  * @property-read float|null $target_weight
  * @property-read string|null $additional_goals
- * @property-read int|null $lifestyle_id
  * @property-read GlucoseUnit|null $units_preference
  * @property-read bool $onboarding_completed
  * @property-read CarbonInterface|null $onboarding_completed_at
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read User $user
- * @property-read Goal|null $goal
- * @property-read Lifestyle|null $lifestyle
  * @property-read float|null $bmi
  * @property-read float|null $bmr
  * @property-read float|null $tdee
@@ -65,10 +67,14 @@ final class UserProfile extends Model
             'height' => 'float',
             'weight' => 'float',
             'sex' => Sex::class,
-            'goal_id' => 'integer',
+            'goal_choice' => 'string',
+            'animal_product_choice' => 'string',
+            'intensity_choice' => 'string',
+            'calculated_diet_type' => 'string',
+            'derived_activity_multiplier' => 'float',
+            'needs_re_onboarding' => 'boolean',
             'target_weight' => 'float',
             'additional_goals' => 'string',
-            'lifestyle_id' => 'integer',
             'units_preference' => GlucoseUnit::class,
             'onboarding_completed' => 'boolean',
             'onboarding_completed_at' => 'datetime',
@@ -83,22 +89,6 @@ final class UserProfile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    /**
-     * @return BelongsTo<Goal, $this>
-     */
-    public function goal(): BelongsTo
-    {
-        return $this->belongsTo(Goal::class);
-    }
-
-    /**
-     * @return BelongsTo<Lifestyle, $this>
-     */
-    public function lifestyle(): BelongsTo
-    {
-        return $this->belongsTo(Lifestyle::class);
     }
 
     /**
@@ -176,11 +166,13 @@ final class UserProfile extends Model
     protected function tdee(): Attribute
     {
         return Attribute::get(function (): ?float {
-            if (! $this->bmr || ! $this->lifestyle) {
+            if (! $this->bmr) {
                 return null;
             }
 
-            return round($this->bmr * $this->lifestyle->activity_multiplier, 2);
+            $multiplier = $this->derived_activity_multiplier ?? 1.3;
+
+            return round($this->bmr * $multiplier, 2);
         });
     }
 }
