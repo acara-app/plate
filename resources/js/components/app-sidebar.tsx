@@ -30,6 +30,7 @@ import {
     LeafIcon,
     ShieldCheck,
     TrendingUp,
+    UserPen,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AppLogo from './app-logo';
@@ -52,7 +53,7 @@ const getProfileNavItems = (t: (key: string) => string): NavItem[] => [
     {
         title: t('sidebar.nav.update_info'),
         href: biometrics.show(),
-        icon: LeafIcon,
+        icon: UserPen,
     },
     {
         title: t('sidebar.nav.dietary_preferences'),
