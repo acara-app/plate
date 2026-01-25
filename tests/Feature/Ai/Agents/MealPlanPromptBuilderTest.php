@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\MealPlanPromptBuilder;
+use App\Enums\GlucoseReadingType;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
+use App\Models\DiabetesLog;
 use App\Models\DietaryPreference;
 use App\Models\HealthCondition;
 use App\Models\User;
@@ -392,4 +394,127 @@ test('it handles unknown goal type gracefully', function (): void {
 
     expect($result)
         ->toBeString();
+});
+
+test('it automatically analyzes glucose data when analysis not provided', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'age' => 32,
+        'height' => 178,
+        'weight' => 82,
+        'sex' => Sex::Male,
+        'goal_choice' => GoalChoice::HealthyEating->value,
+        'derived_activity_multiplier' => 1.55,
+    ]);
+
+    // Create glucose readings to ensure analyzer has data
+    DiabetesLog::factory()->create([
+        'user_id' => $user->id,
+        'glucose_value' => 95.0,
+        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'measured_at' => now()->subDays(1),
+    ]);
+
+    DiabetesLog::factory()->create([
+        'user_id' => $user->id,
+        'glucose_value' => 140.0,
+        'glucose_reading_type' => GlucoseReadingType::PostMeal,
+        'measured_at' => now()->subDays(2),
+    ]);
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    // Call handle WITHOUT passing glucoseAnalysis parameter - this triggers the fallback path at line 93
+    $result = $builder->handle($user);
+
+    expect($result)
+        ->toBeString()
+        ->toContain('Glucose Monitoring Data')
+        ->toContain('Total Readings')
+        ->toContain('Average Glucose Levels');
+});
+
+test('it handles user profile with no tdee for calorie calculation', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'age' => null,
+        'height' => null,
+        'weight' => null,
+        'sex' => null,
+        'goal_choice' => GoalChoice::WeightLoss->value,
+        'derived_activity_multiplier' => 1.3,
+    ]);
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    $result = $builder->handle($user);
+
+    expect($result)->toBeString();
+});
+
+test('it handles user profile with no goal choice for calorie calculation', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'age' => 30,
+        'height' => 175,
+        'weight' => 80,
+        'sex' => Sex::Male,
+        'goal_choice' => null,
+        'derived_activity_multiplier' => 1.55,
+    ]);
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    $result = $builder->handle($user);
+
+    expect($result)->toBeString();
+});
+
+test('it handles user profile with invalid goal choice enum value', function (): void {
+    $user = User::factory()->create();
+    $profile = UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'age' => 30,
+        'height' => 175,
+        'weight' => 80,
+        'sex' => Sex::Male,
+        'goal_choice' => 'invalid_goal_value',  // Invalid enum value
+        'derived_activity_multiplier' => 1.55,
+    ]);
+
+    // Manually update to bypass validation
+    $profile->update(['goal_choice' => 'invalid_goal_value']);
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    $result = $builder->handle($user->fresh());
+
+    expect($result)->toBeString();
+});
+
+test('it generates single day meal plan prompt with all parameters', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'age' => 30,
+        'height' => 175,
+        'weight' => 80,
+        'sex' => Sex::Male,
+        'goal_choice' => GoalChoice::WeightLoss->value,
+        'derived_activity_multiplier' => 1.55,
+    ]);
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    $result = $builder->handleForDay(
+        user: $user,
+        dayNumber: 3,
+        totalDays: 7,
+        previousDaysContext: null,
+        glucoseAnalysis: null,
+        customPrompt: null
+    );
+
+    expect($result)
+        ->toBeString()
+        ->toContain('Day 3')
+        ->toContain('7');
 });
