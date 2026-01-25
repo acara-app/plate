@@ -56,14 +56,17 @@ export interface SexOption {
 }
 
 export interface Profile {
-    age: number;
-    height: number;
-    weight: number;
-    sex: string;
+    age?: number;
+    height?: number;
+    weight?: number;
+    sex?: string;
     goal_id?: number;
     target_weight?: number;
     additional_goals?: string;
     lifestyle_id?: number;
+    goal_choice?: string;
+    animal_product_choice?: string;
+    intensity_choice?: string;
 }
 
 export interface DietaryPreference extends Row {

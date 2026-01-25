@@ -224,7 +224,33 @@ it('renders identity page', function (): void {
         ->get(route('onboarding.identity.show'));
 
     $response->assertOk()
-        ->assertInertia(fn ($page) => $page->component('onboarding/identity'));
+        ->assertInertia(fn ($page) => $page
+            ->component('onboarding/identity')
+            ->has('profile'));
+});
+
+it('identity page displays existing profile choices', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'goal_choice' => App\Enums\GoalChoice::Spikes->value,
+        'animal_product_choice' => App\Enums\AnimalProductChoice::Omnivore->value,
+        'intensity_choice' => App\Enums\IntensityChoice::Balanced->value,
+        'age' => 30,
+        'height' => 175,
+        'weight' => 70,
+        'sex' => Sex::Male->value,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('onboarding.identity.show'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('onboarding/identity')
+            ->has('profile')
+            ->where('profile.goal_choice', App\Enums\GoalChoice::Spikes->value)
+            ->where('profile.animal_product_choice', App\Enums\AnimalProductChoice::Omnivore->value)
+            ->where('profile.intensity_choice', App\Enums\IntensityChoice::Balanced->value));
 });
 
 it('may store identity data and complete onboarding', function (): void {

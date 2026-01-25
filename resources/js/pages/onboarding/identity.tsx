@@ -6,7 +6,12 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-import { AnimalProductChoice, GoalChoice, IntensityChoice } from '@/types';
+import {
+    AnimalProductChoice,
+    GoalChoice,
+    IntensityChoice,
+    Profile,
+} from '@/types';
 
 const GOAL_OPTIONS = [
     {
@@ -62,7 +67,11 @@ const INTENSITY_OPTIONS = [
     },
 ];
 
-export default function Identity() {
+interface Props {
+    profile?: Profile;
+}
+
+export default function Identity({ profile }: Props) {
     return (
         <>
             <Head title="Let's Create Your Perfect Plan" />
@@ -70,7 +79,7 @@ export default function Identity() {
                 <div className="w-full max-w-2xl">
                     <div className="mb-8">
                         <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
-                            <span>Step 1 of 1</span>
+                            <span>Step 3 of 3</span>
                             <span>100%</span>
                         </div>
                         <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
@@ -116,6 +125,10 @@ export default function Identity() {
                                                         name="goal_choice"
                                                         value={option.value}
                                                         required
+                                                        defaultChecked={
+                                                            profile?.goal_choice ===
+                                                            option.value
+                                                        }
                                                         className="h-5 w-5 border-gray-300 text-primary focus:ring-primary"
                                                     />
                                                     <div>
@@ -155,6 +168,10 @@ export default function Identity() {
                                                             name="animal_product_choice"
                                                             value={option.value}
                                                             required
+                                                            defaultChecked={
+                                                                profile?.animal_product_choice ===
+                                                                option.value
+                                                            }
                                                             className="h-5 w-5 border-gray-300 text-primary focus:ring-primary"
                                                         />
                                                         <div className="text-gray-900 dark:text-white">
@@ -191,6 +208,10 @@ export default function Identity() {
                                                         name="intensity_choice"
                                                         value={option.value}
                                                         required
+                                                        defaultChecked={
+                                                            profile?.intensity_choice ===
+                                                            option.value
+                                                        }
                                                         className="h-5 w-5 border-gray-300 text-primary focus:ring-primary"
                                                     />
                                                     <div className="text-gray-900 dark:text-white">

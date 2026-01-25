@@ -52,7 +52,11 @@ final readonly class OnboardingController
 
     public function showIdentity(): Response
     {
-        return Inertia::render('onboarding/identity');
+        $profile = $this->user->profile;
+
+        return Inertia::render('onboarding/identity', [
+            'profile' => $profile,
+        ]);
     }
 
     public function storeIdentity(\App\Http\Requests\StoreIdentityRequest $request): RedirectResponse
