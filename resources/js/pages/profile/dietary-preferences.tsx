@@ -1,5 +1,6 @@
+import { dashboard } from '@/routes';
 import profileDietaryPreferences from '@/routes/profile/dietary-preferences';
-import { DietaryPreference, Profile } from '@/types';
+import { BreadcrumbItem, DietaryPreference, Profile } from '@/types';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
@@ -36,6 +37,17 @@ interface Props {
     };
     severityOptions: SeverityOption[];
 }
+
+const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
+    {
+        title: t('sidebar.nav.home'),
+        href: dashboard().url,
+    },
+    {
+        title: t('sidebar.nav.dietary_preferences'),
+        href: profileDietaryPreferences.show.url(),
+    },
+];
 
 export default function DietaryPreferences({
     selectedPreferences,
@@ -191,7 +203,7 @@ export default function DietaryPreferences({
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={getBreadcrumbs(t)}>
             <Head title={t('onboarding.dietary_preferences.title')} />
             <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
                 <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">

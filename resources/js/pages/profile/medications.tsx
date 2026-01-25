@@ -1,5 +1,6 @@
+import { dashboard } from '@/routes';
 import profileMedications from '@/routes/profile/medications';
-import { Profile, UserMedication } from '@/types';
+import { BreadcrumbItem, Profile, UserMedication } from '@/types';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -25,6 +26,17 @@ interface Props {
     profile?: Profile;
     medications: UserMedication[];
 }
+
+const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
+    {
+        title: t('sidebar.nav.home'),
+        href: dashboard().url,
+    },
+    {
+        title: t('sidebar.nav.medications'),
+        href: profileMedications.show.url(),
+    },
+];
 
 export default function Medications({ medications }: Props) {
     const { t } = useTranslation('common');
@@ -88,7 +100,7 @@ export default function Medications({ medications }: Props) {
     ];
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={getBreadcrumbs(t)}>
             <Head title={t('onboarding.medications.title')} />
             <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
                 <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">

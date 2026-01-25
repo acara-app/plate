@@ -1,5 +1,6 @@
+import { dashboard } from '@/routes';
 import profileHealthConditions from '@/routes/profile/health-conditions';
-import { HealthCondition, Profile } from '@/types';
+import { BreadcrumbItem, HealthCondition, Profile } from '@/types';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
@@ -26,6 +27,17 @@ interface Props {
     glucoseUnitOptions: GlucoseUnitOption[];
     selectedGlucoseUnit?: string | null;
 }
+
+const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
+    {
+        title: t('sidebar.nav.home'),
+        href: dashboard().url,
+    },
+    {
+        title: t('sidebar.nav.health_conditions'),
+        href: profileHealthConditions.show.url(),
+    },
+];
 
 export default function HealthConditions({
     selectedConditions,
@@ -59,7 +71,7 @@ export default function HealthConditions({
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={getBreadcrumbs(t)}>
             <Head title={t('onboarding.health_conditions.title')} />
             <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
                 <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
