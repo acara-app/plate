@@ -81,6 +81,18 @@ class extends Component {
                 ],
             ],
             [
+                'name' => 'AI-Powered Chef',
+                'description' => 'Let our Michelin-star AI chef create delicious meals. Choose Mediterranean or creative mode.',
+                'icon' => '👨‍🍳',
+                'route' => '#todo',
+                'badge' => 'AI Powered',
+                'features' => [
+                    'Mediterranean diet mode',
+                    'Creative fusion combinations',
+                    'Accurate nutritional data',
+                ],
+            ],
+            [
                 'name' => '10-Day Meal Plan',
                 'description' => 'A free 10-day diabetic-friendly meal plan with recipes and shopping lists.',
                 'icon' => '📅',

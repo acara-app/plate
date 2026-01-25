@@ -21,7 +21,6 @@ Route::livewire('/tools', 'pages::tools-index')->name('tools.index'); // @phpsta
 Route::livewire('/tools/spike-calculator', 'pages::spike-calculator')->name('spike-calculator'); // @phpstan-ignore method.nonObject
 Route::livewire('/tools/snap-to-track', 'pages::snap-to-track')->name('snap-to-track'); // @phpstan-ignore method.nonObject
 Route::livewire('/tools/usda-daily-servings-calculator', 'pages::usda-daily-servings-calculator')->name('usda-servings-calculator'); // @phpstan-ignore method.nonObject
-Route::livewire('/tools/meal', 'pages::meal.create')->name('mediterranean-diet-food-checker'); // @phpstan-ignore method.nonObject
 
 // Redirects for old tool URLs (SEO)...
 Route::redirect('/spike-calculator', '/tools/spike-calculator', 301);
