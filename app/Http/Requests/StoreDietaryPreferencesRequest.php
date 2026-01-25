@@ -16,11 +16,11 @@ final class StoreDietaryPreferencesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'dietary_preference_ids' => ['nullable', 'array'],
+            'dietary_preference_ids' => ['required', 'array'],
             'dietary_preference_ids.*' => ['integer', 'exists:dietary_preferences,id'],
-            'severities' => ['nullable', 'array'],
+            'severities' => ['required', 'array'],
             'severities.*' => ['nullable', new Enum(AllergySeverity::class)],
-            'notes' => ['nullable', 'array'],
+            'notes' => ['required', 'array'],
             'notes.*' => ['nullable', 'string', 'max:500'],
         ];
     }

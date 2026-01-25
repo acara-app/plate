@@ -14,8 +14,8 @@ final class StoreMedicationsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'medications' => ['nullable', 'array'],
-            'medications.*.name' => ['nullable', 'string', 'max:255'],
+            'medications' => ['required', 'array'],
+            'medications.*.name' => ['required', 'string', 'max:255'],
             'medications.*.dosage' => ['nullable', 'string', 'max:100'],
             'medications.*.frequency' => ['nullable', 'string', 'max:100'],
             'medications.*.purpose' => ['nullable', 'string', 'max:255'],
