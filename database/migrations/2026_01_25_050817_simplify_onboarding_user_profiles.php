@@ -8,9 +8,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
         Schema::table('user_profiles', function (Blueprint $table): void {
@@ -21,13 +19,5 @@ return new class extends Migration
             $table->decimal('derived_activity_multiplier', 3, 2)->nullable();
             $table->boolean('needs_re_onboarding')->default(false);
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        //
     }
 };

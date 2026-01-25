@@ -17,22 +17,4 @@ return new class extends Migration
 
         Schema::dropIfExists('lifestyles');
     }
-
-    public function down(): void
-    {
-        Schema::create('lifestyles', function (Blueprint $table): void {
-            $table->id();
-            $table->string('name');
-            $table->string('activity_level')->nullable();
-            $table->string('sleep_hours')->nullable();
-            $table->string('occupation')->nullable();
-            $table->text('description')->nullable();
-            $table->float('activity_multiplier')->nullable();
-            $table->timestamps();
-        });
-
-        Schema::table('user_profiles', function (Blueprint $table): void {
-            $table->foreignId('lifestyle_id')->nullable()->constrained()->nullOnDelete();
-        });
-    }
 };
