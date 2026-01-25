@@ -18,7 +18,7 @@ use RuntimeException;
 final readonly class MealPlanPromptBuilder
 {
     public function __construct(
-        private readonly GlucoseDataAnalyzer $glucoseDataAnalyzer,
+        private GlucoseDataAnalyzer $glucoseDataAnalyzer,
     ) {}
 
     /**

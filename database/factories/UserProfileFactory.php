@@ -13,13 +13,14 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @template TModel of \App\Models\UserProfile
+ *
  * @extends Factory<TModel>
  */
 final class UserProfileFactory extends Factory
 {
     protected $model = UserProfile::class;
 
-/**
+    /**
      * @return array<string, mixed>
      */
     public function definition(): array

@@ -507,10 +507,7 @@ test('it generates single day meal plan prompt with all parameters', function ()
     $result = $builder->handleForDay(
         user: $user,
         dayNumber: 3,
-        totalDays: 7,
-        previousDaysContext: null,
-        glucoseAnalysis: null,
-        customPrompt: null
+        totalDays: 7
     );
 
     expect($result)

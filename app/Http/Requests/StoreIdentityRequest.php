@@ -17,15 +17,15 @@ final class StoreIdentityRequest extends FormRequest
         return true;
     }
 
-/**
- * @return array<string, array<int, string|\Illuminate\Validation\Rules\Enum>>
- */
-public function rules(): array
-{
-    return [
-        'goal_choice' => ['required', Rule::enum(GoalChoice::class)],
-        'animal_product_choice' => ['required', Rule::enum(AnimalProductChoice::class)],
-        'intensity_choice' => ['required', Rule::enum(IntensityChoice::class)],
-    ];
-}
+    /**
+     * @return array<string, array<int, string|\Illuminate\Validation\Rules\Enum>>
+     */
+    public function rules(): array
+    {
+        return [
+            'goal_choice' => ['required', Rule::enum(GoalChoice::class)],
+            'animal_product_choice' => ['required', Rule::enum(AnimalProductChoice::class)],
+            'intensity_choice' => ['required', Rule::enum(IntensityChoice::class)],
+        ];
+    }
 }
