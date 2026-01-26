@@ -17,10 +17,10 @@ Route::view('/diabetes-log-book-info', 'diabetes-log-book-info')->name('diabetes
 Route::view('/10-day-meal-plan', '10-day-meal-plan')->name('10-day-meal-plan');
 
 // Tools...
-Route::livewire('/tools', 'pages::tools-index')->name('tools.index'); // @phpstan-ignore method.nonObject
-Route::livewire('/tools/spike-calculator', 'pages::spike-calculator')->name('spike-calculator'); // @phpstan-ignore method.nonObject
-Route::livewire('/tools/snap-to-track', 'pages::snap-to-track')->name('snap-to-track'); // @phpstan-ignore method.nonObject
-Route::livewire('/tools/usda-daily-servings-calculator', 'pages::usda-daily-servings-calculator')->name('usda-servings-calculator'); // @phpstan-ignore method.nonObject
+Route::livewire('/tools', 'pages::tools-index')->name('tools.index');
+Route::livewire('/tools/spike-calculator', 'pages::spike-calculator')->name('spike-calculator');
+Route::livewire('/tools/snap-to-track', 'pages::snap-to-track')->name('snap-to-track');
+Route::livewire('/tools/usda-daily-servings-calculator', 'pages::usda-daily-servings-calculator')->name('usda-servings-calculator');
 
 // Redirects for old tool URLs (SEO)...
 Route::redirect('/spike-calculator', '/tools/spike-calculator', 301);
