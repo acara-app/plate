@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "93e3a36d9a46974c5fe6a0eb9f13b007",
+    "content-hash": "979ce92b0da134ab0f9c945fe98eb6aa",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.369.19",
+            "version": "3.369.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "32fee3a25290186724ede9ca177d5090f7c5a837"
+                "reference": "f53d8fc6cdbc1e64e7d14e72d1e315d05003b2b4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/32fee3a25290186724ede9ca177d5090f7c5a837",
-                "reference": "32fee3a25290186724ede9ca177d5090f7c5a837",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/f53d8fc6cdbc1e64e7d14e72d1e315d05003b2b4",
+                "reference": "f53d8fc6cdbc1e64e7d14e72d1e315d05003b2b4",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.19"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.20"
             },
-            "time": "2026-01-23T19:05:51+00:00"
+            "time": "2026-01-26T19:14:05+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -4566,16 +4566,16 @@
         },
         {
             "name": "prism-php/prism",
-            "version": "v0.99.16",
+            "version": "v0.99.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/prism-php/prism.git",
-                "reference": "2e35911bf3db684e19ae22142b8ff8e21d87ed9b"
+                "reference": "28517946d0b015c38a9d2665bda926a340d8feae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/prism-php/prism/zipball/2e35911bf3db684e19ae22142b8ff8e21d87ed9b",
-                "reference": "2e35911bf3db684e19ae22142b8ff8e21d87ed9b",
+                "url": "https://api.github.com/repos/prism-php/prism/zipball/28517946d0b015c38a9d2665bda926a340d8feae",
+                "reference": "28517946d0b015c38a9d2665bda926a340d8feae",
                 "shasum": ""
             },
             "require": {
@@ -4633,7 +4633,7 @@
             "description": "A powerful Laravel package for integrating Large Language Models (LLMs) into your applications.",
             "support": {
                 "issues": "https://github.com/prism-php/prism/issues",
-                "source": "https://github.com/prism-php/prism/tree/v0.99.16"
+                "source": "https://github.com/prism-php/prism/tree/v0.99.17"
             },
             "funding": [
                 {
@@ -4641,7 +4641,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-01-25T16:17:27+00:00"
+            "time": "2026-01-26T13:24:31+00:00"
         },
         {
             "name": "psr/clock",
@@ -11367,33 +11367,33 @@
         },
         {
             "name": "laravel/boost",
-            "version": "v1.8.10",
+            "version": "v2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/boost.git",
-                "reference": "aad8b2a423b0a886c2ce7ee92abbfde69992ff32"
+                "reference": "59874334803197654c1e8de96547804465bbdd0c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/boost/zipball/aad8b2a423b0a886c2ce7ee92abbfde69992ff32",
-                "reference": "aad8b2a423b0a886c2ce7ee92abbfde69992ff32",
+                "url": "https://api.github.com/repos/laravel/boost/zipball/59874334803197654c1e8de96547804465bbdd0c",
+                "reference": "59874334803197654c1e8de96547804465bbdd0c",
                 "shasum": ""
             },
             "require": {
                 "guzzlehttp/guzzle": "^7.9",
-                "illuminate/console": "^10.49.0|^11.45.3|^12.41.1",
-                "illuminate/contracts": "^10.49.0|^11.45.3|^12.41.1",
-                "illuminate/routing": "^10.49.0|^11.45.3|^12.41.1",
-                "illuminate/support": "^10.49.0|^11.45.3|^12.41.1",
+                "illuminate/console": "^11.45.3|^12.41.1",
+                "illuminate/contracts": "^11.45.3|^12.41.1",
+                "illuminate/routing": "^11.45.3|^12.41.1",
+                "illuminate/support": "^11.45.3|^12.41.1",
                 "laravel/mcp": "^0.5.1",
-                "laravel/prompts": "0.1.25|^0.3.6",
+                "laravel/prompts": "^0.3.10",
                 "laravel/roster": "^0.2.9",
-                "php": "^8.1"
+                "php": "^8.2"
             },
             "require-dev": {
-                "laravel/pint": "^1.20.0",
+                "laravel/pint": "^1.27.0",
                 "mockery/mockery": "^1.6.12",
-                "orchestra/testbench": "^8.36.0|^9.15.0|^10.6",
+                "orchestra/testbench": "^9.15.0|^10.6",
                 "pestphp/pest": "^2.36.0|^3.8.4|^4.1.5",
                 "phpstan/phpstan": "^2.1.27",
                 "rector/rector": "^2.1"
@@ -11429,7 +11429,7 @@
                 "issues": "https://github.com/laravel/boost/issues",
                 "source": "https://github.com/laravel/boost"
             },
-            "time": "2026-01-14T14:51:16+00:00"
+            "time": "2026-01-26T16:36:25+00:00"
         },
         {
             "name": "laravel/mcp",
@@ -13478,12 +13478,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "8e1e81cec2f088871c624d2adf767eb5e492ecdf"
+                "reference": "41f66a85ed999edf9e171452b75f642321aa7fcc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/8e1e81cec2f088871c624d2adf767eb5e492ecdf",
-                "reference": "8e1e81cec2f088871c624d2adf767eb5e492ecdf",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/41f66a85ed999edf9e171452b75f642321aa7fcc",
+                "reference": "41f66a85ed999edf9e171452b75f642321aa7fcc",
                 "shasum": ""
             },
             "conflict": {
@@ -13971,7 +13971,7 @@
                 "mongodb/mongodb": ">=1,<1.9.2",
                 "mongodb/mongodb-extension": "<1.21.2",
                 "monolog/monolog": ">=1.8,<1.12",
-                "moodle/moodle": "<=5.1.1",
+                "moodle/moodle": "<4.4.12|>=4.5.0.0-beta,<4.5.8|>=5.0.0.0-beta,<5.0.4|>=5.1.0.0-beta,<5.1.1",
                 "moonshine/moonshine": "<=3.12.5",
                 "mos/cimage": "<0.7.19",
                 "movim/moxl": ">=0.8,<=0.10",
@@ -14485,7 +14485,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-01-23T21:05:59+00:00"
+            "time": "2026-01-26T18:09:51+00:00"
         },
         {
             "name": "sebastian/cli-parser",
