@@ -85,7 +85,7 @@ final readonly class OnboardingController
             'goal_choice' => $dietIdentityData->goal_choice,
             'animal_product_choice' => $dietIdentityData->animal_product_choice,
             'intensity_choice' => $dietIdentityData->intensity_choice,
-            'calculated_diet_type' => $dietType->value,
+            'calculated_diet_type' => $dietType,
             'derived_activity_multiplier' => $activityMultiplier,
         ];
 

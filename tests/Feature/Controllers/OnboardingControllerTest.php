@@ -277,7 +277,7 @@ it('may store identity data and complete onboarding', function (): void {
         ->goal_choice->toBe(App\Enums\GoalChoice::Spikes->value)
         ->animal_product_choice->toBe(App\Enums\AnimalProductChoice::Omnivore->value)
         ->intensity_choice->toBe(App\Enums\IntensityChoice::Balanced->value)
-        ->calculated_diet_type->toBe('mediterranean')
+        ->calculated_diet_type->toBe(App\Enums\DietType::Mediterranean)
         ->derived_activity_multiplier->toBe(1.3)
         ->onboarding_completed->toBeTrue()
         ->onboarding_completed_at->not->toBeNull();
