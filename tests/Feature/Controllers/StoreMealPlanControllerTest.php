@@ -105,16 +105,35 @@ it('creates meal plan name based on diet type', function (): void {
     expect($mealPlan->name)->toBe('3-Day Keto Plan');
 });
 
-it('creates generic name when no diet type available', function (): void {
+it('uses custom duration days from request', function (): void {
     Queue::fake();
 
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
-        ->post(route('meal-plans.store'));
+        ->post(route('meal-plans.store'), [
+            'duration_days' => 5,
+        ]);
 
     $response->assertRedirect();
 
     $mealPlan = $user->mealPlans->first();
-    expect($mealPlan->name)->toBe('3-Day Balanced Plan');
+    expect($mealPlan->duration_days)->toBe(5);
+});
+
+it('creates meal plan name with correct duration', function (): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('meal-plans.store'), [
+            'duration_days' => 7,
+            'diet_type' => DietType::Keto->value,
+        ]);
+
+    $response->assertRedirect();
+
+    $mealPlan = $user->mealPlans->first();
+    expect($mealPlan->name)->toBe('7-Day Keto Plan');
 });

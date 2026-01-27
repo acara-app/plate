@@ -63,7 +63,7 @@ final class MealPlanInitializeWorkflow extends Workflow
     {
         $mealPlanType = self::getMealPlanType($totalDays);
 
-        $name = $dietType
+        $name = $dietType instanceof DietType
             ? "{$totalDays}-Day {$dietType->shortName()} Plan"
             : "{$totalDays}-Day Personalized Plan";
 

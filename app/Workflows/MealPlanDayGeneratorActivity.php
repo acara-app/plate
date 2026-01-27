@@ -30,7 +30,7 @@ final class MealPlanDayGeneratorActivity extends Activity
         /** @var MealPlanGeneratorAgent $generateMealPlan */
         $generateMealPlan = resolve(MealPlanGeneratorAgent::class);
 
-        if ($dietType) {
+        if ($dietType instanceof DietType) {
             $generateMealPlan = $generateMealPlan->withDietType($dietType);
         }
 

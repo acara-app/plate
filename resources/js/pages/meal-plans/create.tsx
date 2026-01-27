@@ -38,6 +38,9 @@ interface Props {
 export default function CreateMealPlan({ dietTypes, userProfile }: Props) {
     const { t } = useTranslation('common');
     const [showOptions, setShowOptions] = useState(false);
+    const [selectedDays, setSelectedDays] = useState(1);
+
+    const days = [1, 2, 3, 4, 5, 6, 7];
 
     return (
         <AppLayout breadcrumbs={getBreadcrumbs(t)}>
@@ -74,12 +77,6 @@ export default function CreateMealPlan({ dietTypes, userProfile }: Props) {
                                             {t('meal_plans.create.prompt_hint')}
                                         </p>
                                     </div>
-
-                                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                                        <p className="text-sm">
-                                            {t('meal_plans.create.note')}
-                                        </p>
-                                    </div>
                                 </div>
 
                                 <Button
@@ -107,6 +104,48 @@ export default function CreateMealPlan({ dietTypes, userProfile }: Props) {
 
                                     {showOptions && (
                                         <>
+                                            <input
+                                                type="hidden"
+                                                name="duration_days"
+                                                id="duration_days"
+                                                value={selectedDays}
+                                            />
+                                            <div>
+                                                <label
+                                                    htmlFor="duration_days"
+                                                    className="mb-2 block text-sm font-medium"
+                                                >
+                                                    {t(
+                                                        'meal_plans.create.duration_label',
+                                                    )}
+                                                </label>
+                                                <div className="flex gap-2">
+                                                    {days.map((day) => (
+                                                        <button
+                                                            key={day}
+                                                            type="button"
+                                                            onClick={() =>
+                                                                setSelectedDays(
+                                                                    day,
+                                                                )
+                                                            }
+                                                            className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+                                                                selectedDays ===
+                                                                day
+                                                                    ? 'border-primary bg-primary text-primary-foreground'
+                                                                    : 'border-border bg-background hover:bg-muted'
+                                                            }`}
+                                                        >
+                                                            {day}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                                <p className="mt-2 text-xs text-muted-foreground">
+                                                    {t(
+                                                        'meal_plans.create.duration_hint',
+                                                    )}
+                                                </p>
+                                            </div>
                                             <div>
                                                 <label
                                                     htmlFor="diet_type"

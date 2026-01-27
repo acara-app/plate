@@ -35,7 +35,8 @@ final readonly class StoreMealPlanController
         }
 
         $prompt = request()->input('prompt');
-        $mealPlan = MealPlanInitializeWorkflow::createMealPlan($user, 3, $dietType);
+        $durationDays = (int) request()->input('duration_days', 3);
+        $mealPlan = MealPlanInitializeWorkflow::createMealPlan($user, $durationDays, $dietType);
 
         if ($prompt) {
             $mealPlan->update([
