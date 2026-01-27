@@ -125,7 +125,7 @@ class extends Component
                 type="text" 
                 wire:model.live.debounce.150ms="food"
                 placeholder="e.g. 2 slices of pepperoni pizza" 
-                class="w-full min-h-[56px] rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-4 pr-14 text-lg font-medium outline-none transition-colors focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:focus:border-blue-500 dark:focus:bg-slate-800"
+                class="w-full min-h-14 rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-4 pr-14 text-lg font-medium outline-none transition-colors focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:focus:border-blue-500 dark:focus:bg-slate-800"
                 @disabled($loading)
             >
             <button
