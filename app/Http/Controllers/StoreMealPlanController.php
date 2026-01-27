@@ -35,17 +35,11 @@ final readonly class StoreMealPlanController
         }
 
         $prompt = request()->input('prompt');
-        $mealPlan = MealPlanInitializeWorkflow::createMealPlan($user, 3);
+        $mealPlan = MealPlanInitializeWorkflow::createMealPlan($user, 3, $dietType);
 
         if ($prompt) {
             $mealPlan->update([
                 'metadata->custom_prompt' => $prompt,
-            ]);
-        }
-
-        if ($dietType) {
-            $mealPlan->update([
-                'metadata->diet_type' => $dietType->value,
             ]);
         }
 

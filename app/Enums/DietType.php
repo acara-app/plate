@@ -43,6 +43,20 @@ enum DietType: string
         };
     }
 
+    public function shortName(): string
+    {
+        return match ($this) {
+            self::Mediterranean => 'Mediterranean',
+            self::LowCarb => 'Low Carb',
+            self::Keto => 'Keto',
+            self::Dash => 'DASH',
+            self::Vegetarian => 'Vegetarian',
+            self::Vegan => 'Vegan',
+            self::Paleo => 'Paleo',
+            self::Balanced => 'Balanced',
+        };
+    }
+
     /**
      * Returns the primary nutritional focus for this diet.
      * Useful for AI prompts or UI hints.

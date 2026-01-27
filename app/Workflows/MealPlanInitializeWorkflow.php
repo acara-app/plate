@@ -59,14 +59,18 @@ final class MealPlanInitializeWorkflow extends Workflow
      * This must be called synchronously before starting the workflow
      * to ensure the user sees the "Generating" state immediately.
      */
-    public static function createMealPlan(User $user, int $totalDays = 7): MealPlan
+    public static function createMealPlan(User $user, int $totalDays = 7, ?DietType $dietType = null): MealPlan
     {
         $mealPlanType = self::getMealPlanType($totalDays);
+
+        $name = $dietType
+            ? "{$totalDays}-Day {$dietType->shortName()} Plan"
+            : "{$totalDays}-Day Personalized Plan";
 
         /** @var MealPlan $mealPlan */
         $mealPlan = $user->mealPlans()->create([
             'type' => $mealPlanType,
-            'name' => $totalDays.'-Day Personalized Meal Plan',
+            'name' => $name,
             'description' => 'AI-generated meal plan tailored to your nutritional needs and preferences.',
             'duration_days' => $totalDays,
             'target_daily_calories' => null,
@@ -76,6 +80,7 @@ final class MealPlanInitializeWorkflow extends Workflow
                 'generation_method' => 'workflow',
                 'status' => MealPlanGenerationStatus::Generating->value,
                 'days_completed' => 0,
+                'diet_type' => $dietType?->value,
             ],
         ]);
 

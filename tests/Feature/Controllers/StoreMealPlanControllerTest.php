@@ -88,3 +88,33 @@ it('uses balanced diet type when no diet type provided and profile has none', fu
     $mealPlan = $user->mealPlans->first();
     expect($mealPlan->metadata['diet_type'])->toBe(DietType::Balanced->value);
 });
+
+it('creates meal plan name based on diet type', function (): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('meal-plans.store'), [
+            'diet_type' => DietType::Keto->value,
+        ]);
+
+    $response->assertRedirect();
+
+    $mealPlan = $user->mealPlans->first();
+    expect($mealPlan->name)->toBe('3-Day Keto Plan');
+});
+
+it('creates generic name when no diet type available', function (): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('meal-plans.store'));
+
+    $response->assertRedirect();
+
+    $mealPlan = $user->mealPlans->first();
+    expect($mealPlan->name)->toBe('3-Day Balanced Plan');
+});

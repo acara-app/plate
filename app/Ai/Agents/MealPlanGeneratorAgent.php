@@ -91,7 +91,9 @@ final class MealPlanGeneratorAgent extends BaseAgent
     {
         $glucoseAnalysis = $this->analyzeGlucose->handle($user);
 
-        $mealPlan = MealPlanInitializeWorkflow::createMealPlan($user, $totalDays);
+        $dietType = $user->profile?->calculated_diet_type ?? DietType::Balanced;
+
+        $mealPlan = MealPlanInitializeWorkflow::createMealPlan($user, $totalDays, $dietType);
 
         WorkflowStub::make(MealPlanInitializeWorkflow::class)
             ->start($user, $mealPlan, $glucoseAnalysis->analysisData);
