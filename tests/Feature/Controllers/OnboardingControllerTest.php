@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Enums\AnimalProductChoice;
+use App\Enums\DietType;
+use App\Enums\GoalChoice;
+use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use App\Models\User;
 
@@ -232,9 +236,9 @@ it('renders identity page', function (): void {
 it('identity page displays existing profile choices', function (): void {
     $user = User::factory()->create();
     $user->profile()->create([
-        'goal_choice' => App\Enums\GoalChoice::Spikes->value,
-        'animal_product_choice' => App\Enums\AnimalProductChoice::Omnivore->value,
-        'intensity_choice' => App\Enums\IntensityChoice::Balanced->value,
+        'goal_choice' => GoalChoice::Spikes->value,
+        'animal_product_choice' => AnimalProductChoice::Omnivore->value,
+        'intensity_choice' => IntensityChoice::Balanced->value,
         'age' => 30,
         'height' => 175,
         'weight' => 70,
@@ -248,9 +252,9 @@ it('identity page displays existing profile choices', function (): void {
         ->assertInertia(fn ($page) => $page
             ->component('onboarding/identity')
             ->has('profile')
-            ->where('profile.goal_choice', App\Enums\GoalChoice::Spikes->value)
-            ->where('profile.animal_product_choice', App\Enums\AnimalProductChoice::Omnivore->value)
-            ->where('profile.intensity_choice', App\Enums\IntensityChoice::Balanced->value));
+            ->where('profile.goal_choice', GoalChoice::Spikes->value)
+            ->where('profile.animal_product_choice', AnimalProductChoice::Omnivore->value)
+            ->where('profile.intensity_choice', IntensityChoice::Balanced->value));
 });
 
 it('may store identity data and complete onboarding', function (): void {
@@ -264,9 +268,9 @@ it('may store identity data and complete onboarding', function (): void {
 
     $response = $this->actingAs($user)
         ->post(route('onboarding.identity.store'), [
-            'goal_choice' => App\Enums\GoalChoice::Spikes->value,
-            'animal_product_choice' => App\Enums\AnimalProductChoice::Omnivore->value,
-            'intensity_choice' => App\Enums\IntensityChoice::Balanced->value,
+            'goal_choice' => GoalChoice::Spikes->value,
+            'animal_product_choice' => AnimalProductChoice::Omnivore->value,
+            'intensity_choice' => IntensityChoice::Balanced->value,
         ]);
 
     $response->assertRedirectToRoute('meal-plans.create');
@@ -274,10 +278,10 @@ it('may store identity data and complete onboarding', function (): void {
     $profile = $user->profile()->first();
 
     expect($profile)->not->toBeNull()
-        ->goal_choice->toBe(App\Enums\GoalChoice::Spikes->value)
-        ->animal_product_choice->toBe(App\Enums\AnimalProductChoice::Omnivore->value)
-        ->intensity_choice->toBe(App\Enums\IntensityChoice::Balanced->value)
-        ->calculated_diet_type->toBe(App\Enums\DietType::Mediterranean)
+        ->goal_choice->toBe(GoalChoice::Spikes)
+        ->animal_product_choice->toBe(AnimalProductChoice::Omnivore)
+        ->intensity_choice->toBe(IntensityChoice::Balanced)
+        ->calculated_diet_type->toBe(DietType::Mediterranean)
         ->derived_activity_multiplier->toBe(1.3)
         ->onboarding_completed->toBeTrue()
         ->onboarding_completed_at->not->toBeNull();

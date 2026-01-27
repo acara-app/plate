@@ -82,9 +82,9 @@ final readonly class OnboardingController
         );
 
         $profileData = [
-            'goal_choice' => $dietIdentityData->goal_choice,
-            'animal_product_choice' => $dietIdentityData->animal_product_choice,
-            'intensity_choice' => $dietIdentityData->intensity_choice,
+            'goal_choice' => GoalChoice::from($dietIdentityData->goal_choice),
+            'animal_product_choice' => AnimalProductChoice::from($dietIdentityData->animal_product_choice),
+            'intensity_choice' => IntensityChoice::from($dietIdentityData->intensity_choice),
             'calculated_diet_type' => $dietType,
             'derived_activity_multiplier' => $activityMultiplier,
         ];

@@ -77,7 +77,7 @@ final readonly class MealPlanPromptBuilder
 
         return MealPlanContextData::from([
             ...$profile->toArray(),
-            'goal' => $profile->goal_choice ? GoalChoice::tryFrom($profile->goal_choice)?->label() : null,
+            'goal' => $profile->goal_choice?->label(),
             'dietary_preferences' => $profile->dietaryPreferences,
             'health_conditions' => $profile->healthConditions,
             'medications' => $profile->medications,
@@ -99,11 +99,11 @@ final readonly class MealPlanPromptBuilder
      */
     private function calculateDietType(UserProfile $profile): DietType
     {
-        $goal = GoalChoice::tryFrom($profile->goal_choice ?? '');
-        $animalProductChoice = \App\Enums\AnimalProductChoice::tryFrom($profile->animal_product_choice ?? '');
-        $intensityChoice = \App\Enums\IntensityChoice::tryFrom($profile->intensity_choice ?? '');
-
-        return DietMapper::map($goal ?? GoalChoice::HealthyEating, $animalProductChoice ?? \App\Enums\AnimalProductChoice::Omnivore, $intensityChoice ?? \App\Enums\IntensityChoice::Balanced);
+        return DietMapper::map(
+            $profile->goal_choice ?? GoalChoice::HealthyEating,
+            $profile->animal_product_choice ?? \App\Enums\AnimalProductChoice::Omnivore,
+            $profile->intensity_choice ?? \App\Enums\IntensityChoice::Balanced,
+        );
     }
 
     /**
@@ -117,13 +117,7 @@ final readonly class MealPlanPromptBuilder
             return null;
         }
 
-        $goal = GoalChoice::tryFrom($profile->goal_choice);
-
-        if (! $goal) {
-            return $tdee;
-        }
-
-        return match ($goal) {
+        return match ($profile->goal_choice) {
             GoalChoice::WeightLoss => round($tdee - 500, 2),
             GoalChoice::BuildMuscle => round($tdee + 300, 2),
             GoalChoice::Spikes, GoalChoice::HeartHealth, GoalChoice::HealthyEating => round($tdee - 300, 2),

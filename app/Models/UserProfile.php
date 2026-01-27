@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\AnimalProductChoice;
 use App\Enums\DietType;
 use App\Enums\GlucoseUnit;
+use App\Enums\GoalChoice;
+use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -68,9 +71,9 @@ final class UserProfile extends Model
             'height' => 'float',
             'weight' => 'float',
             'sex' => Sex::class,
-            'goal_choice' => 'string',
-            'animal_product_choice' => 'string',
-            'intensity_choice' => 'string',
+            'goal_choice' => GoalChoice::class,
+            'animal_product_choice' => AnimalProductChoice::class,
+            'intensity_choice' => IntensityChoice::class,
             'calculated_diet_type' => DietType::class,
             'derived_activity_multiplier' => 'float',
             'needs_re_onboarding' => 'boolean',
