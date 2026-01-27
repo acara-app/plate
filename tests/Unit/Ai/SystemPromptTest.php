@@ -26,6 +26,7 @@ it('generates prompt with only background', function (): void {
 it('generates prompt with all sections', function (): void {
     $prompt = new SystemPrompt(
         background: ['You are an AI assistant.'],
+        context: ['The user is a diabetic.', 'The user likes keto.'],
         steps: ['1. Analyze the request', '2. Generate response'],
         output: ['Use JSON format', 'Be concise'],
         toolsUsage: ['Use file_search for data', 'Verify before using'],
@@ -36,6 +37,9 @@ it('generates prompt with all sections', function (): void {
     expect($result)
         ->toContain('# IDENTITY AND PURPOSE')
         ->toContain('You are an AI assistant.')
+        ->toContain('# CONTEXT')
+        ->toContain('The user is a diabetic.')
+        ->toContain('The user likes keto.')
         ->toContain('# INTERNAL ASSISTANT STEPS')
         ->toContain('1. Analyze the request')
         ->toContain('2. Generate response')
@@ -45,6 +49,24 @@ it('generates prompt with all sections', function (): void {
         ->toContain('# TOOLS USAGE RULES')
         ->toContain(' - Use file_search for data')
         ->toContain(' - Verify before using');
+});
+
+it('generates prompt with context only', function (): void {
+    $prompt = new SystemPrompt(
+        background: ['Background info.'],
+        context: ['Context 1', 'Context 2'],
+    );
+
+    $result = (string) $prompt;
+
+    expect($result)
+        ->toContain('# IDENTITY AND PURPOSE')
+        ->toContain('# CONTEXT')
+        ->toContain('Context 1')
+        ->toContain('Context 2')
+        ->not->toContain('# INTERNAL ASSISTANT STEPS')
+        ->not->toContain('# OUTPUT INSTRUCTIONS')
+        ->not->toContain('# TOOLS USAGE RULES');
 });
 
 it('generates prompt with steps only', function (): void {
@@ -134,4 +156,14 @@ it('prefixes tools usage items with dash', function (): void {
     $result = (string) $prompt;
 
     expect($result)->toContain(" - First tool rule\n - Second tool rule");
+});
+it('joins context items with newlines', function (): void {
+    $prompt = new SystemPrompt(
+        background: ['Background.'],
+        context: ['Line 1', 'Line 2', 'Line 3'],
+    );
+
+    $result = (string) $prompt;
+
+    expect($result)->toContain("Line 1\nLine 2\nLine 3");
 });
