@@ -11,8 +11,11 @@ use App\Enums\IntensityChoice;
 
 final class DietMapper
 {
-    public static function map(GoalChoice $goalChoice, AnimalProductChoice $animalProductChoice, IntensityChoice $intensityChoice): DietType
-    {
+    public static function map(
+        GoalChoice $goalChoice,
+        AnimalProductChoice $animalProductChoice,
+        IntensityChoice $intensityChoice
+    ): DietType {
         return match (true) {
             $goalChoice === GoalChoice::Spikes && $animalProductChoice === AnimalProductChoice::Omnivore && $intensityChoice === IntensityChoice::Balanced => DietType::Mediterranean,
             $goalChoice === GoalChoice::Spikes && $animalProductChoice === AnimalProductChoice::Omnivore && $intensityChoice === IntensityChoice::Aggressive => DietType::LowCarb,

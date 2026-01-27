@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\DataObjects\DietIdentityData;
+use App\Enums\AnimalProductChoice;
+use App\Enums\GoalChoice;
+use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use App\Http\Requests\StoreBiometricsRequest;
+use App\Http\Requests\StoreIdentityRequest;
 use App\Models\User;
+use App\Services\DietMapper;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -59,27 +65,26 @@ final readonly class OnboardingController
         ]);
     }
 
-    public function storeIdentity(\App\Http\Requests\StoreIdentityRequest $request): RedirectResponse
+    public function storeIdentity(StoreIdentityRequest $request): RedirectResponse
     {
         $user = $this->user;
-        /** @var string $goalChoiceValue */
-        $goalChoiceValue = $request->validated('goal_choice');
-        /** @var string $animalProductChoiceValue */
-        $animalProductChoiceValue = $request->validated('animal_product_choice');
-        /** @var string $intensityChoiceValue */
-        $intensityChoiceValue = $request->validated('intensity_choice');
+        $dietIdentityData = DietIdentityData::from($request->validated());
 
-        $goalChoice = \App\Enums\GoalChoice::from($goalChoiceValue);
-        $animalProductChoice = \App\Enums\AnimalProductChoice::from($animalProductChoiceValue);
-        $intensityChoice = \App\Enums\IntensityChoice::from($intensityChoiceValue);
+        $dietType = DietMapper::map(
+            GoalChoice::from($dietIdentityData->goal_choice),
+            AnimalProductChoice::from($dietIdentityData->animal_product_choice),
+            IntensityChoice::from($dietIdentityData->intensity_choice)
+        );
 
-        $dietType = \App\Services\DietMapper::map($goalChoice, $animalProductChoice, $intensityChoice);
-        $activityMultiplier = \App\Services\DietMapper::getActivityMultiplier($goalChoice, $intensityChoice);
+        $activityMultiplier = DietMapper::getActivityMultiplier(
+            GoalChoice::from($dietIdentityData->goal_choice),
+            IntensityChoice::from($dietIdentityData->intensity_choice)
+        );
 
         $profileData = [
-            'goal_choice' => $goalChoice->value,
-            'animal_product_choice' => $animalProductChoice->value,
-            'intensity_choice' => $intensityChoice->value,
+            'goal_choice' => $dietIdentityData->goal_choice,
+            'animal_product_choice' => $dietIdentityData->animal_product_choice,
+            'intensity_choice' => $dietIdentityData->intensity_choice,
             'calculated_diet_type' => $dietType->value,
             'derived_activity_multiplier' => $activityMultiplier,
         ];
