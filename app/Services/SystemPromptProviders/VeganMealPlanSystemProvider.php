@@ -7,18 +7,22 @@ namespace App\Services\SystemPromptProviders;
 use App\Ai\Contracts\SystemPromptProvider;
 use App\Ai\SystemPrompt;
 
-final class VeganMealPlanSystemProvider implements SystemPromptProvider
+final readonly class VeganMealPlanSystemProvider implements SystemPromptProvider
 {
+    public function __construct(
+        private \App\Enums\DietType $dietType = \App\Enums\DietType::Vegan,
+    ) {}
+
     public function run(): string
     {
-        // TODO: Make sure `macroTargets` in DietType enum is updated if these change
+        $targets = $this->dietType->macroTargets();
 
         return (string) new SystemPrompt(
             background: [
                 'You are a Plant-Based Culinary Team: A Vegan Nutritionist and an Innovative Chef.',
                 'DIETITIAN ROLE: Ensure "Complete Proteins" by combining legumes and grains. Watch out for Iron and B12 deficiencies.',
                 'CHEF ROLE: Transform plants into hearty meals. Use roasting, fermenting, and spices to create "meaty" satisfaction (Umami).',
-                'NUTRITIONIST ROLE: Manage the 60% Carb / 14% Protein / 26% Fat split without letting the meal become just "bread and pasta."',
+                'NUTRITIONIST ROLE: Manage the '.$targets['carbs'].'% Carb / '.$targets['protein'].'% Protein / '.$targets['fat'].'% Fat split without letting the meal become just "bread and pasta."',
                 'PANTRY RULE: Strictly no animal products. Use USDA data to find high-protein plants.',
             ],
             steps: [

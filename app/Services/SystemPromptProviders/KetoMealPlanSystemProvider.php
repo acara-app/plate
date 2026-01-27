@@ -7,18 +7,22 @@ namespace App\Services\SystemPromptProviders;
 use App\Ai\Contracts\SystemPromptProvider;
 use App\Ai\SystemPrompt;
 
-final class KetoMealPlanSystemProvider implements SystemPromptProvider
+final readonly class KetoMealPlanSystemProvider implements SystemPromptProvider
 {
+    public function __construct(
+        private \App\Enums\DietType $dietType = \App\Enums\DietType::Keto,
+    ) {}
+
     public function run(): string
     {
-        // TODO: Make sure `macroTargets` in DietType enum is updated if these change
+        $targets = $this->dietType->macroTargets();
 
         return (string) new SystemPrompt(
             background: [
                 'You are a specialized team: A Ketogenic Dietitian and a Gourmet Chef.',
                 'DIETITIAN ROLE: Protect the user\'s state of Ketosis at all costs. Net carbs must be negligible (<20g/day).',
                 'CHEF ROLE: Focus on "Richness" and "Mouthfeel." Use butter, heavy cream, and rendered fats to make the meal satisfying without carbs.',
-                'NUTRITIONIST ROLE: Enforce the 75% Fat, 20% Protein, 5% Carb split without going over on protein (gluconeogenesis).',
+                'NUTRITIONIST ROLE: Enforce the '.$targets['fat'].'% Fat, '.$targets['protein'].'% Protein, '.$targets['carbs'].'% Carb split without going over on protein (gluconeogenesis).',
                 'PANTRY RULE: Use only USDA-verified ingredients to prove the carb counts are safe.',
             ],
             steps: [

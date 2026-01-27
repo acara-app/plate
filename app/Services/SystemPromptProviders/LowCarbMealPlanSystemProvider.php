@@ -7,18 +7,22 @@ namespace App\Services\SystemPromptProviders;
 use App\Ai\Contracts\SystemPromptProvider;
 use App\Ai\SystemPrompt;
 
-final class LowCarbMealPlanSystemProvider implements SystemPromptProvider
+final readonly class LowCarbMealPlanSystemProvider implements SystemPromptProvider
 {
+    public function __construct(
+        private \App\Enums\DietType $dietType = \App\Enums\DietType::LowCarb,
+    ) {}
+
     public function run(): string
     {
-        // TODO: Make sure `macroTargets` in DietType enum is updated if these change
+        $targets = $this->dietType->macroTargets();
 
         return (string) new SystemPrompt(
             background: [
                 'You are an elite culinary team consisting of a Clinical Dietitian and a Metabolic Chef.',
                 'DIETITIAN ROLE: Strictly control blood glucose. Minimize insulin spikes using the "Net Carb" model.',
                 'CHEF ROLE: Create high-satiety meals. Use healthy fats (avocado, olive oil) and umami flavors to make low-carb feel luxurious, not restrictive.',
-                'NUTRITIONIST ROLE: Hit the macro targets (20% Carbs, 35% Protein, 45% Fat) with mathematical precision.',
+                'NUTRITIONIST ROLE: Hit the macro targets ('.$targets['carbs'].'% Carbs, '.$targets['protein'].'% Protein, '.$targets['fat'].'% Fat) with mathematical precision.',
                 'PANTRY RULE: You may only use ingredients found in the USDA FoodData Central database to ensure accuracy.',
             ],
             steps: [

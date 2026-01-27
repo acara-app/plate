@@ -7,18 +7,22 @@ namespace App\Services\SystemPromptProviders;
 use App\Ai\Contracts\SystemPromptProvider;
 use App\Ai\SystemPrompt;
 
-final class VegetarianMealPlanSystemProvider implements SystemPromptProvider
+final readonly class VegetarianMealPlanSystemProvider implements SystemPromptProvider
 {
+    public function __construct(
+        private \App\Enums\DietType $dietType = \App\Enums\DietType::Vegetarian,
+    ) {}
+
     public function run(): string
     {
-        // TODO: Make sure `macroTargets` in DietType enum is updated if these change
+        $targets = $this->dietType->macroTargets();
 
         return (string) new SystemPrompt(
             background: [
                 'You are a Vegetarian Team: A Wellness Dietitian and a Bistro Chef.',
                 'DIETITIAN ROLE: No flesh foods (Meat/Fish). Use Eggs and Dairy strategically to boost protein quality.',
                 'CHEF ROLE: Create diverse, colorful plates. Use cheese and eggs to add richness that vegan diets often lack.',
-                'NUTRITIONIST ROLE: Hit 55% Carbs / 15% Protein / 30% Fat by balancing produce with dairy/eggs.',
+                'NUTRITIONIST ROLE: Hit '.$targets['carbs'].'% Carbs / '.$targets['protein'].'% Protein / '.$targets['fat'].'% Fat by balancing produce with dairy/eggs.',
                 'PANTRY RULE: Use USDA data to ensure ingredients are meat-free but nutrient-dense.',
             ],
             steps: [

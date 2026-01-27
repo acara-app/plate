@@ -23,14 +23,14 @@ final readonly class SystemPromptProviderResolver
     public function resolve(DietType $dietType): SystemPromptProvider
     {
         return match ($dietType) {
-            DietType::Mediterranean => new MediterraneanMealPlanSystemProvider(),
-            DietType::LowCarb => new LowCarbMealPlanSystemProvider(),
-            DietType::Keto => new KetoMealPlanSystemProvider(),
-            DietType::Dash => new DashMealPlanSystemProvider(),
-            DietType::Vegetarian => new VegetarianMealPlanSystemProvider(),
-            DietType::Vegan => new VeganMealPlanSystemProvider(),
-            DietType::Paleo => new PaleoMealPlanSystemProvider(),
-            DietType::Balanced => new BalancedMealPlanSystemProvider(),
+            DietType::Mediterranean => new MediterraneanMealPlanSystemProvider($dietType),
+            DietType::LowCarb => new LowCarbMealPlanSystemProvider($dietType),
+            DietType::Keto => new KetoMealPlanSystemProvider($dietType),
+            DietType::Dash => new DashMealPlanSystemProvider($dietType),
+            DietType::Vegetarian => new VegetarianMealPlanSystemProvider($dietType),
+            DietType::Vegan => new VeganMealPlanSystemProvider($dietType),
+            DietType::Paleo => new PaleoMealPlanSystemProvider($dietType),
+            DietType::Balanced => new BalancedMealPlanSystemProvider($dietType),
         };
     }
 }

@@ -7,17 +7,22 @@ namespace App\Services\SystemPromptProviders;
 use App\Ai\Contracts\SystemPromptProvider;
 use App\Ai\SystemPrompt;
 
-final class PaleoMealPlanSystemProvider implements SystemPromptProvider
+final readonly class PaleoMealPlanSystemProvider implements SystemPromptProvider
 {
+    public function __construct(
+        private \App\Enums\DietType $dietType = \App\Enums\DietType::Paleo,
+    ) {}
+
     public function run(): string
     {
-        // TODO: Make sure `macroTargets` in DietType enum is updated if these change
+        $targets = $this->dietType->macroTargets();
+
         return (string) new SystemPrompt(
             background: [
                 'You are a team consisting of an Evolutionary Biologist/Dietitian and a Farm-to-Table Chef.',
                 'DIETITIAN ROLE: Elimination is key. No grains, no legumes, no dairy, no processed oils. Focus on gut health.',
                 'CHEF ROLE: Focus on roasting, grilling, and raw preparations. Let the quality of the meat and produce shine.',
-                'NUTRITIONIST ROLE: Balance energy with 35% Protein and 35% Fat, using fruit/tubers for the 30% Carbs.',
+                'NUTRITIONIST ROLE: Balance energy with '.$targets['protein'].'% Protein and '.$targets['fat'].'% Fat, using fruit/tubers for the '.$targets['carbs'].'% Carbs.',
                 'PANTRY RULE: Use only whole, single-ingredient foods from the USDA database.',
             ],
             steps: [

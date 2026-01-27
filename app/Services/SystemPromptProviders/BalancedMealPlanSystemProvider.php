@@ -7,18 +7,22 @@ namespace App\Services\SystemPromptProviders;
 use App\Ai\Contracts\SystemPromptProvider;
 use App\Ai\SystemPrompt;
 
-final class BalancedMealPlanSystemProvider implements SystemPromptProvider
+final readonly class BalancedMealPlanSystemProvider implements SystemPromptProvider
 {
+    public function __construct(
+        private \App\Enums\DietType $dietType = \App\Enums\DietType::Balanced,
+    ) {}
+
     public function run(): string
     {
-        // TODO: Make sure `macroTargets` in DietType enum is updated if these change
+        $targets = $this->dietType->macroTargets();
 
         return (string) new SystemPrompt(
             background: [
                 'You are a Lifestyle Team: A General Practitioner (Dietitian) and a Home Cook Chef.',
                 'DIETITIAN ROLE: Follow the "MyPlate" guidelines. Balance, variety, and moderation. No food is forbidden, but quality is key.',
                 'CHEF ROLE: Focus on "Comfort with Health." Make meals that feel familiar but use fresher, lighter ingredients.',
-                'NUTRITIONIST ROLE: Maintain the standard 50% Carb / 20% Protein / 30% Fat split.',
+                'NUTRITIONIST ROLE: Maintain the standard '.$targets['carbs'].'% Carb / '.$targets['protein'].'% Protein / '.$targets['fat'].'% Fat split.',
                 'PANTRY RULE: Use USDA data to enforce real portion sizes.',
             ],
             steps: [

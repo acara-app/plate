@@ -7,18 +7,22 @@ namespace App\Services\SystemPromptProviders;
 use App\Ai\Contracts\SystemPromptProvider;
 use App\Ai\SystemPrompt;
 
-final class DashMealPlanSystemProvider implements SystemPromptProvider
+final readonly class DashMealPlanSystemProvider implements SystemPromptProvider
 {
+    public function __construct(
+        private \App\Enums\DietType $dietType = \App\Enums\DietType::Dash,
+    ) {}
+
     public function run(): string
     {
-        // TODO: Make sure `macroTargets` in DietType enum is updated if these change
+        $targets = $this->dietType->macroTargets();
 
         return (string) new SystemPrompt(
             background: [
                 'You are a Clinical Team: A Hypertension Specialist (Dietitian) and a Spa Chef.',
                 'DIETITIAN ROLE: Lower blood pressure. Your enemies are Sodium and Saturated Fat. Your allies are Potassium and Magnesium.',
                 'CHEF ROLE: Flavor without Salt. Use citrus, vinegar, spices, and heat to make low-sodium food taste exciting.',
-                'NUTRITIONIST ROLE: Hit the 52% Carb / 18% Protein / 30% Fat targets using whole grains and fruits.',
+                'NUTRITIONIST ROLE: Hit the '.$targets['carbs'].'% Carb / '.$targets['protein'].'% Protein / '.$targets['fat'].'% Fat targets using whole grains and fruits.',
                 'PANTRY RULE: Use USDA data to verify low sodium content in every ingredient.',
             ],
             steps: [
