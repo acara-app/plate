@@ -11,21 +11,25 @@ final class MediterraneanMealPlanSystemProvider implements SystemPromptProvider
 {
     public function run(): string
     {
-        // TODO: Make sure `macroTargets` in DietType enum is updated if these change
+        $scoreCard = file_get_contents(resource_path('markdown/med-diet-nutrient-score-card.md'));
+
         return (string) new SystemPrompt(
             background: [
-                'You are a specialized team consisting of a Mediterranean Dietitian and a Head Chef.',
-                'DIETITIAN ROLE: Focus on "Anti-Inflammatory" nutrition. Prioritize Omega-3s, polyphenols, and heart health.',
-                'CHEF ROLE: Use the flavors of the Mediterranean (Lemon, Garlic, Oregano, Basil, EVOO). Make simple ingredients taste vibrant.',
-                'NUTRITIONIST ROLE: Balance the plate with 45% Carbs (complex), 18% Protein, and 37% Fat (healthy).',
-                'PANTRY RULE: Use only verifiable whole foods from the USDA database.',
+                'You are a specialized team: A Mediterranean Dietitian and a Head Chef.',
+                'DIETITIAN ROLE: Optimize the "Nutrient Density Score." You have a specific list of "Superfoods" (The Score Card) that MUST be prioritized.',
+                'CHEF ROLE: Build meals around the Score Card ingredients. If the data lists "Artichoke," do not just serve "steamed artichoke"—make it a culinary experience (e.g., Grilled Artichoke with Lemon-Garlic Emulsion).',
+                'NUTRITIONIST ROLE: Balance the plate with 45% Carbs, 18% Protein, 37% Fat.',
+                'PANTRY RULE: The "Score Card" below is your Primary Pantry. Use these specific foods first. Use the USDA database only to fill in gaps (like spices, oils, or secondary ingredients).',
+            ],
+            context: [
+                $scoreCard,
             ],
             steps: [
-                '1. CHEF: Start every dish with a "Soffritto" concept (aromatic veggies) and Extra Virgin Olive Oil.',
-                '2. CHEF: Choose fatty fish or lean poultry, seasoned with fresh herbs, not heavy sauces.',
-                '3. DIETITIAN: Ensure carbohydrates come from dense, fibrous sources like lentils, chickpeas, or farro.',
-                '4. NUTRITIONIST: Verify that Saturated Fat is low while Monounsaturated Fat (from Olive Oil/Nuts) is high.',
-                '5. TEAM: Compile the menu into valid JSON using USDA data points.',
+                '1. CHEF: Scan the "Score Card" list above. Select 1 Protein and 1-2 Vegetables from strictly that list as your meal foundation.',
+                '2. CHEF: If the Score Card lists "Scallops" and "Asparagus," create a coherent dish using them (e.g., Pan-Seared Scallops with Roasted Asparagus).',
+                '3. DIETITIAN: Verify that the fiber count is high (referencing the high fiber values in the Score Card, like Artichokes having 16g).',
+                '4. NUTRITIONIST: The Score Card provides macro estimates. Use these for the core ingredients. Use USDA data to calculate the olive oil and side ingredients to hit the 37% Fat target.',
+                '5. TEAM: Generate the JSON. If a food is from the Score Card, use its exact name from the list.',
             ],
             output: [
                 'Your response MUST be valid JSON and ONLY JSON',

@@ -19,12 +19,14 @@ final class SystemPrompt implements Stringable
 {
     /**
      * @param  array<int, string>  $background
+     * @param  array<int, string>  $context
      * @param  array<int, string>  $steps
      * @param  array<int, string>  $output
      * @param  array<int, string>  $toolsUsage
      */
     public function __construct(
         public array $background,
+        public array $context = [],
         public array $steps = [],
         public array $output = [],
         public array $toolsUsage = []
@@ -33,6 +35,10 @@ final class SystemPrompt implements Stringable
     public function __toString(): string
     {
         $prompt = '# IDENTITY AND PURPOSE'.PHP_EOL.implode(PHP_EOL, $this->background);
+
+        if ($this->context !== []) {
+            $prompt .= PHP_EOL.PHP_EOL.'# CONTEXT'.PHP_EOL.implode(PHP_EOL, $this->context);
+        }
 
         if ($this->steps !== []) {
             $prompt .= PHP_EOL.PHP_EOL.'# INTERNAL ASSISTANT STEPS'.PHP_EOL.implode(PHP_EOL, $this->steps);
