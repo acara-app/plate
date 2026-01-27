@@ -5,6 +5,11 @@ declare(strict_types=1);
 use App\Enums\DietType;
 use App\Services\SystemPromptProviders\MediterraneanMealPlanSystemProvider;
 
+beforeEach(function (): void {
+    // Reset any file_get_contents mocks
+    Mockery::close();
+});
+
 it('returns a system prompt string with Mediterranean diet content', function (): void {
     $provider = new MediterraneanMealPlanSystemProvider;
     $result = $provider->run();
@@ -51,4 +56,18 @@ it('includes tools usage rules', function (): void {
     expect($result)
         ->toContain('TOOLS USAGE RULES')
         ->and($result)->toContain('file_search');
+});
+
+it('handles missing score card file gracefully', function (): void {
+    $functionName = 'file_get_contents';
+    Mockery::mock('alias:'.$functionName.'')
+        ->shouldReceive($functionName)
+        ->andReturn(false);
+
+    $provider = new MediterraneanMealPlanSystemProvider;
+    $result = $provider->run();
+
+    expect($result)->toBeString()
+        ->and($result)->toContain('Mediterranean Dietitian')
+        ->and($result)->not->toContain('Score Card below');
 });

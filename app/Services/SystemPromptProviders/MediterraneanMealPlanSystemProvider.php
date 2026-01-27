@@ -18,10 +18,6 @@ final readonly class MediterraneanMealPlanSystemProvider implements SystemPrompt
         $targets = $this->dietType->macroTargets();
         $scoreCard = file_get_contents(resource_path('markdown/med-diet-nutrient-score-card.md'));
 
-        if ($scoreCard === false) {
-            $scoreCard = null;
-        }
-
         return (string) new SystemPrompt(
             background: [
                 'You are a specialized team: A Mediterranean Dietitian and a Head Chef.',
