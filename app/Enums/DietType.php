@@ -15,6 +15,11 @@ enum DietType: string
     case Paleo = 'paleo';
     case Balanced = 'balanced'; // Standard USDA
 
+    /**
+     * Get all diet types as an associative array of value => label.
+     *
+     * @return array<string, string>
+     */
     public static function toArray(): array
     {
         return [

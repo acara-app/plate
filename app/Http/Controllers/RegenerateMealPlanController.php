@@ -29,7 +29,7 @@ final readonly class RegenerateMealPlanController
 
         $glucoseAnalysis = $this->analyzeGlucose->handle($this->user);
 
-        $dietType = $this->user->profile?->calculated_diet_type ?? DietType::Balanced;
+        $dietType = $this->user->profile->calculated_diet_type ?? DietType::Balanced;
 
         $mealPlan = MealPlanInitializeWorkflow::createMealPlan(
             $this->user,

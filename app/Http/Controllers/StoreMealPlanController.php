@@ -27,15 +27,12 @@ final readonly class StoreMealPlanController
 
         $glucoseAnalysis = $this->analyzeGlucose->handle($user);
         $dietTypeInput = request()->input('diet_type');
-
-        if ($dietTypeInput) {
-            $dietType = DietType::tryFrom($dietTypeInput);
-        } else {
-            $dietType = $user->profile?->calculated_diet_type ?? DietType::Balanced;
-        }
+        $dietType = $dietTypeInput !== null && is_string($dietTypeInput)
+            ? DietType::tryFrom($dietTypeInput)
+            : ($user->profile->calculated_diet_type ?? DietType::Balanced);
 
         $prompt = request()->input('prompt');
-        $durationDays = (int) request()->input('duration_days', 3);
+        $durationDays = request()->integer('duration_days', 3);
         $mealPlan = MealPlanInitializeWorkflow::createMealPlan($user, $durationDays, $dietType);
 
         if ($prompt) {
