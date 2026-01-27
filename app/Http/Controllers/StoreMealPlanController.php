@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\AnalyzeGlucoseForNotificationAction;
+use App\Enums\DietType;
 use App\Models\User;
 use App\Workflows\MealPlanInitializeWorkflow;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -25,9 +26,14 @@ final readonly class StoreMealPlanController
         $user = $this->user;
 
         $glucoseAnalysis = $this->analyzeGlucose->handle($user);
+        $dietTypeInput = request()->input('diet_type');
+        $dietType = $dietTypeInput !== null && is_string($dietTypeInput)
+            ? DietType::tryFrom($dietTypeInput)
+            : ($user->profile->calculated_diet_type ?? DietType::Balanced);
 
         $prompt = request()->input('prompt');
-        $mealPlan = MealPlanInitializeWorkflow::createMealPlan($user, 3);
+        $durationDays = request()->integer('duration_days', 3);
+        $mealPlan = MealPlanInitializeWorkflow::createMealPlan($user, $durationDays, $dietType);
 
         if ($prompt) {
             $mealPlan->update([
@@ -36,7 +42,12 @@ final readonly class StoreMealPlanController
         }
 
         WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start($user, $mealPlan, $glucoseAnalysis->analysisData);
+            ->start(
+                $user,
+                $mealPlan,
+                $glucoseAnalysis->analysisData,
+                $dietType,
+            );
 
         return to_route('meal-plans.index');
     }

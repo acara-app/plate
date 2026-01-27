@@ -29,3 +29,15 @@ it('renders create meal plan page for authenticated user', function (): void {
         ->assertInertia(fn ($page) => $page
             ->component('meal-plans/create'));
 });
+
+it('passes diet types to the page', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->get(route('meal-plans.create'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('dietTypes')
+            ->has('userProfile'));
+});

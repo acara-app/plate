@@ -11,6 +11,7 @@ use App\Models\DietaryPreference;
 use App\Models\HealthCondition;
 use App\Models\User;
 use App\Models\UserProfile;
+use Illuminate\Support\Facades\DB;
 
 test('it generates meal plan context for user with complete profile', function (): void {
     $user = User::factory()->create();
@@ -478,17 +479,20 @@ test('it handles user profile with invalid goal choice enum value', function ():
         'height' => 175,
         'weight' => 80,
         'sex' => Sex::Male,
-        'goal_choice' => 'invalid_goal_value',  // Invalid enum value
+        'goal_choice' => GoalChoice::WeightLoss,
         'derived_activity_multiplier' => 1.55,
     ]);
 
-    // Manually update to bypass validation
-    $profile->update(['goal_choice' => 'invalid_goal_value']);
+    // Directly insert invalid value in database to bypass validation and casting
+    DB::table('user_profiles')->where('id', $profile->id)->update(['goal_choice' => 'invalid_goal_value']);
 
     $builder = resolve(MealPlanPromptBuilder::class);
-    $result = $builder->handle($user->fresh());
 
-    expect($result)->toBeString();
+    // Enum casting will throw ValueError when accessing invalid value
+    $closure = function () use ($builder, $user): void {
+        $builder->handle($user->fresh());
+    };
+    expect($closure)->toThrow(ValueError::class);
 });
 
 test('it generates single day meal plan prompt with all parameters', function (): void {

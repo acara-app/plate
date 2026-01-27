@@ -1,6 +1,6 @@
-# The Mediterranean Diet Nutrient Score Card
+## The Mediterranean Diet Nutrient Score Card
 
-## Vegetables
+### Vegetables
 
 | Food Item                                  | Calories | Protein (g) | Fat (g) | Sat. Fat (g) | Fiber (g) |
 | ------------------------------------------ | -------- | ----------- | ------- | ------------ | --------- |
@@ -23,7 +23,7 @@
 | Tomato, red, raw, 1 medium                 | 26       | 1           | 0       | 0            | 1.5       |
 | Tomato, red, sun-dried, 1/2 cup            | 70       | 3.5         | 0       | 0            | 3.5       |
 
-## Beans, Lentils, Peas
+### Beans, Lentils, Peas
 
 | Food Item                                 | Calories | Protein (g) | Fat (g) | Sat. Fat (g) | Fiber (g) |
 | ----------------------------------------- | -------- | ----------- | ------- | ------------ | --------- |
@@ -39,7 +39,7 @@
 | Peas, split, boiled, 1/2 cup              | 215      | 8           | 0       | 0            | 8         |
 | White beans, boiled, 1/2 cup              | 125      | 8.5         | 0       | 0            | 5.5       |
 
-## Fruits
+### Fruits
 
 | Food Item                      | Calories | Protein (g) | Fat (g) | Sat. Fat (g) | Fiber (g) |
 | ------------------------------ | -------- | ----------- | ------- | ------------ | --------- |
@@ -53,7 +53,7 @@
 | Plums, raw, 1 medium           | 36       | 0.5         | 0       | 0            | 1         |
 | Raspberries, raw, 1/2 cup      | 30       | 0.5         | 0       | 0            | 4.5       |
 
-## Grain Products
+### Grain Products
 
 | Food Item                               | Calories | Protein (g) | Fat (g) | Sat. Fat (g) | Fiber (g) |
 | --------------------------------------- | -------- | ----------- | ------- | ------------ | --------- |
@@ -63,7 +63,7 @@
 | Spaghetti, whole wheat, cooked, 1 cup   | 175      | 7.5         | 1       | 0            | 6.5       |
 | Macaroni, whole wheat, cooked, 1 cup    | 175      | 7.5         | 1       | 0            | 4         |
 
-## Nuts & Seeds
+### Nuts & Seeds
 
 | Food Item                                | Calories | Protein (g) | Fat (g) | Sat. Fat (g) | Fiber (g) |
 | ---------------------------------------- | -------- | ----------- | ------- | ------------ | --------- |
@@ -74,7 +74,7 @@
 | Pumpkin seeds, 1/3 cup                   | 110      | 5           | 5       | 1            | 2         |
 | Sesame seeds, whole, dried, 1 tablespoon | 52       | 1.6         | 4.5     | 0.5          | 1         |
 
-## Cheese
+### Cheese
 
 | Food Item                                 | Calories | Protein (g) | Fat (g) | Sat. Fat (g) | Fiber (g) |
 | ----------------------------------------- | -------- | ----------- | ------- | ------------ | --------- |
@@ -84,7 +84,7 @@
 | Provolone, 1 oz                           | 100      | 7           | 7.5     | 5            | 0         |
 | Feta, 1 oz                                | 75       | 4           | 6       | 4            | 0         |
 
-## Dairy & Eggs
+### Dairy & Eggs
 
 | Food Item                          | Calories | Protein (g) | Fat (g) | Sat. Fat (g) | Fiber (g) |
 | ---------------------------------- | -------- | ----------- | ------- | ------------ | --------- |
@@ -93,13 +93,13 @@
 | Milk, 1% fat, 8 fl oz              | 102      | 8           | 2.5     | 1.5          | 0         |
 | Egg, chicken, 1 large, boiled      | 80       | 6           | 5.5     | 1.5          | 0         |
 
-## Poultry
+### Poultry
 
 | Food Item                                             | Calories | Protein (g) | Fat (g) | Sat. Fat (g) | Fiber (g) |
 | ----------------------------------------------------- | -------- | ----------- | ------- | ------------ | --------- |
 | Chicken/Turkey, light meat, w/o skin, roasted, 3.5 oz | 175      | 30          | 4.5     | 1.5          | 0         |
 
-## Fish & Seafood
+### Fish & Seafood
 
 | Food Item                                     | Calories | Protein (g) | Fat (g) | Sat. Fat (g) | Fiber (g) |
 | --------------------------------------------- | -------- | ----------- | ------- | ------------ | --------- |

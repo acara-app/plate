@@ -15,6 +15,25 @@ enum DietType: string
     case Paleo = 'paleo';
     case Balanced = 'balanced'; // Standard USDA
 
+    /**
+     * Get all diet types as an associative array of value => label.
+     *
+     * @return array<string, string>
+     */
+    public static function toArray(): array
+    {
+        return [
+            self::Mediterranean->value => self::Mediterranean->label(),
+            self::LowCarb->value => self::LowCarb->label(),
+            self::Keto->value => self::Keto->label(),
+            self::Dash->value => self::Dash->label(),
+            self::Vegetarian->value => self::Vegetarian->label(),
+            self::Vegan->value => self::Vegan->label(),
+            self::Paleo->value => self::Paleo->label(),
+            self::Balanced->value => self::Balanced->label(),
+        ];
+    }
+
     public function label(): string
     {
         return match ($this) {
@@ -26,6 +45,20 @@ enum DietType: string
             self::Vegan => 'Vegan',
             self::Paleo => 'Paleo',
             self::Balanced => 'Standard Balanced (USDA)',
+        };
+    }
+
+    public function shortName(): string
+    {
+        return match ($this) {
+            self::Mediterranean => 'Mediterranean',
+            self::LowCarb => 'Low Carb',
+            self::Keto => 'Keto',
+            self::Dash => 'DASH',
+            self::Vegetarian => 'Vegetarian',
+            self::Vegan => 'Vegan',
+            self::Paleo => 'Paleo',
+            self::Balanced => 'Balanced',
         };
     }
 

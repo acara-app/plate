@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\AnimalProductChoice;
+use App\Enums\DietType;
 use App\Enums\GlucoseUnit;
+use App\Enums\GoalChoice;
+use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -22,10 +26,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read float|null $height
  * @property-read float|null $weight
  * @property-read Sex|null $sex
- * @property-read string|null $goal_choice
- * @property-read string|null $animal_product_choice
- * @property-read string|null $intensity_choice
- * @property-read string|null $calculated_diet_type
+ * @property-read GoalChoice|null $goal_choice
+ * @property-read AnimalProductChoice|null $animal_product_choice
+ * @property-read IntensityChoice|null $intensity_choice
+ * @property-read DietType|null $calculated_diet_type
  * @property-read float|null $derived_activity_multiplier
  * @property-read bool $needs_re_onboarding
  * @property-read float|null $target_weight
@@ -67,10 +71,10 @@ final class UserProfile extends Model
             'height' => 'float',
             'weight' => 'float',
             'sex' => Sex::class,
-            'goal_choice' => 'string',
-            'animal_product_choice' => 'string',
-            'intensity_choice' => 'string',
-            'calculated_diet_type' => 'string',
+            'goal_choice' => GoalChoice::class,
+            'animal_product_choice' => AnimalProductChoice::class,
+            'intensity_choice' => IntensityChoice::class,
+            'calculated_diet_type' => DietType::class,
             'derived_activity_multiplier' => 'float',
             'needs_re_onboarding' => 'boolean',
             'target_weight' => 'float',
