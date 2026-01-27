@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\DietType;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
 
@@ -31,4 +32,59 @@ it('stores meal plan for authenticated user', function (): void {
         ]);
 
     $response->assertRedirect();
+});
+
+it('stores diet type from request', function (): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('meal-plans.store'), [
+            'prompt' => 'Test custom prompt',
+            'diet_type' => DietType::Mediterranean->value,
+        ]);
+
+    $response->assertRedirect();
+
+    $mealPlan = $user->mealPlans->first();
+    expect($mealPlan->metadata['diet_type'])->toBe(DietType::Mediterranean->value);
+});
+
+it('uses profile diet type as fallback when not provided', function (): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'calculated_diet_type' => DietType::Vegan,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->post(route('meal-plans.store'), [
+            'prompt' => 'Test custom prompt',
+        ]);
+
+    $response->assertRedirect();
+
+    $mealPlan = $user->mealPlans->first();
+    expect($mealPlan->metadata['diet_type'])->toBe(DietType::Vegan->value);
+});
+
+it('uses balanced diet type when no diet type provided and profile has none', function (): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'calculated_diet_type' => null,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->post(route('meal-plans.store'), [
+            'prompt' => 'Test custom prompt',
+        ]);
+
+    $response->assertRedirect();
+
+    $mealPlan = $user->mealPlans->first();
+    expect($mealPlan->metadata['diet_type'])->toBe(DietType::Balanced->value);
 });

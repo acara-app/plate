@@ -749,6 +749,10 @@ return [
             'prompt_hint' => 'Add any dietary preferences, restrictions, or requests for your AI meal plan assistant',
             'note' => 'Note: Your meal plan will be 3 days by default with recipes and grocery list',
             'button' => 'Generate My Meal Plan',
+            'advanced' => 'Advanced',
+            'diet_type_label' => 'Diet Type',
+            'diet_type_placeholder' => 'Select a diet type',
+            'diet_type_hint' => 'Choose your preferred diet approach. We\'ll generate meals tailored to this style.',
         ],
     ],
     'grocery_list' => [

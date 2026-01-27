@@ -749,6 +749,10 @@ return [
             'prompt_hint' => 'Ajouter des préférences alimentaires, restrictions ou demandes pour votre assistant de plan de repas IA',
             'note' => 'Remarque : Votre plan de repas sera de 3 jours par défaut avec des recettes et une liste de courses',
             'button' => 'Générer mon plan de repas',
+            'advanced' => 'Avancé',
+            'diet_type_label' => 'Type de régime',
+            'diet_type_placeholder' => 'Sélectionner un type de régime',
+            'diet_type_hint' => 'Choisissez votre approche alimentaire préférée. Nous générerons des repas adaptés à ce style.',
         ],
     ],
     'grocery_list' => [

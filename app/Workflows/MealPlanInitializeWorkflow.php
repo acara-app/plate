@@ -8,6 +8,7 @@ use App\DataObjects\DayMealsData;
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\MealData;
 use App\DataObjects\PreviousDayContext;
+use App\Enums\DietType;
 use App\Enums\MealPlanGenerationStatus;
 use App\Enums\MealPlanType;
 use App\Models\MealPlan;
@@ -90,6 +91,7 @@ final class MealPlanInitializeWorkflow extends Workflow
         User $user,
         MealPlan $mealPlan,
         ?GlucoseAnalysisData $glucoseAnalysis = null,
+        ?DietType $dietType = null,
     ): Generator {
         $totalDays = $mealPlan->duration_days;
 
@@ -102,6 +104,7 @@ final class MealPlanInitializeWorkflow extends Workflow
             new PreviousDayContext,  // previousDaysContext
             $glucoseAnalysis,        // glucoseAnalysis
             $mealPlan,               // mealPlan
+            $dietType,               // dietType
         );
 
         yield ActivityStub::make(

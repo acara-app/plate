@@ -15,6 +15,20 @@ enum DietType: string
     case Paleo = 'paleo';
     case Balanced = 'balanced'; // Standard USDA
 
+    public static function toArray(): array
+    {
+        return [
+            self::Mediterranean->value => self::Mediterranean->label(),
+            self::LowCarb->value => self::LowCarb->label(),
+            self::Keto->value => self::Keto->label(),
+            self::Dash->value => self::Dash->label(),
+            self::Vegetarian->value => self::Vegetarian->label(),
+            self::Vegan->value => self::Vegan->label(),
+            self::Paleo->value => self::Paleo->label(),
+            self::Balanced->value => self::Balanced->label(),
+        ];
+    }
+
     public function label(): string
     {
         return match ($this) {
