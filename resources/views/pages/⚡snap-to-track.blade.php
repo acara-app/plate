@@ -11,12 +11,10 @@ use Livewire\WithFileUploads;
 use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
 new
-#[Layout('layouts.mini-app', [
-    'metaDescription' => "Instantly analyze your meal's calories and macros by snapping a photo. Free AI food scanner for easy diabetes & nutrition tracking. Try it now!",
-    'metaKeywords' => 'food photo calorie counter, snap to track calories, AI food recognition, meal photo analyzer, instant macro breakdown, calorie tracking app, food image analysis, nutrition scanner',
-])]
+#[Layout('layouts.mini-app', ['metaDescription' => "Instantly analyze your meal's calories and macros by snapping a photo. Free AI food scanner for easy diabetes & nutrition tracking. Try it now!", 'metaKeywords' => 'food photo calorie counter, snap to track calories, AI food recognition, meal photo analyzer, instant macro breakdown, calorie tracking app, food image analysis, nutrition scanner'])]
 #[Title('AI Food Photo Calorie Counter | Snap & Track Macros for Free')]
-class extends Component {
+class extends Component
+{
     use WithFileUploads;
 
     public ?TemporaryUploadedFile $photo = null;
@@ -102,12 +100,12 @@ class extends Component {
 </x-slot:jsonLd>
 
 <div
-    class="relative flex min-h-screen flex-col items-center overflow-hidden bg-linear-to-br from-slate-50 via-white to-orange-50 p-4 text-slate-900 lg:justify-center lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-orange-950 dark:text-slate-50"
+    class="relative flex min-h-screen flex-col items-center overflow-hidden bg-linear-to-br from-slate-50 via-white to-blue-50 p-4 text-slate-900 lg:justify-center lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 dark:text-slate-50"
 >
     {{-- Animated background elements --}}
     <div aria-hidden="true" class="pointer-events-none absolute inset-0 overflow-hidden">
-        <div class="absolute -left-4 top-0 h-72 w-72 animate-pulse rounded-full bg-orange-300/20 blur-3xl dark:bg-orange-500/10"></div>
-        <div class="absolute -right-4 bottom-0 h-96 w-96 animate-pulse rounded-full bg-amber-300/20 blur-3xl dark:bg-amber-500/10"></div>
+        <div class="absolute -left-4 top-0 h-72 w-72 animate-pulse rounded-full bg-blue-300/20 blur-3xl dark:bg-blue-500/10"></div>
+        <div class="absolute -right-4 bottom-0 h-96 w-96 animate-pulse rounded-full bg-sky-300/20 blur-3xl dark:bg-sky-500/10"></div>
     </div>
 
     {{-- Header --}}
@@ -121,11 +119,11 @@ class extends Component {
     </header>
 
     {{-- Main Card --}}
-    <main class="relative z-10 w-full max-w-md space-y-6 rounded-3xl bg-white p-6 shadow-xl shadow-orange-500/10 dark:bg-slate-800 dark:shadow-orange-900/20">
+    <main class="relative z-10 w-full max-w-md space-y-6 rounded-3xl bg-white p-6 shadow-xl shadow-blue-500/10 dark:bg-slate-800 dark:shadow-blue-900/20">
 
         {{-- Header Section --}}
         <div class="text-center speakable-intro">
-            <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-2xl dark:bg-orange-900/50">📸</div>
+            <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-2xl dark:bg-blue-900/50">📸</div>
             <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Snap to Track: AI Food Calorie Counter</h1>
             <p class="text-sm text-slate-500 dark:text-slate-400">Instant macro breakdown with AI</p>
         </div>
@@ -146,10 +144,10 @@ class extends Component {
                     >
                     <label 
                         for="photo-upload"
-                        class="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 transition-colors hover:border-orange-500 hover:bg-orange-50/50 dark:border-slate-600 dark:bg-slate-900 dark:hover:border-orange-500 dark:hover:bg-orange-900/20"
+                        class="flex min-h-[160px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 transition-colors hover:border-blue-500 hover:bg-blue-50/50 dark:border-slate-600 dark:bg-slate-900 dark:hover:border-blue-500 dark:hover:bg-blue-900/20"
                     >
-                        <div class="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/50">
-                            <svg class="h-8 w-8 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50">
+                            <svg class="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
@@ -179,9 +177,9 @@ class extends Component {
                 </div>
 
                 {{-- Analyze Button --}}
-                <button 
+                <button
                     type="submit"
-                    class="w-full rounded-xl bg-orange-600 py-4 text-center font-bold text-white transition-all hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    class="w-full min-h-[56px] rounded-xl bg-blue-600 py-4 text-center font-bold text-white transition-all hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
                     @disabled($loading)
                 >
                     <span wire:loading.remove wire:target="analyze" class="flex items-center justify-center gap-2">
@@ -237,7 +235,7 @@ class extends Component {
                 <div class="bg-slate-50 p-6 dark:bg-slate-800/50">
                     <div class="mb-3 flex items-center justify-between">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Nutrition</span>
-                        <span class="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-bold text-orange-700 dark:bg-orange-900/50 dark:text-orange-300">
+                        <span class="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
                             {{ $result['confidence'] }}% confident
                         </span>
                     </div>
@@ -325,12 +323,12 @@ class extends Component {
 
         {{-- Empty State Tips --}}
         @if (!$result && !$loading && !$error && !$photo)
-            <div class="rounded-xl border border-orange-200 bg-orange-50 p-4 dark:border-orange-900/50 dark:bg-orange-900/20">
+            <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-900/20">
                 <div class="flex items-center gap-2 mb-2">
                     <span class="text-lg">💡</span>
-                    <span class="text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-400">Tips for best results</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">Tips for best results</span>
                 </div>
-                <ul class="space-y-1 text-sm text-orange-800 dark:text-orange-200">
+                <ul class="space-y-1 text-sm text-blue-800 dark:text-blue-200">
                     <li>• Take photo in good lighting</li>
                     <li>• Make sure all food is visible</li>
                     <li>• Capture from directly above</li>
@@ -470,9 +468,9 @@ class extends Component {
             <strong>Disclaimer:</strong> AI estimates are for guidance only, not medical advice.
         </p>
         <p class="mt-2">
-            <a href="{{ route('home') }}" class="underline hover:text-orange-600">Back to Home</a>
+            <a href="{{ route('home') }}" class="underline hover:text-blue-600">Back to Home</a>
             ·
-            <a href="{{ route('register') }}" class="underline hover:text-orange-600">Create Free Account</a>
+            <a href="{{ route('register') }}" class="underline hover:text-blue-600">Create Free Account</a>
         </p>
     </footer>
 </div>
