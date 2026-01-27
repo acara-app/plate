@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\MealPlanPromptBuilder;
+use App\Ai\MealPlanPromptBuilder;
 use App\Models\DiabetesLog;
 use App\Models\HealthCondition;
 use App\Models\User;

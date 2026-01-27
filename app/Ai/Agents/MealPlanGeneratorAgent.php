@@ -6,6 +6,7 @@ namespace App\Ai\Agents;
 
 use App\Actions\AnalyzeGlucoseForNotificationAction;
 use App\Ai\BaseAgent;
+use App\Ai\MealPlanPromptBuilder;
 use App\Ai\SystemPrompt;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;

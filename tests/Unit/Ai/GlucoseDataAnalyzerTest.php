@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\GlucoseDataAnalyzer;
+use App\Ai\GlucoseDataAnalyzer;
 use App\Enums\GlucoseReadingType;
 use App\Models\DiabetesLog;
 use App\Models\User;

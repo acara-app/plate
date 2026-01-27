@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Ai\Agents;
+namespace App\Ai;
 
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\MealPlanContext\MacronutrientRatiosData;
