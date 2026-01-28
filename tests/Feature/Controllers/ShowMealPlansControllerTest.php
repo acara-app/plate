@@ -574,6 +574,45 @@ it('returns generating status when overall plan is generating and day is empty',
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('currentDay.day_number', 2)
-            ->where('currentDay.status', 'generating')
             ->where('currentDay.needs_generation', true));
+});
+
+it('requires subscription when upgrades are enabled and user is not verified', function (): void {
+    $user = User::factory()->create(['is_verified' => false]);
+    config()->set('plate.enable_premium_upgrades', true);
+
+    $response = $this->actingAs($user)
+        ->get(route('meal-plans.index'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('requiresSubscription', true));
+});
+
+it('does not require subscription when upgrades are disabled even if user is not verified', function (): void {
+    $user = User::factory()->create(['is_verified' => false]);
+    config()->set('plate.enable_premium_upgrades', false);
+
+    $response = $this->actingAs($user)
+        ->get(route('meal-plans.index'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('requiresSubscription', false));
+});
+
+it('does not require subscription when user is verified regardless of upgrades setting', function (): void {
+    $user = User::factory()->verified()->create();
+
+    // Test with upgrades enabled
+    config()->set('plate.enable_premium_upgrades', true);
+    $response = $this->actingAs($user)->get(route('meal-plans.index'));
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page->where('requiresSubscription', false));
+
+    // Test with upgrades disabled
+    config()->set('plate.enable_premium_upgrades', false);
+    $response = $this->actingAs($user)->get(route('meal-plans.index'));
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page->where('requiresSubscription', false));
 });

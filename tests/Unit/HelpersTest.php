@@ -73,3 +73,13 @@ it('flashes toast messages with various types', function (string $type): void {
 
     expect($flashed['toast']['type'])->toBe($type);
 })->with(['success', 'error', 'warning', 'info']);
+
+it('returns true when premium upgrades are enabled', function (): void {
+    config()->set('plate.enable_premium_upgrades', true);
+    expect(enable_premium_upgrades())->toBeTrue();
+});
+
+it('returns false when premium upgrades are disabled', function (): void {
+    config()->set('plate.enable_premium_upgrades', false);
+    expect(enable_premium_upgrades())->toBeFalse();
+});
