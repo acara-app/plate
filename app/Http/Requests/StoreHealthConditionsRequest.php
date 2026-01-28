@@ -16,9 +16,9 @@ final class StoreHealthConditionsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'health_condition_ids' => ['nullable', 'array'],
+            'health_condition_ids' => ['required', 'array'],
             'health_condition_ids.*' => ['integer', 'exists:health_conditions,id'],
-            'notes' => ['nullable', 'array'],
+            'notes' => ['required', 'array'],
             'notes.*' => ['nullable', 'string', 'max:500'],
             'units_preference' => ['nullable', new Enum(GlucoseUnit::class)],
         ];

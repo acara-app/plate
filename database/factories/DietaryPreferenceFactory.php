@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\DietaryPreferenceType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,15 +17,20 @@ final class DietaryPreferenceFactory extends Factory
      */
     public function definition(): array
     {
-        $types = ['allergy', 'intolerance', 'pattern', 'dislike'];
+        $types = [
+            DietaryPreferenceType::Allergy->value,
+            DietaryPreferenceType::Intolerance->value,
+            DietaryPreferenceType::Pattern->value,
+            DietaryPreferenceType::Dislike->value,
+        ];
         /** @var string $type */
         $type = fake()->randomElement($types);
 
         $preferences = [
-            'allergy' => ['Peanuts', 'Tree Nuts', 'Dairy', 'Eggs', 'Soy', 'Wheat', 'Shellfish', 'Fish', 'Sesame'],
-            'intolerance' => ['Lactose', 'Gluten', 'FODMAPs', 'Histamine', 'Fructose', 'Caffeine'],
-            'pattern' => ['Vegan', 'Vegetarian', 'Pescatarian', 'Keto', 'Paleo', 'Mediterranean', 'Low-Carb', 'High-Protein'],
-            'dislike' => ['Mushrooms', 'Cilantro', 'Olives', 'Blue Cheese', 'Anchovies', 'Liver', 'Brussels Sprouts'],
+            DietaryPreferenceType::Allergy->value => ['Peanuts', 'Tree Nuts', 'Dairy', 'Eggs', 'Soy', 'Wheat', 'Shellfish', 'Fish', 'Sesame'],
+            DietaryPreferenceType::Intolerance->value => ['Lactose', 'Gluten', 'FODMAPs', 'Histamine', 'Fructose', 'Caffeine'],
+            DietaryPreferenceType::Pattern->value => ['Vegan', 'Vegetarian', 'Pescatarian', 'Keto', 'Paleo', 'Mediterranean', 'Low-Carb', 'High-Protein'],
+            DietaryPreferenceType::Dislike->value => ['Mushrooms', 'Cilantro', 'Olives', 'Blue Cheese', 'Anchovies', 'Liver', 'Brussels Sprouts'],
         ];
 
         $name = fake()->randomElement($preferences[$type]);

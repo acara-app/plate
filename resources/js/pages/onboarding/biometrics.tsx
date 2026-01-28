@@ -37,13 +37,13 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                             <span>
                                 {t('onboarding.biometrics.step', {
                                     current: 1,
-                                    total: 5,
+                                    total: 3,
                                 })}
                             </span>
-                            <span>20%</span>
+                            <span>33%</span>
                         </div>
                         <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                            <div className="relative h-2 w-1/5 overflow-hidden rounded-full bg-primary shadow-[0_0_12px_rgba(16,185,129,0.4)]">
+                            <div className="relative h-2 w-[33%] overflow-hidden rounded-full bg-primary shadow-[0_0_12px_rgba(16,185,129,0.4)]">
                                 <div className="absolute inset-0 bg-linear-to-r from-white/30 via-transparent to-transparent"></div>
                                 <div className="absolute inset-0 bg-linear-to-l from-black/10 via-transparent to-white/10"></div>
                             </div>
@@ -163,8 +163,23 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                         </p>
                                     </div>
 
-                                    {/* Submit Button */}
-                                    <div className="flex items-center justify-between gap-4">
+                                    {/* Footer Section */}
+                                    <div className="flex flex-col items-center gap-4">
+                                        {/* Action Buttons */}
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="min-w-30"
+                                        >
+                                            {processing && (
+                                                <LoaderCircle className="h-4 w-4 animate-spin" />
+                                            )}
+                                            {t(
+                                                'onboarding.biometrics.continue',
+                                            )}
+                                        </Button>
+
+                                        {/* Exit Link - Centered Below */}
                                         {currentUser?.has_meal_plan && (
                                             <Link
                                                 href={dashboard.url()}
@@ -175,18 +190,6 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                                 )}
                                             </Link>
                                         )}
-                                        <Button
-                                            type="submit"
-                                            disabled={processing}
-                                            className="w-auto"
-                                        >
-                                            {processing && (
-                                                <LoaderCircle className="h-4 w-4 animate-spin" />
-                                            )}
-                                            {t(
-                                                'onboarding.biometrics.continue',
-                                            )}
-                                        </Button>
                                     </div>
                                 </>
                             )}

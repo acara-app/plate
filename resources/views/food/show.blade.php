@@ -88,7 +88,7 @@
             "name": "What is the glycemic load of {{ $displayName }}?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "{{ $displayName }} has a {{ $glycemicLoad ?? 'not yet calculated' }} glycemic load (GL). Glycemic Load accounts for both the quality (GI) and quantity of carbohydrates, making it a more accurate predictor of blood sugar response than GI alone. Low GL is 0-10, Medium is 11-19, and High is 20+."
+                "text": "{{ $displayName }} has a {{ $glycemicLoad }} glycemic load (GL). Per 100g serving, it contains {{ $nutrition['carbs'] ?? 0 }}g of carbohydrates with {{ $nutrition['fiber'] ?? 0 }}g of fiber, resulting in {{ number_format(($nutrition['carbs'] ?? 0) - ($nutrition['fiber'] ?? 0), 1) }}g of net carbs. Glycemic Load accounts for both the quality (GI) and quantity of carbohydrates, making it a more accurate predictor of blood sugar response than GI alone. Low GL is 0-10, Medium is 11-19, and High is 20+."
             }
         },
         {
@@ -226,6 +226,38 @@
                     Source: USDA FoodData Central
                 </p>
             </div>
+
+            {{-- Compare With Section (SEO Cross-Links) --}}
+            @if(isset($comparisonLinks) && count($comparisonLinks) > 0)
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 mb-10">
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                    Compare With Similar Foods
+                </h2>
+                <div class="space-y-3">
+                    @foreach($comparisonLinks as $link)
+                        @if($link['content'])
+                        <p class="text-slate-600 dark:text-slate-300">
+                            <x-food-link :slug="$link['slug']" :anchor="$link['anchor']" />
+                        </p>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            {{-- Related Foods Section --}}
+            @if(isset($relatedFoods) && $relatedFoods->count() > 0)
+            <div class="mb-10">
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                    More {{ $content->category?->label() ?? 'Foods' }} to Explore
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    @foreach($relatedFoods as $relatedFood)
+                        @include('food._card', ['food' => $relatedFood])
+                    @endforeach
+                </div>
+            </div>
+            @endif
 
             {{-- CTA Section --}}
             <div class="bg-linear-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-2xl p-8 mb-10">

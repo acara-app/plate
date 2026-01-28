@@ -6,7 +6,12 @@ import checkout from '@/routes/checkout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import clsx from 'clsx';
-import { CreditCardIcon, ReceiptIcon, TriangleIcon } from 'lucide-react';
+import {
+    CreditCardIcon,
+    HeartIcon,
+    ReceiptIcon,
+    TriangleIcon,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -242,6 +247,34 @@ export default function CashierSubscription({
                                         )}
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Transparency Info Banner */}
+                    {!currentSubscription && (
+                        <div className="rounded-lg border border-green-200 bg-linear-to-r from-green-50 to-emerald-50 p-5 dark:border-green-900/50 dark:from-green-900/20 dark:to-emerald-900/20">
+                            <div className="flex">
+                                <div className="shrink-0">
+                                    <HeartIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
+                                </div>
+                                <div className="ml-4 flex-1">
+                                    <h3 className="text-base font-semibold text-green-800 dark:text-green-200">
+                                        {t(
+                                            'checkout_subscription.trial_info_title',
+                                        )}
+                                    </h3>
+                                    <p className="mt-2 text-sm text-green-700 dark:text-green-300">
+                                        {t(
+                                            'checkout_subscription.trial_info_description',
+                                        )}
+                                    </p>
+                                    <p className="mt-2 text-sm font-medium text-green-600 dark:text-green-400">
+                                        {t(
+                                            'checkout_subscription.trial_refund_note',
+                                        )}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     )}

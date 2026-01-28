@@ -44,7 +44,7 @@
     "@@context": "https://schema.org",
     "@@type": "ItemList",
     "name": "Diabetic Food Database",
-    "numberOfItems": {{ $foods->total() }},
+    "numberOfItems": {{ $foods->count() }},
     "itemListElement": [
         @foreach($foods as $food)
         {
@@ -231,13 +231,30 @@
                         <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-3">
                             <span class="w-1.5 h-8 bg-linear-to-b from-primary to-primary/60 rounded-full"></span>
                             {{ $categoryLabel }}
-                            <span class="text-sm font-normal text-slate-400">({{ $categoryFoods->count() }})</span>
+                            <span class="text-sm font-normal text-slate-400">({{ $categoryCounts[$categoryValue] ?? $categoryFoods->count() }})</span>
                         </h2>
                         <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             @foreach($categoryFoods as $food)
                                 @include('food._card', ['food' => $food])
                             @endforeach
                         </div>
+                        @php
+                            $totalInCategory = $categoryCounts[$categoryValue] ?? $categoryFoods->count();
+                            $displayedCount = $categoryFoods->count();
+                        @endphp
+                        @if($totalInCategory > $displayedCount)
+                            <div class="mt-6 text-center">
+                                <a 
+                                    href="{{ route('food.category', ['category' => $categoryValue]) }}"
+                                    class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-primary hover:text-primary/80 bg-primary/5 hover:bg-primary/10 rounded-xl transition-all"
+                                >
+                                    View all {{ $totalInCategory }} {{ $categoryLabel }} foods
+                                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                </a>
+                            </div>
+                        @endif
                     </div>
                 @endforeach
             @else

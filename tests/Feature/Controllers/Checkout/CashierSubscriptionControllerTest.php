@@ -32,7 +32,8 @@ it('creates monthly subscription checkout successfully', function (): void {
             'price_actual_id_123',
             Mockery::type('string'),
             Mockery::type('string'),
-            Mockery::type('array')
+            Mockery::type('array'),
+            Mockery::any() // trialDays parameter
         )
         ->andReturn('https://checkout.stripe.com/session_123');
 

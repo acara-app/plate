@@ -13,19 +13,20 @@ final class SubscriptionProductSeeder extends Seeder
     {
         $products = [
             [
-                'name' => 'Weekly Meal Plan',
+                'name' => 'Personal',
                 'description' => 'AI-powered meal plans personalized to your nutrition goals, preferences, and lifestyle.',
                 'features' => [
+                    '7-day free trial',
                     'Personalized weekly meal plans',
                     'Tailored to your dietary preferences',
                     'Recipes that match your goals',
                 ],
-                'price' => 4.99,
-                'yearly_price' => 49.70, // 17% discount (~2 months free)
-                'stripe_price_id' => 'acara-plate-monthly',
-                'yearly_stripe_price_id' => 'acara-plate-yearly',
+                'price' => 9.00,
+                'yearly_price' => 89.90, // 17% discount (~2 months free)
+                'stripe_price_id' => 'acara-plate-personal-monthly',
+                'yearly_stripe_price_id' => 'acara-plate-personal-yearly',
                 'billing_interval' => 'monthly',
-                'product_group' => 'weekly-meal-plan',
+                'product_group' => 'trial', // Enables 7-day trial
                 'popular' => true,
                 'coming_soon' => false,
             ],
@@ -34,7 +35,6 @@ final class SubscriptionProductSeeder extends Seeder
         foreach ($products as $product) {
             SubscriptionProduct::query()->updateOrCreate(
                 ['name' => $product['name']],
-                // Find by name
                 $product
             );
         }

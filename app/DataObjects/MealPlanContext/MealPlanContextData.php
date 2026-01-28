@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DataObjects\MealPlanContext;
 
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
+use App\Enums\DietType;
 use App\Enums\Sex;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\MapOutputName;
@@ -19,6 +20,7 @@ final class MealPlanContextData extends Data
     /**
      * @param  array<DietaryPreferenceData>  $dietaryPreferences
      * @param  array<HealthConditionData>  $healthConditions
+     * @param  array<MedicationData>  $medications
      */
     public function __construct(
         // Physical metrics
@@ -31,13 +33,9 @@ final class MealPlanContextData extends Data
         public ?float $tdee,
 
         // Goals
-        #[MapInputName('goal_name')]
         public ?string $goal,
         public ?float $targetWeight,
         public ?string $additionalGoals,
-
-        // Lifestyle
-        public ?LifestyleData $lifestyle,
 
         // Dietary preferences
         public array $dietaryPreferences,
@@ -45,9 +43,17 @@ final class MealPlanContextData extends Data
         // Health conditions
         public array $healthConditions,
 
+        // Medications
+        public array $medications,
+
         // Calculated values
         public ?float $dailyCalorieTarget,
         public MacronutrientRatiosData $macronutrientRatios,
+
+        // Diet type information
+        public DietType $dietType,
+        public string $dietTypeLabel,
+        public string $dietTypeFocus,
 
         // Glucose data analysis
         public ?GlucoseAnalysisData $glucoseAnalysis,

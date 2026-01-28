@@ -55,6 +55,9 @@ final readonly class CashierSubscriptionController
             // Use product name as subscription type for better UX
             $subscriptionType = str($product->name)->slug()->toString();
 
+            // Determine if this is a trial product (7-day trial)
+            $trialDays = $product->product_group === 'trial' ? 7 : null;
+
             $checkoutUrl = $this->stripeService->createSubscriptionCheckout(
                 $user,
                 $subscriptionType,
@@ -66,7 +69,8 @@ final readonly class CashierSubscriptionController
                     'product_name' => $product->name,
                     'user_id' => (string) $user->id,
                     'billing_interval' => $data['billing_interval'],
-                ]
+                ],
+                $trialDays
             );
 
             return Inertia::location($checkoutUrl);

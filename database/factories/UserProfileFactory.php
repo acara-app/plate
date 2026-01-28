@@ -5,33 +5,41 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\GlucoseUnit;
+use App\Enums\GoalChoice;
+use App\Enums\Sex;
+use App\Models\User;
+use App\Models\UserProfile;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\UserProfile>
+ * @template TModel of \App\Models\UserProfile
+ *
+ * @extends Factory<TModel>
  */
 final class UserProfileFactory extends Factory
 {
+    protected $model = UserProfile::class;
+
     /**
-     * Define the model's default state.
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
+        /** @var Sex $sex */
+        $sex = fake()->randomElement(Sex::cases());
+        /** @var GoalChoice $goal */
+        $goal = fake()->randomElement(GoalChoice::cases());
+        /** @var GlucoseUnit $unit */
+        $unit = fake()->randomElement(GlucoseUnit::cases());
+
         return [
-            'user_id' => \App\Models\User::factory(),
+            'user_id' => User::factory(),
             'age' => fake()->numberBetween(18, 80),
-            'height' => fake()->randomFloat(2, 150, 200),
-            'weight' => fake()->randomFloat(2, 50, 120),
-            'sex' => fake()->randomElement([\App\Enums\Sex::Male, \App\Enums\Sex::Female]),
-            'goal_id' => \App\Models\Goal::factory(),
-            'target_weight' => fake()->randomFloat(2, 50, 100),
-            'additional_goals' => fake()->optional()->sentence(),
-            'lifestyle_id' => \App\Models\Lifestyle::factory(),
-            'onboarding_completed' => false,
-            'onboarding_completed_at' => null,
-            'units_preference' => fake()->randomElement(GlucoseUnit::cases()),
+            'height' => fake()->numberBetween(150, 200),
+            'weight' => fake()->numberBetween(50, 120),
+            'sex' => $sex->value,
+            'goal_choice' => $goal->value,
+            'units_preference' => $unit->value,
         ];
     }
 }

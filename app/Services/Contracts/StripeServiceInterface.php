@@ -38,7 +38,7 @@ interface StripeServiceInterface
      *
      * @param  array<string, string>  $metadata
      */
-    public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = []): string;
+    public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string;
 
     /**
      * Get the hosted invoice URL for an incomplete payment.

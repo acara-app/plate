@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Enums\AnimalProductChoice;
+use App\Enums\DietType;
+use App\Enums\GoalChoice;
+use App\Enums\IntensityChoice;
 use App\Enums\Sex;
-use App\Models\DietaryPreference;
-use App\Models\Goal;
-use App\Models\HealthCondition;
-use App\Models\Lifestyle;
 use App\Models\User;
-use Workflow\WorkflowStub;
 
 // Questionnaire Tests
 it('renders questionnaire page', function (): void {
@@ -60,7 +59,7 @@ it('may store biometrics data', function (): void {
             'sex' => Sex::Male->value,
         ]);
 
-    $response->assertRedirectToRoute('onboarding.goals.show');
+    $response->assertRedirectToRoute('onboarding.identity.show');
 
     $profile = $user->profile()->first();
 
@@ -221,344 +220,110 @@ it('requires valid sex value', function (): void {
     $response->assertSessionHasErrors('sex');
 });
 
-// Goals Tests
-it('renders goals page', function (): void {
+// Identity Tests
+it('renders identity page', function (): void {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
-        ->get(route('onboarding.goals.show'));
+        ->get(route('onboarding.identity.show'));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('onboarding/goals')
-            ->has('profile')
-            ->has('goals'));
+            ->component('onboarding/identity')
+            ->has('profile'));
 });
 
-it('may store goals data', function (): void {
+it('identity page displays existing profile choices', function (): void {
     $user = User::factory()->create();
-    $goal = Goal::factory()->create();
+    $user->profile()->create([
+        'goal_choice' => GoalChoice::Spikes->value,
+        'animal_product_choice' => AnimalProductChoice::Omnivore->value,
+        'intensity_choice' => IntensityChoice::Balanced->value,
+        'age' => 30,
+        'height' => 175,
+        'weight' => 70,
+        'sex' => Sex::Male->value,
+    ]);
 
     $response = $this->actingAs($user)
-        ->post(route('onboarding.goals.store'), [
-            'goal_id' => $goal->id,
-            'target_weight' => 65,
-            'additional_goals' => 'Build muscle and improve endurance',
+        ->get(route('onboarding.identity.show'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('onboarding/identity')
+            ->has('profile')
+            ->where('profile.goal_choice', GoalChoice::Spikes->value)
+            ->where('profile.animal_product_choice', AnimalProductChoice::Omnivore->value)
+            ->where('profile.intensity_choice', IntensityChoice::Balanced->value));
+});
+
+it('may store identity data and complete onboarding', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'age' => 30,
+        'height' => 175,
+        'weight' => 70,
+        'sex' => Sex::Male->value,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.identity.store'), [
+            'goal_choice' => GoalChoice::Spikes->value,
+            'animal_product_choice' => AnimalProductChoice::Omnivore->value,
+            'intensity_choice' => IntensityChoice::Balanced->value,
         ]);
 
-    $response->assertRedirectToRoute('onboarding.lifestyle.show');
+    $response->assertRedirectToRoute('meal-plans.create');
 
     $profile = $user->profile()->first();
 
     expect($profile)->not->toBeNull()
-        ->goal_id->toBe($goal->id)
-        ->target_weight->toBe(65.0)
-        ->additional_goals->toBe('Build muscle and improve endurance');
-});
-
-it('requires goal_id', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.goals.store'), [
-            'target_weight' => 65,
-        ]);
-
-    $response->assertSessionHasErrors('goal_id');
-});
-
-it('requires valid goal_id', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.goals.store'), [
-            'goal_id' => 99999,
-            'target_weight' => 65,
-        ]);
-
-    $response->assertSessionHasErrors('goal_id');
-});
-
-it('allows optional target_weight', function (): void {
-    $user = User::factory()->create();
-    $goal = Goal::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.goals.store'), [
-            'goal_id' => $goal->id,
-        ]);
-
-    $response->assertRedirectToRoute('onboarding.lifestyle.show');
-});
-
-it('requires target_weight to be at least 20 if provided', function (): void {
-    $user = User::factory()->create();
-    $goal = Goal::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.goals.store'), [
-            'goal_id' => $goal->id,
-            'target_weight' => 19,
-        ]);
-
-    $response->assertSessionHasErrors('target_weight');
-});
-
-it('requires target_weight to be at most 500 if provided', function (): void {
-    $user = User::factory()->create();
-    $goal = Goal::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.goals.store'), [
-            'goal_id' => $goal->id,
-            'target_weight' => 501,
-        ]);
-
-    $response->assertSessionHasErrors('target_weight');
-});
-
-it('allows optional additional_goals', function (): void {
-    $user = User::factory()->create();
-    $goal = Goal::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.goals.store'), [
-            'goal_id' => $goal->id,
-        ]);
-
-    $response->assertRedirectToRoute('onboarding.lifestyle.show');
-});
-
-it('requires additional_goals to be at most 1000 characters', function (): void {
-    $user = User::factory()->create();
-    $goal = Goal::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.goals.store'), [
-            'goal_id' => $goal->id,
-            'additional_goals' => str_repeat('a', 1001),
-        ]);
-
-    $response->assertSessionHasErrors('additional_goals');
-});
-
-// Lifestyle Tests
-it('renders lifestyle page', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->get(route('onboarding.lifestyle.show'));
-
-    $response->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('onboarding/life-style-page')
-            ->has('profile')
-            ->has('lifestyles'));
-});
-
-it('may store lifestyle data', function (): void {
-    $user = User::factory()->create();
-    $lifestyle = Lifestyle::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.lifestyle.store'), [
-            'lifestyle_id' => $lifestyle->id,
-        ]);
-
-    $response->assertRedirectToRoute('onboarding.dietary-preferences.show');
-
-    $profile = $user->profile()->first();
-
-    expect($profile)->not->toBeNull()
-        ->lifestyle_id->toBe($lifestyle->id);
-});
-
-it('requires lifestyle_id', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.lifestyle.store'), []);
-
-    $response->assertSessionHasErrors('lifestyle_id');
-});
-
-it('requires valid lifestyle_id', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.lifestyle.store'), [
-            'lifestyle_id' => 99999,
-        ]);
-
-    $response->assertSessionHasErrors('lifestyle_id');
-});
-
-// Dietary Preferences Tests
-it('renders dietary preferences page', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->get(route('onboarding.dietary-preferences.show'));
-
-    $response->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('onboarding/dietary-preferences')
-            ->has('profile')
-            ->has('selectedPreferences')
-            ->has('preferences'));
-});
-
-it('may store dietary preferences', function (): void {
-    $user = User::factory()->create();
-    $user->profile()->create([]);
-
-    $pref1 = DietaryPreference::factory()->create(['name' => 'Vegan', 'type' => 'pattern']);
-    $pref2 = DietaryPreference::factory()->create(['name' => 'Gluten Free', 'type' => 'intolerance']);
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.dietary-preferences.store'), [
-            'dietary_preference_ids' => [$pref1->id, $pref2->id],
-        ]);
-
-    $response->assertRedirectToRoute('onboarding.health-conditions.show');
-
-    $profile = $user->profile()->first();
-
-    expect($profile->dietaryPreferences)
-        ->toHaveCount(2)
-        ->pluck('id')->toArray()->toBe([$pref1->id, $pref2->id]);
-});
-
-it('allows empty dietary preferences', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.dietary-preferences.store'), []);
-
-    $response->assertRedirectToRoute('onboarding.health-conditions.show');
-});
-
-it('requires valid dietary preference ids', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.dietary-preferences.store'), [
-            'dietary_preference_ids' => [99999],
-        ]);
-
-    $response->assertSessionHasErrors('dietary_preference_ids.0');
-});
-
-// Health Conditions Tests
-it('renders health conditions page', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->get(route('onboarding.health-conditions.show'));
-
-    $response->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('onboarding/health-conditions')
-            ->has('profile')
-            ->has('selectedConditions')
-            ->has('healthConditions'));
-});
-
-it('may store health conditions', function (): void {
-    WorkflowStub::fake();
-
-    $user = User::factory()->create();
-    $user->profile()->create([]);
-
-    $condition1 = HealthCondition::factory()->create(['name' => 'Diabetes']);
-    $condition2 = HealthCondition::factory()->create(['name' => 'Hypertension']);
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.health-conditions.store'), [
-            'health_condition_ids' => [$condition1->id, $condition2->id],
-            'notes' => ['Managing with medication', 'Controlled with diet'],
-        ]);
-
-    $response->assertRedirectToRoute('onboarding.completion.show');
-
-    $profile = $user->profile()->first();
-
-    expect($profile)->not->toBeNull()
+        ->goal_choice->toBe(GoalChoice::Spikes)
+        ->animal_product_choice->toBe(AnimalProductChoice::Omnivore)
+        ->intensity_choice->toBe(IntensityChoice::Balanced)
+        ->calculated_diet_type->toBe(DietType::Mediterranean)
+        ->derived_activity_multiplier->toBe(1.3)
         ->onboarding_completed->toBeTrue()
         ->onboarding_completed_at->not->toBeNull();
-
-    expect($profile->healthConditions)
-        ->toHaveCount(2);
-
-    expect($profile->healthConditions->first()->pivot->notes)
-        ->toBe('Managing with medication');
-
-    // Meal plan was created synchronously with Generating status for immediate UI feedback
-    $mealPlan = $user->mealPlans()->first();
-    expect($mealPlan)->not->toBeNull();
-    expect($mealPlan->metadata['status'])->toBe('generating');
-    expect($mealPlan->metadata['days_completed'])->toBe(0);
 });
 
-it('allows empty health conditions', function (): void {
-    WorkflowStub::fake();
-
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.health-conditions.store'), []);
-
-    $response->assertRedirectToRoute('onboarding.completion.show');
-
-    $profile = $user->profile()->first();
-
-    expect($profile)->not->toBeNull()
-        ->onboarding_completed->toBeTrue();
-
-    // Meal plan was created synchronously with Generating status for immediate UI feedback
-    $mealPlan = $user->mealPlans()->first();
-    expect($mealPlan)->not->toBeNull();
-    expect($mealPlan->metadata['status'])->toBe('generating');
-});
-
-it('requires valid health condition ids', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.health-conditions.store'), [
-            'health_condition_ids' => [99999],
-        ]);
-
-    $response->assertSessionHasErrors('health_condition_ids.0');
-});
-
-it('stores units_preference when provided', function (): void {
-    WorkflowStub::fake();
-
+it('requires goal_choice', function (): void {
     $user = User::factory()->create();
     $user->profile()->create([]);
 
     $response = $this->actingAs($user)
-        ->post(route('onboarding.health-conditions.store'), [
-            'units_preference' => 'mmol/L',
+        ->post(route('onboarding.identity.store'), [
+            'animal_product_choice' => 'omnivore',
+            'intensity_choice' => 'balanced',
         ]);
 
-    $response->assertRedirectToRoute('onboarding.completion.show');
-
-    expect($user->profile->fresh()->units_preference->value)->toBe('mmol/L');
+    $response->assertSessionHasErrors('goal_choice');
 });
 
-it('requires notes to be at most 500 characters', function (): void {
+it('requires animal_product_choice', function (): void {
     $user = User::factory()->create();
-    $condition = HealthCondition::factory()->create();
+    $user->profile()->create([]);
 
     $response = $this->actingAs($user)
-        ->post(route('onboarding.health-conditions.store'), [
-            'health_condition_ids' => [$condition->id],
-            'notes' => [str_repeat('a', 501)],
+        ->post(route('onboarding.identity.store'), [
+            'goal_choice' => 'spikes',
+            'intensity_choice' => 'balanced',
         ]);
 
-    $response->assertSessionHasErrors('notes.0');
+    $response->assertSessionHasErrors('animal_product_choice');
+});
+
+it('requires intensity_choice', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([]);
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.identity.store'), [
+            'goal_choice' => 'spikes',
+            'animal_product_choice' => 'omnivore',
+        ]);
+
+    $response->assertSessionHasErrors('intensity_choice');
 });
 
 // Completion Tests

@@ -7,14 +7,18 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
 
-export function NavMain({ items = [] }: { items: NavItem[] }) {
+export function NavMain({
+    items = [],
+    label,
+}: {
+    items: NavItem[];
+    label?: string;
+}) {
     const page = usePage();
-    const { t } = useTranslation('common');
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>{t('sidebar.group_label')}</SidebarGroupLabel>
+            {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
             <SidebarMenu>
                 {items.map((item) => (
                     <SidebarMenuItem key={item.title}>

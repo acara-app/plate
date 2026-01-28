@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataObjects\MealPlanContext;
 
+use App\Enums\AllergySeverity;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\MapOutputName;
 use Spatie\LaravelData\Data;
@@ -18,5 +19,7 @@ final class DietaryPreferenceData extends Data
         public string $name,
         public ?string $type,
         public ?string $description,
+        public ?AllergySeverity $severity,
+        public ?string $notes,
     ) {}
 }

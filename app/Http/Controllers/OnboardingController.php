@@ -4,34 +4,24 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\AnalyzeGlucoseForNotificationAction;
-use App\Enums\GlucoseUnit;
+use App\DataObjects\DietIdentityData;
+use App\Enums\AnimalProductChoice;
+use App\Enums\GoalChoice;
+use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use App\Http\Requests\StoreBiometricsRequest;
-use App\Http\Requests\StoreDietaryPreferencesRequest;
-use App\Http\Requests\StoreGoalsRequest;
-use App\Http\Requests\StoreHealthConditionsRequest;
-use App\Http\Requests\StoreLifestyleRequest;
-use App\Models\DietaryPreference;
-use App\Models\Goal;
-use App\Models\HealthCondition;
-use App\Models\Lifestyle;
+use App\Http\Requests\StoreIdentityRequest;
 use App\Models\User;
-use App\Models\UserProfile;
-use App\Workflows\MealPlanInitializeWorkflow;
+use App\Services\DietMapper;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
-use Workflow\WorkflowStub;
 
 final readonly class OnboardingController
 {
-    private const int DEFAULT_DURATION_DAYS = 7;
-
     public function __construct(
         #[CurrentUser] private User $user,
-        private AnalyzeGlucoseForNotificationAction $analyzeGlucose,
     ) {
         //
     }
@@ -63,141 +53,53 @@ final readonly class OnboardingController
             $request->validated()
         );
 
-        return to_route('onboarding.goals.show');
+        return to_route('onboarding.identity.show');
     }
 
-    public function showGoals(): Response
+    public function showIdentity(): Response
     {
         $profile = $this->user->profile;
 
-        return Inertia::render('onboarding/goals', [
+        return Inertia::render('onboarding/identity', [
             'profile' => $profile,
-            'goals' => Goal::all(),
         ]);
     }
 
-    public function storeGoals(StoreGoalsRequest $request): RedirectResponse
+    public function storeIdentity(StoreIdentityRequest $request): RedirectResponse
     {
         $user = $this->user;
+        $dietIdentityData = DietIdentityData::from($request->validated());
 
-        $user->profile()->updateOrCreate(
-            ['user_id' => $user->id],
-            $request->validated()
+        $dietType = DietMapper::map(
+            GoalChoice::from($dietIdentityData->goal_choice),
+            AnimalProductChoice::from($dietIdentityData->animal_product_choice),
+            IntensityChoice::from($dietIdentityData->intensity_choice)
         );
 
-        return to_route('onboarding.lifestyle.show');
-    }
-
-    public function showLifestyle(): Response
-    {
-        $profile = $this->user->profile;
-
-        return Inertia::render('onboarding/life-style-page', [
-            'profile' => $profile,
-            'lifestyles' => Lifestyle::all(),
-        ]);
-    }
-
-    public function storeLifestyle(StoreLifestyleRequest $request): RedirectResponse
-    {
-        $user = $this->user;
-
-        $user->profile()->updateOrCreate(
-            ['user_id' => $user->id],
-            $request->validated()
+        $activityMultiplier = DietMapper::getActivityMultiplier(
+            GoalChoice::from($dietIdentityData->goal_choice),
+            IntensityChoice::from($dietIdentityData->intensity_choice)
         );
 
-        return to_route('onboarding.dietary-preferences.show');
-    }
+        $profileData = [
+            'goal_choice' => GoalChoice::from($dietIdentityData->goal_choice),
+            'animal_product_choice' => AnimalProductChoice::from($dietIdentityData->animal_product_choice),
+            'intensity_choice' => IntensityChoice::from($dietIdentityData->intensity_choice),
+            'calculated_diet_type' => $dietType,
+            'derived_activity_multiplier' => $activityMultiplier,
+        ];
 
-    public function showDietaryPreferences(): Response
-    {
-        $profile = $this->user->profile;
+        $user->profile()->updateOrCreate(['user_id' => $user->id], $profileData);
 
-        $preferences = DietaryPreference::all()->groupBy('type');
-
-        return Inertia::render('onboarding/dietary-preferences', [
-            'profile' => $profile,
-            'selectedPreferences' => $profile?->dietaryPreferences->pluck('id')->toArray() ?? [],
-            'preferences' => $preferences,
-        ]);
-    }
-
-    public function storeDietaryPreferences(StoreDietaryPreferencesRequest $request): RedirectResponse
-    {
-        $user = $this->user;
-
-        /** @var UserProfile $profile */
-        $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
-
-        /** @var array<int, int> $preferenceIds */
-        $preferenceIds = $request->validated('dietary_preference_ids') ?? [];
-        $profile->dietaryPreferences()->sync($preferenceIds);
-
-        return to_route('onboarding.health-conditions.show');
-    }
-
-    public function showHealthConditions(): Response
-    {
-        $profile = $this->user->profile;
-
-        return Inertia::render('onboarding/health-conditions', [
-            'profile' => $profile,
-            'selectedConditions' => $profile?->healthConditions->pluck('id')->toArray() ?? [],
-            'healthConditions' => HealthCondition::all(),
-            'glucoseUnitOptions' => collect(GlucoseUnit::cases())->map(fn (GlucoseUnit $unit): array => [
-                'value' => $unit->value,
-                'label' => $unit->label(),
-            ]),
-            'selectedGlucoseUnit' => $profile?->units_preference?->value,
-        ]);
-    }
-
-    public function storeHealthConditions(StoreHealthConditionsRequest $request): RedirectResponse
-    {
-        $user = $this->user;
-
-        /** @var UserProfile $profile */
-        $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
-
-        /** @var array<int, int> $conditionIds */
-        $conditionIds = $request->validated('health_condition_ids') ?? [];
-        /** @var array<int, string|null> $notes */
-        $notes = $request->validated('notes') ?? [];
-
-        $syncData = [];
-        foreach ($conditionIds as $index => $conditionId) {
-            $syncData[$conditionId] = [
-                'notes' => $notes[$index] ?? null,
-            ];
+        $profile = $user->profile()->first();
+        if ($profile) {
+            $profile->update([
+                'onboarding_completed' => true,
+                'onboarding_completed_at' => now(),
+            ]);
         }
 
-        $profile->healthConditions()->sync($syncData);
-
-        // Save glucose unit preference
-        /** @var string|null $glucoseUnit */
-        $glucoseUnit = $request->validated('units_preference');
-        if ($glucoseUnit !== null) {
-            $profile->update(['units_preference' => $glucoseUnit]);
-        }
-
-        // Mark onboarding as completed
-        $profile->update([
-            'onboarding_completed' => true,
-            'onboarding_completed_at' => now(),
-        ]);
-
-        $glucoseAnalysis = $this->analyzeGlucose->handle($user);
-
-        $mealPlan = MealPlanInitializeWorkflow::createMealPlan(
-            $user,
-            self::DEFAULT_DURATION_DAYS,
-        );
-
-        WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start($user, $mealPlan, $glucoseAnalysis->analysisData);
-
-        return to_route('onboarding.completion.show');
+        return to_route('meal-plans.create');
     }
 
     public function showCompletion(): Response|RedirectResponse

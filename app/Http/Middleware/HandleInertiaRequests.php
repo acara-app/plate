@@ -6,6 +6,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Inertia\Inertia;
 use Inertia\Middleware;
 
 final class HandleInertiaRequests extends Middleware
@@ -43,7 +44,7 @@ final class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'locale' => $locale,
-            'translations' => $this->getTranslations($locale),
+            'translations' => Inertia::once(fn (): array => $this->getTranslations($locale)),
         ];
     }
 

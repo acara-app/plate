@@ -4,14 +4,20 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\AnimalProductChoice;
+use App\Enums\DietType;
 use App\Enums\GlucoseUnit;
+use App\Enums\GoalChoice;
+use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property-read int $id
@@ -20,21 +26,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property-read float|null $height
  * @property-read float|null $weight
  * @property-read Sex|null $sex
- * @property-read int|null $goal_id
+ * @property-read GoalChoice|null $goal_choice
+ * @property-read AnimalProductChoice|null $animal_product_choice
+ * @property-read IntensityChoice|null $intensity_choice
+ * @property-read DietType|null $calculated_diet_type
+ * @property-read float|null $derived_activity_multiplier
+ * @property-read bool $needs_re_onboarding
  * @property-read float|null $target_weight
  * @property-read string|null $additional_goals
- * @property-read int|null $lifestyle_id
  * @property-read GlucoseUnit|null $units_preference
  * @property-read bool $onboarding_completed
  * @property-read CarbonInterface|null $onboarding_completed_at
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read User $user
- * @property-read Goal|null $goal
- * @property-read Lifestyle|null $lifestyle
  * @property-read float|null $bmi
  * @property-read float|null $bmr
  * @property-read float|null $tdee
+ * @property-read Collection<int, UserMedication> $medications
  */
 final class UserProfile extends Model
 {
@@ -62,10 +71,14 @@ final class UserProfile extends Model
             'height' => 'float',
             'weight' => 'float',
             'sex' => Sex::class,
-            'goal_id' => 'integer',
+            'goal_choice' => GoalChoice::class,
+            'animal_product_choice' => AnimalProductChoice::class,
+            'intensity_choice' => IntensityChoice::class,
+            'calculated_diet_type' => DietType::class,
+            'derived_activity_multiplier' => 'float',
+            'needs_re_onboarding' => 'boolean',
             'target_weight' => 'float',
             'additional_goals' => 'string',
-            'lifestyle_id' => 'integer',
             'units_preference' => GlucoseUnit::class,
             'onboarding_completed' => 'boolean',
             'onboarding_completed_at' => 'datetime',
@@ -83,22 +96,6 @@ final class UserProfile extends Model
     }
 
     /**
-     * @return BelongsTo<Goal, $this>
-     */
-    public function goal(): BelongsTo
-    {
-        return $this->belongsTo(Goal::class);
-    }
-
-    /**
-     * @return BelongsTo<Lifestyle, $this>
-     */
-    public function lifestyle(): BelongsTo
-    {
-        return $this->belongsTo(Lifestyle::class);
-    }
-
-    /**
      * @return BelongsToMany<DietaryPreference, $this>
      */
     public function dietaryPreferences(): BelongsToMany
@@ -106,7 +103,15 @@ final class UserProfile extends Model
         return $this->belongsToMany(
             DietaryPreference::class,
             'user_profile_dietary_preference'
-        )->withTimestamps();
+        )->withPivot(['severity', 'notes'])->withTimestamps();
+    }
+
+    /**
+     * @return HasMany<UserMedication, $this>
+     */
+    public function medications(): HasMany
+    {
+        return $this->hasMany(UserMedication::class);
     }
 
     /**
@@ -165,11 +170,13 @@ final class UserProfile extends Model
     protected function tdee(): Attribute
     {
         return Attribute::get(function (): ?float {
-            if (! $this->bmr || ! $this->lifestyle) {
+            if (! $this->bmr) {
                 return null;
             }
 
-            return round($this->bmr * $this->lifestyle->activity_multiplier, 2);
+            $multiplier = $this->derived_activity_multiplier ?? 1.3;
+
+            return round($this->bmr * $multiplier, 2);
         });
     }
 }

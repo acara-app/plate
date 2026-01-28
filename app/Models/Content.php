@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read array<string, mixed> $body
  * @property-read FoodCategory|null $category
  * @property-read string|null $image_path
+ * @property-read array<string, mixed>|null $seo_metadata
  * @property-read bool $is_published
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -47,6 +48,7 @@ final class Content extends Model
             'meta_title' => 'string',
             'meta_description' => 'string',
             'body' => 'array',
+            'seo_metadata' => 'array',
             'image_path' => 'string',
             'is_published' => 'boolean',
             'created_at' => 'datetime',
@@ -134,12 +136,34 @@ final class Content extends Model
         return $assessment;
     }
 
-    protected function getGlycemicLoadAttribute(): ?string
+    protected function getGlycemicLoadAttribute(): string
     {
         /** @var string|null $load */
         $load = $this->body['glycemic_load'] ?? null;
 
-        return $load;
+        if ($load !== null) {
+            return $load;
+        }
+
+        // Calculate GL on-the-fly if not stored in database
+        // Formula: GL = (GI * Net Carbs) / 100
+        // Net Carbs = Total Carbs - Fiber
+        $nutrition = $this->nutrition;
+        $carbs = (float) ($nutrition['carbs'] ?? 0);
+        $fiber = (float) ($nutrition['fiber'] ?? 0);
+        $netCarbs = max(0, $carbs - $fiber);
+
+        // Use category-average GI, or default to 50 if no category
+        $gi = $this->category?->averageGlycemicIndex() ?? 50;
+
+        $calculatedGL = ($gi * $netCarbs) / 100;
+
+        // Classify: Low (0-10), Medium (11-19), High (20+)
+        return match (true) {
+            $calculatedGL <= 10 => 'low',
+            $calculatedGL <= 19 => 'medium',
+            default => 'high',
+        };
     }
 
     /**
@@ -148,5 +172,16 @@ final class Content extends Model
     protected function getCategoryLabelAttribute(): string
     {
         return $this->category?->label() ?? 'Uncategorized';
+    }
+
+    /**
+     * @return array<int, array{slug: string, anchor: string}>
+     */
+    protected function getManualLinksAttribute(): array
+    {
+        /** @var array<int, array{slug: string, anchor: string}> $links */
+        $links = $this->seo_metadata['manual_links'] ?? [];
+
+        return $links;
     }
 }

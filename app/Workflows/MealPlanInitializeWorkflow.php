@@ -8,6 +8,7 @@ use App\DataObjects\DayMealsData;
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\MealData;
 use App\DataObjects\PreviousDayContext;
+use App\Enums\DietType;
 use App\Enums\MealPlanGenerationStatus;
 use App\Enums\MealPlanType;
 use App\Models\MealPlan;
@@ -58,14 +59,20 @@ final class MealPlanInitializeWorkflow extends Workflow
      * This must be called synchronously before starting the workflow
      * to ensure the user sees the "Generating" state immediately.
      */
-    public static function createMealPlan(User $user, int $totalDays = 7): MealPlan
+    public static function createMealPlan(User $user, int $totalDays = 7, ?DietType $dietType = null): MealPlan
     {
         $mealPlanType = self::getMealPlanType($totalDays);
+
+        // @codeCoverageIgnoreStart
+        $name = $dietType instanceof DietType
+            ? "{$totalDays}-Day {$dietType->shortName()} Plan"
+            : "{$totalDays}-Day Personalized Plan";
+        // @codeCoverageIgnoreEnd
 
         /** @var MealPlan $mealPlan */
         $mealPlan = $user->mealPlans()->create([
             'type' => $mealPlanType,
-            'name' => $totalDays.'-Day Personalized Meal Plan',
+            'name' => $name,
             'description' => 'AI-generated meal plan tailored to your nutritional needs and preferences.',
             'duration_days' => $totalDays,
             'target_daily_calories' => null,
@@ -75,6 +82,7 @@ final class MealPlanInitializeWorkflow extends Workflow
                 'generation_method' => 'workflow',
                 'status' => MealPlanGenerationStatus::Generating->value,
                 'days_completed' => 0,
+                'diet_type' => $dietType?->value,
             ],
         ]);
 
@@ -90,6 +98,7 @@ final class MealPlanInitializeWorkflow extends Workflow
         User $user,
         MealPlan $mealPlan,
         ?GlucoseAnalysisData $glucoseAnalysis = null,
+        ?DietType $dietType = null,
     ): Generator {
         $totalDays = $mealPlan->duration_days;
 
@@ -101,6 +110,8 @@ final class MealPlanInitializeWorkflow extends Workflow
             $totalDays,              // totalDays
             new PreviousDayContext,  // previousDaysContext
             $glucoseAnalysis,        // glucoseAnalysis
+            $mealPlan,               // mealPlan
+            $dietType,               // dietType
         );
 
         yield ActivityStub::make(

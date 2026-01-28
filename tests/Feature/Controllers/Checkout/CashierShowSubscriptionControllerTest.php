@@ -250,3 +250,44 @@ it('returns incomplete payment url when payment is incomplete', function (): voi
 
     $response->assertOk();
 });
+
+it('renders subscription page with trialing subscription', function (): void {
+    $user = User::factory()->create(['stripe_id' => 'cus_test123']);
+    $product = SubscriptionProduct::factory()->create([
+        'name' => 'Premium Plan',
+        'stripe_price_id' => 'price_monthly_test',
+    ]);
+
+    DB::table('subscriptions')->insert([
+        'user_id' => $user->id,
+        'type' => 'premium-plan',
+        'stripe_id' => 'sub_trial123',
+        'stripe_status' => 'trialing',
+        'stripe_price' => 'price_monthly_test',
+        'quantity' => 1,
+        'trial_ends_at' => now()->addDays(7),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $subscription = $user->subscriptions()->first();
+
+    DB::table('subscription_items')->insert([
+        'subscription_id' => $subscription->id,
+        'stripe_id' => 'si_trial123',
+        'stripe_product' => 'prod_test123',
+        'stripe_price' => 'price_monthly_test',
+        'quantity' => 1,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock->shouldReceive('ensureStripeCustomer')->once();
+    $stripeMock->shouldReceive('hasIncompletePayment')->once()->andReturn(false);
+    $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com/session/test');
+
+    $response = $this->actingAs($user)->get(route('checkout.subscription'));
+
+    $response->assertOk();
+});

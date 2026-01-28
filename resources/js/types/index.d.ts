@@ -60,10 +60,8 @@ export interface Profile {
     height: number;
     weight: number;
     sex: string;
-    goal_id?: number;
     target_weight?: number;
     additional_goals?: string;
-    lifestyle_id?: number;
 }
 
 export interface DietaryPreference extends Row {
@@ -87,4 +85,13 @@ export interface LifeStyle extends Row {
     activity_level: string;
     description: string;
     activity_multiplier: number;
+}
+
+export interface UserMedication extends Row {
+    user_profile_id: number;
+    name: string;
+    dosage: string | null;
+    frequency: string | null;
+    purpose: string | null;
+    started_at: string | null;
 }

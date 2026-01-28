@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Models\User;
+use App\Services\Contracts\IndexNowServiceInterface;
 use App\Services\Contracts\StripeServiceInterface;
+use App\Services\IndexNowService;
 use App\Services\StripeService;
+use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -19,6 +23,7 @@ final class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(StripeServiceInterface::class, StripeService::class);
+        $this->app->bind(IndexNowServiceInterface::class, IndexNowService::class);
     }
 
     public function boot(): void
@@ -28,6 +33,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->bootVerificationDefaults();
         $this->bootCashierDefaults();
         $this->bootUrlDefaults();
+        $this->configureDates();
     }
 
     private function bootModelsDefaults(): void
@@ -64,5 +70,13 @@ final class AppServiceProvider extends ServiceProvider
         if (app()->isProduction()) {
             URL::forceScheme('https');
         }
+    }
+
+    /**
+     * Configure the dates.
+     */
+    private function configureDates(): void
+    {
+        Date::use(CarbonImmutable::class);
     }
 }

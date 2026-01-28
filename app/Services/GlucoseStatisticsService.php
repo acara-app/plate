@@ -205,10 +205,11 @@ final readonly class GlucoseStatisticsService
         $total = $readings->count();
         $grouped = $readings->groupBy(fn (\App\Models\DiabetesLog $reading): string => $reading->glucose_reading_type->value ?? \App\Enums\GlucoseReadingType::Random->value);
 
+        /** @var array<string, array{count: int, percentage: float, average: float|null}> $result */
         $result = [];
         foreach ($grouped as $type => $typeReadings) {
             $avg = $typeReadings->avg('glucose_value');
-            $result[$type] = [
+            $result[(string) $type] = [
                 'count' => $typeReadings->count(),
                 'percentage' => round(($typeReadings->count() / $total) * 100, 1),
                 'average' => is_numeric($avg) ? round((float) $avg, 1) : null,
