@@ -71,16 +71,16 @@ enum FoodCategory: string
     public function description(): string
     {
         return match ($this) {
-            self::Fruits => 'Fruits contain natural fructose, but their fiber content often buffers the insulin response. We focus on low-glycemic berries and stone fruits that satisfy sweet cravings without causing rapid glucose spikes.',
-            self::Vegetables => 'The cornerstone of blood sugar management. These non-starchy powerhouses are high in volume, rich in micronutrients, and have a negligible impact on blood glucose, making them "free foods" for most diabetics.',
-            self::GrainsStarches => 'The trickiest category for glucose control. We distinguish between complex, slow-digesting grains (like quinoa/barley) and refined starches that act like sugar. Portion control here is critical for preventing post-meal spikes.',
-            self::DairyAlternatives => 'A source of protein and calcium, but watch out for lactose (milk sugar). We prioritize full-fat or fermented options like Greek yogurt which have a lower insulin index compared to skim milk.',
-            self::ProteinsLegumes => 'Your best defense against spikes. Protein slows down the absorption of carbohydrates when eaten together. Legumes offer a double benefit: high protein plus "resistant starch" that improves insulin sensitivity.',
-            self::NutsSeeds => 'The ultimate blood sugar stabilizers. Packed with healthy fats and fiber, adding a handful of nuts to a carb-heavy meal can significantly lower the overall glycemic load of that meal.',
-            self::Beverages => 'Hydration without the sugar crash. We analyze everything from coffee and tea to fruit juices, helping you identify "liquid sugar" bombs that bypass digestion and spike glucose instantly.',
-            self::CondimentsSauces => 'Hidden sugars often lurk here. From ketchup to BBQ sauce, we expose the secret carb counts in your favorite toppings so you can add flavor without ruining your daily numbers.',
-            self::SnacksSweets => 'Treats, optimized. You don\'t have to live without dessert, but you do need strategy. We focus on high-fat, low-carb treats that satisfy cravings while keeping you in a safe glucose range.',
-            self::Other => 'Miscellaneous items and ingredients. Always verify the nutritional label, as these specialized products can vary wildly in their glycemic impact.',
+            self::Fruits => 'Fruits contain natural fructose. We analyze the essential FDA foundational list to show you exactly which common fruits—from berries to bananas—have a safe glycemic impact.',
+            self::Vegetables => 'From leafy greens to starchy roots, we grade the glycemic impact of everyday vegetables. Use our data to distinguish between "free foods" and those that require portion control.',
+            self::GrainsStarches => 'Not all carbs are equal. We display the glycemic index for pantry staples like whole quinoa and white rice, helping you spot the difference between slow-digesting grains and refined starches.',
+            self::DairyAlternatives => 'Dairy contains lactose (milk sugar). We reveal the insulin impact of common milks, yogurts, and cheeses so you can see which options fit your glucose management goals.',
+            self::ProteinsLegumes => 'Proteins are usually safe, but preparation matters. We break down the data for core proteins and legumes to help you identify healthy options with hidden carb loads.',
+            self::NutsSeeds => 'Healthy fats usually stabilize blood sugar, but carb counts vary. Check the glycemic score of verified nuts and seeds to find zero-spike snacking options.',
+            self::Beverages => 'Liquids hit the bloodstream fast. We rate standard beverages—from pure juices to coffee—so you can instantly spot the "sugar bombs" that bypass digestion.',
+            self::CondimentsSauces => 'Sauces are often where sugar hides. We expose the true carb counts in key condiments like ketchup and dressings, ensuring you don\'t ruin a healthy meal with the wrong topping.',
+            self::SnacksSweets => 'Craving something sweet? We analyze the glycemic load of classic treats to help you find the ones that satisfy a craving without sending your numbers off the charts.',
+            self::Other => 'Unsure about a specific ingredient? Search our verified database to uncover the nutritional facts and glycemic safety of miscellaneous common foods.',
         };
     }
 
