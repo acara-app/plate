@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Enums\ContentType;
 use App\Models\Content;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 
@@ -37,6 +38,7 @@ final class GenerateFoodSitemapCommand extends Command
         $sitemap->add(
             Url::create(route('food.index'))
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+                ->setLastModificationDate(Carbon::parse('2026-01-29'))
                 ->setPriority(0.8)
         );
 
