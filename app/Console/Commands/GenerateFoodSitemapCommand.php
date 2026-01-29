@@ -7,7 +7,6 @@ namespace App\Console\Commands;
 use App\Enums\ContentType;
 use App\Models\Content;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 

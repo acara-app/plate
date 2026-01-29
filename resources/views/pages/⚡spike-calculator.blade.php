@@ -10,8 +10,8 @@ use Livewire\Component;
 use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
 new
-#[Layout('layouts.mini-app', ['metaDescription' => 'Check if foods will spike your blood sugar with our free AI calculator. Get instant glycemic risk analysis and smart food swaps.', 'metaKeywords' => 'glucose spike checker, blood sugar spike, glycemic index, food blood sugar impact, diabetes food checker, will food spike blood sugar, free glucose tool, blood sugar calculator, what foods cause blood sugar spikes, low glycemic foods'])]
-#[Title('Free Glucose Spike Calculator | Predict Blood Sugar Impact Instantly')]
+#[Layout('layouts.mini-app', ['metaDescription' => 'Free AI blood sugar spike checker: Enter any food to instantly predict its glucose impact. Get glycemic risk levels, smart swaps, and diabetes-friendly food alternatives—perfect for Type 2 diabetes meal planning.', 'metaKeywords' => 'blood sugar spike checker, glucose spike calculator, will this food spike my blood sugar, food glycemic impact, diabetes food analyzer, pre-diabetes food checker, glucose predictor, food insulin impact, type 2 diabetes food checker, carb spike risk'])]
+#[Title('Blood Sugar Spike Checker | Free AI Glucose Impact Calculator')]
 class extends Component
 {
     public string $food = '';
@@ -115,18 +115,19 @@ class extends Component
         {{-- Header Section --}}
         <div class="text-center speakable-intro">
             <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-2xl dark:bg-blue-900/50">⚡️</div>
-            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Glucose Spike Calculator: Will It Spike?</h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Type in a food to check its impact.</p>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Which Foods Spike Your Blood Sugar? Find Out Instantly</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Free AI-powered glucose spike checker. Type any food to predict blood sugar impact and discover diabetes-friendly swaps.</p>
         </div>
 
         {{-- Input Section --}}
         <form wire:submit="predict" class="relative">
-            <input 
-                type="text" 
+            <input
+                type="text"
                 wire:model.live.debounce.150ms="food"
-                placeholder="e.g. 2 slices of pepperoni pizza" 
+                placeholder="e.g. white rice, chocolate cake, or grilled salmon"
                 class="w-full min-h-14 rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-4 pr-14 text-lg font-medium outline-none transition-colors focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:focus:border-blue-500 dark:focus:bg-slate-800"
                 @disabled($loading)
+                aria-label="Enter a food to check its blood sugar impact"
             >
             <button
                 type="submit"
@@ -282,13 +283,19 @@ class extends Component
     </main>
 
     {{-- How it Works Section --}}
-    <section class="relative z-10 mt-8 w-full max-w-md">
-        <h2 class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
-            How We Check for Spikes
+    <section class="relative z-10 mt-8 w-full max-w-md" aria-labelledby="how-it-works-heading">
+        <h2 id="how-it-works-heading" class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
+            How This Blood Sugar Spike Checker Works
         </h2>
-        <div class="grid gap-4 text-sm text-slate-600 dark:text-slate-400">
+        <div class="space-y-3 text-sm text-slate-600 dark:text-slate-400">
             <div class="rounded-xl bg-white/50 p-4 backdrop-blur-sm dark:bg-slate-800/50">
-                <p class="speakable-how-it-works">We look at the carbs, fiber, protein, and fat in the food you enter. This helps us guess how fast your body will digest it and if it might cause a sugar spike. Then we suggest better options to keep your energy steady.</p>
+                <p class="speakable-how-it-works"><strong>AI-Powered Analysis:</strong> Our free tool analyzes carbohydrates, fiber, protein, and fat content in any food. It predicts how quickly your body digests it and determines the likelihood of a glucose spike.</p>
+            </div>
+            <div class="rounded-xl bg-white/50 p-4 backdrop-blur-sm dark:bg-slate-800/50">
+                <p class="speakable-how-it-works"><strong>Instant Risk Levels:</strong> Get immediate Low, Medium, or High glycemic risk assessment based on USDA nutrition data and diabetic safety guidelines.</p>
+            </div>
+            <div class="rounded-xl bg-white/50 p-4 backdrop-blur-sm dark:bg-slate-800/50">
+                <p class="speakable-how-it-works"><strong>Smart Food Swaps:</strong> Receive diabetes-friendly alternatives that significantly reduce blood sugar impact—perfect for Type 2 diabetes meal planning and pre-diabetes management.</p>
             </div>
         </div>
     </section>
@@ -296,97 +303,97 @@ class extends Component
     {{-- FAQ Section --}}
     <section class="relative z-10 mt-8 w-full max-w-md" aria-labelledby="faq-heading">
         <h2 id="faq-heading" class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
-            Common Questions
+            Frequently Asked Questions
         </h2>
-        
+
         <div class="space-y-3" x-data="{ openFaq: null }">
             {{-- FAQ 1 --}}
             <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
-                <button 
+                <button
                     type="button"
                     @click="openFaq = openFaq === 1 ? null : 1"
                     class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
                     aria-expanded="false"
                 >
-                    <span class="speakable-intro">What is a glucose spike and why should I care?</span>
+                    <span class="speakable-intro">What is a glucose spike and why does it matter for Type 2 diabetes?</span>
                     <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
                 <div x-show="openFaq === 1" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p class="speakable-intro">A spike happens when your blood sugar goes up fast after you eat. You might feel tired or hungry afterwards. Keeping your levels steady helps you feel better and stay healthy.</p>
+                    <p class="speakable-intro">A glucose spike occurs when blood sugar rises rapidly after eating high-carbohydrate foods. For people with pre-diabetes or Type 2 diabetes, frequent spikes can lead to long-term health complications. This tool helps you predict which foods trigger spikes and find safer alternatives.</p>
                 </div>
             </div>
 
             {{-- FAQ 2 --}}
             <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
-                <button 
+                <button
                     type="button"
                     @click="openFaq = openFaq === 2 ? null : 2"
                     class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
                     aria-expanded="false"
                 >
-                    <span class="speakable-how-it-works">How does the glucose spike checker work?</span>
+                    <span class="speakable-how-it-works">How accurate is this blood sugar spike checker?</span>
                     <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
                 <div x-show="openFaq === 2" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p class="speakable-how-it-works">We look at the carbs, fiber, protein, and fat in the food. Then we give you a risk level: Low, Medium, or High. We also suggest foods that might be better for your blood sugar.</p>
+                    <p class="speakable-how-it-works">Our AI tool provides estimates based on USDA nutrition data, glycemic index research, and diabetic safety guidelines. While individual responses vary based on metabolism, portion size, and food combinations, our checker offers reliable guidance for meal planning. Always verify with your doctor.</p>
                 </div>
             </div>
 
             {{-- FAQ 3 --}}
             <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
-                <button 
+                <button
                     type="button"
                     @click="openFaq = openFaq === 3 ? null : 3"
                     class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
                     aria-expanded="false"
                 >
-                    <span>What foods typically cause high blood sugar spikes?</span>
+                    <span>What foods cause the highest blood sugar spikes?</span>
                     <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
                 <div x-show="openFaq === 3" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>White bread, white rice, and sugary drinks often cause spikes. Candy and pastries do too. These foods have lots of carbs but not much fiber. Your body digests them fast, which sends sugar into your blood quickly.</p>
+                    <p>High-glycemic foods include white rice, white bread, pastries, sugar-sweetened beverages, candy, and fruit juices. These refined carbohydrates digest quickly, causing fast blood sugar elevation. Whole grains, legumes, non-starchy vegetables, and lean proteins generally have lower impact.</p>
                 </div>
             </div>
 
             {{-- FAQ 4 --}}
             <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
-                <button 
+                <button
                     type="button"
                     @click="openFaq = openFaq === 4 ? null : 4"
                     class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
                     aria-expanded="false"
                 >
-                    <span>How can I reduce the glycemic impact of my meals?</span>
+                    <span>How can I reduce meal glycemic impact naturally?</span>
                     <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
                 <div x-show="openFaq === 4" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>Add protein or healthy fats to your meal. Choose whole grains instead of white ones. Eat vegetables first. A short walk after eating also helps.</p>
+                    <p>Pair carbohydrates with protein, healthy fats, or fiber-rich vegetables to slow sugar absorption. Choose whole grains over refined options, eat smaller portions, and take a 10-15 minute walk after meals to improve insulin sensitivity. Our tool suggests specific swaps to maximize these benefits.</p>
                 </div>
             </div>
 
             {{-- FAQ 5 --}}
             <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
-                <button 
+                <button
                     type="button"
                     @click="openFaq = openFaq === 5 ? null : 5"
                     class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
                     aria-expanded="false"
                 >
-                    <span>Is this tool a replacement for medical advice?</span>
+                    <span>Can I use this tool for pre-diabetes or Type 2 diabetes management?</span>
                     <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 5 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
                 <div x-show="openFaq === 5" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>No. This tool gives you estimates. It does not replace your doctor. Talk to a medical professional if you have health questions.</p>
+                    <p>Yes! This tool is designed for pre-diabetes and Type 2 diabetes meal planning. However, it provides educational estimates only and is not a substitute for professional medical advice or glucose monitoring. Always consult your healthcare provider for personalized guidance.</p>
                 </div>
             </div>
         </div>

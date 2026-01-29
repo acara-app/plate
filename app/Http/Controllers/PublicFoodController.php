@@ -122,6 +122,8 @@ final readonly class PublicFoodController
             ['name1' => 'Sweet Potato', 'name2' => 'Regular Potato'],
         ];
 
+        $categoryEnum = $category !== null && $category !== '' ? FoodCategory::tryFrom($category) : null;
+
         return view('food.index', [
             'foods' => $foods,
             'foodsByCategory' => $foodsByCategory,
@@ -131,6 +133,8 @@ final readonly class PublicFoodController
             'currentSearch' => $search,
             'currentAssessment' => $assessment,
             'currentCategory' => $category,
+            'categoryTitle' => $categoryEnum?->title(),
+            'categoryDescription' => $categoryEnum?->description(),
             'comparisons' => $comparisons,
             'canonicalUrl' => $this->getCanonicalUrl($request, $category),
         ]);
@@ -177,6 +181,8 @@ final readonly class PublicFoodController
             'currentSearch' => null,
             'currentAssessment' => $assessment,
             'currentCategory' => $category,
+            'categoryTitle' => $categoryEnum->title(),
+            'categoryDescription' => $categoryEnum->description(),
             'comparisons' => [],
             'canonicalUrl' => $this->getCategoryCanonicalUrl($request, $category),
         ]);
