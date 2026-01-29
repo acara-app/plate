@@ -19,13 +19,13 @@ function fakeTurnstile(bool $success = true): void
 it('renders the spike calculator page', function (): void {
     Livewire::test('pages::spike-calculator')
         ->assertStatus(200)
-        ->assertSee('Will It Spike?')
-        ->assertSee('Type in a food to check its impact.');
+        ->assertSee('Which Foods Spike Your Blood Sugar?')
+        ->assertSee('Free AI-powered glucose spike checker');
 });
 
 it('has food input field', function (): void {
     Livewire::test('pages::spike-calculator')
-        ->assertSee('e.g. 2 slices of pepperoni pizza');
+        ->assertSee('e.g. white rice, chocolate cake, or grilled salmon');
 });
 
 it('validates food is required', function (): void {

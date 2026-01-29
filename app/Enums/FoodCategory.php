@@ -49,6 +49,42 @@ enum FoodCategory: string
     }
 
     /**
+     * SEO-friendly title for the food category.
+     * Focus: Glycemic Index, Diabetes Safety, Blood Sugar Impact.
+     */
+    public function title(): string
+    {
+        return match ($this) {
+            self::Fruits => 'Diabetic Friendly Fruits: Glycemic Index & Sugar Safety Chart',
+            self::Vegetables => 'Low Carb Vegetables: Non-Starchy List for Blood Sugar Control',
+            self::GrainsStarches => 'Grains & Starches: Glycemic Index & Carb Counting Guide',
+            self::DairyAlternatives => 'Dairy & Alternatives: Glucose Impact & Lactose Guide',
+            self::ProteinsLegumes => 'Proteins & Legumes: Blood Sugar Stabilizers & Fiber List',
+            self::NutsSeeds => 'Best Nuts & Seeds for Diabetics: Zero Spike Snacking',
+            self::Beverages => 'Diabetic Safe Drinks: No-Spike Juices & Hydration List',
+            self::CondimentsSauces => 'Condiments & Sauces: Hidden Sugars & Carb Count Detector',
+            self::SnacksSweets => 'Low GI Sweets: Diabetes Friendly Desserts & Treat Guide',
+            self::Other => 'Specialty Foods Database: Glycemic Index & Nutrition Facts',
+        };
+    }
+
+    public function description(): string
+    {
+        return match ($this) {
+            self::Fruits => 'Fruits contain natural fructose, but their fiber content often buffers the insulin response. We focus on low-glycemic berries and stone fruits that satisfy sweet cravings without causing rapid glucose spikes.',
+            self::Vegetables => 'The cornerstone of blood sugar management. These non-starchy powerhouses are high in volume, rich in micronutrients, and have a negligible impact on blood glucose, making them "free foods" for most diabetics.',
+            self::GrainsStarches => 'The trickiest category for glucose control. We distinguish between complex, slow-digesting grains (like quinoa/barley) and refined starches that act like sugar. Portion control here is critical for preventing post-meal spikes.',
+            self::DairyAlternatives => 'A source of protein and calcium, but watch out for lactose (milk sugar). We prioritize full-fat or fermented options like Greek yogurt which have a lower insulin index compared to skim milk.',
+            self::ProteinsLegumes => 'Your best defense against spikes. Protein slows down the absorption of carbohydrates when eaten together. Legumes offer a double benefit: high protein plus "resistant starch" that improves insulin sensitivity.',
+            self::NutsSeeds => 'The ultimate blood sugar stabilizers. Packed with healthy fats and fiber, adding a handful of nuts to a carb-heavy meal can significantly lower the overall glycemic load of that meal.',
+            self::Beverages => 'Hydration without the sugar crash. We analyze everything from coffee and tea to fruit juices, helping you identify "liquid sugar" bombs that bypass digestion and spike glucose instantly.',
+            self::CondimentsSauces => 'Hidden sugars often lurk here. From ketchup to BBQ sauce, we expose the secret carb counts in your favorite toppings so you can add flavor without ruining your daily numbers.',
+            self::SnacksSweets => 'Treats, optimized. You don\'t have to live without dessert, but you do need strategy. We focus on high-fat, low-carb treats that satisfy cravings while keeping you in a safe glucose range.',
+            self::Other => 'Miscellaneous items and ingredients. Always verify the nutritional label, as these specialized products can vary wildly in their glycemic impact.',
+        };
+    }
+
+    /**
      * Get the display order for sorting categories.
      */
     public function order(): int

@@ -1,5 +1,5 @@
-@section('title', 'Food Database - Glycemic Index & Nutrition for Diabetics | Acara Plate')
-@section('meta_description', "Explore our comprehensive diabetic food list and glycemic index database. Find safe foods for your blood sugar, nutrition facts, and detailed insulin spike predictions.")
+@section('title', ($categoryTitle ?? 'Food Database - Glycemic Index & Nutrition for Diabetics') . ' | Acara Plate')
+@section('meta_description', $categoryDescription ?? "Explore our comprehensive diabetic food list and glycemic index database. Find safe foods for your blood sugar, nutrition facts, and detailed insulin spike predictions.")
 @section('meta_keywords', 'food database, glycemic index database, diabetes food list, nutrition facts, diabetic food guide, blood sugar friendly foods, low glycemic foods list')
 @section('canonical_url', $canonicalUrl)
 
@@ -74,13 +74,17 @@
             </a>
         </nav>
 
-        {{-- Hero Section --}}
+{{-- Hero Section --}}
         <div class="mt-6">
             <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-                Diabetic Food Database & Glycemic Index
+                {{ $categoryTitle ?? 'Diabetic Food Database & Glycemic Index' }}
             </h1>
             <p class="text-lg text-slate-600 dark:text-slate-300 mb-8 max-w-3xl">
-                So, what can you actually eat? We’ve built a USDA-verified database containing proper nutrition info and safety checks—so you can instantly spot what triggers a spike without all the guesswork.
+                @if($currentCategory)
+                    {{ $categoryDescription }}
+                @else
+                    So, what can you actually eat? We've built a USDA-verified database containing proper nutrition info and safety checks—so you can instantly spot what triggers a spike without all the guesswork.
+                @endif
             </p>
 
             {{-- ======================= --}}
@@ -298,29 +302,31 @@
             {{-- ======================= --}}
             {{-- POPULAR COMPARISONS --}}
             {{-- ======================= --}}
-            <div class="mt-16 pt-10 border-t border-slate-200 dark:border-slate-700">
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">
-                    Which One Is Actually Better?
-                </h2>
-                <p class="text-slate-600 dark:text-slate-400 mb-6 max-w-2xl">
-                    It's kinda tricky knowing which choice will spike your blood sugar more, isn't it? We've put these comparisons together so you can see which one is actually safer for you.
-                </p>
-                <div class="flex flex-wrap gap-3">
-                    @foreach($comparisons as $comparison)
-                        <a 
-                            href="{{ route('spike-calculator', ['compare' => $comparison['name1'] . ' vs ' . $comparison['name2']]) }}"
-                            class="group px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-emerald-500 dark:hover:border-emerald-500 hover:shadow-md transition-all flex items-center gap-2"
-                        >
-                            <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{ $comparison['name1'] }}</span>
-                            <span class="text-slate-400 text-sm">vs</span>
-                            <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{ $comparison['name2'] }}</span>
-                            <svg class="size-4 text-slate-400 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                        </a>
-                    @endforeach
+            @if($comparisons)
+                <div class="mt-16 pt-10 border-t border-slate-200 dark:border-slate-700">
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">
+                        Which One Is Actually Better?
+                    </h2>
+                    <p class="text-slate-600 dark:text-slate-400 mb-6 max-w-2xl">
+                        It's kinda tricky knowing which choice will spike your blood sugar more, isn't it? We've put these comparisons together so you can see which one is actually safer for you.
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        @foreach($comparisons as $comparison)
+                            <a
+                                href="{{ route('spike-calculator', ['compare' => $comparison['name1'] . ' vs ' . $comparison['name2']]) }}"
+                                class="group px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-emerald-500 dark:hover:border-emerald-500 hover:shadow-md transition-all flex items-center gap-2"
+                            >
+                                <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{ $comparison['name1'] }}</span>
+                                <span class="text-slate-400 text-sm">vs</span>
+                                <span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{ $comparison['name2'] }}</span>
+                                <svg class="size-4 text-slate-400 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </a>
+                        @endforeach
+                    </div>
                 </div>
-            </div>
+            @endif
 
             {{-- ======================= --}}
             {{-- CTA Section --}}
@@ -328,10 +334,14 @@
             <div class="mt-16 bg-linear-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-2xl p-8">
                 <div class="max-w-2xl">
                     <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-                        Curious How This Meal Might Affect You?
+                        {{ $currentCategory ? 'Check Specific ' . \App\Enums\FoodCategory::tryFrom($currentCategory)?->label() . ' for Blood Sugar Impact?' : 'Curious How This Meal Might Affect You?' }}
                     </h2>
                     <p class="text-slate-600 dark:text-slate-300 mb-6">
-                        You should really try our Spike Calculator—it basically guesses how your specific meal and portion size might change your numbers.
+                        @if($currentCategory)
+                            Not sure which foods in the {{ \App\Enums\FoodCategory::tryFrom($currentCategory)?->label() }} category might spike your glucose? Use our AI-powered Spike Calculator to check any food's glycemic impact instantly and discover safer alternatives.
+                        @else
+                            You should really try our Spike Calculator—it basically guesses how your specific meal and portion size might change your numbers.
+                        @endif
                     </p>
                     <a
                         href="{{ route('spike-calculator') }}"
@@ -340,7 +350,7 @@
                         <svg class="size-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
-                        Try the Spike Calculator
+                        {{ $currentCategory ? 'Check ' . \App\Enums\FoodCategory::tryFrom($currentCategory)?->label() . ' Foods' : 'Try the Spike Calculator' }}
                     </a>
                 </div>
             </div>
