@@ -96,7 +96,7 @@ const getFooterNavItems = (t: (key: string) => string): NavItem[] => [
 ];
 
 export function AppSidebar() {
-    const { currentUser } = useSharedProps();
+    const { currentUser, enablePremiumUpgrades } = useSharedProps();
     const { t } = useTranslation('common');
     const mainNavItems = getMainNavItems(t);
     const profileNavItems = getProfileNavItems(t);
@@ -129,7 +129,9 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                {!currentUser?.is_verified && <UpgradeButton />}
+                {!currentUser?.is_verified && enablePremiumUpgrades && (
+                    <UpgradeButton />
+                )}
                 <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>

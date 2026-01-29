@@ -7,6 +7,7 @@ interface SharedProps {
         subscribed: boolean;
     };
     sidebarOpen: boolean;
+    enablePremiumUpgrades: boolean;
 }
 
 export default function useSharedProps() {
@@ -17,5 +18,6 @@ export default function useSharedProps() {
     return {
         currentUser: props.auth.user,
         sidebarOpen: page.props.sidebarOpen as boolean,
+        enablePremiumUpgrades: page.props.enablePremiumUpgrades as boolean,
     };
 }

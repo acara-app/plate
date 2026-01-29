@@ -346,5 +346,72 @@
             </div>
         </div>
     </div>
+    <div class="bg-slate-50 dark:bg-slate-900 py-12 border-t border-slate-200 dark:border-slate-800" aria-labelledby="gi-guide-title">
+        <div class="mx-auto max-w-4xl px-6">
+            <h2 id="gi-guide-title" class="text-2xl font-bold text-slate-900 dark:text-white mb-6">
+                Understanding Glycemic Index (GI) vs. Glycemic Load (GL)
+            </h2>
+            
+            <div class="prose dark:prose-invert text-slate-600 dark:text-slate-400 max-w-none">
+                <p class="mb-6 leading-relaxed">
+                    When managing Type 2 Diabetes, it's crucial to distinguish between <strong>quality</strong> and <strong>quantity</strong>. 
+                    While <strong>Glycemic Index (GI)</strong> measures how quickly a food raises blood sugar, <strong>Glycemic Load (GL)</strong> tells the full story by factoring in portion size.
+                </p>
+
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-3">Glycemic Index (Speed)</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li>
+                                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
+                                <strong>Low (0-55):</strong> Digested slowly. Best for consistency.
+                            </li>
+                            <li>
+                                <span class="inline-block w-2 h-2 rounded-full bg-yellow-500 mr-2"></span>
+                                <strong>Medium (56-69):</strong> Moderate impact.
+                            </li>
+                            <li>
+                                <span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-2"></span>
+                                <strong>High (70+):</strong> Cause rapid spikes.
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-3">Glycemic Load (Impact)</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li>
+                                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
+                                <strong>Low (&lt;10):</strong> Minimal blood sugar impact.
+                            </li>
+                            <li>
+                                <span class="inline-block w-2 h-2 rounded-full bg-yellow-500 mr-2"></span>
+                                <strong>Medium (11-19):</strong> Use portion control.
+                            </li>
+                            <li>
+                                <span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-2"></span>
+                                <strong>High (20+):</strong> Significantly raises glucose.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 mb-6 shadow-xs">
+                    <h4 class="text-base font-bold text-slate-900 dark:text-white mb-2 flex items-center">
+                        <svg class="size-5 text-amber-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Watch Out for "Hidden Spikers"
+                    </h4>
+                    <p class="text-sm mb-0">
+                        Some foods like <strong>Watermelon</strong> have a high GI (~72) but a very low GL (~5 per serving) because they are mostly water. Conversely, <strong>Brown Rice</strong> is healthy but can have a high GL if portions are too large.
+                        For the best results, pair carbs with <strong>fiber, protein, and healthy fats</strong> to blunt the spike.
+                    </p>
+                </div>
+
+                <p class="text-xs text-slate-500 dark:text-slate-500 border-t border-slate-200 dark:border-slate-800 pt-4 mt-8">
+                    Data sources: University of Sydney GI Database and USDA FoodData Central. Consult your healthcare provider before making significant diet changes.
+                </p>
+            </div>
+        </div>
+    </div>
+
     <x-footer />
 </x-mini-app-layout>

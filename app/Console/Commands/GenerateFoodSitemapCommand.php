@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Enums\ContentType;
 use App\Models\Content;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 
@@ -34,19 +35,22 @@ final class GenerateFoodSitemapCommand extends Command
 
         $sitemap = Sitemap::create();
 
-        $sitemap->add(
-            Url::create(route('food.index'))
-                ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
-                ->setPriority(0.8)
-        );
-
         foreach ($foods as $food) {
-            $sitemap->add(
-                Url::create(route('food.show', $food->slug))
-                    ->setLastModificationDate($food->updated_at)
-                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
-                    ->setPriority(0.6)
-            );
+            $url = Url::create(route('food.show', $food->slug))
+                ->setLastModificationDate($food->updated_at)
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
+                ->setPriority(0.6);
+
+            if ($food->image_url) {
+                $url->addImage(
+                    $food->image_url,
+                    '',
+                    '',
+                    $food->title.' Glycemic Index'
+                );
+            }
+
+            $sitemap->add($url);
         }
 
         /** @var string $outputPath */
