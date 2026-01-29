@@ -8,14 +8,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 beforeEach(function (): void {
-    // Clean up any existing sitemap
     if (File::exists(base_path('public/food_sitemap.xml'))) {
         File::delete(base_path('public/food_sitemap.xml'));
     }
 });
 
 afterEach(function (): void {
-    // Clean up
     if (File::exists(base_path('public/food_sitemap.xml'))) {
         File::delete(base_path('public/food_sitemap.xml'));
     }
@@ -59,15 +57,19 @@ it('includes image tags in sitemap when food has image', function (): void {
     Content::factory()->create([
         'slug' => 'apple',
         'title' => 'Apple',
-        'image_path' => 'food-images/apple.png', // Assuming factory/model handles full URL generation
+        'image_path' => 'food-images/apple.png',
         'is_published' => true,
         'type' => App\Enums\ContentType::Food,
     ]);
 
-    // Mock storage if needed, or rely on existing model behavior.
-    // The Content model uses Storage::disk('s3_public')->url($this->image_path).
-    // We might need to mock Storage facade to return a predictable URL.
     Storage::fake('s3_public');
+
+    $imagePath = 'food-images/apple.png';
+    $storageUrl = Storage::disk('s3_public')->url($imagePath);
+    
+    $expectedUrl = Str::startsWith($storageUrl, ['http://', 'https://']) 
+        ? $storageUrl 
+        : url($storageUrl);
 
     $this->artisan('sitemap:generate-food')
         ->assertSuccessful();
@@ -76,6 +78,6 @@ it('includes image tags in sitemap when food has image', function (): void {
 
     expect($content)
         ->toContain('<image:image>')
-        ->toContain('<image:loc>http://plate.test/storage/food-images/apple.png</image:loc>') // Default fake storage URL structure? We'll check.
+        ->toContain("<image:loc>{$expectedUrl}</image:loc>")
         ->toContain('<image:title>Apple Glycemic Index</image:title>');
 });
