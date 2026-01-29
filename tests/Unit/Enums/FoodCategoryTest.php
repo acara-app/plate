@@ -65,3 +65,11 @@ it('returns correct average glycemic index for all categories', function (FoodCa
     'Snacks & Sweets' => [FoodCategory::SnacksSweets, 70],
     'Other' => [FoodCategory::Other, 50],
 ]);
+
+it('returns a non-empty title for all categories', function (FoodCategory $category): void {
+    expect($category->title())->toBeString()->not->toBeEmpty();
+})->with(FoodCategory::cases());
+
+it('returns a non-empty description for all categories', function (FoodCategory $category): void {
+    expect($category->description())->toBeString()->not->toBeEmpty();
+})->with(FoodCategory::cases());

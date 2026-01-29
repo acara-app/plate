@@ -124,6 +124,6 @@ if (! function_exists('enable_premium_upgrades')) {
      */
     function enable_premium_upgrades(): bool
     {
-        return config('plate.enable_premium_upgrades', false);
+        return (bool) config('plate.enable_premium_upgrades', false);
     }
 }
