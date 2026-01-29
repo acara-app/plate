@@ -42,6 +42,7 @@ final class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
                 'subscribed' => $request->user()?->hasActiveSubscription() ?? false,
             ],
+            'enablePremiumUpgrades' => config('plate.enable_premium_upgrades'),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'locale' => $locale,
             'translations' => Inertia::once(fn (): array => $this->getTranslations($locale)),

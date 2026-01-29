@@ -34,7 +34,7 @@ final class ShowMealPlansController
                 'mealPlan' => null,
                 'currentDay' => null,
                 'navigation' => null,
-                'requiresSubscription' => false,
+                'requiresSubscription' => enable_premium_upgrades() && ! $user->is_verified,
             ]);
         }
 
@@ -151,7 +151,7 @@ final class ShowMealPlansController
             'mealPlan' => $formattedMealPlan,
             'currentDay' => $currentDay,
             'navigation' => $navigation,
-            'requiresSubscription' => ! $user->is_verified,
+            'requiresSubscription' => enable_premium_upgrades() && ! $user->is_verified,
         ]);
     }
 

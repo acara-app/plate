@@ -117,3 +117,13 @@ if (! function_exists('toast')) {
         ]);
     }
 }
+
+if (! function_exists('enable_premium_upgrades')) {
+    /**
+     * Check if premium upgrades are enabled.
+     */
+    function enable_premium_upgrades(): bool
+    {
+        return config('plate.enable_premium_upgrades', false);
+    }
+}
