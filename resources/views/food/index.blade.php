@@ -1,7 +1,10 @@
 @section('title', ($categoryTitle ?? 'Food Database - Glycemic Index & Nutrition for Diabetics') . ' | Acara Plate')
-@section('meta_description', $categoryDescription ?? 'Explore our comprehensive diabetic food list and glycemic index
+@section('meta_description',
+    $categoryDescription ??
+    'Explore our comprehensive diabetic food list and glycemic index
     database. Find safe foods for your blood sugar, nutrition facts, and detailed insulin spike predictions.')
-@section('meta_keywords', 'food database, glycemic index database, diabetes food list, nutrition facts, diabetic food
+@section('meta_keywords',
+    'food database, glycemic index database, diabetes food list, nutrition facts, diabetic food
     guide, blood sugar friendly foods, low glycemic foods list')
 @section('canonical_url', $canonicalUrl)
 
@@ -240,12 +243,18 @@
                         $categoryLabel = $categoryEnum?->label() ?? 'Uncategorized';
                     @endphp
                     <div class="mb-12">
-                        <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-3">
+
+                        <h2
+                            class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-3 group-hover:text-primary transition-colors">
                             <span class="w-1.5 h-8 bg-linear-to-b from-primary to-primary/60 rounded-full"></span>
-                            {{ $categoryLabel }}
+                            <a href="{{ route('food.category', ['category' => $categoryValue]) }}"
+                                class="block group">
+                                {{ $categoryLabel }}
+                            </a>
                             <span
                                 class="text-sm font-normal text-slate-400">({{ $categoryCounts[$categoryValue] ?? $categoryFoods->count() }})</span>
                         </h2>
+
                         <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             @foreach ($categoryFoods as $food)
                                 @include('food._card', ['food' => $food])
