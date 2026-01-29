@@ -91,10 +91,10 @@ final readonly class PublicFoodController
             ->sortBy(fn (FoodCategory $cat): int => $cat->order());
 
         // Group by category when no filters applied and on first page
-        // Limit to 16 items per category for performance
+        // Limit to 8 items per category for performance
         $foodsByCategory = null;
         $categoryCounts = null;
-        $itemsPerCategory = 16;
+        $itemsPerCategory = 8;
         if (! $request->hasAny(['search', 'assessment', 'category', 'page'])) {
             $allFoods = Content::food()
                 ->published()
