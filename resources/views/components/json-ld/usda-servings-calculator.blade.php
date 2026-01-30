@@ -102,7 +102,7 @@
         "description": "Daily food group serving recommendations based on calorie intake levels from 1,000 to 3,200 calories.",
         "license": "https://www.usa.gov/government-works",
         "creator": {
-            "@@type": "GovernmentOrganization",
+            "@@type": "Organization",
             "name": "U.S. Department of Agriculture",
             "url": "https://www.usda.gov/"
         }
