@@ -32,7 +32,11 @@ final readonly class SocialiteController
 
             Auth::login($user);
 
-            return to_route('dashboard');
+            if ($user->profile?->onboarding_completed) {
+                return to_route('dashboard');
+            }
+
+            return to_route('onboarding.biometrics.show');
 
         } catch (Throwable) {
 

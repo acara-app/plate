@@ -36,7 +36,14 @@ final readonly class UserController
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // @codeCoverageIgnoreStart
+        // Defensive check: redirect to dashboard if user somehow already completed onboarding
+        if ($user->profile?->onboarding_completed) {
+            return redirect()->intended(route('dashboard', absolute: false));
+        }
+        // @codeCoverageIgnoreEnd
+
+        return to_route('onboarding.biometrics.show');
     }
 
     public function destroy(DeleteUserRequest $request, #[CurrentUser] User $user, DeleteUser $action): RedirectResponse

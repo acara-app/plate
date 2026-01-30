@@ -9,31 +9,6 @@ use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use App\Models\User;
 
-// Questionnaire Tests
-it('renders questionnaire page', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->get(route('onboarding.questionnaire.show'));
-
-    $response->assertOk()
-        ->assertInertia(fn ($page) => $page->component('onboarding/questionnaire'));
-});
-
-it('allows users to view questionnaire even if onboarding already completed', function (): void {
-    $user = User::factory()->create();
-    $user->profile()->create([
-        'onboarding_completed' => true,
-        'onboarding_completed_at' => now(),
-    ]);
-
-    $response = $this->actingAs($user)
-        ->get(route('onboarding.questionnaire.show'));
-
-    $response->assertOk()
-        ->assertInertia(fn ($page) => $page->component('onboarding/questionnaire'));
-});
-
 // Biometrics Tests
 it('renders biometrics page', function (): void {
     $user = User::factory()->create();
@@ -341,11 +316,11 @@ it('renders completion page', function (): void {
         ->assertInertia(fn ($page) => $page->component('onboarding/completion'));
 });
 
-it('redirects to questionnaire if completion page accessed without completing onboarding', function (): void {
+it('redirects to biometrics if completion page accessed without completing onboarding', function (): void {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
         ->get(route('onboarding.completion.show'));
 
-    $response->assertRedirectToRoute('onboarding.questionnaire.show');
+    $response->assertRedirectToRoute('onboarding.biometrics.show');
 });

@@ -220,7 +220,7 @@ export default function DiabetesInsights({
                                             >
                                                 <Link
                                                     href={
-                                                        onboarding.questionnaire.show()
+                                                        onboarding.biometrics.show()
                                                             .url
                                                     }
                                                 >

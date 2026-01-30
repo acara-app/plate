@@ -60,7 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 });
 
 Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(function (): void {
-    Route::get('/', [Web\OnboardingController::class, 'showQuestionnaire'])->name('questionnaire.show');
+    Route::get('/', fn () => to_route('onboarding.biometrics.show'));
 
     Route::get('/biometrics', [Web\OnboardingController::class, 'showBiometrics'])->name('biometrics.show');
     Route::post('/biometrics', [Web\OnboardingController::class, 'storeBiometrics'])->name('biometrics.store');

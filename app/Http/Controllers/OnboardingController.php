@@ -26,11 +26,6 @@ final readonly class OnboardingController
         //
     }
 
-    public function showQuestionnaire(): Response
-    {
-        return Inertia::render('onboarding/questionnaire');
-    }
-
     public function showBiometrics(): Response
     {
         $profile = $this->user->profile;
@@ -107,7 +102,7 @@ final readonly class OnboardingController
         $user = $this->user;
 
         if (! $user->profile?->onboarding_completed) {
-            return to_route('onboarding.questionnaire.show');
+            return to_route('onboarding.biometrics.show');
         }
 
         return Inertia::render('onboarding/completion');
