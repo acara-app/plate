@@ -13,7 +13,7 @@ use Livewire\Component;
 
 new
 #[Layout('layouts.mini-app', [
-    'metaDescription' => 'Calculate your daily food servings based on official USDA 2025-2030 Dietary Guidelines. Adjust for calories (1,000-3,200), view FDA sugar limits, and get diabetic-friendly recommendations.',
+    'metaDescription' => 'Calculate daily food servings with USDA 2025-2030 guidelines. Adjusts for 1,000-3,200 calories, includes FDA sugar limits & diabetic-friendly options.',
     'metaKeywords' => 'USDA dietary guidelines 2030, daily serving calculator, food group servings, calorie intake guide, diabetic meal planning, FDA sugar limits, healthy eating guide',
 ])]
 #[Title('USDA 2025-2030 Daily Serving Calculator | Official Dietary Guidelines')]
