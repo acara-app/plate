@@ -20,7 +20,7 @@ export function OnboardingBanner() {
                     fits you.
                 </p>
                 <Button asChild size="sm">
-                    <Link href={onboarding.questionnaire.show.url()}>
+                    <Link href={onboarding.biometrics.show.url()}>
                         Create My Plan Now
                     </Link>
                 </Button>

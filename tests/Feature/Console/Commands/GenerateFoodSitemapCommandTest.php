@@ -66,9 +66,9 @@ it('includes image tags in sitemap when food has image', function (): void {
 
     $imagePath = 'food-images/apple.png';
     $storageUrl = Storage::disk('s3_public')->url($imagePath);
-    
-    $expectedUrl = Str::startsWith($storageUrl, ['http://', 'https://']) 
-        ? $storageUrl 
+
+    $expectedUrl = Str::startsWith($storageUrl, ['http://', 'https://'])
+        ? $storageUrl
         : url($storageUrl);
 
     $this->artisan('sitemap:generate-food')
