@@ -59,7 +59,7 @@ final class FoodPhotoAnalyzerAgent extends BaseAgent
     public function clientOptions(): array
     {
         return [
-            'timeout' => 60,
+            'timeout' => 90,
         ];
     }
 
