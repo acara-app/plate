@@ -70,7 +70,7 @@ final class SpikePredictorAgent extends BaseAgent
     public function clientOptions(): array
     {
         return [
-            'timeout' => 60,
+            'timeout' => 120,
         ];
     }
 
