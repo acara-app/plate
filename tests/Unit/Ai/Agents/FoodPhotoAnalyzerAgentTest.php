@@ -39,7 +39,7 @@ it('returns system prompt with food analysis instructions', function (): void {
 });
 
 it('returns correct max tokens', function (): void {
-    expect($this->agent->maxTokens())->toBe(2000);
+    expect($this->agent->maxTokens())->toBe(8000);
 });
 
 it('returns client options with timeout', function (): void {

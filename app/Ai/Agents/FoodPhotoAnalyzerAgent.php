@@ -59,7 +59,7 @@ final class FoodPhotoAnalyzerAgent extends BaseAgent
 
     public function maxTokens(): int
     {
-        return 2000;
+        return 8000;
     }
 
     /**
