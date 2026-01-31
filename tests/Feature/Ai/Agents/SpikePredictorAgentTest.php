@@ -30,7 +30,7 @@ it('has proper max tokens', function (): void {
 it('has client options with timeout', function (): void {
     $agent = new SpikePredictorAgent;
 
-    expect($agent->clientOptions())->toBe(['timeout' => 30]);
+    expect($agent->clientOptions())->toBe(['timeout' => 60]);
 });
 
 it('system prompt contains glycemic analysis instructions', function (): void {

@@ -5,11 +5,8 @@ declare(strict_types=1);
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\DataObjects\FoodAnalysisData;
 use Illuminate\Support\Facades\Config;
-use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Facades\Prism;
-use Prism\Prism\Testing\TextResponseFake;
-use Prism\Prism\ValueObjects\Meta;
-use Prism\Prism\ValueObjects\Usage;
+use Prism\Prism\Testing\StructuredResponseFake;
 
 beforeEach(function (): void {
     Config::set('prism.providers.gemini.api_key', 'test-key');
@@ -17,11 +14,17 @@ beforeEach(function (): void {
 });
 
 it('calls the agent with image data and returns analysis result', function (): void {
-    $fakeResponse = TextResponseFake::make()
-        ->withText('{"items": [{"name": "Grilled Chicken", "calories": 165.0, "protein": 31.0, "carbs": 0.0, "fat": 3.6, "portion": "100g"}], "total_calories": 165.0, "total_protein": 31.0, "total_carbs": 0.0, "total_fat": 3.6, "confidence": 85}')
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(100, 200))
-        ->withMeta(new Meta('test-id', 'gemini-3-flash-preview'));
+    $fakeResponse = StructuredResponseFake::make()
+        ->withStructured([
+            'items' => [
+                ['name' => 'Grilled Chicken', 'calories' => 165.0, 'protein' => 31.0, 'carbs' => 0.0, 'fat' => 3.6, 'portion' => '100g'],
+            ],
+            'total_calories' => 165.0,
+            'total_protein' => 31.0,
+            'total_carbs' => 0.0,
+            'total_fat' => 3.6,
+            'confidence' => 85,
+        ]);
 
     Prism::fake([$fakeResponse]);
 
@@ -38,11 +41,18 @@ it('calls the agent with image data and returns analysis result', function (): v
 });
 
 it('handles multiple food items in analysis', function (): void {
-    $fakeResponse = TextResponseFake::make()
-        ->withText('{"items": [{"name": "Rice", "calories": 130.0, "protein": 2.7, "carbs": 28.0, "fat": 0.3, "portion": "100g"}, {"name": "Chicken", "calories": 165.0, "protein": 31.0, "carbs": 0.0, "fat": 3.6, "portion": "100g"}], "total_calories": 295.0, "total_protein": 33.7, "total_carbs": 28.0, "total_fat": 3.9, "confidence": 90}')
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(100, 200))
-        ->withMeta(new Meta('test-id', 'gemini-3-flash-preview'));
+    $fakeResponse = StructuredResponseFake::make()
+        ->withStructured([
+            'items' => [
+                ['name' => 'Rice', 'calories' => 130.0, 'protein' => 2.7, 'carbs' => 28.0, 'fat' => 0.3, 'portion' => '100g'],
+                ['name' => 'Chicken', 'calories' => 165.0, 'protein' => 31.0, 'carbs' => 0.0, 'fat' => 3.6, 'portion' => '100g'],
+            ],
+            'total_calories' => 295.0,
+            'total_protein' => 33.7,
+            'total_carbs' => 28.0,
+            'total_fat' => 3.9,
+            'confidence' => 90,
+        ]);
 
     Prism::fake([$fakeResponse]);
 

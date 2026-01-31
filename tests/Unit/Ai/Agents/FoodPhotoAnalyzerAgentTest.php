@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Config;
 use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Facades\Prism;
-use Prism\Prism\Testing\TextResponseFake;
+use Prism\Prism\Testing\StructuredResponseFake;
 use Prism\Prism\ValueObjects\Meta;
 use Prism\Prism\ValueObjects\Usage;
 
@@ -31,7 +31,6 @@ it('returns system prompt with food analysis instructions', function (): void {
     expect($systemPrompt)
         ->toContain('nutritionist')
         ->toContain('food recognition')
-        ->toContain('valid JSON')
         ->toContain('calories')
         ->toContain('protein')
         ->toContain('carbs')
@@ -51,8 +50,17 @@ it('returns client options with timeout', function (): void {
 });
 
 it('analyzes food photo and returns analysis data', function (): void {
-    $fakeResponse = TextResponseFake::make()
-        ->withText('{"items": [{"name": "Grilled Chicken", "calories": 165.0, "protein": 31.0, "carbs": 0.0, "fat": 3.6, "portion": "100g"}], "total_calories": 165.0, "total_protein": 31.0, "total_carbs": 0.0, "total_fat": 3.6, "confidence": 85}')
+    $fakeResponse = StructuredResponseFake::make()
+        ->withStructured([
+            'items' => [
+                ['name' => 'Grilled Chicken', 'calories' => 165.0, 'protein' => 31.0, 'carbs' => 0.0, 'fat' => 3.6, 'portion' => '100g'],
+            ],
+            'total_calories' => 165.0,
+            'total_protein' => 31.0,
+            'total_carbs' => 0.0,
+            'total_fat' => 3.6,
+            'confidence' => 85,
+        ])
         ->withFinishReason(FinishReason::Stop)
         ->withUsage(new Usage(100, 200))
         ->withMeta(new Meta('test-id', 'gemini-3-flash-preview'));
@@ -72,8 +80,18 @@ it('analyzes food photo and returns analysis data', function (): void {
 });
 
 it('analyzes food photo with multiple items', function (): void {
-    $fakeResponse = TextResponseFake::make()
-        ->withText('{"items": [{"name": "Rice", "calories": 130.0, "protein": 2.7, "carbs": 28.0, "fat": 0.3, "portion": "100g"}, {"name": "Chicken", "calories": 165.0, "protein": 31.0, "carbs": 0.0, "fat": 3.6, "portion": "100g"}], "total_calories": 295.0, "total_protein": 33.7, "total_carbs": 28.0, "total_fat": 3.9, "confidence": 90}')
+    $fakeResponse = StructuredResponseFake::make()
+        ->withStructured([
+            'items' => [
+                ['name' => 'Rice', 'calories' => 130.0, 'protein' => 2.7, 'carbs' => 28.0, 'fat' => 0.3, 'portion' => '100g'],
+                ['name' => 'Chicken', 'calories' => 165.0, 'protein' => 31.0, 'carbs' => 0.0, 'fat' => 3.6, 'portion' => '100g'],
+            ],
+            'total_calories' => 295.0,
+            'total_protein' => 33.7,
+            'total_carbs' => 28.0,
+            'total_fat' => 3.9,
+            'confidence' => 90,
+        ])
         ->withFinishReason(FinishReason::Stop)
         ->withUsage(new Usage(100, 200))
         ->withMeta(new Meta('test-id', 'gemini-3-flash-preview'));
@@ -90,8 +108,15 @@ it('analyzes food photo with multiple items', function (): void {
 });
 
 it('handles empty food detection', function (): void {
-    $fakeResponse = TextResponseFake::make()
-        ->withText('{"items": [], "total_calories": 0, "total_protein": 0, "total_carbs": 0, "total_fat": 0, "confidence": 0}')
+    $fakeResponse = StructuredResponseFake::make()
+        ->withStructured([
+            'items' => [],
+            'total_calories' => 0,
+            'total_protein' => 0,
+            'total_carbs' => 0,
+            'total_fat' => 0,
+            'confidence' => 0,
+        ])
         ->withFinishReason(FinishReason::Stop)
         ->withUsage(new Usage(100, 200))
         ->withMeta(new Meta('test-id', 'gemini-3-flash-preview'));
@@ -106,9 +131,9 @@ it('handles empty food detection', function (): void {
     expect($result->items)->toHaveCount(0);
 });
 
-it('throws exception for invalid json response', function (): void {
-    $fakeResponse = TextResponseFake::make()
-        ->withText('invalid json')
+it('throws exception when structured data is empty', function (): void {
+    $fakeResponse = StructuredResponseFake::make()
+        ->withStructured([])
         ->withFinishReason(FinishReason::Stop)
         ->withUsage(new Usage(100, 200))
         ->withMeta(new Meta('test-id', 'gemini-3-flash-preview'));
@@ -118,4 +143,4 @@ it('throws exception for invalid json response', function (): void {
     $imageBase64 = base64_encode('fake-image-data');
 
     $this->agent->analyze($imageBase64, 'image/jpeg');
-})->throws(InvalidArgumentException::class);
+})->throws(InvalidArgumentException::class, 'AI returned invalid analysis structure');
