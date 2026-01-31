@@ -9,6 +9,7 @@ use Inertia\Inertia;
 Route::get('/', Web\HomeController::class)->name('home');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy');
 Route::view('/terms-of-service', 'terms-of-service')->name('terms');
+Route::view('/about', 'about')->name('about');
 Route::view('/support', 'support')->name('support');
 Route::view('/install-app', 'install-app')->name('install-app');
 

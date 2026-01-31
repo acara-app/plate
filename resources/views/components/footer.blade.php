@@ -65,10 +65,13 @@
                         </ul>
                     </div>
                     <div class="mt-10 md:mt-0">
-                        <h3 class="text-sm font-semibold leading-6 text-slate-900 dark:text-white">Support</h3>
+                                                <h3 class="text-sm font-semibold leading-6 text-slate-900 dark:text-white">Support</h3>
                         <ul role="list" class="mt-6 space-y-4">
                             <li>
-                                <a href="{{ route('support') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">Help Center</a>
+                                <a href="{{ route('support') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">Help & Support</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('about') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">About</a>
                             </li>
                         </ul>
                     </div>
