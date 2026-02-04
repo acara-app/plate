@@ -20,8 +20,6 @@
             <directory>app</directory>
         </include>
         <exclude>
-            <file>app/Console/Commands/ImportUsdaFoodDataCommand.php</file>
-            <file>app/Console/Commands/ImportUsdaSrLegacyFoodDataCommand.php</file>
             <file>app/Console/Commands/UploadDocumentToGeminiFileSearchCommand.php</file>
             <file>app/Console/Commands/CheckGeminiFileSearchStoreCommand.php</file>
         </exclude>
