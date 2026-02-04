@@ -34,4 +34,5 @@ yarn-error.log
 /.zed
 /tmp/
 package-lock.json
+composer.local.json
 /storage/sources/*

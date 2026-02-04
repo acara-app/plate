@@ -22,7 +22,7 @@ return RectorConfig::configure()
         LaravelSetList::LARAVEL_IF_HELPERS,
         LaravelSetList::LARAVEL_LEGACY_FACTORIES_TO_CLASSES,
     ])
-    ->withComposerBased(laravel: true)
+    ->withComposerBased(laravel: true, phpunit: true)
     ->withCache(
         cacheDirectory: '/tmp/rector',
         cacheClass: FileCacheStorage::class,
