@@ -180,16 +180,12 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                         </Button>
 
                                         {/* Exit Link - Centered Below */}
-                                        {currentUser?.has_meal_plan && (
-                                            <Link
-                                                href={dashboard.url()}
-                                                className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
-                                            >
-                                                {t(
-                                                    'onboarding.biometrics.exit',
-                                                )}
-                                            </Link>
-                                        )}
+                                        <Link
+                                            href={dashboard.url()}
+                                            className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                        >
+                                            {t('onboarding.biometrics.exit')}
+                                        </Link>
                                     </div>
                                 </>
                             )}
