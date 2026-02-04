@@ -119,7 +119,8 @@
 
                 <p>
                     <strong>Acara</strong><br>
-                    <em>Personalized Nutrition AI</em><br>
+                    <em>Personalized Nutrition for Better Metabolic Health</em><br>
+                    AI-generated meal plans, glucose tracking, and actionable insights to help manage diabetes, lose weight, or optimize wellness.<br>
                     <a href="mailto:team@acara.app">team@acara.app</a>
                 </p>
             </div>
