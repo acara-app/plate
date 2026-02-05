@@ -60,7 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::delete('diabetes-log/{diabetesLog}', Web\Diabetes\DestroyDiabetesLogController::class)->name('diabetes-log.destroy');
 });
 
-Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(function (): void {
+Route::middleware(['auth', 'verified'])->prefix('onboarding')->name('onboarding.')->group(function (): void {
     Route::get('/', fn () => to_route('onboarding.biometrics.show'));
 
     Route::get('/biometrics', [Web\OnboardingController::class, 'showBiometrics'])->name('biometrics.show');

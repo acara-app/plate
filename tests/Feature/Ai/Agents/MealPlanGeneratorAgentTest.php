@@ -8,7 +8,6 @@ use App\Enums\GoalChoice;
 use App\Enums\MealPlanType;
 use App\Enums\ModelName;
 use App\Enums\Sex;
-use App\Models\UsdaFoundationFood;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Prism\Prism\Enums\FinishReason;
@@ -44,17 +43,6 @@ it('returns client options', function (): void {
 });
 
 it('generates a meal plan using PrismPHP', function (): void {
-    UsdaFoundationFood::factory()->create([
-        'id' => 12345,
-        'description' => 'Greek Yogurt',
-        'nutrients' => [
-            ['nutrient' => ['number' => '208'], 'amount' => 59],
-            ['nutrient' => ['number' => '203'], 'amount' => 10],
-            ['nutrient' => ['number' => '205'], 'amount' => 3.6],
-            ['nutrient' => ['number' => '204'], 'amount' => 0.4],
-        ],
-    ]);
-
     $user = User::factory()->create();
 
     $user->profile()->create([

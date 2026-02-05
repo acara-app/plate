@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 
 import { Button } from '@/components/ui/button';
+import { dashboard } from '@/routes';
 import mealPlans from '@/routes/meal-plans';
 import { useTranslation } from 'react-i18next';
 
@@ -42,6 +43,21 @@ export default function Completion() {
                                     <Button className="w-full" size="lg">
                                         {t(
                                             'onboarding.completion.view_meal_plan',
+                                        )}
+                                    </Button>
+                                </Link>
+
+                                <Link
+                                    href={dashboard.url()}
+                                    className="mt-3 block"
+                                >
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full"
+                                        size="lg"
+                                    >
+                                        {t(
+                                            'onboarding.completion.go_to_dashboard',
                                         )}
                                     </Button>
                                 </Link>

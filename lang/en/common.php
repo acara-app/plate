@@ -202,6 +202,7 @@ return [
             'description' => 'Your personalized nutrition journey starts now. We\'re creating your meal plan right now!',
             'whats_next' => 'What\'s Next?',
             'view_meal_plan' => 'View Your Meal Plan',
+            'go_to_dashboard' => 'Go to Dashboard',
             'meal_plan_ready' => 'Your personalized meal plan will be ready in a few moments',
             'update_preferences' => 'You can always update your preferences and profile information in your settings.',
         ],

@@ -1,5 +1,6 @@
+import { dashboard } from '@/routes';
 import onboarding from '@/routes/onboarding';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
 import InputError from '@/components/input-error';
@@ -250,6 +251,15 @@ export default function Identity({ profile }: Props) {
                                         )}
                                         {t('onboarding.identity.submit')}
                                     </Button>
+
+                                    <div className="flex justify-center">
+                                        <Link
+                                            href={dashboard.url()}
+                                            className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                        >
+                                            {t('onboarding.biometrics.exit')}
+                                        </Link>
+                                    </div>
                                 </>
                             )}
                         </Form>
