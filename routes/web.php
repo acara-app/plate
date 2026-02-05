@@ -51,6 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::patch('grocery-items/{groceryItem}/toggle', [Web\GroceryListController::class, 'toggleItem'])->name('grocery-items.toggle');
 
     Route::get('chat/create', [Web\ChatController::class, 'create'])->name('chat.create');
+    Route::post('chat/stream', [Web\ChatController::class, 'stream'])->name('chat.stream');
 
     Route::get('diabetes-log', Web\Diabetes\ListDiabetesLogController::class)->name('diabetes-log.index');
     Route::get('diabetes-log/tracking', Web\Diabetes\DashboardDiabetesLogController::class)->name('diabetes-log.dashboard');
@@ -61,7 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 });
 
 Route::middleware(['auth', 'verified'])->prefix('onboarding')->name('onboarding.')->group(function (): void {
-    Route::get('/', fn () => to_route('onboarding.biometrics.show'));
+    Route::get('/', fn() => to_route('onboarding.biometrics.show'));
 
     Route::get('/biometrics', [Web\OnboardingController::class, 'showBiometrics'])->name('biometrics.show');
     Route::post('/biometrics', [Web\OnboardingController::class, 'storeBiometrics'])->name('biometrics.store');
@@ -70,7 +71,6 @@ Route::middleware(['auth', 'verified'])->prefix('onboarding')->name('onboarding.
     Route::post('/identity', [Web\OnboardingController::class, 'storeIdentity'])->name('identity.store');
 
     Route::get('/completion', [Web\OnboardingController::class, 'showCompletion'])->name('completion.show');
-
 });
 
 Route::middleware('auth')->group(function (): void {
@@ -106,7 +106,7 @@ Route::middleware('auth')->group(function (): void {
         ->name('password.update');
 
     // Appearance...
-    Route::get('settings/appearance', fn () => Inertia::render('appearance/update'))->name('appearance.edit');
+    Route::get('settings/appearance', fn() => Inertia::render('appearance/update'))->name('appearance.edit');
 
     // User Two-Factor Authentication...
     Route::get('settings/two-factor', [Web\UserTwoFactorAuthenticationController::class, 'show'])
