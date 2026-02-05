@@ -20,7 +20,6 @@ use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Messages\Message;
 use Laravel\Ai\Promptable;
-use Stringable;
 
 final class NutritionAdvisor implements Agent, Conversational, HasTools
 {
@@ -44,7 +43,7 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
         return $this;
     }
 
-    public function instructions(): Stringable|string
+    public function instructions(): string
     {
         $profileData = $this->profileContext->handle($this->user);
 

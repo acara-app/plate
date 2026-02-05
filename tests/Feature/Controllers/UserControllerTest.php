@@ -26,7 +26,7 @@ it('may register a new user', function (): void {
             'password_confirmation' => 'password1234',
         ]);
 
-    $response->assertRedirectToRoute('onboarding.biometrics.show');
+    $response->assertRedirectToRoute('chat.create');
 
     $user = User::query()->where('email', 'test@example.com')->first();
 

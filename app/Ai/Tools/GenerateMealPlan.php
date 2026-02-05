@@ -11,18 +11,17 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
-use Stringable;
 
-final class GenerateMealPlan implements Tool
+final readonly class GenerateMealPlan implements Tool
 {
     public function __construct(
-        private readonly MealPlanGeneratorAgent $mealPlanGenerator,
+        private MealPlanGeneratorAgent $mealPlanGenerator,
     ) {}
 
     /**
      * Get the description of the tool's purpose.
      */
-    public function description(): Stringable|string
+    public function description(): string
     {
         return 'Generate a complete multi-day meal plan tailored to the user\'s profile, dietary preferences, health conditions, and goals. This creates a structured meal plan that can be saved and followed. Use this when the user explicitly asks for a meal plan or when in "Generate Meal Plan" mode.';
     }
@@ -30,7 +29,7 @@ final class GenerateMealPlan implements Tool
     /**
      * Execute the tool.
      */
-    public function handle(Request $request): Stringable|string
+    public function handle(Request $request): string
     {
         $user = Auth::user();
 

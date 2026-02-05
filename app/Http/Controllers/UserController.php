@@ -43,7 +43,7 @@ final readonly class UserController
         }
         // @codeCoverageIgnoreEnd
 
-        return to_route('onboarding.biometrics.show');
+        return to_route('chat.create');
     }
 
     public function destroy(DeleteUserRequest $request, #[CurrentUser] User $user, DeleteUser $action): RedirectResponse

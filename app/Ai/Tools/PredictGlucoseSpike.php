@@ -9,18 +9,17 @@ use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
-use Stringable;
 
-final class PredictGlucoseSpike implements Tool
+final readonly class PredictGlucoseSpike implements Tool
 {
     public function __construct(
-        private readonly SpikePredictorAgent $spikePredictor,
+        private SpikePredictorAgent $spikePredictor,
     ) {}
 
     /**
      * Get the description of the tool's purpose.
      */
-    public function description(): Stringable|string
+    public function description(): string
     {
         return 'Predict the blood glucose spike impact of a specific food or meal. Returns estimated glucose increase, risk level, and personalized recommendations to minimize spikes. Use this when users ask about specific foods, restaurant meals, or want to understand glucose impact.';
     }
@@ -28,7 +27,7 @@ final class PredictGlucoseSpike implements Tool
     /**
      * Execute the tool.
      */
-    public function handle(Request $request): Stringable|string
+    public function handle(Request $request): string
     {
         $food = $request['food'] ?? '';
         $context = $request['context'] ?? null;
@@ -84,9 +83,9 @@ final class PredictGlucoseSpike implements Tool
     {
         // Rough estimation: GL 0-10 = +10-30 mg/dL, GL 11-20 = +30-60 mg/dL, GL 20+ = +60-100+ mg/dL
         return match (true) {
-            $glycemicLoad <= 10 => rand(10, 30),
-            $glycemicLoad <= 20 => rand(30, 60),
-            default => rand(60, 100),
+            $glycemicLoad <= 10 => random_int(10, 30),
+            $glycemicLoad <= 20 => random_int(30, 60),
+            default => random_int(60, 100),
         };
     }
 

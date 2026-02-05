@@ -94,7 +94,7 @@ final readonly class OnboardingController
             ]);
         }
 
-        return to_route('meal-plans.create');
+        return to_route('chat.create');
     }
 
     public function showCompletion(): Response|RedirectResponse

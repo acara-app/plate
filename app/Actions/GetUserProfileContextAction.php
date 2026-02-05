@@ -95,7 +95,7 @@ final readonly class GetUserProfileContextAction
             'dosage' => $med->dosage,
             'frequency' => $med->frequency,
             'purpose' => $med->purpose,
-        ])->toArray();
+        ])->all();
     }
 
     /**
@@ -181,21 +181,21 @@ final readonly class GetUserProfileContextAction
         // Dietary Preferences
         $prefs = $context['dietary_preferences'];
         if ($prefs !== []) {
-            $prefStrings = array_map(fn ($p): string => $p['name'].($p['severity'] ? " ({$p['severity']})" : '').($p['notes'] ? ": {$p['notes']}" : ''), $prefs);
+            $prefStrings = array_map(fn (array $p): string => $p['name'].($p['severity'] ? " ({$p['severity']})" : '').($p['notes'] ? ": {$p['notes']}" : ''), $prefs);
             $parts[] = 'DIETARY PREFERENCES/RESTRICTIONS: '.implode(', ', $prefStrings);
         }
 
         // Health Conditions
         $conditions = $context['health_conditions'];
         if ($conditions !== []) {
-            $conditionStrings = array_map(fn ($c): string => $c['name'].($c['notes'] ? " ({$c['notes']})" : ''), $conditions);
+            $conditionStrings = array_map(fn (array $c): string => $c['name'].($c['notes'] ? " ({$c['notes']})" : ''), $conditions);
             $parts[] = 'HEALTH CONDITIONS: '.implode(', ', $conditionStrings);
         }
 
         // Medications
         $medications = $context['medications'];
         if ($medications !== []) {
-            $medStrings = array_map(fn ($m): string => "{$m['name']}".($m['dosage'] ? " {$m['dosage']}" : '').($m['frequency'] ? " ({$m['frequency']})" : ''), $medications);
+            $medStrings = array_map(fn (array $m): string => "{$m['name']}".($m['dosage'] ? " {$m['dosage']}" : '').($m['frequency'] ? " ({$m['frequency']})" : ''), $medications);
             $parts[] = 'MEDICATIONS: '.implode(', ', $medStrings);
         }
 

@@ -10,18 +10,17 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
-use Stringable;
 
-final class GetUserProfile implements Tool
+final readonly class GetUserProfile implements Tool
 {
     public function __construct(
-        private readonly GetUserProfileContextAction $profileContext,
+        private GetUserProfileContextAction $profileContext,
     ) {}
 
     /**
      * Get the description of the tool's purpose.
      */
-    public function description(): Stringable|string
+    public function description(): string
     {
         return 'Retrieve the current user\'s profile information including biometrics, dietary preferences, health conditions, medications, and goals. Use this when you need specific user data to provide personalized advice.';
     }
@@ -29,7 +28,7 @@ final class GetUserProfile implements Tool
     /**
      * Execute the tool.
      */
-    public function handle(Request $request): Stringable|string
+    public function handle(Request $request): string
     {
         $user = Auth::user();
 

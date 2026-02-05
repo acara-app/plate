@@ -34,7 +34,7 @@ final class ChatController
     public function stream(
         StoreAgentConversationRequest $request
     ): StreamableAgentResponse {
-        $agent = app(NutritionAdvisor::class, ['user' => $request->user()])
+        $agent = resolve(NutritionAdvisor::class, ['user' => $request->user()])
             ->withMode($request->mode())
             ->forUser($request->user());
 

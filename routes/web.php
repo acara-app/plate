@@ -36,7 +36,6 @@ Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])-
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', [Web\DashboardController::class, 'show'])->name('dashboard');
 
-    Route::get('meal-plans/create', Web\CreateMealPlanController::class)->name('meal-plans.create');
     Route::post('meal-plans', Web\StoreMealPlanController::class)->name('meal-plans.store');
     Route::get('meal-plans', Web\ShowMealPlansController::class)->name('meal-plans.index');
     Route::get('meal-plans/{mealPlan}/print', Web\PrintMealPlanController::class)->name('meal-plans.print');

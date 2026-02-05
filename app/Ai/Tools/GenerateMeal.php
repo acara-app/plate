@@ -6,26 +6,23 @@ namespace App\Ai\Tools;
 
 use App\Actions\GetUserProfileContextAction;
 use App\Ai\BaseAgent;
-use App\Ai\MealPlanPromptBuilder;
 use App\Models\User;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
-use Stringable;
 
-final class GenerateMeal implements Tool
+final readonly class GenerateMeal implements Tool
 {
     public function __construct(
-        private readonly MealPlanPromptBuilder $promptBuilder,
-        private readonly GetUserProfileContextAction $profileContext,
+        private GetUserProfileContextAction $profileContext,
     ) {}
 
     /**
      * Get the description of the tool's purpose.
      */
-    public function description(): Stringable|string
+    public function description(): string
     {
         return 'Generate a personalized meal suggestion based on user preferences, dietary restrictions, and nutritional goals. Returns a complete meal with nutritional information.';
     }
@@ -33,7 +30,7 @@ final class GenerateMeal implements Tool
     /**
      * Execute the tool.
      */
-    public function handle(Request $request): Stringable|string
+    public function handle(Request $request): string
     {
         $user = Auth::user();
 
@@ -52,7 +49,6 @@ final class GenerateMeal implements Tool
         $profileContext = $this->profileContext->handle($user);
 
         $prompt = $this->buildMealPrompt(
-            $user,
             $mealType,
             $cuisine,
             $maxCalories,
@@ -98,7 +94,6 @@ final class GenerateMeal implements Tool
      * Build the prompt for meal generation.
      */
     private function buildMealPrompt(
-        User $user,
         string $mealType,
         ?string $cuisine,
         ?int $maxCalories,
@@ -161,9 +156,8 @@ final class GenerateMeal implements Tool
         $response = $this->getAIResponse($prompt);
 
         $jsonText = $this->extractJson($response);
-        $data = json_decode($jsonText, true, 512, JSON_THROW_ON_ERROR);
 
-        return $data;
+        return json_decode($jsonText, true, 512, JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -195,10 +189,10 @@ final class GenerateMeal implements Tool
 
         if (str_starts_with($response, '```json')) {
             $response = preg_replace('/^```json\s*/', '', $response);
-            $response = preg_replace('/\s*```$/', '', $response);
+            $response = preg_replace('/\s*```$/', '', (string) $response);
         } elseif (str_starts_with($response, '```')) {
             $response = preg_replace('/^```\s*/', '', $response);
-            $response = preg_replace('/\s*```$/', '', $response);
+            $response = preg_replace('/\s*```$/', '', (string) $response);
         }
 
         return mb_trim($response);

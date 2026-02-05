@@ -10,7 +10,7 @@ use App\Models\UserMedication;
 use App\Models\UserProfile;
 
 beforeEach(function (): void {
-    $this->action = app(GetUserProfileContextAction::class);
+    $this->action = resolve(GetUserProfileContextAction::class);
 });
 
 it('returns profile not completed for user without profile', function (): void {
