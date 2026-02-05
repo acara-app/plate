@@ -45,6 +45,8 @@ final readonly class PublicFoodController
             'diabeticInsight' => $content->diabetic_insight,
             'glycemicAssessment' => $content->glycemic_assessment,
             'glycemicLoad' => $content->glycemic_load,
+            'glycemicIndex' => $content->glycemic_index,
+            'glycemicLoadNumeric' => $content->glycemic_load_numeric,
             'comparisonLinks' => $comparisonLinks,
             'relatedFoods' => $relatedFoods,
         ]);

@@ -175,3 +175,91 @@ it('returns Uncategorized when no category', function (): void {
 
     expect($content->category_label)->toBe('Uncategorized');
 });
+
+it('returns stored glycemic index from body', function (): void {
+    $content = Content::factory()->create([
+        'slug' => Str::uuid()->toString(),
+        'body' => ['glycemic_index' => 45],
+    ]);
+
+    expect($content->glycemic_index)->toBe(45);
+});
+
+it('returns category average glycemic index when no stored value', function (): void {
+    // Fruits category has average GI of 40
+    $content = Content::factory()->create([
+        'slug' => Str::uuid()->toString(),
+        'category' => FoodCategory::Fruits,
+        'body' => [],
+    ]);
+
+    expect($content->glycemic_index)->toBe(40);
+});
+
+it('returns default glycemic index of 50 when no category', function (): void {
+    $content = Content::factory()->create([
+        'slug' => Str::uuid()->toString(),
+        'category' => null,
+        'body' => [],
+    ]);
+
+    expect($content->glycemic_index)->toBe(50);
+});
+
+it('returns stored numeric glycemic load from body', function (): void {
+    $content = Content::factory()->create([
+        'slug' => Str::uuid()->toString(),
+        'body' => ['glycemic_load_numeric' => 12.5],
+    ]);
+
+    expect($content->glycemic_load_numeric)->toBe(12.5);
+});
+
+it('calculates numeric glycemic load from nutrition and gi', function (): void {
+    // Category: Fruits (GI ~40)
+    // Carbs: 50g, Fiber: 10g -> Net Carbs: 40g
+    // GL = (40 * 40) / 100 = 16 -> rounded to 16.0
+    $content = Content::factory()->create([
+        'slug' => Str::uuid()->toString(),
+        'category' => FoodCategory::Fruits,
+        'body' => [
+            'nutrition' => [
+                'carbs' => 50,
+                'fiber' => 10,
+            ],
+        ],
+    ]);
+
+    expect($content->glycemic_load_numeric)->toBe(16.0);
+});
+
+it('calculates glycemic load classification from numeric value', function (): void {
+    // Low GL: <= 10
+    $lowGlContent = Content::factory()->create([
+        'slug' => Str::uuid()->toString(),
+        'category' => FoodCategory::Vegetables, // Low GI category
+        'body' => [
+            'nutrition' => [
+                'carbs' => 10,
+                'fiber' => 5,
+            ],
+        ],
+    ]);
+
+    expect($lowGlContent->glycemic_load)->toBe('low');
+
+    // Medium GL: 11-19
+    $mediumGlContent = Content::factory()->create([
+        'slug' => Str::uuid()->toString(),
+        'category' => FoodCategory::GrainsStarches, // High GI category (65)
+        'body' => [
+            'nutrition' => [
+                'carbs' => 25,
+                'fiber' => 0,
+            ],
+        ],
+    ]);
+
+    // GL = (65 * 25) / 100 = 16.25 -> Medium
+    expect($mediumGlContent->glycemic_load)->toBe('medium');
+});
