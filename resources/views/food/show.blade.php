@@ -120,51 +120,64 @@
 
 <x-mini-app-layout>
     <div class="mx-auto my-16 max-w-4xl px-6 lg:px-8">
-        {{-- Visual Breadcrumb Navigation --}}
-        <nav aria-label="Breadcrumb" class="mb-6">
-            <ol class="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400">
-                <li>
-                    <a href="{{ url('/') }}" class="hover:text-primary transition-colors" wire:navigate>Home</a>
-                </li>
-                <li>
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </li>
-                <li>
-                    <a href="{{ route('food.index') }}" class="hover:text-primary transition-colors" wire:navigate>Food Database</a>
-                </li>
-                @if($content->category)
-                <li>
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </li>
-                <li>
-                    <a href="{{ route('food.category', $content->category->value) }}" class="hover:text-primary transition-colors" wire:navigate>
-                        {{ $content->category->label() }}
-                    </a>
-                </li>
-                @endif
-                <li>
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </li>
-                <li aria-current="page" class="font-medium text-slate-900 dark:text-white truncate max-w-[200px]">
-                    {{ $displayName }}
-                </li>
-            </ol>
-        </nav>
-
         <a
             href="{{ url()->previous() === request()->url() ? route('food.index') : url()->previous() }}"
-            class="-mt-2 mb-12 flex items-center dark:text-slate-400 text-slate-600 hover:underline z-50 relative"
+            class="mb-3 flex items-center dark:text-slate-400 text-slate-600 hover:underline"
             wire:navigate
         >
             <x-icons.chevron-left class="size-4" />
             <span>Back</span>
         </a>
+
+        <nav aria-label="Breadcrumb" class="mb-8">
+            <ol class="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400">
+                {{-- Home Icon - Always visible --}}
+                <li>
+                    <a href="{{ url('/') }}" class="hover:text-primary transition-colors" wire:navigate aria-label="Home">
+                        <x-icons.home class="size-4" />
+                    </a>
+                </li>
+                <li>
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </li>
+                
+                {{-- Ellipsis for mobile - Hidden on sm+ --}}
+                <li class="sm:hidden">
+                    <span class="text-slate-400">...</span>
+                </li>
+                
+                {{-- Food Database - Hidden on mobile, visible on sm+ --}}
+                <li class="hidden sm:block">
+                    <a href="{{ route('food.index') }}" class="hover:text-primary transition-colors" wire:navigate>Food Database</a>
+                </li>
+                @if($content->category)
+                <li class="hidden sm:block">
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </li>
+                <li class="hidden sm:block">
+                    <a href="{{ route('food.category', $content->category->value) }}" class="hover:text-primary transition-colors" wire:navigate>
+                        {{ $content->category->label() }}
+                    </a>
+                </li>
+                @endif
+                
+                {{-- Chevron before current item - Hidden on mobile when showing ellipsis --}}
+                <li class="hidden sm:block">
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </li>
+                
+                {{-- Current Food Name - Always visible --}}
+                <li aria-current="page" class="font-medium text-slate-900 dark:text-white truncate max-w-[150px] sm:max-w-[200px]">
+                    {{ $displayName }}
+                </li>
+            </ol>
+        </nav>
 
         <article class="mt-6">
             {{-- Hero Section with Image --}}
