@@ -38,9 +38,10 @@ export default function CreateChat() {
         chatMode: ChatMode,
         aiModel: AIModel,
     ) {
-        if (!message.trim()) return;
+        if (!message.trim()) {
+            return;
+        }
 
-        // Generate conversationId for new conversations
         const id = conversationId ?? generateUUID();
         if (!conversationId) {
             setConversationId(id);
@@ -60,7 +61,6 @@ export default function CreateChat() {
             <Head title="Chat" />
             <div className="flex h-full flex-1 flex-col items-center justify-center p-8">
                 <div className="flex w-full max-w-4xl flex-col items-center gap-8">
-                    <ChatMessages messages={messages} status={status} />
                     <ChatInput
                         className="w-full"
                         onSubmit={handleSubmit}
@@ -71,6 +71,7 @@ export default function CreateChat() {
                             Error: {error.message}
                         </div>
                     )}
+                    <ChatMessages messages={messages} status={status} />
                 </div>
             </div>
         </AppLayout>
