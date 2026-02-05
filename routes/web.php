@@ -50,7 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('meal-plans/{mealPlan}/grocery-list/print', Web\PrintGroceryListController::class)->name('meal-plans.grocery-list.print');
     Route::patch('grocery-items/{groceryItem}/toggle', [Web\GroceryListController::class, 'toggleItem'])->name('grocery-items.toggle');
 
-    Route::get('chat/create', [Web\ChatController::class, 'create'])->name('chat.create');
+    Route::get('chat/create/{conversationId?}', [Web\ChatController::class, 'create'])->name('chat.create');
     Route::post('chat/stream', [Web\ChatController::class, 'stream'])->name('chat.stream');
 
     Route::get('diabetes-log', Web\Diabetes\ListDiabetesLogController::class)->name('diabetes-log.index');

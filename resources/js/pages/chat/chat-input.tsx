@@ -37,13 +37,13 @@ export type ChatMode = keyof typeof CHAT_MODES;
 interface Props {
     onSubmit: (message: string, mode: ChatMode, model: AIModel) => void;
     className?: string;
-    isLoading?: boolean;
+    disabled?: boolean;
 }
 
 export default function ChatInput({
     className,
     onSubmit,
-    isLoading = false,
+    disabled = false,
 }: Props) {
     const [message, setMessage] = useState('');
     const [selectedMode, setSelectedMode] = useState<ChatMode>('ask');
@@ -80,7 +80,7 @@ export default function ChatInput({
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Ask anything"
-                    disabled={isLoading}
+                    disabled={disabled}
                     className="min-h-[60px] w-full resize-none bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
                     rows={2}
                 />
@@ -161,7 +161,7 @@ export default function ChatInput({
                         size="icon"
                         className="size-8 text-muted-foreground hover:text-foreground"
                         onClick={handleSubmit}
-                        disabled={!message.trim() || isLoading}
+                        disabled={!message.trim() || disabled}
                     >
                         <Send className="size-4" />
                     </Button>
