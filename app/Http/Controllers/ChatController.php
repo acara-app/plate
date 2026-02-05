@@ -12,9 +12,10 @@ use Laravel\Ai\Responses\StreamableAgentResponse;
 
 final class ChatController
 {
-    public function create(?string $conversationId): \Inertia\Response
-    {
-        $conversation = Conversation::query()->find($conversationId);
+    public function create(
+        ?string $conversationId = null
+    ): \Inertia\Response {
+        $conversation = $conversationId ? Conversation::query()->findSole($conversationId) : null;
 
         $messages = $conversation?->messages->map(fn ($message): array => [
             'id' => $message->id,
@@ -33,8 +34,11 @@ final class ChatController
     public function stream(
         StoreAgentConversationRequest $request
     ): StreamableAgentResponse {
-        return new NutritionAdvisor(user: $request->user())
-            ->forUser($request->user())
+        $agent = app(NutritionAdvisor::class, ['user' => $request->user()])
+            ->withMode($request->mode())
+            ->forUser($request->user());
+
+        return $agent
             ->stream($request->userMessage())
             ->usingVercelDataProtocol();
     }
