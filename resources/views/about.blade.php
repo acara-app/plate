@@ -20,7 +20,7 @@
                     Acara Plate creates customized meal plans based on unique biometrics, dietary preferences, and health goals. Whether managing diabetes, working toward weight loss, or optimizing metabolic health, the platform simplifies meal planning with tailored recipes, nutritional insights, and glucose tracking capabilities.
                 </p>
                 <p>
-                    What makes Acara Plate different? A focus on evidence-based nutrition combined with smart technology. Based on USDA-verified food data and personalized algorithms, meal plans are generated to align with specific needs—including dietary restrictions, health conditions, and lifestyle factors. Every recommendation is designed to fit seamlessly into daily routines while supporting the long-term wellness journey.
+                    What makes Acara Plate different? A focus on evidence-based nutrition combined with agentic intelligence. Powered by high-fidelity nutritional data and personalized algorithms, meal plans are generated to align with specific needs—including dietary restrictions, health conditions, and lifestyle factors. Every recommendation is designed to fit seamlessly into daily routines while supporting the long-term wellness journey.
                 </p>
 
                 <h2>How It Works</h2>
@@ -31,20 +31,20 @@
                     AI processes this information to generate personalized meal plans complete with macro-balanced recipes, portion guidance, and automated grocery lists. Track progress through an integrated diabetes logbook, monitor glucose trends, and receive actionable insights to improve time-in-range.
                 </p>
 
-                <h2>Integrated Health Strategy</h2>
+                <h2>Roadmap: Towards a Fully Agentic System</h2>
                 <p>
-                    Health should be personal, flexible, and evidence-based. By considering a complete health profile, dietary preferences, and lifestyle, the system creates meal plans that are both enjoyable and effective.
+                    Health should be personal, flexible, and evidence-based. We are moving beyond simple tracking toward a proactive, autonomous system that adapts to your life in real-time.
                 </p>
 
-                <h3>Nutrition & Diet Personalization</h3>
+                <h3>Personalization & Agentic Intelligence</h3>
                 <p>
-                    Whether following a specific dietary pattern or managing multiple restrictions, the platform adapts to users—not the other way around. A wide range of dietary preferences are supported: vegan, vegetarian, ketogenic, paleo, Mediterranean, gluten-free, dairy-free, low-FODMAP, and allergen-conscious eating.
+                    The journey toward a fully agentic system starts with deep personalization. Instead of static meal plans, Acara Plate is evolving into a proactive health partner that understands unique biometrics, real-time responses, and long-term goals. 
                 </p>
                 <p>
-                    Every meal plan automatically excludes foods that are disliked or restricted, while meeting caloric and macronutrient targets. For those managing diabetes, meals with appropriate glycemic impact and carbohydrate distribution are prioritized throughout the day.
+                    Today, the platform already supports a wide range of dietary patterns—from ketogenic and vegan to low-FODMAP and allergen-conscious eating. We are building the intelligence required to not just react to recorded data, but to anticipate needs and provide autonomous guidance.
                 </p>
                 <p>
-                    Recommendations are grounded in USDA FoodData Central, providing accurate nutritional information for thousands of ingredients. One-size-fits-all diets don’t work—the platform learns from feedback and preferences to continuously improve recommendations that fit any lifestyle, cultural food preferences, and health goals.
+                    Our recommendations are grounded in high-fidelity nutritional data and evidence-based insights. By moving beyond "one-size-fits-all" models, the system learns from every interaction, continuously refining its understanding of metabolic health to help users achieve optimal wellness through an increasingly autonomous and intelligent interface.
                 </p>
 
                 <h3>The Complete Agentic System</h3>
