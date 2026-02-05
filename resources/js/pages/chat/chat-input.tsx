@@ -71,10 +71,10 @@ export default function ChatInput({
     const SelectedModeIcon = CHAT_MODES[selectedMode].icon;
 
     return (
-        <div className="relative mx-auto flex w-full max-w-3xl items-end bg-background px-4 py-4">
+        <div className="mx-auto flex w-full max-w-3xl items-end bg-background px-4 py-4">
             <div
                 className={cn(
-                    'w-full max-w-4xl rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900',
+                    'w-full rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900',
                     className,
                 )}
             >

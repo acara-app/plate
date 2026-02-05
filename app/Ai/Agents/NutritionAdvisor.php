@@ -20,17 +20,13 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
 
     public function __construct(public User $user) {}
 
-    /**
-     * Get the instructions that the agent should follow.
-     */
+
     public function instructions(): Stringable|string
     {
         return 'You are a nutrition advisor.';
     }
 
-    /**
-     * Get the list of messages comprising the conversation so far.
-     */
+
     public function messages(): iterable
     {
         return History::query()->where('user_id', $this->user->id)
@@ -38,11 +34,10 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
             ->limit(50)
             ->get()
             ->reverse()
-            ->map(fn ($message): Message => new Message($message->role, $message->content))->all();
+            ->map(fn($message): Message => new Message($message->role, $message->content))->all();
     }
 
     /**
-     * Get the tools available to the agent.
      *
      * @return Tool[]
      */

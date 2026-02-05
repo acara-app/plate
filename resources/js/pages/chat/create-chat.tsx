@@ -44,7 +44,7 @@ export default function CreateChat() {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
-    }, [messages, status]);
+    }, [messages]);
 
     function handleSubmit(
         message: string,
@@ -74,8 +74,7 @@ export default function CreateChat() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Chat" />
-            <main className="flex min-h-0 flex-1 flex-col">
-                {/* Scrollable messages area */}
+            <main className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden">
                 <div className="flex-1 overflow-y-auto scroll-smooth">
                     <div className="mx-auto w-full max-w-3xl px-4 py-6">
                         <ChatMessages
@@ -88,12 +87,14 @@ export default function CreateChat() {
                     </div>
                 </div>
 
-                <ChatInput
-                    className="w-full"
-                    onSubmit={handleSubmit}
-                    disabled={isStreaming || isSubmitting}
-                    isLoading={isStreaming || isSubmitting}
-                />
+                <div className="shrink-0 bg-background">
+                    <ChatInput
+                        className="w-full"
+                        onSubmit={handleSubmit}
+                        disabled={isStreaming || isSubmitting}
+                        isLoading={isStreaming || isSubmitting}
+                    />
+                </div>
             </main>
         </AppLayout>
     );

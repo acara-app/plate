@@ -16,7 +16,7 @@ final class ChatController
     {
         $conversation = Conversation::query()->find($conversationId);
 
-        $messages = $conversation?->messages->map(fn ($message) => [
+        $messages = $conversation?->messages->map(fn ($message): array => [
             'id' => $message->id,
             'role' => $message->role->value,
             'parts' => [
@@ -33,7 +33,7 @@ final class ChatController
     public function stream(
         StoreAgentConversationRequest $request
     ): StreamableAgentResponse {
-        return (new NutritionAdvisor(user: $request->user()))
+        return new NutritionAdvisor(user: $request->user())
             ->forUser($request->user())
             ->stream($request->userMessage())
             ->usingVercelDataProtocol();

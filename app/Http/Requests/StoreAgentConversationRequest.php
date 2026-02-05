@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Enums\AgenMode;
@@ -7,7 +9,7 @@ use App\Enums\ModelName;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreAgentConversationRequest extends FormRequest
+final class StoreAgentConversationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -15,18 +17,6 @@ class StoreAgentConversationRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
-    }
-
-    /**
-     * Prepare the data for validation.
-     * Merge query parameters into the request data.
-     */
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'mode' => $this->query('mode'),
-            'model' => $this->query('model'),
-        ]);
     }
 
     /**
@@ -93,5 +83,17 @@ class StoreAgentConversationRequest extends FormRequest
             'mode.required' => 'Mode is required',
             'model.required' => 'Model is required',
         ];
+    }
+
+    /**
+     * Prepare the data for validation.
+     * Merge query parameters into the request data.
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'mode' => $this->query('mode'),
+            'model' => $this->query('model'),
+        ]);
     }
 }
