@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm';
 interface ChatMessagesProps {
     messages: UIMessage[];
     status: ChatStatus;
+    isSubmitting?: boolean;
 }
 
 export function ChatErrorBanner({ error }: { error?: Error }) {
@@ -118,12 +119,26 @@ function UserBubble({ message }: { message: UIMessage }) {
 }
 
 function AssistantBubble({ message }: { message: UIMessage }) {
+    const renderableParts = message.parts?.filter((part) => {
+        if (part.type === 'text' || part.type === 'reasoning') {
+            return part.text && part.text.trim().length > 0;
+        }
+        if (part.type === 'source-url' || part.type === 'file') {
+            return true;
+        }
+        return false;
+    });
+
+    if (!renderableParts || renderableParts.length === 0) {
+        return null;
+    }
+
     return (
         <div className="flex gap-3">
             <MessageAvatar role="assistant" />
             <div className="max-w-[80%] rounded-2xl rounded-bl-md bg-muted px-4 py-3 text-foreground shadow-sm">
                 <div className="space-y-2 text-sm">
-                    {message.parts?.map((part, index) => (
+                    {renderableParts.map((part, index) => (
                         <MessagePart key={index} part={part} />
                     ))}
                 </div>
@@ -140,29 +155,57 @@ function MessageBubble({ message }: { message: UIMessage }) {
     );
 }
 
-function StreamingIndicator() {
+function ThinkingIndicator() {
     return (
-        <div className="flex gap-3">
+        <div className="flex gap-3 duration-300 animate-in fade-in slide-in-from-bottom-2">
             <MessageAvatar role="assistant" />
-            <div className="flex items-center gap-1 rounded-2xl bg-muted px-4 py-3">
-                <span className="size-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
-                <span className="size-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
-                <span className="size-2 animate-bounce rounded-full bg-muted-foreground" />
+            <div className="flex items-center gap-2 rounded-2xl bg-muted px-4 py-3">
+                <div className="flex items-center gap-1">
+                    <span className="size-2 animate-pulse rounded-full bg-emerald-500" />
+                    <span className="size-2 animate-pulse rounded-full bg-emerald-500 [animation-delay:150ms]" />
+                    <span className="size-2 animate-pulse rounded-full bg-emerald-500 [animation-delay:300ms]" />
+                </div>
+                <span className="text-sm text-muted-foreground">
+                    Thinking...
+                </span>
             </div>
         </div>
     );
 }
 
-export default function ChatMessages({ messages, status }: ChatMessagesProps) {
+function StreamingIndicator() {
+    return (
+        <div className="flex gap-3 duration-300 animate-in fade-in slide-in-from-bottom-2">
+            <MessageAvatar role="assistant" />
+            <div className="flex items-center gap-2 rounded-2xl bg-muted px-4 py-3">
+                <div className="flex items-center gap-1">
+                    <span className="size-2 animate-bounce rounded-full bg-emerald-500 [animation-delay:-0.3s]" />
+                    <span className="size-2 animate-bounce rounded-full bg-emerald-500 [animation-delay:-0.15s]" />
+                    <span className="size-2 animate-bounce rounded-full bg-emerald-500" />
+                </div>
+                <span className="text-sm text-muted-foreground">
+                    Generating response...
+                </span>
+            </div>
+        </div>
+    );
+}
+
+export default function ChatMessages({
+    messages,
+    status,
+    isSubmitting,
+}: ChatMessagesProps) {
     if (messages.length === 0) {
         return <EmptyState />;
     }
 
     return (
-        <div className="flex w-full flex-1 flex-col gap-4 overflow-y-auto">
+        <div className="flex w-full flex-1 flex-col gap-4">
             {messages.map((message) => (
                 <MessageBubble key={message.id} message={message} />
             ))}
+            {isSubmitting && <ThinkingIndicator />}
             {status === 'streaming' && <StreamingIndicator />}
         </div>
     );

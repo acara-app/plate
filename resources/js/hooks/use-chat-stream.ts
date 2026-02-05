@@ -9,6 +9,7 @@ interface UseChatStreamOptions {
     conversationId?: string;
     mode: ChatMode;
     model: AIModel;
+    initialMessages: UIMessage[];
 }
 
 interface UseChatStreamReturn {
@@ -18,12 +19,14 @@ interface UseChatStreamReturn {
     error: Error | undefined;
     isStreaming: boolean;
     isSubmitting: boolean;
+    initialMessages: UIMessage[];
 }
 
 export function useChatStream({
     conversationId,
     mode,
     model,
+    initialMessages,
 }: UseChatStreamOptions): UseChatStreamReturn {
     const transport = useMemo(
         () =>
@@ -36,6 +39,7 @@ export function useChatStream({
     );
 
     const { messages, sendMessage, status, error } = useChat({
+        messages: initialMessages,
         transport,
     });
 
@@ -43,6 +47,7 @@ export function useChatStream({
     const isSubmitting = status === 'submitted';
 
     return {
+        initialMessages,
         messages,
         sendMessage,
         status: status as ChatStatus,

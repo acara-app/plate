@@ -41,16 +41,10 @@ final class Conversation extends Model
 
     protected $guarded = [];
 
-    /**
-     * The data type of the primary key ID.
-     *
-     * @var string
-     */
-    protected $keyType = 'string';
-
     public function casts(): array
     {
         return [
+            'id' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

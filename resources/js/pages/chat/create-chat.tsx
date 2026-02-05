@@ -3,9 +3,9 @@ import AppLayout from '@/layouts/app-layout';
 import { generateUUID } from '@/lib/utils';
 import chat from '@/routes/chat';
 import type { BreadcrumbItem } from '@/types';
-import type { ChatPageProps } from '@/types/chat';
+import type { ChatPageProps, UIMessage } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ChatInput, { type AIModel, type ChatMode } from './chat-input';
 import ChatMessages, { ChatErrorBanner } from './chate-messages';
 
@@ -17,8 +17,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function CreateChat() {
-    const { conversationId: initialConversationId } =
-        usePage<ChatPageProps>().props;
+    const {
+        conversationId: initialConversationId,
+        messages: messageHistories,
+    } = usePage<ChatPageProps>().props;
 
     const [conversationId, setConversationId] = useState<string | undefined>(
         initialConversationId,
@@ -26,12 +28,23 @@ export default function CreateChat() {
     const [mode, setMode] = useState<ChatMode>('ask');
     const [model, setModel] = useState<AIModel>('gemini-3-flash-preview');
 
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const initialMessages = (messageHistories ?? []) as UIMessage[];
+
     const { messages, sendMessage, status, error, isStreaming, isSubmitting } =
         useChatStream({
             conversationId,
             mode,
             model,
+            initialMessages,
         });
+
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages, status]);
 
     function handleSubmit(
         message: string,
@@ -56,20 +69,32 @@ export default function CreateChat() {
         sendMessage({ text: message });
     }
 
+    const showThinkingIndicator = isSubmitting && messages.length > 0;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Chat" />
-            <div className="flex h-full flex-1 flex-col items-center justify-center p-8">
-                <div className="flex w-full max-w-4xl flex-col items-center gap-8">
-                    <ChatMessages messages={messages} status={status} />
-                    <ChatErrorBanner error={error} />
-                    <ChatInput
-                        className="w-full"
-                        onSubmit={handleSubmit}
-                        disabled={isStreaming || isSubmitting}
-                    />
+            <main className="flex min-h-0 flex-1 flex-col">
+                {/* Scrollable messages area */}
+                <div className="flex-1 overflow-y-auto scroll-smooth">
+                    <div className="mx-auto w-full max-w-3xl px-4 py-6">
+                        <ChatMessages
+                            messages={messages}
+                            status={status}
+                            isSubmitting={showThinkingIndicator}
+                        />
+                        <ChatErrorBanner error={error} />
+                        <div ref={messagesEndRef} />
+                    </div>
                 </div>
-            </div>
+
+                <ChatInput
+                    className="w-full"
+                    onSubmit={handleSubmit}
+                    disabled={isStreaming || isSubmitting}
+                    isLoading={isStreaming || isSubmitting}
+                />
+            </main>
         </AppLayout>
     );
 }
