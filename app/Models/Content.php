@@ -24,6 +24,15 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string|null $image_path
  * @property-read array<string, mixed>|null $seo_metadata
  * @property-read bool $is_published
+ * @property-read string $display_name
+ * @property-read string|null $diabetic_insight
+ * @property-read array<string, float|int|null> $nutrition
+ * @property-read string|null $glycemic_assessment
+ * @property-read int $glycemic_index
+ * @property-read string $glycemic_load
+ * @property-read float $glycemic_load_numeric
+ * @property-read string $category_label
+ * @property-read array<int, array{slug: string, anchor: string}> $manual_links
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  */
@@ -136,6 +145,26 @@ final class Content extends Model
         return $assessment;
     }
 
+    /**
+     * Get the estimated glycemic index (GI) value.
+     * Returns the category average GI since exact GI is not always available.
+     */
+    protected function getGlycemicIndexAttribute(): int
+    {
+        /** @var int|null $storedGi */
+        $storedGi = $this->body['glycemic_index'] ?? null;
+
+        if ($storedGi !== null) {
+            return $storedGi;
+        }
+
+        // Use category-average GI, or default to 50 if no category
+        return $this->category?->averageGlycemicIndex() ?? 50;
+    }
+
+    /**
+     * Get the glycemic load classification (low/medium/high).
+     */
     protected function getGlycemicLoadAttribute(): string
     {
         /** @var string|null $load */
@@ -145,25 +174,39 @@ final class Content extends Model
             return $load;
         }
 
-        // Calculate GL on-the-fly if not stored in database
-        // Formula: GL = (GI * Net Carbs) / 100
+        $numericGl = $this->glycemic_load_numeric;
+
+        // Classify: Low (0-10), Medium (11-19), High (20+)
+        return match (true) {
+            $numericGl <= 10 => 'low',
+            $numericGl <= 19 => 'medium',
+            default => 'high',
+        };
+    }
+
+    /**
+     * Get the numeric glycemic load value.
+     * Formula: GL = (GI * Net Carbs) / 100
+     */
+    protected function getGlycemicLoadNumericAttribute(): float
+    {
+        /** @var float|null $storedGl */
+        $storedGl = $this->body['glycemic_load_numeric'] ?? null;
+
+        if ($storedGl !== null) {
+            return $storedGl;
+        }
+
+        // Calculate GL on-the-fly
         // Net Carbs = Total Carbs - Fiber
         $nutrition = $this->nutrition;
         $carbs = (float) ($nutrition['carbs'] ?? 0);
         $fiber = (float) ($nutrition['fiber'] ?? 0);
         $netCarbs = max(0, $carbs - $fiber);
 
-        // Use category-average GI, or default to 50 if no category
-        $gi = $this->category?->averageGlycemicIndex() ?? 50;
+        $gi = $this->glycemic_index;
 
-        $calculatedGL = ($gi * $netCarbs) / 100;
-
-        // Classify: Low (0-10), Medium (11-19), High (20+)
-        return match (true) {
-            $calculatedGL <= 10 => 'low',
-            $calculatedGL <= 19 => 'medium',
-            default => 'high',
-        };
+        return round(($gi * $netCarbs) / 100, 1);
     }
 
     /**

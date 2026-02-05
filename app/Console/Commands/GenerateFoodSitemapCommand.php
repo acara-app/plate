@@ -38,7 +38,7 @@ final class GenerateFoodSitemapCommand extends Command
             $url = Url::create(route('food.show', $food->slug))
                 ->setLastModificationDate($food->updated_at)
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
-                ->setPriority(0.6);
+                ->setPriority(0.7);
 
             if ($food->image_url) {
                 $url->addImage(

@@ -59,7 +59,21 @@
     "proteinContent": "{{ $nutrition['protein'] ?? 0 }} g",
     "fatContent": "{{ $nutrition['fat'] ?? 0 }} g",
     "fiberContent": "{{ $nutrition['fiber'] ?? 0 }} g",
-    "sugarContent": "{{ $nutrition['sugar'] ?? 0 }} g"
+    "sugarContent": "{{ $nutrition['sugar'] ?? 0 }} g",
+    "additionalProperty": [
+        {
+            "@@type": "PropertyValue",
+            "name": "Glycemic Index (GI)",
+            "value": "{{ $glycemicIndex }}",
+            "unitCode": "C62"
+        },
+        {
+            "@@type": "PropertyValue",
+            "name": "Glycemic Load (GL)",
+            "value": "{{ $glycemicLoadNumeric }}",
+            "unitCode": "C62"
+        }
+    ]
 }
 </script>
 <script type="application/ld+json">
@@ -80,7 +94,7 @@
             "name": "What is the glycemic impact of {{ $displayName }}?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "{{ $displayName }} has a {{ $glycemicAssessment }} glycemic impact{{ $glycemicLoad ? ' with a ' . $glycemicLoad . ' glycemic load (GL)' : '' }}. Per 100g, it contains {{ $nutrition['carbs'] ?? 0 }}g of carbohydrates and {{ $nutrition['sugar'] ?? 0 }}g of sugar, with {{ $nutrition['fiber'] ?? 0 }}g of fiber to help moderate blood sugar response."
+                "text": "{{ $displayName }} has a {{ $glycemicAssessment }} glycemic impact with an estimated Glycemic Index (GI) of {{ $glycemicIndex }}. Per 100g, it contains {{ $nutrition['carbs'] ?? 0 }}g of carbohydrates and {{ $nutrition['sugar'] ?? 0 }}g of sugar, with {{ $nutrition['fiber'] ?? 0 }}g of fiber to help moderate blood sugar response."
             }
         },
         {
@@ -88,7 +102,7 @@
             "name": "What is the glycemic load of {{ $displayName }}?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "{{ $displayName }} has a {{ $glycemicLoad }} glycemic load (GL). Per 100g serving, it contains {{ $nutrition['carbs'] ?? 0 }}g of carbohydrates with {{ $nutrition['fiber'] ?? 0 }}g of fiber, resulting in {{ number_format(($nutrition['carbs'] ?? 0) - ($nutrition['fiber'] ?? 0), 1) }}g of net carbs. Glycemic Load accounts for both the quality (GI) and quantity of carbohydrates, making it a more accurate predictor of blood sugar response than GI alone. Low GL is 0-10, Medium is 11-19, and High is 20+."
+                "text": "{{ $displayName }} has a {{ $glycemicLoad }} glycemic load (GL) with a value of {{ $glycemicLoadNumeric }}. Per 100g serving, it contains {{ $nutrition['carbs'] ?? 0 }}g of carbohydrates with {{ $nutrition['fiber'] ?? 0 }}g of fiber, resulting in {{ number_format(($nutrition['carbs'] ?? 0) - ($nutrition['fiber'] ?? 0), 1) }}g of net carbs. Glycemic Load accounts for both the quality (GI) and quantity of carbohydrates, making it a more accurate predictor of blood sugar response than GI alone. Low GL is 0-10, Medium is 11-19, and High is 20+."
             }
         },
         {
@@ -108,12 +122,62 @@
     <div class="mx-auto my-16 max-w-4xl px-6 lg:px-8">
         <a
             href="{{ url()->previous() === request()->url() ? route('food.index') : url()->previous() }}"
-            class="-mt-10 mb-12 flex items-center dark:text-slate-400 text-slate-600 hover:underline z-50 relative"
+            class="mb-3 flex items-center dark:text-slate-400 text-slate-600 hover:underline"
             wire:navigate
         >
             <x-icons.chevron-left class="size-4" />
             <span>Back</span>
         </a>
+
+        <nav aria-label="Breadcrumb" class="mb-8">
+            <ol class="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400">
+                {{-- Home Icon - Always visible --}}
+                <li>
+                    <a href="{{ url('/') }}" class="hover:text-primary transition-colors" wire:navigate aria-label="Home">
+                        <x-icons.home class="size-4" />
+                    </a>
+                </li>
+                <li>
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </li>
+                
+                {{-- Ellipsis for mobile - Hidden on sm+ --}}
+                <li class="sm:hidden">
+                    <span class="text-slate-400">...</span>
+                </li>
+                
+                {{-- Food Database - Hidden on mobile, visible on sm+ --}}
+                <li class="hidden sm:block">
+                    <a href="{{ route('food.index') }}" class="hover:text-primary transition-colors" wire:navigate>Food Database</a>
+                </li>
+                @if($content->category)
+                <li class="hidden sm:block">
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </li>
+                <li class="hidden sm:block">
+                    <a href="{{ route('food.category', $content->category->value) }}" class="hover:text-primary transition-colors" wire:navigate>
+                        {{ $content->category->label() }}
+                    </a>
+                </li>
+                @endif
+                
+                {{-- Chevron before current item - Hidden on mobile when showing ellipsis --}}
+                <li class="hidden sm:block">
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </li>
+                
+                {{-- Current Food Name - Always visible --}}
+                <li aria-current="page" class="font-medium text-slate-900 dark:text-white truncate max-w-[150px] sm:max-w-[200px]">
+                    {{ $displayName }}
+                </li>
+            </ol>
+        </nav>
 
         <article class="mt-6">
             {{-- Hero Section with Image --}}
@@ -169,6 +233,69 @@
                     {{ ucfirst($glycemicLoad) }} GL
                 </span>
                 @endif
+            </div>
+
+            {{-- Glycemic Index & Load Numeric Values --}}
+            <div class="mb-8 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                    Glycemic Values (per 100g serving)
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {{-- Glycemic Index --}}
+                    <div class="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-slate-600 dark:text-slate-400">Glycemic Index (GI)</span>
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium {{ $badgeColors[$glycemicAssessment] ?? $badgeColors['medium'] }}">
+                                {{ ucfirst($glycemicAssessment) }}
+                            </span>
+                        </div>
+                        <div class="flex items-baseline">
+                            <span class="text-3xl font-bold text-slate-900 dark:text-white">{{ $glycemicIndex }}</span>
+                            <span class="ml-2 text-sm text-slate-500 dark:text-slate-400">/ 100</span>
+                        </div>
+                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                            @if($glycemicAssessment === 'low')
+                                Low GI (0-55): Digests slowly, minimal blood sugar impact
+                            @elseif($glycemicAssessment === 'medium')
+                                Medium GI (56-69): Moderate digestion speed
+                            @else
+                                High GI (70+): Rapid digestion, spikes blood sugar
+                            @endif
+                        </p>
+                    </div>
+
+                    {{-- Glycemic Load --}}
+                    <div class="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-slate-600 dark:text-slate-400">Glycemic Load (GL)</span>
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium {{ $glBadgeColors[$glycemicLoad] ?? $glBadgeColors['medium'] }}">
+                                {{ ucfirst($glycemicLoad) }}
+                            </span>
+                        </div>
+                        <div class="flex items-baseline">
+                            <span class="text-3xl font-bold text-slate-900 dark:text-white">{{ $glycemicLoadNumeric }}</span>
+                            <span class="ml-2 text-sm text-slate-500 dark:text-slate-400">/ 100g</span>
+                        </div>
+                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                            @if($glycemicLoad === 'low')
+                                Low GL (0-10): Minimal glucose impact per serving
+                            @elseif($glycemicLoad === 'medium')
+                                Medium GL (11-19): Moderate glucose impact
+                            @else
+                                High GL (20+): Significant glucose impact
+                            @endif
+                        </p>
+                    </div>
+                </div>
+                <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">
+                    <svg class="inline size-4 mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    GI measures carb quality (how fast sugar enters blood). GL measures carb impact (quality × quantity).
+                    @if($glycemicLoad === 'low' && $glycemicAssessment === 'high')
+                        This is a "hidden spiker" — high GI but low GL due to small carb amount per serving.
+                    @endif
+                </p>
             </div>
 
             {{-- Diabetic Insight --}}
