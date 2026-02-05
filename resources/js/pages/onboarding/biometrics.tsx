@@ -15,7 +15,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import useSharedProps from '@/hooks/use-shared-props';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
@@ -25,7 +24,6 @@ interface Props {
 
 export default function Biometrics({ profile, sexOptions }: Props) {
     const { t } = useTranslation('common');
-    const { currentUser } = useSharedProps();
     return (
         <>
             <Head title={t('onboarding.biometrics.title')} />
