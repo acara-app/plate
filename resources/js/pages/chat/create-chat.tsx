@@ -7,7 +7,7 @@ import type { ChatPageProps } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import ChatInput, { type AIModel, type ChatMode } from './chat-input';
-import ChatMessages from './chate-messages';
+import ChatMessages, { ChatErrorBanner } from './chate-messages';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -61,17 +61,13 @@ export default function CreateChat() {
             <Head title="Chat" />
             <div className="flex h-full flex-1 flex-col items-center justify-center p-8">
                 <div className="flex w-full max-w-4xl flex-col items-center gap-8">
+                    <ChatMessages messages={messages} status={status} />
+                    <ChatErrorBanner error={error} />
                     <ChatInput
                         className="w-full"
                         onSubmit={handleSubmit}
                         disabled={isStreaming || isSubmitting}
                     />
-                    {error && (
-                        <div className="text-sm text-red-500">
-                            Error: {error.message}
-                        </div>
-                    )}
-                    <ChatMessages messages={messages} status={status} />
                 </div>
             </div>
         </AppLayout>

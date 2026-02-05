@@ -1,13 +1,32 @@
 import { cn } from '@/lib/utils';
 import type { ChatStatus } from '@/types/chat';
 import { type UIMessage } from '@ai-sdk/react';
-import { Bot, User } from 'lucide-react';
+import { AlertCircle, Bot, User } from 'lucide-react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 interface ChatMessagesProps {
     messages: UIMessage[];
     status: ChatStatus;
+}
+
+export function ChatErrorBanner({ error }: { error?: Error }) {
+    if (!error) {
+        return null;
+    }
+    return (
+        <div className="flex w-full items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-950/50">
+            <AlertCircle className="mt-0.5 size-5 shrink-0 text-red-600 dark:text-red-400" />
+            <div className="flex-1 space-y-1">
+                <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                    Something went wrong
+                </p>
+                <p className="text-sm text-red-700 dark:text-red-300">
+                    {error.message}
+                </p>
+            </div>
+        </div>
+    );
 }
 
 function EmptyState() {
