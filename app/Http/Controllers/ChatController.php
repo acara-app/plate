@@ -13,9 +13,9 @@ use Laravel\Ai\Responses\StreamableAgentResponse;
 final class ChatController
 {
     public function create(
-        ?string $conversationId = null
+        string $conversationId = ''
     ): \Inertia\Response {
-        $conversation = $conversationId ? Conversation::query()->findSole($conversationId) : null;
+        $conversation = $conversationId !== '' ? Conversation::query()->find($conversationId) : null;
 
         $messages = $conversation?->messages->map(fn ($message): array => [
             'id' => $message->id,
