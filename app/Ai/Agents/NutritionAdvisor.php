@@ -174,7 +174,7 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
         return [
             'generate_meal: Use when the user wants a specific meal suggestion (breakfast, lunch, dinner, snack)',
             'get_user_profile: Use when you need to query specific user data not provided in the context',
-            'generate_meal_plan: Use when the user wants a complete multi-day meal plan or when in "Generate Meal Plan" mode',
+            'generate_meal_plan: Use when the user wants a complete multi-day meal plan or when in "Generate Meal Plan" mode. After using this tool, show the user the redirect_url from the result so they can navigate to their meal plans.',
             'Always use tools rather than attempting to generate complex meal data manually',
             'After using a tool, incorporate the results naturally into your response',
         ];

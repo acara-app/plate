@@ -41,7 +41,7 @@ final class GenerateMealPlan implements Tool
             ]);
         }
 
-        $totalDays = $request['total_days'] ?? 7;
+        $totalDays = min($request['total_days'] ?? 1, 7);
         $customPrompt = $request['custom_prompt'] ?? null;
 
         try {
@@ -50,9 +50,10 @@ final class GenerateMealPlan implements Tool
 
             return json_encode([
                 'success' => true,
-                'message' => "Meal plan generation started for {$totalDays} days. The meal plan will be available shortly in your meal plans section.",
+                'message' => "I've started generating your {$totalDays}-day meal plan! You can view it in your [Meal Plans](/meal-plans) section once it's ready.",
                 'total_days' => $totalDays,
                 'custom_prompt' => $customPrompt,
+                'redirect_url' => '/meal-plans',
             ]);
         } catch (Exception $e) {
             return json_encode([
@@ -69,7 +70,7 @@ final class GenerateMealPlan implements Tool
     {
         return [
             'total_days' => $schema->integer()
-                ->description('Number of days for the meal plan (default: 7, max: 14)')
+                ->description('Number of days for the meal plan (default: 1, max: 7)')
                 ->required(),
             'custom_prompt' => $schema->string()
                 ->description('Optional custom instructions or preferences for the meal plan (e.g., "focus on Mediterranean diet", "high protein for muscle building")'),
