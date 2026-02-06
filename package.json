@@ -27,7 +27,7 @@
         "vite-plugin-pwa": "^1.2.0"
     },
     "dependencies": {
-        "@ai-sdk/react": "^3.0.74",
+        "@ai-sdk/react": "^3.0.75",
         "@headlessui/react": "^2.2.9",
         "@inertiajs/react": "^2.3.13",
         "@radix-ui/react-alert-dialog": "^1.1.15",
