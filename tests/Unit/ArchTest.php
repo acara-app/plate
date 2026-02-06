@@ -15,6 +15,7 @@ arch('strict rules')
         'App\Models',
         'App\Console\Commands',
         'App\Ai',
+        'App\Http\Requests',
     ]);
 
 arch('controllers')

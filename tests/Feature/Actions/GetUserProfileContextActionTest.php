@@ -95,6 +95,7 @@ it('includes medications in context', function (): void {
         'name' => 'Metformin',
         'dosage' => '500mg',
         'frequency' => 'twice daily',
+        'purpose' => 'Blood sugar control',
     ]);
 
     $result = $this->action->handle($user);
@@ -106,7 +107,7 @@ it('includes medications in context', function (): void {
             'name' => 'Metformin',
             'dosage' => '500mg',
             'frequency' => 'twice daily',
-            'purpose' => 'Heart health',
+            'purpose' => 'Blood sugar control',
         ]);
 });
 
