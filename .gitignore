@@ -36,3 +36,4 @@ yarn-error.log
 package-lock.json
 composer.local.json
 /storage/sources/*
+boost.json

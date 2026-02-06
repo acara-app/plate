@@ -1,28 +1,101 @@
+import { useChatStream } from '@/hooks/use-chat-stream';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { generateUUID } from '@/lib/utils';
+import chat from '@/routes/chat';
+import type { BreadcrumbItem } from '@/types';
+import type { ChatPageProps, UIMessage } from '@/types/chat';
+import { Head, router, usePage } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
+import ChatInput, { type AIModel, type ChatMode } from './chat-input';
+import ChatMessages, { ChatErrorBanner } from './chate-messages';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Chat',
-        href: '/chat/create',
+        href: chat.create().url,
     },
 ];
 
 export default function CreateChat() {
+    const {
+        conversationId: initialConversationId,
+        messages: messageHistories,
+    } = usePage<ChatPageProps>().props;
+
+    const [conversationId, setConversationId] = useState<string | undefined>(
+        initialConversationId,
+    );
+    const [mode, setMode] = useState<ChatMode>('ask');
+    const [model, setModel] = useState<AIModel>('gemini-3-flash-preview');
+
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const initialMessages = (messageHistories ?? []) as UIMessage[];
+
+    const { messages, sendMessage, status, error, isStreaming, isSubmitting } =
+        useChatStream({
+            conversationId,
+            mode,
+            model,
+            initialMessages,
+        });
+
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages]);
+
+    function handleSubmit(
+        message: string,
+        chatMode: ChatMode,
+        aiModel: AIModel,
+    ) {
+        if (!message.trim()) {
+            return;
+        }
+
+        const id = conversationId ?? generateUUID();
+        if (!conversationId) {
+            setConversationId(id);
+            router.visit(chat.create(id).url, {
+                replace: true,
+                preserveState: true,
+            });
+        }
+
+        setMode(chatMode);
+        setModel(aiModel);
+        sendMessage({ text: message });
+    }
+
+    const showThinkingIndicator = isSubmitting && messages.length > 0;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Chat" />
-            <div className="flex h-full flex-1 flex-col items-center justify-center rounded-xl border border-sidebar-border/70 p-8 dark:border-sidebar-border">
-                <div className="text-center">
-                    <h1 className="text-4xl font-bold tracking-tight text-foreground">
-                        Coming Soon
-                    </h1>
-                    <p className="mt-4 text-lg text-muted-foreground">
-                        Chat feature is currently under development
-                    </p>
+            <main className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden">
+                <div className="flex-1 overflow-y-auto scroll-smooth">
+                    <div className="mx-auto w-full max-w-3xl px-4 py-6">
+                        <ChatMessages
+                            messages={messages}
+                            status={status}
+                            isSubmitting={showThinkingIndicator}
+                        />
+                        <ChatErrorBanner error={error} />
+                        <div ref={messagesEndRef} />
+                    </div>
                 </div>
-            </div>
+
+                <div className="shrink-0 bg-background">
+                    <ChatInput
+                        className="w-full"
+                        onSubmit={handleSubmit}
+                        disabled={isStreaming || isSubmitting}
+                        isLoading={isStreaming || isSubmitting}
+                    />
+                </div>
+            </main>
         </AppLayout>
     );
 }

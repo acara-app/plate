@@ -33,7 +33,7 @@ it('creates new user from Google OAuth callback with mocked provider', function 
 
     $response = get(route('auth.google.callback'));
 
-    $response->assertRedirectToRoute('onboarding.biometrics.show');
+    $response->assertRedirectToRoute('chat.create');
 
     assertDatabaseHas('users', [
         'google_id' => 'google123',
@@ -64,7 +64,7 @@ it('marks email as verified when creating user from Google OAuth', function (): 
     expect($user->email_verified_at)->not->toBeNull();
 })->group('oauth');
 
-it('links Google account to existing user by email and redirects to dashboard if onboarding completed', function (): void {
+it('links Google account to existing user by email and redirects to chat', function (): void {
     $existingUser = User::factory()->create([
         'email' => 'existing@example.com',
         'google_id' => null,
@@ -88,7 +88,7 @@ it('links Google account to existing user by email and redirects to dashboard if
 
     $response = get(route('auth.google.callback'));
 
-    $response->assertRedirect(route('dashboard'));
+    $response->assertRedirectToRoute('chat.create');
 
     $existingUser->refresh();
     expect($existingUser->google_id)->toBe('google456');
@@ -96,7 +96,7 @@ it('links Google account to existing user by email and redirects to dashboard if
     expect(Auth::id())->toBe($existingUser->id);
 })->group('oauth');
 
-it('updates existing Google user information on login and redirects to dashboard if onboarding completed', function (): void {
+it('updates existing Google user information on login and redirects to chat', function (): void {
     $existingUser = User::factory()->create([
         'google_id' => 'google789',
         'email' => 'oldmail@example.com',
@@ -121,7 +121,7 @@ it('updates existing Google user information on login and redirects to dashboard
 
     $response = get(route('auth.google.callback'));
 
-    $response->assertRedirect(route('dashboard'));
+    $response->assertRedirectToRoute('chat.create');
 
     $existingUser->refresh();
     expect($existingUser->email)->toBe('newmail@example.com');
@@ -144,7 +144,7 @@ it('handles missing name from Google gracefully for new users', function (): voi
 
     $response = get(route('auth.google.callback'));
 
-    $response->assertRedirectToRoute('onboarding.biometrics.show');
+    $response->assertRedirectToRoute('chat.create');
 
     assertDatabaseHas('users', [
         'google_id' => 'google999',
@@ -210,7 +210,7 @@ it('handles duplicate Google ID gracefully', function (): void {
 
     $response = get(route('auth.google.callback'));
 
-    $response->assertRedirectToRoute('onboarding.biometrics.show');
+    $response->assertRedirectToRoute('chat.create');
 
     // Should update the existing user with the Google ID
     $user = User::query()->where('google_id', 'google_duplicate')->first();

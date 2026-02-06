@@ -32,11 +32,7 @@ final readonly class SocialiteController
 
             Auth::login($user);
 
-            if ($user->profile?->onboarding_completed) {
-                return to_route('dashboard');
-            }
-
-            return to_route('onboarding.biometrics.show');
+            return to_route('chat.create');
 
         } catch (Throwable) {
 
