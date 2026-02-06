@@ -211,7 +211,7 @@
                             from a restaurant or just some brand you like.
                         </p>
                     </div>
-                    <a href="{{ route('chat.create') }}"
+                    <a href="{{ route('ai-nutritionist') }}"
                         class="inline-flex items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-teal-200 dark:border-teal-800 px-4 py-2 text-sm font-semibold text-teal-700 dark:text-teal-300 transition-all hover:bg-teal-50 dark:hover:bg-teal-900/30">
                         <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

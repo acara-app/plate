@@ -421,14 +421,14 @@
                             Wondering how {{ $displayName }} fits into your meal plan? Or what to pair it with for stable glucose? Our AI nutritionist has answers.
                         </p>
                         <div class="flex flex-wrap gap-2">
-                            <a href="{{ route('chat.create') }}?question=How does {{ urlencode($displayName) }} fit into my meal plan?" 
+                            <a href="{{ route('ai-nutritionist') }}?question=How does {{ urlencode($displayName) }} fit into my meal plan?" 
                                 class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:bg-rose-700">
                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 Ask about {{ $displayName }}
                             </a>
-                            <a href="{{ route('chat.create') }}" 
+                            <a href="{{ route('ai-nutritionist') }}" 
                                 class="inline-flex items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-rose-200 dark:border-rose-800 px-4 py-2 text-sm font-semibold text-rose-700 dark:text-rose-300 transition-all hover:bg-rose-50 dark:hover:bg-rose-900/30">
                                 Ask anything else
                             </a>
