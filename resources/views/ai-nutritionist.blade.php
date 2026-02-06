@@ -1,5 +1,5 @@
 @section('title', 'AI Nutritionist for Diabetes | Virtual Nutrition Coach Online')
-@section('meta_description', 'Get personalized nutrition advice from our AI nutritionist. Designed for Type 2 diabetes & prediabetes. Ask anything, get instant answers. Try free today!')
+@section('meta_description', 'Get personalized nutrition advice from your AI nutritionist. Designed for Type 2 diabetes & prediabetes. Ask anything, get instant answers. Try free today!')
 @section('meta_keywords', 'AI nutritionist, virtual nutritionist, online nutritionist diabetes, AI nutrition coach, diabetes nutritionist online, virtual dietitian, online dietitian for diabetics')
 
 @section('head')
@@ -17,7 +17,9 @@
         "@@type": "Offer",
         "price": "0",
         "priceCurrency": "USD",
-        "availability": "https://schema.org/InStock"
+        "availability": "https://schema.org/InStock",
+        "priceValidUntil": "2026-12-31",
+        "description": "7-Day Free Trial"
     }
 }
 </script>
@@ -39,7 +41,7 @@
             "name": "Can an AI nutritionist help with diabetes?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Yes, our AI nutritionist specializes in diabetes and prediabetes management. It understands glycemic index, carbohydrate counting, and how different foods affect blood sugar. It provides personalized recommendations based on your health goals."
+                "text": "Yes, this AI nutritionist specializes in diabetes and prediabetes management. It understands glycemic index, carbohydrate counting, and how different foods affect blood sugar. It provides personalized recommendations based on your health goals."
             }
         },
         {
@@ -125,6 +127,41 @@
                                 </svg>
                                 Cancel anytime
                             </span>
+                        </div>
+
+                        {{-- Social Proof --}}
+                        <div class="mt-6 flex items-center justify-center gap-4 lg:justify-start">
+                            <div class="flex -space-x-2">
+                                <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=Sarah+J&background=random" alt=""/>
+                                <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=Mike+T&background=random" alt=""/>
+                                <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=Ali+R&background=random" alt=""/>
+                            </div>
+                            <div class="text-sm font-medium text-slate-600">
+                                Trusted by early adopters
+                            </div>
+                        </div>
+
+                        {{-- The "Open Source" Trust Badge --}}
+                        <div class="mt-12 border-t border-slate-100 pt-8">
+                            <div class="flex flex-col items-center justify-between gap-6 sm:flex-row">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-900">
+                                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="text-left">
+                                        <p class="font-bold text-slate-900">Open Source & Transparent</p>
+                                        <p class="text-sm text-slate-600">
+                                            Your health data is sensitive. The code is public so you (or experts) 
+                                            can verify exactly how your privacy is handled.
+                                        </p>
+                                    </div>
+                                </div>
+                                <a href="https://github.com/acara-app/plate" class="text-sm font-semibold text-rose-600 hover:text-rose-500 shrink-0">
+                                    View Source Code →
+                                </a>
+                            </div>
                         </div>
                     </div>
 
@@ -249,7 +286,7 @@
                             </div>
                             <h3 class="text-xl font-bold text-slate-900 mb-3">Get Personalized Advice</h3>
                             <p class="text-slate-600">
-                                Our AI analyzes your profile, health goals, and the latest nutrition science 
+                                Your AI analyzes your profile, health goals, and the latest nutrition science 
                                 to give you tailored recommendations — not generic advice.
                             </p>
                         </div>
@@ -370,52 +407,51 @@
             <div class="mx-auto max-w-4xl">
                 <div class="text-center mb-12">
                     <h2 class="text-3xl font-bold text-slate-900">AI vs Traditional Nutritionist</h2>
-                    <p class="mt-4 text-lg text-slate-600">Both have their place. Here's how they compare:</p>
+                    <p class="mt-4 text-lg text-slate-600">Both have their place. Here is how they compare:</p>
                 </div>
 
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-                    <div class="grid grid-cols-3 divide-x divide-slate-200">
-                        <div class="bg-slate-50 p-4 font-semibold text-slate-900">Feature</div>
-                        <div class="bg-rose-50 p-4 font-semibold text-rose-900 text-center">AI Nutritionist</div>
-                        <div class="bg-slate-50 p-4 font-semibold text-slate-900 text-center">Human Nutritionist</div>
-                    </div>
+                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 overflow-x-auto">
+                    <div class="min-w-[600px] text-sm sm:text-base">
+                        
+                        <div class="grid grid-cols-3 divide-x divide-slate-200">
+                            <div class="bg-slate-50 p-4 font-semibold text-slate-900 flex items-center">Feature</div>
+                            <div class="bg-rose-50 p-4 font-bold text-rose-900 text-center">AI Nutritionist</div>
+                            <div class="bg-slate-50 p-4 font-semibold text-slate-900 text-center">Human Dietitian</div>
+                        </div>
 
-                    <div class="grid grid-cols-3 divide-x divide-slate-200 border-t border-slate-200">
-                        <div class="p-4 text-slate-600">Availability</div>
-                        <div class="p-4 text-center text-emerald-600 font-medium">24/7 Instant</div>
-                        <div class="p-4 text-center text-slate-600">By appointment</div>
-                    </div>
+                        <div class="grid grid-cols-3 divide-x divide-slate-200 border-t border-slate-200">
+                            <div class="p-4 text-slate-600 font-medium">Availability</div>
+                            <div class="p-4 text-center text-emerald-600 font-bold">24/7 Instant</div>
+                            <div class="p-4 text-center text-slate-600">By appointment</div>
+                        </div>
 
-                    <div class="grid grid-cols-3 divide-x divide-slate-200 border-t border-slate-200">
-                        <div class="p-4 text-slate-600">Cost per session</div>
-                        <div class="p-4 text-center text-emerald-600 font-medium">Included in plan</div>
-                        <div class="p-4 text-center text-slate-600">$100-300/hour</div>
-                    </div>
+                        <div class="grid grid-cols-3 divide-x divide-slate-200 border-t border-slate-200">
+                            <div class="p-4 text-slate-600 font-medium">Cost</div>
+                            <div class="p-4 text-center text-emerald-600 font-bold">Unlimited / Flat Fee</div>
+                            <div class="p-4 text-center text-slate-600">$100-300 per session</div>
+                        </div>
 
-                    <div class="grid grid-cols-3 divide-x divide-slate-200 border-t border-slate-200">
-                        <div class="p-4 text-slate-600">Response time</div>
-                        <div class="p-4 text-center text-emerald-600 font-medium">Seconds</div>
-                        <div class="p-4 text-center text-slate-600">Hours to days</div>
-                    </div>
+                        <div class="grid grid-cols-3 divide-x divide-slate-200 border-t border-slate-200">
+                            <div class="p-4 text-slate-600 font-medium">Data Memory</div>
+                            <div class="p-4 text-center text-emerald-600 font-bold">Recalls every meal instantly</div>
+                            <div class="p-4 text-center text-slate-600">Relies on food logs</div>
+                        </div>
 
-                    <div class="grid grid-cols-3 divide-x divide-slate-200 border-t border-slate-200">
-                        <div class="p-4 text-slate-600">Personalization</div>
-                        <div class="p-4 text-center text-emerald-600 font-medium">High (AI + your data)</div>
-                        <div class="p-4 text-center text-emerald-600 font-medium">Very High</div>
-                    </div>
-
-                    <div class="grid grid-cols-3 divide-x divide-slate-200 border-t border-slate-200">
-                        <div class="p-4 text-slate-600">Best for</div>
-                        <div class="p-4 text-center text-slate-600">Daily decisions, quick questions</div>
-                        <div class="p-4 text-center text-slate-600">Complex medical conditions</div>
+                        <div class="grid grid-cols-3 divide-x divide-slate-200 border-t border-slate-200">
+                            <div class="p-4 text-slate-600 font-medium">Best For</div>
+                            <div class="p-4 text-center text-slate-900">Daily decisions & meal ideas</div>
+                            <div class="p-4 text-center text-slate-900">Complex medical conditions</div>
+                        </div>
                     </div>
                 </div>
+
+                <p class="mt-2 text-center text-xs text-slate-400 sm:hidden">← Scroll to compare →</p>
 
                 <p class="mt-6 text-center text-sm text-slate-500">
-                    Many people use both: AI for daily decisions, human nutritionists for periodic check-ins and complex cases.
+                    Many people use both: AI for daily choices, and a human dietitian for quarterly check-ins.
                 </p>
             </div>
-        </section>
+    </section>
 
         {{-- FAQ Section --}}
         <section class="px-4 py-24 sm:px-6 lg:px-8">
@@ -448,7 +484,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            Yes, our AI nutritionist specializes in Type 2 diabetes and prediabetes management. It understands 
+                            Yes, this AI nutritionist specializes in Type 2 diabetes and prediabetes management. It understands 
                             glycemic index, carbohydrate counting, portion control, and how different foods affect blood sugar. 
                             It provides personalized recommendations based on your health goals, dietary preferences, and glucose patterns.
                         </p>
@@ -476,7 +512,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            The AI nutritionist is included with your Acara Plate subscription. We offer a free trial so you can 
+                            The AI nutritionist is included with your Acara Plate subscription. A free trial is available so you can 
                             test it out before committing. Compared to traditional nutritionists who charge $100-300 per session, 
                             it's an affordable way to get ongoing nutrition support.
                         </p>
@@ -508,8 +544,7 @@
                 </h2>
 
                 <p class="mt-6 text-lg text-slate-300">
-                    Join thousands of people managing their diabetes with AI-powered nutrition guidance. 
-                    Start your free trial today — no credit card required.
+                    Experience the clarity of AI-powered guidance without the "black box." Open source, privacy-focused, and designed for real life.
                 </p>
 
                 <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">

@@ -155,6 +155,25 @@
                     </div>
 
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                        {{-- AI Nutritionist Card --}}
+                        <div class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-rose-300 hover:shadow-md">
+                            <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-rose-100 text-rose-600 transition-transform group-hover:scale-110">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-900">AI Nutritionist</h3>
+                            <p class="mt-2 text-sm text-slate-600">
+                                Stuck at a restaurant? Ask what to order and get personalized advice.
+                            </p>
+                            <a href="{{ route('ai-nutritionist') }}" class="mt-4 inline-flex items-center text-sm font-semibold text-rose-600 hover:text-rose-700">
+                                Meet Your AI Coach
+                                <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
+                        </div>
+                        
                         {{-- Spike Calculator Card --}}
                         <div class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-orange-300 hover:shadow-md">
                             <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-orange-600 transition-transform group-hover:scale-110">
@@ -194,24 +213,7 @@
                             </a>
                         </div>
 
-                        {{-- AI Nutritionist Card --}}
-                        <div class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-rose-300 hover:shadow-md">
-                            <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-rose-100 text-rose-600 transition-transform group-hover:scale-110">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                                </svg>
-                            </div>
-                            <h3 class="text-lg font-bold text-slate-900">AI Nutritionist</h3>
-                            <p class="mt-2 text-sm text-slate-600">
-                                Stuck at a restaurant? Ask what to order and get personalized advice.
-                            </p>
-                            <a href="{{ route('chat.create') }}" class="mt-4 inline-flex items-center text-sm font-semibold text-rose-600 hover:text-rose-700">
-                                Start chatting
-                                <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </a>
-                        </div>
+                        
                     </div>
                 </div>
             </section>
@@ -314,9 +316,9 @@
                                     <p class="mt-2 text-xs text-slate-600 lg:text-sm">
                                         Stuck at a restaurant? Not sure what to order? Just ask. Our AI nutritionist knows your goals and can suggest meals that keep your glucose steady — no judgment, just helpful answers.
                                     </p>
-                                    <a href="{{ route('chat.create') }}" 
+                                    <a href="{{ route('ai-nutritionist') }}" 
                                         class="mt-3 inline-flex items-center text-xs font-medium text-rose-600 hover:text-rose-700 lg:text-sm">
-                                        Start chatting 
+                                        Meet Your AI Coach 
                                         <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                         </svg>
