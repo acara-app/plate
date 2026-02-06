@@ -153,7 +153,7 @@ return [
     // Dashboard
     'dashboard_cards' => [
         'diabetes_insights' => [
-            'title' => 'My Trends',
+            'title' => 'Glucose Insights',
             'description' => 'See how your choices are affecting your health.',
             'button' => 'Check Trends',
         ],
@@ -172,8 +172,19 @@ return [
         ],
         'chat' => [
             'title' => 'Ask a Nutritionist',
-            'description' => 'Have questions? Get instant expert advice.',
-            'button' => 'Chat Now',
+            'description' => 'Get personalized nutrition advice, meal recommendations, and glucose predictions powered by AI.',
+            'button' => 'Start Chatting',
+            'recent_conversations' => 'Recent Conversations',
+            'quick_actions' => [
+                'ask' => 'Ask a Question',
+                'meal_plan' => 'Generate Meal Plan',
+            ],
+            'prompts' => [
+                'complete_profile' => 'Complete your profile for personalized advice →',
+                'analyze_glucose' => 'Analyze your recent glucose trends →',
+                'health_conditions' => 'Get advice for your health conditions →',
+                'restaurant' => 'Ask about restaurant meals and glucose impact →',
+            ],
         ],
     ],
 

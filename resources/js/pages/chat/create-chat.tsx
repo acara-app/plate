@@ -20,12 +20,13 @@ export default function CreateChat() {
     const {
         conversationId: initialConversationId,
         messages: messageHistories,
+        mode: initialMode,
     } = usePage<ChatPageProps>().props;
 
     const [conversationId, setConversationId] = useState<string | undefined>(
         initialConversationId,
     );
-    const [mode, setMode] = useState<ChatMode>('ask');
+    const [mode, setMode] = useState<ChatMode>(initialMode ?? 'ask');
     const [model, setModel] = useState<AIModel>('gemini-3-flash-preview');
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -93,6 +94,7 @@ export default function CreateChat() {
                         onSubmit={handleSubmit}
                         disabled={isStreaming || isSubmitting}
                         isLoading={isStreaming || isSubmitting}
+                        mode={mode}
                     />
                 </div>
             </main>

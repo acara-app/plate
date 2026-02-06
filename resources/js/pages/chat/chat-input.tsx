@@ -40,6 +40,7 @@ interface Props {
     className?: string;
     disabled?: boolean;
     isLoading?: boolean;
+    mode: ChatMode;
 }
 
 export default function ChatInput({
@@ -47,9 +48,10 @@ export default function ChatInput({
     onSubmit,
     disabled = false,
     isLoading = false,
+    mode,
 }: Props) {
     const [message, setMessage] = useState('');
-    const [selectedMode, setSelectedMode] = useState<ChatMode>('ask');
+    const [selectedMode, setSelectedMode] = useState<ChatMode>(mode || 'ask');
     const [selectedModel, setSelectedModel] = useState<AIModel>(
         'gemini-3-flash-preview',
     );
@@ -131,6 +133,7 @@ export default function ChatInput({
                             variant="outline"
                             size="icon"
                             className="size-8"
+                            disabled
                         >
                             <Plus className="size-4" />
                         </Button>

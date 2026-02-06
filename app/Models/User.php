@@ -122,6 +122,14 @@ final class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * @return HasMany<Conversation, $this>
+     */
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(Conversation::class)->latest();
+    }
+
+    /**
      * Check if the user has any active subscription.
      */
     public function hasActiveSubscription(): bool

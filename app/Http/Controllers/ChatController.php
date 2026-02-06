@@ -5,19 +5,22 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Ai\Agents\NutritionAdvisor;
+use App\Enums\AgentMode;
 use App\Http\Requests\StoreAgentConversationRequest;
 use App\Models\Conversation;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
 final class ChatController
 {
     public function create(
+        Request $request,
         string $conversationId = ''
     ): \Inertia\Response {
         $conversation = $conversationId !== '' ? Conversation::query()->find($conversationId) : null;
 
-        $messages = $conversation?->messages->map(fn ($message): array => [
+        $messages = $conversation?->messages->map(fn($message): array => [
             'id' => $message->id,
             'role' => $message->role->value,
             'parts' => [
@@ -28,6 +31,7 @@ final class ChatController
         return Inertia::render('chat/create-chat', [
             'conversationId' => $conversation?->id,
             'messages' => $messages,
+            'mode' => $request->enum('mode', AgentMode::class),
         ]);
     }
 
