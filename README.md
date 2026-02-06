@@ -83,12 +83,53 @@ Acara Plate is a Laravel 12 application that pairs Inertia (React) with Tailwind
     - Localized email notifications and printable documents.
     - Easy to add new languages via translation files.
 
-### User Journey Highlights
+### How Users Experience Acara Plate
 
-1. **Onboarding Questionnaire:** Collects deep biometric data, goals, lifestyle factors, dietary preferences, and health constraints to build a user profile.
-2. **AI Meal Planning:** Uses PrismPHP-driven LLM workflows to build structured seven-day plans with queue-backed processing and progress tracking.
-3. **Meal Plan Management:** Offers day-by-day navigation, macro bars, detailed meal cards, and instant grocery list generation.
-4. **Comprehensive Diabetes Tracking:** A unified logbook interface for recording glucose, insulin, carb intake, medications, vitals, and exercise. The system correlates these separate logs to provide 7-day trend analysis, helping users identify patterns (e.g., insulin sensitivity or exercise impact) and improve their Time-in-Range.
+**1. Tell Us About Yourself**  
+Answer a few questions about your body, goals, and lifestyle. Whether you're managing Type 2 diabetes, trying to lose weight, or just eating healthier — Acara Plate builds your profile in under 3 minutes.
+
+**2. Get Your Personal Meal Plan**  
+The AI creates a complete 7-day meal plan tailored to your calorie targets, macro needs, and food preferences. Each recipe includes portions, prep steps, and nutrition facts. No more guessing what to eat.
+
+**3. Shop with Confidence**  
+Generate a consolidated grocery list organized by store section. Everything you need for the week, no wasted ingredients, no impulse buys.
+
+**4. Track What Matters**  
+Log your glucose readings, meals, insulin, and activity in one place. Spot patterns — like how that afternoon coffee affects your numbers or which workouts keep you stable.
+
+**5. Ask Anything, Anytime**  
+Stuck at a restaurant? Wondering if a food will spike you? Chat with the AI Nutritionist for instant, personalized guidance based on your actual data.
+
+### AI Nutritionist
+
+Your personal AI-powered nutrition assistant, available 24/7:
+
+- **Conversational Guidance:** Ask anything naturally — "What should I order at Chipotle?" or "Will this spike my blood sugar?"
+- **Personalized Advice:** Context-aware recommendations based on your profile, goals, and glucose patterns
+- **Restaurant Help:** Navigate any menu with confidence, from fast food to fine dining
+- **Meal Planning:** Get day-of suggestions or full week plans based on your constraints
+- **Glucose Predictions:** Understand how foods will affect your blood sugar before you eat
+
+[Learn more about AI Nutritionist →](https://plate.acara.app/ai-nutritionist)
+
+### Food Database
+
+USDA-verified nutrition information at your fingertips:
+
+- **310+ Foods:** Comprehensive database with glycemic index, glycemic load, and full nutrition facts
+- **Diabetes-Focused:** Each food includes safety assessments and glucose impact predictions
+- **Searchable:** Filter by category, GI impact, or search by name
+- **Free & Open:** Browse the full database without signup at [plate.acara.app/food](https://plate.acara.app/food)
+
+### Free Tools
+
+No registration required — try these instantly:
+
+- **Spike Calculator:** Check if any food will spike your blood sugar. Just type a food name and get instant glucose impact predictions.
+  → [Try Spike Calculator](https://plate.acara.app/tools/spike-calculator)
+
+- **Snap to Track:** Take a photo of your meal and get instant nutrition facts. AI-powered food recognition with macro breakdown.
+  → [Try Snap to Track](https://plate.acara.app/tools/snap-to-track)
 
 ## Getting Started
 
@@ -100,10 +141,13 @@ This application is built with:
 - **Composer 2** — PHP dependency manager
 - **Node.js 20+**
 - **Laravel 12** — backend API and frontend delivery
+- **[Laravel AI SDK](https://github.com/laravel/ai-sdk)** — AI agents, tools, and streaming
+- **[PrismPHP](https://github.com/prism-php/prism)** — unified LLM interface for multiple AI providers
+- **[Workflow](https://github.com/durable-workflow/workflow)** — durable workflow orchestration for meal plan generation
 - **React 19** — frontend UI layer
 - **Inertia.js** — bridges Laravel and React
-- **PostgreSQL 17+** (pgvector recommended for advanced features)
 - **Tailwind CSS** — utility-first styling
+- **PostgreSQL 17+** (pgvector recommended for advanced features)
 
 ### Project Setup
 
@@ -212,7 +256,7 @@ php artisan import:usda-sr-legacy-food-data --path=/path/to/legacy.json
 
 ### Production Environment
 
-Our live deployment is hosted on [Hetzner](https://www.hetzner.com/) with [Ploi](https://ploi.io/) coordinating releases. We treat this setup as a practical template for similar self-managed installations. The current server runs Ubuntu 22.04 LTS with 2 vCPUs, 2 GB RAM, and 50 GB SSD storage.
+The live deployment is hosted on [Hetzner](https://www.hetzner.com/) with [Ploi](https://ploi.io/) coordinating releases. This setup serves as a practical template for similar self-managed installations. The current server runs Ubuntu 22.04 LTS with 2 vCPUs, 2 GB RAM, and 50 GB SSD storage.
 
 - **Database:** Dedicated PostgreSQL VM isolated from the application server
 - **Backups:** [pgBackRest](https://pgbackrest.org/) provides automated, incremental backups
@@ -298,7 +342,7 @@ Contributions for new languages are highly encouraged! See the [Contributing Gui
 
 ## Contributing
 
-We welcome contributions! Review the [Contributing Guide](CONTRIBUTING.md) for workflows, coding standards, and issue triage details.
+Contributions are welcome! Review the [Contributing Guide](CONTRIBUTING.md) for workflows, coding standards, and issue triage details.
 
 ## Code of Conduct
 
@@ -314,7 +358,7 @@ Acara Plate is an open-source project designed for informational and educational
 
 **Not Medical Advice:** This software is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition, dietary changes, or blood glucose management.
 
-**AI Limitations:** Meal plans and nutritional data are generated by large language models (OpenAI, Anthropic Claude, Google Gemini, DeepSeek, Groq, Mistral, XAI, etc.) via PrismPHP. While we strive for accuracy, LLMs can misstate allergens, ingredients, or macro values. Verify critical information independently.
+**AI Limitations:** Meal plans and nutritional data are generated by large language models (OpenAI, Anthropic Claude, Google Gemini, DeepSeek, Groq, Mistral, XAI, etc.) via PrismPHP. While accuracy is prioritized, LLMs can misstate allergens, ingredients, or macro values. Verify critical information independently.
 
 **No Liability:** Authors and contributors are not liable for adverse effects, health complications, or damages arising from use of the software or reliance on its information.
 
