@@ -9,8 +9,8 @@
 <meta property="og:title" content="AI Nutritionist for Diabetes | Virtual Nutrition Coach Online">
 <meta property="og:description" content="Get personalized nutrition advice from your AI nutritionist. Designed for Type 2 diabetes & prediabetes. Ask anything, get instant answers. Try free today!">
 <meta property="og:image" content="{{ asset('screenshots/og-ai-nutritionist.webp') }}">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image:width" content="1920">
+<meta property="og:image:height" content="1096">
 <meta property="og:image:alt" content="Acara Plate AI Nutritionist - Personal nutrition guidance for diabetes management">
 
 {{-- Twitter Card --}}
