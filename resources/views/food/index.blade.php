@@ -101,36 +101,6 @@
                 @endif
             </p>
 
-            {{-- Nutrition Advisor Banner --}}
-            <div class="mb-8 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/30 rounded-2xl p-6 border border-rose-200 dark:border-rose-800">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div class="flex items-start gap-4">
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 text-white shadow-lg">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                Not sure what to eat?
-                                <span class="inline-flex items-center rounded-full bg-rose-100 dark:bg-rose-900/50 px-2.5 py-0.5 text-xs font-medium text-rose-700 dark:text-rose-300">New</span>
-                            </h2>
-                            <p class="mt-1 text-slate-600 dark:text-slate-300">
-                                Ask our AI nutritionist. Get personalized advice for any situation — restaurants, grocery stores, or your own kitchen.
-                            </p>
-                        </div>
-                    </div>
-                    <a href="{{ route('chat') }}" 
-                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-rose-700 hover:shadow-lg shrink-0">
-                        Ask AI Nutritionist
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-
             {{-- ======================= --}}
             {{-- SEARCH & FILTER BAR --}}
             {{-- ======================= --}}
@@ -241,14 +211,14 @@
                             from a restaurant or just some brand you like.
                         </p>
                     </div>
-                    <button disabled
-                        class="shrink-0 px-5 py-2.5 bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 rounded-xl font-medium cursor-not-allowed flex items-center gap-2">
+                    <a href="{{ route('chat.create') }}"
+                        class="inline-flex items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-teal-200 dark:border-teal-800 px-4 py-2 text-sm font-semibold text-teal-700 dark:text-teal-300 transition-all hover:bg-teal-50 dark:hover:bg-teal-900/30">
                         <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
-                        Coming Soon
-                    </button>
+                        Ask AI
+                    </a>
                 </div>
             </div>
 

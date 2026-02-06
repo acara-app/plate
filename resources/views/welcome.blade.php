@@ -440,7 +440,7 @@
                             </div>
 
                             <div class="flex flex-col gap-4 sm:flex-row sm:justify-center lg:justify-start">
-                                <a href="{{ route('chat') }}"
+                                <a href="{{ route('chat.create') }}"
                                     class="group inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-bold text-rose-600 shadow-lg shadow-black/10 transition-all hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-rose-500">
                                     Chat with Nutritionist
                                     <svg class="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
@@ -646,7 +646,7 @@
                                     <p class="mt-2 text-xs text-slate-600 lg:text-sm">
                                         Stuck at a restaurant? Not sure what to order? Just ask. Our AI nutritionist knows your goals and can suggest meals that keep your glucose steady — no judgment, just helpful answers.
                                     </p>
-                                    <a href="{{ route('chat') }}" 
+                                    <a href="{{ route('chat.create') }}" 
                                         class="mt-3 inline-flex items-center text-xs font-medium text-rose-600 hover:text-rose-700 lg:text-sm">
                                         Start chatting 
                                         <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
