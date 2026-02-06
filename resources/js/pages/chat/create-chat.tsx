@@ -11,7 +11,7 @@ import ChatMessages, { ChatErrorBanner } from './chate-messages';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Chat',
+        title: 'Chat (beta version)',
         href: chat.create().url,
     },
 ];
@@ -73,10 +73,10 @@ export default function CreateChat() {
     const showThinkingIndicator = isSubmitting && messages.length > 0;
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={breadcrumbs} fixedHeight>
             <Head title="Chat" />
-            <main className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden">
-                <div className="flex-1 overflow-y-auto scroll-smooth">
+            <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth">
                     <div className="mx-auto w-full max-w-3xl px-4 py-6">
                         <ChatMessages
                             messages={messages}
@@ -96,8 +96,12 @@ export default function CreateChat() {
                         isLoading={isStreaming || isSubmitting}
                         mode={mode}
                     />
+                    <p className="px-4 pb-4 text-center text-xs text-muted-foreground">
+                        For informational purposes only. Not a substitute for
+                        professional medical or nutritional advice.
+                    </p>
                 </div>
-            </main>
+            </section>
         </AppLayout>
     );
 }
