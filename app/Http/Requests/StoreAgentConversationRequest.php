@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
-use App\Enums\AgenMode;
 use App\Enums\ModelName;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -35,7 +34,7 @@ final class StoreAgentConversationRequest extends FormRequest
             'messages.*.parts.*.text' => ['required_if:messages.*.parts.*.type,text', 'string'],
 
             // Query params
-            'mode' => ['required', Rule::enum(AgenMode::class)],
+            'mode' => ['required', Rule::enum(AgentMode::class)],
             'model' => ['required', Rule::enum(ModelName::class)],
         ];
     }
@@ -63,9 +62,9 @@ final class StoreAgentConversationRequest extends FormRequest
     /**
      * Get the validated mode.
      */
-    public function mode(): AgenMode
+    public function mode(): AgentMode
     {
-        return AgenMode::from($this->validated('mode'));
+        return AgentMode::from($this->validated('mode'));
     }
 
     /**

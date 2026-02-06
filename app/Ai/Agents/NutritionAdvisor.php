@@ -10,7 +10,7 @@ use App\Ai\Tools\GenerateMeal;
 use App\Ai\Tools\GenerateMealPlan;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\PredictGlucoseSpike;
-use App\Enums\AgenMode;
+use App\Enums\AgentMode;
 use App\Models\History;
 use App\Models\User;
 use Laravel\Ai\Concerns\RemembersConversations;
@@ -25,7 +25,7 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
 {
     use Promptable, RemembersConversations;
 
-    private AgenMode $mode = AgenMode::Ask;
+    private AgentMode $mode = AgentMode::Ask;
 
     public function __construct(
         public User $user,
@@ -36,7 +36,7 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
         private readonly PredictGlucoseSpike $predictGlucoseSpikeTool,
     ) {}
 
-    public function withMode(AgenMode $mode): self
+    public function withMode(AgentMode $mode): self
     {
         $this->mode = $mode;
 
@@ -126,7 +126,7 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
             'CHAT MODE: '.$this->mode->value,
         ];
 
-        if ($this->mode === AgenMode::GenerateMealPlan) {
+        if ($this->mode === AgentMode::GenerateMealPlan) {
             $context[] = '';
             $context[] = 'The user has explicitly selected "Generate Meal Plan" mode. They want a complete multi-day meal plan.';
             $context[] = 'Use the generate_meal_plan tool to initiate the meal plan generation workflow.';

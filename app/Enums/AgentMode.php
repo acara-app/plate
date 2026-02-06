@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-enum AgenMode: string
+enum AgentMode: string
 {
     case Ask = 'ask';
     case GenerateMealPlan = 'generate-meal-plan';

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Ai\Tools;
 
 use App\Ai\Agents\SpikePredictorAgent;
+use App\Enums\SpikeRiskLevel;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
@@ -47,7 +48,7 @@ final readonly class PredictGlucoseSpike implements Tool
                 'food' => $food,
                 'prediction' => [
                     'risk_level' => $prediction->riskLevel->value,
-                    'estimated_glucose_increase_mg_dl' => $this->estimateGlucoseIncrease($prediction->estimatedGlycemicLoad),
+                    'estimated_glucose_increase_mg_dl' => $this->estimateGlucoseIncrease($prediction->riskLevel),
                     'explanation' => $prediction->explanation,
                     'smart_fix' => $prediction->smartFix,
                     'spike_reduction_percentage' => $prediction->spikeReductionPercentage,
@@ -77,15 +78,15 @@ final readonly class PredictGlucoseSpike implements Tool
     }
 
     /**
-     * Estimate glucose increase in mg/dL based on glycemic load.
+     * Estimate glucose increase in mg/dL based on risk level.
      */
-    private function estimateGlucoseIncrease(int $glycemicLoad): int
+    private function estimateGlucoseIncrease(SpikeRiskLevel $riskLevel): int
     {
-        // Rough estimation: GL 0-10 = +10-30 mg/dL, GL 11-20 = +30-60 mg/dL, GL 20+ = +60-100+ mg/dL
-        return match (true) {
-            $glycemicLoad <= 10 => random_int(10, 30),
-            $glycemicLoad <= 20 => random_int(30, 60),
-            default => random_int(60, 100),
+        // Use deterministic values based on risk level instead of random
+        return match ($riskLevel) {
+            SpikeRiskLevel::Low => 20,
+            SpikeRiskLevel::Medium => 45,
+            SpikeRiskLevel::High => 80,
         };
     }
 
@@ -107,11 +108,11 @@ final readonly class PredictGlucoseSpike implements Tool
         }
 
         // Add recommendations based on risk level
-        if ($prediction->riskLevel->value === 'high') {
-            $recommendations[] = 'High spike risk: Consider eating protein first, adding healthy fats (avocado, nuts), or splitting this into two smaller portions.';
-        } elseif ($prediction->riskLevel->value === 'medium') {
-            $recommendations[] = 'Moderate spike: Pair with a side salad or vegetables to add fiber and slow absorption.';
-        }
+        $recommendations[] = match ($prediction->riskLevel) {
+            SpikeRiskLevel::High => 'High spike risk: Consider eating protein first, adding healthy fats (avocado, nuts), or splitting this into two smaller portions.',
+            SpikeRiskLevel::Medium => 'Moderate spike: Pair with a side salad or vegetables to add fiber and slow absorption.',
+            SpikeRiskLevel::Low => 'Low spike risk: This is a good choice for stable glucose levels.',
+        };
 
         return $recommendations;
     }
