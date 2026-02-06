@@ -14,6 +14,7 @@ return [
     */
 
     'login' => [
+        'page_title' => 'Connexion à Acara Plate | Nutrition IA pour le diabète',
         'title' => 'Se connecter',
         'description' => 'Entrez votre adresse e-mail et votre mot de passe',
         'email' => 'Adresse e-mail',
@@ -29,6 +30,7 @@ return [
     ],
 
     'register' => [
+        'page_title' => 'Créer votre compte Acara Plate | Commencez votre parcours',
         'title' => 'Créer un compte',
         'description' => 'Entrez vos informations ci-dessous pour créer votre compte',
         'name' => 'Nom',
@@ -50,6 +52,8 @@ return [
     ],
 
     'password_reset' => [
+        'request_page_title' => 'Réinitialiser votre mot de passe | Aide Acara Plate',
+        'reset_page_title' => 'Créez un nouveau mot de passe | Acara Plate',
         'request_title' => 'Réinitialiser le mot de passe',
         'request_description' => 'Entrez votre adresse e-mail pour recevoir un lien de réinitialisation',
         'email' => 'Adresse e-mail',
@@ -78,6 +82,7 @@ return [
     ],
 
     'email_verification' => [
+        'page_title' => 'Vérifiez votre e-mail | Sécurité Acara Plate',
         'title' => 'Vérifier votre adresse e-mail',
         'description' => 'Merci de vous être inscrit! Avant de commencer, pourriez-vous vérifier votre adresse e-mail en cliquant sur le lien que nous venons de vous envoyer? Si vous n\'avez pas reçu l\'e-mail, nous vous en enverrons un autre avec plaisir.',
         'resend' => 'Renvoyer l\'e-mail de vérification',

@@ -1,3 +1,6 @@
+@section('title', 'Install Acara Plate PWA | Native App Experience on iOS & Android')
+@section('meta_description', 'Learn how to install Acara Plate as a Progressive Web App (PWA) on your iPhone or Android device for faster access, offline support, and a more immersive experience.')
+
 <x-default-layout>
     <div class="mx-auto my-16 max-w-7xl px-6 lg:px-8">
         <a

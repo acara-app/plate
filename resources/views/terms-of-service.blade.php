@@ -1,3 +1,6 @@
+@section('title', 'Terms of Service | Acara Plate Usage Agreement')
+@section('meta_description', 'Review the Terms of Service for Acara Plate. Learn about your rights, eligibility, user data responsibilities, and our medical disclaimer regarding AI-generated plans.')
+
 <x-default-layout>
     <div class="mx-auto my-16 max-w-7xl px-6 lg:px-8">
         <a

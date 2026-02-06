@@ -14,6 +14,7 @@ return [
     */
 
     'login' => [
+        'page_title' => 'Log in to Acara Plate | AI Nutrition for Diabetes Management',
         'title' => 'Log in to your account',
         'description' => 'Enter your email and password below to log in',
         'email' => 'Email address',
@@ -29,6 +30,7 @@ return [
     ],
 
     'register' => [
+        'page_title' => 'Create Your Acara Plate Account | Start Your Journey',
         'title' => 'Create an account',
         'description' => 'Enter your details below to create your account',
         'name' => 'Name',
@@ -50,6 +52,8 @@ return [
     ],
 
     'password_reset' => [
+        'request_page_title' => 'Reset Your Password | Acara Plate Help',
+        'reset_page_title' => 'Create New Password | Acara Plate',
         'request_title' => 'Forgot password',
         'request_description' => 'Enter your email to receive a password reset link',
         'email' => 'Email address',
@@ -78,6 +82,7 @@ return [
     ],
 
     'email_verification' => [
+        'page_title' => 'Verify Your Email | Acara Plate Security',
         'title' => 'Verify email',
         'description' => 'Please verify your email address by clicking on the link we just emailed to you.',
         'resend' => 'Resend verification email',

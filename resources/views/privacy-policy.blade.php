@@ -1,3 +1,6 @@
+@section('title', 'Privacy Policy | How We Protect Your Health Data')
+@section('meta_description', 'Your privacy is paramount. Read the Acara Plate Privacy Policy to understand how we collect, use, and protect your biometrics, health conditions, and dietary data.')
+
 <x-default-layout>
     <div class="mx-auto my-16 max-w-7xl px-6 lg:px-8">
         <a
