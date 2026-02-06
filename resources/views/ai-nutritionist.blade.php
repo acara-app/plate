@@ -3,12 +3,31 @@
 @section('meta_keywords', 'AI nutritionist, virtual nutritionist, online nutritionist diabetes, AI nutrition coach, diabetes nutritionist online, virtual dietitian, online dietitian for diabetics')
 
 @section('head')
+{{-- Open Graph / Facebook --}}
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ url()->current() }}">
+<meta property="og:title" content="AI Nutritionist for Diabetes | Virtual Nutrition Coach Online">
+<meta property="og:description" content="Get personalized nutrition advice from your AI nutritionist. Designed for Type 2 diabetes & prediabetes. Ask anything, get instant answers. Try free today!">
+<meta property="og:image" content="{{ asset('screenshots/og-ai-nutritionist.webp') }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Acara Plate AI Nutritionist - Personal nutrition guidance for diabetes management">
+
+{{-- Twitter Card --}}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="{{ url()->current() }}">
+<meta name="twitter:title" content="AI Nutritionist for Diabetes | Virtual Nutrition Coach Online">
+<meta name="twitter:description" content="Get personalized nutrition advice from your AI nutritionist. Designed for Type 2 diabetes & prediabetes. Ask anything, get instant answers. Try free today!">
+<meta name="twitter:image" content="{{ asset('screenshots/og-ai-nutritionist.webp') }}">
+<meta name="twitter:image:alt" content="Acara Plate AI Nutritionist - Personal nutrition guidance for diabetes management">
+
 <script type="application/ld+json">
 {
     "@@context": "https://schema.org",
     "@@type": "Product",
     "name": "Acara Plate AI Nutritionist",
     "description": "AI-powered nutritionist for diabetes management. Get personalized meal advice, glucose predictions, and dietary guidance.",
+    "image": "{{ asset('screenshots/og-ai-nutritionist.webp') }}",
     "brand": {
         "@@type": "Brand",
         "name": "Acara Plate"
