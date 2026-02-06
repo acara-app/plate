@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
