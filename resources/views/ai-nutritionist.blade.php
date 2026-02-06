@@ -470,7 +470,7 @@
                     Many people use both: AI for daily choices, and a human dietitian for quarterly check-ins.
                 </p>
             </div>
-    </section>
+        </section>
 
         {{-- FAQ Section --}}
         <section class="px-4 py-24 sm:px-6 lg:px-8">
@@ -589,4 +589,5 @@
             </div>
         </section>
     </div>
+    <x-footer />
 </x-default-layout>
