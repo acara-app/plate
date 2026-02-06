@@ -41,6 +41,8 @@ composer.local.json
 boost.json
 CLAUDE.md
 AGENTS.md
-junie/
 .roo
 .opencode
+.junie
+.claude
+.cursor
