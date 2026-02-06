@@ -33,6 +33,8 @@ Route::get('/food/{slug}', [Web\PublicFoodController::class, 'show'])->name('foo
 
 Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])->name('profile.timezone.update');
 
+Route::view('/ai-nutritionist', 'ai-nutritionist')->name('ai-nutritionist');
+
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', [Web\DashboardController::class, 'show'])->name('dashboard');
 
