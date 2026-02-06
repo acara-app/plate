@@ -205,7 +205,7 @@
                             <p class="mt-2 text-sm text-slate-600">
                                 Stuck at a restaurant? Ask what to order and get personalized advice.
                             </p>
-                            <a href="{{ route('chat') }}" class="mt-4 inline-flex items-center text-sm font-semibold text-rose-600 hover:text-rose-700">
+                            <a href="{{ route('chat.create') }}" class="mt-4 inline-flex items-center text-sm font-semibold text-rose-600 hover:text-rose-700">
                                 Start chatting
                                 <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
