@@ -211,14 +211,14 @@
                             from a restaurant or just some brand you like.
                         </p>
                     </div>
-                    <button disabled
-                        class="shrink-0 px-5 py-2.5 bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 rounded-xl font-medium cursor-not-allowed flex items-center gap-2">
+                    <a href="{{ route('chat.create') }}"
+                        class="inline-flex items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-teal-200 dark:border-teal-800 px-4 py-2 text-sm font-semibold text-teal-700 dark:text-teal-300 transition-all hover:bg-teal-50 dark:hover:bg-teal-900/30">
                         <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
-                        Coming Soon
-                    </button>
+                        Ask AI
+                    </a>
                 </div>
             </div>
 

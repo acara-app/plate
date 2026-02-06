@@ -405,6 +405,38 @@
                 </a>
             </div>
 
+            {{-- Nutrition Advisor CTA --}}
+            <div class="bg-linear-to-r from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/30 rounded-2xl p-8 mb-10 border border-rose-200 dark:border-rose-800/50">
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-rose-500 to-pink-500 text-white shadow-lg">
+                        <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                            Have questions about {{ $displayName }}?
+                        </h2>
+                        <p class="text-slate-600 dark:text-slate-300 mb-4">
+                            Wondering how {{ $displayName }} fits into your meal plan? Or what to pair it with for stable glucose? Our AI nutritionist has answers.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="{{ route('chat.create') }}?question=How does {{ urlencode($displayName) }} fit into my meal plan?" 
+                                class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:bg-rose-700">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Ask about {{ $displayName }}
+                            </a>
+                            <a href="{{ route('chat.create') }}" 
+                                class="inline-flex items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-rose-200 dark:border-rose-800 px-4 py-2 text-sm font-semibold text-rose-700 dark:text-rose-300 transition-all hover:bg-rose-50 dark:hover:bg-rose-900/30">
+                                Ask anything else
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- Additional Resources --}}
             <div class="border-t border-slate-200 dark:border-slate-700 pt-10">
                 <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6">
