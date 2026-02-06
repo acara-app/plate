@@ -20,7 +20,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
             title={t('password_reset.request_title')}
             description={t('password_reset.request_description')}
         >
-            <Head title={t('password_reset.request_title')} />
+            <Head title={t('password_reset.request_page_title')} />
 
             {status && (
                 <div className="mb-4 text-center text-sm font-medium text-green-600">

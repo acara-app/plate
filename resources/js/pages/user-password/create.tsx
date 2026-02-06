@@ -22,7 +22,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
             title={t('password_reset.reset_title')}
             description={t('password_reset.reset_description')}
         >
-            <Head title={t('password_reset.reset_title')} />
+            <Head title={t('password_reset.reset_page_title')} />
 
             <Form
                 {...UserPasswordController.store.form()}

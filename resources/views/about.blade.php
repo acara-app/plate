@@ -1,3 +1,6 @@
+@section('title', 'About Acara Plate | Our Vision for Agentic AI Nutrition')
+@section('meta_description', 'Learn about the vision behind Acara Plate: personalized, evidence-based nutrition for diabetes management powered by agentic AI and high-fidelity USDA data.')
+
 <x-default-layout>
     <div class="mx-auto my-16 max-w-7xl px-6 lg:px-8">
         <a

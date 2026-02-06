@@ -26,7 +26,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             title={t('login.title')}
             description={t('login.description')}
         >
-            <Head title={t('login.submit')} />
+            <Head title={t('login.page_title')} />
 
             <Form
                 {...SessionController.store.form()}

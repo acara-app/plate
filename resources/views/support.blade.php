@@ -1,3 +1,6 @@
+@section('title', 'Acara Plate Help & Support | Contact Details & FAQs')
+@section('meta_description', 'Get help with Acara Plate. Contact our team, report bugs on GitHub, or find answers to frequently asked questions about AI meal planning and diabetes management.')
+
 <x-default-layout>
     <div class="mx-auto my-16 max-w-7xl px-6 lg:px-8">
         <a

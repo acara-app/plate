@@ -20,7 +20,7 @@ export default function Register() {
             title={t('register.title')}
             description={t('register.description')}
         >
-            <Head title={t('register.title')} />
+            <Head title={t('register.page_title')} />
             <Form
                 {...UserController.store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}
