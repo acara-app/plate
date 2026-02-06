@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Inertia\Inertia;
@@ -20,7 +21,7 @@ final readonly class DashboardController
             ->latest()
             ->limit(3)
             ->get()
-            ->map(fn ($conversation) => [
+            ->map(fn(Conversation $conversation): array => [
                 'id' => $conversation->id,
                 'title' => $conversation->title ?: 'New Conversation',
                 'updated_at' => $conversation->updated_at->diffForHumans(),

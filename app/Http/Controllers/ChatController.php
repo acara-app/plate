@@ -8,6 +8,7 @@ use App\Ai\Agents\NutritionAdvisor;
 use App\Enums\AgentMode;
 use App\Http\Requests\StoreAgentConversationRequest;
 use App\Models\Conversation;
+use App\Models\History;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Laravel\Ai\Responses\StreamableAgentResponse;
@@ -20,7 +21,7 @@ final class ChatController
     ): \Inertia\Response {
         $conversation = $conversationId !== '' ? Conversation::query()->find($conversationId) : null;
 
-        $messages = $conversation?->messages->map(fn($message): array => [
+        $messages = $conversation?->messages->map(fn(History $message): array => [
             'id' => $message->id,
             'role' => $message->role->value,
             'parts' => [

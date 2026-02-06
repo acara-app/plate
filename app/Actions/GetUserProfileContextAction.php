@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Models\User;
+use App\Models\UserMedication;
 use App\Models\UserProfile;
 
 final readonly class GetUserProfileContextAction
@@ -67,7 +68,7 @@ final readonly class GetUserProfileContextAction
      */
     private function getDietaryPreferences(UserProfile $profile): array
     {
-        return $profile->dietaryPreferences->map(fn ($pref): array => [
+        return $profile->dietaryPreferences->map(fn(\App\Models\DietaryPreference $pref): array => [
             'name' => $pref->name,
             'severity' => $pref->pivot->severity ?? null,
             'notes' => $pref->pivot->notes ?? null,
@@ -79,7 +80,7 @@ final readonly class GetUserProfileContextAction
      */
     private function getHealthConditions(UserProfile $profile): array
     {
-        return $profile->healthConditions->map(fn ($condition): array => [
+        return $profile->healthConditions->map(fn(\App\Models\HealthCondition $condition): array => [
             'name' => $condition->name,
             'notes' => $condition->pivot->notes ?? null,
         ])->toArray();
@@ -90,7 +91,7 @@ final readonly class GetUserProfileContextAction
      */
     private function getMedications(UserProfile $profile): array
     {
-        return $profile->medications->map(fn ($med): array => [
+        return $profile->medications->map(fn(UserMedication $med): array => [
             'name' => $med->name,
             'dosage' => $med->dosage,
             'frequency' => $med->frequency,
@@ -175,28 +176,28 @@ final readonly class GetUserProfileContextAction
         }
 
         if ($bioParts !== []) {
-            $parts[] = 'BIOMETRICS: '.implode(', ', $bioParts);
+            $parts[] = 'BIOMETRICS: ' . implode(', ', $bioParts);
         }
 
         // Dietary Preferences
         $prefs = $context['dietary_preferences'];
         if ($prefs !== []) {
-            $prefStrings = array_map(fn (array $p): string => $p['name'].($p['severity'] ? " ({$p['severity']})" : '').($p['notes'] ? ": {$p['notes']}" : ''), $prefs);
-            $parts[] = 'DIETARY PREFERENCES/RESTRICTIONS: '.implode(', ', $prefStrings);
+            $prefStrings = array_map(fn(array $p): string => $p['name'] . ($p['severity'] ? " ({$p['severity']})" : '') . ($p['notes'] ? ": {$p['notes']}" : ''), $prefs);
+            $parts[] = 'DIETARY PREFERENCES/RESTRICTIONS: ' . implode(', ', $prefStrings);
         }
 
         // Health Conditions
         $conditions = $context['health_conditions'];
         if ($conditions !== []) {
-            $conditionStrings = array_map(fn (array $c): string => $c['name'].($c['notes'] ? " ({$c['notes']})" : ''), $conditions);
-            $parts[] = 'HEALTH CONDITIONS: '.implode(', ', $conditionStrings);
+            $conditionStrings = array_map(fn(array $c): string => $c['name'] . ($c['notes'] ? " ({$c['notes']})" : ''), $conditions);
+            $parts[] = 'HEALTH CONDITIONS: ' . implode(', ', $conditionStrings);
         }
 
         // Medications
         $medications = $context['medications'];
         if ($medications !== []) {
-            $medStrings = array_map(fn (array $m): string => "{$m['name']}".($m['dosage'] ? " {$m['dosage']}" : '').($m['frequency'] ? " ({$m['frequency']})" : ''), $medications);
-            $parts[] = 'MEDICATIONS: '.implode(', ', $medStrings);
+            $medStrings = array_map(fn(array $m): string => "{$m['name']}" . ($m['dosage'] ? " {$m['dosage']}" : '') . ($m['frequency'] ? " ({$m['frequency']})" : ''), $medications);
+            $parts[] = 'MEDICATIONS: ' . implode(', ', $medStrings);
         }
 
         // Goals
@@ -216,12 +217,12 @@ final readonly class GetUserProfileContextAction
         }
 
         if ($goalParts !== []) {
-            $parts[] = 'GOALS: '.implode(', ', $goalParts);
+            $parts[] = 'GOALS: ' . implode(', ', $goalParts);
         }
 
         // Missing data note
         if ($missingData !== []) {
-            $parts[] = 'MISSING PROFILE DATA: '.implode(', ', $missingData).'. Consider suggesting the user complete their profile for more personalized advice when relevant.';
+            $parts[] = 'MISSING PROFILE DATA: ' . implode(', ', $missingData) . '. Consider suggesting the user complete their profile for more personalized advice when relevant.';
         }
 
         return implode("\n", $parts);
