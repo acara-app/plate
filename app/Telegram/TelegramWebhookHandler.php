@@ -18,17 +18,17 @@ final class TelegramWebhookHandler extends WebhookHandler
     public function start(): void
     {
         $text = "👋 Welcome to Acara Plate!\n\n"
-            ."I'm your AI nutrition advisor. I can help you with:\n"
-            ."• General nutrition advice\n"
-            ."• Meal suggestions and meal plans\n"
-            ."• Glucose spike predictions\n"
-            ."• Dietary recommendations\n\n"
-            ."Commands:\n"
-            ."/new - Start a new conversation\n"
-            ."/reset - Clear conversation history\n"
-            ."/me - Show your profile\n"
-            ."/help - Show all commands\n\n"
-            .'To get started, link your account in Settings → Integrations.';
+            . "I'm your AI nutrition advisor. I can help you with:\n"
+            . "• General nutrition advice\n"
+            . "• Meal suggestions and meal plans\n"
+            . "• Glucose spike predictions\n"
+            . "• Dietary recommendations\n\n"
+            . "Commands:\n"
+            . "/new - Start a new conversation\n"
+            . "/reset - Clear conversation history\n"
+            . "/me - Show your profile\n"
+            . "/help - Show all commands\n\n"
+            . 'To get started, link your account in Settings → Integrations.';
 
         $this->chat->message($text)->send();
     }
@@ -36,12 +36,12 @@ final class TelegramWebhookHandler extends WebhookHandler
     public function help(): void
     {
         $text = "📚 Available Commands:\n\n"
-            ."/start - Welcome message\n"
-            ."/new - Start a new conversation\n"
-            ."/reset - Clear conversation history\n"
-            ."/me - Show your profile\n"
-            ."/help - Show this help\n\n"
-            .'Just send me any message for nutrition advice!';
+            . "/start - Welcome message\n"
+            . "/new - Start a new conversation\n"
+            . "/reset - Clear conversation history\n"
+            . "/me - Show your profile\n"
+            . "/help - Show this help\n\n"
+            . 'Just send me any message for nutrition advice!';
 
         $this->chat->message($text)->send();
     }
@@ -92,7 +92,7 @@ final class TelegramWebhookHandler extends WebhookHandler
 
         if ($user->profile) {
             $text .= "\n\n📊 {$user->profile->age} years, {$user->profile->gender}\n"
-                ."📏 {$user->profile->height_cm}cm, {$user->profile->weight_kg}kg";
+                . "📏 {$user->profile->height_cm}cm, {$user->profile->weight_kg}kg";
         }
 
         $this->chat->message($text)->send();
@@ -145,7 +145,7 @@ final class TelegramWebhookHandler extends WebhookHandler
                 $chat->update(['conversation_id' => $result['conversation_id']]);
             }
 
-            $this->chat->message($result['response'])->send();
+            $this->chat->markdown($result['response'])->send();
         } catch (Exception $e) {
             report($e);
             $this->chat->message('❌ Error processing message. Please try again.')->send();
