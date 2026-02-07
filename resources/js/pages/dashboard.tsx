@@ -199,47 +199,6 @@ export default function Dashboard() {
                         </Card>
                     </Link>
 
-                    {/* Recent Conversations Card */}
-                    {recentConversations.length > 0 && (
-                        <Card className="flex flex-col">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="flex items-center gap-2 text-base">
-                                    <MessageSquare className="h-4 w-4 text-primary" />
-                                    Recent Conversations
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex-1">
-                                <div className="space-y-2">
-                                    {recentConversations.map((conv) => (
-                                        <Link
-                                            key={conv.id}
-                                            href={chat.create(conv.id).url}
-                                            className="group flex items-center justify-between rounded-md px-2 py-2 text-sm transition-colors hover:bg-muted"
-                                        >
-                                            <span className="truncate text-muted-foreground group-hover:text-foreground">
-                                                {conv.title}
-                                            </span>
-                                            <span className="ml-2 shrink-0 text-xs text-muted-foreground">
-                                                {conv.updated_at}
-                                            </span>
-                                        </Link>
-                                    ))}
-                                </div>
-                                <div className="mt-4 border-t pt-3">
-                                    <Link href={chat.create().url}>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="w-full text-xs"
-                                        >
-                                            View All Conversations
-                                        </Button>
-                                    </Link>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-
                     {/* My Menu Card */}
                     <Link href={mealPlans.index().url} className="group">
                         <Card className="h-full transition-all hover:border-primary/50 hover:shadow-md">
@@ -315,6 +274,47 @@ export default function Dashboard() {
                             </CardContent>
                         </Card>
                     </Link>
+
+                    {/* Recent Conversations Card */}
+                    {recentConversations.length > 0 && (
+                        <Card className="flex flex-col">
+                            <CardHeader className="pb-3">
+                                <CardTitle className="flex items-center gap-2 text-base">
+                                    <MessageSquare className="h-4 w-4 text-primary" />
+                                    Recent Conversations
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex-1">
+                                <div className="space-y-2">
+                                    {recentConversations.map((conv) => (
+                                        <Link
+                                            key={conv.id}
+                                            href={chat.create(conv.id).url}
+                                            className="group flex items-center justify-between rounded-md px-2 py-2 text-sm transition-colors hover:bg-muted"
+                                        >
+                                            <span className="truncate text-muted-foreground group-hover:text-foreground">
+                                                {conv.title}
+                                            </span>
+                                            <span className="ml-2 shrink-0 text-xs text-muted-foreground">
+                                                {conv.updated_at}
+                                            </span>
+                                        </Link>
+                                    ))}
+                                </div>
+                                <div className="mt-4 border-t pt-3">
+                                    <Link href={chat.create().url}>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="w-full text-xs"
+                                        >
+                                            View All Conversations
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
             </div>
         </AppLayout>
