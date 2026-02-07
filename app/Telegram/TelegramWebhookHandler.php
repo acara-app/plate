@@ -7,13 +7,17 @@ namespace App\Telegram;
 use App\Actions\GenerateAiResponseAction;
 use App\Models\User;
 use App\Models\UserTelegramChat;
+use App\Services\Telegram\TelegramMessageService;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
 use Exception;
 use Illuminate\Support\Stringable;
 
 final class TelegramWebhookHandler extends WebhookHandler
 {
-    public function __construct(private readonly GenerateAiResponseAction $generateAiResponse) {}
+    public function __construct(
+        private readonly GenerateAiResponseAction $generateAiResponse,
+        private readonly TelegramMessageService $telegramMessage,
+    ) {}
 
     public function start(): void
     {
@@ -30,7 +34,7 @@ final class TelegramWebhookHandler extends WebhookHandler
             . "/help - Show all commands\n\n"
             . 'To get started, link your account in Settings → Integrations.';
 
-        $this->chat->message($text)->send();
+        $this->telegramMessage->sendLongMessage($this->chat, $text, false);
     }
 
     public function help(): void
@@ -43,7 +47,7 @@ final class TelegramWebhookHandler extends WebhookHandler
             . "/help - Show this help\n\n"
             . 'Just send me any message for nutrition advice!';
 
-        $this->chat->message($text)->send();
+        $this->telegramMessage->sendLongMessage($this->chat, $text, false);
     }
 
     public function link(string $token): void
@@ -75,7 +79,11 @@ final class TelegramWebhookHandler extends WebhookHandler
         $chat->update(['telegraph_chat_id' => $this->chat->id]);
         $chat->markAsLinked();
 
-        $this->chat->message("✅ Linked! Welcome, {$chat->user->name}!\n\nTry asking:\n• What should I eat for breakfast?\n• Create a meal plan\n• Will this spike my glucose?")->send();
+        $this->telegramMessage->sendLongMessage(
+            $this->chat,
+            "✅ Linked! Welcome, {$chat->user->name}!\n\nTry asking:\n• What should I eat for breakfast?\n• Create a meal plan\n• Will this spike my glucose?",
+            false
+        );
     }
 
     public function me(): void
@@ -95,7 +103,7 @@ final class TelegramWebhookHandler extends WebhookHandler
                 . "📏 {$user->profile->height_cm}cm, {$user->profile->weight_kg}kg";
         }
 
-        $this->chat->message($text)->send();
+        $this->telegramMessage->sendLongMessage($this->chat, $text, false);
     }
 
     public function new(): void
@@ -136,20 +144,37 @@ final class TelegramWebhookHandler extends WebhookHandler
         $chat = $this->getUserTelegramChat();
         $conversationId = $chat?->conversation_id;
 
-        $this->chat->action('typing')->send();
+        // Start typing indicator
+        $this->telegramMessage->startTypingLoop($this->chat);
 
         try {
-            $result = $this->generateAiResponse->handle($user, $text->toString(), $conversationId);
-
-            if ($chat instanceof UserTelegramChat && $conversationId === null) {
-                $chat->update(['conversation_id' => $result['conversation_id']]);
-            }
-
-            $this->chat->markdown($result['response'])->send();
+            // Send periodic typing indicators during AI processing
+            $this->sendTypingDuringGeneration($user, $text->toString(), $conversationId, $chat);
         } catch (Exception $e) {
+            $this->telegramMessage->stopTypingLoop();
             report($e);
             $this->chat->message('❌ Error processing message. Please try again.')->send();
         }
+    }
+
+    /**
+     * Generate AI response with periodic typing indicators.
+     */
+    private function sendTypingDuringGeneration(
+        User $user,
+        string $message,
+        ?string $conversationId,
+        ?UserTelegramChat $chat,
+    ): void {
+        $result = $this->generateAiResponse->handle($user, $message, $conversationId);
+
+        if ($chat instanceof UserTelegramChat && $conversationId === null) {
+            $chat->update(['conversation_id' => $result['conversation_id']]);
+        }
+
+        // Stop typing and send the response
+        $this->telegramMessage->stopTypingLoop();
+        $this->telegramMessage->sendLongMessage($this->chat, $result['response']);
     }
 
     private function getLinkedUser(): ?User

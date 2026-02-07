@@ -1,0 +1,227 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Services\Telegram\TelegramMessageService;
+use DefStudio\Telegraph\Facades\Telegraph;
+use DefStudio\Telegraph\Models\TelegraphBot;
+use DefStudio\Telegraph\Models\TelegraphChat;
+
+beforeEach(function (): void {
+    Telegraph::fake();
+});
+
+describe('message chunking', function (): void {
+    it('returns single chunk for short messages', function (): void {
+        $service = new TelegramMessageService();
+
+        $chunks = $service->splitMessage('Hello, world!');
+
+        expect($chunks)->toHaveCount(1)
+            ->and($chunks[0])->toBe('Hello, world!');
+    });
+
+    it('returns single chunk for message at max length', function (): void {
+        $service = new TelegramMessageService();
+        $message = str_repeat('a', TelegramMessageService::getMaxMessageLength());
+
+        $chunks = $service->splitMessage($message);
+
+        expect($chunks)->toHaveCount(1)
+            ->and(mb_strlen($chunks[0]))->toBe(TelegramMessageService::getMaxMessageLength());
+    });
+
+    it('splits at paragraph boundary when available', function (): void {
+        $service = new TelegramMessageService();
+
+        $paragraph1 = str_repeat('First paragraph. ', 150); // ~2550 chars
+        $paragraph2 = str_repeat('Second paragraph. ', 150); // ~2700 chars
+        $message = $paragraph1 . "\n\n" . $paragraph2;
+
+        $chunks = $service->splitMessage($message);
+
+        expect($chunks)->toHaveCount(2)
+            ->and($chunks[0])->toBe(trim($paragraph1))
+            ->and($chunks[1])->toBe(trim($paragraph2));
+    });
+
+    it('splits at line boundary when no paragraphs available', function (): void {
+        $service = new TelegramMessageService();
+
+        $line1 = str_repeat('First line content. ', 130); // ~2600 chars
+        $line2 = str_repeat('Second line content. ', 130); // ~2600 chars
+        $message = $line1 . "\n" . $line2;
+
+        $chunks = $service->splitMessage($message);
+
+        expect($chunks)->toHaveCount(2)
+            ->and($chunks[0])->toBe(trim($line1))
+            ->and($chunks[1])->toBe(trim($line2));
+    });
+
+    it('splits at sentence boundary when no line breaks available', function (): void {
+        $service = new TelegramMessageService();
+
+        // Create a message that's just over max length without line breaks
+        $sentence1 = str_repeat('A ', 2000); // 4000 chars
+        $sentence2 = str_repeat('B ', 500); // 1000 chars
+        $message = $sentence1 . '. ' . $sentence2;
+
+        $chunks = $service->splitMessage($message);
+
+        expect($chunks)->toHaveCount(2)
+            ->and($chunks[0])->toEndWith('.')
+            ->and(mb_strlen($chunks[0]))->toBeLessThanOrEqual(TelegramMessageService::getMaxMessageLength());
+    });
+
+    it('splits at word boundary as fallback', function (): void {
+        $service = new TelegramMessageService();
+
+        // Create a long string with only spaces
+        $message = str_repeat('word ', 1000); // 5000 chars
+
+        $chunks = $service->splitMessage($message);
+
+        expect($chunks)->toHaveCount(2);
+        foreach ($chunks as $chunk) {
+            expect(mb_strlen($chunk))->toBeLessThanOrEqual(TelegramMessageService::getMaxMessageLength());
+        }
+    });
+
+    it('force splits when no boundaries available', function (): void {
+        $service = new TelegramMessageService();
+
+        // Create a message with no word boundaries
+        $message = str_repeat('x', 5000);
+
+        $chunks = $service->splitMessage($message);
+
+        expect($chunks)->toHaveCount(2)
+            ->and(mb_strlen($chunks[0]))->toBe(TelegramMessageService::getMaxMessageLength())
+            ->and(mb_strlen($chunks[1]))->toBe(904); // 5000 - 4096
+    });
+
+    it('handles empty message', function (): void {
+        $service = new TelegramMessageService();
+
+        $chunks = $service->splitMessage('');
+
+        expect($chunks)->toHaveCount(0);
+    });
+
+    it('handles whitespace-only message', function (): void {
+        $service = new TelegramMessageService();
+
+        $chunks = $service->splitMessage('   ');
+
+        expect($chunks)->toHaveCount(0);
+    });
+
+    it('chunks very long multi-paragraph message correctly', function (): void {
+        $service = new TelegramMessageService();
+
+        // Create a message with 5 paragraphs, each ~1000 chars
+        $paragraphs = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $paragraphs[] = str_repeat("Paragraph {$i}. ", 60);
+        }
+        $message = implode("\n\n", $paragraphs);
+
+        $chunks = $service->splitMessage($message);
+
+        // Each chunk should be under limit
+        foreach ($chunks as $chunk) {
+            expect(mb_strlen($chunk))->toBeLessThanOrEqual(TelegramMessageService::getMaxMessageLength());
+        }
+
+        // All content should be preserved
+        $reconstructed = implode("\n\n", $chunks);
+        expect(mb_strlen($reconstructed))->toBeGreaterThanOrEqual(mb_strlen($message) - 100);
+    });
+});
+
+describe('message sending', function (): void {
+    it('sends short message in single call', function (): void {
+        Telegraph::fake([
+            \DefStudio\Telegraph\Telegraph::ENDPOINT_MESSAGE => ['ok' => true, 'result' => []],
+        ]);
+
+        $bot = TelegraphBot::factory()->create();
+        $chat = TelegraphChat::factory()->for($bot)->create();
+        $service = new TelegramMessageService();
+
+        $service->sendLongMessage($chat, 'Hello, world!', false);
+
+        Telegraph::assertSent('Hello, world!');
+    });
+
+    it('sends markdown message correctly', function (): void {
+        Telegraph::fake([
+            \DefStudio\Telegraph\Telegraph::ENDPOINT_MESSAGE => ['ok' => true, 'result' => []],
+        ]);
+
+        $bot = TelegraphBot::factory()->create();
+        $chat = TelegraphChat::factory()->for($bot)->create();
+        $service = new TelegramMessageService();
+
+        $service->sendLongMessage($chat, '**Bold text**');
+
+        Telegraph::assertSent('**Bold text**');
+    });
+
+    it('sends chunked messages for long content', function (): void {
+        Telegraph::fake([
+            \DefStudio\Telegraph\Telegraph::ENDPOINT_MESSAGE => ['ok' => true, 'result' => []],
+        ]);
+
+        $bot = TelegraphBot::factory()->create();
+        $chat = TelegraphChat::factory()->for($bot)->create();
+        $service = new TelegramMessageService();
+
+        $longMessage = str_repeat('Test content. ', 400); // ~5200 chars
+        $service->sendLongMessage($chat, $longMessage, false);
+
+        // Should have sent 2 messages
+        Telegraph::assertSentCount(2);
+    });
+});
+
+describe('typing indicator', function (): void {
+    it('can start and stop typing loop', function (): void {
+        $bot = TelegraphBot::factory()->create();
+        $chat = TelegraphChat::factory()->for($bot)->create();
+        $service = new TelegramMessageService();
+
+        expect($service->isTypingLoopActive())->toBeFalse();
+
+        $service->startTypingLoop($chat);
+        expect($service->isTypingLoopActive())->toBeTrue();
+
+        $service->stopTypingLoop();
+        expect($service->isTypingLoopActive())->toBeFalse();
+    });
+
+    it('sends typing action when loop is started', function (): void {
+        Telegraph::fake();
+
+        $bot = TelegraphBot::factory()->create();
+        $chat = TelegraphChat::factory()->for($bot)->create();
+        $service = new TelegramMessageService();
+
+        $service->startTypingLoop($chat);
+
+        Telegraph::assertSentData(\DefStudio\Telegraph\Telegraph::ENDPOINT_SEND_CHAT_ACTION, [
+            'action' => 'typing',
+        ]);
+    });
+
+    it('returns correct typing interval', function (): void {
+        expect(TelegramMessageService::getTypingIntervalSeconds())->toBe(4);
+    });
+});
+
+describe('max message length', function (): void {
+    it('returns 4096 as max message length', function (): void {
+        expect(TelegramMessageService::getMaxMessageLength())->toBe(4096);
+    });
+});
