@@ -110,7 +110,7 @@ return [
         /*
          * if enabled, allows messages and commands from unregistered chats
          */
-        'allow_messages_from_unknown_chats' => false,
+        'allow_messages_from_unknown_chats' => true,
 
         /*
          * if enabled, store unknown chats as new TelegraphChat models
