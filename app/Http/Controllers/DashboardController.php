@@ -21,7 +21,7 @@ final readonly class DashboardController
             ->latest()
             ->limit(3)
             ->get()
-            ->map(fn(Conversation $conversation): array => [
+            ->map(fn (Conversation $conversation): array => [
                 'id' => $conversation->id,
                 'title' => $conversation->title ?: 'New Conversation',
                 'updated_at' => $conversation->updated_at->diffForHumans(),
@@ -31,8 +31,8 @@ final readonly class DashboardController
 
         return Inertia::render('dashboard', [
             'recentConversations' => $recentConversations,
-            'hasGlucoseData' => $profile ? $this->user->diabetesLogs()->whereNotNull('glucose_value')->exists() : false,
-            'hasHealthConditions' => $profile ? $profile->healthConditions()->exists() : false,
+            'hasGlucoseData' => $profile && $this->user->diabetesLogs()->whereNotNull('glucose_value')->exists(),
+            'hasHealthConditions' => $profile && $profile->healthConditions()->exists(),
         ]);
     }
 }

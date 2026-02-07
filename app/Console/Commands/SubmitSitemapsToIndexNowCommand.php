@@ -29,7 +29,6 @@ final class SubmitSitemapsToIndexNowCommand extends Command
         $allUrls = [];
 
         foreach ($files as $file) {
-            /** @var string $file */
             $path = public_path($file);
 
             if (! File::exists($path)) {

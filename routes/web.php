@@ -12,6 +12,7 @@ Route::view('/terms-of-service', 'terms-of-service')->name('terms');
 Route::view('/about', 'about')->name('about');
 Route::view('/support', 'support')->name('support');
 Route::view('/install-app', 'install-app')->name('install-app');
+Route::view('/telegram', 'telegram')->name('telegram');
 
 Route::view('/diabetes-log-book', 'diabetes-log-book')->name('diabetes-log-book');
 Route::view('/diabetes-log-book-info', 'diabetes-log-book-info')->name('diabetes-log-book-info');
@@ -108,6 +109,11 @@ Route::middleware('auth')->group(function (): void {
 
     // Appearance...
     Route::get('settings/appearance', fn () => Inertia::render('appearance/update'))->name('appearance.edit');
+
+    // Integrations...
+    Route::get('settings/integrations', [Web\IntegrationsController::class, 'edit'])->name('integrations.edit');
+    Route::post('settings/integrations/telegram/token', [Web\IntegrationsController::class, 'generateTelegramToken'])->name('integrations.telegram.token');
+    Route::delete('settings/integrations/telegram', [Web\IntegrationsController::class, 'disconnectTelegram'])->name('integrations.telegram.destroy');
 
     // User Two-Factor Authentication...
     Route::get('settings/two-factor', [Web\UserTwoFactorAuthenticationController::class, 'show'])

@@ -10,6 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.4 || ^8.5",
+        "defstudio/telegraph": "^1.68",
         "inertiajs/inertia-laravel": "^2.0.19",
         "laravel-workflow/laravel-workflow": "^1.0.56",
         "laravel-workflow/waterline": "^1.0.14",

@@ -13,6 +13,7 @@ import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import chat from '@/routes/chat';
 import diabetesLog from '@/routes/diabetes-log';
+import integrations from '@/routes/integrations';
 import mealPlans from '@/routes/meal-plans';
 import biometrics from '@/routes/onboarding/biometrics';
 import { BreadcrumbItem } from '@/types';
@@ -296,6 +297,29 @@ export default function Dashboard() {
                                         {t(
                                             'dashboard_cards.diabetes_log.description',
                                         )}
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
+
+                    {/* Integrations Card */}
+                    <Link href={integrations.edit().url} className="group">
+                        <Card className="h-full transition-all hover:border-primary/50 hover:shadow-md">
+                            <CardContent className="flex h-full flex-col justify-between p-5">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
+                                        <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold">
+                                        Integrations
+                                    </h3>
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        Connect Telegram and other messaging
+                                        apps
                                     </p>
                                 </div>
                             </CardContent>

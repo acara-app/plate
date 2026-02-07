@@ -130,6 +130,14 @@ final class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * @return HasOne<UserTelegramChat, $this>
+     */
+    public function telegramChat(): HasOne
+    {
+        return $this->hasOne(UserTelegramChat::class);
+    }
+
+    /**
      * Check if the user has any active subscription.
      */
     public function hasActiveSubscription(): bool
