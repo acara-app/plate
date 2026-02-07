@@ -10,9 +10,7 @@ use Inertia\Inertia;
 
 final class IntegrationsController
 {
-    /**
-     * Show the integrations settings page.
-     */
+
     public function edit(Request $request): \Inertia\Response
     {
         $user = $request->user();
@@ -28,17 +26,13 @@ final class IntegrationsController
         ]);
     }
 
-    /**
-     * Generate a new linking token for Telegram.
-     */
+
     public function generateTelegramToken(Request $request): \Illuminate\Http\RedirectResponse
     {
         $user = $request->user();
 
-        // Deactivate any existing active links using the relationship
         $user->telegramChat()->active()->update(['is_active' => false]);
 
-        // Create new link with token using the relationship
         $userTelegramChat = $user->telegramChat()->create([
             'is_active' => true,
         ]);
@@ -51,14 +45,10 @@ final class IntegrationsController
         ]);
     }
 
-    /**
-     * Disconnect Telegram integration.
-     */
     public function disconnectTelegram(Request $request): \Illuminate\Http\RedirectResponse
     {
         $user = $request->user();
 
-        // Use the relationship to deactivate all links
         $user->telegramChat()->update(['is_active' => false]);
 
         return to_route('integrations.edit')->with('status', 'telegram-disconnected');
