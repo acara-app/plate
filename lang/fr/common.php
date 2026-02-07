@@ -180,7 +180,7 @@ return [
 
     // Dashboard Onboarding Banner
     'onboarding_banner' => [
-        'text' => 'Complétez votre profil pour obtenir des plans de repas personnalisés.',
+        'text' => 'Terminez la configuration pour obtenir des recommandations nutritionnelles adaptées.',
         'complete' => 'Compléter la configuration',
         'dismiss' => 'Ignorer',
     ],

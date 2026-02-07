@@ -190,7 +190,7 @@ return [
 
     // Dashboard Onboarding Banner
     'onboarding_banner' => [
-        'text' => 'Complete your profile to get personalized meal plans.',
+        'text' => 'Finish setup to get tailored nutrition recommendations.',
         'complete' => 'Complete Setup',
         'dismiss' => 'Dismiss',
     ],
