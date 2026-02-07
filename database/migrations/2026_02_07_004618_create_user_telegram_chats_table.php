@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('telegraph_chat_id')->nullable()->constrained('telegraph_chats')->onDelete('cascade');
+            $table->string('conversation_id')->nullable();
             $table->string('linking_token', 16)->unique()->nullable();
             $table->timestamp('token_expires_at')->nullable();
             $table->boolean('is_active')->default(true);
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['user_id', 'telegraph_chat_id'])->whereNotNull('telegraph_chat_id');
+            $table->index('conversation_id');
         });
     }
 
