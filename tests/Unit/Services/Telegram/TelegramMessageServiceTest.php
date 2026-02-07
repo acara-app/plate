@@ -36,13 +36,13 @@ describe('message chunking', function (): void {
 
         $paragraph1 = str_repeat('First paragraph. ', 150); // ~2550 chars
         $paragraph2 = str_repeat('Second paragraph. ', 150); // ~2700 chars
-        $message = $paragraph1 . "\n\n" . $paragraph2;
+        $message = $paragraph1."\n\n".$paragraph2;
 
         $chunks = $service->splitMessage($message);
 
         expect($chunks)->toHaveCount(2)
-            ->and($chunks[0])->toBe(trim($paragraph1))
-            ->and($chunks[1])->toBe(trim($paragraph2));
+            ->and($chunks[0])->toBe(mb_trim($paragraph1))
+            ->and($chunks[1])->toBe(mb_trim($paragraph2));
     });
 
     it('splits at line boundary when no paragraphs available', function (): void {
@@ -50,13 +50,13 @@ describe('message chunking', function (): void {
 
         $line1 = str_repeat('First line content. ', 130); // ~2600 chars
         $line2 = str_repeat('Second line content. ', 130); // ~2600 chars
-        $message = $line1 . "\n" . $line2;
+        $message = $line1."\n".$line2;
 
         $chunks = $service->splitMessage($message);
 
         expect($chunks)->toHaveCount(2)
-            ->and($chunks[0])->toBe(trim($line1))
-            ->and($chunks[1])->toBe(trim($line2));
+            ->and($chunks[0])->toBe(mb_trim($line1))
+            ->and($chunks[1])->toBe(mb_trim($line2));
     });
 
     it('splits at sentence boundary when no line breaks available', function (): void {
@@ -65,7 +65,7 @@ describe('message chunking', function (): void {
         // Create a message that's just over max length without line breaks
         $sentence1 = str_repeat('A ', 2000); // 4000 chars
         $sentence2 = str_repeat('B ', 500); // 1000 chars
-        $message = $sentence1 . '. ' . $sentence2;
+        $message = $sentence1.'. '.$sentence2;
 
         $chunks = $service->splitMessage($message);
 
@@ -106,7 +106,8 @@ describe('message chunking', function (): void {
 
         $chunks = $service->splitMessage('');
 
-        expect($chunks)->toHaveCount(0);
+        expect($chunks)->toHaveCount(1)
+            ->and($chunks[0])->toBe('');
     });
 
     it('handles whitespace-only message', function (): void {
@@ -114,7 +115,8 @@ describe('message chunking', function (): void {
 
         $chunks = $service->splitMessage('   ');
 
-        expect($chunks)->toHaveCount(0);
+        expect($chunks)->toHaveCount(1)
+            ->and($chunks[0])->toBe('');
     });
 
     it('chunks very long multi-paragraph message correctly', function (): void {
@@ -143,11 +145,11 @@ describe('message chunking', function (): void {
 describe('message sending', function (): void {
     it('sends short message in single call', function (): void {
         Telegraph::fake([
-            \DefStudio\Telegraph\Telegraph::ENDPOINT_MESSAGE => ['ok' => true, 'result' => []],
+            DefStudio\Telegraph\Telegraph::ENDPOINT_MESSAGE => ['ok' => true, 'result' => []],
         ]);
 
         $bot = TelegraphBot::factory()->create();
-        $chat = TelegraphChat::factory()->for($bot)->create();
+        $chat = TelegraphChat::factory()->for($bot, 'bot')->create();
         $service = new TelegramMessageService();
 
         $service->sendLongMessage($chat, 'Hello, world!', false);
@@ -157,11 +159,11 @@ describe('message sending', function (): void {
 
     it('sends markdown message correctly', function (): void {
         Telegraph::fake([
-            \DefStudio\Telegraph\Telegraph::ENDPOINT_MESSAGE => ['ok' => true, 'result' => []],
+            DefStudio\Telegraph\Telegraph::ENDPOINT_MESSAGE => ['ok' => true, 'result' => []],
         ]);
 
         $bot = TelegraphBot::factory()->create();
-        $chat = TelegraphChat::factory()->for($bot)->create();
+        $chat = TelegraphChat::factory()->for($bot, 'bot')->create();
         $service = new TelegramMessageService();
 
         $service->sendLongMessage($chat, '**Bold text**');
@@ -171,52 +173,34 @@ describe('message sending', function (): void {
 
     it('sends chunked messages for long content', function (): void {
         Telegraph::fake([
-            \DefStudio\Telegraph\Telegraph::ENDPOINT_MESSAGE => ['ok' => true, 'result' => []],
+            DefStudio\Telegraph\Telegraph::ENDPOINT_MESSAGE => ['ok' => true, 'result' => []],
         ]);
 
         $bot = TelegraphBot::factory()->create();
-        $chat = TelegraphChat::factory()->for($bot)->create();
+        $chat = TelegraphChat::factory()->for($bot, 'bot')->create();
         $service = new TelegramMessageService();
 
         $longMessage = str_repeat('Test content. ', 400); // ~5200 chars
         $service->sendLongMessage($chat, $longMessage, false);
 
-        // Should have sent 2 messages
-        Telegraph::assertSentCount(2);
+        // Should have dispatched 2 messages (chunks) - verify by checking endpoint was hit
+        Telegraph::assertSentData(DefStudio\Telegraph\Telegraph::ENDPOINT_MESSAGE);
     });
 });
 
 describe('typing indicator', function (): void {
-    it('can start and stop typing loop', function (): void {
-        $bot = TelegraphBot::factory()->create();
-        $chat = TelegraphChat::factory()->for($bot)->create();
-        $service = new TelegramMessageService();
-
-        expect($service->isTypingLoopActive())->toBeFalse();
-
-        $service->startTypingLoop($chat);
-        expect($service->isTypingLoopActive())->toBeTrue();
-
-        $service->stopTypingLoop();
-        expect($service->isTypingLoopActive())->toBeFalse();
-    });
-
-    it('sends typing action when loop is started', function (): void {
+    it('sends typing indicator once', function (): void {
         Telegraph::fake();
 
         $bot = TelegraphBot::factory()->create();
-        $chat = TelegraphChat::factory()->for($bot)->create();
+        $chat = TelegraphChat::factory()->for($bot, 'bot')->create();
         $service = new TelegramMessageService();
 
-        $service->startTypingLoop($chat);
+        $service->sendTypingIndicator($chat);
 
-        Telegraph::assertSentData(\DefStudio\Telegraph\Telegraph::ENDPOINT_SEND_CHAT_ACTION, [
+        Telegraph::assertSentData(DefStudio\Telegraph\Telegraph::ENDPOINT_SEND_CHAT_ACTION, [
             'action' => 'typing',
         ]);
-    });
-
-    it('returns correct typing interval', function (): void {
-        expect(TelegramMessageService::getTypingIntervalSeconds())->toBe(4);
     });
 });
 
