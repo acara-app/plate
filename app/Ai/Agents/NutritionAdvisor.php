@@ -28,13 +28,25 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
     private AgentMode $mode = AgentMode::Ask;
 
     public function __construct(
-        public User $user,
+        private User $user,
         private readonly GetUserProfileContextAction $profileContext,
         private readonly GenerateMeal $generateMealTool,
         private readonly GetUserProfile $getUserProfileTool,
         private readonly GenerateMealPlan $generateMealPlanTool,
         private readonly PredictGlucoseSpike $predictGlucoseSpikeTool,
     ) {}
+
+    /**
+     * Get the current user (prefers conversation participant set by continue method).
+     */
+    private function getUser(): User
+    {
+        if ($this->conversationUser instanceof User) {
+            return $this->conversationUser;
+        }
+
+        return $this->user;
+    }
 
     public function withMode(AgentMode $mode): self
     {
@@ -45,7 +57,7 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
 
     public function instructions(): string
     {
-        $profileData = $this->profileContext->handle($this->user);
+        $profileData = $this->profileContext->handle($this->getUser());
 
         return (string) new SystemPrompt(
             background: $this->getBackgroundInstructions(),
@@ -58,7 +70,7 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
 
     public function messages(): iterable
     {
-        return History::query()->where('user_id', $this->user->id)
+        return History::query()->where('user_id', $this->getUser()->id)
             ->latest()
             ->limit(50)
             ->get()
