@@ -178,6 +178,13 @@ return [
         ],
     ],
 
+    // Dashboard Onboarding Banner
+    'onboarding_banner' => [
+        'text' => 'Complétez votre profil pour obtenir des plans de repas personnalisés.',
+        'complete' => 'Compléter la configuration',
+        'dismiss' => 'Ignorer',
+    ],
+
     // Onboarding
     'onboarding' => [
         'biometrics' => [

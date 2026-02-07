@@ -33,7 +33,7 @@ it('creates new user from Google OAuth callback with mocked provider', function 
 
     $response = get(route('auth.google.callback'));
 
-    $response->assertRedirectToRoute('chat.create');
+    $response->assertRedirectToRoute('dashboard');
 
     assertDatabaseHas('users', [
         'google_id' => 'google123',
@@ -88,7 +88,7 @@ it('links Google account to existing user by email and redirects to chat', funct
 
     $response = get(route('auth.google.callback'));
 
-    $response->assertRedirectToRoute('chat.create');
+    $response->assertRedirectToRoute('dashboard');
 
     $existingUser->refresh();
     expect($existingUser->google_id)->toBe('google456');
@@ -121,7 +121,7 @@ it('updates existing Google user information on login and redirects to chat', fu
 
     $response = get(route('auth.google.callback'));
 
-    $response->assertRedirectToRoute('chat.create');
+    $response->assertRedirectToRoute('dashboard');
 
     $existingUser->refresh();
     expect($existingUser->email)->toBe('newmail@example.com');
@@ -144,7 +144,7 @@ it('handles missing name from Google gracefully for new users', function (): voi
 
     $response = get(route('auth.google.callback'));
 
-    $response->assertRedirectToRoute('chat.create');
+    $response->assertRedirectToRoute('dashboard');
 
     assertDatabaseHas('users', [
         'google_id' => 'google999',
@@ -210,7 +210,7 @@ it('handles duplicate Google ID gracefully', function (): void {
 
     $response = get(route('auth.google.callback'));
 
-    $response->assertRedirectToRoute('chat.create');
+    $response->assertRedirectToRoute('dashboard');
 
     // Should update the existing user with the Google ID
     $user = User::query()->where('google_id', 'google_duplicate')->first();

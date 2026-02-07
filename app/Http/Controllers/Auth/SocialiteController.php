@@ -32,7 +32,7 @@ final readonly class SocialiteController
 
             Auth::login($user);
 
-            return to_route('chat.create');
+            return redirect()->intended(route('dashboard', absolute: false));
 
         } catch (Throwable) {
 

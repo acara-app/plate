@@ -94,7 +94,7 @@ final readonly class OnboardingController
             ]);
         }
 
-        return to_route('chat.create');
+        return to_route('dashboard');
     }
 
     public function showCompletion(): Response|RedirectResponse

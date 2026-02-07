@@ -248,7 +248,7 @@ it('may store identity data and complete onboarding', function (): void {
             'intensity_choice' => IntensityChoice::Balanced->value,
         ]);
 
-    $response->assertRedirectToRoute('chat.create');
+    $response->assertRedirectToRoute('dashboard');
 
     $profile = $user->profile()->first();
 

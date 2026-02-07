@@ -188,6 +188,13 @@ return [
         ],
     ],
 
+    // Dashboard Onboarding Banner
+    'onboarding_banner' => [
+        'text' => 'Complete your profile to get personalized meal plans.',
+        'complete' => 'Complete Setup',
+        'dismiss' => 'Dismiss',
+    ],
+
     // Onboarding
     'onboarding' => [
         'biometrics' => [
