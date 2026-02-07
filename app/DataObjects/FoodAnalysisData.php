@@ -23,6 +23,6 @@ final class FoodAnalysisData extends Data
         public float $totalProtein,
         public float $totalCarbs,
         public float $totalFat,
-        public int $confidence,
+        public float $confidence,
     ) {}
 }

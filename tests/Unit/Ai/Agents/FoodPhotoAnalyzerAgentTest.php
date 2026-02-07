@@ -59,7 +59,7 @@ it('analyzes food photo and returns analysis data', function (): void {
             'total_protein' => 31.0,
             'total_carbs' => 0.0,
             'total_fat' => 3.6,
-            'confidence' => 85,
+            'confidence' => 85.0,
         ])
         ->withFinishReason(FinishReason::Stop)
         ->withUsage(new Usage(100, 200))
@@ -74,7 +74,7 @@ it('analyzes food photo and returns analysis data', function (): void {
     expect($result->totalProtein)->toBe(31.0);
     expect($result->totalCarbs)->toBe(0.0);
     expect($result->totalFat)->toBe(3.6);
-    expect($result->confidence)->toBe(85);
+    expect($result->confidence)->toBe(85.0);
     expect($result->items)->toHaveCount(1);
     expect($result->items->first()->name)->toBe('Grilled Chicken');
 });
@@ -90,7 +90,7 @@ it('analyzes food photo with multiple items', function (): void {
             'total_protein' => 33.7,
             'total_carbs' => 28.0,
             'total_fat' => 3.9,
-            'confidence' => 90,
+            'confidence' => 90.0,
         ])
         ->withFinishReason(FinishReason::Stop)
         ->withUsage(new Usage(100, 200))
@@ -115,7 +115,7 @@ it('handles empty food detection', function (): void {
             'total_protein' => 0,
             'total_carbs' => 0,
             'total_fat' => 0,
-            'confidence' => 0,
+            'confidence' => 0.0,
         ])
         ->withFinishReason(FinishReason::Stop)
         ->withUsage(new Usage(100, 200))
@@ -127,7 +127,7 @@ it('handles empty food detection', function (): void {
     $result = $this->agent->analyze($imageBase64, 'image/jpeg');
 
     expect($result->totalCalories)->toBe(0.0);
-    expect($result->confidence)->toBe(0);
+    expect($result->confidence)->toBe(0.0);
     expect($result->items)->toHaveCount(0);
 });
 

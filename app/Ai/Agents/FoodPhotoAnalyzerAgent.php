@@ -22,7 +22,7 @@ use Spatie\LaravelData\DataCollection;
 
 /**
  * @phpstan-type FoodItem array{name: string, calories: float, protein: float, carbs: float, fat: float, portion: string}
- * @phpstan-type FoodAnalysisResponse array{items: array<int, FoodItem>, total_calories: float, total_protein: float, total_carbs: float, total_fat: float, confidence: int}
+ * @phpstan-type FoodAnalysisResponse array{items: array<int, FoodItem>, total_calories: float, total_protein: float, total_carbs: float, total_fat: float, confidence: float}
  */
 final class FoodPhotoAnalyzerAgent extends BaseAgent
 {
