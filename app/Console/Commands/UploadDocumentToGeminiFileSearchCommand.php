@@ -100,7 +100,6 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
                 return null;
             }
 
-            /** @var string $fileName */
             $fileName = basename($filePath);
 
             /** @var string $fileContent */

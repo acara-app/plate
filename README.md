@@ -193,6 +193,20 @@ composer run dev
 
 Use `npm run build` and your Herd `.test` domain when validating PWA installability. Clear site data if the service worker appears stale.
 
+### Telegram Bot (Optional)
+
+To test Telegram bot integration locally:
+
+1. Install [ngrok](https://ngrok.com/): `brew install ngrok`
+2. Start tunnel: `ngrok http https://plate.test`
+3. Update `.env`:
+    ```env
+    TELEGRAM_BOT_TOKEN=your_bot_token
+    TELEGRAM_WEBHOOK_DOMAIN=https://your-ngrok-url.ngrok.io
+    ```
+4. Register bot: `php artisan telegraph:new-bot`
+5. Set webhook: `php artisan telegraph:set-webhook`
+
 ### Testing & Code Quality
 
 Run the full QA suite:

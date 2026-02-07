@@ -10,16 +10,16 @@
         "test:types": "tsc --noEmit"
     },
     "devDependencies": {
-        "@eslint/js": "^9.39.2",
+        "@eslint/js": "^10.0.1",
         "@laravel/vite-plugin-wayfinder": "^0.1.7",
         "@tailwindcss/typography": "^0.5.19",
         "@types/node": "^25.2.1",
-        "eslint": "^9.39.2",
+        "eslint": "^10.0.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^7.0.1",
         "npm-check-updates": "^19.3.2",
-        "playwright": "^1.58.1",
+        "playwright": "^1.58.2",
         "prettier": "^3.8.1",
         "prettier-plugin-organize-imports": "^4.3.0",
         "prettier-plugin-tailwindcss": "^0.7.2",
@@ -27,7 +27,7 @@
         "vite-plugin-pwa": "^1.2.0"
     },
     "dependencies": {
-        "@ai-sdk/react": "^3.0.75",
+        "@ai-sdk/react": "^3.0.77",
         "@headlessui/react": "^2.2.9",
         "@inertiajs/react": "^2.3.13",
         "@radix-ui/react-alert-dialog": "^1.1.15",

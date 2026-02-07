@@ -63,7 +63,7 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
             ->limit(50)
             ->get()
             ->reverse()
-            ->map(fn(History $message): Message => new Message($message->role, $message->content))->all();
+            ->map(fn (History $message): Message => new Message($message->role, $message->content))->all();
     }
 
     /**
@@ -123,7 +123,7 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
             'USER PROFILE CONTEXT:',
             $profileData['context'],
             '',
-            'CHAT MODE: ' . $this->mode->value,
+            'CHAT MODE: '.$this->mode->value,
         ];
 
         if ($this->mode === AgentMode::GenerateMealPlan) {
