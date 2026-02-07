@@ -10,7 +10,6 @@ use Inertia\Inertia;
 
 final class IntegrationsController
 {
-
     public function edit(Request $request): \Inertia\Response
     {
         $user = $request->user();
@@ -25,7 +24,6 @@ final class IntegrationsController
             ],
         ]);
     }
-
 
     public function generateTelegramToken(Request $request): \Illuminate\Http\RedirectResponse
     {
