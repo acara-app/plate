@@ -19,10 +19,11 @@ import biometrics from '@/routes/onboarding/biometrics';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
-    Activity,
+    ArrowRight,
     ChevronRight,
     Droplets,
     MessageSquare,
+    Send,
     Sparkles,
     TrendingUp,
     Utensils,
@@ -164,23 +165,35 @@ export default function Dashboard() {
                         </CardContent>
                     </Card>
 
-                    {/* Contextual Prompt Card */}
-                    <Link href={contextualPrompt.link} className="group">
-                        <Card className="h-full transition-all hover:border-primary/50 hover:shadow-md">
-                            <CardContent className="flex h-full flex-col justify-between p-5">
+                    {/* Telegram Integration Card - High Priority */}
+                    <Link href={integrations.edit().url} className="group">
+                        <Card className="relative h-full overflow-hidden transition-all hover:border-blue-500/50 hover:shadow-md">
+                            <div className="absolute inset-0 bg-linear-to-br from-blue-50/50 via-transparent to-transparent opacity-50 dark:from-blue-900/10" />
+                            <CardContent className="relative flex h-full flex-col justify-between p-5">
                                 <div className="flex items-start justify-between">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/20">
-                                        <Activity className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
+                                        <Send className="h-5 w-5" />
                                     </div>
-                                    <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                                    <Badge
+                                        variant="secondary"
+                                        className="bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-500/20 dark:text-blue-400"
+                                    >
+                                        Recommended
+                                    </Badge>
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold text-emerald-700 dark:text-emerald-400">
-                                        Quick Action
+                                    <h3 className="font-semibold text-blue-950 dark:text-blue-50">
+                                        Instant advice. Just text.
                                     </h3>
-                                    <p className="mt-2 text-sm text-muted-foreground">
-                                        {contextualPrompt.text}
+                                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                                        Ask what to eat. Check sugar spikes. Get
+                                        healthy swaps instantly. All from
+                                        Telegram, the chat app you already use.
                                     </p>
+                                    <div className="mt-4 flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400">
+                                        Connect your message app
+                                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -297,29 +310,6 @@ export default function Dashboard() {
                                         {t(
                                             'dashboard_cards.diabetes_log.description',
                                         )}
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </Link>
-
-                    {/* Integrations Card */}
-                    <Link href={integrations.edit().url} className="group">
-                        <Card className="h-full transition-all hover:border-primary/50 hover:shadow-md">
-                            <CardContent className="flex h-full flex-col justify-between p-5">
-                                <div className="flex items-start justify-between">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
-                                        <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                                    </div>
-                                    <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">
-                                        Integrations
-                                    </h3>
-                                    <p className="mt-1 text-sm text-muted-foreground">
-                                        Connect Telegram and other messaging
-                                        apps
                                     </p>
                                 </div>
                             </CardContent>
