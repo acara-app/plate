@@ -24,6 +24,7 @@ final readonly class GetUserProfileContextAction
                 'onboarding_completed' => false,
                 'missing_data' => ['profile'],
                 'context' => 'User has not completed their profile. Biometric data, dietary preferences, health conditions, and medications are unavailable.',
+                'raw_data' => null,
             ];
         }
 
