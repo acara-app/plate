@@ -36,18 +36,6 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
         private readonly PredictGlucoseSpike $predictGlucoseSpikeTool,
     ) {}
 
-    /**
-     * Get the current user (prefers conversation participant set by continue method).
-     */
-    private function getUser(): User
-    {
-        if ($this->conversationUser instanceof User) {
-            return $this->conversationUser;
-        }
-
-        return $this->user;
-    }
-
     public function withMode(AgentMode $mode): self
     {
         $this->mode = $mode;
@@ -89,6 +77,18 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
             $this->generateMealPlanTool,
             $this->predictGlucoseSpikeTool,
         ];
+    }
+
+    /**
+     * Get the current user (prefers conversation participant set by continue method).
+     */
+    private function getUser(): User
+    {
+        if ($this->conversationUser instanceof User) {
+            return $this->conversationUser;
+        }
+
+        return $this->user;
     }
 
     /**
