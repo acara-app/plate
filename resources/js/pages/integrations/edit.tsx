@@ -42,6 +42,8 @@ export default function Edit() {
     const { telegram, telegram_token, token_expires_at } =
         usePage<IntegrationsProps>().props;
     const [copied, setCopied] = useState(false);
+    const [botNameCopied, setBotNameCopied] = useState(false);
+    const BOT_USERNAME = 'AcaraPlate_bot';
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -59,6 +61,12 @@ export default function Edit() {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         }
+    };
+
+    const handleCopyBotName = () => {
+        navigator.clipboard.writeText(BOT_USERNAME);
+        setBotNameCopied(true);
+        setTimeout(() => setBotNameCopied(false), 2000);
     };
 
     const formatDate = (dateString: string | null | undefined) => {
@@ -118,11 +126,23 @@ export default function Edit() {
                                             )}
                                         </h4>
                                         <ol className="list-decimal space-y-1 pl-4 text-sm text-muted-foreground">
-                                            <li>
+                                            <li className="flex items-center gap-1">
                                                 {t(
                                                     'integrations.telegram.step_1',
                                                 )}{' '}
-                                                <strong>@AcaraPlate_bot</strong>
+                                                <strong>@{BOT_USERNAME}</strong>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="ml-1 h-4 w-4"
+                                                    onClick={handleCopyBotName}
+                                                >
+                                                    {botNameCopied ? (
+                                                        <Check className="h-3 w-3 text-green-600" />
+                                                    ) : (
+                                                        <Copy className="h-3 w-3" />
+                                                    )}
+                                                </Button>
                                             </li>
                                             <li>
                                                 {t(
@@ -144,7 +164,7 @@ export default function Edit() {
                                             asChild
                                         >
                                             <a
-                                                href="https://t.me/AcaraPlate_bot"
+                                                href={`https://t.me/${BOT_USERNAME}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                             >
@@ -218,11 +238,23 @@ export default function Edit() {
                                                     'integrations.telegram.copy_token',
                                                 )}
                                             </li>
-                                            <li>
+                                            <li className="flex items-center gap-1">
                                                 {t(
                                                     'integrations.telegram.step_1',
                                                 )}{' '}
-                                                <strong>@AcaraPlate_bot</strong>
+                                                <strong>@{BOT_USERNAME}</strong>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="ml-1 h-4 w-4"
+                                                    onClick={handleCopyBotName}
+                                                >
+                                                    {botNameCopied ? (
+                                                        <Check className="h-3 w-3 text-green-600" />
+                                                    ) : (
+                                                        <Copy className="h-3 w-3" />
+                                                    )}
+                                                </Button>
                                             </li>
                                             <li>
                                                 {t(
@@ -239,7 +271,7 @@ export default function Edit() {
 
                                     <Button variant="outline" size="sm" asChild>
                                         <a
-                                            href="https://t.me/AcaraPlate_bot"
+                                            href={`https://t.me/${BOT_USERNAME}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
