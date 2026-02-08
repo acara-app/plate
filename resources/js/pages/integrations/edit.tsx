@@ -28,22 +28,23 @@ interface TelegramData {
     linking_token: string | null;
     token_expires_at: string | null;
     connected_at: string | null;
+    bot_username: string;
 }
 
-interface IntegrationsProps {
+interface Props {
     telegram: TelegramData;
     telegram_token?: string;
     token_expires_at?: string;
+    bot_username: string;
     [key: string]: unknown;
 }
 
 export default function Edit() {
     const { t } = useTranslation('common');
     const { telegram, telegram_token, token_expires_at } =
-        usePage<IntegrationsProps>().props;
+        usePage<Props>().props;
     const [copied, setCopied] = useState(false);
     const [botNameCopied, setBotNameCopied] = useState(false);
-    const BOT_USERNAME = 'AcaraPlate_bot';
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -64,7 +65,7 @@ export default function Edit() {
     };
 
     const handleCopyBotName = () => {
-        navigator.clipboard.writeText(BOT_USERNAME);
+        navigator.clipboard.writeText(telegram.bot_username);
         setBotNameCopied(true);
         setTimeout(() => setBotNameCopied(false), 2000);
     };
@@ -130,7 +131,9 @@ export default function Edit() {
                                                 {t(
                                                     'integrations.telegram.step_1',
                                                 )}{' '}
-                                                <strong>@{BOT_USERNAME}</strong>
+                                                <strong>
+                                                    @{telegram.bot_username}
+                                                </strong>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
@@ -164,7 +167,7 @@ export default function Edit() {
                                             asChild
                                         >
                                             <a
-                                                href={`https://t.me/${BOT_USERNAME}`}
+                                                href={`https://t.me/${telegram.bot_username}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                             >
@@ -242,7 +245,9 @@ export default function Edit() {
                                                 {t(
                                                     'integrations.telegram.step_1',
                                                 )}{' '}
-                                                <strong>@{BOT_USERNAME}</strong>
+                                                <strong>
+                                                    @{telegram.bot_username}
+                                                </strong>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
@@ -271,7 +276,7 @@ export default function Edit() {
 
                                     <Button variant="outline" size="sm" asChild>
                                         <a
-                                            href={`https://t.me/${BOT_USERNAME}`}
+                                            href={`https://t.me/${telegram.bot_username}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
