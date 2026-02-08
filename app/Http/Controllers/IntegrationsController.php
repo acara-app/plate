@@ -21,6 +21,7 @@ final class IntegrationsController
                 'linking_token' => $telegramChat?->linking_token,
                 'token_expires_at' => $telegramChat?->token_expires_at?->toIso8601String(),
                 'connected_at' => $telegramChat?->linked_at?->toIso8601String(),
+                'bot_username' => config('plate.telegram_bot_username'),
             ],
         ]);
     }

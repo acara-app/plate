@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-interface DashboardProps {
+interface Props {
     recentConversations: Array<{
         id: string;
         title: string;
@@ -38,6 +38,7 @@ interface DashboardProps {
     }>;
     hasGlucoseData: boolean;
     hasHealthConditions: boolean;
+    [key: string]: unknown;
 }
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
@@ -52,7 +53,7 @@ export default function Dashboard() {
     const breadcrumbs = getBreadcrumbs(t);
     const { currentUser } = useSharedProps();
     const { recentConversations, hasGlucoseData, hasHealthConditions } =
-        usePage().props as unknown as DashboardProps;
+        usePage<Props>().props;
 
     const getContextualPrompt = () => {
         if (!currentUser?.is_onboarded) {
@@ -87,7 +88,6 @@ export default function Dashboard() {
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-6">
                 {!currentUser?.is_onboarded && <OnboardingBanner />}
 
-                {/* Modular Grid Layout */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {/* AI Chat Card */}
                     <Card className="group relative flex flex-col overflow-hidden transition-all hover:shadow-lg">
@@ -178,7 +178,7 @@ export default function Dashboard() {
                                         variant="secondary"
                                         className="bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-500/20 dark:text-blue-400"
                                     >
-                                        Recommended
+                                        Beta
                                     </Badge>
                                 </div>
                                 <div>
