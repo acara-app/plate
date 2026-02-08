@@ -1,7 +1,7 @@
 User-agent: *
 Disallow: /cdn-cgi/
 Disallow: /profile/timezone
-Disallow  /auth/google/redirect
+Disallow: /auth/google/redirect
 
 # Prevent crawling of filtered/search food URLs (duplicate content)
 Disallow: /food?search=
