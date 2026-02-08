@@ -76,6 +76,12 @@ final class TelegramWebhookHandler extends WebhookHandler
             ->where('is_active', true)
             ->update(['is_active' => false]);
 
+        UserTelegramChat::query()
+            ->where('user_id', $chat->user_id)
+            ->where('telegraph_chat_id', $this->chat->id)
+            ->where('id', '!=', $chat->id)
+            ->delete();
+
         $chat->update(['telegraph_chat_id' => $this->chat->id]);
         $chat->markAsLinked();
 
