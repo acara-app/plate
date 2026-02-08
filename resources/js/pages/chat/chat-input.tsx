@@ -73,10 +73,10 @@ export default function ChatInput({
     const SelectedModeIcon = CHAT_MODES[selectedMode].icon;
 
     return (
-        <div className="mx-auto flex w-full max-w-3xl items-end bg-background px-4 py-4">
+        <div className="mx-auto flex w-full max-w-3xl items-end bg-background p-0.5 md:px-4 md:py-4">
             <div
                 className={cn(
-                    'w-full rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900',
+                    'w-full rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
                     className,
                 )}
             >
@@ -101,9 +101,11 @@ export default function ChatInput({
                                     className="gap-1.5"
                                 >
                                     <SelectedModeIcon className="size-4" />
-                                    <span>
-                                        {CHAT_MODES[selectedMode].label}
-                                    </span>
+                                    {selectedMode !== 'generate-meal-plan' && (
+                                        <span>
+                                            {CHAT_MODES[selectedMode].label}
+                                        </span>
+                                    )}
                                     <ChevronDown className="size-3.5 opacity-60" />
                                 </Button>
                             </DropdownMenuTrigger>
@@ -147,7 +149,9 @@ export default function ChatInput({
                                     size="sm"
                                     className="gap-1.5 text-muted-foreground hover:text-foreground"
                                 >
-                                    <span>{AI_MODELS[selectedModel]}</span>
+                                    <span className="max-w-[80px] truncate sm:max-w-[90px]">
+                                        {AI_MODELS[selectedModel]}
+                                    </span>
                                     <ChevronDown className="size-3.5 opacity-60" />
                                 </Button>
                             </DropdownMenuTrigger>
