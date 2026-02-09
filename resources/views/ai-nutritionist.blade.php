@@ -65,12 +65,10 @@
 <x-default-layout>
     <div class="bg-white">
         
-        {{-- SECTION 1: The "Tool" Hero (Utility Vibe) --}}
         <section class="relative overflow-hidden pt-12 pb-16 sm:pt-20 sm:pb-24">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="lg:grid lg:grid-cols-12 lg:gap-16 items-center">
                     
-                    {{-- Left: The Value Prop (Educational & Calm) --}}
                     <div class="lg:col-span-6 text-center lg:text-left">
                         <div class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-800 mb-6">
                             <svg class="h-4 w-4 text-slate-500" fill="currentColor" viewBox="0 0 24 24">
@@ -78,14 +76,13 @@
                             </svg>
                             100% Open Source Project
                         </div>
-                        
-                        <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                            Analyze your food. <br>
-                            <span class="text-rose-600">Predict the spike.</span>
-                        </h1>
+                        <h1 class="text-teal-600 text-4xl mb-2">Acara Plate</h1> 
+                        <p class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+                        An AI That Truly Understands You
+                        </p>
                         
                         <p class="mt-6 text-lg text-slate-600 leading-relaxed">
-                            Stop guessing. Meet your <strong>personal AI nutritionist</strong>. Acara Plate uses transparent, open-source data to analyze your meals. Just chat naturally—ask questions, paste recipes, or upload photos to get instant answers.
+                            Personalized meal guidance based on your goals, activity, and metabolic history. Tell Acara what you're eating—chat, paste a recipe, or upload a photo—and get actionable recommendations.
                         </p>
 
                         <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -99,9 +96,7 @@
                         </div>
                     </div>
 
-                    {{-- Right: The "Simulator" (Looks like a working tool, not a marketing image) --}}
                     <div class="mt-12 lg:mt-0 lg:col-span-6">
-                        {{-- Hidden accessible image for screen readers and Google Image Search --}}
                         <img 
                             src="{{ asset('screenshots/og-ai-nutritionist.webp') }}" 
                             alt="AI Nutritionist terminal interface analyzing oatmeal with banana and honey, showing ingredient breakdown with carbohydrate counts, predicted high glucose spike with glycemic load of 35, and recommendation to swap honey for blueberries and add chia seeds to reduce spike by 40 percent"
@@ -110,9 +105,7 @@
                             height="630"
                         >
                         
-                        {{-- Visual terminal for sighted users --}}
                         <div class="relative rounded-xl bg-slate-900 shadow-2xl ring-1 ring-white/10" aria-hidden="true">
-                            {{-- Terminal Header --}}
                             <div class="flex items-center gap-2 border-b border-white/10 px-4 py-3 bg-white/5 rounded-t-xl">
                                 <div class="flex gap-1.5">
                                     <div class="h-3 w-3 rounded-full bg-red-500"></div>
@@ -122,7 +115,6 @@
                                 <div class="text-xs font-mono text-slate-400 ml-2">acara-ai — analysis</div>
                             </div>
 
-                            {{-- Simulation Content --}}
                             <div class="p-6 font-mono text-sm space-y-4">
                                 <div class="text-slate-400">
                                     <span class="text-rose-500">user@acara:~$</span> ask "I'm having oatmeal with banana and honey. Will this spike me?"
@@ -154,7 +146,6 @@
             </div>
         </section>
 
-        {{-- SECTION 2: The "Science" (Educational Vibe) --}}
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-2xl mx-auto mb-16">
@@ -178,7 +169,6 @@
                         </p>
                     </div>
 
-                    {{-- Card 2 --}}
                     <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
                         <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 mb-6">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -191,7 +181,6 @@
                         </p>
                     </div>
 
-                    {{-- Card 3 --}}
                     <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
                         <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 mb-6">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -207,7 +196,6 @@
             </div>
         </section>
 
-        {{-- SECTION 3: How It Works --}}
         <section class="py-16 sm:py-24 bg-white">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-2xl mx-auto mb-16">
@@ -251,7 +239,6 @@
             </div>
         </section>
 
-        {{-- SECTION 4: FAQ --}}
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
@@ -310,7 +297,6 @@
             </div>
         </section>
 
-        {{-- SECTION 5: The "Anti-Sales" CTA --}}
         <section class="py-24 px-4 bg-white border-t border-slate-100">
             <div class="max-w-3xl mx-auto text-center">
                 <h2 class="text-2xl font-bold text-slate-900 sm:text-3xl">
