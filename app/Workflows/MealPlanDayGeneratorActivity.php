@@ -18,6 +18,7 @@ use Workflow\Activity;
  */
 final class MealPlanDayGeneratorActivity extends Activity
 {
+    /** @var int */
     public $tries = 2;
 
     public function execute(

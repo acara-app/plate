@@ -13,10 +13,10 @@ use Workflow\Activity;
  */
 final class SaveDayMealsActivity extends Activity
 {
+    /** @var int */
     public $tries = 1;
+
     /**
-     * Store meals for a single day to an existing meal plan.
-     *
      * @return array{day_number: int, meals_count: int}
      */
     public function execute(

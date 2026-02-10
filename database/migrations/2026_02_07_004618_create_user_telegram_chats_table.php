@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('user_telegram_chats', function (Blueprint $table): void {
@@ -27,13 +24,5 @@ return new class extends Migration
             $table->unique(['user_id', 'telegraph_chat_id'])->whereNotNull('telegraph_chat_id');
             $table->index('conversation_id');
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('user_telegram_chats');
     }
 };
