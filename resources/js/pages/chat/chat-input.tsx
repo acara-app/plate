@@ -80,18 +80,18 @@ export default function ChatInput({
                     className,
                 )}
             >
-                <div className="p-4">
+                <div className="p-2">
                     <textarea
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Ask anything"
                         disabled={disabled}
-                        className="min-h-[60px] w-full resize-none bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
+                        className="min-h-[40px] w-full resize-y bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
                         rows={2}
                     />
                 </div>
-                <div className="flex items-center justify-between px-4 pb-4">
+                <div className="flex items-center justify-between px-2 pb-2">
                     <div className="flex items-center gap-2">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
