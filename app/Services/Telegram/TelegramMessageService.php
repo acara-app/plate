@@ -29,7 +29,7 @@ final class TelegramMessageService
             $this->dispatchMessage($chat, $chunk, $markdown);
 
             if ($index < count($chunks) - 1) {
-                usleep(self::CHUNK_DELAY_MS * 1000);
+                \Illuminate\Support\Sleep::usleep(self::CHUNK_DELAY_MS * 1000);
             }
         }
     }

@@ -15,15 +15,13 @@ final readonly class GenerateAiResponseAction
         private ConversationStore $conversationStore,
     ) {}
 
+    /**
+     * @return array{response: string, conversation_id: string}
+     */
     public function handle(User $user, string $message, ?string $conversationId = null): array
     {
-        if ($conversationId === null) {
-            $conversationId = $this->conversationStore->latestConversationId($user->id);
-
-            if ($conversationId === null) {
-                $conversationId = $this->conversationStore->storeConversation($user->id, 'Telegram Chat');
-            }
-        }
+        $conversationId ??= $this->conversationStore->latestConversationId($user->id)
+            ?? $this->conversationStore->storeConversation($user->id, 'Telegram Chat');
 
         $agent = $this->nutritionAdvisor->continue($conversationId, $user);
         $response = $agent->prompt($message);
