@@ -29,7 +29,6 @@ it('reproduces unique constraint violation when relinking telegram', function ()
         'linked_at' => null,
     ]);
 
-
     expect(function () use ($pendingChat, $telegraphChat): void {
         $pendingChat->update(['telegraph_chat_id' => $telegraphChat->id]);
     })->toThrow(Illuminate\Database\UniqueConstraintViolationException::class);
@@ -65,6 +64,6 @@ it('prevents duplicate by deleting existing link before update', function (): vo
 
     $pendingChat->update(['telegraph_chat_id' => $telegraphChat->id]);
 
-    expect(UserTelegramChat::find($existingChat->id))->toBeNull();
+    expect(UserTelegramChat::query()->find($existingChat->id))->toBeNull();
     expect($pendingChat->fresh()->telegraph_chat_id)->toBe($telegraphChat->id);
 });

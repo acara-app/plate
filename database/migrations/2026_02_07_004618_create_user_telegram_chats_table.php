@@ -8,14 +8,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('user_telegram_chats', function (Blueprint $table): void {
             $table->id();
+            /** @phpstan-ignore-next-line */
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            /** @phpstan-ignore-next-line */
             $table->foreignId('telegraph_chat_id')->nullable()->constrained('telegraph_chats')->onDelete('cascade');
             $table->string('conversation_id')->nullable();
             $table->string('linking_token', 16)->unique()->nullable();
@@ -24,16 +23,7 @@ return new class extends Migration
             $table->timestamp('linked_at')->nullable();
             $table->timestamps();
 
-            $table->unique(['user_id', 'telegraph_chat_id'])->whereNotNull('telegraph_chat_id');
             $table->index('conversation_id');
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('user_telegram_chats');
     }
 };

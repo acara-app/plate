@@ -13,7 +13,7 @@
         "@eslint/js": "^9.26.0",
         "@laravel/vite-plugin-wayfinder": "^0.1.7",
         "@tailwindcss/typography": "^0.5.19",
-        "@types/node": "^25.2.1",
+        "@types/node": "^25.2.2",
         "eslint": "^9.26.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-react": "^7.37.5",
@@ -23,11 +23,11 @@
         "prettier": "^3.8.1",
         "prettier-plugin-organize-imports": "^4.3.0",
         "prettier-plugin-tailwindcss": "^0.7.2",
-        "typescript-eslint": "^8.54.0",
+        "typescript-eslint": "^8.55.0",
         "vite-plugin-pwa": "^1.2.0"
     },
     "dependencies": {
-        "@ai-sdk/react": "^3.0.77",
+        "@ai-sdk/react": "^3.0.80",
         "@headlessui/react": "^2.2.9",
         "@inertiajs/react": "^2.3.13",
         "@radix-ui/react-alert-dialog": "^1.1.15",

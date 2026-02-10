@@ -35,36 +35,42 @@ final readonly class GenerateMeal implements Tool
         $user = Auth::user();
 
         if (! $user instanceof User) {
-            return json_encode([
+            return (string) json_encode([
                 'error' => 'User not authenticated',
                 'meal' => null,
             ]);
         }
 
+        /** @var string $mealType */
         $mealType = $request['meal_type'] ?? 'any';
+        /** @var string|null $cuisine */
         $cuisine = $request['cuisine'] ?? null;
+        /** @var int|null $maxCalories */
         $maxCalories = $request['max_calories'] ?? null;
+        /** @var string|null $specificRequest */
         $specificRequest = $request['specific_request'] ?? null;
 
         $profileContext = $this->profileContext->handle($user);
+        /** @var string $contextString */
+        $contextString = $profileContext['context'];
 
         $prompt = $this->buildMealPrompt(
             $mealType,
             $cuisine,
             $maxCalories,
             $specificRequest,
-            $profileContext['context']
+            $contextString
         );
 
         try {
             $meal = $this->generateMeal($prompt);
 
-            return json_encode([
+            return (string) json_encode([
                 'success' => true,
                 'meal' => $meal,
             ]);
         } catch (Exception $e) {
-            return json_encode([
+            return (string) json_encode([
                 'error' => 'Failed to generate meal: '.$e->getMessage(),
                 'meal' => null,
             ]);
@@ -73,6 +79,8 @@ final readonly class GenerateMeal implements Tool
 
     /**
      * Get the tool's schema definition.
+     *
+     * @return array<string, mixed>
      */
     public function schema(JsonSchema $schema): array
     {
@@ -157,7 +165,10 @@ final readonly class GenerateMeal implements Tool
 
         $jsonText = $this->extractJson($response);
 
-        return json_decode($jsonText, true, 512, JSON_THROW_ON_ERROR);
+        /** @var array<string, mixed> $decoded */
+        $decoded = json_decode($jsonText, true, 512, JSON_THROW_ON_ERROR);
+
+        return $decoded;
     }
 
     /**
@@ -188,11 +199,11 @@ final readonly class GenerateMeal implements Tool
         $response = mb_trim($response);
 
         if (str_starts_with($response, '```json')) {
-            $response = preg_replace('/^```json\s*/', '', $response);
-            $response = preg_replace('/\s*```$/', '', (string) $response);
+            $response = (string) preg_replace('/^```json\s*/', '', $response);
+            $response = (string) preg_replace('/\s*```$/', '', $response);
         } elseif (str_starts_with($response, '```')) {
-            $response = preg_replace('/^```\s*/', '', $response);
-            $response = preg_replace('/\s*```$/', '', (string) $response);
+            $response = (string) preg_replace('/^```\s*/', '', $response);
+            $response = (string) preg_replace('/\s*```$/', '', $response);
         }
 
         return mb_trim($response);

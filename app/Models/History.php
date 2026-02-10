@@ -11,22 +11,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Ai\Messages\MessageRole;
 
 /**
- * Agent Conversation Message History
- *
- * Stores messages exchanged in AI agent conversations, including user prompts
- * and assistant responses with associated metadata.
- *
- * @property string $id UUID primary key
- * @property string $conversation_id UUID of the parent conversation
- * @property int $user_id ID of the user who owns this message
- * @property string $agent Fully qualified class name of the agent (e.g., App\Ai\Agents\MealPlanGeneratorAgent)
- * @property MessageRole $role Message role (user or assistant)
- * @property string $content The text content of the message
- * @property array $attachments Array of attachments (files, images) associated with user messages
- * @property array<\Laravel\Ai\Responses\Data\ToolCall> $tool_calls Array of tool calls made by the assistant
- * @property array<\Laravel\Ai\Responses\Data\ToolResult> $tool_results Array of tool execution results
- * @property array{\Laravel\Ai\Responses\Data\Usage} $usage Token usage information (prompt_tokens, completion_tokens, etc.)
- * @property array $meta Additional metadata about the message
+ * @property string $id
+ * @property string $conversation_id
+ * @property int $user_id
+ * @property string $agent
+ * @property MessageRole $role
+ * @property string $content
+ * @property array<string, mixed> $attachments
+ * @property array<\Laravel\Ai\Responses\Data\ToolCall> $tool_calls
+ * @property array<\Laravel\Ai\Responses\Data\ToolResult> $tool_results
+ * @property array{\Laravel\Ai\Responses\Data\Usage} $usage
+ * @property array<string, mixed> $meta
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
  * @property-read Conversation $conversation

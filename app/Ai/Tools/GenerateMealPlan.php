@@ -34,20 +34,23 @@ final readonly class GenerateMealPlan implements Tool
         $user = Auth::user();
 
         if (! $user instanceof User) {
-            return json_encode([
+            return (string) json_encode([
                 'error' => 'User not authenticated',
                 'meal_plan' => null,
             ]);
         }
 
-        $totalDays = min($request['total_days'] ?? 1, 7);
+        $totalDaysValue = $request['total_days'] ?? 1;
+        /** @var int $totalDays */
+        $totalDays = min(is_numeric($totalDaysValue) ? (int) $totalDaysValue : 1, 7);
+        /** @var string|null $customPrompt */
         $customPrompt = $request['custom_prompt'] ?? null;
 
         try {
             // Start the meal plan generation workflow
             $this->mealPlanGenerator->handle($user, $totalDays);
 
-            return json_encode([
+            return (string) json_encode([
                 'success' => true,
                 'message' => "I've started generating your {$totalDays}-day meal plan! You can view it in your [Meal Plans](/meal-plans) section once it's ready.",
                 'total_days' => $totalDays,
@@ -55,7 +58,7 @@ final readonly class GenerateMealPlan implements Tool
                 'redirect_url' => '/meal-plans',
             ]);
         } catch (Exception $e) {
-            return json_encode([
+            return (string) json_encode([
                 'error' => 'Failed to start meal plan generation: '.$e->getMessage(),
                 'meal_plan' => null,
             ]);
@@ -64,6 +67,8 @@ final readonly class GenerateMealPlan implements Tool
 
     /**
      * Get the tool's schema definition.
+     *
+     * @return array<string, mixed>
      */
     public function schema(JsonSchema $schema): array
     {

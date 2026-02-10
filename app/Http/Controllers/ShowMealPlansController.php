@@ -83,7 +83,6 @@ final class ShowMealPlansController
             }
         }
 
-        // Get day name for current day
         $dayName = $dayMeals->first()?->getDayName() ?? "Day {$currentDayNumber}";
 
         $formattedMealPlan = [
@@ -98,7 +97,6 @@ final class ShowMealPlansController
             'created_at' => $mealPlan->created_at->toISOString(),
         ];
 
-        // Check if current day needs generation and auto-trigger if pending
         $dayNeedsGeneration = $dayMeals->isEmpty();
         $dayStatus = $this->getDayStatus($mealPlan, $currentDayNumber, $dayMeals->isEmpty());
 
