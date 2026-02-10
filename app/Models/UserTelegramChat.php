@@ -13,9 +13,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * User Telegram Chat Link
- *
- * Links a Telegram chat to a user account for AI nutrition advisor access.
  *
  * @property int $id
  * @property int $user_id
@@ -113,27 +110,33 @@ final class UserTelegramChat extends Model
 
     /**
      * Scope to only include active links.
+     *
+     * @param Builder<self> $query
      */
     #[Scope]
-    protected function active(Builder $query): void
+    public function active(Builder $query): void
     {
         $query->where('is_active', true);
     }
 
     /**
      * Scope to only include linked chats (with telegraph_chat_id).
+     *
+     * @param Builder<self> $query
      */
     #[Scope]
-    protected function linked(Builder $query): void
+    public function linked(Builder $query): void
     {
         $query->whereNotNull('telegraph_chat_id');
     }
 
     /**
      * Scope to only include pending links (without telegraph_chat_id but with token).
+     *
+     * @param Builder<self> $query
      */
     #[Scope]
-    protected function pending(Builder $query): void
+    public function pending(Builder $query): void
     {
         $query->whereNull('telegraph_chat_id')
             ->whereNotNull('linking_token');
