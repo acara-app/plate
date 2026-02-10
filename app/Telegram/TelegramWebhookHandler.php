@@ -105,8 +105,10 @@ final class TelegramWebhookHandler extends WebhookHandler
         $text = "👤 {$user->name}\n📧 {$user->email}";
 
         if ($user->profile) {
-            $text .= "\n\n📊 {$user->profile->age} years, {$user->profile->gender}\n"
-                . "📏 {$user->profile->height_cm}cm, {$user->profile->weight_kg}kg";
+            $sex = $user->profile->sex?->value ? ucfirst($user->profile->sex->value) : 'N/A';
+
+            $text .= "\n\n📊 {$user->profile->age} years, {$sex}\n"
+                . "📏 {$user->profile->height}cm, {$user->profile->weight}kg";
         }
 
         $this->telegramMessage->sendLongMessage($this->chat, $text, false);
