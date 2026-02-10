@@ -56,14 +56,18 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
         );
     }
 
-    public function messages(): iterable
+    /**
+     * @return array<int, Message>
+     */
+    public function messages(): array
     {
-        return History::query()->where('user_id', $this->getUser()->id)
+        return array_values(History::query()->where('user_id', $this->getUser()->id)
             ->latest()
             ->limit(50)
             ->get()
             ->reverse()
-            ->map(fn (History $message): Message => new Message($message->role, $message->content))->all();
+            ->map(fn (History $message): Message => new Message($message->role, $message->content))
+            ->all());
     }
 
     /**
@@ -127,13 +131,15 @@ final class NutritionAdvisor implements Agent, Conversational, HasTools
 
     /**
      * @param  array<string, mixed>  $profileData
-     * @return array<int, string>
+     * @return list<string>
      */
     private function getContextInstructions(array $profileData): array
     {
+        /** @var string $profileContext */
+        $profileContext = $profileData['context'];
         $context = [
             'USER PROFILE CONTEXT:',
-            $profileData['context'],
+            $profileContext,
             '',
             'CHAT MODE: '.$this->mode->value,
         ];

@@ -114,7 +114,7 @@ final class UserTelegramChat extends Model
      * @param Builder<self> $query
      */
     #[Scope]
-    public function active(Builder $query): void
+    protected function active(Builder $query): void
     {
         $query->where('is_active', true);
     }
@@ -125,7 +125,7 @@ final class UserTelegramChat extends Model
      * @param Builder<self> $query
      */
     #[Scope]
-    public function linked(Builder $query): void
+    protected function linked(Builder $query): void
     {
         $query->whereNotNull('telegraph_chat_id');
     }
@@ -136,7 +136,7 @@ final class UserTelegramChat extends Model
      * @param Builder<self> $query
      */
     #[Scope]
-    public function pending(Builder $query): void
+    protected function pending(Builder $query): void
     {
         $query->whereNull('telegraph_chat_id')
             ->whereNotNull('linking_token');

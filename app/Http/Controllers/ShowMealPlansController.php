@@ -69,9 +69,9 @@ final class ShowMealPlansController
         if ($mealPlan->macronutrient_ratios) {
             $avgMacros = $mealPlan->macronutrient_ratios;
         } elseif ($dayMeals->whereNotNull('protein_grams')->isNotEmpty()) {
-            $totalProteinCals = $dayMeals->sum(fn (Meal $m): float => ($m->protein_grams ?? 0) * 4);
-            $totalCarbsCals = $dayMeals->sum(fn (Meal $m): float => ($m->carbs_grams ?? 0) * 4);
-            $totalFatCals = $dayMeals->sum(fn (Meal $m): float => ($m->fat_grams ?? 0) * 9);
+            $totalProteinCals = $dayMeals->sum(fn(Meal $m): float => ($m->protein_grams ?? 0) * 4);
+            $totalCarbsCals = $dayMeals->sum(fn(Meal $m): float => ($m->carbs_grams ?? 0) * 4);
+            $totalFatCals = $dayMeals->sum(fn(Meal $m): float => ($m->fat_grams ?? 0) * 9);
             $totalMacroCals = $totalProteinCals + $totalCarbsCals + $totalFatCals;
 
             if ($totalMacroCals > 0) {
@@ -83,7 +83,6 @@ final class ShowMealPlansController
             }
         }
 
-        // Get day name for current day
         $dayName = $dayMeals->first()?->getDayName() ?? "Day {$currentDayNumber}";
 
         $formattedMealPlan = [
@@ -98,7 +97,6 @@ final class ShowMealPlansController
             'created_at' => $mealPlan->created_at->toISOString(),
         ];
 
-        // Check if current day needs generation and auto-trigger if pending
         $dayNeedsGeneration = $dayMeals->isEmpty();
         $dayStatus = $this->getDayStatus($mealPlan, $currentDayNumber, $dayMeals->isEmpty());
 
@@ -121,7 +119,7 @@ final class ShowMealPlansController
             'day_name' => $dayName,
             'needs_generation' => $dayNeedsGeneration,
             'status' => $dayStatus,
-            'meals' => $dayMeals->map(fn (Meal $meal): array => [
+            'meals' => $dayMeals->map(fn(Meal $meal): array => [
                 'id' => $meal->id,
                 'type' => $meal->type->value,
                 'name' => $meal->name,

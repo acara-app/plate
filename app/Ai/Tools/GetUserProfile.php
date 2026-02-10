@@ -33,18 +33,19 @@ final readonly class GetUserProfile implements Tool
         $user = Auth::user();
 
         if (! $user instanceof User) {
-            return json_encode([
+            return (string) json_encode([
                 'error' => 'User not authenticated',
                 'profile' => null,
             ]);
         }
 
+        /** @var string $section */
         $section = $request['section'] ?? 'all';
 
         $context = $this->profileContext->handle($user);
 
         if ($section === 'all') {
-            return json_encode([
+            return (string) json_encode([
                 'success' => true,
                 'onboarding_completed' => $context['onboarding_completed'],
                 'missing_data' => $context['missing_data'],
@@ -53,17 +54,26 @@ final readonly class GetUserProfile implements Tool
         }
 
         // Return specific section
+        /** @var array<string, mixed>|null $rawData */
         $rawData = $context['raw_data'];
+
+        if (! is_array($rawData)) {
+            return (string) json_encode([
+                'error' => 'Profile data not available',
+                'profile' => null,
+            ]);
+        }
+
         $sectionData = $rawData[$section] ?? null;
 
         if ($sectionData === null) {
-            return json_encode([
+            return (string) json_encode([
                 'error' => "Section '{$section}' not found. Available sections: biometrics, dietary_preferences, health_conditions, medications, goals",
                 'profile' => null,
             ]);
         }
 
-        return json_encode([
+        return (string) json_encode([
             'success' => true,
             'section' => $section,
             'data' => $sectionData,
@@ -72,6 +82,8 @@ final readonly class GetUserProfile implements Tool
 
     /**
      * Get the tool's schema definition.
+     *
+     * @return array<string, mixed>
      */
     public function schema(JsonSchema $schema): array
     {

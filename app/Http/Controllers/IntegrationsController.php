@@ -13,6 +13,9 @@ final class IntegrationsController
     public function edit(Request $request): \Inertia\Response
     {
         $user = $request->user();
+
+        abort_if($user === null, 401);
+
         $telegramChat = $user->telegramChat;
 
         return Inertia::render('integrations/edit', [
@@ -30,23 +33,31 @@ final class IntegrationsController
     {
         $user = $request->user();
 
-        $user->telegramChat()->active()->update(['is_active' => false]);
+        abort_if($user === null, 401);
 
-        $userTelegramChat = $user->telegramChat()->create([
+        $userTelegramChat = $user->telegramChat;
+
+        if ($userTelegramChat !== null) {
+            $userTelegramChat->update(['is_active' => false]);
+        }
+
+        $newUserTelegramChat = $user->telegramChat()->create([
             'is_active' => true,
         ]);
 
-        $token = $userTelegramChat->generateToken();
+        $token = $newUserTelegramChat->generateToken();
 
         return to_route('integrations.edit')->with([
             'telegram_token' => $token,
-            'token_expires_at' => $userTelegramChat->token_expires_at->toIso8601String(),
+            'token_expires_at' => $newUserTelegramChat->token_expires_at?->toIso8601String(),
         ]);
     }
 
     public function disconnectTelegram(Request $request): \Illuminate\Http\RedirectResponse
     {
         $user = $request->user();
+
+        abort_if($user === null, 401);
 
         $user->telegramChat()->update(['is_active' => false]);
 
