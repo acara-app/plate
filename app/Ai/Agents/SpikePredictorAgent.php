@@ -11,7 +11,7 @@ use App\Enums\ModelName;
 use App\Enums\SpikeRiskLevel;
 use App\Utilities\JsonCleaner;
 
-class SpikePredictorAgent extends BaseAgent
+final class SpikePredictorAgent extends BaseAgent
 {
     public function modelName(): ModelName
     {

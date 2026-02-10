@@ -59,7 +59,7 @@ final class TelegramMessageService
             $remaining = mb_trim(mb_substr($remaining, mb_strlen($chunk)));
         }
 
-        return array_filter($chunks, fn(string $c): bool => $c !== '');
+        return array_filter($chunks, fn (string $c): bool => $c !== '');
     }
 
     public function sendTypingIndicator(TelegraphChat $chat): void

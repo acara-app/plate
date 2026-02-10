@@ -12,24 +12,6 @@ use Tests\TestCase;
 
 final class StoreAgentConversationRequestTest extends TestCase
 {
-    protected function createRequest(array $data): StoreAgentConversationRequest
-    {
-        $request = new StoreAgentConversationRequest();
-
-        // Merge data so it's available in all()
-        $request->merge($data);
-
-        // Run validation to populate validated data
-        $validator = Validator::make($data, $request->rules());
-        $request->setValidator($validator);
-
-        if ($validator->fails()) {
-            $this->fail('Validation failed: ' . json_encode($validator->errors()->all()));
-        }
-
-        return $request;
-    }
-
     public function test_user_message_extraction(): void
     {
         $messages = [
@@ -87,5 +69,23 @@ final class StoreAgentConversationRequestTest extends TestCase
 
         $this->assertEquals(AgentMode::GenerateMealPlan, $request->mode());
         $this->assertEquals(ModelName::GEMINI_2_5_FLASH, $request->modelName());
+    }
+
+    protected function createRequest(array $data): StoreAgentConversationRequest
+    {
+        $request = new StoreAgentConversationRequest();
+
+        // Merge data so it's available in all()
+        $request->merge($data);
+
+        // Run validation to populate validated data
+        $validator = Validator::make($data, $request->rules());
+        $request->setValidator($validator);
+
+        if ($validator->fails()) {
+            $this->fail('Validation failed: '.json_encode($validator->errors()->all()));
+        }
+
+        return $request;
     }
 }

@@ -59,7 +59,7 @@ final readonly class PredictGlucoseSpike implements Tool
             ]);
         } catch (Exception $e) {
             return (string) json_encode([
-                'error' => 'Failed to predict glucose impact: ' . $e->getMessage(),
+                'error' => 'Failed to predict glucose impact: '.$e->getMessage(),
                 'prediction' => null,
             ]);
         }

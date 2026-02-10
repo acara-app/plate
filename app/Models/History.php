@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Ai\Messages\MessageRole;
 
 /**
- *
  * @property string $id
  * @property string $conversation_id
  * @property int $user_id

@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- *
  * @property int $id
  * @property int $user_id
  * @property int $telegraph_chat_id
@@ -111,7 +110,7 @@ final class UserTelegramChat extends Model
     /**
      * Scope to only include active links.
      *
-     * @param Builder<self> $query
+     * @param  Builder<self>  $query
      */
     #[Scope]
     protected function active(Builder $query): void
@@ -122,7 +121,7 @@ final class UserTelegramChat extends Model
     /**
      * Scope to only include linked chats (with telegraph_chat_id).
      *
-     * @param Builder<self> $query
+     * @param  Builder<self>  $query
      */
     #[Scope]
     protected function linked(Builder $query): void
@@ -133,7 +132,7 @@ final class UserTelegramChat extends Model
     /**
      * Scope to only include pending links (without telegraph_chat_id but with token).
      *
-     * @param Builder<self> $query
+     * @param  Builder<self>  $query
      */
     #[Scope]
     protected function pending(Builder $query): void
