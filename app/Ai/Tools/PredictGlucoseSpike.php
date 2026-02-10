@@ -30,11 +30,13 @@ final readonly class PredictGlucoseSpike implements Tool
      */
     public function handle(Request $request): string
     {
+        /** @var string $food */
         $food = $request['food'] ?? '';
+        /** @var string|null $context */
         $context = $request['context'] ?? null;
 
         if ($food === '') {
-            return json_encode([
+            return (string) json_encode([
                 'error' => 'Food description is required',
                 'prediction' => null,
             ]);
@@ -43,7 +45,7 @@ final readonly class PredictGlucoseSpike implements Tool
         try {
             $prediction = $this->spikePredictor->predict($food);
 
-            return json_encode([
+            return (string) json_encode([
                 'success' => true,
                 'food' => $food,
                 'prediction' => [
@@ -56,8 +58,8 @@ final readonly class PredictGlucoseSpike implements Tool
                 'recommendations' => $this->generateRecommendations($prediction, $context),
             ]);
         } catch (Exception $e) {
-            return json_encode([
-                'error' => 'Failed to predict glucose impact: '.$e->getMessage(),
+            return (string) json_encode([
+                'error' => 'Failed to predict glucose impact: ' . $e->getMessage(),
                 'prediction' => null,
             ]);
         }
@@ -65,6 +67,8 @@ final readonly class PredictGlucoseSpike implements Tool
 
     /**
      * Get the tool's schema definition.
+     *
+     * @return array<string, mixed>
      */
     public function schema(JsonSchema $schema): array
     {
@@ -82,7 +86,6 @@ final readonly class PredictGlucoseSpike implements Tool
      */
     private function estimateGlucoseIncrease(SpikeRiskLevel $riskLevel): int
     {
-        // Use deterministic values based on risk level instead of random
         return match ($riskLevel) {
             SpikeRiskLevel::Low => 20,
             SpikeRiskLevel::Medium => 45,
@@ -99,15 +102,12 @@ final readonly class PredictGlucoseSpike implements Tool
     {
         $recommendations = [];
 
-        // Add the smart fix as the primary recommendation
         $recommendations[] = $prediction->smartFix;
 
-        // Add context-specific recommendations
         if ($context !== null && str_contains(mb_strtolower($context), 'chipotle')) {
             $recommendations[] = 'At Chipotle: Choose a bowl over a burrito (saves 300+ calories from the tortilla). Load up on fajita veggies and lettuce. Skip the corn salsa and go light on rice.';
         }
 
-        // Add recommendations based on risk level
         $recommendations[] = match ($prediction->riskLevel) {
             SpikeRiskLevel::High => 'High spike risk: Consider eating protein first, adding healthy fats (avocado, nuts), or splitting this into two smaller portions.',
             SpikeRiskLevel::Medium => 'Moderate spike: Pair with a side salad or vegetables to add fiber and slow absorption.',
