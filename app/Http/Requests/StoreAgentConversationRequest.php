@@ -45,7 +45,9 @@ final class StoreAgentConversationRequest extends FormRequest
      */
     public function userMessage(): string
     {
+        /** @var array<int, array{role: string, parts: array<int, array{type: string, text?: string}>}> $messages */
         $messages = $this->validated('messages');
+
         $lastUserMessage = collect($messages)
             ->reverse()
             ->firstWhere('role', 'user');
@@ -54,7 +56,8 @@ final class StoreAgentConversationRequest extends FormRequest
             return '';
         }
 
-        return collect($lastUserMessage['parts'] ?? [])
+        /** @var array{parts: array<int, array{type: string, text?: string}>} $lastUserMessage */
+        return collect($lastUserMessage['parts'])
             ->where('type', 'text')
             ->pluck('text')
             ->implode('');
@@ -65,7 +68,10 @@ final class StoreAgentConversationRequest extends FormRequest
      */
     public function mode(): AgentMode
     {
-        return AgentMode::from($this->validated('mode'));
+        /** @var string $mode */
+        $mode = $this->validated('mode');
+
+        return AgentMode::from($mode);
     }
 
     /**
@@ -73,7 +79,10 @@ final class StoreAgentConversationRequest extends FormRequest
      */
     public function modelName(): ModelName
     {
-        return ModelName::from($this->validated('model'));
+        /** @var string $model */
+        $model = $this->validated('model');
+
+        return ModelName::from($model);
     }
 
     public function messages(): array
