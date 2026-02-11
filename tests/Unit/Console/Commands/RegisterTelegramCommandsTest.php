@@ -3,13 +3,11 @@
 declare(strict_types=1);
 
 use App\Console\Commands\RegisterTelegramCommands;
+use Illuminate\Support\Facades\Http;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Telegraph as TelegraphClient;
 
-beforeEach(function (): void {
-    Telegraph::fake();
-});
 
 it('registers telegram commands successfully when bot exists', function (): void {
     $bot = TelegraphBot::factory()->create([
@@ -27,6 +25,19 @@ it('registers telegram commands successfully when bot exists', function (): void
         ->assertSuccessful()
         ->expectsOutputToContain('Registering commands for bot: TestBot')
         ->expectsOutputToContain('Commands registered successfully!');
+});
+
+it('fails when telegram response is not ok', function (): void {
+    $bot = TelegraphBot::factory()->create([
+        'name' => 'TestBot',
+    ]);
+
+    Http::fake([
+        '*' => Http::response(['ok' => false], 400),
+    ]);
+
+    $this->artisan(RegisterTelegramCommands::class)
+        ->assertExitCode(1);
 });
 
 it('fails when no telegraph bot exists', function (): void {
