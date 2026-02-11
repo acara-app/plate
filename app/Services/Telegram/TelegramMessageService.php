@@ -7,14 +7,21 @@ namespace App\Services\Telegram;
 use DefStudio\Telegraph\Models\TelegraphChat;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Sleep;
 
 final class TelegramMessageService
 {
-    private const int MAX_MESSAGE_LENGTH = 4096;
+    public const int MAX_MESSAGE_LENGTH = 4096;
 
     private const int CHUNK_DELAY_MS = 1000;
 
     private const string QUEUE_NAME = 'telegram';
+
+    private const float MIN_SPLIT_THRESHOLD = 0.3;
+
+    private const array SENTENCE_ENDINGS = ['. ', '! ', '? ', ".\n", "!\n", "?\n"];
+
+    private const array SPLIT_PRIORITIES = ["\n\n", "\n"];
 
     public static function getMaxMessageLength(): int
     {
@@ -29,7 +36,7 @@ final class TelegramMessageService
             $this->dispatchMessage($chat, $chunk, $markdown);
 
             if ($index < count($chunks) - 1) {
-                \Illuminate\Support\Sleep::usleep(self::CHUNK_DELAY_MS * 1000);
+                Sleep::usleep(self::CHUNK_DELAY_MS * 1000);
             }
         }
     }
@@ -45,6 +52,25 @@ final class TelegramMessageService
             return [$message];
         }
 
+        return $this->chunkMessage($message);
+    }
+
+    public function sendTypingIndicator(TelegraphChat $chat): void
+    {
+        try {
+            $chat->action('typing')->dispatch(self::QUEUE_NAME);
+        } catch (Exception $e) {
+            // @codeCoverageIgnoreStart
+            Log::warning('Failed to send typing action', ['error' => $e->getMessage()]);
+            // @codeCoverageIgnoreEnd
+        }
+    }
+
+    /**
+     * @return array<string>
+     */
+    private function chunkMessage(string $message): array
+    {
         $chunks = [];
         $remaining = $message;
 
@@ -59,62 +85,60 @@ final class TelegramMessageService
             $remaining = mb_trim(mb_substr($remaining, mb_strlen($chunk)));
         }
 
-        return array_filter($chunks, fn (string $c): bool => $c !== '');
-    }
-
-    public function sendTypingIndicator(TelegraphChat $chat): void
-    {
-        try {
-            $chat->action('typing')->dispatch(self::QUEUE_NAME);
-        } catch (Exception $e) {
-            Log::warning('Failed to send typing action', ['error' => $e->getMessage()]);
-        }
+        return array_values(array_filter($chunks, fn(string $chunk): bool => $chunk !== ''));
     }
 
     private function extractChunk(string $text): string
     {
-        $maxLen = self::MAX_MESSAGE_LENGTH;
-        $searchText = mb_substr($text, 0, $maxLen);
-        $lastParagraph = mb_strrpos($searchText, "\n\n");
+        $maxLength = self::MAX_MESSAGE_LENGTH;
+        $searchText = mb_substr($text, 0, $maxLength);
+        $threshold = (int) ($maxLength * self::MIN_SPLIT_THRESHOLD);
 
-        if ($lastParagraph !== false && $lastParagraph > $maxLen * 0.3) {
-            return mb_substr($text, 0, $lastParagraph);
+        foreach (self::SPLIT_PRIORITIES as $delimiter) {
+            if ($chunk = $this->findSplitPoint($searchText, $delimiter, $threshold)) {
+                return $chunk;
+            }
         }
 
-        $lastNewline = mb_strrpos($searchText, "\n");
-
-        if ($lastNewline !== false && $lastNewline > $maxLen * 0.3) {
-            return mb_substr($text, 0, $lastNewline);
+        if ($chunk = $this->findSentenceEndSplit($searchText, $threshold)) {
+            return $chunk;
         }
 
-        $lastSentence = $this->findLastSentenceEnd($searchText);
-
-        if ($lastSentence !== false && $lastSentence > $maxLen * 0.3) {
-            return mb_substr($text, 0, $lastSentence + 1);
-        }
-
-        $lastSpace = mb_strrpos($searchText, ' ');
-
-        if ($lastSpace !== false && $lastSpace > $maxLen * 0.3) {
-            return mb_substr($text, 0, $lastSpace);
+        if ($chunk = $this->findSplitPoint($searchText, ' ', $threshold)) {
+            return $chunk;
         }
 
         return $searchText;
     }
 
-    private function findLastSentenceEnd(string $text): int|false
+    private function findSplitPoint(string $text, string $delimiter, int $threshold): ?string
     {
-        $lastPos = false;
+        $position = mb_strrpos($text, $delimiter);
 
-        foreach (['. ', '! ', '? ', ".\n", "!\n", "?\n"] as $ending) {
-            $pos = mb_strrpos($text, $ending);
+        if ($position === false || $position <= $threshold) {
+            return null;
+        }
 
-            if ($pos !== false && ($lastPos === false || $pos > $lastPos)) {
-                $lastPos = $pos;
+        return mb_substr($text, 0, $position);
+    }
+
+    private function findSentenceEndSplit(string $text, int $threshold): ?string
+    {
+        $lastPosition = null;
+
+        foreach (self::SENTENCE_ENDINGS as $ending) {
+            $position = mb_strrpos($text, $ending);
+
+            if ($position !== false && ($lastPosition === null || $position > $lastPosition)) {
+                $lastPosition = $position;
             }
         }
 
-        return $lastPos;
+        if ($lastPosition === null || $lastPosition <= $threshold) {
+            return null;
+        }
+
+        return mb_substr($text, 0, $lastPosition + 1);
     }
 
     private function dispatchMessage(TelegraphChat $chat, string $chunk, bool $markdown): void
@@ -122,7 +146,7 @@ final class TelegramMessageService
         $message = $chat->message($chunk);
 
         if ($markdown) {
-            $message = $message->markdown();
+            $message->markdown();
         }
 
         $message->dispatch(self::QUEUE_NAME);
