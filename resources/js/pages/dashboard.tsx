@@ -15,7 +15,6 @@ import chat from '@/routes/chat';
 import diabetesLog from '@/routes/diabetes-log';
 import integrations from '@/routes/integrations';
 import mealPlans from '@/routes/meal-plans';
-import biometrics from '@/routes/onboarding/biometrics';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -52,35 +51,7 @@ export default function Dashboard() {
     const { t } = useTranslation('common');
     const breadcrumbs = getBreadcrumbs(t);
     const { currentUser } = useSharedProps();
-    const { recentConversations, hasGlucoseData, hasHealthConditions } =
-        usePage<Props>().props;
-
-    const getContextualPrompt = () => {
-        if (!currentUser?.is_onboarded) {
-            return {
-                text: t('dashboard_cards.chat.prompts.complete_profile'),
-                link: biometrics.show().url,
-            };
-        }
-        if (hasGlucoseData) {
-            return {
-                text: t('dashboard_cards.chat.prompts.analyze_glucose'),
-                link: chat.create().url,
-            };
-        }
-        if (hasHealthConditions) {
-            return {
-                text: t('dashboard_cards.chat.prompts.health_conditions'),
-                link: chat.create().url,
-            };
-        }
-        return {
-            text: t('dashboard_cards.chat.prompts.restaurant'),
-            link: chat.create().url,
-        };
-    };
-
-    const contextualPrompt = getContextualPrompt();
+    const { recentConversations } = usePage<Props>().props;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Ai\BaseAgent;
+use App\Ai\Contracts\PredictsGlucoseSpikes;
 use App\Ai\SystemPrompt;
 use App\DataObjects\SpikePredictionData;
 use App\Enums\ModelName;
 use App\Enums\SpikeRiskLevel;
 use App\Utilities\JsonCleaner;
 
-final class SpikePredictorAgent extends BaseAgent
+final class SpikePredictorAgent extends BaseAgent implements PredictsGlucoseSpikes
 {
     public function modelName(): ModelName
     {
