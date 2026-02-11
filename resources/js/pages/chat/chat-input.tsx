@@ -87,7 +87,7 @@ export default function ChatInput({
                         onKeyDown={handleKeyDown}
                         placeholder="Ask anything"
                         disabled={disabled}
-                        className="min-h-[40px] w-full resize-y bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
+                        className="min-h-10 w-full resize-y bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
                         rows={2}
                     />
                 </div>

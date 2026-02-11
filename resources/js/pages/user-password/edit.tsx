@@ -14,7 +14,6 @@ import { Label } from '@/components/ui/label';
 import { edit } from '@/routes/password';
 import { useTranslation } from 'react-i18next';
 
-// Breadcrumbs will be set dynamically using translation
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
         title: t('password_settings.title'),

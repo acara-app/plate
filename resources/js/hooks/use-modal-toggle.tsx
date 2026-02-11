@@ -1,4 +1,4 @@
-import { Nullable } from '@/types/index';
+import { Nullable } from '@/types';
 import { useState } from 'react';
 
 export default function useModalToggle() {

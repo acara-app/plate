@@ -1,6 +1,5 @@
 import { dashboard } from '@/routes';
 import onboarding from '@/routes/onboarding';
-import { Profile, SexOption } from '@/types';
 import { Form, Head, Link } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
@@ -15,6 +14,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Profile, SexOption } from '@/types/user';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
