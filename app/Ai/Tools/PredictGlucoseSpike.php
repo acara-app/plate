@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Ai\Agents\SpikePredictorAgent;
+use App\Ai\Contracts\PredictsGlucoseSpikes;
 use App\Enums\SpikeRiskLevel;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -14,7 +14,7 @@ use Laravel\Ai\Tools\Request;
 final readonly class PredictGlucoseSpike implements Tool
 {
     public function __construct(
-        private SpikePredictorAgent $spikePredictor,
+        private PredictsGlucoseSpikes $spikePredictor,
     ) {}
 
     /**
