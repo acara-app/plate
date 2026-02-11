@@ -163,7 +163,7 @@ final class FoodPhotoAnalyzerAgent extends BaseAgent
             totalProtein: $data['total_protein'],
             totalCarbs: $data['total_carbs'],
             totalFat: $data['total_fat'],
-            confidence: $data['confidence'],
+            confidence: (int) $data['confidence'],
         );
     }
 }

@@ -74,7 +74,7 @@ it('analyzes food photo and returns analysis data', function (): void {
     expect($result->totalProtein)->toBe(31.0);
     expect($result->totalCarbs)->toBe(0.0);
     expect($result->totalFat)->toBe(3.6);
-    expect($result->confidence)->toBe(85.0);
+    expect($result->confidence)->toBe(85);
     expect($result->items)->toHaveCount(1);
     expect($result->items->first()->name)->toBe('Grilled Chicken');
 });
@@ -127,7 +127,7 @@ it('handles empty food detection', function (): void {
     $result = $this->agent->analyze($imageBase64, 'image/jpeg');
 
     expect($result->totalCalories)->toBe(0.0);
-    expect($result->confidence)->toBe(0.0);
+    expect($result->confidence)->toBe(0);
     expect($result->items)->toHaveCount(0);
 });
 
