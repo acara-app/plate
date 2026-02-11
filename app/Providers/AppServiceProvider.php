@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\Services\IndexNowServiceContract;
+use App\Contracts\Services\StripeServiceContract;
 use App\Models\User;
-use App\Services\Contracts\IndexNowServiceInterface;
-use App\Services\Contracts\StripeServiceInterface;
 use App\Services\IndexNowService;
 use App\Services\StripeService;
 use Carbon\CarbonImmutable;
@@ -22,8 +22,8 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind(StripeServiceInterface::class, StripeService::class);
-        $this->app->bind(IndexNowServiceInterface::class, IndexNowService::class);
+        $this->app->bind(StripeServiceContract::class, StripeService::class);
+        $this->app->bind(IndexNowServiceContract::class, IndexNowService::class);
     }
 
     public function boot(): void

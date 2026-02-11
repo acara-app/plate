@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Contracts\Services\StripeServiceContract;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
-use App\Services\Contracts\StripeServiceInterface;
 
 use function Pest\Laravel\mock;
 
@@ -15,7 +15,7 @@ it('creates monthly subscription checkout successfully', function (): void {
         'stripe_price_id' => 'price_monthly_test',
     ]);
 
-    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock = mock(StripeServiceContract::class);
     $stripeMock->shouldReceive('hasActiveSubscription')
         ->once()
         ->with(Mockery::type(User::class))
@@ -52,7 +52,7 @@ it('creates yearly subscription checkout successfully', function (): void {
         'yearly_stripe_price_id' => 'price_yearly_test',
     ]);
 
-    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock = mock(StripeServiceContract::class);
     $stripeMock->shouldReceive('hasActiveSubscription')
         ->once()
         ->andReturn(false);
@@ -76,7 +76,7 @@ it('redirects when user already has active subscription', function (): void {
     $user = User::factory()->create();
     $product = SubscriptionProduct::factory()->create();
 
-    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock = mock(StripeServiceContract::class);
     $stripeMock->shouldReceive('hasActiveSubscription')
         ->once()
         ->andReturn(true);
@@ -96,7 +96,7 @@ it('redirects when price lookup key not found', function (): void {
         'stripe_price_id' => 'price_invalid',
     ]);
 
-    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock = mock(StripeServiceContract::class);
     $stripeMock->shouldReceive('hasActiveSubscription')
         ->once()
         ->andReturn(false);
@@ -163,7 +163,7 @@ it('handles missing yearly price id gracefully', function (): void {
         'yearly_stripe_price_id' => null,
     ]);
 
-    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock = mock(StripeServiceContract::class);
     $stripeMock->shouldReceive('hasActiveSubscription')
         ->once()
         ->andReturn(false);

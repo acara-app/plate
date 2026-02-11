@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Services\StripeServiceContract;
 use App\Models\User;
-use App\Services\Contracts\StripeServiceInterface;
 use RuntimeException;
 
-final readonly class StripeService implements StripeServiceInterface
+final readonly class StripeService implements StripeServiceContract
 {
     public function ensureStripeCustomer(User $user): void
     {

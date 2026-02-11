@@ -10,19 +10,67 @@ use Illuminate\Support\Facades\Validator;
 $createRequest = function (array $data): StoreAgentConversationRequest {
     $request = new StoreAgentConversationRequest();
 
-    // Merge data so it's available in all()
     $request->merge($data);
 
-    // Run validation to populate validated data
     $validator = Validator::make($data, $request->rules());
     $request->setValidator($validator);
 
     if ($validator->fails()) {
-        throw new Exception('Validation failed: '.json_encode($validator->errors()->all()));
+        throw new Exception('Validation failed: ' . json_encode($validator->errors()->all()));
     }
 
     return $request;
 };
+
+it('authorizes the request', function (): void {
+    $request = new StoreAgentConversationRequest();
+    expect($request->authorize())->toBeTrue();
+});
+
+it('returns custom validation messages', function (): void {
+    $request = new StoreAgentConversationRequest();
+    $messages = $request->messages();
+
+    expect($messages)->toHaveKey('messages.required')
+        ->and($messages['messages.required'])->toBe('Messages are required')
+        ->and($messages)->toHaveKey('mode.required')
+        ->and($messages['mode.required'])->toBe('Mode is required')
+        ->and($messages)->toHaveKey('model.required')
+        ->and($messages['model.required'])->toBe('Model is required');
+});
+
+it('prepares data for validation by merging query parameters', function (): void {
+    $uri = route('chat.stream', ['mode' => 'ask', 'model' => 'gpt-5-mini']);
+    $request = StoreAgentConversationRequest::create(
+        uri: $uri,
+        method: 'POST'
+    );
+
+    $reflection = new ReflectionClass($request);
+    $method = $reflection->getMethod('prepareForValidation');
+    $method->setAccessible(true);
+    $method->invoke($request);
+
+    expect($request->input('mode'))->toBe(AgentMode::Ask->value)
+        ->and($request->input('model'))->toBe(ModelName::GPT_5_MINI->value);
+});
+
+it('returns empty string if no user message is found', function () use ($createRequest): void {
+    $request = $createRequest([
+        'messages' => [
+            [
+                'role' => 'assistant',
+                'parts' => [
+                    ['type' => 'text', 'text' => 'Hello'],
+                ],
+            ],
+        ],
+        'mode' => AgentMode::Ask->value,
+        'model' => ModelName::GPT_5_MINI->value,
+    ]);
+
+    expect($request->userMessage())->toBe('');
+});
 
 it('extracts user message from conversation', function () use ($createRequest): void {
     $messages = [

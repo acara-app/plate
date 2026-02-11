@@ -9,6 +9,7 @@ use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Workflows\MealPlanDayWorkflow;
 use Carbon\CarbonImmutable;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
@@ -18,14 +19,15 @@ use Workflow\WorkflowStub;
 
 final class ShowMealPlansController
 {
+    public function __construct(
+        #[CurrentUser] private \App\Models\User $user
+    ) {
+        //
+    }
+
     public function __invoke(Request $request): Response
     {
-        /** @var \App\Models\User $user */
-        $user = $request->user();
-
-        // Get the latest meal plan first to determine duration
-        $mealPlan = MealPlan::query()
-            ->where('user_id', $user->id)
+        $mealPlan = $this->user->mealPlans()
             ->latest()
             ->first();
 
@@ -34,7 +36,7 @@ final class ShowMealPlansController
                 'mealPlan' => null,
                 'currentDay' => null,
                 'navigation' => null,
-                'requiresSubscription' => enable_premium_upgrades() && ! $user->is_verified,
+                'requiresSubscription' => enable_premium_upgrades() && ! $this->user->is_verified,
             ]);
         }
 
@@ -69,9 +71,9 @@ final class ShowMealPlansController
         if ($mealPlan->macronutrient_ratios) {
             $avgMacros = $mealPlan->macronutrient_ratios;
         } elseif ($dayMeals->whereNotNull('protein_grams')->isNotEmpty()) {
-            $totalProteinCals = $dayMeals->sum(fn (Meal $m): float => ($m->protein_grams ?? 0) * 4);
-            $totalCarbsCals = $dayMeals->sum(fn (Meal $m): float => ($m->carbs_grams ?? 0) * 4);
-            $totalFatCals = $dayMeals->sum(fn (Meal $m): float => ($m->fat_grams ?? 0) * 9);
+            $totalProteinCals = $dayMeals->sum(fn(Meal $m): float => ($m->protein_grams ?? 0) * 4);
+            $totalCarbsCals = $dayMeals->sum(fn(Meal $m): float => ($m->carbs_grams ?? 0) * 4);
+            $totalFatCals = $dayMeals->sum(fn(Meal $m): float => ($m->fat_grams ?? 0) * 9);
             $totalMacroCals = $totalProteinCals + $totalCarbsCals + $totalFatCals;
 
             if ($totalMacroCals > 0) {
@@ -119,7 +121,7 @@ final class ShowMealPlansController
             'day_name' => $dayName,
             'needs_generation' => $dayNeedsGeneration,
             'status' => $dayStatus,
-            'meals' => $dayMeals->map(fn (Meal $meal): array => [
+            'meals' => $dayMeals->map(fn(Meal $meal): array => [
                 'id' => $meal->id,
                 'type' => $meal->type->value,
                 'name' => $meal->name,
@@ -149,7 +151,7 @@ final class ShowMealPlansController
             'mealPlan' => $formattedMealPlan,
             'currentDay' => $currentDay,
             'navigation' => $navigation,
-            'requiresSubscription' => enable_premium_upgrades() && ! $user->is_verified,
+            'requiresSubscription' => enable_premium_upgrades() && ! $this->user->is_verified,
         ]);
     }
 

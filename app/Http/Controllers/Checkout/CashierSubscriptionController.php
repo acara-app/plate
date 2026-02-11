@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Checkout;
 
+use App\Contracts\Services\StripeServiceContract;
 use App\Models\SubscriptionProduct;
-use App\Services\Contracts\StripeServiceInterface;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 final readonly class CashierSubscriptionController
 {
-    public function __construct(private StripeServiceInterface $stripeService)
+    public function __construct(private StripeServiceContract $stripeService)
     {
         //
     }

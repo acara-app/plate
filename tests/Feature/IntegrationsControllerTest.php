@@ -80,7 +80,7 @@ it('disconnects telegram integration', function (): void {
         ->delete(route('integrations.telegram.destroy'))
         ->assertRedirect(route('integrations.edit'));
 
-    expect($user->fresh()->telegramChat->is_active)->toBeFalse();
+    expect($user->fresh()->telegramChat)->toBeNull();
 });
 
 it('requires authentication to view integrations', function (): void {

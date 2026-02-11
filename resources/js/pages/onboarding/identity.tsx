@@ -12,8 +12,7 @@ import {
     GoalChoice,
     IntensityChoice,
     Profile,
-} from '@/types';
-
+} from '@/types/user';
 import { useTranslation } from 'react-i18next';
 
 interface Props {

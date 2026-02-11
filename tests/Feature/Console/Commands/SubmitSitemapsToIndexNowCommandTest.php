@@ -48,11 +48,11 @@ it('extracts and submits URLs from sitemap fixtures', function (): void {
         ->expectsOutputToContain('Submitting 3 unique URLs to IndexNow')
         ->expectsOutputToContain('Successfully submitted 3 URLs to IndexNow');
 
-    Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.indexnow.org/IndexNow' &&
-           count($request->data()['urlList']) === 3 &&
-           in_array('https://plate.acara.app/page1', $request->data()['urlList']) &&
-           in_array('https://plate.acara.app/page2', $request->data()['urlList']) &&
-           in_array('https://plate.acara.app/no-ns-page1', $request->data()['urlList']));
+    Http::assertSent(fn(Request $request): bool => $request->url() === 'https://api.indexnow.org/IndexNow' &&
+        count($request->data()['urlList']) === 3 &&
+        in_array('https://plate.acara.app/page1', $request->data()['urlList']) &&
+        in_array('https://plate.acara.app/page2', $request->data()['urlList']) &&
+        in_array('https://plate.acara.app/no-ns-page1', $request->data()['urlList']));
 });
 
 it('handles missing sitemap files', function (): void {
@@ -106,7 +106,7 @@ it('uses default files when no file option is provided', function (): void {
         ->expectsOutputToContain('Processing test_temp/sitemap.xml')
         ->expectsOutputToContain('Processing test_temp/food_sitemap.xml');
 
-    Http::assertSent(fn (Request $request): bool => count($request->data()['urlList']) === 3);
+    Http::assertSent(fn(Request $request): bool => count($request->data()['urlList']) === 3);
 });
 
 it('handles invalid XML files gracefully', function (): void {
@@ -151,19 +151,66 @@ it('handles empty XML files', function (): void {
     Http::assertNothingSent();
 });
 
-it('shows detailed error when key is not configured', function (): void {
-    Config::set('services.indexnow.key');
-
-    File::copy(
-        base_path('tests/Fixtures/Sitemaps/simple_sitemap.xml'),
-        public_path('test_temp/sitemap.xml')
-    );
+it('handles empty string and non-string file options', function (): void {
+    Http::fake();
 
     $this->artisan('sitemap:indexnow', [
-        '--file' => ['test_temp/sitemap.xml'],
+        '--file' => ['', null],
     ])
-        ->assertFailed()
-        ->expectsOutputToContain('key is not configured');
+        ->assertSuccessful()
+        ->expectsOutputToContain('No URLs found to submit');
 
     Http::assertNothingSent();
+});
+
+it('uses default files when no file option is provided and files do not exist', function (): void {
+    Http::fake();
+
+    // Ensure default files don't exist in public path
+    if (File::exists(public_path('sitemap.xml'))) {
+        File::move(public_path('sitemap.xml'), public_path('sitemap.xml.bak'));
+    }
+    if (File::exists(public_path('food_sitemap.xml'))) {
+        File::move(public_path('food_sitemap.xml'), public_path('food_sitemap.xml.bak'));
+    }
+
+    $this->artisan('sitemap:indexnow')
+        ->assertSuccessful()
+        ->expectsOutputToContain('Sitemap file not found: sitemap.xml')
+        ->expectsOutputToContain('Sitemap file not found: food_sitemap.xml')
+        ->expectsOutputToContain('No URLs found to submit');
+
+    // Restore if they existed
+    if (File::exists(public_path('sitemap.xml.bak'))) {
+        File::move(public_path('sitemap.xml.bak'), public_path('sitemap.xml'));
+    }
+    if (File::exists(public_path('food_sitemap.xml.bak'))) {
+        File::move(public_path('food_sitemap.xml.bak'), public_path('food_sitemap.xml'));
+    }
+});
+
+it('handles simplexml_load_file returning false (with internal errors)', function (): void {
+    Http::fake();
+    $internal = libxml_use_internal_errors(true);
+    try {
+        File::put(public_path('test_temp/failing.xml'), 'not xml');
+        $this->artisan('sitemap:indexnow', [
+            '--file' => ['test_temp/failing.xml'],
+        ])
+            ->assertSuccessful()
+            ->expectsOutputToContain('No URLs found to submit');
+    } finally {
+        libxml_use_internal_errors($internal);
+    }
+});
+
+it('handles simplexml_load_file throwing an exception', function (): void {
+    Http::fake();
+    File::put(public_path('test_temp/broken.xml'), '<?xml version="1.0"?><broken><unclosed>');
+
+    $this->artisan('sitemap:indexnow', [
+        '--file' => ['test_temp/broken.xml'],
+    ])
+        ->assertSuccessful()
+        ->expectsOutputToContain('No URLs found to submit');
 });

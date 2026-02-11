@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Telegram;
 
-use App\Actions\GenerateAiResponseAction;
+use App\Contracts\GeneratesAiResponse;
 use App\Models\User;
 use App\Models\UserTelegramChat;
 use App\Services\Telegram\TelegramMessageService;
@@ -15,7 +15,7 @@ use Illuminate\Support\Stringable;
 final class TelegramWebhookHandler extends WebhookHandler
 {
     public function __construct(
-        private readonly GenerateAiResponseAction $generateAiResponse,
+        private readonly GeneratesAiResponse $generateAiResponse,
         private readonly TelegramMessageService $telegramMessage,
     ) {}
 
@@ -60,76 +60,56 @@ final class TelegramWebhookHandler extends WebhookHandler
             return;
         }
 
-        $chat = UserTelegramChat::query()
-            ->where('linking_token', $token)
-            ->where('token_expires_at', '>', now())
-            ->first();
+        $pendingChat = $this->findPendingChatByToken($token);
 
-        if (! $chat instanceof UserTelegramChat) {
+        if (! $pendingChat instanceof UserTelegramChat) {
             $this->chat->message('❌ Invalid or expired token.')->send();
 
             return;
         }
 
-        UserTelegramChat::query()
-            ->where('telegraph_chat_id', $this->chat->id)
-            ->where('is_active', true)
-            ->update(['is_active' => false]);
+        $this->deactivateExistingLinks();
+        $this->removeOtherChatsForUser($pendingChat);
 
-        UserTelegramChat::query()
-            ->where('user_id', $chat->user_id)
-            ->where('telegraph_chat_id', $this->chat->id)
-            ->where('id', '!=', $chat->id)
-            ->delete();
-
-        $chat->update(['telegraph_chat_id' => $this->chat->id]);
-        $chat->markAsLinked();
+        $pendingChat->update(['telegraph_chat_id' => $this->chat->id]);
+        $pendingChat->markAsLinked();
 
         $this->telegramMessage->sendLongMessage(
             $this->chat,
-            "✅ Linked! Welcome, {$chat->user->name}!\n\nTry asking:\n• What should I eat for breakfast?\n• Create a meal plan\n• Will this spike my glucose?",
+            "✅ Linked! Welcome, {$pendingChat->user->name}!\n\nTry asking:\n• What should I eat for breakfast?\n• Create a meal plan\n• Will this spike my glucose?",
             false
         );
     }
 
     public function me(): void
     {
-        $user = $this->getLinkedUser();
+        $linkedChat = $this->resolveLinkedChat();
 
-        if (! $user instanceof User) {
+        if (! $linkedChat instanceof UserTelegramChat) {
             $this->replyNotLinked();
 
             return;
         }
 
+        $user = $linkedChat->user;
         $text = "👤 {$user->name}\n📧 {$user->email}";
-
-        if ($user->profile) {
-            $sex = $user->profile->sex?->value ? ucfirst($user->profile->sex->value) : 'N/A';
-
-            $text .= "\n\n📊 {$user->profile->age} years, {$sex}\n"
-                ."📏 {$user->profile->height}cm, {$user->profile->weight}kg";
-        }
+        $text .= $this->formatProfileInfo($user);
 
         $this->telegramMessage->sendLongMessage($this->chat, $text, false);
     }
 
     public function new(): void
     {
-        $user = $this->getLinkedUser();
+        $linkedChat = $this->resolveLinkedChat();
 
-        if (! $user instanceof User) {
+        if (! $linkedChat instanceof UserTelegramChat) {
             $this->replyNotLinked();
 
             return;
         }
 
-        $chat = $this->getUserTelegramChat();
-        $conversationId = $this->generateAiResponse->resetConversation($user);
-
-        if ($chat instanceof UserTelegramChat) {
-            $chat->update(['conversation_id' => $conversationId]);
-        }
+        $conversationId = $this->generateAiResponse->resetConversation($linkedChat->user);
+        $linkedChat->update(['conversation_id' => $conversationId]);
 
         $this->chat->message('✨ New conversation started! How can I help you?')->send();
     }
@@ -141,63 +121,88 @@ final class TelegramWebhookHandler extends WebhookHandler
 
     protected function handleChatMessage(Stringable $text): void
     {
-        $user = $this->getLinkedUser();
+        $linkedChat = $this->resolveLinkedChat();
 
-        if (! $user instanceof User) {
+        if (! $linkedChat instanceof UserTelegramChat) {
             $this->replyNotLinked();
 
             return;
         }
 
-        $chat = $this->getUserTelegramChat();
-        $conversationId = $chat?->conversation_id;
-
         $this->telegramMessage->sendTypingIndicator($this->chat);
 
         try {
-            $this->generateAndSendResponse($user, $text->toString(), $conversationId, $chat);
+            $this->generateAndSendResponse($linkedChat, $text->toString());
         } catch (Exception $e) {
             report($e);
             $this->chat->message('❌ Error processing message. Please try again.')->send();
         }
     }
 
-    /**
-     * Generate AI response and send it.
-     */
-    private function generateAndSendResponse(
-        User $user,
-        string $message,
-        ?string $conversationId,
-        ?UserTelegramChat $chat,
-    ): void {
-        $result = $this->generateAiResponse->handle($user, $message, $conversationId);
+    private function generateAndSendResponse(UserTelegramChat $linkedChat, string $message): void
+    {
+        $result = $this->generateAiResponse->handle(
+            $linkedChat->user,
+            $message,
+            $linkedChat->conversation_id,
+        );
 
-        if ($chat instanceof UserTelegramChat && $conversationId === null) {
-            $chat->update(['conversation_id' => $result['conversation_id']]);
+        if ($linkedChat->conversation_id === null) {
+            $linkedChat->update(['conversation_id' => $result['conversation_id']]);
         }
 
         $this->telegramMessage->sendLongMessage($this->chat, $result['response']);
     }
 
-    private function getLinkedUser(): ?User
+    private function formatProfileInfo(User $user): string
     {
-        $link = UserTelegramChat::query()
-            ->where('telegraph_chat_id', $this->chat->id)
-            ->where('is_active', true)
-            ->whereNotNull('linked_at')
-            ->first();
+        $profile = $user->profile;
 
-        return $link?->user;
+        if ($profile === null) {
+            return '';
+        }
+
+        $sex = $profile->sex !== null ? ucfirst($profile->sex->value) : 'N/A';
+        $age = $profile->age !== null ? "{$profile->age} years" : 'N/A';
+        $height = $profile->height !== null ? "{$profile->height}cm" : 'N/A';
+        $weight = $profile->weight !== null ? "{$profile->weight}kg" : 'N/A';
+
+        return "\n\n📊 {$age}, {$sex}\n📏 {$height}, {$weight}";
     }
 
-    private function getUserTelegramChat(): ?UserTelegramChat
+    private function resolveLinkedChat(): ?UserTelegramChat
     {
         return UserTelegramChat::query()
+            ->with('user')
             ->where('telegraph_chat_id', $this->chat->id)
             ->where('is_active', true)
             ->whereNotNull('linked_at')
             ->first();
+    }
+
+    private function findPendingChatByToken(string $token): ?UserTelegramChat
+    {
+        return UserTelegramChat::query()
+            ->where('linking_token', $token)
+            ->where('token_expires_at', '>', now())
+            ->first();
+    }
+
+    private function deactivateExistingLinks(): void
+    {
+        UserTelegramChat::query()
+            ->where('telegraph_chat_id', $this->chat->id)
+            ->where('is_active', true)
+            ->update(['is_active' => false]);
+    }
+
+    private function removeOtherChatsForUser(UserTelegramChat $pendingChat): void
+    {
+        UserTelegramChat::query()
+            ->where('user_id', $pendingChat->user_id)
+            ->where('telegraph_chat_id', $this->chat->id)
+            ->where('id', '!=', $pendingChat->id)
+            ->delete();
     }
 
     private function replyNotLinked(): void

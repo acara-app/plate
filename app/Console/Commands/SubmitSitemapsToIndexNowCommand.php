@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Services\Contracts\IndexNowServiceInterface;
+use App\Contracts\Services\IndexNowServiceContract;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
@@ -15,15 +15,13 @@ final class SubmitSitemapsToIndexNowCommand extends Command
 
     protected $description = 'Submit URLs from sitemaps to IndexNow';
 
-    public function handle(IndexNowServiceInterface $indexNowService): int
+    public function handle(IndexNowServiceContract $indexNowService): int
     {
         $this->info('Starting IndexNow submission...');
 
         $files = $this->option('file');
         if (empty($files)) {
-            // @codeCoverageIgnoreStart
             $files = ['sitemap.xml', 'food_sitemap.xml'];
-            // @codeCoverageIgnoreEnd
         }
 
         $allUrls = [];
@@ -45,7 +43,7 @@ final class SubmitSitemapsToIndexNowCommand extends Command
 
             $this->info("Processing {$file}...");
             $urls = $this->extractUrlsFromSitemap($path);
-            $this->info('Found '.count($urls)." URLs in {$file}.");
+            $this->info('Found ' . count($urls) . " URLs in {$file}.");
 
             $allUrls = array_merge($allUrls, $urls);
         }
@@ -58,7 +56,7 @@ final class SubmitSitemapsToIndexNowCommand extends Command
             return self::SUCCESS;
         }
 
-        $this->info('Submitting '.count($allUrls).' unique URLs to IndexNow...');
+        $this->info('Submitting ' . count($allUrls) . ' unique URLs to IndexNow...');
 
         $result = $indexNowService->submit($allUrls);
 
@@ -86,9 +84,7 @@ final class SubmitSitemapsToIndexNowCommand extends Command
         try {
             $xml = simplexml_load_file($path);
             if ($xml === false) {
-                // @codeCoverageIgnoreStart
                 return [];
-                // @codeCoverageIgnoreEnd
             }
 
             $namespaces = $xml->getNamespaces(true);
@@ -106,7 +102,7 @@ final class SubmitSitemapsToIndexNowCommand extends Command
                 }
             }
         } catch (Exception $e) {
-            $this->error("Error parsing {$path}: ".$e->getMessage());
+            $this->error("Error parsing {$path}: " . $e->getMessage());
         }
 
         return $urls;

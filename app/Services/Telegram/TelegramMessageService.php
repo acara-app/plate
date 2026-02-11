@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Telegram;
 
 use DefStudio\Telegraph\Models\TelegraphChat;
-use Exception;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Sleep;
 
 final class TelegramMessageService
@@ -79,7 +77,7 @@ final class TelegramMessageService
             $remaining = mb_trim(mb_substr($remaining, mb_strlen($chunk)));
         }
 
-        return array_values(array_filter($chunks, fn(string $chunk): bool => $chunk !== ''));
+        return array_values(array_filter($chunks, fn (string $chunk): bool => $chunk !== ''));
     }
 
     private function extractChunk(string $text): string
