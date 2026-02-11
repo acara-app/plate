@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Contracts;
+namespace App\Contracts\Services;
 
 use App\Models\User;
 
-interface StripeServiceInterface
+interface StripeServiceContract
 {
     /**
      * Ensure the user has a Stripe customer ID.

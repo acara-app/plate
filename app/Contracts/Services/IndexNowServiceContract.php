@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Contracts;
+namespace App\Contracts\Services;
 
 use App\DataObjects\IndexNowResultData;
 
-interface IndexNowServiceInterface
+interface IndexNowServiceContract
 {
     /**
      * Submit URLs to IndexNow

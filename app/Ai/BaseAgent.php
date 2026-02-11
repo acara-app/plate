@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Ai;
 
-use App\Ai\Contracts\AgentInterface;
+use App\Contracts\Ai\Agent;
 use App\Enums\ModelName;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Facades\Prism;
 use Prism\Prism\Text\PendingRequest;
 use Prism\Prism\Tool;
 
-abstract class BaseAgent implements AgentInterface
+abstract class BaseAgent implements Agent
 {
     abstract public function systemPrompt(): string;
 

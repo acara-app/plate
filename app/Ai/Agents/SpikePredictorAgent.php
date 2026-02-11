@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Ai\BaseAgent;
-use App\Ai\Contracts\PredictsGlucoseSpikes;
 use App\Ai\SystemPrompt;
+use App\Contracts\Ai\PredictsGlucoseSpikes;
 use App\DataObjects\SpikePredictionData;
 use App\Enums\ModelName;
 use App\Enums\SpikeRiskLevel;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Ai\Contracts\Memory;
+namespace App\Contracts\Ai\Memory;
 
 use App\Ai\Exceptions\Memory\MemoryNotFoundException;
 use App\Ai\Exceptions\Memory\MemoryStorageException;

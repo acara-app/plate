@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Services\Contracts\IndexNowServiceInterface;
+use App\Contracts\Services\IndexNowServiceContract;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
@@ -15,7 +15,7 @@ final class SubmitSitemapsToIndexNowCommand extends Command
 
     protected $description = 'Submit URLs from sitemaps to IndexNow';
 
-    public function handle(IndexNowServiceInterface $indexNowService): int
+    public function handle(IndexNowServiceContract $indexNowService): int
     {
         $this->info('Starting IndexNow submission...');
 

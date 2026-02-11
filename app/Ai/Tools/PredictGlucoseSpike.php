@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Ai\Contracts\PredictsGlucoseSpikes;
+use App\Contracts\Ai\PredictsGlucoseSpikes;
 use App\Enums\SpikeRiskLevel;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;

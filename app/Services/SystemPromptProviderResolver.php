@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Ai\Contracts\SystemPromptProvider;
+use App\Contracts\Ai\SystemPromptProvider;
 use App\Enums\DietType;
 use App\Services\SystemPromptProviders\BalancedMealPlanSystemProvider;
 use App\Services\SystemPromptProviders\DashMealPlanSystemProvider;

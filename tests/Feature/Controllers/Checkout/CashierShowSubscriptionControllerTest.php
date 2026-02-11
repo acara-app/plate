@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Contracts\Services\StripeServiceContract;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
-use App\Services\Contracts\StripeServiceInterface;
 use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\mock;
@@ -13,7 +13,7 @@ it('calls stripe service for user without stripe id', function (): void {
     $user = User::factory()->create(['stripe_id' => null]);
     SubscriptionProduct::factory()->count(3)->create();
 
-    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock = mock(StripeServiceContract::class);
     $stripeMock->shouldReceive('ensureStripeCustomer')
         ->once()
         ->with(Mockery::type(User::class));
@@ -56,7 +56,7 @@ it('renders subscription with active subscription', function (): void {
         'updated_at' => now(),
     ]);
 
-    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock = mock(StripeServiceContract::class);
     $stripeMock->shouldReceive('ensureStripeCustomer')->once();
     $stripeMock->shouldReceive('hasIncompletePayment')
         ->once()
@@ -100,7 +100,7 @@ it('detects yearly subscription correctly', function (): void {
         'updated_at' => now(),
     ]);
 
-    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock = mock(StripeServiceContract::class);
     $stripeMock->shouldReceive('ensureStripeCustomer')->once();
     $stripeMock->shouldReceive('hasIncompletePayment')->once()->andReturn(false);
     $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com/session/test');
@@ -114,7 +114,7 @@ it('renders page when user has no active subscription', function (): void {
     $user = User::factory()->create(['stripe_id' => 'cus_test123']);
     SubscriptionProduct::factory()->count(3)->create();
 
-    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock = mock(StripeServiceContract::class);
     $stripeMock->shouldReceive('ensureStripeCustomer')->once();
     $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com/session/test');
 
@@ -144,7 +144,7 @@ it('renders subscription when no subscription items exist', function (): void {
         'updated_at' => now(),
     ]);
 
-    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock = mock(StripeServiceContract::class);
     $stripeMock->shouldReceive('ensureStripeCustomer')->once();
     $stripeMock->shouldReceive('hasIncompletePayment')->once()->andReturn(false);
     $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com/session/test');
@@ -185,7 +185,7 @@ it('renders subscription when product does not match price id', function (): voi
         'updated_at' => now(),
     ]);
 
-    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock = mock(StripeServiceContract::class);
     $stripeMock->shouldReceive('ensureStripeCustomer')->once();
     $stripeMock->shouldReceive('hasIncompletePayment')->once()->andReturn(false);
     $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com/session/test');
@@ -210,7 +210,7 @@ it('returns null for incomplete payment url when has incomplete payment is false
         'updated_at' => now(),
     ]);
 
-    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock = mock(StripeServiceContract::class);
     $stripeMock->shouldReceive('ensureStripeCustomer')->once();
     $stripeMock->shouldReceive('hasIncompletePayment')->once()->andReturn(false);
     $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com');
@@ -237,7 +237,7 @@ it('returns incomplete payment url when payment is incomplete', function (): voi
 
     $subscription = $user->subscriptions()->first();
 
-    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock = mock(StripeServiceContract::class);
     $stripeMock->shouldReceive('ensureStripeCustomer')->once();
     $stripeMock->shouldReceive('hasIncompletePayment')->once()->andReturn(true);
     $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com');
@@ -282,7 +282,7 @@ it('renders subscription page with trialing subscription', function (): void {
         'updated_at' => now(),
     ]);
 
-    $stripeMock = mock(StripeServiceInterface::class);
+    $stripeMock = mock(StripeServiceContract::class);
     $stripeMock->shouldReceive('ensureStripeCustomer')->once();
     $stripeMock->shouldReceive('hasIncompletePayment')->once()->andReturn(false);
     $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com/session/test');

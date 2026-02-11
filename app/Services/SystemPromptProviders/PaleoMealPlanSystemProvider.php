@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\SystemPromptProviders;
 
-use App\Ai\Contracts\SystemPromptProvider;
 use App\Ai\SystemPrompt;
+use App\Contracts\Ai\SystemPromptProvider;
 
 final readonly class PaleoMealPlanSystemProvider implements SystemPromptProvider
 {

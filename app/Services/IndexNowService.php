@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Services\IndexNowServiceContract;
 use App\DataObjects\IndexNowResultData;
-use App\Services\Contracts\IndexNowServiceInterface;
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-final readonly class IndexNowService implements IndexNowServiceInterface
+final readonly class IndexNowService implements IndexNowServiceContract
 {
     private const int TIMEOUT_SECONDS = 30;
 

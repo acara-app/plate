@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Ai\Contracts;
+namespace App\Contracts\Ai;
 
 use App\Enums\ModelName;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Text\PendingRequest;
 use Prism\Prism\Tool;
 
-interface AgentInterface
+interface Agent
 {
     public function modelName(): ModelName;
 

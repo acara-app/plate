@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Contracts;
+namespace App\Contracts\Services;
 
 use App\Enums\IngredientSpecificity;
 
-interface FoodDataProviderInterface
+interface FoodDataProviderContract
 {
     /**
      * @return array<int, array{id: string, name: string, brand: string|null, calories: float|null, protein: float|null, carbs: float|null, fat: float|null, fiber: float|null, sugar: float|null, sodium: float|null, source: string}>

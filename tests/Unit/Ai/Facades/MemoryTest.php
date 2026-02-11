@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Ai\Contracts\Memory\StoreMemoryTool;
 use App\Ai\Facades\Memory;
+use App\Contracts\Ai\Memory\StoreMemoryTool;
 
 it('throws exception for unknown method', function (): void {
     Memory::unknownMethod('test');

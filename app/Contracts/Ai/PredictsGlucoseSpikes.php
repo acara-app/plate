@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Ai\Contracts;
+namespace App\Contracts\Ai;
 
 use App\Ai\Agents\SpikePredictorAgent;
 use App\DataObjects\SpikePredictionData;
