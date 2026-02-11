@@ -82,3 +82,31 @@ it('correctly identifies diabetic friendly diets', function (DietType $diet, boo
     'Vegan (not friendly)' => [DietType::Vegan, false],
     'Paleo (not friendly)' => [DietType::Paleo, false],
 ]);
+
+it('returns correct short names', function (DietType $diet, string $shortName): void {
+    expect($diet->shortName())->toBe($shortName);
+})->with([
+    'Mediterranean' => [DietType::Mediterranean, 'Mediterranean'],
+    'Low Carb' => [DietType::LowCarb, 'Low Carb'],
+    'Keto' => [DietType::Keto, 'Keto'],
+    'Dash' => [DietType::Dash, 'DASH'],
+    'Vegetarian' => [DietType::Vegetarian, 'Vegetarian'],
+    'Vegan' => [DietType::Vegan, 'Vegan'],
+    'Paleo' => [DietType::Paleo, 'Paleo'],
+    'Balanced' => [DietType::Balanced, 'Balanced'],
+]);
+
+it('returns array with all diet types and labels', function (): void {
+    $array = DietType::toArray();
+
+    expect($array)->toBeArray()
+        ->toHaveCount(8)
+        ->toHaveKey('mediterranean', 'Mediterranean (Gold Standard)')
+        ->toHaveKey('low_carb', 'Low Carb (Diabetic Friendly)')
+        ->toHaveKey('keto', 'Ketogenic (Strict)')
+        ->toHaveKey('dash', 'DASH Diet')
+        ->toHaveKey('vegetarian', 'Vegetarian')
+        ->toHaveKey('vegan', 'Vegan')
+        ->toHaveKey('paleo', 'Paleo')
+        ->toHaveKey('balanced', 'Standard Balanced (USDA)');
+});

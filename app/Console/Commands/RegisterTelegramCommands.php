@@ -39,8 +39,6 @@ final class RegisterTelegramCommands extends Command
             return self::SUCCESS;
         }
 
-        $this->error('Failed to register commands: '.$response->body());
-
         return self::FAILURE;
     }
 }
