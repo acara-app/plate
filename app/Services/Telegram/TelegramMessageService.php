@@ -57,13 +57,7 @@ final class TelegramMessageService
 
     public function sendTypingIndicator(TelegraphChat $chat): void
     {
-        try {
-            $chat->action('typing')->dispatch(self::QUEUE_NAME);
-        } catch (Exception $e) {
-            // @codeCoverageIgnoreStart
-            Log::warning('Failed to send typing action', ['error' => $e->getMessage()]);
-            // @codeCoverageIgnoreEnd
-        }
+        $chat->action('typing')->dispatch(self::QUEUE_NAME);
     }
 
     /**
