@@ -21,7 +21,7 @@ beforeEach(function (): void {
     ]);
 });
 
-function sendWebhook(mixed $test, string $text): \Illuminate\Testing\TestResponse
+function sendWebhook(mixed $test, string $text): Illuminate\Testing\TestResponse
 {
     return $test->postJson(
         route('telegraph.webhook', ['token' => $test->bot->token]),
@@ -45,7 +45,6 @@ describe('/start command', function (): void {
     });
 });
 
-
 describe('/help command', function (): void {
     it('sends the help message listing all commands', function (): void {
         sendWebhook($this, '/help');
@@ -53,7 +52,6 @@ describe('/help command', function (): void {
         Telegraph::assertSent('📚 Available Commands:', false);
     });
 });
-
 
 describe('/link command', function (): void {
     it('rejects token with invalid length', function (): void {
@@ -248,7 +246,7 @@ describe('/new command', function (): void {
         $mock = Mockery::mock(GeneratesAiResponse::class);
         $mock->shouldReceive('resetConversation')
             ->once()
-            ->with(Mockery::on(fn(User $u): bool => $u->id === $user->id))
+            ->with(Mockery::on(fn (User $u): bool => $u->id === $user->id))
             ->andReturn('new-conv-id');
         app()->instance(GeneratesAiResponse::class, $mock);
 
@@ -296,7 +294,7 @@ describe('chat message handling', function (): void {
         $mock->shouldReceive('handle')
             ->once()
             ->with(
-                Mockery::on(fn(User $u): bool => $u->id === $user->id),
+                Mockery::on(fn (User $u): bool => $u->id === $user->id),
                 'What should I eat for breakfast?',
                 'existing-conv',
             )
@@ -323,7 +321,7 @@ describe('chat message handling', function (): void {
         $mock->shouldReceive('handle')
             ->once()
             ->with(
-                Mockery::on(fn(User $u): bool => $u->id === $user->id),
+                Mockery::on(fn (User $u): bool => $u->id === $user->id),
                 'Hello!',
                 null,
             )

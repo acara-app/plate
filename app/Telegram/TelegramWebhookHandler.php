@@ -22,17 +22,17 @@ final class TelegramWebhookHandler extends WebhookHandler
     public function start(): void
     {
         $text = "👋 Welcome to Acara Plate!\n\n"
-            . "I'm your AI nutrition advisor. I can help you with:\n"
-            . "• General nutrition advice\n"
-            . "• Meal suggestions and meal plans\n"
-            . "• Glucose spike predictions\n"
-            . "• Dietary recommendations\n\n"
-            . "Commands:\n"
-            . "/new - Start a new conversation\n"
-            . "/reset - Clear conversation history\n"
-            . "/me - Show your profile\n"
-            . "/help - Show all commands\n\n"
-            . 'To get started, link your account in Settings → Integrations.';
+            ."I'm your AI nutrition advisor. I can help you with:\n"
+            ."• General nutrition advice\n"
+            ."• Meal suggestions and meal plans\n"
+            ."• Glucose spike predictions\n"
+            ."• Dietary recommendations\n\n"
+            ."Commands:\n"
+            ."/new - Start a new conversation\n"
+            ."/reset - Clear conversation history\n"
+            ."/me - Show your profile\n"
+            ."/help - Show all commands\n\n"
+            .'To get started, link your account in Settings → Integrations.';
 
         $this->telegramMessage->sendLongMessage($this->chat, $text, false);
     }
@@ -40,12 +40,12 @@ final class TelegramWebhookHandler extends WebhookHandler
     public function help(): void
     {
         $text = "📚 Available Commands:\n\n"
-            . "/start - Welcome message\n"
-            . "/new - Start a new conversation\n"
-            . "/reset - Clear conversation history\n"
-            . "/me - Show your profile\n"
-            . "/help - Show this help\n\n"
-            . 'Just send me any message for nutrition advice!';
+            ."/start - Welcome message\n"
+            ."/new - Start a new conversation\n"
+            ."/reset - Clear conversation history\n"
+            ."/me - Show your profile\n"
+            ."/help - Show this help\n\n"
+            .'Just send me any message for nutrition advice!';
 
         $this->telegramMessage->sendLongMessage($this->chat, $text, false);
     }
