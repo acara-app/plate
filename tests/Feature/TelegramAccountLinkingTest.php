@@ -7,34 +7,7 @@ use App\Models\UserTelegramChat;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Models\TelegraphChat;
 
-it('reproduces unique constraint violation when relinking telegram', function (): void {
-    $user = User::factory()->create();
-    $bot = TelegraphBot::factory()->create();
-
-    $telegraphChat = TelegraphChat::factory()->for($bot, 'bot')->create([
-        'chat_id' => '123456789',
-    ]);
-
-    $existingChat = UserTelegramChat::factory()->for($user)->create([
-        'telegraph_chat_id' => $telegraphChat->id,
-        'is_active' => true,
-        'linked_at' => now(),
-    ]);
-
-    $pendingChat = UserTelegramChat::factory()->for($user)->create([
-        'telegraph_chat_id' => null,
-        'is_active' => true,
-        'linking_token' => 'ABC123XY',
-        'token_expires_at' => now()->addHours(24),
-        'linked_at' => null,
-    ]);
-
-    expect(function () use ($pendingChat, $telegraphChat): void {
-        $pendingChat->update(['telegraph_chat_id' => $telegraphChat->id]);
-    })->toThrow(Illuminate\Database\UniqueConstraintViolationException::class);
-});
-
-it('prevents duplicate by deleting existing link before update', function (): void {
+it('links telegram account and removes duplicates', function (): void {
     $user = User::factory()->create();
     $bot = TelegraphBot::factory()->create();
 
