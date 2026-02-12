@@ -11,7 +11,7 @@ it('can update own diabetes log', function (): void {
 
     $data = [
         'log_type' => 'glucose',
-        'glucose_value' => 130.0,
+        'glucose_value' => 7.2,
         'glucose_reading_type' => 'fasting',
         'measured_at' => now()->toDateTimeString(),
         'notes' => 'Updated notes',
@@ -24,7 +24,7 @@ it('can update own diabetes log', function (): void {
 
     $this->assertDatabaseHas('diabetes_logs', [
         'id' => $log->id,
-        'glucose_value' => 130.0,
+        'glucose_value' => 7.2,
         'notes' => 'Updated notes',
     ]);
 });
@@ -36,7 +36,7 @@ it('cannot update another user diabetes log', function (): void {
 
     $data = [
         'log_type' => 'glucose',
-        'glucose_value' => 130.0,
+        'glucose_value' => 7.2,
         'glucose_reading_type' => 'fasting',
         'measured_at' => now()->toDateTimeString(),
     ];

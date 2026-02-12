@@ -6,7 +6,9 @@ namespace App\Http\Requests;
 
 use App\Enums\DiabeteLogType;
 use App\Enums\GlucoseReadingType;
+use App\Enums\GlucoseUnit;
 use App\Enums\InsulinType;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -19,16 +21,21 @@ final class UpdateDiabetesLogRequest extends FormRequest
     {
         $logType = $this->input('log_type');
 
+        /** @var User $user */
+        $user = $this->user();
+        $glucoseUnit = $user->profile?->units_preference ?? GlucoseUnit::MmolL;
+        $range = $glucoseUnit->validationRange();
+
         return [
             // Log type to determine which fields are required
-            'log_type' => ['required',  Rule::enum(DiabeteLogType::class)],
+            'log_type' => ['required', Rule::enum(DiabeteLogType::class)],
 
-            // Glucose tracking
+            // Glucose tracking (unit-aware validation)
             'glucose_value' => [
                 $logType === DiabeteLogType::Glucose->value ? 'required' : 'nullable',
                 'numeric',
-                'min:20',
-                'max:600',
+                "min:{$range['min']}",
+                "max:{$range['max']}",
             ],
             'glucose_reading_type' => [
                 $logType === DiabeteLogType::Glucose->value ? 'required' : 'nullable',
@@ -119,8 +126,8 @@ final class UpdateDiabetesLogRequest extends FormRequest
             'log_type.required' => 'Please select a log type.',
             'glucose_value.required' => 'Please enter a glucose reading.',
             'glucose_value.numeric' => 'The glucose reading must be a number.',
-            'glucose_value.min' => 'Please enter a valid glucose reading (minimum 20 mg/dL).',
-            'glucose_value.max' => 'Please enter a valid glucose reading (maximum 600 mg/dL).',
+            'glucose_value.min' => 'Please enter a valid glucose reading.',
+            'glucose_value.max' => 'Please enter a valid glucose reading.',
             'glucose_reading_type.required' => 'Please select the type of glucose reading.',
             'glucose_reading_type.required_with' => 'Please select the type of glucose reading.',
             'measured_at.required' => 'Please provide the date and time of the measurement.',
