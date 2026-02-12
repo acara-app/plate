@@ -47,6 +47,11 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
         href: mealPlans.index(),
         icon: CalendarHeartIcon,
     },
+    {
+        title: t('sidebar.nav.diabetes_log'),
+        href: DashboardDiabetesLogController().url,
+        icon: ActivityIcon,
+    },
 ];
 
 const getProfileNavItems = (t: (key: string) => string): NavItem[] => [
@@ -74,11 +79,6 @@ const getProfileNavItems = (t: (key: string) => string): NavItem[] => [
         title: t('sidebar.nav.diabetes_insights'),
         href: diabetesLog.insights(),
         icon: TrendingUp,
-    },
-    {
-        title: t('sidebar.nav.diabetes_log'),
-        href: DashboardDiabetesLogController().url,
-        icon: ActivityIcon,
     },
 ];
 
