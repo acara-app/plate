@@ -595,7 +595,7 @@ return [
             'units_label' => 'u',
         ],
         'tracking_page' => [
-            'title' => 'Tableau de bord du journal du diabète',
+            'title' => 'Journal de Santé',
             'description' => 'Analyses et tendances complètes pour votre gestion du diabète',
             'add_entry' => 'Ajouter une entrée',
             'time_period_title' => 'Période',

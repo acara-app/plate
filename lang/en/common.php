@@ -607,7 +607,7 @@ return [
             'units_label' => 'u',
         ],
         'tracking_page' => [
-            'title' => 'Diabetes Log Dashboard',
+            'title' => 'Health Log',
             'description' => 'Comprehensive analytics and trends for your diabetes management',
             'add_entry' => 'Add Entry',
             'time_period_title' => 'Time Period',
