@@ -48,7 +48,7 @@ it('extracts and submits URLs from sitemap fixtures', function (): void {
         ->expectsOutputToContain('Submitting 3 unique URLs to IndexNow')
         ->expectsOutputToContain('Successfully submitted 3 URLs to IndexNow');
 
-    Http::assertSent(fn(Request $request): bool => $request->url() === 'https://api.indexnow.org/IndexNow' &&
+    Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.indexnow.org/IndexNow' &&
         count($request->data()['urlList']) === 3 &&
         in_array('https://plate.acara.app/page1', $request->data()['urlList']) &&
         in_array('https://plate.acara.app/page2', $request->data()['urlList']) &&
@@ -106,7 +106,7 @@ it('uses default files when no file option is provided', function (): void {
         ->expectsOutputToContain('Processing test_temp/sitemap.xml')
         ->expectsOutputToContain('Processing test_temp/food_sitemap.xml');
 
-    Http::assertSent(fn(Request $request): bool => count($request->data()['urlList']) === 3);
+    Http::assertSent(fn (Request $request): bool => count($request->data()['urlList']) === 3);
 });
 
 it('handles invalid XML files gracefully', function (): void {

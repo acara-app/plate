@@ -17,7 +17,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Workflow\WorkflowStub;
 
-final class ShowMealPlansController
+final readonly class ShowMealPlansController
 {
     public function __construct(
         #[CurrentUser] private \App\Models\User $user
@@ -71,9 +71,9 @@ final class ShowMealPlansController
         if ($mealPlan->macronutrient_ratios) {
             $avgMacros = $mealPlan->macronutrient_ratios;
         } elseif ($dayMeals->whereNotNull('protein_grams')->isNotEmpty()) {
-            $totalProteinCals = $dayMeals->sum(fn(Meal $m): float => ($m->protein_grams ?? 0) * 4);
-            $totalCarbsCals = $dayMeals->sum(fn(Meal $m): float => ($m->carbs_grams ?? 0) * 4);
-            $totalFatCals = $dayMeals->sum(fn(Meal $m): float => ($m->fat_grams ?? 0) * 9);
+            $totalProteinCals = $dayMeals->sum(fn (Meal $m): float => ($m->protein_grams ?? 0) * 4);
+            $totalCarbsCals = $dayMeals->sum(fn (Meal $m): float => ($m->carbs_grams ?? 0) * 4);
+            $totalFatCals = $dayMeals->sum(fn (Meal $m): float => ($m->fat_grams ?? 0) * 9);
             $totalMacroCals = $totalProteinCals + $totalCarbsCals + $totalFatCals;
 
             if ($totalMacroCals > 0) {
@@ -121,7 +121,7 @@ final class ShowMealPlansController
             'day_name' => $dayName,
             'needs_generation' => $dayNeedsGeneration,
             'status' => $dayStatus,
-            'meals' => $dayMeals->map(fn(Meal $meal): array => [
+            'meals' => $dayMeals->map(fn (Meal $meal): array => [
                 'id' => $meal->id,
                 'type' => $meal->type->value,
                 'name' => $meal->name,

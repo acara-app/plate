@@ -16,7 +16,7 @@ $createRequest = function (array $data): StoreAgentConversationRequest {
     $request->setValidator($validator);
 
     if ($validator->fails()) {
-        throw new Exception('Validation failed: ' . json_encode($validator->errors()->all()));
+        throw new Exception('Validation failed: '.json_encode($validator->errors()->all()));
     }
 
     return $request;
@@ -48,7 +48,6 @@ it('prepares data for validation by merging query parameters', function (): void
 
     $reflection = new ReflectionClass($request);
     $method = $reflection->getMethod('prepareForValidation');
-    $method->setAccessible(true);
     $method->invoke($request);
 
     expect($request->input('mode'))->toBe(AgentMode::Ask->value)

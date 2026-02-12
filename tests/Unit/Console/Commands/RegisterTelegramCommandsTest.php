@@ -3,11 +3,10 @@
 declare(strict_types=1);
 
 use App\Console\Commands\RegisterTelegramCommands;
-use Illuminate\Support\Facades\Http;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Telegraph as TelegraphClient;
-
+use Illuminate\Support\Facades\Http;
 
 it('registers telegram commands successfully when bot exists', function (): void {
     $bot = TelegraphBot::factory()->create([
