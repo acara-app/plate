@@ -22,7 +22,7 @@ it('can store a new diabetes log with glucose reading', function (): void {
 
     $this->assertDatabaseHas('diabetes_logs', [
         'user_id' => $user->id,
-        'glucose_value' => 6.7,
+        'glucose_value' => 121, // 6.7 mmol/L converted to mg/dL
         'glucose_reading_type' => 'fasting',
         'notes' => 'Morning reading after breakfast',
     ]);
@@ -107,7 +107,7 @@ it('stores diabetes log without notes', function (): void {
 
     $this->assertDatabaseHas('diabetes_logs', [
         'user_id' => $user->id,
-        'glucose_value' => 5.3,
+        'glucose_value' => 95, // 5.3 mmol/L converted to mg/dL
         'glucose_reading_type' => 'post-meal',
         'notes' => null,
     ]);

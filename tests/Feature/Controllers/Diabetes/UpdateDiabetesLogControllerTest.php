@@ -24,7 +24,7 @@ it('can update own diabetes log', function (): void {
 
     $this->assertDatabaseHas('diabetes_logs', [
         'id' => $log->id,
-        'glucose_value' => 7.2,
+        'glucose_value' => 130, // 7.2 mmol/L converted to mg/dL
         'notes' => 'Updated notes',
     ]);
 });
