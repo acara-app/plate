@@ -580,7 +580,7 @@ return [
             ],
         ],
         'index_page' => [
-            'title' => 'Journal du diabète',
+            'title' => 'Journal de Santé',
             'description' => 'Suivez et surveillez votre gestion du diabète',
             'view_dashboard' => 'Voir le tableau de bord',
             'add_entry' => 'Ajouter une entrée',

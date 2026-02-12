@@ -592,7 +592,7 @@ return [
             ],
         ],
         'index_page' => [
-            'title' => 'Diabetes Log',
+            'title' => 'Health Log',
             'description' => 'Track and monitor your diabetes management',
             'view_dashboard' => 'View Dashboard',
             'add_entry' => 'Add Entry',
