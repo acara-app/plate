@@ -12,9 +12,11 @@ import {
 } from '@/components/ui/card';
 import useModalToggle, { useModalValueToggle } from '@/hooks/use-modal-toggle';
 import AppLayout from '@/layouts/app-layout';
+import { convertGlucoseValue } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
 import {
     DiabetesLogEntry,
+    type GlucoseUnitType,
     ReadingType,
     RecentInsulin,
     RecentMedication,
@@ -163,9 +165,10 @@ export default function DiabetesLogIndex({
                                                         {log.glucose_value && (
                                                             <>
                                                                 <span className="text-2xl font-bold">
-                                                                    {
-                                                                        log.glucose_value
-                                                                    }
+                                                                    {convertGlucoseValue(
+                                                                        log.glucose_value,
+                                                                        glucoseUnit as GlucoseUnitType,
+                                                                    )}
                                                                 </span>
                                                                 <span className="text-sm text-muted-foreground">
                                                                     {

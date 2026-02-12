@@ -9,7 +9,7 @@ it('can store a new diabetes log with glucose reading', function (): void {
 
     $data = [
         'log_type' => 'glucose',
-        'glucose_value' => 120.5,
+        'glucose_value' => 6.7,
         'glucose_reading_type' => 'fasting',
         'measured_at' => now()->toDateTimeString(),
         'notes' => 'Morning reading after breakfast',
@@ -22,7 +22,7 @@ it('can store a new diabetes log with glucose reading', function (): void {
 
     $this->assertDatabaseHas('diabetes_logs', [
         'user_id' => $user->id,
-        'glucose_value' => 120.5,
+        'glucose_value' => 121, // 6.7 mmol/L converted to mg/dL
         'glucose_reading_type' => 'fasting',
         'notes' => 'Morning reading after breakfast',
     ]);
@@ -53,22 +53,22 @@ it('can store a diabetes log with insulin only', function (): void {
 it('validates reading value range', function (): void {
     $user = User::factory()->create();
 
-    // Test minimum value
+    // Test minimum value (default unit is mmol/L, min is 1.1)
     $response = $this->actingAs($user)
         ->post(route('diabetes-log.store'), [
             'log_type' => 'glucose',
-            'glucose_value' => 10, // Below minimum of 20
+            'glucose_value' => 0.5, // Below minimum of 1.1 mmol/L
             'glucose_reading_type' => 'fasting',
             'measured_at' => now()->toDateTimeString(),
         ]);
 
     $response->assertSessionHasErrors(['glucose_value']);
 
-    // Test maximum value
+    // Test maximum value (default unit is mmol/L, max is 33.3)
     $response = $this->actingAs($user)
         ->post(route('diabetes-log.store'), [
             'log_type' => 'glucose',
-            'glucose_value' => 700, // Above maximum of 600
+            'glucose_value' => 40.0, // Above maximum of 33.3 mmol/L
             'glucose_reading_type' => 'fasting',
             'measured_at' => now()->toDateTimeString(),
         ]);
@@ -82,7 +82,7 @@ it('validates reading type enum', function (): void {
     $response = $this->actingAs($user)
         ->post(route('diabetes-log.store'), [
             'log_type' => 'glucose',
-            'glucose_value' => 120,
+            'glucose_value' => 6.7,
             'glucose_reading_type' => 'InvalidType',
             'measured_at' => now()->toDateTimeString(),
         ]);
@@ -95,7 +95,7 @@ it('stores diabetes log without notes', function (): void {
 
     $data = [
         'log_type' => 'glucose',
-        'glucose_value' => 95.0,
+        'glucose_value' => 5.3,
         'glucose_reading_type' => 'post-meal',
         'measured_at' => now()->toDateTimeString(),
     ];
@@ -107,7 +107,7 @@ it('stores diabetes log without notes', function (): void {
 
     $this->assertDatabaseHas('diabetes_logs', [
         'user_id' => $user->id,
-        'glucose_value' => 95.0,
+        'glucose_value' => 95, // 5.3 mmol/L converted to mg/dL
         'glucose_reading_type' => 'post-meal',
         'notes' => null,
     ]);

@@ -48,4 +48,17 @@ enum GlucoseUnit: string
     {
         return $this->value;
     }
+
+    /**
+     * Get the valid glucose value range for this unit.
+     *
+     * @return array{min: float, max: float}
+     */
+    public function validationRange(): array
+    {
+        return match ($this) {
+            self::MgDl => ['min' => 20, 'max' => 600],
+            self::MmolL => ['min' => 1.1, 'max' => 33.3],
+        };
+    }
 }

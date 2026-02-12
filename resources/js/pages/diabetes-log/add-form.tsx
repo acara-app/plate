@@ -13,6 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { formatLocalDatetime } from '@/lib/format-local-datetime';
 import {
     GlucoseUnit,
     LogType,
@@ -53,7 +54,7 @@ export default function CreateDiabetesLogForm({
     onCancel,
 }: CreateDiabetesLogFormProps) {
     const { t } = useTranslation('common');
-    const defaultMeasuredAt = new Date().toISOString().slice(0, 16);
+    const defaultMeasuredAt = formatLocalDatetime(new Date());
     const [activeTab, setActiveTab] = useState<string>(LogType.Glucose);
     /**
      * Form State for filling inputs via label chips

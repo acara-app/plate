@@ -13,9 +13,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { formatLocalDatetime } from '@/lib/format-local-datetime';
+import { convertGlucoseValue } from '@/lib/utils';
 import {
     DiabetesLogEntry,
     GlucoseUnit,
+    type GlucoseUnitType,
     LogType,
     LogTypeValue,
     ReadingType,
@@ -84,9 +87,7 @@ export default function EditDiabetesLogForm({
     onCancel,
 }: EditDiabetesLogFormProps) {
     const { t } = useTranslation('common');
-    const measuredAt = new Date(logEntry.measured_at)
-        .toISOString()
-        .slice(0, 16);
+    const measuredAt = formatLocalDatetime(new Date(logEntry.measured_at));
     const [activeTab, setActiveTab] = useState<string>(getDefaultTab(logEntry));
     /**
      * Form State for filling inputs via label chips
@@ -110,6 +111,15 @@ export default function EditDiabetesLogForm({
 
     const glucosePlaceholder =
         glucoseUnit === GlucoseUnit.MmolL ? 'e.g., 6.7' : 'e.g., 120';
+
+    // Convert stored mg/dL value to user's unit for display
+    const displayGlucoseValue =
+        logEntry.glucose_value !== null
+            ? convertGlucoseValue(
+                  logEntry.glucose_value,
+                  glucoseUnit as GlucoseUnitType,
+              )
+            : '';
 
     const handleMedicationChipClick = (med: RecentMedication) => {
         setMedicationName(med.name);
@@ -210,7 +220,7 @@ export default function EditDiabetesLogForm({
                                     name="glucose_value"
                                     step="0.1"
                                     placeholder={glucosePlaceholder}
-                                    defaultValue={logEntry.glucose_value ?? ''}
+                                    defaultValue={displayGlucoseValue}
                                 />
                                 <InputError message={errors.glucose_value} />
                             </div>

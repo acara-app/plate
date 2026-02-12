@@ -43,7 +43,7 @@ final class SubmitSitemapsToIndexNowCommand extends Command
 
             $this->info("Processing {$file}...");
             $urls = $this->extractUrlsFromSitemap($path);
-            $this->info('Found ' . count($urls) . " URLs in {$file}.");
+            $this->info('Found '.count($urls)." URLs in {$file}.");
 
             $allUrls = array_merge($allUrls, $urls);
         }
@@ -56,7 +56,7 @@ final class SubmitSitemapsToIndexNowCommand extends Command
             return self::SUCCESS;
         }
 
-        $this->info('Submitting ' . count($allUrls) . ' unique URLs to IndexNow...');
+        $this->info('Submitting '.count($allUrls).' unique URLs to IndexNow...');
 
         $result = $indexNowService->submit($allUrls);
 
@@ -102,7 +102,7 @@ final class SubmitSitemapsToIndexNowCommand extends Command
                 }
             }
         } catch (Exception $e) {
-            $this->error("Error parsing {$path}: " . $e->getMessage());
+            $this->error("Error parsing {$path}: ".$e->getMessage());
         }
 
         return $urls;

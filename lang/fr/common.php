@@ -580,7 +580,7 @@ return [
             ],
         ],
         'index_page' => [
-            'title' => 'Journal du diabète',
+            'title' => 'Journal de Santé',
             'description' => 'Suivez et surveillez votre gestion du diabète',
             'view_dashboard' => 'Voir le tableau de bord',
             'add_entry' => 'Ajouter une entrée',
@@ -595,7 +595,7 @@ return [
             'units_label' => 'u',
         ],
         'tracking_page' => [
-            'title' => 'Tableau de bord du journal du diabète',
+            'title' => 'Journal de Santé',
             'description' => 'Analyses et tendances complètes pour votre gestion du diabète',
             'add_entry' => 'Ajouter une entrée',
             'time_period_title' => 'Période',

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Diabetes;
 
 use App\Actions\UpdateDiabetesLogAction;
+use App\Enums\GlucoseUnit;
 use App\Http\Requests\UpdateDiabetesLogRequest;
 use App\Models\DiabetesLog;
 use App\Models\User;
@@ -26,6 +27,11 @@ final readonly class UpdateDiabetesLogController
 
         /** @var array<string, mixed> $updateData */
         $updateData = collect($data)->except('log_type')->toArray();
+
+        $glucoseUnit = $this->currentUser->profile?->units_preference ?? GlucoseUnit::MmolL;
+        if ($glucoseUnit === GlucoseUnit::MmolL && isset($updateData['glucose_value'])) {
+            $updateData['glucose_value'] = GlucoseUnit::mmolLToMgDl((float) $updateData['glucose_value']);
+        }
 
         $this->updateDiabetesLog->handle(
             diabetesLog: $diabetesLog,

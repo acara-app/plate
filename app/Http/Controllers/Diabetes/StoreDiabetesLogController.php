@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Diabetes;
 
 use App\Actions\RecordDiabetesLogAction;
+use App\Enums\GlucoseUnit;
 use App\Http\Requests\StoreDiabetesLogRequest;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -23,6 +24,11 @@ final readonly class StoreDiabetesLogController
 
         /** @var array<string, mixed> $recordData */
         $recordData = collect($data + ['user_id' => $this->currentUser->id])->except('log_type')->toArray();
+
+        $glucoseUnit = $this->currentUser->profile?->units_preference ?? GlucoseUnit::MmolL;
+        if ($glucoseUnit === GlucoseUnit::MmolL && isset($recordData['glucose_value'])) {
+            $recordData['glucose_value'] = GlucoseUnit::mmolLToMgDl((float) $recordData['glucose_value']);
+        }
 
         $this->recordDiabetesLog->handle($recordData);
 
