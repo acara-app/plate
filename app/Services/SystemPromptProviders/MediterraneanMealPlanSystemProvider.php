@@ -11,12 +11,13 @@ final readonly class MediterraneanMealPlanSystemProvider implements SystemPrompt
 {
     public function __construct(
         private \App\Enums\DietType $dietType = \App\Enums\DietType::Mediterranean,
-    ) {}
+    ) {
+    }
 
     public function run(): string
     {
         $targets = $this->dietType->macroTargets();
-        $scoreCard = file_get_contents(resource_path('markdown/med-diet-nutrient-score-card.md'));
+        $scoreCard = file_get_contents(resource_path('markdown/mediterranean/references/med-diet-nutrient-score-card.md'));
 
         return (string) new SystemPrompt(
             background: [
