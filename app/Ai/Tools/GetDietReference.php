@@ -40,13 +40,13 @@ final readonly class GetDietReference implements Tool
         if ($dietType === null) {
             return (string) json_encode([
                 'success' => false,
-                'error' => "Invalid diet type '{$dietTypeValue}'. Valid options: ".implode(', ', array_map(fn ($t) => $t->value, DietType::cases())),
+                'error' => "Invalid diet type '{$dietTypeValue}'. Valid options: ".implode(', ', array_map(fn (DietType $t) => $t->value, DietType::cases())),
             ]);
         }
 
         // Validate reference name (prevent directory traversal)
         $sanitizedName = preg_replace('/[^a-zA-Z0-9_-]/', '', $referenceName);
-        if ($sanitizedName !== $referenceName || empty($sanitizedName)) {
+        if ($sanitizedName !== $referenceName || ($sanitizedName === '' || $sanitizedName === '0')) {
             return (string) json_encode([
                 'success' => false,
                 'error' => 'Invalid reference name. Use only alphanumeric characters, hyphens, and underscores.',
