@@ -7,6 +7,7 @@ namespace App\Ai\Agents;
 use App\Actions\AnalyzeGlucoseForNotificationAction;
 use App\Ai\BaseAgent;
 use App\Ai\MealPlanPromptBuilder;
+use App\Ai\Tools\GetDietReference;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\MealPlanData;
@@ -62,6 +63,16 @@ final class MealPlanGeneratorAgent extends BaseAgent
     {
         return [
             'timeout' => 180,
+        ];
+    }
+
+    /**
+     * @return array<int, object>
+     */
+    public function tools(): array
+    {
+        return [
+            new GetDietReference,
         ];
     }
 
