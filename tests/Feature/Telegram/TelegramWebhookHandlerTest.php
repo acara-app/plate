@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Contracts\GeneratesAiResponse;
+use App\Contracts\ParsesHealthData;
 use App\Enums\Sex;
 use App\Models\User;
 use App\Models\UserProfile;
@@ -19,6 +20,10 @@ beforeEach(function (): void {
     $this->telegraphChat = TelegraphChat::factory()->for($this->bot, 'bot')->create([
         'chat_id' => '123456789',
     ]);
+
+    $parserMock = Mockery::mock(ParsesHealthData::class);
+    $parserMock->shouldReceive('parse')->andReturn(new App\DataObjects\HealthLogData(isHealthData: false, logType: 'glucose'));
+    app()->instance(ParsesHealthData::class, $parserMock);
 });
 
 function sendWebhook(mixed $test, string $text): Illuminate\Testing\TestResponse

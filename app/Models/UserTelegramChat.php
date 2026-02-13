@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property CarbonInterface|null $token_expires_at
  * @property bool $is_active
  * @property CarbonInterface|null $linked_at
+ * @property array<string, mixed>|null $pending_health_log
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
  * @property-read User $user
@@ -40,6 +41,7 @@ final class UserTelegramChat extends Model
             'token_expires_at' => 'datetime',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+            'pending_health_log' => 'array',
         ];
     }
 
@@ -105,6 +107,42 @@ final class UserTelegramChat extends Model
         ]);
 
         return $token;
+    }
+
+    /**
+     * Set the pending health log data.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function setPendingHealthLog(array $data): void
+    {
+        $this->update(['pending_health_log' => $data]);
+    }
+
+    /**
+     * Get the pending health log data.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function getPendingHealthLog(): ?array
+    {
+        return $this->pending_health_log;
+    }
+
+    /**
+     * Clear the pending health log.
+     */
+    public function clearPendingHealthLog(): void
+    {
+        $this->update(['pending_health_log' => null]);
+    }
+
+    /**
+     * Check if there is a pending health log.
+     */
+    public function hasPendingHealthLog(): bool
+    {
+        return $this->pending_health_log !== null;
     }
 
     /**
