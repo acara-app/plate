@@ -11,13 +11,14 @@ use App\DataObjects\HealthLogData;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\InsulinType;
+use App\Exceptions\TelegramUserException;
 use App\Models\User;
 use App\Models\UserTelegramChat;
 use App\Services\Telegram\TelegramMessageService;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
-use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Stringable;
+use Throwable;
 
 final class TelegramWebhookHandler extends WebhookHandler
 {
@@ -180,7 +181,7 @@ final class TelegramWebhookHandler extends WebhookHandler
             $linkedChat->clearPendingHealthLog();
 
             $this->chat->message('✅ Saved! Your health data has been logged.')->send();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             report($e);
             $this->chat->message('❌ Error saving log. Please try again.')->send();
         }
@@ -232,15 +233,12 @@ final class TelegramWebhookHandler extends WebhookHandler
 
                 return;
             }
-        } catch (Exception $e) {
-            report($e);
-        }
 
-        $this->telegramMessage->sendTypingIndicator($this->chat);
-
-        try {
+            $this->telegramMessage->sendTypingIndicator($this->chat);
             $this->generateAndSendResponse($linkedChat, $message);
-        } catch (Exception $e) {
+        } catch (TelegramUserException $e) {
+            $this->chat->message($e->getMessage())->send();
+        } catch (Throwable $e) {
             report($e);
             $this->chat->message('❌ Error processing message. Please try again.')->send();
         }
@@ -265,7 +263,9 @@ final class TelegramWebhookHandler extends WebhookHandler
         try {
             $healthData = $this->healthDataParser->parse($message);
             $this->handleHealthLogAttempt($linkedChat, $healthData);
-        } catch (Exception $e) {
+        } catch (TelegramUserException $e) {
+            $this->chat->message($e->getMessage())->send();
+        } catch (Throwable $e) {
             report($e);
             $this->chat->message('❌ Could not understand that. Try something like: "My glucose is 140" or "Took 5 units insulin"')->send();
         }
@@ -273,35 +273,30 @@ final class TelegramWebhookHandler extends WebhookHandler
 
     private function handleHealthLogAttempt(UserTelegramChat $linkedChat, HealthLogData $healthData): void
     {
-        try {
-            $pendingLog = [
-                'log_type' => $healthData->logType,
-                'glucose_value' => $healthData->glucoseValue,
-                'glucose_reading_type' => $healthData->glucoseReadingType,
-                'glucose_unit' => $healthData->glucoseUnit,
-                'carbs_grams' => $healthData->carbsGrams,
-                'insulin_units' => $healthData->insulinUnits,
-                'insulin_type' => $healthData->insulinType,
-                'medication_name' => $healthData->medicationName,
-                'medication_dosage' => $healthData->medicationDosage,
-                'weight' => $healthData->weight,
-                'blood_pressure_systolic' => $healthData->bpSystolic,
-                'blood_pressure_diastolic' => $healthData->bpDiastolic,
-                'exercise_type' => $healthData->exerciseType,
-                'exercise_duration_minutes' => $healthData->exerciseDurationMinutes,
-                'measured_at' => $healthData->measuredAt?->toISOString(),
-            ];
+        $pendingLog = [
+            'log_type' => $healthData->logType,
+            'glucose_value' => $healthData->glucoseValue,
+            'glucose_reading_type' => $healthData->glucoseReadingType,
+            'glucose_unit' => $healthData->glucoseUnit,
+            'carbs_grams' => $healthData->carbsGrams,
+            'insulin_units' => $healthData->insulinUnits,
+            'insulin_type' => $healthData->insulinType,
+            'medication_name' => $healthData->medicationName,
+            'medication_dosage' => $healthData->medicationDosage,
+            'weight' => $healthData->weight,
+            'blood_pressure_systolic' => $healthData->bpSystolic,
+            'blood_pressure_diastolic' => $healthData->bpDiastolic,
+            'exercise_type' => $healthData->exerciseType,
+            'exercise_duration_minutes' => $healthData->exerciseDurationMinutes,
+            'measured_at' => $healthData->measuredAt?->toISOString(),
+        ];
 
-            $linkedChat->setPendingHealthLog($pendingLog);
+        $linkedChat->setPendingHealthLog($pendingLog);
 
-            $formattedLog = $this->formatPendingLog($pendingLog);
-            $confirmationText = "📝 Log: {$formattedLog}\n\nType /yes to confirm or /no to cancel.";
+        $formattedLog = $this->formatPendingLog($pendingLog);
+        $confirmationText = "📝 Log: {$formattedLog}\n\nType /yes to confirm or /no to cancel.";
 
-            $this->telegramMessage->sendLongMessage($this->chat, $confirmationText, false);
-        } catch (Exception $e) {
-            report($e);
-            $this->chat->message('❌ Could not understand that. Try something like: "My glucose is 140" or "Took 5 units insulin"')->send();
-        }
+        $this->telegramMessage->sendLongMessage($this->chat, $confirmationText, false);
     }
 
     /**
