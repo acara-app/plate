@@ -34,10 +34,10 @@ final class MigrateGlucoseValuesToMgDlCommand extends Command
 
         // Get users with mmol/L preference
         $usersWithMmolL = User::query()
-            ->whereHas('profile', function ($query): void {
+            ->whereHas('profile', function (\Illuminate\Database\Eloquent\Builder $query): void {
                 $query->where('units_preference', GlucoseUnit::MmolL->value);
             })
-            ->withCount(['diabetesLogs as glucose_logs_count' => function ($query): void {
+            ->withCount(['healthEntries as glucose_logs_count' => function (\Illuminate\Database\Eloquent\Builder $query): void {
                 $query->whereNotNull('glucose_value');
             }])
             ->get();
