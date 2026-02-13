@@ -46,10 +46,8 @@ final readonly class GetDietReference implements Tool
             ]);
         }
 
-        // Build file path
         $filePath = resource_path("markdown/{$dietType->value}/references/{$sanitizedName}.md");
 
-        // Check if file exists
         if (! File::exists($filePath)) {
             return (string) json_encode([
                 'success' => false,
@@ -57,7 +55,6 @@ final readonly class GetDietReference implements Tool
             ]);
         }
 
-        // Read and return file content
         $content = File::get($filePath);
 
         return (string) json_encode([
