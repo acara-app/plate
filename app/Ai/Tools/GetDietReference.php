@@ -17,17 +17,11 @@ use Laravel\Ai\Tools\Request;
  */
 final readonly class GetDietReference implements Tool
 {
-    /**
-     * Get the description of the tool's purpose.
-     */
     public function description(): string
     {
         return 'Fetch diet-specific reference materials (nutrient score cards, food lists, detailed guidelines) on-demand. Use this when you need specific reference data for meal planning that is not in your immediate context.';
     }
 
-    /**
-     * Execute the tool.
-     */
     public function handle(Request $request): string
     {
         /** @var string $dietTypeValue */
@@ -35,7 +29,6 @@ final readonly class GetDietReference implements Tool
         /** @var string $referenceName */
         $referenceName = $request['reference_name'] ?? '';
 
-        // Validate diet type
         $dietType = DietType::tryFrom($dietTypeValue);
         if ($dietType === null) {
             return (string) json_encode([
