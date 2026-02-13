@@ -7,10 +7,10 @@ import {
 } from '@/components/ui/card';
 import { convertGlucoseValue } from '@/lib/utils';
 import {
-    type HealthEntry,
     type DiabetesTrackingPageProps,
     GlucoseUnit,
     type GlucoseUnitType,
+    type HealthEntry,
 } from '@/types/diabetes';
 import { usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
@@ -494,7 +494,9 @@ export default function CorrelationChart() {
                     {/* Insights */}
                     <div className="border-t pt-4">
                         <p className="mb-2 text-sm font-medium">
-                            {t('health_entries.correlation_chart.insights.title')}
+                            {t(
+                                'health_entries.correlation_chart.insights.title',
+                            )}
                         </p>
                         <div className="space-y-2 text-xs text-muted-foreground">
                             {dataTypes.hasInsulin && dataTypes.hasGlucose && (

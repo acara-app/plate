@@ -14,7 +14,7 @@ final readonly class RecordHealthEntryAction
      */
     public function handle(array $data, ?HealthEntrySource $source = null): HealthEntry
     {
-        if ($source !== null) {
+        if ($source instanceof HealthEntrySource) {
             $data['source'] = $source;
         }
 

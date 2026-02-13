@@ -98,9 +98,12 @@ export default function DashboardSummaryCards() {
                 title={t('health_entries.summary_cards.logging_streak.title')}
                 value={
                     streakStats.currentStreak > 0
-                        ? t('health_entries.summary_cards.logging_streak.days', {
-                              count: streakStats.currentStreak,
-                          })
+                        ? t(
+                              'health_entries.summary_cards.logging_streak.days',
+                              {
+                                  count: streakStats.currentStreak,
+                              },
+                          )
                         : t(
                               'health_entries.summary_cards.logging_streak.start_today',
                           )

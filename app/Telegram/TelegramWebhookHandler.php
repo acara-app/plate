@@ -17,7 +17,6 @@ use App\Models\User;
 use App\Models\UserTelegramChat;
 use App\Services\Telegram\TelegramMessageService;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Stringable;
 use Throwable;
 
@@ -429,14 +428,14 @@ final class TelegramWebhookHandler extends WebhookHandler
         $user = $linkedChat->user;
         $profile = $user->profile;
         $glucoseUnit = $profile !== null ? $profile->units_preference : null;
-        $glucoseUnit = $glucoseUnit ?? GlucoseUnit::MmolL;
+        $glucoseUnit ??= GlucoseUnit::MmolL;
 
         /** @var string $logType */
         $logType = $logData['log_type'];
         /** @var string|null $measuredAtString */
         $measuredAtString = $logData['measured_at'] ?? null;
         $measuredAt = $measuredAtString !== null
-            ? Carbon::parse($measuredAtString)
+            ? \Illuminate\Support\Facades\Date::parse($measuredAtString)
             : now();
 
         $recordData = [

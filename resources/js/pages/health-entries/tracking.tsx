@@ -17,8 +17,8 @@ import { List, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import CorrelationChart from './correlation-chart';
 import DashboardSummaryCards from './dashboard-summary-cards';
-import DiabetesLogDialog from './health-entries-dialog';
 import GlucoseChart from './glucose-chart';
+import DiabetesLogDialog from './health-entries-dialog';
 import TimePeriodFilter from './time-period-filter';
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [

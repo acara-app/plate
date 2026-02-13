@@ -16,11 +16,11 @@ import { convertGlucoseValue } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
 import {
     HealthEntry,
-    type GlucoseUnitType,
     ReadingType,
     RecentInsulin,
     RecentMedication,
     TodaysMeal,
+    type GlucoseUnitType,
 } from '@/types/diabetes';
 import { Head, InfiniteScroll, Link, router } from '@inertiajs/react';
 import { BarChart3, Pencil, Plus, Trash2 } from 'lucide-react';
@@ -137,7 +137,9 @@ export default function DiabetesLogIndex({
                     <Card>
                         <CardHeader>
                             <CardTitle>
-                                {t('health_entries.index_page.your_log_entries')}
+                                {t(
+                                    'health_entries.index_page.your_log_entries',
+                                )}
                             </CardTitle>
                             <CardDescription>
                                 {t('health_entries.index_page.recent_entries')}

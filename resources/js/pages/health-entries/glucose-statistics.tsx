@@ -204,7 +204,9 @@ export default function GlucoseStatistics({ readings }: Props) {
                                   'health_entries.glucose_statistics.status.excellent',
                               )
                             : stats.timeInRange >= 50
-                              ? t('health_entries.glucose_statistics.status.good')
+                              ? t(
+                                    'health_entries.glucose_statistics.status.good',
+                                )
                               : t(
                                     'health_entries.glucose_statistics.status.needs_improvement',
                                 )}

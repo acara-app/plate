@@ -16,9 +16,9 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { formatLocalDatetime } from '@/lib/format-local-datetime';
 import { convertGlucoseValue } from '@/lib/utils';
 import {
-    HealthEntry,
     GlucoseUnit,
     type GlucoseUnitType,
+    HealthEntry,
     LogType,
     LogTypeValue,
     ReadingType,
@@ -227,7 +227,9 @@ export default function EditDiabetesLogForm({
 
                             <div className="space-y-2">
                                 <Label>
-                                    {t('health_entries.glucose.reading_context')}
+                                    {t(
+                                        'health_entries.glucose.reading_context',
+                                    )}
                                 </Label>
                                 <input
                                     type="hidden"
@@ -342,7 +344,9 @@ export default function EditDiabetesLogForm({
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="insulin_units">
-                                        {t('health_entries.insulin.units_label')}
+                                        {t(
+                                            'health_entries.insulin.units_label',
+                                        )}
                                     </Label>
                                     <Input
                                         id="insulin_units"
@@ -479,7 +483,9 @@ export default function EditDiabetesLogForm({
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="weight">
-                                        {t('health_entries.vitals.weight_label')}
+                                        {t(
+                                            'health_entries.vitals.weight_label',
+                                        )}
                                     </Label>
                                     <Input
                                         id="weight"
@@ -568,7 +574,9 @@ export default function EditDiabetesLogForm({
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="exercise_type">
-                                        {t('health_entries.exercise.type_label')}
+                                        {t(
+                                            'health_entries.exercise.type_label',
+                                        )}
                                     </Label>
                                     <Input
                                         id="exercise_type"

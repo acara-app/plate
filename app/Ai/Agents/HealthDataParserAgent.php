@@ -7,7 +7,6 @@ namespace App\Ai\Agents;
 use App\Contracts\ParsesHealthData;
 use App\DataObjects\HealthLogData;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Support\Carbon;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
@@ -115,7 +114,7 @@ INST;
 
         $measuredAt = null;
         if ($measuredAtString !== null) {
-            $measuredAt = Carbon::parse($measuredAtString);
+            $measuredAt = \Illuminate\Support\Facades\Date::parse($measuredAtString);
         }
 
         return new HealthLogData(
