@@ -12,7 +12,7 @@ import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import chat from '@/routes/chat';
-import diabetesLog from '@/routes/diabetes-log';
+import healthEntries from '@/routes/health-entries';
 import integrations from '@/routes/integrations';
 import mealPlans from '@/routes/meal-plans';
 import { BreadcrumbItem } from '@/types';
@@ -195,7 +195,7 @@ export default function Dashboard() {
                     </Link>
 
                     {/* My Trends Card */}
-                    <Link href={diabetesLog.insights().url} className="group">
+                    <Link href={healthEntries.insights().url} className="group">
                         <Card className="h-full transition-all hover:border-primary/50 hover:shadow-md">
                             <CardContent className="flex h-full flex-col justify-between p-5">
                                 <div className="flex items-start justify-between">
@@ -221,7 +221,7 @@ export default function Dashboard() {
                     </Link>
 
                     {/* Logbook Card */}
-                    <Link href={diabetesLog.dashboard().url} className="group">
+                    <Link href={healthEntries.dashboard().url} className="group">
                         <Card className="h-full transition-all hover:border-primary/50 hover:shadow-md">
                             <CardContent className="flex h-full flex-col justify-between p-5">
                                 <div className="flex items-start justify-between">
