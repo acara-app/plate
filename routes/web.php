@@ -55,12 +55,12 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('chat/create/{conversationId?}', [Web\ChatController::class, 'create'])->name('chat.create');
     Route::post('chat/stream', [Web\ChatController::class, 'stream'])->name('chat.stream');
 
-    Route::get('diabetes-log', Web\Diabetes\ListDiabetesLogController::class)->name('diabetes-log.index');
-    Route::get('diabetes-log/tracking', Web\Diabetes\DashboardDiabetesLogController::class)->name('diabetes-log.dashboard');
-    Route::get('diabetes-log/insights', Web\Diabetes\InsightsDiabetesLogController::class)->name('diabetes-log.insights');
-    Route::post('diabetes-log', Web\Diabetes\StoreDiabetesLogController::class)->name('diabetes-log.store');
-    Route::put('diabetes-log/{diabetesLog}', Web\Diabetes\UpdateDiabetesLogController::class)->name('diabetes-log.update');
-    Route::delete('diabetes-log/{diabetesLog}', Web\Diabetes\DestroyDiabetesLogController::class)->name('diabetes-log.destroy');
+    Route::get('health-entries', Web\HealthEntry\ListHealthEntryController::class)->name('health-entries.index');
+    Route::get('health-entries/tracking', Web\HealthEntry\DashboardHealthEntryController::class)->name('health-entries.dashboard');
+    Route::get('health-entries/insights', Web\HealthEntry\InsightsHealthEntryController::class)->name('health-entries.insights');
+    Route::post('health-entries', Web\HealthEntry\StoreHealthEntryController::class)->name('health-entries.store');
+    Route::put('health-entries/{healthEntry}', Web\HealthEntry\UpdateHealthEntryController::class)->name('health-entries.update');
+    Route::delete('health-entries/{healthEntry}', Web\HealthEntry\DestroyHealthEntryController::class)->name('health-entries.destroy');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('onboarding')->name('onboarding.')->group(function (): void {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Layouts;
 
 use App\Http\Layouts\DiabetesLayout;
-use App\Models\DiabetesLog;
+use App\Models\HealthEntry;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -23,14 +23,14 @@ test('calculate weight stats determines upward trend', function (): void {
     $user = User::factory()->create();
 
     // Create log with lower weight earlier
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $user->id,
         'weight' => 80.0,
         'measured_at' => now()->subDays(2),
     ]);
 
     // Create log with higher weight later
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $user->id,
         'weight' => 81.0,
         'measured_at' => now(),
@@ -46,13 +46,13 @@ test('calculate weight stats determines upward trend', function (): void {
 test('calculate weight stats determines downward trend', function (): void {
     $user = User::factory()->create();
 
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $user->id,
         'weight' => 82.0,
         'measured_at' => now()->subDays(2),
     ]);
 
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $user->id,
         'weight' => 81.0,
         'measured_at' => now(),
@@ -68,13 +68,13 @@ test('calculate weight stats determines downward trend', function (): void {
 test('calculate weight stats determines stable trend', function (): void {
     $user = User::factory()->create();
 
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $user->id,
         'weight' => 81.0,
         'measured_at' => now()->subDays(2),
     ]);
 
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $user->id,
         'weight' => 81.0,
         'measured_at' => now(),
@@ -90,12 +90,12 @@ test('calculate weight stats determines stable trend', function (): void {
 test('calculate streak continues if log exists yesterday but not today', function (): void {
     $user = User::factory()->create();
 
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $user->id,
         'measured_at' => now()->subDay(),
     ]);
 
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $user->id,
         'measured_at' => now()->subDays(2),
     ]);

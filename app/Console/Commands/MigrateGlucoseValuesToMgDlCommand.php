@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Enums\GlucoseUnit;
-use App\Models\DiabetesLog;
+use App\Models\HealthEntry;
 use App\Models\User;
 use Illuminate\Console\Command;
 
@@ -90,7 +90,7 @@ final class MigrateGlucoseValuesToMgDlCommand extends Command
         $skipped = 0;
 
         // Get all glucose logs for this user
-        $logs = DiabetesLog::query()
+        $logs = HealthEntry::query()
             ->where('user_id', $user->id)
             ->whereNotNull('glucose_value')
             ->cursor();

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Ai\GlucoseDataAnalyzer;
 use App\Enums\GlucoseReadingType;
-use App\Models\DiabetesLog;
+use App\Models\HealthEntry;
 use App\Models\User;
 use App\Services\GlucoseStatisticsService;
 
@@ -37,14 +37,14 @@ it('returns empty analysis when no glucose readings exist', function (): void {
 
 it('calculates average glucose levels correctly', function (): void {
     // Create fasting readings
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 95.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
         'measured_at' => now()->subDays(1),
     ]);
 
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 105.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -52,7 +52,7 @@ it('calculates average glucose levels correctly', function (): void {
     ]);
 
     // Create post-meal readings
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 140.0,
         'glucose_reading_type' => GlucoseReadingType::PostMeal,
@@ -72,7 +72,7 @@ it('calculates average glucose levels correctly', function (): void {
 it('detects consistently high glucose pattern', function (): void {
     // Create multiple high readings
     for ($i = 0; $i < 10; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 150.0 + ($i * 5),
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -109,7 +109,7 @@ it('detects post-meal spikes pattern', function (): void {
     // Create normal fasting readings and high post-meal readings
     // This will trigger postMealSpikes but NOT consistentlyHigh
     for ($i = 0; $i < 5; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 90.0,
             'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -118,7 +118,7 @@ it('detects post-meal spikes pattern', function (): void {
     }
 
     for ($i = 0; $i < 5; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 160.0,
             'glucose_reading_type' => GlucoseReadingType::PostMeal,
@@ -138,7 +138,7 @@ it('detects high variability pattern', function (): void {
     $values = [70, 150, 85, 140, 75, 160, 80, 145];
 
     foreach ($values as $index => $value) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => (float) $value,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -164,7 +164,7 @@ it('detects high variability pattern', function (): void {
 
 it('only analyzes readings within specified time period', function (): void {
     // Create old reading (outside 30 days)
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 100.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -172,7 +172,7 @@ it('only analyzes readings within specified time period', function (): void {
     ]);
 
     // Create recent reading (within 30 days)
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 120.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -189,7 +189,7 @@ it('only analyzes readings within specified time period', function (): void {
 it('provides default recommendations when glucose is well controlled', function (): void {
     // Create normal glucose readings
     for ($i = 0; $i < 5; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 90.0 + ($i * 2),
             'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -206,7 +206,7 @@ it('provides default recommendations when glucose is well controlled', function 
 it('detects consistently low glucose pattern', function (): void {
     // Create multiple low readings
     for ($i = 0; $i < 10; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 65.0 + ($i),
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -234,14 +234,14 @@ it('detects consistently low glucose pattern', function (): void {
 
 it('classifies low fasting glucose correctly', function (): void {
     // Create low fasting readings (below 70)
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 60.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
         'measured_at' => now()->subDays(1),
     ]);
 
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 65.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -257,7 +257,7 @@ it('classifies low fasting glucose correctly', function (): void {
 it('identifies concern for high fasting glucose', function (): void {
     // Create high fasting readings
     for ($i = 0; $i < 5; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 110.0 + ($i * 2),
             'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -272,14 +272,14 @@ it('identifies concern for high fasting glucose', function (): void {
 
 it('classifies elevated fasting glucose correctly', function (): void {
     // Create elevated fasting readings (between 100 and 125)
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 110.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
         'measured_at' => now()->subDays(1),
     ]);
 
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 115.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -293,14 +293,14 @@ it('classifies elevated fasting glucose correctly', function (): void {
 
 it('classifies high fasting glucose correctly', function (): void {
     // Create high fasting readings (above 125)
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 130.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
         'measured_at' => now()->subDays(1),
     ]);
 
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 140.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -324,14 +324,14 @@ it('classifies high fasting glucose correctly', function (): void {
 
 it('classifies elevated post-meal glucose correctly', function (): void {
     // Create elevated post-meal readings
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 150.0,
         'glucose_reading_type' => GlucoseReadingType::PostMeal,
         'measured_at' => now()->subDays(1),
     ]);
 
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 160.0,
         'glucose_reading_type' => GlucoseReadingType::PostMeal,
@@ -356,7 +356,7 @@ it('classifies elevated post-meal glucose correctly', function (): void {
 
 it('handles single glucose reading correctly', function (): void {
     // Create a single reading (edge case for standard deviation calculation)
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 100.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -375,7 +375,7 @@ it('handles single glucose reading correctly', function (): void {
 it('calculates time in range percentages correctly', function (): void {
     // Create 5 in-range, 3 above-range, 2 below-range readings (10 total)
     for ($i = 0; $i < 5; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 100.0,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -384,7 +384,7 @@ it('calculates time in range percentages correctly', function (): void {
     }
 
     for ($i = 0; $i < 3; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 160.0,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -393,7 +393,7 @@ it('calculates time in range percentages correctly', function (): void {
     }
 
     for ($i = 0; $i < 2; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 60.0,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -414,7 +414,7 @@ it('calculates time in range percentages correctly', function (): void {
 it('detects rising glucose trend', function (): void {
     // Create readings that increase over time
     for ($i = 0; $i < 10; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 90.0 + ($i * 5),
             'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -441,7 +441,7 @@ it('detects rising glucose trend', function (): void {
 it('detects falling glucose trend', function (): void {
     // Create readings that decrease over time
     for ($i = 0; $i < 10; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 140.0 - ($i * 5),
             'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -458,7 +458,7 @@ it('detects falling glucose trend', function (): void {
 it('detects stable glucose trend', function (): void {
     // Create readings with minimal variation
     for ($i = 0; $i < 10; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 95.0 + (($i % 2) * 2), // Alternates between 95 and 97
             'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -473,13 +473,13 @@ it('detects stable glucose trend', function (): void {
 
 it('analyzes time of day patterns correctly', function (): void {
     // Morning (5-11): 2 readings
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 90.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
         'measured_at' => now()->setTime(8, 0)->subDays(1),
     ]);
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 100.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -487,7 +487,7 @@ it('analyzes time of day patterns correctly', function (): void {
     ]);
 
     // Afternoon (12-16): 1 reading
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 120.0,
         'glucose_reading_type' => GlucoseReadingType::Random,
@@ -495,7 +495,7 @@ it('analyzes time of day patterns correctly', function (): void {
     ]);
 
     // Evening (17-20): 1 reading
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 110.0,
         'glucose_reading_type' => GlucoseReadingType::PostMeal,
@@ -503,7 +503,7 @@ it('analyzes time of day patterns correctly', function (): void {
     ]);
 
     // Night (21-4): 1 reading
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 85.0,
         'glucose_reading_type' => GlucoseReadingType::Random,
@@ -523,7 +523,7 @@ it('analyzes time of day patterns correctly', function (): void {
 it('analyzes reading type frequency correctly', function (): void {
     // 5 fasting, 3 post-meal, 2 random
     for ($i = 0; $i < 5; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 95.0,
             'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -532,7 +532,7 @@ it('analyzes reading type frequency correctly', function (): void {
     }
 
     for ($i = 0; $i < 3; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 130.0,
             'glucose_reading_type' => GlucoseReadingType::PostMeal,
@@ -541,7 +541,7 @@ it('analyzes reading type frequency correctly', function (): void {
     }
 
     for ($i = 0; $i < 2; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 105.0,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -563,7 +563,7 @@ it('calculates coefficient of variation correctly', function (): void {
     $values = [80, 90, 100, 110, 120];
 
     foreach ($values as $index => $value) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => (float) $value,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -580,7 +580,7 @@ it('calculates coefficient of variation correctly', function (): void {
 it('classifies variability correctly', function (): void {
     // Stable variability (CV < 36%)
     for ($i = 0; $i < 10; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 95.0 + ($i * 0.5), // Very low variability
             'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -596,7 +596,7 @@ it('classifies variability correctly', function (): void {
 it('correctly identifies hypoglycemia risk levels', function (): void {
     // Create 12% readings below range (high risk) - all within 30 days
     for ($i = 0; $i < 22; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 100.0,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -605,7 +605,7 @@ it('correctly identifies hypoglycemia risk levels', function (): void {
     }
 
     for ($i = 0; $i < 3; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 65.0,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -622,7 +622,7 @@ it('correctly identifies hypoglycemia risk levels', function (): void {
 it('uses actual days analyzed in insights', function (): void {
     // Create readings over 7 days
     for ($i = 0; $i < 5; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 95.0,
             'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -650,7 +650,7 @@ it('classifies moderate variability correctly', function (): void {
     // These values produce CV ≈ 38.2%
     $values = [45.0, 75.0, 100.0, 125.0, 155.0];
     foreach ($values as $index => $value) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => $value,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -668,7 +668,7 @@ it('classifies high variability correctly', function (): void {
     // These values produce CV ≈ 56.9%
     $values = [30.0, 60.0, 100.0, 160.0, 200.0];
     foreach ($values as $index => $value) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => $value,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -683,7 +683,7 @@ it('classifies high variability correctly', function (): void {
 
 it('generates insight when coefficient of variation is null', function (): void {
     // Single reading will have null CV
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $this->user->id,
         'glucose_value' => 100.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -698,7 +698,7 @@ it('generates insight when coefficient of variation is null', function (): void 
 it('includes moderate hypoglycemia risk in insights', function (): void {
     // Create 7% readings below range (moderate risk)
     for ($i = 0; $i < 28; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 100.0,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -707,7 +707,7 @@ it('includes moderate hypoglycemia risk in insights', function (): void {
     }
 
     for ($i = 0; $i < 2; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 65.0,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -732,7 +732,7 @@ it('includes moderate hypoglycemia risk in insights', function (): void {
 it('includes moderate hyperglycemia risk in insights', function (): void {
     // Create 30% readings above range (moderate risk)
     for ($i = 0; $i < 7; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 100.0,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -741,7 +741,7 @@ it('includes moderate hyperglycemia risk in insights', function (): void {
     }
 
     for ($i = 0; $i < 3; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 160.0,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -766,7 +766,7 @@ it('includes moderate hyperglycemia risk in insights', function (): void {
 it('generates concern for low time in range', function (): void {
     // Create readings with < 50% time in range
     for ($i = 0; $i < 6; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 160.0,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -775,7 +775,7 @@ it('generates concern for low time in range', function (): void {
     }
 
     for ($i = 0; $i < 4; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 100.0,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -799,7 +799,7 @@ it('generates insight for falling trend with absolute slope', function (): void 
     // Create falling trend: recent readings ($i=0) should be LOWER than older readings ($i=9)
     // For falling: want recent < older, so start high and decrease as $i increases
     for ($i = 0; $i < 10; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 120.0 - ($i * 2), // $i=0 (recent) = 120, $i=9 (old) = 102
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -825,7 +825,7 @@ it('generates goal for addressing post-meal spikes when postMeal average exists'
     // Create post-meal spikes WITHOUT triggering consistently high or low TIR
     // Add some normal readings to balance it out
     for ($i = 0; $i < 5; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 95.0,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -835,7 +835,7 @@ it('generates goal for addressing post-meal spikes when postMeal average exists'
 
     // Then add post-meal spikes
     for ($i = 0; $i < 5; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 155.0, // Above threshold but not too high
             'glucose_reading_type' => GlucoseReadingType::PostMeal,
@@ -853,7 +853,7 @@ it('generates goal for addressing rising trend when slope is significant', funct
     // Recent readings (low $i) should be HIGH, older readings (high $i) should be LOW
     // Need steeper slope: 0.6 per day = 4.2 per week
     for ($i = 0; $i < 30; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 105.0 - ($i * 0.6), // Recent 105, older 87 = rising trend
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -870,7 +870,7 @@ it('generates goal for addressing rising trend when slope is significant', funct
 it('generates well-controlled maintenance goal when glucose is optimal', function (): void {
     // Create perfectly controlled glucose readings - all in range, stable, no concerns
     for ($i = 0; $i < 10; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $this->user->id,
             'glucose_value' => 100.0, // Perfectly in range
             'glucose_reading_type' => GlucoseReadingType::Random,

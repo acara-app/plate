@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Telegram;
 
-use App\Actions\RecordDiabetesLogAction;
+use App\Actions\RecordHealthEntryAction;
 use App\Contracts\GeneratesAiResponse;
 use App\Contracts\ParsesHealthData;
 use App\DataObjects\HealthLogData;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
+use App\Enums\HealthEntrySource;
 use App\Enums\InsulinType;
 use App\Exceptions\TelegramUserException;
 use App\Models\User;
@@ -26,7 +27,7 @@ final class TelegramWebhookHandler extends WebhookHandler
         private readonly GeneratesAiResponse $generateAiResponse,
         private readonly TelegramMessageService $telegramMessage,
         private readonly ParsesHealthData $healthDataParser,
-        private readonly RecordDiabetesLogAction $recordDiabetesLog,
+        private readonly RecordHealthEntryAction $recordHealthEntry,
     ) {}
 
     public function start(): void
@@ -478,7 +479,7 @@ final class TelegramWebhookHandler extends WebhookHandler
 
         /** @var array<string, mixed> $data */
         $data = $recordData;
-        $this->recordDiabetesLog->handle($data);
+        $this->recordHealthEntry->handle($data, HealthEntrySource::Telegram);
     }
 
     /**
@@ -493,7 +494,7 @@ final class TelegramWebhookHandler extends WebhookHandler
 
         /** @var array<string, mixed> $data */
         $data = $recordData;
-        $this->recordDiabetesLog->handle($data);
+        $this->recordHealthEntry->handle($data, HealthEntrySource::Telegram);
     }
 
     /**
@@ -514,7 +515,7 @@ final class TelegramWebhookHandler extends WebhookHandler
 
         /** @var array<string, mixed> $data */
         $data = $recordData;
-        $this->recordDiabetesLog->handle($data);
+        $this->recordHealthEntry->handle($data, HealthEntrySource::Telegram);
     }
 
     /**
@@ -533,7 +534,7 @@ final class TelegramWebhookHandler extends WebhookHandler
 
         /** @var array<string, mixed> $data */
         $data = $recordData;
-        $this->recordDiabetesLog->handle($data);
+        $this->recordHealthEntry->handle($data, HealthEntrySource::Telegram);
     }
 
     /**
@@ -556,7 +557,7 @@ final class TelegramWebhookHandler extends WebhookHandler
 
         /** @var array<string, mixed> $data */
         $data = $recordData;
-        $this->recordDiabetesLog->handle($data);
+        $this->recordHealthEntry->handle($data, HealthEntrySource::Telegram);
     }
 
     /**
@@ -575,7 +576,7 @@ final class TelegramWebhookHandler extends WebhookHandler
 
         /** @var array<string, mixed> $data */
         $data = $recordData;
-        $this->recordDiabetesLog->handle($data);
+        $this->recordHealthEntry->handle($data, HealthEntrySource::Telegram);
     }
 
     private function generateAndSendResponse(UserTelegramChat $linkedChat, string $message): void

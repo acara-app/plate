@@ -1,4 +1,4 @@
-import DashboardDiabetesLogController from '@/actions/App/Http/Controllers/Diabetes/DashboardDiabetesLogController';
+import DashboardHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/DashboardHealthEntryController';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -14,7 +14,7 @@ import {
 import { UpgradeButton } from '@/components/upgrade-button';
 import useSharedProps from '@/hooks/use-shared-props';
 import { dashboard, privacy, terms } from '@/routes';
-import diabetesLog from '@/routes/diabetes-log';
+import healthEntries from '@/routes/health-entries';
 import mealPlans from '@/routes/meal-plans';
 import biometrics from '@/routes/onboarding/biometrics';
 import profileDietaryPreferences from '@/routes/profile/dietary-preferences';
@@ -48,8 +48,8 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
         icon: CalendarHeartIcon,
     },
     {
-        title: t('sidebar.nav.diabetes_log'),
-        href: DashboardDiabetesLogController().url,
+        title: t('sidebar.nav.health_entries'),
+        href: DashboardHealthEntryController().url,
         icon: ActivityIcon,
     },
 ];
@@ -76,8 +76,8 @@ const getProfileNavItems = (t: (key: string) => string): NavItem[] => [
         icon: ActivityIcon,
     },
     {
-        title: t('sidebar.nav.diabetes_insights'),
-        href: diabetesLog.insights(),
+        title: t('sidebar.nav.health_insights'),
+        href: healthEntries.insights(),
         icon: TrendingUp,
     },
 ];
