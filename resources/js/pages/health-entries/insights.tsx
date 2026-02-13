@@ -37,7 +37,7 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     { title: t('health_entries.insights_page.breadcrumb'), href: '#' },
 ];
 
-export default function DiabetesInsights({
+export default function HealthEntriesInsights({
     glucoseAnalysis,
     concerns,
     hasMealPlan,

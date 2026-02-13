@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import CorrelationChart from './correlation-chart';
 import DashboardSummaryCards from './dashboard-summary-cards';
 import GlucoseChart from './glucose-chart';
-import DiabetesLogDialog from './health-entries-dialog';
+import HealthEntriesDialog from './health-entries-dialog';
 import TimePeriodFilter from './time-period-filter';
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
@@ -28,7 +28,7 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     },
 ];
 
-export default function DiabetesLogDashboard() {
+export default function HealthEntriesDashboard() {
     const {
         logs,
         timePeriod,
@@ -87,10 +87,10 @@ export default function DiabetesLogDashboard() {
                     </div>
 
                     {/* Add Entry Dialog */}
-                    <DiabetesLogDialog
+                    <HealthEntriesDialog
                         mode="create"
                         open={createModal.isOpen}
-                        onOpenChange={(open) =>
+                        onOpenChange={(open: boolean) =>
                             open ? createModal.open() : createModal.close()
                         }
                         glucoseReadingTypes={glucoseReadingTypes}

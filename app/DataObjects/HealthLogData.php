@@ -66,10 +66,10 @@ final class HealthLogData extends Data
 
     private function formatGlucoseLog(): string
     {
-        $unit = $this->glucoseUnit?->value ?? GlucoseUnit::MgDl->value;
-        $readingType = $this->glucoseReadingType?->label() ?? 'Random';
+        $unit = $this->glucoseUnit ?? GlucoseUnit::MgDl;
+        $readingType = $this->glucoseReadingType ?? GlucoseReadingType::Random;
 
-        return "Glucose {$this->glucoseValue} {$unit} ({$readingType})";
+        return "Glucose {$this->glucoseValue} {$unit->value} ({$readingType->label()})";
     }
 
     private function formatFoodLog(): string

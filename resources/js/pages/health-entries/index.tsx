@@ -25,7 +25,7 @@ import {
 import { Head, InfiniteScroll, Link, router } from '@inertiajs/react';
 import { BarChart3, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import DiabetesLogDialog from './health-entries-dialog';
+import HealthEntriesDialog from './health-entries-dialog';
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
@@ -50,7 +50,7 @@ interface Props {
     todaysMeals: TodaysMeal[];
 }
 
-export default function DiabetesLogIndex({
+export default function HealthEntriesIndex({
     logs,
     glucoseReadingTypes,
     insulinTypes,
@@ -103,7 +103,7 @@ export default function DiabetesLogIndex({
                         </div>
                     </div>
 
-                    <DiabetesLogDialog
+                    <HealthEntriesDialog
                         mode="create"
                         open={createModal.isOpen}
                         onOpenChange={(open: boolean) =>
@@ -117,7 +117,7 @@ export default function DiabetesLogIndex({
                         todaysMeals={todaysMeals}
                     />
 
-                    <DiabetesLogDialog
+                    <HealthEntriesDialog
                         mode="edit"
                         open={editModal.isOpen}
                         onOpenChange={(open: boolean) =>

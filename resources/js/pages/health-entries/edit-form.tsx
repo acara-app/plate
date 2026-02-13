@@ -38,7 +38,7 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-interface EditDiabetesLogFormProps {
+interface EditHealthEntryFormProps {
     glucoseReadingTypes: ReadingType[];
     insulinTypes: ReadingType[];
     glucoseUnit: string;
@@ -76,7 +76,7 @@ function getDefaultTab(logEntry: HealthEntry): LogTypeValue {
     return LogType.Glucose;
 }
 
-export default function EditDiabetesLogForm({
+export default function EditHealthEntryForm({
     glucoseReadingTypes,
     insulinTypes,
     glucoseUnit,
@@ -85,7 +85,7 @@ export default function EditDiabetesLogForm({
     recentInsulins = [],
     todaysMeals = [],
     onCancel,
-}: EditDiabetesLogFormProps) {
+}: EditHealthEntryFormProps) {
     const { t } = useTranslation('common');
     const measuredAt = formatLocalDatetime(new Date(logEntry.measured_at));
     const [activeTab, setActiveTab] = useState<string>(getDefaultTab(logEntry));

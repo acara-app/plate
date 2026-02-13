@@ -315,47 +315,79 @@ final class TelegramWebhookHandler extends WebhookHandler
      */
     private function reconstructHealthLogData(array $log): HealthLogData
     {
+        /** @var string $logTypeString */
         $logTypeString = $log['log_type'] ?? 'glucose';
         $logType = HealthEntryType::tryFrom($logTypeString) ?? HealthEntryType::Glucose;
 
+        /** @var string|null $glucoseReadingTypeString */
         $glucoseReadingTypeString = $log['glucose_reading_type'] ?? null;
         $glucoseReadingType = $glucoseReadingTypeString !== null
             ? \App\Enums\GlucoseReadingType::tryFrom($glucoseReadingTypeString)
             : null;
 
+        /** @var string|null $glucoseUnitString */
         $glucoseUnitString = $log['glucose_unit'] ?? null;
         $glucoseUnit = $glucoseUnitString !== null
             ? \App\Enums\GlucoseUnit::tryFrom($glucoseUnitString)
             : null;
 
+        /** @var string|null $insulinTypeString */
         $insulinTypeString = $log['insulin_type'] ?? null;
         $insulinType = $insulinTypeString !== null
             ? \App\Enums\InsulinType::tryFrom($insulinTypeString)
             : null;
 
+        /** @var string|null $measuredAtString */
         $measuredAtString = $log['measured_at'] ?? null;
         $measuredAt = $measuredAtString !== null
             ? Date::parse($measuredAtString)
             : null;
 
         return new HealthLogData(
-            isHealthData: $log['is_health_data'] ?? false,
+            isHealthData: (bool) ($log['is_health_data'] ?? false),
             logType: $logType,
-            glucoseValue: $log['glucose_value'] ?? null,
+            glucoseValue: $this->toFloatOrNull($log['glucose_value'] ?? null),
             glucoseReadingType: $glucoseReadingType,
             glucoseUnit: $glucoseUnit,
-            carbsGrams: $log['carbs_grams'] ?? null,
-            insulinUnits: $log['insulin_units'] ?? null,
+            carbsGrams: $this->toIntOrNull($log['carbs_grams'] ?? null),
+            insulinUnits: $this->toFloatOrNull($log['insulin_units'] ?? null),
             insulinType: $insulinType,
-            medicationName: $log['medication_name'] ?? null,
-            medicationDosage: $log['medication_dosage'] ?? null,
-            weight: $log['weight'] ?? null,
-            bpSystolic: $log['blood_pressure_systolic'] ?? null,
-            bpDiastolic: $log['blood_pressure_diastolic'] ?? null,
-            exerciseType: $log['exercise_type'] ?? null,
-            exerciseDurationMinutes: $log['exercise_duration_minutes'] ?? null,
+            medicationName: $this->toStringOrNull($log['medication_name'] ?? null),
+            medicationDosage: $this->toStringOrNull($log['medication_dosage'] ?? null),
+            weight: $this->toFloatOrNull($log['weight'] ?? null),
+            bpSystolic: $this->toIntOrNull($log['blood_pressure_systolic'] ?? null),
+            bpDiastolic: $this->toIntOrNull($log['blood_pressure_diastolic'] ?? null),
+            exerciseType: $this->toStringOrNull($log['exercise_type'] ?? null),
+            exerciseDurationMinutes: $this->toIntOrNull($log['exercise_duration_minutes'] ?? null),
             measuredAt: $measuredAt,
         );
+    }
+
+    private function toFloatOrNull(mixed $value): ?float
+    {
+        return is_numeric($value) ? (float) $value : null;
+    }
+
+    private function toIntOrNull(mixed $value): ?int
+    {
+        return is_numeric($value) ? (int) $value : null;
+    }
+
+    private function toStringOrNull(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (is_string($value)) {
+            return $value;
+        }
+
+        if (is_scalar($value)) {
+            return (string) $value;
+        }
+
+        return null;
     }
 
     private function generateAndSendResponse(UserTelegramChat $linkedChat, string $message): void

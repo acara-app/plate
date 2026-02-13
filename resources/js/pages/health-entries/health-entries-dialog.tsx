@@ -13,8 +13,8 @@ import {
     TodaysMeal,
 } from '@/types/diabetes';
 import { useTranslation } from 'react-i18next';
-import CreateDiabetesLogForm from './add-form';
-import EditDiabetesLogForm from './edit-form';
+import CreateHealthEntryForm from './add-form';
+import EditHealthEntryForm from './edit-form';
 
 interface DialogProps {
     mode: 'create' | 'edit';
@@ -29,7 +29,7 @@ interface DialogProps {
     logEntry?: HealthEntry;
 }
 
-export default function DiabetesLogDialog({
+export default function HealthEntriesDialog({
     mode,
     open,
     onOpenChange,
@@ -58,7 +58,7 @@ export default function DiabetesLogDialog({
                     </DialogDescription>
                 </DialogHeader>
                 {mode === 'create' ? (
-                    <CreateDiabetesLogForm
+                    <CreateHealthEntryForm
                         glucoseReadingTypes={glucoseReadingTypes}
                         insulinTypes={insulinTypes}
                         glucoseUnit={glucoseUnit}
@@ -69,7 +69,7 @@ export default function DiabetesLogDialog({
                     />
                 ) : (
                     logEntry && (
-                        <EditDiabetesLogForm
+                        <EditHealthEntryForm
                             glucoseReadingTypes={glucoseReadingTypes}
                             insulinTypes={insulinTypes}
                             glucoseUnit={glucoseUnit}
