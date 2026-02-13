@@ -6,7 +6,7 @@ use App\Ai\MealPlanPromptBuilder;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
-use App\Models\DiabetesLog;
+use App\Models\HealthEntry;
 use App\Models\User;
 use App\Models\UserProfile;
 
@@ -24,14 +24,14 @@ it('includes glucose analysis in the prompt when glucose data exists', function 
     ]);
 
     // Create some glucose readings
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $user->id,
         'glucose_value' => 150.0,
         'glucose_reading_type' => GlucoseReadingType::PostMeal,
         'measured_at' => now()->subDays(1),
     ]);
 
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $user->id,
         'glucose_value' => 155.0,
         'glucose_reading_type' => GlucoseReadingType::PostMeal,
@@ -87,7 +87,7 @@ it('includes glucose concerns when post-meal spikes are detected', function (): 
 
     // Create normal fasting and high post-meal readings to trigger spike detection without consistentlyHigh
     for ($i = 0; $i < 5; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => 90.0,
             'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -96,7 +96,7 @@ it('includes glucose concerns when post-meal spikes are detected', function (): 
     }
 
     for ($i = 0; $i < 5; $i++) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => 160.0,
             'glucose_reading_type' => GlucoseReadingType::PostMeal,

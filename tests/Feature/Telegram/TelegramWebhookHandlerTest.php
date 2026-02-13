@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Contracts\GeneratesAiResponse;
 use App\Contracts\ParsesHealthData;
+use App\Enums\HealthEntryType;
 use App\Enums\Sex;
 use App\Models\User;
 use App\Models\UserProfile;
@@ -22,7 +23,7 @@ beforeEach(function (): void {
     ]);
 
     $parserMock = Mockery::mock(ParsesHealthData::class);
-    $parserMock->shouldReceive('parse')->andReturn(new App\DataObjects\HealthLogData(isHealthData: false, logType: 'glucose'));
+    $parserMock->shouldReceive('parse')->andReturn(new App\DataObjects\HealthLogData(isHealthData: false, logType: HealthEntryType::Glucose));
     app()->instance(ParsesHealthData::class, $parserMock);
 });
 

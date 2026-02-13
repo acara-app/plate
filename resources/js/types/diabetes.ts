@@ -162,7 +162,7 @@ export interface GlucoseAnalysisData {
 // Diabetes Log Entry Types
 // =============================================================================
 
-export interface DiabetesLogEntry {
+export interface HealthEntry {
     id: number;
     glucose_value: number | null;
     glucose_reading_type: string | null;
@@ -295,7 +295,7 @@ export interface DashboardSummary {
 export type TimePeriod = '7d' | '30d' | '90d';
 
 export interface DiabetesTrackingPageProps {
-    logs: DiabetesLogEntry[];
+    logs: HealthEntry[];
     timePeriod: TimePeriod;
     summary: DashboardSummary;
     glucoseReadingTypes: ReadingType[];

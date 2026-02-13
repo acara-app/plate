@@ -177,7 +177,7 @@ test('mail notification contains action button to glucose action page', function
 
     $mailMessage = $notification->toMail($user);
 
-    expect($mailMessage->viewData['mealPlanUrl'])->toContain('diabetes-log/insights');
+    expect($mailMessage->viewData['mealPlanUrl'])->toContain('health-entries/insights');
 });
 
 test('database notification contains correct structure', function (): void {

@@ -153,12 +153,12 @@ return [
 
     // Dashboard
     'dashboard_cards' => [
-        'diabetes_insights' => [
+        'health_insights' => [
             'title' => 'Aperçus du diabète',
             'description' => 'Consultez votre analyse de glucose, vos tendances et vos recommandations personnalisées',
             'button' => 'Voir les aperçus',
         ],
-        'diabetes_log' => [
+        'health_entries' => [
             'title' => 'Journal du diabète',
             'description' => 'Suivez votre glucose, insuline, médicaments et plus encore',
             'button' => 'Suivre le diabète',
@@ -386,7 +386,7 @@ return [
     ],
 
     // Diabetes Log
-    'diabetes_log' => [
+    'health_entries' => [
         'tabs' => [
             'glucose' => 'Glucose',
             'food' => 'Nourriture',
@@ -675,8 +675,8 @@ return [
             'context' => 'Contexte',
             'home' => 'Accueil',
             'meal_plans' => 'Plans de repas',
-            'diabetes_insights' => 'Informations sur le diabète',
-            'diabetes_log' => 'Journal du diabète',
+            'health_insights' => 'Informations sur le diabète',
+            'health_entries' => 'Journal du diabète',
             'update_info' => 'Mettre à jour vos informations',
             'dietary_preferences' => 'Préférences alimentaires',
             'health_conditions' => 'Conditions de santé',

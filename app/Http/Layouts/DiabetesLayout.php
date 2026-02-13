@@ -7,7 +7,7 @@ namespace App\Http\Layouts;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\InsulinType;
-use App\Models\DiabetesLog;
+use App\Models\HealthEntry;
 use App\Models\Meal;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -59,7 +59,7 @@ final readonly class DiabetesLayout
      * Get filtered logs and calculated summary for dashboard.
      *
      * @return array{
-     *     logs: Collection<int, DiabetesLog>,
+     *     logs: Collection<int, HealthEntry>,
      *     timePeriod: string,
      *     summary: array<string, mixed>
      * }
@@ -73,12 +73,12 @@ final readonly class DiabetesLayout
 
         $days = self::TIME_PERIODS[$timePeriod];
         $cutoffDate = now()->subDays($days);
-        $logs = $user->diabetesLogs()
+        $logs = $user->healthEntries()
             ->where('measured_at', '>=', $cutoffDate)
             ->latest('measured_at')
             ->get();
 
-        $allLogs = $user->diabetesLogs()
+        $allLogs = $user->healthEntries()
             ->latest('measured_at')
             ->get();
 
@@ -97,14 +97,14 @@ final readonly class DiabetesLayout
     public static function getRecentMedications(User $user): array
     {
         /** @var array<int, array{name: string, dosage: string, label: string}> */
-        return $user->diabetesLogs()
+        return $user->healthEntries()
             ->whereNotNull('medication_name')
             ->whereNotNull('medication_dosage')
             ->latest()
             ->get(['medication_name', 'medication_dosage'])
-            ->unique(fn (DiabetesLog $log): string => "{$log->medication_name}|{$log->medication_dosage}")
+            ->unique(fn (HealthEntry $log): string => "{$log->medication_name}|{$log->medication_dosage}")
             ->take(5)
-            ->map(fn (DiabetesLog $log): array => [
+            ->map(fn (HealthEntry $log): array => [
                 'name' => (string) $log->medication_name,
                 'dosage' => (string) $log->medication_dosage,
                 'label' => "{$log->medication_name} {$log->medication_dosage}",
@@ -121,14 +121,14 @@ final readonly class DiabetesLayout
     public static function getRecentInsulins(User $user): array
     {
         /** @var array<int, array{units: float, type: string, label: string}> */
-        return $user->diabetesLogs()
+        return $user->healthEntries()
             ->whereNotNull('insulin_units')
             ->whereNotNull('insulin_type')
             ->latest()
             ->get(['insulin_units', 'insulin_type'])
-            ->unique(fn (DiabetesLog $log): string => "{$log->insulin_units}|{$log->insulin_type?->value}")
+            ->unique(fn (HealthEntry $log): string => "{$log->insulin_units}|{$log->insulin_type?->value}")
             ->take(5)
-            ->map(fn (DiabetesLog $log): array => [
+            ->map(fn (HealthEntry $log): array => [
                 'units' => (float) $log->insulin_units,
                 'type' => (string) $log->insulin_type?->value,
                 'label' => "{$log->insulin_units}u {$log->insulin_type?->value}",
@@ -178,8 +178,8 @@ final readonly class DiabetesLayout
     /**
      * Calculate all summary statistics for the dashboard.
      *
-     * @param  Collection<int, DiabetesLog>  $logs
-     * @param  Collection<int, DiabetesLog>  $allLogs
+     * @param  Collection<int, HealthEntry>  $logs
+     * @param  Collection<int, HealthEntry>  $allLogs
      * @return array<string, mixed>
      */
     private static function calculateSummary(Collection $logs, Collection $allLogs): array
@@ -201,12 +201,12 @@ final readonly class DiabetesLayout
     /**
      * Calculate glucose statistics.
      *
-     * @param  Collection<int, DiabetesLog>  $logs
+     * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, avg: float, min: float, max: float}
      */
     private static function calculateGlucoseStats(Collection $logs): array
     {
-        $glucoseLogs = $logs->filter(fn (DiabetesLog $log): bool => $log->glucose_value !== null);
+        $glucoseLogs = $logs->filter(fn (HealthEntry $log): bool => $log->glucose_value !== null);
         $values = $glucoseLogs->pluck('glucose_value')->filter()->values();
 
         if ($values->isEmpty()) {
@@ -224,32 +224,32 @@ final readonly class DiabetesLayout
     /**
      * Calculate insulin statistics.
      *
-     * @param  Collection<int, DiabetesLog>  $logs
+     * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, total: float, bolusCount: int, basalCount: int}
      */
     private static function calculateInsulinStats(Collection $logs): array
     {
-        $insulinLogs = $logs->filter(fn (DiabetesLog $log): bool => $log->insulin_units !== null);
+        $insulinLogs = $logs->filter(fn (HealthEntry $log): bool => $log->insulin_units !== null);
 
         return [
             'count' => $insulinLogs->count(),
             'total' => round((float) ($insulinLogs->sum('insulin_units')), 1), // @phpstan-ignore-line
-            'bolusCount' => $insulinLogs->filter(fn (DiabetesLog $log): bool => $log->insulin_type === InsulinType::Bolus)->count(),
-            'basalCount' => $insulinLogs->filter(fn (DiabetesLog $log): bool => $log->insulin_type === InsulinType::Basal)->count(),
+            'bolusCount' => $insulinLogs->filter(fn (HealthEntry $log): bool => $log->insulin_type === InsulinType::Bolus)->count(),
+            'basalCount' => $insulinLogs->filter(fn (HealthEntry $log): bool => $log->insulin_type === InsulinType::Basal)->count(),
         ];
     }
 
     /**
      * Calculate carb statistics.
      *
-     * @param  Collection<int, DiabetesLog>  $logs
+     * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, total: float, uniqueDays: int, avgPerDay: float}
      */
     private static function calculateCarbStats(Collection $logs): array
     {
-        $carbLogs = $logs->filter(fn (DiabetesLog $log): bool => $log->carbs_grams !== null);
+        $carbLogs = $logs->filter(fn (HealthEntry $log): bool => $log->carbs_grams !== null);
         $total = $carbLogs->sum('carbs_grams');
-        $uniqueDays = $carbLogs->map(fn (DiabetesLog $log) => $log->measured_at->toDateString())->unique()->count();
+        $uniqueDays = $carbLogs->map(fn (HealthEntry $log) => $log->measured_at->toDateString())->unique()->count();
 
         $totalFloat = (float) $total; // @phpstan-ignore-line
 
@@ -264,12 +264,12 @@ final readonly class DiabetesLayout
     /**
      * Calculate exercise statistics.
      *
-     * @param  Collection<int, DiabetesLog>  $logs
+     * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, totalMinutes: int, types: array<int, string>}
      */
     private static function calculateExerciseStats(Collection $logs): array
     {
-        $exerciseLogs = $logs->filter(fn (DiabetesLog $log): bool => $log->exercise_duration_minutes !== null);
+        $exerciseLogs = $logs->filter(fn (HealthEntry $log): bool => $log->exercise_duration_minutes !== null);
 
         /** @var array<int, string> $types */
         $types = $exerciseLogs->pluck('exercise_type')->filter()->unique()->take(2)->values()->all();
@@ -284,12 +284,12 @@ final readonly class DiabetesLayout
     /**
      * Calculate weight statistics.
      *
-     * @param  Collection<int, DiabetesLog>  $logs
+     * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, latest: float|null, previous: float|null, trend: string|null, diff: float|null}
      */
     private static function calculateWeightStats(Collection $logs): array
     {
-        $weightLogs = $logs->filter(fn (DiabetesLog $log): bool => $log->weight !== null)
+        $weightLogs = $logs->filter(fn (HealthEntry $log): bool => $log->weight !== null)
             ->sortByDesc('measured_at')
             ->values();
 
@@ -321,12 +321,12 @@ final readonly class DiabetesLayout
     /**
      * Calculate blood pressure statistics.
      *
-     * @param  Collection<int, DiabetesLog>  $logs
+     * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, latestSystolic: int|null, latestDiastolic: int|null}
      */
     private static function calculateBloodPressureStats(Collection $logs): array
     {
-        $bpLogs = $logs->filter(fn (DiabetesLog $log): bool => $log->blood_pressure_systolic !== null && $log->blood_pressure_diastolic !== null)
+        $bpLogs = $logs->filter(fn (HealthEntry $log): bool => $log->blood_pressure_systolic !== null && $log->blood_pressure_diastolic !== null)
             ->sortByDesc('measured_at')
             ->values();
 
@@ -342,12 +342,12 @@ final readonly class DiabetesLayout
     /**
      * Calculate medication statistics.
      *
-     * @param  Collection<int, DiabetesLog>  $logs
+     * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, uniqueMedications: array<int, string>}
      */
     private static function calculateMedicationStats(Collection $logs): array
     {
-        $medicationLogs = $logs->filter(fn (DiabetesLog $log): bool => $log->medication_name !== null);
+        $medicationLogs = $logs->filter(fn (HealthEntry $log): bool => $log->medication_name !== null);
 
         /** @var array<int, string> $uniqueMedications */
         $uniqueMedications = $medicationLogs->pluck('medication_name')->filter()->unique()->take(2)->values()->all();
@@ -361,12 +361,12 @@ final readonly class DiabetesLayout
     /**
      * Calculate A1C statistics.
      *
-     * @param  Collection<int, DiabetesLog>  $logs
+     * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, latest: float|null}
      */
     private static function calculateA1cStats(Collection $logs): array
     {
-        $a1cLogs = $logs->filter(fn (DiabetesLog $log): bool => $log->a1c_value !== null)
+        $a1cLogs = $logs->filter(fn (HealthEntry $log): bool => $log->a1c_value !== null)
             ->sortByDesc('measured_at')
             ->values();
 
@@ -379,7 +379,7 @@ final readonly class DiabetesLayout
     /**
      * Calculate logging streak (consecutive days).
      *
-     * @param  Collection<int, DiabetesLog>  $allLogs
+     * @param  Collection<int, HealthEntry>  $allLogs
      * @return array{currentStreak: int, activeDays: int}
      */
     private static function calculateStreak(Collection $allLogs): array
@@ -389,7 +389,7 @@ final readonly class DiabetesLayout
         }
 
         // Get unique dates with logs
-        $uniqueDates = $allLogs->map(fn (DiabetesLog $log) => $log->measured_at->toDateString())
+        $uniqueDates = $allLogs->map(fn (HealthEntry $log) => $log->measured_at->toDateString())
             ->unique()
             ->sort()
             ->reverse()
@@ -428,15 +428,15 @@ final readonly class DiabetesLayout
     /**
      * Calculate data type flags for conditional rendering.
      *
-     * @param  Collection<int, DiabetesLog>  $logs
+     * @param  Collection<int, HealthEntry>  $logs
      * @return array{hasGlucose: bool, hasInsulin: bool, hasCarbs: bool, hasExercise: bool, hasMultipleFactors: bool}
      */
     private static function calculateDataTypes(Collection $logs): array
     {
-        $hasGlucose = $logs->contains(fn (DiabetesLog $log): bool => $log->glucose_value !== null);
-        $hasInsulin = $logs->contains(fn (DiabetesLog $log): bool => $log->insulin_units !== null);
-        $hasCarbs = $logs->contains(fn (DiabetesLog $log): bool => $log->carbs_grams !== null);
-        $hasExercise = $logs->contains(fn (DiabetesLog $log): bool => $log->exercise_duration_minutes !== null);
+        $hasGlucose = $logs->contains(fn (HealthEntry $log): bool => $log->glucose_value !== null);
+        $hasInsulin = $logs->contains(fn (HealthEntry $log): bool => $log->insulin_units !== null);
+        $hasCarbs = $logs->contains(fn (HealthEntry $log): bool => $log->carbs_grams !== null);
+        $hasExercise = $logs->contains(fn (HealthEntry $log): bool => $log->exercise_duration_minutes !== null);
 
         $factorCount = array_filter([$hasGlucose, $hasInsulin, $hasCarbs, $hasExercise]);
 

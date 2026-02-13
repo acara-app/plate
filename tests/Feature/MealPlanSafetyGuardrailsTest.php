@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Ai\MealPlanPromptBuilder;
-use App\Models\DiabetesLog;
 use App\Models\HealthCondition;
+use App\Models\HealthEntry;
 use App\Models\User;
 use App\Models\UserProfile;
 
@@ -45,7 +45,7 @@ it('includes diabetes safety guardrails when user has glucose data', function ()
         ->create();
 
     // Add glucose readings
-    DiabetesLog::factory()->count(5)->create([
+    HealthEntry::factory()->count(5)->create([
         'user_id' => $user->id,
         'glucose_value' => 140,
     ]);
@@ -160,7 +160,7 @@ it('reinforces safety rules in glucose monitoring section for users with glucose
         ->has(UserProfile::factory(), 'profile')
         ->create();
 
-    DiabetesLog::factory()->count(10)->create([
+    HealthEntry::factory()->count(10)->create([
         'user_id' => $user->id,
         'glucose_value' => 150,
     ]);

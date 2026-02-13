@@ -114,11 +114,11 @@ final class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * @return HasMany<DiabetesLog, $this>
+     * @return HasMany<HealthEntry, $this>
      */
-    public function diabetesLogs(): HasMany
+    public function healthEntries(): HasMany
     {
-        return $this->hasMany(DiabetesLog::class)->latest('measured_at');
+        return $this->hasMany(HealthEntry::class)->latest('measured_at');
     }
 
     /**

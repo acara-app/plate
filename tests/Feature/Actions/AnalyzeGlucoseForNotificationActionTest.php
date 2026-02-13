@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\AnalyzeGlucoseForNotificationAction;
 use App\Enums\GlucoseReadingType;
-use App\Models\DiabetesLog;
+use App\Models\HealthEntry;
 use App\Models\User;
 
 test('it returns should not notify when notifications are disabled', function (): void {
@@ -12,7 +12,7 @@ test('it returns should not notify when notifications are disabled', function ()
         'settings' => ['glucose_notifications_enabled' => false],
     ]);
 
-    DiabetesLog::factory()->count(10)->create([
+    HealthEntry::factory()->count(10)->create([
         'user_id' => $user->id,
         'glucose_value' => 200,
         'measured_at' => now()->subDays(3),
@@ -47,7 +47,7 @@ test('it returns should not notify when glucose is well controlled', function ()
     $stableValues = [100, 98, 102, 99, 101, 100, 97, 103, 100, 99, 101, 98, 102, 100, 99, 101, 100, 98, 102, 100];
 
     foreach ($stableValues as $i => $value) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => $value,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -71,7 +71,7 @@ test('it returns should notify when high readings exceed trigger percentage', fu
 
     // Create 40% high readings (above 140)
     foreach (range(1, 6) as $i) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => 180,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -81,7 +81,7 @@ test('it returns should notify when high readings exceed trigger percentage', fu
 
     // Create 60% normal readings
     foreach (range(1, 9) as $i) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => 100,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -106,7 +106,7 @@ test('it returns should notify when hypoglycemia risk is detected', function ():
 
     // Create multiple low readings to trigger hypoglycemia risk
     foreach (range(1, 8) as $i) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => 55,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -116,7 +116,7 @@ test('it returns should notify when hypoglycemia risk is detected', function ():
 
     // Add some normal readings
     foreach (range(1, 5) as $i) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => 100,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -137,7 +137,7 @@ test('it returns should notify when consistently high pattern is detected', func
 
     // Create all high readings
     foreach (range(1, 20) as $i) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => fake()->randomFloat(1, 180, 220),
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -158,7 +158,7 @@ test('it returns should notify when consistently low pattern is detected', funct
 
     // Create all low readings
     foreach (range(1, 20) as $i) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => fake()->randomFloat(1, 50, 65),
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -179,7 +179,7 @@ test('it returns should notify when high variability is detected', function (): 
 
     // Create highly variable readings (alternating very low and very high)
     foreach (range(1, 20) as $i) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => $i % 2 === 0 ? 60 : 220,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -200,7 +200,7 @@ test('it returns should notify when post-meal spikes are detected', function ():
 
     // Create post-meal spikes
     foreach (range(1, 15) as $i) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => 200,
             'glucose_reading_type' => GlucoseReadingType::PostMeal,
@@ -210,7 +210,7 @@ test('it returns should notify when post-meal spikes are detected', function ():
 
     // Add some fasting readings for comparison
     foreach (range(1, 5) as $i) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => 90,
             'glucose_reading_type' => GlucoseReadingType::Fasting,
@@ -231,7 +231,7 @@ test('it uses custom analysis window days parameter', function (): void {
 
     // Create readings only in the last 5 days
     foreach (range(1, 5) as $i) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => 100,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -241,7 +241,7 @@ test('it uses custom analysis window days parameter', function (): void {
 
     // Create old readings that should be excluded with 7 day window
     foreach (range(10, 15) as $i) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => 250,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -268,7 +268,7 @@ test('it uses user custom thresholds when set', function (): void {
 
     // Readings at 180 - above default 140 but below user's 200
     foreach (range(1, 15) as $i) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => 180,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -289,7 +289,7 @@ test('it preserves analysis data in result', function (): void {
     ]);
 
     foreach (range(1, 10) as $i) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => 100,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -320,7 +320,7 @@ test('it does not trigger concern for high variability alone without other conce
     $normalValues = [85, 130, 90, 140, 95, 135, 100, 125, 105, 120, 110, 115];
 
     foreach ($normalValues as $index => $value) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => $value,
             'glucose_reading_type' => GlucoseReadingType::Random,
@@ -352,7 +352,7 @@ test('it does not trigger post-meal spikes concern when average post-meal is bel
     $postMealValues = [140, 150, 145, 155, 160, 148, 152, 158, 142, 165];
 
     foreach ($postMealValues as $index => $value) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => $value,
             'glucose_reading_type' => GlucoseReadingType::PostMeal,
@@ -362,7 +362,7 @@ test('it does not trigger post-meal spikes concern when average post-meal is bel
 
     // Add some fasting readings to establish baseline
     foreach (range(1, 5) as $i) {
-        DiabetesLog::factory()->create([
+        HealthEntry::factory()->create([
             'user_id' => $user->id,
             'glucose_value' => 95,
             'glucose_reading_type' => GlucoseReadingType::Fasting,

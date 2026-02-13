@@ -152,12 +152,12 @@ return [
 
     // Dashboard
     'dashboard_cards' => [
-        'diabetes_insights' => [
+        'health_insights' => [
             'title' => 'Glucose Insights',
             'description' => 'See how your choices are affecting your health.',
             'button' => 'Check Trends',
         ],
-        'diabetes_log' => [
+        'health_entries' => [
             'title' => 'Logbook',
             'description' => 'Log your vitals, food, and meds in seconds.',
             'button' => 'Log Entry',
@@ -397,7 +397,7 @@ return [
     ],
 
     // Diabetes Log
-    'diabetes_log' => [
+    'health_entries' => [
         'tabs' => [
             'glucose' => 'Glucose',
             'food' => 'Food',
@@ -687,8 +687,8 @@ return [
             'context' => 'My Profile',
             'home' => 'Home',
             'meal_plans' => 'My Menu',
-            'diabetes_insights' => 'Health Patterns',
-            'diabetes_log' => 'Logbook',
+            'health_insights' => 'Health Patterns',
+            'health_entries' => 'Logbook',
             'update_info' => 'Personal Details',
             'dietary_preferences' => 'Food Preferences',
             'health_conditions' => 'Health Conditions',

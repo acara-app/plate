@@ -73,6 +73,6 @@ final class GlucoseReportNotification extends Notification implements ShouldQueu
      */
     private function generateMealPlanUrl(): string
     {
-        return route('diabetes-log.insights', absolute: true);
+        return route('health-entries.insights', absolute: true);
     }
 }

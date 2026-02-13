@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Enums\GlucoseUnit;
-use App\Models\DiabetesLog;
+use App\Models\HealthEntry;
 use App\Models\User;
 use Illuminate\Console\Command;
 
@@ -34,10 +34,10 @@ final class MigrateGlucoseValuesToMgDlCommand extends Command
 
         // Get users with mmol/L preference
         $usersWithMmolL = User::query()
-            ->whereHas('profile', function ($query): void {
+            ->whereHas('profile', function (\Illuminate\Database\Eloquent\Builder $query): void {
                 $query->where('units_preference', GlucoseUnit::MmolL->value);
             })
-            ->withCount(['diabetesLogs as glucose_logs_count' => function ($query): void {
+            ->withCount(['healthEntries as glucose_logs_count' => function (\Illuminate\Database\Eloquent\Builder $query): void {
                 $query->whereNotNull('glucose_value');
             }])
             ->get();
@@ -90,7 +90,7 @@ final class MigrateGlucoseValuesToMgDlCommand extends Command
         $skipped = 0;
 
         // Get all glucose logs for this user
-        $logs = DiabetesLog::query()
+        $logs = HealthEntry::query()
             ->where('user_id', $user->id)
             ->whereNotNull('glucose_value')
             ->cursor();

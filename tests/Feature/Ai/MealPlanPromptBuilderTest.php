@@ -6,9 +6,9 @@ use App\Ai\MealPlanPromptBuilder;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
-use App\Models\DiabetesLog;
 use App\Models\DietaryPreference;
 use App\Models\HealthCondition;
+use App\Models\HealthEntry;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Support\Facades\DB;
@@ -410,14 +410,14 @@ test('it automatically analyzes glucose data when analysis not provided', functi
     ]);
 
     // Create glucose readings to ensure analyzer has data
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $user->id,
         'glucose_value' => 95.0,
         'glucose_reading_type' => GlucoseReadingType::Fasting,
         'measured_at' => now()->subDays(1),
     ]);
 
-    DiabetesLog::factory()->create([
+    HealthEntry::factory()->create([
         'user_id' => $user->id,
         'glucose_value' => 140.0,
         'glucose_reading_type' => GlucoseReadingType::PostMeal,

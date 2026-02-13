@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace App\Telegram;
 
-use App\Actions\RecordDiabetesLogAction;
+use App\Actions\SaveHealthLogAction;
 use App\Contracts\GeneratesAiResponse;
 use App\Contracts\ParsesHealthData;
 use App\DataObjects\HealthLogData;
-use App\Enums\GlucoseReadingType;
-use App\Enums\GlucoseUnit;
-use App\Enums\InsulinType;
+use App\Enums\HealthEntryType;
 use App\Exceptions\TelegramUserException;
 use App\Models\User;
 use App\Models\UserTelegramChat;
 use App\Services\Telegram\TelegramMessageService;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Stringable;
 use Throwable;
 
@@ -26,7 +24,7 @@ final class TelegramWebhookHandler extends WebhookHandler
         private readonly GeneratesAiResponse $generateAiResponse,
         private readonly TelegramMessageService $telegramMessage,
         private readonly ParsesHealthData $healthDataParser,
-        private readonly RecordDiabetesLogAction $recordDiabetesLog,
+        private readonly SaveHealthLogAction $saveHealthLog,
     ) {}
 
     public function start(): void
@@ -177,7 +175,8 @@ final class TelegramWebhookHandler extends WebhookHandler
         }
 
         try {
-            $this->saveHealthLog($linkedChat, $pendingLog);
+            $healthData = $this->reconstructHealthLogData($pendingLog);
+            $this->saveHealthLog->handle($linkedChat->user, $healthData, $healthData->measuredAt);
             $linkedChat->clearPendingHealthLog();
 
             $this->chat->message('✅ Saved! Your health data has been logged.')->send();
@@ -273,309 +272,90 @@ final class TelegramWebhookHandler extends WebhookHandler
 
     private function handleHealthLogAttempt(UserTelegramChat $linkedChat, HealthLogData $healthData): void
     {
-        $pendingLog = [
-            'log_type' => $healthData->logType,
-            'glucose_value' => $healthData->glucoseValue,
-            'glucose_reading_type' => $healthData->glucoseReadingType,
-            'glucose_unit' => $healthData->glucoseUnit,
-            'carbs_grams' => $healthData->carbsGrams,
-            'insulin_units' => $healthData->insulinUnits,
-            'insulin_type' => $healthData->insulinType,
-            'medication_name' => $healthData->medicationName,
-            'medication_dosage' => $healthData->medicationDosage,
-            'weight' => $healthData->weight,
-            'blood_pressure_systolic' => $healthData->bpSystolic,
-            'blood_pressure_diastolic' => $healthData->bpDiastolic,
-            'exercise_type' => $healthData->exerciseType,
-            'exercise_duration_minutes' => $healthData->exerciseDurationMinutes,
-            'measured_at' => $healthData->measuredAt?->toISOString(),
-        ];
-
+        $pendingLog = $this->serializeHealthLogData($healthData);
         $linkedChat->setPendingHealthLog($pendingLog);
 
-        $formattedLog = $this->formatPendingLog($pendingLog);
+        $formattedLog = $healthData->formatForDisplay();
         $confirmationText = "📝 Log: {$formattedLog}\n\nType /yes to confirm or /no to cancel.";
 
         $this->telegramMessage->sendLongMessage($this->chat, $confirmationText, false);
     }
 
     /**
-     * @param  array<string, mixed>  $log
+     * Serialize HealthLogData to array for storage in pending log.
+     *
+     * @return array<string, mixed>
      */
-    private function formatPendingLog(array $log): string
+    private function serializeHealthLogData(HealthLogData $data): array
     {
-        /** @var string $logType */
-        $logType = $log['log_type'];
-
-        return match ($logType) {
-            'glucose' => $this->formatGlucoseLog($log),
-            'food' => $this->formatFoodLog($log),
-            'insulin' => $this->formatInsulinLog($log),
-            'meds' => $this->formatMedsLog($log),
-            'vitals' => $this->formatVitalsLog($log),
-            'exercise' => $this->formatExerciseLog($log),
-            default => 'Unknown data',
-        };
-    }
-
-    /**
-     * @param  array<string, mixed>  $log
-     */
-    private function formatGlucoseLog(array $log): string
-    {
-        /** @var float|null $value */
-        $value = $log['glucose_value'];
-        /** @var string|null $unit */
-        $unit = $log['glucose_unit'] ?? 'mg/dL';
-        /** @var string|null $readingType */
-        $readingType = $log['glucose_reading_type'] ?? 'random';
-
-        $readingTypeLabel = match ($readingType) {
-            'fasting' => 'Fasting',
-            'before-meal' => 'Before meal',
-            'post-meal' => 'Post-meal',
-            default => 'Random',
-        };
-
-        return "Glucose {$value} {$unit} ({$readingTypeLabel})";
-    }
-
-    /**
-     * @param  array<string, mixed>  $log
-     */
-    private function formatFoodLog(array $log): string
-    {
-        /** @var int|null $carbs */
-        $carbs = $log['carbs_grams'];
-
-        return "Food - {$carbs}g carbs";
-    }
-
-    /**
-     * @param  array<string, mixed>  $log
-     */
-    private function formatInsulinLog(array $log): string
-    {
-        /** @var float|null $units */
-        $units = $log['insulin_units'];
-        /** @var string|null $type */
-        $type = $log['insulin_type'] ?? 'bolus';
-
-        $typeLabel = match ($type) {
-            'basal' => 'Basal',
-            'bolus' => 'Bolus',
-            'mixed' => 'Mixed',
-            default => $type,
-        };
-
-        return "Insulin {$units} units ({$typeLabel})";
-    }
-
-    /**
-     * @param  array<string, mixed>  $log
-     */
-    private function formatMedsLog(array $log): string
-    {
-        /** @var string|null $name */
-        $name = $log['medication_name'];
-        /** @var string|null $dosage */
-        $dosage = $log['medication_dosage'] ?? '';
-
-        return "Medication - {$name}".($dosage ? " {$dosage}" : '');
-    }
-
-    /**
-     * @param  array<string, mixed>  $log
-     */
-    private function formatVitalsLog(array $log): string
-    {
-        /** @var float|null $weight */
-        $weight = $log['weight'];
-        /** @var int|null $bpSystolic */
-        $bpSystolic = $log['blood_pressure_systolic'];
-        /** @var int|null $bpDiastolic */
-        $bpDiastolic = $log['blood_pressure_diastolic'];
-
-        if ($weight !== null) {
-            return "Weight {$weight} kg";
-        }
-
-        if ($bpSystolic !== null && $bpDiastolic !== null) {
-            return "Blood Pressure {$bpSystolic}/{$bpDiastolic}";
-        }
-
-        return 'Vitals';
-    }
-
-    /**
-     * @param  array<string, mixed>  $log
-     */
-    private function formatExerciseLog(array $log): string
-    {
-        /** @var string|null $type */
-        $type = $log['exercise_type'] ?? 'exercise';
-        /** @var int|null $duration */
-        $duration = $log['exercise_duration_minutes'];
-
-        return "Exercise - {$duration} min {$type}";
-    }
-
-    /**
-     * @param  array<string, mixed>  $logData
-     */
-    private function saveHealthLog(UserTelegramChat $linkedChat, array $logData): void
-    {
-        $user = $linkedChat->user;
-        $profile = $user->profile;
-        $glucoseUnit = $profile !== null ? $profile->units_preference : null;
-        $glucoseUnit = $glucoseUnit ?? GlucoseUnit::MmolL;
-
-        /** @var string $logType */
-        $logType = $logData['log_type'];
-        /** @var string|null $measuredAtString */
-        $measuredAtString = $logData['measured_at'] ?? null;
-        $measuredAt = $measuredAtString !== null
-            ? Carbon::parse($measuredAtString)
-            : now();
-
-        $recordData = [
-            'user_id' => $user->id,
-            'measured_at' => $measuredAt,
-            'notes' => null,
+        return [
+            'is_health_data' => $data->isHealthData,
+            'log_type' => $data->logType->value,
+            'glucose_value' => $data->glucoseValue,
+            'glucose_reading_type' => $data->glucoseReadingType?->value,
+            'glucose_unit' => $data->glucoseUnit?->value,
+            'carbs_grams' => $data->carbsGrams,
+            'insulin_units' => $data->insulinUnits,
+            'insulin_type' => $data->insulinType?->value,
+            'medication_name' => $data->medicationName,
+            'medication_dosage' => $data->medicationDosage,
+            'weight' => $data->weight,
+            'blood_pressure_systolic' => $data->bpSystolic,
+            'blood_pressure_diastolic' => $data->bpDiastolic,
+            'exercise_type' => $data->exerciseType,
+            'exercise_duration_minutes' => $data->exerciseDurationMinutes,
+            'measured_at' => $data->measuredAt?->toISOString(),
         ];
-
-        match ($logType) {
-            'glucose' => $this->saveGlucoseLog($logData, $recordData, $glucoseUnit),
-            'food' => $this->saveFoodLog($logData, $recordData),
-            'insulin' => $this->saveInsulinLog($logData, $recordData),
-            'meds' => $this->saveMedsLog($logData, $recordData),
-            'vitals' => $this->saveVitalsLog($logData, $recordData),
-            'exercise' => $this->saveExerciseLog($logData, $recordData),
-            default => null,
-        };
     }
 
     /**
-     * @param  array<string, mixed>  $logData
-     * @param  array<string, mixed>  $recordData
+     * Reconstruct HealthLogData from stored pending log array.
+     *
+     * @param  array<string, mixed>  $log
      */
-    private function saveGlucoseLog(array $logData, array $recordData, GlucoseUnit $glucoseUnit): void
+    private function reconstructHealthLogData(array $log): HealthLogData
     {
-        /** @var float|null $glucoseValue */
-        $glucoseValue = $logData['glucose_value'];
+        $logTypeString = $log['log_type'] ?? 'glucose';
+        $logType = HealthEntryType::tryFrom($logTypeString) ?? HealthEntryType::Glucose;
 
-        if ($glucoseValue !== null && $glucoseUnit === GlucoseUnit::MmolL) {
-            $glucoseValue = GlucoseUnit::mmolLToMgDl($glucoseValue);
-        }
-
-        $recordData['glucose_value'] = $glucoseValue;
-
-        /** @var string|null $glucoseReadingType */
-        $glucoseReadingType = $logData['glucose_reading_type'];
-        $recordData['glucose_reading_type'] = $glucoseReadingType !== null
-            ? GlucoseReadingType::tryFrom($glucoseReadingType)
+        $glucoseReadingTypeString = $log['glucose_reading_type'] ?? null;
+        $glucoseReadingType = $glucoseReadingTypeString !== null
+            ? \App\Enums\GlucoseReadingType::tryFrom($glucoseReadingTypeString)
             : null;
 
-        /** @var array<string, mixed> $data */
-        $data = $recordData;
-        $this->recordDiabetesLog->handle($data);
-    }
-
-    /**
-     * @param  array<string, mixed>  $logData
-     * @param  array<string, mixed>  $recordData
-     */
-    private function saveFoodLog(array $logData, array $recordData): void
-    {
-        /** @var int|null $carbsGrams */
-        $carbsGrams = $logData['carbs_grams'];
-        $recordData['carbs_grams'] = $carbsGrams;
-
-        /** @var array<string, mixed> $data */
-        $data = $recordData;
-        $this->recordDiabetesLog->handle($data);
-    }
-
-    /**
-     * @param  array<string, mixed>  $logData
-     * @param  array<string, mixed>  $recordData
-     */
-    private function saveInsulinLog(array $logData, array $recordData): void
-    {
-        /** @var float|null $insulinUnits */
-        $insulinUnits = $logData['insulin_units'];
-        $recordData['insulin_units'] = $insulinUnits;
-
-        /** @var string|null $insulinType */
-        $insulinType = $logData['insulin_type'];
-        $recordData['insulin_type'] = $insulinType !== null
-            ? InsulinType::tryFrom($insulinType)
+        $glucoseUnitString = $log['glucose_unit'] ?? null;
+        $glucoseUnit = $glucoseUnitString !== null
+            ? \App\Enums\GlucoseUnit::tryFrom($glucoseUnitString)
             : null;
 
-        /** @var array<string, mixed> $data */
-        $data = $recordData;
-        $this->recordDiabetesLog->handle($data);
-    }
+        $insulinTypeString = $log['insulin_type'] ?? null;
+        $insulinType = $insulinTypeString !== null
+            ? \App\Enums\InsulinType::tryFrom($insulinTypeString)
+            : null;
 
-    /**
-     * @param  array<string, mixed>  $logData
-     * @param  array<string, mixed>  $recordData
-     */
-    private function saveMedsLog(array $logData, array $recordData): void
-    {
-        /** @var string|null $medicationName */
-        $medicationName = $logData['medication_name'];
-        $recordData['medication_name'] = $medicationName;
+        $measuredAtString = $log['measured_at'] ?? null;
+        $measuredAt = $measuredAtString !== null
+            ? Date::parse($measuredAtString)
+            : null;
 
-        /** @var string|null $medicationDosage */
-        $medicationDosage = $logData['medication_dosage'];
-        $recordData['medication_dosage'] = $medicationDosage;
-
-        /** @var array<string, mixed> $data */
-        $data = $recordData;
-        $this->recordDiabetesLog->handle($data);
-    }
-
-    /**
-     * @param  array<string, mixed>  $logData
-     * @param  array<string, mixed>  $recordData
-     */
-    private function saveVitalsLog(array $logData, array $recordData): void
-    {
-        /** @var float|null $weight */
-        $weight = $logData['weight'];
-        $recordData['weight'] = $weight;
-
-        /** @var int|null $bpSystolic */
-        $bpSystolic = $logData['blood_pressure_systolic'];
-        $recordData['blood_pressure_systolic'] = $bpSystolic;
-
-        /** @var int|null $bpDiastolic */
-        $bpDiastolic = $logData['blood_pressure_diastolic'];
-        $recordData['blood_pressure_diastolic'] = $bpDiastolic;
-
-        /** @var array<string, mixed> $data */
-        $data = $recordData;
-        $this->recordDiabetesLog->handle($data);
-    }
-
-    /**
-     * @param  array<string, mixed>  $logData
-     * @param  array<string, mixed>  $recordData
-     */
-    private function saveExerciseLog(array $logData, array $recordData): void
-    {
-        /** @var string|null $exerciseType */
-        $exerciseType = $logData['exercise_type'];
-        $recordData['exercise_type'] = $exerciseType;
-
-        /** @var int|null $exerciseDuration */
-        $exerciseDuration = $logData['exercise_duration_minutes'];
-        $recordData['exercise_duration_minutes'] = $exerciseDuration;
-
-        /** @var array<string, mixed> $data */
-        $data = $recordData;
-        $this->recordDiabetesLog->handle($data);
+        return new HealthLogData(
+            isHealthData: $log['is_health_data'] ?? false,
+            logType: $logType,
+            glucoseValue: $log['glucose_value'] ?? null,
+            glucoseReadingType: $glucoseReadingType,
+            glucoseUnit: $glucoseUnit,
+            carbsGrams: $log['carbs_grams'] ?? null,
+            insulinUnits: $log['insulin_units'] ?? null,
+            insulinType: $insulinType,
+            medicationName: $log['medication_name'] ?? null,
+            medicationDosage: $log['medication_dosage'] ?? null,
+            weight: $log['weight'] ?? null,
+            bpSystolic: $log['blood_pressure_systolic'] ?? null,
+            bpDiastolic: $log['blood_pressure_diastolic'] ?? null,
+            exerciseType: $log['exercise_type'] ?? null,
+            exerciseDurationMinutes: $log['exercise_duration_minutes'] ?? null,
+            measuredAt: $measuredAt,
+        );
     }
 
     private function generateAndSendResponse(UserTelegramChat $linkedChat, string $message): void
