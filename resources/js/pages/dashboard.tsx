@@ -221,7 +221,10 @@ export default function Dashboard() {
                     </Link>
 
                     {/* Logbook Card */}
-                    <Link href={healthEntries.dashboard().url} className="group">
+                    <Link
+                        href={healthEntries.dashboard().url}
+                        className="group"
+                    >
                         <Card className="h-full transition-all hover:border-primary/50 hover:shadow-md">
                             <CardContent className="flex h-full flex-col justify-between p-5">
                                 <div className="flex items-start justify-between">

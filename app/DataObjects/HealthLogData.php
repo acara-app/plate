@@ -88,7 +88,7 @@ final class HealthLogData extends Data
     {
         $dosage = $this->medicationDosage ?? '';
 
-        return "Medication - {$this->medicationName}".($dosage ? " {$dosage}" : '');
+        return "Medication - {$this->medicationName}".($dosage !== '' && $dosage !== '0' ? " {$dosage}" : '');
     }
 
     private function formatVitalsLog(): string
