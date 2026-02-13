@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 use App\Contracts\ParsesHealthData;
 use App\DataObjects\HealthLogData;
+use App\Enums\GlucoseReadingType;
+use App\Enums\GlucoseUnit;
+use App\Enums\HealthEntryType;
+use App\Enums\InsulinType;
 use App\Models\User;
 use App\Models\UserTelegramChat;
 use DefStudio\Telegraph\Facades\Telegraph;
@@ -98,6 +102,7 @@ describe('/no command', function (): void {
             'log_type' => 'glucose',
             'glucose_value' => 140.0,
             'glucose_reading_type' => 'fasting',
+            'is_health_data' => true,
         ]);
 
         sendHealthWebhook($this, '/no');
@@ -118,10 +123,10 @@ describe('health data keywords detection', function (): void {
             ->with('My glucose is 140')
             ->andReturn(new HealthLogData(
                 isHealthData: true,
-                logType: 'glucose',
+                logType: HealthEntryType::Glucose,
                 glucoseValue: 140.0,
-                glucoseReadingType: 'random',
-                glucoseUnit: 'mg/dL',
+                glucoseReadingType: GlucoseReadingType::Random,
+                glucoseUnit: GlucoseUnit::MgDl,
             ));
         app()->instance(ParsesHealthData::class, $parserMock);
 
@@ -140,9 +145,9 @@ describe('health data keywords detection', function (): void {
             ->with('Took 5 units of insulin')
             ->andReturn(new HealthLogData(
                 isHealthData: true,
-                logType: 'insulin',
+                logType: HealthEntryType::Insulin,
                 insulinUnits: 5.0,
-                insulinType: 'bolus',
+                insulinType: InsulinType::Bolus,
             ));
         app()->instance(ParsesHealthData::class, $parserMock);
 
@@ -161,7 +166,7 @@ describe('health data keywords detection', function (): void {
             ->with('Ate 45g carbs')
             ->andReturn(new HealthLogData(
                 isHealthData: true,
-                logType: 'food',
+                logType: HealthEntryType::Food,
                 carbsGrams: 45,
             ));
         app()->instance(ParsesHealthData::class, $parserMock);
@@ -181,7 +186,7 @@ describe('health data keywords detection', function (): void {
             ->with('Walked 30 minutes')
             ->andReturn(new HealthLogData(
                 isHealthData: true,
-                logType: 'exercise',
+                logType: HealthEntryType::Exercise,
                 exerciseType: 'walking',
                 exerciseDurationMinutes: 30,
             ));
@@ -202,7 +207,7 @@ describe('health data keywords detection', function (): void {
             ->with('Weigh 180 lbs')
             ->andReturn(new HealthLogData(
                 isHealthData: true,
-                logType: 'vitals',
+                logType: HealthEntryType::Vitals,
                 weight: 81.65,
             ));
         app()->instance(ParsesHealthData::class, $parserMock);
@@ -222,7 +227,7 @@ describe('health data keywords detection', function (): void {
             ->with('BP 120/80')
             ->andReturn(new HealthLogData(
                 isHealthData: true,
-                logType: 'vitals',
+                logType: HealthEntryType::Vitals,
                 bpSystolic: 120,
                 bpDiastolic: 80,
             ));
@@ -240,7 +245,7 @@ describe('health data keywords detection', function (): void {
         $parserMock = Mockery::mock(ParsesHealthData::class);
         $parserMock->shouldReceive('parse')
             ->once()
-            ->andReturn(new HealthLogData(isHealthData: true, logType: 'glucose', glucoseValue: 140.0));
+            ->andReturn(new HealthLogData(isHealthData: true, logType: HealthEntryType::Glucose, glucoseValue: 140.0));
         app()->instance(ParsesHealthData::class, $parserMock);
 
         sendHealthWebhook($this, 'My glucose is 140');

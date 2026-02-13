@@ -6,6 +6,10 @@ namespace App\Ai\Agents;
 
 use App\Contracts\ParsesHealthData;
 use App\DataObjects\HealthLogData;
+use App\Enums\GlucoseReadingType;
+use App\Enums\GlucoseUnit;
+use App\Enums\HealthEntryType;
+use App\Enums\InsulinType;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
@@ -96,13 +100,29 @@ INST;
         }
 
         $isHealthData = $this->getBooleanValue($responseArray, 'is_health_data', false);
-        $logType = $this->getStringValue($responseArray, 'log_type', 'glucose');
+        $logTypeString = $this->getStringValue($responseArray, 'log_type', 'glucose');
+        $logType = HealthEntryType::tryFrom($logTypeString) ?? HealthEntryType::Glucose;
+
         $glucoseValue = $this->getFloatOrNull($responseArray, 'glucose_value');
-        $glucoseReadingType = $this->getStringOrNull($responseArray, 'glucose_reading_type');
-        $glucoseUnit = $this->getStringOrNull($responseArray, 'glucose_unit');
+
+        $glucoseReadingTypeString = $this->getStringOrNull($responseArray, 'glucose_reading_type');
+        $glucoseReadingType = $glucoseReadingTypeString !== null
+            ? GlucoseReadingType::tryFrom($glucoseReadingTypeString)
+            : null;
+
+        $glucoseUnitString = $this->getStringOrNull($responseArray, 'glucose_unit');
+        $glucoseUnit = $glucoseUnitString !== null
+            ? GlucoseUnit::tryFrom($glucoseUnitString)
+            : null;
+
         $carbsGrams = $this->getIntOrNull($responseArray, 'carbs_grams');
         $insulinUnits = $this->getFloatOrNull($responseArray, 'insulin_units');
-        $insulinType = $this->getStringOrNull($responseArray, 'insulin_type');
+
+        $insulinTypeString = $this->getStringOrNull($responseArray, 'insulin_type');
+        $insulinType = $insulinTypeString !== null
+            ? InsulinType::tryFrom($insulinTypeString)
+            : null;
+
         $medicationName = $this->getStringOrNull($responseArray, 'medication_name');
         $medicationDosage = $this->getStringOrNull($responseArray, 'medication_dosage');
         $weight = $this->getFloatOrNull($responseArray, 'weight');

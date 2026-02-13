@@ -10,4 +10,14 @@ enum GlucoseReadingType: string
     case BeforeMeal = 'before-meal';
     case PostMeal = 'post-meal';
     case Random = 'random';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Fasting => 'Fasting',
+            self::BeforeMeal => 'Before meal',
+            self::PostMeal => 'Post-meal',
+            self::Random => 'Random',
+        };
+    }
 }
