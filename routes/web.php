@@ -12,7 +12,6 @@ Route::view('/terms-of-service', 'terms-of-service')->name('terms');
 Route::view('/about', 'about')->name('about');
 Route::view('/support', 'support')->name('support');
 Route::view('/install-app', 'install-app')->name('install-app');
-Route::view('/telegram', 'telegram')->name('telegram');
 
 Route::view('/diabetes-log-book', 'diabetes-log-book')->name('diabetes-log-book');
 Route::view('/diabetes-log-book-info', 'diabetes-log-book-info')->name('diabetes-log-book-info');
@@ -23,6 +22,7 @@ Route::livewire('/tools', 'pages::tools-index')->name('tools.index');
 Route::livewire('/tools/spike-calculator', 'pages::spike-calculator')->name('spike-calculator');
 Route::livewire('/tools/snap-to-track', 'pages::snap-to-track')->name('snap-to-track');
 Route::livewire('/tools/usda-daily-servings-calculator', 'pages::usda-daily-servings-calculator')->name('usda-servings-calculator');
+Route::livewire('/tools/telegram-health-logging', 'pages::telegram-health-logging')->name('telegram-health-logging');
 
 // Redirects for old tool URLs (SEO)...
 Route::redirect('/spike-calculator', '/tools/spike-calculator', 301);
