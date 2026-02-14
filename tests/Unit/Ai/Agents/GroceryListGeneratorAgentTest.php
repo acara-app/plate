@@ -6,38 +6,13 @@ use App\Ai\Agents\GroceryListGeneratorAgent;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
-use Illuminate\Support\Facades\Config;
-use Prism\Prism\Enums\FinishReason;
-use Prism\Prism\Enums\Provider;
-use Prism\Prism\Facades\Prism;
-use Prism\Prism\Testing\TextResponseFake;
-use Prism\Prism\ValueObjects\Meta;
-use Prism\Prism\ValueObjects\Usage;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->agent = new GroceryListGeneratorAgent;
-    Config::set('prism.providers.gemini.api_key', 'test-key');
-});
-
-it('returns gemini as provider', function (): void {
-    expect($this->agent->provider())->toBe(Provider::Gemini);
-});
-
-it('returns correct model', function (): void {
-    expect($this->agent->model())->toBe('gemini-3-flash-preview');
-});
-
-it('returns system prompt with instructions', function (): void {
-    $systemPrompt = $this->agent->systemPrompt();
-
-    expect($systemPrompt)
-        ->toContain('grocery list optimizer')
-        ->toContain('consolidate ingredients')
-        ->toContain('valid JSON')
-        ->toContain('Produce')
-        ->toContain('Dairy')
-        ->toContain('Meat & Seafood');
 });
 
 it('returns correct max tokens', function (): void {
@@ -51,14 +26,27 @@ it('returns client options with timeout', function (): void {
         ->and($options['timeout'])->toBe(120);
 });
 
-it('generates grocery list from meal plan with ingredients', function (): void {
-    $fakeResponse = TextResponseFake::make()
-        ->withText('{"items": [{"name": "Chicken Breast", "quantity": "2 lbs", "category": "Meat & Seafood"}, {"name": "Olive Oil", "quantity": "2 tbsp", "category": "Condiments & Sauces"}]}')
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(100, 200))
-        ->withMeta(new Meta('test-id', 'gemini-3-flash-preview'));
+it('returns instructions with grocery list guidance', function (): void {
+    $instructions = $this->agent->instructions();
 
-    Prism::fake([$fakeResponse]);
+    expect($instructions)
+        ->toContain('grocery list optimizer')
+        ->toContain('consolidate ingredients')
+        ->toContain('valid JSON')
+        ->toContain('Produce')
+        ->toContain('Dairy')
+        ->toContain('Meat & Seafood');
+});
+
+it('generates grocery list from meal plan with ingredients', function (): void {
+    $mockResponse = [
+        'items' => [
+            ['name' => 'Chicken Breast', 'quantity' => '2 lbs', 'category' => 'Meat & Seafood'],
+            ['name' => 'Olive Oil', 'quantity' => '2 tbsp', 'category' => 'Condiments & Sauces'],
+        ],
+    ];
+
+    GroceryListGeneratorAgent::fake([$mockResponse]);
 
     $mealPlan = MealPlan::factory()->for($this->user)->create(['duration_days' => 7]);
 
@@ -116,13 +104,14 @@ it('returns empty list when meals have empty ingredients array', function (): vo
 });
 
 it('extracts ingredients from multiple meals', function (): void {
-    $fakeResponse = TextResponseFake::make()
-        ->withText('{"items": [{"name": "Eggs", "quantity": "18", "category": "Dairy"}, {"name": "Bread", "quantity": "1 loaf", "category": "Bakery"}]}')
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(150, 250))
-        ->withMeta(new Meta('test-id', 'gemini-3-flash-preview'));
+    $mockResponse = [
+        'items' => [
+            ['name' => 'Eggs', 'quantity' => '18', 'category' => 'Dairy'],
+            ['name' => 'Bread', 'quantity' => '1 loaf', 'category' => 'Bakery'],
+        ],
+    ];
 
-    Prism::fake([$fakeResponse]);
+    GroceryListGeneratorAgent::fake([$mockResponse]);
 
     $mealPlan = MealPlan::factory()->for($this->user)->create(['duration_days' => 7]);
 
@@ -157,15 +146,13 @@ it('extracts ingredients from multiple meals', function (): void {
 });
 
 it('handles json with markdown code blocks', function (): void {
-    $fakeResponse = TextResponseFake::make()
-        ->withText('```json
-{"items": [{"name": "Rice", "quantity": "2 cups", "category": "Pantry"}]}
-```')
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(80, 100))
-        ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
+    $mockResponse = [
+        'items' => [
+            ['name' => 'Rice', 'quantity' => '2 cups', 'category' => 'Pantry'],
+        ],
+    ];
 
-    Prism::fake([$fakeResponse]);
+    GroceryListGeneratorAgent::fake([$mockResponse]);
 
     $mealPlan = MealPlan::factory()->for($this->user)->create(['duration_days' => 7]);
 

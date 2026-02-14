@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\BaseAgent;
 use App\Ai\SystemPrompt;
 use App\DataObjects\ExtractedIngredientData;
 use App\DataObjects\GroceryItemData;
@@ -12,11 +11,21 @@ use App\DataObjects\GroceryListData;
 use App\DataObjects\IngredientData;
 use App\Models\MealPlan;
 use App\Utilities\JsonCleaner;
+use Laravel\Ai\Attributes\MaxTokens;
+use Laravel\Ai\Attributes\Provider;
+use Laravel\Ai\Attributes\Timeout;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Promptable;
 use Spatie\LaravelData\DataCollection;
 
-final class GroceryListGeneratorAgent extends BaseAgent
+#[Provider('gemini')]
+#[MaxTokens(67000)]
+#[Timeout(120)]
+final class GroceryListGeneratorAgent implements Agent
 {
-    public function systemPrompt(): string
+    use Promptable;
+
+    public function instructions(): string
     {
         return (string) new SystemPrompt(
             background: [
@@ -153,10 +162,8 @@ final class GroceryListGeneratorAgent extends BaseAgent
 
     private function generateGroceryListJson(string $prompt): string
     {
-        $response = $this->text()
-            ->withPrompt($prompt)
-            ->asText();
+        $response = $this->prompt($prompt);
 
-        return $response->text;
+        return (string) $response;
     }
 }

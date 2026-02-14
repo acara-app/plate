@@ -4,22 +4,25 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\BaseAgent;
 use App\Ai\SystemPrompt;
 use App\Contracts\Ai\PredictsGlucoseSpikes;
 use App\DataObjects\SpikePredictionData;
-use App\Enums\ModelName;
 use App\Enums\SpikeRiskLevel;
 use App\Utilities\JsonCleaner;
+use Laravel\Ai\Attributes\MaxTokens;
+use Laravel\Ai\Attributes\Provider;
+use Laravel\Ai\Attributes\Timeout;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Promptable;
 
-final class SpikePredictorAgent extends BaseAgent implements PredictsGlucoseSpikes
+#[Provider('openai')]
+#[MaxTokens(2000)]
+#[Timeout(120)]
+final class SpikePredictorAgent implements Agent, PredictsGlucoseSpikes
 {
-    public function modelName(): ModelName
-    {
-        return ModelName::GPT_5_MINI;
-    }
+    use Promptable;
 
-    public function systemPrompt(): string
+    public function instructions(): string
     {
         return (string) new SystemPrompt(
             background: [
@@ -79,11 +82,9 @@ final class SpikePredictorAgent extends BaseAgent implements PredictsGlucoseSpik
     {
         $prompt = "Analyze this food for glucose spike risk: \"{$food}\"";
 
-        $response = $this->text()
-            ->withPrompt($prompt)
-            ->asText();
+        $response = $this->prompt($prompt);
 
-        $jsonText = $response->text;
+        $jsonText = (string) $response;
         $cleanedJsonText = JsonCleaner::extractAndValidateJson($jsonText);
 
         /** @var array{risk_level: string, estimated_gl: int, explanation: string, smart_fix: string, spike_reduction_percentage: int} $data */
