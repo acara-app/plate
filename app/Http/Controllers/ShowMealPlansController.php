@@ -36,7 +36,6 @@ final readonly class ShowMealPlansController
                 'mealPlan' => null,
                 'currentDay' => null,
                 'navigation' => null,
-                'requiresSubscription' => enable_premium_upgrades() && ! $this->user->is_verified,
             ]);
         }
 
@@ -151,7 +150,6 @@ final readonly class ShowMealPlansController
             'mealPlan' => $formattedMealPlan,
             'currentDay' => $currentDay,
             'navigation' => $navigation,
-            'requiresSubscription' => enable_premium_upgrades() && ! $this->user->is_verified,
         ]);
     }
 

@@ -20,7 +20,6 @@ import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
 import { MealCard } from '@/pages/meal-plans/elements/meal-card';
 import { NutritionStats } from '@/pages/meal-plans/elements/nutrition-stats';
-import checkout from '@/routes/checkout';
 import mealPlans from '@/routes/meal-plans';
 import { type BreadcrumbItem } from '@/types';
 import {
@@ -35,7 +34,6 @@ import {
     Calendar,
     ChevronLeft,
     ChevronRight,
-    CrownIcon,
     Info,
     Loader2,
     Printer,
@@ -49,7 +47,6 @@ interface MealPlansProps {
     mealPlan: MealPlan | null;
     currentDay: CurrentDay | null;
     navigation: Navigation | null;
-    requiresSubscription?: boolean;
 }
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
@@ -73,7 +70,6 @@ export default function MealPlans({
     mealPlan,
     currentDay,
     navigation,
-    requiresSubscription = false,
 }: MealPlansProps) {
     const { currentUser } = useSharedProps();
     const { t } = useTranslation('common');
@@ -95,34 +91,6 @@ export default function MealPlans({
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
                 {!currentUser?.is_onboarded ? (
                     <OnboardingBanner />
-                ) : requiresSubscription ? (
-                    <>
-                        <div className="space-y-2">
-                            <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
-                                <Calendar className="h-8 w-8 text-primary" />
-                                {t('meal_plans.your_meal_plans')}
-                            </h1>
-                            <p className="text-muted-foreground">
-                                {t('meal_plans.description')}
-                            </p>
-                        </div>
-
-                        <Alert className="border-purple-300 bg-purple-50 dark:border-purple-700 dark:bg-purple-950/50">
-                            <CrownIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                            <AlertTitle className="text-lg text-purple-900 dark:text-purple-100">
-                                {t('meal_plans.unlock_title')}
-                            </AlertTitle>
-                            <AlertDescription className="space-y-3 text-purple-800 dark:text-purple-200">
-                                <p>{t('meal_plans.unlock_description')}</p>
-                                <Button asChild size="sm">
-                                    <Link href={checkout.subscription().url}>
-                                        <CrownIcon className="mr-2 h-4 w-4" />
-                                        {t('meal_plans.upgrade_now')}
-                                    </Link>
-                                </Button>
-                            </AlertDescription>
-                        </Alert>
-                    </>
                 ) : !mealPlan ? (
                     <>
                         <div className="space-y-2">
