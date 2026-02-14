@@ -128,7 +128,7 @@ it('handles empty user message gracefully', function (): void {
     actingAs($user)
         ->post($url, [
             'messages' => [
-                ['role' => 'assistant', 'content' => 'Hello'], // No user message
+                ['role' => 'assistant', 'parts' => [['type' => 'text', 'text' => 'Hello']]],
             ],
         ])
         ->assertOk();
