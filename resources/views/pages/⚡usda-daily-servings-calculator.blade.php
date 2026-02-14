@@ -12,13 +12,10 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 
 new
-#[Layout('layouts.mini-app', [
-    'metaDescription' => 'Calculate daily food servings with USDA 2025-2030 guidelines. Adjusts for 1,000-3,200 calories, includes FDA sugar limits & diabetic-friendly options.',
-    'metaKeywords' => 'USDA dietary guidelines 2030, daily serving calculator, food group servings, calorie intake guide, diabetic meal planning, FDA sugar limits, healthy eating guide',
-])]
+#[Layout('layouts.mini-app', ['metaDescription' => 'Calculate daily food servings with USDA 2025-2030 guidelines. Adjusts for 1,000-3,200 calories, includes FDA sugar limits & diabetic-friendly options.', 'metaKeywords' => 'USDA dietary guidelines 2030, daily serving calculator, food group servings, calorie intake guide, diabetic meal planning, FDA sugar limits, healthy eating guide'])]
 #[Title('USDA 2025-2030 Daily Serving Calculator | Official Dietary Guidelines')]
-class extends Component {
-
+class extends Component
+{
     #[Url]
     public int $calories = 2000;
 
@@ -49,30 +46,28 @@ class extends Component {
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Content>
+     * @return Illuminate\Database\Eloquent\Collection<int, Content>
      */
     #[Computed]
-    public function servingSizes(): \Illuminate\Database\Eloquent\Collection
+    public function servingSizes(): Illuminate\Database\Eloquent\Collection
     {
-        return Cache::remember('usda-daily-serving-sizes', 3600, fn () =>
-            Content::query()
-                ->ofType(ContentType::UsdaDailyServingSize)
-                ->published()
-                ->get()
+        return Cache::remember('usda-daily-serving-sizes', 3600, fn () => Content::query()
+            ->ofType(ContentType::UsdaDailyServingSize)
+            ->published()
+            ->get()
         );
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Content>
+     * @return Illuminate\Database\Eloquent\Collection<int, Content>
      */
     #[Computed]
-    public function sugarLimits(): \Illuminate\Database\Eloquent\Collection
+    public function sugarLimits(): Illuminate\Database\Eloquent\Collection
     {
-        return Cache::remember('usda-sugar-limits', 3600, fn () =>
-            Content::query()
-                ->ofType(ContentType::UsdaSugarLimit)
-                ->published()
-                ->get()
+        return Cache::remember('usda-sugar-limits', 3600, fn () => Content::query()
+            ->ofType(ContentType::UsdaSugarLimit)
+            ->published()
+            ->get()
         );
     }
 
@@ -192,6 +187,16 @@ class extends Component {
         return $data;
     }
 
+    /**
+     * Get the progress percentage for visualization (based on max 8 servings scale)
+     */
+    public function getProgressPercentage(float $value): int
+    {
+        $maxScale = 8;
+
+        return (int) min(100, ($value / $maxScale) * 100);
+    }
+
     private function getUnitForGroup(string $group): string
     {
         return match ($group) {
@@ -203,15 +208,6 @@ class extends Component {
             'Healthy Fats' => 'tsp',
             default => 'servings',
         };
-    }
-
-    /**
-     * Get the progress percentage for visualization (based on max 8 servings scale)
-     */
-    public function getProgressPercentage(float $value): int
-    {
-        $maxScale = 8;
-        return (int) min(100, ($value / $maxScale) * 100);
     }
 };
 ?>
@@ -516,38 +512,17 @@ class extends Component {
         </section>
 
         {{-- More Free Tools --}}
-        <section class="relative z-10 w-full">
+        <section class="relative z-10 mt-12 mb-8 w-full">
             <h2 class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
-                More Free Tools
+                Explore More Free Tools
             </h2>
-            <div class="grid gap-4 sm:grid-cols-2">
-                <a href="{{ route('spike-calculator') }}" class="group flex flex-col items-center rounded-xl bg-white p-4 text-center shadow-sm transition-all hover:shadow-md dark:bg-slate-800">
-                    <span class="mb-2 text-2xl">⚡</span>
-                    <h3 class="font-bold text-slate-900 dark:text-white">Spike Calculator</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Check if a food will spike your blood sugar</p>
-                </a>
-                <a href="{{ route('snap-to-track') }}" class="group flex flex-col items-center rounded-xl bg-white p-4 text-center shadow-sm transition-all hover:shadow-md dark:bg-slate-800">
-                    <span class="mb-2 text-2xl">📸</span>
-                    <h3 class="font-bold text-slate-900 dark:text-white">Snap to Track</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Get instant macro breakdown from food photos</p>
-                </a>
-            </div>
+            <a href="{{ route('tools.index') }}" class="group flex flex-col items-center rounded-xl bg-white p-6 text-center shadow-sm transition-all hover:shadow-md dark:bg-slate-800">
+                <span class="mb-2 text-3xl">🛠️</span>
+                <h3 class="font-bold text-slate-900 dark:text-white">View All Free Tools</h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Discover free health trackers, calculators, and nutrition tools</p>
+            </a>
         </section>
 
-        {{-- Footer --}}
-        <footer class="text-center text-xs text-slate-500 dark:text-slate-400">
-            <p>
-                <strong>Disclaimer:</strong> This calculator provides general guidance based on USDA guidelines. It is not medical advice. Consult a healthcare professional for personalized nutrition recommendations.
-            </p>
-            <p class="mt-2">
-                <a href="{{ route('home') }}" class="underline hover:text-emerald-600">Back to Home</a>
-                ·
-                <a href="{{ route('register') }}" class="underline hover:text-emerald-600">Create Free Account</a>
-            </p>
-            <p class="mt-2 text-slate-400">
-                Source: <a href="https://realfood.gov" target="_blank" rel="noopener" class="underline">Dietary Guidelines for Americans, 2025-2030</a>
-            </p>
-        </footer>
-
+        <x-footer />
     </main>
 </div>

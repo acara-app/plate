@@ -7,13 +7,10 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new
-#[Layout('layouts.mini-app', [
-    'metaDescription' => 'Free diabetes and nutrition tools: glucose spike calculator, food photo analyzer, USDA daily servings calculator, diabetes log book, and more.',
-    'metaKeywords' => 'diabetes tools, free nutrition calculator, glucose spike checker, food analyzer, USDA dietary guidelines, diabetes management, blood sugar tools',
-])]
+#[Layout('layouts.mini-app', ['metaDescription' => 'Free diabetes and nutrition tools: glucose spike calculator, food photo analyzer, USDA daily servings calculator, diabetes log book, and more.', 'metaKeywords' => 'diabetes tools, free nutrition calculator, glucose spike checker, food analyzer, USDA dietary guidelines, diabetes management, blood sugar tools'])]
 #[Title('Free Diabetes & Nutrition Tools | Acara Plate')]
-class extends Component {
-
+class extends Component
+{
     /**
      * @return array<int, array{name: string, description: string, icon: string, route: string, badge: string|null, features: array<string>}>
      */
@@ -30,6 +27,18 @@ class extends Component {
                     'Instant glucose impact prediction',
                     'Smart food swap suggestions',
                     'Risk level analysis (Low/Medium/High)',
+                ],
+            ],
+            [
+                'name' => 'Telegram Health Logger',
+                'description' => 'Log glucose, insulin, carbs, and more via Telegram. Hands-free health tracking using AI-powered natural language.',
+                'icon' => '💬',
+                'route' => route('telegram-health-logging'),
+                'badge' => 'New',
+                'features' => [
+                    'Log health data via messaging',
+                    'AI understands natural language',
+                    'Works with 6+ data types',
                 ],
             ],
             [
@@ -211,19 +220,6 @@ class extends Component {
             </div>
         </div>
 
-        {{-- Footer --}}
-        <footer class="mt-10 text-center text-xs text-slate-500 dark:text-slate-400">
-            <p>
-                <strong>Disclaimer:</strong> These tools provide general guidance and are not medical advice. Always consult a healthcare professional for personalized recommendations.
-            </p>
-            <p class="mt-3">
-                <a href="{{ route('home') }}" class="underline hover:text-emerald-600">Back to Home</a>
-                ·
-                <a href="{{ route('register') }}" class="underline hover:text-emerald-600">Create Free Account</a>
-                ·
-                <a href="https://github.com/acara-app/plate" class="underline hover:text-emerald-600">Star on GitHub</a>
-            </p>
-        </footer>
-
+        <x-footer />
     </main>
 </div>

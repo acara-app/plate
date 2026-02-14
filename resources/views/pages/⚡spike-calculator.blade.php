@@ -400,33 +400,16 @@ class extends Component
     </section>
 
     {{-- More Free Tools --}}
-    <section class="relative z-10 mt-8 w-full max-w-md">
+    <section class="relative z-10 mt-12 mb-8 w-full max-w-md">
         <h2 class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
-            More Free Tools
+            Explore More Free Tools
         </h2>
-        <div class="grid gap-4 sm:grid-cols-2">
-            <a href="{{ route('snap-to-track') }}" class="group flex flex-col items-center rounded-xl bg-white p-4 text-center shadow-sm transition-all hover:shadow-md dark:bg-slate-800">
-                <span class="mb-2 text-2xl">📸</span>
-                <h3 class="font-bold text-slate-900 dark:text-white">Snap to Track</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Get instant macro breakdown from food photos</p>
-            </a>
-            <a href="{{ route('diabetes-log-book-info') }}" class="group flex flex-col items-center rounded-xl bg-white p-4 text-center shadow-sm transition-all hover:shadow-md dark:bg-slate-800">
-                <span class="mb-2 text-2xl">📖</span>
-                <h3 class="font-bold text-slate-900 dark:text-white">Diabetes Log Book</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Free printable log book to track your levels</p>
-            </a>
-        </div>
+        <a href="{{ route('tools.index') }}" class="group flex flex-col items-center rounded-xl bg-white p-6 text-center shadow-sm transition-all hover:shadow-md dark:bg-slate-800">
+            <span class="mb-2 text-3xl">🛠️</span>
+            <h3 class="font-bold text-slate-900 dark:text-white">View All Free Tools</h3>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Discover free health trackers, calculators, and nutrition tools</p>
+        </a>
     </section>
 
-    {{-- Footer --}}
-    <footer class="relative z-10 mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
-        <p>
-            <strong>Disclaimer:</strong> AI estimates are for guidance only, not medical advice. Got a health question? Talk to your doctor.
-        </p>
-        <p class="mt-2">
-            <a href="{{ route('home') }}" class="underline hover:text-blue-600">Back to Home</a>
-            ·
-            <a href="{{ route('register') }}" class="underline hover:text-blue-600">Create Free Account</a>
-        </p>
-    </footer>
+    <x-footer />
 </div>
