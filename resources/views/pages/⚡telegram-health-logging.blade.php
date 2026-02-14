@@ -262,7 +262,7 @@ class extends Component
         </h2>
         <div class="space-y-3 text-sm text-slate-600 dark:text-slate-400">
             <div class="rounded-xl bg-white/50 p-4 backdrop-blur-sm dark:bg-slate-800/50">
-                <p class="speakable-how-it-works"><strong>Text Like You Talk:</strong> Forget complex forms. Just send a message like "Apple for snack" or "Blood pressure 120/80". We handle the rest.</p>
+                <p class="speakable-how-it-works"><strong>Text Like You Talk:</strong> Forget complex forms. Just send a message like "Apple for snack" or "Blood pressure 120/80". Your AI assistant handles the rest.</p>
             </div>
             <div class="rounded-xl bg-white/50 p-4 backdrop-blur-sm dark:bg-slate-800/50">
                 <p class="speakable-how-it-works"><strong>Instant Verification:</strong> Get immediate feedback on what you logged. A quick tap confirms it—keeping your data clean and accurate.</p>
