@@ -143,7 +143,7 @@ it('single day meal data converts to meal data with day number', function (): vo
         ->calories->toBe(450.0);
 });
 
-it('generates day meals using activity with mocked prism', function (): void {
+it('generates day meals using activity with mocked agent', function (): void {
     $mockResponse = [
         'meals' => [
             [

@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
-use Prism\Prism\Facades\Prism;
-use Prism\Prism\Testing\StructuredResponseFake;
 use RyanChandler\LaravelCloudflareTurnstile\Facades\Turnstile;
 
 function fakeTurnstileForSnapToTrack(bool $success = true): void
@@ -74,18 +73,17 @@ it('can clear photo and reset state', function (): void {
 it('displays result after successful analysis', function (): void {
     fakeTurnstileForSnapToTrack();
 
-    Prism::fake([
-        StructuredResponseFake::make()
-            ->withStructured([
-                'items' => [
-                    ['name' => 'Grilled Chicken', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'portion' => '100g'],
-                ],
-                'total_calories' => 165,
-                'total_protein' => 31,
-                'total_carbs' => 0,
-                'total_fat' => 3.6,
-                'confidence' => 85,
-            ]),
+    FoodPhotoAnalyzerAgent::fake([
+        [
+            'items' => [
+                ['name' => 'Grilled Chicken', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'portion' => '100g'],
+            ],
+            'total_calories' => 165,
+            'total_protein' => 31,
+            'total_carbs' => 0,
+            'total_fat' => 3.6,
+            'confidence' => 85,
+        ],
     ]);
 
     $file = UploadedFile::fake()->image('food.jpg');
@@ -107,19 +105,18 @@ it('displays result after successful analysis', function (): void {
 it('displays multiple food items in result', function (): void {
     fakeTurnstileForSnapToTrack();
 
-    Prism::fake([
-        StructuredResponseFake::make()
-            ->withStructured([
-                'items' => [
-                    ['name' => 'Rice', 'calories' => 130, 'protein' => 2.7, 'carbs' => 28, 'fat' => 0.3, 'portion' => '100g'],
-                    ['name' => 'Chicken', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'portion' => '100g'],
-                ],
-                'total_calories' => 295,
-                'total_protein' => 33.7,
-                'total_carbs' => 28,
-                'total_fat' => 3.9,
-                'confidence' => 90,
-            ]),
+    FoodPhotoAnalyzerAgent::fake([
+        [
+            'items' => [
+                ['name' => 'Rice', 'calories' => 130, 'protein' => 2.7, 'carbs' => 28, 'fat' => 0.3, 'portion' => '100g'],
+                ['name' => 'Chicken', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'portion' => '100g'],
+            ],
+            'total_calories' => 295,
+            'total_protein' => 33.7,
+            'total_carbs' => 28,
+            'total_fat' => 3.9,
+            'confidence' => 90,
+        ],
     ]);
 
     $file = UploadedFile::fake()->image('food.jpg');
@@ -137,10 +134,9 @@ it('displays multiple food items in result', function (): void {
 it('displays error when analysis fails', function (): void {
     fakeTurnstileForSnapToTrack();
 
-    Prism::fake([
-        StructuredResponseFake::make()
-            ->withStructured([]),
-    ]);
+    FoodPhotoAnalyzerAgent::fake(function (): void {
+        throw new Exception('AI analysis failed');
+    });
 
     $file = UploadedFile::fake()->image('food.jpg');
 
@@ -175,18 +171,17 @@ it('shows faq section', function (): void {
 it('shows cta to register after result', function (): void {
     fakeTurnstileForSnapToTrack();
 
-    Prism::fake([
-        StructuredResponseFake::make()
-            ->withStructured([
-                'items' => [
-                    ['name' => 'Apple', 'calories' => 52, 'protein' => 0.3, 'carbs' => 14, 'fat' => 0.2, 'portion' => '1 medium'],
-                ],
-                'total_calories' => 52,
-                'total_protein' => 0.3,
-                'total_carbs' => 14,
-                'total_fat' => 0.2,
-                'confidence' => 95,
-            ]),
+    FoodPhotoAnalyzerAgent::fake([
+        [
+            'items' => [
+                ['name' => 'Apple', 'calories' => 52, 'protein' => 0.3, 'carbs' => 14, 'fat' => 0.2, 'portion' => '1 medium'],
+            ],
+            'total_calories' => 52,
+            'total_protein' => 0.3,
+            'total_carbs' => 14,
+            'total_fat' => 0.2,
+            'confidence' => 95,
+        ],
     ]);
 
     $file = UploadedFile::fake()->image('food.jpg');
@@ -202,16 +197,15 @@ it('shows cta to register after result', function (): void {
 it('handles empty food detection gracefully', function (): void {
     fakeTurnstileForSnapToTrack();
 
-    Prism::fake([
-        StructuredResponseFake::make()
-            ->withStructured([
-                'items' => [],
-                'total_calories' => 0,
-                'total_protein' => 0,
-                'total_carbs' => 0,
-                'total_fat' => 0,
-                'confidence' => 0,
-            ]),
+    FoodPhotoAnalyzerAgent::fake([
+        [
+            'items' => [],
+            'total_calories' => 0,
+            'total_protein' => 0,
+            'total_carbs' => 0,
+            'total_fat' => 0,
+            'confidence' => 0,
+        ],
     ]);
 
     $file = UploadedFile::fake()->image('empty.jpg');

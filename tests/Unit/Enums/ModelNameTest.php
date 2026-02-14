@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\ModelName;
-use Prism\Prism\Enums\Provider;
 
 it('has correct model values', function (): void {
     expect(ModelName::GPT_5_MINI->value)->toBe('gpt-5-mini')
@@ -27,10 +26,10 @@ it('returns correct descriptions', function (): void {
 });
 
 it('returns correct providers', function (): void {
-    expect(ModelName::GPT_5_MINI->getProvider())->toBe(Provider::OpenAI)
-        ->and(ModelName::GPT_5_NANO->getProvider())->toBe(Provider::OpenAI)
-        ->and(ModelName::GEMINI_2_5_FLASH->getProvider())->toBe(Provider::Gemini)
-        ->and(ModelName::GEMINI_3_FLASH->getProvider())->toBe(Provider::Gemini);
+    expect(ModelName::GPT_5_MINI->getProvider())->toBe('openai')
+        ->and(ModelName::GPT_5_NANO->getProvider())->toBe('openai')
+        ->and(ModelName::GEMINI_2_5_FLASH->getProvider())->toBe('google')
+        ->and(ModelName::GEMINI_3_FLASH->getProvider())->toBe('google');
 });
 
 it('identifies models that require thinking mode', function (): void {

@@ -142,7 +142,6 @@ This application is built with:
 - **Node.js 20+**
 - **Laravel 12** — backend API and frontend delivery
 - **[Laravel AI SDK](https://github.com/laravel/ai-sdk)** — AI agents, tools, and streaming
-- **[PrismPHP](https://github.com/prism-php/prism)** — unified LLM interface for multiple AI providers
 - **[Workflow](https://github.com/durable-workflow/workflow)** — durable workflow orchestration for meal plan generation
 - **React 19** — frontend UI layer
 - **Inertia.js** — bridges Laravel and React
