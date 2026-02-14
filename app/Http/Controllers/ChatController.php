@@ -19,7 +19,9 @@ final class ChatController
         Request $request,
         string $conversationId = ''
     ): \Inertia\Response {
-        $conversation = $conversationId !== '' ? Conversation::query()->find($conversationId) : null;
+        $conversation = $conversationId !== ''
+            ? Conversation::query()->with('messages')->find($conversationId)
+            : null;
 
         $messages = $conversation?->messages->map(fn (History $message): array => [
             'id' => $message->id,
