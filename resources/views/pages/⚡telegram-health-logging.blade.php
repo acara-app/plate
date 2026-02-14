@@ -102,17 +102,14 @@ class extends Component
         </nav>
     </header>
 
-    {{-- Main Card --}}
-    <div class="relative z-10 w-full max-w-md space-y-6 rounded-3xl bg-white p-6 shadow-xl shadow-blue-500/10 dark:bg-slate-800 dark:shadow-blue-900/20">
+    {{-- Header Section --}}
+    <div class="relative z-10 mb-6 w-full max-w-md text-center speakable-intro">
+        <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-2xl dark:bg-blue-900/50">💬</div>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Quick Health Logging with Telegram</h1>
+        <p class="text-sm text-slate-600 dark:text-slate-400">Log your health data hands-free using AI-powered natural language</p>
+    </div>
 
-        {{-- Header Section --}}
-        <div class="text-center speakable-intro">
-            <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-2xl dark:bg-blue-900/50">💬</div>
-            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Quick Health Logging with Telegram</h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Log your health data hands-free using AI-powered natural language</p>
-        </div>
-
-    <main class="relative z-10 w-full max-w-md">
+    <main class="relative z-10 w-full max-w-md space-y-6">
         <div class="rounded-3xl bg-white shadow-xl dark:bg-slate-800">
             <div class="p-6">
                 <h2 class="mb-4 text-lg font-bold text-slate-900 dark:text-white">
@@ -156,12 +153,13 @@ class extends Component
                     </figcaption>
                 </figure>
 
+                <ol class="space-y-4 mt-4" start="3">
                     <li class="flex gap-4">
                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white font-semibold text-sm">3</span>
                         <div>
                             <strong class="text-slate-900 dark:text-white">Link Your Account</strong>
                             <p class="text-sm text-slate-600 dark:text-slate-400">
-                                Go to <a href="{{ route('integrations.edit') }}" class="text-blue-600 dark:text-blue-400 hover:underline">Settings → Integrations</a> and generate a linking token
+                                Go to <a href="{{ route('integrations.edit') }}" class="text-blue-600 dark:text-blue-400 hover:underline">Settings &rarr; Integrations</a> and generate a linking token
                             </p>
                         </div>
                     </li>
@@ -180,14 +178,14 @@ class extends Component
                 @auth
                     <a
                         href="{{ route('integrations.edit') }}"
-                        class="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-white font-medium hover:bg-blue-700 transition-colors"
+                        class="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-white font-medium hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
                     >
                         Generate Linking Token
                     </a>
                 @else
                     <a
                         href="{{ route('register') }}"
-                        class="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-white font-medium hover:bg-blue-700 transition-colors"
+                        class="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-white font-medium hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
                     >
                         Create Free Account
                     </a>
@@ -195,13 +193,13 @@ class extends Component
             </div>
         </div>
 
-        <div class="mt-6 rounded-3xl bg-white shadow-xl dark:bg-slate-800">
+        <div class="rounded-3xl bg-white shadow-xl dark:bg-slate-800">
             <div class="p-6">
                 <h2 class="mb-4 text-lg font-bold text-slate-900 dark:text-white">
                     What You Can Log
                 </h2>
                 <p class="mb-4 text-sm text-slate-600 dark:text-slate-400">
-                    Just describe your health data in natural language. The AI understands:
+                    Just describe your health data naturally. The AI understands:
                 </p>
 
                 <div class="grid gap-3 sm:grid-cols-2">
@@ -230,13 +228,13 @@ class extends Component
                         loading="lazy"
                     >
                     <figcaption class="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">
-                        Just type naturally - the AI understands what you're logging
+                        Type naturally - the AI understands what you're logging
                     </figcaption>
                 </figure>
             </div>
         </div>
 
-        <div class="mt-6 rounded-3xl bg-white shadow-xl dark:bg-slate-800">
+        <div class="rounded-3xl bg-white shadow-xl dark:bg-slate-800">
             <div class="p-6">
                 <h2 class="mb-4 text-lg font-bold text-slate-900 dark:text-white">
                     Available Commands
@@ -253,10 +251,10 @@ class extends Component
             </div>
         </div>
 
-        <p class="mt-4 text-center text-xs text-slate-500 dark:text-slate-400">
-            <strong>Note:</strong> You can also just send health data directly without commands. The AI will detect and parse it automatically!
+        <p class="text-center text-xs text-slate-500 dark:text-slate-400">
+            <strong>Tip:</strong> You don't need commands to log data. JUST send the message, the AI will figure it out!
         </p>
-    </div>
+    </main>
 
     <section class="relative z-10 mt-8 w-full max-w-md" aria-labelledby="how-it-works-heading">
         <h2 id="how-it-works-heading" class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
@@ -264,10 +262,10 @@ class extends Component
         </h2>
         <div class="space-y-3 text-sm text-slate-600 dark:text-slate-400">
             <div class="rounded-xl bg-white/50 p-4 backdrop-blur-sm dark:bg-slate-800/50">
-                <p class="speakable-how-it-works"><strong>AI-Powered Parsing:</strong> Our AI understands natural language and automatically detects what health data you're logging—glucose, carbs, insulin, medication, vitals, or exercise.</p>
+                <p class="speakable-how-it-works"><strong>Text Like You Talk:</strong> Forget complex forms. Just send a message like "Apple for snack" or "Blood pressure 120/80". We handle the rest.</p>
             </div>
             <div class="rounded-xl bg-white/50 p-4 backdrop-blur-sm dark:bg-slate-800/50">
-                <p class="speakable-how-it-works"><strong>Smart Confirmations:</strong> Before saving, the bot shows you exactly what will be logged. Simply reply /yes to confirm or /no to cancel.</p>
+                <p class="speakable-how-it-works"><strong>Instant Verification:</strong> Get immediate feedback on what you logged. A quick tap confirms it—keeping your data clean and accurate.</p>
             </div>
 
             <figure class="mt-2">
@@ -284,10 +282,10 @@ class extends Component
                 </figcaption>
             </figure>
             <div class="rounded-xl bg-white/50 p-4 backdrop-blur-sm dark:bg-slate-800/50">
-                <p class="speakable-how-it-works"><strong>Unit Conversions:</strong> The AI automatically handles conversions—say "weight 180 lbs" and it saves in kilograms. Say "glucose 6.5" and it understands mmol/L.</p>
+                <p class="speakable-how-it-works"><strong>Any Unit, Any Time:</strong> mg/dL or mmol/L? lbs or kg? Use whatever units you prefer. We'll convert and standardize them automatically.</p>
             </div>
             <div class="rounded-xl bg-white/50 p-4 backdrop-blur-sm dark:bg-slate-800/50">
-                <p class="speakable-how-it-works"><strong>Multi-Language Support:</strong> Log data in multiple languages. Try "mi glucosa es 140" or "ma glycémie est 7.2"—it understands!</p>
+                <p class="speakable-how-it-works"><strong>Global & Accessible:</strong> Log in English, Spanish, French, or your native tongue. Health tracking that speaks your language.</p>
             </div>
         </div>
     </section>
@@ -362,7 +360,7 @@ class extends Component
                     </svg>
                 </button>
                 <div x-show="openFaq === 4" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>Your Telegram account is securely linked to your Plate account using a unique token. Health data is stored in your private Plate account, not on Telegram's servers. Telegram's end-to-end encryption protects your conversations.</p>
+                    <p>Your Telegram account links securely to your Plate account using a unique token. Health data is stored in your private Plate account, not on Telegram's servers. Telegram's end-to-end encryption protects your conversations.</p>
                 </div>
             </div>
 
