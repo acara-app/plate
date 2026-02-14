@@ -12,7 +12,6 @@ Route::view('/terms-of-service', 'terms-of-service')->name('terms');
 Route::view('/about', 'about')->name('about');
 Route::view('/support', 'support')->name('support');
 Route::view('/install-app', 'install-app')->name('install-app');
-
 Route::view('/diabetes-log-book', 'diabetes-log-book')->name('diabetes-log-book');
 Route::view('/diabetes-log-book-info', 'diabetes-log-book-info')->name('diabetes-log-book-info');
 Route::view('/10-day-meal-plan', '10-day-meal-plan')->name('10-day-meal-plan');
