@@ -13,8 +13,7 @@ final readonly class SaveHealthLogAction
 {
     public function __construct(
         private RecordHealthEntryAction $recordHealthEntry,
-    ) {
-    }
+    ) {}
 
     /**
      * Save health log data for a user.

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Ai\Agents\MealPlanGeneratorAgent;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\MealData;
 use App\DataObjects\PreviousDayContext;
@@ -15,11 +16,6 @@ use App\Workflows\MealPlanDayGeneratorActivity;
 use App\Workflows\MealPlanInitializeWorkflow;
 use App\Workflows\SaveDayMealsActivity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Prism\Prism\Enums\FinishReason;
-use Prism\Prism\Facades\Prism;
-use Prism\Prism\Testing\TextResponseFake;
-use Prism\Prism\ValueObjects\Meta;
-use Prism\Prism\ValueObjects\Usage;
 use Spatie\LaravelData\DataCollection;
 
 uses(RefreshDatabase::class);
@@ -167,16 +163,10 @@ it('generates day meals using activity with mocked prism', function (): void {
         ],
     ];
 
-    $fakeResponse = TextResponseFake::make()
-        ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(100, 200))
-        ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
-
-    Prism::fake([$fakeResponse]);
+    MealPlanGeneratorAgent::fake([$mockResponse]);
 
     // Test using the action directly instead of activity instantiation
-    $action = resolve(App\Ai\Agents\MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanGeneratorAgent::class);
     $result = $action->generateForDay(
         $this->user,
         dayNumber: 1,
@@ -208,7 +198,7 @@ it('workflow class exists and extends correct base class', function (): void {
 it('workflow triggers via generate meal plan action with workflow stub fake', function (): void {
     Workflow\WorkflowStub::fake();
 
-    $action = resolve(App\Ai\Agents\MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanGeneratorAgent::class);
     $action->handle($this->user);
 
     // Meal plan is now created synchronously before workflow starts

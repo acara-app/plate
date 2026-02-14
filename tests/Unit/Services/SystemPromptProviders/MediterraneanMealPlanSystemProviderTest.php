@@ -17,7 +17,7 @@ it('returns a system prompt string with Mediterranean diet content', function ()
     expect($result)->toBeString()
         ->and($result)->toContain('Mediterranean Dietitian')
         ->and($result)->toContain('Head Chef')
-        ->and($result)->toContain('Score Card')
+        ->and($result)->toContain('skill guidelines')
         ->and($result)->toContain('USDA')
         ->and($result)->toContain('IDENTITY AND PURPOSE');
 });

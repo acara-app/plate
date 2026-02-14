@@ -5,25 +5,28 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Actions\AnalyzeGlucoseForNotificationAction;
-use App\Ai\BaseAgent;
 use App\Ai\MealPlanPromptBuilder;
+use App\Ai\Tools\GetDietReference;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\MealPlanData;
 use App\DataObjects\PreviousDayContext;
 use App\Enums\DietType;
-use App\Enums\SettingKey;
 use App\Models\MealPlan;
-use App\Models\Setting;
 use App\Models\User;
 use App\Services\SystemPromptProviderResolver;
 use App\Utilities\JsonCleaner;
 use App\Workflows\MealPlanInitializeWorkflow;
-use Prism\Prism\ValueObjects\ProviderTool;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasTools;
+use Laravel\Ai\Contracts\Tool;
+use Laravel\Ai\Promptable;
 use Workflow\WorkflowStub;
 
-final class MealPlanGeneratorAgent extends BaseAgent
+final class MealPlanGeneratorAgent implements Agent, HasTools
 {
+    use Promptable;
+
     private ?DietType $dietType = null;
 
     public function __construct(
@@ -32,10 +35,6 @@ final class MealPlanGeneratorAgent extends BaseAgent
         private readonly SystemPromptProviderResolver $systemPromptResolver,
     ) {}
 
-    /**
-     * Set the diet type for this agent.
-     * This allows for diet-specific system prompts.
-     */
     public function withDietType(DietType $dietType): self
     {
         $this->dietType = $dietType;
@@ -43,7 +42,7 @@ final class MealPlanGeneratorAgent extends BaseAgent
         return $this;
     }
 
-    public function systemPrompt(): string
+    public function instructions(): string
     {
         $dietType = $this->dietType ?? DietType::Balanced;
 
@@ -66,24 +65,12 @@ final class MealPlanGeneratorAgent extends BaseAgent
     }
 
     /**
-     * @return array<int, ProviderTool>
+     * @return array<int, Tool>
      */
-    public function providerTools(): array
+    public function tools(): array
     {
-        $storeNames = $this->getFileSearchStoreNames();
-
-        if ($storeNames === []) {
-            return [];
-        }
-
         return [
-            new ProviderTool(
-                type: 'file_search',
-                name: 'file_search',
-                options: [
-                    'file_search_store_names' => $storeNames,
-                ]
-            ),
+            new GetDietReference,
         ];
     }
 
@@ -106,9 +93,9 @@ final class MealPlanGeneratorAgent extends BaseAgent
     {
         $prompt = $this->promptBuilder->handle($user, $glucoseAnalysis);
 
-        $jsonText = $this->generateMealPlanJson($prompt);
+        $response = $this->prompt($prompt);
 
-        $cleanedJsonText = JsonCleaner::extractAndValidateJson($jsonText);
+        $cleanedJsonText = JsonCleaner::extractAndValidateJson((string) $response);
 
         $data = json_decode($cleanedJsonText, true, 512, JSON_THROW_ON_ERROR);
 
@@ -138,39 +125,12 @@ final class MealPlanGeneratorAgent extends BaseAgent
             $customPrompt,
         );
 
-        $jsonText = $this->generateMealPlanJson($prompt);
+        $response = $this->prompt($prompt);
 
-        $cleanedJsonText = JsonCleaner::extractAndValidateJson($jsonText);
+        $cleanedJsonText = JsonCleaner::extractAndValidateJson((string) $response);
 
         $data = json_decode($cleanedJsonText, true, 512, JSON_THROW_ON_ERROR);
 
         return DayMealsData::from($data);
-    }
-
-    /**
-     * Generate meal plan as JSON using File Search for accurate USDA nutritional data
-     */
-    private function generateMealPlanJson(string $prompt): string
-    {
-        $response = $this->text()
-            ->withPrompt($prompt)
-            ->withProviderTools($this->providerTools())
-            ->asText();
-
-        return $response->text;
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function getFileSearchStoreNames(): array
-    {
-        $storeName = Setting::get(SettingKey::GeminiFileSearchStoreName);
-
-        if (! $storeName || ! is_string($storeName)) {
-            return [];
-        }
-
-        return [$storeName];
     }
 }

@@ -6,15 +6,9 @@ use App\Ai\Agents\MealPlanGeneratorAgent;
 use App\Enums\DietType;
 use App\Enums\GoalChoice;
 use App\Enums\MealPlanType;
-use App\Enums\ModelName;
 use App\Enums\Sex;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Prism\Prism\Enums\FinishReason;
-use Prism\Prism\Facades\Prism;
-use Prism\Prism\Testing\TextResponseFake;
-use Prism\Prism\ValueObjects\Meta;
-use Prism\Prism\ValueObjects\Usage;
 use Workflow\WorkflowStub;
 
 uses(RefreshDatabase::class);
@@ -42,7 +36,7 @@ it('returns client options', function (): void {
         ->and($options['timeout'])->toBe(180);
 });
 
-it('generates a meal plan using PrismPHP', function (): void {
+it('generates a meal plan using Laravel AI SDK', function (): void {
     $user = User::factory()->create();
 
     $user->profile()->create([
@@ -89,13 +83,7 @@ it('generates a meal plan using PrismPHP', function (): void {
         ],
     ];
 
-    $fakeResponse = TextResponseFake::make()
-        ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(100, 200))
-        ->withMeta(new Meta('test-id', ModelName::GEMINI_3_FLASH->value));
-
-    Prism::fake([$fakeResponse]);
+    MealPlanGeneratorAgent::fake([$mockResponse]);
 
     $action = resolve(MealPlanGeneratorAgent::class);
     $mealPlanData = $action->generate($user);
@@ -115,7 +103,7 @@ it('generates a meal plan using PrismPHP', function (): void {
     expect($mealPlanData->meals[0]->calories)->toBeGreaterThan(0);
 });
 
-it('uses the correct AI model from enum', function (): void {
+it('generates meal plan with minimal data', function (): void {
     $user = User::factory()->create();
 
     $user->profile()->create([
@@ -137,13 +125,7 @@ it('uses the correct AI model from enum', function (): void {
         'meals' => [],
     ];
 
-    $fakeResponse = TextResponseFake::make()
-        ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(100, 200))
-        ->withMeta(new Meta('test-id', 'ModelName::GEMINI_3_FLASH->value'));
-
-    Prism::fake([$fakeResponse]);
+    MealPlanGeneratorAgent::fake([$mockResponse]);
 
     $action = resolve(MealPlanGeneratorAgent::class);
     $result = $action->generate($user);
@@ -226,13 +208,7 @@ it('handles meals with no ingredients', function (): void {
         ],
     ];
 
-    $fakeResponse = TextResponseFake::make()
-        ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(100, 200))
-        ->withMeta(new Meta('test-id', 'ModelName::GEMINI_3_FLASH->value'));
-
-    Prism::fake([$fakeResponse]);
+    MealPlanGeneratorAgent::fake([$mockResponse]);
 
     $action = resolve(MealPlanGeneratorAgent::class);
     $mealPlanData = $action->generate($user);
@@ -265,13 +241,7 @@ it('works without file search store configured', function (): void {
         'meals' => [],
     ];
 
-    $fakeResponse = TextResponseFake::make()
-        ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(100, 200))
-        ->withMeta(new Meta('test-id', 'ModelName::GEMINI_3_FLASH->value'));
-
-    Prism::fake([$fakeResponse]);
+    MealPlanGeneratorAgent::fake([$mockResponse]);
 
     $action = resolve(MealPlanGeneratorAgent::class);
     $mealPlanData = $action->generate($user);
@@ -305,13 +275,7 @@ it('uses file search store when configured', function (): void {
         'meals' => [],
     ];
 
-    $fakeResponse = TextResponseFake::make()
-        ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(100, 200))
-        ->withMeta(new Meta('test-id', 'ModelName::GEMINI_3_FLASH->value'));
-
-    Prism::fake([$fakeResponse]);
+    MealPlanGeneratorAgent::fake([$mockResponse]);
 
     $action = resolve(MealPlanGeneratorAgent::class);
     $mealPlanData = $action->generate($user);
@@ -354,13 +318,7 @@ it('generates meals for a single day', function (): void {
         ],
     ];
 
-    $fakeResponse = TextResponseFake::make()
-        ->withText(json_encode($mockResponse, JSON_THROW_ON_ERROR))
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(100, 200))
-        ->withMeta(new Meta('test-id', 'ModelName::GEMINI_3_FLASH->value'));
-
-    Prism::fake([$fakeResponse]);
+    MealPlanGeneratorAgent::fake([$mockResponse]);
 
     $action = resolve(MealPlanGeneratorAgent::class);
     $dayMeals = $action->generateForDay($user, 1, 7);
