@@ -22,6 +22,7 @@ final class MealPlanInitializeWorkflow extends Workflow
 {
     /**
      * Summary of timeout
+     *
      * @var int
      */
     public $timeout = 1800; // 30 minutes for 7 days
