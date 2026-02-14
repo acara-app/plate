@@ -14,12 +14,15 @@ use Workflow\Workflow;
 
 final class MealPlanDayWorkflow extends Workflow
 {
-    public int $timeout = 300; // 5 minutes per day
+    /** @var int 5 minutes per day */
+    public $timeout = 300;
 
     /**
      * Generate meals for a specific day in an existing meal plan.
      *
      * @codeCoverageIgnore Generator methods with yield are executed by the workflow engine
+     *
+     * @phpstan-return Generator<mixed, mixed, mixed, mixed>
      */
     public function execute(
         MealPlan $mealPlan,
