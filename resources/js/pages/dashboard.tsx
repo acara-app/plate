@@ -207,12 +207,12 @@ export default function Dashboard() {
                                 <div>
                                     <h3 className="font-semibold">
                                         {t(
-                                            'dashboard_cards.diabetes_insights.title',
+                                            'dashboard_cards.health_insights.title',
                                         )}
                                     </h3>
                                     <p className="mt-1 text-sm text-muted-foreground">
                                         {t(
-                                            'dashboard_cards.diabetes_insights.description',
+                                            'dashboard_cards.health_insights.description',
                                         )}
                                     </p>
                                 </div>
@@ -236,12 +236,12 @@ export default function Dashboard() {
                                 <div>
                                     <h3 className="font-semibold">
                                         {t(
-                                            'dashboard_cards.diabetes_log.title',
+                                            'dashboard_cards.health_entries.title',
                                         )}
                                     </h3>
                                     <p className="mt-1 text-sm text-muted-foreground">
                                         {t(
-                                            'dashboard_cards.diabetes_log.description',
+                                            'dashboard_cards.health_entries.description',
                                         )}
                                     </p>
                                 </div>
