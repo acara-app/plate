@@ -20,7 +20,11 @@ use Workflow\Workflow;
 
 final class MealPlanInitializeWorkflow extends Workflow
 {
-    public int $timeout = 1800; // 30 minutes for 7 days
+    /**
+     * Summary of timeout
+     * @var int
+     */
+    public $timeout = 1800; // 30 minutes for 7 days
 
     /**
      * Convert all days' meals to a collection of MealData with proper day numbers.
