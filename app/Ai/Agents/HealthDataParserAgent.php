@@ -174,7 +174,7 @@ INST;
     {
         $value = $response[$key] ?? null;
 
-        return is_string($value) ? $value : $default;
+        return is_string($value) && $value !== 'null' ? $value : $default;
     }
 
     /**
@@ -184,7 +184,15 @@ INST;
     {
         $value = $response[$key] ?? null;
 
-        return is_string($value) ? $value : null;
+        if ($value === null) {
+            return null;
+        }
+
+        if (is_string($value) && $value !== 'null' && $value !== '') {
+            return $value;
+        }
+
+        return null;
     }
 
     /**
@@ -193,6 +201,10 @@ INST;
     private function getFloatOrNull(array $response, string $key): ?float
     {
         $value = $response[$key] ?? null;
+
+        if ($value === null || $value === 'null') {
+            return null;
+        }
 
         return is_numeric($value) ? (float) $value : null;
     }
@@ -203,6 +215,10 @@ INST;
     private function getIntOrNull(array $response, string $key): ?int
     {
         $value = $response[$key] ?? null;
+
+        if ($value === null || $value === 'null') {
+            return null;
+        }
 
         return is_numeric($value) ? (int) $value : null;
     }
