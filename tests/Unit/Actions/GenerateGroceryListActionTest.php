@@ -3,17 +3,12 @@
 declare(strict_types=1);
 
 use App\Actions\GenerateGroceryListAction;
+use App\Ai\Agents\GroceryListGeneratorAgent;
 use App\Enums\GroceryListStatus;
 use App\Models\GroceryList;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
-use Illuminate\Support\Facades\Config;
-use Prism\Prism\Enums\FinishReason;
-use Prism\Prism\Facades\Prism;
-use Prism\Prism\Testing\TextResponseFake;
-use Prism\Prism\ValueObjects\Meta;
-use Prism\Prism\ValueObjects\Usage;
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();
@@ -21,9 +16,6 @@ beforeEach(function (): void {
         'duration_days' => 7,
         'name' => 'Weekly Plan',
     ]);
-
-    // Set up Prism fake for AI interactions
-    Config::set('prism.providers.gemini.api_key', 'test-key');
 });
 
 it('creates a placeholder grocery list', function (): void {
@@ -52,13 +44,9 @@ it('deletes existing grocery list before creating placeholder', function (): voi
 });
 
 it('generates items for grocery list successfully', function (): void {
-    $fakeResponse = TextResponseFake::make()
-        ->withText('{"items": [{"name": "Chicken Breast", "quantity": "2 lbs", "category": "Meat & Seafood"}, {"name": "Olive Oil", "quantity": "2 tbsp", "category": "Condiments & Sauces"}]}')
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(100, 200))
-        ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
-
-    Prism::fake([$fakeResponse]);
+    GroceryListGeneratorAgent::fake([
+        '{"items": [{"name": "Chicken Breast", "quantity": "2 lbs", "category": "Meat & Seafood"}, {"name": "Olive Oil", "quantity": "2 tbsp", "category": "Condiments & Sauces"}]}',
+    ]);
 
     Meal::factory()->for($this->mealPlan)->create([
         'ingredients' => [
@@ -91,13 +79,9 @@ it('generates items for grocery list successfully', function (): void {
 });
 
 it('generates items with no ingredients returns empty list', function (): void {
-    $fakeResponse = TextResponseFake::make()
-        ->withText('{"items": []}')
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(50, 10))
-        ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
-
-    Prism::fake([$fakeResponse]);
+    GroceryListGeneratorAgent::fake([
+        '{"items": []}',
+    ]);
 
     $groceryList = GroceryList::factory()
         ->for($this->mealPlan)
@@ -113,13 +97,9 @@ it('generates items with no ingredients returns empty list', function (): void {
 });
 
 it('handles generation failure gracefully', function (): void {
-    $fakeResponse = TextResponseFake::make()
-        ->withText('invalid json{}}')
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(50, 10))
-        ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
-
-    Prism::fake([$fakeResponse]);
+    GroceryListGeneratorAgent::fake(function (): void {
+        throw new Exception('Invalid JSON response');
+    });
 
     Meal::factory()->for($this->mealPlan)->create([
         'ingredients' => [
@@ -141,13 +121,9 @@ it('handles generation failure gracefully', function (): void {
 });
 
 it('handles full generation with handle method', function (): void {
-    $fakeResponse = TextResponseFake::make()
-        ->withText('{"items": [{"name": "Eggs", "quantity": "12", "category": "Dairy"}]}')
-        ->withFinishReason(FinishReason::Stop)
-        ->withUsage(new Usage(80, 50))
-        ->withMeta(new Meta('test-id', 'gemini-2.5-flash'));
-
-    Prism::fake([$fakeResponse]);
+    GroceryListGeneratorAgent::fake([
+        '{"items": [{"name": "Eggs", "quantity": "12", "category": "Dairy"}]}',
+    ]);
 
     Meal::factory()->for($this->mealPlan)->create([
         'ingredients' => [

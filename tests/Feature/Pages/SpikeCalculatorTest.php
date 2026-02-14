@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Ai\Agents\SpikePredictorAgent;
 use Livewire\Livewire;
-use Prism\Prism\Facades\Prism;
-use Prism\Prism\Testing\TextResponseFake;
 use RyanChandler\LaravelCloudflareTurnstile\Facades\Turnstile;
 
 function fakeTurnstile(bool $success = true): void
@@ -67,9 +66,8 @@ it('sets example food when clicking example button', function (): void {
 it('displays result after successful prediction', function (): void {
     fakeTurnstile();
 
-    Prism::fake([
-        TextResponseFake::make()
-            ->withText('{"risk_level": "high", "estimated_gl": 43, "explanation": "White rice is a refined carbohydrate.", "smart_fix": "Try cauliflower rice instead.", "spike_reduction_percentage": 40}'),
+    SpikePredictorAgent::fake([
+        '{"risk_level": "high", "estimated_gl": 43, "explanation": "White rice is a refined carbohydrate.", "smart_fix": "Try cauliflower rice instead.", "spike_reduction_percentage": 40}',
     ]);
 
     Livewire::test('pages::spike-calculator')
@@ -95,9 +93,8 @@ it('shows example suggestions when no result', function (): void {
 it('shows all risk levels correctly', function (string $riskLevel, string $label): void {
     fakeTurnstile();
 
-    Prism::fake([
-        TextResponseFake::make()
-            ->withText('{"risk_level": "'.$riskLevel.'", "estimated_gl": 25, "explanation": "Test explanation.", "smart_fix": "Test smart fix.", "spike_reduction_percentage": 20}'),
+    SpikePredictorAgent::fake([
+        '{"risk_level": "'.$riskLevel.'", "estimated_gl": 25, "explanation": "Test explanation.", "smart_fix": "Test smart fix.", "spike_reduction_percentage": 20}',
     ]);
 
     Livewire::test('pages::spike-calculator')
@@ -114,10 +111,9 @@ it('shows all risk levels correctly', function (string $riskLevel, string $label
 it('displays error when prediction fails', function (): void {
     fakeTurnstile();
 
-    Prism::fake([
-        TextResponseFake::make()
-            ->withText('invalid json response'),
-    ]);
+    SpikePredictorAgent::fake(function (): void {
+        throw new Exception('AI prediction failed');
+    });
 
     Livewire::test('pages::spike-calculator')
         ->set('food', 'Some food')
