@@ -4,34 +4,30 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\BaseAgent;
 use App\Ai\SystemPrompt;
 use App\DataObjects\FoodAnalysisData;
 use App\DataObjects\FoodItemData;
-use App\Enums\ModelName;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
-use Prism\Prism\Facades\Prism;
-use Prism\Prism\Schema\ArraySchema;
-use Prism\Prism\Schema\NumberSchema;
-use Prism\Prism\Schema\ObjectSchema;
-use Prism\Prism\Schema\StringSchema;
-use Prism\Prism\Structured\PendingRequest;
-use Prism\Prism\ValueObjects\Media\Image;
+use Laravel\Ai\Attributes\MaxTokens;
+use Laravel\Ai\Attributes\Provider;
+use Laravel\Ai\Attributes\Timeout;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasStructuredOutput;
+use Laravel\Ai\Files\Base64Image;
+use Laravel\Ai\Promptable;
 use Spatie\LaravelData\DataCollection;
 
-/**
- * @phpstan-type FoodItem array{name: string, calories: float, protein: float, carbs: float, fat: float, portion: string}
- * @phpstan-type FoodAnalysisResponse array{items: array<int, FoodItem>, total_calories: float, total_protein: float, total_carbs: float, total_fat: float, confidence: float}
- */
-final class FoodPhotoAnalyzerAgent extends BaseAgent
+#[Provider('gemini')]
+#[MaxTokens(8000)]
+#[Timeout(60)]
+final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
 {
-    public function modelName(): ModelName
-    {
-        return ModelName::GEMINI_3_FLASH;
-    }
+    use Promptable;
 
-    public function systemPrompt(): string
+    public function instructions(): string
     {
         return (string) new SystemPrompt(
             background: [
@@ -72,75 +68,59 @@ final class FoodPhotoAnalyzerAgent extends BaseAgent
         ];
     }
 
-    public function structured(): PendingRequest
+    /**
+     * @return array<string, \Illuminate\JsonSchema\Types\Type>
+     */
+    public function schema(JsonSchema $schema): array
     {
-        return Prism::structured()
-            ->using($this->provider(), $this->modelName())
-            ->withSystemPrompt($this->systemPrompt())
-            ->withSchema($this->getOutputSchema())
-            ->withMaxTokens($this->maxTokens());
+        $foodItemSchema = new ObjectType([
+            'name' => $schema->string(),
+            'calories' => $schema->number(),
+            'protein' => $schema->number(),
+            'carbs' => $schema->number(),
+            'fat' => $schema->number(),
+            'portion' => $schema->string(),
+        ]);
+
+        return [
+            'items' => $schema->array()->items($foodItemSchema)->required(),
+            'total_calories' => $schema->number()->required(),
+            'total_protein' => $schema->number()->required(),
+            'total_carbs' => $schema->number()->required(),
+            'total_fat' => $schema->number()->required(),
+            'confidence' => $schema->number()->required(),
+        ];
     }
 
     public function analyze(string $imageBase64, string $mimeType): FoodAnalysisData
     {
-        $image = Image::fromBase64($imageBase64, $mimeType);
+        $response = $this->prompt(
+            'Analyze this food photo and provide nutritional breakdown for all food items visible.',
+            attachments: [
+                new Base64Image($imageBase64, $mimeType),
+            ]
+        );
 
-        $response = $this->structured()
-            ->withPrompt('Analyze this food photo and provide nutritional breakdown for all food items visible.', [$image])
-            ->withClientOptions($this->clientOptions())
-            ->asStructured();
-
-        $data = $response->structured;
+        $data = json_decode(json_encode($response), true);
 
         // Validate response data is present and has required keys
         $requiredKeys = ['items', 'total_calories', 'total_protein', 'total_carbs', 'total_fat', 'confidence'];
-        if ($data === null || array_diff($requiredKeys, array_keys($data)) !== []) {
+        if (! is_array($data) || array_diff($requiredKeys, array_keys($data)) !== []) {
             Log::error('Food analysis returned invalid structured data', [
-                'original_response' => $response->text ?? 'No text response',
-                'structured_data' => $data,
+                'response' => $response,
+                'data' => $data,
             ]);
             throw new InvalidArgumentException('AI returned invalid analysis structure');
         }
 
-        /** @var FoodAnalysisResponse $data */
+        /** @var array{items: array<int, array{name: string, calories: float, protein: float, carbs: float, fat: float, portion: string}>, total_calories: float, total_protein: float, total_carbs: float, total_fat: float, confidence: float} $data */
         return $this->mapToFoodAnalysisData($data);
-    }
-
-    private function getOutputSchema(): ObjectSchema
-    {
-        $foodItemSchema = new ObjectSchema(
-            name: 'food_item',
-            description: 'A single food item with nutritional information',
-            properties: [
-                new StringSchema('name', 'Name of the food item (e.g., "Grilled Chicken Breast")'),
-                new NumberSchema('calories', 'Calories in kcal'),
-                new NumberSchema('protein', 'Protein content in grams'),
-                new NumberSchema('carbs', 'Carbohydrates content in grams'),
-                new NumberSchema('fat', 'Fat content in grams'),
-                new StringSchema('portion', 'Estimated portion size (e.g., "100g", "1 medium apple")'),
-            ],
-            requiredFields: ['name', 'calories', 'protein', 'carbs', 'fat', 'portion'],
-        );
-
-        return new ObjectSchema(
-            name: 'food_analysis',
-            description: 'Nutritional analysis of a food photo containing all identified food items and totals',
-            properties: [
-                new ArraySchema('items', 'List of all food items identified in the image', $foodItemSchema),
-                new NumberSchema('total_calories', 'Total calories for the entire meal'),
-                new NumberSchema('total_protein', 'Total protein in grams'),
-                new NumberSchema('total_carbs', 'Total carbohydrates in grams'),
-                new NumberSchema('total_fat', 'Total fat in grams'),
-                new NumberSchema('confidence', 'Confidence score (0-100) indicating how confident the analysis is'),
-            ],
-            requiredFields: ['items', 'total_calories', 'total_protein', 'total_carbs', 'total_fat', 'confidence'],
-        );
     }
 
     /**
      * Map the structured response to FoodAnalysisData DTO.
      *
-     * @param  FoodAnalysisResponse  $data
+     * @param  array{items: array<int, array{name: string, calories: float, protein: float, carbs: float, fat: float, portion: string}>, total_calories: float, total_protein: float, total_carbs: float, total_fat: float, confidence: float}  $data
      */
     private function mapToFoodAnalysisData(array $data): FoodAnalysisData
     {

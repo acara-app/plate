@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Ai\Tools;
 
 use App\Actions\GetUserProfileContextAction;
-use App\Ai\BaseAgent;
 use App\Models\User;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Tool;
+use Laravel\Ai\Promptable;
 use Laravel\Ai\Tools\Request;
 
 final readonly class GenerateMeal implements Tool
@@ -176,19 +177,34 @@ final readonly class GenerateMeal implements Tool
      */
     private function getAIResponse(string $prompt): string
     {
-        $agent = new class extends BaseAgent
+        $agent = new class implements Agent
         {
-            public function systemPrompt(): string
+            use Promptable;
+
+            public function instructions(): string
             {
                 return 'You are a professional nutritionist and chef. Generate healthy, delicious meals that are appropriate for the user\'s dietary needs and health conditions. Always provide accurate nutritional estimates and consider glucose impact for users with diabetes or blood sugar concerns.';
             }
+
+            public function maxTokens(): int
+            {
+                return 8000;
+            }
+
+            /**
+             * @return array<string, mixed>
+             */
+            public function clientOptions(): array
+            {
+                return [
+                    'timeout' => 60,
+                ];
+            }
         };
 
-        $response = $agent->text()
-            ->withPrompt($prompt)
-            ->asText();
+        $response = $agent->prompt($prompt);
 
-        return $response->text;
+        return (string) $response;
     }
 
     /**
