@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,7 +31,7 @@ use Laravel\Ai\Messages\MessageRole;
 final class History extends Model
 {
     /** @use HasFactory<\Database\Factories\HistoryFactory> */
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     protected $table = 'agent_conversation_messages';
 

@@ -158,7 +158,7 @@ it('shows tips for best results when no photo is selected', function (): void {
 it('shows disclaimer about AI estimates', function (): void {
     Livewire::test('pages::snap-to-track')
         ->assertSee('Disclaimer')
-        ->assertSee('AI estimates are for guidance only');
+        ->assertSee('These are AI estimates');
 });
 
 it('shows faq section', function (): void {
