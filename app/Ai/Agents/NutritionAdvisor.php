@@ -10,18 +10,16 @@ use App\Ai\Tools\GenerateMeal;
 use App\Ai\Tools\GenerateMealPlan;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\PredictGlucoseSpike;
+use App\Contracts\Ai\Advisor;
 use App\Enums\AgentMode;
 use App\Models\History;
 use App\Models\User;
 use Laravel\Ai\Concerns\RemembersConversations;
-use Laravel\Ai\Contracts\Agent;
-use Laravel\Ai\Contracts\Conversational;
-use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Messages\Message;
 use Laravel\Ai\Promptable;
 
-final class NutritionAdvisor implements Agent, Conversational, HasTools
+final class NutritionAdvisor implements Advisor
 {
     use Promptable, RemembersConversations;
 

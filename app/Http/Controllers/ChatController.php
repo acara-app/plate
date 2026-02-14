@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Ai\Agents\NutritionAdvisor;
+use App\Contracts\Ai\Advisor;
 use App\Enums\AgentMode;
 use App\Http\Requests\StoreAgentConversationRequest;
 use App\Models\Conversation;
@@ -39,12 +39,15 @@ final class ChatController
     public function stream(
         StoreAgentConversationRequest $request
     ): StreamableAgentResponse {
-        $agent = resolve(NutritionAdvisor::class, ['user' => $request->user()])
+        $agent = resolve(Advisor::class, ['user' => $request->user()])
             ->withMode($request->mode())
             ->forUser($request->user());
 
         return $agent
-            ->stream($request->userMessage())
+            ->stream(
+                prompt: $request->userMessage(),
+                model: $request->modelName()->value
+            )
             ->usingVercelDataProtocol();
     }
 }
