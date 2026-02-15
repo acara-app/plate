@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\SingleMealPromptBuilder;
 use App\DataObjects\GeneratedMealData;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Agent;

@@ -15,11 +15,11 @@ final class GeneratedMealData extends Data
      */
     public function __construct(
         public string $name,
-        public ?string $description,
         public string $mealType,
-        public ?string $cuisine,
         public float $calories,
         public float $proteinGrams,
+        public ?string $cuisine,
+        public ?string $description,
         public float $carbsGrams,
         public float $fatGrams,
         public ?float $fiberGrams = null,
