@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Enums\AgentMode;
-use App\Enums\AgentType;
 use App\Enums\ModelName;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -38,7 +37,6 @@ final class StoreAgentConversationRequest extends FormRequest
             // Query params
             'mode' => ['required', Rule::enum(AgentMode::class)],
             'model' => ['required', Rule::enum(ModelName::class)],
-            'agentType' => ['required', Rule::enum(AgentType::class)],
         ];
     }
 
@@ -87,24 +85,12 @@ final class StoreAgentConversationRequest extends FormRequest
         return ModelName::from($model);
     }
 
-    /**
-     * Get the validated agent type.
-     */
-    public function agentType(): AgentType
-    {
-        /** @var string $agentType */
-        $agentType = $this->validated('agentType');
-
-        return AgentType::from($agentType);
-    }
-
     public function messages(): array
     {
         return [
             'messages.required' => 'Messages are required',
             'mode.required' => 'Mode is required',
             'model.required' => 'Model is required',
-            'agentType.required' => 'Agent type is required',
         ];
     }
 
@@ -117,7 +103,6 @@ final class StoreAgentConversationRequest extends FormRequest
         $this->merge([
             'mode' => $this->query('mode'),
             'model' => $this->query('model'),
-            'agentType' => $this->query('agentType'),
         ]);
     }
 }

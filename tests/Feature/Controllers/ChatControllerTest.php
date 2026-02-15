@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Contracts\Ai\Advisor;
 use App\Enums\AgentMode;
-use App\Enums\AgentType;
 use App\Enums\ModelName;
 use App\Models\Conversation;
 use App\Models\History;
@@ -21,13 +20,12 @@ it('renders chat page with correct props when no conversation id provided', func
     $user = User::factory()->create();
 
     actingAs($user)
-        ->get(route('chat.create', ['agentType' => AgentType::Nutrition->value, 'mode' => AgentMode::Ask->value]))
+        ->get(route('chat.create', ['mode' => AgentMode::Ask->value]))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->has('conversationId', null)
             ->has('messages', 0)
             ->where('mode', AgentMode::Ask)
-            ->where('agentType', AgentType::Nutrition->value)
         );
 });
 
@@ -41,7 +39,7 @@ it('renders chat page with correct props with conversation id', function (): voi
     ]);
 
     actingAs($user)
-        ->get(route('chat.create', ['agentType' => AgentType::Nutrition->value, 'conversationId' => $conversation->id]))
+        ->get(route('chat.create', ['conversationId' => $conversation->id]))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('conversationId', $conversation->id)
@@ -56,7 +54,7 @@ it('handles invalid conversation id gracefully', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
-        ->get(route('chat.create', ['agentType' => AgentType::Nutrition->value, 'conversationId' => 'invalid-id']))
+        ->get(route('chat.create', ['conversationId' => 'invalid-id']))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->has('conversationId', null)
@@ -95,7 +93,7 @@ it('streams agent response correctly', function (): void {
         ->once()
         ->andReturn(response('OK'));
 
-    $url = route('chat.stream').'?mode='.AgentMode::Ask->value.'&model='.ModelName::GPT_5_MINI->value.'&agentType='.AgentType::Nutrition->value;
+    $url = route('chat.stream').'?mode='.AgentMode::Ask->value.'&model='.ModelName::GPT_5_MINI->value;
 
     actingAs($user)
         ->post($url, [
@@ -125,7 +123,7 @@ it('handles empty user message gracefully', function (): void {
     $mockResponse->shouldReceive('usingVercelDataProtocol')->once()->andReturn($mockResponse);
     $mockResponse->shouldReceive('toResponse')->once()->andReturn(response('OK'));
 
-    $url = route('chat.stream').'?mode='.AgentMode::Ask->value.'&model='.ModelName::GPT_5_MINI->value.'&agentType='.AgentType::Nutrition->value;
+    $url = route('chat.stream').'?mode='.AgentMode::Ask->value.'&model='.ModelName::GPT_5_MINI->value;
 
     actingAs($user)
         ->post($url, [
@@ -141,5 +139,5 @@ test('stream endpoint validation', function (): void {
 
     actingAs($user)
         ->post(route('chat.stream'), [])
-        ->assertSessionHasErrors(['messages', 'mode', 'model', 'agentType']);
+        ->assertSessionHasErrors(['messages', 'mode', 'model']);
 });

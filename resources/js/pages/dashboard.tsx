@@ -89,7 +89,7 @@ export default function Dashboard() {
                             {/* Quick Actions */}
                             <div className="grid grid-cols-2 gap-2">
                                 <Link
-                                    href={`${chat.create({ agentType: 'nutrition' }).url}?mode=ask`}
+                                    href={`${chat.create().url}?mode=ask`}
                                     className="group/action"
                                 >
                                     <Button
@@ -106,7 +106,7 @@ export default function Dashboard() {
                                     </Button>
                                 </Link>
                                 <Link
-                                    href={`${chat.create({ agentType: 'nutrition' }).url}?mode=generate-meal-plan`}
+                                    href={`${chat.create().url}?mode=generate-meal-plan`}
                                     className="group/action"
                                 >
                                     <Button
@@ -126,12 +126,7 @@ export default function Dashboard() {
 
                             {/* Main CTA */}
                             <div className="mt-auto pt-2">
-                                <Link
-                                    href={
-                                        chat.create({ agentType: 'nutrition' })
-                                            .url
-                                    }
-                                >
+                                <Link href={chat.create().url}>
                                     <Button className="w-full gap-2">
                                         <Sparkles className="h-4 w-4" />
                                         {t('dashboard_cards.chat.button')}
@@ -268,12 +263,7 @@ export default function Dashboard() {
                                     {recentConversations.map((conv) => (
                                         <Link
                                             key={conv.id}
-                                            href={
-                                                chat.create({
-                                                    agentType: 'nutrition',
-                                                    conversationId: conv.id,
-                                                }).url
-                                            }
+                                            href={chat.create(conv.id).url}
                                             className="group flex items-center justify-between rounded-md px-2 py-2 text-sm transition-colors hover:bg-muted"
                                         >
                                             <span className="truncate text-muted-foreground group-hover:text-foreground">
@@ -286,13 +276,7 @@ export default function Dashboard() {
                                     ))}
                                 </div>
                                 <div className="mt-4 border-t pt-3">
-                                    <Link
-                                        href={
-                                            chat.create({
-                                                agentType: 'nutrition',
-                                            }).url
-                                        }
-                                    >
+                                    <Link href={chat.create().url}>
                                         <Button
                                             variant="ghost"
                                             size="sm"
