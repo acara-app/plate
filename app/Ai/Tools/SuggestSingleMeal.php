@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Ai\Agents\MealGeneratorAgent;
+use App\Ai\Agents\SingleMealAgent;
 use App\Models\User;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
-final readonly class GenerateMeal implements Tool
+final readonly class SuggestSingleMeal implements Tool
 {
     public function __construct(
-        private MealGeneratorAgent $mealGenerator,
+        private SingleMealAgent $singleMealAgent,
     ) {}
 
     public function description(): string
@@ -44,7 +44,7 @@ final readonly class GenerateMeal implements Tool
         $specificRequest = $request['specific_request'] ?? null;
 
         try {
-            $meal = $this->mealGenerator->generate(
+            $meal = $this->singleMealAgent->generate(
                 $user,
                 $mealType,
                 $cuisine,

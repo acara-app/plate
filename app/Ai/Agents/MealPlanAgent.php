@@ -23,7 +23,7 @@ use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Promptable;
 use Workflow\WorkflowStub;
 
-final class MealPlanGeneratorAgent implements Agent, HasTools
+final class MealPlanAgent implements Agent, HasTools
 {
     use Promptable;
 

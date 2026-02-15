@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\MealPlanGeneratorAgent;
+use App\Ai\Agents\MealPlanAgent;
 use App\Enums\DietType;
 use App\Enums\GoalChoice;
 use App\Enums\MealPlanType;
@@ -14,21 +14,21 @@ use Workflow\WorkflowStub;
 uses(RefreshDatabase::class);
 
 it('returns fluent interface when setting diet type', function (): void {
-    $action = resolve(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanAgent::class);
     $result = $action->withDietType(DietType::Mediterranean);
 
-    expect($result)->toBeInstanceOf(MealPlanGeneratorAgent::class);
+    expect($result)->toBeInstanceOf(MealPlanAgent::class);
 });
 
 it('returns max tokens', function (): void {
-    $action = resolve(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanAgent::class);
     $maxTokens = $action->maxTokens();
 
     expect($maxTokens)->toBe(64000);
 });
 
 it('returns client options', function (): void {
-    $action = resolve(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanAgent::class);
     $options = $action->clientOptions();
 
     expect($options)->toBeArray()
@@ -83,9 +83,9 @@ it('generates a meal plan using Laravel AI SDK', function (): void {
         ],
     ];
 
-    MealPlanGeneratorAgent::fake([$mockResponse]);
+    MealPlanAgent::fake([$mockResponse]);
 
-    $action = resolve(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanAgent::class);
     $mealPlanData = $action->generate($user);
 
     expect($mealPlanData)
@@ -125,9 +125,9 @@ it('generates meal plan with minimal data', function (): void {
         'meals' => [],
     ];
 
-    MealPlanGeneratorAgent::fake([$mockResponse]);
+    MealPlanAgent::fake([$mockResponse]);
 
-    $action = resolve(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanAgent::class);
     $result = $action->generate($user);
 
     expect($result)->not->toBeNull();
@@ -147,7 +147,7 @@ it('starts workflow when handle is called', function (): void {
         'derived_activity_multiplier' => 1.5,
     ]);
 
-    $action = resolve(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanAgent::class);
     $action->handle($user);
 
     $mealPlan = $user->mealPlans()->first();
@@ -208,9 +208,9 @@ it('handles meals with no ingredients', function (): void {
         ],
     ];
 
-    MealPlanGeneratorAgent::fake([$mockResponse]);
+    MealPlanAgent::fake([$mockResponse]);
 
-    $action = resolve(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanAgent::class);
     $mealPlanData = $action->generate($user);
 
     expect($mealPlanData->meals)->toHaveCount(2);
@@ -241,9 +241,9 @@ it('works without file search store configured', function (): void {
         'meals' => [],
     ];
 
-    MealPlanGeneratorAgent::fake([$mockResponse]);
+    MealPlanAgent::fake([$mockResponse]);
 
-    $action = resolve(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanAgent::class);
     $mealPlanData = $action->generate($user);
 
     expect($mealPlanData)
@@ -275,9 +275,9 @@ it('uses file search store when configured', function (): void {
         'meals' => [],
     ];
 
-    MealPlanGeneratorAgent::fake([$mockResponse]);
+    MealPlanAgent::fake([$mockResponse]);
 
-    $action = resolve(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanAgent::class);
     $mealPlanData = $action->generate($user);
 
     expect($mealPlanData)
@@ -318,9 +318,9 @@ it('generates meals for a single day', function (): void {
         ],
     ];
 
-    MealPlanGeneratorAgent::fake([$mockResponse]);
+    MealPlanAgent::fake([$mockResponse]);
 
-    $action = resolve(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanAgent::class);
     $dayMeals = $action->generateForDay($user, 1, 7);
 
     expect($dayMeals)

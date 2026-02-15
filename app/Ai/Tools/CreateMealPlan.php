@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Ai\Agents\MealPlanGeneratorAgent;
+use App\Ai\Agents\MealPlanAgent;
 use App\Models\User;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -12,11 +12,12 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
-final readonly class GenerateMealPlan implements Tool
+final readonly class CreateMealPlan implements Tool
 {
     public function __construct(
-        private MealPlanGeneratorAgent $mealPlanGenerator,
-    ) {}
+        private MealPlanAgent $mealPlanAgent,
+    ) {
+    }
 
     /**
      * Get the description of the tool's purpose.
@@ -48,7 +49,7 @@ final readonly class GenerateMealPlan implements Tool
 
         try {
             // Start the meal plan generation workflow
-            $this->mealPlanGenerator->handle($user, $totalDays);
+            $this->mealPlanAgent->handle($user, $totalDays);
 
             return (string) json_encode([
                 'success' => true,
