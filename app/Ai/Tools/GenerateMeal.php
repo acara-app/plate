@@ -4,33 +4,25 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Actions\GetUserProfileContextAction;
+use App\Ai\Agents\MealGeneratorAgent;
 use App\Models\User;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
-use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Tool;
-use Laravel\Ai\Promptable;
 use Laravel\Ai\Tools\Request;
 
 final readonly class GenerateMeal implements Tool
 {
     public function __construct(
-        private GetUserProfileContextAction $profileContext,
+        private MealGeneratorAgent $mealGenerator,
     ) {}
 
-    /**
-     * Get the description of the tool's purpose.
-     */
     public function description(): string
     {
         return 'Generate a personalized meal suggestion based on user preferences, dietary restrictions, and nutritional goals. Returns a complete meal with nutritional information.';
     }
 
-    /**
-     * Execute the tool.
-     */
     public function handle(Request $request): string
     {
         $user = Auth::user();
@@ -51,20 +43,14 @@ final readonly class GenerateMeal implements Tool
         /** @var string|null $specificRequest */
         $specificRequest = $request['specific_request'] ?? null;
 
-        $profileContext = $this->profileContext->handle($user);
-        /** @var string $contextString */
-        $contextString = $profileContext['context'];
-
-        $prompt = $this->buildMealPrompt(
-            $mealType,
-            $cuisine,
-            $maxCalories,
-            $specificRequest,
-            $contextString
-        );
-
         try {
-            $meal = $this->generateMeal($prompt);
+            $meal = $this->mealGenerator->generate(
+                $user,
+                $mealType,
+                $cuisine,
+                $maxCalories,
+                $specificRequest,
+            );
 
             return (string) json_encode([
                 'success' => true,
@@ -79,8 +65,6 @@ final readonly class GenerateMeal implements Tool
     }
 
     /**
-     * Get the tool's schema definition.
-     *
      * @return array<string, mixed>
      */
     public function schema(JsonSchema $schema): array
@@ -97,131 +81,5 @@ final readonly class GenerateMeal implements Tool
             'specific_request' => $schema->string()
                 ->description('Any specific requirements or preferences (e.g., "high protein", "quick to prepare", "comfort food")'),
         ];
-    }
-
-    /**
-     * Build the prompt for meal generation.
-     */
-    private function buildMealPrompt(
-        string $mealType,
-        ?string $cuisine,
-        ?int $maxCalories,
-        ?string $specificRequest,
-        string $profileContext
-    ): string {
-        $parts = [
-            'Generate a single meal suggestion for a user with the following profile:',
-            '',
-            $profileContext,
-            '',
-            'MEAL REQUIREMENTS:',
-            "- Meal Type: {$mealType}",
-        ];
-
-        if ($cuisine !== null) {
-            $parts[] = "- Cuisine Style: {$cuisine}";
-        }
-
-        if ($maxCalories !== null) {
-            $parts[] = "- Maximum Calories: {$maxCalories}";
-        }
-
-        if ($specificRequest !== null) {
-            $parts[] = "- Specific Request: {$specificRequest}";
-        }
-
-        $parts[] = '';
-        $parts[] = 'Please provide the meal in the following JSON format:';
-        $parts[] = json_encode([
-            'name' => 'Meal name',
-            'description' => 'Brief description of the meal',
-            'meal_type' => $mealType,
-            'cuisine' => 'Cuisine style',
-            'calories' => 0,
-            'protein_g' => 0,
-            'carbs_g' => 0,
-            'fat_g' => 0,
-            'fiber_g' => 0,
-            'ingredients' => ['ingredient 1', 'ingredient 2'],
-            'instructions' => ['Step 1', 'Step 2'],
-            'prep_time_minutes' => 0,
-            'cook_time_minutes' => 0,
-            'servings' => 1,
-            'dietary_tags' => ['tag1', 'tag2'],
-            'glycemic_index_estimate' => 'low|medium|high',
-            'glucose_impact_notes' => 'Notes about glucose impact',
-        ], JSON_PRETTY_PRINT);
-
-        return implode("\n", $parts);
-    }
-
-    /**
-     * Generate a meal using the AI.
-     *
-     * @return array<string, mixed>
-     */
-    private function generateMeal(string $prompt): array
-    {
-        $response = $this->getAIResponse($prompt);
-
-        $jsonText = $this->extractJson($response);
-
-        /** @var array<string, mixed> $decoded */
-        $decoded = json_decode($jsonText, true, 512, JSON_THROW_ON_ERROR);
-
-        return $decoded;
-    }
-
-    /**
-     * Get AI response for meal generation.
-     */
-    private function getAIResponse(string $prompt): string
-    {
-        $agent = new class implements Agent
-        {
-            use Promptable;
-
-            public function instructions(): string
-            {
-                return 'You are a professional nutritionist and chef. Generate healthy, delicious meals that are appropriate for the user\'s dietary needs and health conditions. Always provide accurate nutritional estimates and consider glucose impact for users with diabetes or blood sugar concerns.';
-            }
-
-            public function maxTokens(): int
-            {
-                return 8000;
-            }
-
-            /**
-             * @return array<string, mixed>
-             */
-            public function clientOptions(): array
-            {
-                return [
-                    'timeout' => 60,
-                ];
-            }
-        };
-
-        $response = $agent->prompt($prompt);
-
-        return (string) $response;
-    }
-
-    /**
-     * Extract JSON from AI response.
-     */
-    private function extractJson(string $response): string
-    {
-        $response = mb_trim($response);
-
-        if (str_starts_with($response, '```json')) {
-            $response = (string) preg_replace('/^```json\s*/', '', $response);
-            $response = (string) preg_replace('/\s*```$/', '', $response);
-        } elseif (str_starts_with($response, '```')) {
-            $response = (string) preg_replace('/^```\s*/', '', $response);
-            $response = (string) preg_replace('/\s*```$/', '', $response);
-        }
-
-        return mb_trim($response);
     }
 }
