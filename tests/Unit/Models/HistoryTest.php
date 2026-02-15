@@ -117,11 +117,11 @@ it('can create history for specific user', function (): void {
     expect($history->user_id)->toBe($user->id);
 });
 
-it('generates auto-incrementing integer id on creation', function (): void {
+it('generates UUID id on creation', function (): void {
     $history = History::factory()->create();
 
-    expect($history->id)->toBeInt()
-        ->and($history->id)->toBeGreaterThan(0);
+    expect($history->id)->toBeString()
+        ->and($history->id)->not->toBeEmpty();
 });
 
 it('factory creates valid history', function (): void {
