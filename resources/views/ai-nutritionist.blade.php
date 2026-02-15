@@ -1,7 +1,7 @@
 @section('title', 'Open Source AI Nutritionist | Acara Plate')
 @section('meta_description', 'Analyze your meals for glycemic impact. An open-source, AI-powered tool to understand how food affects your blood sugar and metabolic health.')
 @section('meta_keywords', 'open source nutritionist, AI nutrition analysis, glycemic load calculator, metabolic health tool')
-@section('canonical_url', url()->current())
+@section('canonical_url', strtok(url()->current(), '?'))
 @section('og_image', asset('screenshots/og-ai-nutritionist.webp'))
 @section('og_image_width', '1920')
 @section('og_image_height', '1096')

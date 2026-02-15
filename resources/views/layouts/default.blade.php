@@ -7,7 +7,7 @@
         <title>@yield('title', 'Acara Plate - AI Diabetes Meal Planner & Glucose Tracker')</title>
         <meta name="description" content="@yield('meta_description', 'Acara Plate is an AI-powered nutrition platform for diabetes management. Get personalized meal plans, track glucose levels, and achieve your health goals.')">
         <meta name="keywords" content="@yield('meta_keywords', 'diabetes nutrition, AI meal planner, glucose tracking, personalized meal plans, diabetes management, blood sugar tracking, diabetic meal planning, AI nutrition assistant')">
-        <link rel="canonical" href="@yield('canonical_url', url()->current())">
+        <link rel="canonical" href="@yield('canonical_url', strtok(url()->current(), '?'))">
         <meta name="robots" content="index, follow">
         
         <!-- Open Graph / Facebook -->
