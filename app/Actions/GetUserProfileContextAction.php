@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Enums\DietType;
 use App\Models\User;
 use App\Models\UserMedication;
 use App\Models\UserProfile;
@@ -230,7 +231,12 @@ final readonly class GetUserProfileContextAction
             $goalParts[] = 'Target Weight: '.$goals['target_weight_kg'].'kg';
         }
         if (isset($goals['calculated_diet_type']) && is_scalar($goals['calculated_diet_type'])) {
-            $goalParts[] = 'Diet Type: '.$goals['calculated_diet_type'];
+            $parts[] = 'Diet Type: '.$goals['calculated_diet_type'];
+            $dietTypeEnum = DietType::tryFrom((string) $goals['calculated_diet_type']);
+            if ($dietTypeEnum instanceof DietType) {
+                $macros = $dietTypeEnum->macroTargets();
+                $parts[] = 'Recommended Macros: '.$macros['carbs'].'% carbs, '.$macros['protein'].'% protein, '.$macros['fat'].'% fat';
+            }
         }
         if (isset($goals['additional_goals']) && is_scalar($goals['additional_goals'])) {
             $goalParts[] = 'Additional Goals: '.$goals['additional_goals'];
