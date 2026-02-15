@@ -119,10 +119,10 @@ it('ignores non-text parts when extracting user message', function () use ($crea
 it('extracts mode and model from request', function () use ($createRequest): void {
     $request = $createRequest([
         'messages' => [['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Hi']]]],
-        'mode' => AgentMode::GenerateMealPlan->value,
+        'mode' => AgentMode::CreateMealPlan->value,
         'model' => ModelName::GEMINI_2_5_FLASH->value,
     ]);
 
-    expect($request->mode())->toBe(AgentMode::GenerateMealPlan)
+    expect($request->mode())->toBe(AgentMode::CreateMealPlan)
         ->and($request->modelName())->toBe(ModelName::GEMINI_2_5_FLASH);
 });

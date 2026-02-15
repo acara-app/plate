@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Workflows;
 
-use App\Ai\Agents\MealPlanGeneratorAgent;
+use App\Ai\Agents\MealPlanAgent;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\PreviousDayContext;
@@ -30,8 +30,8 @@ final class MealPlanDayGeneratorActivity extends Activity
         ?MealPlan $mealPlan = null,
         ?DietType $dietType = null,
     ): DayMealsData {
-        /** @var MealPlanGeneratorAgent $generateMealPlan */
-        $generateMealPlan = resolve(MealPlanGeneratorAgent::class);
+        /** @var MealPlanAgent $generateMealPlan */
+        $generateMealPlan = resolve(MealPlanAgent::class);
 
         if ($dietType instanceof DietType) {
             $generateMealPlan = $generateMealPlan->withDietType($dietType);

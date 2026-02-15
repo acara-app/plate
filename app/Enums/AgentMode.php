@@ -7,5 +7,5 @@ namespace App\Enums;
 enum AgentMode: string
 {
     case Ask = 'ask';
-    case GenerateMealPlan = 'generate-meal-plan';
+    case CreateMealPlan = 'generate-meal-plan';
 }

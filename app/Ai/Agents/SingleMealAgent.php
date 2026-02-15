@@ -11,7 +11,7 @@ use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 
-final class MealGeneratorAgent implements Agent, HasStructuredOutput
+final class SingleMealAgent implements Agent, HasStructuredOutput
 {
     use Promptable;
 

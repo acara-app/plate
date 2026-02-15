@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\MealPlanGeneratorAgent;
+use App\Ai\Agents\MealPlanAgent;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\MealData;
 use App\DataObjects\PreviousDayContext;
@@ -163,10 +163,10 @@ it('generates day meals using activity with mocked agent', function (): void {
         ],
     ];
 
-    MealPlanGeneratorAgent::fake([$mockResponse]);
+    MealPlanAgent::fake([$mockResponse]);
 
     // Test using the action directly instead of activity instantiation
-    $action = resolve(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanAgent::class);
     $result = $action->generateForDay(
         $this->user,
         dayNumber: 1,
@@ -198,7 +198,7 @@ it('workflow class exists and extends correct base class', function (): void {
 it('workflow triggers via generate meal plan action with workflow stub fake', function (): void {
     Workflow\WorkflowStub::fake();
 
-    $action = resolve(MealPlanGeneratorAgent::class);
+    $action = resolve(MealPlanAgent::class);
     $action->handle($this->user);
 
     // Meal plan is now created synchronously before workflow starts

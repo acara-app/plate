@@ -6,10 +6,10 @@ namespace App\Ai\Agents;
 
 use App\Actions\GetUserProfileContextAction;
 use App\Ai\SystemPrompt;
-use App\Ai\Tools\GenerateMeal;
-use App\Ai\Tools\GenerateMealPlan;
+use App\Ai\Tools\CreateMealPlan;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\PredictGlucoseSpike;
+use App\Ai\Tools\SuggestSingleMeal;
 use App\Contracts\Ai\Advisor;
 use App\Enums\AgentMode;
 use App\Models\History;
@@ -28,9 +28,9 @@ final class NutritionAdvisor implements Advisor
     public function __construct(
         private User $user,
         private readonly GetUserProfileContextAction $profileContext,
-        private readonly GenerateMeal $generateMealTool,
+        private readonly SuggestSingleMeal $suggestSingleMealTool,
         private readonly GetUserProfile $getUserProfileTool,
-        private readonly GenerateMealPlan $generateMealPlanTool,
+        private readonly CreateMealPlan $createMealPlanTool,
         private readonly PredictGlucoseSpike $predictGlucoseSpikeTool,
     ) {}
 
@@ -74,9 +74,9 @@ final class NutritionAdvisor implements Advisor
     public function tools(): array
     {
         return [
-            $this->generateMealTool,
+            $this->suggestSingleMealTool,
             $this->getUserProfileTool,
-            $this->generateMealPlanTool,
+            $this->createMealPlanTool,
             $this->predictGlucoseSpikeTool,
         ];
     }
@@ -142,7 +142,7 @@ final class NutritionAdvisor implements Advisor
             'CHAT MODE: '.$this->mode->value,
         ];
 
-        if ($this->mode === AgentMode::GenerateMealPlan) {
+        if ($this->mode === AgentMode::CreateMealPlan) {
             $context[] = '';
             $context[] = 'The user has explicitly selected "Generate Meal Plan" mode. They want a complete multi-day meal plan.';
             $context[] = 'Use the generate_meal_plan tool to initiate the meal plan generation workflow.';
