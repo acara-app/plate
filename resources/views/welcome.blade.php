@@ -1,10 +1,9 @@
 @section('title', 'AI Diabetes Meal Planner & Glucose Tracker | Personalized Nutrition')
-@section('meta_description', 'Manage Type 2 diabetes with Acara Plate\'s AI nutritionist. Get personalized meal plans
-    that match your glucose levels. Start your free plan today!')
+@section('meta_description', 'Manage Type 2 diabetes with Acara Plate\'s AI nutritionist. Get meal plans that match your glucose levels. Start your free plan today!')
 
-    <x-default-layout>
-    @section('head')
-        <script type="application/ld+json">
+<x-default-layout>
+@section('head')
+<script type="application/ld+json">
     {
         "@@context": "https://schema.org",
         "@@type": "WebSite",
@@ -164,7 +163,7 @@
                             </div>
                             <h3 class="text-lg font-bold text-slate-900">AI Nutritionist</h3>
                             <p class="mt-2 text-sm text-slate-600">
-                                Stuck at a restaurant? Ask what to order and get personalized advice.
+                                Stuck at a restaurant? Ask the AI what to order and get advice that keeps your glucose steady.
                             </p>
                             <a href="{{ route('ai-nutritionist') }}" class="mt-4 inline-flex items-center text-sm font-semibold text-rose-600 hover:text-rose-700">
                                 Meet Your AI Coach
@@ -299,35 +298,7 @@
                             </div>
                         </div>
 
-                        {{-- Nutrition Advisor Feature Card --}}
-                        <div
-                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-rose-500 hover:bg-slate-50 hover:shadow-md lg:col-span-4">
-                            <div class="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left lg:gap-6">
-                                <div
-                                    class="mb-3 rounded-lg bg-rose-100 p-3 transition-transform duration-300 group-hover/card:scale-110 shrink-0">
-                                    <svg class="h-6 w-6 text-rose-600" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <h3 class="text-sm font-semibold text-slate-900 lg:text-base">Ask Our Nutritionist</h3>
-                                    <p class="mt-2 text-xs text-slate-600 lg:text-sm">
-                                        Stuck at a restaurant? Not sure what to order? Just ask. Our AI nutritionist knows your goals and can suggest meals that keep your glucose steady — no judgment, just helpful answers.
-                                    </p>
-                                    <a href="{{ route('ai-nutritionist') }}" 
-                                        class="mt-3 inline-flex items-center text-xs font-medium text-rose-600 hover:text-rose-700 lg:text-sm">
-                                        Meet Your AI Coach 
-                                        <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Health Coach Feature Card --}}
+{{-- Health Coach Feature Card --}}
                         <div
                             class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-indigo-500 hover:bg-slate-50 hover:shadow-md lg:col-span-4">
                             <div class="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left lg:gap-6">

@@ -1,25 +1,13 @@
 @section('title', 'Open Source AI Health Coach | Acara Plate')
-@section('meta_description', 'Your personal AI wellness coach for sleep, stress, hydration, and lifestyle optimization. Get personalized guidance to improve your overall well-being.')
+@section('meta_description', 'Your personal AI wellness coach for sleep, stress, hydration, and lifestyle optimization. Get guidance to improve your overall well-being.')
 @section('meta_keywords', 'open source health coach, AI wellness, sleep optimization, stress management, hydration tracker, lifestyle optimization')
+@section('canonical_url', url()->current())
+@section('og_image', asset('screenshots/og-ai-health-coach.webp'))
+@section('og_image_width', '1920')
+@section('og_image_height', '1096')
+@section('og_image_alt', 'AI Health Coach showing personalized sleep routines, stress management tips, and hydration schedules')
 
 @section('head')
-{{-- Open Graph / Facebook --}}
-<meta property="og:type" content="website">
-<meta property="og:url" content="{{ url()->current() }}">
-<meta property="og:title" content="Open Source AI Health Coach | Acara Plate">
-<meta property="og:description" content="Your personal AI wellness coach for sleep, stress, hydration, and lifestyle optimization.">
-<meta property="og:image" content="{{ asset('screenshots/og-ai-health-coach.webp') }}">
-<meta property="og:image:width" content="1920">
-<meta property="og:image:height" content="1096">
-<meta property="og:image:alt" content="AI Health Coach interface showing sleep optimization recommendations and wellness routine suggestions">
-
-{{-- Twitter Card --}}
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:url" content="{{ url()->current() }}">
-<meta name="twitter:title" content="Open Source AI Health Coach | Acara Plate">
-<meta name="twitter:description" content="Your personal AI wellness coach for sleep, stress, hydration, and lifestyle optimization.">
-<meta name="twitter:image" content="{{ asset('screenshots/og-ai-health-coach.webp') }}">
-<meta name="twitter:image:alt" content="AI Health Coach interface showing sleep optimization recommendations and wellness routine suggestions">
 
 <script type="application/ld+json">
 {
@@ -56,6 +44,49 @@
                 "@@type": "Answer",
                 "text": "Yes. We believe health utilities should be transparent. You can view our entire codebase on GitHub, verify our privacy controls, and see exactly how our wellness recommendations are generated."
             }
+        },
+        {
+            "@@type": "Question",
+            "name": "How does the AI Health Coach work?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Simply tell the AI what you're struggling with—sleep issues, high stress, low energy—and it analyzes your situation to provide specific recommendations. No forms to fill out, just conversational input."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "Is my health data secure?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "We take a privacy-first approach. Your data is never sold to third parties. Since our code is open source, you can verify exactly how your information is handled."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "Do I need to track everything manually?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "No. Unlike other wellness apps, you don't need to log every meal or hour of sleep. Just describe how you feel and what challenges you're facing."
+            }
+        }
+    ]
+}
+</script>
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "{{ url('/') }}"
+        },
+        {
+            "@@type": "ListItem",
+            "position": 2,
+            "name": "AI Health Coach"
         }
     ]
 }
@@ -64,6 +95,28 @@
 
 <x-default-layout>
     <div class="bg-white">
+        <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
+            <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+                <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80">
+                    <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
+                    <span>Acara Plate</span>
+                </a>
+                <div class="flex items-center gap-3">
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="inline-flex items-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800">
+                            Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="hidden items-center px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:text-slate-900 sm:inline-flex">
+                            Sign in
+                        </a>
+                        <a href="{{ route('register') }}" class="inline-flex items-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800">
+                            Start for Free
+                        </a>
+                    @endauth
+                </div>
+            </div>
+        </header>
         
         <section class="relative overflow-hidden pt-12 pb-16 sm:pt-20 sm:pb-24">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -74,20 +127,19 @@
                             <svg class="h-4 w-4 text-slate-500" fill="currentColor" viewBox="0 0 24 24">
                                 <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
                             </svg>
-                            100% Open Source Project
+                            Open Source Project
                         </div>
-                        <h1 class="text-teal-600 text-4xl mb-2">Acara Plate</h1> 
-                        <p class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                        Your Personal Wellness Coach
-                        </p>
+                        <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+                            Your Personal AI Wellness Coach
+                        </h1>
                         
                         <p class="mt-6 text-lg text-slate-600 leading-relaxed">
-                            Get personalized guidance on sleep, stress, hydration, and lifestyle. Tell Acara what you're struggling with—sleep issues, high stress, energy dips—and get actionable recommendations.
+                            Get guidance on sleep, stress, hydration, and lifestyle. Tell Acara what you're struggling with—sleep issues, high stress, energy dips—and get practical recommendations.
                         </p>
 
                         <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                             <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-lg bg-slate-900 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-slate-800 transition-all">
-                                Start Your Wellness Journey
+                                Get Started Free
                                 <span class="ml-2 text-slate-400">→</span>
                             </a>
                             <a href="https://github.com/acara-app/plate" target="_blank" class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-6 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 transition-all">
@@ -167,7 +219,7 @@
                         </div>
                         <h3 class="text-lg font-bold text-slate-900 mb-3">Sleep Optimization</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            Quality sleep affects everything from mood to metabolism. Get personalized sleep hygiene recommendations and routines tailored to your lifestyle.
+                            Quality sleep affects everything from mood to metabolism. Get sleep hygiene recommendations and routines that fit your schedule.
                         </p>
                     </div>
 
@@ -222,9 +274,9 @@
                         <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6 border-2 border-cyan-500">
                             02
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Personalized Routines</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Customized Routines</h3>
                         <p class="text-slate-600 leading-relaxed">
-                            Receive tailored wellness routines based on your goals, lifestyle, and current challenges. Everything from sleep schedules to stress techniques.
+                            Receive wellness routines built around your goals, schedule, and current challenges. Everything from sleep schedules to stress techniques.
                         </p>
                     </div>
 
@@ -256,7 +308,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            The AI Health Coach specializes in sleep optimization, stress management, hydration guidance, and general lifestyle wellness. It provides evidence-based recommendations tailored to your specific situation and goals.
+                            The AI Health Coach specializes in sleep optimization, stress management, hydration guidance, and general lifestyle wellness. It provides evidence-based recommendations for your specific situation and goals.
                         </p>
                     </details>
 
@@ -292,7 +344,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            Anyone looking to improve their overall wellness. Whether you're struggling with sleep, feeling stressed, wanting to stay better hydrated, or just looking for general health optimization, this tool provides personalized guidance without the complexity.
+                            Anyone looking to improve their overall wellness. Whether you're struggling with sleep, feeling stressed, wanting to stay better hydrated, or just looking for general health optimization, this tool gives you practical guidance without the complexity.
                         </p>
                     </details>
                 </div>

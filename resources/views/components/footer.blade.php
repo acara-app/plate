@@ -47,22 +47,6 @@
                                 <a href="{{ route('install-app') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Install Acara Plate as an App">Install App</a>
                             </li>
                         </ul>
-                        {{-- Popular Searches (SEO Power Links) --}}
-                        <h4 class="mt-6 text-xs font-semibold leading-6 text-slate-500 dark:text-slate-500 uppercase tracking-wide">Popular Searches</h4>
-                        <ul role="list" class="mt-3 space-y-2">
-                            <li>
-                                <a href="{{ route('food.show', 'cheese-pasteurized-process-american-vitamin-d-fortified') }}" class="text-xs leading-5 text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300" title="Is American Cheese safe for diabetics?">American Cheese Glycemic Index</a>
-                            </li>
-                            <li>
-                                <a href="{{ route('food.show', 'farro-pearled-dry-raw') }}" class="text-xs leading-5 text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300" title="Pearled Farro glycemic index and nutrition">Pearled Farro GI Score</a>
-                            </li>
-                            <li>
-                                <a href="{{ route('food.show', 'egg-yolk-raw-frozen-pasteurized') }}" class="text-xs leading-5 text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300" title="Egg Yolk nutrition for diabetics">Egg Yolk Nutrition Facts</a>
-                            </li>
-                            <li>
-                                <a href="{{ route('food.show', 'apples-red-delicious-with-skin-raw') }}" class="text-xs leading-5 text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300" title="Are Red Apples safe for diabetics?">Red Apple Diabetes Safety</a>
-                            </li>
-                        </ul>
                     </div>
                     <div class="mt-10 md:mt-0">
                                                 <h3 class="text-sm font-semibold leading-6 text-slate-900 dark:text-white">Support</h3>

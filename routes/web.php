@@ -33,7 +33,6 @@ Route::get('/food/{slug}', [Web\PublicFoodController::class, 'show'])->name('foo
 
 Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])->name('profile.timezone.update');
 
-// AI Pages...
 Route::view('/ai-nutritionist', 'ai-nutritionist')->name('ai-nutritionist');
 Route::view('/ai-health-coach', 'ai-health-coach')->name('ai-health-coach');
 Route::view('/ai-personal-trainer', 'ai-personal-trainer')->name('ai-personal-trainer');
