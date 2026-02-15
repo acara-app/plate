@@ -9,18 +9,12 @@ import { useEffect, useRef, useState } from 'react';
 import ChatInput, { type AIModel, type ChatMode } from './chat-input';
 import ChatMessages, { ChatErrorBanner } from './chate-messages';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Chat (beta version)',
-        href: chat.create().url,
-    },
-];
-
 export default function CreateChat() {
     const {
         conversationId: initialConversationId,
         messages: messageHistories,
         mode: initialMode,
+        agentType: initialAgentType,
     } = usePage<ChatPageProps>().props;
 
     const [conversationId, setConversationId] = useState<string | undefined>(
@@ -28,13 +22,25 @@ export default function CreateChat() {
     );
     const [mode, setMode] = useState<ChatMode>(initialMode ?? 'ask');
     const [model, setModel] = useState<AIModel>('gemini-3-flash-preview');
+    const [agentType] = useState(initialAgentType);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const initialMessages = (messageHistories ?? []) as UIMessage[];
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Chat (beta version)',
+            href: chat.create({
+                agentType,
+                conversationId: conversationId ?? '',
+            }).url,
+        },
+    ];
+
     const { messages, sendMessage, status, error, isStreaming, isSubmitting } =
         useChatStream({
+            agentType,
             conversationId,
             mode,
             model,
@@ -59,7 +65,7 @@ export default function CreateChat() {
         const id = conversationId ?? generateUUID();
         if (!conversationId) {
             setConversationId(id);
-            router.visit(chat.create(id).url, {
+            router.visit(chat.create({ agentType, conversationId: id }).url, {
                 replace: true,
                 preserveState: true,
             });

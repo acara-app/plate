@@ -1,11 +1,12 @@
 import type { AIModel, ChatMode } from '@/pages/chat/chat-input';
 import { stream } from '@/routes/chat';
-import type { ChatStatus } from '@/types/chat';
+import type { AgentType, ChatStatus } from '@/types/chat';
 import { useChat, type UIMessage } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { useMemo } from 'react';
 
 interface UseChatStreamOptions {
+    agentType: AgentType;
     conversationId?: string;
     mode: ChatMode;
     model: AIModel;
@@ -23,6 +24,7 @@ interface UseChatStreamReturn {
 }
 
 export function useChatStream({
+    agentType,
     conversationId,
     mode,
     model,
@@ -32,10 +34,10 @@ export function useChatStream({
         () =>
             new DefaultChatTransport({
                 api: stream.url({
-                    query: { mode, model, conversationId },
+                    query: { agentType, mode, model, conversationId },
                 }),
             }),
-        [mode, model, conversationId],
+        [agentType, mode, model, conversationId],
     );
 
     const { messages, sendMessage, status, error } = useChat({

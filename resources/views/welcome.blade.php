@@ -326,6 +326,62 @@
                                 </div>
                             </div>
                         </div>
+
+                        {{-- Health Coach Feature Card --}}
+                        <div
+                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-indigo-500 hover:bg-slate-50 hover:shadow-md lg:col-span-4">
+                            <div class="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left lg:gap-6">
+                                <div
+                                    class="mb-3 rounded-lg bg-indigo-100 p-3 transition-transform duration-300 group-hover/card:scale-110 shrink-0">
+                                    <svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-sm font-semibold text-slate-900 lg:text-base">AI Health Coach</h3>
+                                    <p class="mt-2 text-xs text-slate-600 lg:text-sm">
+                                        Struggling with sleep, stress, or hydration? Your AI wellness coach provides personalized routines and guidance for a healthier lifestyle.
+                                    </p>
+                                    <a href="{{ route('ai-health-coach') }}" 
+                                        class="mt-3 inline-flex items-center text-xs font-medium text-indigo-600 hover:text-indigo-700 lg:text-sm">
+                                        Meet Your Health Coach 
+                                        <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Personal Trainer Feature Card --}}
+                        <div
+                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-500 hover:bg-slate-50 hover:shadow-md lg:col-span-4">
+                            <div class="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left lg:gap-6">
+                                <div
+                                    class="mb-3 rounded-lg bg-orange-100 p-3 transition-transform duration-300 group-hover/card:scale-110 shrink-0">
+                                    <svg class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-sm font-semibold text-slate-900 lg:text-base">AI Personal Trainer</h3>
+                                    <p class="mt-2 text-xs text-slate-600 lg:text-sm">
+                                        Want to build strength or improve cardio? Your AI trainer creates personalized workout plans tailored to your fitness level and goals.
+                                    </p>
+                                    <a href="{{ route('ai-personal-trainer') }}" 
+                                        class="mt-3 inline-flex items-center text-xs font-medium text-orange-600 hover:text-orange-700 lg:text-sm">
+                                        Meet Your Trainer 
+                                        <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

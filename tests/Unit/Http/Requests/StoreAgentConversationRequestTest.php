@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\AgentMode;
+use App\Enums\AgentType;
 use App\Enums\ModelName;
 use App\Http\Requests\StoreAgentConversationRequest;
 use Illuminate\Support\Facades\Validator;
@@ -36,11 +37,13 @@ it('returns custom validation messages', function (): void {
         ->and($messages)->toHaveKey('mode.required')
         ->and($messages['mode.required'])->toBe('Mode is required')
         ->and($messages)->toHaveKey('model.required')
-        ->and($messages['model.required'])->toBe('Model is required');
+        ->and($messages['model.required'])->toBe('Model is required')
+        ->and($messages)->toHaveKey('agentType.required')
+        ->and($messages['agentType.required'])->toBe('Agent type is required');
 });
 
 it('prepares data for validation by merging query parameters', function (): void {
-    $uri = route('chat.stream', ['mode' => 'ask', 'model' => 'gpt-5-mini']);
+    $uri = route('chat.stream', ['mode' => 'ask', 'model' => 'gpt-5-mini', 'agentType' => 'nutrition']);
     $request = StoreAgentConversationRequest::create(
         uri: $uri,
         method: 'POST'
@@ -51,7 +54,8 @@ it('prepares data for validation by merging query parameters', function (): void
     $method->invoke($request);
 
     expect($request->input('mode'))->toBe(AgentMode::Ask->value)
-        ->and($request->input('model'))->toBe(ModelName::GPT_5_MINI->value);
+        ->and($request->input('model'))->toBe(ModelName::GPT_5_MINI->value)
+        ->and($request->input('agentType'))->toBe(AgentType::Nutrition->value);
 });
 
 it('returns empty string if no user message is found', function () use ($createRequest): void {
@@ -66,6 +70,7 @@ it('returns empty string if no user message is found', function () use ($createR
         ],
         'mode' => AgentMode::Ask->value,
         'model' => ModelName::GPT_5_MINI->value,
+        'agentType' => AgentType::Nutrition->value,
     ]);
 
     expect($request->userMessage())->toBe('');
@@ -91,6 +96,7 @@ it('extracts user message from conversation', function () use ($createRequest): 
         'messages' => $messages,
         'mode' => AgentMode::Ask->value,
         'model' => ModelName::GPT_5_MINI->value,
+        'agentType' => AgentType::Nutrition->value,
     ]);
 
     expect($request->userMessage())->toBe('Hello world');
@@ -111,6 +117,7 @@ it('ignores non-text parts when extracting user message', function () use ($crea
         'messages' => $messages,
         'mode' => AgentMode::Ask->value,
         'model' => ModelName::GPT_5_MINI->value,
+        'agentType' => AgentType::Nutrition->value,
     ]);
 
     expect($request->userMessage())->toBe('Text content');
@@ -121,8 +128,10 @@ it('extracts mode and model from request', function () use ($createRequest): voi
         'messages' => [['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Hi']]]],
         'mode' => AgentMode::CreateMealPlan->value,
         'model' => ModelName::GEMINI_2_5_FLASH->value,
+        'agentType' => AgentType::HealthCoach->value,
     ]);
 
     expect($request->mode())->toBe(AgentMode::CreateMealPlan)
-        ->and($request->modelName())->toBe(ModelName::GEMINI_2_5_FLASH);
+        ->and($request->modelName())->toBe(ModelName::GEMINI_2_5_FLASH)
+        ->and($request->agentType())->toBe(AgentType::HealthCoach);
 });

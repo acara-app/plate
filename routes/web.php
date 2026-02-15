@@ -33,10 +33,17 @@ Route::get('/food/{slug}', [Web\PublicFoodController::class, 'show'])->name('foo
 
 Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])->name('profile.timezone.update');
 
+// AI Pages...
 Route::view('/ai-nutritionist', 'ai-nutritionist')->name('ai-nutritionist');
+Route::view('/ai-health-coach', 'ai-health-coach')->name('ai-health-coach');
+Route::view('/ai-personal-trainer', 'ai-personal-trainer')->name('ai-personal-trainer');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', [Web\DashboardController::class, 'show'])->name('dashboard');
+
+    // Chat with agent type...
+    Route::get('/chat/{agentType}/create/{conversationId?}', [Web\ChatController::class, 'create'])
+        ->name('chat.create');
 
     Route::post('meal-plans', Web\StoreMealPlanController::class)->name('meal-plans.store');
     Route::get('meal-plans', Web\ShowMealPlansController::class)->name('meal-plans.index');
@@ -51,7 +58,6 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('meal-plans/{mealPlan}/grocery-list/print', Web\PrintGroceryListController::class)->name('meal-plans.grocery-list.print');
     Route::patch('grocery-items/{groceryItem}/toggle', [Web\GroceryListController::class, 'toggleItem'])->name('grocery-items.toggle');
 
-    Route::get('chat/create/{conversationId?}', [Web\ChatController::class, 'create'])->name('chat.create');
     Route::post('chat/stream', [Web\ChatController::class, 'stream'])->name('chat.stream');
 
     Route::get('health-entries', Web\HealthEntry\ListHealthEntryController::class)->name('health-entries.index');
