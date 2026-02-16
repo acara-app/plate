@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { ChatStatus } from '@/types/chat';
 import { type UIMessage } from '@ai-sdk/react';
-import { AlertCircle, Bot, User } from 'lucide-react';
+import { AlertCircle, Sparkles, User } from 'lucide-react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -33,8 +33,8 @@ export function ChatErrorBanner({ error }: { error?: Error }) {
 function EmptyState() {
     return (
         <div className="flex flex-1 flex-col items-center justify-center text-center">
-            <div className="mb-4 rounded-full bg-linear-to-br from-emerald-500 to-teal-600 p-4">
-                <Bot className="size-8 text-white" />
+            <div className="mb-4 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 p-4">
+                <Sparkles className="size-8 text-white" />
             </div>
             <h2 className="mb-2 text-xl font-semibold text-foreground">
                 How can I help you today?
@@ -56,10 +56,14 @@ function MessageAvatar({ role }: { role: string }) {
                 'flex size-8 shrink-0 items-center justify-center rounded-full',
                 isUser
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-linear-to-br from-emerald-500 to-teal-600 text-white',
+                    : 'bg-linear-to-br from-indigo-500 to-purple-600 text-white',
             )}
         >
-            {isUser ? <User className="size-4" /> : <Bot className="size-4" />}
+            {isUser ? (
+                <User className="size-4" />
+            ) : (
+                <Sparkles className="size-4" />
+            )}
         </div>
     );
 }
@@ -161,12 +165,12 @@ function ThinkingIndicator() {
             <MessageAvatar role="assistant" />
             <div className="flex items-center gap-2 rounded-2xl bg-muted px-4 py-3">
                 <div className="flex items-center gap-1">
-                    <span className="size-2 animate-pulse rounded-full bg-emerald-500" />
-                    <span className="size-2 animate-pulse rounded-full bg-emerald-500 [animation-delay:150ms]" />
-                    <span className="size-2 animate-pulse rounded-full bg-emerald-500 [animation-delay:300ms]" />
+                    <span className="size-2 animate-pulse rounded-full bg-indigo-500" />
+                    <span className="size-2 animate-pulse rounded-full bg-indigo-500 [animation-delay:150ms]" />
+                    <span className="size-2 animate-pulse rounded-full bg-indigo-500 [animation-delay:300ms]" />
                 </div>
                 <span className="text-sm text-muted-foreground">
-                    Thinking...
+                    Just a moment...
                 </span>
             </div>
         </div>
@@ -179,12 +183,12 @@ function StreamingIndicator() {
             <MessageAvatar role="assistant" />
             <div className="flex items-center gap-2 rounded-2xl bg-muted px-4 py-3">
                 <div className="flex items-center gap-1">
-                    <span className="size-2 animate-bounce rounded-full bg-emerald-500 [animation-delay:-0.3s]" />
-                    <span className="size-2 animate-bounce rounded-full bg-emerald-500 [animation-delay:-0.15s]" />
-                    <span className="size-2 animate-bounce rounded-full bg-emerald-500" />
+                    <span className="size-2 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.3s]" />
+                    <span className="size-2 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.15s]" />
+                    <span className="size-2 animate-bounce rounded-full bg-indigo-500" />
                 </div>
                 <span className="text-sm text-muted-foreground">
-                    Generating response...
+                    Crafting the perfect response...
                 </span>
             </div>
         </div>
