@@ -138,7 +138,7 @@ final class TelegramMessageService
         $message = $chat->message($chunk);
 
         if ($markdown) {
-            $message->markdown();
+            $message->markdownV2();
         }
 
         $message->dispatch(self::QUEUE_NAME);

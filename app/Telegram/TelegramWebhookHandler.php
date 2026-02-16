@@ -403,7 +403,7 @@ final class TelegramWebhookHandler extends WebhookHandler
             $linkedChat->update(['conversation_id' => $result['conversation_id']]);
         }
 
-        $this->telegramMessage->sendLongMessage($this->chat, $result['response']);
+        $this->telegramMessage->sendLongMessage($this->chat, $result['response'], true);
     }
 
     private function formatProfileInfo(User $user): string
