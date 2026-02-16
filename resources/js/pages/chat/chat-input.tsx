@@ -75,22 +75,22 @@ export default function ChatInput({
     const SelectedModeIcon = CHAT_MODES[selectedMode].icon;
 
     return (
-        <div className="mx-auto flex w-full max-w-3xl items-end bg-background p-0.5 md:px-4 md:py-4">
+        <div className="mx-auto flex w-full max-w-3xl items-end bg-background p-0.5 md:px-4 md:py-2">
             <div
                 className={cn(
                     'w-full rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
                     className,
                 )}
             >
-                <div className="p-2">
+                <div className="p-2 sm:p-3">
                     <textarea
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder={t('chat.placeholder')}
                         disabled={disabled}
-                        className="min-h-10 w-full resize-y bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
-                        rows={2}
+                        className="w-full resize-y bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
+                        rows={1}
                     />
                 </div>
                 <div className="flex items-center justify-between px-2 pb-2">
