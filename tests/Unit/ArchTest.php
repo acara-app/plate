@@ -19,7 +19,6 @@ arch('strict rules')
         'App\Ai',
         'App\Http\Requests',
         'App\Services\Telegram',
-        'App\Telegram',
     ]);
 
 arch('controllers')

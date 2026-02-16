@@ -145,7 +145,6 @@
                 </div>
             </section>
 
-            {{-- Tools Section --}}
             <section class="w-full max-w-6xl">
                 <div class="space-y-6">
                     <div class="text-center">
@@ -217,7 +216,6 @@
                 </div>
             </section>
 
-            {{-- Features Section --}}
             <section class="w-full max-w-6xl">
                 <div class="space-y-4 lg:space-y-6">
                     <div class="text-center">
@@ -298,9 +296,8 @@
                             </div>
                         </div>
 
-{{-- Health Coach Feature Card --}}
                         <div
-                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-indigo-500 hover:bg-slate-50 hover:shadow-md lg:col-span-4">
+                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-indigo-500 hover:bg-slate-50 hover:shadow-md lg:col-span-2">
                             <div class="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left lg:gap-6">
                                 <div
                                     class="mb-3 rounded-lg bg-indigo-100 p-3 transition-transform duration-300 group-hover/card:scale-110 shrink-0">
@@ -326,9 +323,8 @@
                             </div>
                         </div>
 
-                        {{-- Personal Trainer Feature Card --}}
                         <div
-                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-500 hover:bg-slate-50 hover:shadow-md lg:col-span-4">
+                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-500 hover:bg-slate-50 hover:shadow-md lg:col-span-2">
                             <div class="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left lg:gap-6">
                                 <div
                                     class="mb-3 rounded-lg bg-orange-100 p-3 transition-transform duration-300 group-hover/card:scale-110 shrink-0">
@@ -357,7 +353,6 @@
                 </div>
             </section>
 
-            {{-- Trending Low-GI Foods Section (SEO Internal Links) --}}
             @if(isset($featuredFoods) && $featuredFoods->count() > 0)
             <section class="w-full max-w-6xl">
                 <div class="space-y-4 lg:space-y-6">
@@ -384,7 +379,6 @@
             </section>
             @endif
 
-            {{-- How It Works Section --}}
             <section class="w-full max-w-6xl">
                 <div class="space-y-4 lg:space-y-6">
                     <div class="text-center">
@@ -440,7 +434,6 @@
                 </div>
             </section>
 
-            {{-- Open Source Section --}}
             <section class="w-full max-w-6xl">
                 <div
                     class="relative overflow-hidden rounded-3xl bg-slate-900 px-6 py-12 shadow-2xl sm:px-12 sm:py-16 lg:px-16">
@@ -491,7 +484,6 @@
                 </div>
             </section>
 
-            {{-- FAQ Section --}}
             <section class="w-full max-w-6xl">
                 <div class="space-y-4 lg:space-y-6">
                     <div class="text-center">

@@ -36,7 +36,7 @@ return [
          *
          * For reference, see https://docs.defstudio.it/telegraph/webhooks/overview
          */
-        'handler' => App\Telegram\TelegramWebhookHandler::class,
+        'handler' => App\Services\Telegram\TelegramWebhookHandler::class,
 
         /*
          * Middleware to be applied to the webhook route

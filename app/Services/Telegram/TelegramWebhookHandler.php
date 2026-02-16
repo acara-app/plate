@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Telegram;
+namespace App\Services\Telegram;
 
 use App\Actions\SaveHealthLogAction;
 use App\Contracts\GeneratesAiResponse;
@@ -12,7 +12,6 @@ use App\Enums\HealthEntryType;
 use App\Exceptions\TelegramUserException;
 use App\Models\User;
 use App\Models\UserTelegramChat;
-use App\Services\Telegram\TelegramMessageService;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Stringable;
@@ -25,8 +24,7 @@ final class TelegramWebhookHandler extends WebhookHandler
         private readonly TelegramMessageService $telegramMessage,
         private readonly ParsesHealthData $healthDataParser,
         private readonly SaveHealthLogAction $saveHealthLog,
-    ) {
-    }
+    ) {}
 
     public function start(): void
     {

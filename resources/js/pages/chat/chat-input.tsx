@@ -15,20 +15,21 @@ import {
     UtensilsCrossed,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const AI_MODELS = {
-    'gemini-3-flash-preview': 'Gemini 3 Flash',
+    'gemini-3-flash-preview': 'chat.models.gemini_3_flash',
 } as const;
 
 export type AIModel = keyof typeof AI_MODELS;
 
 export const CHAT_MODES = {
     ask: {
-        label: 'Ask',
+        label: 'chat.modes.ask',
         icon: MessageSquare,
     },
     'generate-meal-plan': {
-        label: 'Generate Meal Plan',
+        label: 'chat.modes.meal_plan',
         icon: UtensilsCrossed,
     },
 } as const;
@@ -50,6 +51,7 @@ export default function ChatInput({
     isLoading = false,
     mode,
 }: Props) {
+    const { t } = useTranslation('common');
     const [message, setMessage] = useState('');
     const [selectedMode, setSelectedMode] = useState<ChatMode>(mode || 'ask');
     const [selectedModel, setSelectedModel] = useState<AIModel>(
@@ -85,7 +87,7 @@ export default function ChatInput({
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder="Ask anything"
+                        placeholder={t('chat.placeholder')}
                         disabled={disabled}
                         className="min-h-10 w-full resize-y bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
                         rows={2}
@@ -103,7 +105,7 @@ export default function ChatInput({
                                     <SelectedModeIcon className="size-4" />
                                     {selectedMode !== 'generate-meal-plan' && (
                                         <span>
-                                            {CHAT_MODES[selectedMode].label}
+                                            {t(CHAT_MODES[selectedMode].label)}
                                         </span>
                                     )}
                                     <ChevronDown className="size-3.5 opacity-60" />
@@ -124,7 +126,7 @@ export default function ChatInput({
                                             )}
                                         >
                                             <Icon className="size-4" />
-                                            <span>{label}</span>
+                                            <span>{t(label)}</span>
                                         </DropdownMenuItem>
                                     ),
                                 )}
@@ -150,7 +152,7 @@ export default function ChatInput({
                                     className="gap-1.5 text-muted-foreground hover:text-foreground"
                                 >
                                     <span className="max-w-[80px] truncate sm:max-w-[90px]">
-                                        {AI_MODELS[selectedModel]}
+                                        {t(AI_MODELS[selectedModel])}
                                     </span>
                                     <ChevronDown className="size-3.5 opacity-60" />
                                 </Button>
@@ -168,7 +170,7 @@ export default function ChatInput({
                                                     'bg-accent text-accent-foreground',
                                             )}
                                         >
-                                            <span>{label}</span>
+                                            <span>{t(label)}</span>
                                         </DropdownMenuItem>
                                     ),
                                 )}
