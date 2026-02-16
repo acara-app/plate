@@ -25,7 +25,8 @@ final class TelegramWebhookHandler extends WebhookHandler
         private readonly TelegramMessageService $telegramMessage,
         private readonly ParsesHealthData $healthDataParser,
         private readonly SaveHealthLogAction $saveHealthLog,
-    ) {}
+    ) {
+    }
 
     public function start(): void
     {
@@ -392,30 +393,17 @@ final class TelegramWebhookHandler extends WebhookHandler
 
     private function generateAndSendResponse(UserTelegramChat $linkedChat, string $message): void
     {
-        $conversationId = $linkedChat->conversation_id;
-
-        if ($conversationId === null) {
-            $conversationId = $this->generateAiResponse->resetConversation($linkedChat->user);
-            $linkedChat->update(['conversation_id' => $conversationId]);
-        }
-
-        $this->telegramMessage->sendTypingIndicator($this->chat);
-
-        $streamResponse = $this->generateAiResponse->stream(
+        $result = $this->generateAiResponse->handle(
             $linkedChat->user,
             $message,
-            $conversationId,
+            $linkedChat->conversation_id,
         );
 
-        $chunks = [];
-        foreach ($streamResponse as $event) {
-            if ($event instanceof \Laravel\Ai\Streaming\Events\TextDelta) {
-                $chunks[] = $event->delta;
-            }
+        if ($linkedChat->conversation_id === null) {
+            $linkedChat->update(['conversation_id' => $result['conversation_id']]);
         }
 
-        $this->telegramMessage->sendStreamingMessage($this->chat, $chunks);
-        $this->telegramMessage->stopTypingIndicator($this->chat);
+        $this->telegramMessage->sendLongMessage($this->chat, $result['response']);
     }
 
     private function formatProfileInfo(User $user): string

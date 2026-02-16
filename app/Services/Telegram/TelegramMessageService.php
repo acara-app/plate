@@ -11,7 +11,7 @@ final class TelegramMessageService
 {
     public const int MAX_MESSAGE_LENGTH = 4096;
 
-    private const int CHUNK_DELAY_MS = 500;
+    private const int CHUNK_DELAY_MS = 1000;
 
     private const string QUEUE_NAME = 'telegram';
 
@@ -31,33 +31,11 @@ final class TelegramMessageService
         $chunks = $this->splitMessage($message);
 
         foreach ($chunks as $index => $chunk) {
-            $this->dispatchMessage($chat, $chunk);
+            $this->dispatchMessage($chat, $chunk, $markdown);
 
             if ($index < count($chunks) - 1) {
                 Sleep::usleep(self::CHUNK_DELAY_MS * 1000);
             }
-        }
-    }
-
-    public function sendStreamingMessage(TelegraphChat $chat, iterable $chunks): void
-    {
-        $buffer = '';
-        $chunkCount = 0;
-
-        foreach ($chunks as $chunk) {
-            $buffer .= $chunk;
-            $chunkCount++;
-
-            if (mb_strlen($buffer) >= 500 || $chunkCount >= 10) {
-                $this->dispatchMessage($chat, $buffer);
-                Sleep::usleep(self::CHUNK_DELAY_MS * 1000);
-                $buffer = '';
-                $chunkCount = 0;
-            }
-        }
-
-        if ($buffer !== '') {
-            $this->dispatchMessage($chat, $buffer);
         }
     }
 
@@ -76,11 +54,6 @@ final class TelegramMessageService
     }
 
     public function sendTypingIndicator(TelegraphChat $chat): void
-    {
-        $chat->action('typing')->send();
-    }
-
-    public function stopTypingIndicator(TelegraphChat $chat): void
     {
         $chat->action('typing')->send();
     }
@@ -160,8 +133,14 @@ final class TelegramMessageService
         return mb_substr($text, 0, $lastPosition + 1);
     }
 
-    private function dispatchMessage(TelegraphChat $chat, string $content): void
+    private function dispatchMessage(TelegraphChat $chat, string $chunk, bool $markdown): void
     {
-        $chat->message($content)->markdownV2()->dispatch(self::QUEUE_NAME);
+        $message = $chat->message($chunk);
+
+        if ($markdown) {
+            $message->markdown();
+        }
+
+        $message->dispatch(self::QUEUE_NAME);
     }
 }

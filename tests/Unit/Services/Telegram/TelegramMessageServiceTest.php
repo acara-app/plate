@@ -168,7 +168,7 @@ describe('message sending', function (): void {
 
         $service->sendLongMessage($chat, '**Bold text**');
 
-        Telegraph::assertSentData(DefStudio\Telegraph\Telegraph::ENDPOINT_MESSAGE);
+        Telegraph::assertSent('**Bold text**');
     });
 
     it('sends chunked messages for long content', function (): void {

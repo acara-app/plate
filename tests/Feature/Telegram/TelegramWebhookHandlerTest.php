@@ -296,28 +296,23 @@ describe('chat message handling', function (): void {
             'conversation_id' => 'existing-conv',
         ]);
 
-        $events = [
-            new Laravel\Ai\Streaming\Events\TextDelta(
-                id: 'test-id',
-                messageId: 'msg-1',
-                delta: 'Here are some breakfast suggestions...',
-                timestamp: time(),
-            ),
-        ];
-        $iterator = new ArrayIterator($events);
-
-        $mockResponse = Mockery::mock(StreamableAgentResponse::class);
-        $mockResponse->shouldReceive('getIterator')->andReturn($iterator);
-
         $mock = Mockery::mock(GeneratesAiResponse::class);
-        $mock->shouldReceive('stream')
+        $mock->shouldReceive('handle')
             ->once()
-            ->andReturn($mockResponse);
+            ->with(
+                Mockery::on(fn (User $u): bool => $u->id === $user->id),
+                'What should I eat for breakfast?',
+                'existing-conv',
+            )
+            ->andReturn([
+                'response' => 'Here are some breakfast suggestions...',
+                'conversation_id' => 'existing-conv',
+            ]);
         app()->instance(GeneratesAiResponse::class, $mock);
 
         sendWebhook($this, 'What should I eat for breakfast?');
 
-        Telegraph::assertSentData('sendMessage');
+        Telegraph::assertSent('Here are some breakfast suggestions...', false);
     });
 
     it('stores conversation id on first message', function (): void {
@@ -328,30 +323,18 @@ describe('chat message handling', function (): void {
             'conversation_id' => null,
         ]);
 
-        $mockStream = Mockery::mock(StreamableAgentResponse::class);
-        $mockStream->shouldReceive('getIterator')
-            ->andReturn(new ArrayIterator([
-                new Laravel\Ai\Streaming\Events\TextDelta(
-                    id: 'test-id',
-                    messageId: 'msg-1',
-                    delta: 'Welcome!',
-                    timestamp: time(),
-                ),
-            ]));
-
         $mock = Mockery::mock(GeneratesAiResponse::class);
-        $mock->shouldReceive('resetConversation')
-            ->once()
-            ->with(Mockery::on(fn (User $u): bool => $u->id === $user->id))
-            ->andReturn('first-conv-id');
-        $mock->shouldReceive('stream')
+        $mock->shouldReceive('handle')
             ->once()
             ->with(
                 Mockery::on(fn (User $u): bool => $u->id === $user->id),
                 'Hello!',
-                'first-conv-id',
+                null,
             )
-            ->andReturn($mockStream);
+            ->andReturn([
+                'response' => 'Welcome!',
+                'conversation_id' => 'first-conv-id',
+            ]);
         app()->instance(GeneratesAiResponse::class, $mock);
 
         sendWebhook($this, 'Hello!');
@@ -367,26 +350,13 @@ describe('chat message handling', function (): void {
             'conversation_id' => 'existing-conv',
         ]);
 
-        $mockStream = Mockery::mock(StreamableAgentResponse::class);
-        $mockStream->shouldReceive('getIterator')
-            ->andReturn(new ArrayIterator([
-                new Laravel\Ai\Streaming\Events\TextDelta(
-                    id: 'test-id',
-                    messageId: 'msg-1',
-                    delta: 'Response',
-                    timestamp: time(),
-                ),
-            ]));
-
         $mock = Mockery::mock(GeneratesAiResponse::class);
-        $mock->shouldReceive('stream')
+        $mock->shouldReceive('handle')
             ->once()
-            ->with(
-                Mockery::on(fn (User $u): bool => $u->id === $user->id),
-                'Follow-up message',
-                'existing-conv',
-            )
-            ->andReturn($mockStream);
+            ->andReturn([
+                'response' => 'Response',
+                'conversation_id' => 'some-new-conv',
+            ]);
         app()->instance(GeneratesAiResponse::class, $mock);
 
         sendWebhook($this, 'Follow-up message');
@@ -402,11 +372,7 @@ describe('chat message handling', function (): void {
         ]);
 
         $mock = Mockery::mock(GeneratesAiResponse::class);
-        $mock->shouldReceive('resetConversation')
-            ->once()
-            ->andReturn('new-conv-id');
-        $mock->shouldReceive('stream')
-            ->once()
+        $mock->shouldReceive('handle')
             ->andThrow(new Exception('AI service unavailable'));
         app()->instance(GeneratesAiResponse::class, $mock);
 

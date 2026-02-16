@@ -8,14 +8,14 @@ use App\Contracts\Ai\Advisor;
 use App\Contracts\GeneratesAiResponse;
 use App\Models\User;
 use Laravel\Ai\Contracts\ConversationStore;
-use Laravel\Ai\Responses\StreamableAgentResponse;
 
 final readonly class GenerateAiResponseAction implements GeneratesAiResponse
 {
     public function __construct(
         private Advisor $advisor,
         private ConversationStore $conversationStore,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array{response: string, conversation_id: string}
@@ -32,16 +32,6 @@ final readonly class GenerateAiResponseAction implements GeneratesAiResponse
             'response' => $response->text,
             'conversation_id' => $conversationId,
         ];
-    }
-
-    public function stream(User $user, string $message, ?string $conversationId = null): StreamableAgentResponse
-    {
-        $conversationId ??= $this->conversationStore->latestConversationId($user->id)
-            ?? $this->conversationStore->storeConversation($user->id, 'Telegram Chat');
-
-        $agent = $this->advisor->continue($conversationId, $user);
-
-        return $agent->stream($message);
     }
 
     public function resetConversation(User $user): string
