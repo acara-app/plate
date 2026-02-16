@@ -42,7 +42,9 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
     Route::get('/chat/create/{conversationId?}', [Web\ChatController::class, 'create'])
         ->name('chat.create');
-    Route::post('chat/stream', [Web\ChatController::class, 'stream'])->name('chat.stream');
+    Route::post('chat/stream', [Web\ChatController::class, 'stream'])
+        ->middleware(\App\Http\Middleware\DisableResponseBuffering::class)
+        ->name('chat.stream');
 
     Route::post('meal-plans', Web\StoreMealPlanController::class)->name('meal-plans.store');
     Route::get('meal-plans', Web\ShowMealPlansController::class)->name('meal-plans.index');
