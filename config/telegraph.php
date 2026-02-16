@@ -15,7 +15,7 @@ return [
      * Sets Telegraph messages default parse mode
      * allowed values: html|markdown|MarkdownV2
      */
-    'default_parse_mode' => Telegraph::PARSE_HTML,
+    'default_parse_mode' => Telegraph::PARSE_MARKDOWN,
 
     'webhook' => [
         /*

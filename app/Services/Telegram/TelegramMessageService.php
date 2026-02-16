@@ -137,12 +137,6 @@ final class TelegramMessageService
 
     private function dispatchMessage(TelegraphChat $chat, string $chunk, bool $markdown): void
     {
-        if ($markdown) {
-            $converter = new GithubFlavoredMarkdownConverter();
-            $chunk = $converter->convert($chunk)->getContent();
-            $chat->html($chunk)->send();
-        } else {
-            $chat->message($chunk)->send();
-        }
+        $chat->message($chunk)->send();
     }
 }
