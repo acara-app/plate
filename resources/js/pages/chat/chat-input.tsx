@@ -28,7 +28,7 @@ export const CHAT_MODES = {
         label: 'chat.modes.ask',
         icon: MessageSquare,
     },
-    'generate-meal-plan': {
+    'create-meal-plan': {
         label: 'chat.modes.meal_plan',
         icon: UtensilsCrossed,
     },
@@ -103,7 +103,7 @@ export default function ChatInput({
                                     className="gap-1.5"
                                 >
                                     <SelectedModeIcon className="size-4" />
-                                    {selectedMode !== 'generate-meal-plan' && (
+                                    {selectedMode !== 'create-meal-plan' && (
                                         <span>
                                             {t(CHAT_MODES[selectedMode].label)}
                                         </span>

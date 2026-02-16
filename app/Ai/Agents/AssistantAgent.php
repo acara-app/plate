@@ -40,7 +40,8 @@ final class AssistantAgent implements Advisor
         private readonly GetHealthGoals $getHealthGoalsTool,
         private readonly SuggestWorkoutRoutine $suggestWorkoutRoutineTool,
         private readonly GetFitnessGoals $getFitnessGoalsTool,
-    ) {}
+    ) {
+    }
 
     public function withMode(AgentMode $mode): self
     {
@@ -158,8 +159,8 @@ final class AssistantAgent implements Advisor
 
         if ($this->mode === AgentMode::CreateMealPlan) {
             $context[] = '';
-            $context[] = 'The user has explicitly selected "Generate Meal Plan" mode. They want a complete multi-day meal plan.';
-            $context[] = 'Use the generate_meal_plan tool to initiate the meal plan generation workflow.';
+            $context[] = 'The user has explicitly selected "Create Meal Plan" mode. They want a complete multi-day meal plan.';
+            $context[] = 'Use the create_meal_plan tool to initiate the meal plan generation workflow.';
         }
 
         return $context;
@@ -174,8 +175,8 @@ final class AssistantAgent implements Advisor
             '1. Analyze the user\'s message to understand their wellness needs (nutrition, fitness, health/lifestyle)',
             '2. Review the user\'s profile context to understand their biometrics, goals, and constraints',
             '3. Use appropriate tools based on user intent:',
-            '   - generate_meal: For specific meal suggestions',
-            '   - generate_meal_plan: For multi-day meal plans or when in "Generate Meal Plan" mode',
+            '   - suggest_meal: For specific meal suggestions',
+            '   - create_meal_plan: For multi-day meal plans or when in "Create Meal Plan" mode',
             '   - predict_glucose_spike: For food/meal glucose impact questions',
             '   - suggest_wellness_routine: For sleep, stress, hydration, or lifestyle routines',
             '   - suggest_workout_routine: For fitness and exercise guidance',
@@ -218,8 +219,8 @@ final class AssistantAgent implements Advisor
     private function getToolsUsageInstructions(): array
     {
         return [
-            'generate_meal: Use when user wants specific meal suggestions',
-            'generate_meal_plan: Use for multi-day meal plans or when in "Generate Meal Plan" mode',
+            'suggest_meal: Use when user wants specific meal suggestions',
+            'create_meal_plan: Use for multi-day meal plans or when in "Create Meal Plan" mode',
             'predict_glucose_spike: Use for food/meal glucose impact questions',
             'suggest_wellness_routine: Use for sleep, stress, hydration, or lifestyle guidance',
             'suggest_workout_routine: Use for fitness and exercise recommendations',

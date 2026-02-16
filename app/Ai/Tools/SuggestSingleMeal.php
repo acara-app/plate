@@ -16,7 +16,13 @@ final readonly class SuggestSingleMeal implements Tool
 {
     public function __construct(
         private SingleMealAgent $singleMealAgent,
-    ) {}
+    ) {
+    }
+
+    public function name(): string
+    {
+        return 'suggest_meal';
+    }
 
     public function description(): string
     {
