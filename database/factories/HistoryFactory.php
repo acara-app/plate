@@ -29,7 +29,7 @@ final class HistoryFactory extends Factory
             'id' => (string) Str::uuid7(),
             'conversation_id' => Conversation::factory(),
             'user_id' => User::factory(),
-            'agent' => \App\Ai\Agents\NutritionAdvisor::class,
+            'agent' => \App\Ai\Agents\AssistantAgent::class,
             'role' => fake()->randomElement([MessageRole::User, MessageRole::Assistant]),
             'content' => fake()->paragraph(),
             'attachments' => [],

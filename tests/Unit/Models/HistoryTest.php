@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\NutritionAdvisor;
+use App\Ai\Agents\AssistantAgent;
 use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
@@ -73,10 +73,10 @@ it('casts array fields to arrays', function (): void {
         ->and($history->meta)->toBeArray()->toHaveKey('key');
 });
 
-it('defaults agent to NutritionAdvisor', function (): void {
+it('defaults agent to AssistantAgent', function (): void {
     $history = History::factory()->create();
 
-    expect($history->agent)->toBe(NutritionAdvisor::class);
+    expect($history->agent)->toBe(AssistantAgent::class);
 });
 
 it('can set custom agent', function (): void {

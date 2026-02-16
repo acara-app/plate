@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use App\Actions\ProcessAdvisorMessageAction;
-use App\Ai\Agents\NutritionAdvisor;
+use App\Ai\Agents\AssistantAgent;
 use App\Models\User;
 use Laravel\Ai\Contracts\ConversationStore;
 
 it('creates new conversation when none exists', function (): void {
-    NutritionAdvisor::fake(['Hello!']);
+    AssistantAgent::fake(['Hello!']);
 
     $conversationStore = mock(ConversationStore::class);
     $conversationStore
@@ -24,7 +24,7 @@ it('creates new conversation when none exists', function (): void {
         ->andReturn('conv-123');
 
     $action = new ProcessAdvisorMessageAction(
-        resolve(NutritionAdvisor::class),
+        resolve(AssistantAgent::class),
         $conversationStore,
     );
 
@@ -33,14 +33,14 @@ it('creates new conversation when none exists', function (): void {
 
     expect($result['response'])->toBe('Hello!');
     expect($result['conversation_id'])->toBe('conv-123');
-    NutritionAdvisor::assertPrompted('Test message');
+    AssistantAgent::assertPrompted('Test message');
 });
 
 it('uses existing conversation when provided', function (): void {
-    NutritionAdvisor::fake(['Continuing...']);
+    AssistantAgent::fake(['Continuing...']);
 
     $action = new ProcessAdvisorMessageAction(
-        resolve(NutritionAdvisor::class),
+        resolve(AssistantAgent::class),
         resolve(ConversationStore::class),
     );
 
@@ -52,7 +52,7 @@ it('uses existing conversation when provided', function (): void {
 });
 
 it('reuses latest conversation when no id provided but exists', function (): void {
-    NutritionAdvisor::fake(['Reusing!']);
+    AssistantAgent::fake(['Reusing!']);
 
     $conversationStore = mock(ConversationStore::class);
     $conversationStore
@@ -62,7 +62,7 @@ it('reuses latest conversation when no id provided but exists', function (): voi
         ->andReturn('latest-conv');
 
     $action = new ProcessAdvisorMessageAction(
-        resolve(NutritionAdvisor::class),
+        resolve(AssistantAgent::class),
         $conversationStore,
     );
 
@@ -82,7 +82,7 @@ it('resets conversation', function (): void {
         ->andReturn('new-conv');
 
     $action = new ProcessAdvisorMessageAction(
-        resolve(NutritionAdvisor::class),
+        resolve(AssistantAgent::class),
         $conversationStore,
     );
 
