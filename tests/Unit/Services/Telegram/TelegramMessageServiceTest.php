@@ -23,12 +23,12 @@ describe('message chunking', function (): void {
 
     it('returns single chunk for message at max length', function (): void {
         $service = new TelegramMessageService();
-        $message = str_repeat('a', TelegramMessageService::getMaxMessageLength());
+        $message = str_repeat('a', TelegramMessageService::getSafeMessageLength());
 
         $chunks = $service->splitMessage($message);
 
         expect($chunks)->toHaveCount(1)
-            ->and(mb_strlen($chunks[0]))->toBe(TelegramMessageService::getMaxMessageLength());
+            ->and(mb_strlen($chunks[0]))->toBe(TelegramMessageService::getSafeMessageLength());
     });
 
     it('splits at paragraph boundary when available', function (): void {
@@ -63,7 +63,8 @@ describe('message chunking', function (): void {
         $service = new TelegramMessageService();
 
         // Create a message that's just over max length without line breaks
-        $sentence1 = str_repeat('A ', 2000); // 4000 chars
+        // Safe length is 3800. We need sentence1 to be < 3800.
+        $sentence1 = str_repeat('A ', 1800); // 3600 chars
         $sentence2 = str_repeat('B ', 500); // 1000 chars
         $message = $sentence1.'. '.$sentence2;
 
@@ -71,7 +72,7 @@ describe('message chunking', function (): void {
 
         expect($chunks)->toHaveCount(2)
             ->and($chunks[0])->toEndWith('.')
-            ->and(mb_strlen($chunks[0]))->toBeLessThanOrEqual(TelegramMessageService::getMaxMessageLength());
+            ->and(mb_strlen($chunks[0]))->toBeLessThanOrEqual(TelegramMessageService::getSafeMessageLength());
     });
 
     it('splits at word boundary as fallback', function (): void {
@@ -84,7 +85,7 @@ describe('message chunking', function (): void {
 
         expect($chunks)->toHaveCount(2);
         foreach ($chunks as $chunk) {
-            expect(mb_strlen($chunk))->toBeLessThanOrEqual(TelegramMessageService::getMaxMessageLength());
+            expect(mb_strlen($chunk))->toBeLessThanOrEqual(TelegramMessageService::getSafeMessageLength());
         }
     });
 
@@ -97,8 +98,8 @@ describe('message chunking', function (): void {
         $chunks = $service->splitMessage($message);
 
         expect($chunks)->toHaveCount(2)
-            ->and(mb_strlen($chunks[0]))->toBe(TelegramMessageService::getMaxMessageLength())
-            ->and(mb_strlen($chunks[1]))->toBe(904); // 5000 - 4096
+            ->and(mb_strlen($chunks[0]))->toBe(TelegramMessageService::getSafeMessageLength())
+            ->and(mb_strlen($chunks[1]))->toBe(5000 - TelegramMessageService::getSafeMessageLength());
     });
 
     it('handles empty message', function (): void {
@@ -133,7 +134,7 @@ describe('message chunking', function (): void {
 
         // Each chunk should be under limit
         foreach ($chunks as $chunk) {
-            expect(mb_strlen($chunk))->toBeLessThanOrEqual(TelegramMessageService::getMaxMessageLength());
+            expect(mb_strlen($chunk))->toBeLessThanOrEqual(TelegramMessageService::getSafeMessageLength());
         }
 
         // All content should be preserved
@@ -169,7 +170,8 @@ describe('message sending', function (): void {
         $service->sendLongMessage($chat, '**Bold text**');
 
         Telegraph::assertSentData(DefStudio\Telegraph\Telegraph::ENDPOINT_MESSAGE, [
-            'text' => "<p><strong>Bold text</strong></p>\n",
+            'text' => '<strong>Bold text</strong>',
+            'parse_mode' => 'html',
         ]);
     });
 
