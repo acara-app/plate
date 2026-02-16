@@ -7,6 +7,7 @@ namespace App\Services\Telegram;
 use DefStudio\Telegraph\Enums\ChatActions;
 use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Support\Sleep;
+use League\CommonMark\GithubFlavoredMarkdownConverter;
 
 final class TelegramMessageService
 {
@@ -136,10 +137,12 @@ final class TelegramMessageService
 
     private function dispatchMessage(TelegraphChat $chat, string $chunk, bool $markdown): void
     {
-        $message = $markdown
-            ? $chat->markdown($chunk)
-            : $chat->message($chunk);
-
-        $message->dispatch(self::QUEUE_NAME);
+        if ($markdown) {
+            $converter = new GithubFlavoredMarkdownConverter();
+            $chunk = $converter->convert($chunk)->getContent();
+            $chat->html($chunk)->dispatch(self::QUEUE_NAME);
+        } else {
+            $chat->message($chunk)->dispatch(self::QUEUE_NAME);
+        }
     }
 }
