@@ -140,9 +140,9 @@ final class TelegramMessageService
         if ($markdown) {
             $converter = new GithubFlavoredMarkdownConverter();
             $chunk = $converter->convert($chunk)->getContent();
-            $chat->html($chunk)->dispatch(self::QUEUE_NAME);
+            $chat->html($chunk)->send();
         } else {
-            $chat->message($chunk)->dispatch(self::QUEUE_NAME);
+            $chat->message($chunk)->send();
         }
     }
 }

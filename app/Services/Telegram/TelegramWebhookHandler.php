@@ -14,7 +14,9 @@ use App\Models\User;
 use App\Models\UserTelegramChat;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Stringable;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 final class TelegramWebhookHandler extends WebhookHandler
@@ -203,6 +205,23 @@ final class TelegramWebhookHandler extends WebhookHandler
 
         $linkedChat->clearPendingHealthLog();
         $this->chat->message('❌ Log discarded. Tell me if you want to log something else!')->send();
+    }
+
+    protected function onFailure(Throwable $throwable): void
+    {
+        if ($throwable instanceof NotFoundHttpException) {
+            throw $throwable;
+        }
+
+        Log::error('Telegram webhook error', [
+            'exception' => $throwable->getMessage(),
+            'class' => get_class($throwable),
+            'chat_id' => $this->chat?->chat_id,
+        ]);
+
+        report($throwable);
+
+        rescue(fn () => $this->reply('❌ Sorry, I encountered an error while processing your message. Please try again or contact support if the problem persists.'), report: false);
     }
 
     protected function handleChatMessage(Stringable $text): void
