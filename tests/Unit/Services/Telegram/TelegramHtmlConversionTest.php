@@ -39,6 +39,18 @@ test('converts lists to telegram compatible format', function (): void {
         ->toContain('• Item 2');
 });
 
+test('handles complex structure without excessive whitespace', function (): void {
+    $service = new TelegramMessageService();
+    $reflection = new ReflectionClass(TelegramMessageService::class);
+    $method = $reflection->getMethod('convertMarkdownToHtml');
+
+    $markdown = "Paragraph 1\n\n- Item 1\n- Item 2\n\nParagraph 2";
+    $html = $method->invoke($service, $markdown);
+
+    // We expect max 2 newlines ideally
+    expect($html)->not->toContain("\n\n\n");
+});
+
 test('safe message length is respected', function (): void {
     $reflection = new ReflectionClass(TelegramMessageService::class);
     $constant = $reflection->getReflectionConstant('SAFE_MESSAGE_LENGTH');

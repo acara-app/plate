@@ -181,6 +181,9 @@ final class TelegramMessageService
         // Strip unsupported tags
         // Telegram supports: <b>, <strong>, <i>, <em>, <u>, <ins>, <s>, <strike>, <del>,
         // <span class="tg-spoiler">, <a>, <code>, <pre>, <blockquote>
-        return trim(strip_tags($html, '<b><strong><i><em><u><ins><s><strike><del><a><code><pre><blockquote>'));
+        $html = strip_tags($html, '<b><strong><i><em><u><ins><s><strike><del><a><code><pre><blockquote>');
+
+        // Collapse multiple newlines into max 2
+        return trim(preg_replace('/\n{3,}/', "\n\n", $html));
     }
 }
