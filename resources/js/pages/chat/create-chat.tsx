@@ -7,7 +7,7 @@ import type { ChatPageProps, UIMessage } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import ChatInput, { type AIModel, type ChatMode } from './chat-input';
-import ChatMessages, { ChatErrorBanner } from './chate-messages';
+import ChatMessages, { ChatErrorBanner } from './chat-messages';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
