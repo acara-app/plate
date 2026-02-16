@@ -6,7 +6,6 @@ namespace App\Services\Telegram;
 
 use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Support\Sleep;
-use League\CommonMark\CommonMarkConverter;
 
 final class TelegramMessageService
 {
@@ -22,16 +21,6 @@ final class TelegramMessageService
 
     private const array SPLIT_PRIORITIES = ["\n\n", "\n"];
 
-    private CommonMarkConverter $markdownConverter;
-
-    public function __construct()
-    {
-        $this->markdownConverter = new CommonMarkConverter([
-            'html_input' => 'strip',
-            'allow_unsafe_links' => false,
-        ]);
-    }
-
     public static function getMaxMessageLength(): int
     {
         return self::MAX_MESSAGE_LENGTH;
@@ -42,8 +31,7 @@ final class TelegramMessageService
         $chunks = $this->splitMessage($message);
 
         foreach ($chunks as $index => $chunk) {
-            $content = $markdown ? $this->convertToHtml($chunk) : $chunk;
-            $this->dispatchMessage($chat, $content);
+            $this->dispatchMessage($chat, $chunk);
 
             if ($index < count($chunks) - 1) {
                 Sleep::usleep(self::CHUNK_DELAY_MS * 1000);
@@ -51,7 +39,7 @@ final class TelegramMessageService
         }
     }
 
-    public function sendStreamingMessage(TelegraphChat $chat, iterable $chunks, bool $html = false): void
+    public function sendStreamingMessage(TelegraphChat $chat, iterable $chunks): void
     {
         $buffer = '';
         $chunkCount = 0;
@@ -61,8 +49,7 @@ final class TelegramMessageService
             $chunkCount++;
 
             if (mb_strlen($buffer) >= 500 || $chunkCount >= 10) {
-                $content = $html ? $buffer : $this->convertToHtml($buffer);
-                $this->dispatchMessage($chat, $content);
+                $this->dispatchMessage($chat, $buffer);
                 Sleep::usleep(self::CHUNK_DELAY_MS * 1000);
                 $buffer = '';
                 $chunkCount = 0;
@@ -70,14 +57,8 @@ final class TelegramMessageService
         }
 
         if ($buffer !== '') {
-            $content = $html ? $buffer : $this->convertToHtml($buffer);
-            $this->dispatchMessage($chat, $content);
+            $this->dispatchMessage($chat, $buffer);
         }
-    }
-
-    public function convertToHtml(string $markdown): string
-    {
-        return $this->markdownConverter->convert($markdown)->getContent();
     }
 
     /**
@@ -181,6 +162,6 @@ final class TelegramMessageService
 
     private function dispatchMessage(TelegraphChat $chat, string $content): void
     {
-        $chat->message($content)->html()->dispatch(self::QUEUE_NAME);
+        $chat->message($content)->markdownV2()->dispatch(self::QUEUE_NAME);
     }
 }
