@@ -6,12 +6,13 @@ namespace App\Services\Telegram;
 
 use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Support\Sleep;
+use League\CommonMark\CommonMarkConverter;
 
 final class TelegramMessageService
 {
     public const int MAX_MESSAGE_LENGTH = 4096;
 
-    private const int CHUNK_DELAY_MS = 1000;
+    private const int CHUNK_DELAY_MS = 500;
 
     private const string QUEUE_NAME = 'telegram';
 
@@ -20,6 +21,16 @@ final class TelegramMessageService
     private const array SENTENCE_ENDINGS = ['. ', '! ', '? ', ".\n", "!\n", "?\n"];
 
     private const array SPLIT_PRIORITIES = ["\n\n", "\n"];
+
+    private CommonMarkConverter $markdownConverter;
+
+    public function __construct()
+    {
+        $this->markdownConverter = new CommonMarkConverter([
+            'html_input' => 'strip',
+            'allow_unsafe_links' => false,
+        ]);
+    }
 
     public static function getMaxMessageLength(): int
     {
@@ -31,12 +42,42 @@ final class TelegramMessageService
         $chunks = $this->splitMessage($message);
 
         foreach ($chunks as $index => $chunk) {
-            $this->dispatchMessage($chat, $chunk, $markdown);
+            $content = $markdown ? $this->convertToHtml($chunk) : $chunk;
+            $this->dispatchMessage($chat, $content);
 
             if ($index < count($chunks) - 1) {
                 Sleep::usleep(self::CHUNK_DELAY_MS * 1000);
             }
         }
+    }
+
+    public function sendStreamingMessage(TelegraphChat $chat, iterable $chunks, bool $html = false): void
+    {
+        $buffer = '';
+        $chunkCount = 0;
+
+        foreach ($chunks as $chunk) {
+            $buffer .= $chunk;
+            $chunkCount++;
+
+            if (mb_strlen($buffer) >= 500 || $chunkCount >= 10) {
+                $content = $html ? $buffer : $this->convertToHtml($buffer);
+                $this->dispatchMessage($chat, $content);
+                Sleep::usleep(self::CHUNK_DELAY_MS * 1000);
+                $buffer = '';
+                $chunkCount = 0;
+            }
+        }
+
+        if ($buffer !== '') {
+            $content = $html ? $buffer : $this->convertToHtml($buffer);
+            $this->dispatchMessage($chat, $content);
+        }
+    }
+
+    public function convertToHtml(string $markdown): string
+    {
+        return $this->markdownConverter->convert($markdown)->getContent();
     }
 
     /**
@@ -55,7 +96,12 @@ final class TelegramMessageService
 
     public function sendTypingIndicator(TelegraphChat $chat): void
     {
-        $chat->action('typing')->dispatch(self::QUEUE_NAME);
+        $chat->action('typing')->send();
+    }
+
+    public function stopTypingIndicator(TelegraphChat $chat): void
+    {
+        $chat->action('typing')->send();
     }
 
     /**
@@ -133,14 +179,8 @@ final class TelegramMessageService
         return mb_substr($text, 0, $lastPosition + 1);
     }
 
-    private function dispatchMessage(TelegraphChat $chat, string $chunk, bool $markdown): void
+    private function dispatchMessage(TelegraphChat $chat, string $content): void
     {
-        $message = $chat->message($chunk);
-
-        if ($markdown) {
-            $message->markdown();
-        }
-
-        $message->dispatch(self::QUEUE_NAME);
+        $chat->message($content)->html()->dispatch(self::QUEUE_NAME);
     }
 }
