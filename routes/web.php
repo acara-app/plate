@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers as Web;
+use App\Http\Middleware\DisableResponseBuffering;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -43,7 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('/chat/create/{conversationId?}', [Web\ChatController::class, 'create'])
         ->name('chat.create');
     Route::post('chat/stream', [Web\ChatController::class, 'stream'])
-        ->middleware(\App\Http\Middleware\DisableResponseBuffering::class)
+        ->middleware(DisableResponseBuffering::class)
         ->name('chat.stream');
 
     Route::post('meal-plans', Web\StoreMealPlanController::class)->name('meal-plans.store');
