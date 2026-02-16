@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Telegram;
 
 use App\Actions\SaveHealthLogAction;
-use App\Contracts\GeneratesAiResponse;
+use App\Contracts\ProcessesAdvisorMessage;
 use App\Contracts\ParsesHealthData;
 use App\DataObjects\HealthLogData;
 use App\Enums\HealthEntryType;
@@ -22,11 +22,12 @@ use Throwable;
 final class TelegramWebhookHandler extends WebhookHandler
 {
     public function __construct(
-        private readonly GeneratesAiResponse $generateAiResponse,
+        private readonly ProcessesAdvisorMessage $processAdvisorMessage,
         private readonly TelegramMessageService $telegramMessage,
         private readonly ParsesHealthData $healthDataParser,
         private readonly SaveHealthLogAction $saveHealthLog,
-    ) {}
+    ) {
+    }
 
     public function start(): void
     {
@@ -124,7 +125,7 @@ final class TelegramWebhookHandler extends WebhookHandler
             return;
         }
 
-        $conversationId = $this->generateAiResponse->resetConversation($linkedChat->user);
+        $conversationId = $this->processAdvisorMessage->resetConversation($linkedChat->user);
         $linkedChat->update(['conversation_id' => $conversationId]);
 
         $this->chat->message('✨ New conversation started! How can I help you?')->send();
@@ -410,7 +411,7 @@ final class TelegramWebhookHandler extends WebhookHandler
 
     private function generateAndSendResponse(UserTelegramChat $linkedChat, string $message): void
     {
-        $result = $this->generateAiResponse->handle(
+        $result = $this->processAdvisorMessage->handle(
             $linkedChat->user,
             $message,
             $linkedChat->conversation_id,
