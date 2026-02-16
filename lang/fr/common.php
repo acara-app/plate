@@ -940,4 +940,15 @@ return [
         'stay_healthy' => 'Restez en bonne santé !',
         'thanks' => 'Merci,',
     ],
+
+    'chat' => [
+        'placeholder' => 'Posez n\'importe quelle question',
+        'modes' => [
+            'ask' => 'Demander',
+            'meal_plan' => 'Plan de repas',
+        ],
+        'models' => [
+            'gemini_3_flash' => 'Gemini 3 Flash',
+        ],
+    ],
 ];

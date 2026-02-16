@@ -55,6 +55,9 @@
                                 <a href="{{ route('support') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">Help & Support</a>
                             </li>
                             <li>
+                                <a href="{{ route('telegram-health-logging') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Quickly log your glucose, insulin, and carbs via our AI-powered Telegram bot">AI Health Logging on Telegram</a>
+                            </li>
+                            <li>
                                 <a href="{{ route('about') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">About</a>
                             </li>
                         </ul>

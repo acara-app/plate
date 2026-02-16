@@ -952,4 +952,15 @@ return [
         'stay_healthy' => 'Stay healthy!',
         'thanks' => 'Thanks,',
     ],
+
+    'chat' => [
+        'placeholder' => 'Ask anything',
+        'modes' => [
+            'ask' => 'Ask',
+            'meal_plan' => 'Meal Plan',
+        ],
+        'models' => [
+            'gemini_3_flash' => 'Gemini 3 Flash',
+        ],
+    ],
 ];

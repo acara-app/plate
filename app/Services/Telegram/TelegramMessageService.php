@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Telegram;
 
+use DefStudio\Telegraph\Enums\ChatActions;
 use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Support\Sleep;
 
@@ -55,7 +56,7 @@ final class TelegramMessageService
 
     public function sendTypingIndicator(TelegraphChat $chat): void
     {
-        $chat->action('typing')->send();
+        $chat->action(ChatActions::TYPING)->send();
     }
 
     /**
@@ -135,12 +136,11 @@ final class TelegramMessageService
 
     private function dispatchMessage(TelegraphChat $chat, string $chunk, bool $markdown): void
     {
-        $message = $chat->message($chunk);
 
         if ($markdown) {
-            $message->markdownV2();
+            $chat->markdownV2($chunk)->dispatch(self::QUEUE_NAME);
+        } else {
+            $chat->message($chunk)->dispatch(self::QUEUE_NAME);
         }
-
-        $message->dispatch(self::QUEUE_NAME);
     }
 }
