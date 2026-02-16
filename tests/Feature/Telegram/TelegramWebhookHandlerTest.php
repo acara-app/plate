@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Contracts\GeneratesAiResponse;
+use App\Contracts\ProcessesAdvisorMessage;
 use App\Contracts\ParsesHealthData;
 use App\Enums\HealthEntryType;
 use App\Enums\Sex;
@@ -249,12 +249,12 @@ describe('/new command', function (): void {
             'conversation_id' => 'old-conv-id',
         ]);
 
-        $mock = Mockery::mock(GeneratesAiResponse::class);
+        $mock = Mockery::mock(ProcessesAdvisorMessage::class);
         $mock->shouldReceive('resetConversation')
             ->once()
             ->with(Mockery::on(fn (User $u): bool => $u->id === $user->id))
             ->andReturn('new-conv-id');
-        app()->instance(GeneratesAiResponse::class, $mock);
+        app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, '/new');
 
@@ -271,9 +271,9 @@ describe('/reset command', function (): void {
             'telegraph_chat_id' => $this->telegraphChat->id,
         ]);
 
-        $mock = Mockery::mock(GeneratesAiResponse::class);
+        $mock = Mockery::mock(ProcessesAdvisorMessage::class);
         $mock->shouldReceive('resetConversation')->once()->andReturn('reset-conv-id');
-        app()->instance(GeneratesAiResponse::class, $mock);
+        app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, '/reset');
 
@@ -296,7 +296,7 @@ describe('chat message handling', function (): void {
             'conversation_id' => 'existing-conv',
         ]);
 
-        $mock = Mockery::mock(GeneratesAiResponse::class);
+        $mock = Mockery::mock(ProcessesAdvisorMessage::class);
         $mock->shouldReceive('handle')
             ->once()
             ->with(
@@ -308,7 +308,7 @@ describe('chat message handling', function (): void {
                 'response' => 'Here are some breakfast suggestions...',
                 'conversation_id' => 'existing-conv',
             ]);
-        app()->instance(GeneratesAiResponse::class, $mock);
+        app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, 'What should I eat for breakfast?');
 
@@ -323,7 +323,7 @@ describe('chat message handling', function (): void {
             'conversation_id' => null,
         ]);
 
-        $mock = Mockery::mock(GeneratesAiResponse::class);
+        $mock = Mockery::mock(ProcessesAdvisorMessage::class);
         $mock->shouldReceive('handle')
             ->once()
             ->with(
@@ -335,7 +335,7 @@ describe('chat message handling', function (): void {
                 'response' => 'Welcome!',
                 'conversation_id' => 'first-conv-id',
             ]);
-        app()->instance(GeneratesAiResponse::class, $mock);
+        app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, 'Hello!');
 
@@ -350,14 +350,14 @@ describe('chat message handling', function (): void {
             'conversation_id' => 'existing-conv',
         ]);
 
-        $mock = Mockery::mock(GeneratesAiResponse::class);
+        $mock = Mockery::mock(ProcessesAdvisorMessage::class);
         $mock->shouldReceive('handle')
             ->once()
             ->andReturn([
                 'response' => 'Response',
                 'conversation_id' => 'some-new-conv',
             ]);
-        app()->instance(GeneratesAiResponse::class, $mock);
+        app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, 'Follow-up message');
 
@@ -371,10 +371,10 @@ describe('chat message handling', function (): void {
             'telegraph_chat_id' => $this->telegraphChat->id,
         ]);
 
-        $mock = Mockery::mock(GeneratesAiResponse::class);
+        $mock = Mockery::mock(ProcessesAdvisorMessage::class);
         $mock->shouldReceive('handle')
             ->andThrow(new Exception('AI service unavailable'));
-        app()->instance(GeneratesAiResponse::class, $mock);
+        app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, 'Hello');
 

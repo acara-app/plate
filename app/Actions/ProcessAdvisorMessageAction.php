@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Contracts\Ai\Advisor;
-use App\Contracts\GeneratesAiResponse;
+use App\Contracts\ProcessesAdvisorMessage;
 use App\Models\User;
 use Laravel\Ai\Contracts\ConversationStore;
 
-final readonly class GenerateAiResponseAction implements GeneratesAiResponse
+final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMessage
 {
     public function __construct(
         private Advisor $advisor,

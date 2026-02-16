@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\GenerateAiResponseAction;
+use App\Actions\ProcessAdvisorMessageAction;
 use App\Ai\Agents\NutritionAdvisor;
 use App\Models\User;
 use Laravel\Ai\Contracts\ConversationStore;
@@ -23,7 +23,7 @@ it('creates new conversation when none exists', function (): void {
         ->once()
         ->andReturn('conv-123');
 
-    $action = new GenerateAiResponseAction(
+    $action = new ProcessAdvisorMessageAction(
         resolve(NutritionAdvisor::class),
         $conversationStore,
     );
@@ -39,7 +39,7 @@ it('creates new conversation when none exists', function (): void {
 it('uses existing conversation when provided', function (): void {
     NutritionAdvisor::fake(['Continuing...']);
 
-    $action = new GenerateAiResponseAction(
+    $action = new ProcessAdvisorMessageAction(
         resolve(NutritionAdvisor::class),
         resolve(ConversationStore::class),
     );
@@ -61,7 +61,7 @@ it('reuses latest conversation when no id provided but exists', function (): voi
         ->once()
         ->andReturn('latest-conv');
 
-    $action = new GenerateAiResponseAction(
+    $action = new ProcessAdvisorMessageAction(
         resolve(NutritionAdvisor::class),
         $conversationStore,
     );
@@ -81,7 +81,7 @@ it('resets conversation', function (): void {
         ->once()
         ->andReturn('new-conv');
 
-    $action = new GenerateAiResponseAction(
+    $action = new ProcessAdvisorMessageAction(
         resolve(NutritionAdvisor::class),
         $conversationStore,
     );

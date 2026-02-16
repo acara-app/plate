@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Contracts;
 
-use App\Actions\GenerateAiResponseAction;
+use App\Actions\ProcessAdvisorMessageAction;
 use App\Models\User;
 use Illuminate\Container\Attributes\Bind;
 
-#[Bind(GenerateAiResponseAction::class)]
-interface GeneratesAiResponse
+#[Bind(ProcessAdvisorMessageAction::class)]
+interface ProcessesAdvisorMessage
 {
     /**
      * @return array{response: string, conversation_id: string}
