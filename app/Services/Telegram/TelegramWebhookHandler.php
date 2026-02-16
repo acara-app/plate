@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\Telegram;
 
-use App\Actions\SaveHealthLogAction;
-use App\Contracts\ProcessesAdvisorMessage;
 use App\Contracts\ParsesHealthData;
+use App\Contracts\ProcessesAdvisorMessage;
+use App\Contracts\SavesHealthLog;
 use App\DataObjects\HealthLogData;
+use App\Enums\GlucoseReadingType;
+use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
+use App\Enums\InsulinType;
 use App\Exceptions\TelegramUserException;
 use App\Models\User;
 use App\Models\UserTelegramChat;
@@ -25,9 +28,8 @@ final class TelegramWebhookHandler extends WebhookHandler
         private readonly ProcessesAdvisorMessage $processAdvisorMessage,
         private readonly TelegramMessageService $telegramMessage,
         private readonly ParsesHealthData $healthDataParser,
-        private readonly SaveHealthLogAction $saveHealthLog,
-    ) {
-    }
+        private readonly SavesHealthLog $saveHealthLog,
+    ) {}
 
     public function start(): void
     {
@@ -210,13 +212,11 @@ final class TelegramWebhookHandler extends WebhookHandler
 
     protected function onFailure(Throwable $throwable): void
     {
-        if ($throwable instanceof NotFoundHttpException) {
-            throw $throwable;
-        }
+        throw_if($throwable instanceof NotFoundHttpException, $throwable);
 
         Log::error('Telegram webhook error', [
             'exception' => $throwable->getMessage(),
-            'class' => get_class($throwable),
+            'class' => $throwable::class,
             'chat_id' => $this->chat?->chat_id,
         ]);
 
@@ -341,19 +341,19 @@ final class TelegramWebhookHandler extends WebhookHandler
         /** @var string|null $glucoseReadingTypeString */
         $glucoseReadingTypeString = $log['glucose_reading_type'] ?? null;
         $glucoseReadingType = $glucoseReadingTypeString !== null
-            ? \App\Enums\GlucoseReadingType::tryFrom($glucoseReadingTypeString)
+            ? GlucoseReadingType::tryFrom($glucoseReadingTypeString)
             : null;
 
         /** @var string|null $glucoseUnitString */
         $glucoseUnitString = $log['glucose_unit'] ?? null;
         $glucoseUnit = $glucoseUnitString !== null
-            ? \App\Enums\GlucoseUnit::tryFrom($glucoseUnitString)
+            ? GlucoseUnit::tryFrom($glucoseUnitString)
             : null;
 
         /** @var string|null $insulinTypeString */
         $insulinTypeString = $log['insulin_type'] ?? null;
         $insulinType = $insulinTypeString !== null
-            ? \App\Enums\InsulinType::tryFrom($insulinTypeString)
+            ? InsulinType::tryFrom($insulinTypeString)
             : null;
 
         /** @var string|null $measuredAtString */

@@ -134,8 +134,18 @@ it('delegates to user newSubscription for checkout', function (): void {
 });
 
 it('returns null when subscription has no latest payment', function (): void {
-    $subscription = mock(Subscription::class);
-    $subscription->shouldReceive('latestPayment')->andReturn(null);
+    $subscription = new class extends Subscription
+    {
+        public function __construct()
+        {
+            // Skip parent constructor to avoid DB connection issues
+        }
+
+        public function latestPayment(): ?Payment
+        {
+            return null;
+        }
+    };
 
     $service = new StripeService();
     $url = $service->getIncompletePaymentUrl($subscription);
@@ -144,11 +154,25 @@ it('returns null when subscription has no latest payment', function (): void {
 });
 
 it('returns hosted invoice url when subscription has latest payment with url', function (): void {
-    $mockPayment = mock(Payment::class)->makePartial();
-    $mockPayment->hosted_invoice_url = 'https://invoice.stripe.com/invoice_123';
+    $mockPayment = new class extends Payment
+    {
+        public ?string $hosted_invoice_url = 'https://invoice.stripe.com/invoice_123';
 
-    $subscription = mock(Subscription::class);
-    $subscription->shouldReceive('latestPayment')->andReturn($mockPayment);
+        public function __construct()
+        {
+            // Skip parent constructor
+        }
+    };
+
+    $subscription = new class($mockPayment) extends Subscription
+    {
+        public function __construct(private readonly Payment $payment) {}
+
+        public function latestPayment(): Payment
+        {
+            return $this->payment;
+        }
+    };
 
     $service = new StripeService();
     $url = $service->getIncompletePaymentUrl($subscription);
@@ -157,11 +181,25 @@ it('returns hosted invoice url when subscription has latest payment with url', f
 });
 
 it('returns null when latest payment has no hosted invoice url', function (): void {
-    $mockPayment = mock(Payment::class)->makePartial();
-    $mockPayment->hosted_invoice_url = null;
+    $mockPayment = new class extends Payment
+    {
+        public ?string $hosted_invoice_url = null;
 
-    $subscription = mock(Subscription::class);
-    $subscription->shouldReceive('latestPayment')->andReturn($mockPayment);
+        public function __construct()
+        {
+            // Skip parent constructor
+        }
+    };
+
+    $subscription = new class($mockPayment) extends Subscription
+    {
+        public function __construct(private readonly Payment $payment) {}
+
+        public function latestPayment(): Payment
+        {
+            return $this->payment;
+        }
+    };
 
     $service = new StripeService();
     $url = $service->getIncompletePaymentUrl($subscription);
@@ -170,11 +208,25 @@ it('returns null when latest payment has no hosted invoice url', function (): vo
 });
 
 it('returns null when hosted invoice url is not a string', function (): void {
-    $mockPayment = mock(Payment::class)->makePartial();
-    $mockPayment->hosted_invoice_url = 12345; // Not a string
+    $mockPayment = new class extends Payment
+    {
+        public int $hosted_invoice_url = 12345; // Not a string
 
-    $subscription = mock(Subscription::class);
-    $subscription->shouldReceive('latestPayment')->andReturn($mockPayment);
+        public function __construct()
+        {
+            // Skip parent constructor
+        }
+    };
+
+    $subscription = new class($mockPayment) extends Subscription
+    {
+        public function __construct(private readonly Payment $payment) {}
+
+        public function latestPayment(): Payment
+        {
+            return $this->payment;
+        }
+    };
 
     $service = new StripeService();
     $url = $service->getIncompletePaymentUrl($subscription);

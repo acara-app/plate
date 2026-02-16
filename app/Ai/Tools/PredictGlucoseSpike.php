@@ -17,6 +17,11 @@ final readonly class PredictGlucoseSpike implements Tool
         private PredictsGlucoseSpikes $spikePredictor,
     ) {}
 
+    public function name(): string
+    {
+        return 'predict_glucose_spike';
+    }
+
     /**
      * Get the description of the tool's purpose.
      */

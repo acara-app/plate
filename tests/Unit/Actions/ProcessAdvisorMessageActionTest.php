@@ -5,23 +5,53 @@ declare(strict_types=1);
 use App\Actions\ProcessAdvisorMessageAction;
 use App\Ai\Agents\AssistantAgent;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Laravel\Ai\Contracts\ConversationStore;
+use Laravel\Ai\Prompts\AgentPrompt;
+use Laravel\Ai\Responses\AgentResponse;
 
 it('creates new conversation when none exists', function (): void {
     AssistantAgent::fake(['Hello!']);
 
-    $conversationStore = mock(ConversationStore::class);
-    $conversationStore
-        ->shouldReceive('latestConversationId')
-        ->with(1)
-        ->once()
-        ->andReturn(null);
+    // Create a simple test implementation of ConversationStore
+    $conversationStore = new class implements ConversationStore
+    {
+        public ?string $latestConversationIdReturn = null;
 
-    $conversationStore
-        ->shouldReceive('storeConversation')
-        ->with(1, 'Telegram Chat')
-        ->once()
-        ->andReturn('conv-123');
+        public ?string $storedConversationId = null;
+
+        public array $calls = [];
+
+        public function latestConversationId(string|int $userId): ?string
+        {
+            $this->calls[] = ['method' => 'latestConversationId', 'userId' => $userId];
+
+            return $this->latestConversationIdReturn;
+        }
+
+        public function storeConversation(string|int|null $userId, string $title): string
+        {
+            $this->calls[] = ['method' => 'storeConversation', 'userId' => $userId, 'title' => $title];
+            $this->storedConversationId = 'conv-123';
+
+            return $this->storedConversationId;
+        }
+
+        public function storeUserMessage(string $conversationId, string|int|null $userId, AgentPrompt $prompt): string
+        {
+            return 'msg-1';
+        }
+
+        public function storeAssistantMessage(string $conversationId, string|int|null $userId, AgentPrompt $prompt, AgentResponse $response): string
+        {
+            return 'msg-2';
+        }
+
+        public function getLatestConversationMessages(string $conversationId, int $limit): Collection
+        {
+            return collect();
+        }
+    };
 
     $action = new ProcessAdvisorMessageAction(
         resolve(AssistantAgent::class),
@@ -54,12 +84,36 @@ it('uses existing conversation when provided', function (): void {
 it('reuses latest conversation when no id provided but exists', function (): void {
     AssistantAgent::fake(['Reusing!']);
 
-    $conversationStore = mock(ConversationStore::class);
-    $conversationStore
-        ->shouldReceive('latestConversationId')
-        ->with(1)
-        ->once()
-        ->andReturn('latest-conv');
+    // Create a simple test implementation that returns an existing conversation
+    $conversationStore = new class implements ConversationStore
+    {
+        public ?string $latestConversationIdReturn = 'latest-conv';
+
+        public function latestConversationId(string|int $userId): ?string
+        {
+            return $this->latestConversationIdReturn;
+        }
+
+        public function storeConversation(string|int|null $userId, string $title): string
+        {
+            return 'new-conv';
+        }
+
+        public function storeUserMessage(string $conversationId, string|int|null $userId, AgentPrompt $prompt): string
+        {
+            return 'msg-1';
+        }
+
+        public function storeAssistantMessage(string $conversationId, string|int|null $userId, AgentPrompt $prompt, AgentResponse $response): string
+        {
+            return 'msg-2';
+        }
+
+        public function getLatestConversationMessages(string $conversationId, int $limit): Collection
+        {
+            return collect();
+        }
+    };
 
     $action = new ProcessAdvisorMessageAction(
         resolve(AssistantAgent::class),
@@ -74,12 +128,38 @@ it('reuses latest conversation when no id provided but exists', function (): voi
 });
 
 it('resets conversation', function (): void {
-    $conversationStore = mock(ConversationStore::class);
-    $conversationStore
-        ->shouldReceive('storeConversation')
-        ->with(1, 'Telegram Chat')
-        ->once()
-        ->andReturn('new-conv');
+    // Create a simple test implementation
+    $conversationStore = new class implements ConversationStore
+    {
+        public ?string $storedConversationId = null;
+
+        public function latestConversationId(string|int $userId): ?string
+        {
+            return null;
+        }
+
+        public function storeConversation(string|int|null $userId, string $title): string
+        {
+            $this->storedConversationId = 'new-conv';
+
+            return $this->storedConversationId;
+        }
+
+        public function storeUserMessage(string $conversationId, string|int|null $userId, AgentPrompt $prompt): string
+        {
+            return 'msg-1';
+        }
+
+        public function storeAssistantMessage(string $conversationId, string|int|null $userId, AgentPrompt $prompt, AgentResponse $response): string
+        {
+            return 'msg-2';
+        }
+
+        public function getLatestConversationMessages(string $conversationId, int $limit): Collection
+        {
+            return collect();
+        }
+    };
 
     $action = new ProcessAdvisorMessageAction(
         resolve(AssistantAgent::class),

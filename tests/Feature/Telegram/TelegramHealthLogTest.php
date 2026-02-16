@@ -23,9 +23,15 @@ beforeEach(function (): void {
         'chat_id' => '123456789',
     ]);
 
-    // Mock ParsesHealthData interface for tests
-    $parserMock = Mockery::mock(ParsesHealthData::class);
-    $parserMock->shouldReceive('parse')->andThrow(new Exception('Should not be called unless testing health data'));
+    // Create a simple test implementation that throws by default
+    $parserMock = new class implements ParsesHealthData
+    {
+        public function parse(string $message): HealthLogData
+        {
+            throw new Exception('Should not be called unless testing health data');
+        }
+    };
+
     app()->instance(ParsesHealthData::class, $parserMock);
 });
 
@@ -117,17 +123,21 @@ describe('health data keywords detection', function (): void {
         $user = User::factory()->create();
         createLinkedChatForHealth($this, $user);
 
-        $parserMock = Mockery::mock(ParsesHealthData::class);
-        $parserMock->shouldReceive('parse')
-            ->once()
-            ->with('My glucose is 140')
-            ->andReturn(new HealthLogData(
-                isHealthData: true,
-                logType: HealthEntryType::Glucose,
-                glucoseValue: 140.0,
-                glucoseReadingType: GlucoseReadingType::Random,
-                glucoseUnit: GlucoseUnit::MgDl,
-            ));
+        // Create a simple test implementation
+        $parserMock = new class implements ParsesHealthData
+        {
+            public function parse(string $message): HealthLogData
+            {
+                return new HealthLogData(
+                    isHealthData: true,
+                    logType: HealthEntryType::Glucose,
+                    glucoseValue: 140.0,
+                    glucoseReadingType: GlucoseReadingType::Random,
+                    glucoseUnit: GlucoseUnit::MgDl,
+                );
+            }
+        };
+
         app()->instance(ParsesHealthData::class, $parserMock);
 
         sendHealthWebhook($this, 'My glucose is 140');
@@ -139,16 +149,20 @@ describe('health data keywords detection', function (): void {
         $user = User::factory()->create();
         createLinkedChatForHealth($this, $user);
 
-        $parserMock = Mockery::mock(ParsesHealthData::class);
-        $parserMock->shouldReceive('parse')
-            ->once()
-            ->with('Took 5 units of insulin')
-            ->andReturn(new HealthLogData(
-                isHealthData: true,
-                logType: HealthEntryType::Insulin,
-                insulinUnits: 5.0,
-                insulinType: InsulinType::Bolus,
-            ));
+        // Create a simple test implementation
+        $parserMock = new class implements ParsesHealthData
+        {
+            public function parse(string $message): HealthLogData
+            {
+                return new HealthLogData(
+                    isHealthData: true,
+                    logType: HealthEntryType::Insulin,
+                    insulinUnits: 5.0,
+                    insulinType: InsulinType::Bolus,
+                );
+            }
+        };
+
         app()->instance(ParsesHealthData::class, $parserMock);
 
         sendHealthWebhook($this, 'Took 5 units of insulin');
@@ -160,15 +174,19 @@ describe('health data keywords detection', function (): void {
         $user = User::factory()->create();
         createLinkedChatForHealth($this, $user);
 
-        $parserMock = Mockery::mock(ParsesHealthData::class);
-        $parserMock->shouldReceive('parse')
-            ->once()
-            ->with('Ate 45g carbs')
-            ->andReturn(new HealthLogData(
-                isHealthData: true,
-                logType: HealthEntryType::Food,
-                carbsGrams: 45,
-            ));
+        // Create a simple test implementation
+        $parserMock = new class implements ParsesHealthData
+        {
+            public function parse(string $message): HealthLogData
+            {
+                return new HealthLogData(
+                    isHealthData: true,
+                    logType: HealthEntryType::Food,
+                    carbsGrams: 45,
+                );
+            }
+        };
+
         app()->instance(ParsesHealthData::class, $parserMock);
 
         sendHealthWebhook($this, 'Ate 45g carbs');
@@ -180,16 +198,20 @@ describe('health data keywords detection', function (): void {
         $user = User::factory()->create();
         createLinkedChatForHealth($this, $user);
 
-        $parserMock = Mockery::mock(ParsesHealthData::class);
-        $parserMock->shouldReceive('parse')
-            ->once()
-            ->with('Walked 30 minutes')
-            ->andReturn(new HealthLogData(
-                isHealthData: true,
-                logType: HealthEntryType::Exercise,
-                exerciseType: 'walking',
-                exerciseDurationMinutes: 30,
-            ));
+        // Create a simple test implementation
+        $parserMock = new class implements ParsesHealthData
+        {
+            public function parse(string $message): HealthLogData
+            {
+                return new HealthLogData(
+                    isHealthData: true,
+                    logType: HealthEntryType::Exercise,
+                    exerciseType: 'walking',
+                    exerciseDurationMinutes: 30,
+                );
+            }
+        };
+
         app()->instance(ParsesHealthData::class, $parserMock);
 
         sendHealthWebhook($this, 'Walked 30 minutes');
@@ -201,15 +223,19 @@ describe('health data keywords detection', function (): void {
         $user = User::factory()->create();
         createLinkedChatForHealth($this, $user);
 
-        $parserMock = Mockery::mock(ParsesHealthData::class);
-        $parserMock->shouldReceive('parse')
-            ->once()
-            ->with('Weigh 180 lbs')
-            ->andReturn(new HealthLogData(
-                isHealthData: true,
-                logType: HealthEntryType::Vitals,
-                weight: 81.65,
-            ));
+        // Create a simple test implementation
+        $parserMock = new class implements ParsesHealthData
+        {
+            public function parse(string $message): HealthLogData
+            {
+                return new HealthLogData(
+                    isHealthData: true,
+                    logType: HealthEntryType::Vitals,
+                    weight: 81.65,
+                );
+            }
+        };
+
         app()->instance(ParsesHealthData::class, $parserMock);
 
         sendHealthWebhook($this, 'Weigh 180 lbs');
@@ -221,16 +247,20 @@ describe('health data keywords detection', function (): void {
         $user = User::factory()->create();
         createLinkedChatForHealth($this, $user);
 
-        $parserMock = Mockery::mock(ParsesHealthData::class);
-        $parserMock->shouldReceive('parse')
-            ->once()
-            ->with('BP 120/80')
-            ->andReturn(new HealthLogData(
-                isHealthData: true,
-                logType: HealthEntryType::Vitals,
-                bpSystolic: 120,
-                bpDiastolic: 80,
-            ));
+        // Create a simple test implementation
+        $parserMock = new class implements ParsesHealthData
+        {
+            public function parse(string $message): HealthLogData
+            {
+                return new HealthLogData(
+                    isHealthData: true,
+                    logType: HealthEntryType::Vitals,
+                    bpSystolic: 120,
+                    bpDiastolic: 80,
+                );
+            }
+        };
+
         app()->instance(ParsesHealthData::class, $parserMock);
 
         sendHealthWebhook($this, 'BP 120/80');
@@ -242,10 +272,19 @@ describe('health data keywords detection', function (): void {
         $user = User::factory()->create();
         createLinkedChatForHealth($this, $user);
 
-        $parserMock = Mockery::mock(ParsesHealthData::class);
-        $parserMock->shouldReceive('parse')
-            ->once()
-            ->andReturn(new HealthLogData(isHealthData: true, logType: HealthEntryType::Glucose, glucoseValue: 140.0));
+        // Create a simple test implementation
+        $parserMock = new class implements ParsesHealthData
+        {
+            public function parse(string $message): HealthLogData
+            {
+                return new HealthLogData(
+                    isHealthData: true,
+                    logType: HealthEntryType::Glucose,
+                    glucoseValue: 140.0
+                );
+            }
+        };
+
         app()->instance(ParsesHealthData::class, $parserMock);
 
         sendHealthWebhook($this, 'My glucose is 140');

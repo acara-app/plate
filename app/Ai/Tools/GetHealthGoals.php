@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Actions\GetUserProfileContextAction;
+use App\Contracts\Actions\GetsUserProfileContext;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
@@ -14,8 +14,13 @@ use Laravel\Ai\Tools\Request;
 final readonly class GetHealthGoals implements Tool
 {
     public function __construct(
-        private GetUserProfileContextAction $profileContext,
+        private GetsUserProfileContext $profileContext,
     ) {}
+
+    public function name(): string
+    {
+        return 'get_health_goals';
+    }
 
     /**
      * Get the description of the tool's purpose.

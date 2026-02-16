@@ -7,6 +7,7 @@ namespace App\Ai\Agents;
 use App\Actions\AnalyzeGlucoseForNotificationAction;
 use App\Ai\MealPlanPromptBuilder;
 use App\Ai\Tools\GetDietReference;
+use App\Contracts\Ai\GeneratesMealPlans;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\MealPlanData;
@@ -23,7 +24,7 @@ use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Promptable;
 use Workflow\WorkflowStub;
 
-final class MealPlanAgent implements Agent, HasTools
+final class MealPlanAgent implements Agent, GeneratesMealPlans, HasTools
 {
     use Promptable;
 

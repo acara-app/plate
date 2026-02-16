@@ -3,13 +3,53 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
-use Laravel\Socialite\Two\GoogleProvider;
 use Laravel\Socialite\Two\User as SocialiteUser;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
+
+beforeEach(function (): void {
+    // Create a mock provider that can be configured per test
+    $this->provider = new class implements Provider
+    {
+        public ?SocialiteUser $user = null;
+
+        public ?Exception $exception = null;
+
+        public function redirect(): RedirectResponse
+        {
+            return new RedirectResponse('https://accounts.google.com');
+        }
+
+        public function user(): SocialiteUser
+        {
+            if ($this->exception instanceof Exception) {
+                throw $this->exception;
+            }
+
+            return $this->user ?? new SocialiteUser();
+        }
+    };
+
+    // Bind the mock provider to the Socialite facade
+    Socialite::swap(new readonly class($this->provider)
+    {
+        public function __construct(private Provider $provider) {}
+
+        public function driver(?string $driver = null): Provider
+        {
+            if ($driver === 'google') {
+                return $this->provider;
+            }
+
+            throw new InvalidArgumentException("Driver [{$driver}] not supported.");
+        }
+    });
+});
 
 it('redirects to Google OAuth page', function (): void {
     $response = get(route('auth.google.redirect'));
@@ -24,12 +64,7 @@ it('creates new user from Google OAuth callback with mocked provider', function 
     $googleUser->email = 'newuser@example.com';
     $googleUser->name = 'New User';
 
-    $provider = Mockery::mock(GoogleProvider::class);
-    $provider->shouldReceive('user')->andReturn($googleUser);
-
-    Socialite::shouldReceive('driver')
-        ->with('google')
-        ->andReturn($provider);
+    $this->provider->user = $googleUser;
 
     $response = get(route('auth.google.callback'));
 
@@ -51,12 +86,7 @@ it('marks email as verified when creating user from Google OAuth', function (): 
     $googleUser->email = 'verified@example.com';
     $googleUser->name = 'Verified User';
 
-    $provider = Mockery::mock(GoogleProvider::class);
-    $provider->shouldReceive('user')->andReturn($googleUser);
-
-    Socialite::shouldReceive('driver')
-        ->with('google')
-        ->andReturn($provider);
+    $this->provider->user = $googleUser;
 
     get(route('auth.google.callback'));
 
@@ -79,12 +109,7 @@ it('links Google account to existing user by email and redirects to chat', funct
     $googleUser->email = 'existing@example.com';
     $googleUser->name = 'Updated Name';
 
-    $provider = Mockery::mock(GoogleProvider::class);
-    $provider->shouldReceive('user')->andReturn($googleUser);
-
-    Socialite::shouldReceive('driver')
-        ->with('google')
-        ->andReturn($provider);
+    $this->provider->user = $googleUser;
 
     $response = get(route('auth.google.callback'));
 
@@ -112,12 +137,7 @@ it('updates existing Google user information on login and redirects to chat', fu
     $googleUser->email = 'newmail@example.com';
     $googleUser->name = 'New Name';
 
-    $provider = Mockery::mock(GoogleProvider::class);
-    $provider->shouldReceive('user')->andReturn($googleUser);
-
-    Socialite::shouldReceive('driver')
-        ->with('google')
-        ->andReturn($provider);
+    $this->provider->user = $googleUser;
 
     $response = get(route('auth.google.callback'));
 
@@ -135,12 +155,7 @@ it('handles missing name from Google gracefully for new users', function (): voi
     $googleUser->email = 'noname@example.com';
     $googleUser->name = null;
 
-    $provider = Mockery::mock(GoogleProvider::class);
-    $provider->shouldReceive('user')->andReturn($googleUser);
-
-    Socialite::shouldReceive('driver')
-        ->with('google')
-        ->andReturn($provider);
+    $this->provider->user = $googleUser;
 
     $response = get(route('auth.google.callback'));
 
@@ -165,12 +180,7 @@ it('handles missing name from Google gracefully for existing users', function ()
     $googleUser->email = 'existing@example.com';
     $googleUser->name = null;
 
-    $provider = Mockery::mock(GoogleProvider::class);
-    $provider->shouldReceive('user')->andReturn($googleUser);
-
-    Socialite::shouldReceive('driver')
-        ->with('google')
-        ->andReturn($provider);
+    $this->provider->user = $googleUser;
 
     get(route('auth.google.callback'));
 
@@ -179,9 +189,7 @@ it('handles missing name from Google gracefully for existing users', function ()
 })->group('oauth');
 
 it('redirects to login with error on OAuth exception', function (): void {
-    Socialite::shouldReceive('driver')
-        ->with('google')
-        ->andThrow(new Exception('OAuth Error'));
+    $this->provider->exception = new Exception('OAuth Error');
 
     $response = get(route('auth.google.callback'));
 
@@ -201,12 +209,7 @@ it('handles duplicate Google ID gracefully', function (): void {
     $googleUser->email = 'second@example.com';
     $googleUser->name = 'Second User';
 
-    $provider = Mockery::mock(GoogleProvider::class);
-    $provider->shouldReceive('user')->andReturn($googleUser);
-
-    Socialite::shouldReceive('driver')
-        ->with('google')
-        ->andReturn($provider);
+    $this->provider->user = $googleUser;
 
     $response = get(route('auth.google.callback'));
 

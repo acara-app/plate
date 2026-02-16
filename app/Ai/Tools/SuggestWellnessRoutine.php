@@ -10,8 +10,13 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
-final readonly class SuggestWellnessRoutine implements Tool
+final class SuggestWellnessRoutine implements Tool
 {
+    public function name(): string
+    {
+        return 'suggest_wellness_routine';
+    }
+
     /**
      * Get the description of the tool's purpose.
      */

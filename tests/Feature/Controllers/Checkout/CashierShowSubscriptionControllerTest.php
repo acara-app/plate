@@ -6,24 +6,64 @@ use App\Contracts\Services\StripeServiceContract;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-
-use function Pest\Laravel\mock;
+use Laravel\Cashier\Subscription;
 
 it('calls stripe service for user without stripe id', function (): void {
     $user = User::factory()->create(['stripe_id' => null]);
     SubscriptionProduct::factory()->count(3)->create();
 
-    $stripeMock = mock(StripeServiceContract::class);
-    $stripeMock->shouldReceive('ensureStripeCustomer')
-        ->once()
-        ->with(Mockery::type(User::class));
-    $stripeMock->shouldReceive('getBillingPortalUrl')
-        ->once()
-        ->andReturn('https://billing.stripe.com/session/test');
+    $stripeMock = new class implements StripeServiceContract
+    {
+        public bool $ensureStripeCustomerCalled = false;
+
+        public bool $getBillingPortalUrlCalled = false;
+
+        public function ensureStripeCustomer(User $user): void
+        {
+            $this->ensureStripeCustomerCalled = true;
+            expect($user)->toBeInstanceOf(User::class);
+        }
+
+        public function getBillingPortalUrl(User $user, string $returnUrl): string
+        {
+            $this->getBillingPortalUrlCalled = true;
+
+            return 'https://billing.stripe.com/session/test';
+        }
+
+        public function hasIncompletePayment(User $user, string $subscriptionType): bool
+        {
+            return false;
+        }
+
+        public function hasActiveSubscription(User $user): bool
+        {
+            return false;
+        }
+
+        public function getPriceIdFromLookupKey(string $lookupKey): ?string
+        {
+            return null;
+        }
+
+        public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string
+        {
+            return '';
+        }
+
+        public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+    };
+
+    app()->instance(StripeServiceContract::class, $stripeMock);
 
     $response = $this->actingAs($user)->get(route('checkout.subscription'));
 
     $response->assertOk();
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue();
+    expect($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
 });
 
 it('renders subscription with active subscription', function (): void {
@@ -56,23 +96,67 @@ it('renders subscription with active subscription', function (): void {
         'updated_at' => now(),
     ]);
 
-    $stripeMock = mock(StripeServiceContract::class);
-    $stripeMock->shouldReceive('ensureStripeCustomer')->once();
-    $stripeMock->shouldReceive('hasIncompletePayment')
-        ->once()
-        ->andReturn(false);
-    $stripeMock->shouldReceive('getBillingPortalUrl')
-        ->once()
-        ->andReturn('https://billing.stripe.com/session/test');
+    $stripeMock = new class implements StripeServiceContract
+    {
+        public bool $ensureStripeCustomerCalled = false;
+
+        public bool $hasIncompletePaymentCalled = false;
+
+        public bool $getBillingPortalUrlCalled = false;
+
+        public function ensureStripeCustomer(User $user): void
+        {
+            $this->ensureStripeCustomerCalled = true;
+        }
+
+        public function getBillingPortalUrl(User $user, string $returnUrl): string
+        {
+            $this->getBillingPortalUrlCalled = true;
+
+            return 'https://billing.stripe.com/session/test';
+        }
+
+        public function hasIncompletePayment(User $user, string $subscriptionType): bool
+        {
+            $this->hasIncompletePaymentCalled = true;
+
+            return false;
+        }
+
+        public function hasActiveSubscription(User $user): bool
+        {
+            return false;
+        }
+
+        public function getPriceIdFromLookupKey(string $lookupKey): ?string
+        {
+            return null;
+        }
+
+        public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string
+        {
+            return '';
+        }
+
+        public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+    };
+
+    app()->instance(StripeServiceContract::class, $stripeMock);
 
     $response = $this->actingAs($user)->get(route('checkout.subscription'));
 
     $response->assertOk();
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue();
+    expect($stripeMock->hasIncompletePaymentCalled)->toBeTrue();
+    expect($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
 });
 
 it('detects yearly subscription correctly', function (): void {
     $user = User::factory()->create(['stripe_id' => 'cus_test123']);
-    $product = SubscriptionProduct::factory()->create([
+    SubscriptionProduct::factory()->create([
         'name' => 'Pro Plan',
         'yearly_stripe_price_id' => 'price_yearly_test',
     ]);
@@ -100,27 +184,119 @@ it('detects yearly subscription correctly', function (): void {
         'updated_at' => now(),
     ]);
 
-    $stripeMock = mock(StripeServiceContract::class);
-    $stripeMock->shouldReceive('ensureStripeCustomer')->once();
-    $stripeMock->shouldReceive('hasIncompletePayment')->once()->andReturn(false);
-    $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com/session/test');
+    $stripeMock = new class implements StripeServiceContract
+    {
+        public bool $ensureStripeCustomerCalled = false;
+
+        public bool $hasIncompletePaymentCalled = false;
+
+        public bool $getBillingPortalUrlCalled = false;
+
+        public function ensureStripeCustomer(User $user): void
+        {
+            $this->ensureStripeCustomerCalled = true;
+        }
+
+        public function getBillingPortalUrl(User $user, string $returnUrl): string
+        {
+            $this->getBillingPortalUrlCalled = true;
+
+            return 'https://billing.stripe.com/session/test';
+        }
+
+        public function hasIncompletePayment(User $user, string $subscriptionType): bool
+        {
+            $this->hasIncompletePaymentCalled = true;
+
+            return false;
+        }
+
+        public function hasActiveSubscription(User $user): bool
+        {
+            return false;
+        }
+
+        public function getPriceIdFromLookupKey(string $lookupKey): ?string
+        {
+            return null;
+        }
+
+        public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string
+        {
+            return '';
+        }
+
+        public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+    };
+
+    app()->instance(StripeServiceContract::class, $stripeMock);
 
     $response = $this->actingAs($user)->get(route('checkout.subscription'));
 
     $response->assertOk();
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue();
+    expect($stripeMock->hasIncompletePaymentCalled)->toBeTrue();
+    expect($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
 });
 
 it('renders page when user has no active subscription', function (): void {
     $user = User::factory()->create(['stripe_id' => 'cus_test123']);
     SubscriptionProduct::factory()->count(3)->create();
 
-    $stripeMock = mock(StripeServiceContract::class);
-    $stripeMock->shouldReceive('ensureStripeCustomer')->once();
-    $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com/session/test');
+    $stripeMock = new class implements StripeServiceContract
+    {
+        public bool $ensureStripeCustomerCalled = false;
+
+        public bool $getBillingPortalUrlCalled = false;
+
+        public function ensureStripeCustomer(User $user): void
+        {
+            $this->ensureStripeCustomerCalled = true;
+        }
+
+        public function getBillingPortalUrl(User $user, string $returnUrl): string
+        {
+            $this->getBillingPortalUrlCalled = true;
+
+            return 'https://billing.stripe.com/session/test';
+        }
+
+        public function hasIncompletePayment(User $user, string $subscriptionType): bool
+        {
+            return false;
+        }
+
+        public function hasActiveSubscription(User $user): bool
+        {
+            return false;
+        }
+
+        public function getPriceIdFromLookupKey(string $lookupKey): ?string
+        {
+            return null;
+        }
+
+        public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string
+        {
+            return '';
+        }
+
+        public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+    };
+
+    app()->instance(StripeServiceContract::class, $stripeMock);
 
     $response = $this->actingAs($user)->get(route('checkout.subscription'));
 
     $response->assertOk();
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue();
+    expect($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
 });
 
 it('requires authentication', function (): void {
@@ -144,14 +320,62 @@ it('renders subscription when no subscription items exist', function (): void {
         'updated_at' => now(),
     ]);
 
-    $stripeMock = mock(StripeServiceContract::class);
-    $stripeMock->shouldReceive('ensureStripeCustomer')->once();
-    $stripeMock->shouldReceive('hasIncompletePayment')->once()->andReturn(false);
-    $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com/session/test');
+    $stripeMock = new class implements StripeServiceContract
+    {
+        public bool $ensureStripeCustomerCalled = false;
+
+        public bool $hasIncompletePaymentCalled = false;
+
+        public bool $getBillingPortalUrlCalled = false;
+
+        public function ensureStripeCustomer(User $user): void
+        {
+            $this->ensureStripeCustomerCalled = true;
+        }
+
+        public function getBillingPortalUrl(User $user, string $returnUrl): string
+        {
+            $this->getBillingPortalUrlCalled = true;
+
+            return 'https://billing.stripe.com/session/test';
+        }
+
+        public function hasIncompletePayment(User $user, string $subscriptionType): bool
+        {
+            $this->hasIncompletePaymentCalled = true;
+
+            return false;
+        }
+
+        public function hasActiveSubscription(User $user): bool
+        {
+            return false;
+        }
+
+        public function getPriceIdFromLookupKey(string $lookupKey): ?string
+        {
+            return null;
+        }
+
+        public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string
+        {
+            return '';
+        }
+
+        public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+    };
+
+    app()->instance(StripeServiceContract::class, $stripeMock);
 
     $response = $this->actingAs($user)->get(route('checkout.subscription'));
 
     $response->assertOk();
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue();
+    expect($stripeMock->hasIncompletePaymentCalled)->toBeTrue();
+    expect($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
 });
 
 it('renders subscription when product does not match price id', function (): void {
@@ -185,14 +409,62 @@ it('renders subscription when product does not match price id', function (): voi
         'updated_at' => now(),
     ]);
 
-    $stripeMock = mock(StripeServiceContract::class);
-    $stripeMock->shouldReceive('ensureStripeCustomer')->once();
-    $stripeMock->shouldReceive('hasIncompletePayment')->once()->andReturn(false);
-    $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com/session/test');
+    $stripeMock = new class implements StripeServiceContract
+    {
+        public bool $ensureStripeCustomerCalled = false;
+
+        public bool $hasIncompletePaymentCalled = false;
+
+        public bool $getBillingPortalUrlCalled = false;
+
+        public function ensureStripeCustomer(User $user): void
+        {
+            $this->ensureStripeCustomerCalled = true;
+        }
+
+        public function getBillingPortalUrl(User $user, string $returnUrl): string
+        {
+            $this->getBillingPortalUrlCalled = true;
+
+            return 'https://billing.stripe.com/session/test';
+        }
+
+        public function hasIncompletePayment(User $user, string $subscriptionType): bool
+        {
+            $this->hasIncompletePaymentCalled = true;
+
+            return false;
+        }
+
+        public function hasActiveSubscription(User $user): bool
+        {
+            return false;
+        }
+
+        public function getPriceIdFromLookupKey(string $lookupKey): ?string
+        {
+            return null;
+        }
+
+        public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string
+        {
+            return '';
+        }
+
+        public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+    };
+
+    app()->instance(StripeServiceContract::class, $stripeMock);
 
     $response = $this->actingAs($user)->get(route('checkout.subscription'));
 
     $response->assertOk();
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue();
+    expect($stripeMock->hasIncompletePaymentCalled)->toBeTrue();
+    expect($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
 });
 
 it('returns null for incomplete payment url when has incomplete payment is false', function (): void {
@@ -210,14 +482,62 @@ it('returns null for incomplete payment url when has incomplete payment is false
         'updated_at' => now(),
     ]);
 
-    $stripeMock = mock(StripeServiceContract::class);
-    $stripeMock->shouldReceive('ensureStripeCustomer')->once();
-    $stripeMock->shouldReceive('hasIncompletePayment')->once()->andReturn(false);
-    $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com');
+    $stripeMock = new class implements StripeServiceContract
+    {
+        public bool $ensureStripeCustomerCalled = false;
+
+        public bool $hasIncompletePaymentCalled = false;
+
+        public bool $getBillingPortalUrlCalled = false;
+
+        public function ensureStripeCustomer(User $user): void
+        {
+            $this->ensureStripeCustomerCalled = true;
+        }
+
+        public function getBillingPortalUrl(User $user, string $returnUrl): string
+        {
+            $this->getBillingPortalUrlCalled = true;
+
+            return 'https://billing.stripe.com';
+        }
+
+        public function hasIncompletePayment(User $user, string $subscriptionType): bool
+        {
+            $this->hasIncompletePaymentCalled = true;
+
+            return false;
+        }
+
+        public function hasActiveSubscription(User $user): bool
+        {
+            return false;
+        }
+
+        public function getPriceIdFromLookupKey(string $lookupKey): ?string
+        {
+            return null;
+        }
+
+        public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string
+        {
+            return '';
+        }
+
+        public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+    };
+
+    app()->instance(StripeServiceContract::class, $stripeMock);
 
     $response = $this->actingAs($user)->get(route('checkout.subscription'));
 
     $response->assertOk();
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue();
+    expect($stripeMock->hasIncompletePaymentCalled)->toBeTrue();
+    expect($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
 });
 
 it('returns incomplete payment url when payment is incomplete', function (): void {
@@ -237,18 +557,76 @@ it('returns incomplete payment url when payment is incomplete', function (): voi
 
     $subscription = $user->subscriptions()->first();
 
-    $stripeMock = mock(StripeServiceContract::class);
-    $stripeMock->shouldReceive('ensureStripeCustomer')->once();
-    $stripeMock->shouldReceive('hasIncompletePayment')->once()->andReturn(true);
-    $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com');
-    $stripeMock->shouldReceive('getIncompletePaymentUrl')
-        ->once()
-        ->with(Mockery::on(fn ($sub): bool => $sub->id === $subscription->id))
-        ->andReturn('https://invoice.stripe.com/test_invoice');
+    $stripeMock = new class($subscription->id) implements StripeServiceContract
+    {
+        public bool $ensureStripeCustomerCalled = false;
+
+        public bool $hasIncompletePaymentCalled = false;
+
+        public bool $getBillingPortalUrlCalled = false;
+
+        public bool $getIncompletePaymentUrlCalled = false;
+
+        public ?int $capturedSubscriptionId = null;
+
+        public function __construct()
+        {
+            //
+        }
+
+        public function ensureStripeCustomer(User $user): void
+        {
+            $this->ensureStripeCustomerCalled = true;
+        }
+
+        public function getBillingPortalUrl(User $user, string $returnUrl): string
+        {
+            $this->getBillingPortalUrlCalled = true;
+
+            return 'https://billing.stripe.com';
+        }
+
+        public function hasIncompletePayment(User $user, string $subscriptionType): bool
+        {
+            $this->hasIncompletePaymentCalled = true;
+
+            return true;
+        }
+
+        public function hasActiveSubscription(User $user): bool
+        {
+            return false;
+        }
+
+        public function getPriceIdFromLookupKey(string $lookupKey): ?string
+        {
+            return null;
+        }
+
+        public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string
+        {
+            return '';
+        }
+
+        public function getIncompletePaymentUrl(Subscription $subscription): string
+        {
+            $this->getIncompletePaymentUrlCalled = true;
+            $this->capturedSubscriptionId = $subscription->id;
+
+            return 'https://invoice.stripe.com/test_invoice';
+        }
+    };
+
+    app()->instance(StripeServiceContract::class, $stripeMock);
 
     $response = $this->actingAs($user)->get(route('checkout.subscription'));
 
     $response->assertOk();
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue();
+    expect($stripeMock->hasIncompletePaymentCalled)->toBeTrue();
+    expect($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
+    expect($stripeMock->getIncompletePaymentUrlCalled)->toBeTrue();
+    expect($stripeMock->capturedSubscriptionId)->toBe($subscription->id);
 });
 
 it('renders subscription page with trialing subscription', function (): void {
@@ -282,12 +660,60 @@ it('renders subscription page with trialing subscription', function (): void {
         'updated_at' => now(),
     ]);
 
-    $stripeMock = mock(StripeServiceContract::class);
-    $stripeMock->shouldReceive('ensureStripeCustomer')->once();
-    $stripeMock->shouldReceive('hasIncompletePayment')->once()->andReturn(false);
-    $stripeMock->shouldReceive('getBillingPortalUrl')->once()->andReturn('https://billing.stripe.com/session/test');
+    $stripeMock = new class implements StripeServiceContract
+    {
+        public bool $ensureStripeCustomerCalled = false;
+
+        public bool $hasIncompletePaymentCalled = false;
+
+        public bool $getBillingPortalUrlCalled = false;
+
+        public function ensureStripeCustomer(User $user): void
+        {
+            $this->ensureStripeCustomerCalled = true;
+        }
+
+        public function getBillingPortalUrl(User $user, string $returnUrl): string
+        {
+            $this->getBillingPortalUrlCalled = true;
+
+            return 'https://billing.stripe.com/session/test';
+        }
+
+        public function hasIncompletePayment(User $user, string $subscriptionType): bool
+        {
+            $this->hasIncompletePaymentCalled = true;
+
+            return false;
+        }
+
+        public function hasActiveSubscription(User $user): bool
+        {
+            return false;
+        }
+
+        public function getPriceIdFromLookupKey(string $lookupKey): ?string
+        {
+            return null;
+        }
+
+        public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string
+        {
+            return '';
+        }
+
+        public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+    };
+
+    app()->instance(StripeServiceContract::class, $stripeMock);
 
     $response = $this->actingAs($user)->get(route('checkout.subscription'));
 
     $response->assertOk();
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue();
+    expect($stripeMock->hasIncompletePaymentCalled)->toBeTrue();
+    expect($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
 });

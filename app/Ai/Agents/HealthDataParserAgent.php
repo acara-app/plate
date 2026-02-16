@@ -10,7 +10,9 @@ use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
 use App\Enums\InsulinType;
+use BackedEnum;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\Date;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
@@ -93,115 +95,88 @@ INST;
     public function parse(string $message): HealthLogData
     {
         $response = $this->prompt($message);
-        $responseArray = json_decode(json_encode($response), true);
 
-        if (! is_array($responseArray)) {
-            $responseArray = [];
-        }
-
-        $isHealthData = $this->getBooleanValue($responseArray, 'is_health_data', false);
-        $logTypeString = $this->getStringValue($responseArray, 'log_type', 'glucose');
-        $logType = HealthEntryType::tryFrom($logTypeString) ?? HealthEntryType::Glucose;
-
-        $glucoseValue = $this->getFloatOrNull($responseArray, 'glucose_value');
-
-        $glucoseReadingTypeString = $this->getStringOrNull($responseArray, 'glucose_reading_type');
-        $glucoseReadingType = $glucoseReadingTypeString !== null
-            ? GlucoseReadingType::tryFrom($glucoseReadingTypeString)
-            : null;
-
-        $glucoseUnitString = $this->getStringOrNull($responseArray, 'glucose_unit');
-        $glucoseUnit = $glucoseUnitString !== null
-            ? GlucoseUnit::tryFrom($glucoseUnitString)
-            : null;
-
-        $carbsGrams = $this->getIntOrNull($responseArray, 'carbs_grams');
-        $insulinUnits = $this->getFloatOrNull($responseArray, 'insulin_units');
-
-        $insulinTypeString = $this->getStringOrNull($responseArray, 'insulin_type');
-        $insulinType = $insulinTypeString !== null
-            ? InsulinType::tryFrom($insulinTypeString)
-            : null;
-
-        $medicationName = $this->getStringOrNull($responseArray, 'medication_name');
-        $medicationDosage = $this->getStringOrNull($responseArray, 'medication_dosage');
-        $weight = $this->getFloatOrNull($responseArray, 'weight');
-        $bpSystolic = $this->getIntOrNull($responseArray, 'bp_systolic');
-        $bpDiastolic = $this->getIntOrNull($responseArray, 'bp_diastolic');
-        $exerciseType = $this->getStringOrNull($responseArray, 'exercise_type');
-        $exerciseDurationMinutes = $this->getIntOrNull($responseArray, 'exercise_duration_minutes');
-        $measuredAtString = $this->getStringOrNull($responseArray, 'measured_at');
-
-        $measuredAt = null;
-        if ($measuredAtString !== null) {
-            $measuredAt = \Illuminate\Support\Facades\Date::parse($measuredAtString);
-        }
+        // Extract response data from structured output or JSON string
+        $data = $this->extractResponseData($response);
 
         return new HealthLogData(
-            isHealthData: $isHealthData,
-            logType: $logType,
-            glucoseValue: $glucoseValue,
-            glucoseReadingType: $glucoseReadingType,
-            glucoseUnit: $glucoseUnit,
-            carbsGrams: $carbsGrams,
-            insulinUnits: $insulinUnits,
-            insulinType: $insulinType,
-            medicationName: $medicationName,
-            medicationDosage: $medicationDosage,
-            weight: $weight,
-            bpSystolic: $bpSystolic,
-            bpDiastolic: $bpDiastolic,
-            exerciseType: $exerciseType,
-            exerciseDurationMinutes: $exerciseDurationMinutes,
-            measuredAt: $measuredAt,
+            isHealthData: $this->toBoolean($data['is_health_data'] ?? null, false),
+            logType: $this->toLogType($data['log_type'] ?? null),
+            glucoseValue: $this->toFloat($data['glucose_value'] ?? null),
+            glucoseReadingType: $this->toEnum($data['glucose_reading_type'] ?? null, GlucoseReadingType::class),
+            glucoseUnit: $this->toEnum($data['glucose_unit'] ?? null, GlucoseUnit::class),
+            carbsGrams: $this->toInt($data['carbs_grams'] ?? null),
+            insulinUnits: $this->toFloat($data['insulin_units'] ?? null),
+            insulinType: $this->toEnum($data['insulin_type'] ?? null, InsulinType::class),
+            medicationName: $this->toString($data['medication_name'] ?? null),
+            medicationDosage: $this->toString($data['medication_dosage'] ?? null),
+            weight: $this->toFloat($data['weight'] ?? null),
+            bpSystolic: $this->toInt($data['bp_systolic'] ?? null),
+            bpDiastolic: $this->toInt($data['bp_diastolic'] ?? null),
+            exerciseType: $this->toString($data['exercise_type'] ?? null),
+            exerciseDurationMinutes: $this->toInt($data['exercise_duration_minutes'] ?? null),
+            measuredAt: $this->toDateTime($data['measured_at'] ?? null),
         );
     }
 
     /**
-     * @param  array<string, mixed>  $response
+     * Extract response data from structured output or JSON string.
+     *
+     * @return array<string, mixed>
      */
-    private function getBooleanValue(array $response, string $key, bool $default): bool
+    private function extractResponseData(mixed $response): array
     {
-        $value = $response[$key] ?? null;
+        // Try structured output first (HasStructuredOutput agents)
+        if (property_exists($response, 'structured') && is_array($response->structured)) {
+            return $response->structured;
+        }
 
+        // Try JSON string conversion
+        $json = (string) $response;
+        $data = json_decode($json, true);
+
+        if (is_array($data)) {
+            return $data;
+        }
+
+        // Final fallback: object serialization
+        /** @var array<string, mixed>|null $encoded */
+        $encoded = json_decode(json_encode($response), true);
+
+        return is_array($encoded) ? $encoded : [];
+    }
+
+    private function toBoolean(mixed $value, bool $default): bool
+    {
         return is_bool($value) ? $value : $default;
     }
 
-    /**
-     * @param  array<string, mixed>  $response
-     */
-    private function getStringValue(array $response, string $key, string $default): string
+    private function toLogType(mixed $value): HealthEntryType
     {
-        $value = $response[$key] ?? null;
+        $string = $this->toString($value);
 
-        return is_string($value) && $value !== 'null' ? $value : $default;
+        return HealthEntryType::tryFrom($string ?? '') ?? HealthEntryType::Glucose;
     }
 
     /**
-     * @param  array<string, mixed>  $response
+     * @template T of \BackedEnum
+     *
+     * @param  class-string<T>  $enumClass
+     * @return T|null
      */
-    private function getStringOrNull(array $response, string $key): ?string
+    private function toEnum(mixed $value, string $enumClass): ?BackedEnum
     {
-        $value = $response[$key] ?? null;
+        $string = $this->toString($value);
 
-        if ($value === null) {
+        if ($string === null) {
             return null;
         }
 
-        if (is_string($value) && $value !== 'null' && $value !== '') {
-            return $value;
-        }
-
-        return null;
+        return $enumClass::tryFrom($string);
     }
 
-    /**
-     * @param  array<string, mixed>  $response
-     */
-    private function getFloatOrNull(array $response, string $key): ?float
+    private function toFloat(mixed $value): ?float
     {
-        $value = $response[$key] ?? null;
-
         if ($value === null || $value === 'null') {
             return null;
         }
@@ -209,17 +184,28 @@ INST;
         return is_numeric($value) ? (float) $value : null;
     }
 
-    /**
-     * @param  array<string, mixed>  $response
-     */
-    private function getIntOrNull(array $response, string $key): ?int
+    private function toInt(mixed $value): ?int
     {
-        $value = $response[$key] ?? null;
-
         if ($value === null || $value === 'null') {
             return null;
         }
 
         return is_numeric($value) ? (int) $value : null;
+    }
+
+    private function toString(mixed $value): ?string
+    {
+        if ($value === null || $value === 'null' || $value === '') {
+            return null;
+        }
+
+        return is_string($value) ? $value : (is_scalar($value) ? (string) $value : null);
+    }
+
+    private function toDateTime(mixed $value): ?\Carbon\CarbonInterface
+    {
+        $string = $this->toString($value);
+
+        return $string !== null ? Date::parse($string) : null;
     }
 }
