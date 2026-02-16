@@ -137,7 +137,7 @@ final class TelegramMessageService
     private function dispatchMessage(TelegraphChat $chat, string $chunk, bool $markdown): void
     {
         $message = $markdown
-            ? $chat->markdownV2($chunk)
+            ? $chat->markdown($chunk)
             : $chat->message($chunk);
 
         $message->dispatch(self::QUEUE_NAME);
