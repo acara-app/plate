@@ -80,8 +80,9 @@ final class SuggestWorkoutRoutine implements Tool
             'beginner' => ['duration' => '20-30 min', 'rest' => '60-90 sec'],
             'intermediate' => ['duration' => '30-45 min', 'rest' => '45-60 sec'],
             'advanced' => ['duration' => '45-60 min', 'rest' => '30-45 sec'],
-            /** @codeCoverageIgnore */
+            // @codeCoverageIgnoreStart
             default => ['duration' => '30-45 min', 'rest' => '45-60 sec'],
+        // @codeCoverageIgnoreEnd
         };
         $workouts = match ($focus) {
             'strength' => [

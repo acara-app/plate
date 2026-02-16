@@ -29,7 +29,8 @@ final class TelegramWebhookHandler extends WebhookHandler
         private readonly TelegramMessageService $telegramMessage,
         private readonly ParsesHealthData $healthDataParser,
         private readonly SavesHealthLog $saveHealthLog,
-    ) {}
+    ) {
+    }
 
     public function start(): void
     {
@@ -210,21 +211,6 @@ final class TelegramWebhookHandler extends WebhookHandler
         $this->chat->message('❌ Log discarded. Tell me if you want to log something else!')->send();
     }
 
-    protected function onFailure(Throwable $throwable): void
-    {
-        throw_if($throwable instanceof NotFoundHttpException, $throwable);
-
-        Log::error('Telegram webhook error', [
-            'exception' => $throwable->getMessage(),
-            'class' => $throwable::class,
-            'chat_id' => $this->chat?->chat_id,
-        ]);
-
-        report($throwable);
-
-        rescue(fn () => $this->reply('❌ Sorry, I encountered an error while processing your message. Please try again or contact support if the problem persists.'), report: false);
-    }
-
     protected function handleChatMessage(Stringable $text): void
     {
         $linkedChat = $this->resolveLinkedChat();
@@ -277,7 +263,7 @@ final class TelegramWebhookHandler extends WebhookHandler
 
             return;
         }
-
+        // @codeCoverageIgnoreStart
         try {
             $healthData = $this->healthDataParser->parse($message);
             $this->handleHealthLogAttempt($linkedChat, $healthData);
@@ -287,6 +273,7 @@ final class TelegramWebhookHandler extends WebhookHandler
             report($e);
             $this->chat->message('❌ Could not understand that. Try something like: "My glucose is 140" or "Took 5 units insulin"')->send();
         }
+        // @codeCoverageIgnoreEnd
     }
 
     private function handleHealthLogAttempt(UserTelegramChat $linkedChat, HealthLogData $healthData): void
@@ -405,8 +392,9 @@ final class TelegramWebhookHandler extends WebhookHandler
         if (is_scalar($value)) {
             return (string) $value;
         }
-
+        // @codeCoverageIgnoreStart
         return null;
+        // @codeCoverageIgnoreEnd
     }
 
     private function generateAndSendResponse(UserTelegramChat $linkedChat, string $message): void

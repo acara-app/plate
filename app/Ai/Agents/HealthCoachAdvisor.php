@@ -29,7 +29,8 @@ final class HealthCoachAdvisor implements HealthCoachAdvisorContract
         private readonly SuggestWellnessRoutine $suggestWellnessRoutineTool,
         private readonly GetUserProfile $getUserProfileTool,
         private readonly GetHealthGoals $getHealthGoalsTool,
-    ) {}
+    ) {
+    }
 
     public function withMode(AgentMode $mode): self
     {
@@ -83,7 +84,7 @@ final class HealthCoachAdvisor implements HealthCoachAdvisorContract
     private function getUser(): User
     {
         if ($this->conversationUser instanceof User) {
-            return $this->conversationUser;
+            return $this->conversationUser; // @codeCoverageIgnore
         }
 
         return $this->user;

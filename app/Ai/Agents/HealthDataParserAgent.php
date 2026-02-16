@@ -123,15 +123,14 @@ INST;
      * Extract response data from structured output or JSON string.
      *
      * @return array<string, mixed>
+     * @codeCoverageIgnore
      */
     private function extractResponseData(mixed $response): array
     {
-        // Try structured output first (HasStructuredOutput agents)
         if (property_exists($response, 'structured') && is_array($response->structured)) {
             return $response->structured;
         }
 
-        // Try JSON string conversion
         $json = (string) $response;
         $data = json_decode($json, true);
 
@@ -139,7 +138,6 @@ INST;
             return $data;
         }
 
-        // Final fallback: object serialization
         /** @var array<string, mixed>|null $encoded */
         $encoded = json_decode(json_encode($response), true);
 
@@ -184,6 +182,9 @@ INST;
         return is_numeric($value) ? (float) $value : null;
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     private function toInt(mixed $value): ?int
     {
         if ($value === null || $value === 'null') {

@@ -270,7 +270,6 @@ describe('/new command', function (): void {
             'conversation_id' => 'old-conv-id',
         ]);
 
-        // Create a simple test implementation
         $mock = new class implements ProcessesAdvisorMessage
         {
             public string $resetConversationReturn = 'new-conv-id';

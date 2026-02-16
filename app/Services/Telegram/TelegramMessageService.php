@@ -9,7 +9,7 @@ use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Support\Sleep;
 use League\CommonMark\GithubFlavoredMarkdownConverter;
 
-final class TelegramMessageService
+class TelegramMessageService
 {
     public const int MAX_MESSAGE_LENGTH = 4096;
 
