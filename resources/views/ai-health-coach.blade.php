@@ -2,10 +2,6 @@
 @section('meta_description', 'Your personal AI wellness coach for sleep, stress, hydration, and lifestyle optimization. Get guidance to improve your overall well-being.')
 @section('meta_keywords', 'open source health coach, AI wellness, sleep optimization, stress management, hydration tracker, lifestyle optimization')
 @section('canonical_url', url()->current())
-@section('og_image', asset('screenshots/og-ai-health-coach.webp'))
-@section('og_image_width', '1920')
-@section('og_image_height', '1096')
-@section('og_image_alt', 'AI Health Coach showing personalized sleep routines, stress management tips, and hydration schedules')
 
 @section('head')
 
@@ -149,14 +145,6 @@
                     </div>
 
                     <div class="mt-12 lg:mt-0 lg:col-span-6">
-                        <img 
-                            src="{{ asset('screenshots/og-ai-health-coach.webp') }}" 
-                            alt="AI Health Coach terminal interface showing sleep optimization recommendations"
-                            class="sr-only"
-                            width="1200"
-                            height="630"
-                        >
-                        
                         <div class="relative rounded-xl bg-slate-900 shadow-2xl ring-1 ring-white/10" aria-hidden="true">
                             <div class="flex items-center gap-2 border-b border-white/10 px-4 py-3 bg-white/5 rounded-t-xl">
                                 <div class="flex gap-1.5">
