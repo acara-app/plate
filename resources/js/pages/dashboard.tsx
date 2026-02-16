@@ -106,7 +106,7 @@ export default function Dashboard() {
                                     </Button>
                                 </Link>
                                 <Link
-                                    href={`${chat.create().url}?mode=generate-meal-plan`}
+                                    href={`${chat.create().url}?mode=create-meal-plan`}
                                     className="group/action"
                                 >
                                     <Button

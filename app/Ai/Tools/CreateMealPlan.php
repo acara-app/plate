@@ -19,6 +19,11 @@ final readonly class CreateMealPlan implements Tool
     ) {
     }
 
+    public function name(): string
+    {
+        return 'create_meal_plan';
+    }
+
     /**
      * Get the description of the tool's purpose.
      */
