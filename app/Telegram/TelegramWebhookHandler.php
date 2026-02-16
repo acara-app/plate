@@ -414,7 +414,7 @@ final class TelegramWebhookHandler extends WebhookHandler
             }
         }
 
-        $this->telegramMessage->sendStreamingMessage($this->chat, $chunks, true);
+        $this->telegramMessage->sendStreamingMessage($this->chat, $chunks);
         $this->telegramMessage->stopTypingIndicator($this->chat);
     }
 
