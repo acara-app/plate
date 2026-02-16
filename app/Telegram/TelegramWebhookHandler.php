@@ -392,17 +392,30 @@ final class TelegramWebhookHandler extends WebhookHandler
 
     private function generateAndSendResponse(UserTelegramChat $linkedChat, string $message): void
     {
-        $result = $this->generateAiResponse->handle(
-            $linkedChat->user,
-            $message,
-            $linkedChat->conversation_id,
-        );
+        $conversationId = $linkedChat->conversation_id;
 
-        if ($linkedChat->conversation_id === null) {
-            $linkedChat->update(['conversation_id' => $result['conversation_id']]);
+        if ($conversationId === null) {
+            $conversationId = $this->generateAiResponse->resetConversation($linkedChat->user);
+            $linkedChat->update(['conversation_id' => $conversationId]);
         }
 
-        $this->telegramMessage->sendLongMessage($this->chat, $result['response']);
+        $this->telegramMessage->sendTypingIndicator($this->chat);
+
+        $streamResponse = $this->generateAiResponse->stream(
+            $linkedChat->user,
+            $message,
+            $conversationId,
+        );
+
+        $chunks = [];
+        foreach ($streamResponse as $event) {
+            if ($event instanceof \Laravel\Ai\Streaming\Events\TextDelta) {
+                $chunks[] = $event->delta;
+            }
+        }
+
+        $this->telegramMessage->sendStreamingMessage($this->chat, $chunks, true);
+        $this->telegramMessage->stopTypingIndicator($this->chat);
     }
 
     private function formatProfileInfo(User $user): string
