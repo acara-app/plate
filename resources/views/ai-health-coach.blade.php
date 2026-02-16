@@ -1,11 +1,7 @@
-@section('title', 'Open Source AI Nutritionist | Acara Plate')
-@section('meta_description', 'Analyze your meals for glycemic impact. An open-source, AI-powered tool to understand how food affects your blood sugar and metabolic health.')
-@section('meta_keywords', 'open source nutritionist, AI nutrition analysis, glycemic load calculator, metabolic health tool')
-@section('canonical_url', strtok(url()->current(), '?'))
-@section('og_image', asset('screenshots/og-ai-nutritionist.webp'))
-@section('og_image_width', '1920')
-@section('og_image_height', '1096')
-@section('og_image_alt', 'AI Nutritionist analyzing oatmeal meal showing predicted glucose spike and recommendations')
+@section('title', 'Open Source AI Health Coach | Acara Plate')
+@section('meta_description', 'Your personal AI wellness coach for sleep, stress, hydration, and lifestyle optimization. Get guidance to improve your overall well-being.')
+@section('meta_keywords', 'open source health coach, AI wellness, sleep optimization, stress management, hydration tracker, lifestyle optimization')
+@section('canonical_url', url()->current())
 
 @section('head')
 
@@ -13,8 +9,8 @@
 {
     "@@context": "https://schema.org",
     "@@type": "WebApplication",
-    "name": "Acara Plate AI Nutritionist",
-    "description": "Open source tool for analyzing the glycemic impact of meals and providing metabolic health guidance.",
+    "name": "Acara Plate AI Health Coach",
+    "description": "Open source AI-powered health coach for wellness optimization including sleep, stress management, and lifestyle guidance.",
     "applicationCategory": "HealthApplication",
     "operatingSystem": "All",
     "offers": {
@@ -31,10 +27,10 @@
     "mainEntity": [
         {
             "@@type": "Question",
-            "name": "How does the analysis engine work?",
+            "name": "What areas can the AI Health Coach help with?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "The engine uses metabolic modeling trained on nutritional datasets and glycemic research. It analyzes the interaction between carbohydrates, fiber, protein, and fat to estimate how a specific food item will impact blood glucose levels."
+                "text": "The AI Health Coach specializes in sleep optimization, stress management, hydration guidance, and general lifestyle wellness. It provides personalized routines and evidence-based recommendations for improving your overall well-being."
             }
         },
         {
@@ -42,31 +38,31 @@
             "name": "Is this tool really open source?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Yes. We believe health utilities should be transparent. You can view our entire codebase on GitHub, verify our privacy controls, and see exactly how we calculate nutritional values."
+                "text": "Yes. We believe health utilities should be transparent. You can view our entire codebase on GitHub, verify our privacy controls, and see exactly how our wellness recommendations are generated."
             }
         },
         {
             "@@type": "Question",
-            "name": "How accurate is the glucose prediction?",
+            "name": "How does the AI Health Coach work?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "The tool uses USDA FoodData Central as its primary data source, which is the scientific gold standard for nutritional information. Glucose predictions are estimates based on established glycemic research, but individual responses can vary."
+                "text": "Simply tell the AI what you're struggling with—sleep issues, high stress, low energy—and it analyzes your situation to provide specific recommendations. No forms to fill out, just conversational input."
             }
         },
         {
             "@@type": "Question",
-            "name": "Do I need to create an account to use this?",
+            "name": "Is my health data secure?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "No! You can analyze meals instantly without signing up. Create an account if you want to save your meal history and get recommendations over time."
+                "text": "We take a privacy-first approach. Your data is never sold to third parties. Since our code is open source, you can verify exactly how your information is handled."
             }
         },
         {
             "@@type": "Question",
-            "name": "Can I analyze restaurant meals?",
+            "name": "Do I need to track everything manually?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Yes. Simply describe what you ordered or paste the ingredient list. The AI will estimate the nutritional content and glycemic impact based on similar foods in our database."
+                "text": "No. Unlike other wellness apps, you don't need to log every meal or hour of sleep. Just describe how you feel and what challenges you're facing."
             }
         }
     ]
@@ -86,7 +82,7 @@
         {
             "@@type": "ListItem",
             "position": 2,
-            "name": "AI Nutritionist"
+            "name": "AI Health Coach"
         }
     ]
 }
@@ -130,16 +126,16 @@
                             Open Source Project
                         </div>
                         <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                            An AI That Truly Understands You
+                            Your Personal AI Wellness Coach
                         </h1>
                         
                         <p class="mt-6 text-lg text-slate-600 leading-relaxed">
-                            Meal guidance based on your goals, activity, and metabolic history. Tell Acara what you're eating—chat, paste a recipe, or upload a photo—and get recommendations that keep your glucose steady.
+                            Get guidance on sleep, stress, hydration, and lifestyle. Tell Acara what you're struggling with—sleep issues, high stress, energy dips—and get practical recommendations.
                         </p>
 
                         <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                             <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-lg bg-slate-900 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-slate-800 transition-all">
-                                Analyze Your First Meal
+                                Get Started Free
                                 <span class="ml-2 text-slate-400">→</span>
                             </a>
                             <a href="https://github.com/acara-app/plate" target="_blank" class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-6 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 transition-all">
@@ -149,14 +145,6 @@
                     </div>
 
                     <div class="mt-12 lg:mt-0 lg:col-span-6">
-                        <img 
-                            src="{{ asset('screenshots/og-ai-nutritionist.webp') }}" 
-                            alt="AI Nutritionist terminal interface analyzing oatmeal with banana and honey, showing ingredient breakdown with carbohydrate counts, predicted high glucose spike with glycemic load of 35, and recommendation to swap honey for blueberries and add chia seeds to reduce spike by 40 percent"
-                            class="sr-only"
-                            width="1200"
-                            height="630"
-                        >
-                        
                         <div class="relative rounded-xl bg-slate-900 shadow-2xl ring-1 ring-white/10" aria-hidden="true">
                             <div class="flex items-center gap-2 border-b border-white/10 px-4 py-3 bg-white/5 rounded-t-xl">
                                 <div class="flex gap-1.5">
@@ -164,28 +152,30 @@
                                     <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
                                     <div class="h-3 w-3 rounded-full bg-green-500"></div>
                                 </div>
-                                <div class="text-xs font-mono text-slate-400 ml-2">acara-ai — analysis</div>
+                                <div class="text-xs font-mono text-slate-400 ml-2">acara-ai — wellness</div>
                             </div>
 
                             <div class="p-6 font-mono text-sm space-y-4">
                                 <div class="text-slate-400">
-                                    <span class="text-rose-500">user@acara:~$</span> ask "I'm having oatmeal with banana and honey. Will this spike me?"
+                                    <span class="text-rose-500">user@acara:~$</span> ask "I having trouble sleeping and feel stressed all the time"
                                 </div>
                                 
                                 <div class="space-y-2 border-l-2 border-slate-700 pl-4 py-2">
-                                    <div class="text-emerald-400">✓ Ingredients identified</div>
+                                    <div class="text-emerald-400">✓ Wellness areas identified</div>
                                     <div class="text-slate-300">
-                                        • Oatmeal (Cup, cooked): <span class="text-yellow-400">27g Carbs</span><br>
-                                        • Banana (Medium): <span class="text-yellow-400">27g Carbs</span><br>
-                                        • Honey (1 tbsp): <span class="text-yellow-400">17g Carbs</span>
+                                        • Sleep quality issues<br>
+                                        • Chronic stress patterns
                                     </div>
                                 </div>
 
                                 <div class="bg-white/10 rounded p-3 text-slate-200">
-                                    <span class="font-bold text-rose-400">⚠ PREDICTED SPIKE: HIGH</span><br>
-                                    Total Glycemic Load: <span class="font-bold">35 (High)</span><br>
+                                    <span class="font-bold text-cyan-400">SUGGESTED ROUTINE</span><br>
                                     <br>
-                                    <span class="text-slate-400">Suggestion:</span> Swap instant oats for steel-cut, remove honey, and add 1 tbsp peanut butter to reduce spike by ~40%.
+                                    <span class="text-slate-400">Morning:</span> 10 min sunlight, avoid phone first hour<br>
+                                    <span class="text-slate-400">Evening:</span> Dim lights 8pm, no screens after 9pm<br>
+                                    <span class="text-slate-400">Bedtime:</span> 65°F room, 4-7-8 breathing<br>
+                                    <br>
+                                    <span class="text-cyan-400">→</span> Try the sleep optimization routine for 2 weeks
                                 </div>
                                 
                                 <div class="animate-pulse text-slate-500">
@@ -201,47 +191,47 @@
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-2xl mx-auto mb-16">
-                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Why calculate the spike?</h2>
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Why focus on wellness?</h2>
                     <p class="mt-4 text-lg text-slate-600">
-                        Blood sugar isn't just about sugar. It's about the complex interaction between fiber, protein, and carbohydrates.
+                        Sleep, stress, and hydration are the foundations of good health. Small improvements in these areas can have dramatic effects on your energy, mood, and long-term health.
                     </p>
                 </div>
 
                 <div class="grid gap-8 md:grid-cols-3">
                     {{-- Card 1 --}}
                     <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
-                        <div class="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center text-rose-600 mb-6">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Glycemic Load vs. Index</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">
-                            Glycemic Index (GI) only tells half the story. We calculate Glycemic Load (GL), which accounts for portion size—a far more accurate predictor of real-world spikes.
-                        </p>
-                    </div>
-
-                    <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
                         <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 mb-6">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Transparent Data</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Sleep Optimization</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            No "proprietary magic." Our food data comes from verified USDA databases and open scientific literature. You can audit our logic on GitHub.
+                            Quality sleep affects everything from mood to metabolism. Get sleep hygiene recommendations and routines that fit your schedule.
                         </p>
                     </div>
 
                     <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
-                        <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 mb-6">
+                        <div class="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center text-rose-600 mb-6">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Context Aware</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Stress Management</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            A banana affects a marathon runner differently than an office worker. The AI adjusts recommendations based on your activity context and history.
+                            Chronic stress impacts every system in your body. Learn practical techniques for managing stress, from breathing exercises to daily mindfulness.
+                        </p>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
+                        <div class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center text-cyan-600 mb-6">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Hydration & Lifestyle</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed">
+                            Proper hydration and daily habits are essential for optimal function. Get practical tips for staying hydrated and building healthy routines.
                         </p>
                     </div>
                 </div>
@@ -253,7 +243,7 @@
                 <div class="text-center max-w-2xl mx-auto mb-16">
                     <h2 class="text-3xl font-bold tracking-tight text-slate-900">How it works</h2>
                     <p class="mt-4 text-lg text-slate-600">
-                        Three steps to understand your food better
+                        Three steps to better wellness
                     </p>
                 </div>
 
@@ -264,17 +254,17 @@
                         </div>
                         <h3 class="text-lg font-bold text-slate-900 mb-3">Conversational Interface</h3>
                         <p class="text-slate-600 leading-relaxed">
-                            No strict forms or calorie counting. Just tell the AI what you're eating like you're texting a friend. It understands context, recipes, and restaurant menus.
+                            No strict forms or tracking apps. Just tell the AI what you're struggling with. It understands your context and provides relevant guidance.
                         </p>
                     </div>
 
                     <div class="relative">
-                        <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6 border-2 border-rose-500">
+                        <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6 border-2 border-cyan-500">
                             02
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">AI Analysis</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Customized Routines</h3>
                         <p class="text-slate-600 leading-relaxed">
-                            Our engine breaks down macronutrients, calculates glycemic load, and predicts metabolic impact based on scientific data.
+                            Receive wellness routines built around your goals, schedule, and current challenges. Everything from sleep schedules to stress techniques.
                         </p>
                     </div>
 
@@ -282,9 +272,9 @@
                         <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6">
                             03
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Get Recommendations</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Track Your Progress</h3>
                         <p class="text-slate-600 leading-relaxed">
-                            Receive actionable suggestions to optimize your meal for stable energy and better metabolic health.
+                            Get ongoing support and adjustments. The AI remembers your context and helps you build sustainable healthy habits.
                         </p>
                     </div>
                 </div>
@@ -300,13 +290,13 @@
                 <div class="space-y-4">
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
-                            How does the analysis engine work?
+                            What areas can the AI Health Coach help with?
                             <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            The engine simulates digestion. It calculates how the fiber, protein, and fats in your meal interact to slow down sugar absorption, giving you a realistic prediction of your blood sugar response.
+                            The AI Health Coach specializes in sleep optimization, stress management, hydration guidance, and general lifestyle wellness. It provides evidence-based recommendations for your specific situation and goals.
                         </p>
                     </details>
 
@@ -318,7 +308,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            Yes. We believe health utilities should be transparent. You can view our entire codebase on GitHub, verify our privacy controls, and see exactly how we calculate nutritional values. We welcome audits and contributions from the developer and health science communities.
+                            Yes. We believe health utilities should be transparent. You can view our entire codebase on GitHub, verify our privacy controls, and see exactly how our wellness recommendations are generated. We welcome audits and contributions from the developer and health science communities.
                         </p>
                     </details>
 
@@ -330,7 +320,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            We take a "Privacy-First" approach. We do not sell your data to third-party advertisers or insurance companies. Because our code is open source, these claims are verifiable by anyone. Your metabolic data is used solely to provide you with accurate analysis.
+                            We take a "Privacy-First" approach. We do not sell your data to third-party advertisers or insurance companies. Because our code is open source, these claims are verifiable by anyone. Your wellness data is used solely to provide you with accurate guidance.
                         </p>
                     </details>
 
@@ -342,7 +332,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            Anyone interested in understanding how food affects their body. Whether you're managing diabetes, optimizing athletic performance, or simply want to make more informed food choices, this tool provides data-driven insights without the guesswork.
+                            Anyone looking to improve their overall wellness. Whether you're struggling with sleep, feeling stressed, wanting to stay better hydrated, or just looking for general health optimization, this tool gives you practical guidance without the complexity.
                         </p>
                     </details>
                 </div>
@@ -355,7 +345,7 @@
                     Part of the Open Source Health Stack
                 </h2>
                 <p class="mt-4 text-slate-600">
-                    Acara Plate is built by developers and diabetics who believe health data should be accessible, not locked in a black box.
+                    Acara Plate is built by developers and health enthusiasts who believe health data should be accessible, not locked in a black box.
                 </p>
                 <div class="mt-8 flex justify-center">
                     <a href="{{ route('register') }}" class="text-base font-semibold text-rose-600 hover:text-rose-500 border-b-2 border-rose-100 hover:border-rose-500 transition-colors pb-1">

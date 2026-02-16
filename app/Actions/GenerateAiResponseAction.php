@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Ai\Agents\NutritionAdvisor;
+use App\Contracts\Ai\Advisor;
 use App\Contracts\GeneratesAiResponse;
 use App\Models\User;
 use Laravel\Ai\Contracts\ConversationStore;
@@ -12,7 +12,7 @@ use Laravel\Ai\Contracts\ConversationStore;
 final readonly class GenerateAiResponseAction implements GeneratesAiResponse
 {
     public function __construct(
-        private NutritionAdvisor $nutritionAdvisor,
+        private Advisor $advisor,
         private ConversationStore $conversationStore,
     ) {}
 
@@ -24,7 +24,7 @@ final readonly class GenerateAiResponseAction implements GeneratesAiResponse
         $conversationId ??= $this->conversationStore->latestConversationId($user->id)
             ?? $this->conversationStore->storeConversation($user->id, 'Telegram Chat');
 
-        $agent = $this->nutritionAdvisor->continue($conversationId, $user);
+        $agent = $this->advisor->continue($conversationId, $user);
         $response = $agent->prompt($message);
 
         return [

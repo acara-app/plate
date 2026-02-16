@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="canonical" href="{{ url()->current() }}">
+        <link rel="canonical" href="{{ strtok(url()->current(), '?') }}">
 
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>

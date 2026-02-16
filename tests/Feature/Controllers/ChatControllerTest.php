@@ -25,7 +25,7 @@ it('renders chat page with correct props when no conversation id provided', func
         ->assertInertia(fn ($page) => $page
             ->has('conversationId', null)
             ->has('messages', 0)
-            ->where('mode', AgentMode::Ask) // Default mode
+            ->where('mode', AgentMode::Ask)
         );
 });
 

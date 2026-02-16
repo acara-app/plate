@@ -27,7 +27,7 @@
         content="{{ $metaKeywords ?? 'diabetes nutrition, AI meal planner, glucose tracking, personalized meal plans, diabetes management' }}" />
 @endif
 
-<link rel="canonical" href="@yield('canonical_url', url()->current())" />
+<link rel="canonical" href="@yield('canonical_url', strtok(url()->current(), '?'))" />
 
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="Acara Plate" />

@@ -1,11 +1,7 @@
-@section('title', 'Open Source AI Nutritionist | Acara Plate')
-@section('meta_description', 'Analyze your meals for glycemic impact. An open-source, AI-powered tool to understand how food affects your blood sugar and metabolic health.')
-@section('meta_keywords', 'open source nutritionist, AI nutrition analysis, glycemic load calculator, metabolic health tool')
-@section('canonical_url', strtok(url()->current(), '?'))
-@section('og_image', asset('screenshots/og-ai-nutritionist.webp'))
-@section('og_image_width', '1920')
-@section('og_image_height', '1096')
-@section('og_image_alt', 'AI Nutritionist analyzing oatmeal meal showing predicted glucose spike and recommendations')
+@section('title', 'Open Source AI Personal Trainer | Acara Plate')
+@section('meta_description', 'Your AI fitness coach for strength, cardio, and flexibility training. Get workout plans and exercise guidance.')
+@section('meta_keywords', 'open source personal trainer, AI fitness coach, workout planner, exercise guidance, strength training, cardio training')
+@section('canonical_url', url()->current())
 
 @section('head')
 
@@ -13,9 +9,9 @@
 {
     "@@context": "https://schema.org",
     "@@type": "WebApplication",
-    "name": "Acara Plate AI Nutritionist",
-    "description": "Open source tool for analyzing the glycemic impact of meals and providing metabolic health guidance.",
-    "applicationCategory": "HealthApplication",
+    "name": "Acara Plate AI Personal Trainer",
+    "description": "Open source AI-powered personal trainer for fitness, strength training, and exercise guidance.",
+    "applicationCategory": "SportsApplication",
     "operatingSystem": "All",
     "offers": {
         "@@type": "Offer",
@@ -31,10 +27,10 @@
     "mainEntity": [
         {
             "@@type": "Question",
-            "name": "How does the analysis engine work?",
+            "name": "What can the AI Personal Trainer help with?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "The engine uses metabolic modeling trained on nutritional datasets and glycemic research. It analyzes the interaction between carbohydrates, fiber, protein, and fat to estimate how a specific food item will impact blood glucose levels."
+                "text": "The AI Personal Trainer specializes in strength training, cardio, HIIT, flexibility, and general fitness programming. It provides workout routines and training plans tailored to your fitness level and goals."
             }
         },
         {
@@ -42,31 +38,31 @@
             "name": "Is this tool really open source?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Yes. We believe health utilities should be transparent. You can view our entire codebase on GitHub, verify our privacy controls, and see exactly how we calculate nutritional values."
+                "text": "Yes. We believe fitness tools should be transparent. You can view our entire codebase on GitHub, verify our privacy controls, and see exactly how our workout recommendations are generated."
             }
         },
         {
             "@@type": "Question",
-            "name": "How accurate is the glucose prediction?",
+            "name": "How does the AI Personal Trainer create workouts?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "The tool uses USDA FoodData Central as its primary data source, which is the scientific gold standard for nutritional information. Glucose predictions are estimates based on established glycemic research, but individual responses can vary."
+                "text": "Simply tell the AI what you want to achieve—build muscle, lose weight, improve endurance—and it builds a custom program based on your fitness level and available equipment."
             }
         },
         {
             "@@type": "Question",
-            "name": "Do I need to create an account to use this?",
+            "name": "Do I need gym equipment?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "No! You can analyze meals instantly without signing up. Create an account if you want to save your meal history and get recommendations over time."
+                "text": "No! The AI can create effective workouts using just your bodyweight. However, if you have access to dumbbells, kettlebells, or gym equipment, it can incorporate those into your program as well."
             }
         },
         {
             "@@type": "Question",
-            "name": "Can I analyze restaurant meals?",
+            "name": "Can beginners use this tool?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Yes. Simply describe what you ordered or paste the ingredient list. The AI will estimate the nutritional content and glycemic impact based on similar foods in our database."
+                "text": "Absolutely. The AI Personal Trainer works for all fitness levels. Whether you're just starting out or you've been training for years, you get workout plans that match your current abilities."
             }
         }
     ]
@@ -86,7 +82,7 @@
         {
             "@@type": "ListItem",
             "position": 2,
-            "name": "AI Nutritionist"
+            "name": "AI Personal Trainer"
         }
     ]
 }
@@ -130,16 +126,16 @@
                             Open Source Project
                         </div>
                         <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                            An AI That Truly Understands You
+                            Your Personal AI Trainer
                         </h1>
                         
                         <p class="mt-6 text-lg text-slate-600 leading-relaxed">
-                            Meal guidance based on your goals, activity, and metabolic history. Tell Acara what you're eating—chat, paste a recipe, or upload a photo—and get recommendations that keep your glucose steady.
+                            Get workout plans built around your fitness level and goals. Tell Acara what you want to achieve—build muscle, improve cardio, or just stay active—and get a custom training program.
                         </p>
 
                         <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                             <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-lg bg-slate-900 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-slate-800 transition-all">
-                                Analyze Your First Meal
+                                Get Started Free
                                 <span class="ml-2 text-slate-400">→</span>
                             </a>
                             <a href="https://github.com/acara-app/plate" target="_blank" class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-6 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 transition-all">
@@ -149,14 +145,6 @@
                     </div>
 
                     <div class="mt-12 lg:mt-0 lg:col-span-6">
-                        <img 
-                            src="{{ asset('screenshots/og-ai-nutritionist.webp') }}" 
-                            alt="AI Nutritionist terminal interface analyzing oatmeal with banana and honey, showing ingredient breakdown with carbohydrate counts, predicted high glucose spike with glycemic load of 35, and recommendation to swap honey for blueberries and add chia seeds to reduce spike by 40 percent"
-                            class="sr-only"
-                            width="1200"
-                            height="630"
-                        >
-                        
                         <div class="relative rounded-xl bg-slate-900 shadow-2xl ring-1 ring-white/10" aria-hidden="true">
                             <div class="flex items-center gap-2 border-b border-white/10 px-4 py-3 bg-white/5 rounded-t-xl">
                                 <div class="flex gap-1.5">
@@ -164,28 +152,33 @@
                                     <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
                                     <div class="h-3 w-3 rounded-full bg-green-500"></div>
                                 </div>
-                                <div class="text-xs font-mono text-slate-400 ml-2">acara-ai — analysis</div>
+                                <div class="text-xs font-mono text-slate-400 ml-2">acara-ai — fitness</div>
                             </div>
 
                             <div class="p-6 font-mono text-sm space-y-4">
                                 <div class="text-slate-400">
-                                    <span class="text-rose-500">user@acara:~$</span> ask "I'm having oatmeal with banana and honey. Will this spike me?"
+                                    <span class="text-rose-500">user@acara:~$</span> ask "I want to build muscle and get stronger"
                                 </div>
                                 
                                 <div class="space-y-2 border-l-2 border-slate-700 pl-4 py-2">
-                                    <div class="text-emerald-400">✓ Ingredients identified</div>
+                                    <div class="text-emerald-400">✓ Fitness goal identified</div>
                                     <div class="text-slate-300">
-                                        • Oatmeal (Cup, cooked): <span class="text-yellow-400">27g Carbs</span><br>
-                                        • Banana (Medium): <span class="text-yellow-400">27g Carbs</span><br>
-                                        • Honey (1 tbsp): <span class="text-yellow-400">17g Carbs</span>
+                                        • Goal: Strength & Muscle Building<br>
+                                        • Level: Intermediate<br>
+                                        • Focus: Upper & Lower Body
                                     </div>
                                 </div>
 
                                 <div class="bg-white/10 rounded p-3 text-slate-200">
-                                    <span class="font-bold text-rose-400">⚠ PREDICTED SPIKE: HIGH</span><br>
-                                    Total Glycemic Load: <span class="font-bold">35 (High)</span><br>
+                                    <span class="font-bold text-orange-400">WEEKLY WORKOUT PLAN</span><br>
                                     <br>
-                                    <span class="text-slate-400">Suggestion:</span> Swap instant oats for steel-cut, remove honey, and add 1 tbsp peanut butter to reduce spike by ~40%.
+                                    <span class="text-slate-400">Day 1 - Upper Body:</span> Push-ups, Rows, Press<br>
+                                    <span class="text-slate-400">Day 2 - Lower Body:</span> Squats, Lunges, Deadlifts<br>
+                                    <span class="text-slate-400">Day 3 - Rest</span><br>
+                                    <span class="text-slate-400">Day 4 - HIIT:</span> 20 min intervals<br>
+                                    <span class="text-slate-400">Day 5 - Upper:</span> Dips, Curls, Extensions<br>
+                                    <br>
+                                    <span class="text-orange-400">→</span> 3 sets, 10-12 reps, 60sec rest
                                 </div>
                                 
                                 <div class="animate-pulse text-slate-500">
@@ -201,47 +194,47 @@
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-2xl mx-auto mb-16">
-                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Why calculate the spike?</h2>
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Why train with AI?</h2>
                     <p class="mt-4 text-lg text-slate-600">
-                        Blood sugar isn't just about sugar. It's about the complex interaction between fiber, protein, and carbohydrates.
+                        Get professional-level training guidance without the gym membership. Personalized workouts that adapt to your fitness level and goals.
                     </p>
                 </div>
 
                 <div class="grid gap-8 md:grid-cols-3">
                     {{-- Card 1 --}}
                     <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
-                        <div class="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center text-rose-600 mb-6">
+                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 mb-6">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Glycemic Load vs. Index</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Strength Training</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            Glycemic Index (GI) only tells half the story. We calculate Glycemic Load (GL), which accounts for portion size—a far more accurate predictor of real-world spikes.
+                            Build muscle and increase strength with programs that match your level. From bodyweight exercises to weighted movements, get the right workout for you.
                         </p>
                     </div>
 
                     <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
-                        <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 mb-6">
+                        <div class="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center text-rose-600 mb-6">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Transparent Data</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Cardio & HIIT</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            No "proprietary magic." Our food data comes from verified USDA databases and open scientific literature. You can audit our logic on GitHub.
+                            Improve your cardiovascular fitness with running plans, HIIT workouts, and interval training. Burn calories and build endurance efficiently.
                         </p>
                     </div>
 
                     <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
                         <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 mb-6">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Context Aware</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Flexibility & Mobility</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            A banana affects a marathon runner differently than an office worker. The AI adjusts recommendations based on your activity context and history.
+                            Improve your range of motion and prevent injury with stretching routines, mobility drills, and yoga-inspired movements.
                         </p>
                     </div>
                 </div>
@@ -253,7 +246,7 @@
                 <div class="text-center max-w-2xl mx-auto mb-16">
                     <h2 class="text-3xl font-bold tracking-tight text-slate-900">How it works</h2>
                     <p class="mt-4 text-lg text-slate-600">
-                        Three steps to understand your food better
+                        Three steps to get fit
                     </p>
                 </div>
 
@@ -262,19 +255,19 @@
                         <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6">
                             01
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Conversational Interface</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Tell Us Your Goal</h3>
                         <p class="text-slate-600 leading-relaxed">
-                            No strict forms or calorie counting. Just tell the AI what you're eating like you're texting a friend. It understands context, recipes, and restaurant menus.
+                            Tell the AI what you want to achieve. Whether it's building muscle, losing weight, or improving endurance—it builds a plan around your goals.
                         </p>
                     </div>
 
                     <div class="relative">
-                        <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6 border-2 border-rose-500">
+                        <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6 border-2 border-orange-500">
                             02
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">AI Analysis</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Get Your Program</h3>
                         <p class="text-slate-600 leading-relaxed">
-                            Our engine breaks down macronutrients, calculates glycemic load, and predicts metabolic impact based on scientific data.
+                            Receive a workout plan built for your fitness level, available equipment, and schedule. Complete with sets, reps, and rest periods.
                         </p>
                     </div>
 
@@ -282,9 +275,9 @@
                         <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6">
                             03
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Get Recommendations</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Train & Progress</h3>
                         <p class="text-slate-600 leading-relaxed">
-                            Receive actionable suggestions to optimize your meal for stable energy and better metabolic health.
+                            Follow your program and track progress. The AI adjusts recommendations based on your feedback and helps you progress over time.
                         </p>
                     </div>
                 </div>
@@ -300,13 +293,25 @@
                 <div class="space-y-4">
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
-                            How does the analysis engine work?
+                            What can the AI Personal Trainer help with?
                             <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            The engine simulates digestion. It calculates how the fiber, protein, and fats in your meal interact to slow down sugar absorption, giving you a realistic prediction of your blood sugar response.
+                            The AI Personal Trainer specializes in strength training, cardiovascular fitness, HIIT, flexibility, and general fitness programming. It can create workout plans, suggest exercises, provide form guidance, and help you progress toward your fitness goals.
+                        </p>
+                    </details>
+
+                    <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+                        <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
+                            Do I need gym equipment?
+                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="mt-4 text-slate-600">
+                            No! The AI can create effective workouts using just your bodyweight. However, if you have access to dumbbells, kettlebells, or gym equipment, it can incorporate those into your program as well.
                         </p>
                     </details>
 
@@ -318,19 +323,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            Yes. We believe health utilities should be transparent. You can view our entire codebase on GitHub, verify our privacy controls, and see exactly how we calculate nutritional values. We welcome audits and contributions from the developer and health science communities.
-                        </p>
-                    </details>
-
-                    <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-                        <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
-                            How is my privacy protected?
-                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </summary>
-                        <p class="mt-4 text-slate-600">
-                            We take a "Privacy-First" approach. We do not sell your data to third-party advertisers or insurance companies. Because our code is open source, these claims are verifiable by anyone. Your metabolic data is used solely to provide you with accurate analysis.
+                            Yes. We believe fitness tools should be transparent. You can view our entire codebase on GitHub, verify our privacy controls, and see exactly how our workout recommendations are generated. We welcome audits and contributions from the developer and fitness communities.
                         </p>
                     </details>
 
@@ -342,7 +335,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            Anyone interested in understanding how food affects their body. Whether you're managing diabetes, optimizing athletic performance, or simply want to make more informed food choices, this tool provides data-driven insights without the guesswork.
+                            Anyone looking to improve their fitness! Whether you're a complete beginner, an intermediate athlete, or an advanced trainer looking for new ideas, the AI Personal Trainer provides guidance for all levels.
                         </p>
                     </details>
                 </div>
@@ -355,7 +348,7 @@
                     Part of the Open Source Health Stack
                 </h2>
                 <p class="mt-4 text-slate-600">
-                    Acara Plate is built by developers and diabetics who believe health data should be accessible, not locked in a black box.
+                    Acara Plate is built by developers and fitness enthusiasts who believe health data should be accessible, not locked in a black box.
                 </p>
                 <div class="mt-8 flex justify-center">
                     <a href="{{ route('register') }}" class="text-base font-semibold text-rose-600 hover:text-rose-500 border-b-2 border-rose-100 hover:border-rose-500 transition-colors pb-1">
