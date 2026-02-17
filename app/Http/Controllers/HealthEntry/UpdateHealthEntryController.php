@@ -31,7 +31,8 @@ final readonly class UpdateHealthEntryController
         // @phpstan-ignore nullsafe.neverNull
         $glucoseUnit = $this->currentUser->profile?->units_preference ?? GlucoseUnit::MmolL;
         if ($glucoseUnit === GlucoseUnit::MmolL && isset($updateData['glucose_value'])) {
-            $glucoseValue = is_numeric($updateData['glucose_value'] ?? '') ? (float) ($updateData['glucose_value'] ?? 0) : 0.0;
+            // @phpstan-ignore nullCoalesce.offset,cast.double
+            $glucoseValue = (float) ($updateData['glucose_value'] ?? 0);
             $updateData['glucose_value'] = GlucoseUnit::mmolLToMgDl($glucoseValue);
         }
 

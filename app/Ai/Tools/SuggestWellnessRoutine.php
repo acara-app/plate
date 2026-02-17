@@ -65,7 +65,7 @@ final class SuggestWellnessRoutine implements Tool
     }
 
     /**
-     * @phpstan-ignore return.type
+     * @return array<string, array<string, mixed>>
      */
     private function generateRoutines(string $focus): array
     {
@@ -189,6 +189,7 @@ final class SuggestWellnessRoutine implements Tool
             ],
         };
 
+        // @phpstan-ignore return.type
         return [
             'focus' => $focus,
             'routine' => $routines,

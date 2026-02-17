@@ -43,7 +43,6 @@ final class SingleMealAgent implements Agent, GeneratesSingleMeals, HasStructure
     /**
      * @return array<string, mixed>
      */
-    // @phpstan-ignore return.type
     public function schema(JsonSchema $schema): array
     {
         return [

@@ -72,7 +72,7 @@ final class SuggestWorkoutRoutine implements Tool
     }
 
     /**
-     * @phpstan-ignore return.type
+     * @return array<string, array<string, mixed>>
      */
     private function generateWorkouts(string $focus, string $fitnessLevel): array
     {
@@ -164,6 +164,7 @@ final class SuggestWorkoutRoutine implements Tool
             ],
         };
 
+        // @phpstan-ignore return.type
         return [
             'intensity' => $intensity,
             'schedule' => $workouts,

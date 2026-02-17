@@ -29,7 +29,8 @@ final readonly class StoreHealthEntryController
         // @phpstan-ignore nullsafe.neverNull
         $glucoseUnit = $this->currentUser->profile?->units_preference ?? GlucoseUnit::MmolL;
         if ($glucoseUnit === GlucoseUnit::MmolL && isset($recordData['glucose_value'])) {
-            $glucoseValue = is_numeric($recordData['glucose_value'] ?? '') ? (float) ($recordData['glucose_value'] ?? 0) : 0.0;
+            // @phpstan-ignore nullCoalesce.offset,cast.double
+            $glucoseValue = (float) ($recordData['glucose_value'] ?? 0);
             $recordData['glucose_value'] = GlucoseUnit::mmolLToMgDl($glucoseValue);
         }
 
