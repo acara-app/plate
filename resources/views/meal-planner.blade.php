@@ -100,10 +100,10 @@
             Designed for Type 2 Diabetes & Pre-diabetes
         </div>
         <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
-            Eat With Confidence. <br class="hidden sm:inline" />AI Meal Plans That Understand Your Glucose.
+            I Tried Every Meal Planning App. They All Wanted Me to Count Calories.
         </h1>
         <p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
-            Get personalized 7-day meal plans to help you lower A1C, lose weight, and stabilize blood sugar.
+            That's not sustainable. That's not enjoyable. And that's not how real people eat. What if meal planning actually fit your life instead of the other way around?
         </p>
         <div class="mt-6 flex flex-wrap justify-center gap-4 text-sm text-slate-600">
             <span class="inline-flex items-center gap-1.5">
@@ -145,23 +145,23 @@
 
     {{-- How It Works --}}
     <section class="mb-16">
-        <h2 class="text-2xl font-bold text-center text-slate-900 mb-8">How the AI Meal Planner Works</h2>
+        <h2 class="text-2xl font-bold text-center text-slate-900 mb-8">How It Actually Works</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="relative rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="absolute -top-3 left-6 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">1</div>
-                <h3 class="mt-2 text-lg font-semibold text-slate-900">Tell Us About You</h3>
-                <p class="mt-2 text-sm text-slate-600">Share your diabetes type, diet preferences (Mediterranean, Keto, Low Carb, etc.), and glucose goals.</p>
+                <h3 class="mt-2 text-lg font-semibold text-slate-900">Tell It About Yourself</h3>
+                <p class="mt-2 text-sm text-slate-600">Diabetes type, diet preferences (Mediterranean, Keto, Low Carb, etc.), and your glucose goals. Just describe what you're working with.</p>
             </div>
             <div class="relative rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="absolute -top-3 left-6 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">2</div>
-                <h3 class="mt-2 text-lg font-semibold text-slate-900">AI Generates Your Plan</h3>
-                <p class="mt-2 text-sm text-slate-600">The AI creates a complete 7-day meal plan with breakfast, lunch, dinner, and snacks — all macro-balanced and glucose-friendly.</p>
+                <h3 class="mt-2 text-lg font-semibold text-slate-900">AI Builds Your Plan</h3>
+                <p class="mt-2 text-sm text-slate-600">A complete 7-day meal plan appears—breakfast, lunch, dinner, snacks—all balanced for your diet type and glucose goals. No math required.</p>
             </div>
             <div class="relative rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="absolute -top-3 left-6 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">3</div>
-                <h3 class="mt-2 text-lg font-semibold text-slate-900">Track & Adjust</h3>
+                <h3 class="mt-2 text-lg font-semibold text-slate-900">Track & Tweak</h3>
                 <p class="mt-2 text-sm text-slate-600">
-                    Log meals via easy chat (Web or <a href="{{ route('telegram-health-logging') }}" class="text-emerald-600 hover:underline">Telegram</a>). See <a href="{{ route('spike-calculator') }}" class="text-emerald-600 hover:underline">glucose predictions</a> and get real-time adjustments.
+                    Log meals through easy chat (Web or <a href="{{ route('telegram-health-logging') }}" class="text-emerald-600 hover:underline">Telegram</a>). See <a href="{{ route('spike-calculator') }}" class="text-emerald-600 hover:underline">glucose predictions</a> and adjust as you go.
                 </p>
             </div>
         </div>
@@ -170,8 +170,8 @@
     {{-- Diet Types Showcase --}}
     <section class="mb-16">
         <div class="text-center mb-8">
-            <h2 class="text-2xl font-bold text-slate-900">Meal Plans for Every Diet Type</h2>
-            <p class="mt-2 text-slate-600">Whether you're managing Type 2 diabetes, pre-diabetes, or optimizing for glucose control, there's a plan for you.</p>
+            <h2 class="text-2xl font-bold text-slate-900">Plans for Every Eating Style</h2>
+            <p class="mt-2 text-slate-600">Whether you're managing Type 2 diabetes, pre-diabetes, or just want better glucose control, there's a plan that fits. Here's what each one looks like.</p>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="rounded-xl border border-emerald-200 bg-emerald-50/50 p-5">
@@ -223,8 +223,8 @@
     {{-- Sample 3-Day Preview --}}
     <section class="mb-16" x-data="{ activeTab: 'mediterranean' }">
         <div class="text-center mb-8">
-            <h2 class="text-2xl font-bold text-slate-900">See a Sample Meal Plan</h2>
-            <p class="mt-2 text-slate-600">Explore how our AI tailors nutrition for different needs.</p>
+            <h2 class="text-2xl font-bold text-slate-900">See What You're Actually Getting</h2>
+            <p class="mt-2 text-slate-600">Here's what real meal plans look like for different diet types.</p>
             
             <div class="mt-6 flex flex-wrap justify-center gap-2">
                 <button 
@@ -502,7 +502,7 @@
 
     {{-- Unique Features --}}
     <section class="mb-16">
-        <h2 class="text-2xl font-bold text-center text-slate-900 mb-8">Why the Meal Planner is Different</h2>
+        <h2 class="text-2xl font-bold text-center text-slate-900 mb-8">What Makes This Different</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div class="rounded-xl border border-slate-200 bg-white p-5">
                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 text-orange-600 mb-3">
@@ -569,7 +569,7 @@
 
     {{-- FAQ Section --}}
     <section class="mb-16">
-        <h2 class="text-2xl font-bold text-center text-slate-900 mb-8">Frequently Asked Questions</h2>
+        <h2 class="text-2xl font-bold text-center text-slate-900 mb-8">Questions People Actually Ask</h2>
         <div class="space-y-4 max-w-3xl mx-auto">
             <details class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                 <summary class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900">
@@ -633,8 +633,8 @@
     {{-- Final CTA --}}
     <section class="mb-12 text-center">
         <div class="rounded-2xl bg-linear-to-br from-emerald-50 to-teal-50 border border-emerald-200 p-8">
-            <h2 class="text-2xl font-bold text-slate-900">Start Your Personalized Meal Plan Today</h2>
-            <p class="mt-2 text-slate-600 max-w-xl mx-auto">Join thousands of people managing their diabetes with AI-powered meal planning.</p>
+            <h2 class="text-2xl font-bold text-slate-900">Give It a Try</h2>
+            <p class="mt-2 text-slate-600 max-w-xl mx-auto">Join thousands of people managing their diabetes with meal plans that actually fit their life.</p>
             <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a href="{{ route('register') }}"
                     class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-8 py-4 text-base font-bold text-white shadow-lg transition-all hover:bg-emerald-500 hover:shadow-xl">

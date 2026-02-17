@@ -130,10 +130,10 @@
                             Free for Practitioners During Beta
                         </div>
                         <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                            The Meal Planning Tool Dietitians Actually Want to Use
+                            The Meal Planning Tool You'll Actually Want to Use
                         </h1>
                         <p class="mt-6 text-lg text-slate-600 leading-relaxed">
-                            Stop spending hours building meal plans in spreadsheets. Acara Plate combines AI-powered meal generation with seamless client tracking — so you can focus on counseling, not copy-pasting recipes.
+                            Here's what nobody talks about: you became a dietitian to help people change their lives through food. Not to spend three hours building meal plans in spreadsheets. We built the tool we wished existed.
                         </p>
                         <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                             <a href="{{ route('support') }}" class="inline-flex items-center justify-center rounded-lg bg-slate-900 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-slate-800 transition-all">
@@ -198,10 +198,10 @@
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-3xl mx-auto">
                     <h2 class="text-3xl font-bold tracking-tight text-slate-900">
-                        You're Spending 40% of Your Time on Meal Plans
+                        Here's What Actually Happens in Most Practices
                     </h2>
                     <p class="mt-4 text-lg text-slate-600">
-                        As a registered dietitian, you didn't get your credentials to:
+                        You went to school for nutrition science. Here's what your typical day actually looks like:
                     </p>
                 </div>
 
@@ -212,9 +212,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Copy-Paste Admin</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">The Copy-Paste Grind</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            Building meal plans in Word documents, manually formatting macros, and sending PDFs back and forth eats up hours that could be spent on actual counseling.
+                            Building meal plans in Word, manually formatting macros in Excel, emailing PDFs back and forth. Hours of your week gone to admin work that a computer should handle.
                         </p>
                     </div>
 
@@ -224,9 +224,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Client Chasing</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">The Client Chase</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            Following up for food logs that clients forgot to keep. The constant back-and-forth to get basic adherence data takes time away from meaningful interventions.
+                            Sending reminders for food logs. Following up on adherence. The endless back-and-forth just to get basic data. It takes time away from the meaningful work that actually changes lives.
                         </p>
                     </div>
 
@@ -236,16 +236,16 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Macro Recalculation</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">The Macro Recalculation Spiral</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            Every time a client wants to try a Ketogenic approach or switch to Mediterranean, you're back at the spreadsheet. Manual recalculation for every adjustment.
+                            Client wants to try keto? Back to the spreadsheet. Switching to Mediterranean? Manually recalculate everything. Every diet change means starting from scratch.
                         </p>
                     </div>
                 </div>
 
                 <div class="mt-12 text-center">
                     <p class="text-lg text-slate-900 font-medium">
-                        You became an RD to help people. But administrative overhead eats your billable hours.
+                        You became an RD to help people. The admin overhead just eats away your billable hours.
                     </p>
                 </div>
             </div>
@@ -256,10 +256,10 @@
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-3xl mx-auto mb-16">
                     <h2 class="text-3xl font-bold tracking-tight text-slate-900">
-                        Client Meal Planning Software That Scales With You
+                        Client Meal Planning That Grows With Your Practice
                     </h2>
                     <p class="mt-4 text-lg text-slate-600">
-                        Acara Plate is an open-source nutrition platform designed for practitioners who want to spend more time counseling and less time on admin.
+                        Think of it as an AI assistant that handles the repetitive work so you can focus on what actually matters—your clients and your expertise.
                     </p>
                 </div>
 
@@ -348,10 +348,10 @@
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-3xl mx-auto mb-16">
                     <h2 class="text-3xl font-bold tracking-tight text-slate-900">
-                        Three Ways Dietitians Use Acara Plate
+                        Three Ways Dietitians Use This
                     </h2>
                     <p class="mt-4 text-lg text-slate-600">
-                        Flexible workflows for different practice models
+                        Flexible workflows for different practice types
                     </p>
                 </div>
 
@@ -472,10 +472,10 @@
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-3xl mx-auto mb-16">
                     <h2 class="text-3xl font-bold tracking-tight text-slate-900">
-                        Built on Clinical Nutrition Principles
+                        Built by People Who Actually Understand Nutrition
                     </h2>
                     <p class="mt-4 text-lg text-slate-600">
-                        This isn't a Silicon Valley "move fast and break things" project.
+                        This isn't a Silicon Valley "move fast and break things" project. We take nutrition science seriously.
                     </p>
                 </div>
 
@@ -535,7 +535,7 @@
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold text-slate-900">Questions from Practitioners</h2>
+                    <h2 class="text-3xl font-bold text-slate-900">Questions From Fellow Practitioners</h2>
                 </div>
 
                 <div class="space-y-4">
@@ -634,7 +634,7 @@
                         "But I Already Use..."
                     </h2>
                     <p class="mt-4 text-lg text-slate-600">
-                        How Acara Plate compares to tools you might already know
+                        Here's how we compare to tools you might already know
                     </p>
                 </div>
 
@@ -666,13 +666,13 @@
         <section class="bg-slate-900 py-16 sm:py-24">
             <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
                 <h2 class="text-3xl font-bold tracking-tight text-white">
-                    Building the Future of Nutrition Practice
+                    What We're Building
                 </h2>
                 <p class="mt-6 text-lg text-slate-300">
-                    Imagine a world where every dietitian has AI assistance for routine tasks, clients actually follow their meal plans because they're personalized and easy to log, and nutrition counseling is scalable beyond 1:1 hourly sessions.
+                    Imagine a world where every dietitian has AI help for the repetitive tasks, clients actually follow their meal plans because they're personalized and easy to log, and nutrition counseling scales beyond the 1:1 hourly session model.
                 </p>
                 <p class="mt-4 text-lg text-slate-300">
-                    That's what Acara Plate is building. And it needs dietitians like you to shape it.
+                    That's what we're building. And we need practitioners like you to help shape it.
                 </p>
             </div>
         </section>
