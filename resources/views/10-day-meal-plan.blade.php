@@ -3,6 +3,32 @@
     Type 2 diabetes and prediabetes management. Start eating better today!')
 
     <x-default-layout>
+    <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+            <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80">
+                <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
+                <span>Acara Plate</span>
+            </a>
+            <div class="flex items-center gap-3">
+                @auth
+                    <a href="{{ route('dashboard') }}"
+                        class="inline-flex items-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800">
+                        Dashboard
+                    </a>
+                @else
+                    <a href="{{ route('login') }}"
+                        class="hidden items-center px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:text-slate-900 sm:inline-flex">
+                        Sign in
+                    </a>
+                    <a href="{{ route('register') }}"
+                        class="inline-flex items-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800">
+                        Start for Free
+                    </a>
+                @endauth
+            </div>
+        </div>
+    </header>
+
     @section('head')
         <script type="application/ld+json">
         {
@@ -56,7 +82,7 @@
             <div class="flex overflow-x-auto gap-2 pb-2 scrollbar-thin" id="day-tabs">
                 @for ($day = 1; $day <= 10; $day++)
                     <button onclick="showDay({{ $day }})" id="tab-{{ $day }}"
-                        class="day-tab shrink-0 px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 {{ $day === 1 ? 'bg-slate-900 text-white shadow-md hover:bg-slate-800' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}"
+                        class="day-tab shrink-0 px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 {{ $day === 1 ? 'bg-emerald-600 text-white shadow-md hover:bg-emerald-500' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}"
                         aria-selected="{{ $day === 1 ? 'true' : 'false' }}" role="tab">
                         Day {{ $day }}
                     </button>
@@ -235,7 +261,15 @@
                                 <header class="flex items-center gap-2 mb-2">
                                     <span class="text-lg" aria-hidden="true">{{ $mealInfo['icon'] }}</span>
                                     <h2 class="font-semibold {{ $textColors[$mealInfo['color']] }}">
-                                        {{ $mealInfo['label'] }}</h2>
+                                        {{ $mealInfo['label'] }}
+                                    </h2>
+                                    @if($mealKey === 'breakfast')
+                                        <span class="ml-auto text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">~350 cal • 8g fiber</span>
+                                    @elseif($mealKey === 'lunch')
+                                        <span class="ml-auto text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">~450 cal • 10g fiber</span>
+                                    @elseif($mealKey === 'dinner')
+                                        <span class="ml-auto text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">~550 cal • 12g fiber</span>
+                                    @endif
                                 </header>
                                 <ul class="space-y-1 pl-6 text-sm text-slate-700 list-disc list-inside">
                                     @foreach ($mealPlanData[$day][$mealKey] as $item)
@@ -334,8 +368,21 @@
 
         {{-- Related Links --}}
         <nav class="mt-10 border-t border-slate-200 pt-8" aria-label="Related tools">
-            <h3 class="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-4">Free Diabetes Tools</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <h3 class="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-4">Free Diabetes Tools & Resources</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <a href="{{ route('meal-planner') }}"
+                    class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-emerald-300 hover:bg-emerald-50">
+                    <span
+                        class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 group-hover:bg-emerald-200">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                    </span>
+                    <div>
+                        <span class="font-medium text-slate-900 group-hover:text-emerald-700">AI Meal Planner</span>
+                        <p class="text-xs text-slate-500">Custom 7-day plans</p>
+                    </div>
+                </a>
                 <a href="{{ route('spike-calculator') }}"
                     class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-orange-300 hover:bg-orange-50">
                     <span
@@ -416,14 +463,14 @@
             document.getElementById('day-' + day).classList.remove('hidden');
 
             document.querySelectorAll('.day-tab').forEach(tab => {
-                tab.classList.remove('bg-slate-900', 'text-white', 'shadow-md', 'hover:bg-slate-800');
-                tab.classList.add('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+                tab.classList.remove('bg-emerald-600', 'text-white', 'shadow-md', 'hover:bg-emerald-500');
+                tab.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200', 'hover:bg-slate-50');
                 tab.setAttribute('aria-selected', 'false');
             });
 
             const activeTab = document.getElementById('tab-' + day);
-            activeTab.classList.remove('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
-            activeTab.classList.add('bg-slate-900', 'text-white', 'shadow-md', 'hover:bg-slate-800');
+            activeTab.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200', 'hover:bg-slate-50');
+            activeTab.classList.add('bg-emerald-600', 'text-white', 'shadow-md', 'hover:bg-emerald-500');
             activeTab.setAttribute('aria-selected', 'true');
 
             activeTab.scrollIntoView({

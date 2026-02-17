@@ -64,9 +64,9 @@
             {
                 "@@type": "ListItem",
                 "position": 6,
-                "name": "10-Day Meal Plan",
-                "description": "Free 10-day diabetic-friendly meal plan with recipes",
-                "url": "{{ route('10-day-meal-plan') }}"
+                "name": "AI Meal Planner",
+                "description": "Get personalized 7-day meal plans tailored to your diabetes type and goals",
+                "url": "{{ route('meal-planner') }}"
             }
         ]
     },
