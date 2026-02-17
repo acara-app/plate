@@ -15,6 +15,7 @@ Route::view('/support', 'support')->name('support');
 Route::view('/install-app', 'install-app')->name('install-app');
 Route::view('/diabetes-log-book', 'diabetes-log-book')->name('diabetes-log-book');
 Route::view('/diabetes-log-book-info', 'diabetes-log-book-info')->name('diabetes-log-book-info');
+Route::view('/meal-planner', 'meal-planner')->name('meal-planner');
 Route::view('/10-day-meal-plan', '10-day-meal-plan')->name('10-day-meal-plan');
 
 // Tools...
@@ -37,6 +38,7 @@ Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])-
 Route::view('/ai-nutritionist', 'ai-nutritionist')->name('ai-nutritionist');
 Route::view('/ai-health-coach', 'ai-health-coach')->name('ai-health-coach');
 Route::view('/ai-personal-trainer', 'ai-personal-trainer')->name('ai-personal-trainer');
+Route::view('/for-dietitians', 'for-dietitians')->name('for-dietitians');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', [Web\DashboardController::class, 'show'])->name('dashboard');

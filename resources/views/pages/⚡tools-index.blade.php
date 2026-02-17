@@ -90,15 +90,15 @@ class extends Component
                 ],
             ],
             [
-                'name' => '10-Day Meal Plan',
-                'description' => 'A free 10-day diabetic-friendly meal plan with recipes and shopping lists.',
+                'name' => 'AI Meal Planner',
+                'description' => 'Get personalized 7-day meal plans tailored to your diabetes type, diet preferences, and glucose goals.',
                 'icon' => '📅',
-                'route' => route('10-day-meal-plan'),
-                'badge' => 'Free Download',
+                'route' => route('meal-planner'),
+                'badge' => 'AI Powered',
                 'features' => [
-                    'Diabetic-friendly recipes',
-                    'Shopping lists included',
-                    'Balanced nutrition',
+                    '8 diet types supported',
+                    'Personalized to your goals',
+                    'Glucose-friendly recipes',
                 ],
             ],
         ];

@@ -126,11 +126,11 @@
                             Open Source Project
                         </div>
                         <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                            Your Personal AI Wellness Coach
+                            You Sleep 8 Hours and Still Feel Like a Zombie. What's Actually Going On?
                         </h1>
                         
                         <p class="mt-6 text-lg text-slate-600 leading-relaxed">
-                            Get guidance on sleep, stress, hydration, and lifestyle. Tell Acara what you're struggling with—sleep issues, high stress, energy dips—and get practical recommendations.
+                            It's not about sleeping more—it's about understanding the hidden factors wrecking your rest: afternoon caffeine, blue light at night, room temperature, stress hormones. Your body keeps score even when you're not paying attention.
                         </p>
 
                         <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -191,9 +191,9 @@
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-2xl mx-auto mb-16">
-                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Why focus on wellness?</h2>
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Why Sleep and Stress Deserve Real Attention</h2>
                     <p class="mt-4 text-lg text-slate-600">
-                        Sleep, stress, and hydration are the foundations of good health. Small improvements in these areas can have dramatic effects on your energy, mood, and long-term health.
+                        Skip the generic "drink more water" advice. These three areas—sleep, stress, and hydration—interact in ways that affect everything from your immune system to your afternoon energy crash.
                     </p>
                 </div>
 
@@ -205,9 +205,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Sleep Optimization</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Sleep That Actually Works</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            Quality sleep affects everything from mood to metabolism. Get sleep hygiene recommendations and routines that fit your schedule.
+                            It's not just about hours in bed. Your sleep environment, screen habits, and meal timing all play a role. Get recommendations that fit your actual schedule—not some generic 10pm bedtime rule.
                         </p>
                     </div>
 
@@ -217,9 +217,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Stress Management</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Stress Without the Overwhelm</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            Chronic stress impacts every system in your body. Learn practical techniques for managing stress, from breathing exercises to daily mindfulness.
+                            You can't eliminate stress entirely—that's not the goal. But you can build better recovery patterns. Practical breathing techniques, micro-habits, and routine tweaks that actually move the needle.
                         </p>
                     </div>
 
@@ -229,9 +229,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Hydration & Lifestyle</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Hydration That Makes Sense</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            Proper hydration and daily habits are essential for optimal function. Get practical tips for staying hydrated and building healthy routines.
+                            The "8 glasses a day" rule is oversimplified. Your needs depend on activity, climate, and what you're eating. Get practical reminders and learn to read your body's signals instead of chasing arbitrary numbers.
                         </p>
                     </div>
                 </div>
@@ -241,9 +241,9 @@
         <section class="py-16 sm:py-24 bg-white">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-2xl mx-auto mb-16">
-                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">How it works</h2>
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">How It Works</h2>
                     <p class="mt-4 text-lg text-slate-600">
-                        Three steps to better wellness
+                        No trackers, no spreadsheets, no endless logging. Just describe how you're feeling.
                     </p>
                 </div>
 
@@ -252,9 +252,9 @@
                         <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6">
                             01
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Conversational Interface</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Tell It What's Bothering You</h3>
                         <p class="text-slate-600 leading-relaxed">
-                            No strict forms or tracking apps. Just tell the AI what you're struggling with. It understands your context and provides relevant guidance.
+                            Can't sleep? Stressed about work? Forgot to drink water all day? Just say it. No structured forms, no 47 questions to answer. It understands context.
                         </p>
                     </div>
 
@@ -262,9 +262,9 @@
                         <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6 border-2 border-cyan-500">
                             02
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Customized Routines</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Get a Routine That Fits</h3>
                         <p class="text-slate-600 leading-relaxed">
-                            Receive wellness routines built around your goals, schedule, and current challenges. Everything from sleep schedules to stress techniques.
+                            Instead of generic advice, you get a routine built around your life. Morning sunlight if you're not getting it. Evening wind-down if you're wired at night. Things that actually work for your schedule.
                         </p>
                     </div>
 
@@ -272,9 +272,9 @@
                         <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6">
                             03
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Track Your Progress</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Track Progress Without the Friction</h3>
                         <p class="text-slate-600 leading-relaxed">
-                            Get ongoing support and adjustments. The AI remembers your context and helps you build sustainable healthy habits.
+                            Check in naturally over time. The system remembers your context and adjusts recommendations as your habits shift. No manual tracking required unless you want it.
                         </p>
                     </div>
                 </div>
@@ -284,7 +284,7 @@
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold text-slate-900">Common Questions</h2>
+                    <h2 class="text-3xl font-bold text-slate-900">What People Ask</h2>
                 </div>
 
                 <div class="space-y-4">
@@ -296,19 +296,19 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            The AI Health Coach specializes in sleep optimization, stress management, hydration guidance, and general lifestyle wellness. It provides evidence-based recommendations for your specific situation and goals.
+                            Sleep optimization, stress management, hydration, and general lifestyle wellness. It's not a replacement for therapy or medical care, but it gives you practical, evidence-based routines that fit your actual life.
                         </p>
                     </details>
 
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
-                            Is this tool really open source?
+                            Is this really open source?
                             <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            Yes. We believe health utilities should be transparent. You can view our entire codebase on GitHub, verify our privacy controls, and see exactly how our wellness recommendations are generated. We welcome audits and contributions from the developer and health science communities.
+                            Yep. The code's on GitHub. You can verify how recommendations are generated, check the privacy controls, and even fork it if you want to build your own version. We welcome contributions from developers and health enthusiasts alike.
                         </p>
                     </details>
 
@@ -320,19 +320,19 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            We take a "Privacy-First" approach. We do not sell your data to third-party advertisers or insurance companies. Because our code is open source, these claims are verifiable by anyone. Your wellness data is used solely to provide you with accurate guidance.
+                            Privacy-first, always. We don't sell your data to advertisers or insurance companies. Since the code is open source, these aren't just marketing claims—you can verify them yourself.
                         </p>
                     </details>
 
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
-                            Who is this for?
+                            Do I need to track everything manually?
                             <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            Anyone looking to improve their overall wellness. Whether you're struggling with sleep, feeling stressed, wanting to stay better hydrated, or just looking for general health optimization, this tool gives you practical guidance without the complexity.
+                            No. That's the whole point. Unlike other wellness apps that turn logging into a second job, this one just asks how you're doing. Describe your day, your challenges, your energy levels—and it figures out the patterns.
                         </p>
                     </details>
                 </div>
@@ -342,14 +342,14 @@
         <section class="py-24 px-4 bg-white border-t border-slate-100">
             <div class="max-w-3xl mx-auto text-center">
                 <h2 class="text-2xl font-bold text-slate-900 sm:text-3xl">
-                    Part of the Open Source Health Stack
+                    Part of Something Bigger
                 </h2>
                 <p class="mt-4 text-slate-600">
-                    Acara Plate is built by developers and health enthusiasts who believe health data should be accessible, not locked in a black box.
+                    We're building an open science health stack because we got tired of wellness data being locked in proprietary apps. Your health data should be yours—verifiable, portable, and transparent.
                 </p>
                 <div class="mt-8 flex justify-center">
                     <a href="{{ route('register') }}" class="text-base font-semibold text-rose-600 hover:text-rose-500 border-b-2 border-rose-100 hover:border-rose-500 transition-colors pb-1">
-                        Try the tool for free →
+                        See what it can do →
                     </a>
                 </div>
             </div>

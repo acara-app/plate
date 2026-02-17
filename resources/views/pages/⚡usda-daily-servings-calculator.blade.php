@@ -511,7 +511,6 @@ class extends Component
             </div>
         </section>
 
-        {{-- More Free Tools --}}
         <section class="relative z-10 mt-12 mb-8 w-full">
             <h2 class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
                 Explore More Free Tools
@@ -523,6 +522,7 @@ class extends Component
             </a>
         </section>
 
-        <x-footer />
     </main>
+
+    <x-footer />
 </div>

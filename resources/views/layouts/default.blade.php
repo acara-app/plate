@@ -41,10 +41,14 @@
 
         @vite(['resources/css/app.css'])
 
+        @livewireStyles
+
         @yield('head')
     </head>
 
     <body>
        {{ $slot }}
+       
+       @livewireScripts
     </body>
 </html>

@@ -79,20 +79,33 @@
             {{-- Hero Section --}}
             <section aria-label="Hero" class="flex w-full max-w-7xl flex-col items-center gap-12 lg:gap-16">
 
-                {{-- Screenshot Container --}}
-                <figure class="w-full">
-                    <div
-                        class="relative overflow-hidden rounded-t-2xl shadow-2xl shadow-slate-200 ring-1 ring-slate-900/5">
-                        <picture>
-                            <source srcset="{{ asset('meal-plan-hero-section.webp') }}" type="image/webp">
-                            <img src="{{ asset('meal-plan-hero-section.webp') }}"
-                                alt="AI-personalized meal planning dashboard showing personalized nutrition recommendations"
-                                class="w-full">
-                        </picture>
-                        <div class="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-slate-900">
-                        </div>
+                {{-- Beta Badge + Image Container --}}
+                <div class="flex w-full flex-col items-center gap-4">
+                    {{-- Beta Badge --}}
+                    <div class="inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20 shadow-lg">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Beta Version — Open Source & Free
                     </div>
-                </figure>
+
+                    {{-- Screenshot Container --}}
+                    <figure class="w-full">
+                        <div
+                            class="relative overflow-hidden rounded-t-2xl shadow-2xl shadow-slate-200 ring-1 ring-slate-900/5">
+                            <picture>
+                                <source srcset="{{ asset('meal-plan-hero-section.webp') }}" type="image/webp">
+                                <img src="{{ asset('meal-plan-hero-section.webp') }}"
+                                    alt="AI-personalized meal planning dashboard showing personalized nutrition recommendations"
+                                    class="w-full">
+                            </picture>
+                            <div class="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-slate-900">
+                            </div>
+                        </div>
+                    </figure>
+                </div>
 
                 {{-- Headline Section --}}
                 <div class="flex w-full max-w-4xl flex-col items-center text-center">
@@ -130,17 +143,6 @@
                             </svg>
                             Star on GitHub
                         </a>
-                    </div>
-
-                    {{-- Beta Badge --}}
-                    <div
-                        class="mt-8 inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
-                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        Beta Version — Open Source & Free
                     </div>
                 </div>
             </section>

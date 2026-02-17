@@ -126,11 +126,11 @@
                             Open Source Project
                         </div>
                         <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                            Your Personal AI Trainer
+                            I Hated the Gym. So I Built Workouts That Don't Suck.
                         </h1>
                         
                         <p class="mt-6 text-lg text-slate-600 leading-relaxed">
-                            Get workout plans built around your fitness level and goals. Tell Acara what you want to achieve—build muscle, improve cardio, or just stay active—and get a custom training program.
+                            Turns out, you don't need a gym membership or fancy equipment to get stronger. You need a plan that respects your time and meets you where you are—whether that's a hotel room with just floor space or a garage with a couple of dumbbells.
                         </p>
 
                         <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -194,9 +194,9 @@
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-2xl mx-auto mb-16">
-                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Why train with AI?</h2>
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Why Training with AI Actually Makes Sense</h2>
                     <p class="mt-4 text-lg text-slate-600">
-                        Get professional-level training guidance without the gym membership. Personalized workouts that adapt to your fitness level and goals.
+                        Forget the expensive personal trainer or the cookie-cutter app that doesn't know your shoulder injury from last year. Here's what actually moves the needle.
                     </p>
                 </div>
 
@@ -208,9 +208,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Strength Training</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Strength Without the Gym</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            Build muscle and increase strength with programs that match your level. From bodyweight exercises to weighted movements, get the right workout for you.
+                            Push-ups, squats, lunges, and planks are underrated. The system builds progressive programs using bodyweight or whatever equipment you have available. No expensive memberships required.
                         </p>
                     </div>
 
@@ -220,9 +220,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Cardio & HIIT</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Cardio That Doesn't Bore You</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            Improve your cardiovascular fitness with running plans, HIIT workouts, and interval training. Burn calories and build endurance efficiently.
+                            Running isn't the only option. HIIT, cycling, swimming, dancing—whatever keeps you moving. The system builds interval structures that maximize results in less time.
                         </p>
                     </div>
 
@@ -232,9 +232,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Flexibility & Mobility</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Move Better, Get Hurt Less</h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            Improve your range of motion and prevent injury with stretching routines, mobility drills, and yoga-inspired movements.
+                            Flexibility and mobility aren't just for yogis. Getting your shoulders and hips moving better prevents the injuries that derail progress. Simple drills that make a real difference.
                         </p>
                     </div>
                 </div>
@@ -244,9 +244,9 @@
         <section class="py-16 sm:py-24 bg-white">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-2xl mx-auto mb-16">
-                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">How it works</h2>
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Here's How It Works</h2>
                     <p class="mt-4 text-lg text-slate-600">
-                        Three steps to get fit
+                        No complicated onboarding. Just tell it what you want and what you've got.
                     </p>
                 </div>
 
@@ -255,9 +255,9 @@
                         <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6">
                             01
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Tell Us Your Goal</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Tell It What You Want</h3>
                         <p class="text-slate-600 leading-relaxed">
-                            Tell the AI what you want to achieve. Whether it's building muscle, losing weight, or improving endurance—it builds a plan around your goals.
+                            Build muscle? Lose weight? Just not die when you climb stairs? The system understands goals in plain English. Mention any injuries or limitations too—it adjusts accordingly.
                         </p>
                     </div>
 
@@ -267,7 +267,7 @@
                         </div>
                         <h3 class="text-lg font-bold text-slate-900 mb-3">Get Your Program</h3>
                         <p class="text-slate-600 leading-relaxed">
-                            Receive a workout plan built for your fitness level, available equipment, and schedule. Complete with sets, reps, and rest periods.
+                            Here's where it gets interesting. A complete weekly workout plan lands in your chat—sets, reps, rest periods, the whole thing. Built for your fitness level and available equipment.
                         </p>
                     </div>
 
@@ -275,9 +275,9 @@
                         <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6">
                             03
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Train & Progress</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-3">Train and Adjust</h3>
                         <p class="text-slate-600 leading-relaxed">
-                            Follow your program and track progress. The AI adjusts recommendations based on your feedback and helps you progress over time.
+                            Done with a workout? Tell it. Feeling too easy or too hard? Give feedback. The system evolves your program based on how you're progressing and recovering.
                         </p>
                     </div>
                 </div>
@@ -287,7 +287,7 @@
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold text-slate-900">Common Questions</h2>
+                    <h2 class="text-3xl font-bold text-slate-900">Questions People Actually Ask</h2>
                 </div>
 
                 <div class="space-y-4">
@@ -299,7 +299,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            The AI Personal Trainer specializes in strength training, cardiovascular fitness, HIIT, flexibility, and general fitness programming. It can create workout plans, suggest exercises, provide form guidance, and help you progress toward your fitness goals.
+                            Strength training, cardio, HIIT, flexibility, mobility—basically anything fitness-related. It creates full programs, suggests exercises, gives form guidance, and progresses you over time. From absolute beginner to experienced lifter looking for variety.
                         </p>
                     </details>
 
@@ -311,31 +311,31 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            No! The AI can create effective workouts using just your bodyweight. However, if you have access to dumbbells, kettlebells, or gym equipment, it can incorporate those into your program as well.
+                            Nope. Some of the best workouts need zero equipment. Push-ups, squats, lunges, planks—these build serious strength. If you've got dumbbells or a gym membership, it incorporates those too. Works with whatever you've got.
                         </p>
                     </details>
 
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
-                            Is this tool really open source?
+                            Is this really open source?
                             <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            Yes. We believe fitness tools should be transparent. You can view our entire codebase on GitHub, verify our privacy controls, and see exactly how our workout recommendations are generated. We welcome audits and contributions from the developer and fitness communities.
+                            Yes. The whole thing's on GitHub. You can see exactly how workouts are generated, verify the privacy controls, and even contribute if you're a developer. We welcome audits and contributions from the community.
                         </p>
                     </details>
 
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
-                            Who is this for?
+                            I'm a complete beginner. Is this for me?
                             <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            Anyone looking to improve their fitness! Whether you're a complete beginner, an intermediate athlete, or an advanced trainer looking for new ideas, the AI Personal Trainer provides guidance for all levels.
+                            Absolutely. It meets you where you are. Never worked out before? You'll get a program that builds the basics safely. Been training for years? It'll challenge you with new variations. Everyone starts somewhere.
                         </p>
                     </details>
                 </div>
@@ -345,14 +345,14 @@
         <section class="py-24 px-4 bg-white border-t border-slate-100">
             <div class="max-w-3xl mx-auto text-center">
                 <h2 class="text-2xl font-bold text-slate-900 sm:text-3xl">
-                    Part of the Open Source Health Stack
+                    Part of Something Bigger
                 </h2>
                 <p class="mt-4 text-slate-600">
-                    Acara Plate is built by developers and fitness enthusiasts who believe health data should be accessible, not locked in a black box.
+                    This is one tool in an open science health stack. We're building it because we got tired of fitness data being locked away in proprietary apps. Your progress belongs to you.
                 </p>
                 <div class="mt-8 flex justify-center">
                     <a href="{{ route('register') }}" class="text-base font-semibold text-rose-600 hover:text-rose-500 border-b-2 border-rose-100 hover:border-rose-500 transition-colors pb-1">
-                        Try the tool for free →
+                        Get your first workout →
                     </a>
                 </div>
             </div>
