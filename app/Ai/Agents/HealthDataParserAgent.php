@@ -117,9 +117,14 @@ INST;
             }
         }
 
-        /** @var array<string, mixed>|null $encoded */
-        $encoded = json_decode(json_encode($response), true);
+        $encoded = json_encode($response);
 
-        return HealthParserResult::from(is_array($encoded) ? $encoded : []);
+        if ($encoded === false) {
+            return HealthParserResult::from([]); // @codeCoverageIgnore
+        }
+
+        $decoded = json_decode($encoded, true);
+
+        return HealthParserResult::from(is_array($decoded) ? $decoded : []);
     }
 }

@@ -16,7 +16,3 @@ parameters:
     level: max
 
     tmpDir: /tmp/phpstan
-
-    ignoreErrors:
-        - '#Cannot cast mixed to string#'
-        - '#json_decode expects string#'
