@@ -6,13 +6,8 @@ namespace App\Ai\Agents;
 
 use App\Contracts\ParsesHealthData;
 use App\DataObjects\HealthLogData;
-use App\Enums\GlucoseReadingType;
-use App\Enums\GlucoseUnit;
-use App\Enums\HealthEntryType;
-use App\Enums\InsulinType;
-use BackedEnum;
+use App\DataObjects\HealthParserResult;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Support\Facades\Date;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
@@ -96,117 +91,35 @@ INST;
     {
         $response = $this->prompt($message);
 
-        $data = $this->extractResponseData($response);
+        $result = $this->extractResponseData($response);
 
-        return new HealthLogData(
-            isHealthData: $this->toBoolean($data['is_health_data'] ?? null, false),
-            logType: $this->toLogType($data['log_type'] ?? null),
-            glucoseValue: $this->toFloat($data['glucose_value'] ?? null),
-            glucoseReadingType: $this->toEnum($data['glucose_reading_type'] ?? null, GlucoseReadingType::class),
-            glucoseUnit: $this->toEnum($data['glucose_unit'] ?? null, GlucoseUnit::class),
-            carbsGrams: $this->toInt($data['carbs_grams'] ?? null),
-            insulinUnits: $this->toFloat($data['insulin_units'] ?? null),
-            insulinType: $this->toEnum($data['insulin_type'] ?? null, InsulinType::class),
-            medicationName: $this->toString($data['medication_name'] ?? null),
-            medicationDosage: $this->toString($data['medication_dosage'] ?? null),
-            weight: $this->toFloat($data['weight'] ?? null),
-            bpSystolic: $this->toInt($data['bp_systolic'] ?? null),
-            bpDiastolic: $this->toInt($data['bp_diastolic'] ?? null),
-            exerciseType: $this->toString($data['exercise_type'] ?? null),
-            exerciseDurationMinutes: $this->toInt($data['exercise_duration_minutes'] ?? null),
-            measuredAt: $this->toDateTime($data['measured_at'] ?? null),
-        );
+        return $result->toHealthLogData();
     }
 
     /**
      * Extract response data from structured output or JSON string.
-     *
-     * @return array<string, mixed>
-     *
-     * @codeCoverageIgnore
      */
-    private function extractResponseData(mixed $response): array
+    private function extractResponseData(mixed $response): HealthParserResult
     {
-        if (is_object($response) && property_exists($response, 'structured') && is_array($response->structured)) {
-            return $response->structured;
+        if (is_array($response)) {
+            return HealthParserResult::from($response);
         }
 
-        $json = (string) $response;
-        $data = json_decode($json, true);
+        if (is_object($response) && property_exists($response, 'structured') && is_array($response->structured)) {
+            return HealthParserResult::from($response->structured);
+        }
 
-        if (is_array($data)) {
-            return $data;
+        if (is_string($response)) {
+            $data = json_decode($response, true);
+
+            if (is_array($data)) {
+                return HealthParserResult::from($data);
+            }
         }
 
         /** @var array<string, mixed>|null $encoded */
         $encoded = json_decode(json_encode($response), true);
 
-        return is_array($encoded) ? $encoded : [];
-    }
-
-    private function toBoolean(mixed $value, bool $default): bool
-    {
-        return is_bool($value) ? $value : $default;
-    }
-
-    private function toLogType(mixed $value): HealthEntryType
-    {
-        $string = $this->toString($value);
-
-        return HealthEntryType::tryFrom($string ?? '') ?? HealthEntryType::Glucose;
-    }
-
-    /**
-     * @template T of \BackedEnum
-     *
-     * @param  class-string<T>  $enumClass
-     * @return T|null
-     */
-    private function toEnum(mixed $value, string $enumClass): ?BackedEnum
-    {
-        $string = $this->toString($value);
-
-        if ($string === null) {
-            return null;
-        }
-
-        return $enumClass::tryFrom($string);
-    }
-
-    private function toFloat(mixed $value): ?float
-    {
-        if ($value === null || $value === 'null') {
-            return null;
-        }
-
-        return is_numeric($value) ? (float) $value : null;
-    }
-
-    /**
-     * @codeCoverageIgnore
-     */
-    private function toInt(mixed $value): ?int
-    {
-        if ($value === null || $value === 'null') {
-            return null;
-        }
-
-        return is_numeric($value) ? (int) $value : null;
-    }
-
-    private function toString(mixed $value): ?string
-    {
-        if (in_array($value, [null, 'null', ''], true)) {
-            return null;
-        }
-
-        return is_string($value) ? $value : (is_scalar($value) ? (string) $value : null);
-    }
-
-    private function toDateTime(mixed $value): ?\Carbon\CarbonInterface
-    {
-        $string = $this->toString($value);
-
-        return $string !== null ? Date::parse($string) : null;
+        return HealthParserResult::from(is_array($encoded) ? $encoded : []);
     }
 }

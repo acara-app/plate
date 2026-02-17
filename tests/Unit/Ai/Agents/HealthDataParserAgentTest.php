@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Ai\Agents\HealthDataParserAgent;
 use App\DataObjects\HealthLogData;
+use App\DataObjects\HealthParserResult;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
@@ -163,4 +164,37 @@ it('handles numeric values as null strings', function (): void {
     expect($result->bpSystolic)->toBeNull();
     expect($result->bpDiastolic)->toBeNull();
     expect($result->exerciseDurationMinutes)->toBeNull();
+});
+
+it('extracts response data correctly from different formats', function (): void {
+    $agent = resolve(HealthDataParserAgent::class);
+    $method = new ReflectionMethod($agent, 'extractResponseData');
+
+    // 1. Array (Standard)
+    $arrayData = ['is_health_data' => true, 'log_type' => 'glucose', 'glucose_value' => 100];
+    $result1 = $method->invoke($agent, $arrayData);
+    expect($result1)->toBeInstanceOf(HealthParserResult::class)
+        ->is_health_data->toBeTrue()
+        ->glucose_value->toBe(100);
+
+    // 2. Object with structured property
+    $structuredObj = (object) ['structured' => ['is_health_data' => true, 'log_type' => 'insulin', 'insulin_units' => 5]];
+    $result2 = $method->invoke($agent, $structuredObj);
+    expect($result2)->toBeInstanceOf(HealthParserResult::class)
+        ->is_health_data->toBeTrue()
+        ->insulin_units->toBe(5);
+
+    // 3. JSON String
+    $jsonStr = json_encode(['is_health_data' => true, 'log_type' => 'food', 'carbs_grams' => 50]);
+    $result3 = $method->invoke($agent, $jsonStr);
+    expect($result3)->toBeInstanceOf(HealthParserResult::class)
+        ->is_health_data->toBeTrue()
+        ->carbs_grams->toBe(50);
+
+    // 4. Plain Object (Fallback)
+    $plainObj = (object) ['is_health_data' => true, 'log_type' => 'weight', 'weight' => 80];
+    $result4 = $method->invoke($agent, $plainObj);
+    expect($result4)->toBeInstanceOf(HealthParserResult::class)
+        ->is_health_data->toBeTrue()
+        ->weight->toBe(80);
 });
