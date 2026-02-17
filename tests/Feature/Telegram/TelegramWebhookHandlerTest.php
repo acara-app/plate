@@ -6,7 +6,9 @@ use App\Contracts\ParsesHealthData;
 use App\Contracts\ProcessesAdvisorMessage;
 use App\Contracts\SavesHealthLog;
 use App\DataObjects\HealthLogData;
+use App\Enums\GlucoseReadingType;
 use App\Enums\HealthEntryType;
+use App\Enums\InsulinType;
 use App\Enums\Sex;
 use App\Exceptions\TelegramUserException;
 use App\Models\User;
@@ -795,5 +797,94 @@ describe('health log flow', function (): void {
         expect($saveActionMock->calls[0]['data']->medicationName)->toBe('Metformin');
         expect($saveActionMock->calls[0]['data']->medicationDosage)->toBe('500mg');
         Telegraph::assertSent('✅ Saved! Your health data has been logged.', false);
+    });
+
+    it('catches TelegramUserException during pending log state', function (): void {
+        $user = User::factory()->create();
+        UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+            'pending_health_log' => ['is_health_data' => true],
+        ]);
+
+        $parserMock = new class implements ParsesHealthData
+        {
+            public function parse(string $message): HealthLogData
+            {
+                throw new TelegramUserException('Custom user error');
+            }
+        };
+
+        app()->instance(ParsesHealthData::class, $parserMock);
+
+        sendWebhook($this, 'Invalid input');
+
+        Telegraph::assertSent('Custom user error');
+    });
+
+    it('reconstructs HealthLogData with all enums and dates', function (): void {
+        $user = User::factory()->create();
+        $chat = UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+            'pending_health_log' => [
+                'is_health_data' => true,
+                'log_type' => 'glucose',
+                'glucose_value' => 120,
+                'glucose_reading_type' => GlucoseReadingType::PostMeal->value,
+                'glucose_unit' => 'mg/dL',
+                'insulin_type' => InsulinType::Bolus->value,
+                'measured_at' => '2023-10-27T10:00:00.000000Z',
+                'medication_name' => 123,
+            ],
+        ]);
+
+        $saveActionMock = new class implements SavesHealthLog
+        {
+            public array $calls = [];
+
+            public function handle(User $user, HealthLogData $data, ?CarbonInterface $measuredAt = null): void
+            {
+                $this->calls[] = ['data' => $data];
+            }
+        };
+
+        app()->instance(SavesHealthLog::class, $saveActionMock);
+
+        sendWebhook($this, 'yes');
+
+        expect($saveActionMock->calls)->toHaveCount(1);
+        $data = $saveActionMock->calls[0]['data'];
+
+        expect($data->glucoseReadingType)->toBe(GlucoseReadingType::PostMeal);
+        expect($data->insulinType)->toBe(InsulinType::Bolus);
+        expect($data->measuredAt)->not->toBeNull();
+        expect($data->measuredAt->toIsoString())->toContain('2023-10-27T10:00:00');
+        expect($data->medicationName)->toBe('123');
+    });
+
+    it('handles scalar values in toStringOrNull', function (): void {
+        $user = User::factory()->create();
+        $chat = UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+            'pending_health_log' => [
+                'is_health_data' => true,
+                'log_type' => 'glucose',
+                'medication_name' => true,
+            ],
+        ]);
+
+        $saveActionMock = new class implements SavesHealthLog
+        {
+            public array $calls = [];
+
+            public function handle(User $user, HealthLogData $data, ?CarbonInterface $measuredAt = null): void
+            {
+                $this->calls[] = ['data' => $data];
+            }
+        };
+        app()->instance(SavesHealthLog::class, $saveActionMock);
+
+        sendWebhook($this, 'yes');
+
+        expect($saveActionMock->calls[0]['data']->medicationName)->toBe('1');
     });
 });
