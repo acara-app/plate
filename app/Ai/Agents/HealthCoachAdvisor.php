@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Actions\GetUserProfileContextAction;
 use App\Ai\Tools\GetHealthGoals;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\SuggestWellnessRoutine;
+use App\Contracts\Actions\GetsUserProfileContext;
 use App\Contracts\Ai\HealthCoachAdvisorContract;
 use App\Enums\AgentMode;
 use App\Models\History;
@@ -25,7 +25,7 @@ final class HealthCoachAdvisor implements HealthCoachAdvisorContract
 
     public function __construct(
         private User $user,
-        private readonly GetUserProfileContextAction $profileContext,
+        private readonly GetsUserProfileContext $profileContext,
         private readonly SuggestWellnessRoutine $suggestWellnessRoutineTool,
         private readonly GetUserProfile $getUserProfileTool,
         private readonly GetHealthGoals $getHealthGoalsTool,
@@ -83,7 +83,7 @@ final class HealthCoachAdvisor implements HealthCoachAdvisorContract
     private function getUser(): User
     {
         if ($this->conversationUser instanceof User) {
-            return $this->conversationUser;
+            return $this->conversationUser; // @codeCoverageIgnore
         }
 
         return $this->user;

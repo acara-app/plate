@@ -8,14 +8,12 @@ use App\Http\Middleware\DisableResponseBuffering;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-test('it sets the correct headers to disable buffering', function () {
+test('it sets the correct headers to disable buffering', function (): void {
     $middleware = new DisableResponseBuffering();
 
     $request = Request::create('/test', 'GET');
 
-    $response = $middleware->handle($request, function ($req) {
-        return new Response('content');
-    });
+    $response = $middleware->handle($request, fn ($req): Response => new Response('content'));
 
     expect($response->headers->get('X-Accel-Buffering'))->toBe('no')
         ->and($response->headers->get('Cache-Control'))->toBe('must-revalidate, no-cache, no-store, private')

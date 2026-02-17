@@ -20,5 +20,9 @@ interface PersonalTrainerAdvisorContract extends Agent, Conversational, HasTools
 
     public function forUser(User $user): self;
 
+    /**
+     * @param  array<mixed>  $attachments
+     * @param  array<string, mixed>|string|null  $provider
+     */
     public function stream(string $prompt, array $attachments = [], array|string|null $provider = null, ?string $model = null): StreamableAgentResponse;
 }

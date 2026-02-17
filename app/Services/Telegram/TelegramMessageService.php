@@ -17,8 +17,6 @@ final class TelegramMessageService
 
     private const int CHUNK_DELAY_MS = 1000;
 
-    private const string QUEUE_NAME = 'telegram';
-
     private const float MIN_SPLIT_THRESHOLD = 0.3;
 
     private const array SENTENCE_ENDINGS = ['. ', '! ', '? ', ".\n", "!\n", "?\n"];
@@ -184,6 +182,6 @@ final class TelegramMessageService
         $html = strip_tags($html, '<b><strong><i><em><u><ins><s><strike><del><a><code><pre><blockquote>');
 
         // Collapse multiple newlines into max 2
-        return trim(preg_replace('/\n{3,}/', "\n\n", $html));
+        return mb_trim((string) preg_replace('/\n{3,}/', "\n\n", $html));
     }
 }

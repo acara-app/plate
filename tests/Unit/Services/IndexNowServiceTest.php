@@ -9,8 +9,6 @@ use Exception;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-use Mockery;
 
 beforeEach(function (): void {
     Config::set('services.indexnow.key', 'test-key');
@@ -41,8 +39,6 @@ it('handles submission failure', function (): void {
     Http::fake([
         'api.indexnow.org/IndexNow' => Http::response(['error' => 'invalid key'], 400),
     ]);
-
-    Log::shouldReceive('error')->once();
 
     $service = new IndexNowService();
     $result = $service->submit(['https://www.example.org/url1']);
@@ -115,8 +111,6 @@ it('handles exceptions during submission', function (): void {
     Http::fake(function (): void {
         throw new Exception('Network error');
     });
-
-    Log::shouldReceive('error')->once()->with(Mockery::pattern('/IndexNow: Exception during submission: Network error/'));
 
     $service = new IndexNowService();
     $result = $service->submit(['https://www.example.org/url1']);

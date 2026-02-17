@@ -22,5 +22,9 @@ interface Advisor extends Agent, Conversational, HasTools
 
     public function continue(string $conversationId, object $as): self;
 
+    /**
+     * @param  array<mixed>  $attachments
+     * @param  array<string, mixed>|string|null  $provider
+     */
     public function stream(string $prompt, array $attachments = [], array|string|null $provider = null, ?string $model = null): StreamableAgentResponse;
 }

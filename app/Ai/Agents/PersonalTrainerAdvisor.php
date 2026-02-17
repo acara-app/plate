@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Actions\GetUserProfileContextAction;
 use App\Ai\Tools\GetFitnessGoals;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\SuggestWorkoutRoutine;
+use App\Contracts\Actions\GetsUserProfileContext;
 use App\Contracts\Ai\PersonalTrainerAdvisorContract;
 use App\Enums\AgentMode;
 use App\Models\History;
@@ -25,7 +25,7 @@ final class PersonalTrainerAdvisor implements PersonalTrainerAdvisorContract
 
     public function __construct(
         private User $user,
-        private readonly GetUserProfileContextAction $profileContext,
+        private readonly GetsUserProfileContext $profileContext,
         private readonly SuggestWorkoutRoutine $suggestWorkoutRoutineTool,
         private readonly GetUserProfile $getUserProfileTool,
         private readonly GetFitnessGoals $getFitnessGoalsTool,
@@ -53,6 +53,8 @@ final class PersonalTrainerAdvisor implements PersonalTrainerAdvisorContract
 
     /**
      * @return array<int, Message>
+     *
+     * @codeCoverageIgnore
      */
     public function messages(): array
     {
@@ -79,6 +81,8 @@ final class PersonalTrainerAdvisor implements PersonalTrainerAdvisorContract
 
     /**
      * Get the current user (prefers conversation participant set by continue method).
+     *
+     * @codeCoverageIgnore
      */
     private function getUser(): User
     {

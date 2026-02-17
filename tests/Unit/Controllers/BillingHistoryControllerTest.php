@@ -10,8 +10,13 @@ use Inertia\Response as InertiaResponse;
 covers(BillingHistoryController::class);
 
 it('returns empty billing history when user is null', function (): void {
-    $request = mock(Request::class);
-    $request->shouldReceive('user')->andReturn(null);
+    $request = new class extends Request
+    {
+        public function user($guard = null): ?User
+        {
+            return null;
+        }
+    };
 
     $controller = new BillingHistoryController();
     $response = $controller->index($request);
@@ -22,8 +27,15 @@ it('returns empty billing history when user is null', function (): void {
 it('returns billing history for authenticated user', function (): void {
     $user = User::factory()->create(['stripe_id' => 'cus_test123']);
 
-    $request = mock(Request::class);
-    $request->shouldReceive('user')->andReturn($user);
+    $request = new class($user) extends Request
+    {
+        public function __construct(private readonly User $user) {}
+
+        public function user($guard = null): User
+        {
+            return $this->user;
+        }
+    };
 
     $controller = new BillingHistoryController();
 
@@ -38,8 +50,15 @@ it('returns empty billing history when exception occurs fetching invoices', func
     // Create user with invalid stripe_id to trigger exception
     $user = User::factory()->create(['stripe_id' => 'cus_invalid_will_fail']);
 
-    $request = mock(Request::class);
-    $request->shouldReceive('user')->andReturn($user);
+    $request = new class($user) extends Request
+    {
+        public function __construct(private readonly User $user) {}
+
+        public function user($guard = null): User
+        {
+            return $this->user;
+        }
+    };
 
     $controller = new BillingHistoryController();
     $response = $controller->index($request);

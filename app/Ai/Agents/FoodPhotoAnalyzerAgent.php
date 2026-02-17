@@ -101,7 +101,9 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
             ]
         );
 
-        $data = json_decode(json_encode($response), true);
+        $json = json_encode($response);
+        // @phpstan-ignore argument.type
+        $data = json_decode($json, true);
 
         // Validate response data is present and has required keys
         $requiredKeys = ['items', 'total_calories', 'total_protein', 'total_carbs', 'total_fat', 'confidence'];

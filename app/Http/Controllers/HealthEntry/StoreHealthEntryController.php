@@ -26,9 +26,12 @@ final readonly class StoreHealthEntryController
         /** @var array<string, mixed> $recordData */
         $recordData = collect($data + ['user_id' => $this->currentUser->id])->except('log_type')->toArray();
 
+        // @phpstan-ignore nullsafe.neverNull
         $glucoseUnit = $this->currentUser->profile?->units_preference ?? GlucoseUnit::MmolL;
         if ($glucoseUnit === GlucoseUnit::MmolL && isset($recordData['glucose_value'])) {
-            $recordData['glucose_value'] = GlucoseUnit::mmolLToMgDl((float) $recordData['glucose_value']);
+            // @phpstan-ignore nullCoalesce.offset,cast.double
+            $glucoseValue = (float) ($recordData['glucose_value'] ?? 0);
+            $recordData['glucose_value'] = GlucoseUnit::mmolLToMgDl($glucoseValue);
         }
 
         $this->recordHealthEntry->handle($recordData, HealthEntrySource::Web);

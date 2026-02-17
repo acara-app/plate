@@ -23,6 +23,7 @@ final class UpdateHealthEntryRequest extends FormRequest
 
         /** @var User $user */
         $user = $this->user();
+        // @phpstan-ignore nullsafe.neverNull
         $glucoseUnit = $user->profile?->units_preference ?? GlucoseUnit::MmolL;
         $range = $glucoseUnit->validationRange();
 

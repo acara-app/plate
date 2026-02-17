@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Ai\Agents\SingleMealAgent;
+use App\Contracts\Ai\GeneratesSingleMeals;
 use App\Models\User;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -15,9 +15,8 @@ use Laravel\Ai\Tools\Request;
 final readonly class SuggestSingleMeal implements Tool
 {
     public function __construct(
-        private SingleMealAgent $singleMealAgent,
-    ) {
-    }
+        private GeneratesSingleMeals $singleMealAgent,
+    ) {}
 
     public function name(): string
     {

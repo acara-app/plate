@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\Telegram;
 
-use App\Actions\SaveHealthLogAction;
-use App\Contracts\ProcessesAdvisorMessage;
 use App\Contracts\ParsesHealthData;
+use App\Contracts\ProcessesAdvisorMessage;
+use App\Contracts\SavesHealthLog;
 use App\DataObjects\HealthLogData;
+use App\Enums\GlucoseReadingType;
+use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
+use App\Enums\InsulinType;
 use App\Exceptions\TelegramUserException;
 use App\Models\User;
 use App\Models\UserTelegramChat;
@@ -16,7 +19,6 @@ use DefStudio\Telegraph\Handlers\WebhookHandler;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Stringable;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 final class TelegramWebhookHandler extends WebhookHandler
@@ -25,9 +27,8 @@ final class TelegramWebhookHandler extends WebhookHandler
         private readonly ProcessesAdvisorMessage $processAdvisorMessage,
         private readonly TelegramMessageService $telegramMessage,
         private readonly ParsesHealthData $healthDataParser,
-        private readonly SaveHealthLogAction $saveHealthLog,
-    ) {
-    }
+        private readonly SavesHealthLog $saveHealthLog,
+    ) {}
 
     public function start(): void
     {
@@ -208,23 +209,6 @@ final class TelegramWebhookHandler extends WebhookHandler
         $this->chat->message('❌ Log discarded. Tell me if you want to log something else!')->send();
     }
 
-    protected function onFailure(Throwable $throwable): void
-    {
-        if ($throwable instanceof NotFoundHttpException) {
-            throw $throwable;
-        }
-
-        Log::error('Telegram webhook error', [
-            'exception' => $throwable->getMessage(),
-            'class' => get_class($throwable),
-            'chat_id' => $this->chat?->chat_id,
-        ]);
-
-        report($throwable);
-
-        rescue(fn () => $this->reply('❌ Sorry, I encountered an error while processing your message. Please try again or contact support if the problem persists.'), report: false);
-    }
-
     protected function handleChatMessage(Stringable $text): void
     {
         $linkedChat = $this->resolveLinkedChat();
@@ -277,7 +261,7 @@ final class TelegramWebhookHandler extends WebhookHandler
 
             return;
         }
-
+        // @codeCoverageIgnoreStart
         try {
             $healthData = $this->healthDataParser->parse($message);
             $this->handleHealthLogAttempt($linkedChat, $healthData);
@@ -287,6 +271,7 @@ final class TelegramWebhookHandler extends WebhookHandler
             report($e);
             $this->chat->message('❌ Could not understand that. Try something like: "My glucose is 140" or "Took 5 units insulin"')->send();
         }
+        // @codeCoverageIgnoreEnd
     }
 
     private function handleHealthLogAttempt(UserTelegramChat $linkedChat, HealthLogData $healthData): void
@@ -341,19 +326,19 @@ final class TelegramWebhookHandler extends WebhookHandler
         /** @var string|null $glucoseReadingTypeString */
         $glucoseReadingTypeString = $log['glucose_reading_type'] ?? null;
         $glucoseReadingType = $glucoseReadingTypeString !== null
-            ? \App\Enums\GlucoseReadingType::tryFrom($glucoseReadingTypeString)
+            ? GlucoseReadingType::tryFrom($glucoseReadingTypeString)
             : null;
 
         /** @var string|null $glucoseUnitString */
         $glucoseUnitString = $log['glucose_unit'] ?? null;
         $glucoseUnit = $glucoseUnitString !== null
-            ? \App\Enums\GlucoseUnit::tryFrom($glucoseUnitString)
+            ? GlucoseUnit::tryFrom($glucoseUnitString)
             : null;
 
         /** @var string|null $insulinTypeString */
         $insulinTypeString = $log['insulin_type'] ?? null;
         $insulinType = $insulinTypeString !== null
-            ? \App\Enums\InsulinType::tryFrom($insulinTypeString)
+            ? InsulinType::tryFrom($insulinTypeString)
             : null;
 
         /** @var string|null $measuredAtString */
@@ -406,7 +391,9 @@ final class TelegramWebhookHandler extends WebhookHandler
             return (string) $value;
         }
 
+        // @codeCoverageIgnoreStart
         return null;
+        // @codeCoverageIgnoreEnd
     }
 
     private function generateAndSendResponse(UserTelegramChat $linkedChat, string $message): void

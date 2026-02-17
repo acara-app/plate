@@ -40,8 +40,7 @@ final class AssistantAgent implements Advisor
         private readonly GetHealthGoals $getHealthGoalsTool,
         private readonly SuggestWorkoutRoutine $suggestWorkoutRoutineTool,
         private readonly GetFitnessGoals $getFitnessGoalsTool,
-    ) {
-    }
+    ) {}
 
     public function withMode(AgentMode $mode): self
     {

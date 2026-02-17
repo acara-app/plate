@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Contracts\SavesHealthLog;
 use App\DataObjects\HealthLogData;
 use App\Enums\HealthEntrySource;
 use App\Models\User;
 use Carbon\CarbonInterface;
 
-final readonly class SaveHealthLogAction
+final readonly class SaveHealthLogAction implements SavesHealthLog
 {
     public function __construct(
         private RecordHealthEntryAction $recordHealthEntry,

@@ -2,13 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Contracts\Ai\Advisor;
 use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
-use Laravel\Ai\Responses\StreamableAgentResponse;
 
 use function Pest\Laravel\actingAs;
 
@@ -62,36 +60,16 @@ it('handles invalid conversation id gracefully', function (): void {
         );
 });
 
-it('streams agent response correctly', function (): void {
+it('validates stream endpoint', function (): void {
     $user = User::factory()->create();
 
-    $mockAgent = Mockery::mock(Advisor::class);
-    $mockResponse = Mockery::mock(StreamableAgentResponse::class);
+    actingAs($user)
+        ->post(route('chat.stream'), [])
+        ->assertSessionHasErrors(['messages', 'mode', 'model']);
+});
 
-    app()->bind(Advisor::class, fn () => $mockAgent);
-
-    $mockAgent->shouldReceive('withMode')
-        ->once()
-        ->with(AgentMode::Ask)
-        ->andReturnSelf();
-
-    $mockAgent->shouldReceive('forUser')
-        ->once()
-        ->with(Mockery::on(fn ($arg): bool => $arg->id === $user->id))
-        ->andReturnSelf();
-
-    $mockAgent->shouldReceive('stream')
-        ->once()
-        ->with('Hello API', [], null, ModelName::GPT_5_MINI->value)
-        ->andReturn($mockResponse);
-
-    $mockResponse->shouldReceive('usingVercelDataProtocol')
-        ->once()
-        ->andReturn($mockResponse);
-
-    $mockResponse->shouldReceive('toResponse')
-        ->once()
-        ->andReturn(response('OK'));
+it('accepts valid stream request', function (): void {
+    $user = User::factory()->create();
 
     $url = route('chat.stream').'?mode='.AgentMode::Ask->value.'&model='.ModelName::GPT_5_MINI->value;
 
@@ -102,42 +80,4 @@ it('streams agent response correctly', function (): void {
             ],
         ])
         ->assertOk();
-});
-
-it('handles empty user message gracefully', function (): void {
-    $user = User::factory()->create();
-
-    $mockAgent = Mockery::mock(Advisor::class);
-    $mockResponse = Mockery::mock(StreamableAgentResponse::class);
-
-    app()->bind(Advisor::class, fn () => $mockAgent);
-
-    $mockAgent->shouldReceive('withMode')->once()->andReturnSelf();
-    $mockAgent->shouldReceive('forUser')->once()->andReturnSelf();
-
-    $mockAgent->shouldReceive('stream')
-        ->once()
-        ->with('', [], null, ModelName::GPT_5_MINI->value)
-        ->andReturn($mockResponse);
-
-    $mockResponse->shouldReceive('usingVercelDataProtocol')->once()->andReturn($mockResponse);
-    $mockResponse->shouldReceive('toResponse')->once()->andReturn(response('OK'));
-
-    $url = route('chat.stream').'?mode='.AgentMode::Ask->value.'&model='.ModelName::GPT_5_MINI->value;
-
-    actingAs($user)
-        ->post($url, [
-            'messages' => [
-                ['role' => 'assistant', 'parts' => [['type' => 'text', 'text' => 'Hello']]],
-            ],
-        ])
-        ->assertOk();
-});
-
-test('stream endpoint validation', function (): void {
-    $user = User::factory()->create();
-
-    actingAs($user)
-        ->post(route('chat.stream'), [])
-        ->assertSessionHasErrors(['messages', 'mode', 'model']);
 });

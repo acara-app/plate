@@ -14,8 +14,7 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
     public function __construct(
         private Advisor $advisor,
         private ConversationStore $conversationStore,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{response: string, conversation_id: string}

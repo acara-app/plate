@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Actions\GetUserProfileContextAction;
+use App\Contracts\Actions\GetsUserProfileContext;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
@@ -14,8 +14,13 @@ use Laravel\Ai\Tools\Request;
 final readonly class GetHealthGoals implements Tool
 {
     public function __construct(
-        private GetUserProfileContextAction $profileContext,
+        private GetsUserProfileContext $profileContext,
     ) {}
+
+    public function name(): string
+    {
+        return 'get_health_goals';
+    }
 
     /**
      * Get the description of the tool's purpose.
@@ -36,7 +41,7 @@ final readonly class GetHealthGoals implements Tool
             return json_encode([
                 'error' => 'User not authenticated',
                 'goals' => null,
-            ]);
+            ]) ?: '{"error":"User not authenticated","goals":null}';
         }
 
         $context = $this->profileContext->handle($user);
@@ -50,7 +55,7 @@ final readonly class GetHealthGoals implements Tool
                 'message' => 'User has not completed their profile',
                 'goals' => null,
                 'suggestion' => 'Ask the user to complete their profile for personalized goal tracking',
-            ]);
+            ]) ?: '{"success":false,"message":"User has not completed their profile","goals":null}';
         }
 
         /** @var array<string, mixed> $goals */
@@ -66,7 +71,7 @@ final readonly class GetHealthGoals implements Tool
             ],
             'onboarding_completed' => $context['onboarding_completed'],
             'missing_data' => $context['missing_data'],
-        ]);
+        ]) ?: '{"success":true}';
     }
 
     /**

@@ -119,6 +119,7 @@ it('identifies missing biometric data', function (): void {
         'height' => null,
         'weight' => null,
         'sex' => null,
+        'goal_choice' => null,
         'onboarding_completed' => false,
     ]);
 
@@ -128,7 +129,8 @@ it('identifies missing biometric data', function (): void {
         ->toContain('age')
         ->toContain('height')
         ->toContain('weight')
-        ->toContain('sex');
+        ->toContain('sex')
+        ->toContain('primary_goal');
 });
 
 it('formats context as natural language string', function (): void {
@@ -138,6 +140,7 @@ it('formats context as natural language string', function (): void {
         'age' => 30,
         'height' => 175.0,
         'weight' => 70.0,
+        'target_weight' => 65.0,
         'onboarding_completed' => true,
     ]);
 
@@ -147,5 +150,36 @@ it('formats context as natural language string', function (): void {
         ->toContain('BIOMETRICS')
         ->toContain('Age: 30')
         ->toContain('Height: 175cm')
-        ->toContain('Weight: 70kg');
+        ->toContain('Weight: 70kg')
+        ->toContain('Target Weight: 65kg');
+});
+
+it('identifies missing dietary preferences', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'onboarding_completed' => true,
+    ]);
+    // No preferences attached
+
+    $result = $this->action->handle($user);
+
+    expect($result['missing_data'])->toContain('dietary_preferences');
+});
+
+it('includes full goal details including diet type and macros', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'onboarding_completed' => true,
+        'calculated_diet_type' => App\Enums\DietType::Keto,
+        'additional_goals' => 'Build muscle and stay hydrated',
+    ]);
+
+    $result = $this->action->handle($user);
+
+    expect($result['context'])
+        ->toContain('Diet Type: keto')
+        ->toContain('Recommended Macros: 5% carbs, 20% protein, 75% fat')
+        ->toContain('Additional Goals: Build muscle and stay hydrated');
 });

@@ -17,6 +17,11 @@ use Laravel\Ai\Tools\Request;
  */
 final readonly class GetDietReference implements Tool
 {
+    public function name(): string
+    {
+        return 'get_diet_reference';
+    }
+
     public function description(): string
     {
         return 'Fetch diet-specific reference materials (nutrient score cards, food lists, detailed guidelines) on-demand. Use this when you need specific reference data for meal planning that is not in your immediate context.';

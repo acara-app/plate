@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Contracts\Actions\GetsUserProfileContext;
 use App\Enums\DietType;
 use App\Models\User;
 use App\Models\UserMedication;
 use App\Models\UserProfile;
 
-final readonly class GetUserProfileContextAction
+final readonly class GetUserProfileContextAction implements GetsUserProfileContext
 {
     /**
      * Get formatted user profile context for AI consumption.

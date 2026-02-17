@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Ai\SingleMealPromptBuilder;
+use App\Contracts\Ai\GeneratesSingleMeals;
 use App\DataObjects\GeneratedMealData;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 
-final class SingleMealAgent implements Agent, HasStructuredOutput
+final class SingleMealAgent implements Agent, GeneratesSingleMeals, HasStructuredOutput
 {
     use Promptable;
 
@@ -40,7 +41,7 @@ final class SingleMealAgent implements Agent, HasStructuredOutput
     }
 
     /**
-     * @return array<string, JsonSchema>
+     * @return array<string, mixed>
      */
     public function schema(JsonSchema $schema): array
     {
@@ -82,6 +83,10 @@ final class SingleMealAgent implements Agent, HasStructuredOutput
 
         $response = $this->prompt($prompt);
 
-        return GeneratedMealData::from(collect($response)->toArray());
+        /** @var array<string, mixed> $responseArray */
+        // @phpstan-ignore argument.type
+        $responseArray = json_decode(json_encode($response), true);
+
+        return GeneratedMealData::from($responseArray);
     }
 }

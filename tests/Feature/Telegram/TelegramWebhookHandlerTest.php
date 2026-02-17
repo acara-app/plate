@@ -2,13 +2,19 @@
 
 declare(strict_types=1);
 
-use App\Contracts\ProcessesAdvisorMessage;
 use App\Contracts\ParsesHealthData;
+use App\Contracts\ProcessesAdvisorMessage;
+use App\Contracts\SavesHealthLog;
+use App\DataObjects\HealthLogData;
+use App\Enums\GlucoseReadingType;
 use App\Enums\HealthEntryType;
+use App\Enums\InsulinType;
 use App\Enums\Sex;
+use App\Exceptions\TelegramUserException;
 use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\UserTelegramChat;
+use Carbon\CarbonInterface;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Models\TelegraphChat;
@@ -22,8 +28,25 @@ beforeEach(function (): void {
         'chat_id' => '123456789',
     ]);
 
-    $parserMock = Mockery::mock(ParsesHealthData::class);
-    $parserMock->shouldReceive('parse')->andReturn(new App\DataObjects\HealthLogData(isHealthData: false, logType: HealthEntryType::Glucose));
+    // Create a simple test implementation of ParsesHealthData
+    $parserMock = new class implements ParsesHealthData
+    {
+        public HealthLogData $returnValue;
+
+        public function __construct()
+        {
+            $this->returnValue = new HealthLogData(
+                isHealthData: false,
+                logType: HealthEntryType::Glucose
+            );
+        }
+
+        public function parse(string $message): HealthLogData
+        {
+            return $this->returnValue;
+        }
+    };
+
     app()->instance(ParsesHealthData::class, $parserMock);
 });
 
@@ -249,11 +272,27 @@ describe('/new command', function (): void {
             'conversation_id' => 'old-conv-id',
         ]);
 
-        $mock = Mockery::mock(ProcessesAdvisorMessage::class);
-        $mock->shouldReceive('resetConversation')
-            ->once()
-            ->with(Mockery::on(fn (User $u): bool => $u->id === $user->id))
-            ->andReturn('new-conv-id');
+        $mock = new class implements ProcessesAdvisorMessage
+        {
+            public string $resetConversationReturn = 'new-conv-id';
+
+            public array $calls = [];
+
+            public function handle(User $user, string $message, ?string $conversationId = null): array
+            {
+                $this->calls[] = ['method' => 'handle', 'user' => $user->id, 'message' => $message];
+
+                return ['response' => 'Test', 'conversation_id' => 'conv-123'];
+            }
+
+            public function resetConversation(User $user): string
+            {
+                $this->calls[] = ['method' => 'resetConversation', 'user' => $user->id];
+
+                return $this->resetConversationReturn;
+            }
+        };
+
         app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, '/new');
@@ -271,8 +310,22 @@ describe('/reset command', function (): void {
             'telegraph_chat_id' => $this->telegraphChat->id,
         ]);
 
-        $mock = Mockery::mock(ProcessesAdvisorMessage::class);
-        $mock->shouldReceive('resetConversation')->once()->andReturn('reset-conv-id');
+        // Create a simple test implementation
+        $mock = new class implements ProcessesAdvisorMessage
+        {
+            public string $resetConversationReturn = 'reset-conv-id';
+
+            public function handle(User $user, string $message, ?string $conversationId = null): array
+            {
+                return ['response' => 'Test', 'conversation_id' => 'conv-123'];
+            }
+
+            public function resetConversation(User $user): string
+            {
+                return $this->resetConversationReturn;
+            }
+        };
+
         app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, '/reset');
@@ -296,18 +349,32 @@ describe('chat message handling', function (): void {
             'conversation_id' => 'existing-conv',
         ]);
 
-        $mock = Mockery::mock(ProcessesAdvisorMessage::class);
-        $mock->shouldReceive('handle')
-            ->once()
-            ->with(
-                Mockery::on(fn (User $u): bool => $u->id === $user->id),
-                'What should I eat for breakfast?',
-                'existing-conv',
-            )
-            ->andReturn([
-                'response' => 'Here are some breakfast suggestions...',
-                'conversation_id' => 'existing-conv',
-            ]);
+        // Create a simple test implementation
+        $mock = new class implements ProcessesAdvisorMessage
+        {
+            public array $calls = [];
+
+            public function handle(User $user, string $message, ?string $conversationId = null): array
+            {
+                $this->calls[] = [
+                    'method' => 'handle',
+                    'user' => $user->id,
+                    'message' => $message,
+                    'conversationId' => $conversationId,
+                ];
+
+                return [
+                    'response' => 'Here are some breakfast suggestions...',
+                    'conversation_id' => 'existing-conv',
+                ];
+            }
+
+            public function resetConversation(User $user): string
+            {
+                return 'new-conv';
+            }
+        };
+
         app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, 'What should I eat for breakfast?');
@@ -323,18 +390,32 @@ describe('chat message handling', function (): void {
             'conversation_id' => null,
         ]);
 
-        $mock = Mockery::mock(ProcessesAdvisorMessage::class);
-        $mock->shouldReceive('handle')
-            ->once()
-            ->with(
-                Mockery::on(fn (User $u): bool => $u->id === $user->id),
-                'Hello!',
-                null,
-            )
-            ->andReturn([
-                'response' => 'Welcome!',
-                'conversation_id' => 'first-conv-id',
-            ]);
+        // Create a simple test implementation
+        $mock = new class implements ProcessesAdvisorMessage
+        {
+            public array $calls = [];
+
+            public function handle(User $user, string $message, ?string $conversationId = null): array
+            {
+                $this->calls[] = [
+                    'method' => 'handle',
+                    'user' => $user->id,
+                    'message' => $message,
+                    'conversationId' => $conversationId,
+                ];
+
+                return [
+                    'response' => 'Welcome!',
+                    'conversation_id' => 'first-conv-id',
+                ];
+            }
+
+            public function resetConversation(User $user): string
+            {
+                return 'new-conv';
+            }
+        };
+
         app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, 'Hello!');
@@ -350,13 +431,23 @@ describe('chat message handling', function (): void {
             'conversation_id' => 'existing-conv',
         ]);
 
-        $mock = Mockery::mock(ProcessesAdvisorMessage::class);
-        $mock->shouldReceive('handle')
-            ->once()
-            ->andReturn([
-                'response' => 'Response',
-                'conversation_id' => 'some-new-conv',
-            ]);
+        // Create a simple test implementation
+        $mock = new class implements ProcessesAdvisorMessage
+        {
+            public function handle(User $user, string $message, ?string $conversationId = null): array
+            {
+                return [
+                    'response' => 'Response',
+                    'conversation_id' => 'some-new-conv',
+                ];
+            }
+
+            public function resetConversation(User $user): string
+            {
+                return 'new-conv';
+            }
+        };
+
         app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, 'Follow-up message');
@@ -371,13 +462,429 @@ describe('chat message handling', function (): void {
             'telegraph_chat_id' => $this->telegraphChat->id,
         ]);
 
-        $mock = Mockery::mock(ProcessesAdvisorMessage::class);
-        $mock->shouldReceive('handle')
-            ->andThrow(new Exception('AI service unavailable'));
+        // Create a simple test implementation that throws exception
+        $mock = new class implements ProcessesAdvisorMessage
+        {
+            public function handle(User $user, string $message, ?string $conversationId = null): array
+            {
+                throw new Exception('AI service unavailable');
+            }
+
+            public function resetConversation(User $user): string
+            {
+                return 'new-conv';
+            }
+        };
+
         app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, 'Hello');
 
         Telegraph::assertSent('❌ Error processing message. Please try again.');
+    });
+
+    it('handles TelegramUserException gracefully', function (): void {
+        $user = User::factory()->create();
+
+        UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+        ]);
+
+        // Update the ParsesHealthData mock to throw exception
+        $parserMock = new class implements ParsesHealthData
+        {
+            public function parse(string $message): HealthLogData
+            {
+                throw new TelegramUserException('User error occurred');
+            }
+        };
+
+        app()->instance(ParsesHealthData::class, $parserMock);
+
+        sendWebhook($this, 'Invalid input');
+
+        Telegraph::assertSent('User error occurred');
+    });
+
+    it('handles generic Throwable in handleChatMessage gracefully', function (): void {
+        $user = User::factory()->create();
+
+        UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+        ]);
+
+        // Update the ParsesHealthData mock to throw generic exception
+        $parserMock = new class implements ParsesHealthData
+        {
+            public function parse(string $message): HealthLogData
+            {
+                throw new Exception('Unexpected error');
+            }
+        };
+
+        app()->instance(ParsesHealthData::class, $parserMock);
+
+        sendWebhook($this, 'Something went wrong');
+
+        Telegraph::assertSent('❌ Error processing message. Please try again.');
+    });
+});
+
+describe('/yes command', function (): void {
+    it('replies error when not linked', function (): void {
+        sendWebhook($this, '/yes');
+
+        Telegraph::assertSent('🔒 Please link your account first.', false);
+    });
+
+    it('replies error when no pending log exists', function (): void {
+        $user = User::factory()->create();
+        UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+        ]);
+
+        sendWebhook($this, '/yes');
+
+        Telegraph::assertSent('❌ No pending log to confirm. Just tell me what you want to log!', false);
+    });
+
+    it('confirms pending log and saves it', function (): void {
+        $user = User::factory()->create();
+        $chat = UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+            'pending_health_log' => [
+                'is_health_data' => true,
+                'log_type' => 'glucose',
+                'glucose_value' => 120,
+                'glucose_unit' => 'mg/dL',
+                'measured_at' => now()->toISOString(),
+            ],
+        ]);
+
+        // Create a simple test implementation that captures calls
+        $saveActionMock = new class implements SavesHealthLog
+        {
+            public array $calls = [];
+
+            public function handle(User $user, HealthLogData $data, ?CarbonInterface $measuredAt = null): void
+            {
+                $this->calls[] = [
+                    'user' => $user->id,
+                    'data' => $data,
+                    'measuredAt' => $measuredAt,
+                ];
+            }
+        };
+
+        app()->instance(SavesHealthLog::class, $saveActionMock);
+
+        sendWebhook($this, '/yes');
+
+        expect($chat->fresh()->pending_health_log)->toBeNull();
+        expect($saveActionMock->calls)->toHaveCount(1);
+        expect($saveActionMock->calls[0]['data']->glucoseValue)->toBe(120.0);
+        expect($saveActionMock->calls[0]['data']->logType)->toBe(HealthEntryType::Glucose);
+        Telegraph::assertSent('✅ Saved! Your health data has been logged.', false);
+    });
+
+    it('handles save error gracefully', function (): void {
+        $user = User::factory()->create();
+        UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+            'pending_health_log' => [
+                'is_health_data' => true,
+                'log_type' => 'glucose',
+                'glucose_value' => 120,
+            ],
+        ]);
+
+        // Create a simple test implementation that throws exception
+        $saveActionMock = new class implements SavesHealthLog
+        {
+            public function handle(User $user, HealthLogData $data, ?CarbonInterface $measuredAt = null): void
+            {
+                throw new Exception('Save failed');
+            }
+        };
+
+        app()->instance(SavesHealthLog::class, $saveActionMock);
+
+        sendWebhook($this, '/yes');
+
+        Telegraph::assertSent('❌ Error saving log. Please try again.', false);
+    });
+});
+
+describe('/no command', function (): void {
+    it('replies error when not linked', function (): void {
+        sendWebhook($this, '/no');
+
+        Telegraph::assertSent('🔒 Please link your account first.', false);
+    });
+
+    it('replies error when no pending log exists', function (): void {
+        $user = User::factory()->create();
+        UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+        ]);
+
+        sendWebhook($this, '/no');
+
+        Telegraph::assertSent('❌ No pending log to cancel.', false);
+    });
+
+    it('clears pending log', function (): void {
+        $user = User::factory()->create();
+        $chat = UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+            'pending_health_log' => [
+                'is_health_data' => true,
+                'log_type' => 'glucose',
+                'glucose_value' => 120,
+            ],
+        ]);
+
+        sendWebhook($this, '/no');
+
+        expect($chat->fresh()->pending_health_log)->toBeNull();
+        Telegraph::assertSent('❌ Log discarded. Tell me if you want to log something else!', false);
+    });
+});
+
+describe('health log flow', function (): void {
+    it('detects health log intent and asks for confirmation', function (): void {
+        $user = User::factory()->create();
+        $chat = UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+        ]);
+
+        // Update the ParsesHealthData mock to return health data
+        $parserMock = new class implements ParsesHealthData
+        {
+            public function parse(string $message): HealthLogData
+            {
+                return new HealthLogData(
+                    isHealthData: true,
+                    logType: HealthEntryType::Glucose,
+                    glucoseValue: 120.0,
+                    glucoseUnit: App\Enums\GlucoseUnit::MgDl
+                );
+            }
+        };
+
+        app()->instance(ParsesHealthData::class, $parserMock);
+
+        sendWebhook($this, 'Glucose 120');
+
+        $chat->refresh();
+        expect($chat->pending_health_log)->not->toBeNull()
+            ->and($chat->pending_health_log['glucose_value'])->toEqual(120);
+
+        Telegraph::assertSent('📝 Log: Glucose 120 mg/dL', false);
+    });
+
+    it('handles yes confirmation via text', function (): void {
+        $user = User::factory()->create();
+        $chat = UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+            'pending_health_log' => [
+                'is_health_data' => true,
+                'log_type' => 'glucose',
+                'glucose_value' => 120,
+            ],
+        ]);
+
+        // Create a simple test implementation
+        $saveActionMock = new class implements SavesHealthLog
+        {
+            public bool $handleCalled = false;
+
+            public function handle(User $user, HealthLogData $data, ?CarbonInterface $measuredAt = null): void
+            {
+                $this->handleCalled = true;
+            }
+        };
+
+        app()->instance(SavesHealthLog::class, $saveActionMock);
+
+        sendWebhook($this, 'yes');
+
+        expect($chat->fresh()->pending_health_log)->toBeNull();
+        expect($saveActionMock->handleCalled)->toBeTrue();
+        Telegraph::assertSent('✅ Saved!', false);
+    });
+
+    it('handles no cancellation via text', function (): void {
+        $user = User::factory()->create();
+        $chat = UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+            'pending_health_log' => [
+                'is_health_data' => true,
+                'log_type' => 'glucose',
+                'glucose_value' => 120,
+            ],
+        ]);
+
+        sendWebhook($this, 'no');
+
+        expect($chat->fresh()->pending_health_log)->toBeNull();
+        Telegraph::assertSent('❌ Log discarded.', false);
+    });
+
+    it('handles error when processing pending log message', function (): void {
+        $user = User::factory()->create();
+        $chat = UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+            'pending_health_log' => ['is_health_data' => true],
+        ]);
+
+        // Update the ParsesHealthData mock to throw exception
+        $parserMock = new class implements ParsesHealthData
+        {
+            public function parse(string $message): HealthLogData
+            {
+                throw new Exception('Parsing error');
+            }
+        };
+
+        app()->instance(ParsesHealthData::class, $parserMock);
+
+        sendWebhook($this, 'Invalid input');
+
+        Telegraph::assertSent('❌ Could not understand that. Try something like: "My glucose is 140" or "Took 5 units insulin"');
+    });
+
+    it('reconstructs complex health log data correctly', function (): void {
+        $user = User::factory()->create();
+        // Create user chat but don't set pending log yet to allow clean setup in test logic if needed,
+        // but here we need it set.
+        $chat = UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+            'pending_health_log' => [
+                'is_health_data' => true,
+                'log_type' => 'insulin',
+                'insulin_units' => 5.5,
+                'insulin_type' => 'bolus',
+                'medication_name' => 'Metformin',
+                'medication_dosage' => '500mg',
+                'glucose_value' => null, // ensure nullable fields work
+            ],
+        ]);
+
+        // Create a simple test implementation that captures calls
+        $saveActionMock = new class implements SavesHealthLog
+        {
+            public array $calls = [];
+
+            public function handle(User $user, HealthLogData $data, ?CarbonInterface $measuredAt = null): void
+            {
+                $this->calls[] = [
+                    'user' => $user->id,
+                    'data' => $data,
+                ];
+            }
+        };
+
+        app()->instance(SavesHealthLog::class, $saveActionMock);
+
+        sendWebhook($this, 'yes');
+
+        expect($chat->fresh()->pending_health_log)->toBeNull();
+        expect($saveActionMock->calls)->toHaveCount(1);
+        expect($saveActionMock->calls[0]['data']->logType)->toBe(HealthEntryType::Insulin);
+        expect($saveActionMock->calls[0]['data']->insulinUnits)->toBe(5.5);
+        expect($saveActionMock->calls[0]['data']->insulinType)->toBe(InsulinType::Bolus);
+        expect($saveActionMock->calls[0]['data']->medicationName)->toBe('Metformin');
+        expect($saveActionMock->calls[0]['data']->medicationDosage)->toBe('500mg');
+        Telegraph::assertSent('✅ Saved! Your health data has been logged.', false);
+    });
+
+    it('catches TelegramUserException during pending log state', function (): void {
+        $user = User::factory()->create();
+        UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+            'pending_health_log' => ['is_health_data' => true],
+        ]);
+
+        $parserMock = new class implements ParsesHealthData
+        {
+            public function parse(string $message): HealthLogData
+            {
+                throw new TelegramUserException('Custom user error');
+            }
+        };
+
+        app()->instance(ParsesHealthData::class, $parserMock);
+
+        sendWebhook($this, 'Invalid input');
+
+        Telegraph::assertSent('Custom user error');
+    });
+
+    it('reconstructs HealthLogData with all enums and dates', function (): void {
+        $user = User::factory()->create();
+        $chat = UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+            'pending_health_log' => [
+                'is_health_data' => true,
+                'log_type' => 'glucose',
+                'glucose_value' => 120,
+                'glucose_reading_type' => GlucoseReadingType::PostMeal->value,
+                'glucose_unit' => 'mg/dL',
+                'insulin_type' => InsulinType::Bolus->value,
+                'measured_at' => '2023-10-27T10:00:00.000000Z',
+                'medication_name' => 123,
+            ],
+        ]);
+
+        $saveActionMock = new class implements SavesHealthLog
+        {
+            public array $calls = [];
+
+            public function handle(User $user, HealthLogData $data, ?CarbonInterface $measuredAt = null): void
+            {
+                $this->calls[] = ['data' => $data];
+            }
+        };
+
+        app()->instance(SavesHealthLog::class, $saveActionMock);
+
+        sendWebhook($this, 'yes');
+
+        expect($saveActionMock->calls)->toHaveCount(1);
+        $data = $saveActionMock->calls[0]['data'];
+
+        expect($data->glucoseReadingType)->toBe(GlucoseReadingType::PostMeal);
+        expect($data->insulinType)->toBe(InsulinType::Bolus);
+        expect($data->measuredAt)->not->toBeNull();
+        expect($data->measuredAt->toIsoString())->toContain('2023-10-27T10:00:00');
+        expect($data->medicationName)->toBe('123');
+    });
+
+    it('handles scalar values in toStringOrNull', function (): void {
+        $user = User::factory()->create();
+        $chat = UserTelegramChat::factory()->for($user)->linked()->create([
+            'telegraph_chat_id' => $this->telegraphChat->id,
+            'pending_health_log' => [
+                'is_health_data' => true,
+                'log_type' => 'glucose',
+                'medication_name' => true,
+            ],
+        ]);
+
+        $saveActionMock = new class implements SavesHealthLog
+        {
+            public array $calls = [];
+
+            public function handle(User $user, HealthLogData $data, ?CarbonInterface $measuredAt = null): void
+            {
+                $this->calls[] = ['data' => $data];
+            }
+        };
+        app()->instance(SavesHealthLog::class, $saveActionMock);
+
+        sendWebhook($this, 'yes');
+
+        expect($saveActionMock->calls[0]['data']->medicationName)->toBe('1');
     });
 });

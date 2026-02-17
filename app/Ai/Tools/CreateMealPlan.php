@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Ai\Agents\MealPlanAgent;
+use App\Contracts\Ai\GeneratesMealPlans;
 use App\Models\User;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -15,9 +15,8 @@ use Laravel\Ai\Tools\Request;
 final readonly class CreateMealPlan implements Tool
 {
     public function __construct(
-        private MealPlanAgent $mealPlanAgent,
-    ) {
-    }
+        private GeneratesMealPlans $mealPlanAgent,
+    ) {}
 
     public function name(): string
     {

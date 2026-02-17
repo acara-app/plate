@@ -17,7 +17,7 @@ test('converts basic markdown to telegram compatible html', function (): void {
     $reflection = new ReflectionClass(TelegramMessageService::class);
     $method = $reflection->getMethod('convertMarkdownToHtml');
 
-    $markdown = "**Bold** and *Italic* and `code`";
+    $markdown = '**Bold** and *Italic* and `code`';
     $html = $method->invoke($service, $markdown);
 
     // CommonMark uses <strong> for bold and <em> for italic
