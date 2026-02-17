@@ -9,14 +9,13 @@ use App\Enums\HealthEntrySource;
 use App\Enums\HealthEntryType;
 use App\Models\HealthEntry;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('saves health log data with provided measurement time', function () {
+it('saves health log data with provided measurement time', function (): void {
     $user = User::factory()->create();
-    $measuredAt = Carbon::parse('2023-10-27 10:00:00');
+    $measuredAt = Illuminate\Support\Facades\Date::parse('2023-10-27 10:00:00');
 
     $data = new HealthLogData(
         isHealthData: true,
@@ -38,9 +37,9 @@ it('saves health log data with provided measurement time', function () {
     ]);
 });
 
-it('saves health log data with default measurement time', function () {
+it('saves health log data with default measurement time', function (): void {
     $user = User::factory()->create();
-    Carbon::setTestNow('2023-10-28 12:00:00');
+    Illuminate\Support\Facades\Date::setTestNow('2023-10-28 12:00:00');
 
     $data = new HealthLogData(
         isHealthData: true,

@@ -793,7 +793,7 @@ describe('health log flow', function (): void {
         expect($saveActionMock->calls)->toHaveCount(1);
         expect($saveActionMock->calls[0]['data']->logType)->toBe(HealthEntryType::Insulin);
         expect($saveActionMock->calls[0]['data']->insulinUnits)->toBe(5.5);
-        expect($saveActionMock->calls[0]['data']->insulinType)->toBe(App\Enums\InsulinType::Bolus);
+        expect($saveActionMock->calls[0]['data']->insulinType)->toBe(InsulinType::Bolus);
         expect($saveActionMock->calls[0]['data']->medicationName)->toBe('Metformin');
         expect($saveActionMock->calls[0]['data']->medicationDosage)->toBe('500mg');
         Telegraph::assertSent('✅ Saved! Your health data has been logged.', false);

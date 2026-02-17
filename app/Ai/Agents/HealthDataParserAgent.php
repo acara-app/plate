@@ -196,7 +196,7 @@ INST;
 
     private function toString(mixed $value): ?string
     {
-        if ($value === null || $value === 'null' || $value === '') {
+        if (in_array($value, [null, 'null', ''], true)) {
             return null;
         }
 

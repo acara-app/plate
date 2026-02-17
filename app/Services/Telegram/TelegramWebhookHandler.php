@@ -19,7 +19,6 @@ use DefStudio\Telegraph\Handlers\WebhookHandler;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Stringable;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 final class TelegramWebhookHandler extends WebhookHandler
@@ -29,8 +28,7 @@ final class TelegramWebhookHandler extends WebhookHandler
         private readonly TelegramMessageService $telegramMessage,
         private readonly ParsesHealthData $healthDataParser,
         private readonly SavesHealthLog $saveHealthLog,
-    ) {
-    }
+    ) {}
 
     public function start(): void
     {
@@ -392,6 +390,7 @@ final class TelegramWebhookHandler extends WebhookHandler
         if (is_scalar($value)) {
             return (string) $value;
         }
+
         // @codeCoverageIgnoreStart
         return null;
         // @codeCoverageIgnoreEnd

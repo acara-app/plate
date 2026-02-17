@@ -29,8 +29,7 @@ final class PersonalTrainerAdvisor implements PersonalTrainerAdvisorContract
         private readonly SuggestWorkoutRoutine $suggestWorkoutRoutineTool,
         private readonly GetUserProfile $getUserProfileTool,
         private readonly GetFitnessGoals $getFitnessGoalsTool,
-    ) {
-    }
+    ) {}
 
     public function withMode(AgentMode $mode): self
     {
@@ -54,6 +53,7 @@ final class PersonalTrainerAdvisor implements PersonalTrainerAdvisorContract
 
     /**
      * @return array<int, Message>
+     *
      * @codeCoverageIgnore
      */
     public function messages(): array
@@ -81,6 +81,7 @@ final class PersonalTrainerAdvisor implements PersonalTrainerAdvisorContract
 
     /**
      * Get the current user (prefers conversation participant set by continue method).
+     *
      * @codeCoverageIgnore
      */
     private function getUser(): User

@@ -29,8 +29,7 @@ final class HealthCoachAdvisor implements HealthCoachAdvisorContract
         private readonly SuggestWellnessRoutine $suggestWellnessRoutineTool,
         private readonly GetUserProfile $getUserProfileTool,
         private readonly GetHealthGoals $getHealthGoalsTool,
-    ) {
-    }
+    ) {}
 
     public function withMode(AgentMode $mode): self
     {

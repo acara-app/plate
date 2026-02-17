@@ -33,10 +33,10 @@ beforeEach(function (): void {
     ]);
 
     $this->profileContext = new GetUserProfileContextAction;
-    $this->suggestSingleMealTool = new SuggestSingleMeal(app(App\Contracts\Ai\GeneratesSingleMeals::class));
+    $this->suggestSingleMealTool = new SuggestSingleMeal(resolve(App\Contracts\Ai\GeneratesSingleMeals::class));
     $this->getUserProfileTool = new GetUserProfile($this->profileContext);
-    $this->createMealPlanTool = new CreateMealPlan(app(App\Contracts\Ai\GeneratesMealPlans::class));
-    $this->predictGlucoseSpikeTool = new PredictGlucoseSpike(app(App\Contracts\Ai\PredictsGlucoseSpikes::class));
+    $this->createMealPlanTool = new CreateMealPlan(resolve(App\Contracts\Ai\GeneratesMealPlans::class));
+    $this->predictGlucoseSpikeTool = new PredictGlucoseSpike(resolve(App\Contracts\Ai\PredictsGlucoseSpikes::class));
     $this->suggestWellnessRoutineTool = new SuggestWellnessRoutine;
     $this->getHealthGoalsTool = new GetHealthGoals($this->profileContext);
     $this->suggestWorkoutRoutineTool = new SuggestWorkoutRoutine;
@@ -115,8 +115,8 @@ it('returns messages from history', function (): void {
 
     expect($messages)->toHaveCount(2);
     // Messages are returned in chronological order (oldest first)
-    $userMessage = collect($messages)->first(fn ($m) => $m->content === 'Hello, I need help with my diet');
-    $assistantMessage = collect($messages)->first(fn ($m) => $m->content === 'I can help you with that!');
+    $userMessage = collect($messages)->first(fn ($m): bool => $m->content === 'Hello, I need help with my diet');
+    $assistantMessage = collect($messages)->first(fn ($m): bool => $m->content === 'I can help you with that!');
     expect($userMessage)->not->toBeNull();
     expect($assistantMessage)->not->toBeNull();
 });
