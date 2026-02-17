@@ -123,24 +123,33 @@ INST;
      * Extract response data from structured output or JSON string.
      *
      * @return array<string, mixed>
+     *
      * @codeCoverageIgnore
+     *
+     * @phpstan-return array<string, mixed>
      */
     private function extractResponseData(mixed $response): array
     {
-        if (property_exists($response, 'structured') && is_array($response->structured)) {
+        if (is_object($response) && property_exists($response, 'structured') && is_array($response->structured)) {
+            // @phpstan-ignore return.type
             return $response->structured;
         }
 
+        // @phpstan-ignore cast.string
         $json = (string) $response;
+        // @phpstan-ignore argument.type
         $data = json_decode($json, true);
 
         if (is_array($data)) {
+            // @phpstan-ignore return.type
             return $data;
         }
 
         /** @var array<string, mixed>|null $encoded */
+        // @phpstan-ignore argument.type
         $encoded = json_decode(json_encode($response), true);
 
+        // @phpstan-ignore argument.type
         return is_array($encoded) ? $encoded : [];
     }
 

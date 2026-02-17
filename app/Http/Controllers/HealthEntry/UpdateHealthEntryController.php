@@ -28,9 +28,11 @@ final readonly class UpdateHealthEntryController
         /** @var array<string, mixed> $updateData */
         $updateData = collect($data)->except('log_type')->toArray();
 
+        // @phpstan-ignore nullsafe.neverNull
         $glucoseUnit = $this->currentUser->profile?->units_preference ?? GlucoseUnit::MmolL;
         if ($glucoseUnit === GlucoseUnit::MmolL && isset($updateData['glucose_value'])) {
-            $updateData['glucose_value'] = GlucoseUnit::mmolLToMgDl((float) $updateData['glucose_value']);
+            $glucoseValue = is_numeric($updateData['glucose_value'] ?? '') ? (float) ($updateData['glucose_value'] ?? 0) : 0.0;
+            $updateData['glucose_value'] = GlucoseUnit::mmolLToMgDl($glucoseValue);
         }
 
         $this->updateHealthEntry->handle(

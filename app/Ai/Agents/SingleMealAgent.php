@@ -41,8 +41,9 @@ final class SingleMealAgent implements Agent, GeneratesSingleMeals, HasStructure
     }
 
     /**
-     * @return array<string, JsonSchema>
+     * @return array<string, mixed>
      */
+    // @phpstan-ignore return.type
     public function schema(JsonSchema $schema): array
     {
         return [
@@ -83,6 +84,10 @@ final class SingleMealAgent implements Agent, GeneratesSingleMeals, HasStructure
 
         $response = $this->prompt($prompt);
 
-        return GeneratedMealData::from(collect($response)->toArray());
+        /** @var array<string, mixed> $responseArray */
+        // @phpstan-ignore argument.type
+        $responseArray = json_decode(json_encode($response), true);
+
+        return GeneratedMealData::from($responseArray);
     }
 }

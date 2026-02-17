@@ -98,6 +98,8 @@ final class MealPlanInitializeWorkflow extends Workflow
      * Execute the workflow to generate and save day 1 meals for a meal plan.
      *
      * @codeCoverageIgnore Generator methods with yield are executed by the workflow engine
+     *
+     * @return Generator<int, mixed, mixed, mixed>
      */
     public function execute(
         User $user,

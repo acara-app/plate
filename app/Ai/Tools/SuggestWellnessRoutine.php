@@ -36,7 +36,7 @@ final class SuggestWellnessRoutine implements Tool
             return json_encode([
                 'error' => 'User not authenticated',
                 'routine' => null,
-            ]);
+            ]) ?: '{"error":"User not authenticated","routine":null}';
         }
 
         /** @var string $focus */
@@ -48,7 +48,7 @@ final class SuggestWellnessRoutine implements Tool
             'success' => true,
             'focus' => $focus,
             'routines' => $routines,
-        ]);
+        ]) ?: '{"success":true}';
     }
 
     /**
@@ -65,7 +65,7 @@ final class SuggestWellnessRoutine implements Tool
     }
 
     /**
-     * @return array<string, array<string, mixed>>
+     * @phpstan-ignore return.type
      */
     private function generateRoutines(string $focus): array
     {

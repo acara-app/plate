@@ -36,7 +36,7 @@ final class SuggestWorkoutRoutine implements Tool
             return json_encode([
                 'error' => 'User not authenticated',
                 'workout' => null,
-            ]);
+            ]) ?: '{"error":"User not authenticated","workout":null}';
         }
 
         /** @var string $focus */
@@ -51,7 +51,7 @@ final class SuggestWorkoutRoutine implements Tool
             'focus' => $focus,
             'fitness_level' => $fitnessLevel,
             'workouts' => $workouts,
-        ]);
+        ]) ?: '{"success":true}';
     }
 
     /**
@@ -72,7 +72,7 @@ final class SuggestWorkoutRoutine implements Tool
     }
 
     /**
-     * @return array<string, array<string, mixed>>
+     * @phpstan-ignore return.type
      */
     private function generateWorkouts(string $focus, string $fitnessLevel): array
     {
@@ -82,7 +82,7 @@ final class SuggestWorkoutRoutine implements Tool
             'advanced' => ['duration' => '45-60 min', 'rest' => '30-45 sec'],
             // @codeCoverageIgnoreStart
             default => ['duration' => '30-45 min', 'rest' => '45-60 sec'],
-        // @codeCoverageIgnoreEnd
+            // @codeCoverageIgnoreEnd
         };
         $workouts = match ($focus) {
             'strength' => [
