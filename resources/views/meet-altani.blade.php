@@ -1,5 +1,5 @@
 @section('title', 'Meet Altani | Your AI Health Coach')
-@section('meta_description', 'Altani is your personal AI health coach for diabetes management, nutrition planning, and wellness. Get personalized guidance, meal plans, and glucose insights tailored to your goals.')
+@section('meta_description', 'Altani is your personal AI health coach for diabetes management, nutrition planning, and wellness. Get personalized help, meal plans, and blood sugar insights tailored to your goals.')
 @section('meta_keywords', 'AI health coach, diabetes management, nutrition planning, AI nutritionist, meal planning, glucose tracking, wellness coach')
 @section('canonical_url', url()->current())
 @section('og_image', asset('screenshots/og-meet-altani.webp'))
@@ -14,7 +14,7 @@
     "@@context": "https://schema.org",
     "@@type": "WebApplication",
     "name": "Altani - AI Health Coach",
-    "description": "Your personal AI health coach for diabetes management, nutrition planning, and wellness. Get personalized guidance, meal plans, and glucose insights.",
+    "description": "Your personal AI health coach for diabetes management, nutrition planning, and wellness. Get personalized help, meal plans, and blood sugar insights.",
     "applicationCategory": "HealthApplication",
     "operatingSystem": "All",
     "offers": {
@@ -34,7 +34,7 @@
             "name": "What can Altani help me with?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Altani can help with personalized meal planning, glucose predictions, nutrition guidance, and holistic wellness support including sleep, stress, exercise, and lifestyle habits."
+                "text": "Altani can help with personalized meal planning, blood sugar predictions, nutrition guidance, and wellness support. This includes sleep, stress, exercise, and lifestyle habits."
             }
         },
         {
@@ -42,7 +42,7 @@
             "name": "How does Altani predict my glucose response?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Altani analyzes the nutritional content of your meals—carbohydrates, fiber, protein, and fat—to model how your body might respond. She learns from your personal data over time to provide increasingly tailored insights."
+                "text": "Altani analyzes the nutritional content of your meals. She looks at carbohydrates, fiber, protein, and fat to model how your body might respond. She learns from your personal data over time to give you more tailored insights."
             }
         },
         {
@@ -50,7 +50,7 @@
             "name": "Is Altani a replacement for medical care?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "No. Altani is a wellness tool for education and support, not a medical device. She doesn't diagnose conditions or prescribe treatments. Always work with your healthcare provider for diabetes management."
+                "text": "No. Altani is a wellness tool for education and support. She is not a medical device. She doesn't diagnose conditions or prescribe treatments. Always work with your healthcare provider for diabetes management."
             }
         },
         {
@@ -58,7 +58,7 @@
             "name": "How do I chat with Altani?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "You can chat with Altani on the web or via Telegram. Just describe what you ate or ask questions about your health—she understands natural language and logs your meals automatically."
+                "text": "You can chat with Altani on the web or via Telegram. Just describe what you ate or ask questions about your health. She understands natural language and logs your meals automatically."
             }
         },
         {
@@ -66,7 +66,7 @@
             "name": "Is my health data secure?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "We take privacy seriously. Your health data is never sold to third parties. Altani is part of Acara Plate, an open-source project committed to transparent, privacy-first health technology."
+                "text": "We take privacy seriously. Your health data is never sold to third parties. Altani is part of Acara Plate, an open-source project that is committed to transparent, privacy-first health technology."
             }
         }
     ]
@@ -125,9 +125,9 @@
                         Meet Altani, your ideal<br>
                         <span class="text-emerald-700">AI health coach</span> today.
                     </h1>
-                    <p class="mt-6 text-lg leading-8 text-slate-600 max-w-2xl mx-auto">
-                        Your personal guide for diabetes management, nutrition planning, and holistic wellness. Smart, warm, and always here to help.
-                    </p>
+                        <p class="mt-6 text-lg leading-8 text-slate-600 max-w-2xl mx-auto">
+                            Your personal guide for diabetes, nutrition, and daily wellness. Smart, warm, and always here to help.
+                        </p>
                     <div class="mt-10 flex items-center justify-center gap-x-6">
                         <a href="{{ route('register') }}" class="rounded-full bg-[#FF6B4A] px-8 py-3.5 text-base font-semibold text-white shadow-sm hover:bg-[#E85A3A] transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF6B4A]">
                             Start Chatting
@@ -143,7 +143,7 @@
                 <div class="lg:grid lg:grid-cols-12 lg:gap-16 items-center">
                     <div class="lg:col-span-5 mb-10 lg:mb-0">
                         <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl mb-6">
-                            "Managing your health shouldn't feel like a lonely battle. It should be <span class="text-[#FF6B4A] italic">empowering</span>, supported, and clearly guided."
+                            "Managing your health shouldn't feel like a lonely battle. It should feel <span class="text-[#FF6B4A] italic">empowering</span>, supported, and clear."
                         </h2>
                         <div class="flex items-center gap-4 mt-8">
                             <img src="https://pub-plate-assets.acara.app/images/altani-waving-hello-320.webp" alt="Altani" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
@@ -177,7 +177,7 @@
                             Your Health<br>Responsibility
                         </h2>
                         <p class="text-lg leading-relaxed text-emerald-100/90 mb-8">
-                            Altani combines clinical expertise with AI intelligence to give you the most accurate, personalized guidance possible. She learns from your data to predict glucose trends and suggest meals that work for <em>your</em> body.
+                            Altani uses medical knowledge and AI to give you helpful guidance. She learns from your data to predict blood sugar trends and suggest meals that work for your body.
                         </p>
                         <div class="inline-flex items-center gap-2 text-white font-medium border-b border-[#FF6B4A] pb-1">
                             <span>Explore features</span>
@@ -193,7 +193,7 @@
                             <span class="text-[#FF6B4A] text-xl font-bold block mb-2">01</span>
                             <h3 class="font-bold text-slate-900 text-lg mb-3">Evidence-Based</h3>
                             <p class="text-slate-600 text-sm leading-relaxed">
-                                Every recommendation is grounded in nutritional science and verified clinical guidelines for diabetes management.
+                                Every recommendation is based on nutritional science and approved guidelines for diabetes care.
                             </p>
                         </div>
                         
@@ -202,7 +202,7 @@
                             <span class="text-[#FF6B4A] text-xl font-bold block mb-2">02</span>
                             <h3 class="font-bold text-slate-900 text-lg mb-3">Real-Time Prediction</h3>
                             <p class="text-slate-600 text-sm leading-relaxed">
-                                Altani predicts how your glucose will respond to a meal <em>before</em> you eat it, helping you make smarter choices.
+                                Altani predicts how your blood sugar will respond to a meal before you eat. This helps you make smarter choices.
                             </p>
                         </div>
 
@@ -211,7 +211,7 @@
                             <span class="text-[#FF6B4A] text-xl font-bold block mb-2">03</span>
                             <h3 class="font-bold text-slate-900 text-lg mb-3">Natural Chat</h3>
                             <p class="text-slate-600 text-sm leading-relaxed">
-                                Speak naturally. "I had a salad with chicken." Altani parses it, logs the nutrition, and updates your insights instantly.
+                                Just talk naturally. Say "I had a salad with chicken." Altani understands, logs the nutrition, and updates your insights right away.
                             </p>
                         </div>
 
@@ -220,7 +220,7 @@
                             <span class="text-[#FF6B4A] text-xl font-bold block mb-2">04</span>
                             <h3 class="font-bold text-slate-900 text-lg mb-3">Privacy First</h3>
                             <p class="text-slate-600 text-sm leading-relaxed">
-                                Open source and privacy-focused. Your health data belongs to you, not advertisers or third parties.
+                                We are open source and privacy-focused. Your health data belongs to you. It is not sold to advertisers or other companies.
                             </p>
                         </div>
                     </div>
@@ -304,7 +304,7 @@
                             Meal plans that actually<br>fit your life.
                         </h2>
                         <p class="text-lg text-slate-600 leading-relaxed mb-6">
-                            Whether you're Keto, Mediterranean, or Vegan, Altani creates 7-day meal plans tailored to your glucose goals and calorie needs. She even generates the grocery lists for you.
+                            Whether you're Keto, Mediterranean, or Vegan, Altani creates 7-day meal plans for your blood sugar goals and calorie needs. She also generates the grocery lists for you.
                         </p>
                         <ul class="space-y-3 text-slate-600">
                             <li class="flex items-center gap-3">
@@ -349,7 +349,7 @@
                             See the spike<br>before you eat.
                         </h2>
                         <p class="text-lg text-slate-600 leading-relaxed mb-6">
-                            Unsure about that pasta? Altani predicts your blood sugar response before you take a bite, helping you make smarter choices without the guesswork.
+                            Unsure about that pasta? Altani predicts your blood sugar response before you take a bite. This helps you make smarter choices without the guesswork.
                         </p>
                         <div class="bg-slate-50 rounded-xl p-5 border border-slate-100">
                             <p class="text-sm text-slate-500 italic">
@@ -372,7 +372,7 @@
                             Clinical precision<br>at your fingertips.
                         </h2>
                         <p class="text-lg text-slate-600 leading-relaxed mb-6">
-                            Altani is trained on verified medical protocols and nutritional science. Whether you're managing diabetes or optimizing performance, her guidance is precise, safe, and data-driven.
+                            Altani is trained on approved medical guidelines and nutritional science. Whether you're managing diabetes or trying to improve your performance, her guidance is precise, safe, and based on data.
                         </p>
                         <ul class="space-y-3 text-slate-600">
                              <li class="flex items-center gap-3">
@@ -413,10 +413,10 @@
                             Thoughtful analysis,<br>not just answers.
                         </h2>
                         <p class="text-lg text-slate-600 leading-relaxed mb-6">
-                            Health isn't black and white. Altani considers every factor—your sleep, stress, recent meals, and long-term goals—to give you a complete picture of your wellness.
+                            Health isn't simple. Altani looks at everything: your sleep, stress, recent meals, and long-term goals. She gives you a complete picture of your wellness.
                         </p>
                         <p class="text-slate-600 leading-relaxed">
-                            She doesn't just react; she thinks ahead, spotting patterns you might miss and suggesting small adjustments that yield big results over time.
+                            She doesn't just react. She thinks ahead. She spots patterns you might miss and suggests small changes that lead to big results over time.
                         </p>
                     </div>
                 </div>
@@ -439,7 +439,7 @@
                     Start a conversation<br>with Altani.
                 </h2>
                 <p class="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
-                    She's ready to help you on your health journey. No apps to install if you use Telegram, or chat right here on the web.
+                    She's ready to help you on your health journey. You can use Telegram without installing any apps. Or chat right here on the web.
                 </p>
                 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
