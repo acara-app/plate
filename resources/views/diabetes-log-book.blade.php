@@ -185,4 +185,9 @@
             </table>
         </div>
     </div>
+    <x-cta-block
+        title="Meet Your AI Health Coach"
+        description="Altani can help you track meals, predict glucose responses, and provide personalized nutrition guidance."
+        button-text="Learn More"
+    />
 </x-default-layout>

@@ -689,6 +689,12 @@
     </section>
 </div>
 
+<x-cta-block
+    title="Your AI Health Coach is Here to Help"
+    description="Meet Altani — your personal guide for diabetes, nutrition, and daily wellness. Smart, warm, and always here to support you."
+    button-text="Meet Altani"
+/>
+
 <x-footer />
 
 </x-default-layout>

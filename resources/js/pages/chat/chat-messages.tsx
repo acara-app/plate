@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { ChatStatus } from '@/types/chat';
 import { type UIMessage } from '@ai-sdk/react';
-import { AlertCircle, Sparkles, User } from 'lucide-react';
+import { AlertCircle, User } from 'lucide-react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -33,15 +33,19 @@ export function ChatErrorBanner({ error }: { error?: Error }) {
 function EmptyState() {
     return (
         <div className="flex flex-1 flex-col items-center justify-center text-center">
-            <div className="mb-4 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 p-4">
-                <Sparkles className="size-8 text-white" />
+            <div className="mb-4 overflow-hidden rounded-full ring-4 ring-emerald-100">
+                <img
+                    src="https://pub-plate-assets.acara.app/images/altani_with_hand_on_chin_considering_expression_thought-1024.webp"
+                    alt="Altani"
+                    className="size-20 object-cover"
+                />
             </div>
             <h2 className="mb-2 text-xl font-semibold text-foreground">
-                How can I help you today?
+                How are you feeling today?
             </h2>
             <p className="max-w-md text-sm text-muted-foreground">
-                Ask me anything about nutrition, meal planning, or healthy
-                eating habits.
+                Your personal AI health coach is here to help with nutrition,
+                meal planning, glucose predictions, or just to chat.
             </p>
         </div>
     );
@@ -53,16 +57,21 @@ function MessageAvatar({ role }: { role: string }) {
     return (
         <div
             className={cn(
-                'flex size-8 shrink-0 items-center justify-center rounded-full',
+                'flex shrink-0 items-center justify-center overflow-hidden rounded-full',
+                isUser ? 'size-8' : 'size-10',
                 isUser
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-linear-to-br from-indigo-500 to-purple-600 text-white',
+                    : 'ring-2 ring-emerald-100',
             )}
         >
             {isUser ? (
                 <User className="size-4" />
             ) : (
-                <Sparkles className="size-4" />
+                <img
+                    src="https://pub-plate-assets.acara.app/images/altani-waving-hello-320.webp"
+                    alt="Altani"
+                    className="h-full w-full object-cover"
+                />
             )}
         </div>
     );
@@ -165,12 +174,12 @@ function ThinkingIndicator() {
             <MessageAvatar role="assistant" />
             <div className="flex items-center gap-2 rounded-2xl bg-muted px-4 py-3">
                 <div className="flex items-center gap-1">
-                    <span className="size-2 animate-pulse rounded-full bg-indigo-500" />
-                    <span className="size-2 animate-pulse rounded-full bg-indigo-500 [animation-delay:150ms]" />
-                    <span className="size-2 animate-pulse rounded-full bg-indigo-500 [animation-delay:300ms]" />
+                    <span className="size-2 animate-pulse rounded-full bg-emerald-500" />
+                    <span className="size-2 animate-pulse rounded-full bg-emerald-500 [animation-delay:150ms]" />
+                    <span className="size-2 animate-pulse rounded-full bg-emerald-500 [animation-delay:300ms]" />
                 </div>
                 <span className="text-sm text-muted-foreground">
-                    Just a moment...
+                    Altani is thinking...
                 </span>
             </div>
         </div>
@@ -183,12 +192,12 @@ function StreamingIndicator() {
             <MessageAvatar role="assistant" />
             <div className="flex items-center gap-2 rounded-2xl bg-muted px-4 py-3">
                 <div className="flex items-center gap-1">
-                    <span className="size-2 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.3s]" />
-                    <span className="size-2 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.15s]" />
-                    <span className="size-2 animate-bounce rounded-full bg-indigo-500" />
+                    <span className="size-2 animate-bounce rounded-full bg-emerald-500 [animation-delay:-0.3s]" />
+                    <span className="size-2 animate-bounce rounded-full bg-emerald-500 [animation-delay:-0.15s]" />
+                    <span className="size-2 animate-bounce rounded-full bg-emerald-500" />
                 </div>
                 <span className="text-sm text-muted-foreground">
-                    Crafting the perfect response...
+                    Altani is typing...
                 </span>
             </div>
         </div>

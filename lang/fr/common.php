@@ -172,9 +172,20 @@ return [
             'create_button' => 'Commencer',
         ],
         'chat' => [
-            'title' => 'Chat nutrition',
-            'description' => 'Obtenez des conseils nutritionnels personnalisés et des réponses à vos questions',
-            'button' => 'Démarrer le chat',
+            'title' => 'Altani',
+            'description' => 'Votre coach IA personnel pour le diabète, la nutrition et le bien-être quotidien.',
+            'button' => 'Discuter avec Altani',
+            'recent_conversations' => 'Conversations récentes',
+            'quick_actions' => [
+                'ask' => 'Poser une question',
+                'meal_plan' => 'Générer un plan',
+            ],
+            'prompts' => [
+                'complete_profile' => 'Complétez votre profil pour des conseils personnalisés →',
+                'analyze_glucose' => 'Analysez vos tendances de glucose récentes →',
+                'health_conditions' => 'Obtenez des conseils pour vos problèmes de santé →',
+                'restaurant' => 'Demandez sur les repas au restaurant et l\'impact sur le glucose →',
+            ],
         ],
     ],
 

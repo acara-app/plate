@@ -356,5 +356,10 @@
         </section>
 
     </div>
+    <x-cta-block
+        title="Get to Know Altani Better"
+        description="Meet your AI health coach — ready to help with sleep, stress, nutrition, and daily wellness support."
+        button-text="Meet Altani"
+    />
     <x-footer />
 </x-default-layout>

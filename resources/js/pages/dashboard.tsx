@@ -60,13 +60,17 @@ export default function Dashboard() {
                 {!currentUser?.is_onboarded && <OnboardingBanner />}
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {/* AI Chat Card */}
+                    {/* AI Chat Card - Altani */}
                     <Card className="group relative flex flex-col overflow-hidden transition-all hover:shadow-lg">
-                        <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary via-primary/80 to-primary/60" />
+                        <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-emerald-500 via-emerald-400 to-teal-400" />
                         <CardHeader className="pb-3">
                             <div className="flex items-center gap-3">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                                    <Sparkles className="h-6 w-6 text-primary" />
+                                <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full ring-2 ring-emerald-100">
+                                    <img
+                                        src="https://pub-plate-assets.acara.app/images/altani-waving-hello-320.webp"
+                                        alt="Altani"
+                                        className="h-full w-full object-cover"
+                                    />
                                 </div>
                                 <div>
                                     <CardTitle className="text-lg">
@@ -74,9 +78,9 @@ export default function Dashboard() {
                                     </CardTitle>
                                     <Badge
                                         variant="secondary"
-                                        className="mt-1 text-xs"
+                                        className="mt-1 bg-emerald-100 text-xs text-emerald-700 hover:bg-emerald-100"
                                     >
-                                        AI-Powered
+                                        24/7 Available
                                     </Badge>
                                 </div>
                             </div>
@@ -95,9 +99,9 @@ export default function Dashboard() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-auto w-full flex-col items-start justify-start gap-1 p-3 text-left transition-colors group-hover/action:border-primary group-hover/action:bg-primary/5"
+                                        className="h-auto w-full flex-col items-start justify-start gap-1 p-3 text-left transition-colors group-hover/action:border-emerald-500 group-hover/action:bg-emerald-50"
                                     >
-                                        <MessageSquare className="h-4 w-4 text-primary" />
+                                        <MessageSquare className="h-4 w-4 text-emerald-600" />
                                         <span className="text-xs font-medium">
                                             {t(
                                                 'dashboard_cards.chat.quick_actions.ask',
@@ -112,9 +116,9 @@ export default function Dashboard() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-auto w-full flex-col items-start justify-start gap-1 p-3 text-left transition-colors group-hover/action:border-primary group-hover/action:bg-primary/5"
+                                        className="h-auto w-full flex-col items-start justify-start gap-1 p-3 text-left transition-colors group-hover/action:border-emerald-500 group-hover/action:bg-emerald-50"
                                     >
-                                        <Utensils className="h-4 w-4 text-primary" />
+                                        <Utensils className="h-4 w-4 text-emerald-600" />
                                         <span className="text-xs font-medium">
                                             {t(
                                                 'dashboard_cards.chat.quick_actions.meal_plan',
@@ -127,7 +131,7 @@ export default function Dashboard() {
                             {/* Main CTA */}
                             <div className="mt-auto pt-2">
                                 <Link href={chat.create().url}>
-                                    <Button className="w-full gap-2">
+                                    <Button className="w-full gap-2 bg-emerald-600 hover:bg-emerald-500">
                                         <Sparkles className="h-4 w-4" />
                                         {t('dashboard_cards.chat.button')}
                                     </Button>

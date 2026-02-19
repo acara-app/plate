@@ -756,5 +756,10 @@
         </section>
 
     </div>
+    <x-cta-block
+        title="Altani Can Assist Your Clients"
+        description="Your clients can chat with Altani for instant answers to nutrition questions between sessions."
+        button-text="Learn More"
+    />
     <x-footer />
 </x-default-layout>
