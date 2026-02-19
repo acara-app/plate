@@ -42,7 +42,8 @@
         <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
             <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                 {{-- Logo --}}
-                <a href="/"
+                <a href="{{ route('home') }}"
+                    aria-current="page"
                     class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80">
                     <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
                     <span>Acara Plate</span>
@@ -79,11 +80,11 @@
         <section aria-label="Hero" class="relative w-full overflow-hidden bg-[#FFFBF5] pt-16 pb-20 sm:pt-24 sm:pb-32">
             {{-- Decorative Fruits --}}
             <img src="https://pub-plate-assets.acara.app/images/fruits/avocado.svg"
-                 alt=""
+                 alt="Decorative avocado illustration"
                  class="absolute -top-8 -left-8 w-48 sm:w-64 md:w-80 opacity-40 select-none pointer-events-none z-0">
             
             <img src="https://pub-plate-assets.acara.app/images/fruits/strawberry.svg"
-                 alt=""
+                 alt="Decorative strawberry illustration"
                  class="absolute -top-6 -right-6 w-40 sm:w-56 md:w-72 opacity-40 select-none pointer-events-none z-0">
 
             <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8 relative z-10">
@@ -91,7 +92,7 @@
                     {{-- Badge --}}
                     <div class="mb-6 flex justify-center">
                         <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
-                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
                             </svg>
                             Open Source Beta
@@ -115,7 +116,10 @@
                            class="rounded-full bg-[#FF6B4A] px-8 py-3.5 text-base font-semibold text-white shadow-sm hover:bg-[#E85A3A] transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF6B4A]">
                             Start Your Free Plan
                         </a>
-                        <a href="https://github.com/acara-app/plate" target="_blank"
+                        <a href="https://github.com/acara-app/plate" 
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           aria-label="Star on GitHub (opens in a new tab)"
                            class="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-base font-medium text-slate-600 shadow-sm ring-1 ring-slate-200 transition-all hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300">
                             <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
@@ -139,7 +143,7 @@
                         {{-- AI Nutritionist Card --}}
                         <div class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-rose-300 hover:shadow-md">
                             <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-rose-100 text-rose-600 transition-transform group-hover:scale-110">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                                 </svg>
                             </div>
@@ -147,9 +151,11 @@
                             <p class="mt-2 text-sm text-slate-600">
                                 Stuck at a restaurant? Ask the AI what to order and get advice that keeps your glucose steady.
                             </p>
-                            <a href="{{ route('ai-nutritionist') }}" class="mt-4 inline-flex items-center text-sm font-semibold text-rose-600 hover:text-rose-700">
+                            <a href="{{ route('ai-nutritionist') }}" 
+                               class="mt-4 inline-flex items-center text-sm font-semibold text-rose-600 hover:text-rose-700"
+                               aria-label="Meet Your AI Coach (AI Nutritionist)">
                                 Meet Your AI Coach
-                                <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
                             </a>
@@ -158,7 +164,7 @@
                         {{-- Spike Calculator Card --}}
                         <div class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-orange-300 hover:shadow-md">
                             <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-orange-600 transition-transform group-hover:scale-110">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                             </div>
@@ -166,9 +172,11 @@
                             <p class="mt-2 text-sm text-slate-600">
                                 Type any food and instantly see its glucose impact. No signup needed.
                             </p>
-                            <a href="{{ route('spike-calculator') }}" class="mt-4 inline-flex items-center text-sm font-semibold text-orange-600 hover:text-orange-700">
+                            <a href="{{ route('spike-calculator') }}" 
+                               class="mt-4 inline-flex items-center text-sm font-semibold text-orange-600 hover:text-orange-700"
+                               aria-label="Check a food (Spike Calculator)">
                                 Check a food
-                                <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
                             </a>
@@ -177,7 +185,7 @@
                         {{-- Snap to Track Card --}}
                         <div class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-blue-300 hover:shadow-md">
                             <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600 transition-transform group-hover:scale-110">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
@@ -186,9 +194,11 @@
                             <p class="mt-2 text-sm text-slate-600">
                                 Take a photo of your meal and get instant nutrition facts.
                             </p>
-                            <a href="{{ route('snap-to-track') }}" class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                            <a href="{{ route('snap-to-track') }}" 
+                               class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700"
+                               aria-label="Scan a meal (Snap to Track)">
                                 Scan a meal
-                                <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
                             </a>
@@ -214,7 +224,7 @@
                                 <div
                                     class="mb-3 rounded-lg bg-emerald-100 p-3 transition-transform duration-300 group-hover/card:scale-110">
                                     <svg class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor">
+                                        stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                     </svg>
@@ -231,7 +241,7 @@
                                 <div
                                     class="mb-3 rounded-lg bg-teal-100 p-3 transition-transform duration-300 group-hover/card:scale-110">
                                     <svg class="h-6 w-6 text-teal-600" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor">
+                                        stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                                     </svg>
@@ -249,7 +259,7 @@
                                 <div
                                     class="mb-3 rounded-lg bg-cyan-100 p-3 transition-transform duration-300 group-hover/card:scale-110">
                                     <svg class="h-6 w-6 text-cyan-600" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor">
+                                        stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
@@ -267,7 +277,7 @@
                                 <div
                                     class="mb-3 rounded-lg bg-purple-100 p-3 transition-transform duration-300 group-hover/card:scale-110">
                                     <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor">
+                                        stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                                     </svg>
@@ -285,7 +295,7 @@
                                 <div
                                     class="mb-3 rounded-lg bg-indigo-100 p-3 transition-transform duration-300 group-hover/card:scale-110 shrink-0">
                                     <svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor">
+                                        stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                     </svg>
@@ -298,7 +308,7 @@
                                     <a href="{{ route('ai-health-coach') }}" 
                                         class="mt-3 inline-flex items-center text-xs font-medium text-indigo-600 hover:text-indigo-700 lg:text-sm">
                                         Meet Your Health Coach 
-                                        <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                         </svg>
                                     </a>
@@ -312,7 +322,7 @@
                                 <div
                                     class="mb-3 rounded-lg bg-orange-100 p-3 transition-transform duration-300 group-hover/card:scale-110 shrink-0">
                                     <svg class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor">
+                                        stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                                     </svg>
@@ -325,7 +335,7 @@
                                     <a href="{{ route('ai-personal-trainer') }}" 
                                         class="mt-3 inline-flex items-center text-xs font-medium text-orange-600 hover:text-orange-700 lg:text-sm">
                                         Meet Your Trainer 
-                                        <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                         </svg>
                                     </a>
@@ -353,7 +363,7 @@
                     <div class="text-center">
                         <a href="{{ route('food.index') }}" class="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors">
                             Search the Full 300+ USDA Database
-                            <svg class="ml-1 size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="ml-1 size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </a>
@@ -431,7 +441,7 @@
                         {{-- Badge --}}
                         <div
                             class="mb-8 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                            <span class="relative flex h-2 w-2">
+                            <span class="relative flex h-2 w-2" aria-hidden="true">
                                 <span
                                     class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                                 <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
@@ -453,7 +463,10 @@
                         </p>
 
                         {{-- CTA Button --}}
-                        <a href="https://github.com/acara-app/plate" target="_blank"
+                        <a href="https://github.com/acara-app/plate" 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="View on GitHub (opens in a new tab)"
                             class="group inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-bold text-slate-900 shadow-lg shadow-emerald-500/10 transition-all hover:scale-105 hover:bg-emerald-50 hover:shadow-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-slate-900">
                             <svg class="h-5 w-5 transition-transform duration-300 group-hover:scale-110"
                                 fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
