@@ -76,56 +76,115 @@
             </div>
         </header>
 
-        {{-- Hero Section - Outside main container for full width --}}
+        {{-- Hero Section — F-pattern layout with fruit decorations --}}
         <section aria-label="Hero" class="relative w-full overflow-hidden bg-[#FFFBF5] pt-16 pb-20 sm:pt-24 sm:pb-32">
-            {{-- Decorative Fruits --}}
-            <img src="https://pub-plate-assets.acara.app/images/fruits/avocado.svg"
-                 alt="Decorative avocado illustration"
-                 class="absolute -top-8 -left-8 w-48 sm:w-64 md:w-80 opacity-40 select-none pointer-events-none z-0">
-            
-            <img src="https://pub-plate-assets.acara.app/images/fruits/strawberry.svg"
-                 alt="Decorative strawberry illustration"
-                 class="absolute -top-6 -right-6 w-40 sm:w-56 md:w-72 opacity-40 select-none pointer-events-none z-0">
+            {{-- Ambient gradient blobs --}}
+            <div aria-hidden="true" class="pointer-events-none absolute -left-32 top-0 h-[500px] w-[500px] rounded-full bg-[#FF6B4A]/5 blur-3xl"></div>
+            <div aria-hidden="true" class="pointer-events-none absolute -right-32 bottom-0 h-[400px] w-[400px] rounded-full bg-emerald-200/20 blur-3xl"></div>
 
-            <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8 relative z-10">
-                <div class="mx-auto max-w-3xl">
-                    {{-- Badge --}}
-                    <div class="mb-6 flex justify-center">
-                        <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
-                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
-                            </svg>
-                            Open Source Beta
-                        </span>
+            {{-- Edge fruit decorations (visible on all sizes) --}}
+            <img src="https://pub-plate-assets.acara.app/images/fruits/cherries.svg"
+                 alt="" aria-hidden="true"
+                 class="absolute -bottom-6 -left-6 w-28 sm:w-36 opacity-25 select-none pointer-events-none z-0 animate-float animation-delay-4000 rotate-12">
+            <img src="https://pub-plate-assets.acara.app/images/fruits/pear-green.svg"
+                 alt="" aria-hidden="true"
+                 class="absolute bottom-12 left-16 w-16 sm:w-20 opacity-30 select-none pointer-events-none z-0 animate-float animation-delay-2000 -rotate-6">
+
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
+                    {{-- LEFT COLUMN — Text content (F-pattern reading zone) --}}
+                    <div class="text-center lg:text-left">
+                        {{-- Badge with pulse --}}
+                        <div class="mb-6 flex justify-center lg:justify-start">
+                            <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200/60">
+                                <span class="relative flex h-2 w-2" aria-hidden="true">
+                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                                </span>
+                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+                                </svg>
+                                Open Source Beta
+                            </span>
+                        </div>
+
+                        {{-- Headline (F-pattern primary scan line) --}}
+                        <h1 class="font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl mb-6">
+                            Your Digital Meal Planner<br>
+                            <span class="text-transparent bg-clip-text bg-linear-to-r from-[#FF6B4A] to-[#FF8F6B]">for Diabetes</span>
+                        </h1>
+
+                        {{-- Subheadline (secondary scan path) --}}
+                        <p class="mt-4 text-lg leading-8 text-slate-600 max-w-xl mx-auto lg:mx-0">
+                            A personalized nutrition platform that creates meal plans around your glucose patterns. Built for people managing Type 2 diabetes.
+                        </p>
+
+                        {{-- CTA (natural eye-flow endpoint) --}}
+                        <div class="mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                            <a href="{{ route('register') }}"
+                               class="w-full sm:w-auto rounded-full bg-[#FF6B4A] px-8 py-3.5 text-center text-base font-semibold text-white shadow-lg shadow-[#FF6B4A]/20 hover:bg-[#E85A3A] hover:shadow-[#FF6B4A]/30 hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF6B4A]">
+                                Start Your Free Plan
+                            </a>
+                            <a href="https://github.com/acara-app/plate"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               aria-label="Star on GitHub (opens in a new tab)"
+                               class="group w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-base font-medium text-slate-600 shadow-sm ring-1 ring-slate-200 transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 hover:-translate-y-0.5">
+                                <svg class="h-5 w-5 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                                </svg>
+                                Star on GitHub
+                            </a>
+                        </div>
+
+                        {{-- Trust strip — AI tools mention with internal links --}}
+                        <div class="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-sm text-slate-500">
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true"></span>
+                                <a href="{{ route('ai-nutritionist') }}" class="hover:text-slate-700 transition-colors">AI Nutritionist</a>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="h-1.5 w-1.5 rounded-full bg-indigo-400" aria-hidden="true"></span>
+                                <a href="{{ route('ai-health-coach') }}" class="hover:text-slate-700 transition-colors">Personal Health Coach</a>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="h-1.5 w-1.5 rounded-full bg-orange-400" aria-hidden="true"></span>
+                                <a href="{{ route('ai-personal-trainer') }}" class="hover:text-slate-700 transition-colors">AI Personal Trainer</a>
+                            </span>
+                        </div>
                     </div>
 
-                    {{-- Headline (F-pattern primary scan line) --}}
-                    <h1 class="font-display text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl mb-6">
-                        Your Digital Meal Planner<br>
-                        <span class="text-[#FF6B4A]">for Diabetes</span>
-                    </h1>
+                    {{-- RIGHT COLUMN — Fruit decoration cluster --}}
+                    <div class="hidden lg:block relative h-[420px]" aria-hidden="true">
+                        {{-- Main hero fruit — Avocado --}}
+                        <img src="https://pub-plate-assets.acara.app/images/fruits/avocado.svg"
+                             alt=""
+                             class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 opacity-90 select-none pointer-events-none animate-float drop-shadow-lg">
 
-                    {{-- Subheadline (secondary scan path) --}}
-                    <p class="mt-6 text-lg leading-8 text-slate-600 max-w-2xl mx-auto">
-                        A personalized nutrition platform that creates meal plans around your glucose patterns. Built for people managing Type 2 diabetes.
-                    </p>
+                        {{-- Strawberry — top right --}}
+                        <img src="https://pub-plate-assets.acara.app/images/fruits/strawberry.svg"
+                             alt=""
+                             class="absolute top-2 right-4 w-32 opacity-80 select-none pointer-events-none animate-float animation-delay-1000 -rotate-12 drop-shadow-md">
 
-                    {{-- CTA (natural eye-flow endpoint) --}}
-                    <div class="mt-10 flex items-center justify-center gap-x-6">
-                        <a href="{{ route('register') }}"
-                           class="rounded-full bg-[#FF6B4A] px-8 py-3.5 text-base font-semibold text-white shadow-sm hover:bg-[#E85A3A] transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF6B4A]">
-                            Start Your Free Plan
-                        </a>
-                        <a href="https://github.com/acara-app/plate" 
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           aria-label="Star on GitHub (opens in a new tab)"
-                           class="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-base font-medium text-slate-600 shadow-sm ring-1 ring-slate-200 transition-all hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300">
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
-                            </svg>
-                            Star on GitHub
-                        </a>
+                        {{-- Lemon — bottom left --}}
+                        <img src="https://pub-plate-assets.acara.app/images/fruits/lemon.svg"
+                             alt=""
+                             class="absolute bottom-4 left-8 w-28 opacity-75 select-none pointer-events-none animate-float animation-delay-2000 rotate-6 drop-shadow-md">
+
+                        {{-- Mango — top left --}}
+                        <img src="https://pub-plate-assets.acara.app/images/fruits/mango.svg"
+                             alt=""
+                             class="absolute top-8 left-4 w-24 opacity-70 select-none pointer-events-none animate-float animation-delay-4000 rotate-12 drop-shadow-sm">
+
+                        {{-- Orange — bottom right --}}
+                        <img src="https://pub-plate-assets.acara.app/images/fruits/orange.svg"
+                             alt=""
+                             class="absolute bottom-8 right-12 w-24 opacity-65 select-none pointer-events-none animate-float animation-delay-1000 -rotate-6 drop-shadow-sm">
+
+                        {{-- Beet (vegetable) — middle right --}}
+                        <img src="https://pub-plate-assets.acara.app/images/fruits/beet.svg"
+                             alt=""
+                             class="absolute top-1/3 right-0 w-20 opacity-60 select-none pointer-events-none animate-float animation-delay-2000 rotate-3 drop-shadow-sm">
                     </div>
                 </div>
             </div>
