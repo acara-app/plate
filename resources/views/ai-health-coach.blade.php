@@ -1,7 +1,6 @@
 @section('title', 'Open Source AI Health Coach | Acara Plate')
 @section('meta_description', 'Your personal AI wellness coach for sleep, stress, hydration, and lifestyle optimization. Get guidance to improve your overall well-being.')
 @section('meta_keywords', 'open source health coach, AI wellness, sleep optimization, stress management, hydration tracker, lifestyle optimization')
-@section('canonical_url', url()->current())
 
 @section('head')
 
@@ -113,19 +112,19 @@
         <!-- Hero Section — F-pattern layout with scattered hearts -->
         <section class="relative pt-16 pb-20 sm:pt-24 sm:pb-32 overflow-hidden">
             <!-- Heart SVG decorations — scattered across entire section -->
-            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="" aria-hidden="true"
+            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="Decorative heart icon" aria-hidden="true"
                  class="absolute top-8 right-24 w-12 sm:w-16 opacity-50 select-none pointer-events-none rotate-12"
                  style="filter: hue-rotate(160deg) saturate(40%) brightness(1.1);">
-            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="" aria-hidden="true"
+            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="Decorative heart icon" aria-hidden="true"
                  class="absolute top-1/3 right-4 w-10 sm:w-14 opacity-40 select-none pointer-events-none -rotate-12"
                  style="filter: hue-rotate(290deg) saturate(35%) brightness(1.2);">
-            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="" aria-hidden="true"
+            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="Decorative heart icon" aria-hidden="true"
                  class="absolute bottom-16 right-16 w-8 sm:w-12 opacity-45 select-none pointer-events-none rotate-45"
                  style="filter: hue-rotate(340deg) saturate(45%) brightness(1.15);">
-            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="" aria-hidden="true"
+            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="Decorative heart icon" aria-hidden="true"
                  class="absolute bottom-8 left-8 w-10 sm:w-14 opacity-30 select-none pointer-events-none -rotate-6"
                  style="filter: hue-rotate(200deg) saturate(30%) brightness(1.2);">
-            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="" aria-hidden="true"
+            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="Decorative heart icon" aria-hidden="true"
                  class="absolute top-12 left-1/3 w-6 sm:w-8 opacity-25 select-none pointer-events-none rotate-30"
                  style="filter: hue-rotate(320deg) saturate(50%) brightness(1.05);">
 
@@ -136,7 +135,7 @@
                         <!-- Badge -->
                         <div class="mb-6 flex justify-center lg:justify-start">
                             <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800">
-                                <svg class="h-4 w-4 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-4 w-4 text-emerald-600" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
                                 </svg>
                                 Open Source Project
@@ -193,7 +192,7 @@
                     {{-- Card 1 --}}
                     <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
                         <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 mb-6">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                             </svg>
                         </div>
@@ -205,7 +204,7 @@
 
                     <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
                         <div class="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center text-rose-600 mb-6">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
@@ -217,7 +216,7 @@
 
                     <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
                         <div class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center text-cyan-600 mb-6">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                             </svg>
                         </div>
@@ -283,7 +282,7 @@
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
                             What areas can the AI Health Coach help with?
-                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
@@ -295,7 +294,7 @@
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
                             Is this really open source?
-                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
@@ -307,7 +306,7 @@
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
                             How is my privacy protected?
-                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
@@ -319,7 +318,7 @@
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
                             Do I need to track everything manually?
-                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>

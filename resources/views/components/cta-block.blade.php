@@ -13,7 +13,7 @@
                 <div class="mb-6 shrink-0 lg:mb-0">
                     <img
                         src="{{ $avatarSrc }}"
-                        alt="Altani"
+                        alt="Altani, your personal AI health coach"
                         class="mx-auto h-24 w-24 rounded-full object-cover shadow-lg ring-4 ring-orange-50 sm:h-32 sm:w-32"
                     >
                 </div>

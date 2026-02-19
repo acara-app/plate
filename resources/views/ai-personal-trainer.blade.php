@@ -1,7 +1,6 @@
 @section('title', 'Open Source AI Personal Trainer | Acara Plate')
 @section('meta_description', 'Your AI fitness coach for strength, cardio, and flexibility training. Get workout plans and exercise guidance.')
 @section('meta_keywords', 'open source personal trainer, AI fitness coach, workout planner, exercise guidance, strength training, cardio training')
-@section('canonical_url', url()->current())
 
 @section('head')
 
@@ -91,7 +90,7 @@
 
 <x-default-layout>
     <div class="bg-[#FFFBF5]">
-        <header class="sticky top-0 z-50 w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center bg-[#FFFBF5]/95 backdrop-blur-md border-b border-slate-100">
+        <header class="sticky top-0 z-50 w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center bg-white backdrop-blur-md border-b border-slate-100">
             <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900">
                 <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
                 <span>Acara Plate</span>
@@ -113,14 +112,14 @@
         <!-- Hero Section -->
         <section class="relative pt-16 pb-20 sm:pt-24 sm:pb-32 overflow-hidden">
             <!-- Decorative Yoga Poses -->
-<img src="https://pub-plate-assets.acara.app/images/runner-woman.svg" alt="" class="absolute bottom-0 left-0 w-20 sm:w-24 md:w-32 translate-y-8 -translate-x-4 opacity-90 select-none pointer-events-none grayscale">
-<img src="https://pub-plate-assets.acara.app/images/yoga-pose-2.png" alt="" class="absolute top-0 right-0 w-32 sm:w-48 md:w-64 translate-y-8 -translate-x-4 opacity-90 select-none pointer-events-none grayscale">
+<img src="https://pub-plate-assets.acara.app/images/runner-woman.svg" alt="Graphic of a woman running for fitness" aria-hidden="true" class="absolute bottom-0 left-0 w-20 sm:w-24 md:w-32 translate-y-8 -translate-x-4 opacity-90 select-none pointer-events-none grayscale">
+<img src="https://pub-plate-assets.acara.app/images/yoga-pose-2.png" alt="Graphic of a person in a yoga pose representing wellness" aria-hidden="true" class="absolute top-0 right-0 w-32 sm:w-48 md:w-64 translate-y-8 -translate-x-4 opacity-90 select-none pointer-events-none grayscale">
 
             <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
                 <div class="relative z-10 mx-auto max-w-3xl">
                     <div class="mb-6 flex justify-center">
                         <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800">
-                            <svg class="h-4 w-4 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
+                            <svg class="h-4 w-4 text-emerald-600" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
                             </svg>
                             Open Source Project
@@ -158,7 +157,7 @@
                     {{-- Card 1 --}}
                     <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
                         <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 mb-6">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                             </svg>
                         </div>
@@ -170,7 +169,7 @@
 
                     <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
                         <div class="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center text-rose-600 mb-6">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                         </div>
@@ -182,7 +181,7 @@
 
                     <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
                         <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 mb-6">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
@@ -248,7 +247,7 @@
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
                             What can the AI Personal Trainer help with?
-                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
@@ -260,7 +259,7 @@
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
                             Do I need gym equipment?
-                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
@@ -272,7 +271,7 @@
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
                             Is this really open source?
-                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
@@ -284,7 +283,7 @@
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
                             I'm a complete beginner. Is this for me?
-                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
