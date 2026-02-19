@@ -111,9 +111,42 @@
         
         <!-- Hero Section -->
         <section class="relative pt-16 pb-20 sm:pt-24 sm:pb-32 overflow-hidden">
-            <!-- Decorative Yoga Poses -->
-<img src="https://pub-plate-assets.acara.app/images/runner-woman-4.svg" alt="Graphic of a woman running for fitness" aria-hidden="true" class="absolute bottom-0 left-0 w-20 sm:w-24 md:w-32 translate-y-8 -translate-x-4 opacity-90 select-none pointer-events-none">
-<img src="https://pub-plate-assets.acara.app/images/yoga-pose-2.png" alt="Graphic of a person in a yoga pose representing wellness" aria-hidden="true" class="absolute top-0 right-0 w-32 sm:w-48 md:w-64 translate-y-8 -translate-x-4 opacity-90 select-none pointer-events-none">
+            <!-- Decorative SVG elements — fitness-themed, scattered across hero -->
+            <!-- Speed lines top-right — convey motion and energy -->
+            <svg class="absolute top-10 right-16 w-20 sm:w-28 opacity-[0.12] select-none pointer-events-none rotate-[-15deg]" viewBox="0 0 100 60" fill="none" aria-hidden="true">
+                <path d="M10 15 Q50 10 90 15" stroke="#34D399" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M15 30 Q55 25 90 30" stroke="#34D399" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+                <path d="M20 45 Q60 40 90 45" stroke="#A7F3D0" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+            </svg>
+            <!-- Circle cluster top-left — warm energy dots -->
+            <svg class="absolute top-14 left-10 w-12 sm:w-16 opacity-[0.10] select-none pointer-events-none" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+                <circle cx="16" cy="16" r="8" fill="#FF6B4A"/>
+                <circle cx="34" cy="12" r="5" fill="#FFCBB8"/>
+                <circle cx="24" cy="34" r="6" fill="#FF6B4A" opacity="0.5"/>
+            </svg>
+            <!-- Organic blob bottom-left — grounding shape -->
+            <svg class="absolute bottom-12 left-6 w-20 sm:w-28 opacity-[0.08] select-none pointer-events-none -rotate-12" viewBox="0 0 120 80" fill="none" aria-hidden="true">
+                <path d="M20 40c0-20 15-36 40-36s40 14 44 36c4 22-10 36-44 36S20 60 20 40z" fill="#34D399"/>
+            </svg>
+            <!-- Lightning bolt bottom-right — power and intensity -->
+            <svg class="absolute bottom-20 right-10 w-10 sm:w-14 opacity-[0.10] select-none pointer-events-none rotate-12" viewBox="0 0 40 64" fill="none" aria-hidden="true">
+                <path d="M24 4L8 28h10L14 60l18-32H22L28 4h-4z" fill="#FFCBB8"/>
+            </svg>
+            <!-- Teal dot accent mid-left — analogous depth -->
+            <svg class="absolute top-1/3 left-4 w-6 sm:w-8 opacity-[0.15] select-none pointer-events-none" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" fill="#14B8A6"/>
+            </svg>
+            <!-- Dumbbell molecule dots top-center — fitness motif -->
+            <svg class="absolute top-6 left-1/2 -translate-x-1/2 w-28 sm:w-36 opacity-[0.06] select-none pointer-events-none" viewBox="0 0 140 40" fill="none" aria-hidden="true">
+                <circle cx="20" cy="20" r="8" fill="#34D399"/>
+                <circle cx="70" cy="20" r="5" fill="#34D399" opacity="0.6"/>
+                <circle cx="120" cy="20" r="8" fill="#34D399"/>
+                <line x1="28" y1="20" x2="62" y2="20" stroke="#34D399" stroke-width="2" opacity="0.4"/>
+                <line x1="78" y1="20" x2="112" y2="20" stroke="#34D399" stroke-width="2" opacity="0.4"/>
+            </svg>
+
+            <!-- Runner SVG — repositioned bottom-right, larger, heroic presence -->
+            <img src="https://pub-plate-assets.acara.app/images/runner-woman-4.svg" alt="Graphic of a woman running for fitness" aria-hidden="true" class="absolute bottom-0 right-4 w-24 sm:w-32 md:w-44 translate-y-6 opacity-70 select-none pointer-events-none">
 
             <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
                 <div class="relative z-10 mx-auto max-w-3xl">
