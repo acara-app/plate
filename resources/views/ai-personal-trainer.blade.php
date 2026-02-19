@@ -112,8 +112,8 @@
         <!-- Hero Section -->
         <section class="relative pt-16 pb-20 sm:pt-24 sm:pb-32 overflow-hidden">
             <!-- Decorative Yoga Poses -->
-<img src="https://pub-plate-assets.acara.app/images/runner-woman.svg" alt="Graphic of a woman running for fitness" aria-hidden="true" class="absolute bottom-0 left-0 w-20 sm:w-24 md:w-32 translate-y-8 -translate-x-4 opacity-90 select-none pointer-events-none grayscale">
-<img src="https://pub-plate-assets.acara.app/images/yoga-pose-2.png" alt="Graphic of a person in a yoga pose representing wellness" aria-hidden="true" class="absolute top-0 right-0 w-32 sm:w-48 md:w-64 translate-y-8 -translate-x-4 opacity-90 select-none pointer-events-none grayscale">
+<img src="https://pub-plate-assets.acara.app/images/runner-woman-4.svg" alt="Graphic of a woman running for fitness" aria-hidden="true" class="absolute bottom-0 left-0 w-20 sm:w-24 md:w-32 translate-y-8 -translate-x-4 opacity-90 select-none pointer-events-none">
+<img src="https://pub-plate-assets.acara.app/images/yoga-pose-2.png" alt="Graphic of a person in a yoga pose representing wellness" aria-hidden="true" class="absolute top-0 right-0 w-32 sm:w-48 md:w-64 translate-y-8 -translate-x-4 opacity-90 select-none pointer-events-none">
 
             <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
                 <div class="relative z-10 mx-auto max-w-3xl">

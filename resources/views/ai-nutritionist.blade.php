@@ -133,7 +133,40 @@
         
         <!-- Hero Section - F-Pattern Design -->
         <section class="relative pt-16 pb-20 sm:pt-24 sm:pb-32 overflow-hidden">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <!-- Decorative SVG elements — scattered across the hero -->
+            <!-- Leaf shape top-right -->
+            <svg class="absolute top-10 right-20 w-16 sm:w-20 opacity-[0.12] select-none pointer-events-none rotate-25" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M32 4C32 4 8 20 8 40c0 11.046 10.745 20 24 20s24-8.954 24-20C56 20 32 4 32 4z" fill="#FF6B4A"/>
+                <path d="M32 14v40M32 28c-6 -4-14-2-18 4M32 36c6-4 14-2 18 4" stroke="#FF6B4A" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+            </svg>
+            <!-- Small circle cluster top-left -->
+            <svg class="absolute top-16 left-12 w-10 sm:w-14 opacity-[0.10] select-none pointer-events-none" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+                <circle cx="16" cy="16" r="8" fill="#FF6B4A"/>
+                <circle cx="34" cy="12" r="5" fill="#FF8F6B"/>
+                <circle cx="24" cy="34" r="6" fill="#FFBFA9"/>
+            </svg>
+            <!-- Organic blob bottom-left -->
+            <svg class="absolute bottom-12 left-8 w-20 sm:w-28 opacity-[0.08] select-none pointer-events-none -rotate-12" viewBox="0 0 120 80" fill="none" aria-hidden="true">
+                <path d="M20 40c0-20 15-36 40-36s40 14 44 36c4 22-10 36-44 36S20 60 20 40z" fill="#FF6B4A"/>
+            </svg>
+            <!-- Small leaf bottom-right -->
+            <svg class="absolute bottom-20 right-10 w-10 sm:w-14 opacity-[0.10] select-none pointer-events-none rotate-140" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M32 4C32 4 8 20 8 40c0 11.046 10.745 20 24 20s24-8.954 24-20C56 20 32 4 32 4z" fill="#FFBFA9"/>
+            </svg>
+            <!-- Dot accent mid-left -->
+            <svg class="absolute top-1/3 left-4 w-6 sm:w-8 opacity-[0.15] select-none pointer-events-none" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" fill="#FF6B4A"/>
+            </svg>
+            <!-- Tiny molecule dots top-center -->
+            <svg class="absolute top-6 left-1/2 -translate-x-1/2 w-24 sm:w-32 opacity-[0.06] select-none pointer-events-none" viewBox="0 0 120 40" fill="none" aria-hidden="true">
+                <circle cx="20" cy="20" r="6" fill="#FF6B4A"/>
+                <circle cx="60" cy="12" r="4" fill="#FF8F6B"/>
+                <circle cx="100" cy="24" r="5" fill="#FFBFA9"/>
+                <line x1="26" y1="20" x2="56" y2="14" stroke="#FF6B4A" stroke-width="1" opacity="0.4"/>
+                <line x1="64" y1="14" x2="95" y2="22" stroke="#FF8F6B" stroke-width="1" opacity="0.4"/>
+            </svg>
+
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
                 <div class="lg:grid lg:grid-cols-12 lg:gap-16 items-center">
                     <!-- Left Column - F-Pattern Reading (Text First) -->
                     <div class="lg:col-span-6 text-center lg:text-left">
@@ -165,23 +198,16 @@
                         </div>
                     </div>
                     
-                    <!-- Right Column - Hero Image -->
+                    <!-- Right Column - Hero Image (organic blend, no box) -->
                     <div class="lg:col-span-6 mt-12 lg:mt-0 relative">
-                        <div class="relative">
-                            <!-- Decorative Background Shape -->
-                            <div class="absolute -inset-4 bg-[#FFEFE5] rounded-3xl transform rotate-2 -z-10"></div>
-                            
-                            <!-- Main Hero Image -->
-                            <div class="relative rounded-3xl overflow-hidden shadow-2xl">
-                                <img 
-                                    src="https://pub-plate-assets.acara.app/images/diet.png" 
-                                    alt="AI Nutritionist analyzing a healthy meal with vegetables, fruits, and grains"
-                                    class="w-full h-auto object-cover"
-                                    width="800"
-                                    height="600"
-                                >
-                            </div>
-                        </div>
+                        <img 
+                            src="https://pub-plate-assets.acara.app/images/diet.png" 
+                            alt="AI Nutritionist analyzing a healthy meal with vegetables, fruits, and grains"
+                            class="w-full h-auto max-w-xl mx-auto"
+                            width="800"
+                            height="600"
+                            style="mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, black 55%, transparent 100%); -webkit-mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, black 55%, transparent 100%);"
+                        >
                     </div>
                 </div>
             </div>
