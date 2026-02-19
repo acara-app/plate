@@ -90,8 +90,8 @@
 @endsection
 
 <x-default-layout>
-    <div class="bg-[#FFFBF5]">
-        <header class="sticky top-0 z-50 w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center bg-[#FFFBF5]/95 backdrop-blur-md border-b border-slate-100">
+    <div class="bg-white">
+        <header class="sticky top-0 z-50 w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center bg-white/95 backdrop-blur-md border-b border-slate-100">
             <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900">
                 <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
                 <span>Acara Plate</span>
@@ -110,39 +110,71 @@
             </div>
         </header>
         
-        <!-- Hero Section -->
+        <!-- Hero Section — F-pattern layout with scattered hearts -->
         <section class="relative pt-16 pb-20 sm:pt-24 sm:pb-32 overflow-hidden">
-            <!-- Decorative Mental Health Images -->
-            <img src="https://pub-plate-assets.acara.app/images/woman-meditating.webp" alt="" class="absolute bottom-0 left-0 w-32 sm:w-48 md:w-56 translate-y-4 -translate-x-2 opacity-90 select-none pointer-events-none">
-            <!-- Heart decorations - cascading from top-right to bottom-right with soft colors -->
-<img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="" class="absolute top-0 right-0 w-20 sm:w-28 md:w-36 -translate-y-4 translate-x-8 opacity-70 select-none pointer-events-none rotate-12" style="filter: hue-rotate(160deg) saturate(40%) brightness(1.1);">
-<img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="" class="absolute top-1/2 right-0 w-16 sm:w-24 md:w-32 -translate-y-1/2 translate-x-12 opacity-60 select-none pointer-events-none -rotate-6" style="filter: hue-rotate(290deg) saturate(35%) brightness(1.2);">
-<img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="" class="absolute bottom-0 right-0 w-24 sm:w-32 md:w-40 translate-y-8 translate-x-4 opacity-75 select-none pointer-events-none rotate-45" style="filter: hue-rotate(340deg) saturate(45%) brightness(1.15);">
+            <!-- Heart SVG decorations — scattered across entire section -->
+            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="" aria-hidden="true"
+                 class="absolute top-8 right-24 w-12 sm:w-16 opacity-50 select-none pointer-events-none rotate-12"
+                 style="filter: hue-rotate(160deg) saturate(40%) brightness(1.1);">
+            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="" aria-hidden="true"
+                 class="absolute top-1/3 right-4 w-10 sm:w-14 opacity-40 select-none pointer-events-none -rotate-12"
+                 style="filter: hue-rotate(290deg) saturate(35%) brightness(1.2);">
+            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="" aria-hidden="true"
+                 class="absolute bottom-16 right-16 w-8 sm:w-12 opacity-45 select-none pointer-events-none rotate-45"
+                 style="filter: hue-rotate(340deg) saturate(45%) brightness(1.15);">
+            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="" aria-hidden="true"
+                 class="absolute bottom-8 left-8 w-10 sm:w-14 opacity-30 select-none pointer-events-none -rotate-6"
+                 style="filter: hue-rotate(200deg) saturate(30%) brightness(1.2);">
+            <img src="https://pub-plate-assets.acara.app/images/heart.svg" alt="" aria-hidden="true"
+                 class="absolute top-12 left-1/3 w-6 sm:w-8 opacity-25 select-none pointer-events-none rotate-30"
+                 style="filter: hue-rotate(320deg) saturate(50%) brightness(1.05);">
 
-            <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-                <div class="relative z-10 mx-auto max-w-3xl">
-                    <div class="mb-6 flex justify-center">
-                        <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800">
-                            <svg class="h-4 w-4 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
-                                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
-                            </svg>
-                            Open Source Project
-                        </span>
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
+                    <!-- LEFT COLUMN — Text content (F-pattern reading zone) -->
+                    <div class="text-center lg:text-left">
+                        <!-- Badge -->
+                        <div class="mb-6 flex justify-center lg:justify-start">
+                            <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800">
+                                <svg class="h-4 w-4 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                                </svg>
+                                Open Source Project
+                            </span>
+                        </div>
+
+                        <!-- Headline (F-pattern primary scan line) -->
+                        <h1 class="font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl mb-6">
+                            You Sleep 8 Hours and Still<br>
+                            <span class="text-transparent bg-clip-text bg-linear-to-r from-[#FF6B4A] to-[#FF8F6B]">Feel Like a Zombie</span>?
+                        </h1>
+
+                        <!-- Subheadline (secondary scan path) -->
+                        <p class="mt-4 text-lg leading-8 text-slate-600 max-w-xl mx-auto lg:mx-0">
+                            It's not about sleeping more—it's about understanding the hidden factors wrecking your rest: afternoon caffeine, blue light at night, room temperature, stress hormones. Your body keeps score even when you're not paying attention.
+                        </p>
+
+                        <!-- CTAs (natural eye-flow endpoint) -->
+                        <div class="mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                            <a href="{{ route('register') }}"
+                               class="w-full sm:w-auto rounded-full bg-[#FF6B4A] px-8 py-3.5 text-center text-base font-semibold text-white shadow-lg shadow-[#FF6B4A]/20 hover:bg-[#E85A3A] hover:shadow-[#FF6B4A]/30 hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF6B4A]">
+                                Start Your Wellness Journey
+                            </a>
+                            <a href="https://github.com/acara-app/plate"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="text-sm font-semibold leading-6 text-slate-900 hover:text-slate-700 transition-colors">
+                                View Source Code <span aria-hidden="true">→</span>
+                            </a>
+                        </div>
                     </div>
-                    <h1 class="font-display text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl mb-6">
-                        You Sleep 8 Hours and Still<br>
-                        <span class="text-emerald-700">Feel Like a Zombie</span>?
-                    </h1>
-                    <p class="mt-6 text-lg leading-8 text-slate-600 max-w-2xl mx-auto">
-                        It's not about sleeping more—it's about understanding the hidden factors wrecking your rest: afternoon caffeine, blue light at night, room temperature, stress hormones. Your body keeps score even when you're not paying attention.
-                    </p>
-                    <div class="mt-10 flex items-center justify-center gap-x-6">
-                        <a href="{{ route('register') }}" class="rounded-full bg-[#FF6B4A] px-8 py-3.5 text-base font-semibold text-white shadow-sm hover:bg-[#E85A3A] transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF6B4A]">
-                            Start Your Wellness Journey
-                        </a>
-                        <a href="https://github.com/acara-app/plate" target="_blank" class="text-sm font-semibold leading-6 text-slate-900">
-                            View Source Code <span aria-hidden="true">→</span>
-                        </a>
+
+                    <!-- RIGHT COLUMN — Image with soft-fade edges -->
+                    <div class="hidden lg:block relative mt-12 lg:mt-0">
+                        <img src="https://pub-plate-assets.acara.app/images/woman-meditating-full.webp"
+                             alt="Woman meditating peacefully, representing wellness and mindfulness"
+                             class="w-full h-auto max-w-xl mx-auto"
+                             style="mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, black 55%, transparent 100%); -webkit-mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, black 55%, transparent 100%);">
                     </div>
                 </div>
             </div>
