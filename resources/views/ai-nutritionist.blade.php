@@ -118,103 +118,69 @@
 @endsection
 
 <x-default-layout>
-    <div class="bg-white">
-        <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
-            <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80">
-                    <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
-                    <span>Acara Plate</span>
+    <div class="bg-[#FFFBF5]">
+        <header class="sticky top-0 z-50 w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center bg-[#FFFBF5]/95 backdrop-blur-md border-b border-slate-100">
+            <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900">
+                <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
+                <span>Acara Plate</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="{{ route('login') }}" class="text-sm font-medium text-slate-600 hover:text-slate-900">Log in</a>
+                <a href="{{ route('register') }}" class="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition-all">
+                    Get Started
                 </a>
-                <div class="flex items-center gap-3">
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="inline-flex items-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800">
-                            Dashboard
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}" class="hidden items-center px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:text-slate-900 sm:inline-flex">
-                            Sign in
-                        </a>
-                        <a href="{{ route('register') }}" class="inline-flex items-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800">
-                            Start for Free
-                        </a>
-                    @endauth
-                </div>
             </div>
         </header>
         
-        <section class="relative overflow-hidden pt-12 pb-16 sm:pt-20 sm:pb-24">
+        <!-- Hero Section - F-Pattern Design -->
+        <section class="relative pt-16 pb-20 sm:pt-24 sm:pb-32 overflow-hidden">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="lg:grid lg:grid-cols-12 lg:gap-16 items-center">
-                    
+                    <!-- Left Column - F-Pattern Reading (Text First) -->
                     <div class="lg:col-span-6 text-center lg:text-left">
-                        <div class="inline-flex items-center gap-2 rounded-full bg-rose-100 px-4 py-1.5 text-sm font-semibold text-rose-700 mb-6 ring-1 ring-rose-200">
-                            <svg class="h-4 w-4 text-rose-600" fill="currentColor" viewBox="0 0 24 24">
-                                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
-                            </svg>
-                            Open Science & Source
+                        <div class="mb-6 flex justify-center lg:justify-start">
+                            <span class="inline-flex items-center rounded-full bg-rose-100 px-4 py-1.5 text-sm font-semibold text-rose-700 ring-1 ring-rose-200">
+                                <svg class="h-4 w-4 text-rose-600 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                                </svg>
+                                Open Science & Source
+                            </span>
                         </div>
-                        <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                            I Ate "Healthy" Oatmeal Every Morning For a Year. My Glucose Told a Different Story.
+                        
+                        <h1 class="font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl mb-6">
+                            I Ate "Healthy" Oatmeal Every Morning For a Year.
+                            <span class="text-[#FF6B4A]">My Glucose Told a Different Story.</span>
                         </h1>
                         
-                        <p class="mt-6 text-lg text-slate-600 leading-relaxed">
+                        <p class="mt-6 text-lg leading-8 text-slate-600 max-w-2xl mx-auto lg:mx-0">
                             Turns out, the banana-and-honey "health" bowl I loved was spiking my blood sugar through the roof. That's the thing about nutrition—everyone's body responds differently. The tool I wish I'd had? Something that could look at <em>my</em> plate and tell me what <em>my</em> body would actually do with it.
                         </p>
-
-                        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                            <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-lg bg-slate-900 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-slate-800 transition-all">
-                                See What Your Next Meal Will Do
-                                <span class="ml-2 text-slate-400">→</span>
-                            </a>
-                            <a href="https://github.com/acara-app/plate" target="_blank" class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-6 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 transition-all">
-                                View Source Code
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="mt-12 lg:mt-0 lg:col-span-6">
-                        <img 
-                            src="{{ asset('screenshots/og-ai-nutritionist.webp') }}" 
-                            alt="AI Nutritionist terminal interface analyzing oatmeal with banana and honey, showing ingredient breakdown with carbohydrate counts, predicted high glucose spike with glycemic load of 35, and recommendation to swap honey for blueberries and add chia seeds to reduce spike by 40 percent"
-                            class="sr-only"
-                            width="1200"
-                            height="630"
-                        >
                         
-                        <div class="relative rounded-xl bg-slate-900 shadow-2xl ring-1 ring-white/10" aria-hidden="true">
-                            <div class="flex items-center gap-2 border-b border-white/10 px-4 py-3 bg-white/5 rounded-t-xl">
-                                <div class="flex gap-1.5">
-                                    <div class="h-3 w-3 rounded-full bg-red-500"></div>
-                                    <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
-                                    <div class="h-3 w-3 rounded-full bg-green-500"></div>
-                                </div>
-                                <div class="text-xs font-mono text-slate-400 ml-2">acara-ai — analysis</div>
-                            </div>
-
-                            <div class="p-6 font-mono text-sm space-y-4">
-                                <div class="text-slate-400">
-                                    <span class="text-rose-500">user@acara:~$</span> ask "I'm having oatmeal with banana and honey. Will this spike me?"
-                                </div>
-                                
-                                <div class="space-y-2 border-l-2 border-slate-700 pl-4 py-2">
-                                    <div class="text-emerald-400">✓ Ingredients identified</div>
-                                    <div class="text-slate-300">
-                                        • Oatmeal (Cup, cooked): <span class="text-yellow-400">27g Carbs</span><br>
-                                        • Banana (Medium): <span class="text-yellow-400">27g Carbs</span><br>
-                                        • Honey (1 tbsp): <span class="text-yellow-400">17g Carbs</span>
-                                    </div>
-                                </div>
-
-                                <div class="bg-white/10 rounded p-3 text-slate-200">
-                                    <span class="font-bold text-rose-400">⚠ PREDICTED SPIKE: HIGH</span><br>
-                                    Total Glycemic Load: <span class="font-bold">35 (High)</span><br>
-                                    <br>
-                                    <span class="text-slate-400">Suggestion:</span> Swap instant oats for steel-cut, remove honey, and add 1 tbsp peanut butter to reduce spike by ~40%.
-                                </div>
-                                
-                                <div class="animate-pulse text-slate-500">
-                                    <span class="text-rose-500">user@acara:~$</span> <span class="inline-block w-2 h-4 bg-slate-500 align-middle"></span>
-                                </div>
+                        <div class="mt-10 flex flex-col sm:flex-row gap-4 items-center justify-center lg:justify-start">
+                            <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-full bg-[#FF6B4A] px-8 py-3.5 text-base font-semibold text-white shadow-sm hover:bg-[#E85A3A] transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF6B4A]">
+                                See What Your Next Meal Will Do
+                            </a>
+                            <a href="https://github.com/acara-app/plate" target="_blank" class="text-sm font-semibold leading-6 text-slate-900">
+                                View Source Code <span aria-hidden="true">→</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column - Hero Image -->
+                    <div class="lg:col-span-6 mt-12 lg:mt-0 relative">
+                        <div class="relative">
+                            <!-- Decorative Background Shape -->
+                            <div class="absolute -inset-4 bg-[#FFEFE5] rounded-3xl transform rotate-2 -z-10"></div>
+                            
+                            <!-- Main Hero Image -->
+                            <div class="relative rounded-3xl overflow-hidden shadow-2xl">
+                                <img 
+                                    src="https://pub-plate-assets.acara.app/images/diet.png" 
+                                    alt="AI Nutritionist analyzing a healthy meal with vegetables, fruits, and grains"
+                                    class="w-full h-auto object-cover"
+                                    width="800"
+                                    height="600"
+                                >
                             </div>
                         </div>
                     </div>
@@ -222,99 +188,126 @@
             </div>
         </section>
 
-        <section class="bg-slate-50 py-16 sm:py-24">
+        <!-- Why Your Body Responds Differently Section (Dark Green) -->
+        <section class="bg-[#0E3F3B] py-20 sm:py-32">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-2xl mx-auto mb-16">
-                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Why Your Body Responds Differently to the Same Food</h2>
-                    <p class="mt-4 text-lg text-slate-600">
-                        Your friend can crush bagels for breakfast and feel fine. You take one bite and two hours later you're fighting a food coma. It's not in your head—it's science.
-                    </p>
-                </div>
-
-                <div class="grid gap-8 md:grid-cols-3">
-                    {{-- Card 1 --}}
-                    <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
-                        <div class="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center text-rose-600 mb-6">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <div class="lg:grid lg:grid-cols-12 lg:gap-16">
+                    <div class="lg:col-span-5 text-white mb-12 lg:mb-0">
+                        <h2 class="font-display text-4xl font-bold tracking-tight sm:text-5xl mb-6 text-[#FF6B4A]">
+                            Why Your Body<br>Responds Differently
+                        </h2>
+                        
+                        <p class="text-lg leading-relaxed text-emerald-100/90 mb-8">
+                            Your friend can crush bagels for breakfast and feel fine. You take one bite and two hours later you're fighting a food coma. It's not in your head—it's science.
+                        </p>
+                        
+                        <div class="inline-flex items-center gap-2 text-white font-medium border-b border-[#FF6B4A] pb-1">
+                            <span>Explore features</span>
+                            <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Predict the Spike Before You Eat</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">
-                            Forget generic calorie counts. This tells you whether that "healthy" granola is about to hijack your energy for the next three hours. Glycemic Load is the real story—most apps don't bother with it.
-                        </p>
                     </div>
 
-                    <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
-                        <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 mb-6">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
+                    <div class="lg:col-span-7 grid md:grid-cols-2 gap-6">
+                        <!-- Card 1 -->
+                        <div class="bg-white rounded-2xl p-6 shadow-lg transform md:translate-y-8">
+                            <span class="text-[#FF6B4A] text-xl font-bold block mb-2">01</span>
+                            <h3 class="font-bold text-slate-900 text-lg mb-3">Predict the Spike Before You Eat</h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">
+                                Forget generic calorie counts. This tells you whether that "healthy" granola is about to hijack your energy for the next three hours. Glycemic Load is the real story—most apps don't bother with it.
+                            </p>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">See Exactly How It Works</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">
-                            The code's right there on GitHub. No black boxes, no mysterious algorithms—you can trace every calculation back to USDA data and published glycemic research. Science you can verify yourself.
-                        </p>
-                    </div>
+                        
+                        <!-- Card 2 -->
+                        <div class="bg-white rounded-2xl p-6 shadow-lg">
+                            <span class="text-[#FF6B4A] text-xl font-bold block mb-2">02</span>
+                            <h3 class="font-bold text-slate-900 text-lg mb-3">See Exactly How It Works</h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">
+                                The code's right there on GitHub. No black boxes, no mysterious algorithms—you can trace every calculation back to USDA data and published glycemic research. Science you can verify yourself.
+                            </p>
+                        </div>
 
-                    <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
-                        <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 mb-6">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                        <!-- Card 3 -->
+                        <div class="bg-white rounded-2xl p-6 shadow-lg transform md:translate-y-8">
+                            <span class="text-[#FF6B4A] text-xl font-bold block mb-2">03</span>
+                            <h3 class="font-bold text-slate-900 text-lg mb-3">It Learns Your Patterns</h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">
+                                Track enough meals and it starts noticing what you might miss. Protein at breakfast matters more than you think. That afternoon snack might be the real culprit. The insights get better the more you use it.
+                            </p>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">It Learns Your Patterns</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">
-                            Track enough meals and it starts noticing what you might miss. Protein at breakfast matters more than you think. That afternoon snack might be the real culprit. The insights get better the more you use it.
-                        </p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="py-16 sm:py-24 bg-white">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-2xl mx-auto mb-16">
-                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Here's How It Actually Works</h2>
-                    <p class="mt-4 text-lg text-slate-600">
-                        No forms to fill out, no calorie counting. Just describe what you're eating and the system digs into the details.
-                    </p>
-                </div>
+        <!-- How It Works Section (Sticky Notes) -->
+        <section class="bg-[#FFFBF5] py-20 sm:py-32 overflow-hidden">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+                <span class="text-[#FF6B4A] font-bold tracking-wider uppercase text-sm">How It Works</span>
+                
+                <h2 class="font-display text-4xl font-bold text-slate-900 sm:text-5xl mt-3 mb-6">
+                    Here's How It Actually Works
+                </h2>
+                
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto mb-16">
+                    No forms to fill out, no calorie counting. Just describe what you're eating and the system digs into the details.
+                </p>
 
-                <div class="grid gap-8 md:grid-cols-3">
-                    <div class="relative">
-                        <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6">
-                            01
+                <div class="relative max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+                     <!-- Sticky Note 1 (Orange) -->
+                    <div class="md:-rotate-3 hover:rotate-0 transition-transform duration-300">
+                        <div class="bg-[#FF6B4A] p-8 text-left shadow-lg h-full min-h-[280px] flex flex-col justify-between" style="clip-path: polygon(100% 0, 100% 85%, 85% 100%, 0 100%, 0 0);">
+                             <div>
+                                <h3 class="text-white font-bold text-xl mb-4">01<br>Just Tell It What You're Eating</h3>
+                                <p class="text-white/90 leading-relaxed font-medium">
+                                    Type "oatmeal with banana and honey" or paste a recipe. You can even snap a photo of a restaurant menu. The system figures out the ingredients and nutritional profile automatically.
+                                </p>
+                             </div>
+                             <div class="mt-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                             </div>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Just Tell It What You're Eating</h3>
-                        <p class="text-slate-600 leading-relaxed">
-                            Type "oatmeal with banana and honey" or paste a recipe. You can even snap a photo of a restaurant menu. The system figures out the ingredients and nutritional profile automatically.
-                        </p>
                     </div>
 
-                    <div class="relative">
-                        <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6 border-2 border-rose-500">
-                            02
+                    <!-- Sticky Note 2 (Pink) -->
+                    <div class="md:rotate-2 hover:rotate-0 transition-transform duration-300 md:-translate-y-8">
+                        <div class="bg-[#F8D4D8] p-8 text-left shadow-lg h-full min-h-[280px] flex flex-col justify-between" style="clip-path: polygon(100% 0, 100% 85%, 85% 100%, 0 100%, 0 0);">
+                            <div>
+                                <h3 class="text-slate-900 font-bold text-xl mb-4">02<br>It Runs the Numbers</h3>
+                                <p class="text-slate-800/90 leading-relaxed font-medium">
+                                    Here's where it gets interesting. The system models how your body processes those specific carbs, proteins, and fats together—accounting for fiber, meal timing, and what you've eaten earlier.
+                                </p>
+                            </div>
+                            <div class="mt-4 w-8 h-8 rounded-full bg-slate-900/10 flex items-center justify-center text-slate-900">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                            </div>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">It Runs the Numbers</h3>
-                        <p class="text-slate-600 leading-relaxed">
-                            Here's where it gets interesting. The system models how your body processes those specific carbs, proteins, and fats together—accounting for fiber, meal timing, and what you've eaten earlier.
-                        </p>
                     </div>
 
-                    <div class="relative">
-                        <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-900 font-bold text-xl mb-6">
-                            03
+                    <!-- Sticky Note 3 (Blue/Purple) -->
+                    <div class="md:-rotate-2 hover:rotate-0 transition-transform duration-300">
+                        <div class="bg-[#6B71F3] p-8 text-left shadow-lg h-full min-h-[280px] flex flex-col justify-between" style="clip-path: polygon(100% 0, 100% 85%, 85% 100%, 0 100%, 0 0);">
+                            <div>
+                                <h3 class="text-white font-bold text-xl mb-4">03<br>Actionable Suggestions Pop Out</h3>
+                                <p class="text-white/90 leading-relaxed font-medium">
+                                    Instead of just numbers, you get practical swaps. "Swap honey for blueberries, add chia seeds, and you could reduce that spike by about 40%." Concrete changes you can actually make.
+                                </p>
+                            </div>
+                            <div class="mt-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                            </div>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-3">Actionable Suggestions Pop Out</h3>
-                        <p class="text-slate-600 leading-relaxed">
-                            Instead of just numbers, you get practical swaps. "Swap honey for blueberries, add chia seeds, and you could reduce that spike by about 40%." Concrete changes you can actually make.
-                        </p>
                     </div>
+
+                     <div class="hidden md:block absolute -right-12 top-10 md:rotate-6 w-48 opacity-20 pointer-events-none">
+                        <div class="bg-[#0E3F3B] p-4 h-48"></div>
+                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- FAQ Section -->
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
@@ -396,6 +389,18 @@
 
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
+                            Do I need to create an account to use this?
+                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="mt-4 text-slate-600">
+                            No! You can analyze meals instantly without signing up. Create an account if you want to save your meal history and get recommendations over time.
+                        </p>
+                    </details>
+
+                    <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+                        <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
                             Can I analyze restaurant meals?
                             <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -409,16 +414,19 @@
             </div>
         </section>
 
-        <section class="py-24 px-4 bg-white border-t border-slate-100">
-            <div class="max-w-3xl mx-auto text-center">
-                <h2 class="text-2xl font-bold text-slate-900 sm:text-3xl">
+        <!-- Part of Something Bigger Section (Peach Background) -->
+        <section class="bg-[#FFEFE5] py-20 sm:py-32">
+            <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="font-display text-3xl font-bold text-slate-900 sm:text-4xl">
                     Part of Something Bigger
                 </h2>
-                <p class="mt-4 text-slate-600">
+                
+                <p class="mt-4 text-lg text-slate-600">
                     This is one tool in an open science health stack. We're building it because we got tired of health data being locked away in proprietary apps. Your metabolic health belongs to you.
                 </p>
+                
                 <div class="mt-8 flex justify-center">
-                    <a href="{{ route('register') }}" class="text-base font-semibold text-rose-600 hover:text-rose-500 border-b-2 border-rose-100 hover:border-rose-500 transition-colors pb-1">
+                    <a href="{{ route('register') }}" class="text-base font-semibold text-[#FF6B4A] hover:text-[#E85A3A] border-b-2 border-[#FF6B4A]/30 hover:border-[#FF6B4A] transition-colors pb-1">
                         Try it on your next meal →
                     </a>
                 </div>

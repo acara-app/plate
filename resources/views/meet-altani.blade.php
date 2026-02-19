@@ -95,7 +95,7 @@
 
 <x-default-layout>
     <div class="bg-[#FFFBF5]"> <!-- Cream background color from design -->
-        <header class="w-full pt-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+        <header class="sticky top-0 z-50 w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center bg-[#FFFBF5]/95 backdrop-blur-md border-b border-slate-100">
             <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900">
                 <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
                 <span>Acara Plate</span>
