@@ -75,78 +75,59 @@
             </div>
         </header>
 
-        <main class="relative z-10 flex flex-col items-center gap-24 px-4 pb-24 pt-6 sm:px-6 lg:px-8">
-            {{-- Hero Section --}}
-            <section aria-label="Hero" class="flex w-full max-w-7xl flex-col items-center gap-12 lg:gap-16">
+        {{-- Hero Section - Outside main container for full width --}}
+        <section aria-label="Hero" class="relative w-full overflow-hidden bg-[#FFFBF5] pt-16 pb-20 sm:pt-24 sm:pb-32">
+            {{-- Decorative Fruits --}}
+            <img src="https://pub-plate-assets.acara.app/images/fruits/avocado.svg"
+                 alt=""
+                 class="absolute -top-8 -left-8 w-48 sm:w-64 md:w-80 opacity-40 select-none pointer-events-none z-0">
+            
+            <img src="https://pub-plate-assets.acara.app/images/fruits/strawberry.svg"
+                 alt=""
+                 class="absolute -top-6 -right-6 w-40 sm:w-56 md:w-72 opacity-40 select-none pointer-events-none z-0">
 
-                {{-- Beta Badge + Image Container --}}
-                <div class="flex w-full flex-col items-center gap-4">
-                    {{-- Beta Badge --}}
-                    <div class="inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20 shadow-lg">
-                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        Beta Version — Open Source & Free
+            <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8 relative z-10">
+                <div class="mx-auto max-w-3xl">
+                    {{-- Badge --}}
+                    <div class="mb-6 flex justify-center">
+                        <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+                            </svg>
+                            Open Source Beta
+                        </span>
                     </div>
 
-                    {{-- Screenshot Container --}}
-                    <figure class="w-full">
-                        <div
-                            class="relative overflow-hidden rounded-t-2xl shadow-2xl shadow-slate-200 ring-1 ring-slate-900/5">
-                            <picture>
-                                <source srcset="{{ asset('meal-plan-hero-section.webp') }}" type="image/webp">
-                                <img src="{{ asset('meal-plan-hero-section.webp') }}"
-                                    alt="AI-personalized meal planning dashboard showing personalized nutrition recommendations"
-                                    class="w-full">
-                            </picture>
-                            <div class="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-slate-900">
-                            </div>
-                        </div>
-                    </figure>
-                </div>
-
-                {{-- Headline Section --}}
-                <div class="flex w-full max-w-4xl flex-col items-center text-center">
-                    <h1 class="text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-                        Manage Blood Sugar
-                        <span
-                            class="block bg-linear-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                            with AI Nutrition Specialist
-                        </span>
+                    {{-- Headline (F-pattern primary scan line) --}}
+                    <h1 class="font-display text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl mb-6">
+                        Your Digital Meal Planner<br>
+                        <span class="text-[#FF6B4A]">for Diabetes</span>
                     </h1>
 
-                    <p class="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl">
-                        Eat better without guessing. AI-powered <strong class="text-slate-900">meal plans</strong> that
-                        match your glucose levels. Designed for adults with Type 2 diabetes or prediabetes.
+                    {{-- Subheadline (secondary scan path) --}}
+                    <p class="mt-6 text-lg leading-8 text-slate-600 max-w-2xl mx-auto">
+                        A personalized nutrition platform that creates meal plans around your glucose patterns. Built for people managing Type 2 diabetes.
                     </p>
 
-                    <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                    {{-- CTA (natural eye-flow endpoint) --}}
+                    <div class="mt-10 flex items-center justify-center gap-x-6">
                         <a href="{{ route('register') }}"
-                            class="group/btn inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:bg-slate-800 hover:shadow-xl sm:text-lg">
+                           class="rounded-full bg-[#FF6B4A] px-8 py-3.5 text-base font-semibold text-white shadow-sm hover:bg-[#E85A3A] transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF6B4A]">
                             Start Your Free Plan
-                            <svg class="h-5 w-5 transition-transform duration-300 group-hover/btn:translate-x-1"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
                         </a>
-
-                        {{-- GitHub Trust Button --}}
                         <a href="https://github.com/acara-app/plate" target="_blank"
-                            class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-4 text-base font-medium text-slate-600 transition-all duration-300 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 sm:text-lg">
+                           class="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-base font-medium text-slate-600 shadow-sm ring-1 ring-slate-200 transition-all hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300">
                             <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path fill-rule="evenodd"
-                                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                                    clip-rule="evenodd" />
+                                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
                             </svg>
                             Star on GitHub
                         </a>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
+        <main class="relative z-10 flex flex-col items-center gap-24 px-4 pb-24 pt-16 sm:px-6 lg:px-8">
             <section class="w-full max-w-6xl">
                 <div class="space-y-6">
                     <div class="text-center">
