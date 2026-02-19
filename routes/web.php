@@ -38,6 +38,7 @@ Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])-
 Route::view('/ai-nutritionist', 'ai-nutritionist')->name('ai-nutritionist');
 Route::view('/ai-health-coach', 'ai-health-coach')->name('ai-health-coach');
 Route::view('/ai-personal-trainer', 'ai-personal-trainer')->name('ai-personal-trainer');
+Route::view('/meet-altani', 'meet-altani')->name('meet-altani');
 Route::view('/for-dietitians', 'for-dietitians')->name('for-dietitians');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
