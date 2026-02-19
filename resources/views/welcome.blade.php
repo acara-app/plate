@@ -33,7 +33,7 @@
     <div class="relative min-h-screen bg-white">
         {{-- Gradient overlay at top --}}
         <div aria-hidden="true"
-            class="pointer-events-none absolute inset-x-0 top-0 h-150 bg-linear-to-b from-fuchsia-100/60 via-emerald-100/40 to-transparent">
+            class="pointer-events-none absolute inset-x-0 top-0 h-150 bg-linear-to-b from-fuchsia-100/60 via-orange-100/40 to-transparent">
         </div>
         <div aria-hidden="true"
             class="pointer-events-none absolute inset-x-0 top-0 h-100 bg-linear-to-br from-pink-100/40 via-transparent to-transparent">
@@ -52,7 +52,7 @@
                 {{-- Center promo banner --}}
                 <div class="hidden text-center text-sm text-slate-600 lg:block">
                     Stop guessing what to eat. Personalized meal plans, <span
-                        class="font-semibold text-emerald-600">made simple</span>
+                        class="font-semibold text-[#FF6B4A]">made simple</span>
                 </div>
 
                 {{-- Auth buttons --}}
@@ -80,7 +80,7 @@
         <section aria-label="Hero" class="relative w-full overflow-hidden bg-[#FFFBF5] pt-16 pb-20 sm:pt-24 sm:pb-32">
             {{-- Ambient gradient blobs --}}
             <div aria-hidden="true" class="pointer-events-none absolute -left-32 top-0 h-[500px] w-[500px] rounded-full bg-[#FF6B4A]/5 blur-3xl"></div>
-            <div aria-hidden="true" class="pointer-events-none absolute -right-32 bottom-0 h-[400px] w-[400px] rounded-full bg-emerald-200/20 blur-3xl"></div>
+            <div aria-hidden="true" class="pointer-events-none absolute -right-32 bottom-0 h-[400px] w-[400px] rounded-full bg-orange-200/20 blur-3xl"></div>
 
             {{-- Edge fruit decorations (visible on all sizes) --}}
             <img src="https://pub-plate-assets.acara.app/images/fruits/cherries.svg"
@@ -140,7 +140,7 @@
                         {{-- Trust strip — AI tools mention with internal links --}}
                         <div class="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-sm text-slate-500">
                             <span class="inline-flex items-center gap-1.5">
-                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true"></span>
+                                <span class="h-1.5 w-1.5 rounded-full bg-[#FF6B4A]" aria-hidden="true"></span>
                                 <a href="{{ route('ai-nutritionist') }}" class="hover:text-slate-700 transition-colors">AI Nutritionist</a>
                             </span>
                             <span class="inline-flex items-center gap-1.5">
@@ -278,11 +278,11 @@
 
                     <div class="grid grid-cols-1 gap-3 lg:grid-cols-4 lg:gap-4">
                         <div
-                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-emerald-500 hover:bg-slate-50 hover:shadow-md">
+                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50 hover:shadow-md">
                             <div class="flex flex-col items-center text-center">
                                 <div
-                                    class="mb-3 rounded-lg bg-emerald-100 p-3 transition-transform duration-300 group-hover/card:scale-110">
-                                    <svg class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24"
+                                    class="mb-3 rounded-lg bg-orange-100 p-3 transition-transform duration-300 group-hover/card:scale-110">
+                                    <svg class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -295,11 +295,11 @@
                         </div>
 
                         <div
-                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-teal-500 hover:bg-slate-50 hover:shadow-md">
+                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50 hover:shadow-md">
                             <div class="flex flex-col items-center text-center">
                                 <div
-                                    class="mb-3 rounded-lg bg-teal-100 p-3 transition-transform duration-300 group-hover/card:scale-110">
-                                    <svg class="h-6 w-6 text-teal-600" fill="none" viewBox="0 0 24 24"
+                                    class="mb-3 rounded-lg bg-orange-100 p-3 transition-transform duration-300 group-hover/card:scale-110">
+                                    <svg class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -313,11 +313,11 @@
                         </div>
 
                         <div
-                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-cyan-500 hover:bg-slate-50 hover:shadow-md">
+                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50 hover:shadow-md">
                             <div class="flex flex-col items-center text-center">
                                 <div
-                                    class="mb-3 rounded-lg bg-cyan-100 p-3 transition-transform duration-300 group-hover/card:scale-110">
-                                    <svg class="h-6 w-6 text-cyan-600" fill="none" viewBox="0 0 24 24"
+                                    class="mb-3 rounded-lg bg-orange-100 p-3 transition-transform duration-300 group-hover/card:scale-110">
+                                    <svg class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -331,11 +331,11 @@
                         </div>
 
                         <div
-                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-purple-500 hover:bg-slate-50 hover:shadow-md">
+                            class="group/card rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50 hover:shadow-md">
                             <div class="flex flex-col items-center text-center">
                                 <div
-                                    class="mb-3 rounded-lg bg-purple-100 p-3 transition-transform duration-300 group-hover/card:scale-110">
-                                    <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24"
+                                    class="mb-3 rounded-lg bg-orange-100 p-3 transition-transform duration-300 group-hover/card:scale-110">
+                                    <svg class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -443,7 +443,7 @@
                         {{-- Step 1 --}}
                         <div class="relative rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                             <div
-                                class="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">
+                                class="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-[#FF6B4A] text-sm font-bold text-white">
                                 1</div>
                             <div class="pt-2">
                                 <h3 class="text-base font-semibold text-slate-900 lg:text-lg">Set Up Your Profile</h3>
@@ -457,7 +457,7 @@
                         {{-- Step 2 --}}
                         <div class="relative rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                             <div
-                                class="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-teal-600 text-sm font-bold text-white">
+                                class="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-[#FF6B4A] text-sm font-bold text-white">
                                 2</div>
                             <div class="pt-2">
                                 <h3 class="text-base font-semibold text-slate-900 lg:text-lg">AI Analyzes Patterns</h3>
@@ -472,13 +472,13 @@
                         {{-- Step 3 --}}
                         <div class="relative rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                             <div
-                                class="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-cyan-600 text-sm font-bold text-white">
+                                class="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-[#FF6B4A] text-sm font-bold text-white">
                                 3</div>
                             <div class="pt-2">
                                 <h3 class="text-base font-semibold text-slate-900 lg:text-lg">Eat, Track, Improve</h3>
                                 <p class="mt-2 text-xs leading-relaxed text-slate-600 lg:text-sm">
                                     Follow your personalized meal plan, log your glucose, and watch your plan adapt in
-                                    real-time. <strong class="text-emerald-600">See measurable results</strong>.
+                                    real-time. <strong class="text-[#FF6B4A]">See measurable results</strong>.
                                 </p>
                             </div>
                         </div>
@@ -486,24 +486,31 @@
                 </div>
             </section>
 
+            <x-cta-block
+                title="Meet Altani — Your Personal AI Health Coach"
+                description="Altani helps you plan meals, predict glucose responses, and stay on track with your health goals. She's available 24/7 and learns what works best for your body."
+                buttonText="Chat with Altani"
+                buttonUrl="meet-altani"
+            />
+
             <section class="w-full max-w-6xl">
                 <div
                     class="relative overflow-hidden rounded-3xl bg-slate-900 px-6 py-12 shadow-2xl sm:px-12 sm:py-16 lg:px-16">
                     {{-- Background Effects --}}
                     <div
-                        class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-emerald-500/20 via-slate-900 to-slate-900">
+                        class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-[#FF6B4A]/20 via-slate-900 to-slate-900">
                     </div>
-                    <div class="absolute -left-12 -top-12 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl"></div>
-                    <div class="absolute -bottom-12 -right-12 h-64 w-64 rounded-full bg-teal-500/10 blur-3xl"></div>
+                    <div class="absolute -left-12 -top-12 h-64 w-64 rounded-full bg-[#FF6B4A]/10 blur-3xl"></div>
+                    <div class="absolute -bottom-12 -right-12 h-64 w-64 rounded-full bg-[#FF6B4A]/5 blur-3xl"></div>
 
                     <div class="relative flex flex-col items-center text-center">
                         {{-- Badge --}}
                         <div
-                            class="mb-8 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                            class="mb-8 inline-flex items-center gap-2 rounded-full bg-[#FF6B4A]/10 px-3 py-1 text-sm font-medium text-[#FF8F6B] ring-1 ring-inset ring-[#FF6B4A]/20">
                             <span class="relative flex h-2 w-2" aria-hidden="true">
                                 <span
-                                    class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                                <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                                    class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#FF6B4A] opacity-75"></span>
+                                <span class="relative inline-flex h-2 w-2 rounded-full bg-[#FF6B4A]"></span>
                             </span>
                             One more thing...
                         </div>
@@ -511,7 +518,7 @@
                         {{-- Content --}}
                         <h2 class="mb-6 text-3xl font-bold tracking-tight text-white sm:text-4xl">
                             Acara Plate is <span
-                                class="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-teal-400">Open
+                                class="text-transparent bg-clip-text bg-linear-to-r from-[#FF6B4A] to-[#FF8F6B]">Open
                                 Source</span>
                         </h2>
 
@@ -526,7 +533,7 @@
                             target="_blank"
                             rel="noopener noreferrer"
                             aria-label="View on GitHub (opens in a new tab)"
-                            class="group inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-bold text-slate-900 shadow-lg shadow-emerald-500/10 transition-all hover:scale-105 hover:bg-emerald-50 hover:shadow-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-slate-900">
+                            class="group inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-bold text-slate-900 shadow-lg shadow-[#FF6B4A]/10 transition-all hover:scale-105 hover:bg-orange-50 hover:shadow-[#FF6B4A]/20 focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:ring-offset-2 focus:ring-offset-slate-900">
                             <svg class="h-5 w-5 transition-transform duration-300 group-hover:scale-110"
                                 fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path fill-rule="evenodd"
@@ -548,7 +555,7 @@
 
                     <div class="space-y-3">
                         <details
-                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-emerald-500 hover:bg-slate-50">
+                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
                                 <h3 class="inline">How accurate are the nutritional values in meal plans?</h3>
@@ -569,7 +576,7 @@
                         </details>
 
                         <details
-                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-emerald-500 hover:bg-slate-50">
+                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
                                 <h3 class="inline">Can AI hallucinate incorrect food information?</h3>
@@ -589,7 +596,7 @@
                         </details>
 
                         <details
-                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-emerald-500 hover:bg-slate-50">
+                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
                                 <h3 class="inline">Is this a medical app or diagnostic tool?</h3>
@@ -610,7 +617,7 @@
                         </details>
 
                         <details
-                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-emerald-500 hover:bg-slate-50">
+                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
                                 <h3 class="inline">Why is Acara Plate open source?</h3>
@@ -626,13 +633,13 @@
                                 professionals, developers, and users to inspect how meal plans are generated, how
                                 nutritional data is verified, and how AI is used. You can review the code on <a
                                     href="https://github.com/acara-app/plate" target="_blank"
-                                    class="font-semibold text-emerald-600 hover:underline">GitHub</a>,
+                                    class="font-semibold text-[#FF6B4A] hover:underline">GitHub</a>,
                                 contribute improvements, and verify that the platform operates as described.
                             </p>
                         </details>
 
                         <details
-                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-emerald-500 hover:bg-slate-50">
+                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
                                 <h3 class="inline">How do you ensure nutritional accuracy?</h3>
@@ -645,7 +652,7 @@
                             </summary>
                             <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm">
                                 We reference the <a href="https://fdc.nal.usda.gov/" target="_blank"
-                                    class="font-semibold text-emerald-600 hover:underline">USDA
+                                    class="font-semibold text-[#FF6B4A] hover:underline">USDA
                                     FoodData Central</a> database—the scientific gold standard for nutrition of whole
                                 foods like bananas, chicken breast, and rice. However, as meal plans are AI-generated,
                                 we recommend verifying nutritional information independently and consulting with your
@@ -654,7 +661,7 @@
                         </details>
 
                         <details
-                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-emerald-500 hover:bg-slate-50">
+                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
                                 <h3 class="inline">Who should use Acara Plate?</h3>
@@ -675,7 +682,7 @@
                         </details>
 
                         <details
-                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-emerald-500 hover:bg-slate-50">
+                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50">
                             <summary
                                 class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
                                 <h3 class="inline">Is there a mobile app?</h3>
@@ -690,7 +697,7 @@
                                 Yes! Acara Plate is a Progressive Web App (PWA), which means you can install it directly
                                 on your device without visiting an app store. Visit our <a
                                     href="{{ route('install-app') }}"
-                                    class="font-semibold text-emerald-600 hover:underline">installation
+                                    class="font-semibold text-[#FF6B4A] hover:underline">installation
                                     guide</a> to learn how to add it to your home screen for a native app-like
                                 experience.
                             </p>
