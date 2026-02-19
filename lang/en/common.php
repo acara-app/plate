@@ -171,12 +171,12 @@ return [
             'create_button' => 'Create Menu',
         ],
         'chat' => [
-            'title' => 'Ask a Nutritionist',
-            'description' => 'Get personalized nutrition advice, meal recommendations, and glucose predictions powered by AI.',
-            'button' => 'Start Chatting',
+            'title' => 'Meet Altani',
+            'description' => 'Your personal AI health coach for diabetes management, nutrition advice, and daily wellness support.',
+            'button' => 'Chat with Altani',
             'recent_conversations' => 'Recent Conversations',
             'quick_actions' => [
-                'ask' => 'Ask a Question',
+                'ask' => 'Ask Altani',
                 'meal_plan' => 'Generate Meal Plan',
             ],
             'prompts' => [

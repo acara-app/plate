@@ -359,5 +359,10 @@
         </section>
 
     </div>
+    <x-cta-block
+        title="Pair Your Fitness with Nutrition AI"
+        description="Let Altani help you optimize your nutrition to fuel your workouts and recovery."
+        button-text="Meet Altani"
+    />
     <x-footer />
 </x-default-layout>
