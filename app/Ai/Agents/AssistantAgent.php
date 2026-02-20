@@ -7,6 +7,7 @@ namespace App\Ai\Agents;
 use App\Actions\GetUserProfileContextAction;
 use App\Ai\SystemPrompt;
 use App\Ai\Tools\CreateMealPlan;
+use App\Ai\Tools\GetDietReference;
 use App\Ai\Tools\GetFitnessGoals;
 use App\Ai\Tools\GetHealthGoals;
 use App\Ai\Tools\GetUserProfile;
@@ -90,6 +91,7 @@ final class AssistantAgent implements Advisor
             $this->getHealthGoalsTool,
             $this->suggestWorkoutRoutineTool,
             $this->getFitnessGoalsTool,
+            new GetDietReference,
         ];
     }
 
