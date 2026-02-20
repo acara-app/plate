@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +30,7 @@ final readonly class RequireSubscription
         return $next($request);
     }
 
-    private function requiresSubscription(\App\Models\User $user): bool
+    private function requiresSubscription(User $user): bool
     {
         return enable_premium_upgrades() && ! $user->is_verified;
     }

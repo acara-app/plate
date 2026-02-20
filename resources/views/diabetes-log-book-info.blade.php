@@ -1,6 +1,67 @@
 @section('title', 'Free Printable Diabetes Log Book (PDF Download) | Digital Tracker')
 @section('meta_description', 'Don\'t wait for mail—download and print your free diabetes log book instantly. Track blood sugar, insulin, and A1C with our printable PDF or smart digital tracker.')
 
+@section('head')
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@@type": "Question",
+            "name": "What should I track in a diabetes log book?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "A diabetes log book should track blood sugar readings at key daily checkpoints (breakfast, lunch, dinner, and bedtime), insulin doses, carbohydrate intake, medications, physical activity, and any notes about how you feel. Consistent tracking helps identify patterns and improve your A1C over time."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "Is a digital diabetes tracker better than a paper log book?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Both methods are effective for tracking blood sugar. Paper log books are simple and require no technology, while digital trackers like Acara Plate offer automatic A1C estimation, trend analysis, food-glucose correlation, and secure cloud backup. Many users combine both methods for maximum benefit."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "How often should I check my blood sugar?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "For Type 2 diabetes, most healthcare providers recommend checking blood sugar at least 2-4 times daily: before breakfast (fasting), before meals, and at bedtime. Your doctor may recommend more frequent testing based on your specific treatment plan, especially if you use insulin."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "Can I download the diabetes log book for free?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Yes, our printable diabetes log book PDF is 100% free to download and print. It includes a 4-point daily check format (breakfast, lunch, dinner, bedtime), a notes section for medications and carbs, and a clean layout designed for endocrinologist reviews."
+            }
+        }
+    ]
+}
+</script>
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "WebPage",
+    "name": "Free Printable Diabetes Log Book",
+    "description": "Download and print a free diabetes log book PDF instantly, or use the smart digital tracker with auto A1C estimation and trend analysis.",
+    "url": "{{ url('/diabetes-log-book-info') }}",
+    "speakable": {
+        "@@type": "SpeakableSpecification",
+        "cssSelector": [".speakable-intro"]
+    },
+    "isPartOf": {
+        "@@type": "WebSite",
+        "name": "Acara Plate",
+        "url": "{{ url('/') }}"
+    }
+}
+</script>
+@endsection
+
 <x-default-layout>
     <div class="mx-auto my-16 max-w-7xl px-6 lg:px-8">
         {{-- Navigation --}}
@@ -14,7 +75,7 @@
         </a>
 
         <div class="mt-6">
-            <div class="prose prose-slate dark:prose-invert mx-auto max-w-4xl">
+            <div class="prose prose-slate dark:prose-invert mx-auto max-w-4xl speakable-intro">
                 <h1>Free Diabetes Log Book: Instant PDF Download</h1>
                 
                 <p class="lead">

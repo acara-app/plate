@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Models\DietaryPreference;
+use App\Models\HealthCondition;
 use App\Contracts\Actions\GetsUserProfileContext;
 use App\Enums\DietType;
 use App\Models\User;
@@ -71,7 +73,7 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
      */
     private function getDietaryPreferences(UserProfile $profile): array
     {
-        return array_values($profile->dietaryPreferences->map(fn (\App\Models\DietaryPreference $pref): array => [
+        return array_values($profile->dietaryPreferences->map(fn (DietaryPreference $pref): array => [
             'name' => $pref->name,
             'severity' => $pref->pivot->severity ?? null,
             'notes' => $pref->pivot->notes ?? null,
@@ -83,7 +85,7 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
      */
     private function getHealthConditions(UserProfile $profile): array
     {
-        return array_values($profile->healthConditions->map(fn (\App\Models\HealthCondition $condition): array => [
+        return array_values($profile->healthConditions->map(fn (HealthCondition $condition): array => [
             'name' => $condition->name,
             'notes' => $condition->pivot->notes ?? null,
         ])->all());
@@ -127,18 +129,23 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
         if ($profile->age === null) {
             $missing[] = 'age';
         }
+
         if ($profile->height === null) {
             $missing[] = 'height';
         }
+
         if ($profile->weight === null) {
             $missing[] = 'weight';
         }
+
         if ($profile->sex === null) {
             $missing[] = 'sex';
         }
+
         if ($profile->goal_choice === null) {
             $missing[] = 'primary_goal';
         }
+
         if ($profile->dietaryPreferences->isEmpty()) {
             $missing[] = 'dietary_preferences';
         }
@@ -163,18 +170,23 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
         if (isset($bio['age']) && is_scalar($bio['age'])) {
             $bioParts[] = 'Age: '.$bio['age'];
         }
+
         if (isset($bio['height_cm']) && is_scalar($bio['height_cm'])) {
             $bioParts[] = 'Height: '.$bio['height_cm'].'cm';
         }
+
         if (isset($bio['weight_kg']) && is_scalar($bio['weight_kg'])) {
             $bioParts[] = 'Weight: '.$bio['weight_kg'].'kg';
         }
+
         if (isset($bio['sex']) && is_scalar($bio['sex'])) {
             $bioParts[] = 'Sex: '.$bio['sex'];
         }
+
         if (isset($bio['bmi']) && is_scalar($bio['bmi'])) {
             $bioParts[] = 'BMI: '.$bio['bmi'];
         }
+
         if (isset($bio['tdee']) && is_scalar($bio['tdee'])) {
             $bioParts[] = 'Daily Calorie Needs (TDEE): '.$bio['tdee'].' kcal';
         }
@@ -228,9 +240,11 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
         if (isset($goals['primary_goal']) && is_scalar($goals['primary_goal'])) {
             $goalParts[] = 'Primary Goal: '.$goals['primary_goal'];
         }
+
         if (isset($goals['target_weight_kg']) && is_scalar($goals['target_weight_kg'])) {
             $goalParts[] = 'Target Weight: '.$goals['target_weight_kg'].'kg';
         }
+
         if (isset($goals['calculated_diet_type']) && is_scalar($goals['calculated_diet_type'])) {
             $parts[] = 'Diet Type: '.$goals['calculated_diet_type'];
             $dietTypeEnum = DietType::tryFrom((string) $goals['calculated_diet_type']);
@@ -239,6 +253,7 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
                 $parts[] = 'Recommended Macros: '.$macros['carbs'].'% carbs, '.$macros['protein'].'% protein, '.$macros['fat'].'% fat';
             }
         }
+
         if (isset($goals['additional_goals']) && is_scalar($goals['additional_goals'])) {
             $goalParts[] = 'Additional Goals: '.$goals['additional_goals'];
         }

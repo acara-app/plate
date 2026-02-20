@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Testing\TestResponse;
 use App\Contracts\ParsesHealthData;
 use App\DataObjects\HealthLogData;
 use App\Enums\GlucoseReadingType;
@@ -35,7 +36,7 @@ beforeEach(function (): void {
     app()->instance(ParsesHealthData::class, $parserMock);
 });
 
-function sendHealthWebhook(mixed $test, string $text): Illuminate\Testing\TestResponse
+function sendHealthWebhook(mixed $test, string $text): TestResponse
 {
     return $test->postJson(
         route('telegraph.webhook', ['token' => $test->bot->token]),

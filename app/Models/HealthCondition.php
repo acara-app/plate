@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\HealthConditionFactory;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,7 +25,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 final class HealthCondition extends Model
 {
-    /** @use HasFactory<\Database\Factories\HealthConditionFactory> */
+    /** @use HasFactory<HealthConditionFactory> */
     use HasFactory;
 
     /**

@@ -48,7 +48,7 @@ final class RegenerateMealPlanDayRequest extends FormRequest
         return [
             'day.integer' => 'The day must be a valid number.',
             'day.min' => 'The day must be at least 1.',
-            'day.max' => "The day cannot exceed the meal plan's duration of {$mealPlan->duration_days} days.",
+            'day.max' => sprintf("The day cannot exceed the meal plan's duration of %d days.", $mealPlan->duration_days),
         ];
     }
 }

@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use Spatie\LaravelData\DataCollection;
+use App\Models\Setting;
+use App\Enums\SettingKey;
 use App\Ai\Agents\MealPlanAgent;
 use App\Enums\DietType;
 use App\Enums\GoalChoice;
@@ -214,7 +217,7 @@ it('handles meals with no ingredients', function (): void {
     $mealPlanData = $action->generate($user);
 
     expect($mealPlanData->meals)->toHaveCount(2);
-    expect($mealPlanData->meals[0]->ingredients)->toBeInstanceOf(Spatie\LaravelData\DataCollection::class);
+    expect($mealPlanData->meals[0]->ingredients)->toBeInstanceOf(DataCollection::class);
     expect($mealPlanData->meals[0]->ingredients->count())->toBe(0);
     expect($mealPlanData->meals[1]->ingredients)->toBeNull();
 });
@@ -252,7 +255,7 @@ it('works without file search store configured', function (): void {
 });
 
 it('uses file search store when configured', function (): void {
-    App\Models\Setting::set(App\Enums\SettingKey::GeminiFileSearchStoreName, 'test-store-name');
+    Setting::set(SettingKey::GeminiFileSearchStoreName, 'test-store-name');
 
     $user = User::factory()->create();
 

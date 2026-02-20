@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\DietType;
 use App\Actions\GetUserProfileContextAction;
 use App\Models\DietaryPreference;
 use App\Models\HealthCondition;
@@ -172,7 +173,7 @@ it('includes full goal details including diet type and macros', function (): voi
     UserProfile::factory()->create([
         'user_id' => $user->id,
         'onboarding_completed' => true,
-        'calculated_diet_type' => App\Enums\DietType::Keto,
+        'calculated_diet_type' => DietType::Keto,
         'additional_goals' => 'Build muscle and stay hydrated',
     ]);
 

@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Contracts\Ai\GeneratesSingleMeals;
+use App\Contracts\Ai\GeneratesMealPlans;
+use App\Contracts\Ai\PredictsGlucoseSpikes;
+use App\Models\History;
 use App\Actions\GetUserProfileContextAction;
 use App\Ai\Agents\AssistantAgent;
 use App\Ai\Tools\CreateMealPlan;
@@ -33,10 +37,10 @@ beforeEach(function (): void {
     ]);
 
     $this->profileContext = new GetUserProfileContextAction;
-    $this->suggestSingleMealTool = new SuggestSingleMeal(resolve(App\Contracts\Ai\GeneratesSingleMeals::class));
+    $this->suggestSingleMealTool = new SuggestSingleMeal(resolve(GeneratesSingleMeals::class));
     $this->getUserProfileTool = new GetUserProfile($this->profileContext);
-    $this->createMealPlanTool = new CreateMealPlan(resolve(App\Contracts\Ai\GeneratesMealPlans::class));
-    $this->predictGlucoseSpikeTool = new PredictGlucoseSpike(resolve(App\Contracts\Ai\PredictsGlucoseSpikes::class));
+    $this->createMealPlanTool = new CreateMealPlan(resolve(GeneratesMealPlans::class));
+    $this->predictGlucoseSpikeTool = new PredictGlucoseSpike(resolve(PredictsGlucoseSpikes::class));
     $this->suggestWellnessRoutineTool = new SuggestWellnessRoutine;
     $this->getHealthGoalsTool = new GetHealthGoals($this->profileContext);
     $this->suggestWorkoutRoutineTool = new SuggestWorkoutRoutine;
@@ -99,13 +103,13 @@ it('returns empty messages when no history', function (): void {
 });
 
 it('returns messages from history', function (): void {
-    App\Models\History::factory()->create([
+    History::factory()->create([
         'user_id' => $this->user->id,
         'role' => 'user',
         'content' => 'Hello, I need help with my diet',
     ]);
 
-    App\Models\History::factory()->create([
+    History::factory()->create([
         'user_id' => $this->user->id,
         'role' => 'assistant',
         'content' => 'I can help you with that!',
@@ -124,10 +128,10 @@ it('returns messages from history', function (): void {
 it('limits messages to 50', function (): void {
     // Create 60 messages (only 50 should be returned)
     for ($i = 0; $i < 60; $i++) {
-        App\Models\History::factory()->create([
+        History::factory()->create([
             'user_id' => $this->user->id,
             'role' => 'user',
-            'content' => "Message $i",
+            'content' => 'Message ' . $i,
         ]);
     }
 

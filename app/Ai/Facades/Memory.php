@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Facades;
 
+use DateTimeInterface;
 use App\Contracts\Ai\Memory\ArchiveMemoriesTool;
 use App\Contracts\Ai\Memory\CategorizeMemoriesTool;
 use App\Contracts\Ai\Memory\ConsolidateMemoriesTool;
@@ -32,7 +33,7 @@ use BadMethodCallException;
  *
  * Resolves the appropriate tool contract from the container and invokes it.
  *
- * @method static string store(string $content, array<string, mixed> $metadata = [], array<float>|null $vector = null, int $importance = 1, array<string> $categories = [], \DateTimeInterface|null $expiresAt = null)
+ * @method static string store(string $content, array<string, mixed> $metadata = [], array<float>|null $vector = null, int $importance = 1, array<string> $categories = [], DateTimeInterface|null $expiresAt = null)
  * @method static array<int, MemorySearchResultData> search(string $query, int $limit = 5, float $minRelevance = 0.7, array<string, mixed> $filter = [], bool $includeArchived = false)
  * @method static MemoryData get(string $memoryId, bool $includeArchived = false)
  * @method static bool update(string $memoryId, string|null $content = null, array<string, mixed>|null $metadata = null, int|null $importance = null)
@@ -80,7 +81,7 @@ final class Memory
      */
     public static function __callStatic(string $method, array $arguments): mixed
     {
-        throw_unless(isset(self::$tools[$method]), BadMethodCallException::class, "Method Memory::{$method}() does not exist.");
+        throw_unless(isset(self::$tools[$method]), BadMethodCallException::class, sprintf('Method Memory::%s() does not exist.', $method));
 
         /** @var object $tool */
         $tool = resolve(self::$tools[$method]);

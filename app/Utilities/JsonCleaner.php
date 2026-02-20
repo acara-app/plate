@@ -35,13 +35,13 @@ final class JsonCleaner
 
         try {
             json_decode($response, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
+        } catch (JsonException $jsonException) {
             Log::error('Invalid JSON in AI response', [
                 'original_response' => $originalResponse,
                 'cleaned_response' => $response,
-                'json_error' => $e->getMessage(),
+                'json_error' => $jsonException->getMessage(),
             ]);
-            throw $e;
+            throw $jsonException;
         }
 
         return $response;

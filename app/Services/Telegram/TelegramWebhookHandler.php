@@ -17,7 +17,6 @@ use App\Models\User;
 use App\Models\UserTelegramChat;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
 use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Stringable;
 use Throwable;
 
@@ -183,8 +182,8 @@ final class TelegramWebhookHandler extends WebhookHandler
             $linkedChat->clearPendingHealthLog();
 
             $this->chat->message('✅ Saved! Your health data has been logged.')->send();
-        } catch (Throwable $e) {
-            report($e);
+        } catch (Throwable $throwable) {
+            report($throwable);
             $this->chat->message('❌ Error saving log. Please try again.')->send();
         }
     }
@@ -261,6 +260,7 @@ final class TelegramWebhookHandler extends WebhookHandler
 
             return;
         }
+
         // @codeCoverageIgnoreStart
         try {
             $healthData = $this->healthDataParser->parse($message);
@@ -271,6 +271,7 @@ final class TelegramWebhookHandler extends WebhookHandler
             report($e);
             $this->chat->message('❌ Could not understand that. Try something like: "My glucose is 140" or "Took 5 units insulin"')->send();
         }
+
         // @codeCoverageIgnoreEnd
     }
 
@@ -420,9 +421,9 @@ final class TelegramWebhookHandler extends WebhookHandler
         }
 
         $sex = $profile->sex !== null ? ucfirst($profile->sex->value) : 'N/A';
-        $age = $profile->age !== null ? "{$profile->age} years" : 'N/A';
-        $height = $profile->height !== null ? "{$profile->height}cm" : 'N/A';
-        $weight = $profile->weight !== null ? "{$profile->weight}kg" : 'N/A';
+        $age = $profile->age !== null ? $profile->age . ' years' : 'N/A';
+        $height = $profile->height !== null ? $profile->height . 'cm' : 'N/A';
+        $weight = $profile->weight !== null ? $profile->weight . 'kg' : 'N/A';
 
         return "\n\n📊 {$age}, {$sex}\n📏 {$height}, {$weight}";
     }

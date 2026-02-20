@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Models\User;
 use App\Ai\SingleMealPromptBuilder;
 use App\Contracts\Ai\GeneratesSingleMeals;
 use App\DataObjects\GeneratedMealData;
@@ -22,7 +23,7 @@ final class SingleMealAgent implements Agent, GeneratesSingleMeals, HasStructure
 
     public function instructions(): string
     {
-        return 'You are a professional nutritionist and chef. Generate healthy, delicious meals that are appropriate for the user\'s dietary needs and health conditions. Always provide accurate nutritional estimates and consider glucose impact for users with diabetes or blood sugar concerns.';
+        return "You are a professional nutritionist and chef. Generate healthy, delicious meals that are appropriate for the user's dietary needs and health conditions. Always provide accurate nutritional estimates and consider glucose impact for users with diabetes or blood sugar concerns.";
     }
 
     public function maxTokens(): int
@@ -67,7 +68,7 @@ final class SingleMealAgent implements Agent, GeneratesSingleMeals, HasStructure
     }
 
     public function generate(
-        \App\Models\User $user,
+        User $user,
         string $mealType,
         ?string $cuisine = null,
         ?int $maxCalories = null,

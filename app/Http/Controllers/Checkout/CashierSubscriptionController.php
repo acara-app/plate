@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Checkout;
 
+use Illuminate\Http\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use App\Contracts\Services\StripeServiceContract;
 use App\Models\SubscriptionProduct;
 use Exception;
@@ -17,7 +19,7 @@ final readonly class CashierSubscriptionController
         //
     }
 
-    public function __invoke(Request $request): \Illuminate\Http\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+    public function __invoke(Request $request): RedirectResponse|Response
     {
         /** @var array{product_id: int, billing_interval: string} $data */
         $data = $request->validate([
@@ -46,11 +48,11 @@ final readonly class CashierSubscriptionController
                 : $product->stripe_price_id;
 
             $billingInterval = $data['billing_interval'];
-            throw_unless($stripePriceId, Exception::class, "No {$billingInterval} price ID configured for product: {$product->name}");
+            throw_unless($stripePriceId, Exception::class, sprintf('No %s price ID configured for product: %s', $billingInterval, $product->name));
 
             $actualPriceId = $this->stripeService->getPriceIdFromLookupKey($stripePriceId);
 
-            throw_unless($actualPriceId, Exception::class, "No price found with lookup_key: {$stripePriceId}");
+            throw_unless($actualPriceId, Exception::class, 'No price found with lookup_key: ' . $stripePriceId);
 
             // Use product name as subscription type for better UX
             $subscriptionType = str($product->name)->slug()->toString();

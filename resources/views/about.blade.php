@@ -1,6 +1,67 @@
 @section('title', 'About Acara Plate | Our Vision for Agentic AI Nutrition')
 @section('meta_description', 'Learn about the vision behind Acara Plate: personalized, evidence-based nutrition for diabetes management powered by agentic AI and high-fidelity USDA data.')
 
+@section('head')
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@@type": "Question",
+            "name": "What is Acara Plate?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Acara Plate is an open-source, AI-powered nutrition platform designed for people managing Type 2 diabetes and prediabetes. It creates personalized meal plans based on your biometrics, dietary preferences, and health goals using evidence-based nutrition data from USDA sources."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "Is Acara Plate free to use?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Yes, Acara Plate is open source and free to use. You can create a free account for personalized meal plans, glucose tracking, and AI nutrition coaching. You can also self-host the entire platform on your own infrastructure for complete data ownership."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "Can I self-host Acara Plate?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Yes. Acara Plate is fully open source and can be self-hosted on your own infrastructure using Laravel Forge, Ploi, or Laravel Cloud with providers like DigitalOcean, Hetzner, or AWS. This gives you complete ownership of your health data with no third-party access."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "How does the AI personalization work?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Acara Plate captures your age, weight, height, activity level, dietary preferences, and health conditions during onboarding. The AI then generates personalized meal plans with macro-balanced recipes, portion guidance, and grocery lists. The system learns from your logged data to continuously refine recommendations."
+            }
+        }
+    ]
+}
+</script>
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "WebPage",
+    "name": "About Acara Plate",
+    "description": "Learn about the vision behind Acara Plate: personalized, evidence-based nutrition for diabetes management powered by agentic AI and high-fidelity USDA data.",
+    "url": "{{ url('/about') }}",
+    "speakable": {
+        "@@type": "SpeakableSpecification",
+        "cssSelector": [".speakable-intro"]
+    },
+    "isPartOf": {
+        "@@type": "WebSite",
+        "name": "Acara Plate",
+        "url": "{{ url('/') }}"
+    }
+}
+</script>
+@endsection
+
 <x-default-layout>
     <div class="mx-auto my-16 max-w-7xl px-6 lg:px-8">
         <a
@@ -12,7 +73,7 @@
             <span>Back</span>
         </a>
         <div class="mt-6">
-            <div class="prose prose-slate dark:prose-invert mx-auto max-w-4xl">
+            <div class="prose prose-slate dark:prose-invert mx-auto max-w-4xl speakable-intro">
                 <h1>About Acara Plate</h1>
                 
                 <h2>The Vision</h2>

@@ -118,6 +118,24 @@
     ]
 }
 </script>
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "WebPage",
+    "name": "Meet Altani — Your AI Health Coach",
+    "description": "Altani is your personal AI guide for diabetes, nutrition, and daily wellness. Smart, warm, and always here to help.",
+    "url": "{{ url('/meet-altani') }}",
+    "speakable": {
+        "@@type": "SpeakableSpecification",
+        "cssSelector": [".speakable-intro"]
+    },
+    "isPartOf": {
+        "@@type": "WebSite",
+        "name": "Acara Plate",
+        "url": "{{ url('/') }}"
+    }
+}
+</script>
 @endsection
 
 <x-default-layout>
@@ -148,11 +166,11 @@
                             Now Available 24/7
                         </span>
                     </div>
-                    <h1 class="font-display text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl mb-6">
+                    <h1 class="font-display text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl mb-6 speakable-intro">
                         Meet Altani, your ideal<br>
                         <span class="text-emerald-700">AI health coach</span> today.
                     </h1>
-                        <p class="mt-6 text-lg leading-8 text-slate-600 max-w-2xl mx-auto">
+                        <p class="mt-6 text-lg leading-8 text-slate-600 max-w-2xl mx-auto speakable-intro">
                             Your personal guide for diabetes, nutrition, and daily wellness. Smart, warm, and always here to help.
                         </p>
                     <div class="mt-10 flex items-center justify-center gap-x-6">

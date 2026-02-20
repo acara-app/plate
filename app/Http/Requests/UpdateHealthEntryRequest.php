@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Validator;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
@@ -35,8 +36,8 @@ final class UpdateHealthEntryRequest extends FormRequest
             'glucose_value' => [
                 $logType === HealthEntryType::Glucose->value ? 'required' : 'nullable',
                 'numeric',
-                "min:{$range['min']}",
-                "max:{$range['max']}",
+                'min:' . $range['min'],
+                'max:' . $range['max'],
             ],
             'glucose_reading_type' => [
                 $logType === HealthEntryType::Glucose->value ? 'required' : 'nullable',
@@ -96,9 +97,9 @@ final class UpdateHealthEntryRequest extends FormRequest
     /**
      * Configure the validator instance.
      */
-    public function withValidator(\Illuminate\Validation\Validator $validator): void
+    public function withValidator(Validator $validator): void
     {
-        $validator->after(function (\Illuminate\Validation\Validator $validator): void {
+        $validator->after(function (Validator $validator): void {
             $logType = $this->input('log_type');
 
             // For vitals, ensure at least one vital field is provided

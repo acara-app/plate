@@ -41,14 +41,14 @@ final class CheckGeminiFileSearchStoreCommand extends Command
         /** @var string $baseUrl */
         $baseUrl = config('gemini.base_url', 'https://generativelanguage.googleapis.com/v1beta');
 
-        $this->info("Checking File Search store: {$storeName}");
+        $this->info('Checking File Search store: ' . $storeName);
 
         $storeResponse = Http::withHeaders([
             'x-goog-api-key' => $apiKey,
-        ])->get("{$baseUrl}/{$storeName}");
+        ])->get(sprintf('%s/%s', $baseUrl, $storeName));
 
         if ($storeResponse->failed()) {
-            $this->error("Failed to retrieve File Search store: {$storeResponse->body()}");
+            $this->error('Failed to retrieve File Search store: ' . $storeResponse->body());
 
             return;
         }

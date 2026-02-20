@@ -28,6 +28,88 @@
         ]
     }
     </script>
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "FAQPage",
+        "mainEntity": [
+        {
+            "@@type": "Question",
+            "name": "How accurate are the nutritional values in meal plans?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Acara Plate uses AI-generated meal plans with carefully selected ingredients from the USDA FoodData Central database. We strive for accuracy by leveraging established nutritional data sources. However, since meal plans are AI-generated, we recommend verifying key nutritional information and consulting with your healthcare provider for personalized dietary guidance."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "Can AI hallucinate incorrect food information?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Yes, AI can occasionally hallucinate or generate incorrect information about food, ingredients, or nutritional values. This is a known limitation of language models. We recommend always verifying key ingredients for allergens and consulting your healthcare provider before making significant dietary changes based on meal plan suggestions."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "Is this a medical app or diagnostic tool?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "No. Acara Plate is an informational and educational tool, not a medical device. It does not diagnose, treat, or manage any medical condition. The glucose tracking feature helps you monitor trends, but all meal plans and health decisions should be discussed with your healthcare provider."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "Why is Acara Plate open source?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Transparency is crucial for health-related tools. Being open source allows healthcare professionals, developers, and users to inspect how meal plans are generated, how nutritional data is verified, and how AI is used. You can review the code on GitHub, contribute improvements, and verify that the platform operates as described."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "How do you ensure nutritional accuracy?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "We reference the USDA FoodData Central database—the scientific gold standard for nutrition of whole foods like bananas, chicken breast, and rice. However, as meal plans are AI-generated, we recommend verifying nutritional information independently and consulting with your healthcare provider for personalized guidance."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "Who should use Acara Plate?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Acara Plate is designed for adults seeking personalized meal planning guidance, particularly those managing Type 2 diabetes or prediabetes. It's useful for anyone wanting structured nutrition plans based on their goals, dietary preferences, and health conditions. However, it should complement—not replace—professional medical advice."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "Is there a mobile app?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Yes! Acara Plate is a Progressive Web App (PWA), which means you can install it directly on your device without visiting an app store. Visit our installation guide to learn how to add it to your home screen for a native app-like experience."
+            }
+        }
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "WebPage",
+        "name": "Acara Plate — Your Digital Meal Planner for Diabetes",
+        "description": "A personalized nutrition platform that creates meal plans around your glucose patterns. Built for people managing Type 2 diabetes.",
+        "url": "{{ url('/') }}",
+        "speakable": {
+            "@@type": "SpeakableSpecification",
+            "cssSelector": [".speakable-intro"]
+        },
+        "isPartOf": {
+            "@@type": "WebSite",
+            "name": "Acara Plate",
+            "url": "{{ url('/') }}"
+        }
+    }
+    </script>
     @endsection
     {{-- Hero Section with Fizzy-style design --}}
     <div class="relative min-h-screen bg-white">
@@ -93,7 +175,7 @@
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
                 <div class="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
                     {{-- LEFT COLUMN — Text content (F-pattern reading zone) --}}
-                    <div class="text-center lg:text-left">
+                    <div class="text-center lg:text-left speakable-intro">
                         {{-- Badge with pulse --}}
                         <div class="mb-6 flex justify-center lg:justify-start">
                             <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200/60">

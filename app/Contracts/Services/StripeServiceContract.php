@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contracts\Services;
 
+use Laravel\Cashier\Subscription;
 use App\Models\User;
 
 interface StripeServiceContract
@@ -43,5 +44,5 @@ interface StripeServiceContract
     /**
      * Get the hosted invoice URL for an incomplete payment.
      */
-    public function getIncompletePaymentUrl(\Laravel\Cashier\Subscription $subscription): ?string;
+    public function getIncompletePaymentUrl(Subscription $subscription): ?string;
 }

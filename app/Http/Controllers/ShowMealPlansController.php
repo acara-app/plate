@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\Meal;
 use App\Models\MealPlan;
@@ -20,7 +21,7 @@ use Workflow\WorkflowStub;
 final readonly class ShowMealPlansController
 {
     public function __construct(
-        #[CurrentUser] private \App\Models\User $user
+        #[CurrentUser] private User $user
     ) {
         //
     }
@@ -84,7 +85,7 @@ final readonly class ShowMealPlansController
             }
         }
 
-        $dayName = $dayMeals->first()?->getDayName() ?? "Day {$currentDayNumber}";
+        $dayName = $dayMeals->first()?->getDayName() ?? 'Day ' . $currentDayNumber;
 
         $formattedMealPlan = [
             'id' => $mealPlan->id,
@@ -105,7 +106,7 @@ final readonly class ShowMealPlansController
         if ($dayNeedsGeneration && $dayStatus === MealPlanGenerationStatus::Pending->value) {
             $mealPlan->update([
                 'metadata' => array_merge($mealPlan->metadata ?? [], [
-                    "day_{$currentDayNumber}_status" => MealPlanGenerationStatus::Generating->value,
+                    sprintf('day_%d_status', $currentDayNumber) => MealPlanGenerationStatus::Generating->value,
                 ]),
             ]);
 
@@ -161,7 +162,7 @@ final readonly class ShowMealPlansController
         /** @var array<string, mixed> $metadata */
         $metadata = $mealPlan->metadata ?? [];
 
-        $dayStatusKey = "day_{$dayNumber}_status";
+        $dayStatusKey = sprintf('day_%d_status', $dayNumber);
         if (isset($metadata[$dayStatusKey]) && is_string($metadata[$dayStatusKey])) {
             return $metadata[$dayStatusKey];
         }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Illuminate\Database\Eloquent\Collection;
 use App\Enums\ContentType;
 use App\Models\Content;
 
@@ -147,9 +148,9 @@ final class SeoLinkManager
      * Slots 1-2: Static authority foods (always shown).
      * Slots 3-4: Rotating striking distance foods (weekly rotation).
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, Content>
+     * @return Collection<int, Content>
      */
-    public function getFeaturedFoods(): \Illuminate\Database\Eloquent\Collection
+    public function getFeaturedFoods(): Collection
     {
         // Slots 3-4: Rotate through striking distance foods weekly
         $weekIndex = now()->weekOfYear % count(self::STRIKING_DISTANCE_FOODS);

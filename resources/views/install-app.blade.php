@@ -1,6 +1,59 @@
 @section('title', 'Install Acara Plate PWA | Native App Experience on iOS & Android')
 @section('meta_description', 'Learn how to install Acara Plate as a Progressive Web App (PWA) on your iPhone or Android device for faster access, offline support, and a more immersive experience.')
 
+@section('head')
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@@type": "Question",
+            "name": "How do I install Acara Plate on my phone?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "On iPhone, open Safari, navigate to the site, tap the Share button, and select 'Add to Home Screen'. On Android, open Chrome, navigate to the site, tap the menu (three dots), and select 'Install app' or 'Add to Home screen'. The app will appear on your home screen like a native app."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "What is a Progressive Web App (PWA)?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "A PWA is a web application that can be installed on your device and accessed from your home screen, just like a native app. It offers faster load times, a more immersive full-screen experience, and works with your device's native browser for the best performance."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "Do I need to download anything from the App Store?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "No, Acara Plate is a Progressive Web App that installs directly from your browser. There's no app store download required. Simply visit the website in Safari (iOS) or Chrome (Android) and add it to your home screen for instant access."
+            }
+        }
+    ]
+}
+</script>
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "WebPage",
+    "name": "Install Acara Plate PWA",
+    "description": "Learn how to install Acara Plate as a Progressive Web App on your iPhone or Android device for faster access and a native app experience.",
+    "url": "{{ url('/install-app') }}",
+    "speakable": {
+        "@@type": "SpeakableSpecification",
+        "cssSelector": [".speakable-intro"]
+    },
+    "isPartOf": {
+        "@@type": "WebSite",
+        "name": "Acara Plate",
+        "url": "{{ url('/') }}"
+    }
+}
+</script>
+@endsection
+
 <x-default-layout>
     <div class="mx-auto my-16 max-w-7xl px-6 lg:px-8">
         <a
@@ -11,7 +64,7 @@
             <span>Back</span>
         </a>
         <div class="mt-6">
-            <div class="prose prose-slate dark:prose-invert mx-auto max-w-4xl">
+            <div class="prose prose-slate dark:prose-invert mx-auto max-w-4xl speakable-intro">
                 <h1>Install Acara Plate</h1>
                 <p>
                     For the best experience, use this app with your device's native web browser. Installing Acara Plate as a Progressive Web App (PWA) allows you to access it directly from your home screen, just like a native app, with faster load times and a more immersive experience.

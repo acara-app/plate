@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\ContentType;
 use App\Models\Content;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -17,6 +18,7 @@ afterEach(function (): void {
     if (File::exists(base_path('public/food_sitemap.xml'))) {
         File::delete(base_path('public/food_sitemap.xml'));
     }
+
     if (File::exists(base_path('public/test_sitemap.xml'))) {
         File::delete(base_path('public/test_sitemap.xml'));
     }
@@ -59,7 +61,7 @@ it('includes image tags in sitemap when food has image', function (): void {
         'title' => 'Apple',
         'image_path' => 'food-images/apple.png',
         'is_published' => true,
-        'type' => App\Enums\ContentType::Food,
+        'type' => ContentType::Food,
     ]);
 
     Storage::fake('s3_public');
@@ -78,6 +80,6 @@ it('includes image tags in sitemap when food has image', function (): void {
 
     expect($content)
         ->toContain('<image:image>')
-        ->toContain("<image:loc>{$expectedUrl}</image:loc>")
+        ->toContain(sprintf('<image:loc>%s</image:loc>', $expectedUrl))
         ->toContain('<image:title>Apple Glycemic Index</image:title>');
 });

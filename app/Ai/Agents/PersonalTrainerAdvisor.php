@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\SystemPrompt;
 use App\Ai\Tools\GetFitnessGoals;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\SuggestWorkoutRoutine;
@@ -42,7 +43,7 @@ final class PersonalTrainerAdvisor implements PersonalTrainerAdvisorContract
     {
         $profileData = $this->profileContext->handle($this->getUser());
 
-        return (string) new \App\Ai\SystemPrompt(
+        return (string) new SystemPrompt(
             background: $this->getBackgroundInstructions(),
             context: $this->getContextInstructions($profileData),
             steps: $this->getStepsInstructions(),
@@ -160,8 +161,8 @@ final class PersonalTrainerAdvisor implements PersonalTrainerAdvisorContract
     private function getStepsInstructions(): array
     {
         return [
-            '1. Understand the user\'s fitness goals and current fitness level',
-            '2. Review the user\'s profile context to understand their biometrics, preferences, and any limitations',
+            "1. Understand the user's fitness goals and current fitness level",
+            "2. Review the user's profile context to understand their biometrics, preferences, and any limitations",
             '3. Identify which fitness area the user needs help with (strength, cardio, flexibility, general)',
             '4. Use the suggest_workout_routine tool to provide specific, actionable workout plans',
             '5. If the user asks about their fitness goals, use the get_fitness_goals tool',
@@ -182,13 +183,13 @@ final class PersonalTrainerAdvisor implements PersonalTrainerAdvisorContract
             'Provide specific, actionable workout advice rather than generic recommendations',
             'When suggesting workouts, include specific exercises, sets, reps, and rest periods',
             'Always emphasize proper form and technique',
-            'Use the tools when appropriate - don\'t try to generate workout plans manually',
+            "Use the tools when appropriate - don't try to generate workout plans manually",
             'Keep responses concise but informative',
             'Focus on one or two areas at a time to avoid overwhelming the user',
             'Celebrate progress and encourage consistency',
             '',
             'PERSONALIZATION:',
-            '  - Tailor recommendations to the user\'s fitness level, goals, and available equipment',
+            "  - Tailor recommendations to the user's fitness level, goals, and available equipment",
             '  - Consider their schedule and time constraints',
             '  - Build on existing fitness level rather than suggesting inappropriate exercises',
             '',

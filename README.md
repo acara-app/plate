@@ -219,7 +219,7 @@ Targeted commands are also available:
 ```bash
 composer test:unit         # Unit & feature tests (100% coverage enforced)
 composer test:type-coverage
-composer test:lint         # Pint, Rector, ESLint, Prettier
+composer test:lint         # Pint, Rector, oxlint, Prettier
 composer test:types        # PHPStan + TypeScript
 composer lint              # Auto-fix styling issues
 ```

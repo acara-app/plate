@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Date;
 use App\DataObjects\MealPlanContext\MedicationData;
 
 it('creates medication data with all fields', function (): void {
-    $startedAt = Illuminate\Support\Facades\Date::parse('2024-01-15');
+    $startedAt = Date::parse('2024-01-15');
 
     $data = new MedicationData(
         name: 'Metformin',
@@ -39,7 +40,7 @@ it('creates medication data with null optional fields', function (): void {
 });
 
 it('creates medication data with mixed null and non-null values', function (): void {
-    $startedAt = Illuminate\Support\Facades\Date::parse('2024-06-01');
+    $startedAt = Date::parse('2024-06-01');
 
     $data = new MedicationData(
         name: 'Insulin',

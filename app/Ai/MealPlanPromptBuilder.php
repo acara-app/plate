@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Ai;
 
+use App\Enums\AnimalProductChoice;
+use App\Enums\IntensityChoice;
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\MealPlanContext\MacronutrientRatiosData;
 use App\DataObjects\MealPlanContext\MealPlanContextData;
@@ -101,8 +103,8 @@ final readonly class MealPlanPromptBuilder
     {
         return DietMapper::map(
             $profile->goal_choice ?? GoalChoice::HealthyEating,
-            $profile->animal_product_choice ?? \App\Enums\AnimalProductChoice::Omnivore,
-            $profile->intensity_choice ?? \App\Enums\IntensityChoice::Balanced,
+            $profile->animal_product_choice ?? AnimalProductChoice::Omnivore,
+            $profile->intensity_choice ?? IntensityChoice::Balanced,
         );
     }
 

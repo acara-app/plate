@@ -45,7 +45,7 @@ final class InvalidMemoryFilterException extends Exception
         $allowed = implode(', ', $allowedFields);
 
         return new self(
-            message: "Invalid filter field '{$field}'. Allowed fields: {$allowed}",
+            message: sprintf("Invalid filter field '%s'. Allowed fields: %s", $field, $allowed),
             field: $field,
         );
     }
@@ -58,7 +58,7 @@ final class InvalidMemoryFilterException extends Exception
         $actualType = get_debug_type($value);
 
         return new self(
-            message: "Invalid value for filter field '{$field}'. Expected {$expectedType}, got {$actualType}.",
+            message: sprintf("Invalid value for filter field '%s'. Expected %s, got %s.", $field, $expectedType, $actualType),
             field: $field,
         );
     }

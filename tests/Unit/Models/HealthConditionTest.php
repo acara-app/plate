@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Models\User;
+use App\Models\UserProfile;
 use App\Models\HealthCondition;
 
 it('has correct casts', function (): void {
@@ -39,8 +41,8 @@ it('has fillable order attribute', function (): void {
 
 it('can access notes from pivot when relation is loaded', function (): void {
     $condition = HealthCondition::factory()->create();
-    $user = App\Models\User::factory()->create();
-    $profile = App\Models\UserProfile::factory()->create(['user_id' => $user->id]);
+    $user = User::factory()->create();
+    $profile = UserProfile::factory()->create(['user_id' => $user->id]);
 
     $profile->healthConditions()->attach($condition, ['notes' => 'Test notes']);
 

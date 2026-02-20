@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Contracts\Queue\ShouldQueue;
 use App\DataObjects\GlucoseAnalysis\AveragesData;
 use App\DataObjects\GlucoseAnalysis\DateRangeData;
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
@@ -77,7 +78,7 @@ function createNotificationAnalysisData(array $concerns = []): GlucoseNotificati
     );
 
     return new GlucoseNotificationAnalysisData(
-        shouldNotify: count($concerns) > 0,
+        shouldNotify: $concerns !== [],
         concerns: $concerns,
         analysisData: $analysisData
     );
@@ -225,5 +226,5 @@ test('notification is queueable', function (): void {
     $analysisResult = createNotificationAnalysisData();
     $notification = new GlucoseReportNotification($analysisResult);
 
-    expect($notification)->toBeInstanceOf(Illuminate\Contracts\Queue\ShouldQueue::class);
+    expect($notification)->toBeInstanceOf(ShouldQueue::class);
 });

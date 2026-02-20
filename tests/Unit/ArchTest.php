@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use Database\Factories\UserTelegramChatFactory;
+use App\Models\UserTelegramChat;
+
 arch()->preset()->php();
 arch()->preset()->security()->ignoring([
     'assert',
     'sha1',
-    Database\Factories\UserTelegramChatFactory::class,
-    App\Models\UserTelegramChat::class,
+    UserTelegramChatFactory::class,
+    UserTelegramChat::class,
 ]);
 
 // Apply strict preset but exclude protected method check for models with accessors

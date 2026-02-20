@@ -116,6 +116,18 @@
     ]
 }
 </script>
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "WebPage",
+    "name": "{{ $displayName }} - Diabetic Food Information",
+    "speakable": {
+        "@@type": "SpeakableSpecification",
+        "cssSelector": [".speakable-intro"]
+    },
+    "url": "{{ url()->current() }}"
+}
+</script>
 @endsection
 
 <x-mini-app-layout>
@@ -299,7 +311,7 @@
             </div>
 
             {{-- Diabetic Insight --}}
-            <div class="prose prose-slate dark:prose-invert max-w-none mb-10">
+            <div class="prose prose-slate dark:prose-invert max-w-none mb-10 speakable-intro">
                 <div class="bg-blue-50 dark:bg-blue-950 border-l-4 border-blue-500 p-6 rounded-r-lg">
                     <p class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
                         💡 Diabetic Safety Assessment

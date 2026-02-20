@@ -126,8 +126,9 @@ describe('message chunking', function (): void {
         // Create a message with 5 paragraphs, each ~1000 chars
         $paragraphs = [];
         for ($i = 1; $i <= 5; $i++) {
-            $paragraphs[] = str_repeat("Paragraph {$i}. ", 60);
+            $paragraphs[] = str_repeat(sprintf('Paragraph %d. ', $i), 60);
         }
+
         $message = implode("\n\n", $paragraphs);
 
         $chunks = $service->splitMessage($message);

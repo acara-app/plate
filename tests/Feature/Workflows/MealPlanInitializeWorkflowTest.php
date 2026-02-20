@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use Workflow\Activity;
+use Workflow\Workflow;
+use Workflow\WorkflowStub;
+use App\Enums\MealPlanGenerationStatus;
 use App\Ai\Agents\MealPlanAgent;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\MealData;
@@ -186,17 +190,17 @@ it('generates day meals using activity with mocked agent', function (): void {
 it('activity classes exist and extend correct base class', function (): void {
     expect(class_exists(MealPlanDayGeneratorActivity::class))->toBeTrue();
     expect(class_exists(SaveDayMealsActivity::class))->toBeTrue();
-    expect(is_subclass_of(MealPlanDayGeneratorActivity::class, Workflow\Activity::class))->toBeTrue();
-    expect(is_subclass_of(SaveDayMealsActivity::class, Workflow\Activity::class))->toBeTrue();
+    expect(is_subclass_of(MealPlanDayGeneratorActivity::class, Activity::class))->toBeTrue();
+    expect(is_subclass_of(SaveDayMealsActivity::class, Activity::class))->toBeTrue();
 });
 
 it('workflow class exists and extends correct base class', function (): void {
     expect(class_exists(MealPlanInitializeWorkflow::class))->toBeTrue();
-    expect(is_subclass_of(MealPlanInitializeWorkflow::class, Workflow\Workflow::class))->toBeTrue();
+    expect(is_subclass_of(MealPlanInitializeWorkflow::class, Workflow::class))->toBeTrue();
 });
 
 it('workflow triggers via generate meal plan action with workflow stub fake', function (): void {
-    Workflow\WorkflowStub::fake();
+    WorkflowStub::fake();
 
     $action = resolve(MealPlanAgent::class);
     $action->handle($this->user);
@@ -306,7 +310,7 @@ it('generates expected result structure from workflow execution', function (): v
         'user_id' => $userId,
         'total_days' => $totalDays,
         'days_generated' => $daysGenerated,
-        'status' => App\Enums\MealPlanGenerationStatus::Pending->value,
+        'status' => MealPlanGenerationStatus::Pending->value,
         'meal_plan_id' => $mealPlanId,
     ];
 
@@ -324,8 +328,8 @@ it('workflow returns completed status when all days generated', function (): voi
     $daysGenerated = 3; // All days generated
 
     $finalStatus = $daysGenerated >= $totalDays
-        ? App\Enums\MealPlanGenerationStatus::Completed->value
-        : App\Enums\MealPlanGenerationStatus::Pending->value;
+        ? MealPlanGenerationStatus::Completed->value
+        : MealPlanGenerationStatus::Pending->value;
 
     expect($finalStatus)->toBe('completed');
 });
@@ -335,8 +339,8 @@ it('workflow returns pending status when not all days generated', function (): v
     $daysGenerated = 1; // Only 1 day generated
 
     $finalStatus = $daysGenerated >= $totalDays
-        ? App\Enums\MealPlanGenerationStatus::Completed->value
-        : App\Enums\MealPlanGenerationStatus::Pending->value;
+        ? MealPlanGenerationStatus::Completed->value
+        : MealPlanGenerationStatus::Pending->value;
 
     expect($finalStatus)->toBe('pending');
 });

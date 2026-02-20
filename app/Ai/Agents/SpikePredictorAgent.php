@@ -80,7 +80,7 @@ final class SpikePredictorAgent implements Agent, PredictsGlucoseSpikes
 
     public function predict(string $food): SpikePredictionData
     {
-        $prompt = "Analyze this food for glucose spike risk: \"{$food}\"";
+        $prompt = sprintf('Analyze this food for glucose spike risk: "%s"', $food);
 
         $response = $this->prompt($prompt);
 

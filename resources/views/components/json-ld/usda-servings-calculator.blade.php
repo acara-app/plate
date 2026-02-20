@@ -96,6 +96,10 @@
     "name": "USDA 2025-2030 Daily Serving Calculator",
     "description": "Official USDA dietary guidelines calculator with interactive calorie slider and FDA sugar limits.",
     "url": "{{ $currentUrl }}",
+    "speakable": {
+        "@@type": "SpeakableSpecification",
+        "cssSelector": [".speakable-intro", ".speakable-how-it-works"]
+    },
     "mainEntity": {
         "@@type": "Dataset",
         "name": "USDA Dietary Guidelines 2025-2030 Serving Recommendations",

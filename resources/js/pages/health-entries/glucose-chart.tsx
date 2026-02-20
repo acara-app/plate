@@ -249,7 +249,7 @@ export default function GlucoseChart({ readings, glucoseUnit }: Props) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex h-[400px] items-center justify-center text-muted-foreground">
+                    <div className="flex h-100 items-center justify-center text-muted-foreground">
                         {t('health_entries.glucose_chart.no_data')}
                     </div>
                 </CardContent>
@@ -274,7 +274,6 @@ export default function GlucoseChart({ readings, glucoseUnit }: Props) {
     const hasMovingAvg = chartData.some((d) => d.movingAvg !== null);
     const isSparse =
         chartData.length >= 3 &&
-        chartData.length > 0 &&
         (() => {
             const firstDate = chartData[0].fullDate.getTime();
             const lastDate = chartData[chartData.length - 1].fullDate.getTime();

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Collection;
+use App\Models\Meal;
 use App\DataObjects\GroceryItemResponseData;
 use App\Models\GroceryItem;
 use App\Models\GroceryList;
@@ -94,7 +96,7 @@ it('returns formatted items by category with response data', function (): void {
     $groceryList->load('items');
     $formatted = $groceryList->formattedItemsByCategory();
 
-    expect($formatted)->toBeInstanceOf(Illuminate\Support\Collection::class)
+    expect($formatted)->toBeInstanceOf(Collection::class)
         ->and($formatted->keys()->first())->toBe('Produce')
         ->and($formatted->keys()->last())->toBe('Dairy')
         ->and($formatted['Produce'])->toBeArray()
@@ -128,7 +130,7 @@ it('groups items by day', function (): void {
     $groceryList->load('items');
     $itemsByDay = $groceryList->itemsByDay();
 
-    expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class)
+    expect($itemsByDay)->toBeInstanceOf(Collection::class)
         ->and($itemsByDay->keys()->all())->toBe([1, 2, 3])
         ->and($itemsByDay[1])->toHaveCount(2)
         ->and($itemsByDay[2])->toHaveCount(2)
@@ -158,7 +160,7 @@ it('returns formatted items by day with response data', function (): void {
     $groceryList->load('items');
     $formatted = $groceryList->formattedItemsByDay();
 
-    expect($formatted)->toBeInstanceOf(Illuminate\Support\Collection::class)
+    expect($formatted)->toBeInstanceOf(Collection::class)
         ->and($formatted->keys()->all())->toBe([1, 2])
         ->and($formatted[1])->toBeArray()
         ->and($formatted[1])->toHaveCount(2)
@@ -171,7 +173,7 @@ it('derives days from meal plan for items without day data', function (): void {
     $mealPlan = MealPlan::factory()->for($user)->create();
 
     // Create meals with ingredients
-    App\Models\Meal::factory()->for($mealPlan)->create([
+    Meal::factory()->for($mealPlan)->create([
         'day_number' => 1,
         'name' => 'Breakfast',
         'ingredients' => [
@@ -179,14 +181,14 @@ it('derives days from meal plan for items without day data', function (): void {
             ['name' => 'bacon', 'quantity' => '3 strips'],
         ],
     ]);
-    App\Models\Meal::factory()->for($mealPlan)->create([
+    Meal::factory()->for($mealPlan)->create([
         'day_number' => 2,
         'name' => 'Lunch',
         'ingredients' => [
             ['name' => 'chicken breast', 'quantity' => '1 lb'],
         ],
     ]);
-    App\Models\Meal::factory()->for($mealPlan)->create([
+    Meal::factory()->for($mealPlan)->create([
         'day_number' => 3,
         'name' => 'Dinner',
         'ingredients' => [
@@ -217,7 +219,7 @@ it('derives days from meal plan for items without day data', function (): void {
     $itemsByDay = $groceryList->itemsByDay();
 
     // Verify that days were derived
-    expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class)
+    expect($itemsByDay)->toBeInstanceOf(Collection::class)
         ->and($itemsByDay->keys()->all())->toContain(1, 2, 3);
 });
 
@@ -226,7 +228,7 @@ it('uses fuzzy matching when exact match is not found', function (): void {
     $mealPlan = MealPlan::factory()->for($user)->create();
 
     // Create meals with ingredients
-    App\Models\Meal::factory()->for($mealPlan)->create([
+    Meal::factory()->for($mealPlan)->create([
         'day_number' => 1,
         'name' => 'Breakfast',
         'ingredients' => [
@@ -247,7 +249,7 @@ it('uses fuzzy matching when exact match is not found', function (): void {
     $itemsByDay = $groceryList->itemsByDay();
 
     // Verify that fuzzy matching worked
-    expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class)
+    expect($itemsByDay)->toBeInstanceOf(Collection::class)
         ->and($itemsByDay->has(1))->toBeTrue();
 });
 
@@ -255,7 +257,7 @@ it('handles items with empty days array when deriving', function (): void {
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();
 
-    App\Models\Meal::factory()->for($mealPlan)->create([
+    Meal::factory()->for($mealPlan)->create([
         'day_number' => 1,
         'name' => 'Breakfast',
         'ingredients' => [
@@ -274,7 +276,7 @@ it('handles items with empty days array when deriving', function (): void {
     $groceryList->load('items', 'mealPlan.meals');
     $itemsByDay = $groceryList->itemsByDay();
 
-    expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class)
+    expect($itemsByDay)->toBeInstanceOf(Collection::class)
         ->and($itemsByDay->has(1))->toBeTrue();
 });
 
@@ -293,7 +295,7 @@ it('skips derivation when all items have days', function (): void {
     $itemsByDay = $groceryList->itemsByDay();
 
     // Should not trigger derivation since item already has days
-    expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class)
+    expect($itemsByDay)->toBeInstanceOf(Collection::class)
         ->and($itemsByDay->keys()->all())->toBe([1, 2]);
 });
 
@@ -301,7 +303,7 @@ it('handles meals with null ingredients when deriving days', function (): void {
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();
 
-    App\Models\Meal::factory()->for($mealPlan)->create([
+    Meal::factory()->for($mealPlan)->create([
         'day_number' => 1,
         'name' => 'Breakfast',
         'ingredients' => null,
@@ -319,14 +321,14 @@ it('handles meals with null ingredients when deriving days', function (): void {
     $itemsByDay = $groceryList->itemsByDay();
 
     // Should handle null ingredients gracefully
-    expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class);
+    expect($itemsByDay)->toBeInstanceOf(Collection::class);
 });
 
 it('handles meals with empty ingredients array when deriving days', function (): void {
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();
 
-    App\Models\Meal::factory()->for($mealPlan)->create([
+    Meal::factory()->for($mealPlan)->create([
         'day_number' => 1,
         'name' => 'Breakfast',
         'ingredients' => [],
@@ -344,14 +346,14 @@ it('handles meals with empty ingredients array when deriving days', function ():
     $itemsByDay = $groceryList->itemsByDay();
 
     // Should handle empty ingredients array gracefully
-    expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class);
+    expect($itemsByDay)->toBeInstanceOf(Collection::class);
 });
 
 it('handles ingredients with empty name when deriving days', function (): void {
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();
 
-    App\Models\Meal::factory()->for($mealPlan)->create([
+    Meal::factory()->for($mealPlan)->create([
         'day_number' => 1,
         'name' => 'Breakfast',
         'ingredients' => [
@@ -371,14 +373,14 @@ it('handles ingredients with empty name when deriving days', function (): void {
     $itemsByDay = $groceryList->itemsByDay();
 
     // Should handle empty ingredient name gracefully
-    expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class);
+    expect($itemsByDay)->toBeInstanceOf(Collection::class);
 });
 
 it('normalizes ingredient names correctly when deriving days', function (): void {
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();
 
-    App\Models\Meal::factory()->for($mealPlan)->create([
+    Meal::factory()->for($mealPlan)->create([
         'day_number' => 1,
         'name' => 'Breakfast',
         'ingredients' => [
@@ -398,7 +400,7 @@ it('normalizes ingredient names correctly when deriving days', function (): void
     $itemsByDay = $groceryList->itemsByDay();
 
     // Should match despite different formatting
-    expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class)
+    expect($itemsByDay)->toBeInstanceOf(Collection::class)
         ->and($itemsByDay->has(1))->toBeTrue();
 });
 
@@ -406,7 +408,7 @@ it('handles mixed items where some have days and some need derivation', function
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();
 
-    App\Models\Meal::factory()->for($mealPlan)->create([
+    Meal::factory()->for($mealPlan)->create([
         'day_number' => 1,
         'name' => 'Breakfast',
         'ingredients' => [
@@ -434,7 +436,7 @@ it('handles mixed items where some have days and some need derivation', function
     $itemsByDay = $groceryList->itemsByDay();
 
     // Should have days from both items
-    expect($itemsByDay)->toBeInstanceOf(Illuminate\Support\Collection::class)
+    expect($itemsByDay)->toBeInstanceOf(Collection::class)
         ->and($itemsByDay->has(1))->toBeTrue()
         ->and($itemsByDay->has(2))->toBeTrue()
         ->and($itemsByDay->has(3))->toBeTrue();

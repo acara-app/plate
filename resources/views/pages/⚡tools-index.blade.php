@@ -134,7 +134,7 @@ class extends Component
     <main class="relative z-10 w-full max-w-4xl">
 
         {{-- Hero Section --}}
-        <div class="mb-10 text-center">
+        <div class="mb-10 text-center speakable-intro">
             <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-3xl dark:bg-emerald-900/50">🛠️</div>
             <h1 class="text-3xl font-bold text-slate-900 dark:text-white lg:text-4xl">Free Diabetes & Nutrition Tools</h1>
             <p class="mx-auto mt-3 max-w-2xl text-lg text-slate-600 dark:text-slate-400">

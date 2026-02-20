@@ -171,8 +171,8 @@ final class AssistantAgent implements Advisor
     private function getStepsInstructions(): array
     {
         return [
-            '1. Analyze the user\'s message to understand their wellness needs (nutrition, fitness, health/lifestyle)',
-            '2. Review the user\'s profile context to understand their biometrics, goals, and constraints',
+            "1. Analyze the user's message to understand their wellness needs (nutrition, fitness, health/lifestyle)",
+            "2. Review the user's profile context to understand their biometrics, goals, and constraints",
             '3. Use appropriate tools based on user intent:',
             '   - suggest_meal: For specific meal suggestions',
             '   - create_meal_plan: For multi-day meal plans or when in "Create Meal Plan" mode',
@@ -182,7 +182,7 @@ final class AssistantAgent implements Advisor
             '   - get_user_profile: When you need specific profile data',
             '   - get_health_goals: When user asks about wellness goals',
             '   - get_fitness_goals: When user asks about fitness goals',
-            '4. Provide personalized, evidence-based advice that fits the user\'s situation',
+            "4. Provide personalized, evidence-based advice that fits the user's situation",
             '5. Maintain a supportive, encouraging tone throughout',
         ];
     }
@@ -196,9 +196,9 @@ final class AssistantAgent implements Advisor
             'Be conversational, empathetic, and supportive',
             'Provide specific, actionable advice rather than generic recommendations',
             'When discussing health conditions, include appropriate medical disclaimers',
-            'Use tools when appropriate - don\'t try to generate complex plans manually',
+            "Use tools when appropriate - don't try to generate complex plans manually",
             'Keep responses concise but informative',
-            'Personalize recommendations based on user\'s profile and goals',
+            "Personalize recommendations based on user's profile and goals",
             '',
             'DOMAIN-SPECIFIC TONE:',
             '  - Nutrition: Informative and practical',

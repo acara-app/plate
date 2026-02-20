@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use Illuminate\JsonSchema\Types\BooleanType;
+use Illuminate\JsonSchema\Types\IntegerType;
+use Illuminate\JsonSchema\Types\NumberType;
+use Illuminate\JsonSchema\Types\StringType;
 use App\Contracts\ParsesHealthData;
 use App\DataObjects\HealthLogData;
 use App\DataObjects\HealthParserResult;
@@ -63,7 +67,7 @@ INST;
     }
 
     /**
-     * @return array<string, \Illuminate\JsonSchema\Types\BooleanType|\Illuminate\JsonSchema\Types\IntegerType|\Illuminate\JsonSchema\Types\NumberType|\Illuminate\JsonSchema\Types\StringType>
+     * @return array<string, BooleanType|IntegerType|NumberType|StringType>
      */
     public function schema(JsonSchema $schema): array
     {

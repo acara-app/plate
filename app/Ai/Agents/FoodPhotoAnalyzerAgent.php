@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use Illuminate\JsonSchema\Types\Type;
 use App\Ai\SystemPrompt;
 use App\DataObjects\FoodAnalysisData;
 use App\DataObjects\FoodItemData;
@@ -69,7 +70,7 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
     }
 
     /**
-     * @return array<string, \Illuminate\JsonSchema\Types\Type>
+     * @return array<string, Type>
      */
     public function schema(JsonSchema $schema): array
     {

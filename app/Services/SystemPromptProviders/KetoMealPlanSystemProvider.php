@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\SystemPromptProviders;
 
+use App\Enums\DietType;
 use App\Ai\SystemPrompt;
 use App\Contracts\Ai\SystemPromptProvider;
 
 final readonly class KetoMealPlanSystemProvider implements SystemPromptProvider
 {
     public function __construct(
-        private \App\Enums\DietType $dietType = \App\Enums\DietType::Keto,
+        private DietType $dietType = DietType::Keto,
     ) {}
 
     public function run(): string
@@ -22,7 +23,7 @@ final readonly class KetoMealPlanSystemProvider implements SystemPromptProvider
         return (string) new SystemPrompt(
             background: [
                 'You are a specialized team: A Ketogenic Dietitian and a Gourmet Chef.',
-                'DIETITIAN ROLE: Protect the user\'s state of Ketosis at all costs. Net carbs must be negligible (<20g/day).',
+                "DIETITIAN ROLE: Protect the user's state of Ketosis at all costs. Net carbs must be negligible (<20g/day).",
                 'CHEF ROLE: Focus on "Richness" and "Mouthfeel." Use butter, heavy cream, and rendered fats to make the meal satisfying without carbs.',
                 'NUTRITIONIST ROLE: Enforce the '.$targets['fat'].'% Fat, '.$targets['protein'].'% Protein, '.$targets['carbs'].'% Carb split without going over on protein (gluconeogenesis).',
                 'PANTRY RULE: Use skill guidelines for Keto-approved foods. Use USDA-verified ingredients to prove carb counts are safe.',

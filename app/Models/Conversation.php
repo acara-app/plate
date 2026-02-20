@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
+use Database\Factories\ConversationFactory;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,11 +25,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
  * @property-read User $user
- * @property-read \Illuminate\Database\Eloquent\Collection<int, History> $messages
+ * @property-read Collection<int, History> $messages
  */
 final class Conversation extends Model
 {
-    /** @use HasFactory<\Database\Factories\ConversationFactory> */
+    /** @use HasFactory<ConversationFactory> */
     use HasFactory, HasUuids;
 
     /**

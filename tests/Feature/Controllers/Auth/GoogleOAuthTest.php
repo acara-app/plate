@@ -46,7 +46,7 @@ beforeEach(function (): void {
                 return $this->provider;
             }
 
-            throw new InvalidArgumentException("Driver [{$driver}] not supported.");
+            throw new InvalidArgumentException(sprintf('Driver [%s] not supported.', $driver));
         }
     });
 });
@@ -55,6 +55,7 @@ it('redirects to Google OAuth page', function (): void {
     $response = get(route('auth.google.redirect'));
 
     $response->assertRedirect();
+
     expect($response->getTargetUrl())->toContain('accounts.google.com');
 })->group('oauth');
 
@@ -195,6 +196,7 @@ it('redirects to login with error on OAuth exception', function (): void {
 
     $response->assertRedirect(route('login'));
     $response->assertSessionHas('error', 'Something went wrong!');
+
     expect(Auth::check())->toBeFalse();
 })->group('oauth');
 

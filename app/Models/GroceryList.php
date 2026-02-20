@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\GroceryListFactory;
 use App\DataObjects\GroceryItemResponseData;
 use App\DataObjects\IngredientData;
 use App\Enums\GroceryListStatus;
@@ -29,7 +30,7 @@ use Illuminate\Support\Collection;
  */
 final class GroceryList extends Model
 {
-    /** @use HasFactory<\Database\Factories\GroceryListFactory> */
+    /** @use HasFactory<GroceryListFactory> */
     use HasFactory;
 
     /**
@@ -206,9 +207,11 @@ final class GroceryList extends Model
             if ($meal->ingredients === null) {
                 continue;
             }
+
             if (count($meal->ingredients) === 0) {
                 continue;
             }
+
             foreach ($meal->ingredients as $ingredientArray) {
                 $ingredient = IngredientData::from($ingredientArray);
                 $name = $this->normalizeIngredientName($ingredient->name);

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Workflow\Workflow;
+use Workflow\Activity;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\IngredientData;
 use App\DataObjects\PreviousDayContext;
@@ -37,14 +39,14 @@ beforeEach(function (): void {
 
 it('workflow class exists and extends correct base class', function (): void {
     expect(class_exists(MealPlanDayWorkflow::class))->toBeTrue();
-    expect(is_subclass_of(MealPlanDayWorkflow::class, Workflow\Workflow::class))->toBeTrue();
+    expect(is_subclass_of(MealPlanDayWorkflow::class, Workflow::class))->toBeTrue();
 });
 
 it('activity classes for single day workflow exist', function (): void {
     expect(class_exists(MealPlanDayGeneratorActivity::class))->toBeTrue();
     expect(class_exists(SaveDayMealsActivity::class))->toBeTrue();
-    expect(is_subclass_of(MealPlanDayGeneratorActivity::class, Workflow\Activity::class))->toBeTrue();
-    expect(is_subclass_of(SaveDayMealsActivity::class, Workflow\Activity::class))->toBeTrue();
+    expect(is_subclass_of(MealPlanDayGeneratorActivity::class, Activity::class))->toBeTrue();
+    expect(is_subclass_of(SaveDayMealsActivity::class, Activity::class))->toBeTrue();
 });
 
 it('triggers workflow when navigating to day that needs generation', function (): void {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Inertia\Response;
 use App\Contracts\Ai\Advisor;
 use App\Enums\AgentMode;
 use App\Http\Requests\StoreAgentConversationRequest;
@@ -18,7 +19,7 @@ final class ChatController
     public function create(
         Request $request,
         string $conversationId = ''
-    ): \Inertia\Response {
+    ): Response {
         $conversation = $conversationId !== ''
             ? Conversation::query()->with('messages')->find($conversationId)
             : null;

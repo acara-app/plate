@@ -25,7 +25,7 @@ beforeEach(function (): void {
 
 it('has correct name and description', function (): void {
     expect($this->tool->name())->toBe('get_user_profile')
-        ->and($this->tool->description())->toContain('Retrieve the current user\'s profile');
+        ->and($this->tool->description())->toContain("Retrieve the current user's profile");
 });
 
 it('has valid schema', function (): void {

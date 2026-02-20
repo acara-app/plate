@@ -69,36 +69,36 @@ final class HealthLogData extends Data
         $unit = $this->glucoseUnit ?? GlucoseUnit::MgDl;
         $readingType = $this->glucoseReadingType ?? GlucoseReadingType::Random;
 
-        return "Glucose {$this->glucoseValue} {$unit->value} ({$readingType->label()})";
+        return sprintf('Glucose %s %s (%s)', $this->glucoseValue, $unit->value, $readingType->label());
     }
 
     private function formatFoodLog(): string
     {
-        return "Food - {$this->carbsGrams}g carbs";
+        return sprintf('Food - %sg carbs', $this->carbsGrams);
     }
 
     private function formatInsulinLog(): string
     {
         $typeLabel = $this->insulinType?->label() ?? 'Bolus';
 
-        return "Insulin {$this->insulinUnits} units ({$typeLabel})";
+        return sprintf('Insulin %s units (%s)', $this->insulinUnits, $typeLabel);
     }
 
     private function formatMedsLog(): string
     {
         $dosage = $this->medicationDosage ?? '';
 
-        return "Medication - {$this->medicationName}".($dosage !== '' && $dosage !== '0' ? " {$dosage}" : '');
+        return 'Medication - ' . $this->medicationName.($dosage !== '' && $dosage !== '0' ? ' ' . $dosage : '');
     }
 
     private function formatVitalsLog(): string
     {
         if ($this->weight !== null) {
-            return "Weight {$this->weight} kg";
+            return sprintf('Weight %s kg', $this->weight);
         }
 
         if ($this->bpSystolic !== null && $this->bpDiastolic !== null) {
-            return "Blood Pressure {$this->bpSystolic}/{$this->bpDiastolic}";
+            return sprintf('Blood Pressure %d/%d', $this->bpSystolic, $this->bpDiastolic);
         }
 
         return 'Vitals';
@@ -108,7 +108,7 @@ final class HealthLogData extends Data
     {
         $type = $this->exerciseType ?? 'exercise';
 
-        return "Exercise - {$this->exerciseDurationMinutes} min {$type}";
+        return sprintf('Exercise - %s min %s', $this->exerciseDurationMinutes, $type);
     }
 
     /**

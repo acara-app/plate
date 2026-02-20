@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataObjects;
 
+use Carbon\CarbonInterface;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
@@ -118,7 +119,7 @@ final class HealthParserResult extends Data
         return is_string($value) ? $value : (is_scalar($value) ? (string) $value : null);
     }
 
-    private function toDateTime(mixed $value): ?\Carbon\CarbonInterface
+    private function toDateTime(mixed $value): ?CarbonInterface
     {
         $string = $this->toString($value);
 

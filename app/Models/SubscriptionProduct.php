@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\SubscriptionProductFactory;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -26,7 +27,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 final class SubscriptionProduct extends Model
 {
-    /** @use HasFactory<\Database\Factories\SubscriptionProductFactory> */
+    /** @use HasFactory<SubscriptionProductFactory> */
     use HasFactory;
 
     protected $guarded = [];

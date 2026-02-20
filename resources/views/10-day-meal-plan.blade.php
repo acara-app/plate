@@ -42,11 +42,69 @@
             }
         }
         </script>
+        <script type="application/ld+json">
+        {
+            "@@context": "https://schema.org",
+            "@@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@@type": "Question",
+                    "name": "What is a diabetes-friendly meal plan?",
+                    "acceptedAnswer": {
+                        "@@type": "Answer",
+                        "text": "A diabetes-friendly meal plan focuses on balanced macronutrients, consistent meal timing, high-fiber foods, lean proteins, and healthy fats while reducing refined carbohydrates and added sugars. This approach, known as Medical Nutrition Therapy (MNT), helps stabilize blood sugar levels throughout the day."
+                    }
+                },
+                {
+                    "@@type": "Question",
+                    "name": "How many meals should a diabetic eat per day?",
+                    "acceptedAnswer": {
+                        "@@type": "Answer",
+                        "text": "Most diabetes nutrition guidelines recommend 3 main meals and 2-3 snacks throughout the day to maintain stable blood sugar. This 10-day plan includes breakfast, morning snack, lunch, afternoon snack, dinner, and an evening snack for consistent energy and glucose control."
+                    }
+                },
+                {
+                    "@@type": "Question",
+                    "name": "Can I customize this meal plan for my dietary needs?",
+                    "acceptedAnswer": {
+                        "@@type": "Answer",
+                        "text": "This 10-day plan is a general template based on Medical Nutrition Therapy principles. For a fully personalized plan tailored to your diabetes type, dietary restrictions, and glucose goals, create a free Acara Plate account to get AI-generated meal plans that adapt to your specific needs."
+                    }
+                },
+                {
+                    "@@type": "Question",
+                    "name": "Is this meal plan suitable for Type 2 diabetes?",
+                    "acceptedAnswer": {
+                        "@@type": "Answer",
+                        "text": "Yes, this meal plan is designed specifically for people with Type 2 diabetes and prediabetes. It follows evidence-based Medical Nutrition Therapy (MNT) principles recognized by the American Diabetes Association, focusing on blood sugar stabilization through balanced nutrition and portion control."
+                    }
+                }
+            ]
+        }
+        </script>
+        <script type="application/ld+json">
+        {
+            "@@context": "https://schema.org",
+            "@@type": "WebPage",
+            "name": "10-Day Diabetes-Friendly Meal Plan",
+            "description": "A complete 10-day meal plan with breakfast, lunch, dinner, and snacks designed for Type 2 diabetes and prediabetes management.",
+            "url": "{{ url('/10-day-meal-plan') }}",
+            "speakable": {
+                "@@type": "SpeakableSpecification",
+                "cssSelector": [".speakable-intro"]
+            },
+            "isPartOf": {
+                "@@type": "WebSite",
+                "name": "Acara Plate",
+                "url": "{{ url('/') }}"
+            }
+        }
+        </script>
     @endsection
 
     <div class="mx-auto my-8 max-w-4xl px-4 sm:px-6 lg:px-8">
         {{-- Hero Section --}}
-        <header class="text-center mb-8">
+        <header class="text-center mb-8 speakable-intro">
             <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
                 10-Day Meal Plan
             </h1>

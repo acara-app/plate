@@ -22,7 +22,7 @@ final readonly class RegenerateMealPlanDayController
             ->delete();
 
         $metadata = $mealPlan->metadata ?? [];
-        $dayStatusKey = "day_{$dayNumber}_status";
+        $dayStatusKey = sprintf('day_%d_status', $dayNumber);
 
         $mealPlan->update([
             'metadata' => array_merge($metadata, [

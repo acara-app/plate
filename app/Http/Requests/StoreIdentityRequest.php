@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rules\Enum;
 use App\Enums\AnimalProductChoice;
 use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
@@ -18,7 +19,7 @@ final class StoreIdentityRequest extends FormRequest
     }
 
     /**
-     * @return array<string, array<int, string|\Illuminate\Validation\Rules\Enum>>
+     * @return array<string, array<int, string|Enum>>
      */
     public function rules(): array
     {

@@ -170,6 +170,7 @@ it('uses default files when no file option is provided and files do not exist', 
     if (File::exists(public_path('sitemap.xml'))) {
         File::move(public_path('sitemap.xml'), public_path('sitemap.xml.bak'));
     }
+
     if (File::exists(public_path('food_sitemap.xml'))) {
         File::move(public_path('food_sitemap.xml'), public_path('food_sitemap.xml.bak'));
     }
@@ -184,6 +185,7 @@ it('uses default files when no file option is provided and files do not exist', 
     if (File::exists(public_path('sitemap.xml.bak'))) {
         File::move(public_path('sitemap.xml.bak'), public_path('sitemap.xml'));
     }
+
     if (File::exists(public_path('food_sitemap.xml.bak'))) {
         File::move(public_path('food_sitemap.xml.bak'), public_path('food_sitemap.xml'));
     }

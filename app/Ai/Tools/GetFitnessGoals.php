@@ -27,7 +27,7 @@ final readonly class GetFitnessGoals implements Tool
      */
     public function description(): string
     {
-        return 'Retrieve the current user\'s fitness and exercise goals. Use this to understand what the user wants to achieve regarding their fitness, strength, endurance, weight management, or other athletic objectives.';
+        return "Retrieve the current user's fitness and exercise goals. Use this to understand what the user wants to achieve regarding their fitness, strength, endurance, weight management, or other athletic objectives.";
     }
 
     /**
