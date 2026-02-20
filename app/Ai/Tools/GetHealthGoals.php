@@ -27,7 +27,7 @@ final readonly class GetHealthGoals implements Tool
      */
     public function description(): string
     {
-        return 'Retrieve the current user\'s health and wellness goals. Use this to understand what the user wants to achieve regarding their overall health, energy levels, stress management, sleep quality, or other wellness objectives.';
+        return "Retrieve the current user's health and wellness goals. Use this to understand what the user wants to achieve regarding their overall health, energy levels, stress management, sleep quality, or other wellness objectives.";
     }
 
     /**

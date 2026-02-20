@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\UserProfileFactory;
 use App\Enums\AnimalProductChoice;
 use App\Enums\DietType;
 use App\Enums\GlucoseUnit;
@@ -47,7 +48,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 final class UserProfile extends Model
 {
-    /** @use HasFactory<\Database\Factories\UserProfileFactory> */
+    /** @use HasFactory<UserProfileFactory> */
     use HasFactory;
 
     /**

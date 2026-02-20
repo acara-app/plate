@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\MealPlanFactory;
 use App\Enums\MealPlanType;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,7 +32,7 @@ use Illuminate\Support\Collection;
  */
 final class MealPlan extends Model
 {
-    /** @use HasFactory<\Database\Factories\MealPlanFactory> */
+    /** @use HasFactory<MealPlanFactory> */
     use HasFactory;
 
     /**

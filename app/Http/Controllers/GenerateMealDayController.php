@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\MealPlan;
 use App\Workflows\MealPlanDayWorkflow;
@@ -15,7 +16,7 @@ use Workflow\WorkflowStub;
 final readonly class GenerateMealDayController
 {
     public function __construct(
-        #[CurrentUser] private \App\Models\User $user,
+        #[CurrentUser] private User $user,
     ) {
         //
     }
@@ -46,7 +47,7 @@ final readonly class GenerateMealDayController
         }
 
         $metadata = $mealPlan->metadata ?? [];
-        $dayStatusKey = "day_{$dayNumber}_status";
+        $dayStatusKey = sprintf('day_%d_status', $dayNumber);
 
         if (($metadata[$dayStatusKey] ?? '') === MealPlanGenerationStatus::Generating->value) {
             return response()->json([

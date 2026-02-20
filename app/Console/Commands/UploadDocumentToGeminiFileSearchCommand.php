@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use Illuminate\Support\Sleep;
 use App\DataObjects\GeminiFileSearchStoreData;
 use App\DataObjects\GeminiUploadedFileData;
 use App\Enums\SettingKey;
@@ -33,7 +34,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             ?? config('gemini.default_upload_file_path', storage_path('sources/FoodData_Central_foundation_food_json_2025-04-24 3.json'));
 
         if (! File::exists($filePath)) {
-            $this->error("File not found: {$filePath}");
+            $this->error('File not found: ' . $filePath);
 
             return;
         }
@@ -58,19 +59,19 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             return;
         }
 
-        $this->info("Using File Search store: {$storeName}");
+        $this->info('Using File Search store: ' . $storeName);
 
         $storeData = $this->checkStoreStatus($apiKey, $baseUrl, $storeName);
         if ($storeData && $storeData->hasDocuments()) {
             $sizeMB = $storeData->getSizeMB();
-            $this->info("Store already contains documents: {$storeData->activeDocumentsCount} active, {$storeData->pendingDocumentsCount} pending ({$sizeMB} MB)");
+            $this->info(sprintf('Store already contains documents: %d active, %d pending (%s MB)', $storeData->activeDocumentsCount, $storeData->pendingDocumentsCount, $sizeMB));
             $this->info('Skipping import.');
 
             return;
         }
 
         if ($storeData && $storeData->failedDocumentsCount > 0) {
-            $this->warn("Store has {$storeData->failedDocumentsCount} failed document(s). Proceeding with import...");
+            $this->warn(sprintf('Store has %d failed document(s). Proceeding with import...', $storeData->failedDocumentsCount));
         }
 
         if (! $this->importFile($apiKey, $baseUrl, $storeName, $file->name)) {
@@ -112,7 +113,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
                 ->post($uploadUrl);
 
             if ($response->failed()) {
-                $this->error("File upload failed: {$response->status()} {$response->body()}");
+                $this->error(sprintf('File upload failed: %d %s', $response->status(), $response->body()));
 
                 return null;
             }
@@ -146,9 +147,9 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
                 sizeBytes: is_int($sizeBytes) ? $sizeBytes : (is_string($sizeBytes) ? (int) $sizeBytes : mb_strlen($fileContent)),
                 uri: $uri
             );
-        } catch (Exception $e) {
-            $this->error("File upload failed: {$e->getMessage()}");
-            $this->error('Exception class: '.$e::class);
+        } catch (Exception $exception) {
+            $this->error('File upload failed: ' . $exception->getMessage());
+            $this->error('Exception class: '.$exception::class);
 
             return null;
         }
@@ -169,12 +170,12 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'x-goog-api-key' => $apiKey,
-        ])->post("{$baseUrl}/fileSearchStores", [
+        ])->post($baseUrl . '/fileSearchStores', [
             'displayName' => $storeDisplayName,
         ]);
 
         if ($response->failed()) {
-            $this->error("Failed to create File Search store: {$response->body()}");
+            $this->error('Failed to create File Search store: ' . $response->body());
 
             return null;
         }
@@ -188,7 +189,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
         Setting::set(SettingKey::GeminiFileSearchStoreName, $storeName);
 
-        $this->info("File Search store created: {$storeName}");
+        $this->info('File Search store created: ' . $storeName);
 
         return $storeName;
     }
@@ -197,7 +198,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
     {
         $response = Http::withHeaders([
             'x-goog-api-key' => $apiKey,
-        ])->get("{$baseUrl}/{$storeName}");
+        ])->get(sprintf('%s/%s', $baseUrl, $storeName));
 
         if ($response->failed()) {
             $this->warn('Unable to check store status.');
@@ -224,12 +225,12 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'x-goog-api-key' => $apiKey,
-        ])->post("{$baseUrl}/{$storeName}:importFile", [
+        ])->post(sprintf('%s/%s:importFile', $baseUrl, $storeName), [
             'file_name' => $fileName,
         ]);
 
         if ($response->failed()) {
-            $this->error("Failed to import file: {$response->body()}");
+            $this->error('Failed to import file: ' . $response->body());
 
             return false;
         }
@@ -254,10 +255,10 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             $attempts++;
             $response = Http::withHeaders([
                 'x-goog-api-key' => $apiKey,
-            ])->get("{$baseUrl}/{$operationName}");
+            ])->get(sprintf('%s/%s', $baseUrl, $operationName));
 
             if ($response->failed()) {
-                $this->error("Failed to check operation status: {$response->body()}");
+                $this->error('Failed to check operation status: ' . $response->body());
 
                 return false;
             }
@@ -265,10 +266,10 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             $isDone = $response->json('done', false);
 
             if (! $isDone) {
-                $this->info("Operation still in progress (attempt {$attempts})...");
+                $this->info(sprintf('Operation still in progress (attempt %d)...', $attempts));
                 /** @var int $pollingInterval */
                 $pollingInterval = config('gemini.polling_interval', 10);
-                \Illuminate\Support\Sleep::sleep($pollingInterval);
+                Sleep::sleep($pollingInterval);
 
                 continue;
             }
@@ -305,6 +306,6 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
         }
 
         $sizeMB = $storeData->getSizeMB();
-        $this->info("✓ Verified: {$storeData->activeDocumentsCount} active, {$storeData->pendingDocumentsCount} pending ({$sizeMB} MB)");
+        $this->info(sprintf('✓ Verified: %d active, %d pending (%s MB)', $storeData->activeDocumentsCount, $storeData->pendingDocumentsCount, $sizeMB));
     }
 }

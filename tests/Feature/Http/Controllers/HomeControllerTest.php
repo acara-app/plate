@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Eloquent\Collection;
+
 it('displays the homepage', function (): void {
     $this->get(route('home'))
         ->assertOk()
@@ -16,5 +18,5 @@ it('passes featured foods to the view', function (): void {
 
     $featuredFoods = $response->viewData('featuredFoods');
 
-    expect($featuredFoods)->toBeInstanceOf(Illuminate\Database\Eloquent\Collection::class);
+    expect($featuredFoods)->toBeInstanceOf(Collection::class);
 });

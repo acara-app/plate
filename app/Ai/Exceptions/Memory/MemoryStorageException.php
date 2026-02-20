@@ -33,7 +33,7 @@ final class MemoryStorageException extends Exception
     public static function storeFailed(string $reason, ?array $context = null): self
     {
         return new self(
-            message: "Failed to store memory: {$reason}",
+            message: 'Failed to store memory: ' . $reason,
             operation: 'store',
             context: $context,
         );
@@ -45,7 +45,7 @@ final class MemoryStorageException extends Exception
     public static function updateFailed(string $memoryId, string $reason): self
     {
         return new self(
-            message: "Failed to update memory '{$memoryId}': {$reason}",
+            message: sprintf("Failed to update memory '%s': %s", $memoryId, $reason),
             operation: 'update',
             context: ['memory_id' => $memoryId],
         );
@@ -57,7 +57,7 @@ final class MemoryStorageException extends Exception
     public static function deleteFailed(string $reason): self
     {
         return new self(
-            message: "Failed to delete memory: {$reason}",
+            message: 'Failed to delete memory: ' . $reason,
             operation: 'delete',
         );
     }
@@ -70,7 +70,7 @@ final class MemoryStorageException extends Exception
     public static function consolidationFailed(array $memoryIds, string $reason): self
     {
         return new self(
-            message: "Failed to consolidate memories: {$reason}",
+            message: 'Failed to consolidate memories: ' . $reason,
             operation: 'consolidate',
             context: ['memory_ids' => $memoryIds],
         );

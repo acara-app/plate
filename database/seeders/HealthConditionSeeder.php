@@ -90,7 +90,7 @@ final class HealthConditionSeeder extends Seeder
             [
                 'name' => 'Inflammatory Bowel Disease (IBD)',
                 'order' => 10,
-                'description' => 'Chronic inflammation of the digestive tract, including Crohn\'s disease and ulcerative colitis.',
+                'description' => "Chronic inflammation of the digestive tract, including Crohn's disease and ulcerative colitis.",
                 'nutritional_impact' => 'Focus on anti-inflammatory foods during remission. During flares, may need low-residue diet. Address malnutrition from poor absorption.',
                 'recommended_nutrients' => ['Omega-3 Fatty Acids', 'Probiotics', 'Vitamin D', 'Iron', 'Folate', 'Vitamin B12', 'Zinc'],
                 'nutrients_to_limit' => ['Fiber (during flares)', 'Lactose (if intolerant)', 'FODMAPs', 'Alcohol', 'Saturated Fat'],

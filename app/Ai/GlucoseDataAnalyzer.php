@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Ai;
 
+use Illuminate\Support\Facades\Date;
+use App\Models\HealthEntry;
 use App\DataObjects\GlucoseAnalysis\AveragesData;
 use App\DataObjects\GlucoseAnalysis\DateRangeData;
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
@@ -33,7 +35,7 @@ final readonly class GlucoseDataAnalyzer
      */
     public function handle(User $user, int $daysBack = 30): GlucoseAnalysisData
     {
-        $cutoffDate = \Illuminate\Support\Facades\Date::now()->subDays($daysBack);
+        $cutoffDate = Date::now()->subDays($daysBack);
 
         // Use healthEntries and filter for entries with glucose data
         $readings = $user->healthEntries()
@@ -107,9 +109,9 @@ final readonly class GlucoseDataAnalyzer
         $patterns = $this->detectPatterns($readings, $timeInRange, $variability);
 
         // Generate insights with actual date range
-        /** @var \App\Models\HealthEntry $firstReading */
+        /** @var HealthEntry $firstReading */
         $firstReading = $readings->first();
-        /** @var \App\Models\HealthEntry $lastReading */
+        /** @var HealthEntry $lastReading */
         $lastReading = $readings->last();
 
         $actualDays = (int) $lastReading->measured_at->diffInDays($firstReading->measured_at) + 1;
@@ -205,7 +207,7 @@ final readonly class GlucoseDataAnalyzer
                 hypoglycemiaRisk: 'none',
                 hyperglycemiaRisk: 'none',
             ),
-            insights: ["No glucose data recorded in the past {$daysBack} days"],
+            insights: [sprintf('No glucose data recorded in the past %d days', $daysBack)],
             concerns: [],
             glucoseGoals: new GlucoseGoalsData(
                 target: 'Establish baseline glucose monitoring',
@@ -217,11 +219,11 @@ final readonly class GlucoseDataAnalyzer
     /**
      * Calculate average glucose readings by type.
      *
-     * @param  Collection<int, \App\Models\HealthEntry>  $readings
+     * @param Collection<int, HealthEntry> $readings
      */
     private function calculateAverages(Collection $readings): AveragesData
     {
-        $grouped = $readings->groupBy(fn (\App\Models\HealthEntry $reading): string => $reading->glucose_reading_type->value ?? GlucoseReadingType::Random->value);
+        $grouped = $readings->groupBy(fn (HealthEntry $reading): string => $reading->glucose_reading_type->value ?? GlucoseReadingType::Random->value);
 
         $overallAvg = $readings->avg('glucose_value');
 
@@ -237,7 +239,7 @@ final readonly class GlucoseDataAnalyzer
     /**
      * Calculate average for a collection of readings.
      *
-     * @param  Collection<int, \App\Models\HealthEntry>|null  $readings
+     * @param Collection<int, HealthEntry>|null $readings
      */
     private function calculateAverage(?Collection $readings): ?float
     {
@@ -253,13 +255,13 @@ final readonly class GlucoseDataAnalyzer
     /**
      * Detect patterns in glucose readings with enhanced TIR-based analysis.
      *
-     * @param  Collection<int, \App\Models\HealthEntry>  $readings
+     * @param Collection<int, HealthEntry> $readings
      */
     private function detectPatterns(Collection $readings, TimeInRangeData $timeInRange, VariabilityData $variability): PatternsData
     {
         $postMealReadings = $readings->where('glucose_reading_type', GlucoseReadingType::PostMeal);
         $highPostMeal = $postMealReadings->filter(
-            fn (\App\Models\HealthEntry $r): bool => $r->glucose_value > GlucoseStatisticsService::POST_MEAL_SPIKE_THRESHOLD
+            fn (HealthEntry $r): bool => $r->glucose_value > GlucoseStatisticsService::POST_MEAL_SPIKE_THRESHOLD
         )->count();
 
         // Determine hypoglycemia risk based on time-below-range
@@ -326,15 +328,15 @@ final readonly class GlucoseDataAnalyzer
 
         // Overview
         $dayLabel = $actualDays === 1 ? 'day' : 'days';
-        $insights[] = "Analyzed {$readingsCount} glucose readings over {$actualDays} {$dayLabel}";
+        $insights[] = sprintf('Analyzed %d glucose readings over %d %s', $readingsCount, $actualDays, $dayLabel);
 
         // Average and range
         if ($averages->overall !== null) {
-            $insights[] = "Average glucose level: {$averages->overall} mg/dL";
+            $insights[] = sprintf('Average glucose level: %s mg/dL', $averages->overall);
         }
 
         if ($ranges->min !== null && $ranges->max !== null) {
-            $insights[] = "Glucose range: {$ranges->min}-{$ranges->max} mg/dL";
+            $insights[] = sprintf('Glucose range: %s-%s mg/dL', $ranges->min, $ranges->max);
         }
 
         // Time in range - critical metric
@@ -343,7 +345,7 @@ final readonly class GlucoseDataAnalyzer
             $timeInRange->percentage >= 50 => 'good',
             default => 'needs improvement',
         };
-        $insights[] = "Time in range (70-140 mg/dL): {$timeInRange->percentage}% ({$tirStatus})";
+        $insights[] = sprintf('Time in range (70-140 mg/dL): %s%% (%s)', $timeInRange->percentage, $tirStatus);
 
         // Fasting glucose
         if ($averages->fasting !== null) {
@@ -353,27 +355,27 @@ final readonly class GlucoseDataAnalyzer
                 $averages->fasting <= GlucoseStatisticsService::FASTING_PREDIABETIC_MAX => 'elevated',
                 default => 'high',
             };
-            $insights[] = "Average fasting glucose: {$averages->fasting} mg/dL ({$status})";
+            $insights[] = sprintf('Average fasting glucose: %s mg/dL (%s)', $averages->fasting, $status);
         }
 
         // Post-meal glucose
         if ($averages->postMeal !== null) {
             $status = $averages->postMeal <= GlucoseStatisticsService::POST_MEAL_SPIKE_THRESHOLD ? 'normal' : 'elevated';
-            $insights[] = "Average post-meal glucose: {$averages->postMeal} mg/dL ({$status})";
+            $insights[] = sprintf('Average post-meal glucose: %s mg/dL (%s)', $averages->postMeal, $status);
         }
 
         // Variability analysis
         if ($variability->coefficientOfVariation !== null) {
             $cvStatus = $variability->classification;
-            $insights[] = "Glucose variability: {$cvStatus} (CV: {$variability->coefficientOfVariation}%)";
+            $insights[] = sprintf('Glucose variability: %s (CV: %s%%)', $cvStatus, $variability->coefficientOfVariation);
         }
 
         // Trend analysis
         if ($trend->direction === 'rising' && $trend->slopePerWeek !== null) {
-            $insights[] = "Trend: glucose levels rising by approximately {$trend->slopePerWeek} mg/dL per week";
+            $insights[] = sprintf('Trend: glucose levels rising by approximately %s mg/dL per week', $trend->slopePerWeek);
         } elseif ($trend->direction === 'falling' && $trend->slopePerWeek !== null) {
             $absSlope = abs($trend->slopePerWeek);
-            $insights[] = "Trend: glucose levels decreasing by approximately {$absSlope} mg/dL per week";
+            $insights[] = sprintf('Trend: glucose levels decreasing by approximately %s mg/dL per week', $absSlope);
         } elseif ($trend->direction === 'stable') {
             $insights[] = 'Trend: glucose levels are stable over the analysis period';
         }
@@ -388,9 +390,10 @@ final readonly class GlucoseDataAnalyzer
         ];
         foreach ($periods as $period => $data) {
             if ($data->count > 0 && $data->average !== null) {
-                $timeOfDayInsights[] = "{$period}: {$data->average} mg/dL ({$data->count} readings)";
+                $timeOfDayInsights[] = sprintf('%s: %s mg/dL (%d readings)', $period, $data->average, $data->count);
             }
         }
+
         if ($timeOfDayInsights !== []) {
             $insights[] = 'Average by time of day: '.implode(', ', $timeOfDayInsights);
         }
@@ -400,7 +403,7 @@ final readonly class GlucoseDataAnalyzer
             $mostCommon = collect($readingTypes)->sortByDesc(fn (ReadingTypeStatsData $stats): int => $stats->count)->first();
             if ($mostCommon !== null) {
                 $type = collect($readingTypes)->search($mostCommon);
-                $insights[] = "Most frequent reading type: {$type} ({$mostCommon->percentage}%)";
+                $insights[] = sprintf('Most frequent reading type: %s (%s%%)', $type, $mostCommon->percentage);
             }
         }
 
@@ -435,12 +438,12 @@ final readonly class GlucoseDataAnalyzer
 
         // Time in range concerns
         if ($timeInRange->percentage < 50) {
-            $concerns[] = "Low time in range ({$timeInRange->percentage}%) indicates poor glucose control requiring attention";
+            $concerns[] = sprintf('Low time in range (%s%%) indicates poor glucose control requiring attention', $timeInRange->percentage);
         }
 
         // Hyperglycemia concerns
         if ($patterns->consistentlyHigh && $averages->overall !== null) {
-            $concerns[] = "Consistently elevated glucose levels (average: {$averages->overall} mg/dL, {$timeInRange->abovePercentage}% time above range) may indicate need for dietary intervention";
+            $concerns[] = sprintf('Consistently elevated glucose levels (average: %s mg/dL, %s%% time above range) may indicate need for dietary intervention', $averages->overall, $timeInRange->abovePercentage);
         }
 
         if ($patterns->postMealSpikes) {
@@ -449,7 +452,7 @@ final readonly class GlucoseDataAnalyzer
 
         // Hypoglycemia concerns
         if ($patterns->consistentlyLow && $averages->overall !== null) {
-            $concerns[] = "Consistently low glucose levels (average: {$averages->overall} mg/dL, {$timeInRange->belowPercentage}% time below range) may indicate insufficient carbohydrate intake";
+            $concerns[] = sprintf('Consistently low glucose levels (average: %s mg/dL, %s%% time below range) may indicate insufficient carbohydrate intake', $averages->overall, $timeInRange->belowPercentage);
         }
 
         if ($patterns->hypoglycemiaRisk === 'high') {
@@ -465,12 +468,12 @@ final readonly class GlucoseDataAnalyzer
 
         // Fasting glucose concerns
         if ($averages->fasting !== null && $averages->fasting > GlucoseStatisticsService::FASTING_NORMAL_MAX) {
-            $concerns[] = "Elevated fasting glucose ({$averages->fasting} mg/dL) may be influenced by evening eating patterns";
+            $concerns[] = sprintf('Elevated fasting glucose (%s mg/dL) may be influenced by evening eating patterns', $averages->fasting);
         }
 
         // Trend concerns
         if ($trend->direction === 'rising' && $trend->slopePerWeek !== null && $trend->slopePerWeek > 5) {
-            $concerns[] = "Glucose levels are rising by {$trend->slopePerWeek} mg/dL per week - early intervention recommended";
+            $concerns[] = sprintf('Glucose levels are rising by %s mg/dL per week - early intervention recommended', $trend->slopePerWeek);
         }
 
         return $concerns;
@@ -489,7 +492,7 @@ final readonly class GlucoseDataAnalyzer
         if ($patterns->consistentlyLow && $averages->overall !== null) {
             return new GlucoseGoalsData(
                 target: 'Maintain glucose levels above 70 mg/dL',
-                reasoning: "Current average of {$averages->overall} mg/dL with {$timeInRange->belowPercentage}% time below range indicates need for increased carbohydrate intake",
+                reasoning: sprintf('Current average of %s mg/dL with %s%% time below range indicates need for increased carbohydrate intake', $averages->overall, $timeInRange->belowPercentage),
             );
         }
 
@@ -497,7 +500,7 @@ final readonly class GlucoseDataAnalyzer
         if ($timeInRange->percentage < 50) {
             return new GlucoseGoalsData(
                 target: 'Increase time in range to at least 70%',
-                reasoning: "Current time in range of {$timeInRange->percentage}% is below target; requires comprehensive meal planning",
+                reasoning: sprintf('Current time in range of %s%% is below target; requires comprehensive meal planning', $timeInRange->percentage),
             );
         }
 
@@ -505,7 +508,7 @@ final readonly class GlucoseDataAnalyzer
         if ($patterns->postMealSpikes && $averages->postMeal !== null) {
             return new GlucoseGoalsData(
                 target: 'Reduce post-meal glucose spikes to below 140 mg/dL',
-                reasoning: "Current post-meal average of {$averages->postMeal} mg/dL exceeds recommended threshold",
+                reasoning: sprintf('Current post-meal average of %s mg/dL exceeds recommended threshold', $averages->postMeal),
             );
         }
 
@@ -521,7 +524,7 @@ final readonly class GlucoseDataAnalyzer
         if ($trend->direction === 'rising' && $trend->slopePerWeek !== null && $trend->slopePerWeek > 3) {
             return new GlucoseGoalsData(
                 target: 'Reverse rising glucose trend',
-                reasoning: "Levels are increasing by {$trend->slopePerWeek} mg/dL per week; early intervention can prevent further elevation",
+                reasoning: sprintf('Levels are increasing by %s mg/dL per week; early intervention can prevent further elevation', $trend->slopePerWeek),
             );
         }
 
@@ -529,7 +532,7 @@ final readonly class GlucoseDataAnalyzer
         if ($averages->overall !== null) {
             return new GlucoseGoalsData(
                 target: 'Maintain current glucose control',
-                reasoning: "Current average of {$averages->overall} mg/dL with {$timeInRange->percentage}% time in range shows good control",
+                reasoning: sprintf('Current average of %s mg/dL with %s%% time in range shows good control', $averages->overall, $timeInRange->percentage),
             );
         }
 

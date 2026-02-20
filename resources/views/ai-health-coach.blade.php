@@ -86,6 +86,24 @@
     ]
 }
 </script>
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "WebPage",
+    "name": "AI Health Coach — Personalized Wellness for Diabetes",
+    "description": "An AI-powered health coach that helps you understand sleep, stress, and lifestyle factors affecting your blood sugar and overall wellness.",
+    "url": "{{ url('/ai-health-coach') }}",
+    "speakable": {
+        "@@type": "SpeakableSpecification",
+        "cssSelector": [".speakable-intro"]
+    },
+    "isPartOf": {
+        "@@type": "WebSite",
+        "name": "Acara Plate",
+        "url": "{{ url('/') }}"
+    }
+}
+</script>
 @endsection
 
 <x-default-layout>
@@ -143,13 +161,13 @@
                         </div>
 
                         <!-- Headline (F-pattern primary scan line) -->
-                        <h1 class="font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl mb-6">
+                        <h1 class="font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl mb-6 speakable-intro">
                             You Sleep 8 Hours and Still<br>
                             <span class="text-transparent bg-clip-text bg-linear-to-r from-[#FF6B4A] to-[#FF8F6B]">Feel Like a Zombie</span>?
                         </h1>
 
                         <!-- Subheadline (secondary scan path) -->
-                        <p class="mt-4 text-lg leading-8 text-slate-600 max-w-xl mx-auto lg:mx-0">
+                        <p class="mt-4 text-lg leading-8 text-slate-600 max-w-xl mx-auto lg:mx-0 speakable-intro">
                             It's not about sleeping more—it's about understanding the hidden factors wrecking your rest: afternoon caffeine, blue light at night, room temperature, stress hormones. Your body keeps score even when you're not paying attention.
                         </p>
 

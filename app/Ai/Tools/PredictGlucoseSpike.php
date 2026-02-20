@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\DataObjects\SpikePredictionData;
 use App\Contracts\Ai\PredictsGlucoseSpikes;
 use App\Enums\SpikeRiskLevel;
 use Exception;
@@ -62,9 +63,9 @@ final readonly class PredictGlucoseSpike implements Tool
                 ],
                 'recommendations' => $this->generateRecommendations($prediction, $context),
             ]);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             return (string) json_encode([
-                'error' => 'Failed to predict glucose impact: '.$e->getMessage(),
+                'error' => 'Failed to predict glucose impact: '.$exception->getMessage(),
                 'prediction' => null,
             ]);
         }
@@ -103,7 +104,7 @@ final readonly class PredictGlucoseSpike implements Tool
      *
      * @return array<int, string>
      */
-    private function generateRecommendations(\App\DataObjects\SpikePredictionData $prediction, ?string $context): array
+    private function generateRecommendations(SpikePredictionData $prediction, ?string $context): array
     {
         $recommendations = [];
 

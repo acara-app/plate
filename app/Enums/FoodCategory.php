@@ -78,7 +78,7 @@ enum FoodCategory: string
             self::ProteinsLegumes => 'Proteins are usually safe, but preparation matters. We break down the data for core proteins and legumes to help you identify healthy options with hidden carb loads.',
             self::NutsSeeds => 'Healthy fats usually stabilize blood sugar, but carb counts vary. Check the glycemic score of verified nuts and seeds to find zero-spike snacking options.',
             self::Beverages => 'Liquids hit the bloodstream fast. We rate standard beverages—from pure juices to coffee—so you can instantly spot the "sugar bombs" that bypass digestion.',
-            self::CondimentsSauces => 'Sauces are often where sugar hides. We expose the true carb counts in key condiments like ketchup and dressings, ensuring you don\'t ruin a healthy meal with the wrong topping.',
+            self::CondimentsSauces => "Sauces are often where sugar hides. We expose the true carb counts in key condiments like ketchup and dressings, ensuring you don't ruin a healthy meal with the wrong topping.",
             self::SnacksSweets => 'Craving something sweet? We analyze the glycemic load of classic treats to help you find the ones that satisfy a craving without sending your numbers off the charts.',
             self::Other => 'Unsure about a specific ingredient? Search our verified database to uncover the nutritional facts and glycemic safety of miscellaneous common foods.',
         };

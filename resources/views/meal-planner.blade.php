@@ -36,6 +36,10 @@
         "@@type": "WebPage",
         "name": "AI Meal Planner for Diabetes",
         "description": "Get AI-generated meal plans tailored to your diabetes type, diet preferences, and glucose goals.",
+        "speakable": {
+            "@@type": "SpeakableSpecification",
+            "cssSelector": [".speakable-intro"]
+        },
         "publisher": {
             "@@type": "Organization",
             "name": "Acara Plate"
@@ -99,10 +103,10 @@
             <span class="flex h-2 w-2 rounded-full bg-emerald-600"></span>
             Designed for Type 2 Diabetes & Pre-diabetes
         </div>
-        <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl speakable-intro">
             I Tried Every Meal Planning App. They All Wanted Me to Count Calories.
         </h1>
-        <p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
+        <p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto speakable-intro">
             That's not sustainable. That's not enjoyable. And that's not how real people eat. What if meal planning actually fit your life instead of the other way around?
         </p>
         <div class="mt-6 flex flex-wrap justify-center gap-4 text-sm text-slate-600">

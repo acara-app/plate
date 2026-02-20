@@ -114,6 +114,24 @@
     ]
 }
 </script>
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "WebPage",
+    "name": "AI Nutritionist — Personalized Nutrition for Diabetes",
+    "description": "An AI-powered nutrition assistant that analyzes your meals and predicts glucose impact. Built for people managing Type 2 diabetes and prediabetes.",
+    "url": "{{ url('/ai-nutritionist') }}",
+    "speakable": {
+        "@@type": "SpeakableSpecification",
+        "cssSelector": [".speakable-intro"]
+    },
+    "isPartOf": {
+        "@@type": "WebSite",
+        "name": "Acara Plate",
+        "url": "{{ url('/') }}"
+    }
+}
+</script>
 @endsection
 
 <x-default-layout>
@@ -179,12 +197,12 @@
                             </span>
                         </div>
                         
-                        <h1 class="font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl mb-6">
+                        <h1 class="font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl mb-6 speakable-intro">
                             I Ate "Healthy" Oatmeal Every Morning For a Year.
                             <span class="text-[#FF6B4A]">My Glucose Told a Different Story.</span>
                         </h1>
                         
-                        <p class="mt-6 text-lg leading-8 text-slate-600 max-w-2xl mx-auto lg:mx-0">
+                        <p class="mt-6 text-lg leading-8 text-slate-600 max-w-2xl mx-auto lg:mx-0 speakable-intro">
                             Turns out, the banana-and-honey "health" bowl I loved was spiking my blood sugar through the roof. That's the thing about nutrition—everyone's body responds differently. The tool I wish I'd had? Something that could look at <em>my</em> plate and tell me what <em>my</em> body would actually do with it.
                         </p>
                         

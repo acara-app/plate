@@ -56,7 +56,7 @@ final class GenerateFoodSitemapCommand extends Command
         $outputPath = $this->option('output');
         $sitemap->writeToFile(base_path($outputPath));
 
-        $this->info("✓ Generated sitemap with {$foods->count()} food pages at {$outputPath}");
+        $this->info(sprintf('✓ Generated sitemap with %d food pages at %s', $foods->count(), $outputPath));
 
         return self::SUCCESS;
     }

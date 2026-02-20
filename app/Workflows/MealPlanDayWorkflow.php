@@ -57,7 +57,7 @@ final class MealPlanDayWorkflow extends Workflow
         $isCompleted = $daysCompleted >= $totalDays;
 
         $metadata = $mealPlan->metadata ?? [];
-        unset($metadata["day_{$dayNumber}_status"]);
+        unset($metadata[sprintf('day_%d_status', $dayNumber)]);
 
         $mealPlan->update([
             'metadata' => array_merge($metadata, [
@@ -65,7 +65,7 @@ final class MealPlanDayWorkflow extends Workflow
                 'status' => $isCompleted
                     ? MealPlanGenerationStatus::Completed->value
                     : MealPlanGenerationStatus::Pending->value,
-                "day_{$dayNumber}_generated_at" => now()->toIso8601String(),
+                sprintf('day_%d_generated_at', $dayNumber) => now()->toIso8601String(),
             ]),
         ]);
 

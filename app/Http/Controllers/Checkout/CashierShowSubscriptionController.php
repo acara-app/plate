@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Checkout;
 
+use Laravel\Cashier\Subscription;
+use Laravel\Cashier\SubscriptionItem;
 use App\Contracts\Services\StripeServiceContract;
 use App\Models\SubscriptionProduct;
 use Illuminate\Http\Request;
@@ -34,14 +36,14 @@ final readonly class CashierShowSubscriptionController
 
         /** @var \Laravel\Cashier\Subscription|null $currentSubscription */
         /** @phpstan-ignore-next-line argument.type */
-        $currentSubscription = $user->subscriptions()->get()->first(fn (\Laravel\Cashier\Subscription $subscription): bool => $subscription->valid());
+        $currentSubscription = $user->subscriptions()->get()->first(fn (Subscription $subscription): bool => $subscription->valid());
 
         // Find the current product from local database using subscription_items
         $currentProduct = null;
         $isYearly = false;
 
         if ($currentSubscription) {
-            /** @var \Laravel\Cashier\SubscriptionItem|null $subscriptionItem */
+            /** @var SubscriptionItem|null $subscriptionItem */
             $subscriptionItem = $currentSubscription->items()->first();
 
             if ($subscriptionItem) {

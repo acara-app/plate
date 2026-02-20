@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Eloquent\Builder;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -159,7 +160,7 @@ test('prunable method returns correct query builder instance', function (): void
 
     $prunableQuery = $user->prunable();
 
-    expect($prunableQuery)->toBeInstanceOf(Illuminate\Database\Eloquent\Builder::class);
+    expect($prunableQuery)->toBeInstanceOf(Builder::class);
 });
 
 test('prunable filters out verified users', function (): void {

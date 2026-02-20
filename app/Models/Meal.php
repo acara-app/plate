@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\MealPlanType;
+use Database\Factories\MealFactory;
 use App\DataObjects\IngredientData;
 use App\Enums\MealType;
 use Carbon\CarbonInterface;
@@ -35,7 +37,7 @@ use Illuminate\Support\Collection;
  */
 final class Meal extends Model
 {
-    /** @use HasFactory<\Database\Factories\MealFactory> */
+    /** @use HasFactory<MealFactory> */
     use HasFactory;
 
     /**
@@ -115,12 +117,12 @@ final class Meal extends Model
      */
     public function getDayName(): string
     {
-        if ($this->mealPlan->type === \App\Enums\MealPlanType::Weekly && $this->day_number <= 7) {
+        if ($this->mealPlan->type === MealPlanType::Weekly && $this->day_number <= 7) {
             $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-            return $days[$this->day_number - 1] ?? "Day {$this->day_number}";
+            return $days[$this->day_number - 1] ?? 'Day ' . $this->day_number;
         }
 
-        return "Day {$this->day_number}";
+        return 'Day ' . $this->day_number;
     }
 }

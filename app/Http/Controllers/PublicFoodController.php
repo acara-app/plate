@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Collection;
 use App\Enums\ContentType;
 use App\Enums\FoodCategory;
 use App\Models\Content;
@@ -66,7 +67,7 @@ final readonly class PublicFoodController
         $category = $request->input('category');
 
         if ($search !== null && $search !== '') {
-            $query->where('title', 'ILIKE', "%{$search}%"); // @codeCoverageIgnore
+            $query->where('title', 'ILIKE', sprintf('%%%s%%', $search)); // @codeCoverageIgnore
         }
 
         if ($assessment && in_array($assessment, ['low', 'medium', 'high'], true)) {
@@ -108,10 +109,10 @@ final readonly class PublicFoodController
                 ->groupBy(fn (Content $food): string => $food->category !== null ? $food->category->value : 'uncategorized');
 
             // Store original counts before limiting
-            $categoryCounts = $grouped->map(fn (\Illuminate\Support\Collection $foods): int => $foods->count());
+            $categoryCounts = $grouped->map(fn (Collection $foods): int => $foods->count());
 
             $foodsByCategory = $grouped
-                ->map(fn (\Illuminate\Support\Collection $foods) => $foods->take($itemsPerCategory))
+                ->map(fn (Collection $foods) => $foods->take($itemsPerCategory))
                 ->sortKeys();
         }
 

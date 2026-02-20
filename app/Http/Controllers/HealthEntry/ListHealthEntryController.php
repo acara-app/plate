@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\HealthEntry;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Actions\GetUserHealthEntriesAction;
 use App\Http\Layouts\DiabetesLayout;
 use App\Models\User;
@@ -21,7 +22,7 @@ final readonly class ListHealthEntryController
     public function __invoke(): Response
     {
         return Inertia::render('health-entries/index', [
-            'logs' => Inertia::scroll(fn (): \Illuminate\Contracts\Pagination\LengthAwarePaginator => $this->getUserHealthEntries->handle($this->currentUser)),
+            'logs' => Inertia::scroll(fn (): LengthAwarePaginator => $this->getUserHealthEntries->handle($this->currentUser)),
             ...DiabetesLayout::props($this->currentUser),
         ]);
     }

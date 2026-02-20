@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Stripe\Stripe;
+use Stripe\Price;
+use Laravel\Cashier\Subscription;
+use Laravel\Cashier\Payment;
 use App\Contracts\Services\StripeServiceContract;
 use App\Models\User;
 use RuntimeException;
@@ -41,9 +45,9 @@ final readonly class StripeService implements StripeServiceContract
 
         throw_unless(is_string($apiKey), RuntimeException::class, 'Stripe API key is not configured properly');
 
-        \Stripe\Stripe::setApiKey($apiKey); // @codeCoverageIgnore
+        Stripe::setApiKey($apiKey); // @codeCoverageIgnore
 
-        $prices = \Stripe\Price::all([ // @codeCoverageIgnore
+        $prices = Price::all([ // @codeCoverageIgnore
             'lookup_keys' => [$lookupKey], // @codeCoverageIgnore
             'limit' => 1, // @codeCoverageIgnore
         ]); // @codeCoverageIgnore
@@ -62,6 +66,7 @@ final readonly class StripeService implements StripeServiceContract
         if ($trialDays !== null && $trialDays > 0) {
             $subscription->trialDays($trialDays);
         }
+
         // @codeCoverageIgnoreEnd
 
         $checkout = $subscription->checkout([
@@ -79,11 +84,11 @@ final readonly class StripeService implements StripeServiceContract
         return $url; // @codeCoverageIgnore
     }
 
-    public function getIncompletePaymentUrl(\Laravel\Cashier\Subscription $subscription): ?string
+    public function getIncompletePaymentUrl(Subscription $subscription): ?string
     {
         $latestPayment = $subscription->latestPayment();
 
-        if (! $latestPayment instanceof \Laravel\Cashier\Payment) {
+        if (! $latestPayment instanceof Payment) {
             return null;
         }
 

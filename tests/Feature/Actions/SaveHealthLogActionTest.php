@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Date;
 use App\Actions\RecordHealthEntryAction;
 use App\Actions\SaveHealthLogAction;
 use App\DataObjects\HealthLogData;
@@ -15,7 +16,7 @@ uses(RefreshDatabase::class);
 
 it('saves health log data with provided measurement time', function (): void {
     $user = User::factory()->create();
-    $measuredAt = Illuminate\Support\Facades\Date::parse('2023-10-27 10:00:00');
+    $measuredAt = Date::parse('2023-10-27 10:00:00');
 
     $data = new HealthLogData(
         isHealthData: true,
@@ -39,7 +40,7 @@ it('saves health log data with provided measurement time', function (): void {
 
 it('saves health log data with default measurement time', function (): void {
     $user = User::factory()->create();
-    Illuminate\Support\Facades\Date::setTestNow('2023-10-28 12:00:00');
+    Date::setTestNow('2023-10-28 12:00:00');
 
     $data = new HealthLogData(
         isHealthData: true,

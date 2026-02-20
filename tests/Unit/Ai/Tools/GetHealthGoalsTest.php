@@ -25,7 +25,7 @@ beforeEach(function (): void {
 
 it('has correct name and description', function (): void {
     expect($this->tool->name())->toBe('get_health_goals')
-        ->and($this->tool->description())->toContain('Retrieve the current user\'s health');
+        ->and($this->tool->description())->toContain("Retrieve the current user's health");
 });
 
 it('has valid schema', function (): void {

@@ -38,7 +38,7 @@ final readonly class GetDietReference implements Tool
         if ($dietType === null) {
             return (string) json_encode([
                 'success' => false,
-                'error' => "Invalid diet type '{$dietTypeValue}'. Valid options: ".implode(', ', array_map(fn (DietType $t) => $t->value, DietType::cases())),
+                'error' => sprintf("Invalid diet type '%s'. Valid options: ", $dietTypeValue).implode(', ', array_map(fn (DietType $t) => $t->value, DietType::cases())),
             ]);
         }
 
@@ -51,12 +51,12 @@ final readonly class GetDietReference implements Tool
             ]);
         }
 
-        $filePath = resource_path("markdown/{$dietType->value}/references/{$sanitizedName}.md");
+        $filePath = resource_path(sprintf('markdown/%s/references/%s.md', $dietType->value, $sanitizedName));
 
         if (! File::exists($filePath)) {
             return (string) json_encode([
                 'success' => false,
-                'error' => "Reference '{$sanitizedName}' not found for diet '{$dietType->value}'. Available references may vary by diet type.",
+                'error' => sprintf("Reference '%s' not found for diet '%s'. Available references may vary by diet type.", $sanitizedName, $dietType->value),
             ]);
         }
 

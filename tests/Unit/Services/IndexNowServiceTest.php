@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
+use Illuminate\Http\Client\ConnectionException;
 use App\Services\IndexNowService;
 use Exception;
 use Illuminate\Http\Client\Request;
@@ -73,7 +74,7 @@ it('chunks large URL lists', function (): void {
         'api.indexnow.org/IndexNow' => Http::response([], 200),
     ]);
 
-    $urls = array_map(fn ($i): string => "https://www.example.org/url{$i}", range(1, 10005));
+    $urls = array_map(fn ($i): string => 'https://www.example.org/url' . $i, range(1, 10005));
 
     $service = new IndexNowService();
     $result = $service->submit($urls);
@@ -121,7 +122,7 @@ it('handles exceptions during submission', function (): void {
 
 it('handles connection timeout during submission', function (): void {
     Http::fake(function (): void {
-        throw new \Illuminate\Http\Client\ConnectionException('Connection timeout');
+        throw new ConnectionException('Connection timeout');
     });
 
     $service = new IndexNowService();
@@ -145,7 +146,7 @@ it('handles partial success when some chunks fail', function (): void {
     });
 
     // Create URLs that will be chunked (10,005 URLs = 2 chunks)
-    $urls = array_map(fn (int $i): string => "https://www.example.org/url{$i}", range(1, 10005));
+    $urls = array_map(fn (int $i): string => 'https://www.example.org/url' . $i, range(1, 10005));
 
     $service = new IndexNowService();
     $result = $service->submit($urls);

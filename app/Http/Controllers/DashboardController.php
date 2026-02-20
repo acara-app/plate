@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Inertia\Response;
 use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -15,7 +16,7 @@ final readonly class DashboardController
         #[CurrentUser] private User $user,
     ) {}
 
-    public function show(): \Inertia\Response
+    public function show(): Response
     {
         $recentConversations = $this->user->conversations()
             ->latest()

@@ -23,7 +23,7 @@ final class RegisterTelegramCommands extends Command
             return self::FAILURE;
         }
 
-        $this->info("Registering commands for bot: {$bot->name}");
+        $this->info('Registering commands for bot: ' . $bot->name);
 
         $response = $bot->registerCommands([
             'start' => 'Welcome message & getting started',

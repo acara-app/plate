@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use Laravel\Ai\Provider;
-
 return [
 
     /*

@@ -39,7 +39,7 @@ final class PreviousDayContext extends Data
         $lines = ["## Previous Days' Meals (Avoid Repeating)", ''];
 
         foreach ($this->previousMealNames as $dayNumber => $mealNames) {
-            $lines[] = "**Day {$dayNumber}**: ".implode(', ', $mealNames);
+            $lines[] = sprintf('**Day %d**: ', $dayNumber).implode(', ', $mealNames);
         }
 
         $lines[] = '';

@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\UserProfileHealthCondition;
 use App\Models\HealthCondition;
 use App\Models\UserProfile;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\UserProfileHealthCondition>
+ * @extends Factory<UserProfileHealthCondition>
  */
 final class UserProfileHealthConditionFactory extends Factory
 {

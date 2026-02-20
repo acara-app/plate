@@ -32,7 +32,7 @@ final readonly class AnalyzeGlucoseForNotificationAction
         $concerns = $this->evaluateConcerns($settings, $analysisData);
 
         return new GlucoseNotificationAnalysisData(
-            shouldNotify: count($concerns) > 0,
+            shouldNotify: $concerns !== [],
             concerns: $concerns,
             analysisData: $analysisData,
         );

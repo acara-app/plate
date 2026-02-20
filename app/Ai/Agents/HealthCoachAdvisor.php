@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\SystemPrompt;
 use App\Ai\Tools\GetHealthGoals;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\SuggestWellnessRoutine;
@@ -42,7 +43,7 @@ final class HealthCoachAdvisor implements HealthCoachAdvisorContract
     {
         $profileData = $this->profileContext->handle($this->getUser());
 
-        return (string) new \App\Ai\SystemPrompt(
+        return (string) new SystemPrompt(
             background: $this->getBackgroundInstructions(),
             context: $this->getContextInstructions($profileData),
             steps: $this->getStepsInstructions(),
@@ -128,7 +129,7 @@ final class HealthCoachAdvisor implements HealthCoachAdvisorContract
             '   - Energy and vitality optimization',
             '   - Mind-body connection',
             '',
-            'TONE: Be warm, supportive, and motivational. Use the user\'s name when appropriate.',
+            "TONE: Be warm, supportive, and motivational. Use the user's name when appropriate.",
             'Approach: Guide users toward sustainable lifestyle changes rather than quick fixes.',
         ];
     }
@@ -156,13 +157,13 @@ final class HealthCoachAdvisor implements HealthCoachAdvisorContract
     private function getStepsInstructions(): array
     {
         return [
-            '1. Understand the user\'s current wellness concerns and goals',
-            '2. Review the user\'s profile context to understand their biometrics, preferences, and health conditions',
+            "1. Understand the user's current wellness concerns and goals",
+            "2. Review the user's profile context to understand their biometrics, preferences, and health conditions",
             '3. Identify which wellness area the user needs help with (sleep, stress, hydration, lifestyle)',
             '4. Use the suggest_wellness_routine tool to provide specific, actionable routines',
             '5. If the user asks about their health goals, use the get_health_goals tool',
             '6. If you need specific profile information not provided in context, use the get_user_profile tool',
-            '7. Provide evidence-based, practical advice that fits the user\'s lifestyle',
+            "7. Provide evidence-based, practical advice that fits the user's lifestyle",
             '8. Focus on sustainable changes rather than drastic measures',
             '9. Encourage and motivate the user throughout the conversation',
         ];
@@ -178,19 +179,19 @@ final class HealthCoachAdvisor implements HealthCoachAdvisorContract
             'Provide specific, actionable advice rather than generic recommendations',
             'When suggesting routines, include specific times and activities',
             'Always explain the "why" behind recommendations',
-            'Use the tools when appropriate - don\'t try to generate wellness routines manually',
+            "Use the tools when appropriate - don't try to generate wellness routines manually",
             'Keep responses concise but informative',
             'Focus on one or two areas at a time to avoid overwhelming the user',
             'Celebrate progress and encourage consistency',
             '',
             'PERSONALIZATION:',
-            '  - Tailor recommendations to the user\'s age, lifestyle, and preferences',
+            "  - Tailor recommendations to the user's age, lifestyle, and preferences",
             '  - Consider their schedule and constraints',
             '  - Build on existing habits rather than suggesting complete overhauls',
             '',
             'SAFETY:',
             '  - For medical concerns, always suggest consulting a healthcare professional',
-            '  - Don\'t provide specific medical diagnoses',
+            "  - Don't provide specific medical diagnoses",
             '  - If user mentions concerning symptoms, recommend professional consultation',
         ];
     }

@@ -30,20 +30,22 @@ final class SubmitSitemapsToIndexNowCommand extends Command
             if (! is_string($file)) {
                 continue;
             }
+
             if ($file === '') {
                 continue;
             }
+
             $path = public_path($file);
 
             if (! File::exists($path)) {
-                $this->warn("Sitemap file not found: {$file}");
+                $this->warn('Sitemap file not found: ' . $file);
 
                 continue;
             }
 
-            $this->info("Processing {$file}...");
+            $this->info(sprintf('Processing %s...', $file));
             $urls = $this->extractUrlsFromSitemap($path);
-            $this->info('Found '.count($urls)." URLs in {$file}.");
+            $this->info('Found '.count($urls).sprintf(' URLs in %s.', $file));
 
             $allUrls = array_merge($allUrls, $urls);
         }
@@ -61,7 +63,7 @@ final class SubmitSitemapsToIndexNowCommand extends Command
         $result = $indexNowService->submit($allUrls);
 
         if ($result->success) {
-            $this->info("✓ {$result->message}");
+            $this->info('✓ ' . $result->message);
 
             return self::SUCCESS;
         }
@@ -69,7 +71,7 @@ final class SubmitSitemapsToIndexNowCommand extends Command
         $this->error($result->message);
 
         foreach ($result->errors as $error) {
-            $this->error("  - {$error}");
+            $this->error('  - ' . $error);
         }
 
         return self::FAILURE;
@@ -101,8 +103,8 @@ final class SubmitSitemapsToIndexNowCommand extends Command
                     $urls[] = (string) $element;
                 }
             }
-        } catch (Exception $e) {
-            $this->error("Error parsing {$path}: ".$e->getMessage());
+        } catch (Exception $exception) {
+            $this->error(sprintf('Error parsing %s: ', $path).$exception->getMessage());
         }
 
         return $urls;

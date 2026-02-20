@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Testing\TestResponse;
+use App\Enums\GlucoseUnit;
 use App\Contracts\ParsesHealthData;
 use App\Contracts\ProcessesAdvisorMessage;
 use App\Contracts\SavesHealthLog;
@@ -50,7 +52,7 @@ beforeEach(function (): void {
     app()->instance(ParsesHealthData::class, $parserMock);
 });
 
-function sendWebhook(mixed $test, string $text): Illuminate\Testing\TestResponse
+function sendWebhook(mixed $test, string $text): TestResponse
 {
     return $test->postJson(
         route('telegraph.webhook', ['token' => $test->bot->token]),
@@ -667,7 +669,7 @@ describe('health log flow', function (): void {
                     isHealthData: true,
                     logType: HealthEntryType::Glucose,
                     glucoseValue: 120.0,
-                    glucoseUnit: App\Enums\GlucoseUnit::MgDl
+                    glucoseUnit: GlucoseUnit::MgDl
                 );
             }
         };

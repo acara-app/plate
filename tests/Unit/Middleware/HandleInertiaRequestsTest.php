@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Inertia\OnceProp;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -111,7 +112,7 @@ it('shares translations for current locale', function (): void {
     $shared = $middleware->share($request);
 
     expect($shared)->toHaveKey('translations')
-        ->and($shared['translations'])->toBeInstanceOf(Inertia\OnceProp::class);
+        ->and($shared['translations'])->toBeInstanceOf(OnceProp::class);
 
     $translations = $shared['translations']();
     expect($translations)->toBeArray();

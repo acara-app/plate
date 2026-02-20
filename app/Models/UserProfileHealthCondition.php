@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\UserProfileHealthConditionFactory;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  */
 final class UserProfileHealthCondition extends Pivot
 {
-    /** @use HasFactory<\Database\Factories\UserProfileHealthConditionFactory> */
+    /** @use HasFactory<UserProfileHealthConditionFactory> */
     use HasFactory;
 
     protected $table = 'user_profile_health_condition';

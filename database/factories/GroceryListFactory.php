@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\GroceryList;
 use App\Enums\GroceryListStatus;
 use App\Models\MealPlan;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\GroceryList>
+ * @extends Factory<GroceryList>
  */
 final class GroceryListFactory extends Factory
 {

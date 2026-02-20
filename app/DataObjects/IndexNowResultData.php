@@ -21,7 +21,7 @@ final readonly class IndexNowResultData
         return new self(
             success: true,
             urlsSubmitted: $urlsSubmitted,
-            message: $message ?: "Successfully submitted {$urlsSubmitted} URLs to IndexNow.",
+            message: $message ?: sprintf('Successfully submitted %d URLs to IndexNow.', $urlsSubmitted),
         );
     }
 

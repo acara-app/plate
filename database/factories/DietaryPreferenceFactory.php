@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\DietaryPreference;
 use App\Enums\DietaryPreferenceType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\DietaryPreference>
+ * @extends Factory<DietaryPreference>
  */
 final class DietaryPreferenceFactory extends Factory
 {

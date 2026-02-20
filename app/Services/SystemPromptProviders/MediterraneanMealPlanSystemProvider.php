@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\SystemPromptProviders;
 
+use App\Enums\DietType;
 use App\Ai\SystemPrompt;
 use App\Contracts\Ai\SystemPromptProvider;
 
 final readonly class MediterraneanMealPlanSystemProvider implements SystemPromptProvider
 {
     public function __construct(
-        private \App\Enums\DietType $dietType = \App\Enums\DietType::Mediterranean,
+        private DietType $dietType = DietType::Mediterranean,
     ) {}
 
     public function run(): string

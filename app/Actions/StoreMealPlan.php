@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Enums\MealPlanType;
 use App\DataObjects\MealData;
 use App\DataObjects\MealPlanData;
 use App\Models\MealPlan;
@@ -40,7 +41,7 @@ final readonly class StoreMealPlan
     /**
      * Delete all existing meal plans of the given type for the user
      */
-    private function deleteOldMealPlans(User $user, \App\Enums\MealPlanType $type): void
+    private function deleteOldMealPlans(User $user, MealPlanType $type): void
     {
         $user->mealPlans()
             ->where('type', $type)

@@ -53,6 +53,10 @@
         "@@type": "WebSite",
         "name": "Acara Plate",
         "url": "{{ url('/') }}"
+    },
+    "speakable": {
+        "@@type": "SpeakableSpecification",
+        "cssSelector": [".speakable-intro"]
     }
 }
 </script>
@@ -74,6 +78,46 @@
     ]
 }
 </script>
+    <script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@@type": "Question",
+            "name": "What is the glycemic index and why does it matter for diabetics?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "The Glycemic Index (GI) measures how quickly a food raises blood sugar on a scale of 0-100. Low GI foods (0-55) digest slowly and cause minimal blood sugar impact, medium GI (56-69) has moderate impact, and high GI (70+) causes rapid spikes. For people with Type 2 diabetes or prediabetes, choosing low GI foods helps maintain stable blood sugar levels."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "What is the difference between glycemic index and glycemic load?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Glycemic Index (GI) measures how quickly a food raises blood sugar (quality), while Glycemic Load (GL) factors in portion size to show actual blood sugar impact (quantity). For example, watermelon has a high GI (~72) but a low GL (~5) because a typical serving contains little carbohydrate. GL below 10 is low, 11-19 is medium, and 20+ is high."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "What are the best low glycemic foods for Type 2 diabetes?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "The best low glycemic foods for Type 2 diabetes include non-starchy vegetables, most fruits (especially berries), legumes, whole grains like oats and barley, nuts, seeds, and lean proteins. Pairing carbohydrates with fiber, protein, and healthy fats helps slow sugar absorption and reduce blood sugar spikes."
+            }
+        },
+        {
+            "@@type": "Question",
+            "name": "How do I use this food database for diabetes meal planning?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Search for any food to see its glycemic index, glycemic load, and full nutrition facts from USDA data. Filter by glycemic impact (Low, Medium, High) to find blood-sugar-friendly options, or browse by food category. Each food page includes a diabetic safety assessment and you can use the Spike Calculator to predict how specific portions affect your blood sugar."
+            }
+        }
+    ]
+}
+</script>
 @endsection
 
 <x-mini-app-layout>
@@ -88,7 +132,7 @@
         </nav>
 
         {{-- Hero Section --}}
-        <div class="mt-6">
+        <div class="mt-6 speakable-intro">
             <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
                 {{ $categoryTitle ?? 'Diabetic Food Database & Glycemic Index' }}
             </h1>

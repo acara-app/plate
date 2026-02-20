@@ -1,0 +1,12 @@
+{
+    "rules": {
+        "oxc/const-comparisons": "error"
+    },
+    "ignorePatterns": [
+        "public/vendor/**",
+        "node_modules/**",
+        "vendor/**",
+        "dist/**",
+        "build/**"
+    ]
+}

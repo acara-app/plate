@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Laravel\Cashier\Subscription;
 use App\DataObjects\UserSettingsData;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
@@ -67,9 +69,9 @@ final class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Builder<self>
+     * @return Builder<self>
      */
-    public function prunable(): \Illuminate\Database\Eloquent\Builder
+    public function prunable(): Builder
     {
         return $this->whereNull('email_verified_at')->where('created_at', '<=', now()->subDays(30));
     }
@@ -142,16 +144,16 @@ final class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasActiveSubscription(): bool
     {
-        return $this->subscriptions()->get()->contains(fn (\Laravel\Cashier\Subscription $subscription): bool => $subscription->valid()); // @phpstan-ignore-line
+        return $this->subscriptions()->get()->contains(fn (Subscription $subscription): bool => $subscription->valid()); // @phpstan-ignore-line
     }
 
     /**
      * Get the user's active subscription.
      */
-    public function activeSubscription(): ?\Laravel\Cashier\Subscription
+    public function activeSubscription(): ?Subscription
     {
-        /** @var \Laravel\Cashier\Subscription|null $subscription */
-        $subscription = $this->subscriptions()->get()->first(fn (\Laravel\Cashier\Subscription $subscription): bool => $subscription->valid()); // @phpstan-ignore-line
+        /** @var Subscription|null $subscription */
+        $subscription = $this->subscriptions()->get()->first(fn (Subscription $subscription): bool => $subscription->valid()); // @phpstan-ignore-line
 
         return $subscription;
     }
@@ -163,7 +165,7 @@ final class User extends Authenticatable implements MustVerifyEmail
     {
         $subscription = $this->activeSubscription();
 
-        if (! $subscription instanceof \Laravel\Cashier\Subscription) {
+        if (! $subscription instanceof Subscription) {
             return null;
         }
 

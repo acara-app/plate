@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Inertia\Response;
+use Illuminate\Http\RedirectResponse;
 use App\Models\UserTelegramChat;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 final class IntegrationsController
 {
-    public function edit(Request $request): \Inertia\Response
+    public function edit(Request $request): Response
     {
         $user = $request->user();
 
@@ -29,7 +31,7 @@ final class IntegrationsController
         ]);
     }
 
-    public function generateTelegramToken(Request $request): \Illuminate\Http\RedirectResponse
+    public function generateTelegramToken(Request $request): RedirectResponse
     {
         $user = $request->user();
 
@@ -53,7 +55,7 @@ final class IntegrationsController
         ]);
     }
 
-    public function disconnectTelegram(Request $request): \Illuminate\Http\RedirectResponse
+    public function disconnectTelegram(Request $request): RedirectResponse
     {
         $user = $request->user();
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\UserMedicationFactory;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class UserMedication extends Model
 {
-    /** @use HasFactory<\Database\Factories\UserMedicationFactory> */
+    /** @use HasFactory<UserMedicationFactory> */
     use HasFactory;
 
     /**

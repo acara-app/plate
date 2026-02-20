@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Illuminate\Http\Client\Response;
 use App\Contracts\Services\IndexNowServiceContract;
 use App\DataObjects\IndexNowResultData;
 use Exception;
@@ -71,7 +72,7 @@ final readonly class IndexNowService implements IndexNowServiceContract
 
             try {
                 /**
-                 * @var \Illuminate\Http\Client\Response $response
+                 * @var Response $response
                  */
                 $response = Http::timeout(self::TIMEOUT_SECONDS)
                     ->post('https://api.indexnow.org/IndexNow', $payload);
@@ -79,18 +80,18 @@ final readonly class IndexNowService implements IndexNowServiceContract
                 if ($response->successful()) {
                     $totalSubmitted += count($chunk);
                 } else {
-                    $errorMessage = 'Chunk '.($index + 1).": HTTP {$response->status()} - {$response->body()}";
+                    $errorMessage = 'Chunk '.($index + 1).sprintf(': HTTP %d - %s', $response->status(), $response->body());
                     $errors[] = $errorMessage;
-                    Log::error("IndexNow: {$errorMessage}");
+                    Log::error('IndexNow: ' . $errorMessage);
                 }
             } catch (ConnectionException $e) {
                 $errorMessage = 'Chunk '.($index + 1).': Connection timeout - the request took too long to complete.';
                 $errors[] = $errorMessage;
-                Log::error("IndexNow: Connection timeout during submission: {$e->getMessage()}");
+                Log::error('IndexNow: Connection timeout during submission: ' . $e->getMessage());
             } catch (Exception $e) {
-                $errorMessage = 'Chunk '.($index + 1).": {$e->getMessage()}";
+                $errorMessage = 'Chunk '.($index + 1).(': ' . $e->getMessage());
                 $errors[] = $errorMessage;
-                Log::error("IndexNow: Exception during submission: {$e->getMessage()}");
+                Log::error('IndexNow: Exception during submission: ' . $e->getMessage());
             }
         }
 
@@ -100,7 +101,7 @@ final readonly class IndexNowService implements IndexNowServiceContract
 
         if ($totalSubmitted > 0) {
             return IndexNowResultData::failure(
-                "Partially submitted {$totalSubmitted} URLs with some errors.",
+                sprintf('Partially submitted %d URLs with some errors.', $totalSubmitted),
                 $errors,
                 $totalSubmitted
             );

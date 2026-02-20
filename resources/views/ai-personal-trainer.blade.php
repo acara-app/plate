@@ -86,6 +86,24 @@
     ]
 }
 </script>
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "WebPage",
+    "name": "AI Personal Trainer — Workouts for Diabetes Management",
+    "description": "An AI-powered personal trainer that creates exercise plans for people managing Type 2 diabetes. No gym required.",
+    "url": "{{ url('/ai-personal-trainer') }}",
+    "speakable": {
+        "@@type": "SpeakableSpecification",
+        "cssSelector": [".speakable-intro"]
+    },
+    "isPartOf": {
+        "@@type": "WebSite",
+        "name": "Acara Plate",
+        "url": "{{ url('/') }}"
+    }
+}
+</script>
 @endsection
 
 <x-default-layout>
@@ -158,11 +176,11 @@
                             Open Source Project
                         </span>
                     </div>
-                    <h1 class="font-display text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl mb-6">
+                    <h1 class="font-display text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl mb-6 speakable-intro">
                         I Hated the Gym. So I Built<br>
                         <span class="text-emerald-700">Workouts That Don't Suck</span>.
                     </h1>
-                    <p class="mt-6 text-lg leading-8 text-slate-600 max-w-2xl mx-auto">
+                    <p class="mt-6 text-lg leading-8 text-slate-600 max-w-2xl mx-auto speakable-intro">
                         You don't need a gym membership or fancy equipment to get stronger. You need a plan that respects your time and meets you where you are.
                     </p>
                     <div class="mt-10 flex items-center justify-center gap-x-6">

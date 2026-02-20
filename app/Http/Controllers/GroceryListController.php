@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Actions\GenerateGroceryListAction;
 use App\Enums\GroceryListStatus;
 use App\Jobs\GenerateGroceryListJob;
@@ -18,7 +19,7 @@ use Inertia\Response;
 final readonly class GroceryListController
 {
     public function __construct(
-        #[CurrentUser] private \App\Models\User $user,
+        #[CurrentUser] private User $user,
         private GenerateGroceryListAction $generateAction,
     ) {}
 

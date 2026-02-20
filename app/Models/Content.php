@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Storage;
+use Database\Factories\ContentFactory;
 use App\Enums\ContentType;
 use App\Enums\FoodCategory;
 use Carbon\CarbonInterface;
@@ -38,7 +40,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 final class Content extends Model
 {
-    /** @use HasFactory<\Database\Factories\ContentFactory> */
+    /** @use HasFactory<ContentFactory> */
     use HasFactory;
 
     protected $guarded = [];
@@ -107,7 +109,7 @@ final class Content extends Model
             return null;
         }
 
-        return \Illuminate\Support\Facades\Storage::disk('s3_public')->url($this->image_path);
+        return Storage::disk('s3_public')->url($this->image_path);
     }
 
     protected function getDisplayNameAttribute(): string

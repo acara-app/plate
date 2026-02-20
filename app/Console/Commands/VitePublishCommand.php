@@ -31,11 +31,11 @@ final class VitePublishCommand extends Command
 
     private function publishDirectory(string $directory): void
     {
-        $files = File::allFiles(public_path("/{$directory}"));
+        $files = File::allFiles(public_path('/' . $directory));
 
         foreach ($files as $asset) {
             $mime = getMimeType($asset->getRelativePathname());
-            $path = "{$directory}/".$asset->getRelativePathname();
+            $path = $directory . '/'.$asset->getRelativePathname();
 
             Storage::disk('cdn')->put(
                 $path,
@@ -44,6 +44,6 @@ final class VitePublishCommand extends Command
             );
         }
 
-        $this->info("Published asset into {$directory} directory");
+        $this->info(sprintf('Published asset into %s directory', $directory));
     }
 }

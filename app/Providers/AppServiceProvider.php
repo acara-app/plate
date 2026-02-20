@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Contracts\Services\IndexNowServiceContract;
 use App\Contracts\Services\StripeServiceContract;
 use App\Models\User;
@@ -49,7 +50,7 @@ final class AppServiceProvider extends ServiceProvider
     private function bootVerificationDefaults(): void
     {
         VerifyEmail::createUrlUsing(function (object $notifiable): string {
-            /** @var Model&\Illuminate\Contracts\Auth\MustVerifyEmail $notifiable */
+            /** @var Model&MustVerifyEmail $notifiable */
             $relativeUrl = URL::signedRoute(
                 'verification.verify',
                 ['id' => $notifiable->getKey(), 'hash' => sha1((string) $notifiable->getEmailForVerification())],

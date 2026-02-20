@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\Pivot;
+use Database\Factories\DietaryPreferenceFactory;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,11 +17,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string|null $description
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
- * @property-read \Illuminate\Database\Eloquent\Relations\Pivot|null $pivot
+ * @property-read Pivot|null $pivot
  */
 final class DietaryPreference extends Model
 {
-    /** @use HasFactory<\Database\Factories\DietaryPreferenceFactory> */
+    /** @use HasFactory<DietaryPreferenceFactory> */
     use HasFactory;
 
     /**

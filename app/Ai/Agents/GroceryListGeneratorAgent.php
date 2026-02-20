@@ -107,9 +107,11 @@ final class GroceryListGeneratorAgent implements Agent
             if ($meal->ingredients === null) {
                 continue;
             }
+
             if (count($meal->ingredients) === 0) {
                 continue;
             }
+
             foreach ($meal->ingredients as $ingredient) {
                 $ingredientData = IngredientData::from($ingredient);
                 $ingredients[] = new ExtractedIngredientData(

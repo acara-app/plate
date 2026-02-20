@@ -2,17 +2,18 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 use App\Providers\AppServiceProvider;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rules\Password;
 
 it('boots models defaults', function (): void {
     $provider = new AppServiceProvider(app());
     $provider->boot();
 
-    expect(Illuminate\Database\Eloquent\Model::isUnguarded())->toBeTrue();
+    expect(Model::isUnguarded())->toBeTrue();
 });
 
 it('boots password defaults in local environment', function (): void {
@@ -60,7 +61,7 @@ it('does not force https scheme in non-production', function (): void {
 });
 
 it('boots verification defaults', function (): void {
-    $user = \App\Models\User::factory()->create([
+    $user = User::factory()->create([
         'email' => 'test@example.com',
         'email_verified_at' => null,
     ]);

@@ -142,6 +142,7 @@ describe('markAsLinked', function (): void {
         ]);
 
         $chat->markAsLinked();
+
         $fresh = $chat->fresh();
 
         expect($fresh->is_active)->toBeTrue()

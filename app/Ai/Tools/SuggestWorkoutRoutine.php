@@ -66,7 +66,7 @@ final class SuggestWorkoutRoutine implements Tool
                 ->required(),
             'fitness_level' => $schema->string()
                 ->enum(['beginner', 'intermediate', 'advanced'])
-                ->description('User\'s fitness level to adjust workout intensity.')
+                ->description("User's fitness level to adjust workout intensity.")
                 ->required(),
         ];
     }
@@ -135,7 +135,7 @@ final class SuggestWorkoutRoutine implements Tool
                         'Shoulder stretches: 2 min',
                         'Hip flexor stretches: 3 min',
                         'Hamstring stretches: 3 min',
-                        'Yoga poses: 10 min (downward dog, cobra, child\'s pose)',
+                        "Yoga poses: 10 min (downward dog, cobra, child's pose)",
                     ],
                     'duration' => '25-30 min',
                 ],

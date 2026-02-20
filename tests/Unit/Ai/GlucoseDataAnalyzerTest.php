@@ -102,6 +102,7 @@ it('detects consistently high glucose pattern', function (): void {
             break;
         }
     }
+
     expect($concernFound)->toBeTrue();
 });
 
@@ -159,6 +160,7 @@ it('detects high variability pattern', function (): void {
             break;
         }
     }
+
     expect($hasVariabilityInsight)->toBeTrue();
 });
 
@@ -229,6 +231,7 @@ it('detects consistently low glucose pattern', function (): void {
             break;
         }
     }
+
     expect($concernFound)->toBeTrue();
 });
 
@@ -319,6 +322,7 @@ it('classifies high fasting glucose correctly', function (): void {
             break;
         }
     }
+
     expect($hasHighFastingInsight)->toBeTrue();
 });
 
@@ -351,6 +355,7 @@ it('classifies elevated post-meal glucose correctly', function (): void {
             break;
         }
     }
+
     expect($hasPostMealInsight)->toBeTrue();
 });
 
@@ -435,6 +440,7 @@ it('detects rising glucose trend', function (): void {
             break;
         }
     }
+
     expect($hasTrendInsight)->toBeTrue();
 });
 
@@ -642,6 +648,7 @@ it('uses actual days analyzed in insights', function (): void {
             break;
         }
     }
+
     expect($hasCorrectDaysInsight)->toBeTrue();
 });
 
@@ -726,6 +733,7 @@ it('includes moderate hypoglycemia risk in insights', function (): void {
             break;
         }
     }
+
     expect($hasHypoglycemiaInsight)->toBeTrue();
 });
 
@@ -760,6 +768,7 @@ it('includes moderate hyperglycemia risk in insights', function (): void {
             break;
         }
     }
+
     expect($hasHyperglycemiaInsight)->toBeTrue();
 });
 
@@ -792,6 +801,7 @@ it('generates concern for low time in range', function (): void {
             break;
         }
     }
+
     expect($hasTIRConcern)->toBeTrue();
 });
 
@@ -818,6 +828,7 @@ it('generates insight for falling trend with absolute slope', function (): void 
             break;
         }
     }
+
     expect($hasFallingInsight)->toBeTrue();
 });
 

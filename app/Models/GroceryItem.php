@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\GroceryItemFactory;
 use App\DataObjects\GroceryItemResponseData;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,7 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class GroceryItem extends Model
 {
-    /** @use HasFactory<\Database\Factories\GroceryItemFactory> */
+    /** @use HasFactory<GroceryItemFactory> */
     use HasFactory;
 
     /**

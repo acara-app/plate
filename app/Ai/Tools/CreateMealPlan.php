@@ -57,14 +57,14 @@ final readonly class CreateMealPlan implements Tool
 
             return (string) json_encode([
                 'success' => true,
-                'message' => "I've started generating your {$totalDays}-day meal plan! You can view it in your [Meal Plans](/meal-plans) section once it's ready.",
+                'message' => sprintf("I've started generating your %d-day meal plan! You can view it in your [Meal Plans](/meal-plans) section once it's ready.", $totalDays),
                 'total_days' => $totalDays,
                 'custom_prompt' => $customPrompt,
                 'redirect_url' => '/meal-plans',
             ]);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             return (string) json_encode([
-                'error' => 'Failed to start meal plan generation: '.$e->getMessage(),
+                'error' => 'Failed to start meal plan generation: '.$exception->getMessage(),
                 'meal_plan' => null,
             ]);
         }

@@ -64,7 +64,7 @@ final class GlucoseReportNotification extends Notification implements ShouldQueu
             'above_range_percentage' => $analysis->timeInRange->abovePercentage,
             'below_range_percentage' => $analysis->timeInRange->belowPercentage,
             'concerns' => $this->analysisResult->concerns,
-            'has_concerns' => count($this->analysisResult->concerns) > 0,
+            'has_concerns' => $this->analysisResult->concerns !== [],
         ];
     }
 

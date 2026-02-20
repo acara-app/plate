@@ -24,7 +24,7 @@ it('creates a placeholder grocery list with generating status', function (): voi
     expect($groceryList)
         ->toBeInstanceOf(GroceryList::class)
         ->user_id->toBe($user->id)
-        ->name->toBe("Grocery List for {$mealPlan->name}")
+        ->name->toBe('Grocery List for ' . $mealPlan->name)
         ->status->toBe(GroceryListStatus::Generating)
         ->metadata->toBeArray()
         ->and($groceryList->metadata)

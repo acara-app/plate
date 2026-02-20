@@ -34,9 +34,9 @@ it('attempts to create stripe customer when user has no stripe_id', function ():
     // This will fail without real Stripe API but covers lines 16-19
     try {
         $service->ensureStripeCustomer($user);
-    } catch (Exception $e) {
+    } catch (Exception $exception) {
         // Expected to fail without real Stripe setup
-        expect($e)->toBeInstanceOf(Exception::class);
+        expect($exception)->toBeInstanceOf(Exception::class);
     }
 
     expect(true)->toBeTrue();
@@ -51,9 +51,9 @@ it('delegates to user billingPortalUrl method', function (): void {
     // This will fail without Stripe but covers the code path
     try {
         $url = $service->getBillingPortalUrl($user, 'https://example.com/return');
-    } catch (Exception $e) {
+    } catch (Exception $exception) {
         // Expected to fail without real Stripe setup
-        expect($e)->toBeInstanceOf(Exception::class);
+        expect($exception)->toBeInstanceOf(Exception::class);
     }
 
     expect(true)->toBeTrue();
@@ -103,10 +103,10 @@ it('attempts to fetch price from stripe when valid api key is configured', funct
         $result = $service->getPriceIdFromLookupKey('nonexistent_key');
         // If it returns null, that's OK - it means no price was found
         expect($result)->toBeNull();
-    } catch (Exception $e) {
+    } catch (Exception $exception) {
         // Expected to potentially fail with invalid API key
         // But the code path is covered
-        expect($e)->toBeInstanceOf(Exception::class);
+        expect($exception)->toBeInstanceOf(Exception::class);
     }
 });
 
@@ -125,9 +125,9 @@ it('delegates to user newSubscription for checkout', function (): void {
             'https://example.com/cancel',
             ['test' => 'data']
         );
-    } catch (Exception $e) {
+    } catch (Exception $exception) {
         // Expected to fail without real Stripe setup
-        expect($e)->toBeInstanceOf(Exception::class);
+        expect($exception)->toBeInstanceOf(Exception::class);
     }
 
     expect(true)->toBeTrue();

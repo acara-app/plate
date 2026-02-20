@@ -61,9 +61,9 @@ final readonly class SuggestSingleMeal implements Tool
                 'success' => true,
                 'meal' => $meal,
             ]);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             return (string) json_encode([
-                'error' => 'Failed to generate meal: '.$e->getMessage(),
+                'error' => 'Failed to generate meal: '.$exception->getMessage(),
                 'meal' => null,
             ]);
         }

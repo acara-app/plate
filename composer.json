@@ -10,40 +10,41 @@
     "license": "MIT",
     "require": {
         "php": "^8.4 || ^8.5",
-        "defstudio/telegraph": "^1.69",
+        "defstudio/telegraph": "^1.70",
         "inertiajs/inertia-laravel": "^2.0.20",
-        "laravel-workflow/laravel-workflow": "^1.0.61",
+        "laravel-workflow/laravel-workflow": "^1.0.62",
         "laravel-workflow/waterline": "^1.0.14",
         "laravel/ai": "^0.1.5",
         "laravel/cashier": "^16.2.0",
         "laravel/fortify": "^1.34.1",
-        "laravel/framework": "^12.51.0",
+        "laravel/framework": "^12.52.0",
         "laravel/socialite": "^5.24.2",
         "laravel/tinker": "^2.11.1",
         "laravel/wayfinder": "^0.1.13",
         "league/commonmark": "^2.8",
         "league/flysystem-aws-s3-v3": "^3.31.0",
         "livewire/livewire": "^4.1.4",
-        "nunomaduro/essentials": "^1.0.1",
+        "nunomaduro/essentials": "^1.1.0",
         "ryangjchandler/laravel-cloudflare-turnstile": "^3.0.2",
         "spatie/laravel-data": "^4.19.1",
         "spatie/laravel-mailcoach-mailer": "^1.5.3",
         "spatie/laravel-sitemap": "^7.3.8"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3.6.1",
         "driftingly/rector-laravel": "^2.1.9",
         "fakerphp/faker": "^1.24.1",
         "larastan/larastan": "^3.9.2",
-        "laravel/boost": "^2.1.4",
+        "laravel/boost": "^2.2.0",
         "laravel/pail": "^1.2.6",
         "laravel/pint": "^1.27.1",
         "mockery/mockery": "^1.6.12",
-        "nunomaduro/collision": "^8.8.3",
-        "pestphp/pest": "^4.3.2",
-        "pestphp/pest-plugin-browser": "^4.2.1",
+        "nunomaduro/collision": "^8.9.1",
+        "pestphp/pest": "^4.4.1",
+        "pestphp/pest-plugin-browser": "^4.3.0",
         "pestphp/pest-plugin-laravel": "^4.0.0",
         "pestphp/pest-plugin-type-coverage": "^4.0.3",
-        "rector/rector": "^2.3.6",
+        "rector/rector": "^2.3.7",
         "roave/security-advisories": "dev-latest"
     },
     "autoload": {
@@ -67,12 +68,12 @@
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "@php artisan key:generate",
             "@php artisan migrate --force",
-            "npm install",
-            "npm run build"
+            "bun install",
+            "bun run build"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
+            "bunx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"bun run dev\" --names=server,queue,logs,vite --kill-others"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
@@ -94,23 +95,23 @@
         ],
         "update:requirements": [
             "composer bump",
-            "npx npm-check-updates -u"
+            "bunx npm-check-updates -u"
         ],
         "lint": [
             "rector",
             "pint --parallel",
-            "npm run lint"
+            "bun run lint"
         ],
         "test:type-coverage": "pest --type-coverage --min=100",
         "test:lint": [
             "pint --parallel --test",
             "rector --dry-run",
-            "npm run test:lint"
+            "bun run test:lint"
         ],
         "test:unit": "pest --parallel --coverage --exactly=100.0",
         "test:types": [
             "phpstan",
-            "npm run test:types"
+            "bun run test:types"
         ],
         "test": [
             "@test:type-coverage",

@@ -16,7 +16,7 @@ final class MemoryNotFoundException extends Exception
         string $message = '',
     ) {
         parent::__construct(
-            $message ?: "Memory with ID '{$memoryId}' was not found."
+            $message ?: sprintf("Memory with ID '%s' was not found.", $memoryId)
         );
     }
 }

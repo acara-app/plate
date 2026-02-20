@@ -27,7 +27,7 @@ final readonly class GetUserProfile implements Tool
      */
     public function description(): string
     {
-        return 'Retrieve the current user\'s profile information including biometrics, dietary preferences, health conditions, medications, and goals. Use this when you need specific user data to provide personalized advice.';
+        return "Retrieve the current user's profile information including biometrics, dietary preferences, health conditions, medications, and goals. Use this when you need specific user data to provide personalized advice.";
     }
 
     /**
@@ -73,7 +73,7 @@ final readonly class GetUserProfile implements Tool
 
         if ($sectionData === null) {
             return (string) json_encode([
-                'error' => "Section '{$section}' not found. Available sections: biometrics, dietary_preferences, health_conditions, medications, goals",
+                'error' => sprintf("Section '%s' not found. Available sections: biometrics, dietary_preferences, health_conditions, medications, goals", $section),
                 'profile' => null,
             ]);
         }

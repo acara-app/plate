@@ -23,7 +23,7 @@ final readonly class GenerateGroceryListAction
 
         return $mealPlan->groceryList()->create([
             'user_id' => $mealPlan->user_id,
-            'name' => "Grocery List for {$mealPlan->name}",
+            'name' => 'Grocery List for ' . $mealPlan->name,
             'status' => GroceryListStatus::Generating,
             'metadata' => [
                 'started_at' => now()->toIso8601String(),
@@ -61,12 +61,12 @@ final readonly class GenerateGroceryListAction
                     'total_items' => $groceryListData->items->count(),
                 ]),
             ]);
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             $groceryList->update([
                 'status' => GroceryListStatus::Failed,
                 'metadata' => array_merge($groceryList->metadata ?? [], [
                     'failed_at' => now()->toIso8601String(),
-                    'error' => $e->getMessage(),
+                    'error' => $throwable->getMessage(),
                 ]),
             ]);
         }

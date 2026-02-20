@@ -13,6 +13,7 @@ it('publishes vite assets to cdn', function (): void {
     if (! is_dir($buildPath)) {
         mkdir($buildPath, 0755, true);
     }
+
     file_put_contents($buildPath.'/app.js', 'console.log("test")');
 
     $this->artisan(VitePublishCommand::class)
@@ -40,6 +41,7 @@ it('deletes existing build directory before publishing', function (): void {
     if (! is_dir($buildPath)) {
         mkdir($buildPath, 0755, true);
     }
+
     file_put_contents($buildPath.'/app.js', 'console.log("test")');
 
     $this->artisan(VitePublishCommand::class)
@@ -62,6 +64,7 @@ it('publishes files with correct mime types', function (): void {
     if (! is_dir($buildPath)) {
         mkdir($buildPath, 0755, true);
     }
+
     file_put_contents($buildPath.'/app.js', 'console.log("test")');
     file_put_contents($buildPath.'/app.css', 'body { color: red; }');
 
@@ -75,6 +78,7 @@ it('publishes files with correct mime types', function (): void {
     if (file_exists($buildPath.'/app.js')) {
         unlink($buildPath.'/app.js');
     }
+
     if (file_exists($buildPath.'/app.css')) {
         unlink($buildPath.'/app.css');
     }

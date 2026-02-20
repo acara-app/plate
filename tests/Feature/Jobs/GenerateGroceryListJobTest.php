@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Queue\Middleware\WithoutOverlapping;
+use App\Actions\GenerateGroceryListAction;
 use App\Enums\GroceryListStatus;
 use App\Jobs\GenerateGroceryListJob;
 use App\Models\GroceryList;
@@ -74,7 +76,7 @@ it('uses without overlapping middleware', function (): void {
     $middleware = $job->middleware();
 
     expect($middleware)->toHaveCount(1)
-        ->and($middleware[0])->toBeInstanceOf(Illuminate\Queue\Middleware\WithoutOverlapping::class);
+        ->and($middleware[0])->toBeInstanceOf(WithoutOverlapping::class);
 });
 
 it('returns grocery list id as unique id', function (): void {
@@ -100,7 +102,7 @@ it('calls generate items on the action when handled', function (): void {
 
     $job = new GenerateGroceryListJob($groceryList);
 
-    $action = resolve(App\Actions\GenerateGroceryListAction::class);
+    $action = resolve(GenerateGroceryListAction::class);
     $job->handle($action);
 
     $groceryList->refresh();

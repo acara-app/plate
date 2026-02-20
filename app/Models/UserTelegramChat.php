@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\UserTelegramChatFactory;
 use Carbon\CarbonInterface;
 use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -28,7 +29,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class UserTelegramChat extends Model
 {
-    /** @use HasFactory<\Database\Factories\UserTelegramChatFactory> */
+    /** @use HasFactory<UserTelegramChatFactory> */
     use HasFactory;
 
     protected $guarded = [];

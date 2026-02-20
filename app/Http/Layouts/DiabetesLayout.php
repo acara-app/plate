@@ -102,12 +102,12 @@ final readonly class DiabetesLayout
             ->whereNotNull('medication_dosage')
             ->latest()
             ->get(['medication_name', 'medication_dosage'])
-            ->unique(fn (HealthEntry $log): string => "{$log->medication_name}|{$log->medication_dosage}")
+            ->unique(fn (HealthEntry $log): string => sprintf('%s|%s', $log->medication_name, $log->medication_dosage))
             ->take(5)
             ->map(fn (HealthEntry $log): array => [
                 'name' => (string) $log->medication_name,
                 'dosage' => (string) $log->medication_dosage,
-                'label' => "{$log->medication_name} {$log->medication_dosage}",
+                'label' => sprintf('%s %s', $log->medication_name, $log->medication_dosage),
             ])
             ->values()
             ->all();
@@ -126,12 +126,12 @@ final readonly class DiabetesLayout
             ->whereNotNull('insulin_type')
             ->latest()
             ->get(['insulin_units', 'insulin_type'])
-            ->unique(fn (HealthEntry $log): string => "{$log->insulin_units}|{$log->insulin_type?->value}")
+            ->unique(fn (HealthEntry $log): string => sprintf('%s|%s', $log->insulin_units, $log->insulin_type?->value))
             ->take(5)
             ->map(fn (HealthEntry $log): array => [
                 'units' => (float) $log->insulin_units,
                 'type' => (string) $log->insulin_type?->value,
-                'label' => "{$log->insulin_units}u {$log->insulin_type?->value}",
+                'label' => sprintf('%su %s', $log->insulin_units, $log->insulin_type?->value),
             ])
             ->values()
             ->all();
@@ -306,6 +306,7 @@ final readonly class DiabetesLayout
             } else {
                 $trend = 'stable';
             }
+
             $diff = round(abs($latest - $previous), 1);
         }
 
@@ -408,6 +409,7 @@ final readonly class DiabetesLayout
             if ($uniqueDates->doesntContain($yesterday)) {
                 return ['currentStreak' => 0, 'activeDays' => $activeDays];
             }
+
             $checkDate = today()->subDay();
         }
 

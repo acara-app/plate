@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\SystemPromptProviders;
 
+use App\Enums\DietType;
 use App\Ai\SystemPrompt;
 use App\Contracts\Ai\SystemPromptProvider;
 
 final readonly class BalancedMealPlanSystemProvider implements SystemPromptProvider
 {
     public function __construct(
-        private \App\Enums\DietType $dietType = \App\Enums\DietType::Balanced,
+        private DietType $dietType = DietType::Balanced,
     ) {}
 
     public function run(): string
@@ -32,7 +33,7 @@ final readonly class BalancedMealPlanSystemProvider implements SystemPromptProvi
                 '1. CHEF: Review the Balanced skill guidelines. Design a plate that is visually 50% vegetables/fruit, 25% protein, 25% starch.',
                 '2. DIETITIAN: Ensure variety—rotate colors and protein sources to cover all vitamin bases.',
                 '3. CHEF: Use simple cooking methods (grilling, steaming, sautéing) accessible to a home cook.',
-                '4. NUTRITIONIST: Verify that total calories match the user\'s TDEE without extremes.',
+                "4. NUTRITIONIST: Verify that total calories match the user's TDEE without extremes.",
                 '5. DIETITIAN: Use the get_diet_reference tool with {"diet_type": "balanced", "reference_name": "REFERENCE_NAME"} to fetch any additional reference materials if available.',
                 '6. TEAM: Output the balanced meal plan in valid JSON.',
             ],

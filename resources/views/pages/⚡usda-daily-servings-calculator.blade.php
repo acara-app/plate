@@ -241,7 +241,7 @@ class extends Component
         {{-- Header Card --}}
         <div class="rounded-3xl bg-white p-6 shadow-xl shadow-emerald-500/10 dark:bg-slate-800 dark:shadow-emerald-900/20">
             {{-- Title Section --}}
-            <div class="mb-6 text-center">
+            <div class="mb-6 text-center speakable-intro">
                 <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl dark:bg-emerald-900/50">🥗</div>
                 <h1 class="text-2xl font-bold text-slate-900 dark:text-white">USDA 2025-2030 Daily Serving Calculator</h1>
                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">How much should you eat? Find out based on your calorie needs.</p>
@@ -396,7 +396,7 @@ class extends Component
         </div>
 
         {{-- Diabetic Disclaimer --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800 speakable-how-it-works">
             <div class="flex items-start gap-3">
                 <span class="text-2xl">⚠️</span>
                 <div>

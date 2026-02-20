@@ -43,6 +43,7 @@ final readonly class ProfileController
                 ];
             }
         }
+
         // @codeCoverageIgnoreEnd
 
         return Inertia::render('profile/dietary-preferences', [
@@ -124,6 +125,7 @@ final readonly class ProfileController
         if ($glucoseUnit !== null) {
             $profile->update(['units_preference' => $glucoseUnit]);
         }
+
         // @codeCoverageIgnoreEnd
 
         return back()->with('success', 'Health conditions updated successfully.');

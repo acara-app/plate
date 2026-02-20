@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Carbon\CarbonInterface;
 use App\Models\UserMedication;
 use App\Models\UserProfile;
 
@@ -28,9 +29,9 @@ it('casts attributes correctly', function (): void {
     expect($medication->dosage)->toBeString();
     expect($medication->frequency)->toBeString();
     expect($medication->purpose)->toBeString();
-    expect($medication->started_at)->toBeInstanceOf(Carbon\CarbonInterface::class);
-    expect($medication->created_at)->toBeInstanceOf(Carbon\CarbonInterface::class);
-    expect($medication->updated_at)->toBeInstanceOf(Carbon\CarbonInterface::class);
+    expect($medication->started_at)->toBeInstanceOf(CarbonInterface::class);
+    expect($medication->created_at)->toBeInstanceOf(CarbonInterface::class);
+    expect($medication->updated_at)->toBeInstanceOf(CarbonInterface::class);
 });
 
 it('can have nullable optional fields', function (): void {
@@ -87,6 +88,6 @@ it('casts started_at to date correctly', function (): void {
         'started_at' => $startDate,
     ]);
 
-    expect($medication->started_at)->toBeInstanceOf(Carbon\CarbonInterface::class);
+    expect($medication->started_at)->toBeInstanceOf(CarbonInterface::class);
     expect($medication->started_at->format('Y-m-d'))->toBe($startDate);
 });
