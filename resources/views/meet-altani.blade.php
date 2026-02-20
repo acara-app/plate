@@ -223,17 +223,6 @@
             </div>
         </section>
 
-        <!-- How It Works Section -->
-        <section class="bg-white py-16 sm:py-20">
-            <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
-                <h2 class="text-2xl font-bold text-slate-900 mb-4">How It Works</h2>
-                <p class="text-slate-600 mb-6">
-                    Log your meals and glucose via Telegram chat or web interface. Altani analyzes your trends and provides personalized guidance.
-                </p>
-                @include('components.cgm-coming-soon')
-            </div>
-        </section>
-
         <!-- Philosophy Section (Sticky Notes) -->
         <section class="bg-[#FFFBF5] py-20 sm:py-32 overflow-hidden">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
@@ -427,6 +416,75 @@
                     </div>
                 </div>
              </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="bg-slate-50 py-16 sm:py-24">
+            <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-slate-900 text-center mb-12">Frequently Asked Questions</h2>
+                
+                <div class="space-y-4">
+                    <!-- FAQ 1 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="font-semibold text-slate-900 mb-2">How does Altani work?</h3>
+                        <p class="text-slate-600 text-sm">Altani is your AI health coach. Just chat with her naturally — tell her what you ate, your glucose readings, or ask questions about nutrition. She analyzes your data and provides personalized guidance based on your unique biometrics and goals.</p>
+                    </div>
+
+                    <!-- FAQ 2 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="font-semibold text-slate-900 mb-2">Do I need a CGM device?</h3>
+                        <p class="text-slate-600 text-sm">No, CGM is not required. You can log your glucose manually via Telegram or the web interface. CGM integration is coming soon for those who want automatic data sync with devices like FreeStyle Libre or Dexcom.</p>
+                    </div>
+
+                    <!-- FAQ 3 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="font-semibold text-slate-900 mb-2">Is my data private?</h3>
+                        <p class="text-slate-600 text-sm">Absolutely. We're open source and privacy-focused. Your health data belongs to you — it's never sold to advertisers or third parties. You can export your data anytime.</p>
+                    </div>
+
+                    <!-- FAQ 4 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="font-semibold text-slate-900 mb-2">How do I log my glucose?</h3>
+                        <p class="text-slate-600 text-sm">Simply message Altani on Telegram — no app download required. Say something like "my glucose is 120" or "I had a salad with chicken." She understands natural language and logs everything for you.</p>
+                    </div>
+
+                    <!-- FAQ 5 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="font-semibold text-slate-900 mb-2">Can Altani replace my doctor?</h3>
+                        <p class="text-slate-600 text-sm">No. Altani provides health guidance and education, but she's not a replacement for medical professionals. Always consult your healthcare provider for medical advice, diagnoses, or treatment decisions.</p>
+                    </div>
+
+                    <!-- FAQ 6 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="font-semibold text-slate-900 mb-2">What can Altani help me with?</h3>
+                        <p class="text-slate-600 text-sm">Altani helps with meal planning, glucose predictions, nutrition education, grocery lists, recipe recommendations, and understanding how different foods affect your blood sugar.</p>
+                    </div>
+
+                    <!-- FAQ 7 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="font-semibold text-slate-900 mb-2">How accurate are the glucose predictions?</h3>
+                        <p class="text-slate-600 text-sm">Predictions are based on your personal data patterns and evidence-based nutritional science. Everyone responds differently to food, so predictions improve as Altani learns more about your unique glucose responses.</p>
+                    </div>
+
+                    <!-- FAQ 8 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="font-semibold text-slate-900 mb-2">Does Altani work with Type 1 Diabetes?</h3>
+                        <p class="text-slate-600 text-sm">Yes, Altani can help people with Type 1, Type 2, and prediabetes. She helps you track meals, understand glucose trends, and make smarter food choices. Always follow your healthcare provider's guidance for insulin dosing.</p>
+                    </div>
+
+                    <!-- FAQ 9 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="font-semibold text-slate-900 mb-2">Is Altani free to use?</h3>
+                        <p class="text-slate-600 text-sm">Yes, Altani is free to chat with on Telegram or the web. We offer premium features for dietitians and practitioners who want to use Altani with their clients.</p>
+                    </div>
+
+                    <!-- FAQ 10 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="font-semibold text-slate-900 mb-2">Can I use Altani without Telegram?</h3>
+                        <p class="text-slate-600 text-sm">Yes! You can also chat with Altani directly on our website. Both options provide the same functionality — choose whichever is more convenient for you.</p>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- Final CTA Section -->
