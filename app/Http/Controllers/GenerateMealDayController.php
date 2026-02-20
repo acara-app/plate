@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\MealPlan;
+use App\Models\User;
 use App\Workflows\MealPlanDayWorkflow;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;

@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use Workflow\Workflow;
-use Workflow\Activity;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\IngredientData;
 use App\DataObjects\PreviousDayContext;
@@ -20,6 +18,8 @@ use App\Workflows\MealPlanDayWorkflow;
 use App\Workflows\SaveDayMealsActivity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\LaravelData\DataCollection;
+use Workflow\Activity;
+use Workflow\Workflow;
 use Workflow\WorkflowStub;
 
 uses(RefreshDatabase::class);

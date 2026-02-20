@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Models\User;
 use App\Ai\SingleMealPromptBuilder;
 use App\Contracts\Ai\GeneratesSingleMeals;
 use App\DataObjects\GeneratedMealData;
+use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;

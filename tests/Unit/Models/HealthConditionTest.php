@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Models\HealthCondition;
 use App\Models\User;
 use App\Models\UserProfile;
-use App\Models\HealthCondition;
 
 it('has correct casts', function (): void {
     $condition = HealthCondition::factory()->create();

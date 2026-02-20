@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
-use Illuminate\Validation\Validator;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
@@ -12,6 +11,7 @@ use App\Enums\InsulinType;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 final class UpdateHealthEntryRequest extends FormRequest
 {
@@ -36,8 +36,8 @@ final class UpdateHealthEntryRequest extends FormRequest
             'glucose_value' => [
                 $logType === HealthEntryType::Glucose->value ? 'required' : 'nullable',
                 'numeric',
-                'min:' . $range['min'],
-                'max:' . $range['max'],
+                'min:'.$range['min'],
+                'max:'.$range['max'],
             ],
             'glucose_reading_type' => [
                 $logType === HealthEntryType::Glucose->value ? 'required' : 'nullable',

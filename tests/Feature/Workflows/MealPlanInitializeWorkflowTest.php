@@ -2,16 +2,13 @@
 
 declare(strict_types=1);
 
-use Workflow\Activity;
-use Workflow\Workflow;
-use Workflow\WorkflowStub;
-use App\Enums\MealPlanGenerationStatus;
 use App\Ai\Agents\MealPlanAgent;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\MealData;
 use App\DataObjects\PreviousDayContext;
 use App\DataObjects\SingleDayMealData;
 use App\Enums\GoalChoice;
+use App\Enums\MealPlanGenerationStatus;
 use App\Enums\MealPlanType;
 use App\Enums\MealType;
 use App\Enums\Sex;
@@ -21,6 +18,9 @@ use App\Workflows\MealPlanInitializeWorkflow;
 use App\Workflows\SaveDayMealsActivity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\LaravelData\DataCollection;
+use Workflow\Activity;
+use Workflow\Workflow;
+use Workflow\WorkflowStub;
 
 uses(RefreshDatabase::class);
 

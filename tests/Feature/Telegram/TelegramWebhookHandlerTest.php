@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-use Illuminate\Testing\TestResponse;
-use App\Enums\GlucoseUnit;
 use App\Contracts\ParsesHealthData;
 use App\Contracts\ProcessesAdvisorMessage;
 use App\Contracts\SavesHealthLog;
 use App\DataObjects\HealthLogData;
 use App\Enums\GlucoseReadingType;
+use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
 use App\Enums\InsulinType;
 use App\Enums\Sex;
@@ -20,6 +19,7 @@ use Carbon\CarbonInterface;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Models\TelegraphChat;
+use Illuminate\Testing\TestResponse;
 use Tests\Fixtures\TelegramWebhookPayloads;
 
 beforeEach(function (): void {

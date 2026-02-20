@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Inertia\Response;
 use App\Contracts\Ai\Advisor;
 use App\Enums\AgentMode;
 use App\Http\Requests\StoreAgentConversationRequest;
@@ -12,6 +11,7 @@ use App\Models\Conversation;
 use App\Models\History;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
 final class ChatController

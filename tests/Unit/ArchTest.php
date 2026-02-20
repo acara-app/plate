@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Database\Factories\UserTelegramChatFactory;
 use App\Models\UserTelegramChat;
+use Database\Factories\UserTelegramChatFactory;
 
 arch()->preset()->php();
 arch()->preset()->security()->ignoring([

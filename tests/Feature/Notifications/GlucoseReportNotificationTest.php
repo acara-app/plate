@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Contracts\Queue\ShouldQueue;
 use App\DataObjects\GlucoseAnalysis\AveragesData;
 use App\DataObjects\GlucoseAnalysis\DateRangeData;
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
@@ -17,6 +16,7 @@ use App\DataObjects\GlucoseAnalysis\VariabilityData;
 use App\DataObjects\GlucoseNotificationAnalysisData;
 use App\Models\User;
 use App\Notifications\GlucoseReportNotification;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Notification;
 
 function createNotificationAnalysisData(array $concerns = []): GlucoseNotificationAnalysisData

@@ -39,7 +39,7 @@ final class ContentFactory extends Factory
             'type' => ContentType::Food,
             'slug' => Str::slug($foodName),
             'title' => sprintf('Is %s Good for Diabetics?', $foodName),
-            'meta_title' => $foodName . ' Glycemic Index & Diabetes Safety | Acara Plate',
+            'meta_title' => $foodName.' Glycemic Index & Diabetes Safety | Acara Plate',
             'meta_description' => sprintf("Learn about %s's glycemic index, nutritional value, and whether it's safe for diabetics. Get personalized glucose spike predictions.", $foodName),
             'body' => [
                 'display_name' => $foodName,

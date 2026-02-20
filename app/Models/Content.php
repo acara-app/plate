@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Storage;
-use Database\Factories\ContentFactory;
 use App\Enums\ContentType;
 use App\Enums\FoodCategory;
 use Carbon\CarbonInterface;
+use Database\Factories\ContentFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property-read int $id

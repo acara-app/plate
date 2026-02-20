@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\MealPlanType;
-use Database\Factories\MealFactory;
 use App\DataObjects\IngredientData;
+use App\Enums\MealPlanType;
 use App\Enums\MealType;
 use Carbon\CarbonInterface;
+use Database\Factories\MealFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -120,9 +120,9 @@ final class Meal extends Model
         if ($this->mealPlan->type === MealPlanType::Weekly && $this->day_number <= 7) {
             $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-            return $days[$this->day_number - 1] ?? 'Day ' . $this->day_number;
+            return $days[$this->day_number - 1] ?? 'Day '.$this->day_number;
         }
 
-        return 'Day ' . $this->day_number;
+        return 'Day '.$this->day_number;
     }
 }

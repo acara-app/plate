@@ -38,7 +38,7 @@ final class SubmitSitemapsToIndexNowCommand extends Command
             $path = public_path($file);
 
             if (! File::exists($path)) {
-                $this->warn('Sitemap file not found: ' . $file);
+                $this->warn('Sitemap file not found: '.$file);
 
                 continue;
             }
@@ -63,7 +63,7 @@ final class SubmitSitemapsToIndexNowCommand extends Command
         $result = $indexNowService->submit($allUrls);
 
         if ($result->success) {
-            $this->info('✓ ' . $result->message);
+            $this->info('✓ '.$result->message);
 
             return self::SUCCESS;
         }
@@ -71,7 +71,7 @@ final class SubmitSitemapsToIndexNowCommand extends Command
         $this->error($result->message);
 
         foreach ($result->errors as $error) {
-            $this->error('  - ' . $error);
+            $this->error('  - '.$error);
         }
 
         return self::FAILURE;

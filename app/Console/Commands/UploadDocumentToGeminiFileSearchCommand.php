@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use Illuminate\Support\Sleep;
 use App\DataObjects\GeminiFileSearchStoreData;
 use App\DataObjects\GeminiUploadedFileData;
 use App\Enums\SettingKey;
@@ -13,6 +12,7 @@ use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Sleep;
 
 /**
  * This command is only temporarily needed to upload the FoodData Central JSON file
@@ -34,7 +34,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             ?? config('gemini.default_upload_file_path', storage_path('sources/FoodData_Central_foundation_food_json_2025-04-24 3.json'));
 
         if (! File::exists($filePath)) {
-            $this->error('File not found: ' . $filePath);
+            $this->error('File not found: '.$filePath);
 
             return;
         }
@@ -59,7 +59,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             return;
         }
 
-        $this->info('Using File Search store: ' . $storeName);
+        $this->info('Using File Search store: '.$storeName);
 
         $storeData = $this->checkStoreStatus($apiKey, $baseUrl, $storeName);
         if ($storeData && $storeData->hasDocuments()) {
@@ -148,7 +148,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
                 uri: $uri
             );
         } catch (Exception $exception) {
-            $this->error('File upload failed: ' . $exception->getMessage());
+            $this->error('File upload failed: '.$exception->getMessage());
             $this->error('Exception class: '.$exception::class);
 
             return null;
@@ -170,12 +170,12 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'x-goog-api-key' => $apiKey,
-        ])->post($baseUrl . '/fileSearchStores', [
+        ])->post($baseUrl.'/fileSearchStores', [
             'displayName' => $storeDisplayName,
         ]);
 
         if ($response->failed()) {
-            $this->error('Failed to create File Search store: ' . $response->body());
+            $this->error('Failed to create File Search store: '.$response->body());
 
             return null;
         }
@@ -189,7 +189,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
         Setting::set(SettingKey::GeminiFileSearchStoreName, $storeName);
 
-        $this->info('File Search store created: ' . $storeName);
+        $this->info('File Search store created: '.$storeName);
 
         return $storeName;
     }
@@ -230,7 +230,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
         ]);
 
         if ($response->failed()) {
-            $this->error('Failed to import file: ' . $response->body());
+            $this->error('Failed to import file: '.$response->body());
 
             return false;
         }
@@ -258,7 +258,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             ])->get(sprintf('%s/%s', $baseUrl, $operationName));
 
             if ($response->failed()) {
-                $this->error('Failed to check operation status: ' . $response->body());
+                $this->error('Failed to check operation status: '.$response->body());
 
                 return false;
             }

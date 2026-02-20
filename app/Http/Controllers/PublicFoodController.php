@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Collection;
 use App\Enums\ContentType;
 use App\Enums\FoodCategory;
 use App\Models\Content;
 use App\Services\SeoLinkManager;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final readonly class PublicFoodController

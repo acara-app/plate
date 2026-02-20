@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Database\Factories\UserProfileFactory;
 use App\Enums\AnimalProductChoice;
 use App\Enums\DietType;
 use App\Enums\GlucoseUnit;
@@ -12,6 +11,7 @@ use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use Carbon\CarbonInterface;
+use Database\Factories\UserProfileFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

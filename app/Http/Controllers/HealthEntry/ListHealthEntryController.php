@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\HealthEntry;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Actions\GetUserHealthEntriesAction;
 use App\Http\Layouts\DiabetesLayout;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Inertia\Inertia;
 use Inertia\Response;
 

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Ai\Facades;
 
-use DateTimeInterface;
 use App\Contracts\Ai\Memory\ArchiveMemoriesTool;
 use App\Contracts\Ai\Memory\CategorizeMemoriesTool;
 use App\Contracts\Ai\Memory\ConsolidateMemoriesTool;
@@ -27,6 +26,7 @@ use App\DataObjects\Memory\MemoryStatsData;
 use App\DataObjects\Memory\MemoryValidationResultData;
 use App\DataObjects\Memory\RelatedMemoryData;
 use BadMethodCallException;
+use DateTimeInterface;
 
 /**
  * Static facade for memory operations.

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\HealthEntry;
 use App\Enums\GlucoseReadingType;
+use App\Models\HealthEntry;
 use Illuminate\Support\Collection;
 
 final readonly class GlucoseStatisticsService
@@ -30,7 +30,7 @@ final readonly class GlucoseStatisticsService
     /**
      * Calculate time-in-range, time-above-range, and time-below-range percentages.
      *
-     * @param Collection<int, HealthEntry> $readings
+     * @param  Collection<int, HealthEntry>  $readings
      * @return array{
      *     timeInRange: float,
      *     timeAboveRange: float,
@@ -83,7 +83,7 @@ final readonly class GlucoseStatisticsService
     /**
      * Calculate min, max, average, and standard deviation.
      *
-     * @param Collection<int, HealthEntry> $readings
+     * @param  Collection<int, HealthEntry>  $readings
      * @return array{min: float|null, max: float|null, average: float|null, stdDev: float|null}
      */
     public function calculateBasicStats(Collection $readings): array
@@ -133,7 +133,7 @@ final readonly class GlucoseStatisticsService
      * Calculate coefficient of variation (CV) as percentage.
      * CV = (stdDev / mean) × 100
      *
-     * @param Collection<int, HealthEntry> $readings
+     * @param  Collection<int, HealthEntry>  $readings
      */
     public function calculateCoefficientOfVariation(Collection $readings): ?float
     {
@@ -156,7 +156,7 @@ final readonly class GlucoseStatisticsService
     /**
      * Analyze time-of-day patterns.
      *
-     * @param Collection<int, HealthEntry> $readings
+     * @param  Collection<int, HealthEntry>  $readings
      * @return array{
      *     morning: array{count: int, average: float|null},
      *     afternoon: array{count: int, average: float|null},
@@ -195,7 +195,7 @@ final readonly class GlucoseStatisticsService
     /**
      * Analyze frequency by reading type.
      *
-     * @param Collection<int, HealthEntry> $readings
+     * @param  Collection<int, HealthEntry>  $readings
      * @return array<string, array{count: int, percentage: float, average: float|null}>
      */
     public function analyzeReadingTypeFrequency(Collection $readings): array
@@ -225,7 +225,7 @@ final readonly class GlucoseStatisticsService
      * Calculate linear trend over time (glucose change per day).
      * Uses simple linear regression: slope = sum((x - x_mean)(y - y_mean)) / sum((x - x_mean)^2)
      *
-     * @param Collection<int, HealthEntry> $readings
+     * @param  Collection<int, HealthEntry>  $readings
      * @return array{
      *     slopePerDay: float|null,
      *     slopePerWeek: float|null,

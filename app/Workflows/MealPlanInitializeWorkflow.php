@@ -71,7 +71,7 @@ final class MealPlanInitializeWorkflow extends Workflow
         // @codeCoverageIgnoreStart
         $name = $dietType instanceof DietType
             ? sprintf('%d-Day %s Plan', $totalDays, $dietType->shortName())
-            : $totalDays . '-Day Personalized Plan';
+            : $totalDays.'-Day Personalized Plan';
         // @codeCoverageIgnoreEnd
 
         /** @var MealPlan $mealPlan */

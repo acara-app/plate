@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Ai;
 
-use Illuminate\Support\Facades\Date;
-use App\Models\HealthEntry;
 use App\DataObjects\GlucoseAnalysis\AveragesData;
 use App\DataObjects\GlucoseAnalysis\DateRangeData;
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
@@ -19,9 +17,11 @@ use App\DataObjects\GlucoseAnalysis\TimeOfDayPeriodData;
 use App\DataObjects\GlucoseAnalysis\TrendData;
 use App\DataObjects\GlucoseAnalysis\VariabilityData;
 use App\Enums\GlucoseReadingType;
+use App\Models\HealthEntry;
 use App\Models\User;
 use App\Services\GlucoseStatisticsService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Date;
 
 final readonly class GlucoseDataAnalyzer
 {
@@ -219,7 +219,7 @@ final readonly class GlucoseDataAnalyzer
     /**
      * Calculate average glucose readings by type.
      *
-     * @param Collection<int, HealthEntry> $readings
+     * @param  Collection<int, HealthEntry>  $readings
      */
     private function calculateAverages(Collection $readings): AveragesData
     {
@@ -239,7 +239,7 @@ final readonly class GlucoseDataAnalyzer
     /**
      * Calculate average for a collection of readings.
      *
-     * @param Collection<int, HealthEntry>|null $readings
+     * @param  Collection<int, HealthEntry>|null  $readings
      */
     private function calculateAverage(?Collection $readings): ?float
     {
@@ -255,7 +255,7 @@ final readonly class GlucoseDataAnalyzer
     /**
      * Detect patterns in glucose readings with enhanced TIR-based analysis.
      *
-     * @param Collection<int, HealthEntry> $readings
+     * @param  Collection<int, HealthEntry>  $readings
      */
     private function detectPatterns(Collection $readings, TimeInRangeData $timeInRange, VariabilityData $variability): PatternsData
     {

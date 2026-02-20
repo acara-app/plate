@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Inertia\OnceProp;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
+use Inertia\OnceProp;
 
 it('shares app name from config', function (): void {
     $middleware = new HandleInertiaRequests();

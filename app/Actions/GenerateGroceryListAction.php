@@ -23,7 +23,7 @@ final readonly class GenerateGroceryListAction
 
         return $mealPlan->groceryList()->create([
             'user_id' => $mealPlan->user_id,
-            'name' => 'Grocery List for ' . $mealPlan->name,
+            'name' => 'Grocery List for '.$mealPlan->name,
             'status' => GroceryListStatus::Generating,
             'metadata' => [
                 'started_at' => now()->toIso8601String(),

@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Services\Telegram\TelegramWebhookHandler;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Models\TelegraphChat;
-use DefStudio\Telegraph\Storage\FileStorageDriver;
 use DefStudio\Telegraph\Storage\CacheStorageDriver;
+use DefStudio\Telegraph\Storage\FileStorageDriver;
 use DefStudio\Telegraph\Telegraph;
 
 return [

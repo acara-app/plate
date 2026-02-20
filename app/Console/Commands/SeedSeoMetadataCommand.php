@@ -109,7 +109,7 @@ final class SeedSeoMetadataCommand extends Command
                 ->first();
 
             if (! $content) {
-                $this->warn('  ⚠️  Not found: ' . $sourceSlug);
+                $this->warn('  ⚠️  Not found: '.$sourceSlug);
                 $notFound++;
 
                 continue;
@@ -130,9 +130,9 @@ final class SeedSeoMetadataCommand extends Command
                 $content->update(['seo_metadata' => $seoMetadata]);
             }
 
-            $this->line('  ✅ ' . $sourceSlug);
+            $this->line('  ✅ '.$sourceSlug);
             foreach (array_keys($targets) as $targetSlug) {
-                $this->line('      → ' . $targetSlug);
+                $this->line('      → '.$targetSlug);
             }
 
             $updated++;
@@ -140,8 +140,8 @@ final class SeedSeoMetadataCommand extends Command
 
         $this->newLine();
         $this->info('📊 Summary:');
-        $this->line('   Updated: ' . $updated);
-        $this->line('   Not found: ' . $notFound);
+        $this->line('   Updated: '.$updated);
+        $this->line('   Not found: '.$notFound);
 
         if ($isDryRun) {
             $this->newLine();

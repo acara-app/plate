@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Models\DietaryPreference;
-use App\Models\HealthCondition;
 use App\Contracts\Actions\GetsUserProfileContext;
 use App\Enums\DietType;
+use App\Models\DietaryPreference;
+use App\Models\HealthCondition;
 use App\Models\User;
 use App\Models\UserMedication;
 use App\Models\UserProfile;

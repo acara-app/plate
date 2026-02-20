@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use App\Actions\GenerateGroceryListAction;
 use App\Enums\GroceryListStatus;
 use App\Jobs\GenerateGroceryListJob;
 use App\Models\GroceryList;
 use App\Models\MealPlan;
 use App\Models\User;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Queue;
 
 it('dispatches generate grocery list job when creating via store endpoint', function (): void {

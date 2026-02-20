@@ -2,10 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Contracts\Ai\GeneratesSingleMeals;
-use App\Contracts\Ai\GeneratesMealPlans;
-use App\Contracts\Ai\PredictsGlucoseSpikes;
-use App\Models\History;
 use App\Actions\GetUserProfileContextAction;
 use App\Ai\Agents\AssistantAgent;
 use App\Ai\Tools\CreateMealPlan;
@@ -16,9 +12,13 @@ use App\Ai\Tools\PredictGlucoseSpike;
 use App\Ai\Tools\SuggestSingleMeal;
 use App\Ai\Tools\SuggestWellnessRoutine;
 use App\Ai\Tools\SuggestWorkoutRoutine;
+use App\Contracts\Ai\GeneratesMealPlans;
+use App\Contracts\Ai\GeneratesSingleMeals;
+use App\Contracts\Ai\PredictsGlucoseSpikes;
 use App\Enums\AgentMode;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
+use App\Models\History;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -131,7 +131,7 @@ it('limits messages to 50', function (): void {
         History::factory()->create([
             'user_id' => $this->user->id,
             'role' => 'user',
-            'content' => 'Message ' . $i,
+            'content' => 'Message '.$i,
         ]);
     }
 

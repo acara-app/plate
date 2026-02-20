@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Illuminate\Database\Eloquent\Collection;
 use App\Enums\ContentType;
 use App\Models\Content;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * @codeCoverageIgnore

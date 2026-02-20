@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use Illuminate\JsonSchema\Types\BooleanType;
-use Illuminate\JsonSchema\Types\IntegerType;
-use Illuminate\JsonSchema\Types\NumberType;
-use Illuminate\JsonSchema\Types\StringType;
 use App\Contracts\ParsesHealthData;
 use App\DataObjects\HealthLogData;
 use App\DataObjects\HealthParserResult;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\Types\BooleanType;
+use Illuminate\JsonSchema\Types\IntegerType;
+use Illuminate\JsonSchema\Types\NumberType;
+use Illuminate\JsonSchema\Types\StringType;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;

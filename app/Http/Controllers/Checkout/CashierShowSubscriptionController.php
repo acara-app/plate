@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Checkout;
 
-use Laravel\Cashier\Subscription;
-use Laravel\Cashier\SubscriptionItem;
 use App\Contracts\Services\StripeServiceContract;
 use App\Models\SubscriptionProduct;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Laravel\Cashier\Subscription;
+use Laravel\Cashier\SubscriptionItem;
 
 /**
  * Cashier-based subscription display controller
@@ -34,7 +34,7 @@ final readonly class CashierShowSubscriptionController
 
         $products = SubscriptionProduct::all();
 
-        /** @var \Laravel\Cashier\Subscription|null $currentSubscription */
+        /** @var Subscription|null $currentSubscription */
         /** @phpstan-ignore-next-line argument.type */
         $currentSubscription = $user->subscriptions()->get()->first(fn (Subscription $subscription): bool => $subscription->valid());
 

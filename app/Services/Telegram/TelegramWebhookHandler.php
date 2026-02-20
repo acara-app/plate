@@ -421,9 +421,9 @@ final class TelegramWebhookHandler extends WebhookHandler
         }
 
         $sex = $profile->sex !== null ? ucfirst($profile->sex->value) : 'N/A';
-        $age = $profile->age !== null ? $profile->age . ' years' : 'N/A';
-        $height = $profile->height !== null ? $profile->height . 'cm' : 'N/A';
-        $weight = $profile->weight !== null ? $profile->weight . 'kg' : 'N/A';
+        $age = $profile->age !== null ? $profile->age.' years' : 'N/A';
+        $height = $profile->height !== null ? $profile->height.'cm' : 'N/A';
+        $weight = $profile->weight !== null ? $profile->weight.'kg' : 'N/A';
 
         return "\n\n📊 {$age}, {$sex}\n📏 {$height}, {$weight}";
     }

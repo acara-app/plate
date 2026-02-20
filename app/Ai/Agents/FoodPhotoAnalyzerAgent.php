@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use Illuminate\JsonSchema\Types\Type;
 use App\Ai\SystemPrompt;
 use App\DataObjects\FoodAnalysisData;
 use App\DataObjects\FoodItemData;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ObjectType;
+use Illuminate\JsonSchema\Types\Type;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Laravel\Ai\Attributes\MaxTokens;

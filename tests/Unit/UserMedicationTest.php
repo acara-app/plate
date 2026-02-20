@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Carbon\CarbonInterface;
 use App\Models\UserMedication;
 use App\Models\UserProfile;
+use Carbon\CarbonInterface;
 
 it('belongs to a user profile', function (): void {
     $userProfile = UserProfile::factory()->create();

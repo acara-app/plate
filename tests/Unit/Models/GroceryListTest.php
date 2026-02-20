@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Collection;
-use App\Models\Meal;
 use App\DataObjects\GroceryItemResponseData;
 use App\Models\GroceryItem;
 use App\Models\GroceryList;
+use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
+use Illuminate\Support\Collection;
 
 it('has correct casts', function (): void {
     $groceryList = GroceryList::factory()->create();

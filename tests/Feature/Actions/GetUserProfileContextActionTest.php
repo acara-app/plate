@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Enums\DietType;
 use App\Actions\GetUserProfileContextAction;
+use App\Enums\DietType;
 use App\Models\DietaryPreference;
 use App\Models\HealthCondition;
 use App\Models\User;

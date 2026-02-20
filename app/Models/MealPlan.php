@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Database\Factories\MealPlanFactory;
 use App\Enums\MealPlanType;
 use Carbon\CarbonInterface;
+use Database\Factories\MealPlanFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Database\Factories\GroceryListFactory;
 use App\DataObjects\GroceryItemResponseData;
 use App\DataObjects\IngredientData;
 use App\Enums\GroceryListStatus;
 use Carbon\CarbonInterface;
+use Database\Factories\GroceryListFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\SystemPromptProviders;
 
-use App\Enums\DietType;
 use App\Ai\SystemPrompt;
 use App\Contracts\Ai\SystemPromptProvider;
+use App\Enums\DietType;
 
 final readonly class DashMealPlanSystemProvider implements SystemPromptProvider
 {

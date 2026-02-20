@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Illuminate\Http\Request;
 use App\Http\Controllers as Web;
 use App\Http\Middleware\DisableResponseBuffering;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 

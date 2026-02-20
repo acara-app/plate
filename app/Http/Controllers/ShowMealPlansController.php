@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\Meal;
 use App\Models\MealPlan;
+use App\Models\User;
 use App\Workflows\MealPlanDayWorkflow;
 use Carbon\CarbonImmutable;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -85,7 +85,7 @@ final readonly class ShowMealPlansController
             }
         }
 
-        $dayName = $dayMeals->first()?->getDayName() ?? 'Day ' . $currentDayNumber;
+        $dayName = $dayMeals->first()?->getDayName() ?? 'Day '.$currentDayNumber;
 
         $formattedMealPlan = [
             'id' => $mealPlan->id,

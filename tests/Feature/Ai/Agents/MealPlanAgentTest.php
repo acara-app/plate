@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-use Spatie\LaravelData\DataCollection;
-use App\Models\Setting;
-use App\Enums\SettingKey;
 use App\Ai\Agents\MealPlanAgent;
 use App\Enums\DietType;
 use App\Enums\GoalChoice;
 use App\Enums\MealPlanType;
+use App\Enums\SettingKey;
 use App\Enums\Sex;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\LaravelData\DataCollection;
 use Workflow\WorkflowStub;
 
 uses(RefreshDatabase::class);

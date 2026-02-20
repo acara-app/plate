@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Contracts\Services;
 
-use Laravel\Cashier\Subscription;
 use App\Models\User;
+use Laravel\Cashier\Subscription;
 
 interface StripeServiceContract
 {

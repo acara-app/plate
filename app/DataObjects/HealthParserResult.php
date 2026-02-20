@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\DataObjects;
 
-use Carbon\CarbonInterface;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
 use App\Enums\InsulinType;
 use BackedEnum;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Date;
 use Spatie\LaravelData\Data;
 

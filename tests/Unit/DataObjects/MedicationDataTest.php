@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Date;
 use App\DataObjects\MealPlanContext\MedicationData;
+use Illuminate\Support\Facades\Date;
 
 it('creates medication data with all fields', function (): void {
     $startedAt = Date::parse('2024-01-15');

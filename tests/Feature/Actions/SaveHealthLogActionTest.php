@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Date;
 use App\Actions\RecordHealthEntryAction;
 use App\Actions\SaveHealthLogAction;
 use App\DataObjects\HealthLogData;
@@ -11,6 +10,7 @@ use App\Enums\HealthEntryType;
 use App\Models\HealthEntry;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Date;
 
 uses(RefreshDatabase::class);
 

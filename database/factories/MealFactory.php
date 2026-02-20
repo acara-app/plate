@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\Meal;
 use App\Enums\MealType;
+use App\Models\Meal;
 use App\Models\MealPlan;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

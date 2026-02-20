@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Enums\MealPlanType;
 use App\DataObjects\MealData;
 use App\DataObjects\MealPlanData;
+use App\Enums\MealPlanType;
 use App\Models\MealPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;

@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-use Spatie\LaravelData\Transformers\DateTimeInterfaceTransformer;
 use Illuminate\Contracts\Support\Arrayable;
-use Spatie\LaravelData\Transformers\ArrayableTransformer;
-use Spatie\LaravelData\Transformers\EnumTransformer;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Casts\EnumCast;
-use Spatie\LaravelData\RuleInferrers\SometimesRuleInferrer;
-use Spatie\LaravelData\RuleInferrers\NullableRuleInferrer;
-use Spatie\LaravelData\RuleInferrers\RequiredRuleInferrer;
-use Spatie\LaravelData\RuleInferrers\BuiltInTypesRuleInferrer;
-use Spatie\LaravelData\RuleInferrers\AttributesRuleInferrer;
-use Spatie\LaravelData\Normalizers\ModelNormalizer;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Spatie\LaravelData\Normalizers\ArrayableNormalizer;
-use Spatie\LaravelData\Normalizers\ObjectNormalizer;
 use Spatie\LaravelData\Normalizers\ArrayNormalizer;
 use Spatie\LaravelData\Normalizers\JsonNormalizer;
+use Spatie\LaravelData\Normalizers\ModelNormalizer;
+use Spatie\LaravelData\Normalizers\ObjectNormalizer;
+use Spatie\LaravelData\RuleInferrers\AttributesRuleInferrer;
+use Spatie\LaravelData\RuleInferrers\BuiltInTypesRuleInferrer;
+use Spatie\LaravelData\RuleInferrers\NullableRuleInferrer;
+use Spatie\LaravelData\RuleInferrers\RequiredRuleInferrer;
+use Spatie\LaravelData\RuleInferrers\SometimesRuleInferrer;
 use Spatie\LaravelData\Support\Creation\ValidationStrategy;
-use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Spatie\LaravelData\Transformers\ArrayableTransformer;
+use Spatie\LaravelData\Transformers\DateTimeInterfaceTransformer;
+use Spatie\LaravelData\Transformers\EnumTransformer;
 
 return [
     /*

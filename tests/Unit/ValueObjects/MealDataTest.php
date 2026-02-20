@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Spatie\LaravelData\DataCollection;
 use App\DataObjects\MealData;
 use App\Enums\MealType;
+use Spatie\LaravelData\DataCollection;
 
 it('creates meal data from array with all fields', function (): void {
     $data = [

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
-use Illuminate\Validation\Rules\Enum;
 use App\Enums\AnimalProductChoice;
 use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 final class StoreIdentityRequest extends FormRequest
 {

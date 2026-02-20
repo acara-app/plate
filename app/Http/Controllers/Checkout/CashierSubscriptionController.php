@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Checkout;
 
-use Illuminate\Http\RedirectResponse;
-use Symfony\Component\HttpFoundation\Response;
 use App\Contracts\Services\StripeServiceContract;
 use App\Models\SubscriptionProduct;
 use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 final readonly class CashierSubscriptionController
 {
@@ -52,7 +52,7 @@ final readonly class CashierSubscriptionController
 
             $actualPriceId = $this->stripeService->getPriceIdFromLookupKey($stripePriceId);
 
-            throw_unless($actualPriceId, Exception::class, 'No price found with lookup_key: ' . $stripePriceId);
+            throw_unless($actualPriceId, Exception::class, 'No price found with lookup_key: '.$stripePriceId);
 
             // Use product name as subscription type for better UX
             $subscriptionType = str($product->name)->slug()->toString();
