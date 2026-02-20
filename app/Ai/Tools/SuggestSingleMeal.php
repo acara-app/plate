@@ -14,10 +14,6 @@ use Laravel\Ai\Tools\Request;
 
 final readonly class SuggestSingleMeal implements Tool
 {
-    public function __construct(
-        private GeneratesSingleMeals $singleMealAgent,
-    ) {}
-
     public function name(): string
     {
         return 'suggest_meal';
@@ -49,7 +45,7 @@ final readonly class SuggestSingleMeal implements Tool
         $specificRequest = $request['specific_request'] ?? null;
 
         try {
-            $meal = $this->singleMealAgent->generate(
+            $meal = resolve(GeneratesSingleMeals::class)->generate(
                 $user,
                 $mealType,
                 $cuisine,

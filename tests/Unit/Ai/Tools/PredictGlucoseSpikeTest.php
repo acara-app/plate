@@ -34,7 +34,8 @@ beforeEach(function (): void {
         }
     };
 
-    $this->tool = new PredictGlucoseSpike($this->predictor);
+    app()->instance(PredictsGlucoseSpikes::class, $this->predictor);
+    $this->tool = new PredictGlucoseSpike();
 });
 
 it('predicts glucose spike', function (): void {

@@ -20,7 +20,8 @@ beforeEach(function (): void {
         }
     };
 
-    $this->tool = new GetFitnessGoals($this->action);
+    app()->instance(GetsUserProfileContext::class, $this->action);
+    $this->tool = new GetFitnessGoals();
 });
 
 it('has correct name and description', function (): void {

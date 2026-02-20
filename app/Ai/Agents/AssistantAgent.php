@@ -33,14 +33,6 @@ final class AssistantAgent implements Advisor
     public function __construct(
         private User $user,
         private readonly GetUserProfileContextAction $profileContext,
-        private readonly SuggestSingleMeal $suggestSingleMealTool,
-        private readonly GetUserProfile $getUserProfileTool,
-        private readonly CreateMealPlan $createMealPlanTool,
-        private readonly PredictGlucoseSpike $predictGlucoseSpikeTool,
-        private readonly SuggestWellnessRoutine $suggestWellnessRoutineTool,
-        private readonly GetHealthGoals $getHealthGoalsTool,
-        private readonly SuggestWorkoutRoutine $suggestWorkoutRoutineTool,
-        private readonly GetFitnessGoals $getFitnessGoalsTool,
     ) {}
 
     public function withMode(AgentMode $mode): self
@@ -83,14 +75,14 @@ final class AssistantAgent implements Advisor
     public function tools(): array
     {
         return [
-            $this->suggestSingleMealTool,
-            $this->getUserProfileTool,
-            $this->createMealPlanTool,
-            $this->predictGlucoseSpikeTool,
-            $this->suggestWellnessRoutineTool,
-            $this->getHealthGoalsTool,
-            $this->suggestWorkoutRoutineTool,
-            $this->getFitnessGoalsTool,
+            new SuggestSingleMeal,
+            new GetUserProfile,
+            new CreateMealPlan,
+            new PredictGlucoseSpike,
+            new SuggestWellnessRoutine,
+            new GetHealthGoals,
+            new SuggestWorkoutRoutine,
+            new GetFitnessGoals,
             new GetDietReference,
         ];
     }

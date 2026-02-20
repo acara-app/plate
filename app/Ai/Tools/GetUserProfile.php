@@ -13,10 +13,6 @@ use Laravel\Ai\Tools\Request;
 
 final readonly class GetUserProfile implements Tool
 {
-    public function __construct(
-        private GetsUserProfileContext $profileContext,
-    ) {}
-
     public function name(): string
     {
         return 'get_user_profile';
@@ -47,7 +43,7 @@ final readonly class GetUserProfile implements Tool
         /** @var string $section */
         $section = $request['section'] ?? 'all';
 
-        $context = $this->profileContext->handle($user);
+        $context = resolve(GetsUserProfileContext::class)->handle($user);
 
         if ($section === 'all') {
             return (string) json_encode([

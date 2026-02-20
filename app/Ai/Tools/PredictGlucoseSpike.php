@@ -14,10 +14,6 @@ use Laravel\Ai\Tools\Request;
 
 final readonly class PredictGlucoseSpike implements Tool
 {
-    public function __construct(
-        private PredictsGlucoseSpikes $spikePredictor,
-    ) {}
-
     public function name(): string
     {
         return 'predict_glucose_spike';
@@ -49,7 +45,7 @@ final readonly class PredictGlucoseSpike implements Tool
         }
 
         try {
-            $prediction = $this->spikePredictor->predict($food);
+            $prediction = resolve(PredictsGlucoseSpikes::class)->predict($food);
 
             return (string) json_encode([
                 'success' => true,
