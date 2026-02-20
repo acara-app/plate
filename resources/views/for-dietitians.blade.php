@@ -677,6 +677,35 @@
             </div>
         </section>
 
+        {{-- Dashboard Preview Section --}}
+        <section class="py-16 sm:py-24 bg-[#FFFBF5]">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+                    <div class="p-8 sm:p-12">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl font-bold text-slate-900 sm:text-3xl">
+                                See Your Client Dashboard
+                            </h2>
+                            <p class="mt-3 text-slate-600 max-w-xl mx-auto">
+                                Track adherence, monitor trends, and manage multiple clients from one clean interface. Everything you need to deliver exceptional care.
+                            </p>
+                        </div>
+
+                        <figure class="w-full">
+                            <div class="relative overflow-hidden rounded-2xl shadow-lg ring-1 ring-slate-900/5">
+                                <picture>
+                                    <source srcset="{{ asset('meal-plan-hero-section.webp') }}" type="image/webp">
+                                    <img src="{{ asset('meal-plan-hero-section.webp') }}"
+                                         alt="AI-powered meal planning dashboard showing personalized nutrition recommendations for dietitians"
+                                         class="w-full">
+                                </picture>
+                            </div>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         {{-- Final CTA Section --}}
         <section class="py-16 sm:py-24 bg-white">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">

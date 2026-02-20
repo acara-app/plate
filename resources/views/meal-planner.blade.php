@@ -107,25 +107,25 @@
         </p>
         <div class="mt-6 flex flex-wrap justify-center gap-4 text-sm text-slate-600">
             <span class="inline-flex items-center gap-1.5">
-                <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
                 8 Diet Types
             </span>
             <span class="inline-flex items-center gap-1.5">
-                <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
                 Glucose-Friendly
             </span>
             <span class="inline-flex items-center gap-1.5">
-                <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
                 AI-Generated
             </span>
             <span class="inline-flex items-center gap-1.5">
-                <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
                 AI Chat Support
@@ -135,7 +135,7 @@
             <a href="{{ route('register') }}"
                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:bg-slate-800 hover:shadow-xl">
                 Create Your Free Meal Plan
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
             </a>
@@ -226,20 +226,32 @@
             <h2 class="text-2xl font-bold text-slate-900">See What You're Actually Getting</h2>
             <p class="mt-2 text-slate-600">Here's what real meal plans look like for different diet types.</p>
             
-            <div class="mt-6 flex flex-wrap justify-center gap-2">
+            <div class="mt-6 flex flex-wrap justify-center gap-2" role="tablist" aria-label="Sample meal plans by diet type">
                 <button 
+                    id="tab-mediterranean"
+                    role="tab"
+                    aria-selected="activeTab === 'mediterranean'"
+                    aria-controls="panel-mediterranean"
                     @click="activeTab = 'mediterranean'"
                     :class="activeTab === 'mediterranean' ? 'bg-emerald-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'"
                     class="rounded-full px-4 py-2 text-sm font-semibold transition-all">
                     Mediterranean
                 </button>
                 <button 
+                    id="tab-low_carb"
+                    role="tab"
+                    aria-selected="activeTab === 'low_carb'"
+                    aria-controls="panel-low_carb"
                     @click="activeTab = 'low_carb'"
                     :class="activeTab === 'low_carb' ? 'bg-emerald-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'"
                     class="rounded-full px-4 py-2 text-sm font-semibold transition-all">
                     Low Carb
                 </button>
                 <button 
+                    id="tab-vegetarian"
+                    role="tab"
+                    aria-selected="activeTab === 'vegetarian'"
+                    aria-controls="panel-vegetarian"
                     @click="activeTab = 'vegetarian'"
                     :class="activeTab === 'vegetarian' ? 'bg-emerald-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'"
                     class="rounded-full px-4 py-2 text-sm font-semibold transition-all">
@@ -249,7 +261,7 @@
         </div>
 
         {{-- Mediterranean Grid --}}
-        <div x-show="activeTab === 'mediterranean'" x-transition.opacity class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div id="panel-mediterranean" role="tabpanel" aria-labelledby="tab-mediterranean" x-show="activeTab === 'mediterranean'" x-transition.opacity class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-lg font-bold text-slate-900 mb-4">Day 1</h3>
                 <div class="space-y-4">
@@ -328,7 +340,7 @@
         </div>
 
         {{-- Low Carb Grid --}}
-        <div x-show="activeTab === 'low_carb'" style="display: none;" x-transition.opacity class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div id="panel-low_carb" role="tabpanel" aria-labelledby="tab-low_carb" x-show="activeTab === 'low_carb'" style="display: none;" x-transition.opacity class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-lg font-bold text-slate-900 mb-4">Day 1</h3>
                 <div class="space-y-4">
@@ -407,7 +419,7 @@
         </div>
 
         {{-- Vegetarian Grid --}}
-        <div x-show="activeTab === 'vegetarian'" style="display: none;" x-transition.opacity class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div id="panel-vegetarian" role="tabpanel" aria-labelledby="tab-vegetarian" x-show="activeTab === 'vegetarian'" style="display: none;" x-transition.opacity class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-lg font-bold text-slate-900 mb-4">Day 1</h3>
                  <div class="space-y-4">
@@ -506,7 +518,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div class="rounded-xl border border-slate-200 bg-white p-5">
                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 text-orange-600 mb-3">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 </div>
@@ -517,7 +529,7 @@
             </div>
             <div class="rounded-xl border border-slate-200 bg-white p-5">
                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600 mb-3">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                 </div>
@@ -528,7 +540,7 @@
             </div>
             <div class="rounded-xl border border-slate-200 bg-white p-5">
                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 mb-3">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                 </div>
@@ -539,7 +551,7 @@
             </div>
             <div class="rounded-xl border border-slate-200 bg-white p-5">
                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 text-purple-600 mb-3">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                 </div>
@@ -548,7 +560,7 @@
             </div>
             <div class="rounded-xl border border-slate-200 bg-white p-5">
                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-100 text-teal-600 mb-3">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                 </div>
@@ -573,8 +585,8 @@
         <div class="space-y-4 max-w-3xl mx-auto">
             <details class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                 <summary class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900">
-                    <h3>How does the AI meal planner work for diabetes?</h3>
-                    <svg class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <span class="block">How does the AI meal planner work for diabetes?</span>
+                    <svg class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </summary>
@@ -582,8 +594,8 @@
             </details>
             <details class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                 <summary class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900">
-                    <h3>Can I customize the meal plans?</h3>
-                    <svg class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <span class="block">Can I customize the meal plans?</span>
+                    <svg class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </summary>
@@ -591,8 +603,8 @@
             </details>
             <details class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                 <summary class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900">
-                    <h3>How does this help with A1C and weight loss?</h3>
-                    <svg class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <span class="block">How does this help with A1C and weight loss?</span>
+                    <svg class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </summary>
@@ -600,8 +612,8 @@
             </details>
             <details class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                 <summary class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900">
-                    <h3>What diet types are supported?</h3>
-                    <svg class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <span class="block">What diet types are supported?</span>
+                    <svg class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </summary>
@@ -609,8 +621,8 @@
             </details>
             <details class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                 <summary class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900">
-                    <h3>How do I track my meals?</h3>
-                    <svg class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <span class="block">How do I track my meals?</span>
+                    <svg class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </summary>
@@ -620,8 +632,8 @@
             </details>
             <details class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                 <summary class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900">
-                    <h3>Is Acara Plate free to use?</h3>
-                    <svg class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <span class="block">Is Acara Plate free to use?</span>
+                    <svg class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </summary>
@@ -653,7 +665,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <a href="{{ route('spike-calculator') }}" class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-orange-300 hover:bg-orange-50">
                 <span class="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 text-orange-600 group-hover:bg-orange-200">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 </span>
@@ -664,7 +676,7 @@
             </a>
             <a href="{{ route('snap-to-track') }}" class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-blue-300 hover:bg-blue-50">
                 <span class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-200">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -676,7 +688,7 @@
             </a>
             <a href="{{ route('tools.index') }}" class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-emerald-300 hover:bg-emerald-50">
                 <span class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 group-hover:bg-emerald-200">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                     </svg>
                 </span>

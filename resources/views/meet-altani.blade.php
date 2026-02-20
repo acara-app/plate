@@ -1,11 +1,6 @@
 @section('title', 'Meet Altani | Your AI Health Coach')
 @section('meta_description', 'Altani is your personal AI health coach for diabetes management, nutrition planning, and wellness. Get personalized help, meal plans, and blood sugar insights tailored to your goals.')
 @section('meta_keywords', 'AI health coach, diabetes management, nutrition planning, AI nutritionist, meal planning, glucose tracking, wellness coach')
-@section('canonical_url', url()->current())
-@section('og_image', asset('screenshots/og-meet-altani.webp'))
-@section('og_image_width', '1920')
-@section('og_image_height', '1096')
-@section('og_image_alt', 'Meet Altani - Your personal AI health coach')
 
 @section('head')
 
@@ -95,7 +90,7 @@
 
 <x-default-layout>
     <div class="bg-[#FFFBF5]"> <!-- Cream background color from design -->
-        <header class="w-full pt-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+        <header class="sticky top-0 z-50 w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center bg-[#FFFBF5]/95 backdrop-blur-md border-b border-slate-100">
             <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900">
                 <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
                 <span>Acara Plate</span>
@@ -111,8 +106,8 @@
         <!-- Hero Section -->
         <section class="relative pt-16 pb-20 sm:pt-24 sm:pb-32 overflow-hidden">
             <!-- Decorative Pears -->
-            <img src="https://pub-plate-assets.acara.app/images/pear-1.svg" alt="" class="absolute top-0 left-0 w-32 sm:w-48 md:w-64 -translate-y-4 translate-x-4 opacity-90 select-none pointer-events-none">
-            <img src="https://pub-plate-assets.acara.app/images/pear-2.svg" alt="" class="absolute top-0 right-0 w-32 sm:w-48 md:w-64 translate-y-8 -translate-x-4 opacity-90 select-none pointer-events-none">
+            <img src="https://pub-plate-assets.acara.app/images/pear-1.svg" alt="Decorative pear illustration" aria-hidden="true" class="absolute top-0 left-0 w-32 sm:w-48 md:w-64 -translate-y-4 translate-x-4 opacity-90 select-none pointer-events-none">
+            <img src="https://pub-plate-assets.acara.app/images/pear-2.svg" alt="Decorative pear illustration" aria-hidden="true" class="absolute top-0 right-0 w-32 sm:w-48 md:w-64 translate-y-8 -translate-x-4 opacity-90 select-none pointer-events-none">
 
             <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
                 <div class="relative z-10 mx-auto max-w-3xl">
@@ -146,7 +141,7 @@
                             "Managing your health shouldn't feel like a lonely battle. It should feel <span class="text-[#FF6B4A] italic">empowering</span>, supported, and clear."
                         </h2>
                         <div class="flex items-center gap-4 mt-8">
-                            <img src="https://pub-plate-assets.acara.app/images/altani-waving-hello-320.webp" alt="Altani" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
+                            <img src="https://pub-plate-assets.acara.app/images/altani-waving-hello-320.webp" alt="Avatar of Altani, a friendly AI health coach with warm, inviting colors, waving hello" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
                             <div>
                                 <p class="font-bold text-slate-900">Altani</p>
                                 <p class="text-sm text-slate-600">Your AI Health Coach</p>
@@ -158,7 +153,7 @@
                         <div class="relative rounded-3xl overflow-hidden shadow-xl">
                             <img 
                                 src="https://pub-plate-assets.acara.app/images/altani_with_eyes_closed_peaceful_smile_hands_in_relaxed-1024.webp" 
-                                alt="Altani smiling peacefully"
+                                alt="Altani the AI health coach smiling peacefully with eyes closed, expressing calm and wellness"
                                 class="w-full h-full object-cover"
                             >
                             <!-- Decorative shape overlay/background could go here -->
@@ -181,7 +176,7 @@
                         </p>
                         <div class="inline-flex items-center gap-2 text-white font-medium border-b border-[#FF6B4A] pb-1">
                             <span>Explore features</span>
-                            <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </div>
@@ -247,7 +242,7 @@
                                 </p>
                              </div>
                              <div class="mt-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                              </div>
                         </div>
                     </div>
@@ -262,7 +257,7 @@
                                 </p>
                             </div>
                             <div class="mt-4 w-8 h-8 rounded-full bg-slate-900/10 flex items-center justify-center text-slate-900">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                             </div>
                         </div>
                     </div>
@@ -277,7 +272,7 @@
                                 </p>
                             </div>
                             <div class="mt-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             </div>
                         </div>
                     </div>
@@ -308,15 +303,15 @@
                         </p>
                         <ul class="space-y-3 text-slate-600">
                             <li class="flex items-center gap-3">
-                                <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                                 Macros & Calorie Tracking
                             </li>
                             <li class="flex items-center gap-3">
-                                <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                                 Prep Times & Recipes
                             </li>
                             <li class="flex items-center gap-3">
-                                <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                                 Auto-generated Grocery Lists
                             </li>
                         </ul>
@@ -325,7 +320,7 @@
                          <div class="absolute -inset-4 bg-emerald-50 rounded-3xl transform rotate-2 -z-10"></div>
                          <img 
                             src="https://pub-plate-assets.acara.app/images/altani_holding_plate-1024.webp" 
-                            alt="Altani holding a healthy meal"
+                            alt="Altani holding a plate of fresh, nutritious food including vegetables and lean protein"
                             class="rounded-2xl shadow-xl w-full"
                         >
                     </div>
@@ -337,7 +332,7 @@
                          <div class="absolute -inset-4 bg-rose-50 rounded-2xl transform -rotate-2 -z-10"></div>
                          <img 
                             src="https://pub-plate-assets.acara.app/images/altani-pointing_at_floating_holographic_glucose_chart-1024.webp" 
-                            alt="Altani analyzing glucose data"
+                            alt="Altani the AI health coach pointing at a holographic glucose chart showing blood sugar trends"
                             class="rounded-xl shadow-xl w-full"
                         >
                     </div>
@@ -376,11 +371,11 @@
                         </p>
                         <ul class="space-y-3 text-slate-600">
                              <li class="flex items-center gap-3">
-                                <svg class="w-5 h-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <svg class="w-5 h-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 Evidence-Based Recommendations
                             </li>
                             <li class="flex items-center gap-3">
-                                <svg class="w-5 h-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <svg class="w-5 h-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 Secure Health Data Processing
                             </li>
                         </ul>
@@ -389,7 +384,7 @@
                          <div class="absolute -inset-4 bg-cyan-50 rounded-2xl transform rotate-2 -z-10"></div>
                          <img 
                             src="https://pub-plate-assets.acara.app/images/altani_wearing_high-tech_futuristic_teal_scrubs-1024.webp" 
-                            alt="Altani in high-tech medical attire"
+                            alt="Altani the AI health coach wearing high-tech medical teal scrubs, representing technical health expertise"
                             class="rounded-xl shadow-xl w-full"
                         >
                     </div>
@@ -401,7 +396,7 @@
                          <div class="absolute -inset-4 bg-amber-50 rounded-2xl transform -rotate-2 -z-10"></div>
                          <img 
                             src="https://pub-plate-assets.acara.app/images/altani_with_hand_on_chin_considering_expression_thought-1024.webp" 
-                            alt="Altani considering options"
+                            alt="Altani the AI health coach with hand on chin in a thoughtful, analytical expression"
                             class="rounded-xl shadow-xl w-full"
                         >
                     </div>
@@ -445,7 +440,7 @@
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-full bg-[#FF6B4A] px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-[#E85A3A] transition-all hover:-translate-y-1">
                         Chat Now
-                        <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                        <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                     </a>
                     <a href="https://t.me/AcaraPlate_bot" target="_blank" class="inline-flex items-center justify-center rounded-full bg-white px-8 py-4 text-lg font-semibold text-[#0088cc] shadow-sm hover:bg-slate-50 border border-slate-200 transition-all hover:-translate-y-1">
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.06-.14-.04-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
