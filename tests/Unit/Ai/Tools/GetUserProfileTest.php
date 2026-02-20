@@ -20,7 +20,8 @@ beforeEach(function (): void {
         }
     };
 
-    $this->tool = new GetUserProfile($this->action);
+    app()->instance(GetsUserProfileContext::class, $this->action);
+    $this->tool = new GetUserProfile();
 });
 
 it('has correct name and description', function (): void {

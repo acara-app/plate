@@ -26,7 +26,8 @@ beforeEach(function (): void {
         }
     };
 
-    $this->tool = new CreateMealPlan($this->agent);
+    app()->instance(GeneratesMealPlans::class, $this->agent);
+    $this->tool = new CreateMealPlan();
 });
 
 it('has correct name and description', function (): void {

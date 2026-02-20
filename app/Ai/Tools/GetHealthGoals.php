@@ -13,10 +13,6 @@ use Laravel\Ai\Tools\Request;
 
 final readonly class GetHealthGoals implements Tool
 {
-    public function __construct(
-        private GetsUserProfileContext $profileContext,
-    ) {}
-
     public function name(): string
     {
         return 'get_health_goals';
@@ -44,7 +40,7 @@ final readonly class GetHealthGoals implements Tool
             ]) ?: '{"error":"User not authenticated","goals":null}';
         }
 
-        $context = $this->profileContext->handle($user);
+        $context = resolve(GetsUserProfileContext::class)->handle($user);
 
         /** @var array<string, mixed>|null $rawData */
         $rawData = $context['raw_data'];

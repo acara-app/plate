@@ -14,10 +14,6 @@ use Laravel\Ai\Tools\Request;
 
 final readonly class CreateMealPlan implements Tool
 {
-    public function __construct(
-        private GeneratesMealPlans $mealPlanAgent,
-    ) {}
-
     public function name(): string
     {
         return 'create_meal_plan';
@@ -53,7 +49,7 @@ final readonly class CreateMealPlan implements Tool
 
         try {
             // Start the meal plan generation workflow
-            $this->mealPlanAgent->handle($user, $totalDays);
+            resolve(GeneratesMealPlans::class)->handle($user, $totalDays);
 
             return (string) json_encode([
                 'success' => true,

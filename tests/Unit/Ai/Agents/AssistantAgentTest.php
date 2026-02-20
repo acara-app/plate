@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\GetUserProfileContextAction;
 use App\Ai\Agents\AssistantAgent;
 use App\Ai\Tools\CreateMealPlan;
+use App\Ai\Tools\GetDietReference;
 use App\Ai\Tools\GetFitnessGoals;
 use App\Ai\Tools\GetHealthGoals;
 use App\Ai\Tools\GetUserProfile;
@@ -56,7 +57,7 @@ beforeEach(function (): void {
         $this->suggestWellnessRoutineTool,
         $this->getHealthGoalsTool,
         $this->suggestWorkoutRoutineTool,
-        $this->getFitnessGoalsTool
+        $this->getFitnessGoalsTool,
     );
 });
 
@@ -84,7 +85,7 @@ it('returns instructions with CreateMealPlan mode', function (): void {
 it('returns correct tools', function (): void {
     $tools = $this->agent->tools();
 
-    expect($tools)->toHaveCount(8)
+    expect($tools)->toHaveCount(9)
         ->and($tools[0])->toBeInstanceOf(SuggestSingleMeal::class)
         ->and($tools[1])->toBeInstanceOf(GetUserProfile::class)
         ->and($tools[2])->toBeInstanceOf(CreateMealPlan::class)
@@ -92,7 +93,8 @@ it('returns correct tools', function (): void {
         ->and($tools[4])->toBeInstanceOf(SuggestWellnessRoutine::class)
         ->and($tools[5])->toBeInstanceOf(GetHealthGoals::class)
         ->and($tools[6])->toBeInstanceOf(SuggestWorkoutRoutine::class)
-        ->and($tools[7])->toBeInstanceOf(GetFitnessGoals::class);
+        ->and($tools[7])->toBeInstanceOf(GetFitnessGoals::class)
+        ->and($tools[8])->toBeInstanceOf(GetDietReference::class);
 });
 
 it('returns empty messages when no history', function (): void {

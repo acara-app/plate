@@ -7,6 +7,7 @@ namespace App\Ai\Agents;
 use App\Actions\GetUserProfileContextAction;
 use App\Ai\SystemPrompt;
 use App\Ai\Tools\CreateMealPlan;
+use App\Ai\Tools\GetDietReference;
 use App\Ai\Tools\GetFitnessGoals;
 use App\Ai\Tools\GetHealthGoals;
 use App\Ai\Tools\GetUserProfile;
@@ -32,14 +33,6 @@ final class AssistantAgent implements Advisor
     public function __construct(
         private User $user,
         private readonly GetUserProfileContextAction $profileContext,
-        private readonly SuggestSingleMeal $suggestSingleMealTool,
-        private readonly GetUserProfile $getUserProfileTool,
-        private readonly CreateMealPlan $createMealPlanTool,
-        private readonly PredictGlucoseSpike $predictGlucoseSpikeTool,
-        private readonly SuggestWellnessRoutine $suggestWellnessRoutineTool,
-        private readonly GetHealthGoals $getHealthGoalsTool,
-        private readonly SuggestWorkoutRoutine $suggestWorkoutRoutineTool,
-        private readonly GetFitnessGoals $getFitnessGoalsTool,
     ) {}
 
     public function withMode(AgentMode $mode): self
@@ -82,14 +75,15 @@ final class AssistantAgent implements Advisor
     public function tools(): array
     {
         return [
-            $this->suggestSingleMealTool,
-            $this->getUserProfileTool,
-            $this->createMealPlanTool,
-            $this->predictGlucoseSpikeTool,
-            $this->suggestWellnessRoutineTool,
-            $this->getHealthGoalsTool,
-            $this->suggestWorkoutRoutineTool,
-            $this->getFitnessGoalsTool,
+            new SuggestSingleMeal,
+            new GetUserProfile,
+            new CreateMealPlan,
+            new PredictGlucoseSpike,
+            new SuggestWellnessRoutine,
+            new GetHealthGoals,
+            new SuggestWorkoutRoutine,
+            new GetFitnessGoals,
+            new GetDietReference,
         ];
     }
 

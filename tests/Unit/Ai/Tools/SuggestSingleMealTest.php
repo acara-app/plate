@@ -51,7 +51,8 @@ beforeEach(function (): void {
         }
     };
 
-    $this->tool = new SuggestSingleMeal($this->agent);
+    app()->instance(GeneratesSingleMeals::class, $this->agent);
+    $this->tool = new SuggestSingleMeal();
 });
 
 it('has correct name and description', function (): void {
