@@ -197,7 +197,7 @@
                             <span class="text-[#FF6B4A] text-xl font-bold block mb-2">02</span>
                             <h3 class="font-bold text-slate-900 text-lg mb-3">Real-Time Prediction</h3>
                             <p class="text-slate-600 text-sm leading-relaxed">
-                                Altani predicts how your blood sugar will respond to a meal before you eat. This helps you make smarter choices.
+                                Altani predicts how your blood sugar will respond to a meal before you eat. Log your glucose via Telegram or web — Altani analyzes your trends and provides personalized guidance.
                             </p>
                         </div>
 
@@ -220,6 +220,17 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section class="bg-white py-16 sm:py-20">
+            <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-2xl font-bold text-slate-900 mb-4">How It Works</h2>
+                <p class="text-slate-600 mb-6">
+                    Log your meals and glucose via Telegram chat or web interface. Altani analyzes your trends and provides personalized guidance.
+                </p>
+                @include('components.cgm-coming-soon')
             </div>
         </section>
 

@@ -477,8 +477,8 @@
                             <div class="pt-2">
                                 <h3 class="text-base font-semibold text-slate-900 lg:text-lg">Eat, Track, Improve</h3>
                                 <p class="mt-2 text-xs leading-relaxed text-slate-600 lg:text-sm">
-                                    Follow your personalized meal plan, log your glucose, and watch your plan adapt in
-                                    real-time. <strong class="text-[#FF6B4A]">See measurable results</strong>.
+                                    Follow your personalized meal plan, log your glucose, and watch your plan adapt
+                                    based on your logged data. <strong class="text-[#FF6B4A]">See measurable results</strong>.
                                 </p>
                             </div>
                         </div>

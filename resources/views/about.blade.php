@@ -36,12 +36,12 @@
 
                 <h2>Roadmap: Towards a Fully Agentic System</h2>
                 <p>
-                    Health should be personal, flexible, and evidence-based. We are moving beyond simple tracking toward a proactive, autonomous system that adapts to your life in real-time.
+                    Health should be personal, flexible, and evidence-based. We are moving beyond simple tracking toward a proactive, autonomous system that adapts to your logged data.
                 </p>
 
                 <h3>Personalization & Agentic Intelligence</h3>
                 <p>
-                    The journey toward a fully agentic system starts with deep personalization. Instead of static meal plans, Acara Plate is evolving into a proactive health partner that understands unique biometrics, real-time responses, and long-term goals. 
+                    The journey toward a fully agentic system starts with deep personalization. Instead of static meal plans, Acara Plate is evolving into a proactive health partner that understands unique biometrics, recorded responses, and long-term goals. 
                 </p>
                 <p>
                     Today, the platform already supports a wide range of dietary patterns—from ketogenic and vegan to low-FODMAP and allergen-conscious eating. We are building the intelligence required to not just react to recorded data, but to anticipate needs and provide autonomous guidance.

@@ -286,7 +286,7 @@
                             <h3 class="text-base font-bold text-slate-900">
                                 <a href="{{ route('telegram-health-logging') }}" class="hover:text-emerald-600">Telegram Integration</a>
                             </h3>
-                            <p class="mt-2 text-sm text-slate-600">Clients log meals via Telegram chat — no app download required. You see their data in real-time. 3x better adherence than traditional apps.</p>
+                            <p class="mt-2 text-sm text-slate-600">Clients log meals via Telegram chat — no app download required. See client data instantly when they log it. 3x better adherence than traditional apps.</p>
                         </div>
                     </div>
 
@@ -339,6 +339,10 @@
                             <p class="mt-2 text-sm text-slate-600">Transparent, community-driven development. No vendor lock-in. CSV exports for all data. You own your practice's information.</p>
                         </div>
                     </div>
+
+                    <div class="mt-8 flex justify-center">
+                        @include('components.cgm-coming-soon')
+                    </div>
                 </div>
             </div>
         </section>
@@ -379,7 +383,7 @@
                             </div>
                             <div class="flex items-start gap-3">
                                 <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center">4</span>
-                                <p class="text-slate-600">Client logs meals via Telegram — you see data in real-time</p>
+                                <p class="text-slate-600">Client logs meals via Telegram — you see client data instantly when they log it</p>
                             </div>
                             <div class="flex items-start gap-3">
                                 <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center">5</span>
@@ -641,7 +645,7 @@
                 <div class="grid gap-8 md:grid-cols-2">
                     <div class="bg-slate-50 rounded-xl p-6 border border-slate-200">
                         <h3 class="text-lg font-bold text-slate-900 mb-3">Consumer Apps?</h3>
-                        <p class="text-slate-600 text-sm">Built for end-users, not clinicians. Acara Plate provides a dedicated practitioner dashboard to monitor adherence, trending data, and intervene in real-time.</p>
+                        <p class="text-slate-600 text-sm">Built for end-users, not clinicians. Acara Plate provides a dedicated practitioner dashboard to monitor adherence, trending data, and intervene immediately when issues arise.</p>
                     </div>
 
                     <div class="bg-slate-50 rounded-xl p-6 border border-slate-200">
