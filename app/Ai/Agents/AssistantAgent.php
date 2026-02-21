@@ -17,6 +17,7 @@ use App\Ai\Tools\SuggestWellnessRoutine;
 use App\Ai\Tools\SuggestWorkoutRoutine;
 use App\Contracts\Ai\Advisor;
 use App\Enums\AgentMode;
+use App\Enums\PreferredLanguage;
 use App\Models\History;
 use App\Models\User;
 use Laravel\Ai\Concerns\RemembersConversations;
@@ -143,11 +144,15 @@ final class AssistantAgent implements Advisor
     {
         /** @var string $profileContext */
         $profileContext = $profileData['context'];
+        $language = $this->getUser()->preferred_language ?? PreferredLanguage::English;
+
         $context = [
             'USER PROFILE CONTEXT:',
             $profileContext,
             '',
             'CHAT MODE: '.$this->mode->value,
+            '',
+            'LANGUAGE: Your default language is '.$language->label().' ('.$language->value.'). Respond in this language unless the user writes in a different language — in that case, naturally mirror their language.',
         ];
 
         if ($this->mode === AgentMode::CreateMealPlan) {

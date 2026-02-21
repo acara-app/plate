@@ -828,7 +828,7 @@ return [
     'user_profile' => [
         'title' => 'Profile settings',
         'heading' => 'Profile information',
-        'description' => 'Update your name and email address',
+        'description' => 'Update your name and email address and preferred language',
         'name_label' => 'Name',
         'name_placeholder' => 'Full name',
         'email_label' => 'Email address',
@@ -836,6 +836,8 @@ return [
         'email_unverified' => 'Your email address is unverified.',
         'resend_verification' => 'Click here to resend the verification email.',
         'verification_sent' => 'A new verification link has been sent to your email address.',
+        'language_label' => 'Preferred language',
+        'language_placeholder' => 'Select your preferred language',
         'save_button' => 'Save',
         'saved' => 'Saved',
     ],

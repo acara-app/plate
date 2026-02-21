@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\PreferredLanguage;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -93,15 +94,47 @@ it('includes parent shared data', function (): void {
     expect($shared)->toHaveKey('errors');
 });
 
-it('shares current locale', function (): void {
+it('defaults locale and preferred_language to en for guests', function (): void {
     $middleware = new HandleInertiaRequests();
 
     $request = Request::create('/', 'GET');
 
     $shared = $middleware->share($request);
 
-    expect($shared)->toHaveKey('locale')
-        ->and($shared['locale'])->toBe(app()->getLocale());
+    expect($shared['locale'])->toBe('en')
+        ->and($shared['preferred_language'])->toBe('en');
+});
+
+it('uses user preferred language for locale and preferred_language', function (): void {
+    $user = User::factory()->create([
+        'preferred_language' => PreferredLanguage::Mongolian,
+    ]);
+
+    $middleware = new HandleInertiaRequests();
+
+    $request = Request::create('/', 'GET');
+    $request->setUserResolver(fn () => $user);
+
+    $shared = $middleware->share($request);
+
+    expect($shared['locale'])->toBe('mn')
+        ->and($shared['preferred_language'])->toBe('mn');
+});
+
+it('defaults to en when user has no preferred language set', function (): void {
+    $user = User::factory()->create([
+        'preferred_language' => null,
+    ]);
+
+    $middleware = new HandleInertiaRequests();
+
+    $request = Request::create('/', 'GET');
+    $request->setUserResolver(fn () => $user);
+
+    $shared = $middleware->share($request);
+
+    expect($shared['locale'])->toBe('en')
+        ->and($shared['preferred_language'])->toBe('en');
 });
 
 it('shares translations for current locale', function (): void {

@@ -9,13 +9,19 @@ use App\Enums\AgentMode;
 use App\Http\Requests\StoreAgentConversationRequest;
 use App\Models\Conversation;
 use App\Models\History;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
-final class ChatController
+final readonly class ChatController
 {
+    public function __construct(
+        #[CurrentUser] private User $user,
+    ) {}
+
     public function create(
         Request $request,
         string $conversationId = ''
@@ -42,9 +48,10 @@ final class ChatController
     public function stream(
         StoreAgentConversationRequest $request
     ): StreamableAgentResponse {
-        $agent = resolve(Advisor::class, ['user' => $request->user()])
+
+        $agent = resolve(Advisor::class, ['user' => $this->user])
             ->withMode($request->mode())
-            ->forUser($request->user());
+            ->forUser($this->user);
 
         return $agent
             ->stream(
