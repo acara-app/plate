@@ -389,13 +389,14 @@
             @endif
 
 
-            {{-- Nutrition Advisor CTA --}}
-            <x-cta-block
-                title="Have questions about {{ $displayName }}?"
-                description="Wondering how {{ $displayName }} fits into your meal plan? Or what to pair it with for stable glucose? Our AI nutritionist has answers."
-                button-text="Ask about {{ $displayName }}"
-                button-url="meet-altani"
-            />
+            <div class="my-10">
+                <x-cta-block
+                    title="Have questions about {{ $displayName }}?"
+                    description="Wondering how {{ $displayName }} fits into your meal plan? Or what to pair it with for stable glucose? Our AI nutritionist has answers."
+                    button-text="Ask about {{ $displayName }}"
+                    button-url="{{ route('meet-altani') }}"
+                />
+            </div>
 
             {{-- Related Foods Section --}}
             @if(isset($relatedFoods) && $relatedFoods->count() > 0)

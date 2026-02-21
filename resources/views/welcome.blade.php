@@ -568,12 +568,14 @@
                 </div>
             </section>
 
-            <x-cta-block
-                title="Meet Altani — Your Personal AI Health Coach"
-                description="Altani helps you plan meals, predict glucose responses, and stay on track with your health goals. She's available 24/7 and learns what works best for your body."
-                buttonText="Chat with Altani"
-                buttonUrl="meet-altani"
-            />
+            <section class="w-full max-w-6xl">
+                <x-cta-block
+                    title="Meet Altani — Your Personal AI Health Coach"
+                    description="Altani helps you plan meals, predict glucose responses, and stay on track with your health goals. She's available 24/7 and learns what works best for your body."
+                    buttonText="Chat with Altani"
+                    buttonUrl="{{ route('meet-altani') }}"
+                />
+            </section>
 
             <section class="w-full max-w-6xl">
                 <div

@@ -185,9 +185,11 @@
             </table>
         </div>
     </div>
-    <x-cta-block
-        title="Meet Your AI Health Coach"
-        description="Altani can help you track meals, predict glucose responses, and provide personalized nutrition guidance."
-        button-text="Learn More"
-    />
+    <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <x-cta-block
+            title="Meet Your AI Health Coach"
+            description="Altani can help you track meals, predict glucose responses, and provide personalized nutrition guidance."
+            button-text="Learn More"
+        />
+    </section>
 </x-default-layout>
