@@ -793,10 +793,12 @@
         </section>
 
     </div>
-    <x-cta-block
-        title="Altani Can Assist Your Clients"
-        description="Your clients can chat with Altani for instant answers to nutrition questions between sessions."
-        button-text="Learn More"
-    />
+    <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <x-cta-block
+            title="Altani Can Assist Your Clients"
+            description="Your clients can chat with Altani for instant answers to nutrition questions between sessions."
+            button-text="Learn More"
+        />
+    </section>
     <x-footer />
 </x-default-layout>

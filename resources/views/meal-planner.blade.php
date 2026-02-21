@@ -705,11 +705,13 @@
     </section>
 </div>
 
-<x-cta-block
-    title="Your AI Health Coach is Here to Help"
-    description="Meet Altani — your personal guide for diabetes, nutrition, and daily wellness. Smart, warm, and always here to support you."
-    button-text="Meet Altani"
-/>
+<section class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <x-cta-block
+        title="Your AI Health Coach is Here to Help"
+        description="Meet Altani — your personal guide for diabetes, nutrition, and daily wellness. Smart, warm, and always here to support you."
+        button-text="Meet Altani"
+    />
+</section>
 
 <x-footer />
 
