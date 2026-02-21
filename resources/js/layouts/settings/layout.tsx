@@ -21,6 +21,11 @@ const getSidebarNavItems = (t: (key: string) => string): NavItem[] => [
         icon: User,
     },
     {
+        title: t('settings_layout.nav.integrations'),
+        href: editIntegrations(),
+        icon: Puzzle,
+    },
+    {
         title: t('settings_layout.nav.password'),
         href: editPassword(),
         icon: Lock,
@@ -39,11 +44,6 @@ const getSidebarNavItems = (t: (key: string) => string): NavItem[] => [
         title: t('settings_layout.nav.appearance'),
         href: editAppearance(),
         icon: Palette,
-    },
-    {
-        title: t('settings_layout.nav.integrations'),
-        href: editIntegrations(),
-        icon: Puzzle,
     },
 ];
 

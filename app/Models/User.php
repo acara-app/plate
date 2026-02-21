@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\DataObjects\UserSettingsData;
+use App\Enums\PreferredLanguage;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -34,6 +35,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read bool|null $is_verified
+ * @property-read PreferredLanguage|null $preferred_language
  * @property array<string, mixed>|null $settings
  * @property-read UserSettingsData $notification_settings
  * @property-read UserProfile|null $profile
@@ -93,6 +95,7 @@ final class User extends Authenticatable implements MustVerifyEmail
             'two_factor_recovery_codes' => 'string',
             'two_factor_confirmed_at' => 'datetime',
             'is_verified' => 'boolean',
+            'preferred_language' => PreferredLanguage::class,
             'settings' => 'array',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

@@ -1,6 +1,7 @@
 import UserProfileController from '@/actions/App/Http/Controllers/UserProfileController';
 import { send } from '@/routes/verification';
 import { type BreadcrumbItem } from '@/types';
+import { PREFERRED_LANGUAGE_OPTIONS } from '@/types/preferred-language';
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link } from '@inertiajs/react';
 
@@ -10,6 +11,13 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
@@ -24,7 +32,7 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
 ];
 
 export default function Edit({ status }: { status?: string }) {
-    const { currentUser } = useSharedProps();
+    const { currentUser, preferredLanguage } = useSharedProps();
     const { t } = useTranslation('common');
 
     return (
@@ -91,6 +99,42 @@ export default function Edit({ status }: { status?: string }) {
                                     <InputError
                                         className="mt-2"
                                         message={errors.email}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="preferred_language">
+                                        {t('user_profile.language_label')}
+                                    </Label>
+
+                                    <Select
+                                        name="preferred_language"
+                                        defaultValue={preferredLanguage}
+                                    >
+                                        <SelectTrigger id="preferred_language">
+                                            <SelectValue
+                                                placeholder={t(
+                                                    'user_profile.language_placeholder',
+                                                )}
+                                            />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {PREFERRED_LANGUAGE_OPTIONS.map(
+                                                (option) => (
+                                                    <SelectItem
+                                                        key={option.value}
+                                                        value={option.value}
+                                                    >
+                                                        {option.label}
+                                                    </SelectItem>
+                                                ),
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.preferred_language}
                                     />
                                 </div>
 
