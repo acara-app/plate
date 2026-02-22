@@ -24,7 +24,7 @@
     <meta name="keywords" content="@yield('meta_keywords')" />
 @else
     <meta name="keywords"
-        content="{{ $metaKeywords ?? 'diabetes nutrition, AI meal planner, glucose tracking, personalized meal plans, diabetes management' }}" />
+        content="{{ $metaKeywords ?? 'diabetes nutrition, AI meal planner, glucose tracking, personalized meal plans, diabetes management, blood sugar tracking, diabetic meal planning, AI nutrition assistant' }}" />
 @endif
 
 <link rel="canonical" href="@yield('canonical_url', strtok(url()->current(), '?'))" />
@@ -47,12 +47,12 @@
     <meta property="og:description" content="@yield('meta_description')" />
 @else
     <meta property="og:description"
-        content="{{ $metaDescription ?? 'AI-powered nutrition platform for diabetes management. Get personalized meal plans and track glucose levels.' }}" />
+        content="{{ $metaDescription ?? 'AI-powered nutrition platform for diabetes management. Get personalized meal plans and track glucose levels to achieve your health goals.' }}" />
 @endif
-<meta property="og:image" content="{{ asset('banner-acara-plate.webp') }}" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Acara Plate - AI Nutrition for Diabetes Management" />
+<meta property="og:image" content="@yield('og_image', asset('banner-acara-plate.webp'))" />
+<meta property="og:image:width" content="@yield('og_image_width', '1200')" />
+<meta property="og:image:height" content="@yield('og_image_height', '630')" />
+<meta property="og:image:alt" content="@yield('og_image_alt', 'Acara Plate - AI Nutrition for Diabetes Management')" />
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image" />
@@ -66,17 +66,21 @@
     <meta name="twitter:description" content="@yield('meta_description')" />
 @else
     <meta name="twitter:description"
-        content="{{ $metaDescription ?? 'AI-powered nutrition platform for diabetes management. Get personalized meal plans and track glucose levels.' }}" />
+        content="{{ $metaDescription ?? 'AI-powered nutrition platform for diabetes management. Get personalized meal plans and track glucose levels to achieve your health goals.' }}" />
 @endif
-<meta name="twitter:image" content="{{ asset('banner-acara-plate.webp') }}" />
-<meta name="twitter:image:alt" content="Acara Plate - AI Nutrition for Diabetes Management" />
+<meta name="twitter:image" content="@yield('og_image', asset('banner-acara-plate.webp'))" />
+<meta name="twitter:image:alt" content="@yield('og_image_alt', 'Acara Plate - AI Nutrition for Diabetes Management')" />
 
 <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any" />
 <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon/apple-touch-icon-180x180.png') }}" />
+<link rel="manifest" href="/build/manifest.webmanifest" />
+
+<link rel="preconnect" href="https://fonts.bunny.net">
+<link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
 @livewireStyles
 
-@vite(['resources/css/app.css', 'resources/js/app.js'])
+@vite(['resources/css/app.css'])
 
 @yield('head')
 @stack('head')
@@ -84,3 +88,5 @@
 @production
     <script defer src="https://cloud.umami.is/script.js" data-website-id="00659ffa-f13b-411a-81a7-76d2bd81d2c6"></script>
 @endproduction
+
+@stack('turnstile')

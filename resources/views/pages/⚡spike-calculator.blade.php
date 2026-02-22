@@ -90,6 +90,12 @@ class extends Component
     <x-json-ld.spike-calculator />
 </x-slot:jsonLd>
 
+@push('turnstile')
+    @if (App::environment(['production', 'testing']))
+        <x-turnstile.scripts />
+    @endif
+@endpush
+
 <div
     class="relative flex min-h-screen flex-col items-center overflow-hidden bg-linear-to-br from-slate-50 via-white to-blue-50 p-4 text-slate-900 lg:justify-center lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 dark:text-slate-50"
 >

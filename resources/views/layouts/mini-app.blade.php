@@ -2,10 +2,6 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('layouts.components.head')
-        @if (App::environment(['production', 'testing']))
-            <x-turnstile.scripts />
-        @endif
-        {{ $jsonLd ?? '' }}
     </head>
     <body>
         <livewire:flash-messages.show />
