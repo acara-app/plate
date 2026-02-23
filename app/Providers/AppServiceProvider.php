@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Contracts\Services\IndexNowServiceContract;
 use App\Contracts\Services\StripeServiceContract;
+use App\Listeners\TrackAiUsage;
 use App\Models\User;
 use App\Services\IndexNowService;
 use App\Services\StripeService;
@@ -14,9 +15,11 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Ai\Events\AgentPrompted;
 use Laravel\Cashier\Cashier;
 
 final class AppServiceProvider extends ServiceProvider
@@ -35,6 +38,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->bootCashierDefaults();
         $this->bootUrlDefaults();
         $this->configureDates();
+        $this->registerEventListeners();
     }
 
     private function bootModelsDefaults(): void
@@ -79,5 +83,13 @@ final class AppServiceProvider extends ServiceProvider
     private function configureDates(): void
     {
         Date::use(CarbonImmutable::class);
+    }
+
+    /**
+     * Register event listeners.
+     */
+    private function registerEventListeners(): void
+    {
+        Event::listen(AgentPrompted::class, TrackAiUsage::class);
     }
 }

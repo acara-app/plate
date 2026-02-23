@@ -113,6 +113,47 @@ enum ModelName: string
     }
 
     /**
+     * Get pricing per 1M tokens.
+     *Rough list of popular AI models
+     * @return array{input: float, output: float, reasoning: float, cache_read: float}
+     */
+    public function getPricing(): array
+    {
+        return match ($this) {
+            self::GPT_5_MINI => [
+                'input' => 0.15,
+                'output' => 0.60,
+                'reasoning' => 0.0,
+                'cache_read' => 0.075,
+            ],
+            self::GPT_5_NANO => [
+                'input' => 0.05,
+                'output' => 0.20,
+                'reasoning' => 0.0,
+                'cache_read' => 0.025,
+            ],
+            self::GEMINI_2_5_FLASH => [
+                'input' => 0.15,
+                'output' => 0.60,
+                'reasoning' => 0.0,
+                'cache_read' => 0.075,
+            ],
+            self::GEMINI_3_FLASH => [
+                'input' => 0.075,
+                'output' => 0.30,
+                'reasoning' => 0.0,
+                'cache_read' => 0.0375,
+            ],
+            self::GEMINI_3_1_PRO => [
+                'input' => 1.25,
+                'output' => 5.00,
+                'reasoning' => 0.0,
+                'cache_read' => 0.625,
+            ],
+        };
+    }
+
+    /**
      * @return array{id: string, name: string, description: string, provider: string}
      */
     public function toArray(): array
