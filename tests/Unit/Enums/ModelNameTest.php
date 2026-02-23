@@ -96,3 +96,27 @@ it('returns all available models', function (): void {
         ->and($models[3]['id'])->toBe('gemini-3-flash-preview')
         ->and($models[4]['id'])->toBe('gemini-3.1-pro-preview');
 });
+
+it('returns correct pricing for gemini models', function (): void {
+    $pricing = ModelName::GEMINI_3_FLASH->getPricing();
+
+    expect($pricing['input'])->toBe(0.075)
+        ->and($pricing['output'])->toBe(0.30)
+        ->and($pricing['reasoning'])->toBe(0.0)
+        ->and($pricing['cache_read'])->toBe(0.0375);
+
+    $proPricing = ModelName::GEMINI_3_1_PRO->getPricing();
+    expect($proPricing['input'])->toBe(1.25)
+        ->and($proPricing['output'])->toBe(5.00);
+});
+
+it('returns correct pricing for gpt models', function (): void {
+    $pricing = ModelName::GPT_5_MINI->getPricing();
+
+    expect($pricing['input'])->toBe(0.15)
+        ->and($pricing['output'])->toBe(0.60);
+
+    $nanoPricing = ModelName::GPT_5_NANO->getPricing();
+    expect($nanoPricing['input'])->toBe(0.05)
+        ->and($nanoPricing['output'])->toBe(0.20);
+});
