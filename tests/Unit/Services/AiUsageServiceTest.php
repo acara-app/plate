@@ -16,7 +16,7 @@ it('calculates cost for gemini-3-flash model', function (): void {
 
     $cost = $service->calculateCost('gemini-3-flash-preview', $usage);
 
-    expect($cost)->toBe(0.075 + 0.15);
+    expect($cost)->toBe(0.50 + 1.50);
 });
 
 it('calculates cost for gemini-3-1-pro model', function (): void {
@@ -31,7 +31,7 @@ it('calculates cost for gemini-3-1-pro model', function (): void {
 
     $cost = $service->calculateCost('gemini-3.1-pro-preview', $usage);
 
-    expect($cost)->toBe(1.25 + 5.00);
+    expect($cost)->toBe(2.00 + 12.00);
 });
 
 it('calculates cost for gpt-5-mini model', function (): void {
@@ -61,7 +61,7 @@ it('calculates cost with cache reads', function (): void {
 
     $cost = $service->calculateCost('gemini-3-flash-preview', $usage);
 
-    expect($cost)->toBe(0.0375 + 0.03 + 0.01875);
+    expect($cost)->toBe(0.25 + 0.30 + 0.025);
 });
 
 it('uses default pricing for unknown model', function (): void {
@@ -106,5 +106,5 @@ it('calculates cost with partial tokens', function (): void {
 
     $cost = $service->calculateCost('gemini-3-flash-preview', $usage);
 
-    expect($cost)->toBe(0.000225);
+    expect($cost)->toBe(0.002);
 });

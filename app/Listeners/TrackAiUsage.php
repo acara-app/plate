@@ -49,7 +49,7 @@ final readonly class TrackAiUsage
             'reasoning_tokens' => $usage->reasoningTokens,
         ];
 
-        $cost = (new AiUsageService)->calculateCost($model, $usageArray);
+        $cost = new AiUsageService()->calculateCost($model, $usageArray);
 
         AiUsage::query()->create([
             'user_id' => $user?->id,

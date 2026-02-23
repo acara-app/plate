@@ -100,14 +100,14 @@ it('returns all available models', function (): void {
 it('returns correct pricing for gemini models', function (): void {
     $pricing = ModelName::GEMINI_3_FLASH->getPricing();
 
-    expect($pricing['input'])->toBe(0.075)
-        ->and($pricing['output'])->toBe(0.30)
+    expect($pricing['input'])->toBe(0.50)
+        ->and($pricing['output'])->toBe(3.00)
         ->and($pricing['reasoning'])->toBe(0.0)
-        ->and($pricing['cache_read'])->toBe(0.0375);
+        ->and($pricing['cache_read'])->toBe(0.05);
 
     $proPricing = ModelName::GEMINI_3_1_PRO->getPricing();
-    expect($proPricing['input'])->toBe(1.25)
-        ->and($proPricing['output'])->toBe(5.00);
+    expect($proPricing['input'])->toBe(2.00)
+        ->and($proPricing['output'])->toBe(12.00);
 });
 
 it('returns correct pricing for gpt models', function (): void {
@@ -117,6 +117,6 @@ it('returns correct pricing for gpt models', function (): void {
         ->and($pricing['output'])->toBe(0.60);
 
     $nanoPricing = ModelName::GPT_5_NANO->getPricing();
-    expect($nanoPricing['input'])->toBe(0.05)
-        ->and($nanoPricing['output'])->toBe(0.20);
+    expect($nanoPricing['input'])->toBe(0.10)
+        ->and($nanoPricing['output'])->toBe(0.40);
 });
