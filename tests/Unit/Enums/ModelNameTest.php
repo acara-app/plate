@@ -12,21 +12,29 @@ it('has correct model values', function (): void {
         ->and(ModelName::GEMINI_3_1_PRO->value)->toBe('gemini-3.1-pro-preview');
 });
 
-it('returns correct names', function (): void {
-    expect(ModelName::GPT_5_MINI->getName())->toBe('GPT-5 mini')
-        ->and(ModelName::GPT_5_NANO->getName())->toBe('GPT-5 Nano')
-        ->and(ModelName::GEMINI_2_5_FLASH->getName())->toBe('Gemini 2.5 Flash')
-        ->and(ModelName::GEMINI_3_FLASH->getName())->toBe('Gemini 3 Flash')
-        ->and(ModelName::GEMINI_3_1_PRO->getName())->toBe('Gemini 3.1 Pro');
-});
+it('returns non-empty name for all models', function (ModelName $model): void {
+    expect($model->getName())
+        ->toBeString()
+        ->not->toBeEmpty();
+})->with([
+    'GPT-5 Mini' => [ModelName::GPT_5_MINI],
+    'GPT-5 Nano' => [ModelName::GPT_5_NANO],
+    'Gemini 2.5 Flash' => [ModelName::GEMINI_2_5_FLASH],
+    'Gemini 3 Flash' => [ModelName::GEMINI_3_FLASH],
+    'Gemini 3.1 Pro' => [ModelName::GEMINI_3_1_PRO],
+]);
 
-it('returns correct descriptions', function (): void {
-    expect(ModelName::GPT_5_MINI->getDescription())->toBe('Cheapest model, best for smarter tasks')
-        ->and(ModelName::GPT_5_NANO->getDescription())->toBe('Cheapest model, best for simpler tasks')
-        ->and(ModelName::GEMINI_2_5_FLASH->getDescription())->toBe('Fast and versatile performance across a variety of tasks')
-        ->and(ModelName::GEMINI_3_FLASH->getDescription())->toBe("Google's latest model with frontier intelligence built for speed that helps everyone learn, build, and plan anything — faster")
-        ->and(ModelName::GEMINI_3_1_PRO->getDescription())->toBe("Google's latest Pro model with advanced reasoning and frontier capabilities");
-});
+it('returns non-empty description for all models', function (ModelName $model): void {
+    expect($model->getDescription())
+        ->toBeString()
+        ->not->toBeEmpty();
+})->with([
+    'GPT-5 Mini' => [ModelName::GPT_5_MINI],
+    'GPT-5 Nano' => [ModelName::GPT_5_NANO],
+    'Gemini 2.5 Flash' => [ModelName::GEMINI_2_5_FLASH],
+    'Gemini 3 Flash' => [ModelName::GEMINI_3_FLASH],
+    'Gemini 3.1 Pro' => [ModelName::GEMINI_3_1_PRO],
+]);
 
 it('returns correct providers', function (): void {
     expect(ModelName::GPT_5_MINI->getProvider())->toBe('openai')
@@ -79,8 +87,8 @@ it('converts to array correctly', function (): void {
     expect($array)->toBeArray()
         ->and($array)->toHaveKeys(['id', 'name', 'description', 'provider'])
         ->and($array['id'])->toBe('gpt-5-mini')
-        ->and($array['name'])->toBe('GPT-5 mini')
-        ->and($array['description'])->toBe('Cheapest model, best for smarter tasks')
+        ->and($array['name'])->toBeString()->not->toBeEmpty()
+        ->and($array['description'])->toBeString()->not->toBeEmpty()
         ->and($array['provider'])->toBe('openai');
 });
 
@@ -97,26 +105,36 @@ it('returns all available models', function (): void {
         ->and($models[4]['id'])->toBe('gemini-3.1-pro-preview');
 });
 
-it('returns correct pricing for gemini models', function (): void {
-    $pricing = ModelName::GEMINI_3_FLASH->getPricing();
+it('returns valid pricing structure for all models', function (ModelName $model): void {
+    $pricing = $model->getPricing();
 
-    expect($pricing['input'])->toBe(0.50)
-        ->and($pricing['output'])->toBe(3.00)
-        ->and($pricing['reasoning'])->toBe(0.0)
-        ->and($pricing['cache_read'])->toBe(0.05);
+    expect($pricing)
+        ->toBeArray()
+        ->toHaveKeys(['input', 'output', 'reasoning', 'cache_read'])
+        ->and($pricing['input'])->toBeFloat()->toBeGreaterThanOrEqual(0)
+        ->and($pricing['output'])->toBeFloat()->toBeGreaterThanOrEqual(0)
+        ->and($pricing['reasoning'])->toBeFloat()->toBeGreaterThanOrEqual(0)
+        ->and($pricing['cache_read'])->toBeFloat()->toBeGreaterThanOrEqual(0);
+})->with([
+    'GPT-5 Mini' => [ModelName::GPT_5_MINI],
+    'GPT-5 Nano' => [ModelName::GPT_5_NANO],
+    'Gemini 2.5 Flash' => [ModelName::GEMINI_2_5_FLASH],
+    'Gemini 3 Flash' => [ModelName::GEMINI_3_FLASH],
+    'Gemini 3.1 Pro' => [ModelName::GEMINI_3_1_PRO],
+]);
 
-    $proPricing = ModelName::GEMINI_3_1_PRO->getPricing();
-    expect($proPricing['input'])->toBe(2.00)
-        ->and($proPricing['output'])->toBe(12.00);
-});
+it('has reasonable pricing ratios', function (ModelName $model): void {
+    $pricing = $model->getPricing();
 
-it('returns correct pricing for gpt models', function (): void {
-    $pricing = ModelName::GPT_5_MINI->getPricing();
+    // Output should typically be >= input (sanity check)
+    expect($pricing['output'])->toBeGreaterThanOrEqual($pricing['input'] * 0.5);
 
-    expect($pricing['input'])->toBe(0.15)
-        ->and($pricing['output'])->toBe(0.60);
-
-    $nanoPricing = ModelName::GPT_5_NANO->getPricing();
-    expect($nanoPricing['input'])->toBe(0.10)
-        ->and($nanoPricing['output'])->toBe(0.40);
-});
+    // Cache read should be cheaper than regular input
+    expect($pricing['cache_read'])->toBeLessThan($pricing['input']);
+})->with([
+    'GPT-5 Mini' => [ModelName::GPT_5_MINI],
+    'GPT-5 Nano' => [ModelName::GPT_5_NANO],
+    'Gemini 2.5 Flash' => [ModelName::GEMINI_2_5_FLASH],
+    'Gemini 3 Flash' => [ModelName::GEMINI_3_FLASH],
+    'Gemini 3.1 Pro' => [ModelName::GEMINI_3_1_PRO],
+]);

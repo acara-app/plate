@@ -115,6 +115,7 @@ enum ModelName: string
     /**
      * Get pricing per 1M tokens.
      *Rough list of popular AI models
+     *
      * @return array{input: float, output: float, reasoning: float, cache_read: float}
      */
     public function getPricing(): array
@@ -127,28 +128,28 @@ enum ModelName: string
                 'cache_read' => 0.075,
             ],
             self::GPT_5_NANO => [
-                'input' => 0.05,
-                'output' => 0.20,
+                'input' => 0.10,
+                'output' => 0.40,
                 'reasoning' => 0.0,
-                'cache_read' => 0.025,
+                'cache_read' => 0.05,
             ],
             self::GEMINI_2_5_FLASH => [
-                'input' => 0.15,
-                'output' => 0.60,
+                'input' => 0.30,
+                'output' => 2.50,
                 'reasoning' => 0.0,
-                'cache_read' => 0.075,
+                'cache_read' => 0.03,
             ],
             self::GEMINI_3_FLASH => [
-                'input' => 0.075,
-                'output' => 0.30,
+                'input' => 0.50,
+                'output' => 3.00,
                 'reasoning' => 0.0,
-                'cache_read' => 0.0375,
+                'cache_read' => 0.05,
             ],
             self::GEMINI_3_1_PRO => [
-                'input' => 1.25,
-                'output' => 5.00,
+                'input' => 2.00,
+                'output' => 12.00,
                 'reasoning' => 0.0,
-                'cache_read' => 0.625,
+                'cache_read' => 0.20,
             ],
         };
     }
