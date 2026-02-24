@@ -43,6 +43,11 @@ beforeEach(function (): void {
             );
         }
 
+        public function forUser(User $user): static
+        {
+            return $this;
+        }
+
         public function parse(string $message): HealthLogData
         {
             return $this->returnValue;
@@ -495,6 +500,11 @@ describe('chat message handling', function (): void {
         // Update the ParsesHealthData mock to throw exception
         $parserMock = new class implements ParsesHealthData
         {
+            public function forUser(User $user): static
+            {
+                return $this;
+            }
+
             public function parse(string $message): HealthLogData
             {
                 throw new TelegramUserException('User error occurred');
@@ -518,6 +528,11 @@ describe('chat message handling', function (): void {
         // Update the ParsesHealthData mock to throw generic exception
         $parserMock = new class implements ParsesHealthData
         {
+            public function forUser(User $user): static
+            {
+                return $this;
+            }
+
             public function parse(string $message): HealthLogData
             {
                 throw new Exception('Unexpected error');
@@ -663,6 +678,11 @@ describe('health log flow', function (): void {
         // Update the ParsesHealthData mock to return health data
         $parserMock = new class implements ParsesHealthData
         {
+            public function forUser(User $user): static
+            {
+                return $this;
+            }
+
             public function parse(string $message): HealthLogData
             {
                 return new HealthLogData(
@@ -743,6 +763,11 @@ describe('health log flow', function (): void {
         // Update the ParsesHealthData mock to throw exception
         $parserMock = new class implements ParsesHealthData
         {
+            public function forUser(User $user): static
+            {
+                return $this;
+            }
+
             public function parse(string $message): HealthLogData
             {
                 throw new Exception('Parsing error');
@@ -810,6 +835,11 @@ describe('health log flow', function (): void {
 
         $parserMock = new class implements ParsesHealthData
         {
+            public function forUser(User $user): static
+            {
+                return $this;
+            }
+
             public function parse(string $message): HealthLogData
             {
                 throw new TelegramUserException('Custom user error');

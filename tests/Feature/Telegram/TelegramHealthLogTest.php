@@ -27,6 +27,11 @@ beforeEach(function (): void {
     // Create a simple test implementation that throws by default
     $parserMock = new class implements ParsesHealthData
     {
+        public function forUser(User $user): static
+        {
+            return $this;
+        }
+
         public function parse(string $message): HealthLogData
         {
             throw new Exception('Should not be called unless testing health data');
@@ -127,6 +132,11 @@ describe('health data keywords detection', function (): void {
         // Create a simple test implementation
         $parserMock = new class implements ParsesHealthData
         {
+            public function forUser(User $user): static
+            {
+                return $this;
+            }
+
             public function parse(string $message): HealthLogData
             {
                 return new HealthLogData(
@@ -153,6 +163,11 @@ describe('health data keywords detection', function (): void {
         // Create a simple test implementation
         $parserMock = new class implements ParsesHealthData
         {
+            public function forUser(User $user): static
+            {
+                return $this;
+            }
+
             public function parse(string $message): HealthLogData
             {
                 return new HealthLogData(
@@ -178,6 +193,11 @@ describe('health data keywords detection', function (): void {
         // Create a simple test implementation
         $parserMock = new class implements ParsesHealthData
         {
+            public function forUser(User $user): static
+            {
+                return $this;
+            }
+
             public function parse(string $message): HealthLogData
             {
                 return new HealthLogData(
@@ -202,6 +222,11 @@ describe('health data keywords detection', function (): void {
         // Create a simple test implementation
         $parserMock = new class implements ParsesHealthData
         {
+            public function forUser(User $user): static
+            {
+                return $this;
+            }
+
             public function parse(string $message): HealthLogData
             {
                 return new HealthLogData(
@@ -227,6 +252,11 @@ describe('health data keywords detection', function (): void {
         // Create a simple test implementation
         $parserMock = new class implements ParsesHealthData
         {
+            public function forUser(User $user): static
+            {
+                return $this;
+            }
+
             public function parse(string $message): HealthLogData
             {
                 return new HealthLogData(
@@ -251,6 +281,11 @@ describe('health data keywords detection', function (): void {
         // Create a simple test implementation
         $parserMock = new class implements ParsesHealthData
         {
+            public function forUser(User $user): static
+            {
+                return $this;
+            }
+
             public function parse(string $message): HealthLogData
             {
                 return new HealthLogData(
@@ -276,6 +311,11 @@ describe('health data keywords detection', function (): void {
         // Create a simple test implementation
         $parserMock = new class implements ParsesHealthData
         {
+            public function forUser(User $user): static
+            {
+                return $this;
+            }
+
             public function parse(string $message): HealthLogData
             {
                 return new HealthLogData(

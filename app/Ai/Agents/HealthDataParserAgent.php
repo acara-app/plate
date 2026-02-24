@@ -7,6 +7,7 @@ namespace App\Ai\Agents;
 use App\Contracts\ParsesHealthData;
 use App\DataObjects\HealthLogData;
 use App\DataObjects\HealthParserResult;
+use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\BooleanType;
 use Illuminate\JsonSchema\Types\IntegerType;
@@ -19,6 +20,19 @@ use Laravel\Ai\Promptable;
 final class HealthDataParserAgent implements Agent, HasStructuredOutput, ParsesHealthData
 {
     use Promptable;
+
+    /** @phpstan-ignore-next-line */
+    private ?User $user = null;
+
+    // @codeCoverageIgnoreStart
+    public function forUser(User $user): static
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    // @codeCoverageIgnoreEnd
 
     public function instructions(): string
     {

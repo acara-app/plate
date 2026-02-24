@@ -227,7 +227,9 @@ final class TelegramWebhookHandler extends WebhookHandler
         }
 
         try {
-            $healthData = $this->healthDataParser->parse($message);
+            $healthData = $this->healthDataParser
+                ->forUser($linkedChat->user)
+                ->parse($message);
 
             if ($healthData->isHealthData) {
                 $this->handleHealthLogAttempt($linkedChat, $healthData);
