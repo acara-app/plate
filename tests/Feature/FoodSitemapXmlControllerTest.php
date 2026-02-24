@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Content;
+use Illuminate\Support\Facades\Storage;
 
 it('returns food sitemap as xml', function (): void {
     Content::factory()->create([
@@ -28,6 +29,7 @@ it('only includes published foods', function (): void {
     $response = $this->get(route('food.sitemap'));
 
     $response->assertStatus(200);
+
     $content = $response->getContent();
     expect($content)->toContain('published-food')
         ->not->toContain('unpublished-food');
@@ -43,6 +45,7 @@ it('includes food image when available', function (): void {
     $response = $this->get(route('food.sitemap'));
 
     $response->assertStatus(200);
+
     $content = $response->getContent();
     expect($content)->toContain('image:image')
         ->toContain('food-images/');
