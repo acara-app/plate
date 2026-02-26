@@ -11,6 +11,8 @@ use Illuminate\Container\Attributes\Bind;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
 use Laravel\Ai\Contracts\HasTools;
+use Laravel\Ai\Contracts\Tool;
+use Laravel\Ai\Providers\Tools\ProviderTool;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
 #[Bind(AssistantAgent::class)]
@@ -21,6 +23,8 @@ interface Advisor extends Agent, Conversational, HasTools
     public function forUser(User $user): self;
 
     public function continue(string $conversationId, object $as): self;
+
+    public function addTool(Tool|ProviderTool $tool): self;
 
     /**
      * @param  array<mixed>  $attachments

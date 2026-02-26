@@ -20,6 +20,8 @@ import { useTranslation } from 'react-i18next';
 export const AI_MODELS = {
     'gemini-3-flash-preview': 'chat.models.gemini_3_flash',
     'gemini-3.1-pro-preview': 'chat.models.gemini_3_1_pro',
+    'gpt-5-mini': 'chat.models.gpt_5_mini',
+    'gpt-5-nano': 'chat.models.gpt_5_nano',
 } as const;
 
 export type AIModel = keyof typeof AI_MODELS;
