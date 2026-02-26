@@ -24,6 +24,7 @@ use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Messages\Message;
 use Laravel\Ai\Promptable;
+use Laravel\Ai\Providers\Tools\ProviderTool;
 
 final class AssistantAgent implements Advisor
 {
@@ -31,10 +32,22 @@ final class AssistantAgent implements Advisor
 
     private AgentMode $mode = AgentMode::Ask;
 
+    /**
+     * @var array<int, Tool|ProviderTool>
+     */
+    private array $additionalTools = [];
+
     public function __construct(
         private User $user,
         private readonly GetUserProfileContextAction $profileContext,
     ) {}
+
+    public function addTool(Tool|ProviderTool $tool): self
+    {
+        $this->additionalTools[] = $tool;
+
+        return $this;
+    }
 
     public function withMode(AgentMode $mode): self
     {
@@ -75,7 +88,7 @@ final class AssistantAgent implements Advisor
      */
     public function tools(): array
     {
-        return [
+        return array_merge([
             new SuggestSingleMeal,
             new GetUserProfile,
             new CreateMealPlan,
@@ -85,7 +98,7 @@ final class AssistantAgent implements Advisor
             new SuggestWorkoutRoutine,
             new GetFitnessGoals,
             new GetDietReference,
-        ];
+        ], $this->additionalTools);
     }
 
     /**

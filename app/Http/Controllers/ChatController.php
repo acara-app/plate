@@ -14,6 +14,8 @@ use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Laravel\Ai\Enums\Lab;
+use Laravel\Ai\Providers\Tools\WebSearch;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
 final readonly class ChatController
@@ -53,10 +55,22 @@ final readonly class ChatController
             ->withMode($request->mode())
             ->forUser($this->user);
 
+        $model = $request->modelName()->value;
+
+        if (in_array($model, ['gpt-5-mini', 'gpt-5-nano'], true)) {
+            $agent->addTool(new WebSearch);
+        }
+
+        $providers = match ($model) {
+            'gpt-5-mini', 'gpt-5-nano' => [Lab::OpenAI, Lab::Gemini],
+            default => [Lab::Gemini],
+        };
+
         return $agent
             ->stream(
                 prompt: $request->userMessage(),
-                model: $request->modelName()->value
+                model: $model,
+                provider: $providers
             )
             ->usingVercelDataProtocol();
     }

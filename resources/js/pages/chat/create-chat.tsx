@@ -28,7 +28,7 @@ export default function CreateChat() {
         initialConversationId,
     );
     const [mode, setMode] = useState<ChatMode>(initialMode ?? 'ask');
-    const [model, setModel] = useState<AIModel>('gemini-3-flash-preview');
+    const [model, setModel] = useState<AIModel>('gpt-5-mini');
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
