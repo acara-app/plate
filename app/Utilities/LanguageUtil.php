@@ -7,18 +7,20 @@ namespace App\Utilities;
 final class LanguageUtil
 {
     /**
+     * @var array<string, string>
+     */
+    private const array OPTIONS = [
+        'en' => 'English',
+        'fr' => 'Français',
+        'mn' => 'Монгол',
+    ];
+
+    /**
      * @return array<string, string>
      */
     public static function all(): array
     {
-        $config = config('languages');
-
-        if (! is_array($config)) {
-            return []; // @codeCoverageIgnore
-        }
-
-        /** @var array<string, string> */
-        return $config;
+        return self::OPTIONS;
     }
 
     /**
