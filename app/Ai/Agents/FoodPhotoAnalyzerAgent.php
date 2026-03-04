@@ -22,7 +22,7 @@ use Laravel\Ai\Promptable;
 use Spatie\LaravelData\DataCollection;
 
 #[Provider('gemini')]
-#[MaxTokens(16000)]
+#[MaxTokens(35000)]
 #[Timeout(120)]
 final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
 {
@@ -56,7 +56,7 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
 
     public function maxTokens(): int
     {
-        return 16000;
+        return 35000;
     }
 
     /**
