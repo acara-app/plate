@@ -8,13 +8,17 @@ use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
 use App\DataObjects\MealPlanContext\MacronutrientRatiosData;
 use App\DataObjects\MealPlanContext\MealPlanContextData;
 use App\DataObjects\PreviousDayContext;
+use App\Enums\AllergySeverity;
 use App\Enums\AnimalProductChoice;
 use App\Enums\DietType;
 use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
+use App\Enums\UserProfileAttributeCategory;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Models\UserProfileAttribute;
 use App\Services\DietMapper;
+use Illuminate\Database\Eloquent\Collection;
 use RuntimeException;
 
 final readonly class MealPlanPromptBuilder
@@ -63,9 +67,7 @@ final readonly class MealPlanPromptBuilder
     private function buildContext(User $user, ?GlucoseAnalysisData $glucoseAnalysis = null): MealPlanContextData
     {
         $user->loadMissing([
-            'profile.dietaryPreferences',
-            'profile.healthConditions',
-            'profile.medications',
+            'profile.attributes',
         ]);
 
         throw_unless($user->profile instanceof UserProfile, RuntimeException::class, 'User profile is required to create a meal plan.');
@@ -80,9 +82,9 @@ final readonly class MealPlanPromptBuilder
         return MealPlanContextData::from([
             ...$profile->toArray(),
             'goal' => $profile->goal_choice?->label(),
-            'dietary_preferences' => $profile->dietaryPreferences,
-            'health_conditions' => $profile->healthConditions,
-            'medications' => $profile->medications,
+            'dietary_preferences' => $this->enrichAttributes($profile->dietaryAttributes()->get()),
+            'health_conditions' => $this->enrichAttributes($profile->healthConditionAttributes()->get()),
+            'medications' => $this->enrichAttributes($profile->medicationAttributes()->get()),
             'daily_calorie_target' => $this->calculateDailyCalorieTarget($profile),
             'macronutrient_ratios' => new MacronutrientRatiosData(
                 protein: $macroTargets['protein'],
@@ -94,6 +96,24 @@ final readonly class MealPlanPromptBuilder
             'diet_type_focus' => $dietType->focus(),
             'glucose_analysis' => $glucoseAnalysis ?? $this->glucoseDataAnalyzer->handle($user, 30),
         ]);
+    }
+
+    /**
+     * Return attributes with their stored metadata for the meal plan prompt.
+     * Metadata is now stored when attributes are created via enrich_attribute_metadata tool.
+     *
+     * @param  Collection<int, UserProfileAttribute>  $attributes
+     * @return array<int, array{category: UserProfileAttributeCategory, value: string, severity: AllergySeverity|null, notes: string|null, metadata: array<string, mixed>|null}>
+     */
+    private function enrichAttributes(Collection $attributes): array
+    {
+        return $attributes->map(fn (UserProfileAttribute $attr): array => [
+            'category' => $attr->category,
+            'value' => $attr->value,
+            'severity' => $attr->severity,
+            'notes' => $attr->notes,
+            'metadata' => $attr->metadata,
+        ])->values()->all();
     }
 
     /**

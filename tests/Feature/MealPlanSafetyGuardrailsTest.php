@@ -3,59 +3,116 @@
 declare(strict_types=1);
 
 use App\Ai\MealPlanPromptBuilder;
-use App\Models\HealthCondition;
 use App\Models\HealthEntry;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Models\UserProfileAttribute;
 
-it('includes diabetes safety guardrails when user has type 2 diabetes', function (): void {
+it('includes critical safety warning when user has type 2 diabetes', function (): void {
     $user = User::factory()
         ->has(UserProfile::factory(), 'profile')
         ->create();
 
-    $diabetes = HealthCondition::factory()->create([
-        'name' => 'Type 2 Diabetes',
+    UserProfileAttribute::factory()->healthCondition('Type 2 Diabetes')->create([
+        'user_profile_id' => $user->profile->id,
+        'metadata' => [
+            'safety_level' => 'critical',
+            'dietary_rules' => [
+                'Strictly avoid high-GI foods',
+                'Limit carbs to 45–60g per meal',
+            ],
+            'foods_to_avoid' => [
+                'White bread, white rice, instant oatmeal',
+            ],
+            'foods_to_prioritize' => [
+                'Legumes',
+            ],
+        ],
     ]);
-
-    $user->profile->healthConditions()->attach($diabetes);
-    $user->refresh(); // Reload the user with relationships
+    $user->refresh();
 
     $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
-    // Check for critical safety section
-    expect($prompt)->toContain('CRITICAL SAFETY GUARDRAILS')
-        ->and($prompt)->toContain('DIABETES/GLUCOSE MANAGEMENT ACTIVE')
-        ->and($prompt)->toContain('FORBIDDEN HIGH-GI FOODS')
-        ->and($prompt)->toContain('Glycemic Index (GI) over 70');
-
-    // Check for specific forbidden foods
-    expect($prompt)->toContain('White bread, white rice')
-        ->and($prompt)->toContain('fruit juice')
-        ->and($prompt)->toContain('Watermelon');
-
-    // Check for GI categories
-    expect($prompt)->toContain('PRIORITIZE LOW-GI FOODS (GI ≤55)')
-        ->and($prompt)->toContain('EXERCISE CAUTION (GI 56-69)');
+    expect($prompt)
+        ->toContain('CRITICAL SAFETY GUARDRAILS')
+        ->toContain('Type 2 Diabetes')
+        ->toContain('CRITICAL — Strict dietary rules apply')
+        ->toContain('Dietary Rules');
 });
 
-it('includes diabetes safety guardrails when user has glucose data', function (): void {
+it('includes dietary rules for type 2 diabetes in metadata', function (): void {
     $user = User::factory()
         ->has(UserProfile::factory(), 'profile')
         ->create();
 
-    // Add glucose readings
-    HealthEntry::factory()->count(5)->create([
-        'user_id' => $user->id,
-        'glucose_value' => 140,
+    UserProfileAttribute::factory()->healthCondition('Type 2 Diabetes')->create([
+        'user_profile_id' => $user->profile->id,
+        'metadata' => [
+            'safety_level' => 'critical',
+            'dietary_rules' => [
+                'Strictly avoid high-GI foods',
+                'Limit carbs to 45–60g per meal',
+            ],
+        ],
     ]);
+    $user->refresh();
 
     $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
-    expect($prompt)->toContain('CRITICAL SAFETY GUARDRAILS')
-        ->and($prompt)->toContain('DIABETES/GLUCOSE MANAGEMENT ACTIVE')
-        ->and($prompt)->toContain('Glucose Monitoring Data');
+    expect($prompt)
+        ->toContain('Strictly avoid high-GI foods')
+        ->toContain('Limit carbs to 45–60g per meal')
+        ->toContain('Dietary Rules');
+});
+
+it('includes foods to avoid for diabetic users from metadata', function (): void {
+    $user = User::factory()
+        ->has(UserProfile::factory(), 'profile')
+        ->create();
+
+    UserProfileAttribute::factory()->healthCondition('Type 2 Diabetes')->create([
+        'user_profile_id' => $user->profile->id,
+        'metadata' => [
+            'safety_level' => 'critical',
+            'foods_to_avoid' => [
+                'White bread, white rice, instant oatmeal',
+            ],
+        ],
+    ]);
+    $user->refresh();
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    $prompt = $builder->handle($user);
+
+    expect($prompt)
+        ->toContain('White bread, white rice, instant oatmeal')
+        ->toContain('Foods To Avoid');
+});
+
+it('includes foods to prioritize for diabetic users from metadata', function (): void {
+    $user = User::factory()
+        ->has(UserProfile::factory(), 'profile')
+        ->create();
+
+    UserProfileAttribute::factory()->healthCondition('Type 2 Diabetes')->create([
+        'user_profile_id' => $user->profile->id,
+        'metadata' => [
+            'safety_level' => 'critical',
+            'foods_to_prioritize' => [
+                'Legumes',
+            ],
+        ],
+    ]);
+    $user->refresh();
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    $prompt = $builder->handle($user);
+
+    expect($prompt)
+        ->toContain('Foods To Prioritize')
+        ->toContain('Legumes');
 });
 
 it('includes diabetes safety guardrails for gestational diabetes', function (): void {
@@ -63,21 +120,27 @@ it('includes diabetes safety guardrails for gestational diabetes', function (): 
         ->has(UserProfile::factory(), 'profile')
         ->create();
 
-    $gestational = HealthCondition::factory()->create([
-        'name' => 'Gestational Diabetes',
+    UserProfileAttribute::factory()->healthCondition('Gestational Diabetes')->create([
+        'user_profile_id' => $user->profile->id,
+        'metadata' => [
+            'safety_level' => 'critical',
+            'dietary_rules' => [
+                'Follow carbohydrate counting guidelines',
+            ],
+        ],
     ]);
-
-    $user->profile->healthConditions()->attach($gestational);
     $user->refresh();
 
     $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
-    expect($prompt)->toContain('DIABETES/GLUCOSE MANAGEMENT ACTIVE')
-        ->and($prompt)->toContain('FORBIDDEN HIGH-GI FOODS');
+    expect($prompt)
+        ->toContain('Gestational Diabetes')
+        ->toContain('CRITICAL — Strict dietary rules apply')
+        ->toContain('Dietary Rules');
 });
 
-it('does not include diabetes-specific rules for healthy users', function (): void {
+it('does not show critical warning for healthy users', function (): void {
     $user = User::factory()
         ->has(UserProfile::factory(), 'profile')
         ->create();
@@ -85,9 +148,10 @@ it('does not include diabetes-specific rules for healthy users', function (): vo
     $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
-    expect($prompt)->toContain('CRITICAL SAFETY GUARDRAILS')
-        ->and($prompt)->toContain('General Safety Rules')
-        ->and($prompt)->not->toContain('DIABETES/GLUCOSE MANAGEMENT ACTIVE');
+    expect($prompt)
+        ->toContain('CRITICAL SAFETY GUARDRAILS')
+        ->toContain('General Safety Rules')
+        ->not->toContain('CRITICAL — Strict dietary rules apply');
 });
 
 it('includes general safety rules for all users', function (): void {
@@ -98,69 +162,69 @@ it('includes general safety rules for all users', function (): void {
     $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
-    expect($prompt)->toContain('ALLERGEN AWARENESS')
-        ->and($prompt)->toContain('PORTION REALISM')
-        ->and($prompt)->toContain('MEDICAL DISCLAIMER')
-        ->and($prompt)->toContain('HYDRATION');
+    expect($prompt)
+        ->toContain('ALLERGEN AWARENESS')
+        ->toContain('PORTION REALISM')
+        ->toContain('MEDICAL DISCLAIMER')
+        ->toContain('HYDRATION');
 });
 
-it('includes meal composition requirements for diabetic users', function (): void {
+it('includes halal requirements from metadata', function (): void {
     $user = User::factory()
         ->has(UserProfile::factory(), 'profile')
         ->create();
 
-    $diabetes = HealthCondition::factory()->create([
-        'name' => 'Type 2 Diabetes',
+    UserProfileAttribute::factory()->restriction('Halal')->create([
+        'user_profile_id' => $user->profile->id,
+        'metadata' => [
+            'requirements' => [
+                'No pork or pork-derived products',
+                'No alcohol or alcohol-based ingredients',
+            ],
+        ],
     ]);
-
-    $user->profile->healthConditions()->attach($diabetes);
     $user->refresh();
 
     $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
-    expect($prompt)->toContain('MEAL COMPOSITION')
-        ->and($prompt)->toContain('Lean protein')
-        ->and($prompt)->toContain('Healthy fats')
-        ->and($prompt)->toContain('minimum 5g per meal');
+    expect($prompt)
+        ->toContain('Halal')
+        ->toContain('No pork or pork-derived products')
+        ->toContain('No alcohol or alcohol-based ingredients');
 });
 
-it('includes GI food categories with specific examples', function (): void {
+it('includes kosher requirements from metadata', function (): void {
     $user = User::factory()
         ->has(UserProfile::factory(), 'profile')
         ->create();
 
-    $diabetes = HealthCondition::factory()->create([
-        'name' => 'Type 2 Diabetes',
+    UserProfileAttribute::factory()->restriction('Kosher')->create([
+        'user_profile_id' => $user->profile->id,
+        'metadata' => [
+            'requirements' => [
+                'No pork or shellfish',
+                'Never combine meat and dairy',
+            ],
+        ],
     ]);
-
-    $user->profile->healthConditions()->attach($diabetes);
     $user->refresh();
 
     $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
-    // High GI examples
-    expect($prompt)->toContain('White bread')
-        ->and($prompt)->toContain('French fries')
-        ->and($prompt)->toContain('Sugary cereals');
-
-    // Medium GI examples
-    expect($prompt)->toContain('Whole wheat bread')
-        ->and($prompt)->toContain('Sweet potatoes');
-
-    // Low GI examples
-    expect($prompt)->toContain('Non-starchy vegetables')
-        ->and($prompt)->toContain('legumes')
-        ->and($prompt)->toContain('berries');
+    expect($prompt)
+        ->toContain('Kosher')
+        ->toContain('No pork or shellfish')
+        ->toContain('Never combine meat and dairy');
 });
 
-it('reinforces safety rules in glucose monitoring section for users with glucose data', function (): void {
+it('shows glucose monitoring data when available', function (): void {
     $user = User::factory()
         ->has(UserProfile::factory(), 'profile')
         ->create();
 
-    HealthEntry::factory()->count(10)->create([
+    HealthEntry::factory()->count(5)->create([
         'user_id' => $user->id,
         'glucose_value' => 150,
     ]);
@@ -168,28 +232,28 @@ it('reinforces safety rules in glucose monitoring section for users with glucose
     $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
-    expect($prompt)->toContain('VERIFICATION CHECKLIST')
-        ->and($prompt)->toContain('No high-GI foods (GI >70)')
-        ->and($prompt)->toContain('Total meal carbohydrates do not exceed 60g')
-        ->and($prompt)->toContain('Fiber content is adequate');
+    expect($prompt)
+        ->toContain('Glucose Monitoring Data')
+        ->toContain('Total Readings');
 });
 
-it('includes final safety check before output for diabetic users', function (): void {
+it('includes caution warning for prediabetes from metadata', function (): void {
     $user = User::factory()
         ->has(UserProfile::factory(), 'profile')
         ->create();
 
-    $diabetes = HealthCondition::factory()->create([
-        'name' => 'Type 2 Diabetes',
+    UserProfileAttribute::factory()->healthCondition('Prediabetes')->create([
+        'user_profile_id' => $user->profile->id,
+        'metadata' => [
+            'safety_level' => 'warning',
+        ],
     ]);
-
-    $user->profile->healthConditions()->attach($diabetes);
     $user->refresh();
 
     $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
-    expect($prompt)->toContain('FINAL SAFETY CHECK BEFORE GENERATING OUTPUT')
-        ->and($prompt)->toContain('Review your meal plan against the Safety Guardrails')
-        ->and($prompt)->toContain('If any meal violates these rules, revise it immediately');
+    expect($prompt)
+        ->toContain('Prediabetes')
+        ->toContain('CAUTION — Dietary considerations required');
 });

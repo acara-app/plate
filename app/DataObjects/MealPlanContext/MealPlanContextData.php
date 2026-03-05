@@ -18,9 +18,9 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 final class MealPlanContextData extends Data
 {
     /**
-     * @param  array<DietaryPreferenceData>  $dietaryPreferences
-     * @param  array<HealthConditionData>  $healthConditions
-     * @param  array<MedicationData>  $medications
+     * @param  array<ProfileAttributeData>  $dietaryPreferences
+     * @param  array<ProfileAttributeData>  $healthConditions
+     * @param  array<ProfileAttributeData>  $medications
      */
     public function __construct(
         // Physical metrics

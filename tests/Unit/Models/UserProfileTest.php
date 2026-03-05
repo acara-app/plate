@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Enums\DietaryPreferenceType;
 use App\Enums\Sex;
-use App\Models\DietaryPreference;
-use App\Models\HealthCondition;
+use App\Enums\UserProfileAttributeCategory;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Models\UserProfileAttribute;
 
 test('to array', function (): void {
     $user = User::factory()->create();
@@ -44,34 +43,53 @@ test('belongs to user', function (): void {
         ->id->toBe($user->id);
 });
 
-test('belongs to many dietary preferences', function (): void {
+test('has many attributes', function (): void {
     $profile = UserProfile::factory()->create();
 
-    $pref1 = DietaryPreference::factory()->create(['name' => 'Peanuts', 'type' => DietaryPreferenceType::Allergy->value]);
-    $pref2 = DietaryPreference::factory()->create(['name' => 'Gluten', 'type' => DietaryPreferenceType::Intolerance->value]);
-    $pref3 = DietaryPreference::factory()->create(['name' => 'Vegan', 'type' => DietaryPreferenceType::Pattern->value]);
+    UserProfileAttribute::factory()->allergy('Peanuts')->create(['user_profile_id' => $profile->id]);
+    UserProfileAttribute::factory()->dietaryPattern('Vegan')->create(['user_profile_id' => $profile->id]);
+    UserProfileAttribute::factory()->healthCondition('Type 2 Diabetes')->create(['user_profile_id' => $profile->id]);
 
-    $profile->dietaryPreferences()->attach([$pref1->id, $pref2->id, $pref3->id]);
-
-    expect($profile->dietaryPreferences)
+    expect($profile->attributes)
         ->toHaveCount(3)
-        ->each->toBeInstanceOf(DietaryPreference::class);
+        ->each->toBeInstanceOf(UserProfileAttribute::class);
 });
 
-test('belongs to many health conditions', function (): void {
+test('dietary attributes excludes health conditions and medications', function (): void {
     $profile = UserProfile::factory()->create();
 
-    $condition1 = HealthCondition::factory()->create(['name' => 'Type 2 Diabetes']);
-    $condition2 = HealthCondition::factory()->create(['name' => 'Hypertension']);
+    UserProfileAttribute::factory()->allergy('Peanuts')->create(['user_profile_id' => $profile->id]);
+    UserProfileAttribute::factory()->dietaryPattern('Vegan')->create(['user_profile_id' => $profile->id]);
+    UserProfileAttribute::factory()->healthCondition('Type 2 Diabetes')->create(['user_profile_id' => $profile->id]);
+    UserProfileAttribute::factory()->medication('Metformin')->create(['user_profile_id' => $profile->id]);
 
-    $profile->healthConditions()->attach($condition1->id, ['notes' => 'Test note']);
-    $profile->healthConditions()->attach($condition2->id);
-
-    expect($profile->healthConditions)
+    expect($profile->dietaryAttributes)
         ->toHaveCount(2)
-        ->each->toBeInstanceOf(HealthCondition::class);
+        ->each(fn ($attr) => $attr->category->not->toBe(UserProfileAttributeCategory::HealthCondition)
+            ->category->not->toBe(UserProfileAttributeCategory::Medication));
+});
 
-    expect($profile->healthConditions->first()->pivot->notes)->toBe('Test note');
+test('health condition attributes returns only health conditions', function (): void {
+    $profile = UserProfile::factory()->create();
+
+    UserProfileAttribute::factory()->allergy('Peanuts')->create(['user_profile_id' => $profile->id]);
+    UserProfileAttribute::factory()->healthCondition('Type 2 Diabetes')->create(['user_profile_id' => $profile->id]);
+    UserProfileAttribute::factory()->healthCondition('Hypertension')->create(['user_profile_id' => $profile->id]);
+
+    expect($profile->healthConditionAttributes)
+        ->toHaveCount(2)
+        ->each(fn ($attr) => $attr->category->toBe(UserProfileAttributeCategory::HealthCondition));
+});
+
+test('medication attributes returns only medications', function (): void {
+    $profile = UserProfile::factory()->create();
+
+    UserProfileAttribute::factory()->allergy('Peanuts')->create(['user_profile_id' => $profile->id]);
+    UserProfileAttribute::factory()->medication('Metformin')->create(['user_profile_id' => $profile->id]);
+
+    expect($profile->medicationAttributes)
+        ->toHaveCount(1)
+        ->first()->category->toBe(UserProfileAttributeCategory::Medication);
 });
 
 test('calculate bmi returns null when height is missing', function (): void {

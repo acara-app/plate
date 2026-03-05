@@ -15,26 +15,8 @@ export interface Profile {
     intensity_choice?: string;
 }
 
-export interface DietaryPreference {
-    id: number;
-    name: string;
-    type: string;
-    description: string;
-    created_at: string;
-    updated_at: string;
-}
-
 export interface Goal {
     name: string;
-    created_at: string;
-    updated_at: string;
-}
-
-export interface HealthCondition {
-    id: number;
-    name: string;
-    description: string;
-    nutritional_impact: string;
     created_at: string;
     updated_at: string;
 }
@@ -44,17 +26,6 @@ export interface LifeStyle {
     activity_level: string;
     description: string;
     activity_multiplier: number;
-    created_at: string;
-    updated_at: string;
-}
-
-export interface UserMedication {
-    user_profile_id: number;
-    name: string;
-    dosage: string | null;
-    frequency: string | null;
-    purpose: string | null;
-    started_at: string | null;
     created_at: string;
     updated_at: string;
 }

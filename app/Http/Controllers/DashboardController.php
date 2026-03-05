@@ -33,7 +33,7 @@ final readonly class DashboardController
         return Inertia::render('dashboard', [
             'recentConversations' => $recentConversations,
             'hasGlucoseData' => $profile && $this->user->healthEntries()->whereNotNull('glucose_value')->exists(),
-            'hasHealthConditions' => $profile && $profile->healthConditions()->exists(),
+            'hasHealthConditions' => $profile && $profile->healthConditionAttributes()->exists(),
         ]);
     }
 }

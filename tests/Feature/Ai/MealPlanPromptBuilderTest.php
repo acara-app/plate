@@ -6,11 +6,10 @@ use App\Ai\MealPlanPromptBuilder;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
-use App\Models\DietaryPreference;
-use App\Models\HealthCondition;
 use App\Models\HealthEntry;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Models\UserProfileAttribute;
 use Illuminate\Support\Facades\DB;
 
 test('it generates meal plan context for user with complete profile', function (): void {
@@ -27,19 +26,13 @@ test('it generates meal plan context for user with complete profile', function (
         'onboarding_completed' => true,
     ]);
 
-    $dietaryPreference = DietaryPreference::factory()->create([
-        'name' => 'Vegetarian',
-        'type' => 'diet',
+    UserProfileAttribute::factory()->dietaryPattern('Vegetarian')->create([
+        'user_profile_id' => $profile->id,
     ]);
-    $profile->dietaryPreferences()->attach($dietaryPreference);
-
-    $healthCondition = HealthCondition::factory()->create([
-        'name' => 'Diabetes',
-        'nutritional_impact' => 'Requires blood sugar management',
-        'recommended_nutrients' => ['fiber', 'complex carbs'],
-        'nutrients_to_limit' => ['sugar', 'simple carbs'],
+    UserProfileAttribute::factory()->healthCondition('Diabetes')->create([
+        'user_profile_id' => $profile->id,
+        'notes' => 'Type 2',
     ]);
-    $profile->healthConditions()->attach($healthCondition, ['notes' => 'Type 2']);
 
     $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
@@ -52,7 +45,6 @@ test('it generates meal plan context for user with complete profile', function (
         ->toContain('Vegetarian')
         ->toContain('Diabetes')
         ->toContain('Type 2')
-        ->toContain('fiber')
         ->toContain('BMI')
         ->toContain('TDEE')
         ->toContain('Daily Calorie Target');
@@ -130,16 +122,12 @@ test('it includes dietary preferences in meal plan context', function (): void {
         'derived_activity_multiplier' => 1.55,
     ]);
 
-    $veganPref = DietaryPreference::factory()->create([
-        'name' => 'Vegan',
-        'type' => 'diet',
+    UserProfileAttribute::factory()->dietaryPattern('Vegan')->create([
+        'user_profile_id' => $profile->id,
     ]);
-    $glutenFree = DietaryPreference::factory()->create([
-        'name' => 'Gluten Free',
-        'type' => 'dietary',
+    UserProfileAttribute::factory()->allergy('Gluten')->create([
+        'user_profile_id' => $profile->id,
     ]);
-
-    $profile->dietaryPreferences()->attach([$veganPref->id, $glutenFree->id]);
 
     $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
@@ -147,7 +135,7 @@ test('it includes dietary preferences in meal plan context', function (): void {
     expect($result)
         ->toBeString()
         ->toContain('Vegan')
-        ->toContain('Gluten Free');
+        ->toContain('Gluten');
 });
 
 test('it includes health conditions in meal plan context', function (): void {
@@ -162,21 +150,13 @@ test('it includes health conditions in meal plan context', function (): void {
         'derived_activity_multiplier' => 1.55,
     ]);
 
-    $diabetes = HealthCondition::factory()->create([
-        'name' => 'Diabetes',
-        'nutritional_impact' => 'Requires blood sugar management',
-        'recommended_nutrients' => ['fiber', 'complex carbs'],
-        'nutrients_to_limit' => ['sugar', 'simple carbs'],
+    UserProfileAttribute::factory()->healthCondition('Diabetes')->create([
+        'user_profile_id' => $profile->id,
+        'notes' => 'Type 2',
     ]);
-    $hypertension = HealthCondition::factory()->create([
-        'name' => 'High Blood Pressure',
-        'nutritional_impact' => 'Sodium reduction needed',
-        'recommended_nutrients' => ['potassium', 'magnesium'],
-        'nutrients_to_limit' => ['sodium'],
+    UserProfileAttribute::factory()->healthCondition('High Blood Pressure')->create([
+        'user_profile_id' => $profile->id,
     ]);
-
-    $profile->healthConditions()->attach($diabetes->id, ['notes' => 'Type 2']);
-    $profile->healthConditions()->attach($hypertension->id);
 
     $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
@@ -185,9 +165,7 @@ test('it includes health conditions in meal plan context', function (): void {
         ->toBeString()
         ->toContain('Diabetes')
         ->toContain('Type 2')
-        ->toContain('High Blood Pressure')
-        ->toContain('fiber')
-        ->toContain('potassium');
+        ->toContain('High Blood Pressure');
 });
 
 test('it includes BMI calculation in context', function (): void {
@@ -409,7 +387,6 @@ test('it automatically analyzes glucose data when analysis not provided', functi
         'derived_activity_multiplier' => 1.55,
     ]);
 
-    // Create glucose readings to ensure analyzer has data
     HealthEntry::factory()->create([
         'user_id' => $user->id,
         'glucose_value' => 95.0,
@@ -425,7 +402,6 @@ test('it automatically analyzes glucose data when analysis not provided', functi
     ]);
 
     $builder = resolve(MealPlanPromptBuilder::class);
-    // Call handle WITHOUT passing glucoseAnalysis parameter - this triggers the fallback path at line 93
     $result = $builder->handle($user);
 
     expect($result)
@@ -483,12 +459,10 @@ test('it handles user profile with invalid goal choice enum value', function ():
         'derived_activity_multiplier' => 1.55,
     ]);
 
-    // Directly insert invalid value in database to bypass validation and casting
     DB::table('user_profiles')->where('id', $profile->id)->update(['goal_choice' => 'invalid_goal_value']);
 
     $builder = resolve(MealPlanPromptBuilder::class);
 
-    // Enum casting will throw ValueError when accessing invalid value
     $closure = function () use ($builder, $user): void {
         $builder->handle($user->fresh());
     };

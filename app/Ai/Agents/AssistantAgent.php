@@ -8,6 +8,7 @@ use App\Actions\GetUserProfileContextAction;
 use App\Ai\SystemPrompt;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\CreateMealPlan;
+use App\Ai\Tools\EnrichAttributeMetadata;
 use App\Ai\Tools\GetDietReference;
 use App\Ai\Tools\GetFitnessGoals;
 use App\Ai\Tools\GetHealthEntries;
@@ -18,6 +19,7 @@ use App\Ai\Tools\PredictGlucoseSpike;
 use App\Ai\Tools\SuggestSingleMeal;
 use App\Ai\Tools\SuggestWellnessRoutine;
 use App\Ai\Tools\SuggestWorkoutRoutine;
+use App\Ai\Tools\UpdateUserProfileAttributes;
 use App\Enums\AgentMode;
 use App\Models\User;
 use App\Utilities\LanguageUtil;
@@ -119,6 +121,8 @@ final class AssistantAgent implements Agent, Conversational, HasTools
             new SuggestWorkoutRoutine,
             new GetFitnessGoals,
             new GetDietReference,
+            new EnrichAttributeMetadata,
+            new UpdateUserProfileAttributes,
         ];
 
         if ($this->attachments !== []) {
@@ -227,6 +231,8 @@ final class AssistantAgent implements Agent, Conversational, HasTools
             "   - get_health_entries: For retrieving user's logged health data (food log, glucose readings, vitals, exercise)",
             '   - get_health_goals: When user asks about wellness goals',
             '   - get_fitness_goals: When user asks about fitness goals',
+            '   - enrich_attribute_metadata: When user mentions a new health condition, allergy, restriction, or dietary pattern, call this FIRST to generate dietary metadata before saving',
+            '   - update_user_profile_attributes: After enriching metadata, use this to add/update/remove profile attributes (allergies, health conditions, medications, dietary patterns)',
             "4. Provide personalized, evidence-based advice that fits the user's situation",
             '5. Maintain a supportive, encouraging tone throughout',
         ];
@@ -274,6 +280,8 @@ final class AssistantAgent implements Agent, Conversational, HasTools
             'get_health_entries: Use when user asks about their logged data, food log, health history, what they ate, or wants to compare actual intake vs meal plan',
             'get_health_goals: Use when user asks about wellness goals',
             'get_fitness_goals: Use when user asks about fitness goals',
+            'enrich_attribute_metadata: Use when the user mentions a new health condition, allergy, dietary restriction, or dietary pattern. Call this tool FIRST to generate structured dietary metadata (safety levels, foods to avoid, dietary rules). Then pass the resulting metadata to update_user_profile_attributes to save the attribute.',
+            'update_user_profile_attributes: Use to add, update, remove, or list user profile attributes (allergies, intolerances, dietary patterns, dislikes, restrictions, health conditions, medications). When adding a new attribute, first call enrich_attribute_metadata to get structured metadata, then call this tool with the metadata included. For medications, include dosage, frequency, and purpose in the metadata field.',
             'Always use tools rather than generating complex content manually',
             'After using a tool, incorporate results naturally into your response',
         ];

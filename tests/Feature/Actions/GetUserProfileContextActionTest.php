@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 use App\Actions\GetUserProfileContextAction;
 use App\Enums\DietType;
-use App\Models\DietaryPreference;
-use App\Models\HealthCondition;
 use App\Models\User;
-use App\Models\UserMedication;
 use App\Models\UserProfile;
+use App\Models\UserProfileAttribute;
 
 beforeEach(function (): void {
     $this->action = resolve(GetUserProfileContextAction::class);
@@ -27,7 +25,7 @@ it('returns profile not completed for user without profile', function (): void {
 
 it('returns complete profile data for onboarded user', function (): void {
     $user = User::factory()->create();
-    $profile = UserProfile::factory()->create([
+    UserProfile::factory()->create([
         'user_id' => $user->id,
         'age' => 30,
         'height' => 175.0,
@@ -50,8 +48,10 @@ it('includes dietary preferences in context', function (): void {
         'user_id' => $user->id,
         'onboarding_completed' => true,
     ]);
-    $preference = DietaryPreference::factory()->create(['name' => 'Vegetarian']);
-    $profile->dietaryPreferences()->attach($preference->id, ['severity' => 'strict', 'notes' => 'No meat at all']);
+    UserProfileAttribute::factory()->dietaryPattern('Vegetarian')->create([
+        'user_profile_id' => $profile->id,
+        'notes' => 'No meat at all',
+    ]);
 
     $result = $this->action->handle($user);
 
@@ -60,7 +60,6 @@ it('includes dietary preferences in context', function (): void {
         ->and($result['raw_data']['dietary_preferences'][0])
         ->toMatchArray([
             'name' => 'Vegetarian',
-            'severity' => 'strict',
             'notes' => 'No meat at all',
         ]);
 });
@@ -71,8 +70,10 @@ it('includes health conditions in context', function (): void {
         'user_id' => $user->id,
         'onboarding_completed' => true,
     ]);
-    $condition = HealthCondition::factory()->create(['name' => 'Type 2 Diabetes']);
-    $profile->healthConditions()->attach($condition->id, ['notes' => 'Recently diagnosed']);
+    UserProfileAttribute::factory()->healthCondition('Type 2 Diabetes')->create([
+        'user_profile_id' => $profile->id,
+        'notes' => 'Recently diagnosed',
+    ]);
 
     $result = $this->action->handle($user);
 
@@ -91,12 +92,12 @@ it('includes medications in context', function (): void {
         'user_id' => $user->id,
         'onboarding_completed' => true,
     ]);
-    UserMedication::factory()->create([
-        'user_profile_id' => $profile->id,
-        'name' => 'Metformin',
+    UserProfileAttribute::factory()->medication('Metformin', [
         'dosage' => '500mg',
         'frequency' => 'twice daily',
         'purpose' => 'Blood sugar control',
+    ])->create([
+        'user_profile_id' => $profile->id,
     ]);
 
     $result = $this->action->handle($user);
@@ -161,7 +162,6 @@ it('identifies missing dietary preferences', function (): void {
         'user_id' => $user->id,
         'onboarding_completed' => true,
     ]);
-    // No preferences attached
 
     $result = $this->action->handle($user);
 

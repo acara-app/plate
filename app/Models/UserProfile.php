@@ -10,6 +10,7 @@ use App\Enums\GlucoseUnit;
 use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
 use App\Enums\Sex;
+use App\Enums\UserProfileAttributeCategory;
 use Carbon\CarbonInterface;
 use Database\Factories\UserProfileFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -17,7 +18,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -44,7 +44,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read float|null $bmi
  * @property-read float|null $bmr
  * @property-read float|null $tdee
- * @property-read Collection<int, UserMedication> $medications
+ * @property-read Collection<int, UserProfileAttribute> $attributes
  */
 final class UserProfile extends Model
 {
@@ -97,33 +97,36 @@ final class UserProfile extends Model
     }
 
     /**
-     * @return BelongsToMany<DietaryPreference, $this>
+     * @return HasMany<UserProfileAttribute, $this>
      */
-    public function dietaryPreferences(): BelongsToMany
+    public function attributes(): HasMany
     {
-        return $this->belongsToMany(
-            DietaryPreference::class,
-            'user_profile_dietary_preference'
-        )->withPivot(['severity', 'notes'])->withTimestamps();
+        return $this->hasMany(UserProfileAttribute::class);
     }
 
     /**
-     * @return HasMany<UserMedication, $this>
+     * @return HasMany<UserProfileAttribute, $this>
      */
-    public function medications(): HasMany
+    public function dietaryAttributes(): HasMany
     {
-        return $this->hasMany(UserMedication::class);
+        return $this->attributes()->whereNot('category', UserProfileAttributeCategory::HealthCondition)
+            ->whereNot('category', UserProfileAttributeCategory::Medication);
     }
 
     /**
-     * @return BelongsToMany<HealthCondition, $this, UserProfileHealthCondition>
+     * @return HasMany<UserProfileAttribute, $this>
      */
-    public function healthConditions(): BelongsToMany
+    public function healthConditionAttributes(): HasMany
     {
-        return $this->belongsToMany(
-            HealthCondition::class,
-            'user_profile_health_condition'
-        )->using(UserProfileHealthCondition::class)->withPivot('notes')->withTimestamps();
+        return $this->attributes()->where('category', UserProfileAttributeCategory::HealthCondition);
+    }
+
+    /**
+     * @return HasMany<UserProfileAttribute, $this>
+     */
+    public function medicationAttributes(): HasMany
+    {
+        return $this->attributes()->where('category', UserProfileAttributeCategory::Medication);
     }
 
     /**

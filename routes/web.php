@@ -90,16 +90,6 @@ Route::middleware('auth')->group(function (): void {
     // User...
     Route::delete('user', [Web\UserController::class, 'destroy'])->name('user.destroy');
 
-    // Profile Settings...
-    Route::get('profile/dietary-preferences', [Web\ProfileController::class, 'showDietaryPreferences'])->name('profile.dietary-preferences.show');
-    Route::post('profile/dietary-preferences', [Web\ProfileController::class, 'storeDietaryPreferences'])->name('profile.dietary-preferences.store');
-
-    Route::get('profile/health-conditions', [Web\ProfileController::class, 'showHealthConditions'])->name('profile.health-conditions.show');
-    Route::post('profile/health-conditions', [Web\ProfileController::class, 'storeHealthConditions'])->name('profile.health-conditions.store');
-
-    Route::get('profile/medications', [Web\ProfileController::class, 'showMedications'])->name('profile.medications.show');
-    Route::post('profile/medications', [Web\ProfileController::class, 'storeMedications'])->name('profile.medications.store');
-
     // User Profile...
     Route::redirect('settings', '/settings/profile');
     Route::get('settings/profile', [Web\UserProfileController::class, 'edit'])->name('user-profile.edit');

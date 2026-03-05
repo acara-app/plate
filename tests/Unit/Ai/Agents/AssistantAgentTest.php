@@ -6,6 +6,7 @@ use App\Actions\GetUserProfileContextAction;
 use App\Ai\Agents\AssistantAgent;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\CreateMealPlan;
+use App\Ai\Tools\EnrichAttributeMetadata;
 use App\Ai\Tools\GetDietReference;
 use App\Ai\Tools\GetFitnessGoals;
 use App\Ai\Tools\GetHealthEntries;
@@ -16,6 +17,7 @@ use App\Ai\Tools\PredictGlucoseSpike;
 use App\Ai\Tools\SuggestSingleMeal;
 use App\Ai\Tools\SuggestWellnessRoutine;
 use App\Ai\Tools\SuggestWorkoutRoutine;
+use App\Ai\Tools\UpdateUserProfileAttributes;
 use App\Enums\AgentMode;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
@@ -69,7 +71,7 @@ it('returns instructions with CreateMealPlan mode', function (): void {
 it('returns correct tools', function (): void {
     $tools = $this->agent->tools();
 
-    expect($tools)->toHaveCount(11)
+    expect($tools)->toHaveCount(13)
         ->and($tools[0])->toBeInstanceOf(SuggestSingleMeal::class)
         ->and($tools[1])->toBeInstanceOf(GetUserProfile::class)
         ->and($tools[2])->toBeInstanceOf(CreateMealPlan::class)
@@ -80,7 +82,9 @@ it('returns correct tools', function (): void {
         ->and($tools[7])->toBeInstanceOf(LogHealthEntry::class)
         ->and($tools[8])->toBeInstanceOf(SuggestWorkoutRoutine::class)
         ->and($tools[9])->toBeInstanceOf(GetFitnessGoals::class)
-        ->and($tools[10])->toBeInstanceOf(GetDietReference::class);
+        ->and($tools[10])->toBeInstanceOf(GetDietReference::class)
+        ->and($tools[11])->toBeInstanceOf(EnrichAttributeMetadata::class)
+        ->and($tools[12])->toBeInstanceOf(UpdateUserProfileAttributes::class);
 });
 
 it('returns empty messages when no conversation', function (): void {

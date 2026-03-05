@@ -6,11 +6,9 @@ namespace App\Actions;
 
 use App\Contracts\Actions\GetsUserProfileContext;
 use App\Enums\DietType;
-use App\Models\DietaryPreference;
-use App\Models\HealthCondition;
 use App\Models\User;
-use App\Models\UserMedication;
 use App\Models\UserProfile;
+use App\Models\UserProfileAttribute;
 
 final readonly class GetUserProfileContextAction implements GetsUserProfileContext
 {
@@ -69,38 +67,38 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
     }
 
     /**
-     * @return array<int, array{name: string, severity: mixed, notes: mixed}>
+     * @return array<int, array{name: string, severity: string|null, notes: string|null}>
      */
     private function getDietaryPreferences(UserProfile $profile): array
     {
-        return array_values($profile->dietaryPreferences->map(fn (DietaryPreference $pref): array => [
-            'name' => $pref->name,
-            'severity' => $pref->pivot->severity ?? null,
-            'notes' => $pref->pivot->notes ?? null,
+        return array_values($profile->dietaryAttributes->map(fn (UserProfileAttribute $attr): array => [
+            'name' => $attr->value,
+            'severity' => $attr->severity?->value,
+            'notes' => $attr->notes,
         ])->all());
     }
 
     /**
-     * @return array<int, array{name: string, notes: mixed}>
+     * @return array<int, array{name: string, notes: string|null}>
      */
     private function getHealthConditions(UserProfile $profile): array
     {
-        return array_values($profile->healthConditions->map(fn (HealthCondition $condition): array => [
-            'name' => $condition->name,
-            'notes' => $condition->pivot->notes ?? null,
+        return array_values($profile->healthConditionAttributes->map(fn (UserProfileAttribute $attr): array => [
+            'name' => $attr->value,
+            'notes' => $attr->notes,
         ])->all());
     }
 
     /**
-     * @return array<int, array{name: string, dosage: mixed, frequency: mixed, purpose: mixed}>
+     * @return array<int, array{name: string, dosage: string|null, frequency: string|null, purpose: string|null}>
      */
     private function getMedications(UserProfile $profile): array
     {
-        return array_values($profile->medications->map(fn (UserMedication $med): array => [
-            'name' => $med->name,
-            'dosage' => $med->dosage,
-            'frequency' => $med->frequency,
-            'purpose' => $med->purpose,
+        return array_values($profile->medicationAttributes->map(fn (UserProfileAttribute $attr): array => [
+            'name' => $attr->value,
+            'dosage' => $attr->getMedicationDosage(),
+            'frequency' => $attr->getMedicationFrequency(),
+            'purpose' => $attr->getMedicationPurpose(),
         ])->all());
     }
 
@@ -146,7 +144,7 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
             $missing[] = 'primary_goal';
         }
 
-        if ($profile->dietaryPreferences->isEmpty()) {
+        if ($profile->dietaryAttributes->isEmpty()) {
             $missing[] = 'dietary_preferences';
         }
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\DataObjects\MealPlanContext;
 
+use App\Enums\AllergySeverity;
+use App\Enums\UserProfileAttributeCategory;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\MapOutputName;
 use Spatie\LaravelData\Data;
@@ -12,18 +14,16 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 
 #[MapInputName(SnakeCaseMapper::class)]
 #[MapOutputName(CamelCaseMapper::class)]
-final class HealthConditionData extends Data
+final class ProfileAttributeData extends Data
 {
     /**
-     * @param  array<string>|null  $recommendedNutrients
-     * @param  array<string>|null  $nutrientsToLimit
+     * @param  array<string, mixed>|null  $metadata
      */
     public function __construct(
-        public string $name,
-        public ?string $description,
-        public ?string $nutritionalImpact,
-        public ?array $recommendedNutrients,
-        public ?array $nutrientsToLimit,
+        public string $value,
+        public ?UserProfileAttributeCategory $category,
+        public ?AllergySeverity $severity,
         public ?string $notes,
+        public ?array $metadata,
     ) {}
 }
