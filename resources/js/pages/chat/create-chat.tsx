@@ -14,7 +14,7 @@ import ChatMessages, { ChatErrorBanner } from './chat-messages';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Chat (beta version)',
-        href: chat.create().url,
+        href: '#',
     },
 ];
 
@@ -25,7 +25,7 @@ export default function CreateChat() {
         mode: initialMode,
     } = usePage<ChatPageProps>().props;
 
-    const [conversationId, setConversationId] = useState<string | undefined>(
+    const [conversationId, setConversationId] = useState<string>(
         initialConversationId,
     );
     const [mode, setMode] = useState<ChatMode>(initialMode ?? 'ask');

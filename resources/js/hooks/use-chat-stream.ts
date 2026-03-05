@@ -7,7 +7,7 @@ import { DefaultChatTransport } from 'ai';
 import { useMemo, useRef } from 'react';
 
 interface UseChatStreamOptions {
-    conversationId?: string;
+    conversationId: string;
     mode: ChatMode;
     model: AIModel;
     initialMessages: UIMessage[];
@@ -35,9 +35,7 @@ export function useChatStream({
     const transport = useMemo(
         () =>
             new DefaultChatTransport({
-                api: stream.url({
-                    query: { conversationId },
-                }),
+                api: stream.url(conversationId),
                 body: () => modelRef.current,
             }),
         [conversationId],

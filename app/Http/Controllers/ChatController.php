@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Ai\Responses\StreamableAgentResponse;
+use Illuminate\Support\Str;
 
 final readonly class ChatController
 {
@@ -26,14 +27,14 @@ final readonly class ChatController
 
     public function create(
         Request $request,
-        string $conversationId = ''
+        string $conversationId
     ): Response {
         $conversation = $conversationId !== ''
             ? Conversation::query()->with('messages')->find($conversationId)
             : null;
 
         return Inertia::render('chat/create-chat', [
-            'conversationId' => $conversation?->id,
+            'conversationId' => $conversation?->id ?? $conversationId,
             'messages' => $this->messagesAction->handle($conversation),
             'mode' => $request->enum('mode', AgentMode::class),
         ]);
@@ -41,9 +42,12 @@ final readonly class ChatController
 
     public function stream(
         StoreAgentConversationRequest $request,
+        string $conversationId
     ): StreamableAgentResponse {
-        return $this->agentAction
-            ->handle($request, $this->user)
+        $agent = $this->agentAction->handle($request, $this->user);
+        $agent->continue($conversationId, as: $this->user);
+
+        return $agent
             ->stream(
                 prompt: $request->userMessage(),
                 attachments: $request->userAttachments(),

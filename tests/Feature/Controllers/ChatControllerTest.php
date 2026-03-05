@@ -62,17 +62,19 @@ it('handles invalid conversation id gracefully', function (): void {
 
 it('validates stream endpoint', function (): void {
     $user = User::factory()->create();
+    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
 
     actingAs($user)
-        ->post(route('chat.stream'), [])
+        ->post(route('chat.stream', $conversation->id), [])
         ->assertSessionHasErrors(['messages', 'mode', 'model']);
 });
 
 it('accepts valid stream request', function (): void {
     $user = User::factory()->create();
+    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
 
     actingAs($user)
-        ->post(route('chat.stream'), [
+        ->post(route('chat.stream', $conversation->id), [
             'messages' => [
                 ['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Hello API']]],
             ],

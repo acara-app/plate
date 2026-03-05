@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/card';
 import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
+import { generateUUID } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import chat from '@/routes/chat';
 import healthEntries from '@/routes/health-entries';
@@ -93,7 +94,7 @@ export default function Dashboard() {
                             {/* Quick Actions */}
                             <div className="grid grid-cols-2 gap-2">
                                 <Link
-                                    href={`${chat.create().url}?mode=ask`}
+                                    href={`${chat.create(generateUUID()).url}?mode=ask`}
                                     className="group/action"
                                 >
                                     <Button
@@ -110,7 +111,7 @@ export default function Dashboard() {
                                     </Button>
                                 </Link>
                                 <Link
-                                    href={`${chat.create().url}?mode=create-meal-plan`}
+                                    href={`${chat.create(generateUUID()).url}?mode=create-meal-plan`}
                                     className="group/action"
                                 >
                                     <Button
@@ -130,7 +131,7 @@ export default function Dashboard() {
 
                             {/* Main CTA */}
                             <div className="mt-auto pt-2">
-                                <Link href={chat.create().url}>
+                                <Link href={chat.create(generateUUID()).url}>
                                     <Button className="w-full gap-2 bg-emerald-600 hover:bg-emerald-500">
                                         <Sparkles className="h-4 w-4" />
                                         {t('dashboard_cards.chat.button')}
@@ -280,7 +281,9 @@ export default function Dashboard() {
                                     ))}
                                 </div>
                                 <div className="mt-4 border-t pt-3">
-                                    <Link href={chat.create().url}>
+                                    <Link
+                                        href={chat.create(generateUUID()).url}
+                                    >
                                         <Button
                                             variant="ghost"
                                             size="sm"
