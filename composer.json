@@ -21,7 +21,7 @@
         "laravel/socialite": "^5.24.3",
         "laravel/tinker": "^2.11.1",
         "laravel/wayfinder": "^0.1.14",
-        "league/commonmark": "^2.8",
+        "league/commonmark": "^2.8.1",
         "league/flysystem-aws-s3-v3": "^3.32.0",
         "livewire/livewire": "^4.2.1",
         "nunomaduro/essentials": "^1.2.0",
@@ -32,7 +32,7 @@
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.6.1",
-        "driftingly/rector-laravel": "^2.1.9",
+        "driftingly/rector-laravel": "^2.1.11",
         "fakerphp/faker": "^1.24.1",
         "larastan/larastan": "^3.9.3",
         "laravel/boost": "^2.2.2",
