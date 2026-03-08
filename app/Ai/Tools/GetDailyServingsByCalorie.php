@@ -1,0 +1,54 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ai\Tools;
+
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\File;
+use Laravel\Ai\Contracts\Tool;
+use Laravel\Ai\Tools\Request;
+
+/**
+ * Tool for fetching USDA daily serving recommendations by calorie level.
+ * Provides appropriate serving sizes for protein, dairy, vegetables, fruits,
+ * whole grains, and healthy fats based on different caloric needs (1000-3200).
+ */
+final readonly class GetDailyServingsByCalorie implements Tool
+{
+    private const string FILE_NAME = 'daily-servings-by-calorie-level-usda.md';
+
+    public function name(): string
+    {
+        return 'get_daily_servings_by_calorie';
+    }
+
+    public function description(): string
+    {
+        return "Fetch USDA daily serving recommendations by calorie level (1000-3200). Returns the complete table with serving sizes for protein, dairy, vegetables, fruits, whole grains, and healthy fats. Use this to determine appropriate serving sizes based on a user's caloric needs.";
+    }
+
+    public function handle(Request $request): string
+    {
+        $filePath = resource_path('markdown/'.self::FILE_NAME);
+
+        if (! File::exists($filePath)) {
+            return json_encode([
+                'success' => false,
+                'error' => 'Daily servings file not found.',
+            ]);
+        }
+
+        $content = File::get($filePath);
+
+        return json_encode([
+            'success' => true,
+            'content' => $content,
+        ]);
+    }
+
+    public function schema(JsonSchema $schema): array
+    {
+        return [];
+    }
+}

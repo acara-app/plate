@@ -7,6 +7,8 @@ use App\Ai\Agents\AssistantAgent;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\CreateMealPlan;
 use App\Ai\Tools\EnrichAttributeMetadata;
+use App\Ai\Tools\GetCalorieLevelGuideline;
+use App\Ai\Tools\GetDailyServingsByCalorie;
 use App\Ai\Tools\GetDietReference;
 use App\Ai\Tools\GetFitnessGoals;
 use App\Ai\Tools\GetHealthEntries;
@@ -71,20 +73,22 @@ it('returns instructions with CreateMealPlan mode', function (): void {
 it('returns correct tools', function (): void {
     $tools = $this->agent->tools();
 
-    expect($tools)->toHaveCount(13)
+    expect($tools)->toHaveCount(15)
         ->and($tools[0])->toBeInstanceOf(SuggestSingleMeal::class)
         ->and($tools[1])->toBeInstanceOf(GetUserProfile::class)
         ->and($tools[2])->toBeInstanceOf(CreateMealPlan::class)
-        ->and($tools[3])->toBeInstanceOf(PredictGlucoseSpike::class)
-        ->and($tools[4])->toBeInstanceOf(SuggestWellnessRoutine::class)
-        ->and($tools[5])->toBeInstanceOf(GetHealthGoals::class)
-        ->and($tools[6])->toBeInstanceOf(GetHealthEntries::class)
-        ->and($tools[7])->toBeInstanceOf(LogHealthEntry::class)
-        ->and($tools[8])->toBeInstanceOf(SuggestWorkoutRoutine::class)
-        ->and($tools[9])->toBeInstanceOf(GetFitnessGoals::class)
-        ->and($tools[10])->toBeInstanceOf(GetDietReference::class)
-        ->and($tools[11])->toBeInstanceOf(EnrichAttributeMetadata::class)
-        ->and($tools[12])->toBeInstanceOf(UpdateUserProfileAttributes::class);
+        ->and($tools[3])->toBeInstanceOf(GetCalorieLevelGuideline::class)
+        ->and($tools[4])->toBeInstanceOf(GetDailyServingsByCalorie::class)
+        ->and($tools[5])->toBeInstanceOf(PredictGlucoseSpike::class)
+        ->and($tools[6])->toBeInstanceOf(SuggestWellnessRoutine::class)
+        ->and($tools[7])->toBeInstanceOf(GetHealthGoals::class)
+        ->and($tools[8])->toBeInstanceOf(GetHealthEntries::class)
+        ->and($tools[9])->toBeInstanceOf(LogHealthEntry::class)
+        ->and($tools[10])->toBeInstanceOf(SuggestWorkoutRoutine::class)
+        ->and($tools[11])->toBeInstanceOf(GetFitnessGoals::class)
+        ->and($tools[12])->toBeInstanceOf(GetDietReference::class)
+        ->and($tools[13])->toBeInstanceOf(EnrichAttributeMetadata::class)
+        ->and($tools[14])->toBeInstanceOf(UpdateUserProfileAttributes::class);
 });
 
 it('returns empty messages when no conversation', function (): void {

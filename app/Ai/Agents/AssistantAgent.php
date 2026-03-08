@@ -8,6 +8,8 @@ use App\Actions\GetUserProfileContextAction;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\CreateMealPlan;
 use App\Ai\Tools\EnrichAttributeMetadata;
+use App\Ai\Tools\GetCalorieLevelGuideline;
+use App\Ai\Tools\GetDailyServingsByCalorie;
 use App\Ai\Tools\GetDietReference;
 use App\Ai\Tools\GetFitnessGoals;
 use App\Ai\Tools\GetHealthEntries;
@@ -116,6 +118,8 @@ final class AssistantAgent implements Agent, Conversational, HasTools
             new SuggestSingleMeal,
             new GetUserProfile,
             new CreateMealPlan,
+            new GetCalorieLevelGuideline,
+            new GetDailyServingsByCalorie,
             new PredictGlucoseSpike,
             new SuggestWellnessRoutine,
             new GetHealthGoals,
