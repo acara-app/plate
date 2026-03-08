@@ -32,7 +32,7 @@
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.6.1",
-        "driftingly/rector-laravel": "^2.1.11",
+        "driftingly/rector-laravel": "^2.1.12",
         "fakerphp/faker": "^1.24.1",
         "larastan/larastan": "^3.9.3",
         "laravel/boost": "^2.2.2",
