@@ -24,6 +24,7 @@ use App\Enums\AgentMode;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
 use App\Models\User;
+use App\Services\ToolRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Ai\Files\Base64Image;
 
@@ -42,10 +43,12 @@ beforeEach(function (): void {
     ]);
 
     $this->profileContext = new GetUserProfileContextAction;
+    $this->toolRegistry = resolve(ToolRegistry::class);
 
     $this->agent = new AssistantAgent(
         $this->user,
         $this->profileContext,
+        $this->toolRegistry,
     );
 });
 
@@ -73,22 +76,25 @@ it('returns instructions with CreateMealPlan mode', function (): void {
 it('returns correct tools', function (): void {
     $tools = $this->agent->tools();
 
-    expect($tools)->toHaveCount(15)
-        ->and($tools[0])->toBeInstanceOf(SuggestSingleMeal::class)
-        ->and($tools[1])->toBeInstanceOf(GetUserProfile::class)
-        ->and($tools[2])->toBeInstanceOf(CreateMealPlan::class)
-        ->and($tools[3])->toBeInstanceOf(GetCalorieLevelGuideline::class)
-        ->and($tools[4])->toBeInstanceOf(GetDailyServingsByCalorie::class)
-        ->and($tools[5])->toBeInstanceOf(PredictGlucoseSpike::class)
-        ->and($tools[6])->toBeInstanceOf(SuggestWellnessRoutine::class)
-        ->and($tools[7])->toBeInstanceOf(GetHealthGoals::class)
-        ->and($tools[8])->toBeInstanceOf(GetHealthEntries::class)
-        ->and($tools[9])->toBeInstanceOf(LogHealthEntry::class)
-        ->and($tools[10])->toBeInstanceOf(SuggestWorkoutRoutine::class)
-        ->and($tools[11])->toBeInstanceOf(GetFitnessGoals::class)
-        ->and($tools[12])->toBeInstanceOf(GetDietReference::class)
-        ->and($tools[13])->toBeInstanceOf(EnrichAttributeMetadata::class)
-        ->and($tools[14])->toBeInstanceOf(UpdateUserProfileAttributes::class);
+    $toolClasses = collect($tools)
+        ->map(fn (mixed $t): string => $t::class)
+        ->all();
+
+    expect($toolClasses)->toContain(SuggestSingleMeal::class)
+        ->toContain(GetUserProfile::class)
+        ->toContain(CreateMealPlan::class)
+        ->toContain(GetCalorieLevelGuideline::class)
+        ->toContain(GetDailyServingsByCalorie::class)
+        ->toContain(PredictGlucoseSpike::class)
+        ->toContain(SuggestWellnessRoutine::class)
+        ->toContain(GetHealthGoals::class)
+        ->toContain(GetHealthEntries::class)
+        ->toContain(LogHealthEntry::class)
+        ->toContain(SuggestWorkoutRoutine::class)
+        ->toContain(GetFitnessGoals::class)
+        ->toContain(GetDietReference::class)
+        ->toContain(EnrichAttributeMetadata::class)
+        ->toContain(UpdateUserProfileAttributes::class);
 });
 
 it('returns empty messages when no conversation', function (): void {

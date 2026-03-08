@@ -5,24 +5,9 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Actions\GetUserProfileContextAction;
-use App\Ai\Tools\AnalyzePhoto;
-use App\Ai\Tools\CreateMealPlan;
-use App\Ai\Tools\EnrichAttributeMetadata;
-use App\Ai\Tools\GetCalorieLevelGuideline;
-use App\Ai\Tools\GetDailyServingsByCalorie;
-use App\Ai\Tools\GetDietReference;
-use App\Ai\Tools\GetFitnessGoals;
-use App\Ai\Tools\GetHealthEntries;
-use App\Ai\Tools\GetHealthGoals;
-use App\Ai\Tools\GetUserProfile;
-use App\Ai\Tools\LogHealthEntry;
-use App\Ai\Tools\PredictGlucoseSpike;
-use App\Ai\Tools\SuggestSingleMeal;
-use App\Ai\Tools\SuggestWellnessRoutine;
-use App\Ai\Tools\SuggestWorkoutRoutine;
-use App\Ai\Tools\UpdateUserProfileAttributes;
 use App\Enums\AgentMode;
 use App\Models\User;
+use App\Services\ToolRegistry;
 use App\Utilities\LanguageUtil;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Concerns\RemembersConversations;
@@ -33,7 +18,6 @@ use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Providers\Tools\ProviderTool;
-use Laravel\Ai\Providers\Tools\WebSearch;
 
 #[Timeout(120)]
 final class AssistantAgent implements Agent, Conversational, HasTools
@@ -57,6 +41,7 @@ final class AssistantAgent implements Agent, Conversational, HasTools
     public function __construct(
         private User $user,
         private readonly GetUserProfileContextAction $profileContext,
+        private readonly ToolRegistry $toolRegistry,
     ) {}
 
     public function addTool(Tool|ProviderTool $tool): self
@@ -114,33 +99,19 @@ final class AssistantAgent implements Agent, Conversational, HasTools
      */
     public function tools(): array
     {
-        $tools = [
-            new SuggestSingleMeal,
-            new GetUserProfile,
-            new CreateMealPlan,
-            new GetCalorieLevelGuideline,
-            new GetDailyServingsByCalorie,
-            new PredictGlucoseSpike,
-            new SuggestWellnessRoutine,
-            new GetHealthGoals,
-            new GetHealthEntries,
-            new LogHealthEntry,
-            new SuggestWorkoutRoutine,
-            new GetFitnessGoals,
-            new GetDietReference,
-            new EnrichAttributeMetadata,
-            new UpdateUserProfileAttributes,
-        ];
+        $tools = $this->toolRegistry->getTools();
 
         if ($this->attachments !== []) {
-            $tools[] = new AnalyzePhoto($this->attachments);
+            $imageTools = $this->toolRegistry->getImageTools($this->attachments);
+            $tools = [...$tools, ...$imageTools];
         }
 
         if ($this->webSearchEnabled) {
-            $tools[] = new WebSearch;
+            $providerTools = $this->toolRegistry->getProviderTools();
+            $tools = [...$tools, ...$providerTools];
         }
 
-        return array_merge($tools, $this->additionalTools);
+        return [...$tools, ...$this->additionalTools];
     }
 
     private function resolveTimezone(): string

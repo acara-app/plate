@@ -6,7 +6,6 @@ namespace App\Ai\Agents;
 
 use App\Actions\AnalyzeGlucoseForNotificationAction;
 use App\Ai\MealPlanPromptBuilder;
-use App\Ai\Tools\GetDietReference;
 use App\Contracts\Ai\GeneratesMealPlans;
 use App\DataObjects\DayMealsData;
 use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
@@ -16,6 +15,7 @@ use App\Enums\DietType;
 use App\Models\MealPlan;
 use App\Models\User;
 use App\Services\SystemPromptProviderResolver;
+use App\Services\ToolRegistry;
 use App\Utilities\JsonCleaner;
 use App\Workflows\MealPlanInitializeWorkflow;
 use Laravel\Ai\Attributes\MaxTokens;
@@ -41,6 +41,7 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasTools
         private readonly MealPlanPromptBuilder $promptBuilder,
         private readonly AnalyzeGlucoseForNotificationAction $analyzeGlucose,
         private readonly SystemPromptProviderResolver $systemPromptResolver,
+        private readonly ToolRegistry $toolRegistry,
     ) {}
 
     public function withDietType(DietType $dietType): self
@@ -62,9 +63,7 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasTools
      */
     public function tools(): array
     {
-        return [
-            new GetDietReference,
-        ];
+        return $this->toolRegistry->getMealPlanTools();
     }
 
     public function handle(User $user, int $totalDays = 7): void
