@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\DataObjects\ContentMetaData;
 use App\Enums\ContentType;
 use App\Enums\FoodCategory;
 use App\Models\Content;
@@ -61,6 +62,28 @@ it('returns image url when image path exists', function (): void {
     $content = Content::factory()->withImage()->create(['slug' => Str::uuid()->toString()]);
 
     expect($content->image_url)->toBeString();
+});
+
+it('returns seo metadata attributes from meta data', function (): void {
+    $content = Content::factory()->create([
+        'slug' => Str::uuid()->toString(),
+        'meta_data' => [
+            'seo_title' => 'Banana and blood sugar',
+            'seo_description' => 'A quick glycemic overview for bananas.',
+            'manual_links' => [
+                ['slug' => 'banana', 'anchor' => 'Banana guide'],
+            ],
+        ],
+    ]);
+
+    expect($content->meta)->toBeInstanceOf(ContentMetaData::class)
+        ->and($content->meta?->seoTitle)->toBe('Banana and blood sugar')
+        ->and($content->meta?->seoDescription)->toBe('A quick glycemic overview for bananas.')
+        ->and($content->meta_title)->toBe('Banana and blood sugar')
+        ->and($content->meta_description)->toBe('A quick glycemic overview for bananas.')
+        ->and($content->manual_links)->toBe([
+            ['slug' => 'banana', 'anchor' => 'Banana guide'],
+        ]);
 });
 
 it('returns display name from body or title', function (): void {

@@ -21,9 +21,17 @@ use Illuminate\Support\Facades\Storage;
  * @property-read string $slug
  * @property-read string $title
  * @property-read array<string, mixed> $body
+ * @property-read array{
+ *     seo_title?: string,
+ *     seo_description?: string,
+ *     manual_links?: array<int, array{slug: string, anchor: string}>
+ * }|null $meta_data
  * @property-read FoodCategory|null $category
  * @property-read string|null $image_path
+ * @property-read string|null $image_url
  * @property-read ContentMetaData|null $meta
+ * @property-read string $meta_title
+ * @property-read string $meta_description
  * @property-read bool $is_published
  * @property-read string $display_name
  * @property-read string|null $diabetic_insight
@@ -111,7 +119,7 @@ final class Content extends Model
 
     protected function getMetaAttribute(): ?ContentMetaData
     {
-        $data = $this->meta_data;
+        $data = $this->getMetaDataAttributes();
 
         if ($data === null) {
             return null;
@@ -126,12 +134,24 @@ final class Content extends Model
 
     protected function getMetaTitleAttribute(): string
     {
-        return $this->meta?->seoTitle ?? '';
+        $meta = $this->meta;
+
+        if ($meta === null) {
+            return '';
+        }
+
+        return $meta->seoTitle;
     }
 
     protected function getMetaDescriptionAttribute(): string
     {
-        return $this->meta?->seoDescription ?? '';
+        $meta = $this->meta;
+
+        if ($meta === null) {
+            return '';
+        }
+
+        return $meta->seoDescription;
     }
 
     protected function getDisplayNameAttribute(): string
@@ -246,9 +266,35 @@ final class Content extends Model
      */
     protected function getManualLinksAttribute(): array
     {
+        $metaData = $this->getMetaDataAttributes();
+
+        if ($metaData === null) {
+            return [];
+        }
+
         /** @var array<int, array{slug: string, anchor: string}> $links */
-        $links = $this->meta_data['manual_links'] ?? [];
+        $links = $metaData['manual_links'] ?? [];
 
         return $links;
+    }
+
+    /**
+     * @return array{
+     *     seo_title?: string,
+     *     seo_description?: string,
+     *     manual_links?: array<int, array{slug: string, anchor: string}>
+     * }|null
+     */
+    private function getMetaDataAttributes(): ?array
+    {
+        /** @var array{
+         *     seo_title?: string,
+         *     seo_description?: string,
+         *     manual_links?: array<int, array{slug: string, anchor: string}>
+         * }|null $metaData
+         */
+        $metaData = $this->meta_data;
+
+        return $metaData;
     }
 }
