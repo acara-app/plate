@@ -75,7 +75,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 });
 
 Route::middleware(['auth', 'verified'])->prefix('onboarding')->name('onboarding.')->group(function (): void {
-    Route::get('/', fn() => to_route('onboarding.biometrics.show'));
+    Route::get('/', fn () => to_route('onboarding.biometrics.show'));
 
     Route::get('/biometrics', [Web\OnboardingController::class, 'showBiometrics'])->name('biometrics.show');
     Route::post('/biometrics', [Web\OnboardingController::class, 'storeBiometrics'])->name('biometrics.store');
@@ -109,7 +109,7 @@ Route::middleware('auth')->group(function (): void {
         ->name('password.update');
 
     // Appearance...
-    Route::get('settings/appearance', fn() => Inertia::render('appearance/update'))->name('appearance.edit');
+    Route::get('settings/appearance', fn () => Inertia::render('appearance/update'))->name('appearance.edit');
 
     // Integrations...
     Route::get('settings/integrations', [Web\IntegrationsController::class, 'edit'])->name('integrations.edit');

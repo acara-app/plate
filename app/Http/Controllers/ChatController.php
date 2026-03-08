@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Ai\Responses\StreamableAgentResponse;
-use Illuminate\Support\Str;
 
 final readonly class ChatController
 {

@@ -15,7 +15,7 @@ final class SeoLinkManager
 {
     /**
      * Manual link mappings for SEO cross-linking.
-     * These are fallbacks when database seo_metadata is not populated.
+     * These are fallbacks when database meta_data is not populated.
      * Format: source_slug => [target_slug => anchor_text]
      *
      * Strategy: 70% natural, 20% exact-match, 10% navigational
@@ -114,7 +114,7 @@ final class SeoLinkManager
 
     /**
      * Get comparison links for a given food slug.
-     * First checks database seo_metadata, then falls back to manual mappings.
+     * First checks database meta_data, then falls back to manual mappings.
      *
      * @return array<int, array{slug: string, anchor: string, content: Content|null}>
      */

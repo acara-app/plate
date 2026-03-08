@@ -39,8 +39,11 @@ final class ContentFactory extends Factory
             'type' => ContentType::Food,
             'slug' => Str::slug($foodName),
             'title' => sprintf('Is %s Good for Diabetics?', $foodName),
-            'meta_title' => $foodName.' Glycemic Index & Diabetes Safety | Acara Plate',
-            'meta_description' => sprintf("Learn about %s's glycemic index, nutritional value, and whether it's safe for diabetics. Get personalized glucose spike predictions.", $foodName),
+            'meta_data' => [
+                'seo_title' => $foodName.' Glycemic Index & Diabetes Safety | Acara Plate',
+                'seo_description' => sprintf("Learn about %s's glycemic index, nutritional value, and whether it's safe for diabetics. Get personalized glucose spike predictions.", $foodName),
+                'manual_links' => [],
+            ],
             'body' => [
                 'display_name' => $foodName,
                 'diabetic_insight' => sprintf('Based on USDA nutritional data, %s contains moderate carbohydrates. For diabetics, portion control is recommended.', $foodName),

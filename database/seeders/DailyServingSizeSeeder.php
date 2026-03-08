@@ -188,8 +188,10 @@ final class DailyServingSizeSeeder extends Seeder
                     'type' => ContentType::UsdaDailyServingSize->value,
                     'slug' => $slug,
                     'title' => $foodGroup['food_group'].' - USDA Daily Serving Size',
-                    'meta_title' => 'USDA Daily Serving Size: '.$foodGroup['food_group'],
-                    'meta_description' => 'Recommended daily servings of '.$foodGroup['food_group'].' based on the Dietary Guidelines for Americans, 2025-2030.',
+                    'meta_data' => [
+                        'seo_title' => 'USDA Daily Serving Size: '.$foodGroup['food_group'],
+                        'seo_description' => 'Recommended daily servings of '.$foodGroup['food_group'].' based on the Dietary Guidelines for Americans, 2025-2030.',
+                    ],
                     'body' => [
                         'food_group' => $foodGroup['food_group'],
                         'serving_size_unit' => $foodGroup['serving_size_unit'],
@@ -264,8 +266,10 @@ final class DailyServingSizeSeeder extends Seeder
                     'type' => ContentType::UsdaSugarLimit->value,
                     'slug' => $slug,
                     'title' => $limit['food_group'].' - FDA Healthy Claim Sugar Limit',
-                    'meta_title' => 'FDA Healthy Claim: '.$limit['food_group'].' Sugar Limit',
-                    'meta_description' => 'FDA "Healthy" claim added sugar limit for '.$limit['food_group'].': '.$limit['added_sugar_limit_grams'].' grams.',
+                    'meta_data' => [
+                        'seo_title' => 'FDA Healthy Claim: '.$limit['food_group'].' Sugar Limit',
+                        'seo_description' => 'FDA "Healthy" claim added sugar limit for '.$limit['food_group'].': '.$limit['added_sugar_limit_grams'].' grams.',
+                    ],
                     'body' => [
                         'food_group' => $limit['food_group'],
                         'minimum_equivalent' => $limit['minimum_equivalent'],
