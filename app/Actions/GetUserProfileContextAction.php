@@ -262,7 +262,8 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
 
         // Missing data note
         if ($missingData !== []) {
-            $parts[] = 'MISSING PROFILE DATA: '.implode(', ', $missingData).'. Consider suggesting the user complete their profile for more personalized advice when relevant.';
+            $fieldsList = implode(', ', $missingData);
+            $parts[] = "MISSING PROFILE DATA: {$fieldsList}. If the user asks for meal plans or fitness advice, you can mention which fields are missing and suggest completing their profile for more tailored recommendations.";
         }
 
         return implode("\n", $parts);
