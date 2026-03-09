@@ -22,9 +22,12 @@ function makeStreamRequest(
     ModelName $model = ModelName::GPT_5_MINI,
     AgentMode $mode = AgentMode::Ask,
     array $messages = [['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Hello']]]],
+    ?string $conversationId = null,
 ): StoreAgentConversationRequest {
+    $conversationId ??= (string) fake()->uuid();
+
     $request = StoreAgentConversationRequest::create(
-        route('chat.stream'),
+        route('chat.stream', $conversationId),
         'POST',
         [
             'model' => $model->value,

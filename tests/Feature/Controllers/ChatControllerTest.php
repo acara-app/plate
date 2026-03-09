@@ -16,12 +16,13 @@ beforeEach(function (): void {
 
 it('renders chat page with correct props when no conversation id provided', function (): void {
     $user = User::factory()->create();
+    $conversationId = (string) fake()->uuid();
 
     actingAs($user)
-        ->get(route('chat.create', ['mode' => AgentMode::Ask->value]))
+        ->get(route('chat.create', ['conversationId' => $conversationId, 'mode' => AgentMode::Ask->value]))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->has('conversationId', null)
+            ->where('conversationId', $conversationId)
             ->has('messages', 0)
             ->where('mode', AgentMode::Ask)
         );
@@ -50,12 +51,13 @@ it('renders chat page with correct props with conversation id', function (): voi
 
 it('handles invalid conversation id gracefully', function (): void {
     $user = User::factory()->create();
+    $conversationId = 'non-existent-uuid';
 
     actingAs($user)
-        ->get(route('chat.create', ['conversationId' => 'invalid-id']))
+        ->get(route('chat.create', ['conversationId' => $conversationId]))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->has('conversationId', null)
+            ->where('conversationId', $conversationId)
             ->has('messages', 0)
         );
 });

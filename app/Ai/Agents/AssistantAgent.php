@@ -92,7 +92,7 @@ final class AssistantAgent implements Agent, Conversational, HasTools
                 'context' => 'No user context available.',
             ];
         } else {
-            $profileData = app(GetUserProfileContextAction::class)->handle($user);
+            $profileData = resolve(GetUserProfileContextAction::class)->handle($user);
         }
 
         $languageCode = $user instanceof User ? ($user->preferred_language ?? 'en') : 'en';

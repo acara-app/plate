@@ -6,9 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Actions\BuildAssistantAgentAction;
 use App\Actions\BuildConversationMessagesAction;
+use App\Actions\GetOrCreateConversationAction;
 use App\Enums\AgentMode;
 use App\Http\Requests\StoreAgentConversationRequest;
-use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\Request;
@@ -22,18 +22,17 @@ final readonly class ChatController
         #[CurrentUser] private User $user,
         private BuildConversationMessagesAction $messagesAction,
         private BuildAssistantAgentAction $agentAction,
+        private GetOrCreateConversationAction $conversationAction,
     ) {}
 
     public function create(
         Request $request,
         string $conversationId
     ): Response {
-        $conversation = $conversationId !== ''
-            ? Conversation::query()->with('messages')->find($conversationId)
-            : null;
+        $conversation = $this->conversationAction->handle($conversationId, $this->user);
 
         return Inertia::render('chat/create-chat', [
-            'conversationId' => $conversation?->id ?? $conversationId,
+            'conversationId' => $conversation->id,
             'messages' => $this->messagesAction->handle($conversation),
             'mode' => $request->enum('mode', AgentMode::class),
         ]);
