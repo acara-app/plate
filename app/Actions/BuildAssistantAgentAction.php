@@ -4,34 +4,28 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Ai\Agents\AssistantAgent;
+use App\Ai\AgentPayload;
+use App\Ai\Agents\AgentRunner;
 use App\Http\Requests\StreamChatRequest;
 use App\Models\User;
+use Laravel\Ai\Responses\StreamableAgentResponse;
 
-final class BuildAssistantAgentAction
+final readonly class BuildAssistantAgentAction
 {
-    /**
-     * Resolve and fully configure an AssistantAgent for the given request and user.
-     *
-     * Responsibilities:
-     *  - Resolve the agent from the container
-     *  - Wire the agent mode and attachments from the request
-     *  - Conditionally enable web search based on the selected model
-     */
-    public function handle(StreamChatRequest $request, User $user): AssistantAgent
+    public function __construct(
+        private AgentRunner $agentRunner,
+    ) {}
+
+    public function handle(StreamChatRequest $request, User $user, string $conversationId): StreamableAgentResponse
     {
-        $model = $request->modelName();
-        $attachments = $request->userAttachments();
+        $agentPayload = new AgentPayload(
+            userId: $user->id,
+            message: $request->userMessage(),
+            images: $request->userAttachments(),
+            mode: $request->mode(),
+            modelName: $request->modelName(),
+        );
 
-        $agent = resolve(AssistantAgent::class)
-            ->withUser($user)
-            ->withMode($request->mode())
-            ->withAttachments($attachments);
-
-        if ($model->supportsWebSearch()) {
-            $agent->withWebSearch();
-        }
-
-        return $agent;
+        return $this->agentRunner->runWithConversation($agentPayload, $user, $conversationId);
     }
 }

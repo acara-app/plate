@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\ProcessAdvisorMessageAction;
-use App\Ai\Agents\AssistantAgent;
+use App\Ai\Agents\AgentRunner;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Laravel\Ai\Contracts\ConversationStore;
@@ -11,7 +11,7 @@ use Laravel\Ai\Prompts\AgentPrompt;
 use Laravel\Ai\Responses\AgentResponse;
 
 it('creates new conversation when none exists', function (): void {
-    AssistantAgent::fake(['Hello!']);
+    AgentRunner::fake(['Hello!']);
 
     // Create a simple test implementation of ConversationStore
     $conversationStore = new class implements ConversationStore
@@ -54,7 +54,7 @@ it('creates new conversation when none exists', function (): void {
     };
 
     $action = new ProcessAdvisorMessageAction(
-        resolve(AssistantAgent::class),
+        resolve(AgentRunner::class),
         $conversationStore,
     );
 
@@ -63,14 +63,14 @@ it('creates new conversation when none exists', function (): void {
 
     expect($result['response'])->toBe('Hello!');
     expect($result['conversation_id'])->toBe('conv-123');
-    AssistantAgent::assertPrompted('Test message');
+    AgentRunner::assertPrompted('Test message');
 });
 
 it('uses existing conversation when provided', function (): void {
-    AssistantAgent::fake(['Continuing...']);
+    AgentRunner::fake(['Continuing...']);
 
     $action = new ProcessAdvisorMessageAction(
-        resolve(AssistantAgent::class),
+        resolve(AgentRunner::class),
         resolve(ConversationStore::class),
     );
 
@@ -82,7 +82,7 @@ it('uses existing conversation when provided', function (): void {
 });
 
 it('reuses latest conversation when no id provided but exists', function (): void {
-    AssistantAgent::fake(['Reusing!']);
+    AgentRunner::fake(['Reusing!']);
 
     // Create a simple test implementation that returns an existing conversation
     $conversationStore = new class implements ConversationStore
@@ -116,7 +116,7 @@ it('reuses latest conversation when no id provided but exists', function (): voi
     };
 
     $action = new ProcessAdvisorMessageAction(
-        resolve(AssistantAgent::class),
+        resolve(AgentRunner::class),
         $conversationStore,
     );
 
@@ -162,7 +162,7 @@ it('resets conversation', function (): void {
     };
 
     $action = new ProcessAdvisorMessageAction(
-        resolve(AssistantAgent::class),
+        resolve(AgentRunner::class),
         $conversationStore,
     );
 

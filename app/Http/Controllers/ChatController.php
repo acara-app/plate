@@ -42,16 +42,6 @@ final readonly class ChatController
         StreamChatRequest $request,
         string $conversationId
     ): StreamableAgentResponse {
-        $agent = $this->agentAction->handle($request, $this->user);
-        $agent->continue($conversationId, as: $this->user);
-
-        return $agent
-            ->stream(
-                prompt: $request->userMessage(),
-                attachments: $request->userAttachments(),
-                provider: $request->modelName()->labProvider(),
-                model: $request->modelName()->value,
-            )
-            ->usingVercelDataProtocol();
+        return $this->agentAction->handle($request, $this->user, $conversationId);
     }
 }

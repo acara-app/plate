@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\Actions\BuildAssistantAgentAction;
-use App\Ai\Agents\AssistantAgent;
 use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Http\Requests\StreamChatRequest;
 use App\Models\User;
+use Laravel\Ai\Responses\StreamableAgentResponse;
 
 beforeEach(function (): void {
     $this->action = resolve(BuildAssistantAgentAction::class);
@@ -42,44 +42,11 @@ function makeStreamRequest(
     return $request;
 }
 
-it('returns an AssistantAgent instance', function (): void {
-    AssistantAgent::fake(['OK']);
-
+it('returns a StreamableAgentResponse', function (): void {
     $user = User::factory()->create();
     $request = makeStreamRequest();
 
-    $agent = $this->action->handle($request, $user);
+    $response = $this->action->handle($request, $user);
 
-    expect($agent)->toBeInstanceOf(AssistantAgent::class);
-});
-
-it('enables web search for a model that supports it', function (): void {
-    AssistantAgent::fake(['OK']);
-
-    $user = User::factory()->create();
-    $request = makeStreamRequest(model: ModelName::GPT_5_MINI); // supportsWebSearch = true
-
-    $agent = $this->action->handle($request, $user);
-
-    // Web search tool should be present — verify the tools list contains WebSearch
-    $toolNames = collect($agent->tools())
-        ->map(fn (mixed $tool): string => class_basename($tool))
-        ->all();
-
-    expect($toolNames)->toContain('WebSearch');
-});
-
-it('does not enable web search for a model that does not support it', function (): void {
-    AssistantAgent::fake(['OK']);
-
-    $user = User::factory()->create();
-    $request = makeStreamRequest(model: ModelName::GEMINI_2_5_FLASH); // supportsWebSearch = false
-
-    $agent = $this->action->handle($request, $user);
-
-    $toolNames = collect($agent->tools())
-        ->map(fn (mixed $tool): string => class_basename($tool))
-        ->all();
-
-    expect($toolNames)->not->toContain('WebSearch');
+    expect($response)->toBeInstanceOf(StreamableAgentResponse::class);
 });

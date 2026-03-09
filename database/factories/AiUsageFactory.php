@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Ai\Agents\AssistantAgent;
+use App\Ai\Agents\AgentRunner;
 use App\Models\AiUsage;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,7 +20,7 @@ final class AiUsageFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'agent' => AssistantAgent::class,
+            'agent' => AgentRunner::class,
             'model' => 'gemini-3-flash-preview',
             'provider' => 'gemini',
             'prompt_tokens' => $this->faker->numberBetween(100, 10000),

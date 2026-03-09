@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Ai\Agents\AssistantAgent;
+use App\Ai\Agents\AgentRunner;
 use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
@@ -30,7 +30,7 @@ final class HistoryFactory extends Factory
             'id' => (string) Str::uuid7(),
             'conversation_id' => Conversation::factory(),
             'user_id' => User::factory(),
-            'agent' => AssistantAgent::class,
+            'agent' => AgentRunner::class,
             'role' => fake()->randomElement([MessageRole::User, MessageRole::Assistant]),
             'content' => fake()->paragraph(),
             'attachments' => [],
