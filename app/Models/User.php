@@ -142,17 +142,11 @@ final class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(UserTelegramChat::class)->where('is_active', true);
     }
 
-    /**
-     * Check if the user has any active subscription.
-     */
     public function hasActiveSubscription(): bool
     {
         return $this->subscriptions()->get()->contains(fn (Subscription $subscription): bool => $subscription->valid()); // @phpstan-ignore-line
     }
 
-    /**
-     * Get the user's active subscription.
-     */
     public function activeSubscription(): ?Subscription
     {
         /** @var Subscription|null $subscription */
@@ -161,9 +155,6 @@ final class User extends Authenticatable implements MustVerifyEmail
         return $subscription;
     }
 
-    /**
-     * Get a user-friendly subscription type name.
-     */
     public function subscriptionDisplayName(): ?string
     {
         $subscription = $this->activeSubscription();
@@ -172,7 +163,6 @@ final class User extends Authenticatable implements MustVerifyEmail
             return null;
         }
 
-        // Convert slug back to title case (e.g., 'premium-plan' -> 'Premium Plan')
         return str($subscription->type)->title()->replace('-', ' ')->toString();
     }
 
@@ -198,17 +188,11 @@ final class User extends Authenticatable implements MustVerifyEmail
         return $this->mealPlans()->exists();
     }
 
-    /**
-     * Get the user's "onboarding_completed" attribute.
-     */
     protected function getIsOnboardedAttribute(): bool
     {
         return $this->profile->onboarding_completed ?? false;
     }
 
-    /**
-     * Get the user's notification settings as a DTO.
-     */
     protected function getNotificationSettingsAttribute(): UserSettingsData
     {
         return UserSettingsData::from($this->settings ?? []);

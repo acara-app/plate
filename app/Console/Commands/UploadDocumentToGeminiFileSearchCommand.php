@@ -14,10 +14,6 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Sleep;
 
-/**
- * This command is only temporarily needed to upload the FoodData Central JSON file
- * TODO: Refactor or find a better way to handle initial document uploads
- */
 final class UploadDocumentToGeminiFileSearchCommand extends Command
 {
     protected $signature = 'upload:document-to-gemini-file-search 
@@ -209,7 +205,6 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
         /** @var array<string, mixed> $data */
         $data = $response->json();
 
-        // Ensure optional fields are present
         $data['activeDocumentsCount'] ??= 0;
         $data['pendingDocumentsCount'] ??= 0;
         $data['failedDocumentsCount'] ??= 0;

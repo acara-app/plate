@@ -10,11 +10,6 @@ use App\DataObjects\Memory\RelatedMemoryData;
 interface GetRelatedMemoriesTool
 {
     /**
-     * Retrieve memories linked to a given memory (graph traversal).
-     *
-     * Traverses the memory knowledge graph starting from the specified memory,
-     * returning all connected memories up to the specified depth.
-     *
      * @param  string  $memoryId  The starting memory ID.
      * @param  int  $depth  How many levels of relationships to traverse.
      * @param  array<string>  $relationships  Filter by relationship types (empty = all types).

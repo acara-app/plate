@@ -38,8 +38,6 @@ final class HealthLogData extends Data
     ) {}
 
     /**
-     * Create a HealthLogData from a structured output array.
-     *
      * @param  array<string, mixed>  $data
      */
     public static function fromParsedArray(array $data): self
@@ -68,9 +66,6 @@ final class HealthLogData extends Data
         );
     }
 
-    /**
-     * Format the health log data for display confirmation.
-     */
     public function formatForDisplay(): string
     {
         return match ($this->logType) {
@@ -84,8 +79,6 @@ final class HealthLogData extends Data
     }
 
     /**
-     * Convert the health log data to a record array for database storage.
-     *
      * @return array<string, mixed>
      */
     public function toRecordArray(): array

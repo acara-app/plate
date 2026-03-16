@@ -3,16 +3,6 @@
 declare(strict_types=1);
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines are used during authentication for various
-    | messages that we need to display to the user.
-    |
-    */
-
     'login' => [
         'page_title' => 'Log in to Acara Plate | AI Nutrition for Diabetes Management',
         'title' => 'Log in to your account',

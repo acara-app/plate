@@ -10,7 +10,6 @@ use Illuminate\Support\Collection;
 
 final readonly class GlucoseStatisticsService
 {
-    // Glucose ranges (mg/dL) based on clinical standards
     public const int NORMAL_RANGE_MIN = 70;
 
     public const int NORMAL_RANGE_MAX = 140;
@@ -28,8 +27,6 @@ final readonly class GlucoseStatisticsService
     public const int POST_MEAL_SPIKE_THRESHOLD = 140;
 
     /**
-     * Calculate time-in-range, time-above-range, and time-below-range percentages.
-     *
      * @param  Collection<int, HealthEntry>  $readings
      * @return array{
      *     timeInRange: float,
@@ -81,8 +78,6 @@ final readonly class GlucoseStatisticsService
     }
 
     /**
-     * Calculate min, max, average, and standard deviation.
-     *
      * @param  Collection<int, HealthEntry>  $readings
      * @return array{min: float|null, max: float|null, average: float|null, stdDev: float|null}
      */
@@ -113,8 +108,6 @@ final readonly class GlucoseStatisticsService
     }
 
     /**
-     * Calculate standard deviation of glucose readings.
-     *
      * @param  Collection<int, float>  $values
      */
     public function calculateStandardDeviation(Collection $values): ?float
@@ -130,9 +123,6 @@ final readonly class GlucoseStatisticsService
     }
 
     /**
-     * Calculate coefficient of variation (CV) as percentage.
-     * CV = (stdDev / mean) × 100
-     *
      * @param  Collection<int, HealthEntry>  $readings
      */
     public function calculateCoefficientOfVariation(Collection $readings): ?float
@@ -154,8 +144,6 @@ final readonly class GlucoseStatisticsService
     }
 
     /**
-     * Analyze time-of-day patterns.
-     *
      * @param  Collection<int, HealthEntry>  $readings
      * @return array{
      *     morning: array{count: int, average: float|null},
@@ -193,8 +181,6 @@ final readonly class GlucoseStatisticsService
     }
 
     /**
-     * Analyze frequency by reading type.
-     *
      * @param  Collection<int, HealthEntry>  $readings
      * @return array<string, array{count: int, percentage: float, average: float|null}>
      */
@@ -222,9 +208,6 @@ final readonly class GlucoseStatisticsService
     }
 
     /**
-     * Calculate linear trend over time (glucose change per day).
-     * Uses simple linear regression: slope = sum((x - x_mean)(y - y_mean)) / sum((x - x_mean)^2)
-     *
      * @param  Collection<int, HealthEntry>  $readings
      * @return array{
      *     slopePerDay: float|null,
@@ -248,7 +231,6 @@ final readonly class GlucoseStatisticsService
             ];
         }
 
-        // Sort by measured_at to ensure proper ordering
         $sorted = $readings->sortBy('measured_at')->values();
 
         /** @var HealthEntry $first */
@@ -270,7 +252,6 @@ final readonly class GlucoseStatisticsService
             ];
         }
 
-        // Convert timestamps to days from first reading
         $points = $sorted->map(function (HealthEntry $reading) use ($firstTimestamp): array {
             $daysSinceFirst = ((float) $reading->measured_at->timestamp - $firstTimestamp) / 86400;
 
@@ -285,7 +266,6 @@ final readonly class GlucoseStatisticsService
         $meanX = $points->avg('x');
         $meanY = $points->avg('y');
 
-        // Calculate slope using least squares method
         $numerator = $points->sum(fn (array $point): float => ($point['x'] - $meanX) * ($point['y'] - $meanY));
         $denominator = $points->sum(fn (array $point): float => ($point['x'] - $meanX) ** 2);
 

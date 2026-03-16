@@ -102,7 +102,6 @@ final readonly class ShowMealPlansController
         $dayNeedsGeneration = $dayMeals->isEmpty();
         $dayStatus = $this->getDayStatus($mealPlan, $currentDayNumber, $dayMeals->isEmpty());
 
-        // Auto-trigger generation for pending days
         if ($dayNeedsGeneration && $dayStatus === MealPlanGenerationStatus::Pending->value) {
             $mealPlan->update([
                 'metadata' => array_merge($mealPlan->metadata ?? [], [
@@ -140,8 +139,8 @@ final readonly class ShowMealPlansController
         ];
 
         $navigation = [
-            'has_previous' => true, // Always enabled with looping
-            'has_next' => true, // Always enabled with looping
+            'has_previous' => true,
+            'has_next' => true,
             'previous_day' => $currentDayNumber > 1 ? $currentDayNumber - 1 : $mealPlan->duration_days,
             'next_day' => $currentDayNumber < $mealPlan->duration_days ? $currentDayNumber + 1 : 1,
             'total_days' => $mealPlan->duration_days,
@@ -154,9 +153,6 @@ final readonly class ShowMealPlansController
         ]);
     }
 
-    /**
-     * Get the generation status for a specific day.
-     */
     private function getDayStatus(MealPlan $mealPlan, int $dayNumber, bool $isEmpty): string
     {
         /** @var array<string, mixed> $metadata */

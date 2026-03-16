@@ -3,16 +3,6 @@
 declare(strict_types=1);
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Common Language Lines (French)
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines are used across the application for common
-    | UI elements and messages.
-    |
-    */
-
     'welcome' => 'Bienvenue',
     'loading' => 'Chargement...',
     'save' => 'Sauvegarder',
@@ -31,14 +21,12 @@ return [
     'yes' => 'Oui',
     'no' => 'Non',
 
-    // Navigation
     'dashboard' => 'Tableau de bord',
     'profile' => 'Profil',
     'settings' => 'Paramètres',
     'logout' => 'Se déconnecter',
     'home' => 'Accueil',
 
-    // Actions
     'view' => 'Voir',
     'download' => 'Télécharger',
     'upload' => 'Téléverser',
@@ -60,7 +48,6 @@ return [
     'archive' => 'Archiver',
     'restore' => 'Restaurer',
 
-    // Status messages
     'success' => 'Succès',
     'error' => 'Erreur',
     'warning' => 'Avertissement',
@@ -72,13 +59,11 @@ return [
     'failed' => 'Échoué',
     'processing' => 'Traitement en cours...',
 
-    // Confirmation messages
     'are_you_sure' => 'Êtes-vous sûr?',
     'cannot_be_undone' => 'Cette action ne peut pas être annulée.',
     'confirm_delete' => 'Confirmer la suppression',
     'confirm_action' => 'Confirmer l\'action',
 
-    // Pagination
     'showing' => 'Affichage de',
     'to' => 'à',
     'of' => 'sur',
@@ -87,7 +72,6 @@ return [
     'no_results' => 'Aucun résultat trouvé',
     'no_data' => 'Aucune donnée disponible',
 
-    // Time
     'today' => 'Aujourd\'hui',
     'yesterday' => 'Hier',
     'tomorrow' => 'Demain',
@@ -98,7 +82,6 @@ return [
     'this_year' => 'Cette année',
     'last_year' => 'Année dernière',
 
-    // Common phrases
     'please_wait' => 'Veuillez patienter',
     'try_again' => 'Réessayer',
     'learn_more' => 'En savoir plus',
@@ -118,11 +101,9 @@ return [
     'expand' => 'Développer',
     'collapse' => 'Réduire',
 
-    // OAuth
     'continue_with_google' => 'Continuer avec Google',
     'sign_in_with_google' => 'Se connecter avec Google',
 
-    // Notifications
     'notifications' => [
         'title' => 'Paramètres de notification',
         'preferences' => 'Préférences de notification',
@@ -137,7 +118,6 @@ return [
         'save_preferences' => 'Sauvegarder les préférences',
     ],
 
-    // Password settings
     'password_settings' => [
         'title' => 'Paramètres de mot de passe',
         'update_title' => 'Mettre à jour le mot de passe',
@@ -151,7 +131,6 @@ return [
         'save_password' => 'Sauvegarder le mot de passe',
     ],
 
-    // Dashboard
     'dashboard_cards' => [
         'health_insights' => [
             'title' => 'Aperçus du diabète',
@@ -189,14 +168,12 @@ return [
         ],
     ],
 
-    // Dashboard Onboarding Banner
     'onboarding_banner' => [
         'text' => 'Terminez la configuration pour obtenir des recommandations nutritionnelles adaptées.',
         'complete' => 'Compléter la configuration',
         'dismiss' => 'Ignorer',
     ],
 
-    // Onboarding
     'onboarding' => [
         'biometrics' => [
             'title' => 'Biométrie - Étape 1 sur 7',
@@ -396,7 +373,6 @@ return [
         ],
     ],
 
-    // Diabetes Log
     'health_entries' => [
         'tabs' => [
             'glucose' => 'Glucose',

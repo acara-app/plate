@@ -32,9 +32,6 @@ final class SubscriptionProduct extends Model
 
     protected $guarded = [];
 
-    /**
-     * Append computed attributes to JSON output
-     */
     protected $appends = [
         'formatted_price',
         'formatted_yearly_price',
@@ -43,17 +40,11 @@ final class SubscriptionProduct extends Model
         'coming_soon',
     ];
 
-    /**
-     * Get the Stripe price ID for the specified interval
-     */
     public function getStripePriceId(string $interval = 'month'): ?string
     {
         return $interval === 'year' ? $this->yearly_stripe_price_id : $this->stripe_price_id;
     }
 
-    /**
-     * Get the price for the specified interval
-     */
     public function getPriceForInterval(string $interval = 'month'): float
     {
         return $interval === 'year' ? ($this->yearly_price ?? $this->price * 12) : $this->price;
@@ -82,25 +73,16 @@ final class SubscriptionProduct extends Model
         ];
     }
 
-    /**
-     * Get the formatted price as currency
-     */
     protected function getFormattedPriceAttribute(): string
     {
         return '$'.number_format($this->price, 2);
     }
 
-    /**
-     * Get the formatted yearly price as currency
-     */
     protected function getFormattedYearlyPriceAttribute(): string
     {
         return $this->yearly_price ? '$'.number_format($this->yearly_price, 2) : '$'.number_format($this->price * 12, 2);
     }
 
-    /**
-     * Calculate savings when paying yearly vs monthly
-     */
     protected function getYearlySavingsAttribute(): float
     {
         if (! $this->yearly_price) {
@@ -112,9 +94,6 @@ final class SubscriptionProduct extends Model
         return $monthlyTotal - $this->yearly_price;
     }
 
-    /**
-     * Get savings percentage when paying yearly
-     */
     protected function getYearlySavingsPercentageAttribute(): int
     {
         if (! $this->yearly_price) {
@@ -126,9 +105,6 @@ final class SubscriptionProduct extends Model
         return (int) round((($monthlyTotal - $this->yearly_price) / $monthlyTotal) * 100);
     }
 
-    /**
-     * Check if this product is coming soon
-     */
     protected function getComingSoonAttribute(): bool
     {
         return (bool) ($this->attributes['coming_soon'] ?? false);

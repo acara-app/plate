@@ -76,8 +76,6 @@ final class Meal extends Model
     }
 
     /**
-     * Calculate macronutrient percentages based on calories
-     *
      * @return array{protein: float, carbs: float, fat: float}
      */
     public function macroPercentages(): array
@@ -86,7 +84,6 @@ final class Meal extends Model
             return ['protein' => 0, 'carbs' => 0, 'fat' => 0];
         }
 
-        // 1g protein = 4 cal, 1g carbs = 4 cal, 1g fat = 9 cal
         $proteinCals = ($this->protein_grams ?? 0) * 4;
         $carbsCals = ($this->carbs_grams ?? 0) * 4;
         $fatCals = ($this->fat_grams ?? 0) * 9;
@@ -104,17 +101,11 @@ final class Meal extends Model
         ];
     }
 
-    /**
-     * Check if this meal meets minimum protein requirements (e.g., 20g for main meals)
-     */
     public function meetsProteinRequirement(float $minimumGrams = 20.0): bool
     {
         return ($this->protein_grams ?? 0) >= $minimumGrams;
     }
 
-    /**
-     * Get a human-readable day name (e.g., "Day 1" or "Monday" for weekly plans)
-     */
     public function getDayName(): string
     {
         if ($this->mealPlan->type === MealPlanType::Weekly && $this->day_number <= 7) {

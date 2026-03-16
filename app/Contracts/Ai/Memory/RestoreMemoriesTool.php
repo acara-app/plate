@@ -10,11 +10,6 @@ use App\Ai\Exceptions\Memory\MemoryStorageException;
 interface RestoreMemoriesTool
 {
     /**
-     * Restore archived memories back to active storage.
-     *
-     * Moves memories from cold storage back to active state,
-     * making them available for normal search operations again.
-     *
      * @param  array<string>  $memoryIds  Memories to restore.
      * @return int Number of memories restored.
      *

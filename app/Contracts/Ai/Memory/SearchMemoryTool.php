@@ -9,11 +9,6 @@ use App\DataObjects\Memory\MemorySearchResultData;
 interface SearchMemoryTool
 {
     /**
-     * Semantically search for memories related to a query.
-     *
-     * Uses vector similarity search to find memories semantically related
-     * to the provided query, regardless of exact keyword matches.
-     *
      * @param  string  $query  The search query or question.
      * @param  int  $limit  Max number of results to return.
      * @param  float  $minRelevance  Minimum cosine similarity threshold (0.0 to 1.0).

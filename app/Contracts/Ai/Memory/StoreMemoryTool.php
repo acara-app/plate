@@ -10,11 +10,6 @@ use DateTimeInterface;
 interface StoreMemoryTool
 {
     /**
-     * Store a new semantic memory.
-     *
-     * The memory will be embedded and stored in the vector database for
-     * semantic search. Categories can be assigned automatically or manually.
-     *
      * @param  string  $content  The natural language content of the memory.
      * @param  array<string, mixed>  $metadata  Contextual tags (e.g., ['source' => 'chat', 'user_id' => 12]).
      * @param  array<float>|null  $vector  Optional pre-computed embedding vector (null = auto-compute).

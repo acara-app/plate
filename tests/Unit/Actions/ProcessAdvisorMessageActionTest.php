@@ -13,7 +13,6 @@ use Laravel\Ai\Responses\AgentResponse;
 it('creates new conversation when none exists', function (): void {
     AgentRunner::fake(['Hello!']);
 
-    // Create a simple test implementation of ConversationStore
     $conversationStore = new class implements ConversationStore
     {
         public ?string $latestConversationIdReturn = null;
@@ -84,7 +83,6 @@ it('uses existing conversation when provided', function (): void {
 it('reuses latest conversation when no id provided but exists', function (): void {
     AgentRunner::fake(['Reusing!']);
 
-    // Create a simple test implementation that returns an existing conversation
     $conversationStore = new class implements ConversationStore
     {
         public ?string $latestConversationIdReturn = 'latest-conv';
@@ -128,7 +126,6 @@ it('reuses latest conversation when no id provided but exists', function (): voi
 });
 
 it('resets conversation', function (): void {
-    // Create a simple test implementation
     $conversationStore = new class implements ConversationStore
     {
         public ?string $storedConversationId = null;

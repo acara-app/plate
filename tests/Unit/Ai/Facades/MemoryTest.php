@@ -10,7 +10,6 @@ it('throws exception for unknown method', function (): void {
 })->throws(BadMethodCallException::class, 'Method Memory::unknownMethod() does not exist.');
 
 it('resolves and invokes the correct tool', function (): void {
-    // Create a fake tool using anonymous class
     $fakeTool = new class implements StoreMemoryTool
     {
         public function execute(

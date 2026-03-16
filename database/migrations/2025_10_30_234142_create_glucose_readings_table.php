@@ -8,16 +8,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('glucose_readings', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->decimal('reading_value', 5, 1); // e.g., 125.5 mg/dL
-            $table->string('reading_type'); // Fasting, PostMeal, Random, BeforeMeal
+            $table->decimal('reading_value', 5, 1);
+            $table->string('reading_type');
             $table->timestamp('measured_at');
             $table->text('notes')->nullable();
             $table->timestamps();
@@ -26,9 +23,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('glucose_readings');

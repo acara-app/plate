@@ -14,11 +14,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Agent Conversation
- *
- * Represents a conversation thread between a user and an AI agent.
- * Contains multiple messages stored in the History model.
- *
  * @property string $id UUID primary key
  * @property int $user_id ID of the user who owns this conversation
  * @property string $title Conversation title/summary
@@ -33,8 +28,6 @@ final class Conversation extends Model
     use HasFactory, HasUuids;
 
     /**
-     * Indicates if the model's ID is auto-incrementing.
-     *
      * @var bool
      */
     public $incrementing = false;
@@ -53,8 +46,6 @@ final class Conversation extends Model
     }
 
     /**
-     * Get the user that owns the conversation.
-     *
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
@@ -63,8 +54,6 @@ final class Conversation extends Model
     }
 
     /**
-     * Get all messages in this conversation.
-     *
      * @return HasMany<History, $this>
      */
     public function messages(): HasMany

@@ -6,9 +6,6 @@ namespace App\DataObjects\Memory;
 
 use Spatie\LaravelData\Data;
 
-/**
- * Statistics about the memory store.
- */
 final class MemoryStatsData extends Data
 {
     /**

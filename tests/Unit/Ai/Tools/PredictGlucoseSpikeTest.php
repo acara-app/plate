@@ -10,7 +10,6 @@ use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
 beforeEach(function (): void {
-    // Create a simple test implementation
     $this->predictor = new class implements PredictsGlucoseSpikes
     {
         public ?SpikePredictionData $prediction = null;

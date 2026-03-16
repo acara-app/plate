@@ -137,7 +137,6 @@ it('handles partial success when some chunks fail', function (): void {
 
     Http::fake(function () use (&$requestCount) {
         $requestCount++;
-        // First request succeeds, second fails
         if ($requestCount === 1) {
             return Http::response([], 200);
         }
@@ -145,7 +144,6 @@ it('handles partial success when some chunks fail', function (): void {
         return Http::response(['error' => 'rate limited'], 429);
     });
 
-    // Create URLs that will be chunked (10,005 URLs = 2 chunks)
     $urls = array_map(fn (int $i): string => 'https://www.example.org/url'.$i, range(1, 10005));
 
     $service = new IndexNowService();

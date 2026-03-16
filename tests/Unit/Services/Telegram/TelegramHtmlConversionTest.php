@@ -13,15 +13,12 @@ beforeEach(function (): void {
 
 test('converts basic markdown to telegram compatible html', function (): void {
     $service = new TelegramMessageService();
-    // Use reflection to access private method
     $reflection = new ReflectionClass(TelegramMessageService::class);
     $method = $reflection->getMethod('convertMarkdownToHtml');
 
     $markdown = '**Bold** and *Italic* and `code`';
     $html = $method->invoke($service, $markdown);
 
-    // CommonMark uses <strong> for bold and <em> for italic
-    // Our converter strips <p>
     expect($html)->toContain('<strong>Bold</strong>')
         ->toContain('<em>Italic</em>')
         ->toContain('<code>code</code>');
@@ -47,7 +44,6 @@ test('handles complex structure without excessive whitespace', function (): void
     $markdown = "Paragraph 1\n\n- Item 1\n- Item 2\n\nParagraph 2";
     $html = $method->invoke($service, $markdown);
 
-    // We expect max 2 newlines ideally
     expect($html)->not->toContain("\n\n\n");
 });
 

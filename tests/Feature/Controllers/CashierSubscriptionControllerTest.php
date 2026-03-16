@@ -58,7 +58,6 @@ it('redirects with error if user already has subscription', function (): void {
     $user = User::factory()->create();
     $product = SubscriptionProduct::factory()->create();
 
-    // Create an active subscription
     DB::table('subscriptions')->insert([
         'user_id' => $user->id,
         'type' => 'existing-plan',

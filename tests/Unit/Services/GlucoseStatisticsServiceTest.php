@@ -123,7 +123,6 @@ it('detects stable trend when days difference is zero', function (): void {
 
 it('handles zero denominator in trend calculation', function (): void {
     $now = now();
-    // All readings at same time with same value - should return stable with null slope
     $readings = collect([
         HealthEntry::factory()->make([
             'glucose_value' => 100.0,

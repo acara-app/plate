@@ -45,8 +45,6 @@ final class UserTelegramChat extends Model
     }
 
     /**
-     * Get the user that owns this Telegram chat link.
-     *
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
@@ -55,8 +53,6 @@ final class UserTelegramChat extends Model
     }
 
     /**
-     * Get the Telegraph chat associated with this link.
-     *
      * @return BelongsTo<TelegraphChat, $this>
      */
     public function telegraphChat(): BelongsTo
@@ -64,9 +60,6 @@ final class UserTelegramChat extends Model
         return $this->belongsTo(TelegraphChat::class);
     }
 
-    /**
-     * Check if the linking token is valid (not expired).
-     */
     public function isTokenValid(): bool
     {
         if ($this->linking_token === null) {
@@ -80,9 +73,6 @@ final class UserTelegramChat extends Model
         return $this->token_expires_at->isFuture();
     }
 
-    /**
-     * Mark the chat as linked and clear the token.
-     */
     public function markAsLinked(): void
     {
         $this->update([
@@ -93,9 +83,6 @@ final class UserTelegramChat extends Model
         ]);
     }
 
-    /**
-     * Generate a new linking token.
-     */
     public function generateToken(int $expiresInHours = 24): string
     {
         $token = mb_strtoupper(mb_substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 8));
@@ -109,8 +96,6 @@ final class UserTelegramChat extends Model
     }
 
     /**
-     * Scope to only include active links.
-     *
      * @param  Builder<self>  $query
      */
     #[Scope]
@@ -120,8 +105,6 @@ final class UserTelegramChat extends Model
     }
 
     /**
-     * Scope to only include linked chats (with telegraph_chat_id).
-     *
      * @param  Builder<self>  $query
      */
     #[Scope]
@@ -131,8 +114,6 @@ final class UserTelegramChat extends Model
     }
 
     /**
-     * Scope to only include pending links (without telegraph_chat_id but with token).
-     *
      * @param  Builder<self>  $query
      */
     #[Scope]

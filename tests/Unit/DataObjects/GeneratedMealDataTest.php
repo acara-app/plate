@@ -69,7 +69,7 @@ it('can be instantiated with required properties only', function (): void {
         ->and($data->instructions)->toBeNull()
         ->and($data->prepTimeMinutes)->toBeNull()
         ->and($data->cookTimeMinutes)->toBeNull()
-        ->and($data->servings)->toBe(1) // Default value
+        ->and($data->servings)->toBe(1)
         ->and($data->dietaryTags)->toBeNull()
         ->and($data->glycemicIndexEstimate)->toBeNull()
         ->and($data->glucoseImpactNotes)->toBeNull();

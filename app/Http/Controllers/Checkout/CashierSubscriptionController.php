@@ -42,7 +42,6 @@ final readonly class CashierSubscriptionController
                     ->with('error', 'You already have an active subscription. Use the billing portal to manage it.');
             }
 
-            // Get the appropriate price ID based on billing interval
             $stripePriceId = $data['billing_interval'] === 'yearly'
                 ? $product->yearly_stripe_price_id
                 : $product->stripe_price_id;
@@ -54,10 +53,8 @@ final readonly class CashierSubscriptionController
 
             throw_unless($actualPriceId, Exception::class, 'No price found with lookup_key: '.$stripePriceId);
 
-            // Use product name as subscription type for better UX
             $subscriptionType = str($product->name)->slug()->toString();
 
-            // Determine if this is a trial product (7-day trial)
             $trialDays = $product->product_group === 'trial' ? 7 : null;
 
             $checkoutUrl = $this->stripeService->createSubscriptionCheckout(

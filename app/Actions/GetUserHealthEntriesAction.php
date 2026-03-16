@@ -11,8 +11,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 final readonly class GetUserHealthEntriesAction
 {
     /**
-     * Execute the action.
-     *
      * @return LengthAwarePaginator<int, HealthEntry>
      */
     public function handle(User $user, int $perPage = 15): LengthAwarePaginator

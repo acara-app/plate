@@ -32,9 +32,6 @@ final class SingleDayMealData extends Data
         public ?array $metadata = null,
     ) {}
 
-    /**
-     * Convert to MealData with the given day number.
-     */
     public function toMealData(int $dayNumber): MealData
     {
         return new MealData(

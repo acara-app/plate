@@ -10,11 +10,6 @@ use Waterline\WaterlineApplicationServiceProvider;
 
 final class WaterlineServiceProvider extends WaterlineApplicationServiceProvider
 {
-    /**
-     * Register the Waterline gate.
-     *
-     * This gate determines who can access Waterline in non-local environments.
-     */
     public function gate(): void
     {
         Gate::define('viewWaterline', fn (User $user): bool => in_array($user->email, config()->array('sponsors.admin_emails')));

@@ -11,8 +11,6 @@ use Stringable;
 use function implode;
 
 /**
- * Inspired by Neuron-AI
- *
  * @see https://github.com/neuron-core/neuron-ai
  */
 final class SystemPrompt implements Stringable

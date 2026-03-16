@@ -22,14 +22,12 @@ test('dashboard data uses default time period when invalid period provided', fun
 test('calculate weight stats determines upward trend', function (): void {
     $user = User::factory()->create();
 
-    // Create log with lower weight earlier
     HealthEntry::factory()->create([
         'user_id' => $user->id,
         'weight' => 80.0,
         'measured_at' => now()->subDays(2),
     ]);
 
-    // Create log with higher weight later
     HealthEntry::factory()->create([
         'user_id' => $user->id,
         'weight' => 81.0,

@@ -18,17 +18,11 @@ final readonly class GetUserProfile implements Tool
         return 'get_user_profile';
     }
 
-    /**
-     * Get the description of the tool's purpose.
-     */
     public function description(): string
     {
         return "Retrieve the current user's profile information including biometrics, dietary preferences, health conditions, medications, and goals. Use this when you need specific user data to provide personalized advice.";
     }
 
-    /**
-     * Execute the tool.
-     */
     public function handle(Request $request): string
     {
         $user = Auth::user();
@@ -54,7 +48,6 @@ final readonly class GetUserProfile implements Tool
             ]);
         }
 
-        // Return specific section
         /** @var array<string, mixed>|null $rawData */
         $rawData = $context['raw_data'];
 
@@ -82,8 +75,6 @@ final readonly class GetUserProfile implements Tool
     }
 
     /**
-     * Get the tool's schema definition.
-     *
      * @return array<string, mixed>
      */
     public function schema(JsonSchema $schema): array

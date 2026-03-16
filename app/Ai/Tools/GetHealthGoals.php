@@ -18,17 +18,11 @@ final readonly class GetHealthGoals implements Tool
         return 'get_health_goals';
     }
 
-    /**
-     * Get the description of the tool's purpose.
-     */
     public function description(): string
     {
         return "Retrieve the current user's health and wellness goals. Use this to understand what the user wants to achieve regarding their overall health, energy levels, stress management, sleep quality, or other wellness objectives.";
     }
 
-    /**
-     * Execute the tool.
-     */
     public function handle(Request $request): string
     {
         $user = Auth::user();

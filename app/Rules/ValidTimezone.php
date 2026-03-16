@@ -11,8 +11,6 @@ use Illuminate\Translation\PotentiallyTranslatedString;
 final readonly class ValidTimezone implements ValidationRule
 {
     /**
-     * Run the validation rule.
-     *
      * @param  Closure(string):PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
@@ -25,8 +23,6 @@ final readonly class ValidTimezone implements ValidationRule
     }
 
     /**
-     * Get the list of valid timezones.
-     *
      * @return array<string, string>
      */
     private function getTimezones(): array

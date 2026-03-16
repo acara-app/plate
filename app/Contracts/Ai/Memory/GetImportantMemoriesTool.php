@@ -9,10 +9,6 @@ use App\DataObjects\Memory\MemoryData;
 interface GetImportantMemoriesTool
 {
     /**
-     * Retrieve high-priority memories, optionally filtered by context.
-     *
-     * Returns memories sorted by importance score descending.
-     *
      * @param  int  $threshold  Minimum importance score (1-10).
      * @param  int  $limit  Max results to return.
      * @param  array<string>  $categories  Filter by specific categories (empty = all).

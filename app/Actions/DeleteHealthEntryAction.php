@@ -8,9 +8,6 @@ use App\Models\HealthEntry;
 
 final readonly class DeleteHealthEntryAction
 {
-    /**
-     * Execute the action.
-     */
     public function handle(HealthEntry $healthEntry): void
     {
         $healthEntry->delete();

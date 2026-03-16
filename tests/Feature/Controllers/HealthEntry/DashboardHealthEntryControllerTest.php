@@ -25,12 +25,10 @@ it('renders diabetes log tracking dashboard', function (): void {
 it('displays user diabetes logs filtered by time period', function (): void {
     $user = User::factory()->create();
 
-    // Create 3 logs within 30 days
     HealthEntry::factory()->count(3)->create([
         'user_id' => $user->id,
         'measured_at' => now()->subDays(10),
     ]);
-    // Create 2 logs older than 30 days
     HealthEntry::factory()->count(2)->create([
         'user_id' => $user->id,
         'measured_at' => now()->subDays(40),
@@ -39,7 +37,6 @@ it('displays user diabetes logs filtered by time period', function (): void {
     $response = $this->actingAs($user)
         ->get(route('health-entries.dashboard'));
 
-    // Default 30d period should only show 3 logs
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
             ->has('logs', 3)
@@ -49,7 +46,6 @@ it('displays user diabetes logs filtered by time period', function (): void {
 it('filters logs by query parameter period', function (): void {
     $user = User::factory()->create();
 
-    // Create logs at different times
     HealthEntry::factory()->count(2)->create([
         'user_id' => $user->id,
         'measured_at' => now()->subDays(5),
@@ -59,7 +55,6 @@ it('filters logs by query parameter period', function (): void {
         'measured_at' => now()->subDays(20),
     ]);
 
-    // 7d period should only show 2 logs
     $response = $this->actingAs($user)
         ->get(route('health-entries.dashboard', ['period' => '7d']));
 

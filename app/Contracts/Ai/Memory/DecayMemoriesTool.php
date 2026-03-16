@@ -7,15 +7,6 @@ namespace App\Contracts\Ai\Memory;
 interface DecayMemoriesTool
 {
     /**
-     * Apply decay to old memories, reducing importance or archiving stale ones.
-     *
-     * Simulates human-like forgetting by gradually reducing the importance
-     * of memories over time. Memories below a minimum importance threshold
-     * can optionally be archived or deleted.
-     *
-     * This tool should typically be run on a schedule (e.g., daily) to
-     * maintain a healthy memory system.
-     *
      * @param  int  $ageThresholdDays  Memories older than this get decayed.
      * @param  float  $decayFactor  Multiply importance by this (e.g., 0.9 = 10% reduction).
      * @param  int  $minImportance  Minimum importance before archiving (0 = never archive).

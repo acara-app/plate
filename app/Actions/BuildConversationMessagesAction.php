@@ -10,10 +10,6 @@ use App\Models\History;
 final class BuildConversationMessagesAction
 {
     /**
-     * Build the AI SDK message array from a Conversation's History records.
-     *
-     * Returns an empty array when no conversation is provided.
-     *
      * @return list<array{id: string, role: string, parts: list<array<string, string>>}>
      */
     public function handle(?Conversation $conversation): array
@@ -34,10 +30,6 @@ final class BuildConversationMessagesAction
     }
 
     /**
-     * Build the parts array for a single history message.
-     *
-     * Always starts with a text part, then appends one part per attachment.
-     *
      * @return list<array<string, string>>
      */
     private function buildParts(History $message): array

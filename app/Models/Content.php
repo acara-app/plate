@@ -189,10 +189,6 @@ final class Content extends Model
         return $assessment;
     }
 
-    /**
-     * Get the estimated glycemic index (GI) value.
-     * Returns the category average GI since exact GI is not always available.
-     */
     protected function getGlycemicIndexAttribute(): int
     {
         /** @var int|null $storedGi */
@@ -202,13 +198,9 @@ final class Content extends Model
             return $storedGi;
         }
 
-        // Use category-average GI, or default to 50 if no category
         return $this->category?->averageGlycemicIndex() ?? 50;
     }
 
-    /**
-     * Get the glycemic load classification (low/medium/high).
-     */
     protected function getGlycemicLoadAttribute(): string
     {
         /** @var string|null $load */
@@ -220,7 +212,6 @@ final class Content extends Model
 
         $numericGl = $this->glycemic_load_numeric;
 
-        // Classify: Low (0-10), Medium (11-19), High (20+)
         return match (true) {
             $numericGl <= 10 => 'low',
             $numericGl <= 19 => 'medium',
@@ -228,10 +219,6 @@ final class Content extends Model
         };
     }
 
-    /**
-     * Get the numeric glycemic load value.
-     * Formula: GL = (GI * Net Carbs) / 100
-     */
     protected function getGlycemicLoadNumericAttribute(): float
     {
         /** @var float|null $storedGl */
@@ -241,8 +228,6 @@ final class Content extends Model
             return $storedGl;
         }
 
-        // Calculate GL on-the-fly
-        // Net Carbs = Total Carbs - Fiber
         $nutrition = $this->nutrition;
         $carbs = (float) ($nutrition['carbs'] ?? 0);
         $fiber = (float) ($nutrition['fiber'] ?? 0);
@@ -253,9 +238,6 @@ final class Content extends Model
         return round(($gi * $netCarbs) / 100, 1);
     }
 
-    /**
-     * Get the category label for display.
-     */
     protected function getCategoryLabelAttribute(): string
     {
         return $this->category?->label() ?? 'Uncategorized';
@@ -287,7 +269,8 @@ final class Content extends Model
      */
     private function getMetaDataAttributes(): ?array
     {
-        /** @var array{
+        /**
+/** @var array{
          *     seo_title?: string,
          *     seo_description?: string,
          *     manual_links?: array<int, array{slug: string, anchor: string}>

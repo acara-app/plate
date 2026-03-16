@@ -14,8 +14,6 @@ beforeEach(function (): void {
 });
 
 /**
- * Build a request mock for the given model and mode.
- *
  * @param  array<array{role: string, parts: list<array{type: string, text?: string}>}>  $messages
  */
 function makeStreamRequest(

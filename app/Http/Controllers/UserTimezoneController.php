@@ -9,9 +9,6 @@ use Illuminate\Http\Request;
 
 final readonly class UserTimezoneController
 {
-    /**
-     * Update the session's timezone.
-     */
     public function update(Request $request): void
     {
         /** @var array<string, string> $validated */

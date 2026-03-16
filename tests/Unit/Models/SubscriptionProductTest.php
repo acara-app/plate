@@ -90,7 +90,6 @@ test('yearly savings calculates correctly when yearly price is set', function ()
         'yearly_price' => 100.00,
     ]);
 
-    // Monthly total would be 10 * 12 = 120, yearly is 100, so savings is 20
     expect($product->yearly_savings)->toBe(20.0);
 });
 
@@ -109,7 +108,5 @@ test('yearly savings percentage calculates correctly when yearly price is set', 
         'yearly_price' => 100.00,
     ]);
 
-    // Monthly total would be 10 * 12 = 120, yearly is 100
-    // Savings = 20, percentage = (20 / 120) * 100 = 16.67 rounds to 17
     expect($product->yearly_savings_percentage)->toBe(17);
 });

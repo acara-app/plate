@@ -13,10 +13,6 @@ use Illuminate\JsonSchema\Types\NumberType;
 use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\JsonSchema\Types\StringType;
 
-/**
- * A simple test helper that implements JsonSchema for testing tool schemas.
- * Returns mock type objects that support method chaining.
- */
 final class TestJsonSchema implements JsonSchema
 {
     public function object(Closure|array $properties = []): ObjectType

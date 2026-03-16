@@ -78,9 +78,6 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasTools
             ->start($user, $mealPlan, $glucoseAnalysis->analysisData);
     }
 
-    /**
-     * Generate a complete multi-day meal plan.
-     */
     public function generate(User $user, ?GlucoseAnalysisData $glucoseAnalysis = null): MealPlanData
     {
         $this->user = $user;
@@ -96,9 +93,6 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasTools
         return MealPlanData::from($data);
     }
 
-    /**
-     * Generate meals for a single day.
-     */
     public function generateForDay(
         User $user,
         int $dayNumber,

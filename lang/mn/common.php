@@ -3,16 +3,6 @@
 declare(strict_types=1);
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Common Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines are used across the application for common
-    | UI elements and messages.
-    |
-    */
-
     'welcome' => 'Тавтай морилно уу',
     'loading' => 'Уншиж байна...',
     'save' => 'Хадгалах',
@@ -31,14 +21,12 @@ return [
     'yes' => 'Тийм',
     'no' => 'Үгүй',
 
-    // Navigation
     'dashboard' => 'Хянах самбар',
     'profile' => 'Профайл',
     'settings' => 'Тохиргоо',
     'logout' => 'Гарах',
     'home' => 'Нүүр хуудас',
 
-    // Actions
     'view' => 'Харах',
     'download' => 'Татах',
     'upload' => 'Хуулах',
@@ -60,7 +48,6 @@ return [
     'archive' => 'Архивлах',
     'restore' => 'Сэргээх',
 
-    // Status messages
     'success' => 'Амжилттай',
     'error' => 'Алдаа',
     'warning' => 'Анхааруулга',
@@ -72,13 +59,11 @@ return [
     'failed' => 'Амжилтгүй',
     'processing' => 'Боловсруулж байна...',
 
-    // Confirmation messages
     'are_you_sure' => 'Та итгэлтэй байна уу?',
     'cannot_be_undone' => 'Энэ үйлдлийг буцаах боломжгүй.',
     'confirm_delete' => 'Устгахыг баталгаажуулах',
     'confirm_action' => 'Үйлдлийг баталгаажуулах',
 
-    // Pagination
     'showing' => 'Харуулж байна',
     'to' => '-',
     'of' => '/',
@@ -87,7 +72,6 @@ return [
     'no_results' => 'Үр дүн олдсонгүй',
     'no_data' => 'Мэдээлэл алга',
 
-    // Time
     'today' => 'Өнөөдөр',
     'yesterday' => 'Өчигдөр',
     'tomorrow' => 'Маргааш',
@@ -98,7 +82,6 @@ return [
     'this_year' => 'Энэ жил',
     'last_year' => 'Өнгөрсөн жил',
 
-    // Common phrases
     'please_wait' => 'Түр хүлээнэ үү',
     'try_again' => 'Дахин оролдох',
     'learn_more' => 'Илүү ихийг мэдэх',
@@ -117,11 +100,9 @@ return [
     'show_less' => 'Хураангуйлах',
     'expand' => 'Дэлгэх',
     'collapse' => 'Хумих',
-    // OAuth
     'continue_with_google' => 'Google-ээр үргэлжлүүлэх',
     'sign_in_with_google' => 'Google-ээр нэвтрэх',
 
-    // Notifications
     'notifications' => [
         'title' => 'Мэдэгдлийн тохиргоо',
         'preferences' => 'Мэдэгдлийн сонголтууд',
@@ -136,7 +117,6 @@ return [
         'save_preferences' => 'Сонголтуудыг хадгалах',
     ],
 
-    // Password settings
     'password_settings' => [
         'title' => 'Нууц үгийн тохиргоо',
         'update_title' => 'Нууц үг шинэчлэх',
@@ -150,7 +130,6 @@ return [
         'save_password' => 'Нууц үг хадгалах',
     ],
 
-    // Dashboard
     'dashboard_cards' => [
         'health_insights' => [
             'title' => 'Эрүүл мэндийн тойм',
@@ -188,14 +167,12 @@ return [
         ],
     ],
 
-    // Dashboard Onboarding Banner
     'onboarding_banner' => [
         'text' => 'Танд тохирсон эрүүл мэнд, зөв хоололтын зөвлөмж авахын тулд профайлаа бүрэн оруулна уу!',
         'complete' => 'Тохиргоог дуусгах',
         'dismiss' => 'Хаах',
     ],
 
-    // Onboarding
     'onboarding' => [
         'biometrics' => [
             'title' => 'Биеийн үзүүлэлт - 7 алхмын 1',
@@ -396,7 +373,6 @@ return [
         ],
     ],
 
-    // Diabetes Log
     'health_entries' => [
         'tabs' => [
             'glucose' => 'Сахар',

@@ -14,16 +14,9 @@ use Illuminate\Database\Eloquent\Collection;
 final class SeoLinkManager
 {
     /**
-     * Manual link mappings for SEO cross-linking.
-     * These are fallbacks when database meta_data is not populated.
-     * Format: source_slug => [target_slug => anchor_text]
-     *
-     * Strategy: 70% natural, 20% exact-match, 10% navigational
-     *
      * @var array<string, array<string, string>>
      */
     private const array MANUAL_MAPPINGS = [
-        // Grains linking to Farro (striking distance target)
         'rice-brown-long-grain-unenriched-raw' => [
             'farro-pearled-dry-raw' => 'Looking for alternatives? Pearled Farro has a similar texture but different micronutrient profile.',
         ],
@@ -43,7 +36,6 @@ final class SeoLinkManager
             'farro-pearled-dry-raw' => 'Looking for similar whole grains? Check the Farro glycemic index.',
         ],
 
-        // Eggs linking to Egg Yolk (striking distance target)
         'egg-whole-raw-frozen-pasteurized' => [
             'egg-yolk-raw-frozen-pasteurized' => 'Curious about just the yolk? See the Egg Yolk nutrition and glycemic profile.',
         ],
@@ -54,7 +46,6 @@ final class SeoLinkManager
             'egg-yolk-raw-frozen-pasteurized' => 'Want to know about the other half? See the Egg Yolk nutrition facts.',
         ],
 
-        // Dairy linking to American Cheese (striking distance target)
         'cheese-cheddar' => [
             'cheese-pasteurized-process-american-vitamin-d-fortified' => 'How does American Cheese compare? See its diabetic safety profile.',
         ],
@@ -71,7 +62,6 @@ final class SeoLinkManager
             'cheese-pasteurized-process-american-vitamin-d-fortified' => 'How does American Cheese stack up? Check its diabetic safety.',
         ],
 
-        // Fruits linking to Red Delicious Apple (striking distance target)
         'bananas-ripe-and-slightly-ripe-raw' => [
             'apples-red-delicious-with-skin-raw' => 'Prefer something with a lower GI? Check Red Delicious Apple for diabetics.',
         ],
@@ -90,32 +80,23 @@ final class SeoLinkManager
     ];
 
     /**
-     * Static "all-star" foods that always appear in slots 1-2.
-     * These are high-traffic anchor foods that establish authority.
-     *
      * @var array<string>
      */
     private const array STATIC_AUTHORITY_FOODS = [
-        'rice-brown-long-grain-unenriched-raw',  // Brown Rice - anchor food
-        'apples-red-delicious-with-skin-raw',     // Apple - everyone searches this
+        'rice-brown-long-grain-unenriched-raw',
+        'apples-red-delicious-with-skin-raw',
     ];
 
     /**
-     * "Striking Distance" foods that rotate through slots 3-4.
-     * These are Page 2 keywords we're pushing to Page 1.
-     *
      * @var array<string>
      */
     private const array STRIKING_DISTANCE_FOODS = [
-        'farro-pearled-dry-raw',                                    // Rank 6 → targeting top 3
-        'egg-yolk-raw-frozen-pasteurized',                          // Rank 11 → targeting top 5
-        'cheese-pasteurized-process-american-vitamin-d-fortified',  // Rank 7.5 → targeting top 3
+        'farro-pearled-dry-raw',
+        'egg-yolk-raw-frozen-pasteurized',
+        'cheese-pasteurized-process-american-vitamin-d-fortified',
     ];
 
     /**
-     * Get comparison links for a given food slug.
-     * First checks database meta_data, then falls back to manual mappings.
-     *
      * @return array<int, array{slug: string, anchor: string, content: Content|null}>
      */
     public function getComparisonsFor(string $slug): array
@@ -130,7 +111,6 @@ final class SeoLinkManager
             return $this->resolveLinks($content->manual_links);
         }
 
-        // Fall back to manual mappings
         if (isset(self::MANUAL_MAPPINGS[$slug])) {
             $links = [];
             foreach (self::MANUAL_MAPPINGS[$slug] as $targetSlug => $anchor) {
@@ -144,22 +124,16 @@ final class SeoLinkManager
     }
 
     /**
-     * Get featured foods for homepage with 2+2 rotation strategy.
-     * Slots 1-2: Static authority foods (always shown).
-     * Slots 3-4: Rotating striking distance foods (weekly rotation).
-     *
      * @return Collection<int, Content>
      */
     public function getFeaturedFoods(): Collection
     {
-        // Slots 3-4: Rotate through striking distance foods weekly
         $weekIndex = now()->weekOfYear % count(self::STRIKING_DISTANCE_FOODS);
         $rotatingSlots = [
             self::STRIKING_DISTANCE_FOODS[$weekIndex],
             self::STRIKING_DISTANCE_FOODS[($weekIndex + 1) % count(self::STRIKING_DISTANCE_FOODS)],
         ];
 
-        // Combine: 2 static + 2 rotating
         $allSlugs = array_merge(self::STATIC_AUTHORITY_FOODS, $rotatingSlots);
 
         return Content::query()
@@ -172,8 +146,6 @@ final class SeoLinkManager
     }
 
     /**
-     * Get the striking distance food slugs for footer links.
-     *
      * @return array<string, array{slug: string, anchor: string}>
      */
     public function getPopularSearchLinks(): array
@@ -199,8 +171,6 @@ final class SeoLinkManager
     }
 
     /**
-     * Resolve link slugs to Content models.
-     *
      * @param  array<int, array{slug: string, anchor: string}>  $links
      * @return array<int, array{slug: string, anchor: string, content: Content|null}>
      */

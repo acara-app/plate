@@ -10,7 +10,6 @@ use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
 beforeEach(function (): void {
-    // Create a simple test implementation
     $this->agent = new class implements GeneratesSingleMeals
     {
         public ?GeneratedMealData $mealData = null;

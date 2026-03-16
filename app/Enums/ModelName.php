@@ -55,9 +55,6 @@ enum ModelName: string
         };
     }
 
-    /**
-     * Get the Lab provider enum value for this model.
-     */
     public function labProvider(): string
     {
         return match ($this) {
@@ -66,9 +63,6 @@ enum ModelName: string
         };
     }
 
-    /**
-     * Check if this model supports web search as a tool.
-     */
     public function supportsWebSearch(): bool
     {
         return match ($this) {
@@ -77,9 +71,6 @@ enum ModelName: string
         };
     }
 
-    /**
-     * Check if this model requires thinking mode configuration.
-     */
     public function requiresThinkingMode(): bool
     {
         return match ($this) {
@@ -88,10 +79,6 @@ enum ModelName: string
         };
     }
 
-    /**
-     * Get the recommended thinking budget for thinking-capable models.
-     * Returns null for models that don't support thinking mode.
-     */
     public function getThinkingBudget(): ?int
     {
         return match ($this) {
@@ -100,10 +87,6 @@ enum ModelName: string
         };
     }
 
-    /**
-     * Check if this model supports the temperature parameter.
-     * GPT-5 models (reasoning models) do not support temperature.
-     */
     public function supportsTemperature(): bool
     {
         return match ($this) {
@@ -112,10 +95,6 @@ enum ModelName: string
         };
     }
 
-    /**
-     * Get the recommended temperature for this model.
-     * Gemini 3 models require temperature of 1.0.
-     */
     public function getRecommendedTemperature(): float
     {
         return match ($this) {
@@ -124,10 +103,6 @@ enum ModelName: string
         };
     }
 
-    /**
-     * Get the minimum max tokens required for this model.
-     * Thinking models need more tokens to accommodate thinking + output.
-     */
     public function getMinMaxTokens(): int
     {
         return match ($this) {
@@ -137,9 +112,6 @@ enum ModelName: string
     }
 
     /**
-     * Get pricing per 1M tokens.
-     *Rough list of popular AI models
-     *
      * @return array{input: float, output: float, reasoning: float, cache_read: float}
      */
     public function getPricing(): array

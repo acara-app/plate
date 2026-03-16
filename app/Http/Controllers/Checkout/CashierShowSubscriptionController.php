@@ -12,9 +12,6 @@ use Inertia\Response;
 use Laravel\Cashier\Subscription;
 use Laravel\Cashier\SubscriptionItem;
 
-/**
- * Cashier-based subscription display controller
- */
 final readonly class CashierShowSubscriptionController
 {
     public function __construct(private StripeServiceContract $stripeService)
@@ -38,7 +35,6 @@ final readonly class CashierShowSubscriptionController
         /** @phpstan-ignore-next-line argument.type */
         $currentSubscription = $user->subscriptions()->get()->first(fn (Subscription $subscription): bool => $subscription->valid());
 
-        // Find the current product from local database using subscription_items
         $currentProduct = null;
         $isYearly = false;
 

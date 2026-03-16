@@ -21,15 +21,11 @@ use Workflow\Workflow;
 final class MealPlanInitializeWorkflow extends Workflow
 {
     /**
-     * Summary of timeout
-     *
      * @var int
      */
-    public $timeout = 1800; // 30 minutes for 7 days
+    public $timeout = 1800;
 
     /**
-     * Convert all days' meals to a collection of MealData with proper day numbers.
-     *
      * @param  array<int, DayMealsData>  $allDaysMeals
      * @return DataCollection<int, MealData>
      */
@@ -46,9 +42,6 @@ final class MealPlanInitializeWorkflow extends Workflow
         return new DataCollection(MealData::class, $meals);
     }
 
-    /**
-     * Get the meal plan type based on duration.
-     */
     public static function getMealPlanType(int $totalDays): MealPlanType
     {
         return match (true) {
@@ -58,12 +51,6 @@ final class MealPlanInitializeWorkflow extends Workflow
         };
     }
 
-    /**
-     * Create a meal plan with Generating status.
-     *
-     * This must be called synchronously before starting the workflow
-     * to ensure the user sees the "Generating" state immediately.
-     */
     public static function createMealPlan(User $user, int $totalDays = 7, ?DietType $dietType = null): MealPlan
     {
         $mealPlanType = self::getMealPlanType($totalDays);
@@ -95,8 +82,6 @@ final class MealPlanInitializeWorkflow extends Workflow
     }
 
     /**
-     * Execute the workflow to generate and save day 1 meals for a meal plan.
-     *
      * @codeCoverageIgnore Generator methods with yield are executed by the workflow engine
      *
      * @return Generator<int, mixed, mixed, mixed>
@@ -112,20 +97,20 @@ final class MealPlanInitializeWorkflow extends Workflow
         /** @var DayMealsData $dayMeals */
         $dayMeals = yield ActivityStub::make(
             MealPlanDayGeneratorActivity::class,
-            $user,                   // user
-            1,                       // dayNumber
-            $totalDays,              // totalDays
-            new PreviousDayContext,  // previousDaysContext
-            $glucoseAnalysis,        // glucoseAnalysis
-            $mealPlan,               // mealPlan
-            $dietType,               // dietType
+            $user,
+            1,
+            $totalDays,
+            new PreviousDayContext,
+            $glucoseAnalysis,
+            $mealPlan,
+            $dietType,
         );
 
         yield ActivityStub::make(
             SaveDayMealsActivity::class,
-            $mealPlan,  // mealPlan
-            $dayMeals,  // dayMeals
-            1,          // dayNumber
+            $mealPlan,
+            $dayMeals,
+            1,
         );
 
         $mealPlan->update([

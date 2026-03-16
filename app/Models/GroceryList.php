@@ -34,8 +34,6 @@ final class GroceryList extends Model
     use HasFactory;
 
     /**
-     * Category order for sorting grocery items.
-     *
      * @var array<int, string>
      */
     public const array CATEGORY_ORDER = [
@@ -76,8 +74,6 @@ final class GroceryList extends Model
     }
 
     /**
-     * Get items grouped by category, sorted by predefined order.
-     *
      * @return Collection<string, Collection<int, GroceryItem>>
      */
     public function itemsByCategory(): Collection
@@ -92,8 +88,6 @@ final class GroceryList extends Model
     }
 
     /**
-     * Get items grouped by category with response data format.
-     *
      * @return Collection<string, array<int, GroceryItemResponseData>>
      */
     public function formattedItemsByCategory(): Collection
@@ -108,8 +102,6 @@ final class GroceryList extends Model
     }
 
     /**
-     * Get items grouped by day number.
-     *
      * @return Collection<int, Collection<int, GroceryItem>>
      */
     public function itemsByDay(): Collection
@@ -132,8 +124,6 @@ final class GroceryList extends Model
     }
 
     /**
-     * Get items grouped by day with response data format.
-     *
      * @return Collection<int, array<int, GroceryItemResponseData>>
      */
     public function formattedItemsByDay(): Collection
@@ -162,10 +152,6 @@ final class GroceryList extends Model
         ];
     }
 
-    /**
-     * Derive days from meal plan ingredients for items missing day data.
-     * This is a fallback for grocery lists generated before the days feature.
-     */
     private function deriveItemDaysIfMissing(): void
     {
         $needsDerivation = $this->items->contains(fn (GroceryItem $item): bool => $item->days === null || $item->days === []);
@@ -193,8 +179,6 @@ final class GroceryList extends Model
     }
 
     /**
-     * Build a map of normalized ingredient names to day numbers.
-     *
      * @return array<string, list<int>>
      */
     private function buildIngredientDayMap(): array
@@ -230,9 +214,6 @@ final class GroceryList extends Model
         );
     }
 
-    /**
-     * Normalize an ingredient name for matching.
-     */
     private function normalizeIngredientName(string $name): string
     {
         $name = mb_strtolower(mb_trim($name));
@@ -242,8 +223,6 @@ final class GroceryList extends Model
     }
 
     /**
-     * Fuzzy match an item name against ingredient day map.
-     *
      * @param  array<string, list<int>>  $ingredientDayMap
      * @return list<int>
      */

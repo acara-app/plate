@@ -10,11 +10,6 @@ use Illuminate\Support\Facades\File;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
-/**
- * Tool for fetching diet-specific reference materials on-demand.
- * Allows AI to load detailed nutrient data, food lists, and other
- * reference files when needed for meal planning.
- */
 final readonly class GetDietReference implements Tool
 {
     public function name(): string
@@ -42,7 +37,6 @@ final readonly class GetDietReference implements Tool
             ]);
         }
 
-        // Validate reference name (prevent directory traversal)
         $sanitizedName = preg_replace('/[^a-zA-Z0-9_-]/', '', $referenceName);
         if ($sanitizedName !== $referenceName || ($sanitizedName === '' || $sanitizedName === '0')) {
             return (string) json_encode([
@@ -71,8 +65,6 @@ final readonly class GetDietReference implements Tool
     }
 
     /**
-     * Get the tool's schema definition.
-     *
      * @return array<string, mixed>
      */
     public function schema(JsonSchema $schema): array

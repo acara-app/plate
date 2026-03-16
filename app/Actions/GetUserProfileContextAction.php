@@ -13,8 +13,6 @@ use App\Models\UserProfileAttribute;
 final readonly class GetUserProfileContextAction implements GetsUserProfileContext
 {
     /**
-     * Get formatted user profile context for AI consumption.
-     *
      * @return array<string, mixed>
      */
     public function handle(User $user): array
@@ -152,8 +150,6 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
     }
 
     /**
-     * Format context as a natural language string for AI consumption.
-     *
      * @param  array{biometrics: array<string, mixed>, dietary_preferences: array<int, array{name: string, severity: mixed, notes: mixed}>, health_conditions: array<int, array{name: string, notes: mixed}>, medications: array<int, array{name: string, dosage: mixed, frequency: mixed, purpose: mixed}>, goals: array<string, mixed>}  $context
      * @param  list<string>  $missingData
      */
@@ -161,7 +157,6 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
     {
         $parts = [];
 
-        // Biometrics
         /** @var array<string, mixed> $bio */
         $bio = $context['biometrics'];
         $bioParts = [];
@@ -193,7 +188,6 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
             $parts[] = 'BIOMETRICS: '.implode(', ', $bioParts);
         }
 
-        // Dietary Preferences
         /** @var array<int, array{name: string, severity: mixed, notes: mixed}> $prefs */
         $prefs = $context['dietary_preferences'];
         if ($prefs !== []) {
@@ -206,7 +200,6 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
             $parts[] = 'DIETARY PREFERENCES/RESTRICTIONS: '.implode(', ', $prefStrings);
         }
 
-        // Health Conditions
         /** @var array<int, array{name: string, notes: mixed}> $conditions */
         $conditions = $context['health_conditions'];
         if ($conditions !== []) {
@@ -218,7 +211,6 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
             $parts[] = 'HEALTH CONDITIONS: '.implode(', ', $conditionStrings);
         }
 
-        // Medications
         /** @var array<int, array{name: string, dosage: mixed, frequency: mixed, purpose: mixed}> $medications */
         $medications = $context['medications'];
         if ($medications !== []) {
@@ -231,7 +223,6 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
             $parts[] = 'MEDICATIONS: '.implode(', ', $medStrings);
         }
 
-        // Goals
         /** @var array<string, mixed> $goals */
         $goals = $context['goals'];
         $goalParts = [];
@@ -260,7 +251,6 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
             $parts[] = 'GOALS: '.implode(', ', $goalParts);
         }
 
-        // Missing data note
         if ($missingData !== []) {
             $fieldsList = implode(', ', $missingData);
             $parts[] = sprintf('MISSING PROFILE DATA: %s. If the user asks for meal plans or fitness advice, you can mention which fields are missing and suggest completing their profile for more tailored recommendations.', $fieldsList);

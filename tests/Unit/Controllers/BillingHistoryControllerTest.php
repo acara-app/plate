@@ -42,15 +42,12 @@ it('returns billing history for authenticated user', function (): void {
     $action = new GetAiUsageForBillingAction();
     $controller = new BillingHistoryController($action);
 
-    // Will try to call Stripe API, which will fail without real credentials
-    // This covers the try-catch block
     $response = $controller->index($request);
 
     expect($response)->toBeInstanceOf(InertiaResponse::class);
 });
 
 it('returns empty billing history when exception occurs fetching invoices', function (): void {
-    // Create user with invalid stripe_id to trigger exception
     $user = User::factory()->create(['stripe_id' => 'cus_invalid_will_fail']);
 
     $request = new class($user) extends Request
@@ -67,6 +64,5 @@ it('returns empty billing history when exception occurs fetching invoices', func
     $controller = new BillingHistoryController($action);
     $response = $controller->index($request);
 
-    // Should handle the exception gracefully and return empty array
     expect($response)->toBeInstanceOf(InertiaResponse::class);
 });

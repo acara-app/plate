@@ -55,17 +55,14 @@ it('returns error if file does not exist', function (): void {
 it('returns content if file exists', function (): void {
     $path = resource_path('markdown/keto/references/test-food-list.md');
 
-    // Ensure directory exists
     File::makeDirectory(dirname($path), 0755, true, true);
 
-    // Create test file
     File::put($path, '# Keto Food List');
 
     $request = new Request(['diet_type' => 'keto', 'reference_name' => 'test-food-list']);
     $result = $this->tool->handle($request);
     $json = json_decode((string) $result, true);
 
-    // Cleanup
     File::delete($path);
 
     expect($json)->toHaveKey('success', true)

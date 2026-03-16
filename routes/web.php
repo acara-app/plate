@@ -19,14 +19,12 @@ Route::view('/diabetes-log-book-info', 'diabetes-log-book-info')->name('diabetes
 Route::view('/meal-planner', 'meal-planner')->name('meal-planner');
 Route::view('/10-day-meal-plan', '10-day-meal-plan')->name('10-day-meal-plan');
 
-// Tools...
 Route::livewire('/tools', 'pages::tools-index')->name('tools.index');
 Route::livewire('/tools/spike-calculator', 'pages::spike-calculator')->name('spike-calculator');
 Route::livewire('/tools/snap-to-track', 'pages::snap-to-track')->name('snap-to-track');
 Route::livewire('/tools/usda-daily-servings-calculator', 'pages::usda-daily-servings-calculator')->name('usda-servings-calculator');
 Route::livewire('/tools/telegram-health-logging', 'pages::telegram-health-logging')->name('telegram-health-logging');
 
-// Redirects for old tool URLs (SEO)...
 Route::redirect('/spike-calculator', '/tools/spike-calculator', 301);
 Route::redirect('/snap-to-track', '/tools/snap-to-track', 301);
 
@@ -60,7 +58,6 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::post('meal-plans/{mealPlan}/regenerate-day', Web\RegenerateMealPlanDayController::class)->name('meal-plans.regenerate-day');
     Route::post('meal-plans/regenerate', [Web\RegenerateMealPlanController::class, 'store'])->name('meal-plans.regenerate');
 
-    // Grocery List...
     Route::get('meal-plans/{mealPlan}/grocery-list', [Web\GroceryListController::class, 'show'])->name('meal-plans.grocery-list.show');
     Route::post('meal-plans/{mealPlan}/grocery-list', [Web\GroceryListController::class, 'store'])->name('meal-plans.grocery-list.store');
     Route::get('meal-plans/{mealPlan}/grocery-list/print', Web\PrintGroceryListController::class)->name('meal-plans.grocery-list.print');
@@ -87,40 +84,31 @@ Route::middleware(['auth', 'verified'])->prefix('onboarding')->name('onboarding.
 });
 
 Route::middleware('auth')->group(function (): void {
-    // User...
     Route::delete('user', [Web\UserController::class, 'destroy'])->name('user.destroy');
 
-    // User Profile...
     Route::redirect('settings', '/settings/profile');
     Route::get('settings/profile', [Web\UserProfileController::class, 'edit'])->name('user-profile.edit');
     Route::patch('settings/profile', [Web\UserProfileController::class, 'update'])->name('user-profile.update');
 
-    // User Notifications...
     Route::get('settings/notifications', [Web\UserNotificationsController::class, 'edit'])->name('user-notifications.edit');
     Route::patch('settings/notifications', [Web\UserNotificationsController::class, 'update'])->name('user-notifications.update');
 
-    // Billing History...
     Route::get('settings/billing', [Web\BillingHistoryController::class, 'index'])->name('billing.index');
 
-    // User Password...
     Route::get('settings/password', [Web\UserPasswordController::class, 'edit'])->name('password.edit');
     Route::put('settings/password', [Web\UserPasswordController::class, 'update'])
         ->middleware('throttle:6,1')
         ->name('password.update');
 
-    // Appearance...
     Route::get('settings/appearance', fn () => Inertia::render('appearance/update'))->name('appearance.edit');
 
-    // Integrations...
     Route::get('settings/integrations', [Web\IntegrationsController::class, 'edit'])->name('integrations.edit');
     Route::post('settings/integrations/telegram/token', [Web\IntegrationsController::class, 'generateTelegramToken'])->name('integrations.telegram.token');
     Route::delete('settings/integrations/telegram', [Web\IntegrationsController::class, 'disconnectTelegram'])->name('integrations.telegram.destroy');
 
-    // User Two-Factor Authentication...
     Route::get('settings/two-factor', [Web\UserTwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
 
-    // User Subscription Management...
     Route::get('/checkout/subscription', Web\Checkout\CashierShowSubscriptionController::class)
         ->name('checkout.subscription');
     Route::post('/checkout/subscription', Web\Checkout\CashierSubscriptionController::class)
@@ -141,49 +129,41 @@ Route::middleware('auth')->group(function (): void {
 });
 
 Route::middleware('guest')->group(function (): void {
-    // User...
     Route::get('register', [Web\UserController::class, 'create'])
         ->name('register');
     Route::post('register', [Web\UserController::class, 'store'])
         ->name('register.store');
 
-    // User Password...
     Route::get('reset-password/{token}', [Web\UserPasswordController::class, 'create'])
         ->name('password.reset');
     Route::post('reset-password', [Web\UserPasswordController::class, 'store'])
         ->name('password.store');
 
-    // User Email Reset Notification...
     Route::get('forgot-password', [Web\UserEmailResetNotification::class, 'create'])
         ->name('password.request');
     Route::post('forgot-password', [Web\UserEmailResetNotification::class, 'store'])
         ->name('password.email');
 
-    // Session...
     Route::get('login', [Web\Auth\SessionController::class, 'create'])
         ->name('login');
     Route::post('login', [Web\Auth\SessionController::class, 'store'])
         ->name('login.store');
 
-    // Socialite Authentication...
     Route::get('/auth/google/redirect', [Web\Auth\SocialiteController::class, 'redirect'])->name('auth.google.redirect');
     Route::get('/auth/google/callback', [Web\Auth\SocialiteController::class, 'callback'])->name('auth.google.callback');
 });
 
 Route::middleware('auth')->group(function (): void {
-    // User Email Verification...
     Route::get('verify-email', [Web\UserEmailVerificationNotificationController::class, 'create'])
         ->name('verification.notice');
     Route::post('email/verification-notification', [Web\UserEmailVerificationNotificationController::class, 'store'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
 
-    // User Email Verification...
     Route::get('verify-email/{id}/{hash}', [Web\UserEmailVerification::class, 'update'])
         ->middleware(['signed:relative', 'throttle:6,1'])
         ->name('verification.verify');
 
-    // Session...
     Route::post('logout', [Web\Auth\SessionController::class, 'destroy'])
         ->name('logout');
 });

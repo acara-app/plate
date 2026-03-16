@@ -14,7 +14,6 @@ it('creates monthly subscription checkout successfully', function (): void {
         'stripe_price_id' => 'price_monthly_test',
     ]);
 
-    // Create a simple test implementation
     $stripeMock = new class implements StripeServiceContract
     {
         public array $calls = [];
@@ -80,7 +79,6 @@ it('creates yearly subscription checkout successfully', function (): void {
         'yearly_stripe_price_id' => 'price_yearly_test',
     ]);
 
-    // Create a simple test implementation
     $stripeMock = new class implements StripeServiceContract
     {
         public function ensureStripeCustomer(User $user): void {}
@@ -130,7 +128,6 @@ it('redirects when user already has active subscription', function (): void {
     $user = User::factory()->create();
     $product = SubscriptionProduct::factory()->create();
 
-    // Create a simple test implementation
     $stripeMock = new class implements StripeServiceContract
     {
         public function ensureStripeCustomer(User $user): void {}
@@ -183,7 +180,6 @@ it('redirects when price lookup key not found', function (): void {
         'stripe_price_id' => 'price_invalid',
     ]);
 
-    // Create a simple test implementation
     $stripeMock = new class implements StripeServiceContract
     {
         public function ensureStripeCustomer(User $user): void {}
@@ -279,7 +275,6 @@ it('handles missing yearly price id gracefully', function (): void {
         'yearly_stripe_price_id' => null,
     ]);
 
-    // Create a simple test implementation
     $stripeMock = new class implements StripeServiceContract
     {
         public function ensureStripeCustomer(User $user): void {}

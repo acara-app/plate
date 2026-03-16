@@ -17,9 +17,6 @@ use App\Services\SystemPromptProviders\VegetarianMealPlanSystemProvider;
 
 final readonly class SystemPromptProviderResolver
 {
-    /**
-     * Resolve the appropriate SystemPromptProvider for the given DietType.
-     */
     public function resolve(DietType $dietType): SystemPromptProvider
     {
         return match ($dietType) {

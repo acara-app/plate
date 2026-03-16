@@ -54,8 +54,6 @@ final class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * Load all translations for the given locale.
-     *
      * @return array<string, mixed>
      */
     private function getTranslations(string $locale): array

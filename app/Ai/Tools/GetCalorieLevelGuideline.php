@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\File;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
-/**
- * Tool for fetching USDA Dietary Guidelines and calorie-level serving recommendations.
- * Provides general nutrition guidance, food group recommendations, and daily serving
- * suggestions based on calorie intake levels.
- */
 final readonly class GetCalorieLevelGuideline implements Tool
 {
     private const string FILE_NAME = 'dietary-guidelines-usda.md';

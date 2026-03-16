@@ -6,9 +6,6 @@ namespace App\DataObjects\Memory;
 
 use Spatie\LaravelData\Data;
 
-/**
- * Represents a memory search result with relevance score.
- */
 final class MemorySearchResultData extends Data
 {
     /**

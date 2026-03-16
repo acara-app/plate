@@ -83,7 +83,6 @@ final readonly class PublicFoodController
 
         $foods = $query->orderBy('title')->paginate(12)->withQueryString();
 
-        // Get available categories for filter dropdown
         $categories = Content::food()
             ->published()
             ->whereNotNull('category')
@@ -93,8 +92,6 @@ final readonly class PublicFoodController
             ->filter()
             ->sortBy(fn (FoodCategory $cat): int => $cat->order());
 
-        // Group by category when no filters applied and on first page
-        // Limit to 8 items per category for performance
         $foodsByCategory = null;
         $categoryCounts = null;
         $itemsPerCategory = 8;
@@ -108,7 +105,6 @@ final readonly class PublicFoodController
             $grouped = $allFoods
                 ->groupBy(fn (Content $food): string => $food->category !== null ? $food->category->value : 'uncategorized');
 
-            // Store original counts before limiting
             $categoryCounts = $grouped->map(fn (Collection $foods): int => $foods->count());
 
             $foodsByCategory = $grouped
@@ -116,7 +112,6 @@ final readonly class PublicFoodController
                 ->sortKeys();
         }
 
-        // Hardcoded popular comparisons for Spike Calculator
         $comparisons = [
             ['name1' => 'Brown Rice', 'name2' => 'White Rice'],
             ['name1' => 'Apple', 'name2' => 'Banana'],
@@ -143,9 +138,6 @@ final readonly class PublicFoodController
         ]);
     }
 
-    /**
-     * Show foods filtered by category (clean URL for SEO).
-     */
     public function category(Request $request, string $category): View
     {
         $categoryEnum = FoodCategory::tryFrom($category);
@@ -165,7 +157,6 @@ final readonly class PublicFoodController
 
         $foods = $query->orderBy('title')->paginate(12)->withQueryString();
 
-        // Get available categories for filter dropdown
         $categories = Content::food()
             ->published()
             ->whereNotNull('category')
@@ -191,16 +182,11 @@ final readonly class PublicFoodController
         ]);
     }
 
-    /**
-     * Generate canonical URL for main index - self-referencing based on filters.
-     */
     private function getCanonicalUrl(Request $request, ?string $category): string
     {
         $params = [];
 
-        // Include category in canonical if filtering by category
         if ($category !== null && $category !== '') {
-            // Redirect logic: if using query param, canonical should point to clean URL
             return $this->getCategoryCanonicalUrl($request, $category);
         }
 
@@ -212,9 +198,6 @@ final readonly class PublicFoodController
         return route('food.index', $params);
     }
 
-    /**
-     * Generate canonical URL for category pages (clean URL).
-     */
     private function getCategoryCanonicalUrl(Request $request, string $category): string
     {
         $params = [];

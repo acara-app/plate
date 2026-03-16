@@ -32,14 +32,13 @@ it('casts metadata to array', function (): void {
 it('can calculate macro percentages', function (): void {
     $meal = Meal::factory()->create([
         'calories' => 400,
-        'protein_grams' => 30, // 30 * 4 = 120 cal
-        'carbs_grams' => 40,   // 40 * 4 = 160 cal
-        'fat_grams' => 10,     // 10 * 9 = 90 cal
+        'protein_grams' => 30,
+        'carbs_grams' => 40,
+        'fat_grams' => 10,
     ]);
 
     $percentages = $meal->macroPercentages();
 
-    // Total macro cals = 370, so percentages should be based on that
     expect($percentages['protein'])->toBeFloat();
     expect($percentages['carbs'])->toBeFloat();
     expect($percentages['fat'])->toBeFloat();

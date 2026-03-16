@@ -15,8 +15,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 final class MealFactory extends Factory
 {
     /**
-     * Define the model's default state.
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
@@ -49,9 +47,6 @@ final class MealFactory extends Factory
         ];
     }
 
-    /**
-     * Indicate that the meal is breakfast.
-     */
     public function breakfast(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -68,9 +63,6 @@ final class MealFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the meal is lunch.
-     */
     public function lunch(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -87,9 +79,6 @@ final class MealFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the meal is dinner.
-     */
     public function dinner(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -106,9 +95,6 @@ final class MealFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the meal is a snack.
-     */
     public function snack(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -125,9 +111,6 @@ final class MealFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the meal is for a specific day.
-     */
     public function forDay(int $dayNumber): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -135,9 +118,6 @@ final class MealFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the meal is high protein.
-     */
     public function highProtein(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -145,9 +125,6 @@ final class MealFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the meal is low carb.
-     */
     public function lowCarb(): static
     {
         return $this->state(fn (array $attributes): array => [

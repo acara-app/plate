@@ -10,8 +10,6 @@ use App\DataObjects\Memory\MemoryData;
 interface GetMemoryTool
 {
     /**
-     * Retrieve a single memory by its ID.
-     *
      * @param  string  $memoryId  The unique identifier of the memory.
      * @param  bool  $includeArchived  Whether to retrieve archived memories.
      * @return MemoryData The requested memory.

@@ -20,8 +20,6 @@ final class GenerateGroceryListJob implements ShouldBeUnique, ShouldQueue
     ) {}
 
     /**
-     * Get the middleware the job should pass through.
-     *
      * @return array<int, object>
      */
     public function middleware(): array
@@ -31,9 +29,6 @@ final class GenerateGroceryListJob implements ShouldBeUnique, ShouldQueue
         ];
     }
 
-    /**
-     * Get the unique ID for the job.
-     */
     public function uniqueId(): string
     {
         return (string) $this->groceryList->id;

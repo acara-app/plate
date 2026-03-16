@@ -126,10 +126,8 @@ it('returns valid pricing structure for all models', function (ModelName $model)
 it('has reasonable pricing ratios', function (ModelName $model): void {
     $pricing = $model->getPricing();
 
-    // Output should typically be >= input (sanity check)
     expect($pricing['output'])->toBeGreaterThanOrEqual($pricing['input'] * 0.5);
 
-    // Cache read should be cheaper than regular input
     expect($pricing['cache_read'])->toBeLessThan($pricing['input']);
 })->with([
     'GPT-5 Mini' => [ModelName::GPT_5_MINI],

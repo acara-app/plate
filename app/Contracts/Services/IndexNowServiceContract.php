@@ -9,8 +9,6 @@ use App\DataObjects\IndexNowResultData;
 interface IndexNowServiceContract
 {
     /**
-     * Submit URLs to IndexNow
-     *
      * @param  array<int, string>  $urls
      */
     public function submit(array $urls): IndexNowResultData;

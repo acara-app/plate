@@ -6,9 +6,6 @@ namespace App\DataObjects\Memory;
 
 use Spatie\LaravelData\Data;
 
-/**
- * Represents a single semantic memory record.
- */
 final class MemoryData extends Data
 {
     /**

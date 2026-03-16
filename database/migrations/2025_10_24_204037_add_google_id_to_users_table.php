@@ -12,7 +12,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table): void {
             $table->string('google_id')->nullable()->after('id');
-            $table->string('password')->nullable()->change(); // Allow password to be null
+            $table->string('password')->nullable()->change();
         });
     }
 };

@@ -17,17 +17,11 @@ final class SuggestWellnessRoutine implements Tool
         return 'suggest_wellness_routine';
     }
 
-    /**
-     * Get the description of the tool's purpose.
-     */
     public function description(): string
     {
         return 'Suggest personalized wellness routines including sleep hygiene, stress management, hydration, and lifestyle modifications. Use this to help users establish healthy daily habits.';
     }
 
-    /**
-     * Execute the tool.
-     */
     public function handle(Request $request): string
     {
         $user = Auth::user();

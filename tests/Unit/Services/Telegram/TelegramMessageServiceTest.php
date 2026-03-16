@@ -34,8 +34,8 @@ describe('message chunking', function (): void {
     it('splits at paragraph boundary when available', function (): void {
         $service = new TelegramMessageService();
 
-        $paragraph1 = str_repeat('First paragraph. ', 150); // ~2550 chars
-        $paragraph2 = str_repeat('Second paragraph. ', 150); // ~2700 chars
+        $paragraph1 = str_repeat('First paragraph. ', 150);
+        $paragraph2 = str_repeat('Second paragraph. ', 150);
         $message = $paragraph1."\n\n".$paragraph2;
 
         $chunks = $service->splitMessage($message);
@@ -48,8 +48,8 @@ describe('message chunking', function (): void {
     it('splits at line boundary when no paragraphs available', function (): void {
         $service = new TelegramMessageService();
 
-        $line1 = str_repeat('First line content. ', 130); // ~2600 chars
-        $line2 = str_repeat('Second line content. ', 130); // ~2600 chars
+        $line1 = str_repeat('First line content. ', 130);
+        $line2 = str_repeat('Second line content. ', 130);
         $message = $line1."\n".$line2;
 
         $chunks = $service->splitMessage($message);
@@ -62,10 +62,8 @@ describe('message chunking', function (): void {
     it('splits at sentence boundary when no line breaks available', function (): void {
         $service = new TelegramMessageService();
 
-        // Create a message that's just over max length without line breaks
-        // Safe length is 3800. We need sentence1 to be < 3800.
-        $sentence1 = str_repeat('A ', 1800); // 3600 chars
-        $sentence2 = str_repeat('B ', 500); // 1000 chars
+        $sentence1 = str_repeat('A ', 1800);
+        $sentence2 = str_repeat('B ', 500);
         $message = $sentence1.'. '.$sentence2;
 
         $chunks = $service->splitMessage($message);
@@ -78,9 +76,7 @@ describe('message chunking', function (): void {
     it('splits at word boundary as fallback', function (): void {
         $service = new TelegramMessageService();
 
-        // Create a long string with only spaces
-        $message = str_repeat('word ', 1000); // 5000 chars
-
+        $message = str_repeat('word ', 1000);
         $chunks = $service->splitMessage($message);
 
         expect($chunks)->toHaveCount(2);
@@ -92,7 +88,6 @@ describe('message chunking', function (): void {
     it('force splits when no boundaries available', function (): void {
         $service = new TelegramMessageService();
 
-        // Create a message with no word boundaries
         $message = str_repeat('x', 5000);
 
         $chunks = $service->splitMessage($message);
@@ -123,7 +118,6 @@ describe('message chunking', function (): void {
     it('chunks very long multi-paragraph message correctly', function (): void {
         $service = new TelegramMessageService();
 
-        // Create a message with 5 paragraphs, each ~1000 chars
         $paragraphs = [];
         for ($i = 1; $i <= 5; $i++) {
             $paragraphs[] = str_repeat(sprintf('Paragraph %d. ', $i), 60);
@@ -133,12 +127,10 @@ describe('message chunking', function (): void {
 
         $chunks = $service->splitMessage($message);
 
-        // Each chunk should be under limit
         foreach ($chunks as $chunk) {
             expect(mb_strlen($chunk))->toBeLessThanOrEqual(TelegramMessageService::getSafeMessageLength());
         }
 
-        // All content should be preserved
         $reconstructed = implode("\n\n", $chunks);
         expect(mb_strlen($reconstructed))->toBeGreaterThanOrEqual(mb_strlen($message) - 100);
     });
@@ -185,10 +177,9 @@ describe('message sending', function (): void {
         $chat = TelegraphChat::factory()->for($bot, 'bot')->create();
         $service = new TelegramMessageService();
 
-        $longMessage = str_repeat('Test content. ', 400); // ~5200 chars
+        $longMessage = str_repeat('Test content. ', 400);
         $service->sendLongMessage($chat, $longMessage, false);
 
-        // Should have dispatched 2 messages (chunks) - verify by checking endpoint was hit
         Telegraph::assertSentData(DefStudio\Telegraph\Telegraph::ENDPOINT_MESSAGE);
     });
 });

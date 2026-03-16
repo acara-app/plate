@@ -9,12 +9,6 @@ use App\Models\Content;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
-/**
- * Seeds the database with USDA Daily Serving Size guidelines from the
- * Dietary Guidelines for Americans, 2025-2030.
- *
- * Data source: realfood.gov - Daily Serving Sizes by Calorie Level
- */
 final class DailyServingSizeSeeder extends Seeder
 {
     public function run(): void

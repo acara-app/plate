@@ -155,7 +155,6 @@ final class UserProfile extends Model
                 return null;
             }
 
-            // Mifflin-St Jeor Equation
             $bmr = (10 * $this->weight) + (6.25 * $this->height) - (5 * $this->age);
 
             if ($this->sex === Sex::Male) {

@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\File;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
-/**
- * Tool for fetching USDA daily serving recommendations by calorie level.
- * Provides appropriate serving sizes for protein, dairy, vegetables, fruits,
- * whole grains, and healthy fats based on different caloric needs (1000-3200).
- */
 final readonly class GetDailyServingsByCalorie implements Tool
 {
     private const string FILE_NAME = 'daily-servings-by-calorie-level-usda.md';

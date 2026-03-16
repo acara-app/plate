@@ -13,11 +13,9 @@ enum DietType: string
     case Vegetarian = 'vegetarian';
     case Vegan = 'vegan';
     case Paleo = 'paleo';
-    case Balanced = 'balanced'; // Standard USDA
+    case Balanced = 'balanced';
 
     /**
-     * Get all diet types as an associative array of value => label.
-     *
      * @return array<string, string>
      */
     public static function toArray(): array
@@ -62,10 +60,6 @@ enum DietType: string
         };
     }
 
-    /**
-     * Returns the primary nutritional focus for this diet.
-     * Useful for AI prompts or UI hints.
-     */
     public function focus(): string
     {
         return match ($this) {
@@ -81,41 +75,28 @@ enum DietType: string
     }
 
     /**
-     * Default macronutrient split targets (Carb / Protein / Fat).
-     * These sum to 100% and reflect clinical realities.
-     *
      * @return array{carbs: int, protein: int, fat: int}
      */
     public function macroTargets(): array
     {
         return match ($this) {
-            // High healthy fats (EVOO), moderate protein, moderate carbs.
             self::Mediterranean => ['carbs' => 45, 'protein' => 18, 'fat' => 37],
 
-            // Aggressive carb restriction, high fat/protein.
             self::LowCarb => ['carbs' => 20, 'protein' => 35, 'fat' => 45],
 
-            // Metabolic state inducement.
             self::Keto => ['carbs' => 5, 'protein' => 20, 'fat' => 75],
 
-            // Standard heart-healthy profile.
             self::Dash => ['carbs' => 52, 'protein' => 18, 'fat' => 30],
 
-            // Lower carb than standard, but allows fruits/tubers.
             self::Paleo => ['carbs' => 30, 'protein' => 35, 'fat' => 35],
 
-            // Plant-based naturally implies higher carbs (grains/legumes).
             self::Vegetarian => ['carbs' => 55, 'protein' => 15, 'fat' => 30],
             self::Vegan => ['carbs' => 60, 'protein' => 14, 'fat' => 26],
 
-            // The "MyPlate" standard.
             self::Balanced => ['carbs' => 50, 'protein' => 20, 'fat' => 30],
         };
     }
 
-    /**
-     * Is this diet widely considered suitable for blood sugar management?
-     */
     public function isDiabeticFriendly(): bool
     {
         return match ($this) {
@@ -126,10 +107,6 @@ enum DietType: string
             self::Balanced,
             self::Vegetarian => true,
 
-            // Vegan is debatable for diabetics due to high carb load,
-            // though WFPB (Whole Food Plant Based) is excellent.
-            // Paleo often restricts legumes which are good for diabetics.
-            // Leaving them false for "out of the box" safety, but customizable.
             default => false,
         };
     }

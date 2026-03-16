@@ -9,7 +9,6 @@ use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use App\Models\User;
 
-// Biometrics Tests
 it('renders biometrics page', function (): void {
     $user = User::factory()->create();
 
@@ -195,7 +194,6 @@ it('requires valid sex value', function (): void {
     $response->assertSessionHasErrors('sex');
 });
 
-// Identity Tests
 it('renders identity page', function (): void {
     $user = User::factory()->create();
 
@@ -301,7 +299,6 @@ it('requires intensity_choice', function (): void {
     $response->assertSessionHasErrors('intensity_choice');
 });
 
-// Completion Tests
 it('renders completion page', function (): void {
     $user = User::factory()->create();
     $user->profile()->create([

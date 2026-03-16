@@ -10,16 +10,6 @@ use App\Ai\Exceptions\Memory\MemoryStorageException;
 interface LinkMemoriesTool
 {
     /**
-     * Create bidirectional links between related memories.
-     *
-     * Links allow building a knowledge graph where memories can reference
-     * each other with typed relationships. Common relationship types:
-     * - 'related': General semantic relationship
-     * - 'contradicts': Memories that conflict with each other
-     * - 'follows': Temporal or logical sequence
-     * - 'refines': More detailed version of another memory
-     * - 'supersedes': Replaces outdated information
-     *
      * @param  array<string>  $memoryIds  Memories to link together (minimum 2).
      * @param  string  $relationship  Type of relationship.
      * @param  bool  $bidirectional  Whether links work both ways (default: true).

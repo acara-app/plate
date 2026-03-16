@@ -19,8 +19,6 @@ final class GlucoseReportNotification extends Notification implements ShouldQueu
     ) {}
 
     /**
-     * Get the notification's delivery channels.
-     *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
@@ -47,8 +45,6 @@ final class GlucoseReportNotification extends Notification implements ShouldQueu
     }
 
     /**
-     * Get the array representation of the notification for database storage.
-     *
      * @return array<string, mixed>
      */
     public function toDatabase(object $notifiable): array
@@ -68,9 +64,6 @@ final class GlucoseReportNotification extends Notification implements ShouldQueu
         ];
     }
 
-    /**
-     * Generate a URL for the diabetes insights page.
-     */
     private function generateMealPlanUrl(): string
     {
         return route('health-entries.insights', absolute: true);

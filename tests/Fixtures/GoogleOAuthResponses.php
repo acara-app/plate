@@ -7,8 +7,6 @@ namespace Tests\Fixtures;
 final class GoogleOAuthResponses
 {
     /**
-     * Get a mock Google OAuth user response.
-     *
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>
      */
@@ -27,8 +25,6 @@ final class GoogleOAuthResponses
     }
 
     /**
-     * Get a mock Google OAuth token response.
-     *
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>
      */

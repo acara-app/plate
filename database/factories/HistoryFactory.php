@@ -20,8 +20,6 @@ final class HistoryFactory extends Factory
     protected $model = History::class;
 
     /**
-     * Define the model's default state.
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
@@ -41,9 +39,6 @@ final class HistoryFactory extends Factory
         ];
     }
 
-    /**
-     * Indicate that the message is from a user.
-     */
     public function userMessage(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -54,9 +49,6 @@ final class HistoryFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the message is from an assistant.
-     */
     public function assistantMessage(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -65,9 +57,6 @@ final class HistoryFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the message belongs to a specific conversation.
-     */
     public function forConversation(Conversation $conversation): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -76,9 +65,6 @@ final class HistoryFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the message belongs to a specific user.
-     */
     public function forUser(User $user): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -86,9 +72,6 @@ final class HistoryFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the message uses a specific agent.
-     */
     public function withAgent(string $agentClass): static
     {
         return $this->state(fn (array $attributes): array => [

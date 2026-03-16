@@ -19,17 +19,11 @@ final readonly class PredictGlucoseSpike implements Tool
         return 'predict_glucose_spike';
     }
 
-    /**
-     * Get the description of the tool's purpose.
-     */
     public function description(): string
     {
         return 'Predict the blood glucose spike impact of a specific food or meal. Returns estimated glucose increase, risk level, and personalized recommendations to minimize spikes. Use this when users ask about specific foods, restaurant meals, or want to understand glucose impact.';
     }
 
-    /**
-     * Execute the tool.
-     */
     public function handle(Request $request): string
     {
         /** @var string $food */
@@ -68,8 +62,6 @@ final readonly class PredictGlucoseSpike implements Tool
     }
 
     /**
-     * Get the tool's schema definition.
-     *
      * @return array<string, mixed>
      */
     public function schema(JsonSchema $schema): array
@@ -83,9 +75,6 @@ final readonly class PredictGlucoseSpike implements Tool
         ];
     }
 
-    /**
-     * Estimate glucose increase in mg/dL based on risk level.
-     */
     private function estimateGlucoseIncrease(SpikeRiskLevel $riskLevel): int
     {
         return match ($riskLevel) {
@@ -96,8 +85,6 @@ final readonly class PredictGlucoseSpike implements Tool
     }
 
     /**
-     * Generate personalized recommendations based on prediction and context.
-     *
      * @return array<int, string>
      */
     private function generateRecommendations(SpikePredictionData $prediction, ?string $context): array

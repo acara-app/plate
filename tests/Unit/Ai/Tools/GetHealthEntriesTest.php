@@ -92,14 +92,12 @@ it('returns entries for a date range', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    // Entry from 3 days ago
     HealthEntry::factory()->create([
         'user_id' => $user->id,
         'carbs_grams' => 50,
         'measured_at' => now()->subDays(2),
     ]);
 
-    // Entry from today
     HealthEntry::factory()->create([
         'user_id' => $user->id,
         'carbs_grams' => 30,

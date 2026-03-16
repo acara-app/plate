@@ -17,17 +17,11 @@ final class SuggestWorkoutRoutine implements Tool
         return 'suggest_workout_routine';
     }
 
-    /**
-     * Get the description of the tool's purpose.
-     */
     public function description(): string
     {
         return 'Suggest personalized workout routines and exercise plans. Use this to help users with fitness goals, workout scheduling, exercise variety, and training programs.';
     }
 
-    /**
-     * Execute the tool.
-     */
     public function handle(Request $request): string
     {
         $user = Auth::user();

@@ -10,11 +10,6 @@ use App\Ai\Exceptions\Memory\MemoryStorageException;
 interface ConsolidateMemoriesTool
 {
     /**
-     * Merge multiple related memories into a single synthesized memory.
-     *
-     * Useful for de-duplicating facts, summarizing conversation history,
-     * or combining related insights into a coherent memory.
-     *
      * @param  array<string>  $memoryIds  IDs of memories to merge (minimum 2).
      * @param  string  $synthesizedContent  The new, consolidated content.
      * @param  array<string, mixed>|null  $metadata  Metadata for new memory (null = merge from sources).

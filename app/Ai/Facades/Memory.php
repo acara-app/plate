@@ -29,10 +29,6 @@ use BadMethodCallException;
 use DateTimeInterface;
 
 /**
- * Static facade for memory operations.
- *
- * Resolves the appropriate tool contract from the container and invokes it.
- *
  * @method static string store(string $content, array<string, mixed> $metadata = [], array<float>|null $vector = null, int $importance = 1, array<string> $categories = [], DateTimeInterface|null $expiresAt = null)
  * @method static array<int, MemorySearchResultData> search(string $query, int $limit = 5, float $minRelevance = 0.7, array<string, mixed> $filter = [], bool $includeArchived = false)
  * @method static MemoryData get(string $memoryId, bool $includeArchived = false)
@@ -53,8 +49,6 @@ use DateTimeInterface;
 final class Memory
 {
     /**
-     * Map method names to their tool contracts.
-     *
      * @var array<string, class-string>
      */
     private static array $tools = [

@@ -15,8 +15,6 @@ use Illuminate\Support\Collection;
 final readonly class DiabetesLayout
 {
     /**
-     * Valid time periods for filtering logs.
-     *
      * @var array<string, int>
      */
     public const array TIME_PERIODS = [
@@ -26,8 +24,6 @@ final readonly class DiabetesLayout
     ];
 
     /**
-     * Get common props for diabetes log views.
-     *
      * @return array{
      *     glucoseReadingTypes: Collection<int, array{value: string, label: string}>,
      *     insulinTypes: Collection<int, array{value: string, label: string}>,
@@ -56,8 +52,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Get filtered logs and calculated summary for dashboard.
-     *
      * @return array{
      *     logs: Collection<int, HealthEntry>,
      *     timePeriod: string,
@@ -66,7 +60,6 @@ final readonly class DiabetesLayout
      */
     public static function dashboardData(User $user, string $timePeriod = '30d'): array
     {
-        // Validate and default time period
         if (! array_key_exists($timePeriod, self::TIME_PERIODS)) {
             $timePeriod = '30d';
         }
@@ -90,8 +83,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Get recent unique medications from user's diabetes logs for quick-add chips.
-     *
      * @return array<int, array{name: string, dosage: string, label: string}>
      */
     public static function getRecentMedications(User $user): array
@@ -114,8 +105,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Get recent unique insulin entries from user's diabetes logs for quick-add chips.
-     *
      * @return array<int, array{units: float, type: string, label: string}>
      */
     public static function getRecentInsulins(User $user): array
@@ -138,8 +127,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Get today's meals from active meal plan for quick carb import.
-     *
      * @return array<int, array{id: int, name: string, type: string, carbs: float, label: string}>
      */
     public static function getTodaysMeals(User $user): array
@@ -152,12 +139,10 @@ final readonly class DiabetesLayout
             return [];
         }
 
-        // Calculate what day of the meal plan today is
         $startDate = $mealPlan->created_at->startOfDay();
         $today = today();
         $dayNumber = (int) $startDate->diffInDays($today) + 1;
 
-        // Clamp to valid range (edge case: meal plan older than duration_days)
         if ($dayNumber < 1 || $dayNumber > $mealPlan->duration_days) {
             $dayNumber = (($dayNumber - 1) % $mealPlan->duration_days) + 1; // @codeCoverageIgnore
         }
@@ -176,8 +161,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Calculate all summary statistics for the dashboard.
-     *
      * @param  Collection<int, HealthEntry>  $logs
      * @param  Collection<int, HealthEntry>  $allLogs
      * @return array<string, mixed>
@@ -199,8 +182,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Calculate glucose statistics.
-     *
      * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, avg: float, min: float, max: float}
      */
@@ -222,8 +203,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Calculate insulin statistics.
-     *
      * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, total: float, bolusCount: int, basalCount: int}
      */
@@ -240,8 +219,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Calculate carb statistics.
-     *
      * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, total: float, uniqueDays: int, avgPerDay: float}
      */
@@ -262,8 +239,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Calculate exercise statistics.
-     *
      * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, totalMinutes: int, types: array<int, string>}
      */
@@ -282,8 +257,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Calculate weight statistics.
-     *
      * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, latest: float|null, previous: float|null, trend: string|null, diff: float|null}
      */
@@ -320,8 +293,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Calculate blood pressure statistics.
-     *
      * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, latestSystolic: int|null, latestDiastolic: int|null}
      */
@@ -341,8 +312,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Calculate medication statistics.
-     *
      * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, uniqueMedications: array<int, string>}
      */
@@ -360,8 +329,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Calculate A1C statistics.
-     *
      * @param  Collection<int, HealthEntry>  $logs
      * @return array{count: int, latest: float|null}
      */
@@ -378,8 +345,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Calculate logging streak (consecutive days).
-     *
      * @param  Collection<int, HealthEntry>  $allLogs
      * @return array{currentStreak: int, activeDays: int}
      */
@@ -389,7 +354,6 @@ final readonly class DiabetesLayout
             return ['currentStreak' => 0, 'activeDays' => 0];
         }
 
-        // Get unique dates with logs
         $uniqueDates = $allLogs->map(fn (HealthEntry $log) => $log->measured_at->toDateString())
             ->unique()
             ->sort()
@@ -404,7 +368,6 @@ final readonly class DiabetesLayout
         $streak = 0;
         $checkDate = today();
 
-        // Start from today or yesterday if today has no logs
         if ($uniqueDates->doesntContain($today)) {
             if ($uniqueDates->doesntContain($yesterday)) {
                 return ['currentStreak' => 0, 'activeDays' => $activeDays];
@@ -413,7 +376,6 @@ final readonly class DiabetesLayout
             $checkDate = today()->subDay();
         }
 
-        // Count consecutive days backwards
         for ($i = 0; $i < 365; $i++) {
             $dateStr = $checkDate->toDateString();
             if ($uniqueDates->contains($dateStr)) {
@@ -428,8 +390,6 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * Calculate data type flags for conditional rendering.
-     *
      * @param  Collection<int, HealthEntry>  $logs
      * @return array{hasGlucose: bool, hasInsulin: bool, hasCarbs: bool, hasExercise: bool, hasMultipleFactors: bool}
      */

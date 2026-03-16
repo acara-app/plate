@@ -22,7 +22,6 @@ if (! function_exists('getMimeType')) {
             'swf' => 'application/x-shockwave-flash',
             'flv' => 'video/x-flv',
 
-            // images
             'png' => 'image/png',
             'jpe' => 'image/jpeg',
             'jpeg' => 'image/jpeg',
@@ -37,36 +36,30 @@ if (! function_exists('getMimeType')) {
             'webp' => 'image/webp',
             'avif' => 'image/avif',
 
-            // archives
             'zip' => 'application/zip',
             'rar' => 'application/x-rar-compressed',
             'exe' => 'application/x-msdownload',
             'msi' => 'application/x-msdownload',
             'cab' => 'application/vnd.ms-cab-compressed',
 
-            // audio/video
             'mp3' => 'audio/mpeg',
             'qt' => 'video/quicktime',
             'mov' => 'video/quicktime',
 
-            // adobe
             'pdf' => 'application/pdf',
             'psd' => 'image/vnd.adobe.photoshop',
             'ai' => 'application/postscript',
             'eps' => 'application/postscript',
             'ps' => 'application/postscript',
 
-            // ms office
             'doc' => 'application/msword',
             'rtf' => 'application/rtf',
             'xls' => 'application/vnd.ms-excel',
             'ppt' => 'application/vnd.ms-powerpoint',
 
-            // open office
             'odt' => 'application/vnd.oasis.opendocument.text',
             'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
 
-            // js.map
             'map' => 'application/javascript',
         ];
 
@@ -102,8 +95,6 @@ if (! function_exists('makeKey')) {
 
 if (! function_exists('toast')) {
     /**
-     * Flash a toast message to the session.
-     *
      * @param  string  $message  The message to display
      * @param  string  $type  The type of toast (e.g., 'success', 'error', 'info', 'warning')
      */
@@ -119,9 +110,6 @@ if (! function_exists('toast')) {
 }
 
 if (! function_exists('enable_premium_upgrades')) {
-    /**
-     * Check if premium upgrades are enabled.
-     */
     function enable_premium_upgrades(): bool
     {
         return (bool) config('plate.enable_premium_upgrades', false);

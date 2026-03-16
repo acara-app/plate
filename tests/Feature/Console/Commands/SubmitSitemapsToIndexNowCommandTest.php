@@ -166,7 +166,6 @@ it('handles empty string and non-string file options', function (): void {
 it('uses default files when no file option is provided and files do not exist', function (): void {
     Http::fake();
 
-    // Ensure default files don't exist in public path
     if (File::exists(public_path('sitemap.xml'))) {
         File::move(public_path('sitemap.xml'), public_path('sitemap.xml.bak'));
     }
@@ -181,7 +180,6 @@ it('uses default files when no file option is provided and files do not exist', 
         ->expectsOutputToContain('Sitemap file not found: food_sitemap.xml')
         ->expectsOutputToContain('No URLs found to submit');
 
-    // Restore if they existed
     if (File::exists(public_path('sitemap.xml.bak'))) {
         File::move(public_path('sitemap.xml.bak'), public_path('sitemap.xml'));
     }

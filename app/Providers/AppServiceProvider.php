@@ -78,17 +78,11 @@ final class AppServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * Configure the dates.
-     */
     private function configureDates(): void
     {
         Date::use(CarbonImmutable::class);
     }
 
-    /**
-     * Register event listeners.
-     */
     private function registerEventListeners(): void
     {
         Event::listen(AgentPrompted::class, TrackAiUsage::class);

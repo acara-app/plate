@@ -37,9 +37,6 @@ final class GroceryItem extends Model
         return $this->belongsTo(GroceryList::class);
     }
 
-    /**
-     * Convert the item to a response DTO.
-     */
     public function toResponseData(): GroceryItemResponseData
     {
         return new GroceryItemResponseData(

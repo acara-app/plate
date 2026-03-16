@@ -10,11 +10,6 @@ use App\Ai\Exceptions\Memory\MemoryNotFoundException;
 interface DeleteMemoryTool
 {
     /**
-     * Delete a specific memory or bulk delete by filter.
-     *
-     * IMPORTANT: At least one of $memoryId or a non-empty $filter must be provided
-     * to prevent accidental deletion of all memories.
-     *
      * @param  string|null  $memoryId  Specific ID to delete.
      * @param  array<string, mixed>  $filter  If $memoryId is null, delete all matching this filter (must be non-empty).
      * @return int Number of memories deleted.

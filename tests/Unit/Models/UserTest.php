@@ -55,7 +55,6 @@ test('subscription display name returns null when no subscription', function ():
 test('subscription display name returns formatted name when subscription exists', function (): void {
     $user = User::factory()->create();
 
-    // Create a subscription directly in the database
     DB::table('subscriptions')->insert([
         'user_id' => $user->id,
         'type' => 'premium-plan',

@@ -19,17 +19,11 @@ final readonly class CreateMealPlan implements Tool
         return 'create_meal_plan';
     }
 
-    /**
-     * Get the description of the tool's purpose.
-     */
     public function description(): string
     {
         return 'Generate a complete multi-day meal plan tailored to the user\'s profile, dietary preferences, health conditions, and goals. This creates a structured meal plan that can be saved and followed. Use this when the user explicitly asks for a meal plan or when in "Generate Meal Plan" mode.';
     }
 
-    /**
-     * Execute the tool.
-     */
     public function handle(Request $request): string
     {
         $user = Auth::user();
@@ -48,7 +42,6 @@ final readonly class CreateMealPlan implements Tool
         $customPrompt = $request['custom_prompt'] ?? null;
 
         try {
-            // Start the meal plan generation workflow
             resolve(GeneratesMealPlans::class)->handle($user, $totalDays);
 
             return (string) json_encode([
@@ -67,8 +60,6 @@ final readonly class CreateMealPlan implements Tool
     }
 
     /**
-     * Get the tool's schema definition.
-     *
      * @return array<string, mixed>
      */
     public function schema(JsonSchema $schema): array

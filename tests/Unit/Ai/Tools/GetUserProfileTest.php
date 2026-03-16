@@ -9,7 +9,6 @@ use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
 beforeEach(function (): void {
-    // Create a simple test implementation of the interface
     $this->action = new class implements GetsUserProfileContext
     {
         public array $contextData = [];

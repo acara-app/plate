@@ -15,8 +15,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 final class MealPlanFactory extends Factory
 {
     /**
-     * Define the model's default state.
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
@@ -49,9 +47,6 @@ final class MealPlanFactory extends Factory
         ];
     }
 
-    /**
-     * Indicate that the meal plan is for a weekly duration.
-     */
     public function weekly(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -60,9 +55,6 @@ final class MealPlanFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the meal plan is for a monthly duration.
-     */
     public function monthly(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -71,9 +63,6 @@ final class MealPlanFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the meal plan is custom duration.
-     */
     public function custom(int $days = 10): static
     {
         return $this->state(fn (array $attributes): array => [

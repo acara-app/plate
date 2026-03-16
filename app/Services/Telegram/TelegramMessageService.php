@@ -161,27 +161,20 @@ final class TelegramMessageService
 
         $html = $converter->convert($markdown)->getContent();
 
-        // Handle lists - convert <li> to bullets
         $html = str_replace('<li>', '• ', $html);
         $html = str_replace('</li>', "\n", $html);
         $html = str_replace(['<ul>', '<ol>', '</ul>', '</ol>'], ["\n", "\n", "\n", "\n"], $html);
 
-        // Convert <p> tags to double newlines
         $html = str_replace(
             ['<p>', '</p>'],
             ['', "\n\n"],
             $html
         );
 
-        // Convert <br> to newline
         $html = str_replace(['<br>', '<br />'], "\n", $html);
 
-        // Strip unsupported tags
-        // Telegram supports: <b>, <strong>, <i>, <em>, <u>, <ins>, <s>, <strike>, <del>,
-        // <span class="tg-spoiler">, <a>, <code>, <pre>, <blockquote>
         $html = strip_tags($html, '<b><strong><i><em><u><ins><s><strike><del><a><code><pre><blockquote>');
 
-        // Collapse multiple newlines into max 2
         return mb_trim((string) preg_replace('/\n{3,}/', "\n\n", $html));
     }
 }

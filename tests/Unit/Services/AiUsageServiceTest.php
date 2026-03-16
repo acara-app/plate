@@ -85,7 +85,6 @@ it('uses default pricing for unknown model', function (): void {
 
     $cost = $service->calculateCost('unknown-model', $usage);
 
-    // Default pricing: input=0.50, output=2.00
     expect($cost)->toBe(0.50 + 2.00);
 });
 

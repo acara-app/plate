@@ -11,8 +11,6 @@ use Symfony\Component\HttpFoundation\Response;
 final class DisableResponseBuffering
 {
     /**
-     * Handle an incoming request.
-     *
      * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response

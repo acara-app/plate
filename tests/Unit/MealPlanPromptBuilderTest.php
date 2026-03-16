@@ -23,7 +23,6 @@ it('includes glucose analysis in the prompt when glucose data exists', function 
         'derived_activity_multiplier' => 1.55,
     ]);
 
-    // Create some glucose readings
     HealthEntry::factory()->create([
         'user_id' => $user->id,
         'glucose_value' => 150.0,
@@ -85,7 +84,6 @@ it('includes glucose concerns when post-meal spikes are detected', function (): 
         'derived_activity_multiplier' => 1.55,
     ]);
 
-    // Create normal fasting and high post-meal readings to trigger spike detection without consistentlyHigh
     for ($i = 0; $i < 5; $i++) {
         HealthEntry::factory()->create([
             'user_id' => $user->id,

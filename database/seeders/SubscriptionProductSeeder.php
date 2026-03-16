@@ -22,11 +22,11 @@ final class SubscriptionProductSeeder extends Seeder
                     'Recipes that match your goals',
                 ],
                 'price' => 9.00,
-                'yearly_price' => 89.90, // 17% discount (~2 months free)
+                'yearly_price' => 89.90,
                 'stripe_price_id' => 'acara-plate-personal-monthly',
                 'yearly_stripe_price_id' => 'acara-plate-personal-yearly',
                 'billing_interval' => 'monthly',
-                'product_group' => 'trial', // Enables 7-day trial
+                'product_group' => 'trial',
                 'popular' => true,
                 'coming_soon' => false,
             ],

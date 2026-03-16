@@ -23,9 +23,6 @@ final readonly class GroceryListController
         private GenerateGroceryListAction $generateAction,
     ) {}
 
-    /**
-     * Display the grocery list for a meal plan.
-     */
     public function show(MealPlan $mealPlan): Response
     {
         abort_if($mealPlan->user_id !== $this->user->id, 403);
@@ -42,9 +39,6 @@ final readonly class GroceryListController
         ]);
     }
 
-    /**
-     * Regenerate the grocery list for the meal plan.
-     */
     public function store(MealPlan $mealPlan): Response
     {
         abort_if($mealPlan->user_id !== $this->user->id, 403);
@@ -63,9 +57,6 @@ final readonly class GroceryListController
         ]);
     }
 
-    /**
-     * Toggle the checked status of a grocery item.
-     */
     public function toggleItem(GroceryItem $groceryItem): RedirectResponse
     {
         $groceryList = $groceryItem->groceryList;
@@ -89,8 +80,6 @@ final readonly class GroceryListController
     }
 
     /**
-     * Format grocery list data for the frontend.
-     *
      * @return array<string, mixed>
      */
     private function formatGroceryList(GroceryList $groceryList): array

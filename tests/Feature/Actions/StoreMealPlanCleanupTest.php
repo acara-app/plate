@@ -14,7 +14,6 @@ use Spatie\LaravelData\DataCollection;
 it('deletes old meal plans of the same type when creating a new one', function (): void {
     $user = User::factory()->create();
 
-    // Create an old weekly meal plan
     $oldPlan = MealPlan::factory()
         ->weekly()
         ->for($user)
@@ -24,7 +23,6 @@ it('deletes old meal plans of the same type when creating a new one', function (
     expect(MealPlan::query()->count())->toBe(1);
     expect(Meal::query()->count())->toBe(3);
 
-    // Create a new weekly meal plan using the action
     $mealPlanData = new MealPlanData(
         type: MealPlanType::Weekly,
         name: 'New Weekly Plan',
@@ -54,22 +52,18 @@ it('deletes old meal plans of the same type when creating a new one', function (
     $action = resolve(StoreMealPlan::class);
     $newPlan = $action->handle($user, $mealPlanData);
 
-    // Verify old plan was deleted
     expect(MealPlan::query()->count())->toBe(1);
     expect(MealPlan::query()->first()->id)->toBe($newPlan->id);
     expect(MealPlan::query()->first()->name)->toBe('New Weekly Plan');
 
-    // Verify old meals were also deleted (cascade)
     expect(Meal::query()->count())->toBe(1);
 
-    // Verify we can't find the old plan
     expect(MealPlan::query()->find($oldPlan->id))->toBeNull();
 });
 
 it('only deletes meal plans of the same type', function (): void {
     $user = User::factory()->create();
 
-    // Create meal plans of different types
     $weeklyPlan = MealPlan::factory()
         ->weekly()
         ->for($user)
@@ -85,7 +79,6 @@ it('only deletes meal plans of the same type', function (): void {
     expect(MealPlan::query()->count())->toBe(2);
     expect(Meal::query()->count())->toBe(2);
 
-    // Create a new weekly meal plan
     $mealPlanData = new MealPlanData(
         type: MealPlanType::Weekly,
         name: 'New Weekly Plan',
@@ -115,22 +108,18 @@ it('only deletes meal plans of the same type', function (): void {
     $action = resolve(StoreMealPlan::class);
     $action->handle($user, $mealPlanData);
 
-    // Verify weekly plan was replaced but monthly plan remains
     expect(MealPlan::query()->count())->toBe(2);
     expect(MealPlan::query()->where('type', MealPlanType::Weekly)->count())->toBe(1);
     expect(MealPlan::query()->where('type', MealPlanType::Monthly)->count())->toBe(1);
 
-    // Verify old weekly plan is gone
     expect(MealPlan::query()->find($weeklyPlan->id))->toBeNull();
 
-    // Verify monthly plan still exists
     expect(MealPlan::query()->find($monthlyPlan->id))->not->toBeNull();
 });
 
 it('deletes multiple old meal plans of the same type', function (): void {
     $user = User::factory()->create();
 
-    // Create multiple old weekly meal plans
     $oldPlan1 = MealPlan::factory()
         ->weekly()
         ->for($user)
@@ -152,7 +141,6 @@ it('deletes multiple old meal plans of the same type', function (): void {
     expect(MealPlan::query()->count())->toBe(3);
     expect(Meal::query()->count())->toBe(3);
 
-    // Create a new weekly meal plan
     $mealPlanData = new MealPlanData(
         type: MealPlanType::Weekly,
         name: 'Latest Plan',
@@ -182,15 +170,12 @@ it('deletes multiple old meal plans of the same type', function (): void {
     $action = resolve(StoreMealPlan::class);
     $newPlan = $action->handle($user, $mealPlanData);
 
-    // Verify all old plans were deleted
     expect(MealPlan::query()->count())->toBe(1);
     expect(MealPlan::query()->first()->id)->toBe($newPlan->id);
     expect(MealPlan::query()->first()->name)->toBe('Latest Plan');
 
-    // Verify all old meals were also deleted
     expect(Meal::query()->count())->toBe(1);
 
-    // Verify we can't find any old plans
     expect(MealPlan::query()->find($oldPlan1->id))->toBeNull();
     expect(MealPlan::query()->find($oldPlan2->id))->toBeNull();
     expect(MealPlan::query()->find($oldPlan3->id))->toBeNull();
@@ -200,7 +185,6 @@ it('does not delete other users meal plans', function (): void {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
 
-    // Create meal plans for both users
     $user1Plan = MealPlan::factory()
         ->weekly()
         ->for($user1)
@@ -215,7 +199,6 @@ it('does not delete other users meal plans', function (): void {
 
     expect(MealPlan::query()->count())->toBe(2);
 
-    // Create a new weekly meal plan for user 1
     $mealPlanData = new MealPlanData(
         type: MealPlanType::Weekly,
         name: 'User 1 New Plan',
@@ -245,15 +228,12 @@ it('does not delete other users meal plans', function (): void {
     $action = resolve(StoreMealPlan::class);
     $action->handle($user1, $mealPlanData);
 
-    // Verify user 1's old plan was deleted but user 2's plan remains
     expect(MealPlan::query()->count())->toBe(2);
     expect(MealPlan::query()->where('user_id', $user1->id)->count())->toBe(1);
     expect(MealPlan::query()->where('user_id', $user2->id)->count())->toBe(1);
 
-    // Verify user 1's old plan is gone
     expect(MealPlan::query()->find($user1Plan->id))->toBeNull();
 
-    // Verify user 2's plan still exists
     expect(MealPlan::query()->find($user2Plan->id))->not->toBeNull();
 });
 
@@ -262,7 +242,6 @@ it('handles creating first meal plan when no old plans exist', function (): void
 
     expect(MealPlan::query()->count())->toBe(0);
 
-    // Create first meal plan
     $mealPlanData = new MealPlanData(
         type: MealPlanType::Weekly,
         name: 'First Plan',
@@ -292,7 +271,6 @@ it('handles creating first meal plan when no old plans exist', function (): void
     $action = resolve(StoreMealPlan::class);
     $mealPlan = $action->handle($user, $mealPlanData);
 
-    // Verify meal plan was created successfully
     expect(MealPlan::query()->count())->toBe(1);
     expect($mealPlan->name)->toBe('First Plan');
     expect(Meal::query()->count())->toBe(1);
@@ -301,13 +279,11 @@ it('handles creating first meal plan when no old plans exist', function (): void
 it('cascades delete to meals when deleting old meal plans', function (): void {
     $user = User::factory()->create();
 
-    // Create an old weekly meal plan with many meals
     $oldPlan = MealPlan::factory()
         ->weekly()
         ->for($user)
         ->create(['name' => 'Old Plan']);
 
-    // Create 21 meals (3 meals per day for 7 days)
     for ($day = 1; $day <= 7; $day++) {
         Meal::factory()->breakfast()->forDay($day)->for($oldPlan)->create();
         Meal::factory()->lunch()->forDay($day)->for($oldPlan)->create();
@@ -317,10 +293,8 @@ it('cascades delete to meals when deleting old meal plans', function (): void {
     expect(MealPlan::query()->count())->toBe(1);
     expect(Meal::query()->count())->toBe(21);
 
-    // Store IDs to verify they're deleted
     $oldMealIds = Meal::query()->pluck('id')->toArray();
 
-    // Create a new weekly meal plan with just 1 meal
     $mealPlanData = new MealPlanData(
         type: MealPlanType::Weekly,
         name: 'New Plan',
@@ -350,16 +324,13 @@ it('cascades delete to meals when deleting old meal plans', function (): void {
     $action = resolve(StoreMealPlan::class);
     $newPlan = $action->handle($user, $mealPlanData);
 
-    // Verify old plan and ALL its meals were deleted
     expect(MealPlan::query()->count())->toBe(1);
     expect(MealPlan::query()->first()->id)->toBe($newPlan->id);
     expect(Meal::query()->count())->toBe(1);
 
-    // Verify all old meals are gone
     foreach ($oldMealIds as $oldMealId) {
         expect(Meal::query()->find($oldMealId))->toBeNull();
     }
 
-    // Verify only the new meal exists
     expect(Meal::query()->first()->name)->toBe('New Breakfast');
 });

@@ -31,7 +31,6 @@ final class StoreHealthEntryRequest extends FormRequest
         return [
             'log_type' => ['required', Rule::enum(HealthEntryType::class)],
 
-            // Glucose tracking (unit-aware validation)
             'glucose_value' => [
                 $logType === HealthEntryType::Glucose->value ? 'required' : 'nullable',
                 'numeric',
@@ -47,7 +46,6 @@ final class StoreHealthEntryRequest extends FormRequest
             'measured_at' => ['required', 'date'],
             'notes' => ['nullable', 'string', 'max:500'],
 
-            // Insulin tracking
             'insulin_units' => [
                 $logType === HealthEntryType::Insulin->value ? 'required' : 'nullable',
                 'numeric',
@@ -60,7 +58,6 @@ final class StoreHealthEntryRequest extends FormRequest
                 Rule::enum(InsulinType::class),
             ],
 
-            // Medication tracking
             'medication_name' => [
                 $logType === HealthEntryType::Meds->value ? 'required' : 'nullable',
                 'string',
@@ -68,13 +65,11 @@ final class StoreHealthEntryRequest extends FormRequest
             ],
             'medication_dosage' => ['nullable', 'string', 'max:100'],
 
-            // Vital signs (at least one required when on vitals tab)
             'weight' => ['nullable', 'numeric', 'min:0', 'max:1000'],
             'blood_pressure_systolic' => ['nullable', 'integer', 'min:60', 'max:300'],
             'blood_pressure_diastolic' => ['nullable', 'integer', 'min:30', 'max:200'],
             'a1c_value' => ['nullable', 'numeric', 'min:3', 'max:20'],
 
-            // Carbohydrate intake
             'carbs_grams' => [
                 $logType === HealthEntryType::Food->value ? 'required' : 'nullable',
                 'numeric',
@@ -85,7 +80,6 @@ final class StoreHealthEntryRequest extends FormRequest
             'fat_grams' => ['nullable', 'numeric', 'min:0', 'max:500'],
             'calories' => ['nullable', 'integer', 'min:0', 'max:5000'],
 
-            // Exercise tracking
             'exercise_type' => [
                 $logType === HealthEntryType::Exercise->value ? 'required' : 'nullable',
                 'string',
@@ -95,15 +89,11 @@ final class StoreHealthEntryRequest extends FormRequest
         ];
     }
 
-    /**
-     * Configure the validator instance.
-     */
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
             $logType = $this->input('log_type');
 
-            // For vitals, ensure at least one vital field is provided
             if ($logType === HealthEntryType::Vitals->value) {
                 $hasVitals = $this->filled('weight') ||
                     $this->filled('blood_pressure_systolic') ||

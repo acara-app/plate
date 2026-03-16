@@ -31,7 +31,6 @@ it('returns throttled status when too many attempts', function (): void {
 
     $action = resolve(CreateUserEmailResetNotification::class);
 
-    // Send multiple reset requests to trigger throttling
     $action->handle(['email' => $user->email]);
 
     $status = $action->handle(['email' => $user->email]);

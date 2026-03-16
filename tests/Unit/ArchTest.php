@@ -13,7 +13,6 @@ arch()->preset()->security()->ignoring([
     UserTelegramChat::class,
 ]);
 
-// Apply strict preset but exclude protected method check for models with accessors
 arch('strict rules')
     ->preset()->strict()
     ->ignoring([
@@ -27,5 +26,3 @@ arch('strict rules')
 arch('controllers')
     ->expect('App\Http\Controllers')
     ->not->toBeUsed();
-
-//

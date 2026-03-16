@@ -17,8 +17,6 @@ final class ConversationFactory extends Factory
     protected $model = Conversation::class;
 
     /**
-     * Define the model's default state.
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
@@ -30,9 +28,6 @@ final class ConversationFactory extends Factory
         ];
     }
 
-    /**
-     * Indicate that the conversation belongs to a specific user.
-     */
     public function forUser(User $user): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -40,9 +35,6 @@ final class ConversationFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the conversation has a specific title.
-     */
     public function withTitle(string $title): static
     {
         return $this->state(fn (array $attributes): array => [

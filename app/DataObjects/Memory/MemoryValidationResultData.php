@@ -6,9 +6,6 @@ namespace App\DataObjects\Memory;
 
 use Spatie\LaravelData\Data;
 
-/**
- * Result of memory validation/fact-checking.
- */
 final class MemoryValidationResultData extends Data
 {
     /**

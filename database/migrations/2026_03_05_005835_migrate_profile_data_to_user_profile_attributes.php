@@ -10,7 +10,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Migrate dietary preferences
         if (Schema::hasTable('user_profile_dietary_preference') && Schema::hasTable('dietary_preferences')) {
             $rows = DB::table('user_profile_dietary_preference')
                 ->join('dietary_preferences', 'dietary_preferences.id', '=', 'user_profile_dietary_preference.dietary_preference_id')
@@ -48,7 +47,6 @@ return new class extends Migration
             }
         }
 
-        // Migrate health conditions
         if (Schema::hasTable('user_profile_health_condition') && Schema::hasTable('health_conditions')) {
             $rows = DB::table('user_profile_health_condition')
                 ->join('health_conditions', 'health_conditions.id', '=', 'user_profile_health_condition.health_condition_id')
@@ -75,7 +73,6 @@ return new class extends Migration
             }
         }
 
-        // Migrate medications
         if (Schema::hasTable('user_medications')) {
             $rows = DB::table('user_medications')->get();
 

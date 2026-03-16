@@ -13,14 +13,12 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 final class SubscriptionProductFactory extends Factory
 {
     /**
-     * Define the model's default state.
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
         $price = fake()->randomFloat(2, 9.99, 99.99);
-        $yearlyPrice = $price * 10; // Discount for yearly
+        $yearlyPrice = $price * 10;
 
         return [
             'name' => fake()->randomElement([
@@ -33,7 +31,7 @@ final class SubscriptionProductFactory extends Factory
             ]),
             'price' => $price,
             'description' => fake()->optional(0.8)->sentence(),
-            'popular' => fake()->boolean(20), // 20% chance of being popular
+            'popular' => fake()->boolean(20),
             'stripe_price_id' => fake()->optional(0.7)->regexify('price_[a-zA-Z0-9]{24}'),
             'billing_interval' => fake()->randomElement(['month', 'year', 'week']),
             'product_group' => fake()->optional(0.6)->randomElement(['subscription', 'addon', 'premium']),
@@ -44,13 +42,10 @@ final class SubscriptionProductFactory extends Factory
                 fake()->sentence(3),
                 fake()->sentence(3),
             ]),
-            'coming_soon' => fake()->boolean(10), // 10% chance of coming soon
+            'coming_soon' => fake()->boolean(10),
         ];
     }
 
-    /**
-     * Indicate that the product is popular.
-     */
     public function popular(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -58,9 +53,6 @@ final class SubscriptionProductFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the product is coming soon.
-     */
     public function comingSoon(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -68,9 +60,6 @@ final class SubscriptionProductFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the product has yearly pricing.
-     */
     public function withYearlyPricing(): static
     {
         return $this->state(function (array $attributes): array {
@@ -83,9 +72,6 @@ final class SubscriptionProductFactory extends Factory
         });
     }
 
-    /**
-     * Indicate that the product is monthly billing.
-     */
     public function monthly(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -93,9 +79,6 @@ final class SubscriptionProductFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the product is yearly billing.
-     */
     public function yearly(): static
     {
         return $this->state(fn (array $attributes): array => [

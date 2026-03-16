@@ -82,7 +82,6 @@ it('can calculate total calories for a specific day', function (): void {
 it('can calculate average daily calories', function (): void {
     $mealPlan = MealPlan::factory()->create(['duration_days' => 7]);
 
-    // Create meals totaling 14000 calories across all days
     foreach (range(1, 7) as $day) {
         Meal::factory()->for($mealPlan)->forDay($day)->create(['calories' => 2000]);
     }

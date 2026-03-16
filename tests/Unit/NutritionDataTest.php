@@ -115,7 +115,6 @@ it('can be modified after creation', function (): void {
         sodium: 50.0,
     );
 
-    // Laravel Data objects are mutable by default
     $data->calories = 200.0;
 
     expect($data->calories)->toBe(200.0);

@@ -43,7 +43,6 @@ test('it returns should not notify when glucose is well controlled', function ()
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
 
-    // Create readings all within normal range (85-115) with stable, non-trending values
     $stableValues = [100, 98, 102, 99, 101, 100, 97, 103, 100, 99, 101, 98, 102, 100, 99, 101, 100, 98, 102, 100];
 
     foreach ($stableValues as $i => $value) {
@@ -69,7 +68,6 @@ test('it returns should notify when high readings exceed trigger percentage', fu
         ],
     ]);
 
-    // Create 40% high readings (above 140)
     foreach (range(1, 6) as $i) {
         HealthEntry::factory()->create([
             'user_id' => $user->id,
@@ -79,7 +77,6 @@ test('it returns should notify when high readings exceed trigger percentage', fu
         ]);
     }
 
-    // Create 60% normal readings
     foreach (range(1, 9) as $i) {
         HealthEntry::factory()->create([
             'user_id' => $user->id,
@@ -104,7 +101,6 @@ test('it returns should notify when hypoglycemia risk is detected', function ():
         ],
     ]);
 
-    // Create multiple low readings to trigger hypoglycemia risk
     foreach (range(1, 8) as $i) {
         HealthEntry::factory()->create([
             'user_id' => $user->id,
@@ -114,7 +110,6 @@ test('it returns should notify when hypoglycemia risk is detected', function ():
         ]);
     }
 
-    // Add some normal readings
     foreach (range(1, 5) as $i) {
         HealthEntry::factory()->create([
             'user_id' => $user->id,
@@ -135,7 +130,6 @@ test('it returns should notify when consistently high pattern is detected', func
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
 
-    // Create all high readings
     foreach (range(1, 20) as $i) {
         HealthEntry::factory()->create([
             'user_id' => $user->id,
@@ -156,7 +150,6 @@ test('it returns should notify when consistently low pattern is detected', funct
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
 
-    // Create all low readings
     foreach (range(1, 20) as $i) {
         HealthEntry::factory()->create([
             'user_id' => $user->id,
@@ -177,7 +170,6 @@ test('it returns should notify when high variability is detected', function (): 
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
 
-    // Create highly variable readings (alternating very low and very high)
     foreach (range(1, 20) as $i) {
         HealthEntry::factory()->create([
             'user_id' => $user->id,
@@ -198,7 +190,6 @@ test('it returns should notify when post-meal spikes are detected', function ():
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
 
-    // Create post-meal spikes
     foreach (range(1, 15) as $i) {
         HealthEntry::factory()->create([
             'user_id' => $user->id,
@@ -208,7 +199,6 @@ test('it returns should notify when post-meal spikes are detected', function ():
         ]);
     }
 
-    // Add some fasting readings for comparison
     foreach (range(1, 5) as $i) {
         HealthEntry::factory()->create([
             'user_id' => $user->id,
@@ -229,7 +219,6 @@ test('it uses custom analysis window days parameter', function (): void {
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
 
-    // Create readings only in the last 5 days
     foreach (range(1, 5) as $i) {
         HealthEntry::factory()->create([
             'user_id' => $user->id,
@@ -239,7 +228,6 @@ test('it uses custom analysis window days parameter', function (): void {
         ]);
     }
 
-    // Create old readings that should be excluded with 7 day window
     foreach (range(10, 15) as $i) {
         HealthEntry::factory()->create([
             'user_id' => $user->id,
@@ -252,7 +240,6 @@ test('it uses custom analysis window days parameter', function (): void {
     $action = resolve(AnalyzeGlucoseForNotificationAction::class);
     $result = $action->handle($user, 7);
 
-    // Should only analyze the last 7 days (5 normal readings)
     expect($result->analysisData->hasData)->toBeTrue()
         ->and($result->analysisData->totalReadings)->toBe(5);
 });
@@ -266,7 +253,6 @@ test('it uses user custom thresholds when set', function (): void {
         ],
     ]);
 
-    // Readings at 180 - above default 140 but below user's 200
     foreach (range(1, 15) as $i) {
         HealthEntry::factory()->create([
             'user_id' => $user->id,
@@ -279,7 +265,6 @@ test('it uses user custom thresholds when set', function (): void {
     $action = resolve(AnalyzeGlucoseForNotificationAction::class);
     $result = $action->handle($user);
 
-    // With user's higher threshold of 200, 180 readings are "in range"
     expect($result->analysisData->hasData)->toBeTrue();
 });
 
@@ -315,8 +300,6 @@ test('it does not trigger concern for high variability alone without other conce
         ],
     ]);
 
-    // Create variable readings that stay within acceptable range (70-180)
-    // This creates variability but good time in range (>70%) and no consistently high/low patterns
     $normalValues = [85, 130, 90, 140, 95, 135, 100, 125, 105, 120, 110, 115];
 
     foreach ($normalValues as $index => $value) {
@@ -331,8 +314,6 @@ test('it does not trigger concern for high variability alone without other conce
     $action = resolve(AnalyzeGlucoseForNotificationAction::class);
     $result = $action->handle($user);
 
-    // High variability alone (without consistentlyHigh, postMealSpikes, or poor time in range)
-    // should NOT trigger a concern to reduce false positives
     expect($result->analysisData->hasData)->toBeTrue()
         ->and($result->analysisData->timeInRange->percentage)->toBeGreaterThanOrEqual(70)
         ->and($result->shouldNotify)->toBeFalse()
@@ -347,8 +328,6 @@ test('it does not trigger post-meal spikes concern when average post-meal is bel
         ],
     ]);
 
-    // Create post-meal readings with average below the high threshold (180)
-    // Even if there are some individual spikes, the average should be below threshold
     $postMealValues = [140, 150, 145, 155, 160, 148, 152, 158, 142, 165];
 
     foreach ($postMealValues as $index => $value) {
@@ -360,7 +339,6 @@ test('it does not trigger post-meal spikes concern when average post-meal is bel
         ]);
     }
 
-    // Add some fasting readings to establish baseline
     foreach (range(1, 5) as $i) {
         HealthEntry::factory()->create([
             'user_id' => $user->id,
@@ -373,15 +351,11 @@ test('it does not trigger post-meal spikes concern when average post-meal is bel
     $action = resolve(AnalyzeGlucoseForNotificationAction::class);
     $result = $action->handle($user);
 
-    // Post-meal readings with average below threshold should NOT trigger
-    // "Frequent post-meal glucose spikes" concern
     expect($result->analysisData->hasData)->toBeTrue();
 
-    // Verify average post-meal is below threshold
     if ($result->analysisData->averages->postMeal !== null) {
         expect($result->analysisData->averages->postMeal)->toBeLessThanOrEqual(180);
     }
 
-    // Should not contain the post-meal spikes concern message
     expect($result->concerns)->not->toContain('Frequent post-meal glucose spikes detected.');
 });

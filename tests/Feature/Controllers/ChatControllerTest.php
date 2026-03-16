@@ -11,7 +11,7 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 
 beforeEach(function (): void {
-    // Setup if needed
+    //
 });
 
 it('renders chat page with correct props when no conversation id provided', function (): void {

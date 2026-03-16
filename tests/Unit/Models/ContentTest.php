@@ -170,9 +170,6 @@ it('calculates low glycemic load when no stored value', function (): void {
 });
 
 it('calculates glycemic load from nutrition and category', function (): void {
-    // Category: Fruits (GI ~40)
-    // Carbs: 50g, Fiber: 0g -> Net Carbs: 50g
-    // GL = (40 * 50) / 100 = 20 -> High (>= 20)
     $content = Content::factory()->create([
         'slug' => Str::uuid()->toString(),
         'category' => FoodCategory::Fruits,
@@ -209,7 +206,6 @@ it('returns stored glycemic index from body', function (): void {
 });
 
 it('returns category average glycemic index when no stored value', function (): void {
-    // Fruits category has average GI of 40
     $content = Content::factory()->create([
         'slug' => Str::uuid()->toString(),
         'category' => FoodCategory::Fruits,
@@ -239,9 +235,6 @@ it('returns stored numeric glycemic load from body', function (): void {
 });
 
 it('calculates numeric glycemic load from nutrition and gi', function (): void {
-    // Category: Fruits (GI ~40)
-    // Carbs: 50g, Fiber: 10g -> Net Carbs: 40g
-    // GL = (40 * 40) / 100 = 16 -> rounded to 16.0
     $content = Content::factory()->create([
         'slug' => Str::uuid()->toString(),
         'category' => FoodCategory::Fruits,
@@ -257,10 +250,9 @@ it('calculates numeric glycemic load from nutrition and gi', function (): void {
 });
 
 it('calculates glycemic load classification from numeric value', function (): void {
-    // Low GL: <= 10
     $lowGlContent = Content::factory()->create([
         'slug' => Str::uuid()->toString(),
-        'category' => FoodCategory::Vegetables, // Low GI category
+        'category' => FoodCategory::Vegetables,
         'body' => [
             'nutrition' => [
                 'carbs' => 10,
@@ -271,10 +263,9 @@ it('calculates glycemic load classification from numeric value', function (): vo
 
     expect($lowGlContent->glycemic_load)->toBe('low');
 
-    // Medium GL: 11-19
     $mediumGlContent = Content::factory()->create([
         'slug' => Str::uuid()->toString(),
-        'category' => FoodCategory::GrainsStarches, // High GI category (65)
+        'category' => FoodCategory::GrainsStarches,
         'body' => [
             'nutrition' => [
                 'carbs' => 25,
@@ -283,6 +274,5 @@ it('calculates glycemic load classification from numeric value', function (): vo
         ],
     ]);
 
-    // GL = (65 * 25) / 100 = 16.25 -> Medium
     expect($mediumGlContent->glycemic_load)->toBe('medium');
 });

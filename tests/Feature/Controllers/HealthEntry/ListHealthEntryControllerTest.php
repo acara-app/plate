@@ -39,7 +39,6 @@ it('displays user diabetes logs', function (): void {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    // Create logs for both users
     HealthEntry::factory()->count(3)->create(['user_id' => $user->id]);
     HealthEntry::factory()->count(2)->create(['user_id' => $otherUser->id]);
 
@@ -49,7 +48,7 @@ it('displays user diabetes logs', function (): void {
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('health-entries/index')
-            ->has('logs.data', 3)); // Should only see their own logs
+            ->has('logs.data', 3));
 });
 
 it('includes todays meals on index page', function (): void {

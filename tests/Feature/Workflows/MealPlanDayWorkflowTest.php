@@ -62,7 +62,6 @@ it('triggers workflow when navigating to day that needs generation', function ()
             ],
         ]);
 
-    // Day 1 has meals, day 2 does not
     Meal::factory()->for($mealPlan)->forDay(1)->create();
 
     $response = $this->actingAs($this->user)
@@ -74,7 +73,6 @@ it('triggers workflow when navigating to day that needs generation', function ()
             ->where('currentDay.needs_generation', true)
             ->where('currentDay.status', MealPlanGenerationStatus::Generating->value));
 
-    // Check that metadata was updated to generating
     expect($mealPlan->fresh()->metadata['day_2_status'])
         ->toBe(MealPlanGenerationStatus::Generating->value);
 });
@@ -104,7 +102,6 @@ it('does not trigger workflow when day has meals', function (): void {
             ->where('currentDay.needs_generation', false)
             ->where('currentDay.status', MealPlanGenerationStatus::Completed->value));
 
-    // Metadata should not have day_2_status since day already has meals
     expect($mealPlan->fresh()->metadata['day_2_status'] ?? null)->toBeNull();
 });
 
@@ -116,7 +113,6 @@ it('returns generating status when day is being generated via API', function ():
         'metadata' => ['days_completed' => 1],
     ]);
 
-    // Trigger generation for day 2
     $this->actingAs($this->user)
         ->postJson(route('meal-plans.generate-day', $mealPlan), ['day' => 2])
         ->assertOk()
@@ -133,9 +129,7 @@ it('returns generating status when day is being generated via API', function ():
 it('previous day context builds correctly with meal history', function (): void {
     $context = new PreviousDayContext;
 
-    // Day 1 meals
     $context->addDayMeals(1, ['Oatmeal', 'Chicken Salad', 'Grilled Salmon']);
-    // Day 2 meals
     $context->addDayMeals(2, ['Greek Yogurt', 'Turkey Wrap', 'Beef Stir Fry']);
 
     $promptText = $context->toPromptText();
@@ -215,7 +209,6 @@ it('meal plan updates days_completed metadata correctly', function (): void {
             ],
         ]);
 
-    // Simulate what the workflow does after completion
     $daysCompleted = max(
         $mealPlan->metadata['days_completed'] ?? 0,
         3
@@ -254,7 +247,6 @@ it('meal plan status becomes completed when all days generated', function (): vo
             ],
         ]);
 
-    // Simulate completing day 3 (final day)
     $daysCompleted = max(
         $mealPlan->metadata['days_completed'] ?? 0,
         3
@@ -276,7 +268,6 @@ it('meal plan status becomes completed when all days generated', function (): vo
 });
 
 it('generates single day workflow returns correct result structure', function (): void {
-    // Testing the expected return structure from the workflow
     $mealPlanId = 123;
     $dayNumber = 2;
 

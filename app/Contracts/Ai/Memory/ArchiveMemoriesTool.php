@@ -10,12 +10,6 @@ use App\Ai\Exceptions\Memory\MemoryStorageException;
 interface ArchiveMemoriesTool
 {
     /**
-     * Move memories to cold storage (soft delete).
-     *
-     * Archived memories are not deleted but are excluded from normal
-     * search operations. Use this for memories that are no longer
-     * immediately relevant but might be needed later.
-     *
      * @param  array<string>  $memoryIds  Memories to archive.
      * @return int Number of memories archived.
      *

@@ -7,8 +7,6 @@ namespace Tests\Fixtures;
 final class TelegramWebhookPayloads
 {
     /**
-     * Build a Telegram webhook payload for a text message.
-     *
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>
      */
@@ -26,8 +24,6 @@ final class TelegramWebhookPayloads
     }
 
     /**
-     * Build a Telegram webhook payload for a photo message.
-     *
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>
      */

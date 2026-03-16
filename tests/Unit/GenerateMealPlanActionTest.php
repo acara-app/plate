@@ -27,7 +27,6 @@ it('throws exception for invalid JSON', function (): void {
 })->throws(InvalidArgumentException::class, 'No valid JSON found in AI response');
 
 it('throws exception for malformed JSON', function (): void {
-    $malformedResponse = '{"type": "weekly", "name": "Test Plan"'; // Missing closing brace
-
+    $malformedResponse = '{"type": "weekly", "name": "Test Plan"';
     JsonCleaner::extractAndValidateJson($malformedResponse);
 })->throws(JsonException::class);

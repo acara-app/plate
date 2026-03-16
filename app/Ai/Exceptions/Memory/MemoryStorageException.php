@@ -7,8 +7,6 @@ namespace App\Ai\Exceptions\Memory;
 use Exception;
 
 /**
- * Thrown when memory storage operations fail.
- *
  * @property-read string|null $operation
  * @property-read array<string, mixed>|null $context
  */
@@ -26,8 +24,6 @@ final class MemoryStorageException extends Exception
     }
 
     /**
-     * Create exception for failed store operation.
-     *
      * @param  array<string, mixed>|null  $context
      */
     public static function storeFailed(string $reason, ?array $context = null): self
@@ -39,9 +35,6 @@ final class MemoryStorageException extends Exception
         );
     }
 
-    /**
-     * Create exception for failed update operation.
-     */
     public static function updateFailed(string $memoryId, string $reason): self
     {
         return new self(
@@ -51,9 +44,6 @@ final class MemoryStorageException extends Exception
         );
     }
 
-    /**
-     * Create exception for failed delete operation.
-     */
     public static function deleteFailed(string $reason): self
     {
         return new self(
@@ -63,8 +53,6 @@ final class MemoryStorageException extends Exception
     }
 
     /**
-     * Create exception for failed consolidation.
-     *
      * @param  array<string>  $memoryIds
      */
     public static function consolidationFailed(array $memoryIds, string $reason): self

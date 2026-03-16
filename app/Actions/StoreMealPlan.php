@@ -16,7 +16,6 @@ final readonly class StoreMealPlan
     public function handle(User $user, MealPlanData $mealPlanData): MealPlan
     {
         return DB::transaction(function () use ($user, $mealPlanData): MealPlan {
-            // Delete old meal plans of the same type
             $this->deleteOldMealPlans($user, $mealPlanData->type);
 
             /** @var MealPlan $mealPlan */
@@ -38,9 +37,6 @@ final readonly class StoreMealPlan
         });
     }
 
-    /**
-     * Delete all existing meal plans of the given type for the user
-     */
     private function deleteOldMealPlans(User $user, MealPlanType $type): void
     {
         $user->mealPlans()

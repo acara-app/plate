@@ -102,7 +102,7 @@ it('falls back to image/jpeg mime when attachment mime is missing', function ():
         'role' => 'user',
         'content' => 'Look at this',
         'attachments' => [
-            ['base64' => $base64], // no mime key
+            ['base64' => $base64],
         ],
     ]);
 
@@ -123,7 +123,7 @@ it('falls back to empty string when attachment base64 is missing', function (): 
         'role' => 'user',
         'content' => 'Blank attachment',
         'attachments' => [
-            ['mime' => 'image/gif'], // no base64 key
+            ['mime' => 'image/gif'],
         ],
     ]);
 

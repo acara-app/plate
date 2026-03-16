@@ -56,8 +56,6 @@ final class History extends Model
     }
 
     /**
-     * Get the conversation that owns this message.
-     *
      * @return BelongsTo<Conversation, $this>
      */
     public function conversation(): BelongsTo
@@ -66,8 +64,6 @@ final class History extends Model
     }
 
     /**
-     * Get the user that owns this message.
-     *
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo

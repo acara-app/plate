@@ -20,17 +20,11 @@ final readonly class GetHealthEntries implements Tool
         return 'get_health_entries';
     }
 
-    /**
-     * Get the description of the tool's purpose.
-     */
     public function description(): string
     {
         return "Retrieve the current user's logged health entries including food intake (carbs), glucose readings, weight, blood pressure, insulin, medications, and exercise. Use this when the user asks about their food log, health history, what they ate, or wants to compare their actual intake against a meal plan.";
     }
 
-    /**
-     * Execute the tool.
-     */
     public function handle(Request $request): string
     {
         $user = Auth::user();
@@ -152,8 +146,6 @@ final readonly class GetHealthEntries implements Tool
     }
 
     /**
-     * Apply type-based filtering to the query.
-     *
      * @param  Builder<HealthEntry>  $query
      * @return Builder<HealthEntry>
      */

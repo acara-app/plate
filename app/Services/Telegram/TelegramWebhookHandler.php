@@ -191,8 +191,6 @@ final class TelegramWebhookHandler extends WebhookHandler
     }
 
     /**
-     * Summary of formatProfileInfo
-     *
      * @codeCoverageIgnore
      */
     private function formatProfileInfo(User $user): string

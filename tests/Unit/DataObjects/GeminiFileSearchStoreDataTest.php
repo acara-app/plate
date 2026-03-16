@@ -36,7 +36,7 @@ it('calculates size in MB correctly', function (): void {
         'activeDocumentsCount' => 1,
         'pendingDocumentsCount' => 0,
         'failedDocumentsCount' => 0,
-        'sizeBytes' => 2097152, // 2 MB
+        'sizeBytes' => 2097152,
         'createTime' => '2025-11-23T10:00:00Z',
         'updateTime' => '2025-11-23T10:00:00Z',
     ]);

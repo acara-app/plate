@@ -80,8 +80,6 @@ final class MealPlan extends Model
     }
 
     /**
-     * Get meals for a specific day
-     *
      * @return Collection<int, Meal>
      */
     public function mealsForDay(int $dayNumber): Collection
@@ -89,9 +87,6 @@ final class MealPlan extends Model
         return $this->meals()->where('day_number', $dayNumber)->get();
     }
 
-    /**
-     * Calculate total calories for a specific day
-     */
     public function totalCaloriesForDay(int $dayNumber): float
     {
         return (float) $this->meals()
@@ -99,9 +94,6 @@ final class MealPlan extends Model
             ->sum('calories');
     }
 
-    /**
-     * Calculate average daily calories across all days
-     */
     public function averageDailyCalories(): float
     {
         $totalCalories = $this->meals()->sum('calories');
@@ -110,8 +102,6 @@ final class MealPlan extends Model
     }
 
     /**
-     * Calculate total macronutrients for a specific day
-     *
      * @return array{protein: float, carbs: float, fat: float}
      */
     public function macrosForDay(int $dayNumber): array

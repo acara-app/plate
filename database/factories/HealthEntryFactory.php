@@ -18,8 +18,6 @@ final class HealthEntryFactory extends Factory
     protected $model = HealthEntry::class;
 
     /**
-     * Define the model's default state.
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
@@ -45,9 +43,6 @@ final class HealthEntryFactory extends Factory
         ];
     }
 
-    /**
-     * Indicate that the reading is a fasting reading.
-     */
     public function fasting(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -56,9 +51,6 @@ final class HealthEntryFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the reading is a post-meal reading.
-     */
     public function postMeal(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -67,9 +59,6 @@ final class HealthEntryFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the reading is elevated.
-     */
     public function elevated(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -77,9 +66,6 @@ final class HealthEntryFactory extends Factory
         ]);
     }
 
-    /**
-     * Include insulin tracking data.
-     */
     public function withInsulin(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -88,9 +74,6 @@ final class HealthEntryFactory extends Factory
         ]);
     }
 
-    /**
-     * Include blood pressure data.
-     */
     public function withBloodPressure(): static
     {
         return $this->state(fn (array $attributes): array => [
@@ -99,9 +82,6 @@ final class HealthEntryFactory extends Factory
         ]);
     }
 
-    /**
-     * Include exercise data.
-     */
     public function withExercise(): static
     {
         return $this->state(fn (array $attributes): array => [

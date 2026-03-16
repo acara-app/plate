@@ -9,7 +9,7 @@ use App\Enums\HealthEntryType;
 use App\Enums\InsulinType;
 
 beforeEach(function (): void {
-    // Setup if needed
+    //
 });
 
 test('it formats glucose log correctly', function (): void {
@@ -296,8 +296,8 @@ test('fromParsedArray handles null and invalid values gracefully', function (): 
     ]);
 
     expect($data)
-        ->isHealthData->toBeTrue() // 'not-bool' casts to true
-        ->logType->toBe(HealthEntryType::Glucose) // fallback
+        ->isHealthData->toBeTrue()
+        ->logType->toBe(HealthEntryType::Glucose)
         ->glucoseValue->toBeNull()
         ->glucoseReadingType->toBeNull()
         ->measuredAt->toBeNull();

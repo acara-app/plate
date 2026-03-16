@@ -27,9 +27,6 @@ final readonly class MealPlanPromptBuilder
         private GlucoseDataAnalyzer $glucoseDataAnalyzer,
     ) {}
 
-    /**
-     * Generate a prompt for multi-day meal plan generation.
-     */
     public function handle(User $user, ?GlucoseAnalysisData $glucoseAnalysis = null): string
     {
         $context = $this->buildContext($user, $glucoseAnalysis);
@@ -39,9 +36,6 @@ final readonly class MealPlanPromptBuilder
         ])->render();
     }
 
-    /**
-     * Generate a prompt for single-day meal plan generation.
-     */
     public function handleForDay(
         User $user,
         int $dayNumber,
@@ -61,9 +55,6 @@ final readonly class MealPlanPromptBuilder
         ])->render();
     }
 
-    /**
-     * Build the context data object from user profile.
-     */
     private function buildContext(User $user, ?GlucoseAnalysisData $glucoseAnalysis = null): MealPlanContextData
     {
         $user->loadMissing([
@@ -99,9 +90,6 @@ final readonly class MealPlanPromptBuilder
     }
 
     /**
-     * Return attributes with their stored metadata for the meal plan prompt.
-     * Metadata is now stored when attributes are created via enrich_attribute_metadata tool.
-     *
      * @param  Collection<int, UserProfileAttribute>  $attributes
      * @return array<int, array{category: UserProfileAttributeCategory, value: string, severity: AllergySeverity|null, notes: string|null, metadata: array<string, mixed>|null}>
      */
@@ -116,9 +104,6 @@ final readonly class MealPlanPromptBuilder
         ])->values()->all();
     }
 
-    /**
-     * Calculate the DietType based on user profile choices.
-     */
     private function calculateDietType(UserProfile $profile): DietType
     {
         return DietMapper::map(
@@ -128,9 +113,6 @@ final readonly class MealPlanPromptBuilder
         );
     }
 
-    /**
-     * Calculate daily calorie target based on TDEE and goals
-     */
     private function calculateDailyCalorieTarget(UserProfile $profile): ?float
     {
         $tdee = $profile->tdee;

@@ -6,9 +6,6 @@ namespace App\DataObjects\Memory;
 
 use Spatie\LaravelData\Data;
 
-/**
- * Represents a related memory with relationship type.
- */
 final class RelatedMemoryData extends Data
 {
     /**

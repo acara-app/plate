@@ -13,8 +13,6 @@ final readonly class ValidEmail implements ValidationRule
     private const string REGEX = '/[a-z0-9!#$%&*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&*+\/=?^_`{|}~-]+)*@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.[a-z]{2,}/';
 
     /**
-     * Run the validation rule.
-     *
      * @param  Closure(string, ?string=): PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void

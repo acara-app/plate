@@ -56,9 +56,6 @@ final class GroceryListGeneratorAgent implements Agent
         );
     }
 
-    /**
-     * Generate a consolidated grocery list from a meal plan.
-     */
     public function generate(MealPlan $mealPlan): GroceryListData
     {
         $ingredients = $this->extractIngredients($mealPlan);
@@ -80,8 +77,6 @@ final class GroceryListGeneratorAgent implements Agent
     }
 
     /**
-     * Extract all ingredients from the meal plan's meals.
-     *
      * @return list<ExtractedIngredientData>
      */
     private function extractIngredients(MealPlan $mealPlan): array
@@ -112,8 +107,6 @@ final class GroceryListGeneratorAgent implements Agent
     }
 
     /**
-     * Build the prompt for the AI agent.
-     *
      * @param  list<ExtractedIngredientData>  $ingredients
      */
     private function buildPrompt(array $ingredients, MealPlan $mealPlan): string

@@ -18,17 +18,11 @@ final readonly class GetFitnessGoals implements Tool
         return 'get_fitness_goals';
     }
 
-    /**
-     * Get the description of the tool's purpose.
-     */
     public function description(): string
     {
         return "Retrieve the current user's fitness and exercise goals. Use this to understand what the user wants to achieve regarding their fitness, strength, endurance, weight management, or other athletic objectives.";
     }
 
-    /**
-     * Execute the tool.
-     */
     public function handle(Request $request): string
     {
         $user = Auth::user();

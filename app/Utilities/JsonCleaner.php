@@ -10,9 +10,6 @@ use JsonException;
 
 final class JsonCleaner
 {
-    /**
-     * Extract and validate JSON from AI response, handling common formatting issues
-     */
     public static function extractAndValidateJson(string $response): string
     {
         $originalResponse = $response;

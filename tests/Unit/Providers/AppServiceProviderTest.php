@@ -46,7 +46,6 @@ it('boots url defaults in production', function (): void {
     $provider = new AppServiceProvider(app());
     $provider->boot();
 
-    // URL scheme is forced to https in production
     expect(true)->toBeTrue();
 });
 
@@ -56,7 +55,6 @@ it('does not force https scheme in non-production', function (): void {
     $provider = new AppServiceProvider(app());
     $provider->boot();
 
-    // URL scheme is not forced in non-production
     expect(true)->toBeTrue();
 });
 
@@ -69,7 +67,6 @@ it('boots verification defaults', function (): void {
     $provider = new AppServiceProvider(app());
     $provider->boot();
 
-    // Trigger the verification notification which uses the createUrlUsing closure
     $notification = new VerifyEmail;
     $url = $notification->toMail($user)->actionUrl;
 

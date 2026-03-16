@@ -23,7 +23,6 @@ final class MealPlanContextData extends Data
      * @param  array<ProfileAttributeData>  $medications
      */
     public function __construct(
-        // Physical metrics
         public ?int $age,
         public ?float $height,
         public ?float $weight,
@@ -32,30 +31,23 @@ final class MealPlanContextData extends Data
         public ?float $bmr,
         public ?float $tdee,
 
-        // Goals
         public ?string $goal,
         public ?float $targetWeight,
         public ?string $additionalGoals,
 
-        // Dietary preferences
         public array $dietaryPreferences,
 
-        // Health conditions
         public array $healthConditions,
 
-        // Medications
         public array $medications,
 
-        // Calculated values
         public ?float $dailyCalorieTarget,
         public MacronutrientRatiosData $macronutrientRatios,
 
-        // Diet type information
         public DietType $dietType,
         public string $dietTypeLabel,
         public string $dietTypeFocus,
 
-        // Glucose data analysis
         public ?GlucoseAnalysisData $glucoseAnalysis,
     ) {}
 }

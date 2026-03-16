@@ -73,8 +73,6 @@ it('displays food with category and shows related foods', function (): void {
         ->assertViewHas('relatedFoods', fn ($relatedFoods): bool => $relatedFoods->isNotEmpty() && $relatedFoods->contains('id', $relatedFood->id));
 });
 
-// Search filter uses ILIKE which is PostgreSQL-specific, tested in production
-
 it('filters food by glycemic assessment', function (): void {
     Content::factory()->create([
         'slug' => 'low-gi-food-'.Str::uuid()->toString(),
@@ -212,7 +210,6 @@ it('generates canonical pointing to clean URL when using category query param', 
     $response = $this->get(route('food.index', ['category' => 'fruits']));
 
     $response->assertOk();
-    // When using query param, canonical should point to clean URL
     $response->assertViewHas('canonicalUrl', route('food.category', ['category' => 'fruits']));
 });
 

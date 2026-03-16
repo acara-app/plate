@@ -31,11 +31,9 @@ it('attempts to create stripe customer when user has no stripe_id', function ():
 
     $service = new StripeService();
 
-    // This will fail without real Stripe API but covers lines 16-19
     try {
         $service->ensureStripeCustomer($user);
     } catch (Exception $exception) {
-        // Expected to fail without real Stripe setup
         expect($exception)->toBeInstanceOf(Exception::class);
     }
 
@@ -43,16 +41,13 @@ it('attempts to create stripe customer when user has no stripe_id', function ():
 });
 
 it('delegates to user billingPortalUrl method', function (): void {
-    // Create a real user and test the delegation
     $user = User::factory()->create(['stripe_id' => 'cus_test123']);
 
     $service = new StripeService();
 
-    // This will fail without Stripe but covers the code path
     try {
         $url = $service->getBillingPortalUrl($user, 'https://example.com/return');
     } catch (Exception $exception) {
-        // Expected to fail without real Stripe setup
         expect($exception)->toBeInstanceOf(Exception::class);
     }
 
@@ -86,8 +81,7 @@ it('throws exception when cashier secret is not configured', function (): void {
 })->throws(RuntimeException::class, 'Stripe API key is not configured properly');
 
 it('throws exception when cashier secret is not a string', function (): void {
-    Config::set('cashier.secret', 12345); // Not a string
-
+    Config::set('cashier.secret', 12345);
     $service = new StripeService();
 
     $service->getPriceIdFromLookupKey('any_key');
@@ -98,14 +92,10 @@ it('attempts to fetch price from stripe when valid api key is configured', funct
 
     $service = new StripeService();
 
-    // This will call the real Stripe API (in test mode) or fail gracefully
     try {
         $result = $service->getPriceIdFromLookupKey('nonexistent_key');
-        // If it returns null, that's OK - it means no price was found
         expect($result)->toBeNull();
     } catch (Exception $exception) {
-        // Expected to potentially fail with invalid API key
-        // But the code path is covered
         expect($exception)->toBeInstanceOf(Exception::class);
     }
 });
@@ -115,7 +105,6 @@ it('delegates to user newSubscription for checkout', function (): void {
 
     $service = new StripeService();
 
-    // This will fail without Stripe but covers the code paths
     try {
         $url = $service->createSubscriptionCheckout(
             $user,
@@ -126,7 +115,6 @@ it('delegates to user newSubscription for checkout', function (): void {
             ['test' => 'data']
         );
     } catch (Exception $exception) {
-        // Expected to fail without real Stripe setup
         expect($exception)->toBeInstanceOf(Exception::class);
     }
 
@@ -138,7 +126,7 @@ it('returns null when subscription has no latest payment', function (): void {
     {
         public function __construct()
         {
-            // Skip parent constructor to avoid DB connection issues
+            //
         }
 
         public function latestPayment(): ?Payment
@@ -160,7 +148,7 @@ it('returns hosted invoice url when subscription has latest payment with url', f
 
         public function __construct()
         {
-            // Skip parent constructor
+            //
         }
     };
 
@@ -187,7 +175,7 @@ it('returns null when latest payment has no hosted invoice url', function (): vo
 
         public function __construct()
         {
-            // Skip parent constructor
+            //
         }
     };
 
@@ -210,11 +198,11 @@ it('returns null when latest payment has no hosted invoice url', function (): vo
 it('returns null when hosted invoice url is not a string', function (): void {
     $mockPayment = new class extends Payment
     {
-        public int $hosted_invoice_url = 12345; // Not a string
+        public int $hosted_invoice_url = 12345;
 
         public function __construct()
         {
-            // Skip parent constructor
+            //
         }
     };
 

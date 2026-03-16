@@ -32,9 +32,6 @@ final readonly class GenerateGroceryListAction
         ]);
     }
 
-    /**
-     * Generate items for an existing grocery list using AI.
-     */
     public function generateItems(GroceryList $groceryList): GroceryList
     {
         $mealPlan = $groceryList->mealPlan;
@@ -82,9 +79,6 @@ final readonly class GenerateGroceryListAction
         return $freshGroceryList;
     }
 
-    /**
-     * Full generation: create placeholder and generate items.
-     */
     public function handle(MealPlan $mealPlan): GroceryList
     {
         $groceryList = $this->createPlaceholder($mealPlan);

@@ -43,14 +43,12 @@ it('shows empty state when user has no meal plans', function (): void {
 it('displays the latest weekly meal plan by default', function (): void {
     $user = User::factory()->create();
 
-    // Create older meal plan
     MealPlan::factory()
         ->weekly()
         ->for($user)
         ->has(Meal::factory()->breakfast()->forDay(1), 'meals')
         ->create(['created_at' => now()->subDays(7)]);
 
-    // Create newer meal plan
     $latestPlan = MealPlan::factory()
         ->weekly()
         ->for($user)
@@ -67,8 +65,7 @@ it('displays the latest weekly meal plan by default', function (): void {
 
 it('defaults to current day of week', function (): void {
     $user = User::factory()->create();
-    $currentDayOfWeek = now()->dayOfWeekIso; // 1 = Monday, 7 = Sunday
-
+    $currentDayOfWeek = now()->dayOfWeekIso;
     $mealPlan = MealPlan::factory()
         ->weekly()
         ->for($user)
@@ -91,7 +88,6 @@ it('defaults to current day of week', function (): void {
 it('uses session timezone when calculating current day', function (): void {
     $user = User::factory()->create();
 
-    // Set timezone to Tokyo (UTC+9)
     $timezone = 'Asia/Tokyo';
     $currentDayInTokyo = now($timezone)->dayOfWeekIso;
 
@@ -123,7 +119,6 @@ it('displays meals for a specific day', function (): void {
         ->for($user)
         ->create();
 
-    // Create meals for different days
     $day3Meal = Meal::factory()
         ->breakfast()
         ->for($mealPlan)
@@ -156,7 +151,6 @@ it('clamps day parameter to valid range', function (): void {
         ->has(Meal::factory()->breakfast()->forDay(1), 'meals')
         ->create();
 
-    // Test day < 1
     $response = $this->actingAs($user)
         ->get(route('meal-plans.index', ['day' => -5]));
 
@@ -164,7 +158,6 @@ it('clamps day parameter to valid range', function (): void {
         ->assertInertia(fn ($page) => $page
             ->where('currentDay.day_number', 1));
 
-    // Test day > duration_days
     $response = $this->actingAs($user)
         ->get(route('meal-plans.index', ['day' => 100]));
 
@@ -176,7 +169,6 @@ it('clamps day parameter to valid range', function (): void {
 it('handles short duration meal plans correctly', function (): void {
     $user = User::factory()->create();
 
-    // Create a 3-day meal plan
     $mealPlan = MealPlan::factory()
         ->custom(3)
         ->for($user)
@@ -185,7 +177,6 @@ it('handles short duration meal plans correctly', function (): void {
         ->has(Meal::factory()->breakfast()->forDay(3), 'meals')
         ->create();
 
-    // Test day parameter is clamped to 3
     $response = $this->actingAs($user)
         ->get(route('meal-plans.index', ['day' => 5]));
 
@@ -193,24 +184,22 @@ it('handles short duration meal plans correctly', function (): void {
         ->assertInertia(fn ($page) => $page
             ->where('currentDay.day_number', 3)
             ->where('navigation.total_days', 3)
-            ->where('navigation.next_day', 1) // Loops back to day 1
+            ->where('navigation.next_day', 1)
             ->where('navigation.previous_day', 2));
 
-    // Test day 1 loops back to day 3
     $response = $this->actingAs($user)
         ->get(route('meal-plans.index', ['day' => 1]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('currentDay.day_number', 1)
-            ->where('navigation.previous_day', 3) // Loops back to day 3
+            ->where('navigation.previous_day', 3)
             ->where('navigation.next_day', 2));
 });
 
 it('defaults to day 1 when current day of week exceeds meal plan duration', function (): void {
     $user = User::factory()->create();
 
-    // Create a 3-day meal plan
     $mealPlan = MealPlan::factory()
         ->custom(3)
         ->for($user)
@@ -219,8 +208,6 @@ it('defaults to day 1 when current day of week exceeds meal plan duration', func
         ->has(Meal::factory()->breakfast()->forDay(3), 'meals')
         ->create();
 
-    // If today is Thursday (4), Friday (5), Saturday (6), or Sunday (7),
-    // it should default to day 1 instead of the current day of week
     $currentDayOfWeek = now()->dayOfWeekIso;
     $expectedDefaultDay = $currentDayOfWeek <= 3 ? $currentDayOfWeek : 1;
 
@@ -241,7 +228,6 @@ it('calculates daily stats correctly', function (): void {
         ->for($user)
         ->create();
 
-    // Create meals with known values
     Meal::factory()
         ->for($mealPlan)
         ->forDay(1)
@@ -288,7 +274,7 @@ it('provides navigation with looping for previous day', function (): void {
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('navigation.has_previous', true)
-            ->where('navigation.previous_day', 7) // Loops to Sunday
+            ->where('navigation.previous_day', 7)
             ->where('navigation.total_days', 7));
 });
 
@@ -307,7 +293,7 @@ it('provides navigation with looping for next day', function (): void {
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('navigation.has_next', true)
-            ->where('navigation.next_day', 1) // Loops to Monday
+            ->where('navigation.next_day', 1)
             ->where('navigation.total_days', 7));
 });
 
@@ -340,7 +326,6 @@ it('returns meals sorted by sort_order', function (): void {
         ->for($user)
         ->create();
 
-    // Create meals in reverse order
     $snack = Meal::factory()
         ->for($mealPlan)
         ->forDay(1)
@@ -385,9 +370,9 @@ it('includes meal macro percentages', function (): void {
         ->forDay(1)
         ->create([
             'calories' => 500,
-            'protein_grams' => 40, // 40*4 = 160 cal (40%)
-            'carbs_grams' => 40,   // 40*4 = 160 cal (40%)
-            'fat_grams' => 9,      // 9*9 = 81 cal (20%)
+            'protein_grams' => 40,
+            'carbs_grams' => 40,
+            'fat_grams' => 9,
         ]);
 
     $response = $this->actingAs($user)
@@ -396,7 +381,7 @@ it('includes meal macro percentages', function (): void {
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
             ->has('currentDay.meals.0.macro_percentages')
-            ->where('currentDay.meals.0.macro_percentages.protein', 39.9) // Rounding
+            ->where('currentDay.meals.0.macro_percentages.protein', 39.9)
             ->where('currentDay.meals.0.macro_percentages.carbs', 39.9)
             ->where('currentDay.meals.0.macro_percentages.fat', 20.2));
 });
@@ -436,7 +421,6 @@ it('includes meal plan metadata', function (): void {
 it('displays the latest meal plan regardless of type', function (): void {
     $user = User::factory()->create();
 
-    // Create different types of meal plans with different timestamps
     MealPlan::factory()
         ->monthly()
         ->for($user)
@@ -449,7 +433,6 @@ it('displays the latest meal plan regardless of type', function (): void {
         ->has(Meal::factory()->breakfast()->forDay(1), 'meals')
         ->create(['created_at' => now()->subDays(3)]);
 
-    // Create most recent weekly meal plan
     $latestPlan = MealPlan::factory()
         ->weekly()
         ->for($user)
@@ -469,7 +452,6 @@ it('does not show other users meal plans', function (): void {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    // Create meal plan for other user
     MealPlan::factory()
         ->weekly()
         ->for($otherUser)
@@ -494,14 +476,13 @@ it('calculates macronutrient ratios from meals when not set on plan', function (
         ->for($user)
         ->create(['macronutrient_ratios' => null]);
 
-    // Create meal with known macros
     Meal::factory()
         ->for($mealPlan)
         ->forDay(1)
         ->create([
-            'protein_grams' => 50,  // 50*4 = 200 cal
-            'carbs_grams' => 50,    // 50*4 = 200 cal
-            'fat_grams' => 22,      // 22*9 = 198 cal (~200)
+            'protein_grams' => 50,
+            'carbs_grams' => 50,
+            'fat_grams' => 22,
         ]);
 
     $response = $this->actingAs($user)
@@ -525,7 +506,6 @@ it('navigates between days with inertia', function (): void {
         ->has(Meal::factory()->breakfast()->forDay(2), 'meals')
         ->create();
 
-    // Navigate to day 2
     $response = $this->actingAs($user)
         ->get(route('meal-plans.index', ['day' => 2]));
 
@@ -567,7 +547,6 @@ it('returns generating status when overall plan is generating and day is empty',
             ],
         ]);
 
-    // Day 2 has no meals and no day-specific status
     $response = $this->actingAs($user)
         ->get(route('meal-plans.index', ['day' => 2]));
 

@@ -39,8 +39,6 @@ final readonly class AnalyzeGlucoseForNotificationAction
     }
 
     /**
-     * Evaluate concerns based on user thresholds and analysis patterns.
-     *
      * @return array<int, string>
      */
     private function evaluateConcerns(UserSettingsData $settings, GlucoseAnalysisData $analysisData): array
@@ -50,7 +48,6 @@ final readonly class AnalyzeGlucoseForNotificationAction
         $lowThreshold = $settings->effectiveLowThreshold();
         $highReadingsPercentTrigger = $this->getHighReadingsPercentTrigger();
 
-        // Check for high readings exceeding configured trigger percentage
         if ($analysisData->timeInRange->abovePercentage >= $highReadingsPercentTrigger) {
             $concerns[] = sprintf(
                 '%.0f%% of your readings were above %d mg/dL in the past %d days.',
@@ -60,7 +57,6 @@ final readonly class AnalyzeGlucoseForNotificationAction
             );
         }
 
-        // Check for low readings (below hypoglycemia threshold)
         if ($analysisData->timeInRange->belowPercentage > 0 && $analysisData->patterns->hypoglycemiaRisk !== 'none') {
             $concerns[] = sprintf(
                 '%.0f%% of your readings were below %d mg/dL, indicating potential hypoglycemia risk.',
@@ -69,7 +65,6 @@ final readonly class AnalyzeGlucoseForNotificationAction
             );
         }
 
-        // Check for consistently high or low patterns
         if ($analysisData->patterns->consistentlyHigh && $analysisData->averages->overall !== null) {
             $concerns[] = sprintf(
                 'Your average glucose of %.1f mg/dL is consistently elevated.',
@@ -84,20 +79,17 @@ final readonly class AnalyzeGlucoseForNotificationAction
             );
         }
 
-        // Check for high variability (only if combined with other concerning patterns)
         if ($analysisData->patterns->highVariability &&
             ($analysisData->patterns->consistentlyHigh || $analysisData->patterns->postMealSpikes || $analysisData->timeInRange->percentage < 70)) {
             $concerns[] = 'High glucose variability detected, indicating inconsistent blood sugar control.';
         }
 
-        // Check for post-meal spikes (only if average post-meal is concerning)
         if ($analysisData->patterns->postMealSpikes &&
             $analysisData->averages->postMeal !== null &&
             $analysisData->averages->postMeal > $highThreshold) {
             $concerns[] = 'Frequent post-meal glucose spikes detected.';
         }
 
-        // Check for rising trend
         if ($analysisData->trend->direction === 'rising' && $analysisData->trend->slopePerWeek !== null && $analysisData->trend->slopePerWeek > 5) {
             $concerns[] = sprintf(
                 'Your glucose levels are trending upward by %.1f mg/dL per week.',

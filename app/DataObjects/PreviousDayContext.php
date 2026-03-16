@@ -16,8 +16,6 @@ final class PreviousDayContext extends Data
     ) {}
 
     /**
-     * Add meals from a day to the context.
-     *
      * @param  array<string>  $mealNames
      */
     public function addDayMeals(int $dayNumber, array $mealNames): self
@@ -27,9 +25,6 @@ final class PreviousDayContext extends Data
         return $this;
     }
 
-    /**
-     * Get a formatted string of previous meals for the prompt.
-     */
     public function toPromptText(): string
     {
         if ($this->previousMealNames === []) {

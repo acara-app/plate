@@ -18,8 +18,6 @@ final class MealPlanDayWorkflow extends Workflow
     public $timeout = 300;
 
     /**
-     * Generate meals for a specific day in an existing meal plan.
-     *
      * @codeCoverageIgnore Generator methods with yield are executed by the workflow engine
      *
      * @phpstan-return Generator<mixed, mixed, mixed, mixed>

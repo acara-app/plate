@@ -10,8 +10,6 @@ use App\Ai\Exceptions\Memory\MemoryStorageException;
 interface UpdateMemoryTool
 {
     /**
-     * Update an existing memory's content, metadata, or importance.
-     *
      * @param  string  $memoryId  The ID of the memory to update.
      * @param  string|null  $content  New content (null to keep existing). Will regenerate embedding if changed.
      * @param  array<string, mixed>|null  $metadata  New metadata to merge with existing.

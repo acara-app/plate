@@ -3,16 +3,6 @@
 declare(strict_types=1);
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Common Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines are used across the application for common
-    | UI elements and messages.
-    |
-    */
-
     'welcome' => 'Welcome',
     'loading' => 'Loading...',
     'save' => 'Save',
@@ -31,14 +21,12 @@ return [
     'yes' => 'Yes',
     'no' => 'No',
 
-    // Navigation
     'dashboard' => 'Dashboard',
     'profile' => 'Profile',
     'settings' => 'Settings',
     'logout' => 'Log out',
     'home' => 'Home',
 
-    // Actions
     'view' => 'View',
     'download' => 'Download',
     'upload' => 'Upload',
@@ -60,7 +48,6 @@ return [
     'archive' => 'Archive',
     'restore' => 'Restore',
 
-    // Status messages
     'success' => 'Success',
     'error' => 'Error',
     'warning' => 'Warning',
@@ -72,13 +59,11 @@ return [
     'failed' => 'Failed',
     'processing' => 'Processing...',
 
-    // Confirmation messages
     'are_you_sure' => 'Are you sure?',
     'cannot_be_undone' => 'This action cannot be undone.',
     'confirm_delete' => 'Confirm deletion',
     'confirm_action' => 'Confirm action',
 
-    // Pagination
     'showing' => 'Showing',
     'to' => 'to',
     'of' => 'of',
@@ -87,7 +72,6 @@ return [
     'no_results' => 'No results found',
     'no_data' => 'No data available',
 
-    // Time
     'today' => 'Today',
     'yesterday' => 'Yesterday',
     'tomorrow' => 'Tomorrow',
@@ -98,7 +82,6 @@ return [
     'this_year' => 'This year',
     'last_year' => 'Last year',
 
-    // Common phrases
     'please_wait' => 'Please wait',
     'try_again' => 'Try again',
     'learn_more' => 'Learn more',
@@ -117,11 +100,9 @@ return [
     'show_less' => 'Show less',
     'expand' => 'Expand',
     'collapse' => 'Collapse',
-    // OAuth
     'continue_with_google' => 'Continue with Google',
     'sign_in_with_google' => 'Sign in with Google',
 
-    // Notifications
     'notifications' => [
         'title' => 'Notification settings',
         'preferences' => 'Notification preferences',
@@ -136,7 +117,6 @@ return [
         'save_preferences' => 'Save preferences',
     ],
 
-    // Password settings
     'password_settings' => [
         'title' => 'Password settings',
         'update_title' => 'Update password',
@@ -150,7 +130,6 @@ return [
         'save_password' => 'Save password',
     ],
 
-    // Dashboard
     'dashboard_cards' => [
         'health_insights' => [
             'title' => 'Glucose Insights',
@@ -188,14 +167,12 @@ return [
         ],
     ],
 
-    // Dashboard Onboarding Banner
     'onboarding_banner' => [
         'text' => 'Finish setup to get tailored nutrition recommendations.',
         'complete' => 'Complete Setup',
         'dismiss' => 'Dismiss',
     ],
 
-    // Onboarding
     'onboarding' => [
         'biometrics' => [
             'title' => 'Biometrics - Step 1 of 7',
@@ -396,7 +373,6 @@ return [
         ],
     ],
 
-    // Diabetes Log
     'health_entries' => [
         'tabs' => [
             'glucose' => 'Glucose',

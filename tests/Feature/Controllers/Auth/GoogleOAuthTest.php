@@ -13,7 +13,6 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
 
 beforeEach(function (): void {
-    // Create a mock provider that can be configured per test
     $this->provider = new class implements Provider
     {
         public ?SocialiteUser $user = null;
@@ -35,7 +34,6 @@ beforeEach(function (): void {
         }
     };
 
-    // Bind the mock provider to the Socialite facade
     Socialite::swap(new readonly class($this->provider)
     {
         public function __construct(private Provider $provider) {}
@@ -217,7 +215,6 @@ it('handles duplicate Google ID gracefully', function (): void {
 
     $response->assertRedirectToRoute('dashboard');
 
-    // Should update the existing user with the Google ID
     $user = User::query()->where('google_id', 'google_duplicate')->first();
     expect($user->email)->toBe('second@example.com');
 })->group('oauth');

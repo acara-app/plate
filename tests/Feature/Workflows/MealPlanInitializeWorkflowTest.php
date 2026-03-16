@@ -169,7 +169,6 @@ it('generates day meals using activity with mocked agent', function (): void {
 
     MealPlanAgent::fake([$mockResponse]);
 
-    // Test using the action directly instead of activity instantiation
     $action = resolve(MealPlanAgent::class);
     $result = $action->generateForDay(
         $this->user,
@@ -205,7 +204,6 @@ it('workflow triggers via generate meal plan action with workflow stub fake', fu
     $action = resolve(MealPlanAgent::class);
     $action->handle($this->user);
 
-    // Meal plan is now created synchronously before workflow starts
     $mealPlan = $this->user->mealPlans()->first();
     expect($mealPlan)->not->toBeNull();
     expect($mealPlan->metadata['status'])->toBe('generating');
@@ -269,12 +267,10 @@ it('converts multiple days meals to collection preserving day numbers', function
 
     expect($result)->toHaveCount(3);
 
-    // Check day numbers are preserved
     expect($result[0]->dayNumber)->toBe(1);
     expect($result[1]->dayNumber)->toBe(1);
     expect($result[2]->dayNumber)->toBe(2);
 
-    // Check meal types and names
     expect($result[0]->type)->toBe(MealType::Breakfast);
     expect($result[1]->type)->toBe(MealType::Lunch);
     expect($result[2]->type)->toBe(MealType::Dinner);
@@ -300,7 +296,6 @@ it('returns monthly type for 8 to 30 days', function (): void {
 });
 
 it('generates expected result structure from workflow execution', function (): void {
-    // Testing the expected return structure from the workflow
     $userId = 1;
     $totalDays = 7;
     $daysGenerated = 1;
@@ -325,8 +320,7 @@ it('generates expected result structure from workflow execution', function (): v
 
 it('workflow returns completed status when all days generated', function (): void {
     $totalDays = 3;
-    $daysGenerated = 3; // All days generated
-
+    $daysGenerated = 3;
     $finalStatus = $daysGenerated >= $totalDays
         ? MealPlanGenerationStatus::Completed->value
         : MealPlanGenerationStatus::Pending->value;
@@ -336,8 +330,7 @@ it('workflow returns completed status when all days generated', function (): voi
 
 it('workflow returns pending status when not all days generated', function (): void {
     $totalDays = 7;
-    $daysGenerated = 1; // Only 1 day generated
-
+    $daysGenerated = 1;
     $finalStatus = $daysGenerated >= $totalDays
         ? MealPlanGenerationStatus::Completed->value
         : MealPlanGenerationStatus::Pending->value;

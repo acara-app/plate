@@ -7,14 +7,6 @@ namespace App\Contracts\Ai\Memory;
 interface ReflectOnMemoriesTool
 {
     /**
-     * Analyze recent memories to generate high-level insights or pattern recognition.
-     *
-     * This tool performs meta-cognitive analysis on stored memories to identify:
-     * - Recurring themes or patterns
-     * - Contradictions or inconsistencies
-     * - Opportunities for consolidation
-     * - User behavior patterns or preferences
-     *
      * @param  int  $lookbackWindow  How many recent memories to analyze.
      * @param  string|null  $context  Optional context to focus reflection (e.g., 'user preferences', 'work habits').
      * @param  array<string>  $categories  Only reflect on memories in these categories (empty = all).

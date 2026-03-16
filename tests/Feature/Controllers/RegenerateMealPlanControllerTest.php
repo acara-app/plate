@@ -41,15 +41,12 @@ it('starts meal plan workflow and creates meal plan with generating status', fun
 
     $user = User::factory()->create();
 
-    // Create some glucose data for analysis
     HealthEntry::factory()->count(5)->for($user)->create();
 
     $response = actingAs($user)->post(route('meal-plans.regenerate'));
 
     $response->assertRedirectToRoute('meal-plans.index');
 
-    // Verify meal plan was created synchronously with Generating status
-    // This ensures users see the generating state immediately after redirect
     $mealPlan = $user->fresh()->mealPlans()->first();
     expect($mealPlan)->not->toBeNull();
     expect($mealPlan->metadata['status'])->toBe('generating');
