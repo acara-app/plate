@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\ToolRegistry;
 use App\Utilities\LanguageUtil;
 use Laravel\Ai\Contracts\Tool;
+use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Providers\Tools\ProviderTool;
 
 final readonly class AgentBuilder
@@ -18,6 +19,9 @@ final readonly class AgentBuilder
         private ToolRegistry $toolRegistry,
     ) {}
 
+    /**
+     * @return array{instructions: string, tools: array<int, Tool|ProviderTool>}
+     */
     public function build(AgentPayload $payload, ?User $user = null): array
     {
         $mode = $payload->mode;
@@ -47,6 +51,7 @@ final readonly class AgentBuilder
     }
 
     /**
+     * @param  array<int, Base64Image>  $attachments
      * @return array<int, Tool|ProviderTool>
      */
     private function buildTools(array $attachments, bool $webSearchEnabled): array
@@ -85,8 +90,12 @@ final readonly class AgentBuilder
         /** @var string|null $sessionTimezone */
         $sessionTimezone = session('timezone');
 
+        if (! $user instanceof User) {
+            return $sessionTimezone ?? 'UTC';
+        }
+
         return $sessionTimezone
-            ?? $user?->timezone
+            ?? $user->timezone
             ?? 'UTC';
     }
 }

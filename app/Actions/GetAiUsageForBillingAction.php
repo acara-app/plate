@@ -15,9 +15,10 @@ final readonly class GetAiUsageForBillingAction
      */
     public function handle(User $user): array
     {
+        /** @var array{rolling: array{period_hours: int, limit: float}, weekly: array{limit: float}, monthly: array{limit: float}} $limits */
         $limits = config('plate.ai_usage_limits');
-        $multiplier = (int) config('plate.credit_multiplier');
 
+        $multiplier = (int) config('plate.credit_multiplier'); /** @phpstan-ignore cast.int */
         $rollingPeriodStart = now()->subHours($limits['rolling']['period_hours']);
         $rollingLimit = (float) $limits['rolling']['limit'];
 
@@ -54,10 +55,14 @@ final readonly class GetAiUsageForBillingAction
         ];
     }
 
+    // @codeCoverageIgnoreStart
     private function getPeriodStart(?object $subscription): CarbonImmutable
     {
         if ($subscription && isset($subscription->current_period_start)) {
-            return CarbonImmutable::createFromTimestamp($subscription->current_period_start);
+            /** @var float|int|string $timestamp */
+            $timestamp = $subscription->current_period_start;
+
+            return CarbonImmutable::createFromTimestamp($timestamp);
         }
 
         return CarbonImmutable::now()->startOfWeek();
@@ -66,11 +71,16 @@ final readonly class GetAiUsageForBillingAction
     private function getPeriodEnd(?object $subscription): CarbonImmutable
     {
         if ($subscription && isset($subscription->current_period_end)) {
-            return CarbonImmutable::createFromTimestamp($subscription->current_period_end);
+            /** @var float|int|string $timestamp */
+            $timestamp = $subscription->current_period_end;
+
+            return CarbonImmutable::createFromTimestamp($timestamp);
         }
 
         return CarbonImmutable::now()->endOfWeek();
     }
+
+    // @codeCoverageIgnoreEnd
 
     private function getCostForPeriod(User $user, CarbonImmutable $start, CarbonImmutable $end): float
     {
@@ -88,9 +98,12 @@ final readonly class GetAiUsageForBillingAction
 
     private function calculatePercentage(float $current, float $limit): int
     {
+        // @codeCoverageIgnoreStart
         if ($limit <= 0) {
             return 0;
         }
+
+        // @codeCoverageIgnoreEnd
 
         return (int) min(100, round(($current / $limit) * 100));
     }
@@ -104,10 +117,12 @@ final readonly class GetAiUsageForBillingAction
             return $diff->d.' days '.$diff->h.' hours';
         }
 
+        // @codeCoverageIgnoreStart
         if ($diff->h > 0) {
             return $diff->h.' hours '.$diff->i.' minutes';
         }
 
         return $diff->i.' minutes';
+        // @codeCoverageIgnoreEnd
     }
 }

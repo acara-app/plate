@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\Tools\GetDailyServingsByCalorie;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Tools\Request;
 
 it('returns daily servings content', function (): void {
@@ -22,5 +23,6 @@ it('has correct tool metadata', function (): void {
     $tool = new GetDailyServingsByCalorie;
 
     expect($tool->name())->toBe('get_daily_servings_by_calorie')
-        ->and($tool->description())->toContain('USDA daily serving');
+        ->and($tool->description())->toContain('USDA daily serving')
+        ->and($tool->schema(Mockery::mock(JsonSchema::class)))->toBe([]);
 });

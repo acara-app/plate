@@ -16,28 +16,37 @@ final readonly class ToolRegistry
     ) {}
 
     /**
-     * @return array<int, Tool>
+     * @return array<int, Tool|ProviderTool>
      */
     public function getTools(): array
     {
-        return $this->buildTools(config('plate.tools', []));
+        /** @var array<int, class-string> $classes */
+        $classes = config('plate.tools', []);
+
+        return $this->buildTools($classes);
     }
 
     /**
      * @param  array<int, Base64Image>  $images
-     * @return array<int, Tool>
+     * @return array<int, Tool|ProviderTool>
      */
     public function getImageTools(array $images): array
     {
-        return $this->buildTools(config('plate.image_tools', []), ['images' => $images]);
+        /** @var array<int, class-string> $classes */
+        $classes = config('plate.image_tools', []);
+
+        return $this->buildTools($classes, ['images' => $images]);
     }
 
     /**
-     * @return array<int, Tool>
+     * @return array<int, Tool|ProviderTool>
      */
     public function getMealPlanTools(): array
     {
-        return $this->buildTools(config('plate.meal_plan_tools', []));
+        /** @var array<int, class-string> $classes */
+        $classes = config('plate.meal_plan_tools', []);
+
+        return $this->buildTools($classes);
     }
 
     /**
@@ -45,7 +54,11 @@ final readonly class ToolRegistry
      */
     public function getProviderTools(): array
     {
-        return $this->buildTools(config('plate.provider_tools', []));
+        /** @var array<int, class-string<ProviderTool>> $classes */
+        $classes = config('plate.provider_tools', []);
+
+        /** @var array<int, ProviderTool> */
+        return $this->buildTools($classes);
     }
 
     /**
@@ -56,7 +69,10 @@ final readonly class ToolRegistry
     private function buildTools(array $classes, array $constructorArgs = []): array
     {
         return collect($classes)
-            ->map(fn (string $class) => $this->container->make($class, $constructorArgs))
+            ->map(function (string $class) use ($constructorArgs): Tool|ProviderTool {
+                /** @var Tool|ProviderTool */
+                return $this->container->make($class, $constructorArgs);
+            })
             ->all();
     }
 }

@@ -44,7 +44,8 @@ it('returns a StreamableAgentResponse', function (): void {
     $user = User::factory()->create();
     $request = makeStreamRequest();
 
-    $response = $this->action->handle($request, $user);
+    $conversationId = (string) fake()->uuid();
+    $response = $this->action->handle($request, $user, $conversationId);
 
     expect($response)->toBeInstanceOf(StreamableAgentResponse::class);
 });

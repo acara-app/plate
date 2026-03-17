@@ -24,6 +24,7 @@ use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Promptable;
+use Laravel\Ai\Providers\Tools\ProviderTool;
 use Workflow\WorkflowStub;
 
 #[MaxTokens(64000)]
@@ -59,7 +60,7 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasTools
     }
 
     /**
-     * @return array<int, Tool>
+     * @return array<int, Tool|ProviderTool>
      */
     public function tools(): array
     {

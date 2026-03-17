@@ -64,6 +64,18 @@ it('returns image url when image path exists', function (): void {
     expect($content->image_url)->toBeString();
 });
 
+it('returns null meta when meta_data is null', function (): void {
+    $content = Content::factory()->create([
+        'slug' => Str::uuid()->toString(),
+        'meta_data' => null,
+    ]);
+
+    expect($content->meta)->toBeNull()
+        ->and($content->meta_title)->toBe('')
+        ->and($content->meta_description)->toBe('')
+        ->and($content->manual_links)->toBe([]);
+});
+
 it('returns seo metadata attributes from meta data', function (): void {
     $content = Content::factory()->create([
         'slug' => Str::uuid()->toString(),

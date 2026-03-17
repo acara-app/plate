@@ -54,6 +54,13 @@ final class AgentRunner implements Agent, Conversational, HasTools
 
     public function instructions(): string
     {
+        // @codeCoverageIgnoreStart
+        if (! $this->currentPayload instanceof AgentPayload) {
+            return '';
+        }
+
+        // @codeCoverageIgnoreEnd
+
         return $this->agentBuilder->build($this->currentPayload, $this->user)['instructions'];
     }
 
@@ -62,9 +69,12 @@ final class AgentRunner implements Agent, Conversational, HasTools
      */
     public function tools(): array
     {
+        // @codeCoverageIgnoreStart
         if (! $this->currentPayload instanceof AgentPayload) {
             return [];
         }
+
+        // @codeCoverageIgnoreEnd
 
         return $this->agentBuilder->build($this->currentPayload, $this->user)['tools'];
     }

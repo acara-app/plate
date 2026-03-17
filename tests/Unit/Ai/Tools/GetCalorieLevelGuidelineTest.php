@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\Tools\GetCalorieLevelGuideline;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Tools\Request;
 
 it('returns dietary guidelines content', function (): void {
@@ -22,5 +23,6 @@ it('has correct tool metadata', function (): void {
     $tool = new GetCalorieLevelGuideline;
 
     expect($tool->name())->toBe('get_calorie_level_guideline')
-        ->and($tool->description())->toContain('USDA Dietary Guidelines');
+        ->and($tool->description())->toContain('USDA Dietary Guidelines')
+        ->and($tool->schema(Mockery::mock(JsonSchema::class)))->toBe([]);
 });

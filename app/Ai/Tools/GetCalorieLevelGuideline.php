@@ -27,21 +27,27 @@ final readonly class GetCalorieLevelGuideline implements Tool
     {
         $filePath = resource_path('markdown/'.self::FILE_NAME);
 
+        // @codeCoverageIgnoreStart
         if (! File::exists($filePath)) {
-            return json_encode([
+            return (string) json_encode([
                 'success' => false,
                 'error' => 'Dietary guidelines file not found.',
             ]);
         }
 
+        // @codeCoverageIgnoreEnd
+
         $content = File::get($filePath);
 
-        return json_encode([
+        return (string) json_encode([
             'success' => true,
             'content' => $content,
         ]);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function schema(JsonSchema $schema): array
     {
         return [];

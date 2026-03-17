@@ -46,7 +46,10 @@ export function UsageWidget({
                     className={`h-2 ${progressColorClass}`}
                 />
                 <div className="text-xs text-muted-foreground">
-                    <span>{percentage}% &middot; {t('billing.usage.resets_in', { time: resetsIn })}</span>
+                    <span>
+                        {percentage}% &middot;{' '}
+                        {t('billing.usage.resets_in', { time: resetsIn })}
+                    </span>
                 </div>
             </CardContent>
         </Card>
