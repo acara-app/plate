@@ -17,16 +17,9 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
      */
     public function handle(User $user): array
     {
-        $profile = $user->profile;
-
-        if (! $profile instanceof UserProfile) {
-            return [
-                'onboarding_completed' => false,
-                'missing_data' => ['profile'],
-                'context' => 'User has not completed their profile. Biometric data, dietary preferences, health conditions, and medications are unavailable.',
-                'raw_data' => null,
-            ];
-        }
+        $profile = $user->profile instanceof UserProfile
+            ? $user->profile
+            : $user->profile()->firstOrCreate(['user_id' => $user->id]);
 
         $context = [
             'onboarding_completed' => $profile->onboarding_completed,
@@ -253,7 +246,7 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
 
         if ($missingData !== []) {
             $fieldsList = implode(', ', $missingData);
-            $parts[] = sprintf('MISSING PROFILE DATA: %s. If the user asks for meal plans or fitness advice, you can mention which fields are missing and suggest completing their profile for more tailored recommendations.', $fieldsList);
+            $parts[] = sprintf('MISSING PROFILE DATA: %s. Proceed with reasonable defaults — do NOT block the user or ask them to complete their profile first. After fulfilling their request, briefly mention that providing these details (via conversation) would allow more personalized recommendations. Use the update_user_biometrics tool if the user shares this information.', $fieldsList);
         }
 
         return implode("\n", $parts);
