@@ -12,15 +12,21 @@ beforeEach(function (): void {
     $this->action = resolve(GetUserProfileContextAction::class);
 });
 
-it('returns profile not completed for user without profile', function (): void {
+it('auto-creates profile and reports missing fields for user without profile', function (): void {
     $user = User::factory()->create();
 
     $result = $this->action->handle($user);
 
     expect($result)
-        ->onboarding_completed->toBeFalse()
-        ->missing_data->toContain('profile')
-        ->context->toContain('not completed their profile');
+        ->onboarding_completed->toBeFalsy()
+        ->missing_data->toContain('age')
+        ->missing_data->toContain('height')
+        ->missing_data->toContain('weight')
+        ->missing_data->toContain('sex')
+        ->missing_data->toContain('primary_goal')
+        ->context->toContain('MISSING PROFILE DATA');
+
+    expect($user->refresh()->profile)->toBeInstanceOf(UserProfile::class);
 });
 
 it('returns complete profile data for onboarded user', function (): void {

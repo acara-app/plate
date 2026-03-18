@@ -19,7 +19,6 @@ use App\Models\UserProfile;
 use App\Models\UserProfileAttribute;
 use App\Services\DietMapper;
 use Illuminate\Database\Eloquent\Collection;
-use RuntimeException;
 
 final readonly class MealPlanPromptBuilder
 {
@@ -61,11 +60,10 @@ final readonly class MealPlanPromptBuilder
             'profile.attributes',
         ]);
 
-        throw_unless($user->profile instanceof UserProfile, RuntimeException::class, 'User profile is required to create a meal plan.');
-        /**
-         * @var UserProfile $profile
-         */
-        $profile = $user->profile;
+        /** @var UserProfile $profile */
+        $profile = $user->profile instanceof UserProfile
+            ? $user->profile
+            : $user->profile()->firstOrCreate(['user_id' => $user->id]);
 
         $dietType = $this->calculateDietType($profile);
         $macroTargets = $dietType->macroTargets();

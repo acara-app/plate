@@ -12,6 +12,16 @@ use App\Models\UserProfile;
 use App\Models\UserProfileAttribute;
 use Illuminate\Support\Facades\DB;
 
+test('it handles user without profile gracefully by auto-creating one', function (): void {
+    $user = User::factory()->create();
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    $result = $builder->handle($user);
+
+    expect($result)->toBeString();
+    expect($user->refresh()->profile)->toBeInstanceOf(UserProfile::class);
+});
+
 test('it generates meal plan context for user with complete profile', function (): void {
     $user = User::factory()->create();
     $profile = UserProfile::factory()->create([
