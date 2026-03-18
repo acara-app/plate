@@ -110,12 +110,15 @@ it('includes glucose concerns when post-meal spikes are detected', function (): 
         ->toContain('Glucose Management Goal');
 });
 
-it('throws exception when user has no profile', function (): void {
+it('auto-creates profile and generates prompt when user has no profile', function (): void {
     $user = User::factory()->create();
 
     $builder = resolve(MealPlanPromptBuilder::class);
-    $builder->handle($user);
-})->throws(RuntimeException::class, 'User profile is required to create a meal plan.');
+    $prompt = $builder->handle($user);
+
+    expect($prompt)->toBeString()->not->toBeEmpty();
+    expect($user->refresh()->profile)->toBeInstanceOf(UserProfile::class);
+});
 
 it('calculates calorie deficit for weight loss goal', function (): void {
     $user = User::factory()->create();
