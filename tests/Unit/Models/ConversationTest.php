@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Conversation;
+use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;
 
@@ -87,4 +88,20 @@ it('factory creates valid conversation', function (): void {
     expect($conversation->exists)->toBeTrue()
         ->and($conversation->title)->toBeString()
         ->and($conversation->user_id)->toBeInt();
+});
+
+it('has many summaries', function (): void {
+    $conversation = Conversation::factory()->create();
+
+    ConversationSummary::factory()->create(['conversation_id' => $conversation->id, 'sequence_number' => 1]);
+    ConversationSummary::factory()->create(['conversation_id' => $conversation->id, 'sequence_number' => 2]);
+
+    expect($conversation->summaries)->toHaveCount(2)
+        ->and($conversation->summaries->first())->toBeInstanceOf(ConversationSummary::class);
+});
+
+it('returns empty collection when no summaries exist', function (): void {
+    $conversation = Conversation::factory()->create();
+
+    expect($conversation->summaries)->toBeEmpty();
 });

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Ai\Agents\AgentRunner;
 use App\Models\Conversation;
+use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;
 use Laravel\Ai\Messages\MessageRole;
@@ -161,4 +162,15 @@ it('maintains separate histories for different conversations', function (): void
 
     expect($conversation1->messages)->toHaveCount(2)
         ->and($conversation2->messages)->toHaveCount(1);
+});
+
+it('belongs to a summary', function (): void {
+    $conversation = Conversation::factory()->create();
+    $summary = ConversationSummary::factory()->create(['conversation_id' => $conversation->id]);
+    $history = History::factory()->forConversation($conversation)->create([
+        'summary_id' => $summary->id,
+    ]);
+
+    expect($history->summary)->toBeInstanceOf(ConversationSummary::class)
+        ->and($history->summary->id)->toBe($summary->id);
 });

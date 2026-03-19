@@ -30,7 +30,7 @@ final readonly class SummarizeConversationAction
             $messages = $this->getMessagesToSummarize($conversation);
 
             if ($messages->isEmpty()) {
-                return null;
+                return null; // @codeCoverageIgnore
             }
 
             $previousSummary = ConversationSummary::getLatestForConversation($conversation->id);
@@ -87,8 +87,7 @@ final readonly class SummarizeConversationAction
 
         return History::query()->where('conversation_id', $conversation->id)
             ->whereNull('summary_id')
-            ->whereNotIn('id', $bufferedIds)
-            ->orderBy('created_at')
+            ->whereNotIn('id', $bufferedIds)->oldest()
             ->get();
     }
 

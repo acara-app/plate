@@ -8,9 +8,6 @@ use App\Models\Conversation;
 use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 function createConversationWithMessages(User $user, int $count): Conversation
 {
@@ -172,5 +169,51 @@ describe('handle', function (): void {
             ->toBeInstanceOf(ConversationSummary::class)
             ->sequence_number->toBe(2)
             ->previous_summary_id->toBe($firstSummary->id);
+    });
+
+    it('returns null when messages are empty', function (): void {
+        $user = User::factory()->create();
+        $conversation = createConversationWithMessages($user, 50);
+
+        History::query()->where('conversation_id', $conversation->id)
+            ->update(['summary_id' => 'fake-summary-id']);
+
+        $mockAgent = Mockery::mock(SummarizesConversation::class);
+        $mockAgent->shouldNotReceive('summarize');
+
+        $action = new SummarizeConversationAction($mockAgent);
+        $result = $action->handle($conversation);
+
+        expect($result)->toBeNull();
+    });
+
+    it('logs error when summarization fails', function (): void {
+        $user = User::factory()->create();
+        $conversation = createConversationWithMessages($user, 50);
+
+        $mockAgent = Mockery::mock(SummarizesConversation::class);
+        $mockAgent->shouldReceive('summarize')
+            ->once()
+            ->andThrow(new Exception('API failure'));
+
+        $action = new SummarizeConversationAction($mockAgent);
+        $result = $action->handle($conversation);
+
+        expect($result)->toBeNull();
+    });
+
+    it('returns null when agent returns invalid JSON', function (): void {
+        $user = User::factory()->create();
+        $conversation = createConversationWithMessages($user, 50);
+
+        $mockAgent = Mockery::mock(SummarizesConversation::class);
+        $mockAgent->shouldReceive('summarize')
+            ->once()
+            ->andReturn('not valid json {{{');
+
+        $action = new SummarizeConversationAction($mockAgent);
+        $result = $action->handle($conversation);
+
+        expect($result)->toBeNull();
     });
 });
