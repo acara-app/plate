@@ -837,8 +837,18 @@ return [
             'two_factor' => 'Two-Factor Auth',
             'notifications' => 'Notifications',
             'appearance' => 'Appearance',
+            'household' => 'Household',
             'integrations' => 'Integrations',
         ],
+    ],
+    'household' => [
+        'title' => 'Household',
+        'heading' => 'Household & Family',
+        'description' => 'Describe your household so your AI advisor can consider everyone when suggesting meals and nutrition advice.',
+        'label' => 'Household information',
+        'placeholder' => 'e.g. My husband Bataa is 38, has type 2 diabetes. Kids: Tana (12, girl, peanut allergy), Nomi (8, boy), Sarnai (5, girl). We eat halal.',
+        'save_button' => 'Save',
+        'saved' => 'Saved',
     ],
     'appearance' => [
         'title' => 'Appearance settings',

@@ -35,6 +35,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read bool $needs_re_onboarding
  * @property-read float|null $target_weight
  * @property-read string|null $additional_goals
+ * @property-read string|null $household_context
  * @property-read GlucoseUnit|null $units_preference
  * @property-read bool $onboarding_completed
  * @property-read CarbonInterface|null $onboarding_completed_at

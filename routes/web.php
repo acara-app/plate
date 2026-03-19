@@ -102,6 +102,9 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('settings/appearance', fn () => Inertia::render('appearance/update'))->name('appearance.edit');
 
+    Route::get('settings/household', [Web\HouseholdController::class, 'edit'])->name('household.edit');
+    Route::patch('settings/household', [Web\HouseholdController::class, 'update'])->name('household.update');
+
     Route::get('settings/integrations', [Web\IntegrationsController::class, 'edit'])->name('integrations.edit');
     Route::post('settings/integrations/telegram/token', [Web\IntegrationsController::class, 'generateTelegramToken'])->name('integrations.telegram.token');
     Route::delete('settings/integrations/telegram', [Web\IntegrationsController::class, 'disconnectTelegram'])->name('integrations.telegram.destroy');

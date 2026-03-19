@@ -2,157 +2,107 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\FoodPhotoAnalyzerAgent;
-use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
-use RyanChandler\LaravelCloudflareTurnstile\Facades\Turnstile;
 
-function fakeTurnstileForSnapToTrack(bool $success = true): void
-{
-    if ($success) {
-        Turnstile::fake();
-    } else {
-        Turnstile::fake()->fail();
-    }
-}
-
-it('renders the snap to track page', function (): void {
+it('renders the snap to track landing page', function (): void {
     Livewire::test('pages::snap-to-track')
         ->assertStatus(200)
         ->assertSee('Snap to Track')
-        ->assertSee('Instant macro breakdown with AI');
+        ->assertSee('Track calories & macros instantly with AI');
 });
 
-it('shows upload area when no photo is selected', function (): void {
+it('shows interactive demo trigger when page loads', function (): void {
     Livewire::test('pages::snap-to-track')
-        ->assertSee('Tap to take photo or upload')
-        ->assertSee('JPG, PNG up to 10MB');
+        ->assertSee('Try the interactive demo')
+        ->assertSee('See how Snap to Track works');
 });
 
-it('validates photo is required', function (): void {
-    fakeTurnstileForSnapToTrack();
-
-    Livewire::test('pages::snap-to-track')
-        ->set('turnstileToken', Turnstile::dummy())
-        ->call('analyze')
-        ->assertHasErrors(['photo' => 'required']);
-});
-
-it('validates photo max size', function (): void {
-    fakeTurnstileForSnapToTrack();
-
-    $file = UploadedFile::fake()->image('large-image.jpg')->size(11000);
-
-    Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->set('turnstileToken', Turnstile::dummy())
-        ->call('analyze')
-        ->assertHasErrors(['photo' => 'max']);
-});
-
-it('shows photo preview after upload', function (): void {
-    $file = UploadedFile::fake()->image('food.jpg');
-
-    Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->assertSee('Analyze Food')
-        ->assertDontSee('Tap to take photo or upload');
-});
-
-it('can clear photo and reset state', function (): void {
-    $file = UploadedFile::fake()->image('food.jpg');
-
-    Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->call('clearPhoto')
-        ->assertSet('photo', null)
-        ->assertSet('result', null)
-        ->assertSet('error', null);
-});
-
-it('displays result after successful analysis', function (): void {
-    fakeTurnstileForSnapToTrack();
-
-    FoodPhotoAnalyzerAgent::fake([
-        [
-            'items' => [
-                ['name' => 'Grilled Chicken', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'portion' => '100g'],
-            ],
-            'total_calories' => 165,
-            'total_protein' => 31,
-            'total_carbs' => 0,
-            'total_fat' => 3.6,
-            'confidence' => 85,
-        ],
-    ]);
-
-    $file = UploadedFile::fake()->image('food.jpg');
-
-    Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->set('turnstileToken', Turnstile::dummy())
-        ->call('analyze')
-        ->assertSet('result.totalCalories', 165.0)
-        ->assertSet('result.totalProtein', 31.0)
-        ->assertSet('result.totalCarbs', 0.0)
-        ->assertSet('result.totalFat', 3.6)
-        ->assertSet('result.confidence', 85)
-        ->assertSee('165')
-        ->assertSee('Grilled Chicken')
-        ->assertSee('85% confident');
-});
-
-it('displays multiple food items in result', function (): void {
-    fakeTurnstileForSnapToTrack();
-
-    FoodPhotoAnalyzerAgent::fake([
-        [
-            'items' => [
-                ['name' => 'Rice', 'calories' => 130, 'protein' => 2.7, 'carbs' => 28, 'fat' => 0.3, 'portion' => '100g'],
-                ['name' => 'Chicken', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'portion' => '100g'],
-            ],
-            'total_calories' => 295,
-            'total_protein' => 33.7,
-            'total_carbs' => 28,
-            'total_fat' => 3.9,
-            'confidence' => 90,
-        ],
-    ]);
-
-    $file = UploadedFile::fake()->image('food.jpg');
-
-    Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->set('turnstileToken', Turnstile::dummy())
-        ->call('analyze')
-        ->assertSee('Rice')
-        ->assertSee('Chicken')
-        ->assertSee('295')
-        ->assertSee('Food Items Detected');
-});
-
-it('displays error when analysis fails', function (): void {
-    fakeTurnstileForSnapToTrack();
-
-    FoodPhotoAnalyzerAgent::fake(function (): void {
-        throw new Exception('AI analysis failed');
-    });
-
-    $file = UploadedFile::fake()->image('food.jpg');
-
-    Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->set('turnstileToken', Turnstile::dummy())
-        ->call('analyze')
-        ->assertSet('error', 'Something went wrong. Please try again.')
-        ->assertSet('result', null);
-});
-
-it('shows tips for best results when no photo is selected', function (): void {
+it('shows tips for best results on initial state', function (): void {
     Livewire::test('pages::snap-to-track')
         ->assertSee('Tips for best results')
         ->assertSee('Take photo in good lighting')
         ->assertSee('Make sure all food is visible');
+});
+
+it('shows signup cta on initial state', function (): void {
+    Livewire::test('pages::snap-to-track')
+        ->assertSee('Sign up to start analyzing');
+});
+
+it('transitions to analyzing state when demo starts', function (): void {
+    Livewire::test('pages::snap-to-track')
+        ->call('startDemo')
+        ->assertSet('demoActive', true)
+        ->assertSet('demoAnalyzing', true)
+        ->assertSet('demoComplete', false)
+        ->assertSee('Analyzing your meal...')
+        ->assertSee('This is a demo with sample data');
+});
+
+it('shows demo results after analysis completes', function (): void {
+    Livewire::test('pages::snap-to-track')
+        ->call('startDemo')
+        ->call('showDemoResults')
+        ->assertSet('demoComplete', true)
+        ->assertSet('demoAnalyzing', false)
+        ->assertSee('Interactive Demo')
+        ->assertSee('416')
+        ->assertSee('Grilled Chicken Breast')
+        ->assertSee('Steamed Brown Rice')
+        ->assertSee('Mixed Green Salad')
+        ->assertSee('92% confident');
+});
+
+it('shows macro breakdown in demo results', function (): void {
+    Livewire::test('pages::snap-to-track')
+        ->call('startDemo')
+        ->call('showDemoResults')
+        ->assertSee('37.6')
+        ->assertSee('51.5')
+        ->assertSee('5.8')
+        ->assertSee('Protein')
+        ->assertSee('Carbs')
+        ->assertSee('Fat');
+});
+
+it('shows per-item details in demo results', function (): void {
+    Livewire::test('pages::snap-to-track')
+        ->call('startDemo')
+        ->call('showDemoResults')
+        ->assertSee('Food Items Detected')
+        ->assertSee('Grilled Chicken Breast')
+        ->assertSee('~120g')
+        ->assertSee('165')
+        ->assertSee('Steamed Brown Rice')
+        ->assertSee('~1 cup');
+});
+
+it('shows signup cta after demo results', function (): void {
+    Livewire::test('pages::snap-to-track')
+        ->call('startDemo')
+        ->call('showDemoResults')
+        ->assertSee('Sign up to analyze your own meals')
+        ->assertSee('Already have an account?')
+        ->assertSee('Log in');
+});
+
+it('can reset demo to initial state', function (): void {
+    Livewire::test('pages::snap-to-track')
+        ->call('startDemo')
+        ->call('showDemoResults')
+        ->call('resetDemo')
+        ->assertSet('demoActive', false)
+        ->assertSet('demoAnalyzing', false)
+        ->assertSet('demoComplete', false)
+        ->assertSee('Try the interactive demo');
+});
+
+it('shows how it works section', function (): void {
+    Livewire::test('pages::snap-to-track')
+        ->assertSee('How it works')
+        ->assertSee('Snap a photo of your meal')
+        ->assertSee('AI identifies each food item')
+        ->assertSee('Get instant macro breakdown');
 });
 
 it('shows disclaimer about AI estimates', function (): void {
@@ -165,78 +115,18 @@ it('shows faq section', function (): void {
     Livewire::test('pages::snap-to-track')
         ->assertSee('Frequently Asked Questions')
         ->assertSee('How does the food photo analyzer work?')
-        ->assertSee('How accurate are the calorie estimates?');
+        ->assertSee('How accurate are the calorie estimates?')
+        ->assertSee('How do I use Snap to Track?');
 });
 
-it('shows cta to register after result', function (): void {
-    fakeTurnstileForSnapToTrack();
-
-    FoodPhotoAnalyzerAgent::fake([
-        [
-            'items' => [
-                ['name' => 'Apple', 'calories' => 52, 'protein' => 0.3, 'carbs' => 14, 'fat' => 0.2, 'portion' => '1 medium'],
-            ],
-            'total_calories' => 52,
-            'total_protein' => 0.3,
-            'total_carbs' => 14,
-            'total_fat' => 0.2,
-            'confidence' => 95,
-        ],
-    ]);
-
-    $file = UploadedFile::fake()->image('food.jpg');
-
+it('shows main app promo section', function (): void {
     Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->set('turnstileToken', Turnstile::dummy())
-        ->call('analyze')
-        ->assertSee('Start tracking your meals')
-        ->assertSee('Analyze another photo');
+        ->assertSee('Need more than just tracking?')
+        ->assertSee('Get Started');
 });
 
-it('handles empty food detection gracefully', function (): void {
-    fakeTurnstileForSnapToTrack();
-
-    FoodPhotoAnalyzerAgent::fake([
-        [
-            'items' => [],
-            'total_calories' => 0,
-            'total_protein' => 0,
-            'total_carbs' => 0,
-            'total_fat' => 0,
-            'confidence' => 0,
-        ],
-    ]);
-
-    $file = UploadedFile::fake()->image('empty.jpg');
-
+it('shows explore more tools section', function (): void {
     Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->set('turnstileToken', Turnstile::dummy())
-        ->call('analyze')
-        ->assertSet('result.totalCalories', 0.0)
-        ->assertSet('result.confidence', 0);
-});
-
-it('validates turnstile token is required in testing environment', function (): void {
-    fakeTurnstileForSnapToTrack();
-
-    $file = UploadedFile::fake()->image('food.jpg');
-
-    Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->call('analyze')
-        ->assertHasErrors(['turnstileToken' => 'required']);
-});
-
-it('validates turnstile token with failed verification', function (): void {
-    fakeTurnstileForSnapToTrack(success: false);
-
-    $file = UploadedFile::fake()->image('food.jpg');
-
-    Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->set('turnstileToken', Turnstile::dummy())
-        ->call('analyze')
-        ->assertHasErrors(['turnstileToken']);
+        ->assertSee('Explore More Tools')
+        ->assertSee('View All Tools');
 });

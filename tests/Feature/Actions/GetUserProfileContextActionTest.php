@@ -174,6 +174,35 @@ it('identifies missing dietary preferences', function (): void {
     expect($result['missing_data'])->toContain('dietary_preferences');
 });
 
+it('includes household context in formatted output', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'onboarding_completed' => true,
+        'household_context' => 'My husband Bataa is 38, has type 2 diabetes. Kids: Tana (12, peanut allergy).',
+    ]);
+
+    $result = $this->action->handle($user);
+
+    expect($result['context'])
+        ->toContain('HOUSEHOLD/FAMILY: My husband Bataa is 38, has type 2 diabetes.')
+        ->and($result['raw_data']['household_context'])
+        ->toBe('My husband Bataa is 38, has type 2 diabetes. Kids: Tana (12, peanut allergy).');
+});
+
+it('omits household section when context is null', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'onboarding_completed' => true,
+        'household_context' => null,
+    ]);
+
+    $result = $this->action->handle($user);
+
+    expect($result['context'])->not->toContain('HOUSEHOLD/FAMILY');
+});
+
 it('includes full goal details including diet type and macros', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([

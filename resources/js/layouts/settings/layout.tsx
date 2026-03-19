@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
+import { edit as editHousehold } from '@/routes/household';
 import { edit as editIntegrations } from '@/routes/integrations';
 import { edit as editPassword } from '@/routes/password';
 import { show } from '@/routes/two-factor';
@@ -10,7 +11,7 @@ import { edit as editNotifications } from '@/routes/user-notifications';
 import { edit } from '@/routes/user-profile';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Bell, Lock, Palette, Puzzle, ShieldCheck, User } from 'lucide-react';
+import { Bell, Home, Lock, Palette, Puzzle, ShieldCheck, User } from 'lucide-react';
 import { type PropsWithChildren, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,6 +20,11 @@ const getSidebarNavItems = (t: (key: string) => string): NavItem[] => [
         title: t('settings_layout.nav.profile'),
         href: edit(),
         icon: User,
+    },
+    {
+        title: t('settings_layout.nav.household'),
+        href: editHousehold(),
+        icon: Home,
     },
     {
         title: t('settings_layout.nav.integrations'),

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Actions\AnalyzeFoodPhotoAction;
+use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Files\Base64Image;
@@ -37,8 +37,8 @@ final readonly class AnalyzePhoto implements Tool
 
         $image = $this->images[0];
 
-        $analysis = resolve(AnalyzeFoodPhotoAction::class)
-            ->handle($image->base64, $image->mime ?? 'image/jpeg');
+        $analysis = resolve(FoodPhotoAnalyzerAgent::class)
+            ->analyze($image->base64, $image->mime ?? 'image/jpeg');
 
         return (string) json_encode($analysis->toArray());
     }

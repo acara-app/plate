@@ -825,8 +825,18 @@ return [
             'two_factor' => 'Auth. deux facteurs',
             'notifications' => 'Notifications',
             'appearance' => 'Apparence',
+            'household' => 'Foyer',
             'integrations' => 'Intégrations',
         ],
+    ],
+    'household' => [
+        'title' => 'Foyer',
+        'heading' => 'Foyer & Famille',
+        'description' => 'Décrivez votre foyer pour que votre conseiller IA puisse tenir compte de tous les membres lors des suggestions de repas et de nutrition.',
+        'label' => 'Informations sur le foyer',
+        'placeholder' => 'ex. Mon mari Bataa a 38 ans, diabète de type 2. Enfants : Tana (12 ans, fille, allergie aux arachides), Nomi (8 ans, garçon), Sarnai (5 ans, fille). Nous mangeons halal.',
+        'save_button' => 'Enregistrer',
+        'saved' => 'Enregistré',
     ],
     'appearance' => [
         'title' => 'Paramètres d\'apparence',

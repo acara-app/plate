@@ -44,6 +44,14 @@
                 "@@type": "Answer",
                 "text": "We recognize most common foods. This includes fruits, vegetables, meats, and grains. Snacks and drinks work too. Make sure the food is easy to see."
             }
+        },
+        {
+            "@@type": "Question",
+            "name": "How do I use Snap to Track?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "Create a free account, then open the Altani assistant. Upload a photo of your meal in the chat, and Altani will instantly analyze it and give you a full calorie and macro breakdown."
+            }
         }
     ]
 }
@@ -52,15 +60,16 @@
 {
     "@@context": "https://schema.org",
     "@@type": "WebApplication",
-    "name": "Snap to Track - Food Photo Calorie Counter",
-    "description": "Analyze food photos to get instant calorie and macro breakdown.",
+    "name": "Snap to Track - AI Food Photo Analyzer",
+    "description": "Analyze food photos to get instant calorie and macro breakdown with AI. Sign up to access this feature in the Altani assistant.",
     "url": "{{ $currentUrl }}",
     "applicationCategory": "HealthApplication",
     "operatingSystem": "Any",
     "offers": {
         "@@type": "Offer",
         "price": "0",
-        "priceCurrency": "USD"
+        "priceCurrency": "USD",
+        "description": "Free account required"
     },
     "author": {
         "@@type": "Organization",
@@ -74,7 +83,7 @@
 {
     "@@context": "https://schema.org",
     "@@type": "WebPage",
-    "name": "Free Food Photo Analyzer",
+    "name": "AI Food Photo Analyzer",
     "speakable": {
         "@@type": "SpeakableSpecification",
         "cssSelector": [".speakable-intro", ".speakable-how-it-works"]

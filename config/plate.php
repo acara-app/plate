@@ -17,6 +17,7 @@ use App\Ai\Tools\PredictGlucoseSpike;
 use App\Ai\Tools\SuggestSingleMeal;
 use App\Ai\Tools\SuggestWellnessRoutine;
 use App\Ai\Tools\SuggestWorkoutRoutine;
+use App\Ai\Tools\UpdateHouseholdContext;
 use App\Ai\Tools\UpdateUserBiometrics;
 use App\Ai\Tools\UpdateUserProfileAttributes;
 use Laravel\Ai\Providers\Tools\WebSearch;
@@ -42,6 +43,7 @@ return [
         EnrichAttributeMetadata::class,
         UpdateUserProfileAttributes::class,
         UpdateUserBiometrics::class,
+        UpdateHouseholdContext::class,
     ],
 
     'image_tools' => [

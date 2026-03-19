@@ -223,6 +223,10 @@ final class TelegramWebhookHandler extends WebhookHandler
 🥗 Diet: '.$profile->calculated_diet_type->shortName();
         }
 
+        if ($profile->household_context !== null && $profile->household_context !== '') {
+            $text .= "\n👨‍👩‍👧‍👦 Household: ".$profile->household_context;
+        }
+
         return $text;
     }
 

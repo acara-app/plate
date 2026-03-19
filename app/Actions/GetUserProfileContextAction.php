@@ -28,6 +28,7 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
             'health_conditions' => $this->getHealthConditions($profile),
             'medications' => $this->getMedications($profile),
             'goals' => $this->getGoals($profile),
+            'household_context' => $profile->household_context,
         ];
 
         $missingData = $this->identifyMissingData($profile);
@@ -143,7 +144,7 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
     }
 
     /**
-     * @param  array{biometrics: array<string, mixed>, dietary_preferences: array<int, array{name: string, severity: mixed, notes: mixed}>, health_conditions: array<int, array{name: string, notes: mixed}>, medications: array<int, array{name: string, dosage: mixed, frequency: mixed, purpose: mixed}>, goals: array<string, mixed>}  $context
+     * @param  array{biometrics: array<string, mixed>, dietary_preferences: array<int, array{name: string, severity: mixed, notes: mixed}>, health_conditions: array<int, array{name: string, notes: mixed}>, medications: array<int, array{name: string, dosage: mixed, frequency: mixed, purpose: mixed}>, goals: array<string, mixed>, household_context: string|null}  $context
      * @param  list<string>  $missingData
      */
     private function formatContextForAI(array $context, array $missingData): string
@@ -242,6 +243,10 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
 
         if ($goalParts !== []) {
             $parts[] = 'GOALS: '.implode(', ', $goalParts);
+        }
+
+        if (is_string($context['household_context']) && $context['household_context'] !== '') {
+            $parts[] = 'HOUSEHOLD/FAMILY: '.$context['household_context'];
         }
 
         if ($missingData !== []) {
