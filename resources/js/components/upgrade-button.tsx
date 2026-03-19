@@ -10,7 +10,7 @@ export function UpgradeButton() {
         >
             <CrownIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
             <span className="font-semibold text-purple-900 dark:text-purple-100">
-                Upgrade Now
+                Upgrade
             </span>
         </Link>
     );

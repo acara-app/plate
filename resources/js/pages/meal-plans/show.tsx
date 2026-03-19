@@ -18,8 +18,10 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
+import { generateUUID } from '@/lib/utils';
 import { MealCard } from '@/pages/meal-plans/elements/meal-card';
 import { NutritionStats } from '@/pages/meal-plans/elements/nutrition-stats';
+import chat from '@/routes/chat';
 import mealPlans from '@/routes/meal-plans';
 import { type BreadcrumbItem } from '@/types';
 import {
@@ -29,13 +31,14 @@ import {
     MealPlanGenerationStatus,
     Navigation,
 } from '@/types/meal-plan';
-import { Head, Link, useForm, usePoll } from '@inertiajs/react';
+import { Form, Head, Link, useForm, usePoll } from '@inertiajs/react';
 import {
     Calendar,
     ChevronLeft,
     ChevronRight,
     Info,
     Loader2,
+    MessageSquare,
     Printer,
     RefreshCw,
     ShoppingCart,
@@ -103,12 +106,33 @@ export default function MealPlans({
                             </p>
                         </div>
 
-                        <Alert>
-                            <Info className="h-4 w-4" />
-                            <AlertDescription>
+                        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
+                            <Sparkles className="mb-4 h-12 w-12 text-muted-foreground/50" />
+                            <p className="mb-6 max-w-md text-muted-foreground">
                                 {t('meal_plans.no_plans')}
-                            </AlertDescription>
-                        </Alert>
+                            </p>
+                            <div className="flex flex-col gap-3 sm:flex-row">
+                                <Button asChild>
+                                    <Link
+                                        href={`${chat.create(generateUUID()).url}?mode=create-meal-plan`}
+                                    >
+                                        <MessageSquare className="mr-2 h-4 w-4" />
+                                        {t('meal_plans.create_with_altani')}
+                                    </Link>
+                                </Button>
+                                <Form
+                                    {...mealPlans.store.form()}
+                                >
+                                    <Button
+                                        type="submit"
+                                        variant="outline"
+                                    >
+                                        <Sparkles className="mr-2 h-4 w-4" />
+                                        {t('meal_plans.generate_now')}
+                                    </Button>
+                                </Form>
+                            </div>
+                        </div>
                     </>
                 ) : (
                     mealPlan &&
@@ -177,23 +201,30 @@ export default function MealPlans({
 
                             {/* Current Day Header */}
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                     <h2 className="flex items-center gap-2 text-2xl font-semibold">
                                         {dayEmojis[currentDay.day_name] || '📅'}{' '}
                                         {currentDay.day_name}
                                     </h2>
 
-                                    {mealPlan.target_daily_calories && (
-                                        <CalorieComparison
-                                            actual={
-                                                currentDay.daily_stats
-                                                    .total_calories
-                                            }
-                                            target={
-                                                mealPlan.target_daily_calories
-                                            }
+                                    <div className="flex items-center gap-3">
+                                        {mealPlan.target_daily_calories && (
+                                            <CalorieComparison
+                                                actual={
+                                                    currentDay.daily_stats
+                                                        .total_calories
+                                                }
+                                                target={
+                                                    mealPlan.target_daily_calories
+                                                }
+                                            />
+                                        )}
+                                        <RegenerateDayButton
+                                            mealPlan={mealPlan}
+                                            currentDay={currentDay}
+                                            onRegenerateStart={startPolling}
                                         />
-                                    )}
+                                    </div>
                                 </div>
 
                                 {/* Daily Nutrition Stats */}
@@ -253,11 +284,16 @@ export default function MealPlans({
                             </div>
 
                             {/* Plan Info Footer */}
-                            <PlanInfoFooter
-                                mealPlan={mealPlan}
-                                currentDay={currentDay}
-                                onRegenerateStart={startPolling}
-                            />
+                            <div className="mt-8 rounded-lg bg-muted/30 p-4 text-sm text-muted-foreground">
+                                <p>
+                                    {t('meal_plans.created_on')}{' '}
+                                    {new Date(mealPlan.created_at).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                    })}
+                                </p>
+                            </div>
                         </>
                     )
                 )}
@@ -455,17 +491,17 @@ function DayPagination({ currentDay, totalDays }: DayPaginationProps) {
     );
 }
 
-interface PlanInfoFooterProps {
+interface RegenerateDayButtonProps {
     mealPlan: MealPlan;
     currentDay: CurrentDay;
     onRegenerateStart: () => void;
 }
 
-function PlanInfoFooter({
+function RegenerateDayButton({
     mealPlan,
     currentDay,
     onRegenerateStart,
-}: PlanInfoFooterProps) {
+}: RegenerateDayButtonProps) {
     const { t } = useTranslation('common');
     const regenerateForm = useForm({
         day: currentDay.day_number,
@@ -484,60 +520,51 @@ function PlanInfoFooter({
         });
     };
 
-    return (
-        <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-lg bg-muted/30 p-4 text-sm text-muted-foreground sm:flex-row sm:items-center">
-            <p>
-                {t('meal_plans.created_on')}{' '}
-                {new Date(mealPlan.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                })}
-            </p>
+    if (!canRegenerate) {
+        return null;
+    }
 
-            {canRegenerate && (
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={
-                                isRegenerating || regenerateForm.processing
-                            }
-                        >
-                            {regenerateForm.processing || isRegenerating ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                                <RefreshCw className="mr-2 h-4 w-4" />
-                            )}
-                            {t('meal_plans.regenerate_day')}
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>
-                                {t('meal_plans.regenerate_title')}
-                            </AlertDialogTitle>
-                            <AlertDialogDescription
-                                dangerouslySetInnerHTML={{
-                                    __html: t(
-                                        'meal_plans.regenerate_description',
-                                        { dayName: currentDay.day_name },
-                                    ),
-                                }}
-                            />
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>
-                                {t('meal_plans.cancel')}
-                            </AlertDialogCancel>
-                            <AlertDialogAction onClick={handleRegenerate}>
-                                {t('meal_plans.regenerate')}
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-            )}
-        </div>
+    return (
+        <AlertDialog>
+            <AlertDialogTrigger asChild>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={
+                        isRegenerating || regenerateForm.processing
+                    }
+                >
+                    {regenerateForm.processing || isRegenerating ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                    )}
+                    {t('meal_plans.regenerate_day')}
+                </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>
+                        {t('meal_plans.regenerate_title')}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription
+                        dangerouslySetInnerHTML={{
+                            __html: t(
+                                'meal_plans.regenerate_description',
+                                { dayName: currentDay.day_name },
+                            ),
+                        }}
+                    />
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>
+                        {t('meal_plans.cancel')}
+                    </AlertDialogCancel>
+                    <AlertDialogAction onClick={handleRegenerate}>
+                        {t('meal_plans.regenerate')}
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     );
 }

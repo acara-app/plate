@@ -108,14 +108,14 @@ export default function Edit({ status }: { status?: string }) {
 
                                 <div className="grid gap-2">
                                     <Label htmlFor="locale">
-                                        {t('user_profile.locale_label')}
+                                        {t('user_profile.language_label')}
                                     </Label>
 
                                     <Select name="locale" defaultValue={locale}>
                                         <SelectTrigger id="locale">
                                             <SelectValue
                                                 placeholder={t(
-                                                    'user_profile.locale_placeholder',
+                                                    'user_profile.language_placeholder',
                                                 )}
                                             />
                                         </SelectTrigger>
