@@ -685,7 +685,7 @@ return [
         'description' => 'View and manage your personalized nutrition plans',
         'unlock_title' => 'Unlock Personalized Meal Plans',
         'unlock_description' => 'Subscribe to unlock AI-powered meal plans tailored to your dietary needs, health goals, and lifestyle. Get weekly meal plans with detailed recipes, nutrition information, and shopping lists.',
-        'upgrade_now' => 'Upgrade Now',
+        'upgrade_now' => 'Upgrade',
         'no_plans' => 'You don\'t have any meal plans yet. Complete your profile and preferences to generate your first personalized meal plan!',
         'days' => 'days',
         'grocery_list' => 'Grocery List',
