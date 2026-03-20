@@ -79,10 +79,7 @@ export default function DietaryPreferences({
             : [],
     );
 
-    const addAttribute = (
-        category: string = 'allergy',
-        value: string = '',
-    ) => {
+    const addAttribute = (category: string = 'allergy', value: string = '') => {
         setAttributes((prev) => [
             ...prev,
             { category, value, severity: '', notes: '' },
@@ -119,9 +116,7 @@ export default function DietaryPreferences({
 
     return (
         <>
-            <Head
-                title={t('onboarding.dietary_preferences.title')}
-            />
+            <Head title={t('onboarding.dietary_preferences.title')} />
             <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900">
                 <div className="w-full max-w-2xl">
                     <div className="mb-8">

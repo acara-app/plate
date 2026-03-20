@@ -43,11 +43,15 @@ export function useChatStream({
         [conversationId],
     );
 
-    const { messages, sendMessage: originalSendMessage, status, error } =
-        useChat({
-            messages: initialMessages,
-            transport,
-        });
+    const {
+        messages,
+        sendMessage: originalSendMessage,
+        status,
+        error,
+    } = useChat({
+        messages: initialMessages,
+        transport,
+    });
 
     const sendMessage = useCallback(
         (message: { text: string; files?: FileUIPart[] }) => {
