@@ -22,17 +22,6 @@ export function ChatErrorBanner({
         return null;
     }
 
-    const isNetworkError =
-        error.message.includes('fetch') ||
-        error.message.includes('network') ||
-        error.message.includes('Failed to') ||
-        error.message.includes('timeout') ||
-        error.message.includes('abort');
-
-    const displayMessage = isNetworkError
-        ? 'Connection issue. Please check your internet and try again.'
-        : error.message;
-
     return (
         <div className="flex w-full items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-950/50">
             <AlertCircle className="mt-0.5 size-5 shrink-0 text-red-600 dark:text-red-400" />
@@ -41,7 +30,7 @@ export function ChatErrorBanner({
                     Something went wrong
                 </p>
                 <p className="text-sm text-red-700 dark:text-red-300">
-                    {displayMessage}
+                    {error.message || 'An unexpected error occurred.'}
                 </p>
                 {onRetry && (
                     <button
