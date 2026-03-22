@@ -21,14 +21,12 @@ export default function DisclaimerShow() {
                         <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/50 dark:text-amber-200">
                             <p className="mb-3 font-medium">
                                 Acara Plate and its AI health coach Altani
-                                provide wellness guidance, not medical
-                                advice.
+                                provide wellness guidance, not medical advice.
                             </p>
                             <ul className="list-inside list-disc space-y-1.5 text-xs">
                                 <li>
                                     Altani provides general wellness
-                                    information, not professional medical
-                                    advice
+                                    information, not professional medical advice
                                 </li>
                                 <li>
                                     It is not a substitute for professional

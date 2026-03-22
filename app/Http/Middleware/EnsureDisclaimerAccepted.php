@@ -19,7 +19,7 @@ final class EnsureDisclaimerAccepted
         $user = $request->user();
 
         if ($user instanceof User && $user->accepted_disclaimer_at === null) {
-            return redirect()->route('disclaimer.show');
+            return to_route('disclaimer.show');
         }
 
         return $next($request);

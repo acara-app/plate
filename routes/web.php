@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers as Web;
 use App\Http\Middleware\DisableResponseBuffering;
+use App\Http\Middleware\EnsureDisclaimerAccepted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -47,7 +48,7 @@ Route::middleware(['auth'])->group(function (): void {
     Route::post('disclaimer', [Web\DisclaimerController::class, 'accept'])->name('disclaimer.accept');
 });
 
-Route::middleware(['auth', 'verified', App\Http\Middleware\EnsureDisclaimerAccepted::class])->group(function (): void {
+Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(function (): void {
     Route::get('dashboard', [Web\DashboardController::class, 'show'])->name('dashboard');
 
     Route::get('/chat/create/{conversationId}', [Web\ChatController::class, 'create'])

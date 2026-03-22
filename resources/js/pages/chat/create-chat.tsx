@@ -130,9 +130,8 @@ export default function CreateChat() {
                         model={model}
                     />
                     <p className="px-2 pb-2 text-center text-xs text-muted-foreground sm:px-4 sm:pb-4 sm:text-sm">
-                        ⚠️ For informational purposes only. Not a
-                        substitute for professional medical or nutritional
-                        advice.
+                        ⚠️ For informational purposes only. Not a substitute for
+                        professional medical or nutritional advice.
                     </p>
                 </div>
             </section>

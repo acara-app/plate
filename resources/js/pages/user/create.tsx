@@ -155,9 +155,7 @@ export default function Register() {
                                     </Label>
                                 </div>
                                 <InputError
-                                    message={
-                                        errors.accepted_disclaimer
-                                    }
+                                    message={errors.accepted_disclaimer}
                                 />
                             </div>
 
