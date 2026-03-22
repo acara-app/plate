@@ -9,6 +9,7 @@ use App\Enums\AgentMode;
 use App\Models\ConversationSummary;
 use App\Models\User;
 use App\Services\ToolRegistry;
+use App\Utilities\EmergencyNumberUtil;
 use App\Utilities\LanguageUtil;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Files\Base64Image;
@@ -53,6 +54,7 @@ final readonly class AgentBuilder
             'languageCode' => $languageCode,
             'isCreateMealPlanMode' => $mode->value === 'create-meal-plan',
             'summaries' => $summaries,
+            'emergencyNumber' => EmergencyNumberUtil::emergencyNumber($timezone),
         ])->render();
     }
 

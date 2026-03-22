@@ -40,6 +40,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read UserProfile|null $profile
  * @property-read Collection<int, MealPlan> $mealPlans
  * @property-read bool $is_onboarded
+ * @property-read CarbonInterface|null $accepted_disclaimer_at
  * @property-read bool $has_meal_plan
  */
 final class User extends Authenticatable implements MustVerifyEmail
@@ -96,6 +97,7 @@ final class User extends Authenticatable implements MustVerifyEmail
             'is_verified' => 'boolean',
             'preferred_language' => 'string',
             'locale' => 'string',
+            'accepted_disclaimer_at' => 'datetime',
             'settings' => 'array',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

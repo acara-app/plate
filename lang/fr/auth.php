@@ -36,6 +36,7 @@ return [
         'log_in' => 'Se connecter',
         'or' => 'Ou',
         'terms_acceptance' => 'En m\'inscrivant, je confirme que j\'ai au moins 18 ans et j\'accepte les',
+        'disclaimer_acceptance' => 'Je comprends qu\'Acara Plate et son coach IA Altani fournissent des conseils de bien-être et non des conseils médicaux. J\'ai au moins 18 ans et j\'accepte les',
         'terms_of_service' => 'Conditions d\'utilisation',
         'and' => 'et',
         'privacy_policy' => 'Politique de confidentialité',

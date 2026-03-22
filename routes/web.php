@@ -42,7 +42,12 @@ Route::view('/ai-personal-trainer', 'ai-personal-trainer')->name('ai-personal-tr
 Route::view('/meet-altani', 'meet-altani')->name('meet-altani');
 Route::view('/for-dietitians', 'for-dietitians')->name('for-dietitians');
 
-Route::middleware(['auth', 'verified'])->group(function (): void {
+Route::middleware(['auth'])->group(function (): void {
+    Route::get('disclaimer', [Web\DisclaimerController::class, 'show'])->name('disclaimer.show');
+    Route::post('disclaimer', [Web\DisclaimerController::class, 'accept'])->name('disclaimer.accept');
+});
+
+Route::middleware(['auth', 'verified', App\Http\Middleware\EnsureDisclaimerAccepted::class])->group(function (): void {
     Route::get('dashboard', [Web\DashboardController::class, 'show'])->name('dashboard');
 
     Route::get('/chat/create/{conversationId}', [Web\ChatController::class, 'create'])

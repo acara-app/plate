@@ -36,6 +36,7 @@ return [
         'log_in' => 'Log in',
         'or' => 'Or',
         'terms_acceptance' => 'By signing up, I confirm that I am at least 18 years old and accept the',
+        'disclaimer_acceptance' => 'I understand that Acara Plate and its AI health coach Altani provide wellness guidance, not medical advice. I am at least 18 years old and accept the',
         'terms_of_service' => 'Terms of Service',
         'and' => 'and',
         'privacy_policy' => 'Privacy Policy',

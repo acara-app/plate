@@ -25,7 +25,10 @@ final readonly class UserController
     public function store(CreateUserRequest $request, CreateUser $action): RedirectResponse
     {
         /** @var array<string, mixed> $attributes */
-        $attributes = $request->safe()->except('password');
+        $attributes = [
+            ...$request->safe()->only(['name', 'email']),
+            'accepted_disclaimer_at' => now(),
+        ];
 
         $user = $action->handle(
             $attributes,

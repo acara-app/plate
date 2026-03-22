@@ -119,32 +119,52 @@ export default function Register() {
                                 />
                             </div>
 
-                            <p className="text-xs text-muted-foreground">
-                                {t('register.terms_acceptance')}{' '}
-                                <a
-                                    href={terms.url()}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="underline underline-offset-4 hover:text-foreground"
-                                >
-                                    {t('register.terms_of_service')}
-                                </a>{' '}
-                                {t('register.and')}{' '}
-                                <a
-                                    href={privacy.url()}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="underline underline-offset-4 hover:text-foreground"
-                                >
-                                    {t('register.privacy_policy')}
-                                </a>
-                                .
-                            </p>
+                            <div className="grid gap-2">
+                                <div className="flex items-start gap-2">
+                                    <input
+                                        id="accepted_disclaimer"
+                                        type="checkbox"
+                                        name="accepted_disclaimer"
+                                        value="1"
+                                        tabIndex={5}
+                                        className="mt-0.5 size-4 shrink-0 rounded border border-input accent-primary"
+                                    />
+                                    <Label
+                                        htmlFor="accepted_disclaimer"
+                                        className="text-xs font-normal text-muted-foreground"
+                                    >
+                                        {t('register.disclaimer_acceptance')}{' '}
+                                        <a
+                                            href={terms.url()}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="underline underline-offset-4 hover:text-foreground"
+                                        >
+                                            {t('register.terms_of_service')}
+                                        </a>{' '}
+                                        {t('register.and')}{' '}
+                                        <a
+                                            href={privacy.url()}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="underline underline-offset-4 hover:text-foreground"
+                                        >
+                                            {t('register.privacy_policy')}
+                                        </a>
+                                        .
+                                    </Label>
+                                </div>
+                                <InputError
+                                    message={
+                                        errors.accepted_disclaimer
+                                    }
+                                />
+                            </div>
 
                             <Button
                                 type="submit"
                                 className="mt-2 w-full"
-                                tabIndex={5}
+                                tabIndex={6}
                                 data-test="register-user-button"
                             >
                                 {processing && (
@@ -156,7 +176,7 @@ export default function Register() {
 
                         <div className="text-center text-sm text-muted-foreground">
                             {t('register.already_have_account')}{' '}
-                            <TextLink href={login()} tabIndex={6}>
+                            <TextLink href={login()} tabIndex={7}>
                                 {t('register.log_in')}
                             </TextLink>
                         </div>
