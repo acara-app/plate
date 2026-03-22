@@ -94,9 +94,12 @@
             </div>
         </div>
         <div class="mt-16 border-t border-gray-900/10 pt-8 sm:mt-20 lg:mt-24 dark:border-white/10">
-            <small class="block text-xs leading-5 text-slate-500 dark:text-slate-400">
-                <span class="font-semibold">Disclaimer:</span> Acara Plate is an AI-powered tool for informational purposes only and does not provide medical advice. Always consult a healthcare professional for medical concerns.
-            </small>
+            <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900/50 dark:bg-amber-950/30">
+                <p class="text-sm leading-6 text-amber-900 dark:text-amber-200">
+                    <span class="font-semibold">Medical Disclaimer:</span> Acara Plate is an AI-powered wellness tool for informational purposes only and does not provide medical advice, diagnosis, or treatment. Always consult a healthcare professional for medical concerns.
+                    <a href="{{ route('terms') }}" class="ml-1 font-medium underline underline-offset-2 hover:text-amber-700 dark:hover:text-amber-100">Terms of Service</a>
+                </p>
+            </div>
             <small class="block mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">&copy; {{ date('Y') }} Acara Plate. All rights reserved.</small>
         </div>
     </div>
