@@ -18,7 +18,7 @@ final readonly class VegetarianMealPlanSystemProvider implements SystemPromptPro
     {
         $targets = $this->dietType->macroTargets();
 
-        $skillContent = file_get_contents(resource_path('markdown/vegetarian/SKILL.md'));
+        $skillContent = file_get_contents(resource_path('markdown/vegetarian/vegetarian.md'));
 
         return (string) new SystemPrompt(
             background: [

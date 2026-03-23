@@ -18,7 +18,7 @@ final readonly class MediterraneanMealPlanSystemProvider implements SystemPrompt
     {
         $targets = $this->dietType->macroTargets();
 
-        $skillContent = file_get_contents(resource_path('markdown/mediterranean/SKILL.md'));
+        $skillContent = file_get_contents(resource_path('markdown/mediterranean/mediterranean.md'));
 
         return (string) new SystemPrompt(
             background: [

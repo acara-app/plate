@@ -18,7 +18,7 @@ final readonly class VeganMealPlanSystemProvider implements SystemPromptProvider
     {
         $targets = $this->dietType->macroTargets();
 
-        $skillContent = file_get_contents(resource_path('markdown/vegan/SKILL.md'));
+        $skillContent = file_get_contents(resource_path('markdown/vegan/vegan.md'));
 
         return (string) new SystemPrompt(
             background: [

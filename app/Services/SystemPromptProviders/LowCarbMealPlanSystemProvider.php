@@ -18,7 +18,7 @@ final readonly class LowCarbMealPlanSystemProvider implements SystemPromptProvid
     {
         $targets = $this->dietType->macroTargets();
 
-        $skillContent = file_get_contents(resource_path('markdown/low_carb/SKILL.md'));
+        $skillContent = file_get_contents(resource_path('markdown/low_carb/low_carb.md'));
 
         return (string) new SystemPrompt(
             background: [

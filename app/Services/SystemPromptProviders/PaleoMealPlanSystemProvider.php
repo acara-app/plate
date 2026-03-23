@@ -18,7 +18,7 @@ final readonly class PaleoMealPlanSystemProvider implements SystemPromptProvider
     {
         $targets = $this->dietType->macroTargets();
 
-        $skillContent = file_get_contents(resource_path('markdown/paleo/SKILL.md'));
+        $skillContent = file_get_contents(resource_path('markdown/paleo/paleo.md'));
 
         return (string) new SystemPrompt(
             background: [

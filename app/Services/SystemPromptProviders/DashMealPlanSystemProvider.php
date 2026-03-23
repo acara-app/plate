@@ -18,7 +18,7 @@ final readonly class DashMealPlanSystemProvider implements SystemPromptProvider
     {
         $targets = $this->dietType->macroTargets();
 
-        $skillContent = file_get_contents(resource_path('markdown/dash/SKILL.md'));
+        $skillContent = file_get_contents(resource_path('markdown/dash/dash.md'));
 
         return (string) new SystemPrompt(
             background: [

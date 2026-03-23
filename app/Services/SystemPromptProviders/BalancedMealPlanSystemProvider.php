@@ -18,7 +18,7 @@ final readonly class BalancedMealPlanSystemProvider implements SystemPromptProvi
     {
         $targets = $this->dietType->macroTargets();
 
-        $skillContent = file_get_contents(resource_path('markdown/balanced/SKILL.md'));
+        $skillContent = file_get_contents(resource_path('markdown/balanced/balanced.md'));
 
         return (string) new SystemPrompt(
             background: [
