@@ -28,6 +28,7 @@ test('to array', function (): void {
             'settings',
             'preferred_language',
             'locale',
+            'accepted_disclaimer_at',
             'is_onboarded',
             'has_meal_plan',
             'profile',
