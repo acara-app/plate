@@ -984,7 +984,7 @@ return [
         'steps_title' => 'How to pair',
         'step_1' => 'Open the Acara Health Sync app on your iPhone',
         'step_2' => 'Tap "Get Started" and choose a connection method',
-        'step_3' => 'Scan the QR code, paste the URL, or enter the token',
+        'step_3' => 'Scan the QR code or enter the token manually',
         'step_4' => 'Grant health data permissions and start syncing',
         'paired_devices' => 'Paired Devices',
         'paired_at' => 'Paired',

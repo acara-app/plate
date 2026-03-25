@@ -972,7 +972,7 @@ return [
         'steps_title' => 'Comment jumeler',
         'step_1' => 'Ouvrez l\'application Acara Health Sync sur votre iPhone',
         'step_2' => 'Appuyez sur « Commencer » et choisissez une méthode de connexion',
-        'step_3' => 'Scannez le QR code, collez l\'URL ou entrez le code',
+        'step_3' => 'Scannez le QR code ou entrez le code manuellement',
         'step_4' => 'Accordez les autorisations de données de santé et commencez la synchronisation',
         'paired_devices' => 'Appareils jumelés',
         'paired_at' => 'Jumelé',
