@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editHousehold } from '@/routes/household';
 import { edit as editIntegrations } from '@/routes/integrations';
+import { edit as editMobileSync } from '@/routes/mobile-sync';
 import { edit as editPassword } from '@/routes/password';
 import { show } from '@/routes/two-factor';
 import { edit as editNotifications } from '@/routes/user-notifications';
@@ -18,6 +19,7 @@ import {
     Palette,
     Puzzle,
     ShieldCheck,
+    Smartphone,
     User,
 } from 'lucide-react';
 import { type PropsWithChildren, useEffect, useRef } from 'react';
@@ -33,6 +35,11 @@ const getSidebarNavItems = (t: (key: string) => string): NavItem[] => [
         title: t('settings_layout.nav.household'),
         href: editHousehold(),
         icon: Home,
+    },
+    {
+        title: t('settings_layout.nav.mobile_sync'),
+        href: editMobileSync(),
+        icon: Smartphone,
     },
     {
         title: t('settings_layout.nav.integrations'),

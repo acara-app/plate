@@ -14,7 +14,7 @@
         "@tailwindcss/typography": "^0.5.19",
         "@types/node": "^25.5.0",
         "npm-check-updates": "^19.6.5",
-        "oxlint": "^1.56.0",
+        "oxlint": "^1.57.0",
         "playwright": "^1.58.2",
         "prettier": "^3.8.1",
         "prettier-plugin-organize-imports": "^4.3.0",
@@ -22,7 +22,7 @@
         "vite-plugin-pwa": "^1.2.0"
     },
     "dependencies": {
-        "@ai-sdk/react": "^3.0.118",
+        "@ai-sdk/react": "^3.0.140",
         "@headlessui/react": "^2.2.9",
         "@inertiajs/react": "^2.3.18",
         "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -49,21 +49,22 @@
         "clsx": "^2.1.1",
         "concurrently": "^9.2.1",
         "globals": "^17.4.0",
-        "i18next": "^25.8.20",
+        "i18next": "^25.10.9",
         "input-otp": "^1.4.2",
         "laravel-vite-plugin": "^3.0.0",
-        "lucide-react": "^0.577.0",
+        "lucide-react": "^1.6.0",
+        "qrcode.react": "^4.2.0",
         "react": "^19.2.4",
         "react-dom": "^19.2.4",
-        "react-i18next": "^16.5.8",
+        "react-i18next": "^16.6.6",
         "react-markdown": "^10.1.0",
         "recharts": "^3.8.0",
         "remark-gfm": "^4.0.1",
         "tailwind-merge": "^3.5.0",
         "tailwindcss": "^4.2.2",
         "tailwindcss-animate": "^1.0.7",
-        "typescript": "^5.9.3",
-        "vite": "^8.0.1"
+        "typescript": "^6.0.2",
+        "vite": "^8.0.2"
     },
     "overrides": {
         "vite-plugin-pwa": {

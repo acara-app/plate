@@ -114,6 +114,10 @@ Route::middleware('auth')->group(function (): void {
     Route::get('settings/household', [Web\HouseholdController::class, 'edit'])->name('household.edit');
     Route::patch('settings/household', [Web\HouseholdController::class, 'update'])->name('household.update');
 
+    Route::get('settings/mobile-sync', [Web\MobileSyncController::class, 'edit'])->name('mobile-sync.edit');
+    Route::post('settings/mobile-sync/token', [Web\MobileSyncController::class, 'generateToken'])->name('mobile-sync.token');
+    Route::delete('settings/mobile-sync/{mobileSyncDevice}', [Web\MobileSyncController::class, 'disconnect'])->name('mobile-sync.destroy');
+
     Route::get('settings/integrations', [Web\IntegrationsController::class, 'edit'])->name('integrations.edit');
     Route::post('settings/integrations/telegram/token', [Web\IntegrationsController::class, 'generateTelegramToken'])->name('integrations.telegram.token');
     Route::delete('settings/integrations/telegram', [Web\IntegrationsController::class, 'disconnectTelegram'])->name('integrations.telegram.destroy');

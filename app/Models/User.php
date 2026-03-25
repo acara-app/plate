@@ -19,6 +19,7 @@ use Illuminate\Support\Collection;
 use Laravel\Cashier\Billable;
 use Laravel\Cashier\Subscription;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property-read int $id
@@ -48,7 +49,7 @@ final class User extends Authenticatable implements MustVerifyEmail
     /**
      * @use HasFactory<UserFactory>
      */
-    use Billable, HasFactory, Notifiable, Prunable, TwoFactorAuthenticatable;
+    use Billable, HasApiTokens, HasFactory, Notifiable, Prunable, TwoFactorAuthenticatable;
 
     protected $appends = [
         'is_onboarded',
@@ -142,6 +143,14 @@ final class User extends Authenticatable implements MustVerifyEmail
     public function telegramChat(): HasOne
     {
         return $this->hasOne(UserTelegramChat::class)->where('is_active', true);
+    }
+
+    /**
+     * @return HasMany<MobileSyncDevice, $this>
+     */
+    public function mobileSyncDevices(): HasMany
+    {
+        return $this->hasMany(MobileSyncDevice::class);
     }
 
     public function hasActiveSubscription(): bool
