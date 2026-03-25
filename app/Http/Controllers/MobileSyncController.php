@@ -36,9 +36,7 @@ final class MobileSyncController
                 ]),
             'pending_token' => $pendingDevice?->linking_token,
             'token_expires_at' => $pendingDevice?->token_expires_at?->toIso8601String(),
-            'pairing_url' => $pendingDevice !== null
-                ? config()->string('app.url').'/api/v1/sync/pair?token='.$pendingDevice->linking_token
-                : null,
+            'instance_url' => config()->string('app.url'),
         ]);
     }
 

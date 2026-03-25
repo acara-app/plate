@@ -23,7 +23,7 @@ it('shows empty state when no devices paired', function (): void {
         ->assertInertia(fn ($page) => $page
             ->where('devices', [])
             ->where('pending_token', null)
-            ->where('pairing_url', null)
+            ->has('instance_url')
         );
 });
 
@@ -51,7 +51,7 @@ it('shows pending token when generated', function (): void {
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
             ->where('pending_token', fn ($token): bool => $token !== null && mb_strlen((string) $token) === 8)
-            ->where('pairing_url', fn ($url): bool => $url !== null && str_contains((string) $url, '/api/v1/sync/pair?token='))
+            ->has('instance_url')
         );
 });
 

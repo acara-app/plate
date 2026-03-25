@@ -35,7 +35,7 @@ interface Props {
     devices: Device[];
     pending_token: string | null;
     token_expires_at: string | null;
-    pairing_url: string | null;
+    instance_url: string;
     [key: string]: unknown;
 }
 
@@ -43,11 +43,10 @@ export default function Edit({
     devices,
     pending_token,
     token_expires_at,
-    pairing_url,
+    instance_url,
 }: Props) {
     const { t } = useTranslation('common');
     const [copiedToken, setCopiedToken] = useState(false);
-    const [copiedUrl, setCopiedUrl] = useState(false);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -61,14 +60,6 @@ export default function Edit({
             navigator.clipboard.writeText(pending_token);
             setCopiedToken(true);
             setTimeout(() => setCopiedToken(false), 2000);
-        }
-    };
-
-    const handleCopyUrl = () => {
-        if (pairing_url) {
-            navigator.clipboard.writeText(pairing_url);
-            setCopiedUrl(true);
-            setTimeout(() => setCopiedUrl(false), 2000);
         }
     };
 
@@ -93,7 +84,7 @@ export default function Edit({
                         description={t('mobile_sync.description')}
                     />
 
-                    {hasPendingToken && pairing_url && (
+                    {hasPendingToken && (
                         <Card>
                             <CardHeader>
                                 <div className="flex items-center gap-3">
@@ -114,7 +105,10 @@ export default function Edit({
                                 <div className="flex justify-center">
                                     <div className="rounded-xl border bg-white p-4">
                                         <QRCodeSVG
-                                            value={pairing_url}
+                                            value={JSON.stringify({
+                                                instance: instance_url,
+                                                token: pending_token,
+                                            })}
                                             size={200}
                                             level="M"
                                         />
@@ -140,30 +134,6 @@ export default function Edit({
                                                 onClick={handleCopyToken}
                                             >
                                                 {copiedToken ? (
-                                                    <Check className="h-4 w-4 text-green-600" />
-                                                ) : (
-                                                    <Copy className="h-4 w-4" />
-                                                )}
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <Label className="text-sm font-medium">
-                                            {t('mobile_sync.or_copy_url')}
-                                        </Label>
-                                        <div className="mt-2 flex gap-2">
-                                            <Input
-                                                value={pairing_url}
-                                                readOnly
-                                                className="font-mono text-xs"
-                                            />
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={handleCopyUrl}
-                                            >
-                                                {copiedUrl ? (
                                                     <Check className="h-4 w-4 text-green-600" />
                                                 ) : (
                                                     <Copy className="h-4 w-4" />
