@@ -29,9 +29,18 @@ final class MobileSyncPairController
             ], 422);
         }
 
+        $deviceIdentifier = $request->string('device_identifier')->toString() ?: null;
+
+        if ($deviceIdentifier !== null) {
+            MobileSyncDevice::query()
+                ->where('device_identifier', $deviceIdentifier)
+                ->where('id', '!=', $device->id)
+                ->delete();
+        }
+
         $device->markAsPaired(
             $request->string('device_name')->toString(),
-            $request->string('device_identifier')->toString() ?: null,
+            $deviceIdentifier,
         );
 
         $apiToken = $device->user->createToken(

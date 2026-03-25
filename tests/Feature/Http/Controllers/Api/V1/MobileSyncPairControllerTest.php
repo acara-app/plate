@@ -90,6 +90,27 @@ it('creates a sanctum token for the paired device', function (): void {
         ->and($user->tokens()->first()->name)->toBe('mobile-sync:'.$device->id);
 });
 
+it('deletes old device when re-pairing with the same device_identifier', function (): void {
+    $user = User::factory()->create();
+
+    $oldDevice = MobileSyncDevice::factory()->for($user)->paired()->create([
+        'device_identifier' => 'REUSE-UUID-123',
+    ]);
+
+    $newDevice = MobileSyncDevice::factory()->for($user)->withToken()->create();
+
+    $response = $this->postJson('/api/v1/sync/pair', [
+        'token' => $newDevice->linking_token,
+        'device_name' => 'iPhone 16',
+        'device_identifier' => 'REUSE-UUID-123',
+    ]);
+
+    $response->assertOk();
+
+    expect(MobileSyncDevice::find($oldDevice->id))->toBeNull()
+        ->and($newDevice->fresh()->device_identifier)->toBe('REUSE-UUID-123');
+});
+
 it('handles case-insensitive token input', function (): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->withToken()->create();
