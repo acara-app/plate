@@ -9,6 +9,8 @@ use App\Http\Requests\Api\V1\StoreMobileSyncHealthEntriesRequest;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 final readonly class MobileSyncHealthEntriesController
 {
@@ -30,8 +32,16 @@ final readonly class MobileSyncHealthEntriesController
             ->where('is_active', true)
             ->firstOrFail();
 
-        /** @var array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null}> $entries */
-        $entries = $request->validated('entries');
+        if ($device->encryption_key === null) {
+            throw ValidationException::withMessages([
+                'encrypted_payload' => ['Device encryption key is missing. Please re-pair the device.'],
+            ]);
+        }
+
+        /** @var string $encryptedPayload */
+        $encryptedPayload = $request->validated('encrypted_payload');
+
+        $entries = $this->decryptPayload($encryptedPayload, $device->encryption_key);
 
         $result = $this->syncHealthEntriesAction->handle(
             user: $user,
@@ -46,5 +56,58 @@ final readonly class MobileSyncHealthEntriesController
             'samples_created' => $result['samples_created'],
             'samples_updated' => $result['samples_updated'],
         ]);
+    }
+
+    /**
+     * @return array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null}>
+     */
+    private function decryptPayload(string $base64Payload, string $base64Key): array
+    {
+        $payload = base64_decode($base64Payload, true);
+
+        if ($payload === false || mb_strlen($payload, '8bit') < 28) {
+            abort(422, 'Invalid encrypted payload.');
+        }
+
+        $key = base64_decode($base64Key, true);
+
+        if ($key === false || mb_strlen($key, '8bit') !== 32) {
+            abort(500, 'Device encryption key is corrupted.');
+        }
+
+        $nonce = mb_substr($payload, 0, 12, '8bit');
+        $tag = mb_substr($payload, -16, null, '8bit');
+        $ciphertext = mb_substr($payload, 12, -16, '8bit');
+
+        $decrypted = openssl_decrypt(
+            $ciphertext,
+            'aes-256-gcm',
+            $key,
+            OPENSSL_RAW_DATA,
+            $nonce,
+            $tag,
+        );
+
+        if ($decrypted === false) {
+            abort(422, 'Failed to decrypt payload. The encryption key may be out of sync — please re-pair the device.');
+        }
+
+        $data = json_decode($decrypted, true);
+
+        if (! is_array($data)) {
+            abort(422, 'Decrypted payload has an invalid structure.');
+        }
+
+        $validated = Validator::make($data, [
+            'entries' => ['required', 'array', 'min:1', 'max:1000'],
+            'entries.*.type' => ['required', 'string', 'max:100'],
+            'entries.*.value' => ['required', 'numeric'],
+            'entries.*.unit' => ['required', 'string', 'max:20'],
+            'entries.*.date' => ['required', 'date'],
+            'entries.*.source' => ['nullable', 'string', 'max:100'],
+        ])->validate();
+
+        /** @var array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null}> */
+        return $validated['entries'];
     }
 }

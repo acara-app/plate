@@ -43,6 +43,9 @@ final class MobileSyncPairController
             $deviceIdentifier,
         );
 
+        $encryptionKey = base64_encode(random_bytes(32));
+        $device->update(['encryption_key' => $encryptionKey]);
+
         $apiToken = $device->user->createToken(
             'mobile-sync:'.$device->id,
             ['sync:push'],
@@ -51,6 +54,7 @@ final class MobileSyncPairController
         return response()->json([
             'message' => 'Device paired successfully.',
             'api_token' => $apiToken->plainTextToken,
+            'encryption_key' => $encryptionKey,
             'user' => [
                 'name' => $device->user->name,
             ],
