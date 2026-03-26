@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
  * @property int $user_id
  * @property string|null $device_name
  * @property string|null $device_identifier
+ * @property string|null $encryption_key
  * @property string|null $linking_token
  * @property CarbonInterface|null $token_expires_at
  * @property bool $is_active
@@ -44,6 +45,7 @@ final class MobileSyncDevice extends Model
             'paired_at' => 'datetime',
             'last_synced_at' => 'datetime',
             'token_expires_at' => 'datetime',
+            'encryption_key' => 'encrypted',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

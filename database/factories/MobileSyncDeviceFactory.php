@@ -34,6 +34,7 @@ final class MobileSyncDeviceFactory extends Factory
         return $this->state(fn (array $attributes): array => [
             'device_name' => fake()->randomElement(['iPhone 15 Pro', 'iPhone 16', 'iPad Air']),
             'device_identifier' => fake()->uuid(),
+            'encryption_key' => base64_encode(random_bytes(32)),
             'paired_at' => now(),
         ]);
     }

@@ -11,10 +11,29 @@ use App\Models\MobileSyncDevice;
 use App\Models\User;
 use Illuminate\Support\Facades\Date;
 
+/**
+ * @param  array<int, array<string, mixed>>  $entries
+ */
+function encryptSyncPayload(array $entries, string $base64Key, string $deviceIdentifier = 'test-uuid'): string
+{
+    $json = json_encode([
+        'device_identifier' => $deviceIdentifier,
+        'entries' => $entries,
+    ]);
+
+    $key = base64_decode($base64Key);
+    $nonce = random_bytes(12);
+    $tag = '';
+
+    $ciphertext = openssl_encrypt($json, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $nonce, $tag);
+
+    return base64_encode($nonce.$ciphertext.$tag);
+}
+
 it('requires authentication', function (): void {
     $this->postJson('/api/v1/sync/health-entries', [
         'device_identifier' => 'test-uuid',
-        'entries' => [],
+        'encrypted_payload' => 'some-payload',
     ])->assertUnauthorized();
 });
 
@@ -24,66 +43,58 @@ it('validates device_identifier is required', function (): void {
 
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/v1/sync/health-entries', [
-            'entries' => [],
+            'encrypted_payload' => 'some-payload',
         ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['device_identifier']);
 });
 
-it('validates device_identifier exists and belongs to user', function (): void {
+it('validates encrypted_payload is required', function (): void {
+    $user = User::factory()->create();
+    $token = $user->createToken('test', ['sync:push'])->plainTextToken;
+
+    $this->withHeader('Authorization', 'Bearer '.$token)
+        ->postJson('/api/v1/sync/health-entries', [
+            'device_identifier' => 'test-uuid',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['encrypted_payload']);
+});
+
+it('returns 404 when device does not belong to user', function (): void {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
     $token = $user->createToken('test', ['sync:push'])->plainTextToken;
 
-    $otherDevice = MobileSyncDevice::factory()->for($otherUser)->paired()->create([
+    MobileSyncDevice::factory()->for($otherUser)->paired()->create([
         'device_identifier' => 'other-uuid',
     ]);
 
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/v1/sync/health-entries', [
             'device_identifier' => 'other-uuid',
-            'entries' => [],
+            'encrypted_payload' => 'dummy',
         ])
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors(['device_identifier']);
+        ->assertNotFound();
 });
 
-it('validates entries is required and must be an array', function (): void {
+it('validates decrypted entry structure', function (): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->paired()->create([
         'device_identifier' => 'test-uuid',
     ]);
     $token = $user->createToken('test', ['sync:push'])->plainTextToken;
 
-    $this->withHeader('Authorization', 'Bearer '.$token)
-        ->postJson('/api/v1/sync/health-entries', [
-            'device_identifier' => 'test-uuid',
-        ])
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors(['entries']);
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
 
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/v1/sync/health-entries', [
             'device_identifier' => 'test-uuid',
-            'entries' => 'not-an-array',
-        ])
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors(['entries']);
-});
-
-it('validates entry structure', function (): void {
-    $user = User::factory()->create();
-    $device = MobileSyncDevice::factory()->for($user)->paired()->create([
-        'device_identifier' => 'test-uuid',
-    ]);
-    $token = $user->createToken('test', ['sync:push'])->plainTextToken;
-
-    $this->withHeader('Authorization', 'Bearer '.$token)
-        ->postJson('/api/v1/sync/health-entries', [
-            'device_identifier' => 'test-uuid',
-            'entries' => [
-                ['value' => 5.5],
-            ],
+            'encrypted_payload' => encryptSyncPayload(
+                [['value' => 5.5]],
+                $encryptionKey,
+            ),
         ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['entries.0.type', 'entries.0.date']);
@@ -96,10 +107,13 @@ it('syncs blood glucose to health entry with random reading type', function (): 
     ]);
     $token = $user->createToken('test', ['sync:push'])->plainTextToken;
 
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/v1/sync/health-entries', [
             'device_identifier' => 'test-uuid',
-            'entries' => [
+            'encrypted_payload' => encryptSyncPayload([
                 [
                     'type' => HealthSyncType::BloodGlucose->value,
                     'value' => 5.5,
@@ -107,7 +121,7 @@ it('syncs blood glucose to health entry with random reading type', function (): 
                     'date' => '2026-03-25T10:30:00Z',
                     'source' => 'Apple Watch',
                 ],
-            ],
+            ], $encryptionKey),
         ])
         ->assertOk()
         ->assertJson([
@@ -131,10 +145,13 @@ it('syncs blood pressure to a single health entry row', function (): void {
     ]);
     $token = $user->createToken('test', ['sync:push'])->plainTextToken;
 
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/v1/sync/health-entries', [
             'device_identifier' => 'test-uuid',
-            'entries' => [
+            'encrypted_payload' => encryptSyncPayload([
                 [
                     'type' => HealthSyncType::BloodPressureSystolic->value,
                     'value' => 120,
@@ -147,7 +164,7 @@ it('syncs blood pressure to a single health entry row', function (): void {
                     'unit' => 'mmHg',
                     'date' => '2026-03-25T10:30:00Z',
                 ],
-            ],
+            ], $encryptionKey),
         ])
         ->assertOk()
         ->assertJson([
@@ -173,17 +190,20 @@ it('syncs weight to health entry', function (): void {
     ]);
     $token = $user->createToken('test', ['sync:push'])->plainTextToken;
 
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/v1/sync/health-entries', [
             'device_identifier' => 'test-uuid',
-            'entries' => [
+            'encrypted_payload' => encryptSyncPayload([
                 [
                     'type' => HealthSyncType::Weight->value,
                     'value' => 75.5,
                     'unit' => 'kg',
                     'date' => '2026-03-25T10:30:00Z',
                 ],
-            ],
+            ], $encryptionKey),
         ])
         ->assertOk()
         ->assertJson(['health_entries_created' => 1]);
@@ -199,10 +219,13 @@ it('syncs macros to health entry', function (): void {
     ]);
     $token = $user->createToken('test', ['sync:push'])->plainTextToken;
 
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/v1/sync/health-entries', [
             'device_identifier' => 'test-uuid',
-            'entries' => [
+            'encrypted_payload' => encryptSyncPayload([
                 [
                     'type' => HealthSyncType::Carbohydrates->value,
                     'value' => 50.0,
@@ -227,7 +250,7 @@ it('syncs macros to health entry', function (): void {
                     'unit' => 'kcal',
                     'date' => '2026-03-25T12:00:00Z',
                 ],
-            ],
+            ], $encryptionKey),
         ])
         ->assertOk();
 
@@ -264,10 +287,13 @@ it('syncs exercise minutes to health entry', function (): void {
     ]);
     $token = $user->createToken('test', ['sync:push'])->plainTextToken;
 
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/v1/sync/health-entries', [
             'device_identifier' => 'test-uuid',
-            'entries' => [
+            'encrypted_payload' => encryptSyncPayload([
                 [
                     'type' => HealthSyncType::ExerciseMinutes->value,
                     'value' => 30,
@@ -280,7 +306,7 @@ it('syncs exercise minutes to health entry', function (): void {
                     'unit' => 'min',
                     'date' => '2026-03-25T15:00:00Z',
                 ],
-            ],
+            ], $encryptionKey),
         ])
         ->assertOk();
 
@@ -308,10 +334,13 @@ it('syncs unmapped types to health sync samples table', function (): void {
     ]);
     $token = $user->createToken('test', ['sync:push'])->plainTextToken;
 
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/v1/sync/health-entries', [
             'device_identifier' => 'test-uuid',
-            'entries' => [
+            'encrypted_payload' => encryptSyncPayload([
                 [
                     'type' => 'heartRate',
                     'value' => 72,
@@ -325,7 +354,7 @@ it('syncs unmapped types to health sync samples table', function (): void {
                     'unit' => 'count',
                     'date' => '2026-03-25T10:30:00Z',
                 ],
-            ],
+            ], $encryptionKey),
         ])
         ->assertOk()
         ->assertJson([
@@ -354,17 +383,20 @@ it('syncs sleep stages to health sync samples', function (): void {
     ]);
     $token = $user->createToken('test', ['sync:push'])->plainTextToken;
 
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/v1/sync/health-entries', [
             'device_identifier' => 'test-uuid',
-            'entries' => [
+            'encrypted_payload' => encryptSyncPayload([
                 ['type' => 'timeInBed', 'value' => 480, 'unit' => 'min', 'date' => '2026-03-25T07:00:00Z'],
                 ['type' => 'timeAsleep', 'value' => 420, 'unit' => 'min', 'date' => '2026-03-25T07:00:00Z'],
                 ['type' => 'remSleep', 'value' => 90, 'unit' => 'min', 'date' => '2026-03-25T07:00:00Z'],
                 ['type' => 'coreSleep', 'value' => 210, 'unit' => 'min', 'date' => '2026-03-25T07:00:00Z'],
                 ['type' => 'deepSleep', 'value' => 120, 'unit' => 'min', 'date' => '2026-03-25T07:00:00Z'],
                 ['type' => 'awakeTime', 'value' => 60, 'unit' => 'min', 'date' => '2026-03-25T07:00:00Z'],
-            ],
+            ], $encryptionKey),
         ])
         ->assertOk()
         ->assertJson(['samples_created' => 6]);
@@ -379,17 +411,20 @@ it('upserts on duplicate user type measured_at', function (): void {
     ]);
     $token = $user->createToken('test', ['sync:push'])->plainTextToken;
 
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/v1/sync/health-entries', [
             'device_identifier' => 'test-uuid',
-            'entries' => [
+            'encrypted_payload' => encryptSyncPayload([
                 [
                     'type' => HealthSyncType::BloodGlucose->value,
                     'value' => 5.5,
                     'unit' => 'mmol/L',
                     'date' => '2026-03-25T10:30:00Z',
                 ],
-            ],
+            ], $encryptionKey),
         ])
         ->assertOk()
         ->assertJson(['health_entries_created' => 1]);
@@ -397,14 +432,14 @@ it('upserts on duplicate user type measured_at', function (): void {
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/v1/sync/health-entries', [
             'device_identifier' => 'test-uuid',
-            'entries' => [
+            'encrypted_payload' => encryptSyncPayload([
                 [
                     'type' => HealthSyncType::BloodGlucose->value,
                     'value' => 6.0,
                     'unit' => 'mmol/L',
                     'date' => '2026-03-25T10:30:00Z',
                 ],
-            ],
+            ], $encryptionKey),
         ])
         ->assertOk()
         ->assertJson([
@@ -426,17 +461,20 @@ it('updates mobile sync device last_synced_at', function (): void {
     ]);
     $token = $user->createToken('test', ['sync:push'])->plainTextToken;
 
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/v1/sync/health-entries', [
             'device_identifier' => 'test-uuid',
-            'entries' => [
+            'encrypted_payload' => encryptSyncPayload([
                 [
                     'type' => 'heartRate',
                     'value' => 72,
                     'unit' => 'bpm',
                     'date' => '2026-03-25T10:30:00Z',
                 ],
-            ],
+            ], $encryptionKey),
         ])
         ->assertOk();
 
@@ -452,10 +490,13 @@ it('handles mixed health entries and sync samples', function (): void {
     ]);
     $token = $user->createToken('test', ['sync:push'])->plainTextToken;
 
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/v1/sync/health-entries', [
             'device_identifier' => 'test-uuid',
-            'entries' => [
+            'encrypted_payload' => encryptSyncPayload([
                 [
                     'type' => HealthSyncType::BloodGlucose->value,
                     'value' => 5.5,
@@ -480,7 +521,7 @@ it('handles mixed health entries and sync samples', function (): void {
                     'unit' => 'count',
                     'date' => '2026-03-25T10:30:00Z',
                 ],
-            ],
+            ], $encryptionKey),
         ])
         ->assertOk()
         ->assertJson([

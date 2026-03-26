@@ -16,11 +16,13 @@ it('pairs a device with a valid token', function (): void {
     ]);
 
     $response->assertOk()
-        ->assertJsonStructure(['message', 'api_token', 'user' => ['name']])
+        ->assertJsonStructure(['message', 'api_token', 'encryption_key', 'user' => ['name']])
         ->assertJson([
             'message' => 'Device paired successfully.',
             'user' => ['name' => $user->name],
         ]);
+
+    expect($response->json('encryption_key'))->toBeString()->not->toBeEmpty();
 
     $fresh = $device->fresh();
     expect($fresh->paired_at)->not->toBeNull()
@@ -34,7 +36,7 @@ it('returns 422 for invalid token', function (): void {
         'token' => 'INVALID1',
         'device_name' => 'iPhone 15 Pro',
     ])->assertUnprocessable()
-        ->assertJson(['message' => 'Invalid pairing token.']);
+        ->assertJson(['message' => 'Invalid pairing token. Please generate a new one in Settings → Mobile Sync on your Acara Plate dashboard.']);
 });
 
 it('returns 422 for expired token', function (): void {
@@ -48,7 +50,7 @@ it('returns 422 for expired token', function (): void {
         'token' => 'EXPIRED1',
         'device_name' => 'iPhone 15 Pro',
     ])->assertUnprocessable()
-        ->assertJson(['message' => 'Pairing token has expired.']);
+        ->assertJson(['message' => 'Pairing token has expired. Please generate a new one in Settings → Mobile Sync on your Acara Plate dashboard.']);
 });
 
 it('returns 422 for already used token', function (): void {
