@@ -78,14 +78,14 @@ describe('generateToken', function (): void {
         expect($device->fresh()->linking_token)->toBe($token);
     });
 
-    it('sets token expiration to 24 hours by default', function (): void {
+    it('sets token expiration to 30 days by default', function (): void {
         $device = MobileSyncDevice::factory()->create();
 
         $device->generateToken();
 
         $diffHours = $device->fresh()->token_expires_at->diffInHours(now(), absolute: true);
-        expect($diffHours)->toBeGreaterThanOrEqual(23)
-            ->toBeLessThanOrEqual(25);
+        expect($diffHours)->toBeGreaterThanOrEqual(719)
+            ->toBeLessThanOrEqual(721);
     });
 });
 

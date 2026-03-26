@@ -43,7 +43,7 @@ final class MobileSyncDeviceFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'linking_token' => mb_strtoupper(mb_substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 8)),
-            'token_expires_at' => now()->addHours(24),
+            'token_expires_at' => now()->addHours(720),
         ]);
     }
 

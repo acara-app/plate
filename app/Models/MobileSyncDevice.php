@@ -72,7 +72,7 @@ final class MobileSyncDevice extends Model
         return $this->token_expires_at->isFuture();
     }
 
-    public function generateToken(int $expiresInHours = 24): string
+    public function generateToken(int $expiresInHours = 720): string
     {
         $token = mb_strtoupper(mb_substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 8));
 
