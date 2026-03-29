@@ -14,8 +14,10 @@ createServer((page) =>
         setup: ({ App, props }) => {
             const locale = (props.initialPage.props.locale as string) || 'en';
             const translations =
-                (props.initialPage.props.translations as Record<string, unknown>) ||
-                {};
+                (props.initialPage.props.translations as Record<
+                    string,
+                    unknown
+                >) || {};
             loadTranslations(locale, translations);
 
             return (
