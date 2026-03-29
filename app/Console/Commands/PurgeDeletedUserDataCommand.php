@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Models\DeletedUser;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 final class PurgeDeletedUserDataCommand extends Command
@@ -21,7 +22,7 @@ final class PurgeDeletedUserDataCommand extends Command
 
         DeletedUser::query()
             ->where('deleted_at', '<=', now()->subDays(30))
-            ->chunkById(100, function ($deletedUsers) use (&$count): void {
+            ->chunkById(100, function (Collection $deletedUsers) use (&$count): void {
                 $deletedUsers->each(function (DeletedUser $deletedUser) use (&$count): void {
                     $this->purgeUserData($deletedUser);
                     $count++;
@@ -30,7 +31,7 @@ final class PurgeDeletedUserDataCommand extends Command
 
         $this->info($count === 0
             ? 'No user data to purge.'
-            : "Purged data for {$count} deleted user(s).");
+            : sprintf('Purged data for %d deleted user(s).', $count));
 
         return self::SUCCESS;
     }

@@ -10,16 +10,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('deleted_users', function (Blueprint $table) {
+        Schema::create('deleted_users', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('user_id')->index();
             $table->string('email');
             $table->timestamp('deleted_at')->index();
         });
-    }
-
-    public function down(): void
-    {
-        Schema::dropIfExists('deleted_users');
     }
 };
