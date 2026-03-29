@@ -1,7 +1,6 @@
 import '../css/app.css';
 
 import { createInertiaApp } from '@inertiajs/react';
-import { createRoot } from 'react-dom/client';
 import { I18nextProvider } from 'react-i18next';
 import { registerSW } from 'virtual:pwa-register';
 import { initializeTheme } from './hooks/use-appearance';
@@ -9,24 +8,23 @@ import i18n, { loadTranslations } from './i18n';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Acara Plate';
 
-registerSW({ immediate: true });
+if (typeof window !== 'undefined') {
+    registerSW({ immediate: true });
+
+    const appEl = document.getElementById('app');
+    if (appEl?.dataset.page) {
+        const page = JSON.parse(appEl.dataset.page);
+        loadTranslations(
+            (page.props?.locale as string) || 'en',
+            (page.props?.translations as Record<string, unknown>) || {},
+        );
+    }
+}
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
-    setup({ el, App, props }) {
-        const root = createRoot(el);
-
-        const locale = (props.initialPage.props.locale as string) || 'en';
-        const translations =
-            (props.initialPage.props.translations as Record<string, unknown>) ||
-            {};
-        loadTranslations(locale, translations);
-
-        root.render(
-            <I18nextProvider i18n={i18n}>
-                <App {...props} />
-            </I18nextProvider>,
-        );
+    withApp(app) {
+        return <I18nextProvider i18n={i18n}>{app}</I18nextProvider>;
     },
     progress: {
         color: '#4B5563',
@@ -34,4 +32,6 @@ createInertiaApp({
 });
 
 // This will set light / dark mode on load...
-initializeTheme();
+if (typeof window !== 'undefined') {
+    initializeTheme();
+}
