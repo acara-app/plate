@@ -77,12 +77,12 @@ if (! function_exists('getMimeType')) {
 
 if (! function_exists('makeKey')) {
     /**
-     * @param  string|array<int|string, mixed>  $key
+     * @param  string|array<int|string, string|int|float>  $key
      */
     function makeKey(string|array $key): string
     {
         if (is_array($key)) {
-            $key = implode('|', $key);
+            $key = implode('|', array_map(fn (string|int|float $v): string => (string) $v, $key));
         }
 
         if (mb_strlen($key) > 200) {

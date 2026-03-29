@@ -109,7 +109,7 @@ it('deletes old device when re-pairing with the same device_identifier', functio
 
     $response->assertOk();
 
-    expect(MobileSyncDevice::find($oldDevice->id))->toBeNull()
+    expect(MobileSyncDevice::query()->find($oldDevice->id))->toBeNull()
         ->and($newDevice->fresh()->device_identifier)->toBe('REUSE-UUID-123');
 });
 

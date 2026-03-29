@@ -65,15 +65,11 @@ final readonly class MobileSyncHealthEntriesController
     {
         $payload = base64_decode($base64Payload, true);
 
-        if ($payload === false || mb_strlen($payload, '8bit') < 28) {
-            abort(422, 'Invalid encrypted payload.');
-        }
+        abort_if($payload === false || mb_strlen($payload, '8bit') < 28, 422, 'Invalid encrypted payload.');
 
         $key = base64_decode($base64Key, true);
 
-        if ($key === false || mb_strlen($key, '8bit') !== 32) {
-            abort(500, 'Device encryption key is corrupted.');
-        }
+        abort_if($key === false || mb_strlen($key, '8bit') !== 32, 500, 'Device encryption key is corrupted.');
 
         $nonce = mb_substr($payload, 0, 12, '8bit');
         $tag = mb_substr($payload, -16, null, '8bit');
@@ -88,15 +84,11 @@ final readonly class MobileSyncHealthEntriesController
             $tag,
         );
 
-        if ($decrypted === false) {
-            abort(422, 'Failed to decrypt payload. The encryption key may be out of sync — please re-pair the device.');
-        }
+        abort_if($decrypted === false, 422, 'Failed to decrypt payload. The encryption key may be out of sync — please re-pair the device.');
 
         $data = json_decode($decrypted, true);
 
-        if (! is_array($data)) {
-            abort(422, 'Decrypted payload has an invalid structure.');
-        }
+        abort_unless(is_array($data), 422, 'Decrypted payload has an invalid structure.');
 
         $validated = Validator::make($data, [
             'entries' => ['required', 'array', 'min:1', 'max:1000'],
@@ -107,7 +99,9 @@ final readonly class MobileSyncHealthEntriesController
             'entries.*.source' => ['nullable', 'string', 'max:100'],
         ])->validate();
 
-        /** @var array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null}> */
-        return $validated['entries'];
+        /** @var array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null}> $entries */
+        $entries = $validated['entries'];
+
+        return $entries;
     }
 }
