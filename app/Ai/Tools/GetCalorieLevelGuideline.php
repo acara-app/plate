@@ -50,6 +50,9 @@ final readonly class GetCalorieLevelGuideline implements Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [];
+        return [
+            'context' => $schema->string()->required()->nullable()
+                ->description('Optional context for why the guidelines are needed (e.g., "meal planning", "calorie assessment").'),
+        ];
     }
 }

@@ -77,6 +77,9 @@ final readonly class GetFitnessGoals implements Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [];
+        return [
+            'context' => $schema->string()->required()->nullable()
+                ->description('Optional context for why the fitness goals are being retrieved (e.g., "workout suggestion", "progress check").'),
+        ];
     }
 }

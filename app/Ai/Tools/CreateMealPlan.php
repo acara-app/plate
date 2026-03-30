@@ -68,7 +68,7 @@ final readonly class CreateMealPlan implements Tool
             'total_days' => $schema->integer()
                 ->description('Number of days for the meal plan (default: 1, max: 7)')
                 ->required(),
-            'custom_prompt' => $schema->string()
+            'custom_prompt' => $schema->string()->required()->nullable()
                 ->description('Optional custom instructions or preferences for the meal plan (e.g., "focus on Mediterranean diet", "high protein for muscle building")'),
         ];
     }

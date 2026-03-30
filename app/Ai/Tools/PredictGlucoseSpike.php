@@ -70,7 +70,7 @@ final readonly class PredictGlucoseSpike implements Tool
             'food' => $schema->string()
                 ->description('Description of the food or meal to analyze (e.g., "Chipotle bowl with brown rice, chicken, and guacamole", "pizza slice", "oatmeal with berries")')
                 ->required(),
-            'context' => $schema->string()
+            'context' => $schema->string()->required()->nullable()
                 ->description('Additional context about the situation (e.g., "eating out at Chipotle", "pre-workout meal", "breakfast on the go")'),
         ];
     }

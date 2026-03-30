@@ -69,41 +69,41 @@ final readonly class LogHealthEntry implements Tool
             'log_type' => $schema->string()->required()
                 ->enum(HealthEntryType::class)
                 ->description('Type of health entry to log.'),
-            'glucose_value' => $schema->number()
+            'glucose_value' => $schema->number()->required()->nullable()
                 ->description('Glucose reading value in mg/dL. Convert mmol/L to mg/dL (× 18.018).'),
-            'glucose_reading_type' => $schema->string()
+            'glucose_reading_type' => $schema->string()->required()->nullable()
                 ->enum(GlucoseReadingType::class)
                 ->description('When the glucose was measured.'),
-            'carbs_grams' => $schema->number()
+            'carbs_grams' => $schema->number()->required()->nullable()
                 ->description('Carbohydrate intake in grams (can be decimal like 12.5).'),
-            'protein_grams' => $schema->number()
+            'protein_grams' => $schema->number()->required()->nullable()
                 ->description('Protein intake in grams (can be decimal like 12.5).'),
-            'fat_grams' => $schema->number()
+            'fat_grams' => $schema->number()->required()->nullable()
                 ->description('Fat intake in grams (can be decimal like 12.5).'),
-            'calories' => $schema->integer()
+            'calories' => $schema->integer()->required()->nullable()
                 ->description('Total calories.'),
-            'notes' => $schema->string()
+            'notes' => $schema->string()->required()->nullable()
                 ->description('Food name or additional notes.'),
-            'insulin_units' => $schema->number()
+            'insulin_units' => $schema->number()->required()->nullable()
                 ->description('Insulin dose in units.'),
-            'insulin_type' => $schema->string()
+            'insulin_type' => $schema->string()->required()->nullable()
                 ->enum(InsulinType::class)
                 ->description('Type of insulin administered.'),
-            'medication_name' => $schema->string()
+            'medication_name' => $schema->string()->required()->nullable()
                 ->description('Name of the medication taken.'),
-            'medication_dosage' => $schema->string()
+            'medication_dosage' => $schema->string()->required()->nullable()
                 ->description('Dosage of the medication (e.g., "500mg").'),
-            'weight' => $schema->number()
+            'weight' => $schema->number()->required()->nullable()
                 ->description('Body weight in kg. Convert lbs to kg (÷ 2.205).'),
-            'bp_systolic' => $schema->integer()
+            'bp_systolic' => $schema->integer()->required()->nullable()
                 ->description('Systolic blood pressure reading.'),
-            'bp_diastolic' => $schema->integer()
+            'bp_diastolic' => $schema->integer()->required()->nullable()
                 ->description('Diastolic blood pressure reading.'),
-            'exercise_type' => $schema->string()
+            'exercise_type' => $schema->string()->required()->nullable()
                 ->description('Type of exercise performed (e.g., "walking", "running").'),
-            'exercise_duration_minutes' => $schema->integer()
+            'exercise_duration_minutes' => $schema->integer()->required()->nullable()
                 ->description('Duration of exercise in minutes.'),
-            'measured_at' => $schema->string()
+            'measured_at' => $schema->string()->required()->nullable()
                 ->description('When the measurement was taken in ISO 8601 format. Only set if the user specifies a time. Leave empty for current time.'),
         ];
     }

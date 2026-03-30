@@ -55,9 +55,9 @@ export default function Edit({
         },
     ];
 
-    const handleCopyToken = () => {
+    const handleCopyToken = async () => {
         if (pending_token) {
-            navigator.clipboard.writeText(pending_token);
+            await navigator.clipboard?.writeText(pending_token);
             setCopiedToken(true);
             setTimeout(() => setCopiedToken(false), 2000);
         }

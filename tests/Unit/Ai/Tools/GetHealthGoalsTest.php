@@ -33,7 +33,7 @@ it('has valid schema', function (): void {
 
     $result = $this->tool->schema($schema);
 
-    expect($result)->toBeArray()->toBeEmpty();
+    expect($result)->toBeArray()->not->toBeEmpty();
 });
 
 it('returns error if user is not authenticated', function (): void {

@@ -69,6 +69,9 @@ final readonly class GetHealthGoals implements Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [];
+        return [
+            'context' => $schema->string()->required()->nullable()
+                ->description('Optional context for why the health goals are being retrieved (e.g., "meal suggestion", "health assessment").'),
+        ];
     }
 }

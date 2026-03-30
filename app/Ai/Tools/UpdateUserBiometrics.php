@@ -59,27 +59,27 @@ final readonly class UpdateUserBiometrics implements Tool
             'action' => $schema->string()->required()
                 ->enum(['get', 'update'])
                 ->description('Action to perform: "get" to retrieve current biometrics, "update" to set new values.'),
-            'age' => $schema->integer()
+            'age' => $schema->integer()->required()->nullable()
                 ->description('User age in years.'),
-            'height' => $schema->number()
+            'height' => $schema->number()->required()->nullable()
                 ->description('User height in centimeters.'),
-            'weight' => $schema->number()
+            'weight' => $schema->number()->required()->nullable()
                 ->description('User weight in kilograms.'),
-            'sex' => $schema->string()
+            'sex' => $schema->string()->required()->nullable()
                 ->enum(Sex::class)
                 ->description('Biological sex: male, female, or other.'),
-            'goal_choice' => $schema->string()
+            'goal_choice' => $schema->string()->required()->nullable()
                 ->enum(GoalChoice::class)
                 ->description('Primary health goal: spikes, weight_loss, heart_health, build_muscle, or healthy_eating.'),
-            'animal_product_choice' => $schema->string()
+            'animal_product_choice' => $schema->string()->required()->nullable()
                 ->enum(AnimalProductChoice::class)
                 ->description('Dietary preference: omnivore, pescatarian, or vegan.'),
-            'intensity_choice' => $schema->string()
+            'intensity_choice' => $schema->string()->required()->nullable()
                 ->enum(IntensityChoice::class)
                 ->description('Plan intensity: balanced or aggressive.'),
-            'target_weight' => $schema->number()
+            'target_weight' => $schema->number()->required()->nullable()
                 ->description('Target weight in kilograms.'),
-            'additional_goals' => $schema->string()
+            'additional_goals' => $schema->string()->required()->nullable()
                 ->description('Free-text additional health or fitness goals.'),
         ];
     }

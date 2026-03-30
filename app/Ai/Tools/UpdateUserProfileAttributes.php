@@ -59,18 +59,25 @@ final readonly class UpdateUserProfileAttributes implements Tool
             'action' => $schema->string()->required()
                 ->enum(['list', 'add', 'update', 'remove'])
                 ->description('Action to perform: "list" to see current attributes, "add" to add a new one, "update" to modify an existing one, "remove" to delete one.'),
-            'category' => $schema->string()
+            'category' => $schema->string()->required()->nullable()
                 ->enum(UserProfileAttributeCategory::class)
                 ->description('Category of the attribute. Required for add/update/remove.'),
-            'value' => $schema->string()
+            'value' => $schema->string()->required()->nullable()
                 ->description('The attribute value (e.g., "Peanuts", "Type 2 Diabetes", "Vegan", "Metformin"). Required for add/update/remove.'),
-            'severity' => $schema->string()
+            'severity' => $schema->string()->required()->nullable()
                 ->enum(AllergySeverity::class)
                 ->description('Severity level for allergies only: mild, moderate, severe.'),
-            'notes' => $schema->string()
+            'notes' => $schema->string()->required()->nullable()
                 ->description('Additional notes about this attribute.'),
-            'metadata' => $schema->object()
-                ->description('Structured metadata. For medications: {"dosage": "500mg", "frequency": "twice daily", "purpose": "Blood sugar control"}. For health conditions/allergies/restrictions: use output from enrich_attribute_metadata tool (safety_level, dietary_rules, foods_to_avoid, etc.).'),
+            'metadata' => $schema->object(fn (JsonSchema $s) => [
+                'dosage' => $s->string()->required()->nullable()->description('Medication dosage (e.g., "500mg").'),
+                'frequency' => $s->string()->required()->nullable()->description('Medication frequency (e.g., "twice daily").'),
+                'purpose' => $s->string()->required()->nullable()->description('Purpose of the medication (e.g., "Blood sugar control").'),
+                'safety_level' => $s->string()->required()->nullable()->description('Safety level from enrich_attribute_metadata tool.'),
+                'dietary_rules' => $s->string()->required()->nullable()->description('Dietary rules from enrich_attribute_metadata tool.'),
+                'foods_to_avoid' => $s->string()->required()->nullable()->description('Foods to avoid from enrich_attribute_metadata tool.'),
+            ])->withoutAdditionalProperties()->required()->nullable()
+                ->description('Structured metadata from enrich_attribute_metadata tool or medication details.'),
         ];
     }
 

@@ -50,6 +50,9 @@ final readonly class GetDailyServingsByCalorie implements Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return [];
+        return [
+            'context' => $schema->string()->required()->nullable()
+                ->description('Optional context for why the servings data is needed (e.g., "building meal plan", "checking portions").'),
+        ];
     }
 }

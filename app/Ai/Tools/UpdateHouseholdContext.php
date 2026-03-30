@@ -59,7 +59,7 @@ final readonly class UpdateHouseholdContext implements Tool
             'action' => $schema->string()->required()
                 ->enum(['get', 'update'])
                 ->description('Action to perform: "get" to retrieve current household context, "update" to save new context.'),
-            'household_context' => $schema->string()
+            'household_context' => $schema->string()->required()->nullable()
                 ->description('Free-text description of household/family members, their ages, dietary needs, allergies, and preferences. Maximum 2000 characters. Required when action is "update".'),
         ];
     }

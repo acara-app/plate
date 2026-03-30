@@ -75,11 +75,11 @@ final readonly class SuggestSingleMeal implements Tool
                 ->enum(['breakfast', 'lunch', 'dinner', 'snack', 'any'])
                 ->description('The type of meal to generate')
                 ->required(),
-            'cuisine' => $schema->string()
+            'cuisine' => $schema->string()->required()->nullable()
                 ->description('Preferred cuisine style (e.g., Mediterranean, Asian, Mexican, Italian)'),
-            'max_calories' => $schema->integer()
+            'max_calories' => $schema->integer()->required()->nullable()
                 ->description('Maximum calories for the meal'),
-            'specific_request' => $schema->string()
+            'specific_request' => $schema->string()->required()->nullable()
                 ->description('Any specific requirements or preferences (e.g., "high protein", "quick to prepare", "comfort food")'),
         ];
     }

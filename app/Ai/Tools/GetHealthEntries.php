@@ -135,11 +135,11 @@ final readonly class GetHealthEntries implements Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'date' => $schema->string()
+            'date' => $schema->string()->required()->nullable()
                 ->description('The date to retrieve entries for in ISO format (e.g., "2026-02-27"). Defaults to today.'),
-            'days' => $schema->integer()
+            'days' => $schema->integer()->required()->nullable()
                 ->description('Number of days to look back from the specified date. Defaults to 1 (just that day).'),
-            'type' => $schema->string()
+            'type' => $schema->string()->required()->nullable()
                 ->enum(['all', 'food', 'glucose', 'vitals', 'exercise', 'medication'])
                 ->description('Filter entries by type. "all" returns everything, "food" returns carb entries, "glucose" returns glucose readings, "vitals" returns weight and blood pressure, "exercise" returns exercise logs, "medication" returns insulin and medication entries.'),
         ];
