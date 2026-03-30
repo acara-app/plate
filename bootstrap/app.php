@@ -13,7 +13,6 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
-use Throwable;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
