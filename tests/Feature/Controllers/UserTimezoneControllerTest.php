@@ -20,6 +20,8 @@ test('logged user can update timezone', function (): void {
     ]);
 
     $response->assertStatus(200);
+
+    expect($user->fresh()->timezone)->toBe('Europe/Madrid');
 });
 
 test('timezone must be valid', function (): void {
@@ -28,4 +30,5 @@ test('timezone must be valid', function (): void {
     ]);
 
     $response->assertStatus(302);
+    $response->assertSessionHasErrors('timezone');
 });
