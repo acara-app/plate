@@ -9,24 +9,31 @@ import i18n, { loadTranslations } from './i18n';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Acara Plate';
 
-registerSW({ immediate: true });
+if (typeof window !== 'undefined') {
+    registerSW({ immediate: true });
+}
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     setup({ el, App, props }) {
-        const root = createRoot(el);
-
         const locale = (props.initialPage.props.locale as string) || 'en';
         const translations =
             (props.initialPage.props.translations as Record<string, unknown>) ||
             {};
         loadTranslations(locale, translations);
 
-        root.render(
+        const app = (
             <I18nextProvider i18n={i18n}>
                 <App {...props} />
-            </I18nextProvider>,
+            </I18nextProvider>
         );
+
+        if (el) {
+            createRoot(el).render(app);
+            return;
+        }
+
+        return app;
     },
     progress: {
         color: '#4B5563',
@@ -34,4 +41,6 @@ createInertiaApp({
 });
 
 // This will set light / dark mode on load...
-initializeTheme();
+if (typeof window !== 'undefined') {
+    initializeTheme();
+}
