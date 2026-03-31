@@ -83,7 +83,8 @@ final readonly class GetUserProfile implements Tool
             'section' => $schema->string()
                 ->enum(['all', 'biometrics', 'dietary_preferences', 'health_conditions', 'medications', 'goals'])
                 ->description('Which section of the profile to retrieve. Use "all" for complete profile, or specify a section for specific data.')
-                ->required(),
+                ->required()
+                ->nullable(),
         ];
     }
 }
