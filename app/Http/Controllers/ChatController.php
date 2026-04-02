@@ -12,6 +12,7 @@ use App\Http\Requests\StoreChatConversationRequest;
 use App\Http\Requests\StreamChatRequest;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Ai\Responses\StreamableAgentResponse;
@@ -24,6 +25,18 @@ final readonly class ChatController
         private BuildAssistantAgentAction $agentAction,
         private GetOrCreateConversationAction $conversationAction,
     ) {}
+
+    public function index(): Response
+    {
+        return Inertia::render('chat/index', [
+            'conversations' => Inertia::scroll(
+                fn (): LengthAwarePaginator => $this->user
+                    ->conversations()
+                    ->latest()
+                    ->paginate(15)
+            ),
+        ]);
+    }
 
     public function create(
         StoreChatConversationRequest $request,

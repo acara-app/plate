@@ -150,6 +150,10 @@ return [
             'create_txt' => 'Générez un nouveau plan de repas personnalisé',
             'create_button' => 'Commencer',
         ],
+        'mobile_sync' => [
+            'title' => 'Synchro mobile',
+            'description' => 'Synchronisez automatiquement vos données de santé depuis votre téléphone.',
+        ],
         'chat' => [
             'title' => 'Altani',
             'description' => 'Votre coach IA personnel pour le diabète, la nutrition et le bien-être quotidien.',
@@ -980,5 +984,14 @@ return [
         'never_synced' => 'Jamais',
         'disconnect' => 'Déconnecter',
         'disconnect_confirm' => 'Êtes-vous sûr de vouloir déconnecter cet appareil ?',
+    ],
+
+    'conversations' => [
+        'title' => 'Conversations',
+        'description' => 'Votre historique de discussion avec Altani.',
+        'new_chat' => 'Nouvelle discussion',
+        'empty' => 'Aucune conversation pour le moment.',
+        'start_first' => 'Commencer votre première discussion',
+        'untitled' => 'Nouvelle conversation',
     ],
 ];

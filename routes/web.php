@@ -54,6 +54,8 @@ Route::middleware(['auth'])->group(function (): void {
 Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(function (): void {
     Route::get('dashboard', [Web\DashboardController::class, 'show'])->name('dashboard');
 
+    Route::get('/chat', [Web\ChatController::class, 'index'])->name('chat.index');
+
     Route::get('/chat/create/{conversationId}', [Web\ChatController::class, 'create'])
         ->name('chat.create');
     Route::post('chat/stream/{conversationId}', [Web\ChatController::class, 'stream'])

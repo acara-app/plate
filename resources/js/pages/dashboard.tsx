@@ -16,30 +16,22 @@ import chat from '@/routes/chat';
 import healthEntries from '@/routes/health-entries';
 import integrations from '@/routes/integrations';
 import mealPlans from '@/routes/meal-plans';
+import mobileSync from '@/routes/mobile-sync';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import {
     ArrowRight,
     ChevronRight,
     Droplets,
+    History,
     MessageSquare,
     Send,
+    Smartphone,
     Sparkles,
     TrendingUp,
     Utensils,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
-interface Props {
-    recentConversations: Array<{
-        id: string;
-        title: string;
-        updated_at: string;
-    }>;
-    hasGlucoseData: boolean;
-    hasHealthConditions: boolean;
-    [key: string]: unknown;
-}
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
@@ -52,7 +44,6 @@ export default function Dashboard() {
     const { t } = useTranslation('common');
     const breadcrumbs = getBreadcrumbs(t);
     const { currentUser } = useSharedProps();
-    const { recentConversations } = usePage<Props>().props;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -65,25 +56,33 @@ export default function Dashboard() {
                     <Card className="group relative flex flex-col overflow-hidden transition-all hover:shadow-lg">
                         <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-emerald-500 via-emerald-400 to-teal-400" />
                         <CardHeader className="pb-3">
-                            <div className="flex items-center gap-3">
-                                <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full ring-2 ring-emerald-100">
-                                    <img
-                                        src="https://pub-plate-assets.acara.app/images/altani-waving-hello-320.webp"
-                                        alt="Altani"
-                                        className="h-full w-full object-cover"
-                                    />
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full ring-2 ring-emerald-100">
+                                        <img
+                                            src="https://pub-plate-assets.acara.app/images/altani-waving-hello-320.webp"
+                                            alt="Altani"
+                                            className="h-full w-full object-cover"
+                                        />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg">
+                                            {t('dashboard_cards.chat.title')}
+                                        </CardTitle>
+                                        <Badge
+                                            variant="secondary"
+                                            className="mt-1 bg-emerald-100 text-xs text-emerald-700 hover:bg-emerald-100"
+                                        >
+                                            24/7 Available
+                                        </Badge>
+                                    </div>
                                 </div>
-                                <div>
-                                    <CardTitle className="text-lg">
-                                        {t('dashboard_cards.chat.title')}
-                                    </CardTitle>
-                                    <Badge
-                                        variant="secondary"
-                                        className="mt-1 bg-emerald-100 text-xs text-emerald-700 hover:bg-emerald-100"
-                                    >
-                                        24/7 Available
-                                    </Badge>
-                                </div>
+                                <Link
+                                    href={chat.index().url}
+                                    className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-emerald-50 hover:text-emerald-600"
+                                >
+                                    <History className="h-5 w-5" />
+                                </Link>
                             </div>
                             <CardDescription className="mt-3 text-sm leading-relaxed">
                                 {t('dashboard_cards.chat.description')}
@@ -175,6 +174,30 @@ export default function Dashboard() {
                         </Card>
                     </Link>
 
+                    {/* Mobile Sync Card */}
+                    <Link href={mobileSync.edit().url} className="group">
+                        <Card className="h-full transition-all hover:border-violet-500/50 hover:shadow-md">
+                            <CardContent className="flex h-full flex-col justify-between p-5">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/20">
+                                        <Smartphone className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                                    </div>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold">
+                                        {t('dashboard_cards.mobile_sync.title')}
+                                    </h3>
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        {t(
+                                            'dashboard_cards.mobile_sync.description',
+                                        )}
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
+
                     {/* My Menu Card */}
                     <Link href={mealPlans.index().url} className="group">
                         <Card className="h-full transition-all hover:border-primary/50 hover:shadow-md">
@@ -253,49 +276,6 @@ export default function Dashboard() {
                             </CardContent>
                         </Card>
                     </Link>
-
-                    {/* Recent Conversations Card */}
-                    {recentConversations.length > 0 && (
-                        <Card className="flex flex-col">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="flex items-center gap-2 text-base">
-                                    <MessageSquare className="h-4 w-4 text-primary" />
-                                    Recent Conversations
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex-1">
-                                <div className="space-y-2">
-                                    {recentConversations.map((conv) => (
-                                        <Link
-                                            key={conv.id}
-                                            href={chat.create(conv.id).url}
-                                            className="group flex items-center justify-between rounded-md px-2 py-2 text-sm transition-colors hover:bg-muted"
-                                        >
-                                            <span className="truncate text-muted-foreground group-hover:text-foreground">
-                                                {conv.title}
-                                            </span>
-                                            <span className="ml-2 shrink-0 text-xs text-muted-foreground">
-                                                {conv.updated_at}
-                                            </span>
-                                        </Link>
-                                    ))}
-                                </div>
-                                <div className="mt-4 border-t pt-3">
-                                    <Link
-                                        href={chat.create(generateUUID()).url}
-                                    >
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="w-full text-xs"
-                                        >
-                                            View All Conversations
-                                        </Button>
-                                    </Link>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
                 </div>
             </div>
         </AppLayout>

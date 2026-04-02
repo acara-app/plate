@@ -149,6 +149,10 @@ return [
             'create_txt' => 'Get a fresh custom menu designed just for you.',
             'create_button' => 'Create Menu',
         ],
+        'mobile_sync' => [
+            'title' => 'Mobile Sync',
+            'description' => 'Sync health data from your phone automatically.',
+        ],
         'chat' => [
             'title' => 'Meet Altani',
             'description' => 'Your personal AI health coach for diabetes management, nutrition advice, and daily wellness support.',
@@ -992,5 +996,14 @@ return [
         'never_synced' => 'Never',
         'disconnect' => 'Disconnect',
         'disconnect_confirm' => 'Are you sure you want to disconnect this device?',
+    ],
+
+    'conversations' => [
+        'title' => 'Conversations',
+        'description' => 'Your chat history with Altani.',
+        'new_chat' => 'New Chat',
+        'empty' => 'No conversations yet.',
+        'start_first' => 'Start your first chat',
+        'untitled' => 'New Conversation',
     ],
 ];
