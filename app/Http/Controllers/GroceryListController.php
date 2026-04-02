@@ -10,8 +10,6 @@ use App\Jobs\GenerateGroceryListJob;
 use App\Models\GroceryItem;
 use App\Models\GroceryList;
 use App\Models\MealPlan;
-use App\Models\User;
-use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -20,7 +18,6 @@ use Inertia\Response;
 final readonly class GroceryListController
 {
     public function __construct(
-        #[CurrentUser] private User $user,
         private GenerateGroceryListAction $generateAction,
     ) {}
 
