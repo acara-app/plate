@@ -30,7 +30,7 @@ final class Setting extends Model
         $keyValue = $key instanceof SettingKey ? $key->value : $key;
         $setting = self::query()->where('key', $keyValue)->first();
 
-        return $setting?->value ?? $default;
+        return $setting->value ?? $default;
     }
 
     public static function set(SettingKey|string $key, mixed $value): void
