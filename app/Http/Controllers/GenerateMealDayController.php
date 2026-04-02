@@ -6,24 +6,17 @@ namespace App\Http\Controllers;
 
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\MealPlan;
-use App\Models\User;
 use App\Workflows\MealPlanDayWorkflow;
-use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Workflow\WorkflowStub;
 
-final readonly class GenerateMealDayController
+final class GenerateMealDayController
 {
-    public function __construct(
-        #[CurrentUser] private User $user,
-    ) {
-        //
-    }
-
     public function __invoke(Request $request, MealPlan $mealPlan): JsonResponse
     {
-        abort_if($mealPlan->user_id !== $this->user->id, 403);
+        Gate::authorize('update', $mealPlan);
 
         $dayNumber = $request->integer('day', 1);
 

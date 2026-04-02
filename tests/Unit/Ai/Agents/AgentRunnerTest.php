@@ -12,10 +12,7 @@ use App\Ai\Tools\SuggestSingleMeal;
 use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Ai\Files\Base64Image;
-
-uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();

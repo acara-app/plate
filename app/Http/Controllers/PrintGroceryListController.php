@@ -5,18 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\MealPlan;
-use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 final class PrintGroceryListController
 {
     public function __invoke(Request $request, MealPlan $mealPlan): View
     {
-        /** @var User $user */
-        $user = $request->user();
-
-        abort_unless($mealPlan->user_id === $user->id, 403);
+        Gate::authorize('view', $mealPlan);
 
         $groceryList = $mealPlan->groceryList;
 

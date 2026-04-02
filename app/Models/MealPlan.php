@@ -102,6 +102,36 @@ final class MealPlan extends Model
     }
 
     /**
+     * @param  Collection<int, Meal>  $dayMeals
+     * @return array{protein: float, carbs: float, fat: float}|null
+     */
+    public function macroRatiosForDay(Collection $dayMeals): ?array
+    {
+        if ($this->macronutrient_ratios) {
+            return $this->macronutrient_ratios;
+        }
+
+        if ($dayMeals->whereNotNull('protein_grams')->isEmpty()) {
+            return null;
+        }
+
+        $totalProteinCals = $dayMeals->sum(fn (Meal $m): float => ($m->protein_grams ?? 0) * 4);
+        $totalCarbsCals = $dayMeals->sum(fn (Meal $m): float => ($m->carbs_grams ?? 0) * 4);
+        $totalFatCals = $dayMeals->sum(fn (Meal $m): float => ($m->fat_grams ?? 0) * 9);
+        $totalMacroCals = $totalProteinCals + $totalCarbsCals + $totalFatCals;
+
+        if ($totalMacroCals <= 0) {
+            return null;
+        }
+
+        return [
+            'protein' => round(($totalProteinCals / $totalMacroCals) * 100, 1),
+            'carbs' => round(($totalCarbsCals / $totalMacroCals) * 100, 1),
+            'fat' => round(($totalFatCals / $totalMacroCals) * 100, 1),
+        ];
+    }
+
+    /**
      * @return array{protein: float, carbs: float, fat: float}
      */
     public function macrosForDay(int $dayNumber): array

@@ -13,7 +13,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
-final class UpdateHealthEntryRequest extends FormRequest
+final class HealthEntryRequest extends FormRequest
 {
     /**
      * @return array<string, array<int, mixed>>

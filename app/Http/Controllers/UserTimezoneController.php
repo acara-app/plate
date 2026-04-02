@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\UpdateUserTimezoneAction;
+use App\Http\Requests\UpdateTimezoneRequest;
 use App\Models\User;
-use App\Rules\ValidTimezone;
 use Illuminate\Container\Attributes\CurrentUser;
-use Illuminate\Http\Request;
 
 final readonly class UserTimezoneController
 {
@@ -17,12 +16,10 @@ final readonly class UserTimezoneController
         private UpdateUserTimezoneAction $action,
     ) {}
 
-    public function update(Request $request): void
+    public function update(UpdateTimezoneRequest $request): void
     {
         /** @var array<string, string> $validated */
-        $validated = $request->validate([
-            'timezone' => ['required', 'string', 'max:255', new ValidTimezone],
-        ]);
+        $validated = $request->validated();
 
         $request->session()->put('timezone', $validated['timezone']);
 

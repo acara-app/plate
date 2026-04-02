@@ -38,7 +38,9 @@ Route::get('/food/{slug}', [Web\PublicFoodController::class, 'show'])->name('foo
 
 Route::get('/food_sitemap.xml', [Web\FoodSitemapXmlController::class, 'food'])->name('food.sitemap');
 
-Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])->name('profile.timezone.update');
+Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])
+    ->middleware('throttle:10,1')
+    ->name('profile.timezone.update');
 
 Route::view('/ai-nutritionist', 'ai-nutritionist')->name('ai-nutritionist');
 Route::view('/ai-health-coach', 'ai-health-coach')->name('ai-health-coach');
@@ -48,7 +50,9 @@ Route::view('/for-dietitians', 'for-dietitians')->name('for-dietitians');
 
 Route::middleware(['auth'])->group(function (): void {
     Route::get('disclaimer', [Web\DisclaimerController::class, 'show'])->name('disclaimer.show');
-    Route::post('disclaimer', [Web\DisclaimerController::class, 'accept'])->name('disclaimer.accept');
+    Route::post('disclaimer', [Web\DisclaimerController::class, 'accept'])
+        ->middleware('throttle:6,1')
+        ->name('disclaimer.accept');
 });
 
 Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(function (): void {
@@ -59,7 +63,7 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
     Route::get('/chat/create/{conversationId}', [Web\ChatController::class, 'create'])
         ->name('chat.create');
     Route::post('chat/stream/{conversationId}', [Web\ChatController::class, 'stream'])
-        ->middleware(DisableResponseBuffering::class)
+        ->middleware([DisableResponseBuffering::class, 'throttle:30,1'])
         ->name('chat.stream');
 
     Route::post('meal-plans', Web\StoreMealPlanController::class)->name('meal-plans.store');

@@ -31,7 +31,7 @@ final class MealFactory extends Factory
             'name' => fake()->words(3, true),
             'description' => fake()->optional(0.7)->sentence(),
             'preparation_instructions' => fake()->optional(0.8)->paragraphs(2, true),
-            'ingredients' => fake()->optional(0.8)->paragraphs(1, true),
+            'ingredients' => fake()->optional(0.8)->words(5),
             'portion_size' => fake()->optional(0.7)->randomElement(['1 cup', '200g', '1 serving', '2 pieces', '150ml']),
             'calories' => $calories,
             'protein_grams' => $proteinGrams,

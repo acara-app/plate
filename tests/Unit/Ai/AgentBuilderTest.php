@@ -12,10 +12,7 @@ use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Models\User;
 use App\Services\ToolRegistry;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Ai\Files\Base64Image;
-
-uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->toolRegistry = resolve(ToolRegistry::class);

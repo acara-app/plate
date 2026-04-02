@@ -45,6 +45,7 @@ final class AppServiceProvider extends ServiceProvider
     private function bootModelsDefaults(): void
     {
         Model::unguard();
+        Model::shouldBeStrict(! $this->app->isProduction());
     }
 
     private function bootPasswordDefaults(): void

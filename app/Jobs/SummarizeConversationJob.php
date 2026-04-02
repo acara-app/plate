@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Throwable;
 
 final class SummarizeConversationJob implements ShouldBeUnique, ShouldQueue
 {
@@ -50,6 +51,11 @@ final class SummarizeConversationJob implements ShouldBeUnique, ShouldQueue
     {
         $action->handle($this->conversation);
 
+        $this->conversation->update(['summarization_dispatched_at' => null]);
+    }
+
+    public function failed(Throwable $exception): void
+    {
         $this->conversation->update(['summarization_dispatched_at' => null]);
     }
 }

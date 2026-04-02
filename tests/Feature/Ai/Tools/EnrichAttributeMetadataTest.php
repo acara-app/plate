@@ -3,11 +3,8 @@
 declare(strict_types=1);
 
 use App\Ai\Tools\EnrichAttributeMetadata;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
-
-uses(RefreshDatabase::class);
 
 it('has correct name and description', function (): void {
     $tool = new EnrichAttributeMetadata;

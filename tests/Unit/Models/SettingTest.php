@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\SettingKey;
 use App\Models\Setting;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 it('can set and get a setting using enum', function (): void {
     Setting::set(SettingKey::GeminiFileSearchStoreName, 'test-store-name');

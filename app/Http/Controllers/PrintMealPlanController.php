@@ -5,19 +5,16 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\MealPlan;
-use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 final class PrintMealPlanController
 {
     public function __invoke(Request $request, MealPlan $mealPlan): View
     {
-        /** @var User $user */
-        $user = $request->user();
-
-        abort_unless($mealPlan->user_id === $user->id, 403);
+        Gate::authorize('view', $mealPlan);
 
         $mealPlan->load(['meals' => function (HasMany $query): void {
             $query->orderBy('day_number')->orderBy('sort_order');

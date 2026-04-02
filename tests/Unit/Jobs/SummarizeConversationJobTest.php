@@ -58,6 +58,19 @@ it('backoff returns correct delays', function (): void {
     expect($job->backoff())->toBe([30, 60, 120]);
 });
 
+it('clears dispatch timestamp when the job fails', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create([
+        'summarization_dispatched_at' => now(),
+    ]);
+
+    $job = new SummarizeConversationJob($conversation);
+    $job->failed(new RuntimeException('test'));
+
+    $conversation->refresh();
+    expect($conversation->summarization_dispatched_at)->toBeNull();
+});
+
 it('clears dispatch timestamp after handling', function (): void {
     $user = User::factory()->create();
     $conversation = Conversation::factory()->forUser($user)->create([

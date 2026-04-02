@@ -7,9 +7,6 @@ namespace Tests\Unit\Http\Layouts;
 use App\Http\Layouts\DiabetesLayout;
 use App\Models\HealthEntry;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 test('dashboard data uses default time period when invalid period provided', function (): void {
     $user = User::factory()->create();

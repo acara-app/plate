@@ -6,11 +6,12 @@ namespace App\Http\Controllers\HealthEntry;
 
 use App\Actions\UpdateHealthEntryAction;
 use App\Enums\GlucoseUnit;
-use App\Http\Requests\UpdateHealthEntryRequest;
+use App\Http\Requests\HealthEntryRequest;
 use App\Models\HealthEntry;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 final readonly class UpdateHealthEntryController
 {
@@ -19,9 +20,9 @@ final readonly class UpdateHealthEntryController
         #[CurrentUser()] private User $currentUser,
     ) {}
 
-    public function __invoke(UpdateHealthEntryRequest $request, HealthEntry $healthEntry): RedirectResponse
+    public function __invoke(HealthEntryRequest $request, HealthEntry $healthEntry): RedirectResponse
     {
-        abort_if($healthEntry->user_id !== $this->currentUser->id, 403);
+        Gate::authorize('update', $healthEntry);
 
         $data = $request->validated();
 

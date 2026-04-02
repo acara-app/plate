@@ -10,13 +10,10 @@ use App\Enums\SettingKey;
 use App\Enums\Sex;
 use App\Models\Setting;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Spatie\LaravelData\DataCollection;
 use Workflow\WorkflowStub;
-
-uses(RefreshDatabase::class);
 
 it('returns fluent interface when setting diet type', function (): void {
     $action = resolve(MealPlanAgent::class);

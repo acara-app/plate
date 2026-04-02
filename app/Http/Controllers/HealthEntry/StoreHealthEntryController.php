@@ -7,7 +7,7 @@ namespace App\Http\Controllers\HealthEntry;
 use App\Actions\RecordHealthEntryAction;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntrySource;
-use App\Http\Requests\StoreHealthEntryRequest;
+use App\Http\Requests\HealthEntryRequest;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
@@ -19,7 +19,7 @@ final readonly class StoreHealthEntryController
         #[CurrentUser()] private User $currentUser,
     ) {}
 
-    public function __invoke(StoreHealthEntryRequest $request): RedirectResponse
+    public function __invoke(HealthEntryRequest $request): RedirectResponse
     {
         $data = $request->validated();
 

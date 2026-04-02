@@ -10,22 +10,20 @@ use App\Jobs\GenerateGroceryListJob;
 use App\Models\GroceryItem;
 use App\Models\GroceryList;
 use App\Models\MealPlan;
-use App\Models\User;
-use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
 final readonly class GroceryListController
 {
     public function __construct(
-        #[CurrentUser] private User $user,
         private GenerateGroceryListAction $generateAction,
     ) {}
 
     public function show(MealPlan $mealPlan): Response
     {
-        abort_if($mealPlan->user_id !== $this->user->id, 403);
+        Gate::authorize('view', $mealPlan);
 
         $groceryList = $mealPlan->groceryList;
 
@@ -41,7 +39,7 @@ final readonly class GroceryListController
 
     public function store(MealPlan $mealPlan): Response
     {
-        abort_if($mealPlan->user_id !== $this->user->id, 403);
+        Gate::authorize('update', $mealPlan);
 
         $groceryList = $this->generateAction->createPlaceholder($mealPlan);
 
@@ -61,7 +59,7 @@ final readonly class GroceryListController
     {
         $groceryList = $groceryItem->groceryList;
 
-        abort_if($groceryList->user_id !== $this->user->id, 403);
+        Gate::authorize('update', $groceryList);
 
         $groceryItem->update([
             'is_checked' => ! $groceryItem->is_checked,

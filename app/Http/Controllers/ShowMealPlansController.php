@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\DataObjects\MealResponseData;
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\Meal;
 use App\Models\MealPlan;
@@ -67,23 +68,7 @@ final readonly class ShowMealPlansController
             'fat' => $dayMeals->sum('fat_grams'),
         ];
 
-        $avgMacros = null;
-        if ($mealPlan->macronutrient_ratios) {
-            $avgMacros = $mealPlan->macronutrient_ratios;
-        } elseif ($dayMeals->whereNotNull('protein_grams')->isNotEmpty()) {
-            $totalProteinCals = $dayMeals->sum(fn (Meal $m): float => ($m->protein_grams ?? 0) * 4);
-            $totalCarbsCals = $dayMeals->sum(fn (Meal $m): float => ($m->carbs_grams ?? 0) * 4);
-            $totalFatCals = $dayMeals->sum(fn (Meal $m): float => ($m->fat_grams ?? 0) * 9);
-            $totalMacroCals = $totalProteinCals + $totalCarbsCals + $totalFatCals;
-
-            if ($totalMacroCals > 0) {
-                $avgMacros = [
-                    'protein' => round(($totalProteinCals / $totalMacroCals) * 100, 1),
-                    'carbs' => round(($totalCarbsCals / $totalMacroCals) * 100, 1),
-                    'fat' => round(($totalFatCals / $totalMacroCals) * 100, 1),
-                ];
-            }
-        }
+        $avgMacros = $mealPlan->macroRatiosForDay($dayMeals);
 
         $dayName = $dayMeals->first()?->getDayName() ?? 'Day '.$currentDayNumber;
 
@@ -120,21 +105,7 @@ final readonly class ShowMealPlansController
             'day_name' => $dayName,
             'needs_generation' => $dayNeedsGeneration,
             'status' => $dayStatus,
-            'meals' => $dayMeals->map(fn (Meal $meal): array => [
-                'id' => $meal->id,
-                'type' => $meal->type->value,
-                'name' => $meal->name,
-                'description' => $meal->description,
-                'preparation_instructions' => $meal->preparation_instructions,
-                'ingredients' => $meal->ingredients,
-                'portion_size' => $meal->portion_size,
-                'calories' => (float) $meal->calories,
-                'protein_grams' => $meal->protein_grams ? (float) $meal->protein_grams : null,
-                'carbs_grams' => $meal->carbs_grams ? (float) $meal->carbs_grams : null,
-                'fat_grams' => $meal->fat_grams ? (float) $meal->fat_grams : null,
-                'preparation_time_minutes' => $meal->preparation_time_minutes,
-                'macro_percentages' => $meal->macroPercentages(),
-            ]),
+            'meals' => $dayMeals->map(fn (Meal $meal): MealResponseData => MealResponseData::fromMeal($meal)),
             'daily_stats' => $dailyStats,
         ];
 

@@ -8,6 +8,8 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 
 it('renders conversations index page', function (): void {
+    $this->withoutVite();
+
     $user = User::factory()->create();
 
     actingAs($user)
@@ -17,6 +19,8 @@ it('renders conversations index page', function (): void {
 });
 
 it('lists only the authenticated user conversations', function (): void {
+    $this->withoutVite();
+
     $user = User::factory()->create();
     $other = User::factory()->create();
 
@@ -30,6 +34,8 @@ it('lists only the authenticated user conversations', function (): void {
 });
 
 it('orders conversations by most recent first', function (): void {
+    $this->withoutVite();
+
     $user = User::factory()->create();
 
     Conversation::factory()->forUser($user)->create([

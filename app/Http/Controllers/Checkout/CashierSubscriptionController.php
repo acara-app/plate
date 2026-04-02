@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Checkout;
 
 use App\Contracts\Services\StripeServiceContract;
+use App\Http\Requests\CreateSubscriptionRequest;
 use App\Models\SubscriptionProduct;
 use Exception;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,13 +19,10 @@ final readonly class CashierSubscriptionController
         //
     }
 
-    public function __invoke(Request $request): RedirectResponse|Response
+    public function __invoke(CreateSubscriptionRequest $request): RedirectResponse|Response
     {
         /** @var array{product_id: int, billing_interval: string} $data */
-        $data = $request->validate([
-            'product_id' => ['required', 'exists:subscription_products,id'],
-            'billing_interval' => ['required', 'in:monthly,yearly'],
-        ]);
+        $data = $request->validated();
 
         /** @var SubscriptionProduct $product */
         $product = SubscriptionProduct::query()->findOrFail($data['product_id']);

@@ -7,9 +7,6 @@ use App\Ai\SingleMealPromptBuilder;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();

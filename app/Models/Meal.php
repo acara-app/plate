@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\DataObjects\IngredientData;
 use App\Enums\MealPlanType;
 use App\Enums\MealType;
 use Carbon\CarbonInterface;
@@ -12,7 +11,6 @@ use Database\Factories\MealFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Collection;
 
 /**
  * @property-read int $id
@@ -22,7 +20,7 @@ use Illuminate\Support\Collection;
  * @property-read string $name
  * @property-read string|null $description
  * @property-read string|null $preparation_instructions
- * @property-read Collection<int, IngredientData>|null $ingredients
+ * @property-read array<int, string>|null $ingredients
  * @property-read string|null $portion_size
  * @property-read float $calories
  * @property-read float|null $protein_grams
