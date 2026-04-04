@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\HealthSyncSample;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
 
@@ -92,12 +93,13 @@ it('creates a sanctum token for the paired device', function (): void {
         ->and($user->tokens()->first()->name)->toBe('mobile-sync:'.$device->id);
 });
 
-it('deletes old device when re-pairing with the same device_identifier', function (): void {
+it('deactivates old device when re-pairing with the same device_identifier', function (): void {
     $user = User::factory()->create();
 
     $oldDevice = MobileSyncDevice::factory()->for($user)->paired()->create([
         'device_identifier' => 'REUSE-UUID-123',
     ]);
+    $user->createToken('mobile-sync:'.$oldDevice->id, ['sync:push']);
 
     $newDevice = MobileSyncDevice::factory()->for($user)->withToken()->create();
 
@@ -109,8 +111,40 @@ it('deletes old device when re-pairing with the same device_identifier', functio
 
     $response->assertOk();
 
-    expect(MobileSyncDevice::query()->find($oldDevice->id))->toBeNull()
+    expect($oldDevice->fresh())
+        ->not->toBeNull()
+        ->is_active->toBeFalse()
+        ->device_identifier->toBeNull()
+        ->and($user->tokens()->where('name', 'mobile-sync:'.$oldDevice->id)->count())->toBe(0)
         ->and($newDevice->fresh()->device_identifier)->toBe('REUSE-UUID-123');
+});
+
+it('preserves health sync samples when re-pairing with the same device_identifier', function (): void {
+    $user = User::factory()->create();
+
+    $oldDevice = MobileSyncDevice::factory()->for($user)->paired()->create([
+        'device_identifier' => 'REUSE-UUID-123',
+    ]);
+
+    $sample = HealthSyncSample::factory()->for($user)->create([
+        'mobile_sync_device_id' => $oldDevice->id,
+        'type_identifier' => 'stepCount',
+        'value' => 1500,
+    ]);
+
+    $newDevice = MobileSyncDevice::factory()->for($user)->withToken()->create();
+
+    $this->postJson('/api/v1/sync/pair', [
+        'token' => $newDevice->linking_token,
+        'device_name' => 'iPhone 16',
+        'device_identifier' => 'REUSE-UUID-123',
+    ])->assertOk();
+
+    $freshSample = $sample->fresh();
+
+    expect($freshSample)->not->toBeNull()
+        ->and($freshSample->value)->toBe(1500.0)
+        ->and($freshSample->mobile_sync_device_id)->toBe($oldDevice->id);
 });
 
 it('handles case-insensitive token input', function (): void {

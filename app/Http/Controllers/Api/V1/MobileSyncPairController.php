@@ -32,10 +32,17 @@ final class MobileSyncPairController
         $deviceIdentifier = $request->string('device_identifier')->toString() ?: null;
 
         if ($deviceIdentifier !== null) {
-            MobileSyncDevice::query()
+            $oldDevices = MobileSyncDevice::query()
                 ->where('device_identifier', $deviceIdentifier)
                 ->where('id', '!=', $device->id)
-                ->delete();
+                ->get();
+
+            foreach ($oldDevices as $oldDevice) {
+                $oldDevice->update(['is_active' => false, 'device_identifier' => null]);
+                $oldDevice->user->tokens()
+                    ->where('name', 'mobile-sync:'.$oldDevice->id)
+                    ->delete();
+            }
         }
 
         $device->markAsPaired(

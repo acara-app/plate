@@ -91,7 +91,7 @@ final class MobileSyncDevice extends Model
                 self::query()
                     ->where('device_identifier', $deviceIdentifier)
                     ->where('id', '!=', $this->id)
-                    ->delete();
+                    ->update(['is_active' => false, 'device_identifier' => null]);
             }
 
             $this->update([
