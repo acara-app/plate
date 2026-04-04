@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\AnimalProductChoice;
+use App\Enums\BloodType;
 use App\Enums\DietType;
 use App\Enums\GlucoseUnit;
 use App\Enums\GoalChoice;
@@ -24,9 +25,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read int $id
  * @property-read int $user_id
  * @property-read int|null $age
+ * @property-read CarbonInterface|null $date_of_birth
  * @property-read float|null $height
  * @property-read float|null $weight
  * @property-read Sex|null $sex
+ * @property-read BloodType|null $blood_type
  * @property-read GoalChoice|null $goal_choice
  * @property-read AnimalProductChoice|null $animal_product_choice
  * @property-read IntensityChoice|null $intensity_choice
@@ -70,9 +73,11 @@ final class UserProfile extends Model
             'id' => 'integer',
             'user_id' => 'integer',
             'age' => 'integer',
+            'date_of_birth' => 'date',
             'height' => 'float',
             'weight' => 'float',
             'sex' => Sex::class,
+            'blood_type' => BloodType::class,
             'goal_choice' => GoalChoice::class,
             'animal_product_choice' => AnimalProductChoice::class,
             'intensity_choice' => IntensityChoice::class,

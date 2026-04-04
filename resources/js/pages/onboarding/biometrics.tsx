@@ -14,16 +14,55 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Profile, SexOption } from '@/types/user';
+import { BloodTypeOption, Profile, SexOption } from '@/types/user';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+function calculateAge(dateOfBirth: string): number | null {
+    const birth = new Date(dateOfBirth);
+    if (isNaN(birth.getTime())) {
+        return null;
+    }
+
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+        age--;
+    }
+
+    return age;
+}
 
 interface Props {
     profile: Profile;
     sexOptions: SexOption[];
+    bloodTypeOptions: BloodTypeOption[];
 }
 
-export default function Biometrics({ profile, sexOptions }: Props) {
+export default function Biometrics({
+    profile,
+    sexOptions,
+    bloodTypeOptions,
+}: Props) {
     const { t } = useTranslation('common');
+    const [dateOfBirth, setDateOfBirth] = useState(
+        profile?.date_of_birth ?? '',
+    );
+    const [age, setAge] = useState<string>(profile?.age?.toString() ?? '');
+
+    const handleDateOfBirthChange = (value: string) => {
+        setDateOfBirth(value);
+        const computed = calculateAge(value);
+        if (computed !== null && computed >= 0) {
+            setAge(computed.toString());
+        }
+    };
+
     return (
         <>
             <Head title={t('onboarding.biometrics.title')} />
@@ -72,7 +111,10 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                             id="age"
                                             type="number"
                                             name="age"
-                                            defaultValue={profile?.age || ''}
+                                            value={age}
+                                            onChange={(e) =>
+                                                setAge(e.target.value)
+                                            }
                                             min="13"
                                             max="120"
                                             required
@@ -81,6 +123,39 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                             )}
                                         />
                                         <InputError message={errors.age} />
+                                    </div>
+
+                                    {/* Date of Birth (optional) */}
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="date_of_birth">
+                                            {t(
+                                                'onboarding.biometrics.date_of_birth',
+                                            )}
+                                        </Label>
+                                        <Input
+                                            id="date_of_birth"
+                                            type="date"
+                                            name="date_of_birth"
+                                            value={dateOfBirth}
+                                            onChange={(e) =>
+                                                handleDateOfBirthChange(
+                                                    e.target.value,
+                                                )
+                                            }
+                                            max={
+                                                new Date()
+                                                    .toISOString()
+                                                    .split('T')[0]
+                                            }
+                                        />
+                                        <InputError
+                                            message={errors.date_of_birth}
+                                        />
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            {t(
+                                                'onboarding.biometrics.date_of_birth_help',
+                                            )}
+                                        </p>
                                     </div>
 
                                     {/* Height */}
@@ -157,6 +232,49 @@ export default function Biometrics({ profile, sexOptions }: Props) {
                                         <p className="text-xs text-gray-500 dark:text-gray-400">
                                             {t(
                                                 'onboarding.biometrics.sex_help',
+                                            )}
+                                        </p>
+                                    </div>
+
+                                    {/* Blood Type */}
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="blood_type">
+                                            {t(
+                                                'onboarding.biometrics.blood_type',
+                                            )}
+                                        </Label>
+                                        <Select
+                                            name="blood_type"
+                                            defaultValue={
+                                                profile?.blood_type || ''
+                                            }
+                                        >
+                                            <SelectTrigger id="blood_type">
+                                                <SelectValue
+                                                    placeholder={t(
+                                                        'onboarding.biometrics.blood_type_placeholder',
+                                                    )}
+                                                />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {bloodTypeOptions.map(
+                                                    (option) => (
+                                                        <SelectItem
+                                                            key={option.value}
+                                                            value={option.value}
+                                                        >
+                                                            {option.label}
+                                                        </SelectItem>
+                                                    ),
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                        <InputError
+                                            message={errors.blood_type}
+                                        />
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            {t(
+                                                'onboarding.biometrics.blood_type_help',
                                             )}
                                         </p>
                                     </div>

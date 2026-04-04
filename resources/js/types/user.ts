@@ -3,11 +3,18 @@ export interface SexOption {
     label: string;
 }
 
+export interface BloodTypeOption {
+    value: string;
+    label: string;
+}
+
 export interface Profile {
     age?: number;
+    date_of_birth?: string;
     height?: number;
     weight?: number;
     sex?: string;
+    blood_type?: string;
     target_weight?: number;
     additional_goals?: string;
     goal_choice?: string;

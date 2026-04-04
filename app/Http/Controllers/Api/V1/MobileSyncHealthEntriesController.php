@@ -65,6 +65,7 @@ final readonly class MobileSyncHealthEntriesController
             'health_entries_updated' => $result['health_entries_updated'],
             'samples_created' => $result['samples_created'],
             'samples_updated' => $result['samples_updated'],
+            'profile_updated' => $result['profile_updated'],
         ]);
     }
 

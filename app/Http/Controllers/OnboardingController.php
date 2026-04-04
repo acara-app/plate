@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\DataObjects\DietIdentityData;
 use App\Enums\AllergySeverity;
 use App\Enums\AnimalProductChoice;
+use App\Enums\BloodType;
 use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
 use App\Enums\Sex;
@@ -18,6 +19,7 @@ use App\Models\User;
 use App\Services\DietMapper;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Date;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -39,6 +41,10 @@ final readonly class OnboardingController
                 'value' => $sex->value,
                 'label' => ucfirst($sex->value),
             ]),
+            'bloodTypeOptions' => collect(BloodType::cases())->map(fn (BloodType $type): array => [
+                'value' => $type->value,
+                'label' => $type->value,
+            ]),
         ]);
     }
 
@@ -46,9 +52,15 @@ final readonly class OnboardingController
     {
         $user = $this->user;
 
+        $data = $request->validated();
+
+        if (isset($data['date_of_birth']) && is_string($data['date_of_birth'])) {
+            $data['age'] = Date::parse($data['date_of_birth'])->age;
+        }
+
         $user->profile()->updateOrCreate(
             ['user_id' => $user->id],
-            $request->validated()
+            $data,
         );
 
         return to_route('onboarding.identity.show');

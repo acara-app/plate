@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 use App\Enums\AllergySeverity;
 use App\Enums\AnimalProductChoice;
+use App\Enums\BloodType;
 use App\Enums\DietType;
 use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use App\Enums\UserProfileAttributeCategory;
 use App\Models\User;
+use Illuminate\Support\Facades\Date;
 
 it('renders biometrics page', function (): void {
     $user = User::factory()->create();
@@ -21,10 +23,41 @@ it('renders biometrics page', function (): void {
         ->assertInertia(fn ($page) => $page
             ->component('onboarding/biometrics')
             ->has('profile')
-            ->has('sexOptions'));
+            ->has('sexOptions')
+            ->has('bloodTypeOptions'));
 });
 
-it('may store biometrics data', function (): void {
+it('may store biometrics data with date_of_birth and blood_type', function (): void {
+    Date::setTestNow('2026-04-04 12:00:00');
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'age' => 30,
+            'date_of_birth' => '1996-04-04',
+            'height' => 175,
+            'weight' => 70,
+            'sex' => Sex::Male->value,
+            'blood_type' => BloodType::APositive->value,
+        ]);
+
+    $response->assertRedirectToRoute('onboarding.identity.show');
+
+    $profile = $user->profile()->first();
+
+    expect($profile)->not->toBeNull()
+        ->date_of_birth->format('Y-m-d')->toBe('1996-04-04')
+        ->age->toBe(30)
+        ->height->toBe(175.0)
+        ->weight->toBe(70.0)
+        ->sex->toBe(Sex::Male)
+        ->blood_type->toBe(BloodType::APositive);
+
+    Date::setTestNow();
+});
+
+it('may store biometrics without date_of_birth and blood_type', function (): void {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
@@ -41,9 +74,8 @@ it('may store biometrics data', function (): void {
 
     expect($profile)->not->toBeNull()
         ->age->toBe(30)
-        ->height->toBe(175.0)
-        ->weight->toBe(70.0)
-        ->sex->toBe(Sex::Male);
+        ->date_of_birth->toBeNull()
+        ->blood_type->toBeNull();
 });
 
 it('requires age for biometrics', function (): void {
@@ -85,6 +117,40 @@ it('requires age to be at most 120', function (): void {
         ]);
 
     $response->assertSessionHasErrors('age');
+});
+
+it('rejects future date_of_birth', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'age' => 30,
+            'date_of_birth' => now()->addDay()->format('Y-m-d'),
+            'height' => 175,
+            'weight' => 70,
+            'sex' => Sex::Male->value,
+        ]);
+
+    $response->assertSessionHasErrors('date_of_birth');
+});
+
+it('overrides age from date_of_birth when both provided', function (): void {
+    Date::setTestNow('2026-04-04 12:00:00');
+
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'age' => 99,
+            'date_of_birth' => '1996-04-04',
+            'height' => 175,
+            'weight' => 70,
+            'sex' => Sex::Male->value,
+        ]);
+
+    expect($user->profile()->first()->age)->toBe(30);
+
+    Date::setTestNow();
 });
 
 it('requires height for biometrics', function (): void {

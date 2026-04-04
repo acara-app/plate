@@ -17,6 +17,10 @@ enum HealthSyncType: string
     case ExerciseMinutes = 'exerciseMinutes';
     case Workouts = 'workouts';
 
+    case BiologicalSex = 'biologicalSex';
+    case DateOfBirth = 'dateOfBirth';
+    case BloodType = 'bloodType';
+
     case BloodPressure = 'bloodPressure';
 
     public function healthEntryColumn(): ?string
@@ -30,6 +34,15 @@ enum HealthSyncType: string
             self::ExerciseMinutes, self::Workouts => 'exercise_duration_minutes',
             default => null,
         };
+    }
+
+    public function isUserCharacteristic(): bool
+    {
+        return in_array($this, [
+            self::BiologicalSex,
+            self::DateOfBirth,
+            self::BloodType,
+        ], true);
     }
 
     public function isMappedToHealthEntry(): bool
