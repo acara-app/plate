@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\GetUserProfileContextAction;
+use App\Enums\BloodType;
 use App\Enums\DietType;
 use App\Models\User;
 use App\Models\UserProfile;
@@ -45,7 +46,7 @@ it('returns complete profile data for onboarded user', function (): void {
         ->onboarding_completed->toBeTrue()
         ->raw_data->toHaveKeys(['biometrics', 'dietary_preferences', 'health_conditions', 'medications', 'goals']);
     expect($result['raw_data']['biometrics'])
-        ->toHaveKeys(['age', 'height_cm', 'weight_kg', 'bmi', 'bmr', 'tdee']);
+        ->toHaveKeys(['age', 'date_of_birth', 'height_cm', 'weight_kg', 'sex', 'blood_type', 'bmi', 'bmr', 'tdee']);
 });
 
 it('includes dietary preferences in context', function (): void {
@@ -201,6 +202,29 @@ it('omits household section when context is null', function (): void {
     $result = $this->action->handle($user);
 
     expect($result['context'])->not->toContain('HOUSEHOLD/FAMILY');
+});
+
+it('includes date_of_birth and blood_type in biometrics', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'age' => 30,
+        'date_of_birth' => '1996-04-04',
+        'blood_type' => BloodType::APositive,
+        'height' => 175.0,
+        'weight' => 70.0,
+        'onboarding_completed' => true,
+    ]);
+
+    $result = $this->action->handle($user);
+
+    expect($result['raw_data']['biometrics'])
+        ->date_of_birth->toBe('1996-04-04')
+        ->blood_type->toBe('A+');
+
+    expect($result['context'])
+        ->toContain('Date of Birth: 1996-04-04')
+        ->toContain('Blood Type: A+');
 });
 
 it('includes full goal details including diet type and macros', function (): void {

@@ -48,9 +48,11 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
     {
         return [
             'age' => $profile->age,
+            'date_of_birth' => $profile->date_of_birth?->format('Y-m-d'),
             'height_cm' => $profile->height,
             'weight_kg' => $profile->weight,
             'sex' => $profile->sex?->value,
+            'blood_type' => $profile->blood_type?->value,
             'bmi' => $profile->bmi,
             'bmr' => $profile->bmr,
             'tdee' => $profile->tdee,
@@ -158,6 +160,10 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
             $bioParts[] = 'Age: '.$bio['age'];
         }
 
+        if (isset($bio['date_of_birth']) && is_scalar($bio['date_of_birth'])) {
+            $bioParts[] = 'Date of Birth: '.$bio['date_of_birth'];
+        }
+
         if (isset($bio['height_cm']) && is_scalar($bio['height_cm'])) {
             $bioParts[] = 'Height: '.$bio['height_cm'].'cm';
         }
@@ -168,6 +174,10 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
 
         if (isset($bio['sex']) && is_scalar($bio['sex'])) {
             $bioParts[] = 'Sex: '.$bio['sex'];
+        }
+
+        if (isset($bio['blood_type']) && is_scalar($bio['blood_type'])) {
+            $bioParts[] = 'Blood Type: '.$bio['blood_type'];
         }
 
         if (isset($bio['bmi']) && is_scalar($bio['bmi'])) {

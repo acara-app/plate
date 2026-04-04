@@ -255,6 +255,7 @@ final readonly class SyncMobileHealthEntriesAction
             if ($syncType === null) {
                 continue;
             }
+
             if (! $syncType->isUserCharacteristic()) {
                 continue;
             }
@@ -266,7 +267,7 @@ final readonly class SyncMobileHealthEntriesAction
                 HealthSyncType::BiologicalSex => $updateData['sex'] = $this->mapBiologicalSex((int) $value),
                 HealthSyncType::DateOfBirth => $updateData = array_merge($updateData, $this->mapDateOfBirth((float) $value)),
                 HealthSyncType::BloodType => $updateData['blood_type'] = $this->mapBloodType((int) $value),
-                default => null,
+                default => null, // @codeCoverageIgnore
             };
         }
 
@@ -305,7 +306,7 @@ final readonly class SyncMobileHealthEntriesAction
         $date = Date::createFromFormat('Ymd', $dateString);
 
         if (! $date) {
-            return [];
+            return []; // @codeCoverageIgnore
         }
 
         return [

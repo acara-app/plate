@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace App\Ai\Tools;
 
 use App\Enums\AnimalProductChoice;
+use App\Enums\BloodType;
 use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use App\Models\User;
 use App\Models\UserProfile;
+use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
@@ -24,7 +27,7 @@ final readonly class UpdateUserBiometrics implements Tool
 
     public function description(): string
     {
-        return 'Get or update user biometric profile fields: age, height (cm), weight (kg), sex, goal_choice, animal_product_choice, intensity_choice, target_weight, and additional_goals. Use "get" to retrieve current values and identify missing fields, or "update" to set new values. Auto-creates a profile if one does not exist.';
+        return 'Get or update user biometric profile fields: age, date_of_birth, height (cm), weight (kg), sex, blood_type, goal_choice, animal_product_choice, intensity_choice, target_weight, and additional_goals. Use "get" to retrieve current values and identify missing fields, or "update" to set new values. Auto-creates a profile if one does not exist.';
     }
 
     public function handle(Request $request): string
@@ -61,6 +64,8 @@ final readonly class UpdateUserBiometrics implements Tool
                 ->description('Action to perform: "get" to retrieve current biometrics, "update" to set new values.'),
             'age' => $schema->integer()->required()->nullable()
                 ->description('User age in years.'),
+            'date_of_birth' => $schema->string()->required()->nullable()
+                ->description('User date of birth in YYYY-MM-DD format.'),
             'height' => $schema->number()->required()->nullable()
                 ->description('User height in centimeters.'),
             'weight' => $schema->number()->required()->nullable()
@@ -68,6 +73,9 @@ final readonly class UpdateUserBiometrics implements Tool
             'sex' => $schema->string()->required()->nullable()
                 ->enum(Sex::class)
                 ->description('Biological sex: male, female, or other.'),
+            'blood_type' => $schema->string()->required()->nullable()
+                ->enum(BloodType::class)
+                ->description('Blood type: A+, A-, B+, B-, AB+, AB-, O+, or O-.'),
             'goal_choice' => $schema->string()->required()->nullable()
                 ->enum(GoalChoice::class)
                 ->description('Primary health goal: spikes, weight_loss, heart_health, build_muscle, or healthy_eating.'),
@@ -108,6 +116,16 @@ final readonly class UpdateUserBiometrics implements Tool
             $updateData['age'] = (int) $data['age'];
         }
 
+        if (isset($data['date_of_birth']) && is_string($data['date_of_birth'])) {
+            try {
+                $dateOfBirth = Date::parse($data['date_of_birth']);
+                $updateData['date_of_birth'] = $dateOfBirth;
+                $updateData['age'] = $dateOfBirth->age;
+            } catch (Exception) {
+                return (string) json_encode(['error' => 'Invalid date_of_birth format: '.$data['date_of_birth'].'. Use YYYY-MM-DD.']);
+            }
+        }
+
         if (isset($data['height']) && is_numeric($data['height'])) {
             $updateData['height'] = (float) $data['height'];
         }
@@ -132,6 +150,16 @@ final readonly class UpdateUserBiometrics implements Tool
             }
 
             $updateData['sex'] = $sex;
+        }
+
+        if (isset($data['blood_type']) && is_string($data['blood_type'])) {
+            $bloodType = BloodType::tryFrom($data['blood_type']);
+
+            if (! $bloodType) {
+                return (string) json_encode(['error' => 'Invalid blood_type value: '.$data['blood_type']]);
+            }
+
+            $updateData['blood_type'] = $bloodType;
         }
 
         if (isset($data['goal_choice']) && is_string($data['goal_choice'])) {
@@ -189,9 +217,11 @@ final readonly class UpdateUserBiometrics implements Tool
     {
         return [
             'age' => $profile->age,
+            'date_of_birth' => $profile->date_of_birth?->format('Y-m-d'),
             'height' => $profile->height,
             'weight' => $profile->weight,
             'sex' => $profile->sex?->value,
+            'blood_type' => $profile->blood_type?->value,
             'goal_choice' => $profile->goal_choice?->value,
             'animal_product_choice' => $profile->animal_product_choice?->value,
             'intensity_choice' => $profile->intensity_choice?->value,
