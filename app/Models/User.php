@@ -123,14 +123,6 @@ final class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * @return HasMany<HealthEntry, $this>
-     */
-    public function healthEntries(): HasMany
-    {
-        return $this->hasMany(HealthEntry::class)->latest('measured_at');
-    }
-
-    /**
      * @return HasMany<Conversation, $this>
      */
     public function conversations(): HasMany

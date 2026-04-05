@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\HealthEntry;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Services\GlucoseStatisticsService;
 
@@ -28,10 +28,6 @@ it('returns null stats for empty basic stats', function (): void {
 });
 
 it('returns null for standard deviation with single reading', function (): void {
-    $readings = collect([
-        HealthEntry::factory()->make(['glucose_value' => 100.0]),
-    ]);
-
     $stdDev = $this->service->calculateStandardDeviation(collect([100.0]));
 
     expect($stdDev)->toBeNull();
@@ -45,7 +41,7 @@ it('returns null for coefficient of variation with empty readings', function ():
 
 it('returns null for coefficient of variation when mean is zero', function (): void {
     $readings = collect([
-        HealthEntry::factory()->make(['glucose_value' => 0.0]),
+        HealthSyncSample::factory()->bloodGlucose()->make(['value' => 0.0]),
     ]);
 
     $cv = $this->service->calculateCoefficientOfVariation($readings);
@@ -55,20 +51,20 @@ it('returns null for coefficient of variation when mean is zero', function (): v
 
 it('calculates time of day for all periods', function (): void {
     $readings = collect([
-        HealthEntry::factory()->make([
-            'glucose_value' => 90.0,
+        HealthSyncSample::factory()->bloodGlucose()->make([
+            'value' => 90.0,
             'measured_at' => now()->setTime(8, 0),
         ]),
-        HealthEntry::factory()->make([
-            'glucose_value' => 100.0,
+        HealthSyncSample::factory()->bloodGlucose()->make([
+            'value' => 100.0,
             'measured_at' => now()->setTime(14, 0),
         ]),
-        HealthEntry::factory()->make([
-            'glucose_value' => 110.0,
+        HealthSyncSample::factory()->bloodGlucose()->make([
+            'value' => 110.0,
             'measured_at' => now()->setTime(19, 0),
         ]),
-        HealthEntry::factory()->make([
-            'glucose_value' => 85.0,
+        HealthSyncSample::factory()->bloodGlucose()->make([
+            'value' => 85.0,
             'measured_at' => now()->setTime(23, 0),
         ]),
     ]);
@@ -90,8 +86,8 @@ it('returns empty frequency for empty readings', function (): void {
 
 it('returns null trend for less than 2 readings', function (): void {
     $readings = collect([
-        HealthEntry::factory()->make([
-            'glucose_value' => 100.0,
+        HealthSyncSample::factory()->bloodGlucose()->make([
+            'value' => 100.0,
             'measured_at' => now(),
         ]),
     ]);
@@ -105,12 +101,12 @@ it('returns null trend for less than 2 readings', function (): void {
 it('detects stable trend when days difference is zero', function (): void {
     $now = now();
     $readings = collect([
-        HealthEntry::factory()->make([
-            'glucose_value' => 100.0,
+        HealthSyncSample::factory()->bloodGlucose()->make([
+            'value' => 100.0,
             'measured_at' => $now,
         ]),
-        HealthEntry::factory()->make([
-            'glucose_value' => 105.0,
+        HealthSyncSample::factory()->bloodGlucose()->make([
+            'value' => 105.0,
             'measured_at' => $now,
         ]),
     ]);
@@ -124,12 +120,12 @@ it('detects stable trend when days difference is zero', function (): void {
 it('handles zero denominator in trend calculation', function (): void {
     $now = now();
     $readings = collect([
-        HealthEntry::factory()->make([
-            'glucose_value' => 100.0,
+        HealthSyncSample::factory()->bloodGlucose()->make([
+            'value' => 100.0,
             'measured_at' => $now,
         ]),
-        HealthEntry::factory()->make([
-            'glucose_value' => 100.0,
+        HealthSyncSample::factory()->bloodGlucose()->make([
+            'value' => 100.0,
             'measured_at' => $now,
         ]),
     ]);

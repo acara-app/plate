@@ -16,6 +16,9 @@ enum HealthSyncType: string
     case DietaryEnergy = 'dietaryEnergy';
     case ExerciseMinutes = 'exerciseMinutes';
     case Workouts = 'workouts';
+    case A1c = 'a1c';
+    case Insulin = 'insulin';
+    case Medication = 'medication';
 
     case BiologicalSex = 'biologicalSex';
     case DateOfBirth = 'dateOfBirth';
@@ -23,17 +26,31 @@ enum HealthSyncType: string
 
     case BloodPressure = 'bloodPressure';
 
-    public function healthEntryColumn(): ?string
+    /**
+     * @return array<int, string>
+     */
+    public static function entryTypeValues(): array
     {
-        return match ($this) {
-            self::Weight => 'weight',
-            self::Carbohydrates => 'carbs_grams',
-            self::Protein => 'protein_grams',
-            self::TotalFat => 'fat_grams',
-            self::DietaryEnergy => 'calories',
-            self::ExerciseMinutes, self::Workouts => 'exercise_duration_minutes',
-            default => null,
-        };
+        return array_values(array_map(
+            fn (self $case): string => $case->value,
+            array_filter(self::cases(), fn (self $case): bool => $case->isSyncable()),
+        ));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function userCharacteristicValues(): array
+    {
+        return array_values(array_map(
+            fn (self $case): string => $case->value,
+            array_filter(self::cases(), fn (self $case): bool => $case->isUserCharacteristic()),
+        ));
+    }
+
+    public function isSyncable(): bool
+    {
+        return ! $this->isUserCharacteristic() && $this !== self::BloodPressure;
     }
 
     public function isUserCharacteristic(): bool
@@ -45,8 +62,54 @@ enum HealthSyncType: string
         ], true);
     }
 
-    public function isMappedToHealthEntry(): bool
+    public function category(): string
     {
-        return $this !== self::BloodPressure;
+        return match ($this) {
+            self::Carbohydrates, self::Protein, self::TotalFat, self::DietaryEnergy => 'food',
+            self::BloodGlucose => 'glucose',
+            self::Weight, self::BloodPressureSystolic, self::BloodPressureDiastolic, self::BloodPressure, self::A1c => 'vitals',
+            self::Insulin, self::Medication => 'medication',
+            self::ExerciseMinutes, self::Workouts => 'exercise',
+            self::BiologicalSex, self::DateOfBirth, self::BloodType => 'profile',
+        };
+    }
+
+    public function unit(): string
+    {
+        return match ($this) {
+            self::BloodGlucose => 'mg/dL',
+            self::BloodPressureSystolic, self::BloodPressureDiastolic, self::BloodPressure => 'mmHg',
+            self::Weight => 'kg',
+            self::Carbohydrates, self::Protein, self::TotalFat => 'g',
+            self::DietaryEnergy => 'kcal',
+            self::ExerciseMinutes, self::Workouts => 'min',
+            self::A1c => '%',
+            self::Insulin => 'IU',
+            self::Medication => 'dose',
+            self::BiologicalSex, self::DateOfBirth, self::BloodType => '',
+        };
+    }
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::BloodGlucose => 'Blood Glucose',
+            self::BloodPressureSystolic => 'Blood Pressure (Systolic)',
+            self::BloodPressureDiastolic => 'Blood Pressure (Diastolic)',
+            self::BloodPressure => 'Blood Pressure',
+            self::Weight => 'Weight',
+            self::Carbohydrates => 'Carbohydrates',
+            self::Protein => 'Protein',
+            self::TotalFat => 'Total Fat',
+            self::DietaryEnergy => 'Calories',
+            self::ExerciseMinutes => 'Exercise',
+            self::Workouts => 'Workouts',
+            self::A1c => 'A1C',
+            self::Insulin => 'Insulin',
+            self::Medication => 'Medication',
+            self::BiologicalSex => 'Biological Sex',
+            self::DateOfBirth => 'Date of Birth',
+            self::BloodType => 'Blood Type',
+        };
     }
 }

@@ -7,6 +7,7 @@ namespace App\DataObjects;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
+use App\Enums\HealthSyncType;
 use App\Enums\InsulinType;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Date;
@@ -31,6 +32,7 @@ final class HealthLogData extends Data
         public ?float $weight = null,
         public ?int $bpSystolic = null,
         public ?int $bpDiastolic = null,
+        public ?float $a1cValue = null,
         public ?string $exerciseType = null,
         public ?int $exerciseDurationMinutes = null,
         public ?CarbonInterface $measuredAt = null,
@@ -59,6 +61,7 @@ final class HealthLogData extends Data
             weight: self::toFloat($data['weight'] ?? null),
             bpSystolic: self::toInt($data['bp_systolic'] ?? null),
             bpDiastolic: self::toInt($data['bp_diastolic'] ?? null),
+            a1cValue: self::toFloat($data['a1c_value'] ?? null),
             exerciseType: self::toNullableString($data['exercise_type'] ?? null),
             exerciseDurationMinutes: self::toInt($data['exercise_duration_minutes'] ?? null),
             measuredAt: self::toDateTime($data['measured_at'] ?? null),
@@ -90,6 +93,21 @@ final class HealthLogData extends Data
             HealthEntryType::Meds => $this->toMedsRecordArray(),
             HealthEntryType::Vitals => $this->toVitalsRecordArray(),
             HealthEntryType::Exercise => $this->toExerciseRecordArray(),
+        };
+    }
+
+    /**
+     * @return array<int, array{type_identifier: string, value: float|int, unit: string, metadata?: array<string, mixed>}>
+     */
+    public function toSampleArrays(): array
+    {
+        return match ($this->logType) {
+            HealthEntryType::Glucose => $this->toGlucoseSamples(),
+            HealthEntryType::Food => $this->toFoodSamples(),
+            HealthEntryType::Insulin => $this->toInsulinSamples(),
+            HealthEntryType::Meds => $this->toMedsSamples(),
+            HealthEntryType::Vitals => $this->toVitalsSamples(),
+            HealthEntryType::Exercise => $this->toExerciseSamples(),
         };
     }
 
@@ -243,6 +261,7 @@ final class HealthLogData extends Data
             'weight' => $this->weight,
             'blood_pressure_systolic' => $this->bpSystolic,
             'blood_pressure_diastolic' => $this->bpDiastolic,
+            'a1c_value' => $this->a1cValue,
         ];
     }
 
@@ -254,6 +273,159 @@ final class HealthLogData extends Data
         return [
             'exercise_type' => $this->exerciseType,
             'exercise_duration_minutes' => $this->exerciseDurationMinutes,
+        ];
+    }
+
+    /**
+     * @return array<int, array{type_identifier: string, value: float|int, unit: string, metadata?: array<string, mixed>}>
+     */
+    private function toGlucoseSamples(): array
+    {
+        return [
+            [
+                'type_identifier' => HealthSyncType::BloodGlucose->value,
+                'value' => $this->glucoseValue ?? 0,
+                'unit' => HealthSyncType::BloodGlucose->unit(),
+                'metadata' => array_filter([
+                    'glucose_reading_type' => $this->glucoseReadingType?->value,
+                ]),
+            ],
+        ];
+    }
+
+    /**
+     * @return array<int, array{type_identifier: string, value: float|int, unit: string, metadata?: array<string, mixed>}>
+     */
+    private function toFoodSamples(): array
+    {
+        $samples = [];
+
+        if ($this->carbsGrams !== null) {
+            $samples[] = [
+                'type_identifier' => HealthSyncType::Carbohydrates->value,
+                'value' => $this->carbsGrams,
+                'unit' => HealthSyncType::Carbohydrates->unit(),
+            ];
+        }
+
+        if ($this->proteinGrams !== null) {
+            $samples[] = [
+                'type_identifier' => HealthSyncType::Protein->value,
+                'value' => $this->proteinGrams,
+                'unit' => HealthSyncType::Protein->unit(),
+            ];
+        }
+
+        if ($this->fatGrams !== null) {
+            $samples[] = [
+                'type_identifier' => HealthSyncType::TotalFat->value,
+                'value' => $this->fatGrams,
+                'unit' => HealthSyncType::TotalFat->unit(),
+            ];
+        }
+
+        if ($this->calories !== null) {
+            $samples[] = [
+                'type_identifier' => HealthSyncType::DietaryEnergy->value,
+                'value' => $this->calories,
+                'unit' => HealthSyncType::DietaryEnergy->unit(),
+            ];
+        }
+
+        return $samples;
+    }
+
+    /**
+     * @return array<int, array{type_identifier: string, value: float|int, unit: string, metadata?: array<string, mixed>}>
+     */
+    private function toInsulinSamples(): array
+    {
+        return [
+            [
+                'type_identifier' => HealthSyncType::Insulin->value,
+                'value' => $this->insulinUnits ?? 0,
+                'unit' => HealthSyncType::Insulin->unit(),
+                'metadata' => array_filter([
+                    'insulin_type' => $this->insulinType?->value,
+                ]),
+            ],
+        ];
+    }
+
+    /**
+     * @return array<int, array{type_identifier: string, value: float|int, unit: string, metadata?: array<string, mixed>}>
+     */
+    private function toMedsSamples(): array
+    {
+        return [
+            [
+                'type_identifier' => HealthSyncType::Medication->value,
+                'value' => 1,
+                'unit' => HealthSyncType::Medication->unit(),
+                'metadata' => array_filter([
+                    'medication_name' => $this->medicationName,
+                    'medication_dosage' => $this->medicationDosage,
+                ]),
+            ],
+        ];
+    }
+
+    /**
+     * @return array<int, array{type_identifier: string, value: float|int, unit: string, metadata?: array<string, mixed>}>
+     */
+    private function toVitalsSamples(): array
+    {
+        $samples = [];
+
+        if ($this->weight !== null) {
+            $samples[] = [
+                'type_identifier' => HealthSyncType::Weight->value,
+                'value' => $this->weight,
+                'unit' => HealthSyncType::Weight->unit(),
+            ];
+        }
+
+        if ($this->bpSystolic !== null) {
+            $samples[] = [
+                'type_identifier' => HealthSyncType::BloodPressureSystolic->value,
+                'value' => $this->bpSystolic,
+                'unit' => HealthSyncType::BloodPressureSystolic->unit(),
+            ];
+        }
+
+        if ($this->bpDiastolic !== null) {
+            $samples[] = [
+                'type_identifier' => HealthSyncType::BloodPressureDiastolic->value,
+                'value' => $this->bpDiastolic,
+                'unit' => HealthSyncType::BloodPressureDiastolic->unit(),
+            ];
+        }
+
+        if ($this->a1cValue !== null) {
+            $samples[] = [
+                'type_identifier' => HealthSyncType::A1c->value,
+                'value' => $this->a1cValue,
+                'unit' => HealthSyncType::A1c->unit(),
+            ];
+        }
+
+        return $samples;
+    }
+
+    /**
+     * @return array<int, array{type_identifier: string, value: float|int, unit: string, metadata?: array<string, mixed>}>
+     */
+    private function toExerciseSamples(): array
+    {
+        return [
+            [
+                'type_identifier' => HealthSyncType::ExerciseMinutes->value,
+                'value' => $this->exerciseDurationMinutes ?? 0,
+                'unit' => HealthSyncType::ExerciseMinutes->unit(),
+                'metadata' => array_filter([
+                    'exercise_type' => $this->exerciseType,
+                ]),
+            ],
         ];
     }
 }

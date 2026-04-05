@@ -4,17 +4,29 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Models\HealthEntry;
+use App\Enums\HealthSyncType;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final readonly class GetUserHealthEntriesAction
 {
     /**
-     * @return LengthAwarePaginator<int, HealthEntry>
+     * @return LengthAwarePaginator<int, HealthSyncSample>
      */
     public function handle(User $user, int $perPage = 15): LengthAwarePaginator
     {
-        return $user->healthEntries()->paginate($perPage);
+        return $user->healthSyncSamples()
+            ->whereIn('type_identifier', $this->entryTypeIdentifiers())
+            ->latest('measured_at')
+            ->paginate($perPage);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function entryTypeIdentifiers(): array
+    {
+        return HealthSyncType::entryTypeValues();
     }
 }

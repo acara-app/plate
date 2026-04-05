@@ -20,11 +20,13 @@ it('can store a new diabetes log with glucose reading', function (): void {
 
     $response->assertRedirect();
 
-    $this->assertDatabaseHas('health_entries', [
+    $this->assertDatabaseHas('health_sync_samples', [
         'user_id' => $user->id,
-        'glucose_value' => 121,
-        'glucose_reading_type' => 'fasting',
+        'type_identifier' => 'bloodGlucose',
+        'value' => 121,
+        'unit' => 'mg/dL',
         'notes' => 'Morning reading after breakfast',
+        'entry_source' => 'web',
     ]);
 });
 
@@ -43,10 +45,12 @@ it('can store a diabetes log with insulin only', function (): void {
 
     $response->assertRedirect();
 
-    $this->assertDatabaseHas('health_entries', [
+    $this->assertDatabaseHas('health_sync_samples', [
         'user_id' => $user->id,
-        'insulin_units' => 10,
-        'insulin_type' => 'bolus',
+        'type_identifier' => 'insulin',
+        'value' => 10,
+        'unit' => 'IU',
+        'entry_source' => 'web',
     ]);
 });
 
@@ -103,10 +107,10 @@ it('stores diabetes log without notes', function (): void {
 
     $response->assertRedirect();
 
-    $this->assertDatabaseHas('health_entries', [
+    $this->assertDatabaseHas('health_sync_samples', [
         'user_id' => $user->id,
-        'glucose_value' => 95,
-        'glucose_reading_type' => 'post-meal',
+        'type_identifier' => 'bloodGlucose',
+        'value' => 95,
         'notes' => null,
     ]);
 });
@@ -209,9 +213,11 @@ it('can store food log with carbs', function (): void {
 
     $response->assertRedirect();
 
-    $this->assertDatabaseHas('health_entries', [
+    $this->assertDatabaseHas('health_sync_samples', [
         'user_id' => $user->id,
-        'carbs_grams' => 45,
+        'type_identifier' => 'carbohydrates',
+        'value' => 45,
+        'unit' => 'g',
         'notes' => 'Lunch',
     ]);
 });
@@ -231,10 +237,11 @@ it('can store medication log', function (): void {
 
     $response->assertRedirect();
 
-    $this->assertDatabaseHas('health_entries', [
+    $this->assertDatabaseHas('health_sync_samples', [
         'user_id' => $user->id,
-        'medication_name' => 'Metformin',
-        'medication_dosage' => '500mg',
+        'type_identifier' => 'medication',
+        'value' => 1,
+        'unit' => 'dose',
     ]);
 });
 
@@ -252,9 +259,11 @@ it('can store vitals log with at least one vital sign', function (): void {
 
     $response->assertRedirect();
 
-    $this->assertDatabaseHas('health_entries', [
+    $this->assertDatabaseHas('health_sync_samples', [
         'user_id' => $user->id,
-        'weight' => 75.5,
+        'type_identifier' => 'weight',
+        'value' => 75.5,
+        'unit' => 'kg',
     ]);
 });
 
@@ -273,9 +282,10 @@ it('can store exercise log', function (): void {
 
     $response->assertRedirect();
 
-    $this->assertDatabaseHas('health_entries', [
+    $this->assertDatabaseHas('health_sync_samples', [
         'user_id' => $user->id,
-        'exercise_type' => 'Running',
-        'exercise_duration_minutes' => 30,
+        'type_identifier' => 'exerciseMinutes',
+        'value' => 30,
+        'unit' => 'min',
     ]);
 });

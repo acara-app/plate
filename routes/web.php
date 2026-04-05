@@ -82,8 +82,8 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
     Route::get('health-entries/tracking', Web\HealthEntry\DashboardHealthEntryController::class)->name('health-entries.dashboard');
     Route::get('health-entries/insights', Web\HealthEntry\InsightsHealthEntryController::class)->name('health-entries.insights');
     Route::post('health-entries', Web\HealthEntry\StoreHealthEntryController::class)->name('health-entries.store');
-    Route::put('health-entries/{healthEntry}', Web\HealthEntry\UpdateHealthEntryController::class)->name('health-entries.update');
-    Route::delete('health-entries/{healthEntry}', Web\HealthEntry\DestroyHealthEntryController::class)->name('health-entries.destroy');
+    Route::put('health-entries/{healthSyncSample}', Web\HealthEntry\UpdateHealthEntryController::class)->name('health-entries.update');
+    Route::delete('health-entries/{healthSyncSample}', Web\HealthEntry\DestroyHealthEntryController::class)->name('health-entries.destroy');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('onboarding')->name('onboarding.')->group(function (): void {

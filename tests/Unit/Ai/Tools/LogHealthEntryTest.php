@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 use App\Ai\Tools\LogHealthEntry;
 use App\Enums\HealthEntrySource;
-use App\Models\HealthEntry;
+use App\Enums\HealthSyncType;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Tools\Request;
@@ -63,10 +64,13 @@ it('logs a glucose entry successfully', function (): void {
         ->toHaveKey('entry_id')
         ->toHaveKey('message');
 
-    $entry = HealthEntry::query()->find($result['entry_id']);
-    expect($entry)
-        ->glucose_value->toBe(140.0)
-        ->source->toBe(HealthEntrySource::Chat);
+    $sample = HealthSyncSample::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::BloodGlucose->value)
+        ->first();
+
+    expect($sample->value)->toBe(140.0);
+    expect($sample->entry_source)->toBe(HealthEntrySource::Chat);
 });
 
 it('logs a food entry with notes', function (): void {
@@ -84,10 +88,14 @@ it('logs a food entry with notes', function (): void {
 
     expect($result)->toHaveKey('success', true);
 
-    $entry = HealthEntry::query()->find($result['entry_id']);
-    expect((float) $entry->carbs_grams)->toBe(45.0);
-    expect($entry->notes)->toBe('tsuivan');
-    expect($entry->source)->toBe(HealthEntrySource::Chat);
+    $sample = HealthSyncSample::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::Carbohydrates->value)
+        ->first();
+
+    expect((float) $sample->value)->toBe(45.0);
+    expect($sample->notes)->toBe('tsuivan');
+    expect($sample->entry_source)->toBe(HealthEntrySource::Chat);
 });
 
 it('logs a vitals entry with weight', function (): void {
@@ -104,10 +112,13 @@ it('logs a vitals entry with weight', function (): void {
 
     expect($result)->toHaveKey('success', true);
 
-    $entry = HealthEntry::query()->find($result['entry_id']);
-    expect($entry)
-        ->weight->toBe(81.65)
-        ->source->toBe(HealthEntrySource::Chat);
+    $sample = HealthSyncSample::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::Weight->value)
+        ->first();
+
+    expect($sample->value)->toBe(81.65);
+    expect($sample->entry_source)->toBe(HealthEntrySource::Chat);
 });
 
 it('logs an exercise entry', function (): void {
@@ -125,11 +136,14 @@ it('logs an exercise entry', function (): void {
 
     expect($result)->toHaveKey('success', true);
 
-    $entry = HealthEntry::query()->find($result['entry_id']);
-    expect($entry)
-        ->exercise_type->toBe('walking')
-        ->exercise_duration_minutes->toBe(30)
-        ->source->toBe(HealthEntrySource::Chat);
+    $sample = HealthSyncSample::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::ExerciseMinutes->value)
+        ->first();
+
+    expect($sample->value)->toBe(30.0);
+    expect($sample->entry_source)->toBe(HealthEntrySource::Chat);
+    expect($sample->metadata['exercise_type'])->toBe('walking');
 });
 
 it('logs a medication entry', function (): void {
@@ -147,9 +161,12 @@ it('logs a medication entry', function (): void {
 
     expect($result)->toHaveKey('success', true);
 
-    $entry = HealthEntry::query()->find($result['entry_id']);
-    expect($entry)
-        ->medication_name->toBe('metformin')
-        ->medication_dosage->toBe('500mg')
-        ->source->toBe(HealthEntrySource::Chat);
+    $sample = HealthSyncSample::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::Medication->value)
+        ->first();
+
+    expect($sample->metadata['medication_name'])->toBe('metformin');
+    expect($sample->metadata['medication_dosage'])->toBe('500mg');
+    expect($sample->entry_source)->toBe(HealthEntrySource::Chat);
 });

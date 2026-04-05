@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Actions\RecordHealthEntryAction;
+use App\Actions\RecordHealthSampleAction;
 use App\DataObjects\HealthLogData;
 use App\Enums\GlucoseReadingType;
 use App\Enums\HealthEntrySource;
@@ -45,18 +45,13 @@ final readonly class LogHealthEntry implements Tool
             ['is_health_data' => true],
         ));
 
-        $recordData = array_merge(
-            ['user_id' => $user->id, 'measured_at' => $healthData->measuredAt ?? now()],
-            $healthData->toRecordArray(),
-        );
-
-        $action = resolve(RecordHealthEntryAction::class);
-        $entry = $action->handle($recordData, HealthEntrySource::Chat);
+        $action = resolve(RecordHealthSampleAction::class);
+        $sample = $action->handle($healthData, $user, HealthEntrySource::Chat);
 
         return (string) json_encode([
             'success' => true,
             'message' => $healthData->formatForDisplay(),
-            'entry_id' => $entry->id,
+            'entry_id' => $sample->id,
         ]);
     }
 
@@ -70,7 +65,7 @@ final readonly class LogHealthEntry implements Tool
                 ->enum(HealthEntryType::class)
                 ->description('Type of health entry to log.'),
             'glucose_value' => $schema->number()->required()->nullable()
-                ->description('Glucose reading value in mg/dL. Convert mmol/L to mg/dL (× 18.018).'),
+                ->description('Glucose reading value in mg/dL. Convert mmol/L to mg/dL (x 18.018).'),
             'glucose_reading_type' => $schema->string()->required()->nullable()
                 ->enum(GlucoseReadingType::class)
                 ->description('When the glucose was measured.'),
@@ -94,7 +89,7 @@ final readonly class LogHealthEntry implements Tool
             'medication_dosage' => $schema->string()->required()->nullable()
                 ->description('Dosage of the medication (e.g., "500mg").'),
             'weight' => $schema->number()->required()->nullable()
-                ->description('Body weight in kg. Convert lbs to kg (÷ 2.205).'),
+                ->description('Body weight in kg. Convert lbs to kg (/ 2.205).'),
             'bp_systolic' => $schema->integer()->required()->nullable()
                 ->description('Systolic blood pressure reading.'),
             'bp_diastolic' => $schema->integer()->required()->nullable()

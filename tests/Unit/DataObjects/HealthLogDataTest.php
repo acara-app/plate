@@ -8,10 +8,6 @@ use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
 use App\Enums\InsulinType;
 
-beforeEach(function (): void {
-    //
-});
-
 test('it formats glucose log correctly', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
@@ -227,6 +223,7 @@ test('it exports to vitals record array', function (): void {
         'weight' => 75.5,
         'blood_pressure_systolic' => 120,
         'blood_pressure_diastolic' => 80,
+        'a1c_value' => null,
     ]);
 });
 
@@ -311,6 +308,116 @@ test('fromParsedArray handles empty array', function (): void {
         ->logType->toBe(HealthEntryType::Glucose)
         ->glucoseValue->toBeNull()
         ->notes->toBeNull();
+});
+
+test('toSampleArrays returns food samples with all macros', function (): void {
+    $data = new HealthLogData(
+        isHealthData: true,
+        logType: HealthEntryType::Food,
+        carbsGrams: 50.0,
+        proteinGrams: 25.0,
+        fatGrams: 10.0,
+        calories: 400,
+    );
+
+    $samples = $data->toSampleArrays();
+
+    expect($samples)->toHaveCount(4)
+        ->and($samples[0]['type_identifier'])->toBe('carbohydrates')
+        ->and($samples[0]['value'])->toBe(50.0)
+        ->and($samples[1]['type_identifier'])->toBe('protein')
+        ->and($samples[1]['value'])->toBe(25.0)
+        ->and($samples[2]['type_identifier'])->toBe('totalFat')
+        ->and($samples[2]['value'])->toBe(10.0)
+        ->and($samples[3]['type_identifier'])->toBe('dietaryEnergy')
+        ->and($samples[3]['value'])->toBe(400);
+});
+
+test('toSampleArrays returns vitals samples with all fields', function (): void {
+    $data = new HealthLogData(
+        isHealthData: true,
+        logType: HealthEntryType::Vitals,
+        weight: 75.5,
+        bpSystolic: 120,
+        bpDiastolic: 80,
+        a1cValue: 6.5,
+    );
+
+    $samples = $data->toSampleArrays();
+
+    expect($samples)->toHaveCount(4)
+        ->and($samples[0]['type_identifier'])->toBe('weight')
+        ->and($samples[0]['value'])->toBe(75.5)
+        ->and($samples[1]['type_identifier'])->toBe('bloodPressureSystolic')
+        ->and($samples[1]['value'])->toBe(120)
+        ->and($samples[2]['type_identifier'])->toBe('bloodPressureDiastolic')
+        ->and($samples[2]['value'])->toBe(80)
+        ->and($samples[3]['type_identifier'])->toBe('a1c')
+        ->and($samples[3]['value'])->toBe(6.5);
+});
+
+test('toSampleArrays returns insulin samples', function (): void {
+    $data = new HealthLogData(
+        isHealthData: true,
+        logType: HealthEntryType::Insulin,
+        insulinUnits: 10.0,
+        insulinType: InsulinType::Basal,
+    );
+
+    $samples = $data->toSampleArrays();
+
+    expect($samples)->toHaveCount(1)
+        ->and($samples[0]['type_identifier'])->toBe('insulin')
+        ->and($samples[0]['value'])->toBe(10.0)
+        ->and($samples[0]['metadata'])->toBe(['insulin_type' => 'basal']);
+});
+
+test('toSampleArrays returns meds samples', function (): void {
+    $data = new HealthLogData(
+        isHealthData: true,
+        logType: HealthEntryType::Meds,
+        medicationName: 'Metformin',
+        medicationDosage: '500mg',
+    );
+
+    $samples = $data->toSampleArrays();
+
+    expect($samples)->toHaveCount(1)
+        ->and($samples[0]['type_identifier'])->toBe('medication')
+        ->and($samples[0]['value'])->toBe(1)
+        ->and($samples[0]['metadata'])->toBe(['medication_name' => 'Metformin', 'medication_dosage' => '500mg']);
+});
+
+test('toSampleArrays returns exercise samples', function (): void {
+    $data = new HealthLogData(
+        isHealthData: true,
+        logType: HealthEntryType::Exercise,
+        exerciseType: 'Running',
+        exerciseDurationMinutes: 30,
+    );
+
+    $samples = $data->toSampleArrays();
+
+    expect($samples)->toHaveCount(1)
+        ->and($samples[0]['type_identifier'])->toBe('exerciseMinutes')
+        ->and($samples[0]['value'])->toBe(30)
+        ->and($samples[0]['metadata'])->toBe(['exercise_type' => 'Running']);
+});
+
+test('toSampleArrays returns glucose samples', function (): void {
+    $data = new HealthLogData(
+        isHealthData: true,
+        logType: HealthEntryType::Glucose,
+        glucoseValue: 120.0,
+        glucoseReadingType: GlucoseReadingType::Fasting,
+    );
+
+    $samples = $data->toSampleArrays();
+
+    expect($samples)->toHaveCount(1)
+        ->and($samples[0]['type_identifier'])->toBe('bloodGlucose')
+        ->and($samples[0]['value'])->toBe(120.0)
+        ->and($samples[0]['metadata'])->toBe(['glucose_reading_type' => 'fasting']);
 });
 
 test('fromParsedArray handles null string values', function (): void {

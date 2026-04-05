@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\HealthEntry;
+use App\Models\HealthSyncSample;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
@@ -39,8 +39,8 @@ it('displays user diabetes logs', function (): void {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    HealthEntry::factory()->count(3)->create(['user_id' => $user->id]);
-    HealthEntry::factory()->count(2)->create(['user_id' => $otherUser->id]);
+    HealthSyncSample::factory()->bloodGlucose()->fromWeb()->count(3)->create(['user_id' => $user->id]);
+    HealthSyncSample::factory()->bloodGlucose()->fromWeb()->count(2)->create(['user_id' => $otherUser->id]);
 
     $response = $this->actingAs($user)
         ->get(route('health-entries.index'));

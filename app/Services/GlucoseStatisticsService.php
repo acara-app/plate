@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\GlucoseReadingType;
-use App\Models\HealthEntry;
+use App\Models\HealthSyncSample;
 use Illuminate\Support\Collection;
 
 final readonly class GlucoseStatisticsService
@@ -27,7 +27,7 @@ final readonly class GlucoseStatisticsService
     public const int POST_MEAL_SPIKE_THRESHOLD = 140;
 
     /**
-     * @param  Collection<int, HealthEntry>  $readings
+     * @param  Collection<int, HealthSyncSample>  $readings
      * @return array{
      *     timeInRange: float,
      *     timeAboveRange: float,
@@ -54,16 +54,16 @@ final readonly class GlucoseStatisticsService
 
         $total = $readings->count();
         $inRangeCount = $readings->filter(
-            fn (HealthEntry $r): bool => $r->glucose_value >= self::NORMAL_RANGE_MIN
-                && $r->glucose_value <= self::NORMAL_RANGE_MAX
+            fn (HealthSyncSample $r): bool => $r->value >= self::NORMAL_RANGE_MIN
+                && $r->value <= self::NORMAL_RANGE_MAX
         )->count();
 
         $belowRangeCount = $readings->filter(
-            fn (HealthEntry $r): bool => $r->glucose_value < self::HYPOGLYCEMIA_THRESHOLD
+            fn (HealthSyncSample $r): bool => $r->value < self::HYPOGLYCEMIA_THRESHOLD
         )->count();
 
         $aboveRangeCount = $readings->filter(
-            fn (HealthEntry $r): bool => $r->glucose_value > self::HYPERGLYCEMIA_THRESHOLD
+            fn (HealthSyncSample $r): bool => $r->value > self::HYPERGLYCEMIA_THRESHOLD
         )->count();
 
         return [
@@ -78,7 +78,7 @@ final readonly class GlucoseStatisticsService
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $readings
+     * @param  Collection<int, HealthSyncSample>  $readings
      * @return array{min: float|null, max: float|null, average: float|null, stdDev: float|null}
      */
     public function calculateBasicStats(Collection $readings): array
@@ -93,7 +93,7 @@ final readonly class GlucoseStatisticsService
         }
 
         /** @var Collection<int, float> $values */
-        $values = $readings->pluck('glucose_value');
+        $values = $readings->pluck('value');
 
         $min = $values->min();
         $max = $values->max();
@@ -123,7 +123,7 @@ final readonly class GlucoseStatisticsService
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $readings
+     * @param  Collection<int, HealthSyncSample>  $readings
      */
     public function calculateCoefficientOfVariation(Collection $readings): ?float
     {
@@ -132,7 +132,7 @@ final readonly class GlucoseStatisticsService
         }
 
         /** @var Collection<int, float> $values */
-        $values = $readings->pluck('glucose_value');
+        $values = $readings->pluck('value');
         $mean = (float) $values->avg();
         $stdDev = $this->calculateStandardDeviation($values);
 
@@ -144,7 +144,7 @@ final readonly class GlucoseStatisticsService
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $readings
+     * @param  Collection<int, HealthSyncSample>  $readings
      * @return array{
      *     morning: array{count: int, average: float|null},
      *     afternoon: array{count: int, average: float|null},
@@ -154,7 +154,7 @@ final readonly class GlucoseStatisticsService
      */
     public function analyzeTimeOfDay(Collection $readings): array
     {
-        $grouped = $readings->groupBy(function (HealthEntry $reading): string {
+        $grouped = $readings->groupBy(function (HealthSyncSample $reading): string {
             $hour = (int) $reading->measured_at->format('H');
 
             return match (true) {
@@ -169,7 +169,7 @@ final readonly class GlucoseStatisticsService
         $result = [];
         foreach (['morning', 'afternoon', 'evening', 'night'] as $period) {
             $periodReadings = $grouped->get($period, collect());
-            $avg = $periodReadings->avg('glucose_value');
+            $avg = $periodReadings->avg('value');
 
             $result[$period] = [
                 'count' => $periodReadings->count(),
@@ -181,7 +181,7 @@ final readonly class GlucoseStatisticsService
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $readings
+     * @param  Collection<int, HealthSyncSample>  $readings
      * @return array<string, array{count: int, percentage: float, average: float|null}>
      */
     public function analyzeReadingTypeFrequency(Collection $readings): array
@@ -191,12 +191,12 @@ final readonly class GlucoseStatisticsService
         }
 
         $total = $readings->count();
-        $grouped = $readings->groupBy(fn (HealthEntry $reading): string => $reading->glucose_reading_type->value ?? GlucoseReadingType::Random->value);
+        $grouped = $readings->groupBy(fn (HealthSyncSample $reading): string => is_string($reading->metadata['glucose_reading_type'] ?? null) ? $reading->metadata['glucose_reading_type'] : GlucoseReadingType::Random->value);
 
         /** @var array<string, array{count: int, percentage: float, average: float|null}> $result */
         $result = [];
         foreach ($grouped as $type => $typeReadings) {
-            $avg = $typeReadings->avg('glucose_value');
+            $avg = $typeReadings->avg('value');
             $result[(string) $type] = [
                 'count' => $typeReadings->count(),
                 'percentage' => round(($typeReadings->count() / $total) * 100, 1),
@@ -208,7 +208,7 @@ final readonly class GlucoseStatisticsService
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $readings
+     * @param  Collection<int, HealthSyncSample>  $readings
      * @return array{
      *     slopePerDay: float|null,
      *     slopePerWeek: float|null,
@@ -233,9 +233,9 @@ final readonly class GlucoseStatisticsService
 
         $sorted = $readings->sortBy('measured_at')->values();
 
-        /** @var HealthEntry $first */
+        /** @var HealthSyncSample $first */
         $first = $sorted->first();
-        /** @var HealthEntry $last */
+        /** @var HealthSyncSample $last */
         $last = $sorted->last();
 
         $firstTimestamp = (float) $first->measured_at->timestamp;
@@ -246,18 +246,18 @@ final readonly class GlucoseStatisticsService
                 'slopePerDay' => null,
                 'slopePerWeek' => null,
                 'direction' => 'stable',
-                'firstValue' => round((float) $first->glucose_value, 1),
-                'lastValue' => round((float) $last->glucose_value, 1),
+                'firstValue' => round($first->value, 1),
+                'lastValue' => round($last->value, 1),
                 'daysDifference' => 0,
             ];
         }
 
-        $points = $sorted->map(function (HealthEntry $reading) use ($firstTimestamp): array {
+        $points = $sorted->map(function (HealthSyncSample $reading) use ($firstTimestamp): array {
             $daysSinceFirst = ((float) $reading->measured_at->timestamp - $firstTimestamp) / 86400;
 
             return [
                 'x' => $daysSinceFirst,
-                'y' => $reading->glucose_value,
+                'y' => $reading->value,
             ];
         });
 
@@ -283,8 +283,8 @@ final readonly class GlucoseStatisticsService
             'slopePerDay' => round($slopePerDay, 2),
             'slopePerWeek' => round($slopePerWeek, 1),
             'direction' => $direction,
-            'firstValue' => round((float) $first->glucose_value, 1),
-            'lastValue' => round((float) $last->glucose_value, 1),
+            'firstValue' => round($first->value, 1),
+            'lastValue' => round($last->value, 1),
             'daysDifference' => $daysDiff,
         ];
     }

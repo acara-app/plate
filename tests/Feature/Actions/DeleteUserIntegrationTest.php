@@ -9,7 +9,6 @@ use App\Models\Conversation;
 use App\Models\ConversationSummary;
 use App\Models\GroceryItem;
 use App\Models\GroceryList;
-use App\Models\HealthEntry;
 use App\Models\HealthSyncSample;
 use App\Models\History;
 use App\Models\MealPlan;
@@ -33,8 +32,8 @@ it('deletes user and eventually purges all related data', function (): void {
     ]);
     GroceryItem::factory()->create(['grocery_list_id' => $groceryList->id]);
 
-    HealthEntry::factory()->count(3)->create(['user_id' => $userId]);
-    HealthSyncSample::factory()->bloodGlucose()->count(2)->create(['user_id' => $userId]);
+    HealthSyncSample::factory()->bloodGlucose()->count(3)->create(['user_id' => $userId]);
+    HealthSyncSample::factory()->heartRate()->count(2)->create(['user_id' => $userId]);
 
     $device = MobileSyncDevice::factory()->paired()->create(['user_id' => $userId]);
     UserTelegramChat::factory()->create(['user_id' => $userId]);
@@ -112,7 +111,6 @@ it('deletes user and eventually purges all related data', function (): void {
     $this->assertDatabaseMissing('meal_plans', ['user_id' => $userId]);
     $this->assertDatabaseMissing('grocery_lists', ['user_id' => $userId]);
     $this->assertDatabaseMissing('grocery_items', ['grocery_list_id' => $groceryList->id]);
-    $this->assertDatabaseMissing('health_entries', ['user_id' => $userId]);
     $this->assertDatabaseMissing('health_sync_samples', ['user_id' => $userId]);
     $this->assertDatabaseMissing('mobile_sync_devices', ['user_id' => $userId]);
     $this->assertDatabaseMissing('user_telegram_chats', ['user_id' => $userId]);
@@ -163,8 +161,8 @@ it('does not affect another user when deleting and purging', function (): void {
     $otherConversation = Conversation::factory()->forUser($otherUser)->create();
     History::factory()->forConversation($otherConversation)->create();
 
-    HealthEntry::factory()->create(['user_id' => $deleteUserId]);
-    HealthEntry::factory()->create(['user_id' => $otherUser->id]);
+    HealthSyncSample::factory()->bloodGlucose()->create(['user_id' => $deleteUserId]);
+    HealthSyncSample::factory()->bloodGlucose()->create(['user_id' => $otherUser->id]);
 
     DB::table('sessions')->insert([
         ['id' => fake()->uuid(), 'user_id' => $deleteUserId, 'ip_address' => '127.0.0.1', 'user_agent' => 'test', 'payload' => 'a', 'last_activity' => time()],
@@ -182,7 +180,7 @@ it('does not affect another user when deleting and purging', function (): void {
 
     expect($otherUser->fresh())->not->toBeNull();
     $this->assertDatabaseHas('user_profiles', ['user_id' => $otherUser->id]);
-    $this->assertDatabaseHas('health_entries', ['user_id' => $otherUser->id]);
+    $this->assertDatabaseHas('health_sync_samples', ['user_id' => $otherUser->id]);
     $this->assertDatabaseHas('agent_conversations', ['user_id' => $otherUser->id]);
     $this->assertDatabaseHas('agent_conversation_messages', ['user_id' => $otherUser->id]);
     $this->assertDatabaseHas('sessions', ['user_id' => $otherUser->id]);

@@ -6,7 +6,7 @@ use App\Ai\MealPlanPromptBuilder;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
-use App\Models\HealthEntry;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Models\UserProfile;
 
@@ -23,17 +23,17 @@ it('includes glucose analysis in the prompt when glucose data exists', function 
         'derived_activity_multiplier' => 1.55,
     ]);
 
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $user->id,
-        'glucose_value' => 150.0,
-        'glucose_reading_type' => GlucoseReadingType::PostMeal,
+        'value' => 150.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::PostMeal->value],
         'measured_at' => now()->subDays(1),
     ]);
 
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $user->id,
-        'glucose_value' => 155.0,
-        'glucose_reading_type' => GlucoseReadingType::PostMeal,
+        'value' => 155.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::PostMeal->value],
         'measured_at' => now()->subDays(2),
     ]);
 
@@ -85,19 +85,19 @@ it('includes glucose concerns when post-meal spikes are detected', function (): 
     ]);
 
     for ($i = 0; $i < 5; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $user->id,
-            'glucose_value' => 90.0,
-            'glucose_reading_type' => GlucoseReadingType::Fasting,
+            'value' => 90.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
             'measured_at' => now()->subDays($i * 2),
         ]);
     }
 
     for ($i = 0; $i < 5; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $user->id,
-            'glucose_value' => 160.0,
-            'glucose_reading_type' => GlucoseReadingType::PostMeal,
+            'value' => 160.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::PostMeal->value],
             'measured_at' => now()->subDays($i * 2 + 1),
         ]);
     }
