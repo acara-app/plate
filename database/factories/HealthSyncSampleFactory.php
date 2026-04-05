@@ -53,7 +53,7 @@ final class HealthSyncSampleFactory extends Factory
             'type_identifier' => HealthSyncType::BloodGlucose->value,
             'value' => fake()->randomFloat(1, 70, 180),
             'unit' => HealthSyncType::BloodGlucose->unit(),
-            'metadata' => ['glucose_reading_type' => fake()->randomElement(GlucoseReadingType::cases())->value],
+            'metadata' => ['glucose_reading_type' => collect(GlucoseReadingType::cases())->random()->value],
         ]);
     }
 
@@ -104,7 +104,7 @@ final class HealthSyncSampleFactory extends Factory
             'type_identifier' => HealthSyncType::Insulin->value,
             'value' => fake()->randomFloat(2, 1, 50),
             'unit' => HealthSyncType::Insulin->unit(),
-            'metadata' => ['insulin_type' => fake()->randomElement(InsulinType::cases())->value],
+            'metadata' => ['insulin_type' => collect(InsulinType::cases())->random()->value],
         ]);
     }
 
