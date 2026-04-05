@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
+use stdClass;
 
 final readonly class GetHealthSummary implements Tool
 {
@@ -69,16 +70,24 @@ final readonly class GetHealthSummary implements Tool
             $query->whereIn('type_identifier', $typeFilter);
         }
 
-        $summaries = $query->get()->map(fn (object $row): array => [
-            'date' => $row->date,
-            'type' => $row->type_identifier,
-            'unit' => $row->unit,
-            'total' => round((float) $row->total, 1),
-            'avg' => round((float) $row->avg, 1),
-            'min' => round((float) $row->min, 1),
-            'max' => round((float) $row->max, 1),
-            'count' => (int) $row->count,
-        ])->values()->all();
+        $summaries = $query->toBase()->get()->map(function (stdClass $row): array {
+            $total = is_numeric($row->total) ? (float) $row->total : 0.0;
+            $avg = is_numeric($row->avg) ? (float) $row->avg : 0.0;
+            $min = is_numeric($row->min) ? (float) $row->min : 0.0;
+            $max = is_numeric($row->max) ? (float) $row->max : 0.0;
+            $count = is_numeric($row->count) ? (int) $row->count : 0;
+
+            return [
+                'date' => $row->date,
+                'type' => $row->type_identifier,
+                'unit' => $row->unit,
+                'total' => round($total, 1),
+                'avg' => round($avg, 1),
+                'min' => round($min, 1),
+                'max' => round($max, 1),
+                'count' => $count,
+            ];
+        })->values()->all();
 
         return (string) json_encode([
             'success' => true,

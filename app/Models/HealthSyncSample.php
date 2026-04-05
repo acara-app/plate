@@ -83,25 +83,17 @@ final class HealthSyncSample extends Model
             return null;
         }
 
-        $existsAsRaw = self::query()
-            ->where('user_id', $userId)
-            ->where('type_identifier', $type)
-            ->exists();
-
-        if ($existsAsRaw) {
-            return [$type];
-        }
-
-        $userTypes = self::query()
+        $matched = self::query()
             ->where('user_id', $userId)
             ->select('type_identifier')
             ->distinct()
-            ->pluck('type_identifier')
-            ->filter(fn (string $ti): bool => self::categoryFor($ti) === $type)
+            ->get()
+            ->map(fn (self $sample): string => $sample->type_identifier)
+            ->filter(fn (string $ti): bool => $ti === $type || self::categoryFor($ti) === $type)
             ->values()
             ->all();
 
-        return $userTypes !== [] ? $userTypes : [$type];
+        return $matched !== [] ? $matched : [$type];
     }
 
     /**
