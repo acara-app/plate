@@ -17,7 +17,8 @@ use App\DataObjects\GlucoseAnalysis\TimeOfDayPeriodData;
 use App\DataObjects\GlucoseAnalysis\TrendData;
 use App\DataObjects\GlucoseAnalysis\VariabilityData;
 use App\Enums\GlucoseReadingType;
-use App\Models\HealthEntry;
+use App\Enums\HealthSyncType;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Services\GlucoseStatisticsService;
 use Illuminate\Support\Collection;
@@ -34,8 +35,8 @@ final readonly class GlucoseDataAnalyzer
     {
         $cutoffDate = Date::now()->subDays($daysBack);
 
-        $readings = $user->healthEntries()
-            ->whereNotNull('glucose_value')
+        $readings = $user->healthSyncSamples()
+            ->ofType(HealthSyncType::BloodGlucose)
             ->where('measured_at', '>=', $cutoffDate)
             ->latest('measured_at')
             ->get();
@@ -99,9 +100,9 @@ final readonly class GlucoseDataAnalyzer
 
         $patterns = $this->detectPatterns($readings, $timeInRange, $variability);
 
-        /** @var HealthEntry $firstReading */
+        /** @var HealthSyncSample $firstReading */
         $firstReading = $readings->first();
-        /** @var HealthEntry $lastReading */
+        /** @var HealthSyncSample $lastReading */
         $lastReading = $readings->last();
 
         $actualDays = (int) $lastReading->measured_at->diffInDays($firstReading->measured_at) + 1;
@@ -204,13 +205,13 @@ final readonly class GlucoseDataAnalyzer
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $readings
+     * @param  Collection<int, HealthSyncSample>  $readings
      */
     private function calculateAverages(Collection $readings): AveragesData
     {
-        $grouped = $readings->groupBy(fn (HealthEntry $reading): string => $reading->glucose_reading_type->value ?? GlucoseReadingType::Random->value);
+        $grouped = $readings->groupBy(fn (HealthSyncSample $reading): string => is_string($reading->metadata['glucose_reading_type'] ?? null) ? $reading->metadata['glucose_reading_type'] : GlucoseReadingType::Random->value);
 
-        $overallAvg = $readings->avg('glucose_value');
+        $overallAvg = $readings->avg('value');
 
         return new AveragesData(
             fasting: $this->calculateAverage($grouped->get(GlucoseReadingType::Fasting->value)),
@@ -222,7 +223,7 @@ final readonly class GlucoseDataAnalyzer
     }
 
     /**
-     * @param  Collection<int, HealthEntry>|null  $readings
+     * @param  Collection<int, HealthSyncSample>|null  $readings
      */
     private function calculateAverage(?Collection $readings): ?float
     {
@@ -230,19 +231,21 @@ final readonly class GlucoseDataAnalyzer
             return null;
         }
 
-        $avg = $readings->avg('glucose_value');
+        $avg = $readings->avg('value');
 
         return is_numeric($avg) ? round((float) $avg, 1) : null;
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $readings
+     * @param  Collection<int, HealthSyncSample>  $readings
      */
     private function detectPatterns(Collection $readings, TimeInRangeData $timeInRange, VariabilityData $variability): PatternsData
     {
-        $postMealReadings = $readings->where('glucose_reading_type', GlucoseReadingType::PostMeal);
+        $postMealReadings = $readings->filter(
+            fn (HealthSyncSample $r): bool => ($r->metadata['glucose_reading_type'] ?? null) === GlucoseReadingType::PostMeal->value
+        );
         $highPostMeal = $postMealReadings->filter(
-            fn (HealthEntry $r): bool => $r->glucose_value > GlucoseStatisticsService::POST_MEAL_SPIKE_THRESHOLD
+            fn (HealthSyncSample $r): bool => $r->value > GlucoseStatisticsService::POST_MEAL_SPIKE_THRESHOLD
         )->count();
 
         $hypoglycemiaRisk = match (true) {

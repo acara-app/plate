@@ -6,11 +6,14 @@ namespace App\Http\Layouts;
 
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
+use App\Enums\HealthSyncType;
 use App\Enums\InsulinType;
-use App\Models\HealthEntry;
+use App\Models\HealthSyncSample;
 use App\Models\Meal;
 use App\Models\User;
+use App\Services\HealthEntryAssembler;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 final readonly class DiabetesLayout
 {
@@ -53,7 +56,7 @@ final readonly class DiabetesLayout
 
     /**
      * @return array{
-     *     logs: Collection<int, HealthEntry>,
+     *     logs: Collection<int, array<string, mixed>>,
      *     timePeriod: string,
      *     summary: array<string, mixed>
      * }
@@ -66,19 +69,19 @@ final readonly class DiabetesLayout
 
         $days = self::TIME_PERIODS[$timePeriod];
         $cutoffDate = now()->subDays($days);
-        $logs = $user->healthEntries()
+
+        $samples = $user->healthSyncSamples()
+            ->whereIn('type_identifier', self::entryTypeIdentifiers())
             ->where('measured_at', '>=', $cutoffDate)
             ->latest('measured_at')
             ->get();
 
-        $allLogs = $user->healthEntries()
-            ->latest('measured_at')
-            ->get();
+        $assembler = resolve(HealthEntryAssembler::class);
 
         return [
-            'logs' => $logs,
+            'logs' => $assembler->assemble($samples),
             'timePeriod' => $timePeriod,
-            'summary' => self::calculateSummary($logs, $allLogs),
+            'summary' => self::calculateSummary($samples, $user),
         ];
     }
 
@@ -88,18 +91,35 @@ final readonly class DiabetesLayout
     public static function getRecentMedications(User $user): array
     {
         /** @var array<int, array{name: string, dosage: string, label: string}> */
-        return $user->healthEntries()
-            ->whereNotNull('medication_name')
-            ->whereNotNull('medication_dosage')
+        return $user->healthSyncSamples()
+            ->ofType(HealthSyncType::Medication)
             ->latest()
-            ->get(['medication_name', 'medication_dosage'])
-            ->unique(fn (HealthEntry $log): string => sprintf('%s|%s', $log->medication_name, $log->medication_dosage))
+            ->take(20)
+            ->get()
+            ->filter(function (HealthSyncSample $s): bool {
+                $meta = $s->metadata ?? [];
+
+                return isset($meta['medication_name'], $meta['medication_dosage']);
+            })
+            ->unique(function (HealthSyncSample $s): string {
+                $meta = $s->metadata ?? [];
+                $name = is_string($meta['medication_name'] ?? null) ? $meta['medication_name'] : '';
+                $dosage = is_string($meta['medication_dosage'] ?? null) ? $meta['medication_dosage'] : '';
+
+                return sprintf('%s|%s', $name, $dosage);
+            })
             ->take(5)
-            ->map(fn (HealthEntry $log): array => [
-                'name' => (string) $log->medication_name,
-                'dosage' => (string) $log->medication_dosage,
-                'label' => sprintf('%s %s', $log->medication_name, $log->medication_dosage),
-            ])
+            ->map(function (HealthSyncSample $s): array {
+                $meta = $s->metadata ?? [];
+                $name = is_string($meta['medication_name'] ?? null) ? $meta['medication_name'] : '';
+                $dosage = is_string($meta['medication_dosage'] ?? null) ? $meta['medication_dosage'] : '';
+
+                return [
+                    'name' => $name,
+                    'dosage' => $dosage,
+                    'label' => sprintf('%s %s', $name, $dosage),
+                ];
+            })
             ->values()
             ->all();
     }
@@ -110,18 +130,26 @@ final readonly class DiabetesLayout
     public static function getRecentInsulins(User $user): array
     {
         /** @var array<int, array{units: float, type: string, label: string}> */
-        return $user->healthEntries()
-            ->whereNotNull('insulin_units')
-            ->whereNotNull('insulin_type')
+        return $user->healthSyncSamples()
+            ->ofType(HealthSyncType::Insulin)
             ->latest()
-            ->get(['insulin_units', 'insulin_type'])
-            ->unique(fn (HealthEntry $log): string => sprintf('%s|%s', $log->insulin_units, $log->insulin_type?->value))
+            ->take(20)
+            ->get()
+            ->unique(function (HealthSyncSample $s): string {
+                $type = is_string($s->metadata['insulin_type'] ?? null) ? $s->metadata['insulin_type'] : '';
+
+                return sprintf('%s|%s', $s->value, $type);
+            })
             ->take(5)
-            ->map(fn (HealthEntry $log): array => [
-                'units' => (float) $log->insulin_units,
-                'type' => (string) $log->insulin_type?->value,
-                'label' => sprintf('%su %s', $log->insulin_units, $log->insulin_type?->value),
-            ])
+            ->map(function (HealthSyncSample $s): array {
+                $type = is_string($s->metadata['insulin_type'] ?? null) ? $s->metadata['insulin_type'] : '';
+
+                return [
+                    'units' => $s->value,
+                    'type' => $type,
+                    'label' => sprintf('%su %s', $s->value, $type),
+                ];
+            })
             ->values()
             ->all();
     }
@@ -161,34 +189,36 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $logs
-     * @param  Collection<int, HealthEntry>  $allLogs
+     * @param  Collection<int, HealthSyncSample>  $samples
      * @return array<string, mixed>
      */
-    private static function calculateSummary(Collection $logs, Collection $allLogs): array
+    private static function calculateSummary(Collection $samples, User $user): array
     {
         return [
-            'glucoseStats' => self::calculateGlucoseStats($logs),
-            'insulinStats' => self::calculateInsulinStats($logs),
-            'carbStats' => self::calculateCarbStats($logs),
-            'exerciseStats' => self::calculateExerciseStats($logs),
-            'weightStats' => self::calculateWeightStats($logs),
-            'bpStats' => self::calculateBloodPressureStats($logs),
-            'medicationStats' => self::calculateMedicationStats($logs),
-            'a1cStats' => self::calculateA1cStats($logs),
-            'streakStats' => self::calculateStreak($allLogs),
-            'dataTypes' => self::calculateDataTypes($logs),
+            'glucoseStats' => self::calculateGlucoseStats($samples),
+            'insulinStats' => self::calculateInsulinStats($samples),
+            'carbStats' => self::calculateCarbStats($samples),
+            'exerciseStats' => self::calculateExerciseStats($samples),
+            'weightStats' => self::calculateWeightStats($samples),
+            'bpStats' => self::calculateBloodPressureStats($samples),
+            'medicationStats' => self::calculateMedicationStats($samples),
+            'a1cStats' => self::calculateA1cStats($samples),
+            'streakStats' => self::calculateStreak($user),
+            'dataTypes' => self::calculateDataTypes($samples),
         ];
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $logs
+     * @param  Collection<int, HealthSyncSample>  $samples
      * @return array{count: int, avg: float, min: float, max: float}
      */
-    private static function calculateGlucoseStats(Collection $logs): array
+    private static function calculateGlucoseStats(Collection $samples): array
     {
-        $glucoseLogs = $logs->filter(fn (HealthEntry $log): bool => $log->glucose_value !== null);
-        $values = $glucoseLogs->pluck('glucose_value')->filter()->values();
+        $values = $samples
+            ->filter(fn (HealthSyncSample $s): bool => $s->type_identifier === HealthSyncType::BloodGlucose->value)
+            ->pluck('value')
+            ->filter()
+            ->values();
 
         if ($values->isEmpty()) {
             return ['count' => 0, 'avg' => 0, 'min' => 0, 'max' => 0];
@@ -203,71 +233,75 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $logs
+     * @param  Collection<int, HealthSyncSample>  $samples
      * @return array{count: int, total: float, bolusCount: int, basalCount: int}
      */
-    private static function calculateInsulinStats(Collection $logs): array
+    private static function calculateInsulinStats(Collection $samples): array
     {
-        $insulinLogs = $logs->filter(fn (HealthEntry $log): bool => $log->insulin_units !== null);
+        $insulinSamples = $samples->filter(fn (HealthSyncSample $s): bool => $s->type_identifier === HealthSyncType::Insulin->value);
 
         return [
-            'count' => $insulinLogs->count(),
-            'total' => round((float) ($insulinLogs->sum('insulin_units')), 1), // @phpstan-ignore-line
-            'bolusCount' => $insulinLogs->filter(fn (HealthEntry $log): bool => $log->insulin_type === InsulinType::Bolus)->count(),
-            'basalCount' => $insulinLogs->filter(fn (HealthEntry $log): bool => $log->insulin_type === InsulinType::Basal)->count(),
+            'count' => $insulinSamples->count(),
+            'total' => round($insulinSamples->sum(fn (HealthSyncSample $s): float => $s->value), 1),
+            'bolusCount' => $insulinSamples->filter(fn (HealthSyncSample $s): bool => ($s->metadata['insulin_type'] ?? null) === InsulinType::Bolus->value)->count(),
+            'basalCount' => $insulinSamples->filter(fn (HealthSyncSample $s): bool => ($s->metadata['insulin_type'] ?? null) === InsulinType::Basal->value)->count(),
         ];
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $logs
+     * @param  Collection<int, HealthSyncSample>  $samples
      * @return array{count: int, total: float, uniqueDays: int, avgPerDay: float}
      */
-    private static function calculateCarbStats(Collection $logs): array
+    private static function calculateCarbStats(Collection $samples): array
     {
-        $carbLogs = $logs->filter(fn (HealthEntry $log): bool => $log->carbs_grams !== null);
-        $total = $carbLogs->sum('carbs_grams');
-        $uniqueDays = $carbLogs->map(fn (HealthEntry $log) => $log->measured_at->toDateString())->unique()->count();
-
-        $totalFloat = (float) $total; // @phpstan-ignore-line
+        $carbSamples = $samples->filter(fn (HealthSyncSample $s): bool => $s->type_identifier === HealthSyncType::Carbohydrates->value);
+        $total = $carbSamples->sum(fn (HealthSyncSample $s): float => $s->value);
+        $uniqueDays = $carbSamples->map(fn (HealthSyncSample $s): string => $s->measured_at->toDateString())->unique()->count();
 
         return [
-            'count' => $carbLogs->count(),
-            'total' => round($totalFloat, 1),
+            'count' => $carbSamples->count(),
+            'total' => round($total, 1),
             'uniqueDays' => $uniqueDays,
-            'avgPerDay' => $uniqueDays > 0 ? round($totalFloat / $uniqueDays) : 0,
+            'avgPerDay' => $uniqueDays > 0 ? round($total / $uniqueDays) : 0,
         ];
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $logs
+     * @param  Collection<int, HealthSyncSample>  $samples
      * @return array{count: int, totalMinutes: int, types: array<int, string>}
      */
-    private static function calculateExerciseStats(Collection $logs): array
+    private static function calculateExerciseStats(Collection $samples): array
     {
-        $exerciseLogs = $logs->filter(fn (HealthEntry $log): bool => $log->exercise_duration_minutes !== null);
+        $exerciseSamples = $samples->filter(fn (HealthSyncSample $s): bool => in_array($s->type_identifier, [HealthSyncType::ExerciseMinutes->value, HealthSyncType::Workouts->value], true));
 
         /** @var array<int, string> $types */
-        $types = $exerciseLogs->pluck('exercise_type')->filter()->unique()->take(2)->values()->all();
+        $types = $exerciseSamples
+            ->map(fn (HealthSyncSample $s): string => is_string($s->metadata['exercise_type'] ?? null) ? $s->metadata['exercise_type'] : $s->type_identifier)
+            ->unique()
+            ->take(2)
+            ->values()
+            ->all();
 
         return [
-            'count' => $exerciseLogs->count(),
-            'totalMinutes' => (int) ($exerciseLogs->sum('exercise_duration_minutes')), // @phpstan-ignore-line
+            'count' => $exerciseSamples->count(),
+            'totalMinutes' => (int) $exerciseSamples->sum(fn (HealthSyncSample $s): float => $s->value),
             'types' => $types,
         ];
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $logs
+     * @param  Collection<int, HealthSyncSample>  $samples
      * @return array{count: int, latest: float|null, previous: float|null, trend: string|null, diff: float|null}
      */
-    private static function calculateWeightStats(Collection $logs): array
+    private static function calculateWeightStats(Collection $samples): array
     {
-        $weightLogs = $logs->filter(fn (HealthEntry $log): bool => $log->weight !== null)
+        $weightSamples = $samples
+            ->filter(fn (HealthSyncSample $s): bool => $s->type_identifier === HealthSyncType::Weight->value)
             ->sortByDesc('measured_at')
             ->values();
 
-        $latest = $weightLogs->first()?->weight;
-        $previous = $weightLogs->skip(1)->first()?->weight;
+        $latest = $weightSamples->first()?->value;
+        $previous = $weightSamples->skip(1)->first()?->value;
         $trend = null;
         $diff = null;
 
@@ -284,7 +318,7 @@ final readonly class DiabetesLayout
         }
 
         return [
-            'count' => $weightLogs->count(),
+            'count' => $weightSamples->count(),
             'latest' => $latest,
             'previous' => $previous,
             'trend' => $trend,
@@ -293,74 +327,95 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $logs
+     * @param  Collection<int, HealthSyncSample>  $samples
      * @return array{count: int, latestSystolic: int|null, latestDiastolic: int|null}
      */
-    private static function calculateBloodPressureStats(Collection $logs): array
+    private static function calculateBloodPressureStats(Collection $samples): array
     {
-        $bpLogs = $logs->filter(fn (HealthEntry $log): bool => $log->blood_pressure_systolic !== null && $log->blood_pressure_diastolic !== null)
-            ->sortByDesc('measured_at')
-            ->values();
+        $systolicSamples = $samples
+            ->filter(fn (HealthSyncSample $s): bool => $s->type_identifier === HealthSyncType::BloodPressureSystolic->value)
+            ->sortByDesc('measured_at');
 
-        $latest = $bpLogs->first();
+        $diastolicSamples = $samples
+            ->filter(fn (HealthSyncSample $s): bool => $s->type_identifier === HealthSyncType::BloodPressureDiastolic->value)
+            ->sortByDesc('measured_at');
+
+        $latestSystolic = $systolicSamples->first();
+        $latestDiastolic = $diastolicSamples->first();
+
+        $pairCount = min($systolicSamples->count(), $diastolicSamples->count());
 
         return [
-            'count' => $bpLogs->count(),
-            'latestSystolic' => $latest?->blood_pressure_systolic,
-            'latestDiastolic' => $latest?->blood_pressure_diastolic,
+            'count' => $pairCount,
+            'latestSystolic' => $latestSystolic !== null ? (int) $latestSystolic->value : null,
+            'latestDiastolic' => $latestDiastolic !== null ? (int) $latestDiastolic->value : null,
         ];
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $logs
+     * @param  Collection<int, HealthSyncSample>  $samples
      * @return array{count: int, uniqueMedications: array<int, string>}
      */
-    private static function calculateMedicationStats(Collection $logs): array
+    private static function calculateMedicationStats(Collection $samples): array
     {
-        $medicationLogs = $logs->filter(fn (HealthEntry $log): bool => $log->medication_name !== null);
+        $medSamples = $samples->filter(fn (HealthSyncSample $s): bool => $s->type_identifier === HealthSyncType::Medication->value);
 
         /** @var array<int, string> $uniqueMedications */
-        $uniqueMedications = $medicationLogs->pluck('medication_name')->filter()->unique()->take(2)->values()->all();
+        $uniqueMedications = $medSamples
+            ->map(fn (HealthSyncSample $s): ?string => is_string($s->metadata['medication_name'] ?? null) ? $s->metadata['medication_name'] : null)
+            ->filter()
+            ->unique()
+            ->take(2)
+            ->values()
+            ->all();
 
         return [
-            'count' => $medicationLogs->count(),
+            'count' => $medSamples->count(),
             'uniqueMedications' => $uniqueMedications,
         ];
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $logs
+     * @param  Collection<int, HealthSyncSample>  $samples
      * @return array{count: int, latest: float|null}
      */
-    private static function calculateA1cStats(Collection $logs): array
+    private static function calculateA1cStats(Collection $samples): array
     {
-        $a1cLogs = $logs->filter(fn (HealthEntry $log): bool => $log->a1c_value !== null)
+        $a1cSamples = $samples
+            ->filter(fn (HealthSyncSample $s): bool => $s->type_identifier === HealthSyncType::A1c->value)
             ->sortByDesc('measured_at')
             ->values();
 
         return [
-            'count' => $a1cLogs->count(),
-            'latest' => $a1cLogs->first()?->a1c_value,
+            'count' => $a1cSamples->count(),
+            'latest' => $a1cSamples->first()?->value,
         ];
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $allLogs
      * @return array{currentStreak: int, activeDays: int}
      */
-    private static function calculateStreak(Collection $allLogs): array
+    private static function calculateStreak(User $user): array
     {
-        if ($allLogs->isEmpty()) {
+        /** @var Collection<int, object{date: string}> $uniqueDates */
+        $uniqueDates = $user->healthSyncSamples()
+            ->whereIn('type_identifier', self::entryTypeIdentifiers())
+            ->select(DB::raw('DATE(measured_at) as date'))
+            ->groupBy('date')
+            ->orderByDesc('date')
+            ->limit(365)
+            ->get();
+
+        if ($uniqueDates->isEmpty()) {
             return ['currentStreak' => 0, 'activeDays' => 0];
         }
 
-        $uniqueDates = $allLogs->map(fn (HealthEntry $log) => $log->measured_at->toDateString())
-            ->unique()
-            ->sort()
-            ->reverse()
-            ->values();
+        $activeDays = $user->healthSyncSamples()
+            ->whereIn('type_identifier', self::entryTypeIdentifiers())
+            ->distinct(DB::raw('DATE(measured_at)'))
+            ->count(DB::raw('DATE(measured_at)'));
 
-        $activeDays = $uniqueDates->count();
+        $dates = $uniqueDates->pluck('date');
 
         $today = today()->toDateString();
         $yesterday = today()->subDay()->toDateString();
@@ -368,8 +423,8 @@ final readonly class DiabetesLayout
         $streak = 0;
         $checkDate = today();
 
-        if ($uniqueDates->doesntContain($today)) {
-            if ($uniqueDates->doesntContain($yesterday)) {
+        if ($dates->doesntContain($today)) {
+            if ($dates->doesntContain($yesterday)) {
                 return ['currentStreak' => 0, 'activeDays' => $activeDays];
             }
 
@@ -378,7 +433,7 @@ final readonly class DiabetesLayout
 
         for ($i = 0; $i < 365; $i++) {
             $dateStr = $checkDate->toDateString();
-            if ($uniqueDates->contains($dateStr)) {
+            if ($dates->contains($dateStr)) {
                 $streak++;
                 $checkDate = $checkDate->subDay();
             } else {
@@ -390,15 +445,17 @@ final readonly class DiabetesLayout
     }
 
     /**
-     * @param  Collection<int, HealthEntry>  $logs
+     * @param  Collection<int, HealthSyncSample>  $samples
      * @return array{hasGlucose: bool, hasInsulin: bool, hasCarbs: bool, hasExercise: bool, hasMultipleFactors: bool}
      */
-    private static function calculateDataTypes(Collection $logs): array
+    private static function calculateDataTypes(Collection $samples): array
     {
-        $hasGlucose = $logs->contains(fn (HealthEntry $log): bool => $log->glucose_value !== null);
-        $hasInsulin = $logs->contains(fn (HealthEntry $log): bool => $log->insulin_units !== null);
-        $hasCarbs = $logs->contains(fn (HealthEntry $log): bool => $log->carbs_grams !== null);
-        $hasExercise = $logs->contains(fn (HealthEntry $log): bool => $log->exercise_duration_minutes !== null);
+        $types = $samples->pluck('type_identifier')->unique();
+
+        $hasGlucose = $types->contains(HealthSyncType::BloodGlucose->value);
+        $hasInsulin = $types->contains(HealthSyncType::Insulin->value);
+        $hasCarbs = $types->contains(HealthSyncType::Carbohydrates->value);
+        $hasExercise = $types->contains(HealthSyncType::ExerciseMinutes->value) || $types->contains(HealthSyncType::Workouts->value);
 
         $factorCount = array_filter([$hasGlucose, $hasInsulin, $hasCarbs, $hasExercise]);
 
@@ -409,5 +466,13 @@ final readonly class DiabetesLayout
             'hasExercise' => $hasExercise,
             'hasMultipleFactors' => count($factorCount) > 1,
         ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function entryTypeIdentifiers(): array
+    {
+        return HealthSyncType::entryTypeValues();
     }
 }

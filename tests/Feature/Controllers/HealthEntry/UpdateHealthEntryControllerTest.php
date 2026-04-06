@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Models\HealthEntry;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 
 it('can update own diabetes log', function (): void {
     $user = User::factory()->create();
-    $log = HealthEntry::factory()->create(['user_id' => $user->id]);
+    $sample = HealthSyncSample::factory()->bloodGlucose()->fromWeb()->create(['user_id' => $user->id]);
 
     $data = [
         'log_type' => 'glucose',
@@ -18,13 +18,14 @@ it('can update own diabetes log', function (): void {
     ];
 
     $response = $this->actingAs($user)
-        ->put(route('health-entries.update', $log), $data);
+        ->put(route('health-entries.update', $sample), $data);
 
     $response->assertRedirect();
 
-    $this->assertDatabaseHas('health_entries', [
-        'id' => $log->id,
-        'glucose_value' => 130,
+    $this->assertDatabaseHas('health_sync_samples', [
+        'id' => $sample->id,
+        'type_identifier' => 'bloodGlucose',
+        'value' => 130,
         'notes' => 'Updated notes',
     ]);
 });
@@ -32,7 +33,7 @@ it('can update own diabetes log', function (): void {
 it('cannot update another user diabetes log', function (): void {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
-    $log = HealthEntry::factory()->create(['user_id' => $otherUser->id]);
+    $sample = HealthSyncSample::factory()->bloodGlucose()->fromWeb()->create(['user_id' => $otherUser->id]);
 
     $data = [
         'log_type' => 'glucose',
@@ -42,17 +43,17 @@ it('cannot update another user diabetes log', function (): void {
     ];
 
     $response = $this->actingAs($user)
-        ->put(route('health-entries.update', $log), $data);
+        ->put(route('health-entries.update', $sample), $data);
 
     $response->assertForbidden();
 });
 
 it('prevents empty vitals log submission when updating', function (): void {
     $user = User::factory()->create();
-    $log = HealthEntry::factory()->create(['user_id' => $user->id]);
+    $sample = HealthSyncSample::factory()->weight()->fromWeb()->create(['user_id' => $user->id]);
 
     $response = $this->actingAs($user)
-        ->put(route('health-entries.update', $log), [
+        ->put(route('health-entries.update', $sample), [
             'log_type' => 'vitals',
             'measured_at' => now()->toDateTimeString(),
         ]);

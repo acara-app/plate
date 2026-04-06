@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Console\Commands\ProcessGlucoseNotificationsCommand;
 use App\Enums\GlucoseReadingType;
-use App\Models\HealthEntry;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Notifications\GlucoseReportNotification;
 use Illuminate\Support\Facades\Notification;
@@ -18,11 +18,11 @@ test('it processes users with glucose notifications enabled', function (): void 
     ]);
 
     foreach (range(1, 15) as $i) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $userWithNotifications->id,
-            'glucose_value' => 200,
-            'glucose_reading_type' => GlucoseReadingType::Random,
-            'measured_at' => now()->subDays($i % 7),
+            'value' => 200,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
+            'measured_at' => now()->subDays($i % 7)->subMinutes($i),
         ]);
     }
 
@@ -32,11 +32,11 @@ test('it processes users with glucose notifications enabled', function (): void 
     ]);
 
     foreach (range(1, 15) as $i) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $userWithoutNotifications->id,
-            'glucose_value' => 200,
-            'glucose_reading_type' => GlucoseReadingType::Random,
-            'measured_at' => now()->subDays($i % 7),
+            'value' => 200,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
+            'measured_at' => now()->subDays($i % 7)->subMinutes($i),
         ]);
     }
 
@@ -56,11 +56,11 @@ test('it does not notify users without verified email', function (): void {
     ]);
 
     foreach (range(1, 15) as $i) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $unverifiedUser->id,
-            'glucose_value' => 200,
-            'glucose_reading_type' => GlucoseReadingType::Random,
-            'measured_at' => now()->subDays($i % 7),
+            'value' => 200,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
+            'measured_at' => now()->subDays($i % 7)->subMinutes($i),
         ]);
     }
 
@@ -93,11 +93,11 @@ test('it does not notify users with well-controlled glucose', function (): void 
     ]);
 
     foreach (range(1, 20) as $i) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $userWithGoodControl->id,
-            'glucose_value' => 100,
-            'glucose_reading_type' => GlucoseReadingType::Random,
-            'measured_at' => now()->subDays($i % 7),
+            'value' => 100,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
+            'measured_at' => now()->subDays($i % 7)->subMinutes($i),
         ]);
     }
 
@@ -116,11 +116,11 @@ test('it does not process users with null settings', function (): void {
     ]);
 
     foreach (range(1, 15) as $i) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $userWithNullSettings->id,
-            'glucose_value' => 200,
-            'glucose_reading_type' => GlucoseReadingType::Random,
-            'measured_at' => now()->subDays($i % 7),
+            'value' => 200,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
+            'measured_at' => now()->subDays($i % 7)->subMinutes($i),
         ]);
     }
 
@@ -141,11 +141,11 @@ test('it processes multiple users with concerns', function (): void {
         ]);
 
         foreach (range(1, 15) as $j) {
-            HealthEntry::factory()->create([
+            HealthSyncSample::factory()->bloodGlucose()->create([
                 'user_id' => $user->id,
-                'glucose_value' => 200,
-                'glucose_reading_type' => GlucoseReadingType::Random,
-                'measured_at' => now()->subDays($j % 7),
+                'value' => 200,
+                'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
+                'measured_at' => now()->subDays($j % 7)->subMinutes($j),
             ]);
         }
 

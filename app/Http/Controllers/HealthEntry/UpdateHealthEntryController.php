@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\HealthEntry;
 
-use App\Actions\UpdateHealthEntryAction;
+use App\Actions\UpdateHealthSampleAction;
+use App\DataObjects\HealthLogData;
 use App\Enums\GlucoseUnit;
 use App\Http\Requests\HealthEntryRequest;
-use App\Models\HealthEntry;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
@@ -16,31 +17,29 @@ use Illuminate\Support\Facades\Gate;
 final readonly class UpdateHealthEntryController
 {
     public function __construct(
-        private UpdateHealthEntryAction $updateHealthEntry,
+        private UpdateHealthSampleAction $updateHealthSample,
         #[CurrentUser()] private User $currentUser,
     ) {}
 
-    public function __invoke(HealthEntryRequest $request, HealthEntry $healthEntry): RedirectResponse
+    public function __invoke(HealthEntryRequest $request, HealthSyncSample $healthSyncSample): RedirectResponse
     {
-        Gate::authorize('update', $healthEntry);
+        Gate::authorize('update', $healthSyncSample);
 
         $data = $request->validated();
 
-        /** @var array<string, mixed> $updateData */
-        $updateData = collect($data)->except('log_type')->toArray();
-
         // @phpstan-ignore nullsafe.neverNull
         $glucoseUnit = $this->currentUser->profile?->units_preference ?? GlucoseUnit::MmolL;
-        if ($glucoseUnit === GlucoseUnit::MmolL && isset($updateData['glucose_value'])) {
-            // @phpstan-ignore nullCoalesce.offset,cast.double
-            $glucoseValue = (float) ($updateData['glucose_value'] ?? 0);
-            $updateData['glucose_value'] = GlucoseUnit::mmolLToMgDl($glucoseValue);
+        if ($glucoseUnit === GlucoseUnit::MmolL && isset($data['glucose_value'])) {
+            $glucoseValue = is_numeric($data['glucose_value']) ? (float) $data['glucose_value'] : 0;
+            $data['glucose_value'] = GlucoseUnit::mmolLToMgDl($glucoseValue);
         }
 
-        $this->updateHealthEntry->handle(
-            healthEntry: $healthEntry,
-            data: $updateData
-        );
+        $healthData = HealthLogData::fromParsedArray(array_merge(
+            $data,
+            ['is_health_data' => true],
+        ));
+
+        $this->updateHealthSample->handle($healthSyncSample, $healthData);
 
         return back()->with('success', 'Health entry updated successfully.');
     }

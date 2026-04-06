@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\MealPlanPromptBuilder;
-use App\Models\HealthEntry;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\UserProfileAttribute;
@@ -224,9 +224,9 @@ it('shows glucose monitoring data when available', function (): void {
         ->has(UserProfile::factory(), 'profile')
         ->create();
 
-    HealthEntry::factory()->count(5)->create([
+    HealthSyncSample::factory()->bloodGlucose()->count(5)->create([
         'user_id' => $user->id,
-        'glucose_value' => 150,
+        'value' => 150,
     ]);
 
     $builder = resolve(MealPlanPromptBuilder::class);

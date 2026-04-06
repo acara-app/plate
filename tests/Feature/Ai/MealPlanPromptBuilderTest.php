@@ -6,7 +6,7 @@ use App\Ai\MealPlanPromptBuilder;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
-use App\Models\HealthEntry;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\UserProfileAttribute;
@@ -397,17 +397,17 @@ test('it automatically analyzes glucose data when analysis not provided', functi
         'derived_activity_multiplier' => 1.55,
     ]);
 
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $user->id,
-        'glucose_value' => 95.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 95.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->subDays(1),
     ]);
 
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $user->id,
-        'glucose_value' => 140.0,
-        'glucose_reading_type' => GlucoseReadingType::PostMeal,
+        'value' => 140.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::PostMeal->value],
         'measured_at' => now()->subDays(2),
     ]);
 

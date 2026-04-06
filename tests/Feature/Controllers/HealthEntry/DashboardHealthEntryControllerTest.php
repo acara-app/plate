@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\HealthEntry;
+use App\Models\HealthSyncSample;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
@@ -25,11 +25,11 @@ it('renders diabetes log tracking dashboard', function (): void {
 it('displays user diabetes logs filtered by time period', function (): void {
     $user = User::factory()->create();
 
-    HealthEntry::factory()->count(3)->create([
+    HealthSyncSample::factory()->bloodGlucose()->fromWeb()->count(3)->create([
         'user_id' => $user->id,
         'measured_at' => now()->subDays(10),
     ]);
-    HealthEntry::factory()->count(2)->create([
+    HealthSyncSample::factory()->bloodGlucose()->fromWeb()->count(2)->create([
         'user_id' => $user->id,
         'measured_at' => now()->subDays(40),
     ]);
@@ -46,11 +46,11 @@ it('displays user diabetes logs filtered by time period', function (): void {
 it('filters logs by query parameter period', function (): void {
     $user = User::factory()->create();
 
-    HealthEntry::factory()->count(2)->create([
+    HealthSyncSample::factory()->bloodGlucose()->fromWeb()->count(2)->create([
         'user_id' => $user->id,
         'measured_at' => now()->subDays(5),
     ]);
-    HealthEntry::factory()->count(3)->create([
+    HealthSyncSample::factory()->bloodGlucose()->fromWeb()->count(3)->create([
         'user_id' => $user->id,
         'measured_at' => now()->subDays(20),
     ]);
@@ -66,9 +66,9 @@ it('filters logs by query parameter period', function (): void {
 
 it('includes summary statistics in response', function (): void {
     $user = User::factory()->create();
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->fromWeb()->create([
         'user_id' => $user->id,
-        'glucose_value' => 120,
+        'value' => 120,
         'measured_at' => now(),
     ]);
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Ai\GlucoseDataAnalyzer;
 use App\Enums\GlucoseReadingType;
-use App\Models\HealthEntry;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Services\GlucoseStatisticsService;
 
@@ -36,24 +36,24 @@ it('returns empty analysis when no glucose readings exist', function (): void {
 });
 
 it('calculates average glucose levels correctly', function (): void {
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 95.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 95.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->subDays(1),
     ]);
 
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 105.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 105.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->subDays(2),
     ]);
 
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 140.0,
-        'glucose_reading_type' => GlucoseReadingType::PostMeal,
+        'value' => 140.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::PostMeal->value],
         'measured_at' => now()->subDays(1),
     ]);
 
@@ -69,10 +69,10 @@ it('calculates average glucose levels correctly', function (): void {
 
 it('detects consistently high glucose pattern', function (): void {
     for ($i = 0; $i < 10; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 150.0 + ($i * 5),
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 150.0 + ($i * 5),
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i),
         ]);
     }
@@ -102,19 +102,19 @@ it('detects consistently high glucose pattern', function (): void {
 
 it('detects post-meal spikes pattern', function (): void {
     for ($i = 0; $i < 5; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 90.0,
-            'glucose_reading_type' => GlucoseReadingType::Fasting,
+            'value' => 90.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
             'measured_at' => now()->subDays($i * 2),
         ]);
     }
 
     for ($i = 0; $i < 5; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 160.0,
-            'glucose_reading_type' => GlucoseReadingType::PostMeal,
+            'value' => 160.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::PostMeal->value],
             'measured_at' => now()->subDays($i * 2 + 1),
         ]);
     }
@@ -130,10 +130,10 @@ it('detects high variability pattern', function (): void {
     $values = [70, 150, 85, 140, 75, 160, 80, 145];
 
     foreach ($values as $index => $value) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => (float) $value,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => (float) $value,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($index),
         ]);
     }
@@ -155,17 +155,17 @@ it('detects high variability pattern', function (): void {
 });
 
 it('only analyzes readings within specified time period', function (): void {
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 100.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 100.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->subDays(40),
     ]);
 
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 120.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 120.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->subDays(5),
     ]);
 
@@ -178,10 +178,10 @@ it('only analyzes readings within specified time period', function (): void {
 
 it('provides default recommendations when glucose is well controlled', function (): void {
     for ($i = 0; $i < 5; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 90.0 + ($i * 2),
-            'glucose_reading_type' => GlucoseReadingType::Fasting,
+            'value' => 90.0 + ($i * 2),
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
             'measured_at' => now()->subDays($i),
         ]);
     }
@@ -194,10 +194,10 @@ it('provides default recommendations when glucose is well controlled', function 
 
 it('detects consistently low glucose pattern', function (): void {
     for ($i = 0; $i < 10; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 65.0 + ($i),
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 65.0 + ($i),
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i),
         ]);
     }
@@ -221,17 +221,17 @@ it('detects consistently low glucose pattern', function (): void {
 });
 
 it('classifies low fasting glucose correctly', function (): void {
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 60.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 60.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->subDays(1),
     ]);
 
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 65.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 65.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->subDays(2),
     ]);
 
@@ -243,10 +243,10 @@ it('classifies low fasting glucose correctly', function (): void {
 
 it('identifies concern for high fasting glucose', function (): void {
     for ($i = 0; $i < 5; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 110.0 + ($i * 2),
-            'glucose_reading_type' => GlucoseReadingType::Fasting,
+            'value' => 110.0 + ($i * 2),
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
             'measured_at' => now()->subDays($i),
         ]);
     }
@@ -257,17 +257,17 @@ it('identifies concern for high fasting glucose', function (): void {
 });
 
 it('classifies elevated fasting glucose correctly', function (): void {
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 110.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 110.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->subDays(1),
     ]);
 
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 115.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 115.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->subDays(2),
     ]);
 
@@ -277,17 +277,17 @@ it('classifies elevated fasting glucose correctly', function (): void {
 });
 
 it('classifies high fasting glucose correctly', function (): void {
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 130.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 130.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->subDays(1),
     ]);
 
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 140.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 140.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->subDays(2),
     ]);
 
@@ -307,17 +307,17 @@ it('classifies high fasting glucose correctly', function (): void {
 });
 
 it('classifies elevated post-meal glucose correctly', function (): void {
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 150.0,
-        'glucose_reading_type' => GlucoseReadingType::PostMeal,
+        'value' => 150.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::PostMeal->value],
         'measured_at' => now()->subDays(1),
     ]);
 
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 160.0,
-        'glucose_reading_type' => GlucoseReadingType::PostMeal,
+        'value' => 160.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::PostMeal->value],
         'measured_at' => now()->subDays(2),
     ]);
 
@@ -337,10 +337,10 @@ it('classifies elevated post-meal glucose correctly', function (): void {
 });
 
 it('handles single glucose reading correctly', function (): void {
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 100.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 100.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->subDays(1),
     ]);
 
@@ -353,28 +353,28 @@ it('handles single glucose reading correctly', function (): void {
 
 it('calculates time in range percentages correctly', function (): void {
     for ($i = 0; $i < 5; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 100.0,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 100.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i),
         ]);
     }
 
     for ($i = 0; $i < 3; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 160.0,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 160.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i + 5),
         ]);
     }
 
     for ($i = 0; $i < 2; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 60.0,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 60.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i + 8),
         ]);
     }
@@ -391,10 +391,10 @@ it('calculates time in range percentages correctly', function (): void {
 
 it('detects rising glucose trend', function (): void {
     for ($i = 0; $i < 10; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 90.0 + ($i * 5),
-            'glucose_reading_type' => GlucoseReadingType::Fasting,
+            'value' => 90.0 + ($i * 5),
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
             'measured_at' => now()->subDays(9 - $i),
         ]);
     }
@@ -417,10 +417,10 @@ it('detects rising glucose trend', function (): void {
 
 it('detects falling glucose trend', function (): void {
     for ($i = 0; $i < 10; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 140.0 - ($i * 5),
-            'glucose_reading_type' => GlucoseReadingType::Fasting,
+            'value' => 140.0 - ($i * 5),
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
             'measured_at' => now()->subDays(9 - $i),
         ]);
     }
@@ -433,10 +433,10 @@ it('detects falling glucose trend', function (): void {
 
 it('detects stable glucose trend', function (): void {
     for ($i = 0; $i < 10; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 95.0 + (($i % 2) * 2),
-            'glucose_reading_type' => GlucoseReadingType::Fasting,
+            'value' => 95.0 + (($i % 2) * 2),
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
             'measured_at' => now()->subDays(9 - $i),
         ]);
     }
@@ -447,37 +447,37 @@ it('detects stable glucose trend', function (): void {
 });
 
 it('analyzes time of day patterns correctly', function (): void {
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 90.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 90.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->setTime(8, 0)->subDays(1),
     ]);
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 100.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 100.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->setTime(9, 0)->subDays(2),
     ]);
 
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 120.0,
-        'glucose_reading_type' => GlucoseReadingType::Random,
+        'value' => 120.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
         'measured_at' => now()->setTime(14, 0)->subDays(1),
     ]);
 
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 110.0,
-        'glucose_reading_type' => GlucoseReadingType::PostMeal,
+        'value' => 110.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::PostMeal->value],
         'measured_at' => now()->setTime(19, 0)->subDays(1),
     ]);
 
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 85.0,
-        'glucose_reading_type' => GlucoseReadingType::Random,
+        'value' => 85.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
         'measured_at' => now()->setTime(23, 0)->subDays(1),
     ]);
 
@@ -493,28 +493,28 @@ it('analyzes time of day patterns correctly', function (): void {
 
 it('analyzes reading type frequency correctly', function (): void {
     for ($i = 0; $i < 5; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 95.0,
-            'glucose_reading_type' => GlucoseReadingType::Fasting,
+            'value' => 95.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
             'measured_at' => now()->subDays($i),
         ]);
     }
 
     for ($i = 0; $i < 3; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 130.0,
-            'glucose_reading_type' => GlucoseReadingType::PostMeal,
+            'value' => 130.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::PostMeal->value],
             'measured_at' => now()->subDays($i + 5),
         ]);
     }
 
     for ($i = 0; $i < 2; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 105.0,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 105.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i + 8),
         ]);
     }
@@ -532,10 +532,10 @@ it('calculates coefficient of variation correctly', function (): void {
     $values = [80, 90, 100, 110, 120];
 
     foreach ($values as $index => $value) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => (float) $value,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => (float) $value,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($index),
         ]);
     }
@@ -548,10 +548,10 @@ it('calculates coefficient of variation correctly', function (): void {
 
 it('classifies variability correctly', function (): void {
     for ($i = 0; $i < 10; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 95.0 + ($i * 0.5),
-            'glucose_reading_type' => GlucoseReadingType::Fasting,
+            'value' => 95.0 + ($i * 0.5),
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
             'measured_at' => now()->subDays($i),
         ]);
     }
@@ -563,19 +563,19 @@ it('classifies variability correctly', function (): void {
 
 it('correctly identifies hypoglycemia risk levels', function (): void {
     for ($i = 0; $i < 22; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 100.0,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 100.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i),
         ]);
     }
 
     for ($i = 0; $i < 3; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 65.0,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 65.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i + 22),
         ]);
     }
@@ -588,10 +588,10 @@ it('correctly identifies hypoglycemia risk levels', function (): void {
 
 it('uses actual days analyzed in insights', function (): void {
     for ($i = 0; $i < 5; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 95.0,
-            'glucose_reading_type' => GlucoseReadingType::Fasting,
+            'value' => 95.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
             'measured_at' => now()->subDays($i),
         ]);
     }
@@ -614,10 +614,10 @@ it('uses actual days analyzed in insights', function (): void {
 it('classifies moderate variability correctly', function (): void {
     $values = [45.0, 75.0, 100.0, 125.0, 155.0];
     foreach ($values as $index => $value) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => $value,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => $value,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($index),
         ]);
     }
@@ -630,10 +630,10 @@ it('classifies moderate variability correctly', function (): void {
 it('classifies high variability correctly', function (): void {
     $values = [30.0, 60.0, 100.0, 160.0, 200.0];
     foreach ($values as $index => $value) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => $value,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => $value,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($index),
         ]);
     }
@@ -644,10 +644,10 @@ it('classifies high variability correctly', function (): void {
 });
 
 it('generates insight when coefficient of variation is null', function (): void {
-    HealthEntry::factory()->create([
+    HealthSyncSample::factory()->bloodGlucose()->create([
         'user_id' => $this->user->id,
-        'glucose_value' => 100.0,
-        'glucose_reading_type' => GlucoseReadingType::Fasting,
+        'value' => 100.0,
+        'metadata' => ['glucose_reading_type' => GlucoseReadingType::Fasting->value],
         'measured_at' => now()->subDays(1),
     ]);
 
@@ -658,19 +658,19 @@ it('generates insight when coefficient of variation is null', function (): void 
 
 it('includes moderate hypoglycemia risk in insights', function (): void {
     for ($i = 0; $i < 28; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 100.0,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 100.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i),
         ]);
     }
 
     for ($i = 0; $i < 2; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 65.0,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 65.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i + 28),
         ]);
     }
@@ -692,19 +692,19 @@ it('includes moderate hypoglycemia risk in insights', function (): void {
 
 it('includes moderate hyperglycemia risk in insights', function (): void {
     for ($i = 0; $i < 7; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 100.0,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 100.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i),
         ]);
     }
 
     for ($i = 0; $i < 3; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 160.0,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 160.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i + 7),
         ]);
     }
@@ -726,19 +726,19 @@ it('includes moderate hyperglycemia risk in insights', function (): void {
 
 it('generates concern for low time in range', function (): void {
     for ($i = 0; $i < 6; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 160.0,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 160.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i),
         ]);
     }
 
     for ($i = 0; $i < 4; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 100.0,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 100.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i + 6),
         ]);
     }
@@ -758,10 +758,10 @@ it('generates concern for low time in range', function (): void {
 
 it('generates insight for falling trend with absolute slope', function (): void {
     for ($i = 0; $i < 10; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 120.0 - ($i * 2),
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 120.0 - ($i * 2),
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays(9 - $i),
         ]);
     }
@@ -783,19 +783,19 @@ it('generates insight for falling trend with absolute slope', function (): void 
 
 it('generates goal for addressing post-meal spikes when postMeal average exists', function (): void {
     for ($i = 0; $i < 5; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 95.0,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 95.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i * 2),
         ]);
     }
 
     for ($i = 0; $i < 5; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 155.0,
-            'glucose_reading_type' => GlucoseReadingType::PostMeal,
+            'value' => 155.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::PostMeal->value],
             'measured_at' => now()->subDays(($i * 2) + 1),
         ]);
     }
@@ -807,10 +807,10 @@ it('generates goal for addressing post-meal spikes when postMeal average exists'
 
 it('generates goal for addressing rising trend when slope is significant', function (): void {
     for ($i = 0; $i < 30; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 105.0 - ($i * 0.6),
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 105.0 - ($i * 0.6),
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i),
         ]);
     }
@@ -822,10 +822,10 @@ it('generates goal for addressing rising trend when slope is significant', funct
 
 it('generates well-controlled maintenance goal when glucose is optimal', function (): void {
     for ($i = 0; $i < 10; $i++) {
-        HealthEntry::factory()->create([
+        HealthSyncSample::factory()->bloodGlucose()->create([
             'user_id' => $this->user->id,
-            'glucose_value' => 100.0,
-            'glucose_reading_type' => GlucoseReadingType::Random,
+            'value' => 100.0,
+            'metadata' => ['glucose_reading_type' => GlucoseReadingType::Random->value],
             'measured_at' => now()->subDays($i),
         ]);
     }

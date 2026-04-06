@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\HealthEntry;
+use App\Models\HealthSyncSample;
 use App\Models\MealPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
@@ -41,7 +41,7 @@ it('starts meal plan workflow and creates meal plan with generating status', fun
 
     $user = User::factory()->create();
 
-    HealthEntry::factory()->count(5)->for($user)->create();
+    HealthSyncSample::factory()->bloodGlucose()->count(5)->for($user)->create();
 
     $response = actingAs($user)->post(route('meal-plans.regenerate'));
 

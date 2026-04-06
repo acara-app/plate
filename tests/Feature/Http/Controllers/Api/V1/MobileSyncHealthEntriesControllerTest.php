@@ -3,11 +3,8 @@
 declare(strict_types=1);
 
 use App\Enums\BloodType;
-use App\Enums\GlucoseReadingType;
-use App\Enums\HealthEntrySource;
 use App\Enums\HealthSyncType;
 use App\Enums\Sex;
-use App\Models\HealthEntry;
 use App\Models\HealthSyncSample;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
@@ -102,7 +99,7 @@ it('validates decrypted entry structure', function (): void {
         ->assertJsonValidationErrors(['entries.0.type', 'entries.0.date']);
 });
 
-it('syncs blood glucose to health entry with random reading type', function (): void {
+it('syncs blood glucose to health sync samples with random reading type', function (): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->paired()->create([
         'device_identifier' => 'test-uuid',
@@ -128,19 +125,21 @@ it('syncs blood glucose to health entry with random reading type', function (): 
         ->assertOk()
         ->assertJson([
             'message' => 'Synced successfully.',
-            'health_entries_created' => 1,
-            'health_entries_updated' => 0,
-            'samples_created' => 0,
+            'samples_created' => 1,
             'samples_updated' => 0,
         ]);
 
-    expect(HealthEntry::query()->where('user_id', $user->id)->first())
-        ->glucose_value->toBe(5.5)
-        ->glucose_reading_type->toBe(GlucoseReadingType::Random)
-        ->source->toBe(HealthEntrySource::MobileSync);
+    $sample = HealthSyncSample::query()->where('user_id', $user->id)->first();
+
+    expect($sample)
+        ->type_identifier->toBe('bloodGlucose')
+        ->value->toBe(5.5)
+        ->unit->toBe('mmol/L')
+        ->entry_source->value->toBe('mobile_sync')
+        ->metadata->toBe(['glucose_reading_type' => 'random']);
 });
 
-it('syncs blood pressure to a single health entry row', function (): void {
+it('syncs blood pressure to two health sync sample rows with shared group_id', function (): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->paired()->create([
         'device_identifier' => 'test-uuid',
@@ -170,22 +169,28 @@ it('syncs blood pressure to a single health entry row', function (): void {
         ])
         ->assertOk()
         ->assertJson([
-            'health_entries_created' => 1,
-            'health_entries_updated' => 1,
+            'samples_created' => 2,
+            'samples_updated' => 0,
         ]);
 
-    expect(HealthEntry::query()->where('user_id', $user->id)->count())->toBe(1);
+    expect(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(2);
 
-    $bp = HealthEntry::query()->where('user_id', $user->id)
-        ->where('sync_type', HealthSyncType::BloodPressure->value)
+    $systolic = HealthSyncSample::query()->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::BloodPressureSystolic->value)
         ->first();
 
-    expect($bp->blood_pressure_systolic)->toBe(120)
-        ->and($bp->blood_pressure_diastolic)->toBe(80)
-        ->and($bp->source)->toBe(HealthEntrySource::MobileSync);
+    $diastolic = HealthSyncSample::query()->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::BloodPressureDiastolic->value)
+        ->first();
+
+    expect($systolic->value)->toBe(120.0)
+        ->and($diastolic->value)->toBe(80.0)
+        ->and($systolic->entry_source->value)->toBe('mobile_sync')
+        ->and($systolic->group_id)->not->toBeNull()
+        ->and($systolic->group_id)->toBe($diastolic->group_id);
 });
 
-it('syncs weight to health entry', function (): void {
+it('syncs weight to health sync samples', function (): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->paired()->create([
         'device_identifier' => 'test-uuid',
@@ -208,13 +213,16 @@ it('syncs weight to health entry', function (): void {
             ], $encryptionKey),
         ])
         ->assertOk()
-        ->assertJson(['health_entries_created' => 1]);
+        ->assertJson(['samples_created' => 1]);
 
-    expect(HealthEntry::query()->where('user_id', $user->id)->first())
-        ->weight->toBe(75.5);
+    $sample = HealthSyncSample::query()->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::Weight->value)
+        ->first();
+
+    expect($sample->value)->toBe(75.5);
 });
 
-it('syncs macros to health entry', function (): void {
+it('syncs macros to health sync samples', function (): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->paired()->create([
         'device_identifier' => 'test-uuid',
@@ -254,35 +262,32 @@ it('syncs macros to health entry', function (): void {
                 ],
             ], $encryptionKey),
         ])
-        ->assertOk();
+        ->assertOk()
+        ->assertJson(['samples_created' => 4]);
 
-    $carbsEntry = HealthEntry::query()->where('user_id', $user->id)
-        ->where('sync_type', HealthSyncType::Carbohydrates->value)
-        ->where('measured_at', '2026-03-25 12:00:00')
+    $carbs = HealthSyncSample::query()->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::Carbohydrates->value)
         ->first();
 
-    $proteinEntry = HealthEntry::query()->where('user_id', $user->id)
-        ->where('sync_type', HealthSyncType::Protein->value)
-        ->where('measured_at', '2026-03-25 12:00:00')
+    $protein = HealthSyncSample::query()->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::Protein->value)
         ->first();
 
-    $fatEntry = HealthEntry::query()->where('user_id', $user->id)
-        ->where('sync_type', HealthSyncType::TotalFat->value)
-        ->where('measured_at', '2026-03-25 12:00:00')
+    $fat = HealthSyncSample::query()->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::TotalFat->value)
         ->first();
 
-    $caloriesEntry = HealthEntry::query()->where('user_id', $user->id)
-        ->where('sync_type', HealthSyncType::DietaryEnergy->value)
-        ->where('measured_at', '2026-03-25 12:00:00')
+    $calories = HealthSyncSample::query()->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::DietaryEnergy->value)
         ->first();
 
-    expect($carbsEntry->carbs_grams)->toBe('50.00');
-    expect($proteinEntry->protein_grams)->toBe('25.00');
-    expect($fatEntry->fat_grams)->toBe('15.00');
-    expect($caloriesEntry->calories)->toBe(450);
+    expect($carbs->value)->toBe(50.0)
+        ->and($protein->value)->toBe(25.0)
+        ->and($fat->value)->toBe(15.0)
+        ->and($calories->value)->toBe(450.0);
 });
 
-it('syncs exercise minutes to health entry', function (): void {
+it('syncs exercise minutes to health sync samples', function (): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->paired()->create([
         'device_identifier' => 'test-uuid',
@@ -310,26 +315,22 @@ it('syncs exercise minutes to health entry', function (): void {
                 ],
             ], $encryptionKey),
         ])
-        ->assertOk();
+        ->assertOk()
+        ->assertJson(['samples_created' => 2]);
 
-    $exercise = HealthEntry::query()->where('user_id', $user->id)
-        ->where('sync_type', HealthSyncType::ExerciseMinutes->value)
-        ->where('measured_at', '2026-03-25 14:00:00')
+    $exercise = HealthSyncSample::query()->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::ExerciseMinutes->value)
         ->first();
 
-    $workout = HealthEntry::query()->where('user_id', $user->id)
-        ->where('sync_type', HealthSyncType::Workouts->value)
-        ->where('measured_at', '2026-03-25 15:00:00')
+    $workout = HealthSyncSample::query()->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::Workouts->value)
         ->first();
 
-    expect($exercise->exercise_type)->toBe('exercise');
-    expect($exercise->exercise_duration_minutes)->toBe(30);
-
-    expect($workout->exercise_type)->toBe('workout');
-    expect($workout->exercise_duration_minutes)->toBe(45);
+    expect($exercise->value)->toBe(30.0)
+        ->and($workout->value)->toBe(45.0);
 });
 
-it('syncs unmapped types to health sync samples table', function (): void {
+it('syncs all types to health sync samples table', function (): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->paired()->create([
         'device_identifier' => 'test-uuid',
@@ -360,8 +361,6 @@ it('syncs unmapped types to health sync samples table', function (): void {
         ])
         ->assertOk()
         ->assertJson([
-            'health_entries_created' => 0,
-            'health_entries_updated' => 0,
             'samples_created' => 2,
             'samples_updated' => 0,
         ]);
@@ -429,7 +428,7 @@ it('upserts on duplicate user type measured_at', function (): void {
             ], $encryptionKey),
         ])
         ->assertOk()
-        ->assertJson(['health_entries_created' => 1]);
+        ->assertJson(['samples_created' => 1]);
 
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.v1.sync.health-entries'), [
@@ -445,12 +444,12 @@ it('upserts on duplicate user type measured_at', function (): void {
         ])
         ->assertOk()
         ->assertJson([
-            'health_entries_created' => 0,
-            'health_entries_updated' => 1,
+            'samples_created' => 0,
+            'samples_updated' => 1,
         ]);
 
-    expect(HealthEntry::query()->where('user_id', $user->id)->count())->toBe(1)
-        ->and(HealthEntry::query()->where('user_id', $user->id)->first()->glucose_value)->toBe(6.0);
+    expect(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(1)
+        ->and(HealthSyncSample::query()->where('user_id', $user->id)->first()->value)->toBe(6.0);
 });
 
 it('updates mobile sync device last_synced_at', function (): void {
@@ -577,7 +576,7 @@ it('rejects payload with invalid json structure', function (): void {
         ->assertUnprocessable();
 });
 
-it('updates existing vital entries on duplicate sync', function (): void {
+it('updates existing samples on duplicate sync', function (): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->paired()->create([
         'device_identifier' => 'test-uuid',
@@ -600,7 +599,7 @@ it('updates existing vital entries on duplicate sync', function (): void {
             ], $encryptionKey),
         ])
         ->assertOk()
-        ->assertJson(['health_entries_created' => 1]);
+        ->assertJson(['samples_created' => 1]);
 
     $this->withHeader('Authorization', 'Bearer '.$token)
         ->postJson(route('api.v1.sync.health-entries'), [
@@ -616,12 +615,12 @@ it('updates existing vital entries on duplicate sync', function (): void {
         ])
         ->assertOk()
         ->assertJson([
-            'health_entries_created' => 0,
-            'health_entries_updated' => 1,
+            'samples_created' => 0,
+            'samples_updated' => 1,
         ]);
 
-    expect(HealthEntry::query()->where('user_id', $user->id)->count())->toBe(1)
-        ->and(HealthEntry::query()->where('user_id', $user->id)->first()->weight)->toBe(76.0);
+    expect(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(1)
+        ->and(HealthSyncSample::query()->where('user_id', $user->id)->first()->value)->toBe(76.0);
 });
 
 it('updates existing unmapped samples on duplicate sync', function (): void {
@@ -702,7 +701,6 @@ it('syncs biologicalSex to user profile', function (): void {
         ->assertOk()
         ->assertJson([
             'profile_updated' => true,
-            'health_entries_created' => 0,
             'samples_created' => 0,
         ]);
 
@@ -772,7 +770,7 @@ it('syncs bloodType to user profile', function (): void {
     expect($user->profile->fresh()->blood_type)->toBe(BloodType::OPositive);
 });
 
-it('does not leak user characteristics to health entries or samples', function (): void {
+it('does not leak user characteristics to samples', function (): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->paired()->create([
         'device_identifier' => 'test-uuid',
@@ -793,15 +791,12 @@ it('does not leak user characteristics to health entries or samples', function (
         ])
         ->assertOk()
         ->assertJson([
-            'health_entries_created' => 0,
-            'health_entries_updated' => 0,
             'samples_created' => 0,
             'samples_updated' => 0,
             'profile_updated' => true,
         ]);
 
-    expect(HealthEntry::query()->where('user_id', $user->id)->count())->toBe(0)
-        ->and(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(0);
+    expect(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(0);
 });
 
 it('syncs biologicalSex other to user profile', function (): void {
@@ -904,7 +899,7 @@ it('ignores invalid HealthKit characteristic values', function (): void {
         ->assertJson(['profile_updated' => false]);
 });
 
-it('handles mixed health entries and sync samples', function (): void {
+it('handles mixed entry types all going to samples', function (): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->paired()->create([
         'device_identifier' => 'test-uuid',
@@ -946,9 +941,7 @@ it('handles mixed health entries and sync samples', function (): void {
         ])
         ->assertOk()
         ->assertJson([
-            'health_entries_created' => 2,
-            'health_entries_updated' => 0,
-            'samples_created' => 2,
+            'samples_created' => 4,
             'samples_updated' => 0,
         ]);
 });
