@@ -1005,3 +1005,44 @@ it('syncs without timezone for backward compatibility', function (): void {
 
     expect($sample->timezone)->toBeNull();
 });
+
+it('syncs medication dose event with camelCase metadata mapped to snake_case', function (): void {
+    $user = User::factory()->create();
+    $device = MobileSyncDevice::factory()->for($user)->paired()->create([
+        'device_identifier' => 'test-uuid',
+    ]);
+    $token = $user->createToken('test', ['sync:push'])->plainTextToken;
+
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
+    $this->withHeader('Authorization', 'Bearer '.$token)
+        ->postJson(route('api.v1.sync.health-entries'), [
+            'device_identifier' => 'test-uuid',
+            'encrypted_payload' => encryptSyncPayload([
+                [
+                    'type' => HealthSyncType::MedicationDoseEvent->value,
+                    'value' => 1.0,
+                    'unit' => 'tablet',
+                    'date' => '2026-04-06T09:00:00Z',
+                    'source' => 'iPhone Health',
+                    'metadata' => [
+                        'medicationName' => 'Aspirin',
+                        'logStatus' => 'taken',
+                    ],
+                ],
+            ], $encryptionKey),
+        ])
+        ->assertOk()
+        ->assertJson(['samples_created' => 1]);
+
+    $sample = HealthSyncSample::query()->where('user_id', $user->id)->first();
+
+    expect($sample)
+        ->type_identifier->toBe('medicationDoseEvent')
+        ->value->toBe(1.0)
+        ->metadata->toHaveKey('medication_name', 'Aspirin')
+        ->metadata->toHaveKey('log_status', 'taken')
+        ->metadata->not->toHaveKey('medicationName')
+        ->metadata->not->toHaveKey('logStatus');
+});

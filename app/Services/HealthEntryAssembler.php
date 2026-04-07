@@ -78,7 +78,7 @@ final readonly class HealthEntryAssembler
             HealthSyncType::BloodPressureDiastolic->value => $entry['blood_pressure_diastolic'] = (int) $sample->value,
             HealthSyncType::A1c->value => $entry['a1c_value'] = $sample->value,
             HealthSyncType::Insulin->value => $this->mapInsulin($sample, $metadata, $entry),
-            HealthSyncType::Medication->value => $this->mapMedication($metadata, $entry),
+            HealthSyncType::Medication->value, HealthSyncType::MedicationDoseEvent->value => $this->mapMedication($metadata, $entry),
             HealthSyncType::ExerciseMinutes->value, HealthSyncType::Workouts->value => $this->mapExercise($sample, $metadata, $entry),
             default => null,
         };

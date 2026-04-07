@@ -21,7 +21,7 @@ final readonly class SyncMobileHealthEntriesAction
     ) {}
 
     /**
-     * @param  array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null}>  $entries
+     * @param  array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null, metadata?: array<string, string>|null}>  $entries
      * @return array{samples_created: int, samples_updated: int, profile_updated: bool}
      */
     public function handle(User $user, MobileSyncDevice $device, array $entries, ?string $timezone = null): array
@@ -41,7 +41,7 @@ final readonly class SyncMobileHealthEntriesAction
     }
 
     /**
-     * @param  array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null}>  $entries
+     * @param  array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null, metadata?: array<string, string>|null}>  $entries
      * @return array{created: int, updated: int}
      */
     private function syncSamples(User $user, MobileSyncDevice $device, array $entries, ?string $timezone): array
@@ -83,11 +83,11 @@ final readonly class SyncMobileHealthEntriesAction
             /** @var string|null $source */
             $source = $entry['source'] ?? null;
 
-            $metadata = null;
+            $metadata = $entry['metadata'] ?? null;
             $syncType = HealthSyncType::tryFrom($entry['type']);
 
-            if ($syncType === HealthSyncType::BloodGlucose) {
-                $metadata = ['glucose_reading_type' => 'random'];
+            if ($syncType !== null) {
+                $metadata = $syncType->normalizeMetadata($metadata);
             }
 
             if (isset($cache[$key])) {
@@ -121,7 +121,7 @@ final readonly class SyncMobileHealthEntriesAction
     }
 
     /**
-     * @param  array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null}>  $entries
+     * @param  array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null, metadata?: array<string, string>|null}>  $entries
      */
     private function syncUserCharacteristics(User $user, array $entries): bool
     {
@@ -156,7 +156,7 @@ final readonly class SyncMobileHealthEntriesAction
     }
 
     /**
-     * @param  array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null}>  $entries
+     * @param  array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null, metadata?: array<string, string>|null}>  $entries
      * @return array<string, HealthSyncSample> Keyed by "type_identifier|measured_at"
      */
     private function preloadSamples(User $user, array $entries): array

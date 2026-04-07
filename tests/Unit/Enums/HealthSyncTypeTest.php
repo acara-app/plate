@@ -95,3 +95,31 @@ it('returns correct category for each type', function (HealthSyncType $type, str
     [HealthSyncType::BiologicalSex, 'profile'],
     [HealthSyncType::BloodPressure, 'vitals'],
 ]);
+
+it('normalizes blood glucose metadata with default reading type', function (): void {
+    $result = HealthSyncType::BloodGlucose->normalizeMetadata(null);
+
+    expect($result)->toBe(['glucose_reading_type' => 'random']);
+});
+
+it('normalizes medication dose event metadata from camelCase', function (): void {
+    $result = HealthSyncType::MedicationDoseEvent->normalizeMetadata([
+        'medicationName' => 'Aspirin',
+        'logStatus' => 'taken',
+    ]);
+
+    expect($result)->toBe([
+        'medication_name' => 'Aspirin',
+        'log_status' => 'taken',
+    ]);
+});
+
+it('returns metadata unchanged for types without normalization', function (): void {
+    $metadata = ['foo' => 'bar'];
+
+    expect(HealthSyncType::Weight->normalizeMetadata($metadata))->toBe($metadata);
+});
+
+it('returns null metadata unchanged for types without normalization', function (): void {
+    expect(HealthSyncType::Weight->normalizeMetadata(null))->toBeNull();
+});

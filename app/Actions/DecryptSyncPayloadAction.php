@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 final readonly class DecryptSyncPayloadAction
 {
     /**
-     * @return array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null}>
+     * @return array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null, metadata?: array<string, string>|null}>
      */
     public function handle(string $base64Payload, string $base64Key): array
     {
@@ -47,9 +47,11 @@ final readonly class DecryptSyncPayloadAction
             'entries.*.unit' => ['required', 'string', 'max:20'],
             'entries.*.date' => ['required', 'date'],
             'entries.*.source' => ['nullable', 'string', 'max:100'],
+            'entries.*.metadata' => ['nullable', 'array'],
+            'entries.*.metadata.*' => ['nullable', 'string', 'max:500'],
         ])->validate();
 
-        /** @var array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null}> $entries */
+        /** @var array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null, metadata?: array<string, string>|null}> $entries */
         $entries = $validated['entries'];
 
         return $entries;

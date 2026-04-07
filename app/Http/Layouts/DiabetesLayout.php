@@ -92,7 +92,7 @@ final readonly class DiabetesLayout
     {
         /** @var array<int, array{name: string, dosage: string, label: string}> */
         return $user->healthSyncSamples()
-            ->ofType(HealthSyncType::Medication)
+            ->whereIn('type_identifier', [HealthSyncType::Medication->value, HealthSyncType::MedicationDoseEvent->value])
             ->latest()
             ->take(20)
             ->get()
@@ -358,7 +358,7 @@ final readonly class DiabetesLayout
      */
     private static function calculateMedicationStats(Collection $samples): array
     {
-        $medSamples = $samples->filter(fn (HealthSyncSample $s): bool => $s->type_identifier === HealthSyncType::Medication->value);
+        $medSamples = $samples->filter(fn (HealthSyncSample $s): bool => in_array($s->type_identifier, [HealthSyncType::Medication->value, HealthSyncType::MedicationDoseEvent->value], true));
 
         /** @var array<int, string> $uniqueMedications */
         $uniqueMedications = $medSamples
