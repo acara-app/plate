@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\DataObjects\MobileSync;
 
+use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\CamelCaseMapper;
 
+#[MapInputName(CamelCaseMapper::class)]
 final class BloodGlucoseMetadata extends Data
 {
     public function __construct(
@@ -18,16 +21,9 @@ final class BloodGlucoseMetadata extends Data
      */
     public static function normalize(?array $raw): array
     {
-        /** @var array<string, mixed> $source */
-        $source = $raw ?? [];
+        /** @var array<string, mixed> $result */
+        $result = self::from($raw ?? [])->toArray();
 
-        $instance = self::from($source);
-
-        /** @var array<string, mixed> $normalized */
-        $normalized = $instance->toArray();
-
-        $unknown = array_diff_key($source, array_flip(['glucoseReadingType', 'glucose_reading_type']));
-
-        return [...$unknown, ...$normalized];
+        return $result;
     }
 }

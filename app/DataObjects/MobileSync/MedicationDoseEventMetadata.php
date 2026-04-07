@@ -26,15 +26,12 @@ final class MedicationDoseEventMetadata extends Data
             return null;
         }
 
-        $instance = self::from($raw);
+        /** @var array<string, mixed> $result */
+        $result = array_filter(
+            self::from($raw)->toArray(),
+            fn (mixed $value): bool => $value !== null,
+        );
 
-        /** @var array<string, mixed> $normalized */
-        $normalized = array_filter($instance->toArray(), fn (mixed $v): bool => $v !== null);
-
-        $unknown = array_diff_key($raw, array_flip(['medicationName', 'logStatus']));
-
-        $merged = [...$unknown, ...$normalized];
-
-        return $merged !== [] ? $merged : null;
+        return $result !== [] ? $result : null;
     }
 }

@@ -50,7 +50,7 @@ it('filters null values from output', function (): void {
         ->not->toHaveKey('log_status');
 });
 
-it('preserves unknown keys from raw input', function (): void {
+it('drops unknown keys from raw input', function (): void {
     $result = MedicationDoseEventMetadata::normalize([
         'medicationName' => 'Aspirin',
         'logStatus' => 'taken',
@@ -58,9 +58,8 @@ it('preserves unknown keys from raw input', function (): void {
     ]);
 
     expect($result)
-        ->toHaveKey('medication_name', 'Aspirin')
-        ->toHaveKey('log_status', 'taken')
-        ->toHaveKey('someOtherKey', 'value')
-        ->not->toHaveKey('medicationName')
-        ->not->toHaveKey('logStatus');
+        ->toBe([
+            'medication_name' => 'Aspirin',
+            'log_status' => 'taken',
+        ]);
 });

@@ -16,10 +16,14 @@ it('normalizes empty array to default glucose reading type', function (): void {
     ]);
 });
 
-it('preserves extra keys from raw metadata', function (): void {
+it('drops unknown keys from raw metadata', function (): void {
     $result = BloodGlucoseMetadata::normalize(['someKey' => 'someValue']);
 
-    expect($result)
-        ->toHaveKey('glucose_reading_type', 'random')
-        ->toHaveKey('someKey', 'someValue');
+    expect($result)->toBe(['glucose_reading_type' => 'random']);
+});
+
+it('accepts provided camelCase glucose reading type', function (): void {
+    $result = BloodGlucoseMetadata::normalize(['glucoseReadingType' => 'fasting']);
+
+    expect($result)->toBe(['glucose_reading_type' => 'fasting']);
 });
