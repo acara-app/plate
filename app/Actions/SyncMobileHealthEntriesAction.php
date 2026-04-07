@@ -90,6 +90,24 @@ final readonly class SyncMobileHealthEntriesAction
                 $metadata = $syncType->normalizeMetadata($metadata);
             }
 
+            if ($syncType === HealthSyncType::Medication) {
+                HealthSyncSample::query()->create([
+                    'user_id' => $user->id,
+                    'mobile_sync_device_id' => $device->id,
+                    'type_identifier' => HealthSyncType::Medication->value,
+                    'value' => (float) $entry['value'],
+                    'unit' => $entry['unit'],
+                    'measured_at' => $measuredAt,
+                    'source' => $source,
+                    'entry_source' => HealthEntrySource::MobileSync,
+                    'timezone' => $timezone,
+                    'metadata' => $metadata,
+                ]);
+                $created++;
+
+                continue;
+            }
+
             if (isset($cache[$key])) {
                 $cache[$key]->update([
                     'value' => (float) $entry['value'],

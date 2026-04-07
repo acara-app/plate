@@ -6,6 +6,7 @@ namespace App\Enums;
 
 use App\DataObjects\MobileSync\BloodGlucoseMetadata;
 use App\DataObjects\MobileSync\MedicationDoseEventMetadata;
+use App\DataObjects\MobileSync\MedicationMetadata;
 
 enum HealthSyncType: string
 {
@@ -102,6 +103,7 @@ enum HealthSyncType: string
     {
         return match ($this) {
             self::BloodGlucose => BloodGlucoseMetadata::normalize($metadata),
+            self::Medication => MedicationMetadata::normalize($metadata),
             self::MedicationDoseEvent => MedicationDoseEventMetadata::normalize($metadata),
             default => $metadata,
         };

@@ -1046,3 +1046,125 @@ it('syncs medication dose event with camelCase metadata mapped to snake_case', f
         ->metadata->not->toHaveKey('medicationName')
         ->metadata->not->toHaveKey('logStatus');
 });
+
+it('syncs a medication library entry with camelCase metadata normalized to snake_case', function (): void {
+    $user = User::factory()->create();
+    $device = MobileSyncDevice::factory()->for($user)->paired()->create([
+        'device_identifier' => 'test-uuid',
+    ]);
+    $token = $user->createToken('test', ['sync:push'])->plainTextToken;
+
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
+    $this->withHeader('Authorization', 'Bearer '.$token)
+        ->postJson(route('api.v1.sync.health-entries'), [
+            'device_identifier' => 'test-uuid',
+            'encrypted_payload' => encryptSyncPayload([
+                [
+                    'type' => HealthSyncType::Medication->value,
+                    'value' => 1.0,
+                    'unit' => 'pill',
+                    'date' => '2026-04-07T15:30:45Z',
+                    'source' => 'Apple Health',
+                    'metadata' => [
+                        'name' => 'Metformin 500mg',
+                        'displayText' => 'Metformin Hydrochloride 500 mg',
+                        'form' => 'pill',
+                        'hasSchedule' => 'true',
+                        'isArchived' => 'false',
+                    ],
+                ],
+            ], $encryptionKey),
+        ])
+        ->assertOk()
+        ->assertJson(['samples_created' => 1]);
+
+    $sample = HealthSyncSample::query()->where('user_id', $user->id)->first();
+
+    expect($sample)
+        ->type_identifier->toBe('medication')
+        ->value->toBe(1.0)
+        ->unit->toBe('pill')
+        ->metadata->toHaveKey('name', 'Metformin 500mg')
+        ->metadata->toHaveKey('display_text', 'Metformin Hydrochloride 500 mg')
+        ->metadata->toHaveKey('form', 'pill')
+        ->metadata->toHaveKey('has_schedule', 'true')
+        ->metadata->toHaveKey('is_archived', 'false')
+        ->metadata->not->toHaveKey('displayText')
+        ->metadata->not->toHaveKey('hasSchedule')
+        ->metadata->not->toHaveKey('isArchived');
+});
+
+it('syncs multiple medications with the same timestamp without collision', function (): void {
+    $user = User::factory()->create();
+    $device = MobileSyncDevice::factory()->for($user)->paired()->create([
+        'device_identifier' => 'test-uuid',
+    ]);
+    $token = $user->createToken('test', ['sync:push'])->plainTextToken;
+
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
+    $sharedDate = '2026-04-07T15:30:45Z';
+
+    $this->withHeader('Authorization', 'Bearer '.$token)
+        ->postJson(route('api.v1.sync.health-entries'), [
+            'device_identifier' => 'test-uuid',
+            'encrypted_payload' => encryptSyncPayload([
+                [
+                    'type' => HealthSyncType::Medication->value,
+                    'value' => 1.0,
+                    'unit' => 'pill',
+                    'date' => $sharedDate,
+                    'source' => 'Apple Health',
+                    'metadata' => [
+                        'displayText' => 'Metformin 500 mg',
+                        'name' => 'Metformin',
+                        'form' => 'pill',
+                    ],
+                ],
+                [
+                    'type' => HealthSyncType::Medication->value,
+                    'value' => 1.0,
+                    'unit' => 'tablet',
+                    'date' => $sharedDate,
+                    'source' => 'Apple Health',
+                    'metadata' => [
+                        'displayText' => 'Lisinopril 10 mg',
+                        'name' => 'Lisinopril',
+                        'form' => 'tablet',
+                    ],
+                ],
+                [
+                    'type' => HealthSyncType::Medication->value,
+                    'value' => 1.0,
+                    'unit' => 'pill',
+                    'date' => $sharedDate,
+                    'source' => 'Apple Health',
+                    'metadata' => [
+                        'displayText' => 'Atorvastatin 20 mg',
+                        'name' => 'Atorvastatin',
+                        'form' => 'pill',
+                    ],
+                ],
+            ], $encryptionKey),
+        ])
+        ->assertOk()
+        ->assertJson(['samples_created' => 3]);
+
+    $samples = HealthSyncSample::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::Medication->value)
+        ->get();
+
+    expect($samples)->toHaveCount(3);
+
+    $displayTexts = $samples
+        ->map(fn (HealthSyncSample $s): string => (string) ($s->metadata['display_text'] ?? ''))
+        ->sort()
+        ->values()
+        ->all();
+
+    expect($displayTexts)->toBe(['Atorvastatin 20 mg', 'Lisinopril 10 mg', 'Metformin 500 mg']);
+});
