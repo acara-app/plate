@@ -27,7 +27,6 @@ class extends Component
 
     public function mount(): void
     {
-        // Ensure calories is a valid level
         if (! in_array($this->calories, $this->validCalorieLevels, true)) {
             $this->calories = 2000;
         }
@@ -51,11 +50,7 @@ class extends Component
     #[Computed]
     public function servingSizes(): Illuminate\Database\Eloquent\Collection
     {
-        return Cache::remember('usda-daily-serving-sizes', 3600, fn () => Content::query()
-            ->ofType(ContentType::UsdaDailyServingSize)
-            ->published()
-            ->get()
-        );
+        return $this->rememberCollection('usda-daily-serving-sizes', ContentType::UsdaDailyServingSize);
     }
 
     /**
@@ -64,11 +59,7 @@ class extends Component
     #[Computed]
     public function sugarLimits(): Illuminate\Database\Eloquent\Collection
     {
-        return Cache::remember('usda-sugar-limits', 3600, fn () => Content::query()
-            ->ofType(ContentType::UsdaSugarLimit)
-            ->published()
-            ->get()
-        );
+        return $this->rememberCollection('usda-sugar-limits', ContentType::UsdaSugarLimit);
     }
 
     /**
@@ -110,15 +101,12 @@ class extends Component
             $max = (float) ($servingData['max'] ?? 0);
             $adjusted = false;
 
-            // Apply low-carb adjustments
             if ($this->lowCarbMode) {
                 if ($foodGroup === 'Whole Grains') {
-                    // Reduce grains by 50%
                     $min = round($min * 0.5, 2);
                     $max = round($max * 0.5, 2);
                     $adjusted = true;
                 } elseif ($foodGroup === 'Protein Foods' || $foodGroup === 'Vegetables') {
-                    // Increase protein and vegetables by 25%
                     $min = round($min * 1.25, 2);
                     $max = round($max * 1.25, 2);
                     $adjusted = true;
@@ -137,7 +125,6 @@ class extends Component
             ];
         }
 
-        // Ensure consistent ordering
         $order = ['Protein Foods', 'Dairy', 'Vegetables', 'Fruits', 'Whole Grains', 'Healthy Fats'];
         $ordered = [];
         foreach ($order as $group) {
@@ -181,20 +168,33 @@ class extends Component
             ];
         }
 
-        // Sort by sugar limit (highest first for visual impact)
         uasort($data, fn ($a, $b) => $b['limit'] <=> $a['limit']);
 
         return $data;
     }
 
-    /**
-     * Get the progress percentage for visualization (based on max 8 servings scale)
-     */
     public function getProgressPercentage(float $value): int
     {
         $maxScale = 8;
 
         return (int) min(100, ($value / $maxScale) * 100);
+    }
+
+    private function rememberCollection(string $key, ContentType $type): Illuminate\Database\Eloquent\Collection
+    {
+        $result = Cache::remember($key, 3600, fn () => Content::query()
+            ->ofType($type)
+            ->published()
+            ->get()
+        );
+
+        if (! $result instanceof Illuminate\Database\Eloquent\Collection) {
+            Cache::forget($key);
+
+            return Content::query()->ofType($type)->published()->get();
+        }
+
+        return $result;
     }
 
     private function getUnitForGroup(string $group): string
