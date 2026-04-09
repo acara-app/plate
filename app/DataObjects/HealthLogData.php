@@ -332,6 +332,14 @@ final class HealthLogData extends Data
             ];
         }
 
+        if ($samples === []) {
+            $samples[] = [
+                'type_identifier' => HealthSyncType::DietaryEnergy->value,
+                'value' => 0,
+                'unit' => HealthSyncType::DietaryEnergy->unit(),
+            ];
+        }
+
         return $samples;
     }
 

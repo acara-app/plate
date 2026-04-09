@@ -478,6 +478,29 @@ test('toSampleArrays returns only BP samples when only blood pressure is provide
         ->and($samples[1]['value'])->toBe(80);
 });
 
+test('toSampleArrays returns fallback dietary energy sample for food with no macros', function (): void {
+    $data = new HealthLogData(
+        isHealthData: true,
+        logType: HealthEntryType::Food,
+        notes: 'apple',
+    );
+
+    $samples = $data->toSampleArrays();
+
+    expect($samples)->toHaveCount(1)
+        ->and($samples[0]['type_identifier'])->toBe('dietaryEnergy')
+        ->and($samples[0]['value'])->toBe(0);
+});
+
+test('toSampleArrays returns empty for vitals with no data', function (): void {
+    $data = new HealthLogData(
+        isHealthData: true,
+        logType: HealthEntryType::Vitals,
+    );
+
+    expect($data->toSampleArrays())->toBe([]);
+});
+
 test('fromParsedArray handles null string values', function (): void {
     $data = HealthLogData::fromParsedArray([
         'is_health_data' => true,

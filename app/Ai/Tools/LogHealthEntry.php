@@ -13,6 +13,7 @@ use App\Enums\InsulinType;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
+use InvalidArgumentException;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
@@ -45,8 +46,15 @@ final readonly class LogHealthEntry implements Tool
             ['is_health_data' => true],
         ));
 
-        $action = resolve(RecordHealthSampleAction::class);
-        $sample = $action->handle($healthData, $user, HealthEntrySource::Chat);
+        try {
+            $action = resolve(RecordHealthSampleAction::class);
+            $sample = $action->handle($healthData, $user, HealthEntrySource::Chat);
+        } catch (InvalidArgumentException $e) {
+            return (string) json_encode([
+                'error' => $e->getMessage(),
+                'hint' => 'Ask the user for specific values (e.g. glucose reading, weight, blood pressure) before logging.',
+            ]);
+        }
 
         return (string) json_encode([
             'success' => true,

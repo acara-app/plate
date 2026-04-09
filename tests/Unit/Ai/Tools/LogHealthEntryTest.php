@@ -146,6 +146,45 @@ it('logs an exercise entry', function (): void {
     expect($sample->metadata['exercise_type'])->toBe('walking');
 });
 
+it('logs a food entry with only notes and no macros', function (): void {
+    $user = User::factory()->create();
+    Auth::login($user);
+
+    $tool = new LogHealthEntry;
+    $request = new Request([
+        'log_type' => 'food',
+        'notes' => 'apple',
+    ]);
+
+    $result = json_decode($tool->handle($request), true);
+
+    expect($result)->toHaveKey('success', true);
+
+    $sample = HealthSyncSample::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::DietaryEnergy->value)
+        ->first();
+
+    expect($sample->value)->toBe(0.0);
+    expect($sample->notes)->toBe('apple');
+});
+
+it('returns error when vitals entry has no data', function (): void {
+    $user = User::factory()->create();
+    Auth::login($user);
+
+    $tool = new LogHealthEntry;
+    $request = new Request([
+        'log_type' => 'vitals',
+    ]);
+
+    $result = json_decode($tool->handle($request), true);
+
+    expect($result)
+        ->toHaveKey('error')
+        ->toHaveKey('hint');
+});
+
 it('logs a medication entry', function (): void {
     $user = User::factory()->create();
     Auth::login($user);
