@@ -49,9 +49,9 @@ final readonly class LogHealthEntry implements Tool
         try {
             $action = resolve(RecordHealthSampleAction::class);
             $sample = $action->handle($healthData, $user, HealthEntrySource::Chat);
-        } catch (InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $invalidArgumentException) {
             return (string) json_encode([
-                'error' => $e->getMessage(),
+                'error' => $invalidArgumentException->getMessage(),
                 'hint' => 'Ask the user for specific values (e.g. glucose reading, weight, blood pressure) before logging.',
             ]);
         }

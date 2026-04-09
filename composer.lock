@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aaa5494d651d3ec03ebc2bf53e8f9721",
+    "content-hash": "84fd7319a3c1f74064398922a7d4a5a5",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -393,16 +393,16 @@
         },
         {
             "name": "defstudio/telegraph",
-            "version": "dev-l13-compatibility",
+            "version": "v1.70.2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/laravel-shift/telegraph.git",
-                "reference": "aa3f6b02ff557f32488b32c4c93d149404b9be17"
+                "url": "https://github.com/defstudio/telegraph.git",
+                "reference": "67add137a23b4e1abc98f01c6b6f97eb09af3832"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel-shift/telegraph/zipball/aa3f6b02ff557f32488b32c4c93d149404b9be17",
-                "reference": "aa3f6b02ff557f32488b32c4c93d149404b9be17",
+                "url": "https://api.github.com/repos/defstudio/telegraph/zipball/67add137a23b4e1abc98f01c6b6f97eb09af3832",
+                "reference": "67add137a23b4e1abc98f01c6b6f97eb09af3832",
                 "shasum": ""
             },
             "require": {
@@ -433,12 +433,12 @@
             "type": "library",
             "extra": {
                 "laravel": {
-                    "providers": [
-                        "DefStudio\\Telegraph\\TelegraphServiceProvider"
-                    ],
                     "aliases": {
                         "Telegraph": "DefStudio\\Telegraph\\Facades\\Telegraph"
-                    }
+                    },
+                    "providers": [
+                        "DefStudio\\Telegraph\\TelegraphServiceProvider"
+                    ]
                 }
             },
             "autoload": {
@@ -447,44 +447,7 @@
                     "DefStudio\\Telegraph\\Database\\Factories\\": "database/factories"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "DefStudio\\Telegraph\\Tests\\": "tests"
-                }
-            },
-            "scripts": {
-                "x-ray": [
-                    "vendor/bin/x-ray ."
-                ],
-                "lint": [
-                    "set PHP_CS_FIXER_IGNORE_ENV=1 && php vendor/bin/php-cs-fixer fix -v"
-                ],
-                "test:lint": [
-                    "set PHP_CS_FIXER_IGNORE_ENV=1 && php vendor/bin/php-cs-fixer fix -v --dry-run"
-                ],
-                "test:types": [
-                    "vendor/bin/phpstan analyse --ansi --memory-limit=-1"
-                ],
-                "test:unit": [
-                    "vendor/bin/pest --colors=always --exclude-group=sandbox"
-                ],
-                "test:sandbox": [
-                    "vendor/bin/pest --colors=always --group=sandbox"
-                ],
-                "test": [
-                    "@test:lint",
-                    "@test:types",
-                    "@test:unit",
-                    "@test:sandbox",
-                    "@x-ray"
-                ],
-                "update:snapshots": [
-                    "vendor/bin/pest --colors=always -d --update-snapshots"
-                ],
-                "coverage": [
-                    "@test:unit --coverage"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -503,23 +466,24 @@
                 "telegraph"
             ],
             "support": {
-                "source": "https://github.com/laravel-shift/telegraph/tree/l13-compatibility"
+                "issues": "https://github.com/defstudio/telegraph/issues",
+                "source": "https://github.com/defstudio/telegraph/tree/v1.70.2"
             },
             "funding": [
                 {
-                    "type": "github",
-                    "url": "https://github.com/fabio-ivona"
+                    "url": "https://paypal.me/defstudiosrl",
+                    "type": "custom"
                 },
                 {
-                    "type": "github",
-                    "url": "https://github.com/defstudio"
+                    "url": "https://github.com/defstudio",
+                    "type": "github"
                 },
                 {
-                    "type": "custom",
-                    "url": "https://paypal.me/defstudiosrl"
+                    "url": "https://github.com/fabio-ivona",
+                    "type": "github"
                 }
             ],
-            "time": "2026-03-05T13:31:39+00:00"
+            "time": "2026-04-02T11:33:31+00:00"
         },
         {
             "name": "dflydev/dot-access-data",
@@ -16276,17 +16240,9 @@
             "time": "2025-12-05T16:38:02+00:00"
         }
     ],
-    "aliases": [
-        {
-            "package": "defstudio/telegraph",
-            "version": "dev-l13-compatibility",
-            "alias": "1.70.2",
-            "alias_normalized": "1.70.2.0"
-        }
-    ],
+    "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "defstudio/telegraph": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": true,

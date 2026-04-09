@@ -8,15 +8,9 @@
         "framework"
     ],
     "license": "MIT",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/laravel-shift/telegraph.git"
-        }
-    ],
     "require": {
         "php": "^8.4 || ^8.5",
-        "defstudio/telegraph": "dev-l13-compatibility as 1.70.2",
+        "defstudio/telegraph": "^1.70.2",
         "inertiajs/inertia-laravel": "^3.0.1",
         "laravel-workflow/laravel-workflow": "^1.0.72",
         "laravel-workflow/waterline": "^1.0.15",
