@@ -9,7 +9,7 @@ use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
 use App\Enums\HealthSyncType;
 use App\Enums\InsulinType;
-use Carbon\CarbonInterface;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Date;
 use Spatie\LaravelData\Data;
 
@@ -35,7 +35,7 @@ final class HealthLogData extends Data
         public ?float $a1cValue = null,
         public ?string $exerciseType = null,
         public ?int $exerciseDurationMinutes = null,
-        public ?CarbonInterface $measuredAt = null,
+        public ?Carbon $measuredAt = null,
         public ?string $notes = null,
     ) {}
 
@@ -130,7 +130,7 @@ final class HealthLogData extends Data
         return is_string($value) ? $value : (is_scalar($value) ? (string) $value : null);
     }
 
-    private static function toDateTime(mixed $value): ?CarbonInterface
+    private static function toDateTime(mixed $value): ?Carbon
     {
         $string = self::toNullableString($value);
 
