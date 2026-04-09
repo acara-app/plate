@@ -53,7 +53,7 @@ final readonly class CreateMealPlan implements Tool
 
             return (string) json_encode([
                 'success' => true,
-                'message' => sprintf('Your %d-day meal plan is now being generated. View it here: [Meal Plans](%s)', $totalDays, $mealPlansUrl),
+                'message' => sprintf('Your %d-day meal plan is now being generated. View it here: [Meal Plans](%s) %s', $totalDays, $mealPlansUrl, $mealPlansUrl),
                 'total_days' => $totalDays,
                 'requested_days' => $requestedDays,
                 'was_capped' => $wasCapped,
