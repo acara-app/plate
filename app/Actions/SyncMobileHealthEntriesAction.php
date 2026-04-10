@@ -196,6 +196,7 @@ final readonly class SyncMobileHealthEntriesAction
             if ($syncType === null) {
                 continue;
             }
+
             if (! $syncType->isUserCharacteristic()) {
                 continue;
             }
