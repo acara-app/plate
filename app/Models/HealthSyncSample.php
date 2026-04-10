@@ -21,13 +21,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $type_identifier
  * @property float $value
  * @property string $unit
+ * @property string|null $original_unit
  * @property CarbonInterface $measured_at
+ * @property CarbonInterface|null $ended_at
  * @property string|null $source
  * @property HealthEntrySource|null $entry_source
  * @property string|null $timezone
  * @property array<string, mixed>|null $metadata
  * @property string|null $notes
  * @property string|null $group_id
+ * @property string|null $sample_uuid
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
  * @property-read User $user
@@ -44,13 +47,16 @@ final class HealthSyncSample extends Model
         'type_identifier',
         'value',
         'unit',
+        'original_unit',
         'measured_at',
+        'ended_at',
         'source',
         'entry_source',
         'timezone',
         'metadata',
         'notes',
         'group_id',
+        'sample_uuid',
     ];
 
     public static function categoryFor(string $typeIdentifier): string
@@ -104,6 +110,7 @@ final class HealthSyncSample extends Model
         return [
             'value' => 'float',
             'measured_at' => 'datetime',
+            'ended_at' => 'datetime',
             'metadata' => 'array',
             'entry_source' => HealthEntrySource::class,
         ];

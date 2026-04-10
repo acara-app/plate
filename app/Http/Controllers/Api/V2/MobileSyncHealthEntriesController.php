@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V2;
 
 use App\Actions\DecryptSyncPayloadAction;
 use App\Actions\SyncMobileHealthEntriesAction;
+use App\Actions\SyncSleepEventsAction;
 use App\Actions\UpdateUserTimezoneAction;
 use App\Http\Requests\Api\V1\StoreMobileSyncHealthEntriesRequest;
 use App\Models\MobileSyncDevice;
@@ -18,6 +19,7 @@ final readonly class MobileSyncHealthEntriesController
     public function __construct(
         private DecryptSyncPayloadAction $decryptPayloadAction,
         private SyncMobileHealthEntriesAction $syncHealthEntriesAction,
+        private SyncSleepEventsAction $syncSleepEventsAction,
         private UpdateUserTimezoneAction $updateTimezoneAction,
     ) {}
 
@@ -49,12 +51,22 @@ final readonly class MobileSyncHealthEntriesController
 
         $payload = $this->decryptPayloadAction->handle($encryptedPayload, $device->encryption_key);
 
-        $result = $this->syncHealthEntriesAction->handle(
+        $sampleResult = $this->syncHealthEntriesAction->handle(
             user: $user,
             device: $device,
             entries: $payload->entries,
             timezone: $timezone,
         );
+
+        $sleepResult = ['created' => 0, 'updated' => 0];
+
+        if ($payload->sleep_events !== []) {
+            $sleepResult = $this->syncSleepEventsAction->handle(
+                user: $user,
+                events: $payload->sleep_events,
+                timezone: $timezone,
+            );
+        }
 
         if (is_string($timezone)) {
             $this->updateTimezoneAction->handle($user, $timezone);
@@ -62,10 +74,12 @@ final readonly class MobileSyncHealthEntriesController
 
         return response()->json([
             'message' => 'Synced successfully.',
-            'samples_created' => $result['samples_created'],
-            'samples_updated' => $result['samples_updated'],
-            'samples_dropped' => $result['samples_dropped'],
-            'profile_updated' => $result['profile_updated'],
+            'samples_created' => $sampleResult['samples_created'],
+            'samples_updated' => $sampleResult['samples_updated'],
+            'samples_dropped' => $sampleResult['samples_dropped'],
+            'sleep_events_created' => $sleepResult['created'],
+            'sleep_events_updated' => $sleepResult['updated'],
+            'profile_updated' => $sampleResult['profile_updated'],
         ]);
     }
 }

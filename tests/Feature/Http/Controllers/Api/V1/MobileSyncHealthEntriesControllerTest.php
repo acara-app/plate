@@ -133,8 +133,9 @@ it('syncs blood glucose to health sync samples with random reading type', functi
 
     expect($sample)
         ->type_identifier->toBe('bloodGlucose')
-        ->value->toBe(5.5)
-        ->unit->toBe('mmol/L')
+        ->value->toBe(round(5.5 * 18.0182, 4))
+        ->unit->toBe('mg/dL')
+        ->original_unit->toBe('mmol/L')
         ->entry_source->value->toBe('mobile_sync')
         ->metadata->toBe(['glucose_reading_type' => 'random']);
 });
@@ -449,7 +450,7 @@ it('upserts on duplicate user type measured_at', function (): void {
         ]);
 
     expect(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(1)
-        ->and(HealthSyncSample::query()->where('user_id', $user->id)->first()->value)->toBe(6.0);
+        ->and(HealthSyncSample::query()->where('user_id', $user->id)->first()->value)->toBe(round(6.0 * 18.0182, 4));
 });
 
 it('updates mobile sync device last_synced_at', function (): void {

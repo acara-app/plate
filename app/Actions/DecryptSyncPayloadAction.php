@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\DataObjects\MobileSync\DecryptedSyncPayloadData;
 use Illuminate\Support\Facades\Validator;
 
 final readonly class DecryptSyncPayloadAction
 {
-    /**
-     * @return array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null, metadata?: array<string, string>|null}>
-     */
-    public function handle(string $base64Payload, string $base64Key): array
+    public function handle(string $base64Payload, string $base64Key): DecryptedSyncPayloadData
     {
         $payload = base64_decode($base64Payload, true);
 
@@ -41,7 +39,7 @@ final readonly class DecryptSyncPayloadAction
         abort_unless(is_array($data), 422, 'Decrypted payload has an invalid structure.');
 
         $validated = Validator::make($data, [
-            'entries' => ['required', 'array', 'min:1', 'max:1000'],
+            'entries' => ['present', 'array', 'max:1000'],
             'entries.*.type' => ['required', 'string', 'max:100'],
             'entries.*.value' => ['required', 'numeric'],
             'entries.*.unit' => ['required', 'string', 'max:20'],
@@ -49,11 +47,17 @@ final readonly class DecryptSyncPayloadAction
             'entries.*.source' => ['nullable', 'string', 'max:100'],
             'entries.*.metadata' => ['nullable', 'array'],
             'entries.*.metadata.*' => ['nullable', 'string', 'max:500'],
+            'entries.*.sample_uuid' => ['nullable', 'string', 'max:36'],
+            'entries.*.ended_at' => ['nullable', 'date'],
+            'sleep_events' => ['sometimes', 'array', 'max:500'],
+            'sleep_events.*.type' => ['required_with:sleep_events', 'string', 'max:50'],
+            'sleep_events.*.stage' => ['required_with:sleep_events', 'string', 'max:24'],
+            'sleep_events.*.started_at' => ['required_with:sleep_events', 'date'],
+            'sleep_events.*.ended_at' => ['required_with:sleep_events', 'date'],
+            'sleep_events.*.source' => ['nullable', 'string', 'max:100'],
+            'sleep_events.*.sample_uuid' => ['nullable', 'string', 'max:36'],
         ])->validate();
 
-        /** @var array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null, metadata?: array<string, string>|null}> $entries */
-        $entries = $validated['entries'];
-
-        return $entries;
+        return DecryptedSyncPayloadData::from($validated);
     }
 }

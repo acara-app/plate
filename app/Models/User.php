@@ -42,6 +42,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read Collection<int, MealPlan> $mealPlans
  * @property-read bool $is_onboarded
  * @property-read CarbonInterface|null $accepted_disclaimer_at
+ * @property-read Collection<int, HealthDailyAggregate> $healthDailyAggregates
  * @property-read Collection<int, HealthSyncSample> $healthSyncSamples
  * @property-read bool $has_meal_plan
  */
@@ -152,6 +153,29 @@ final class User extends Authenticatable implements MustVerifyEmail
     public function healthSyncSamples(): HasMany
     {
         return $this->hasMany(HealthSyncSample::class);
+    }
+
+    /**
+     * @return HasMany<HealthDailyAggregate, $this>
+     */
+    public function healthDailyAggregates(): HasMany
+    {
+        return $this->hasMany(HealthDailyAggregate::class);
+    }
+
+    /**
+     * @return HasMany<SleepSession, $this>
+     */
+    public function sleepSessions(): HasMany
+    {
+        return $this->hasMany(SleepSession::class);
+    }
+
+    public function resolveTimezone(): string
+    {
+        $tz = $this->getAttributeValue('timezone');
+
+        return is_string($tz) && $tz !== '' ? $tz : 'UTC';
     }
 
     public function hasActiveSubscription(): bool

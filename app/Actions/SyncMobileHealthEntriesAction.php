@@ -4,25 +4,30 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\DataObjects\MobileSync\HealthEntryData;
 use App\Enums\HealthEntrySource;
 use App\Enums\HealthSyncType;
+use App\Exceptions\HealthUnitConversionException;
 use App\Models\HealthSyncSample;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
 use App\Services\HealthKitCharacteristicMapper;
+use App\Services\HealthMetricUnitConverter;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 final readonly class SyncMobileHealthEntriesAction
 {
     public function __construct(
         private HealthKitCharacteristicMapper $characteristicMapper,
+        private HealthMetricUnitConverter $unitConverter,
     ) {}
 
     /**
-     * @param  array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null, metadata?: array<string, string>|null}>  $entries
-     * @return array{samples_created: int, samples_updated: int, profile_updated: bool}
+     * @param  list<HealthEntryData>  $entries
+     * @return array{samples_created: int, samples_updated: int, samples_dropped: int, profile_updated: bool}
      */
     public function handle(User $user, MobileSyncDevice $device, array $entries, ?string $timezone = null): array
     {
@@ -35,131 +40,167 @@ final readonly class SyncMobileHealthEntriesAction
             return [
                 'samples_created' => $sampleCounts['created'],
                 'samples_updated' => $sampleCounts['updated'],
+                'samples_dropped' => $sampleCounts['dropped'],
                 'profile_updated' => $profileUpdated,
             ];
         });
     }
 
     /**
-     * @param  array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null, metadata?: array<string, string>|null}>  $entries
-     * @return array{created: int, updated: int}
+     * @param  list<HealthEntryData>  $entries
+     * @return array{created: int, updated: int, dropped: int}
      */
     private function syncSamples(User $user, MobileSyncDevice $device, array $entries, ?string $timezone): array
     {
         $syncableEntries = [];
-        $bpPairs = [];
+        $bpGroupIds = [];
 
         foreach ($entries as $entry) {
-            $syncType = HealthSyncType::tryFrom($entry['type']);
+            $syncType = HealthSyncType::tryFrom($entry->type);
 
             if ($syncType !== null && $syncType->isUserCharacteristic()) {
                 continue;
             }
 
             if ($syncType === HealthSyncType::BloodPressureSystolic || $syncType === HealthSyncType::BloodPressureDiastolic) {
-                $date = Date::parse($entry['date'])->toDateTimeString();
-                $bpPairs[$date] ??= (string) Str::uuid();
-                $entry['_group_id'] = $bpPairs[$date];
+                $dateKey = Date::parse($entry->date)->toDateTimeString();
+                $bpGroupIds[$dateKey] ??= (string) Str::uuid();
             }
 
             $syncableEntries[] = $entry;
         }
 
         if ($syncableEntries === []) {
-            return ['created' => 0, 'updated' => 0];
+            return ['created' => 0, 'updated' => 0, 'dropped' => 0];
         }
 
         $cache = $this->preloadSamples($user, $syncableEntries);
+        $uuidCache = $this->preloadSamplesByUuid($user, $syncableEntries);
 
         $created = 0;
         $updated = 0;
+        $dropped = 0;
 
         foreach ($syncableEntries as $entry) {
-            /** @var string $date */
-            $date = $entry['date'];
-            $measuredAt = Date::parse($date);
-            $key = $entry['type'].'|'.$measuredAt->toDateTimeString();
+            $measuredAt = Date::parse($entry->date);
+            $endedAt = $entry->ended_at !== null ? Date::parse($entry->ended_at) : null;
+            $key = $entry->type.'|'.$measuredAt->toDateTimeString();
 
-            /** @var string|null $source */
-            $source = $entry['source'] ?? null;
-
-            $metadata = $entry['metadata'] ?? null;
-            $syncType = HealthSyncType::tryFrom($entry['type']);
+            $syncType = HealthSyncType::tryFrom($entry->type);
+            $metadata = $entry->metadata;
 
             if ($syncType !== null) {
                 $metadata = $syncType->normalizeMetadata($metadata);
             }
 
+            try {
+                $converted = $this->unitConverter->toCanonical(
+                    typeIdentifier: $entry->type,
+                    value: $entry->value,
+                    unit: $entry->unit,
+                );
+            } catch (HealthUnitConversionException $e) {
+                Log::warning('health_aggregate.unit_mismatch_dropped', [
+                    'user_id' => $user->id,
+                    'type_identifier' => $e->typeIdentifier,
+                    'from_unit' => $e->fromUnit,
+                    'canonical_unit' => $e->canonicalUnit,
+                ]);
+
+                $dropped++;
+
+                continue;
+            }
+
+            $baseAttrs = [
+                'value' => $converted['value'],
+                'unit' => $converted['canonical_unit'],
+                'original_unit' => $converted['original_unit'],
+                'measured_at' => $measuredAt,
+                'ended_at' => $endedAt,
+                'source' => $entry->source,
+                'entry_source' => HealthEntrySource::MobileSync,
+                'timezone' => $timezone,
+                'metadata' => $metadata,
+                'sample_uuid' => $entry->sample_uuid,
+            ];
+
             if ($syncType === HealthSyncType::Medication) {
                 HealthSyncSample::query()->create([
+                    ...$baseAttrs,
                     'user_id' => $user->id,
                     'mobile_sync_device_id' => $device->id,
                     'type_identifier' => HealthSyncType::Medication->value,
-                    'value' => (float) $entry['value'],
-                    'unit' => $entry['unit'],
-                    'measured_at' => $measuredAt,
-                    'source' => $source,
-                    'entry_source' => HealthEntrySource::MobileSync,
-                    'timezone' => $timezone,
-                    'metadata' => $metadata,
                 ]);
                 $created++;
 
                 continue;
             }
 
-            if (isset($cache[$key])) {
-                $cache[$key]->update([
-                    'value' => (float) $entry['value'],
-                    'unit' => $entry['unit'],
-                    'source' => $source,
-                    'timezone' => $timezone,
-                    'metadata' => $metadata,
-                ]);
+            $existing = $this->findExisting($entry->sample_uuid, $key, $uuidCache, $cache);
+
+            if ($existing instanceof HealthSyncSample) {
+                $existing->update($baseAttrs);
                 $updated++;
-            } else {
-                $cache[$key] = HealthSyncSample::query()->create([
-                    'user_id' => $user->id,
-                    'mobile_sync_device_id' => $device->id,
-                    'type_identifier' => $entry['type'],
-                    'value' => (float) $entry['value'],
-                    'unit' => $entry['unit'],
-                    'measured_at' => $measuredAt,
-                    'source' => $source,
-                    'entry_source' => HealthEntrySource::MobileSync,
-                    'timezone' => $timezone,
-                    'metadata' => $metadata,
-                    'group_id' => $entry['_group_id'] ?? null,
-                ]);
-                $created++;
+
+                continue;
             }
+
+            $dateKey = $measuredAt->toDateTimeString();
+
+            $sample = HealthSyncSample::query()->create([
+                ...$baseAttrs,
+                'user_id' => $user->id,
+                'mobile_sync_device_id' => $device->id,
+                'type_identifier' => $entry->type,
+                'group_id' => $bpGroupIds[$dateKey] ?? null,
+            ]);
+            $cache[$key] = $sample;
+
+            if ($entry->sample_uuid !== null) {
+                $uuidCache[$entry->sample_uuid] = $sample;
+            }
+
+            $created++;
         }
 
-        return ['created' => $created, 'updated' => $updated];
+        return ['created' => $created, 'updated' => $updated, 'dropped' => $dropped];
     }
 
     /**
-     * @param  array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null, metadata?: array<string, string>|null}>  $entries
+     * @param  array<string, HealthSyncSample>  $uuidCache
+     * @param  array<string, HealthSyncSample>  $cache
+     */
+    private function findExisting(
+        ?string $sampleUuid,
+        string $typeTimestampKey,
+        array &$uuidCache,
+        array &$cache,
+    ): ?HealthSyncSample {
+        if ($sampleUuid !== null && isset($uuidCache[$sampleUuid])) {
+            return $uuidCache[$sampleUuid];
+        }
+
+        return $cache[$typeTimestampKey] ?? null;
+    }
+
+    /**
+     * @param  list<HealthEntryData>  $entries
      */
     private function syncUserCharacteristics(User $user, array $entries): bool
     {
-        /** @var array<string, mixed> $updateData */
         $updateData = [];
 
         foreach ($entries as $entry) {
-            $syncType = HealthSyncType::tryFrom($entry['type']);
+            $syncType = HealthSyncType::tryFrom($entry->type);
             if ($syncType === null) {
                 continue;
             }
-
             if (! $syncType->isUserCharacteristic()) {
                 continue;
             }
 
-            /** @var float|int|string $value */
-            $value = $entry['value'];
-
-            $updateData = array_merge($updateData, $this->characteristicMapper->map($syncType, $value));
+            $updateData = array_merge($updateData, $this->characteristicMapper->map($syncType, $entry->value));
         }
 
         $updateData = array_filter($updateData, fn (mixed $v): bool => $v !== null);
@@ -174,32 +215,41 @@ final readonly class SyncMobileHealthEntriesAction
     }
 
     /**
-     * @param  array<int, array{type: string, value: float|int|string, unit: string, date: string, source?: string|null, metadata?: array<string, string>|null}>  $entries
-     * @return array<string, HealthSyncSample> Keyed by "type_identifier|measured_at"
+     * @param  list<HealthEntryData>  $entries
+     * @return array<string, HealthSyncSample>
      */
     private function preloadSamples(User $user, array $entries): array
     {
-        /** @var array<string> $types */
-        $types = array_unique(array_column($entries, 'type'));
-
-        /** @var array<string> $dates */
-        $dates = array_unique(array_map(
-            fn (array $entry): string => Date::parse($entry['date'])->toDateTimeString(),
-            $entries,
-        ));
-
-        $existing = HealthSyncSample::query()
-            ->where('user_id', $user->id)
-            ->whereIn('type_identifier', $types)
-            ->whereIn('measured_at', $dates)
-            ->get();
+        $types = collect($entries)->pluck('type')->unique()->values()->all();
+        $dates = collect($entries)->map(fn (HealthEntryData $e): string => Date::parse($e->date)->toDateTimeString())->unique()->values()->all();
 
         $keyed = [];
 
-        foreach ($existing as $sample) {
-            /** @var HealthSyncSample $sample */
-            $key = $sample->type_identifier.'|'.$sample->measured_at->toDateTimeString();
-            $keyed[$key] = $sample;
+        foreach (HealthSyncSample::query()->where('user_id', $user->id)->whereIn('type_identifier', $types)->whereIn('measured_at', $dates)->get() as $sample) {
+            $keyed[$sample->type_identifier.'|'.$sample->measured_at->toDateTimeString()] = $sample;
+        }
+
+        return $keyed;
+    }
+
+    /**
+     * @param  list<HealthEntryData>  $entries
+     * @return array<string, HealthSyncSample>
+     */
+    private function preloadSamplesByUuid(User $user, array $entries): array
+    {
+        $uuids = collect($entries)->pluck('sample_uuid')->filter()->unique()->values()->all();
+
+        if ($uuids === []) {
+            return [];
+        }
+
+        $keyed = [];
+
+        foreach (HealthSyncSample::query()->where('user_id', $user->id)->whereIn('sample_uuid', $uuids)->get() as $sample) {
+            if ($sample->sample_uuid !== null) {
+                $keyed[$sample->sample_uuid] = $sample;
+            }
         }
 
         return $keyed;
