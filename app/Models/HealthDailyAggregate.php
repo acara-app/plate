@@ -44,26 +44,7 @@ final class HealthDailyAggregate extends Model
     /** @use HasFactory<HealthDailyAggregateFactory> */
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'date',
-        'local_date',
-        'timezone',
-        'type_identifier',
-        'value_sum',
-        'value_sum_canonical',
-        'value_avg',
-        'value_min',
-        'value_max',
-        'value_last',
-        'value_count',
-        'source_primary',
-        'unit',
-        'canonical_unit',
-        'aggregation_function',
-        'aggregation_version',
-        'metadata',
-    ];
+    protected $guarded = [];
 
     /**
      * @return array<string, string>
