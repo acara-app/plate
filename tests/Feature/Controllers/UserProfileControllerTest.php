@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\UserProfileController;
 use App\Models\User;
+
+covers(UserProfileController::class);
 
 it('renders profile edit page', function (): void {
     $user = User::factory()->create();

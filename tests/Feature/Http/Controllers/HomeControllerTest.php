@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\HomeController;
 use Illuminate\Database\Eloquent\Collection;
+
+covers(HomeController::class);
 
 it('displays the homepage', function (): void {
     $this->get(route('home'))

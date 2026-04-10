@@ -21,6 +21,8 @@ use Workflow\Activity;
 use Workflow\Workflow;
 use Workflow\WorkflowStub;
 
+covers(MealPlanDayWorkflow::class);
+
 beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->user->profile()->create([
@@ -35,15 +37,15 @@ beforeEach(function (): void {
 });
 
 it('workflow class exists and extends correct base class', function (): void {
-    expect(class_exists(MealPlanDayWorkflow::class))->toBeTrue();
-    expect(is_subclass_of(MealPlanDayWorkflow::class, Workflow::class))->toBeTrue();
+    expect(class_exists(MealPlanDayWorkflow::class))->toBeTrue()
+        ->and(is_subclass_of(MealPlanDayWorkflow::class, Workflow::class))->toBeTrue();
 });
 
 it('activity classes for single day workflow exist', function (): void {
-    expect(class_exists(MealPlanDayGeneratorActivity::class))->toBeTrue();
-    expect(class_exists(SaveDayMealsActivity::class))->toBeTrue();
-    expect(is_subclass_of(MealPlanDayGeneratorActivity::class, Activity::class))->toBeTrue();
-    expect(is_subclass_of(SaveDayMealsActivity::class, Activity::class))->toBeTrue();
+    expect(class_exists(MealPlanDayGeneratorActivity::class))->toBeTrue()
+        ->and(class_exists(SaveDayMealsActivity::class))->toBeTrue()
+        ->and(is_subclass_of(MealPlanDayGeneratorActivity::class, Activity::class))->toBeTrue()
+        ->and(is_subclass_of(SaveDayMealsActivity::class, Activity::class))->toBeTrue();
 });
 
 it('triggers workflow when navigating to day that needs generation', function (): void {
@@ -165,9 +167,9 @@ it('day meals data collection can be created for storage', function (): void {
         meals: new DataCollection(SingleDayMealData::class, [$singleMeal]),
     );
 
-    expect($dayMeals->meals)->toHaveCount(1);
-    expect($dayMeals->meals[0]->name)->toBe('Test Breakfast');
-    expect($dayMeals->meals[0]->type)->toBe(MealType::Breakfast);
+    expect($dayMeals->meals)->toHaveCount(1)
+        ->and($dayMeals->meals[0]->name)->toBe('Test Breakfast')
+        ->and($dayMeals->meals[0]->type)->toBe(MealType::Breakfast);
 });
 
 it('single day meal data converts to meal data with correct day number', function (): void {
@@ -227,10 +229,10 @@ it('meal plan updates days_completed metadata correctly', function (): void {
     ]);
 
     $freshMealPlan = $mealPlan->fresh();
-    expect($freshMealPlan->metadata['days_completed'])->toBe(3);
-    expect($freshMealPlan->metadata['status'])->toBe(MealPlanGenerationStatus::Pending->value);
-    expect($freshMealPlan->metadata)->toHaveKey('day_3_generated_at');
-    expect($freshMealPlan->metadata['day_3_generated_at'])->toBe($generatedAt);
+    expect($freshMealPlan->metadata['days_completed'])->toBe(3)
+        ->and($freshMealPlan->metadata['status'])->toBe(MealPlanGenerationStatus::Pending->value)
+        ->and($freshMealPlan->metadata)->toHaveKey('day_3_generated_at')
+        ->and($freshMealPlan->metadata['day_3_generated_at'])->toBe($generatedAt);
 });
 
 it('meal plan status becomes completed when all days generated', function (): void {

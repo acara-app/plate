@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\PrintMealPlanController;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
+
+covers(PrintMealPlanController::class);
 
 it('requires authentication to view printable meal plan', function (): void {
     $mealPlan = MealPlan::factory()->create();

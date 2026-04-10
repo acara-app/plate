@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\UserProfileAttribute;
 
+covers(GetUserProfileContextAction::class);
+
 beforeEach(function (): void {
     $this->action = resolve(GetUserProfileContextAction::class);
 });
@@ -220,9 +222,8 @@ it('includes date_of_birth and blood_type in biometrics', function (): void {
 
     expect($result['raw_data']['biometrics'])
         ->date_of_birth->toBe('1996-04-04')
-        ->blood_type->toBe('A+');
-
-    expect($result['context'])
+        ->blood_type->toBe('A+')
+        ->and($result['context'])
         ->toContain('Date of Birth: 1996-04-04')
         ->toContain('Blood Type: A+');
 });

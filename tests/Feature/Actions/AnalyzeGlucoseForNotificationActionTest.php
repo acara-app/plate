@@ -7,7 +7,9 @@ use App\Enums\GlucoseReadingType;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 
-test('it returns should not notify when notifications are disabled', function (): void {
+covers(AnalyzeGlucoseForNotificationAction::class);
+
+it('returns should not notify when notifications are disabled', function (): void {
     $user = User::factory()->create([
         'settings' => ['glucose_notifications_enabled' => false],
     ]);
@@ -25,7 +27,7 @@ test('it returns should not notify when notifications are disabled', function ()
         ->and($result->concerns)->toBeEmpty();
 });
 
-test('it returns should not notify when no glucose data exists', function (): void {
+it('returns should not notify when no glucose data exists', function (): void {
     $user = User::factory()->create([
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
@@ -38,7 +40,7 @@ test('it returns should not notify when no glucose data exists', function (): vo
         ->and($result->analysisData->hasData)->toBeFalse();
 });
 
-test('it returns should not notify when glucose is well controlled', function (): void {
+it('returns should not notify when glucose is well controlled', function (): void {
     $user = User::factory()->create([
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
@@ -60,7 +62,7 @@ test('it returns should not notify when glucose is well controlled', function ()
     expect($result->shouldNotify)->toBeFalse();
 });
 
-test('it returns should notify when high readings exceed trigger percentage', function (): void {
+it('returns should notify when high readings exceed trigger percentage', function (): void {
     $user = User::factory()->create([
         'settings' => [
             'glucose_notifications_enabled' => true,
@@ -93,7 +95,7 @@ test('it returns should notify when high readings exceed trigger percentage', fu
         ->and($result->concerns)->not->toBeEmpty();
 });
 
-test('it returns should notify when hypoglycemia risk is detected', function (): void {
+it('returns should notify when hypoglycemia risk is detected', function (): void {
     $user = User::factory()->create([
         'settings' => [
             'glucose_notifications_enabled' => true,
@@ -125,7 +127,7 @@ test('it returns should notify when hypoglycemia risk is detected', function ():
     expect($result->shouldNotify)->toBeTrue();
 });
 
-test('it returns should notify when consistently high pattern is detected', function (): void {
+it('returns should notify when consistently high pattern is detected', function (): void {
     $user = User::factory()->create([
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
@@ -145,7 +147,7 @@ test('it returns should notify when consistently high pattern is detected', func
     expect($result->shouldNotify)->toBeTrue();
 });
 
-test('it returns should notify when consistently low pattern is detected', function (): void {
+it('returns should notify when consistently low pattern is detected', function (): void {
     $user = User::factory()->create([
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
@@ -165,7 +167,7 @@ test('it returns should notify when consistently low pattern is detected', funct
     expect($result->shouldNotify)->toBeTrue();
 });
 
-test('it returns should notify when high variability is detected', function (): void {
+it('returns should notify when high variability is detected', function (): void {
     $user = User::factory()->create([
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
@@ -185,7 +187,7 @@ test('it returns should notify when high variability is detected', function (): 
     expect($result->shouldNotify)->toBeTrue();
 });
 
-test('it returns should notify when post-meal spikes are detected', function (): void {
+it('returns should notify when post-meal spikes are detected', function (): void {
     $user = User::factory()->create([
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
@@ -214,7 +216,7 @@ test('it returns should notify when post-meal spikes are detected', function ():
     expect($result->shouldNotify)->toBeTrue();
 });
 
-test('it uses custom analysis window days parameter', function (): void {
+it('uses custom analysis window days parameter', function (): void {
     $user = User::factory()->create([
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
@@ -244,7 +246,7 @@ test('it uses custom analysis window days parameter', function (): void {
         ->and($result->analysisData->totalReadings)->toBe(5);
 });
 
-test('it uses user custom thresholds when set', function (): void {
+it('uses user custom thresholds when set', function (): void {
     $user = User::factory()->create([
         'settings' => [
             'glucose_notifications_enabled' => true,
@@ -268,7 +270,7 @@ test('it uses user custom thresholds when set', function (): void {
     expect($result->analysisData->hasData)->toBeTrue();
 });
 
-test('it preserves analysis data in result', function (): void {
+it('preserves analysis data in result', function (): void {
     $user = User::factory()->create([
         'settings' => ['glucose_notifications_enabled' => true],
     ]);
@@ -291,7 +293,7 @@ test('it preserves analysis data in result', function (): void {
         ->and($result->analysisData->timeInRange)->not->toBeNull();
 });
 
-test('it does not trigger concern for high variability alone without other concerning patterns', function (): void {
+it('does not trigger concern for high variability alone without other concerning patterns', function (): void {
     $user = User::factory()->create([
         'settings' => [
             'glucose_notifications_enabled' => true,
@@ -320,7 +322,7 @@ test('it does not trigger concern for high variability alone without other conce
         ->and($result->concerns)->not->toContain('High glucose variability detected, indicating inconsistent blood sugar control.');
 });
 
-test('it does not trigger post-meal spikes concern when average post-meal is below threshold', function (): void {
+it('does not trigger post-meal spikes concern when average post-meal is below threshold', function (): void {
     $user = User::factory()->create([
         'settings' => [
             'glucose_notifications_enabled' => true,
@@ -351,11 +353,10 @@ test('it does not trigger post-meal spikes concern when average post-meal is bel
     $action = resolve(AnalyzeGlucoseForNotificationAction::class);
     $result = $action->handle($user);
 
-    expect($result->analysisData->hasData)->toBeTrue();
+    expect($result->analysisData->hasData)->toBeTrue()
+        ->and($result->concerns)->not->toContain('Frequent post-meal glucose spikes detected.');
 
     if ($result->analysisData->averages->postMeal !== null) {
         expect($result->analysisData->averages->postMeal)->toBeLessThanOrEqual(180);
     }
-
-    expect($result->concerns)->not->toContain('Frequent post-meal glucose spikes detected.');
 });

@@ -3,8 +3,11 @@
 declare(strict_types=1);
 
 use App\Enums\FoodCategory;
+use App\Http\Controllers\PublicFoodController;
 use App\Models\Content;
 use Illuminate\Support\Str;
+
+covers(PublicFoodController::class);
 
 it('displays the food index page', function (): void {
     Content::factory()->create(['slug' => Str::uuid()->toString()]);

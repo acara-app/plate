@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\PrintGroceryListController;
 use App\Models\GroceryList;
 use App\Models\MealPlan;
 use App\Models\User;
+
+covers(PrintGroceryListController::class);
 
 it('shows print view for grocery list', function (): void {
     $user = User::factory()->create();

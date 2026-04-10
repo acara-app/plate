@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\HealthSyncPageController;
+
+covers(HealthSyncPageController::class);
+
 it('displays the health sync landing page', function (): void {
     $this->get(route('health-sync'))
         ->assertOk()

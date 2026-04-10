@@ -9,6 +9,8 @@ use App\Enums\MealPlanType;
 use App\Models\User;
 use Spatie\LaravelData\DataCollection;
 
+covers(StoreMealPlan::class);
+
 it('stores meal plan with preparation_notes in metadata', function (): void {
     $user = User::factory()->create();
 
@@ -131,8 +133,7 @@ it('stores meal plan with other metadata fields alongside preparation_notes', fu
         ->toHaveKey('preparation_notes')
         ->toHaveKey('bmi')
         ->toHaveKey('bmr')
-        ->toHaveKey('tdee');
-
-    expect($mealPlan->metadata['preparation_notes'])
+        ->toHaveKey('tdee')
+        ->and($mealPlan->metadata['preparation_notes'])
         ->toBe('Weekly meal prep on Sundays');
 });

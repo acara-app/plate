@@ -7,6 +7,8 @@ use App\Models\HealthSyncSample;
 use App\Models\User;
 use Illuminate\Support\Str;
 
+covers(HealthSyncSample::class);
+
 it('deduplicates by sample_uuid when the same UUID is sent twice', function (): void {
     $user = User::factory()->create();
     $uuid = (string) Str::uuid();

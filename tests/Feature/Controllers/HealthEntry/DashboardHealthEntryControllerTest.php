@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\HealthEntry\DashboardHealthEntryController;
 use App\Models\HealthSyncSample;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
+
+covers(DashboardHealthEntryController::class);
 
 it('renders diabetes log tracking dashboard', function (): void {
     $user = User::factory()->create();

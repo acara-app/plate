@@ -3,10 +3,13 @@
 declare(strict_types=1);
 
 use App\Enums\GroceryListStatus;
+use App\Http\Controllers\GroceryListController;
 use App\Models\GroceryItem;
 use App\Models\GroceryList;
 use App\Models\MealPlan;
 use App\Models\User;
+
+covers(GroceryListController::class);
 
 it('denies access to other users meal plan', function (): void {
     $owner = User::factory()->create();

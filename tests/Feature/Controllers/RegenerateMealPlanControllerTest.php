@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\RegenerateMealPlanController;
 use App\Models\HealthSyncSample;
 use App\Models\MealPlan;
 use App\Models\User;
@@ -9,6 +10,8 @@ use Illuminate\Support\Facades\Queue;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\post;
+
+covers(RegenerateMealPlanController::class);
 
 it('requires authentication', function (): void {
     $response = post(route('meal-plans.regenerate'));
@@ -48,9 +51,9 @@ it('starts meal plan workflow and creates meal plan with generating status', fun
     $response->assertRedirectToRoute('meal-plans.index');
 
     $mealPlan = $user->fresh()->mealPlans()->first();
-    expect($mealPlan)->not->toBeNull();
-    expect($mealPlan->metadata['status'])->toBe('generating');
-    expect($mealPlan->metadata['days_completed'])->toBe(0);
+    expect($mealPlan)->not->toBeNull()
+        ->and($mealPlan->metadata['status'])->toBe('generating')
+        ->and($mealPlan->metadata['days_completed'])->toBe(0);
 });
 
 it('redirects to meal plans index with success message', function (): void {

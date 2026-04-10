@@ -12,6 +12,8 @@ use App\Models\HealthSyncSample;
 use App\Models\User;
 use Illuminate\Support\Str;
 
+covers(UpdateHealthSampleAction::class, DeleteHealthSampleAction::class);
+
 it('deletes group siblings and recreates when updating a grouped entry', function (): void {
     $user = User::factory()->create();
     $groupId = (string) Str::uuid();

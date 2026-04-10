@@ -12,6 +12,8 @@ use App\Models\History;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
 
+covers(BuildAssistantAgentAction::class);
+
 function makeDispatchStreamRequest(
     ModelName $model = ModelName::GPT_5_MINI,
     AgentMode $mode = AgentMode::Ask,

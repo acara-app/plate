@@ -10,6 +10,8 @@ use App\Models\UserProfileAttribute;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
+covers(UpdateUserProfileAttributes::class);
+
 beforeEach(function (): void {
     $this->tool = new UpdateUserProfileAttributes;
 });
@@ -202,8 +204,8 @@ it('removes an attribute', function (): void {
     $result = $this->tool->handle($request);
     $json = json_decode((string) $result, true);
 
-    expect($json)->success->toBeTrue();
-    expect(UserProfileAttribute::query()->where('user_profile_id', $profile->id)->count())->toBe(0);
+    expect($json)->success->toBeTrue()
+        ->and(UserProfileAttribute::query()->where('user_profile_id', $profile->id)->count())->toBe(0);
 });
 
 it('returns error when removing non-existent attribute', function (): void {
@@ -238,8 +240,8 @@ it('creates profile if it does not exist', function (): void {
     $this->tool->handle($request);
 
     $user->refresh();
-    expect($user->profile)->not->toBeNull();
-    expect($user->profile->attributes)->toHaveCount(1);
+    expect($user->profile)->not->toBeNull()
+        ->and($user->profile->attributes)->toHaveCount(1);
 });
 
 it('handles unknown action', function (): void {

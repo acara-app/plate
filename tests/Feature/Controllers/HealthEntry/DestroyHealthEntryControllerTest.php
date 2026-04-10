@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\HealthEntry\DestroyHealthEntryController;
 use App\Models\HealthSyncSample;
 use App\Models\User;
+
+covers(DestroyHealthEntryController::class);
 
 it('can delete own diabetes log', function (): void {
     $user = User::factory()->create();

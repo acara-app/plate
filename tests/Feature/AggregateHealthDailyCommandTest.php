@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Console\Commands\AggregateHealthDailyCommand;
 use App\Enums\HealthEntrySource;
 use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+
+covers(AggregateHealthDailyCommand::class);
 
 it('aggregates health data for all users by default for yesterday', function (): void {
     $user = User::factory()->create();

@@ -9,6 +9,8 @@ use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;
 
+covers(SummarizeConversationAction::class);
+
 function createConversationWithMessages(User $user, int $count): Conversation
 {
     $conversation = Conversation::factory()->forUser($user)->create();

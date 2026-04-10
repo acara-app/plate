@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\HealthEntry\UpdateHealthEntryController;
 use App\Models\HealthSyncSample;
 use App\Models\User;
+
+covers(UpdateHealthEntryController::class);
 
 it('can update own diabetes log', function (): void {
     $user = User::factory()->create();

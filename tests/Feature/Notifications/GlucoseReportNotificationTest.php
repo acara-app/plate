@@ -19,6 +19,8 @@ use App\Notifications\GlucoseReportNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Notification;
 
+covers(GlucoseReportNotification::class);
+
 function createNotificationAnalysisData(array $concerns = []): GlucoseNotificationAnalysisData
 {
     $analysisData = new GlucoseAnalysisData(
@@ -84,7 +86,7 @@ function createNotificationAnalysisData(array $concerns = []): GlucoseNotificati
     );
 }
 
-test('notification uses mail and database channels', function (): void {
+it('uses mail and database channels', function (): void {
     $analysisResult = createNotificationAnalysisData(['High readings detected']);
     $notification = new GlucoseReportNotification($analysisResult);
     $user = User::factory()->create();
@@ -94,7 +96,7 @@ test('notification uses mail and database channels', function (): void {
     expect($channels)->toBe(['mail', 'database']);
 });
 
-test('notification can be sent via mail', function (): void {
+it('can be sent via mail', function (): void {
     Notification::fake();
 
     $user = User::factory()->create();
@@ -105,7 +107,7 @@ test('notification can be sent via mail', function (): void {
     Notification::assertSentTo($user, GlucoseReportNotification::class, fn ($notification, $channels): bool => in_array('mail', $channels));
 });
 
-test('notification can be sent to database', function (): void {
+it('can be sent to database', function (): void {
     Notification::fake();
 
     $user = User::factory()->create();
@@ -116,7 +118,7 @@ test('notification can be sent to database', function (): void {
     Notification::assertSentTo($user, GlucoseReportNotification::class, fn ($notification, $channels): bool => in_array('database', $channels));
 });
 
-test('mail notification contains average glucose', function (): void {
+it('contains average glucose in mail', function (): void {
     $analysisResult = createNotificationAnalysisData();
     $notification = new GlucoseReportNotification($analysisResult);
     $user = User::factory()->create();
@@ -126,7 +128,7 @@ test('mail notification contains average glucose', function (): void {
     expect($mailMessage->viewData['averageGlucose'])->toBe(105.0);
 });
 
-test('mail notification contains time in range data', function (): void {
+it('contains time in range data in mail', function (): void {
     $analysisResult = createNotificationAnalysisData();
     $notification = new GlucoseReportNotification($analysisResult);
     $user = User::factory()->create();
@@ -138,7 +140,7 @@ test('mail notification contains time in range data', function (): void {
         ->and($mailMessage->viewData['belowRangePercentage'])->toBe(5.0);
 });
 
-test('mail notification contains total readings', function (): void {
+it('contains total readings in mail', function (): void {
     $analysisResult = createNotificationAnalysisData();
     $notification = new GlucoseReportNotification($analysisResult);
     $user = User::factory()->create();
@@ -148,7 +150,7 @@ test('mail notification contains total readings', function (): void {
     expect($mailMessage->viewData['totalReadings'])->toBe(50);
 });
 
-test('mail notification contains concerns when present', function (): void {
+it('contains concerns when present in mail', function (): void {
     $concerns = ['High readings detected', 'Post-meal spikes observed'];
     $analysisResult = createNotificationAnalysisData($concerns);
     $notification = new GlucoseReportNotification($analysisResult);
@@ -161,7 +163,7 @@ test('mail notification contains concerns when present', function (): void {
         ->and($mailMessage->viewData['concerns'])->toContain('Post-meal spikes observed');
 });
 
-test('mail notification has correct subject', function (): void {
+it('has correct subject in mail', function (): void {
     $analysisResult = createNotificationAnalysisData();
     $notification = new GlucoseReportNotification($analysisResult);
     $user = User::factory()->create();
@@ -171,7 +173,7 @@ test('mail notification has correct subject', function (): void {
     expect($mailMessage->subject)->toBe('Your Weekly Glucose Report');
 });
 
-test('mail notification contains action button to glucose action page', function (): void {
+it('contains action button to glucose action page in mail', function (): void {
     $analysisResult = createNotificationAnalysisData();
     $notification = new GlucoseReportNotification($analysisResult);
     $user = User::factory()->create();
@@ -181,7 +183,7 @@ test('mail notification contains action button to glucose action page', function
     expect($mailMessage->viewData['mealPlanUrl'])->toContain('health-entries/insights');
 });
 
-test('database notification contains correct structure', function (): void {
+it('contains correct structure in database notification', function (): void {
     $concerns = ['High readings detected'];
     $analysisResult = createNotificationAnalysisData($concerns);
     $notification = new GlucoseReportNotification($analysisResult);
@@ -211,7 +213,7 @@ test('database notification contains correct structure', function (): void {
         ->and($databaseData['has_concerns'])->toBeTrue();
 });
 
-test('database notification has_concerns is false when no concerns', function (): void {
+it('has_concerns is false when no concerns in database notification', function (): void {
     $analysisResult = createNotificationAnalysisData([]);
     $notification = new GlucoseReportNotification($analysisResult);
     $user = User::factory()->create();
@@ -222,7 +224,7 @@ test('database notification has_concerns is false when no concerns', function ()
         ->and($databaseData['concerns'])->toBeEmpty();
 });
 
-test('notification is queueable', function (): void {
+it('is queueable', function (): void {
     $analysisResult = createNotificationAnalysisData();
     $notification = new GlucoseReportNotification($analysisResult);
 

@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Console\Commands;
 
+use App\Console\Commands\SubmitSitemapsToIndexNowCommand;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+
+covers(SubmitSitemapsToIndexNowCommand::class);
 
 beforeEach(function (): void {
     Config::set('services.indexnow.key', 'test-key-12345');

@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\HealthEntry\ListHealthEntryController;
 use App\Models\HealthSyncSample;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
+
+covers(ListHealthEntryController::class);
 
 it('requires authentication to view diabetes log index', function (): void {
     $response = $this->get(route('health-entries.index'));

@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\UserEmailVerification;
 use App\Models\User;
 use Illuminate\Support\Facades\URL;
+
+covers(UserEmailVerification::class);
 
 it('may verify email', function (): void {
     $user = User::factory()->create([

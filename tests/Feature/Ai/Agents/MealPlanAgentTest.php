@@ -15,6 +15,8 @@ use Laravel\Ai\Attributes\Timeout;
 use Spatie\LaravelData\DataCollection;
 use Workflow\WorkflowStub;
 
+covers(MealPlanAgent::class);
+
 it('returns fluent interface when setting diet type', function (): void {
     $action = resolve(MealPlanAgent::class);
     $result = $action->withDietType(DietType::Mediterranean);
@@ -96,9 +98,8 @@ it('generates a meal plan using Laravel AI SDK', function (): void {
 
     expect($mealPlanData->meals[0])
         ->dayNumber->toBe(1)
-        ->name->toBe('Greek Yogurt Bowl');
-
-    expect($mealPlanData->meals[0]->calories)->toBeGreaterThan(0);
+        ->name->toBe('Greek Yogurt Bowl')
+        ->and($mealPlanData->meals[0]->calories)->toBeGreaterThan(0);
 });
 
 it('generates meal plan with minimal data', function (): void {
@@ -149,8 +150,8 @@ it('starts workflow when handle is called', function (): void {
     $action->handle($user);
 
     $mealPlan = $user->mealPlans()->first();
-    expect($mealPlan)->not->toBeNull();
-    expect($mealPlan->metadata['status'])->toBe('generating');
+    expect($mealPlan)->not->toBeNull()
+        ->and($mealPlan->metadata['status'])->toBe('generating');
 });
 
 it('stores custom prompt in meal plan metadata when provided', function (): void {
@@ -233,10 +234,10 @@ it('handles meals with no ingredients', function (): void {
     $action = resolve(MealPlanAgent::class);
     $mealPlanData = $action->generate($user);
 
-    expect($mealPlanData->meals)->toHaveCount(2);
-    expect($mealPlanData->meals[0]->ingredients)->toBeInstanceOf(DataCollection::class);
-    expect($mealPlanData->meals[0]->ingredients->count())->toBe(0);
-    expect($mealPlanData->meals[1]->ingredients)->toBeNull();
+    expect($mealPlanData->meals)->toHaveCount(2)
+        ->and($mealPlanData->meals[0]->ingredients)->toBeInstanceOf(DataCollection::class)
+        ->and($mealPlanData->meals[0]->ingredients->count())->toBe(0)
+        ->and($mealPlanData->meals[1]->ingredients)->toBeNull();
 });
 
 it('works without file search store configured', function (): void {

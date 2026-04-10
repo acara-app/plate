@@ -8,6 +8,8 @@ use App\Enums\SpikeRiskLevel;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 
+covers(SpikePredictorAgent::class);
+
 it('has correct attributes configured', function (): void {
     $reflection = new ReflectionClass(SpikePredictorAgent::class);
 

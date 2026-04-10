@@ -8,6 +8,8 @@ use App\Models\SleepSession;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 
+covers(SleepSessionAggregator::class);
+
 it('computes per-stage durations from raw sleep events for a single night', function (): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
     $aggregator = resolve(SleepSessionAggregator::class);
@@ -79,18 +81,14 @@ it('computes per-stage durations from raw sleep events for a single night', func
         ->first();
 
     expect($core)->not->toBeNull()
-        ->and((float) $core->value_last)->toBe(1.5);
-
-    expect($deep)->not->toBeNull()
-        ->and((float) $deep->value_last)->toBe(1.5);
-
-    expect($rem)->not->toBeNull()
-        ->and((float) $rem->value_last)->toBe(1.0);
-
-    expect($awake)->not->toBeNull()
-        ->and((float) $awake->value_last)->toBe(0.25);
-
-    expect($totalAsleep)->not->toBeNull()
+        ->and((float) $core->value_last)->toBe(1.5)
+        ->and($deep)->not->toBeNull()
+        ->and((float) $deep->value_last)->toBe(1.5)
+        ->and($rem)->not->toBeNull()
+        ->and((float) $rem->value_last)->toBe(1.0)
+        ->and($awake)->not->toBeNull()
+        ->and((float) $awake->value_last)->toBe(0.25)
+        ->and($totalAsleep)->not->toBeNull()
         ->and((float) $totalAsleep->value_last)->toBe(4.0);
 });
 

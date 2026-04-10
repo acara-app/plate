@@ -17,7 +17,7 @@ function fakeTurnstile(bool $success = true): void
 
 it('renders the spike calculator page', function (): void {
     Livewire::test('pages::spike-calculator')
-        ->assertStatus(200)
+        ->assertSuccessful()
         ->assertSee('Which Foods Spike Your Blood Sugar?')
         ->assertSee('Free AI-powered glucose spike checker');
 });

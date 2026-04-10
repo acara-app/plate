@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\MobileSyncController;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
+
+covers(MobileSyncController::class);
 
 it('renders mobile sync page', function (): void {
     $user = User::factory()->create();
@@ -62,8 +65,8 @@ it('generates a pairing token', function (): void {
         ->post(route('mobile-sync.token'))
         ->assertRedirect(route('mobile-sync.edit'));
 
-    expect($user->mobileSyncDevices()->count())->toBe(1);
-    expect($user->mobileSyncDevices()->first()->linking_token)->not->toBeNull();
+    expect($user->mobileSyncDevices()->count())->toBe(1)
+        ->and($user->mobileSyncDevices()->first()->linking_token)->not->toBeNull();
 });
 
 it('deactivates pending tokens when generating new one', function (): void {
@@ -74,8 +77,8 @@ it('deactivates pending tokens when generating new one', function (): void {
         ->post(route('mobile-sync.token'))
         ->assertRedirect();
 
-    expect($oldDevice->fresh()->is_active)->toBeFalse();
-    expect($user->mobileSyncDevices()->where('is_active', true)->count())->toBe(1);
+    expect($oldDevice->fresh()->is_active)->toBeFalse()
+        ->and($user->mobileSyncDevices()->where('is_active', true)->count())->toBe(1);
 });
 
 it('disconnects a paired device', function (): void {

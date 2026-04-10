@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\UserTwoFactorAuthenticationController;
 use App\Models\User;
+
+covers(UserTwoFactorAuthenticationController::class);
 
 it('renders two factor authentication page', function (): void {
     $user = User::factory()->create();

@@ -21,6 +21,8 @@ use Workflow\Activity;
 use Workflow\Workflow;
 use Workflow\WorkflowStub;
 
+covers(MealPlanInitializeWorkflow::class);
+
 beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->user->profile()->create([
@@ -77,23 +79,23 @@ it('converts all days meals to meal data collection correctly', function (): voi
 
     $result = MealPlanInitializeWorkflow::convertToMealDataCollection($allDaysMeals);
 
-    expect($result)->toHaveCount(2);
-    expect($result[0])
+    expect($result)->toHaveCount(2)
+        ->and($result[0])
         ->toBeInstanceOf(MealData::class)
         ->dayNumber->toBe(1)
-        ->name->toBe('Day 1 Breakfast');
-    expect($result[1])
+        ->name->toBe('Day 1 Breakfast')
+        ->and($result[1])
         ->toBeInstanceOf(MealData::class)
         ->dayNumber->toBe(2)
         ->name->toBe('Day 2 Lunch');
 });
 
 it('gets correct meal plan type based on total days', function (): void {
-    expect(MealPlanInitializeWorkflow::getMealPlanType(7))->toBe(MealPlanType::Weekly);
-    expect(MealPlanInitializeWorkflow::getMealPlanType(5))->toBe(MealPlanType::Weekly);
-    expect(MealPlanInitializeWorkflow::getMealPlanType(14))->toBe(MealPlanType::Monthly);
-    expect(MealPlanInitializeWorkflow::getMealPlanType(30))->toBe(MealPlanType::Monthly);
-    expect(MealPlanInitializeWorkflow::getMealPlanType(45))->toBe(MealPlanType::Custom);
+    expect(MealPlanInitializeWorkflow::getMealPlanType(7))->toBe(MealPlanType::Weekly)
+        ->and(MealPlanInitializeWorkflow::getMealPlanType(5))->toBe(MealPlanType::Weekly)
+        ->and(MealPlanInitializeWorkflow::getMealPlanType(14))->toBe(MealPlanType::Monthly)
+        ->and(MealPlanInitializeWorkflow::getMealPlanType(30))->toBe(MealPlanType::Monthly)
+        ->and(MealPlanInitializeWorkflow::getMealPlanType(45))->toBe(MealPlanType::Custom);
 });
 
 it('previous day context generates correct prompt text', function (): void {
@@ -184,15 +186,15 @@ it('generates day meals using activity with mocked agent', function (): void {
 });
 
 it('activity classes exist and extend correct base class', function (): void {
-    expect(class_exists(MealPlanDayGeneratorActivity::class))->toBeTrue();
-    expect(class_exists(SaveDayMealsActivity::class))->toBeTrue();
-    expect(is_subclass_of(MealPlanDayGeneratorActivity::class, Activity::class))->toBeTrue();
-    expect(is_subclass_of(SaveDayMealsActivity::class, Activity::class))->toBeTrue();
+    expect(class_exists(MealPlanDayGeneratorActivity::class))->toBeTrue()
+        ->and(class_exists(SaveDayMealsActivity::class))->toBeTrue()
+        ->and(is_subclass_of(MealPlanDayGeneratorActivity::class, Activity::class))->toBeTrue()
+        ->and(is_subclass_of(SaveDayMealsActivity::class, Activity::class))->toBeTrue();
 });
 
 it('workflow class exists and extends correct base class', function (): void {
-    expect(class_exists(MealPlanInitializeWorkflow::class))->toBeTrue();
-    expect(is_subclass_of(MealPlanInitializeWorkflow::class, Workflow::class))->toBeTrue();
+    expect(class_exists(MealPlanInitializeWorkflow::class))->toBeTrue()
+        ->and(is_subclass_of(MealPlanInitializeWorkflow::class, Workflow::class))->toBeTrue();
 });
 
 it('workflow triggers via generate meal plan action with workflow stub fake', function (): void {
@@ -202,8 +204,8 @@ it('workflow triggers via generate meal plan action with workflow stub fake', fu
     $action->handle($this->user);
 
     $mealPlan = $this->user->mealPlans()->first();
-    expect($mealPlan)->not->toBeNull();
-    expect($mealPlan->metadata['status'])->toBe('generating');
+    expect($mealPlan)->not->toBeNull()
+        ->and($mealPlan->metadata['status'])->toBe('generating');
 });
 
 it('converts multiple days meals to collection preserving day numbers', function (): void {
@@ -262,34 +264,32 @@ it('converts multiple days meals to collection preserving day numbers', function
     $allDaysMeals = [1 => $day1Meals, 2 => $day2Meals];
     $result = MealPlanInitializeWorkflow::convertToMealDataCollection($allDaysMeals);
 
-    expect($result)->toHaveCount(3);
-
-    expect($result[0]->dayNumber)->toBe(1);
-    expect($result[1]->dayNumber)->toBe(1);
-    expect($result[2]->dayNumber)->toBe(2);
-
-    expect($result[0]->type)->toBe(MealType::Breakfast);
-    expect($result[1]->type)->toBe(MealType::Lunch);
-    expect($result[2]->type)->toBe(MealType::Dinner);
+    expect($result)->toHaveCount(3)
+        ->and($result[0]->dayNumber)->toBe(1)
+        ->and($result[1]->dayNumber)->toBe(1)
+        ->and($result[2]->dayNumber)->toBe(2)
+        ->and($result[0]->type)->toBe(MealType::Breakfast)
+        ->and($result[1]->type)->toBe(MealType::Lunch)
+        ->and($result[2]->type)->toBe(MealType::Dinner);
 });
 
 it('returns custom type for plans exceeding 30 days', function (): void {
-    expect(MealPlanInitializeWorkflow::getMealPlanType(31))->toBe(MealPlanType::Custom);
-    expect(MealPlanInitializeWorkflow::getMealPlanType(60))->toBe(MealPlanType::Custom);
-    expect(MealPlanInitializeWorkflow::getMealPlanType(90))->toBe(MealPlanType::Custom);
+    expect(MealPlanInitializeWorkflow::getMealPlanType(31))->toBe(MealPlanType::Custom)
+        ->and(MealPlanInitializeWorkflow::getMealPlanType(60))->toBe(MealPlanType::Custom)
+        ->and(MealPlanInitializeWorkflow::getMealPlanType(90))->toBe(MealPlanType::Custom);
 });
 
 it('returns weekly type for 7 days or less', function (): void {
-    expect(MealPlanInitializeWorkflow::getMealPlanType(1))->toBe(MealPlanType::Weekly);
-    expect(MealPlanInitializeWorkflow::getMealPlanType(3))->toBe(MealPlanType::Weekly);
-    expect(MealPlanInitializeWorkflow::getMealPlanType(7))->toBe(MealPlanType::Weekly);
+    expect(MealPlanInitializeWorkflow::getMealPlanType(1))->toBe(MealPlanType::Weekly)
+        ->and(MealPlanInitializeWorkflow::getMealPlanType(3))->toBe(MealPlanType::Weekly)
+        ->and(MealPlanInitializeWorkflow::getMealPlanType(7))->toBe(MealPlanType::Weekly);
 });
 
 it('returns monthly type for 8 to 30 days', function (): void {
-    expect(MealPlanInitializeWorkflow::getMealPlanType(8))->toBe(MealPlanType::Monthly);
-    expect(MealPlanInitializeWorkflow::getMealPlanType(15))->toBe(MealPlanType::Monthly);
-    expect(MealPlanInitializeWorkflow::getMealPlanType(28))->toBe(MealPlanType::Monthly);
-    expect(MealPlanInitializeWorkflow::getMealPlanType(30))->toBe(MealPlanType::Monthly);
+    expect(MealPlanInitializeWorkflow::getMealPlanType(8))->toBe(MealPlanType::Monthly)
+        ->and(MealPlanInitializeWorkflow::getMealPlanType(15))->toBe(MealPlanType::Monthly)
+        ->and(MealPlanInitializeWorkflow::getMealPlanType(28))->toBe(MealPlanType::Monthly)
+        ->and(MealPlanInitializeWorkflow::getMealPlanType(30))->toBe(MealPlanType::Monthly);
 });
 
 it('generates expected result structure from workflow execution', function (): void {
@@ -376,9 +376,9 @@ it('converts day meals data to meal data collection with correct properties', fu
     $allDaysMeals = [5 => $dayMeals];
     $result = MealPlanInitializeWorkflow::convertToMealDataCollection($allDaysMeals);
 
-    expect($result)->toHaveCount(1);
-    expect($result[0]->dayNumber)->toBe(5);
-    expect($result[0]->name)->toBe('Oatmeal');
-    expect($result[0]->calories)->toBe(300.0);
-    expect($result[0]->type)->toBe(MealType::Breakfast);
+    expect($result)->toHaveCount(1)
+        ->and($result[0]->dayNumber)->toBe(5)
+        ->and($result[0]->name)->toBe('Oatmeal')
+        ->and($result[0]->calories)->toBe(300.0)
+        ->and($result[0]->type)->toBe(MealType::Breakfast);
 });

@@ -5,10 +5,13 @@ declare(strict_types=1);
 use App\Enums\BloodType;
 use App\Enums\HealthSyncType;
 use App\Enums\Sex;
+use App\Http\Controllers\Api\V1\MobileSyncHealthEntriesController;
 use App\Models\HealthSyncSample;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
 use Illuminate\Support\Facades\Date;
+
+covers(MobileSyncHealthEntriesController::class);
 
 /**
  * @param  array<int, array<string, mixed>>  $entries
@@ -372,10 +375,10 @@ it('syncs all types to health sync samples table', function (): void {
         ->where('type_identifier', 'heartRate')
         ->first();
 
-    expect($heartRate->value)->toBe(72.0);
-    expect($heartRate->unit)->toBe('bpm');
-    expect($heartRate->source)->toBe('Apple Watch');
-    expect($heartRate->mobile_sync_device_id)->toBe($device->id);
+    expect($heartRate->value)->toBe(72.0)
+        ->and($heartRate->unit)->toBe('bpm')
+        ->and($heartRate->source)->toBe('Apple Watch')
+        ->and($heartRate->mobile_sync_device_id)->toBe($device->id);
 });
 
 it('syncs sleep stages to health sync samples', function (): void {
@@ -974,8 +977,8 @@ it('stores timezone on health sync samples and updates user timezone', function 
 
     $sample = HealthSyncSample::query()->where('user_id', $user->id)->first();
 
-    expect($sample->timezone)->toBe('Asia/Ulaanbaatar');
-    expect($user->fresh()->timezone)->toBe('Asia/Ulaanbaatar');
+    expect($sample->timezone)->toBe('Asia/Ulaanbaatar')
+        ->and($user->fresh()->timezone)->toBe('Asia/Ulaanbaatar');
 });
 
 it('syncs without timezone for backward compatibility', function (): void {

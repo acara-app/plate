@@ -11,6 +11,8 @@ use App\Models\User;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Queue;
 
+covers(GenerateGroceryListJob::class);
+
 it('dispatches generate grocery list job when creating via store endpoint', function (): void {
     Queue::fake();
 

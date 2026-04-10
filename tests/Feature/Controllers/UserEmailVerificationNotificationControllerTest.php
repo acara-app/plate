@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\UserEmailVerificationNotificationController;
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Notification;
+
+covers(UserEmailVerificationNotificationController::class);
 
 it('renders verify email page', function (): void {
     $user = User::factory()->create([

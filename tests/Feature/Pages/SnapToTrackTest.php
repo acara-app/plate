@@ -6,7 +6,7 @@ use Livewire\Livewire;
 
 it('renders the snap to track landing page', function (): void {
     Livewire::test('pages::snap-to-track')
-        ->assertStatus(200)
+        ->assertSuccessful()
         ->assertSee('Snap to Track')
         ->assertSee('Track calories & macros instantly with AI');
 });

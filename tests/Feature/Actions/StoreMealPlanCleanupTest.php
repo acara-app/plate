@@ -11,6 +11,8 @@ use App\Models\MealPlan;
 use App\Models\User;
 use Spatie\LaravelData\DataCollection;
 
+covers(StoreMealPlan::class);
+
 it('deletes old meal plans of the same type when creating a new one', function (): void {
     $user = User::factory()->create();
 
@@ -20,8 +22,8 @@ it('deletes old meal plans of the same type when creating a new one', function (
         ->has(Meal::factory()->breakfast()->forDay(1)->count(3), 'meals')
         ->create(['name' => 'Old Weekly Plan']);
 
-    expect(MealPlan::query()->count())->toBe(1);
-    expect(Meal::query()->count())->toBe(3);
+    expect(MealPlan::query()->count())->toBe(1)
+        ->and(Meal::query()->count())->toBe(3);
 
     $mealPlanData = new MealPlanData(
         type: MealPlanType::Weekly,
@@ -52,13 +54,11 @@ it('deletes old meal plans of the same type when creating a new one', function (
     $action = resolve(StoreMealPlan::class);
     $newPlan = $action->handle($user, $mealPlanData);
 
-    expect(MealPlan::query()->count())->toBe(1);
-    expect(MealPlan::query()->first()->id)->toBe($newPlan->id);
-    expect(MealPlan::query()->first()->name)->toBe('New Weekly Plan');
-
-    expect(Meal::query()->count())->toBe(1);
-
-    expect(MealPlan::query()->find($oldPlan->id))->toBeNull();
+    expect(MealPlan::query()->count())->toBe(1)
+        ->and(MealPlan::query()->first()->id)->toBe($newPlan->id)
+        ->and(MealPlan::query()->first()->name)->toBe('New Weekly Plan')
+        ->and(Meal::query()->count())->toBe(1)
+        ->and(MealPlan::query()->find($oldPlan->id))->toBeNull();
 });
 
 it('only deletes meal plans of the same type', function (): void {
@@ -76,8 +76,8 @@ it('only deletes meal plans of the same type', function (): void {
         ->has(Meal::factory()->lunch()->forDay(1), 'meals')
         ->create(['name' => 'Monthly Plan']);
 
-    expect(MealPlan::query()->count())->toBe(2);
-    expect(Meal::query()->count())->toBe(2);
+    expect(MealPlan::query()->count())->toBe(2)
+        ->and(Meal::query()->count())->toBe(2);
 
     $mealPlanData = new MealPlanData(
         type: MealPlanType::Weekly,
@@ -108,13 +108,11 @@ it('only deletes meal plans of the same type', function (): void {
     $action = resolve(StoreMealPlan::class);
     $action->handle($user, $mealPlanData);
 
-    expect(MealPlan::query()->count())->toBe(2);
-    expect(MealPlan::query()->where('type', MealPlanType::Weekly)->count())->toBe(1);
-    expect(MealPlan::query()->where('type', MealPlanType::Monthly)->count())->toBe(1);
-
-    expect(MealPlan::query()->find($weeklyPlan->id))->toBeNull();
-
-    expect(MealPlan::query()->find($monthlyPlan->id))->not->toBeNull();
+    expect(MealPlan::query()->count())->toBe(2)
+        ->and(MealPlan::query()->where('type', MealPlanType::Weekly)->count())->toBe(1)
+        ->and(MealPlan::query()->where('type', MealPlanType::Monthly)->count())->toBe(1)
+        ->and(MealPlan::query()->find($weeklyPlan->id))->toBeNull()
+        ->and(MealPlan::query()->find($monthlyPlan->id))->not->toBeNull();
 });
 
 it('deletes multiple old meal plans of the same type', function (): void {
@@ -138,8 +136,8 @@ it('deletes multiple old meal plans of the same type', function (): void {
         ->has(Meal::factory()->dinner()->forDay(1), 'meals')
         ->create(['name' => 'Old Plan 3', 'created_at' => now()->subDays(1)]);
 
-    expect(MealPlan::query()->count())->toBe(3);
-    expect(Meal::query()->count())->toBe(3);
+    expect(MealPlan::query()->count())->toBe(3)
+        ->and(Meal::query()->count())->toBe(3);
 
     $mealPlanData = new MealPlanData(
         type: MealPlanType::Weekly,
@@ -170,15 +168,13 @@ it('deletes multiple old meal plans of the same type', function (): void {
     $action = resolve(StoreMealPlan::class);
     $newPlan = $action->handle($user, $mealPlanData);
 
-    expect(MealPlan::query()->count())->toBe(1);
-    expect(MealPlan::query()->first()->id)->toBe($newPlan->id);
-    expect(MealPlan::query()->first()->name)->toBe('Latest Plan');
-
-    expect(Meal::query()->count())->toBe(1);
-
-    expect(MealPlan::query()->find($oldPlan1->id))->toBeNull();
-    expect(MealPlan::query()->find($oldPlan2->id))->toBeNull();
-    expect(MealPlan::query()->find($oldPlan3->id))->toBeNull();
+    expect(MealPlan::query()->count())->toBe(1)
+        ->and(MealPlan::query()->first()->id)->toBe($newPlan->id)
+        ->and(MealPlan::query()->first()->name)->toBe('Latest Plan')
+        ->and(Meal::query()->count())->toBe(1)
+        ->and(MealPlan::query()->find($oldPlan1->id))->toBeNull()
+        ->and(MealPlan::query()->find($oldPlan2->id))->toBeNull()
+        ->and(MealPlan::query()->find($oldPlan3->id))->toBeNull();
 });
 
 it('does not delete other users meal plans', function (): void {
@@ -228,13 +224,11 @@ it('does not delete other users meal plans', function (): void {
     $action = resolve(StoreMealPlan::class);
     $action->handle($user1, $mealPlanData);
 
-    expect(MealPlan::query()->count())->toBe(2);
-    expect(MealPlan::query()->where('user_id', $user1->id)->count())->toBe(1);
-    expect(MealPlan::query()->where('user_id', $user2->id)->count())->toBe(1);
-
-    expect(MealPlan::query()->find($user1Plan->id))->toBeNull();
-
-    expect(MealPlan::query()->find($user2Plan->id))->not->toBeNull();
+    expect(MealPlan::query()->count())->toBe(2)
+        ->and(MealPlan::query()->where('user_id', $user1->id)->count())->toBe(1)
+        ->and(MealPlan::query()->where('user_id', $user2->id)->count())->toBe(1)
+        ->and(MealPlan::query()->find($user1Plan->id))->toBeNull()
+        ->and(MealPlan::query()->find($user2Plan->id))->not->toBeNull();
 });
 
 it('handles creating first meal plan when no old plans exist', function (): void {
@@ -271,9 +265,9 @@ it('handles creating first meal plan when no old plans exist', function (): void
     $action = resolve(StoreMealPlan::class);
     $mealPlan = $action->handle($user, $mealPlanData);
 
-    expect(MealPlan::query()->count())->toBe(1);
-    expect($mealPlan->name)->toBe('First Plan');
-    expect(Meal::query()->count())->toBe(1);
+    expect(MealPlan::query()->count())->toBe(1)
+        ->and($mealPlan->name)->toBe('First Plan')
+        ->and(Meal::query()->count())->toBe(1);
 });
 
 it('cascades delete to meals when deleting old meal plans', function (): void {
@@ -290,8 +284,8 @@ it('cascades delete to meals when deleting old meal plans', function (): void {
         Meal::factory()->dinner()->forDay($day)->for($oldPlan)->create();
     }
 
-    expect(MealPlan::query()->count())->toBe(1);
-    expect(Meal::query()->count())->toBe(21);
+    expect(MealPlan::query()->count())->toBe(1)
+        ->and(Meal::query()->count())->toBe(21);
 
     $oldMealIds = Meal::query()->pluck('id')->toArray();
 
@@ -324,9 +318,9 @@ it('cascades delete to meals when deleting old meal plans', function (): void {
     $action = resolve(StoreMealPlan::class);
     $newPlan = $action->handle($user, $mealPlanData);
 
-    expect(MealPlan::query()->count())->toBe(1);
-    expect(MealPlan::query()->first()->id)->toBe($newPlan->id);
-    expect(Meal::query()->count())->toBe(1);
+    expect(MealPlan::query()->count())->toBe(1)
+        ->and(MealPlan::query()->first()->id)->toBe($newPlan->id)
+        ->and(Meal::query()->count())->toBe(1);
 
     foreach ($oldMealIds as $oldMealId) {
         expect(Meal::query()->find($oldMealId))->toBeNull();

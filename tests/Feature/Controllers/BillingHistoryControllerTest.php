@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\BillingHistoryController;
 use App\Models\User;
+
+covers(BillingHistoryController::class);
 
 it('renders billing history page', function (): void {
     $user = User::factory()->create();

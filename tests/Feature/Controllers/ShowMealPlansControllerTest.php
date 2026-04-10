@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\ShowMealPlansController;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
+
+covers(ShowMealPlansController::class);
 
 it('requires authentication', function (): void {
     $response = $this->get(route('meal-plans.index'));

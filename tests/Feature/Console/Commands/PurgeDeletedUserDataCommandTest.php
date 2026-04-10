@@ -9,6 +9,8 @@ use App\Models\History;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
+covers(PurgeDeletedUserDataCommand::class);
+
 it('purges orphaned data for users deleted over 30 days ago', function (): void {
     $user = User::factory()->create();
     $userId = $user->id;

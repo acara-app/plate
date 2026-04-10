@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\ChatController;
 use App\Models\Conversation;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
+
+covers(ChatController::class);
 
 it('renders conversations index page', function (): void {
     $this->withoutVite();

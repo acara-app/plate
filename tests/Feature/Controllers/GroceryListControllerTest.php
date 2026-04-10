@@ -3,12 +3,15 @@
 declare(strict_types=1);
 
 use App\Enums\GroceryListStatus;
+use App\Http\Controllers\GroceryListController;
 use App\Jobs\GenerateGroceryListJob;
 use App\Models\GroceryItem;
 use App\Models\GroceryList;
 use App\Models\MealPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
+
+covers(GroceryListController::class);
 
 it('returns null when grocery list does not exist', function (): void {
     $this->withoutVite();

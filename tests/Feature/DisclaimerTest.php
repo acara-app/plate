@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\DisclaimerController;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\post;
+
+covers(DisclaimerController::class);
 
 it('renders disclaimer page for user who has not accepted', function (): void {
     $this->withoutVite();

@@ -3,10 +3,13 @@
 declare(strict_types=1);
 
 use App\Enums\MealPlanGenerationStatus;
+use App\Http\Controllers\GenerateMealDayController;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
 use Workflow\WorkflowStub;
+
+covers(GenerateMealDayController::class);
 
 it('returns 403 when user does not own meal plan', function (): void {
     $user = User::factory()->create();

@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\SessionController;
 use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
+
+covers(SessionController::class);
 
 it('renders login page', function (): void {
     $response = $this->fromRoute('home')

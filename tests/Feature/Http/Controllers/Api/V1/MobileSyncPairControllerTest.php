@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\V1\MobileSyncPairController;
 use App\Models\HealthSyncSample;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
+
+covers(MobileSyncPairController::class);
 
 it('pairs a device with a valid token', function (): void {
     $user = User::factory()->create();

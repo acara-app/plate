@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\DashboardController;
 use App\Models\User;
+
+covers(DashboardController::class);
 
 it('requires authentication', function (): void {
     $response = $this->get(route('dashboard'));

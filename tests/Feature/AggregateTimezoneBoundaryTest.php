@@ -9,6 +9,8 @@ use App\Models\HealthSyncSample;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 
+covers(AggregateHealthDailySamplesAction::class);
+
 beforeEach(function (): void {
     $this->action = resolve(AggregateHealthDailySamplesAction::class);
 });

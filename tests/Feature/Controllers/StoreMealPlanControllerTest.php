@@ -3,8 +3,11 @@
 declare(strict_types=1);
 
 use App\Enums\DietType;
+use App\Http\Controllers\StoreMealPlanController;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
+
+covers(StoreMealPlanController::class);
 
 it('requires authentication', function (): void {
     $response = $this->post(route('meal-plans.store'));

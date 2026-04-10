@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\UserProfileAttribute;
 
+covers(MealPlanPromptBuilder::class);
+
 it('includes critical safety warning when user has type 2 diabetes', function (): void {
     $user = User::factory()
         ->has(UserProfile::factory(), 'profile')

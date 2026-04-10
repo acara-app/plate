@@ -18,6 +18,8 @@ use App\Models\UserProfile;
 use App\Models\UserTelegramChat;
 use Illuminate\Support\Facades\DB;
 
+covers(DeleteUser::class);
+
 it('deletes user and eventually purges all related data', function (): void {
     $user = User::factory()->create(['password' => 'password']);
     $userId = $user->id;

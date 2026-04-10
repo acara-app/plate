@@ -9,12 +9,15 @@ use App\Exceptions\TelegramUserException;
 use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\UserTelegramChat;
+use App\Services\Telegram\TelegramWebhookHandler;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Testing\TestResponse;
 use Laravel\Ai\Files\Base64Image;
 use Tests\Fixtures\TelegramWebhookPayloads;
+
+covers(TelegramWebhookHandler::class);
 
 beforeEach(function (): void {
     Telegraph::fake();

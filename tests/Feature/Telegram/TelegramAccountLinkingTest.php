@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 use App\Models\User;
 use App\Models\UserTelegramChat;
+use App\Services\Telegram\TelegramWebhookHandler;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Models\TelegraphChat;
+
+covers(TelegramWebhookHandler::class);
 
 it('links telegram account and removes duplicates', function (): void {
     $user = User::factory()->create();
@@ -37,6 +40,6 @@ it('links telegram account and removes duplicates', function (): void {
 
     $pendingChat->update(['telegraph_chat_id' => $telegraphChat->id]);
 
-    expect(UserTelegramChat::query()->find($existingChat->id))->toBeNull();
-    expect($pendingChat->fresh()->telegraph_chat_id)->toBe($telegraphChat->id);
+    expect(UserTelegramChat::query()->find($existingChat->id))->toBeNull()
+        ->and($pendingChat->fresh()->telegraph_chat_id)->toBe($telegraphChat->id);
 });

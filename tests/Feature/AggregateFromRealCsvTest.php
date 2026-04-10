@@ -8,6 +8,8 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Tests\Fixtures\HealthSyncSamplesFixture;
 
+covers(AggregateHealthDailySamplesAction::class);
+
 it('aggregates the real health_sync_samples-003.csv fixture end-to-end', function (): void {
     $user = User::factory()->create(['timezone' => 'America/Regina']);
 
@@ -22,14 +24,10 @@ it('aggregates the real health_sync_samples-003.csv fixture end-to-end', functio
         CarbonImmutable::parse('2026-04-09'),
     );
 
-    expect($total)->toBeGreaterThan(0);
-
     $distinctDays = HealthDailyAggregate::query()
         ->where('user_id', $user->id)
         ->distinct('local_date')
         ->count('local_date');
-
-    expect($distinctDays)->toBeGreaterThanOrEqual(6);
 
     $invalid = HealthDailyAggregate::query()
         ->where('user_id', $user->id)
@@ -38,7 +36,9 @@ it('aggregates the real health_sync_samples-003.csv fixture end-to-end', functio
         })
         ->count();
 
-    expect($invalid)->toBe(0);
+    expect($total)->toBeGreaterThan(0)
+        ->and($distinctDays)->toBeGreaterThanOrEqual(6)
+        ->and($invalid)->toBe(0);
 });
 
 it('respects interval-based source dedup when aggregating real stepCount data', function (): void {

@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Checkout\CashierSubscriptionController;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+
+covers(CashierSubscriptionController::class);
 
 it('validates product_id is required', function (): void {
     $user = User::factory()->create();

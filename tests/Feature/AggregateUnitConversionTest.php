@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Exceptions\HealthUnitConversionException;
 use App\Services\HealthMetricUnitConverter;
 
+covers(HealthMetricUnitConverter::class);
+
 beforeEach(function (): void {
     $this->converter = resolve(HealthMetricUnitConverter::class);
 });

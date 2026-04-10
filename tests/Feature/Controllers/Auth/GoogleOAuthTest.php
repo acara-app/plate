@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\SocialiteController;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,8 @@ use Laravel\Socialite\Two\User as SocialiteUser;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
+
+covers(SocialiteController::class);
 
 beforeEach(function (): void {
     $this->provider = new class implements Provider
@@ -75,8 +78,8 @@ it('creates new user from Google OAuth callback with mocked provider', function 
         'name' => 'New User',
     ]);
 
-    expect(Auth::check())->toBeTrue();
-    expect(Auth::user()->email)->toBe('newuser@example.com');
+    expect(Auth::check())->toBeTrue()
+        ->and(Auth::user()->email)->toBe('newuser@example.com');
 })->group('oauth');
 
 it('marks email as verified when creating user from Google OAuth', function (): void {
@@ -115,9 +118,9 @@ it('links Google account to existing user by email and redirects to chat', funct
     $response->assertRedirectToRoute('dashboard');
 
     $existingUser->refresh();
-    expect($existingUser->google_id)->toBe('google456');
-    expect($existingUser->name)->toBe('Updated Name');
-    expect(Auth::id())->toBe($existingUser->id);
+    expect($existingUser->google_id)->toBe('google456')
+        ->and($existingUser->name)->toBe('Updated Name')
+        ->and(Auth::id())->toBe($existingUser->id);
 })->group('oauth');
 
 it('updates existing Google user information on login and redirects to chat', function (): void {
@@ -143,9 +146,9 @@ it('updates existing Google user information on login and redirects to chat', fu
     $response->assertRedirectToRoute('dashboard');
 
     $existingUser->refresh();
-    expect($existingUser->email)->toBe('newmail@example.com');
-    expect($existingUser->name)->toBe('New Name');
-    expect(Auth::id())->toBe($existingUser->id);
+    expect($existingUser->email)->toBe('newmail@example.com')
+        ->and($existingUser->name)->toBe('New Name')
+        ->and(Auth::id())->toBe($existingUser->id);
 })->group('oauth');
 
 it('handles missing name from Google gracefully for new users', function (): void {

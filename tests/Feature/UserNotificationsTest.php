@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\UserNotificationsController;
 use App\Models\User;
+
+covers(UserNotificationsController::class);
 
 uses()->group('notification-settings');
 

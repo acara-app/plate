@@ -8,6 +8,8 @@ use App\Models\HealthDailyAggregate;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 
+covers(DiabetesLayout::class);
+
 it('computes the weighted cross-day mean for glucose, not the naive average of averages', function (): void {
     $user = User::factory()->create();
 

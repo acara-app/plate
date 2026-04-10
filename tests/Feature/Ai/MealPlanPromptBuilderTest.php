@@ -12,17 +12,19 @@ use App\Models\UserProfile;
 use App\Models\UserProfileAttribute;
 use Illuminate\Support\Facades\DB;
 
-test('it handles user without profile gracefully by auto-creating one', function (): void {
+covers(MealPlanPromptBuilder::class);
+
+it('handles user without profile gracefully by auto-creating one', function (): void {
     $user = User::factory()->create();
 
     $builder = resolve(MealPlanPromptBuilder::class);
     $result = $builder->handle($user);
 
-    expect($result)->toBeString();
-    expect($user->refresh()->profile)->toBeInstanceOf(UserProfile::class);
+    expect($result)->toBeString()
+        ->and($user->refresh()->profile)->toBeInstanceOf(UserProfile::class);
 });
 
-test('it generates meal plan context for user with complete profile', function (): void {
+it('generates meal plan context for user with complete profile', function (): void {
     $user = User::factory()->create();
     $profile = UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -60,7 +62,7 @@ test('it generates meal plan context for user with complete profile', function (
         ->toContain('Daily Calorie Target');
 });
 
-test('it handles user with minimal profile data', function (): void {
+it('handles user with minimal profile data', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -80,7 +82,7 @@ test('it handles user with minimal profile data', function (): void {
         ->toContain('Not specified');
 });
 
-test('it calculates correct daily calorie target for weight loss', function (): void {
+it('calculates correct daily calorie target for weight loss', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -100,7 +102,7 @@ test('it calculates correct daily calorie target for weight loss', function (): 
         ->toContain('Daily Calorie Target');
 });
 
-test('it calculates correct daily calorie target for muscle gain', function (): void {
+it('calculates correct daily calorie target for muscle gain', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -120,7 +122,7 @@ test('it calculates correct daily calorie target for muscle gain', function (): 
         ->toContain('Daily Calorie Target');
 });
 
-test('it includes dietary preferences in meal plan context', function (): void {
+it('includes dietary preferences in meal plan context', function (): void {
     $user = User::factory()->create();
     $profile = UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -148,7 +150,7 @@ test('it includes dietary preferences in meal plan context', function (): void {
         ->toContain('Gluten');
 });
 
-test('it includes health conditions in meal plan context', function (): void {
+it('includes health conditions in meal plan context', function (): void {
     $user = User::factory()->create();
     $profile = UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -178,7 +180,7 @@ test('it includes health conditions in meal plan context', function (): void {
         ->toContain('High Blood Pressure');
 });
 
-test('it includes BMI calculation in context', function (): void {
+it('includes BMI calculation in context', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -199,7 +201,7 @@ test('it includes BMI calculation in context', function (): void {
         ->toContain('27.78');
 });
 
-test('it includes TDEE calculation in context', function (): void {
+it('includes TDEE calculation in context', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -219,7 +221,7 @@ test('it includes TDEE calculation in context', function (): void {
         ->toContain('TDEE');
 });
 
-test('it calculates correct TDEE for female user', function (): void {
+it('calculates correct TDEE for female user', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -239,7 +241,7 @@ test('it calculates correct TDEE for female user', function (): void {
         ->toContain('TDEE');
 });
 
-test('it generates special instructions for weight loss goal', function (): void {
+it('generates special instructions for weight loss goal', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -257,7 +259,7 @@ test('it generates special instructions for weight loss goal', function (): void
     expect($result)->toBeString();
 });
 
-test('it generates special instructions for muscle gain goal', function (): void {
+it('generates special instructions for muscle gain goal', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -275,7 +277,7 @@ test('it generates special instructions for muscle gain goal', function (): void
     expect($result)->toBeString();
 });
 
-test('it generates special instructions for maintenance goal', function (): void {
+it('generates special instructions for maintenance goal', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -293,7 +295,7 @@ test('it generates special instructions for maintenance goal', function (): void
     expect($result)->toBeString();
 });
 
-test('it generates special instructions for heart health goal', function (): void {
+it('generates special instructions for heart health goal', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -311,7 +313,7 @@ test('it generates special instructions for heart health goal', function (): voi
     expect($result)->toBeString();
 });
 
-test('it generates special instructions for blood sugar control goal', function (): void {
+it('generates special instructions for blood sugar control goal', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -329,7 +331,7 @@ test('it generates special instructions for blood sugar control goal', function 
     expect($result)->toBeString();
 });
 
-test('it handles missing lifestyle gracefully', function (): void {
+it('handles missing lifestyle gracefully', function (): void {
     $user = User::factory()->create();
 
     UserProfile::factory()->create([
@@ -348,7 +350,7 @@ test('it handles missing lifestyle gracefully', function (): void {
     expect($result)->toBeString();
 });
 
-test('it handles missing sex gracefully', function (): void {
+it('handles missing sex gracefully', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -366,7 +368,7 @@ test('it handles missing sex gracefully', function (): void {
     expect($result)->toBeString();
 });
 
-test('it handles unknown goal type gracefully', function (): void {
+it('handles unknown goal type gracefully', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -385,7 +387,7 @@ test('it handles unknown goal type gracefully', function (): void {
         ->toBeString();
 });
 
-test('it automatically analyzes glucose data when analysis not provided', function (): void {
+it('automatically analyzes glucose data when analysis not provided', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -421,7 +423,7 @@ test('it automatically analyzes glucose data when analysis not provided', functi
         ->toContain('Average Glucose Levels');
 });
 
-test('it handles user profile with no tdee for calorie calculation', function (): void {
+it('handles user profile with no tdee for calorie calculation', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -439,7 +441,7 @@ test('it handles user profile with no tdee for calorie calculation', function ()
     expect($result)->toBeString();
 });
 
-test('it handles user profile with no goal choice for calorie calculation', function (): void {
+it('handles user profile with no goal choice for calorie calculation', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -457,7 +459,7 @@ test('it handles user profile with no goal choice for calorie calculation', func
     expect($result)->toBeString();
 });
 
-test('it handles user profile with invalid goal choice enum value', function (): void {
+it('handles user profile with invalid goal choice enum value', function (): void {
     $user = User::factory()->create();
     $profile = UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -479,7 +481,7 @@ test('it handles user profile with invalid goal choice enum value', function ():
     expect($closure)->toThrow(ValueError::class);
 });
 
-test('it generates single day meal plan prompt with all parameters', function (): void {
+it('generates single day meal plan prompt with all parameters', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,

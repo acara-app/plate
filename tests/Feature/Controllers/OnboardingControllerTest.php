@@ -10,8 +10,11 @@ use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use App\Enums\UserProfileAttributeCategory;
+use App\Http\Controllers\OnboardingController;
 use App\Models\User;
 use Illuminate\Support\Facades\Date;
+
+covers(OnboardingController::class);
 
 it('renders biometrics page', function (): void {
     $user = User::factory()->create();
@@ -418,9 +421,9 @@ it('may store dietary preferences with allergies and complete onboarding', funct
         ->onboarding_completed->toBeTrue()
         ->onboarding_completed_at->not->toBeNull();
 
-    expect($profile->attributes)->toHaveCount(2);
-    expect($profile->attributes->first()->value)->toBe('Peanuts');
-    expect($profile->attributes->first()->severity)->toBe(AllergySeverity::Severe);
+    expect($profile->attributes)->toHaveCount(2)
+        ->and($profile->attributes->first()->value)->toBe('Peanuts')
+        ->and($profile->attributes->first()->severity)->toBe(AllergySeverity::Severe);
 });
 
 it('may skip dietary preferences and complete onboarding', function (): void {

@@ -9,7 +9,9 @@ use App\Models\User;
 use App\Notifications\GlucoseReportNotification;
 use Illuminate\Support\Facades\Notification;
 
-test('it processes users with glucose notifications enabled', function (): void {
+covers(ProcessGlucoseNotificationsCommand::class);
+
+it('processes users with glucose notifications enabled', function (): void {
     Notification::fake();
 
     $userWithNotifications = User::factory()->create([
@@ -47,7 +49,7 @@ test('it processes users with glucose notifications enabled', function (): void 
     Notification::assertNotSentTo($userWithoutNotifications, GlucoseReportNotification::class);
 });
 
-test('it does not notify users without verified email', function (): void {
+it('does not notify users without verified email', function (): void {
     Notification::fake();
 
     $unverifiedUser = User::factory()->create([
@@ -70,7 +72,7 @@ test('it does not notify users without verified email', function (): void {
     Notification::assertNotSentTo($unverifiedUser, GlucoseReportNotification::class);
 });
 
-test('it does not notify users with no glucose data', function (): void {
+it('does not notify users with no glucose data', function (): void {
     Notification::fake();
 
     $userWithNoData = User::factory()->create([
@@ -84,7 +86,7 @@ test('it does not notify users with no glucose data', function (): void {
     Notification::assertNotSentTo($userWithNoData, GlucoseReportNotification::class);
 });
 
-test('it does not notify users with well-controlled glucose', function (): void {
+it('does not notify users with well-controlled glucose', function (): void {
     Notification::fake();
 
     $userWithGoodControl = User::factory()->create([
@@ -107,7 +109,7 @@ test('it does not notify users with well-controlled glucose', function (): void 
     Notification::assertNotSentTo($userWithGoodControl, GlucoseReportNotification::class);
 });
 
-test('it does not process users with null settings', function (): void {
+it('does not process users with null settings', function (): void {
     Notification::fake();
 
     $userWithNullSettings = User::factory()->create([
@@ -130,7 +132,7 @@ test('it does not process users with null settings', function (): void {
     Notification::assertNotSentTo($userWithNullSettings, GlucoseReportNotification::class);
 });
 
-test('it processes multiple users with concerns', function (): void {
+it('processes multiple users with concerns', function (): void {
     Notification::fake();
 
     $users = [];

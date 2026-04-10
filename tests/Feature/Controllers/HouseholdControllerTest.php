@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\HouseholdController;
 use App\Models\User;
 use App\Models\UserProfile;
+
+covers(HouseholdController::class);
 
 it('renders household edit page', function (): void {
     $user = User::factory()->create();

@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\HealthEntry\StoreHealthEntryController;
 use App\Models\User;
+
+covers(StoreHealthEntryController::class);
 
 it('can store a new diabetes log with glucose reading', function (): void {
     $user = User::factory()->create();

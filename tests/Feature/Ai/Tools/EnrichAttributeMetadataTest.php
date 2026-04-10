@@ -6,6 +6,8 @@ use App\Ai\Tools\EnrichAttributeMetadata;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
+covers(EnrichAttributeMetadata::class);
+
 it('has correct name and description', function (): void {
     $tool = new EnrichAttributeMetadata;
 

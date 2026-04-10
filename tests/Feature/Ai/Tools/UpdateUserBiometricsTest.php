@@ -11,6 +11,8 @@ use App\Models\UserProfile;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
+covers(UpdateUserBiometrics::class);
+
 beforeEach(function (): void {
     $this->tool = new UpdateUserBiometrics;
 });

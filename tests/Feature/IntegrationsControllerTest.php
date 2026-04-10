@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\IntegrationsController;
 use App\Models\User;
 use App\Models\UserTelegramChat;
+
+covers(IntegrationsController::class);
 
 it('renders integrations page', function (): void {
     $user = User::factory()->create();
@@ -65,8 +68,8 @@ it('deactivates existing links when generating new token', function (): void {
         ->post(route('integrations.telegram.token'))
         ->assertRedirect();
 
-    expect($oldLink->fresh()->is_active)->toBeFalse();
-    expect($user->fresh()->telegramChat)->not->toBeNull();
+    expect($oldLink->fresh()->is_active)->toBeFalse()
+        ->and($user->fresh()->telegramChat)->not->toBeNull();
 });
 
 it('disconnects telegram integration', function (): void {

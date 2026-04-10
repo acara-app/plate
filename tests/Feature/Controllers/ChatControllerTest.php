@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 use App\Enums\AgentMode;
 use App\Enums\ModelName;
+use App\Http\Controllers\ChatController;
 use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
+
+covers(ChatController::class);
 
 beforeEach(function (): void {
     //

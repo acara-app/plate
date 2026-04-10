@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\HealthSyncPageController;
+
+covers(HealthSyncPageController::class);
+
 beforeEach(function (): void {
     $this->appStoreUrl = config('plate.health_sync.app_store_url');
 });

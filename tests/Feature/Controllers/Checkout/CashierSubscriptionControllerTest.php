@@ -3,9 +3,12 @@
 declare(strict_types=1);
 
 use App\Contracts\Services\StripeServiceContract;
+use App\Http\Controllers\Checkout\CashierSubscriptionController;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use Laravel\Cashier\Subscription;
+
+covers(CashierSubscriptionController::class);
 
 it('creates monthly subscription checkout successfully', function (): void {
     $user = User::factory()->create();

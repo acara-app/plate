@@ -10,6 +10,8 @@ use App\Enums\MealType;
 use App\Models\User;
 use Spatie\LaravelData\DataCollection;
 
+covers(StoreMealPlan::class);
+
 it('stores a meal plan with meals for a user', function (): void {
     $user = User::factory()->create();
 

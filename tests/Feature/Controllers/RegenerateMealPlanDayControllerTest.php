@@ -3,10 +3,13 @@
 declare(strict_types=1);
 
 use App\Enums\MealPlanGenerationStatus;
+use App\Http\Controllers\RegenerateMealPlanDayController;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
 use Workflow\WorkflowStub;
+
+covers(RegenerateMealPlanDayController::class);
 
 it('requires authentication to regenerate meal plan day', function (): void {
     $mealPlan = MealPlan::factory()->create();
@@ -100,8 +103,8 @@ it('deletes existing meals for the specified day', function (): void {
             'day' => 1,
         ]);
 
-    expect($mealPlan->meals()->where('day_number', 1)->count())->toBe(0);
-    expect($mealPlan->meals()->where('day_number', 2)->count())->toBe(2);
+    expect($mealPlan->meals()->where('day_number', 1)->count())->toBe(0)
+        ->and($mealPlan->meals()->where('day_number', 2)->count())->toBe(2);
 });
 
 it('updates metadata with generating status', function (): void {
