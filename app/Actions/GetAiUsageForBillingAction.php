@@ -30,8 +30,7 @@ final readonly class GetAiUsageForBillingAction
         $monthlyLimit = (float) $limits['monthly']['limit'];
 
         $rollingCost = $this->getCostForPeriod($user, $rollingPeriodStart, now());
-        $weeklyCost = $this->getCostForPeriod($user, $periodStart, now());
-        $monthlyCost = $this->getCostForPeriod($user, $periodStart, now());
+        $periodCost = $this->getCostForPeriod($user, $periodStart, now());
 
         return [
             'rolling' => [
@@ -41,15 +40,15 @@ final readonly class GetAiUsageForBillingAction
                 'resets_in' => $this->formatResetsIn(now()->addHours($limits['rolling']['period_hours'])),
             ],
             'weekly' => [
-                'current' => $this->toCredits($weeklyCost, $multiplier),
+                'current' => $this->toCredits($periodCost, $multiplier),
                 'limit' => $this->toCredits($weeklyLimit, $multiplier),
-                'percentage' => $this->calculatePercentage($weeklyCost, $weeklyLimit),
+                'percentage' => $this->calculatePercentage($periodCost, $weeklyLimit),
                 'resets_in' => $this->formatResetsIn($periodEnd),
             ],
             'monthly' => [
-                'current' => $this->toCredits($monthlyCost, $multiplier),
+                'current' => $this->toCredits($periodCost, $multiplier),
                 'limit' => $this->toCredits($monthlyLimit, $multiplier),
-                'percentage' => $this->calculatePercentage($monthlyCost, $monthlyLimit),
+                'percentage' => $this->calculatePercentage($periodCost, $monthlyLimit),
                 'resets_in' => $this->formatResetsIn($periodEnd),
             ],
         ];
@@ -58,26 +57,26 @@ final readonly class GetAiUsageForBillingAction
     // @codeCoverageIgnoreStart
     private function getPeriodStart(?object $subscription): CarbonImmutable
     {
-        if ($subscription && isset($subscription->current_period_start)) {
-            /** @var float|int|string $timestamp */
-            $timestamp = $subscription->current_period_start;
-
-            return CarbonImmutable::createFromTimestamp($timestamp);
+        if (! $subscription || ! isset($subscription->current_period_start)) {
+            return CarbonImmutable::now()->startOfWeek();
         }
 
-        return CarbonImmutable::now()->startOfWeek();
+        /** @var float|int|string $timestamp */
+        $timestamp = $subscription->current_period_start;
+
+        return CarbonImmutable::createFromTimestamp($timestamp);
     }
 
     private function getPeriodEnd(?object $subscription): CarbonImmutable
     {
-        if ($subscription && isset($subscription->current_period_end)) {
-            /** @var float|int|string $timestamp */
-            $timestamp = $subscription->current_period_end;
-
-            return CarbonImmutable::createFromTimestamp($timestamp);
+        if (! $subscription || ! isset($subscription->current_period_end)) {
+            return CarbonImmutable::now()->endOfWeek();
         }
 
-        return CarbonImmutable::now()->endOfWeek();
+        /** @var float|int|string $timestamp */
+        $timestamp = $subscription->current_period_end;
+
+        return CarbonImmutable::createFromTimestamp($timestamp);
     }
 
     // @codeCoverageIgnoreEnd

@@ -7,7 +7,7 @@ namespace App\Actions;
 use App\Models\Conversation;
 use App\Models\History;
 
-final class BuildConversationMessagesAction
+final readonly class BuildConversationMessagesAction
 {
     /**
      * @return list<array{id: string, role: string, parts: list<array<string, string>>}>
