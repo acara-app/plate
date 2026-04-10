@@ -49,7 +49,6 @@ final readonly class IndexNowService implements IndexNowServiceContract
         }
 
         if ($urls === []) {
-
             return IndexNowResultData::noUrls();
         }
 
@@ -78,16 +77,19 @@ final readonly class IndexNowService implements IndexNowServiceContract
                 if ($response->successful()) {
                     $totalSubmitted += count($chunk);
                 } else {
-                    $errorMessage = 'Chunk '.($index + 1).sprintf(': HTTP %d - %s', $response->status(), $response->body());
+                    $chunkNumber = $index + 1;
+                    $errorMessage = sprintf('Chunk %d: HTTP %d - %s', $chunkNumber, $response->status(), $response->body());
                     $errors[] = $errorMessage;
                     Log::error('IndexNow: '.$errorMessage);
                 }
             } catch (ConnectionException $e) {
-                $errorMessage = 'Chunk '.($index + 1).': Connection timeout - the request took too long to complete.';
+                $chunkNumber = $index + 1;
+                $errorMessage = sprintf('Chunk %d: Connection timeout - the request took too long to complete.', $chunkNumber);
                 $errors[] = $errorMessage;
                 Log::error('IndexNow: Connection timeout during submission: '.$e->getMessage());
             } catch (Exception $e) {
-                $errorMessage = 'Chunk '.($index + 1).(': '.$e->getMessage());
+                $chunkNumber = $index + 1;
+                $errorMessage = sprintf('Chunk %d: %s', $chunkNumber, $e->getMessage());
                 $errors[] = $errorMessage;
                 Log::error('IndexNow: Exception during submission: '.$e->getMessage());
             }

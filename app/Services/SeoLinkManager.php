@@ -112,10 +112,10 @@ final class SeoLinkManager
         }
 
         if (isset(self::MANUAL_MAPPINGS[$slug])) {
-            $links = [];
-            foreach (self::MANUAL_MAPPINGS[$slug] as $targetSlug => $anchor) {
-                $links[] = ['slug' => $targetSlug, 'anchor' => $anchor];
-            }
+            $links = collect(self::MANUAL_MAPPINGS[$slug])
+                ->map(fn (string $anchor, string $targetSlug): array => ['slug' => $targetSlug, 'anchor' => $anchor])
+                ->values()
+                ->all();
 
             return $this->resolveLinks($links);
         }

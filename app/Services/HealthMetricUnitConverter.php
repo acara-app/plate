@@ -56,13 +56,7 @@ final readonly class HealthMetricUnitConverter
 
     private function normalizeUnit(?string $unit): string
     {
-        if ($unit === null) {
-            // @codeCoverageIgnoreStart
-            return '';
-            // @codeCoverageIgnoreEnd
-        }
-
-        $trimmed = mb_trim($unit);
+        $trimmed = mb_trim($unit ?? '');
 
         return match ($trimmed) {
             'hrs', 'hr' => 'hours',

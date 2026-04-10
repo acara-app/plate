@@ -10,9 +10,6 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
-/**
- * @property array{input: float, output: float, reasoning: float, cache_read: float} $pricing
- */
 final class AiUsageService
 {
     /**

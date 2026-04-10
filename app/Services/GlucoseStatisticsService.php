@@ -272,8 +272,6 @@ final readonly class GlucoseStatisticsService
             ];
         });
 
-        $points->count();
-
         $meanX = $points->avg('x');
         $meanY = $points->avg('y');
 

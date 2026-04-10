@@ -79,16 +79,9 @@ final class HealthMetricRegistry
         foreach ($raw as $identifier => $entry) {
             $category = $entry['category'] ?? null;
             $function = $entry['function'] ?? null;
-            if (! $category instanceof HealthAggregateCategory) {
-                // @codeCoverageIgnoreStart
-                continue;
-                // @codeCoverageIgnoreEnd
-            }
 
-            if (! $function instanceof HealthAggregationFunction) {
-                // @codeCoverageIgnoreStart
-                continue;
-                // @codeCoverageIgnoreEnd
+            if (! $category instanceof HealthAggregateCategory || ! $function instanceof HealthAggregationFunction) {
+                continue; // @codeCoverageIgnore
             }
 
             /** @var list<string> $sourcePref */
