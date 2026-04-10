@@ -8,7 +8,7 @@ use App\Actions\DecryptSyncPayloadAction;
 use App\Actions\SyncMobileHealthEntriesAction;
 use App\Actions\SyncSleepEventsAction;
 use App\Actions\UpdateUserTimezoneAction;
-use App\Http\Requests\Api\V1\StoreMobileSyncHealthEntriesRequest;
+use App\Http\Requests\Api\V2\StoreMobileSyncHealthEntriesRequest;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;

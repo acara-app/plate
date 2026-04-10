@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V2;
 
-use App\Http\Requests\Api\V1\MobileSyncPairRequest;
+use App\Http\Requests\Api\V2\MobileSyncPairRequest;
 use App\Models\MobileSyncDevice;
 use Illuminate\Http\JsonResponse;
 
