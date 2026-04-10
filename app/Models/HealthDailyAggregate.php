@@ -7,7 +7,7 @@ namespace App\Models;
 use App\Enums\HealthAggregateCategory;
 use App\Enums\HealthAggregationFunction;
 use App\Services\HealthMetricRegistry;
-use App\ValueObjects\HealthMetricDescriptor;
+use App\ValueObjects\HealthMetricDescriptorData;
 use Carbon\CarbonInterface;
 use Database\Factories\HealthDailyAggregateFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -75,7 +75,7 @@ final class HealthDailyAggregate extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function descriptor(): HealthMetricDescriptor
+    public function descriptor(): HealthMetricDescriptorData
     {
         /** @var HealthMetricRegistry $registry */
         $registry = resolve(HealthMetricRegistry::class);
@@ -118,8 +118,8 @@ final class HealthDailyAggregate extends Model
     }
 
     #[Scope]
-    protected function ofType(Builder $query, HealthMetricDescriptor|string $type): void
+    protected function ofType(Builder $query, HealthMetricDescriptorData|string $type): void
     {
-        $query->where('type_identifier', $type instanceof HealthMetricDescriptor ? $type->identifier : $type);
+        $query->where('type_identifier', $type instanceof HealthMetricDescriptorData ? $type->identifier : $type);
     }
 }

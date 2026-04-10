@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('health_sync_samples', function (Blueprint $table): void {
-            $table->string('original_unit', 20)->nullable()->after('unit');
+            $table->string('original_unit', 20)->nullable();
         });
     }
 };

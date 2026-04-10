@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Exceptions\HealthUnitConversionException;
-use App\ValueObjects\HealthMetricDescriptor;
+use App\ValueObjects\HealthMetricDescriptorData;
 
 final readonly class HealthMetricUnitConverter
 {
@@ -19,7 +19,7 @@ final readonly class HealthMetricUnitConverter
         $fromUnit = $this->normalizeUnit($unit);
         $descriptor = $this->registry->fromIdentifier($typeIdentifier);
 
-        if (! $descriptor instanceof HealthMetricDescriptor || $descriptor->canonicalUnit === '') {
+        if (! $descriptor instanceof HealthMetricDescriptorData || $descriptor->canonicalUnit === '') {
             return [
                 'value' => $value,
                 'canonical_unit' => $fromUnit,

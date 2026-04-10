@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Enums\HealthAggregateCategory;
 use App\Enums\HealthAggregationFunction;
-use App\ValueObjects\HealthMetricDescriptor;
+use App\ValueObjects\HealthMetricDescriptorData;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 
 final class HealthMetricRegistry
@@ -14,20 +14,20 @@ final class HealthMetricRegistry
     public const int CURRENT_AGGREGATION_VERSION = 1;
 
     /**
-     * @var array<string, HealthMetricDescriptor>|null
+     * @var array<string, HealthMetricDescriptorData>|null
      */
     private ?array $descriptors = null;
 
     public function __construct(private readonly ConfigRepository $config) {}
 
-    public function fromIdentifier(string $typeIdentifier): ?HealthMetricDescriptor
+    public function fromIdentifier(string $typeIdentifier): ?HealthMetricDescriptorData
     {
         return $this->hydrated()[$typeIdentifier] ?? null;
     }
 
-    public function descriptorOrUnknown(string $typeIdentifier): HealthMetricDescriptor
+    public function descriptorOrUnknown(string $typeIdentifier): HealthMetricDescriptorData
     {
-        return $this->fromIdentifier($typeIdentifier) ?? new HealthMetricDescriptor(
+        return $this->fromIdentifier($typeIdentifier) ?? new HealthMetricDescriptorData(
             identifier: $typeIdentifier,
             category: HealthAggregateCategory::Instantaneous,
             function: HealthAggregationFunction::None,
@@ -43,7 +43,7 @@ final class HealthMetricRegistry
     }
 
     /**
-     * @return iterable<HealthMetricDescriptor>
+     * @return iterable<HealthMetricDescriptorData>
      */
     public function all(): iterable
     {
@@ -59,7 +59,7 @@ final class HealthMetricRegistry
     }
 
     /**
-     * @return array<string, HealthMetricDescriptor>
+     * @return array<string, HealthMetricDescriptorData>
      */
     private function hydrated(): array
     {
@@ -96,7 +96,7 @@ final class HealthMetricRegistry
             /** @var string $label */
             $label = $entry['label'] ?? $identifier;
 
-            $out[$identifier] = new HealthMetricDescriptor(
+            $out[$identifier] = new HealthMetricDescriptorData(
                 identifier: $identifier,
                 category: $category,
                 function: $function,

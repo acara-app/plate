@@ -12,16 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('health_daily_aggregates', function (Blueprint $table): void {
-            $table->date('local_date')->nullable()->after('date');
-            $table->string('timezone', 50)->nullable()->after('local_date');
+            $table->date('local_date')->nullable();
+            $table->string('timezone', 50)->nullable();
 
-            $table->string('unit', 20)->nullable()->after('source_primary');
-            $table->string('canonical_unit', 20)->nullable()->after('unit');
+            $table->string('unit', 20)->nullable();
+            $table->string('canonical_unit', 20)->nullable();
 
-            $table->decimal('value_sum_canonical', 14, 4)->nullable()->after('value_sum');
+            $table->decimal('value_sum_canonical', 14, 4)->nullable();
 
-            $table->string('aggregation_function', 16)->nullable()->after('canonical_unit');
-            $table->unsignedSmallInteger('aggregation_version')->default(1)->after('aggregation_function');
+            $table->string('aggregation_function', 16)->nullable();
+            $table->unsignedSmallInteger('aggregation_version')->default(1);
         });
 
         DB::table('health_daily_aggregates')

@@ -7,7 +7,7 @@ namespace App\ValueObjects;
 use App\Enums\HealthAggregateCategory;
 use App\Enums\HealthAggregationFunction;
 
-final readonly class HealthMetricDescriptor
+final readonly class HealthMetricDescriptorData
 {
     /**
      * @param  list<string>  $sourcePreference  Ordered list of preferred source substrings (e.g. ['Apple Watch', 'iPhone']).

@@ -11,8 +11,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('health_sync_samples', function (Blueprint $table): void {
-            $table->uuid('sample_uuid')->nullable()->after('group_id');
-            $table->timestamp('ended_at')->nullable()->after('measured_at');
+            $table->uuid('sample_uuid')->nullable();
+            $table->timestamp('ended_at')->nullable();
         });
 
         Schema::table('health_sync_samples', function (Blueprint $table): void {

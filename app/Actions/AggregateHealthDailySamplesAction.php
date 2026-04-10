@@ -9,7 +9,7 @@ use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Services\HealthMetricRegistry;
-use App\ValueObjects\HealthMetricDescriptor;
+use App\ValueObjects\HealthMetricDescriptorData;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
@@ -159,7 +159,7 @@ final readonly class AggregateHealthDailySamplesAction
      * @return array<string, mixed>|null
      */
     private function aggregateOneType(
-        HealthMetricDescriptor $descriptor,
+        HealthMetricDescriptorData $descriptor,
         Collection $samples,
         User $user,
         string $localDateString,
@@ -344,7 +344,7 @@ final readonly class AggregateHealthDailySamplesAction
      * @return array<string, mixed>
      */
     private function buildRow(
-        HealthMetricDescriptor $descriptor,
+        HealthMetricDescriptorData $descriptor,
         User $user,
         string $localDateString,
         string $fallbackTz,
