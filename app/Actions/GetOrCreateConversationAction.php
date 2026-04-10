@@ -15,13 +15,16 @@ final readonly class GetOrCreateConversationAction
             ->with('messages')
             ->find($conversationId);
 
-        abort_if($conversation && $conversation->user_id !== $user->id, 403, 'Access denied to this conversation');
+        if ($conversation instanceof Conversation) {
+            abort_if($conversation->user_id !== $user->id, 403, 'Access denied to this conversation');
 
-        return $conversation
-            ?? Conversation::query()->create([
-                'id' => $conversationId,
-                'user_id' => $user->id,
-                'title' => 'New Chat',
-            ])->load('messages');
+            return $conversation;
+        }
+
+        return Conversation::query()->create([
+            'id' => $conversationId,
+            'user_id' => $user->id,
+            'title' => 'New Chat',
+        ])->load('messages');
     }
 }

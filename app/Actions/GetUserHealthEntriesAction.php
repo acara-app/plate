@@ -18,16 +18,8 @@ final readonly class GetUserHealthEntriesAction
     public function handle(User $user, int $perPage = 15): LengthAwarePaginator
     {
         return $user->healthSyncSamples()
-            ->whereIn('type_identifier', $this->entryTypeIdentifiers())
+            ->whereIn('type_identifier', HealthSyncType::entryTypeValues())
             ->latest('measured_at')
             ->paginate($perPage);
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function entryTypeIdentifiers(): array
-    {
-        return HealthSyncType::entryTypeValues();
     }
 }
