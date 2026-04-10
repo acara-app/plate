@@ -7,23 +7,40 @@ namespace App\Jobs;
 use App\Actions\AggregateHealthDailySamplesAction;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
-final class AggregateUserDayJob implements ShouldQueue
+final class AggregateUserDayJob implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
     public int $tries = 3;
 
-    public int $backoff = 60;
+    public int $timeout = 120;
+
+    public int $maxExceptions = 3;
 
     public function __construct(
         private readonly int $userId,
         private readonly ?string $overrideDate = null,
     ) {
-        $this->queue = 'health-aggregate';
+        $this->queue = 'default';
+    }
+
+    public function uniqueId(): string
+    {
+        return $this->userId.':'.($this->overrideDate ?? 'yesterday');
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public function backoff(): array
+    {
+        return [30, 60, 120];
     }
 
     public function handle(AggregateHealthDailySamplesAction $action): void
@@ -42,6 +59,15 @@ final class AggregateUserDayJob implements ShouldQueue
             'user_id' => $this->userId,
             'local_date' => $localDate->toDateString(),
             'upserted' => $upserted,
+        ]);
+    }
+
+    public function failed(Throwable $exception): void
+    {
+        Log::channel($this->logChannel())->error('health_aggregate.user_day_failed', [
+            'user_id' => $this->userId,
+            'override_date' => $this->overrideDate,
+            'error' => $exception->getMessage(),
         ]);
     }
 
