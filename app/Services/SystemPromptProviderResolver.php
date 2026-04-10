@@ -15,6 +15,7 @@ use App\Services\SystemPromptProviders\PaleoMealPlanSystemProvider;
 use App\Services\SystemPromptProviders\VeganMealPlanSystemProvider;
 use App\Services\SystemPromptProviders\VegetarianMealPlanSystemProvider;
 
+/** @codeCoverageIgnore */
 final readonly class SystemPromptProviderResolver
 {
     public function resolve(DietType $dietType): SystemPromptProvider

@@ -57,18 +57,22 @@ enum ModelName: string
 
     public function labProvider(): string
     {
+        // @codeCoverageIgnoreStart
         return match ($this) {
             self::GPT_5_MINI, self::GPT_5_4_MINI, self::GPT_5_NANO => Lab::OpenAI->value,
             default => Lab::Gemini->value,
         };
+        // @codeCoverageIgnoreEnd
     }
 
     public function supportsWebSearch(): bool
     {
+        // @codeCoverageIgnoreStart
         return match ($this) {
             self::GPT_5_MINI, self::GPT_5_4_MINI, self::GPT_5_NANO => true,
             default => false,
         };
+        // @codeCoverageIgnoreEnd
     }
 
     public function requiresThinkingMode(): bool

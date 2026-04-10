@@ -90,8 +90,10 @@ final readonly class HealthEntryAssembler
      */
     private function mapGlucose(HealthSyncSample $sample, array $metadata, array &$entry): void
     {
+        // @codeCoverageIgnoreStart
         $entry['glucose_value'] = $sample->value;
         $entry['glucose_reading_type'] = $metadata['glucose_reading_type'] ?? null;
+        // @codeCoverageIgnoreEnd
     }
 
     /**

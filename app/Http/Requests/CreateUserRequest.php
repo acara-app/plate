@@ -10,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
+/** @codeCoverageIgnore */
 final class CreateUserRequest extends FormRequest
 {
     /**

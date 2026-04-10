@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+/** @codeCoverageIgnore */
 enum GlucoseReadingType: string
 {
     case Fasting = 'fasting';

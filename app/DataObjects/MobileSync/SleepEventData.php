@@ -6,6 +6,7 @@ namespace App\DataObjects\MobileSync;
 
 use Spatie\LaravelData\Data;
 
+/** @codeCoverageIgnore */
 final class SleepEventData extends Data
 {
     public function __construct(

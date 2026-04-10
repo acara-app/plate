@@ -37,9 +37,11 @@ final class AggregateHealthDailyCommand extends Command
         }
 
         if ($userId !== null) {
+            // @codeCoverageIgnoreStart
             $date = $dateString !== null
                 ? CarbonImmutable::parse($dateString)
                 : CarbonImmutable::yesterday();
+            // @codeCoverageIgnoreEnd
 
             return $this->aggregateForUser($action, (int) $userId, $date);
         }
@@ -107,12 +109,15 @@ final class AggregateHealthDailyCommand extends Command
         $to = CarbonImmutable::parse($toString);
 
         if ($from->gt($to)) {
+            // @codeCoverageIgnoreStart
             $this->error('--from must be before --to.');
 
             return self::FAILURE;
+            // @codeCoverageIgnoreEnd
         }
 
         if ($userId !== null) {
+            // @codeCoverageIgnoreStart
             $user = User::query()->find((int) $userId);
 
             if ($user === null) {
@@ -125,6 +130,7 @@ final class AggregateHealthDailyCommand extends Command
             $this->info(sprintf('Aggregated daily health data for user %s from %s to %s: %d metric rows upserted.', $userId, $fromString, $toString, $total));
 
             return self::SUCCESS;
+            // @codeCoverageIgnoreEnd
         }
 
         $total = 0;

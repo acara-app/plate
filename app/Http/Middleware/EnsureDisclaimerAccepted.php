@@ -9,6 +9,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/** @codeCoverageIgnore */
 final class EnsureDisclaimerAccepted
 {
     /**

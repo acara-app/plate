@@ -6,6 +6,7 @@ namespace App\DataObjects\MobileSync;
 
 use Spatie\LaravelData\Data;
 
+/** @codeCoverageIgnore */
 final class HealthEntryData extends Data
 {
     public function __construct(

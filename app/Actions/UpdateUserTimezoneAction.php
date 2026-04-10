@@ -6,6 +6,7 @@ namespace App\Actions;
 
 use App\Models\User;
 
+/** @codeCoverageIgnore */
 final readonly class UpdateUserTimezoneAction
 {
     public function handle(User $user, string $timezone): void

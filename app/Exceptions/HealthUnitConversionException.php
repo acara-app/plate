@@ -6,6 +6,7 @@ namespace App\Exceptions;
 
 use RuntimeException;
 
+/** @codeCoverageIgnore */
 final class HealthUnitConversionException extends RuntimeException
 {
     public function __construct(

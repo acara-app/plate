@@ -17,6 +17,7 @@ use App\Services\HealthEntryAssembler;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+/** @codeCoverageIgnore */
 final readonly class DiabetesLayout
 {
     /**

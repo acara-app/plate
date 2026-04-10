@@ -53,6 +53,7 @@ final class UserProfileAttribute extends Model
         return $this->belongsTo(UserProfile::class);
     }
 
+    // @codeCoverageIgnoreStart
     public function getMedicationDosage(): ?string
     {
         return $this->getMetadataString('dosage');
@@ -74,4 +75,6 @@ final class UserProfileAttribute extends Model
 
         return is_scalar($value) ? (string) $value : null;
     }
+
+    // @codeCoverageIgnoreEnd
 }

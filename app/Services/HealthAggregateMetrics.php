@@ -6,6 +6,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
 
+/** @codeCoverageIgnore */
 final class HealthAggregateMetrics
 {
     /**

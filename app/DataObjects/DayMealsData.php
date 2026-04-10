@@ -10,6 +10,7 @@ use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 
+/** @codeCoverageIgnore */
 #[MapInputName(SnakeCaseMapper::class)]
 final class DayMealsData extends Data
 {

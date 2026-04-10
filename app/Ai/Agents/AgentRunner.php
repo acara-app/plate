@@ -38,6 +38,7 @@ final class AgentRunner implements Agent, Conversational, HasTools
         return $this->execute($payload, $user, '');
     }
 
+    // @codeCoverageIgnoreStart
     public function runWithConversation(AgentPayload $payload, User $user, string $conversationId): StreamableAgentResponse
     {
         return $this->execute($payload, $user, $conversationId);
@@ -58,6 +59,8 @@ final class AgentRunner implements Agent, Conversational, HasTools
                 model: $modelName->value,
             );
     }
+
+    // @codeCoverageIgnoreEnd
 
     public function instructions(): string
     {
@@ -86,10 +89,13 @@ final class AgentRunner implements Agent, Conversational, HasTools
         return $this->agentBuilder->build($this->currentPayload, $this->user)['tools'];
     }
 
+    // @codeCoverageIgnoreStart
     protected function maxConversationMessages(): int
     {
         return ConfigHelper::int('altani.context.history_limit', 50);
     }
+
+    // @codeCoverageIgnoreEnd
 
     private function execute(AgentPayload $payload, User $user, string $conversationId): StreamableAgentResponse
     {

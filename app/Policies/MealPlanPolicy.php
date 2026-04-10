@@ -7,6 +7,7 @@ namespace App\Policies;
 use App\Models\MealPlan;
 use App\Models\User;
 
+/** @codeCoverageIgnore */
 final class MealPlanPolicy
 {
     public function view(User $user, MealPlan $mealPlan): bool

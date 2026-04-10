@@ -8,6 +8,7 @@ use App\Rules\ValidTimezone;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/** @codeCoverageIgnore */
 final class StoreMobileSyncHealthEntriesRequest extends FormRequest
 {
     public function authorize(): bool

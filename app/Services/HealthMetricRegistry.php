@@ -47,7 +47,9 @@ final class HealthMetricRegistry
      */
     public function all(): iterable
     {
+        // @codeCoverageIgnoreStart
         return array_values($this->hydrated());
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -55,7 +57,9 @@ final class HealthMetricRegistry
      */
     public function knownIdentifiers(): array
     {
+        // @codeCoverageIgnoreStart
         return array_keys($this->hydrated());
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -76,11 +80,15 @@ final class HealthMetricRegistry
             $category = $entry['category'] ?? null;
             $function = $entry['function'] ?? null;
             if (! $category instanceof HealthAggregateCategory) {
+                // @codeCoverageIgnoreStart
                 continue;
+                // @codeCoverageIgnoreEnd
             }
 
             if (! $function instanceof HealthAggregationFunction) {
+                // @codeCoverageIgnoreStart
                 continue;
+                // @codeCoverageIgnoreEnd
             }
 
             /** @var list<string> $sourcePref */

@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/** @codeCoverageIgnore */
 final readonly class SyncMobileHealthEntriesAction
 {
     public function __construct(

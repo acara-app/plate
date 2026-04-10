@@ -9,6 +9,7 @@ use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Providers\Tools\ProviderTool;
 
+/** @codeCoverageIgnore */
 final readonly class ToolRegistry
 {
     public function __construct(

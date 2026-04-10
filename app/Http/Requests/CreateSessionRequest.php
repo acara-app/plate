@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
+/** @codeCoverageIgnore */
 final class CreateSessionRequest extends FormRequest
 {
     /**

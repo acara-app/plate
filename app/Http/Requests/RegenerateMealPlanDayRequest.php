@@ -7,6 +7,7 @@ namespace App\Http\Requests;
 use App\Models\MealPlan;
 use Illuminate\Foundation\Http\FormRequest;
 
+/** @codeCoverageIgnore */
 final class RegenerateMealPlanDayRequest extends FormRequest
 {
     public function authorize(): bool

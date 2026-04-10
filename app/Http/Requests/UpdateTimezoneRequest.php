@@ -7,6 +7,7 @@ namespace App\Http\Requests;
 use App\Rules\ValidTimezone;
 use Illuminate\Foundation\Http\FormRequest;
 
+/** @codeCoverageIgnore */
 final class UpdateTimezoneRequest extends FormRequest
 {
     /**

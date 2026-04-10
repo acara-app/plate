@@ -9,6 +9,7 @@ use App\Enums\UserProfileAttributeCategory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/** @codeCoverageIgnore */
 final class StoreDietaryPreferencesRequest extends FormRequest
 {
     public function authorize(): bool

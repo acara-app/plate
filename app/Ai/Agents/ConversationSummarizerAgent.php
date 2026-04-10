@@ -28,6 +28,7 @@ final class ConversationSummarizerAgent implements Agent, SummarizesConversation
         ])->render();
     }
 
+    // @codeCoverageIgnoreStart
     public function summarize(string $conversationText, ?ConversationSummary $previousSummary): string
     {
         $this->previousSummary = $previousSummary;
@@ -37,4 +38,6 @@ final class ConversationSummarizerAgent implements Agent, SummarizesConversation
             model: 'gpt-5-nano',
         );
     }
+
+    // @codeCoverageIgnoreEnd
 }

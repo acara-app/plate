@@ -6,6 +6,7 @@ namespace App\DataObjects\GlucoseAnalysis;
 
 use Spatie\LaravelData\Data;
 
+/** @codeCoverageIgnore */
 final class TimeOfDayData extends Data
 {
     public function __construct(

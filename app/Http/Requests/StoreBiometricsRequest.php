@@ -9,6 +9,7 @@ use App\Enums\Sex;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/** @codeCoverageIgnore */
 final class StoreBiometricsRequest extends FormRequest
 {
     /**

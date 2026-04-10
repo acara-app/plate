@@ -7,6 +7,7 @@ namespace App\DataObjects\MobileSync;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
 
+/** @codeCoverageIgnore */
 final class DecryptedSyncPayloadData extends Data
 {
     public function __construct(

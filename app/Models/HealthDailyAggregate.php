@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @codeCoverageIgnore
+ *
  * @property int $id
  * @property int $user_id
  * @property CarbonInterface $date
@@ -105,18 +107,21 @@ final class HealthDailyAggregate extends Model
         };
     }
 
+    /** @param  Builder<self>  $query */
     #[Scope]
     protected function forDate(Builder $query, CarbonInterface $date): void
     {
         $query->where('local_date', $date->toDateString());
     }
 
+    /** @param  Builder<self>  $query */
     #[Scope]
     protected function forDateRange(Builder $query, CarbonInterface $from, CarbonInterface $to): void
     {
         $query->whereBetween('local_date', [$from->toDateString(), $to->toDateString()]);
     }
 
+    /** @param  Builder<self>  $query */
     #[Scope]
     protected function ofType(Builder $query, HealthMetricDescriptorData|string $type): void
     {

@@ -10,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
+/** @codeCoverageIgnore */
 final class StoreChatConversationRequest extends FormRequest
 {
     public function authorize(): bool

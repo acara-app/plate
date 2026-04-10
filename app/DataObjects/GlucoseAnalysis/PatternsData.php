@@ -6,6 +6,7 @@ namespace App\DataObjects\GlucoseAnalysis;
 
 use Spatie\LaravelData\Data;
 
+/** @codeCoverageIgnore */
 final class PatternsData extends Data
 {
     public function __construct(

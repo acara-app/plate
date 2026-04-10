@@ -8,6 +8,7 @@ use Spatie\LaravelData\Attributes\MapOutputName;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\CamelCaseMapper;
 
+/** @codeCoverageIgnore */
 #[MapOutputName(CamelCaseMapper::class)]
 final class MacronutrientRatiosData extends Data
 {

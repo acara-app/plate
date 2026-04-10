@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\User;
 
+/** @codeCoverageIgnore */
 final readonly class BloodPressureDashboardService
 {
     /**

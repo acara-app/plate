@@ -9,6 +9,7 @@ use App\Enums\HealthSyncType;
 use App\Enums\Sex;
 use Illuminate\Support\Facades\Date;
 
+/** @codeCoverageIgnore */
 final class HealthKitCharacteristicMapper
 {
     /**

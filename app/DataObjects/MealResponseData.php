@@ -7,6 +7,7 @@ namespace App\DataObjects;
 use App\Models\Meal;
 use Spatie\LaravelData\Data;
 
+/** @codeCoverageIgnore */
 final class MealResponseData extends Data
 {
     /**

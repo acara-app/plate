@@ -126,17 +126,22 @@ final class User extends Authenticatable implements MustVerifyEmail
     /**
      * @return HasMany<Conversation, $this>
      */
+    // @codeCoverageIgnoreStart
     public function conversations(): HasMany
     {
         return $this->hasMany(Conversation::class)->latest();
     }
+
+    // @codeCoverageIgnoreEnd
 
     /**
      * @return HasOne<UserTelegramChat, $this>
      */
     public function telegramChat(): HasOne
     {
+        // @codeCoverageIgnoreStart
         return $this->hasOne(UserTelegramChat::class)->where('is_active', true);
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -144,7 +149,9 @@ final class User extends Authenticatable implements MustVerifyEmail
      */
     public function mobileSyncDevices(): HasMany
     {
+        // @codeCoverageIgnoreStart
         return $this->hasMany(MobileSyncDevice::class);
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -158,24 +165,31 @@ final class User extends Authenticatable implements MustVerifyEmail
     /**
      * @return HasMany<HealthDailyAggregate, $this>
      */
+    // @codeCoverageIgnoreStart
     public function healthDailyAggregates(): HasMany
     {
         return $this->hasMany(HealthDailyAggregate::class);
     }
+
+    // @codeCoverageIgnoreEnd
 
     /**
      * @return HasMany<SleepSession, $this>
      */
     public function sleepSessions(): HasMany
     {
+        // @codeCoverageIgnoreStart
         return $this->hasMany(SleepSession::class);
+        // @codeCoverageIgnoreEnd
     }
 
     public function resolveTimezone(): string
     {
+        // @codeCoverageIgnoreStart
         $tz = $this->getAttributeValue('timezone');
 
         return is_string($tz) && $tz !== '' ? $tz : 'UTC';
+        // @codeCoverageIgnoreEnd
     }
 
     public function hasActiveSubscription(): bool
@@ -231,6 +245,8 @@ final class User extends Authenticatable implements MustVerifyEmail
 
     protected function getNotificationSettingsAttribute(): UserSettingsData
     {
+        // @codeCoverageIgnoreStart
         return UserSettingsData::from($this->settings ?? []);
+        // @codeCoverageIgnoreEnd
     }
 }

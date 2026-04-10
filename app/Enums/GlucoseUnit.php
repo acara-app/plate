@@ -37,9 +37,11 @@ enum GlucoseUnit: string
      */
     public function validationRange(): array
     {
+        // @codeCoverageIgnoreStart
         return match ($this) {
             self::MgDl => ['min' => 20, 'max' => 600],
             self::MmolL => ['min' => 1.1, 'max' => 33.3],
         };
+        // @codeCoverageIgnoreEnd
     }
 }

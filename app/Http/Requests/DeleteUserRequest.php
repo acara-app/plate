@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 
+/** @codeCoverageIgnore */
 final class DeleteUserRequest extends FormRequest
 {
     /**

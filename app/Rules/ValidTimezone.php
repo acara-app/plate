@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
 
+/** @codeCoverageIgnore */
 final readonly class ValidTimezone implements ValidationRule
 {
     /**

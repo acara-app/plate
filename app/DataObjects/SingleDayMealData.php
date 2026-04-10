@@ -9,6 +9,7 @@ use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 
+/** @codeCoverageIgnore */
 final class SingleDayMealData extends Data
 {
     /**

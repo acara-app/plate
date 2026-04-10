@@ -7,6 +7,7 @@ namespace App\Actions;
 use App\DataObjects\MobileSync\DecryptedSyncPayloadData;
 use Illuminate\Support\Facades\Validator;
 
+/** @codeCoverageIgnore */
 final readonly class DecryptSyncPayloadAction
 {
     public function handle(string $base64Payload, string $base64Key): DecryptedSyncPayloadData

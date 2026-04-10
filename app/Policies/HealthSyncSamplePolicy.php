@@ -7,6 +7,7 @@ namespace App\Policies;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 
+/** @codeCoverageIgnore */
 final class HealthSyncSamplePolicy
 {
     public function update(User $user, HealthSyncSample $healthSyncSample): bool

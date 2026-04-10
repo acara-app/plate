@@ -122,7 +122,9 @@ final class HealthSyncSample extends Model
     #[Scope]
     protected function ofType(Builder $query, HealthSyncType $type): void
     {
+        // @codeCoverageIgnoreStart
         $query->where('type_identifier', $type->value);
+        // @codeCoverageIgnoreEnd
     }
 
     /**

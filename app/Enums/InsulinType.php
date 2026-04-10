@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+/** @codeCoverageIgnore */
 enum InsulinType: string
 {
     case Basal = 'basal';

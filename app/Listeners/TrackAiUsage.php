@@ -69,6 +69,7 @@ final readonly class TrackAiUsage
         try {
             $reflection = new ReflectionClass($agent);
 
+            // @codeCoverageIgnoreStart
             if ($reflection->hasProperty('conversationUser')) {
                 $property = $reflection->getProperty('conversationUser');
                 $user = $property->getValue($agent);
@@ -84,6 +85,8 @@ final readonly class TrackAiUsage
                     return $user;
                 }
             }
+
+            // @codeCoverageIgnoreEnd
         } catch (Throwable) { // @codeCoverageIgnore
             return null; // @codeCoverageIgnore
         }

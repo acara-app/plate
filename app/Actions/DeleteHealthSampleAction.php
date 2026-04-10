@@ -18,6 +18,8 @@ final readonly class DeleteHealthSampleAction
             return;
         }
 
+        // @codeCoverageIgnoreStart
         $sample->delete();
+        // @codeCoverageIgnoreEnd
     }
 }

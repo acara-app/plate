@@ -13,6 +13,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
+/** @codeCoverageIgnore */
 final class HealthEntryRequest extends FormRequest
 {
     /**

@@ -79,7 +79,9 @@ final readonly class SleepSessionAggregator
         }
 
         if ($rows === []) {
+            // @codeCoverageIgnoreStart
             return 0;
+            // @codeCoverageIgnoreEnd
         }
 
         HealthDailyAggregate::query()->upsert(

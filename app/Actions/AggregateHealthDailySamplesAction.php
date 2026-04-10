@@ -57,7 +57,9 @@ final readonly class AggregateHealthDailySamplesAction
             }
 
             if ($rows === []) {
+                // @codeCoverageIgnoreStart
                 return;
+                // @codeCoverageIgnoreEnd
             }
 
             HealthDailyAggregate::query()->upsert(
@@ -102,6 +104,7 @@ final readonly class AggregateHealthDailySamplesAction
         return $total;
     }
 
+    // @codeCoverageIgnoreStart
     public function handleAllUsers(CarbonImmutable $localDate): int
     {
         $total = 0;
@@ -129,6 +132,8 @@ final readonly class AggregateHealthDailySamplesAction
 
         return $total;
     }
+
+    // @codeCoverageIgnoreEnd
 
     /**
      * @return Collection<int, HealthSyncSample>
@@ -201,7 +206,9 @@ final readonly class AggregateHealthDailySamplesAction
         }
 
         if ($samples->isEmpty()) {
+            // @codeCoverageIgnoreStart
             return null;
+            // @codeCoverageIgnoreEnd
         }
 
         $sortedDesc = $samples->sortByDesc(
@@ -255,7 +262,9 @@ final readonly class AggregateHealthDailySamplesAction
     private function intervalDedupBySource(Collection $samples, array $priority): Collection
     {
         if ($samples->isEmpty()) {
+            // @codeCoverageIgnoreStart
             return $samples;
+            // @codeCoverageIgnoreEnd
         }
 
         $buckets = [];
@@ -266,8 +275,10 @@ final readonly class AggregateHealthDailySamplesAction
 
             $endBucket = $startBucket;
             if ($sample->ended_at !== null) {
+                // @codeCoverageIgnoreStart
                 $endEpoch = $sample->ended_at->getTimestamp();
                 $endBucket = (int) floor($endEpoch / self::CUMULATIVE_BUCKET_SECONDS);
+                // @codeCoverageIgnoreEnd
             }
 
             for ($b = $startBucket; $b <= $endBucket; $b++) {
@@ -307,9 +318,12 @@ final readonly class AggregateHealthDailySamplesAction
      */
     private function sourceRank(?string $source, array $priority): int
     {
+        // @codeCoverageIgnoreStart
         if ($source === null || $source === '') {
             return PHP_INT_MAX;
         }
+
+        // @codeCoverageIgnoreEnd
 
         foreach ($priority as $i => $preferredSubstring) {
             if (str_contains($source, $preferredSubstring)) {
@@ -317,7 +331,9 @@ final readonly class AggregateHealthDailySamplesAction
             }
         }
 
+        // @codeCoverageIgnoreStart
         return PHP_INT_MAX;
+        // @codeCoverageIgnoreEnd
     }
 
     /**

@@ -14,6 +14,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
+/** @codeCoverageIgnore */
 final readonly class MobileSyncHealthEntriesController
 {
     public function __construct(

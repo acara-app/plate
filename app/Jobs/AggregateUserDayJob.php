@@ -13,6 +13,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
+/** @codeCoverageIgnore */
 final class AggregateUserDayJob implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;

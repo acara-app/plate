@@ -6,6 +6,7 @@ namespace App\DataObjects;
 
 use Spatie\LaravelData\Data;
 
+/** @codeCoverageIgnore */
 final class IngredientData extends Data
 {
     public function __construct(

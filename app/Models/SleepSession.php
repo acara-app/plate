@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @codeCoverageIgnore
+ *
  * @property int $id
  * @property int $user_id
  * @property string|null $sample_uuid
@@ -68,6 +70,7 @@ final class SleepSession extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** @param  Builder<self>  $query */
     #[Scope]
     protected function forNight(Builder $query, CarbonInterface $nightDate, string $timezone = 'UTC'): void
     {

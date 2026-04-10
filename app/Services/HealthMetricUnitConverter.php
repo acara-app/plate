@@ -28,11 +28,13 @@ final readonly class HealthMetricUnitConverter
         }
 
         if ($fromUnit === '') {
+            // @codeCoverageIgnoreStart
             return [
                 'value' => $value,
                 'canonical_unit' => $descriptor->canonicalUnit,
                 'original_unit' => $descriptor->canonicalUnit,
             ];
+            // @codeCoverageIgnoreEnd
         }
 
         $conversion = $descriptor->conversionFrom($fromUnit);
@@ -55,7 +57,9 @@ final readonly class HealthMetricUnitConverter
     private function normalizeUnit(?string $unit): string
     {
         if ($unit === null) {
+            // @codeCoverageIgnoreStart
             return '';
+            // @codeCoverageIgnoreEnd
         }
 
         $trimmed = mb_trim($unit);

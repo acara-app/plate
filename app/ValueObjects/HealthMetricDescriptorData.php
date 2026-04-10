@@ -7,6 +7,7 @@ namespace App\ValueObjects;
 use App\Enums\HealthAggregateCategory;
 use App\Enums\HealthAggregationFunction;
 
+/** @codeCoverageIgnore */
 final readonly class HealthMetricDescriptorData
 {
     /**

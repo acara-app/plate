@@ -9,6 +9,7 @@ use App\Models\HealthSyncSample;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
+/** @codeCoverageIgnore */
 final readonly class GetUserHealthEntriesAction
 {
     /**

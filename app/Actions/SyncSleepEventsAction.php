@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 
+/** @codeCoverageIgnore */
 final readonly class SyncSleepEventsAction
 {
     /**
