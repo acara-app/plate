@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Enums\DietType;
 use App\Services\SystemPromptProviders\LowCarbMealPlanSystemProvider;
 
+covers(LowCarbMealPlanSystemProvider::class);
+
 it('returns a system prompt string with Low Carb diet content', function (): void {
     $provider = new LowCarbMealPlanSystemProvider;
     $result = $provider->run();

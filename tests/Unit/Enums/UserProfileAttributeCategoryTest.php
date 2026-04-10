@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\UserProfileAttributeCategory;
 
+covers(UserProfileAttributeCategory::class);
+
 it('has all expected cases', function (): void {
     expect(UserProfileAttributeCategory::cases())->toHaveCount(7);
 });

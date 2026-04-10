@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 use App\Services\FoodDataProviders\MediterraneanDietFoods;
 
+covers(MediterraneanDietFoods::class);
+
 it('returns an array of foods', function (): void {
     $foods = MediterraneanDietFoods::all();
 
-    expect($foods)->toBeArray();
-    expect($foods[0])->toBeArray();
+    expect($foods)->toBeArray()
+        ->and($foods[0])->toBeArray();
 });
 
 it('contains the correct number of foods', function (): void {
@@ -102,12 +104,12 @@ it('food data has correct types', function (): void {
 
     $firstFood = $foods[0];
 
-    expect($firstFood['name'])->toBeString();
-    expect($firstFood['calories'])->toBeInt();
-    expect($firstFood['protein'])->toBeFloat();
-    expect($firstFood['fat'])->toBeFloat();
-    expect($firstFood['saturated_fat'])->toBeFloat();
-    expect($firstFood['fiber'])->toBeFloat();
+    expect($firstFood['name'])->toBeString()
+        ->and($firstFood['calories'])->toBeInt()
+        ->and($firstFood['protein'])->toBeFloat()
+        ->and($firstFood['fat'])->toBeFloat()
+        ->and($firstFood['saturated_fat'])->toBeFloat()
+        ->and($firstFood['fiber'])->toBeFloat();
 });
 
 it('has foods with high fiber content', function (): void {

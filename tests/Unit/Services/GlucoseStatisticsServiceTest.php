@@ -6,6 +6,8 @@ use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Services\GlucoseStatisticsService;
 
+covers(GlucoseStatisticsService::class);
+
 beforeEach(function (): void {
     $this->service = new GlucoseStatisticsService;
     $this->user = User::factory()->create();

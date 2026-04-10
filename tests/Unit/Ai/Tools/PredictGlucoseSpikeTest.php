@@ -9,6 +9,8 @@ use App\Enums\SpikeRiskLevel;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
+covers(PredictGlucoseSpike::class);
+
 beforeEach(function (): void {
     $this->predictor = new class implements PredictsGlucoseSpikes
     {

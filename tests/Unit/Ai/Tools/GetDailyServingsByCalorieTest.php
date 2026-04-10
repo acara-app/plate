@@ -6,6 +6,8 @@ use App\Ai\Tools\GetDailyServingsByCalorie;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
+covers(GetDailyServingsByCalorie::class);
+
 it('returns daily servings content', function (): void {
     $tool = new GetDailyServingsByCalorie;
 

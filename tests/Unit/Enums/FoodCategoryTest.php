@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\FoodCategory;
 
+covers(FoodCategory::class);
+
 it('returns all categories as options', function (): void {
     $options = FoodCategory::options();
 

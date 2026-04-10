@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\GlucoseUnit;
 
+covers(GlucoseUnit::class);
+
 it('returns correct placeholder for mg/dL', function (): void {
     expect(GlucoseUnit::MgDl->placeholder())->toBe('e.g., 120');
 });

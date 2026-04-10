@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Actions\UpdateUser;
 use App\Models\User;
 
+covers(UpdateUser::class);
+
 it('may update a user', function (): void {
     $user = User::factory()->create([
         'name' => 'Old Name',

@@ -8,6 +8,8 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 
+covers(CreateUserEmailResetNotification::class);
+
 it('may send password reset notification', function (): void {
     Notification::fake();
 

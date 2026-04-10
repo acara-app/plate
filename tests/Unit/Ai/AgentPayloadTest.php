@@ -7,6 +7,8 @@ use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use Laravel\Ai\Files\Base64Image;
 
+covers(AgentPayload::class);
+
 it('creates payload with required parameters', function (): void {
     $payload = new AgentPayload(
         userId: 1,

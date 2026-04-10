@@ -8,7 +8,9 @@ use App\Http\Middleware\DisableResponseBuffering;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-test('it sets the correct headers to disable buffering', function (): void {
+covers(DisableResponseBuffering::class);
+
+it('sets the correct headers to disable buffering', function (): void {
     $middleware = new DisableResponseBuffering();
 
     $request = Request::create('/test', 'GET');

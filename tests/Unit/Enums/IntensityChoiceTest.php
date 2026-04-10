@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\IntensityChoice;
 
+covers(IntensityChoice::class);
+
 it('has correct values', function (): void {
     expect(IntensityChoice::Balanced->value)->toBe('balanced')
         ->and(IntensityChoice::Aggressive->value)->toBe('aggressive');

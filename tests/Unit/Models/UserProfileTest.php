@@ -8,7 +8,9 @@ use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\UserProfileAttribute;
 
-test('to array', function (): void {
+covers(UserProfile::class);
+
+it('to array', function (): void {
     $user = User::factory()->create();
     $profile = UserProfile::factory()->for($user)->create()->refresh();
 
@@ -34,7 +36,7 @@ test('to array', function (): void {
         );
 });
 
-test('belongs to user', function (): void {
+it('belongs to user', function (): void {
     $user = User::factory()->create();
     $profile = UserProfile::factory()->for($user)->create();
 
@@ -43,7 +45,7 @@ test('belongs to user', function (): void {
         ->id->toBe($user->id);
 });
 
-test('has many attributes', function (): void {
+it('has many attributes', function (): void {
     $profile = UserProfile::factory()->create();
 
     UserProfileAttribute::factory()->allergy('Peanuts')->create(['user_profile_id' => $profile->id]);
@@ -55,7 +57,7 @@ test('has many attributes', function (): void {
         ->each->toBeInstanceOf(UserProfileAttribute::class);
 });
 
-test('dietary attributes excludes health conditions and medications', function (): void {
+it('dietary attributes excludes health conditions and medications', function (): void {
     $profile = UserProfile::factory()->create();
 
     UserProfileAttribute::factory()->allergy('Peanuts')->create(['user_profile_id' => $profile->id]);
@@ -69,7 +71,7 @@ test('dietary attributes excludes health conditions and medications', function (
             ->category->not->toBe(UserProfileAttributeCategory::Medication));
 });
 
-test('health condition attributes returns only health conditions', function (): void {
+it('health condition attributes returns only health conditions', function (): void {
     $profile = UserProfile::factory()->create();
 
     UserProfileAttribute::factory()->allergy('Peanuts')->create(['user_profile_id' => $profile->id]);
@@ -81,7 +83,7 @@ test('health condition attributes returns only health conditions', function (): 
         ->each(fn ($attr) => $attr->category->toBe(UserProfileAttributeCategory::HealthCondition));
 });
 
-test('medication attributes returns only medications', function (): void {
+it('medication attributes returns only medications', function (): void {
     $profile = UserProfile::factory()->create();
 
     UserProfileAttribute::factory()->allergy('Peanuts')->create(['user_profile_id' => $profile->id]);
@@ -92,7 +94,7 @@ test('medication attributes returns only medications', function (): void {
         ->first()->category->toBe(UserProfileAttributeCategory::Medication);
 });
 
-test('calculate bmi returns null when height is missing', function (): void {
+it('calculate bmi returns null when height is missing', function (): void {
     $profile = UserProfile::factory()->create([
         'height' => null,
         'weight' => 70,
@@ -101,7 +103,7 @@ test('calculate bmi returns null when height is missing', function (): void {
     expect($profile->bmi)->toBeNull();
 });
 
-test('calculate bmi returns null when weight is missing', function (): void {
+it('calculate bmi returns null when weight is missing', function (): void {
     $profile = UserProfile::factory()->create([
         'height' => 175,
         'weight' => null,
@@ -110,7 +112,7 @@ test('calculate bmi returns null when weight is missing', function (): void {
     expect($profile->bmi)->toBeNull();
 });
 
-test('calculate bmi returns correct value', function (): void {
+it('calculate bmi returns correct value', function (): void {
     $profile = UserProfile::factory()->create([
         'height' => 175,
         'weight' => 70,
@@ -121,7 +123,7 @@ test('calculate bmi returns correct value', function (): void {
     expect($profile->bmi)->toBe($expectedBMI);
 });
 
-test('calculate bmr returns null when weight is missing', function (): void {
+it('calculate bmr returns null when weight is missing', function (): void {
     $profile = UserProfile::factory()->create([
         'weight' => null,
         'height' => 175,
@@ -132,7 +134,7 @@ test('calculate bmr returns null when weight is missing', function (): void {
     expect($profile->bmr)->toBeNull();
 });
 
-test('calculate bmr returns null when height is missing', function (): void {
+it('calculate bmr returns null when height is missing', function (): void {
     $profile = UserProfile::factory()->create([
         'weight' => 70,
         'height' => null,
@@ -143,7 +145,7 @@ test('calculate bmr returns null when height is missing', function (): void {
     expect($profile->bmr)->toBeNull();
 });
 
-test('calculate bmr returns null when age is missing', function (): void {
+it('calculate bmr returns null when age is missing', function (): void {
     $profile = UserProfile::factory()->create([
         'weight' => 70,
         'height' => 175,
@@ -154,7 +156,7 @@ test('calculate bmr returns null when age is missing', function (): void {
     expect($profile->bmr)->toBeNull();
 });
 
-test('calculate bmr returns null when sex is missing', function (): void {
+it('calculate bmr returns null when sex is missing', function (): void {
     $profile = UserProfile::factory()->create([
         'weight' => 70,
         'height' => 175,
@@ -165,7 +167,7 @@ test('calculate bmr returns null when sex is missing', function (): void {
     expect($profile->bmr)->toBeNull();
 });
 
-test('calculate bmr returns correct value for male', function (): void {
+it('calculate bmr returns correct value for male', function (): void {
     $profile = UserProfile::factory()->create([
         'weight' => 70,
         'height' => 175,
@@ -178,7 +180,7 @@ test('calculate bmr returns correct value for male', function (): void {
     expect($profile->bmr)->toBe($expectedBMR);
 });
 
-test('calculate bmr returns correct value for female', function (): void {
+it('calculate bmr returns correct value for female', function (): void {
     $profile = UserProfile::factory()->create([
         'weight' => 60,
         'height' => 165,
@@ -191,7 +193,7 @@ test('calculate bmr returns correct value for female', function (): void {
     expect($profile->bmr)->toBe($expectedBMR);
 });
 
-test('calculate tdee returns null when bmr cannot be calculated', function (): void {
+it('calculate tdee returns null when bmr cannot be calculated', function (): void {
     $profile = UserProfile::factory()->create([
         'weight' => null,
         'height' => 175,
@@ -202,7 +204,7 @@ test('calculate tdee returns null when bmr cannot be calculated', function (): v
     expect($profile->tdee)->toBeNull();
 });
 
-test('calculate tdee returns correct value', function (): void {
+it('calculate tdee returns correct value', function (): void {
     $profile = UserProfile::factory()->create([
         'weight' => 70,
         'height' => 175,

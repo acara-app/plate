@@ -7,7 +7,9 @@ use App\Enums\UserProfileAttributeCategory;
 use App\Models\UserProfile;
 use App\Models\UserProfileAttribute;
 
-test('belongs to user profile', function (): void {
+covers(UserProfileAttribute::class);
+
+it('belongs to user profile', function (): void {
     $profile = UserProfile::factory()->create();
     $attribute = UserProfileAttribute::factory()->allergy('Peanuts')->create([
         'user_profile_id' => $profile->id,
@@ -18,19 +20,19 @@ test('belongs to user profile', function (): void {
         ->id->toBe($profile->id);
 });
 
-test('casts category to enum', function (): void {
+it('casts category to enum', function (): void {
     $attribute = UserProfileAttribute::factory()->allergy()->create();
 
     expect($attribute->category)->toBe(UserProfileAttributeCategory::Allergy);
 });
 
-test('casts severity to enum', function (): void {
+it('casts severity to enum', function (): void {
     $attribute = UserProfileAttribute::factory()->allergy('Peanuts', AllergySeverity::Severe)->create();
 
     expect($attribute->severity)->toBe(AllergySeverity::Severe);
 });
 
-test('casts metadata to array', function (): void {
+it('casts metadata to array', function (): void {
     $attribute = UserProfileAttribute::factory()->medication('Metformin', [
         'dosage' => '500mg',
         'frequency' => 'twice daily',
@@ -42,19 +44,19 @@ test('casts metadata to array', function (): void {
         ->toHaveKey('frequency', 'twice daily');
 });
 
-test('severity is nullable', function (): void {
+it('severity is nullable', function (): void {
     $attribute = UserProfileAttribute::factory()->healthCondition()->create();
 
     expect($attribute->severity)->toBeNull();
 });
 
-test('metadata is nullable', function (): void {
+it('metadata is nullable', function (): void {
     $attribute = UserProfileAttribute::factory()->allergy()->create();
 
     expect($attribute->metadata)->toBeNull();
 });
 
-test('factory creates valid allergy', function (): void {
+it('factory creates valid allergy', function (): void {
     $attribute = UserProfileAttribute::factory()->allergy('Shellfish', AllergySeverity::Moderate)->create();
 
     expect($attribute)
@@ -63,7 +65,7 @@ test('factory creates valid allergy', function (): void {
         ->severity->toBe(AllergySeverity::Moderate);
 });
 
-test('factory creates valid health condition', function (): void {
+it('factory creates valid health condition', function (): void {
     $attribute = UserProfileAttribute::factory()->healthCondition('Hypertension')->create();
 
     expect($attribute)
@@ -71,7 +73,7 @@ test('factory creates valid health condition', function (): void {
         ->value->toBe('Hypertension');
 });
 
-test('factory creates valid medication with metadata', function (): void {
+it('factory creates valid medication with metadata', function (): void {
     $attribute = UserProfileAttribute::factory()->medication('Metformin')->create();
 
     expect($attribute)

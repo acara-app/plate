@@ -6,6 +6,8 @@ use App\DataObjects\FoodAnalysisData;
 use App\DataObjects\FoodItemData;
 use Spatie\LaravelData\DataCollection;
 
+covers(FoodAnalysisData::class);
+
 it('can be created directly with constructor', function (): void {
     $items = FoodItemData::collect([
         new FoodItemData(
@@ -32,10 +34,9 @@ it('can be created directly with constructor', function (): void {
         ->totalProtein->toBe(31.0)
         ->totalCarbs->toBe(0.0)
         ->totalFat->toBe(3.6)
-        ->confidence->toBe(85);
-
-    expect($analysisData->items)->toHaveCount(1);
-    expect($analysisData->items->first()->name)->toBe('Grilled Chicken');
+        ->confidence->toBe(85)
+        ->and($analysisData->items)->toHaveCount(1)
+        ->and($analysisData->items->first()->name)->toBe('Grilled Chicken');
 });
 
 it('can be created from array using from method', function (): void {
@@ -72,11 +73,10 @@ it('can be created from array using from method', function (): void {
         ->totalProtein->toBe(33.7)
         ->totalCarbs->toBe(28.0)
         ->totalFat->toBe(3.9)
-        ->confidence->toBe(90);
-
-    expect($analysisData->items)->toHaveCount(2);
-    expect($analysisData->items->first()->name)->toBe('Rice');
-    expect($analysisData->items->last()->name)->toBe('Chicken');
+        ->confidence->toBe(90)
+        ->and($analysisData->items)->toHaveCount(2)
+        ->and($analysisData->items->first()->name)->toBe('Rice')
+        ->and($analysisData->items->last()->name)->toBe('Chicken');
 });
 
 it('can be converted to array', function (): void {
@@ -105,10 +105,9 @@ it('can be converted to array', function (): void {
     expect($array)
         ->toBeArray()
         ->toHaveKey('items')
-        ->toHaveKey('confidence');
-
-    expect($array['confidence'])->toBe(95);
-    expect($array['items'])->toHaveCount(1);
+        ->toHaveKey('confidence')
+        ->and($array['confidence'])->toBe(95)
+        ->and($array['items'])->toHaveCount(1);
 });
 
 it('handles empty items array', function (): void {
@@ -125,7 +124,6 @@ it('handles empty items array', function (): void {
 
     expect($analysisData)
         ->totalCalories->toBe(0.0)
-        ->confidence->toBe(0);
-
-    expect($analysisData->items)->toHaveCount(0);
+        ->confidence->toBe(0)
+        ->and($analysisData->items)->toHaveCount(0);
 });

@@ -6,6 +6,8 @@ use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
 
+covers(MealPlan::class);
+
 it('returns null from macroRatiosForDay when all meals have null protein_grams', function (): void {
     $mealPlan = MealPlan::factory()->for(User::factory())->create([
         'macronutrient_ratios' => null,

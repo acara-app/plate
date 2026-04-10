@@ -11,6 +11,8 @@ use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 
+covers(SummarizeConversationJob::class);
+
 it('implements ShouldBeUnique and ShouldQueue', function (): void {
     $conversation = Conversation::factory()->create();
     $job = new SummarizeConversationJob($conversation);

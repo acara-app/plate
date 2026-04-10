@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Utilities\JsonCleaner;
 
+covers(JsonCleaner::class);
+
 it('can extract valid JSON from markdown response', function (): void {
     $markdownResponse = "```json\n{\"type\": \"weekly\", \"name\": \"Test Plan\"}\n```";
 

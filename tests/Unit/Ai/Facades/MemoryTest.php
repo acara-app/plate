@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Ai\Facades\Memory;
 use App\Contracts\Ai\Memory\StoreMemoryTool;
 
+covers(Memory::class);
+
 it('throws exception for unknown method', function (): void {
     Memory::unknownMethod('test');
 })->throws(BadMethodCallException::class, 'Method Memory::unknownMethod() does not exist.');

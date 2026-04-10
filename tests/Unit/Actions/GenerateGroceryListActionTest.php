@@ -10,6 +10,8 @@ use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
 
+covers(GenerateGroceryListAction::class);
+
 beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->mealPlan = MealPlan::factory()->for($this->user)->create([

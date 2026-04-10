@@ -7,6 +7,8 @@ use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Models\TelegraphChat;
 
+covers(TelegramMessageService::class);
+
 beforeEach(function (): void {
     Telegraph::fake();
 });

@@ -8,6 +8,8 @@ use App\Http\Requests\StreamChatRequest;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Ai\Files\Base64Image;
 
+covers(StreamChatRequest::class);
+
 $createRequest = function (array $data): StreamChatRequest {
     $request = new StreamChatRequest();
 

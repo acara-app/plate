@@ -8,7 +8,9 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
-test('to array', function (): void {
+covers(User::class);
+
+it('to array', function (): void {
     $user = User::factory()->create()->refresh();
 
     expect(array_keys($user->toArray()))
@@ -37,25 +39,25 @@ test('to array', function (): void {
         ]);
 });
 
-test('has active subscription returns false when no subscription', function (): void {
+it('has active subscription returns false when no subscription', function (): void {
     $user = User::factory()->create();
 
     expect($user->hasActiveSubscription())->toBeFalse();
 });
 
-test('active subscription returns null when no subscription', function (): void {
+it('active subscription returns null when no subscription', function (): void {
     $user = User::factory()->create();
 
     expect($user->activeSubscription())->toBeNull();
 });
 
-test('subscription display name returns null when no subscription', function (): void {
+it('subscription display name returns null when no subscription', function (): void {
     $user = User::factory()->create();
 
     expect($user->subscriptionDisplayName())->toBeNull();
 });
 
-test('subscription display name returns formatted name when subscription exists', function (): void {
+it('subscription display name returns formatted name when subscription exists', function (): void {
     $user = User::factory()->create();
 
     DB::table('subscriptions')->insert([
@@ -72,13 +74,13 @@ test('subscription display name returns formatted name when subscription exists'
     expect($user->fresh()->subscriptionDisplayName())->toBe('Premium Plan');
 });
 
-test('is_verified returns false when database value is null', function (): void {
+it('is_verified returns false when database value is null', function (): void {
     $user = User::factory()->create(['is_verified' => null]);
 
     expect($user->is_verified)->toBeFalse();
 });
 
-test('is_verified returns true when database value is null but user has trialing subscription', function (): void {
+it('is_verified returns true when database value is null but user has trialing subscription', function (): void {
     $user = User::factory()->create(['is_verified' => null]);
 
     DB::table('subscriptions')->insert([
@@ -96,19 +98,19 @@ test('is_verified returns true when database value is null but user has trialing
     expect($user->fresh()->is_verified)->toBeTrue();
 });
 
-test('is_verified returns false when database value is false', function (): void {
+it('is_verified returns false when database value is false', function (): void {
     $user = User::factory()->create(['is_verified' => false]);
 
     expect($user->is_verified)->toBeFalse();
 });
 
-test('is_verified returns true when database value is true', function (): void {
+it('is_verified returns true when database value is true', function (): void {
     $user = User::factory()->verified()->create();
 
     expect($user->is_verified)->toBeTrue();
 });
 
-test('is_verified returns true for admin emails', function (): void {
+it('is_verified returns true for admin emails', function (): void {
     config(['sponsors.admin_emails' => ['admin@example.com']]);
 
     $user = User::factory()->create([
@@ -119,7 +121,7 @@ test('is_verified returns true for admin emails', function (): void {
     expect($user->is_verified)->toBeTrue();
 });
 
-test('is_verified returns true when user has active subscription', function (): void {
+it('is_verified returns true when user has active subscription', function (): void {
     $user = User::factory()->create(['is_verified' => false]);
 
     DB::table('subscriptions')->insert([
@@ -136,7 +138,7 @@ test('is_verified returns true when user has active subscription', function (): 
     expect($user->fresh()->is_verified)->toBeTrue();
 });
 
-test('prunable returns users without verified email older than 30 days', function (): void {
+it('prunable returns users without verified email older than 30 days', function (): void {
     $oldUnverifiedUser = User::factory()->create([
         'email_verified_at' => null,
         'created_at' => now()->subDays(31),
@@ -159,7 +161,7 @@ test('prunable returns users without verified email older than 30 days', functio
         ->first()->id->toBe($oldUnverifiedUser->id);
 });
 
-test('prunable method returns correct query builder instance', function (): void {
+it('prunable method returns correct query builder instance', function (): void {
     $user = new User();
 
     $prunableQuery = $user->prunable();
@@ -167,7 +169,7 @@ test('prunable method returns correct query builder instance', function (): void
     expect($prunableQuery)->toBeInstanceOf(Builder::class);
 });
 
-test('prunable filters out verified users', function (): void {
+it('prunable filters out verified users', function (): void {
     User::factory()->create([
         'email_verified_at' => null,
         'created_at' => now()->subDays(31),
@@ -183,7 +185,7 @@ test('prunable filters out verified users', function (): void {
     expect($prunableUsers)->toHaveCount(1);
 });
 
-test('prunable filters out recent unverified users', function (): void {
+it('prunable filters out recent unverified users', function (): void {
 
     $recentUser = User::factory()->create([
         'email_verified_at' => null,
@@ -204,7 +206,7 @@ test('prunable filters out recent unverified users', function (): void {
         ->first()->id->toBe($oldUser->id);
 });
 
-test('has active subscription returns true when subscription is trialing', function (): void {
+it('has active subscription returns true when subscription is trialing', function (): void {
     $user = User::factory()->create();
 
     DB::table('subscriptions')->insert([
@@ -222,7 +224,7 @@ test('has active subscription returns true when subscription is trialing', funct
     expect($user->fresh()->hasActiveSubscription())->toBeTrue();
 });
 
-test('is_verified returns true when user has trialing subscription', function (): void {
+it('is_verified returns true when user has trialing subscription', function (): void {
     $user = User::factory()->create(['is_verified' => false]);
 
     DB::table('subscriptions')->insert([
@@ -240,7 +242,7 @@ test('is_verified returns true when user has trialing subscription', function ()
     expect($user->fresh()->is_verified)->toBeTrue();
 });
 
-test('active subscription returns trialing subscription', function (): void {
+it('active subscription returns trialing subscription', function (): void {
     $user = User::factory()->create();
 
     DB::table('subscriptions')->insert([
@@ -259,7 +261,7 @@ test('active subscription returns trialing subscription', function (): void {
         ->and($user->fresh()->activeSubscription()->stripe_status)->toBe('trialing');
 });
 
-test('health sync samples relation returns related samples', function (): void {
+it('health sync samples relation returns related samples', function (): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->create();
     $sample = HealthSyncSample::factory()->for($user)->for($device)->create();
@@ -269,7 +271,7 @@ test('health sync samples relation returns related samples', function (): void {
         ->first()->id->toBe($sample->id);
 });
 
-test('preferred_language returns null when not set', function (): void {
+it('preferred_language returns null when not set', function (): void {
     $user = User::factory()->create(['preferred_language' => null]);
 
     expect($user->preferred_language)->toBeNull();

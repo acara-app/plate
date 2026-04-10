@@ -10,6 +10,8 @@ use App\Models\HealthSyncSample;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 
+covers(AggregateHealthDailySamplesAction::class);
+
 beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->date = CarbonImmutable::parse('2026-04-05');
@@ -182,8 +184,8 @@ it('stores weight aggregates with value_last and value_sum_canonical populated',
 it('returns zero when user has no samples for a date', function (): void {
     $result = $this->action->handle($this->user, $this->date);
 
-    expect($result)->toBe(0);
-    expect(HealthDailyAggregate::query()->where('user_id', $this->user->id)->count())->toBe(0);
+    expect($result)->toBe(0)
+        ->and(HealthDailyAggregate::query()->where('user_id', $this->user->id)->count())->toBe(0);
 });
 
 it('upserts existing aggregates idempotently on re-run', function (): void {

@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Enums\DietType;
 use App\Services\SystemPromptProviders\PaleoMealPlanSystemProvider;
 
+covers(PaleoMealPlanSystemProvider::class);
+
 it('returns a system prompt string with Paleo diet content', function (): void {
     $provider = new PaleoMealPlanSystemProvider;
     $result = $provider->run();

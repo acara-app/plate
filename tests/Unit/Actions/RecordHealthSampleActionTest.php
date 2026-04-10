@@ -8,7 +8,9 @@ use App\Enums\HealthEntrySource;
 use App\Enums\HealthEntryType;
 use App\Models\User;
 
-test('it creates health sync samples from vitals data', function (): void {
+covers(RecordHealthSampleAction::class);
+
+it('creates health sync samples from vitals data', function (): void {
     $user = User::factory()->create();
     $action = new RecordHealthSampleAction();
 
@@ -33,7 +35,7 @@ test('it creates health sync samples from vitals data', function (): void {
     ]);
 });
 
-test('it throws exception when no samples to record', function (): void {
+it('throws exception when no samples to record', function (): void {
     $user = User::factory()->create();
     $action = new RecordHealthSampleAction();
 

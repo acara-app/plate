@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\View;
 
+covers(HandleAppearance::class);
+
 it('shares appearance cookie value with views', function (): void {
     $middleware = new HandleAppearance();
 

@@ -10,6 +10,8 @@ use DefStudio\Telegraph\Telegraph;
 use Illuminate\Support\Facades\Http;
 use Laravel\Ai\Files\Base64Image;
 
+covers(DownloadTelegramPhotoAction::class);
+
 it('downloads a photo and returns a Base64Image', function (): void {
     $imageContent = 'fake-jpeg-content';
 

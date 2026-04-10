@@ -6,6 +6,8 @@ use App\Models\GroceryList;
 use App\Models\User;
 use App\Policies\GroceryListPolicy;
 
+covers(GroceryListPolicy::class);
+
 it('allows the owner to view the grocery list', function (): void {
     $user = User::factory()->create();
     $groceryList = GroceryList::factory()->for($user)->create();

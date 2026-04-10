@@ -7,6 +7,8 @@ use App\Models\HealthSyncSample;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
 
+covers(HealthSyncSample::class);
+
 it('belongs to a user', function (): void {
     $user = User::factory()->create();
     $sample = HealthSyncSample::factory()->for($user)->create();

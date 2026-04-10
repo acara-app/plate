@@ -7,6 +7,8 @@ use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;
 
+covers(Conversation::class);
+
 it('has correct fillable attributes', function (): void {
     $conversation = new Conversation();
 

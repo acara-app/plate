@@ -5,12 +5,14 @@ declare(strict_types=1);
 use App\Models\MealPlan;
 use App\Models\User;
 
+covers(User::class);
+
 it('has many meal plans', function (): void {
     $user = User::factory()->create();
     MealPlan::factory()->count(3)->for($user)->create();
 
-    expect($user->mealPlans)->toHaveCount(3);
-    expect($user->mealPlans->first())->toBeInstanceOf(MealPlan::class);
+    expect($user->mealPlans)->toHaveCount(3)
+        ->and($user->mealPlans->first())->toBeInstanceOf(MealPlan::class);
 });
 
 it('orders meal plans by latest first', function (): void {
@@ -21,8 +23,8 @@ it('orders meal plans by latest first', function (): void {
 
     $plans = $user->mealPlans;
 
-    expect($plans->first()->id)->toBe($newPlan->id);
-    expect($plans->last()->id)->toBe($oldPlan->id);
+    expect($plans->first()->id)->toBe($newPlan->id)
+        ->and($plans->last()->id)->toBe($oldPlan->id);
 });
 
 it('cascades delete meal plans when user is deleted', function (): void {

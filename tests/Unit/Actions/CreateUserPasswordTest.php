@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 
+covers(CreateUserPassword::class);
+
 it('may create a new user password', function (): void {
     Event::fake([PasswordReset::class]);
 

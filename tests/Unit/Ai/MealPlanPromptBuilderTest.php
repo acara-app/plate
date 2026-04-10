@@ -10,6 +10,8 @@ use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Models\UserProfile;
 
+covers(MealPlanPromptBuilder::class);
+
 it('includes glucose analysis in the prompt when glucose data exists', function (): void {
     /** @var User $user */
     $user = User::factory()->create();

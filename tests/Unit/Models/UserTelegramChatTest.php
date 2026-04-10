@@ -7,6 +7,8 @@ use App\Models\UserTelegramChat;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Models\TelegraphChat;
 
+covers(UserTelegramChat::class);
+
 it('has correct fillable attributes', function (): void {
     $chat = new UserTelegramChat();
 

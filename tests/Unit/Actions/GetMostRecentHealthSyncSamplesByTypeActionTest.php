@@ -6,6 +6,8 @@ use App\Actions\GetMostRecentHealthSyncSamplesByTypeAction;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 
+covers(GetMostRecentHealthSyncSamplesByTypeAction::class);
+
 it('returns most recent sample per type', function (): void {
     $user = User::factory()->create();
     $action = resolve(GetMostRecentHealthSyncSamplesByTypeAction::class);

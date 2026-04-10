@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Rules\ValidEmail;
 
+covers(ValidEmail::class);
+
 it('works with valid email', function (string $email): void {
     $rule = new ValidEmail;
 

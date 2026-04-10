@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Models\DeletedUser;
 use Carbon\CarbonInterface;
 
+covers(DeletedUser::class);
+
 it('has correct casts', function (): void {
     $deletedUser = new DeletedUser;
     $casts = $deletedUser->casts();

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\DataObjects\GeneratedMealData;
 
+covers(GeneratedMealData::class);
+
 it('can be instantiated with all properties', function (): void {
     $data = new GeneratedMealData(
         name: 'Chicken Salad',

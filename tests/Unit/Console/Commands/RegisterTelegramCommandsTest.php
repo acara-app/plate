@@ -8,6 +8,8 @@ use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Telegraph as TelegraphClient;
 use Illuminate\Support\Facades\Http;
 
+covers(RegisterTelegramCommands::class);
+
 it('registers telegram commands successfully when bot exists', function (): void {
     $bot = TelegraphBot::factory()->create([
         'name' => 'TestBot',

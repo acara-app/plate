@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
+covers(RequireSubscription::class);
+
 it('does not set requiresSubscription attribute when user is not authenticated', function (): void {
     Auth::shouldReceive('user')->andReturn(null)->once();
 

@@ -8,6 +8,8 @@ use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
 
+covers(GroceryListGeneratorAgent::class);
+
 it('returns empty grocery list when meal plan has no meals', function (): void {
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();

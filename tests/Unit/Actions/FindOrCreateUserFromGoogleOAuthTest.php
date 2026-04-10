@@ -6,6 +6,8 @@ use App\Actions\FindOrCreateUserFromGoogleOAuth;
 use App\Models\User;
 use Laravel\Socialite\Two\User as SocialiteUser;
 
+covers(FindOrCreateUserFromGoogleOAuth::class);
+
 beforeEach(function (): void {
     $this->action = new FindOrCreateUserFromGoogleOAuth();
 });
@@ -18,11 +20,11 @@ it('creates a new user when Google ID does not exist', function (): void {
 
     $user = $this->action->handle($googleUser);
 
-    expect($user)->toBeInstanceOf(User::class);
-    expect($user->google_id)->toBe('google_new_123');
-    expect($user->email)->toBe('newuser@test.com');
-    expect($user->name)->toBe('New Test User');
-    expect($user->email_verified_at)->not->toBeNull();
+    expect($user)->toBeInstanceOf(User::class)
+        ->and($user->google_id)->toBe('google_new_123')
+        ->and($user->email)->toBe('newuser@test.com')
+        ->and($user->name)->toBe('New Test User')
+        ->and($user->email_verified_at)->not->toBeNull();
 })->group('oauth', 'actions');
 
 it('updates existing user when Google ID matches', function (): void {
@@ -39,9 +41,9 @@ it('updates existing user when Google ID matches', function (): void {
 
     $user = $this->action->handle($googleUser);
 
-    expect($user->id)->toBe($existingUser->id);
-    expect($user->email)->toBe('new@test.com');
-    expect($user->name)->toBe('New Name');
+    expect($user->id)->toBe($existingUser->id)
+        ->and($user->email)->toBe('new@test.com')
+        ->and($user->name)->toBe('New Name');
 })->group('oauth', 'actions');
 
 it('links Google account to existing user by email', function (): void {
@@ -58,9 +60,9 @@ it('links Google account to existing user by email', function (): void {
 
     $user = $this->action->handle($googleUser);
 
-    expect($user->id)->toBe($existingUser->id);
-    expect($user->google_id)->toBe('google_link_789');
-    expect($user->name)->toBe('Updated User');
+    expect($user->id)->toBe($existingUser->id)
+        ->and($user->google_id)->toBe('google_link_789')
+        ->and($user->name)->toBe('Updated User');
 })->group('oauth', 'actions');
 
 it('uses default name when Google provides null name for new user', function (): void {
@@ -69,13 +71,11 @@ it('uses default name when Google provides null name for new user', function ():
     $googleUser->email = 'noname@test.com';
     $googleUser->name = null;
 
-    $user = $this->action->handle($googleUser);
-
-    expect($user->name)->toBe('No Name');
+    expect($this->action->handle($googleUser)->name)->toBe('No Name');
 })->group('oauth', 'actions');
 
 it('preserves existing name when Google provides null name for existing user', function (): void {
-    $existingUser = User::factory()->create([
+    User::factory()->create([
         'google_id' => null,
         'email' => 'preserve@test.com',
         'name' => 'Original Name',
@@ -86,13 +86,11 @@ it('preserves existing name when Google provides null name for existing user', f
     $googleUser->email = 'preserve@test.com';
     $googleUser->name = null;
 
-    $user = $this->action->handle($googleUser);
-
-    expect($user->name)->toBe('Original Name');
+    expect($this->action->handle($googleUser)->name)->toBe('Original Name');
 })->group('oauth', 'actions');
 
 it('preserves existing name when Google ID matches and provides null name', function (): void {
-    $existingUser = User::factory()->create([
+    User::factory()->create([
         'google_id' => 'google_keep_222',
         'email' => 'keep@test.com',
         'name' => 'Keep This Name',
@@ -103,9 +101,7 @@ it('preserves existing name when Google ID matches and provides null name', func
     $googleUser->email = 'keep@test.com';
     $googleUser->name = null;
 
-    $user = $this->action->handle($googleUser);
-
-    expect($user->name)->toBe('Keep This Name');
+    expect($this->action->handle($googleUser)->name)->toBe('Keep This Name');
 })->group('oauth', 'actions');
 
 it('sets email_verified_at for new users created via OAuth', function (): void {
@@ -116,6 +112,6 @@ it('sets email_verified_at for new users created via OAuth', function (): void {
 
     $user = $this->action->handle($googleUser);
 
-    expect($user->email_verified_at)->not->toBeNull();
-    expect($user->email_verified_at)->toBeInstanceOf(DateTimeImmutable::class);
+    expect($user->email_verified_at)->not->toBeNull()
+        ->and($user->email_verified_at)->toBeInstanceOf(DateTimeImmutable::class);
 })->group('oauth', 'actions');

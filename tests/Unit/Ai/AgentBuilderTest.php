@@ -14,6 +14,8 @@ use App\Models\User;
 use App\Services\ToolRegistry;
 use Laravel\Ai\Files\Base64Image;
 
+covers(AgentBuilder::class);
+
 beforeEach(function (): void {
     $this->toolRegistry = resolve(ToolRegistry::class);
     $this->builder = new AgentBuilder($this->toolRegistry);

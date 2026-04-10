@@ -8,7 +8,9 @@ use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
 use App\Enums\InsulinType;
 
-test('it formats glucose log correctly', function (): void {
+covers(HealthLogData::class);
+
+it('formats glucose log correctly', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Glucose,
@@ -20,7 +22,7 @@ test('it formats glucose log correctly', function (): void {
     expect($data->formatForDisplay())->toBe('Glucose 120 mg/dL (Fasting)');
 });
 
-test('it formats glucose log with defaults', function (): void {
+it('formats glucose log with defaults', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Glucose,
@@ -30,7 +32,7 @@ test('it formats glucose log with defaults', function (): void {
     expect($data->formatForDisplay())->toBe('Glucose 120 mg/dL (Random)');
 });
 
-test('it formats food log correctly', function (): void {
+it('formats food log correctly', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Food,
@@ -40,7 +42,7 @@ test('it formats food log correctly', function (): void {
     expect($data->formatForDisplay())->toBe('Food - 50g carbs');
 });
 
-test('it formats food log with all macros', function (): void {
+it('formats food log with all macros', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Food,
@@ -58,7 +60,7 @@ test('it formats food log with all macros', function (): void {
         ->toContain('400 kcal');
 });
 
-test('it formats insulin log correctly', function (): void {
+it('formats insulin log correctly', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Insulin,
@@ -69,7 +71,7 @@ test('it formats insulin log correctly', function (): void {
     expect($data->formatForDisplay())->toBe('Insulin 10 units (Basal)');
 });
 
-test('it formats insulin log with Mixed type', function (): void {
+it('formats insulin log with Mixed type', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Insulin,
@@ -80,7 +82,7 @@ test('it formats insulin log with Mixed type', function (): void {
     expect($data->formatForDisplay())->toBe('Insulin 10 units (Mixed)');
 });
 
-test('it formats insulin log with defaults', function (): void {
+it('formats insulin log with defaults', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Insulin,
@@ -90,7 +92,7 @@ test('it formats insulin log with defaults', function (): void {
     expect($data->formatForDisplay())->toBe('Insulin 10 units (Bolus)');
 });
 
-test('it formats meds log correctly', function (): void {
+it('formats meds log correctly', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Meds,
@@ -101,7 +103,7 @@ test('it formats meds log correctly', function (): void {
     expect($data->formatForDisplay())->toBe('Medication - Metformin 500mg');
 });
 
-test('it formats meds log without dosage', function (): void {
+it('formats meds log without dosage', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Meds,
@@ -111,7 +113,7 @@ test('it formats meds log without dosage', function (): void {
     expect($data->formatForDisplay())->toBe('Medication - Metformin');
 });
 
-test('it formats vitals log for weight', function (): void {
+it('formats vitals log for weight', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Vitals,
@@ -121,7 +123,7 @@ test('it formats vitals log for weight', function (): void {
     expect($data->formatForDisplay())->toBe('Weight 75.5 kg');
 });
 
-test('it formats vitals log for blood pressure', function (): void {
+it('formats vitals log for blood pressure', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Vitals,
@@ -132,7 +134,7 @@ test('it formats vitals log for blood pressure', function (): void {
     expect($data->formatForDisplay())->toBe('Blood Pressure 120/80');
 });
 
-test('it formats vitals log fallback', function (): void {
+it('formats vitals log fallback', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Vitals,
@@ -141,7 +143,7 @@ test('it formats vitals log fallback', function (): void {
     expect($data->formatForDisplay())->toBe('Vitals');
 });
 
-test('it formats exercise log correctly', function (): void {
+it('formats exercise log correctly', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Exercise,
@@ -152,7 +154,7 @@ test('it formats exercise log correctly', function (): void {
     expect($data->formatForDisplay())->toBe('Exercise - 30 min Running');
 });
 
-test('it exports to glucose record array', function (): void {
+it('exports to glucose record array', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Glucose,
@@ -166,7 +168,7 @@ test('it exports to glucose record array', function (): void {
     ]);
 });
 
-test('it exports to food record array', function (): void {
+it('exports to food record array', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Food,
@@ -182,7 +184,7 @@ test('it exports to food record array', function (): void {
     ]);
 });
 
-test('it exports to insulin record array', function (): void {
+it('exports to insulin record array', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Insulin,
@@ -196,7 +198,7 @@ test('it exports to insulin record array', function (): void {
     ]);
 });
 
-test('it exports to meds record array', function (): void {
+it('exports to meds record array', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Meds,
@@ -210,7 +212,7 @@ test('it exports to meds record array', function (): void {
     ]);
 });
 
-test('it exports to vitals record array', function (): void {
+it('exports to vitals record array', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Vitals,
@@ -227,7 +229,7 @@ test('it exports to vitals record array', function (): void {
     ]);
 });
 
-test('it exports to exercise record array', function (): void {
+it('exports to exercise record array', function (): void {
     $data = new HealthLogData(
         isHealthData: true,
         logType: HealthEntryType::Exercise,

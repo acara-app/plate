@@ -8,6 +8,8 @@ use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
 use App\Services\DietMapper;
 
+covers(DietMapper::class);
+
 it('maps spikes goal with omnivore and balanced to mediterranean', function (): void {
     $dietType = DietMapper::map(
         GoalChoice::Spikes,

@@ -7,6 +7,8 @@ use App\Enums\HealthAggregationFunction;
 use App\Services\HealthMetricRegistry;
 use App\ValueObjects\HealthMetricDescriptorData;
 
+covers(HealthMetricRegistry::class);
+
 beforeEach(function (): void {
     $this->registry = resolve(HealthMetricRegistry::class);
 });
@@ -59,8 +61,8 @@ it('resolves all nutrients as cumulative sums (fixes B4 regression)', function (
 
         expect($descriptor)->not->toBeNull('Missing registry entry for '.$nutrient);
         /** @var HealthMetricDescriptorData $descriptor */
-        expect($descriptor->category)->toBe(HealthAggregateCategory::Cumulative, $nutrient.' should be Cumulative');
-        expect($descriptor->function)->toBe(HealthAggregationFunction::Sum, $nutrient.' should Sum daily');
+        expect($descriptor->category)->toBe(HealthAggregateCategory::Cumulative, $nutrient.' should be Cumulative')
+            ->and($descriptor->function)->toBe(HealthAggregationFunction::Sum, $nutrient.' should Sum daily');
     }
 });
 
@@ -94,8 +96,8 @@ it('resolves body metrics (BMI, body fat, height) as slow-changing with Last fun
 
         expect($descriptor)->not->toBeNull();
         /** @var HealthMetricDescriptorData $descriptor */
-        expect($descriptor->category)->toBe(HealthAggregateCategory::SlowChanging, $metric.' should be SlowChanging');
-        expect($descriptor->function)->toBe(HealthAggregationFunction::Last, $metric.' should use Last');
+        expect($descriptor->category)->toBe(HealthAggregateCategory::SlowChanging, $metric.' should be SlowChanging')
+            ->and($descriptor->function)->toBe(HealthAggregationFunction::Last, $metric.' should use Last');
     }
 });
 

@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Enums\DietType;
 use App\Services\SystemPromptProviders\DashMealPlanSystemProvider;
 
+covers(DashMealPlanSystemProvider::class);
+
 it('returns a system prompt string with DASH diet content', function (): void {
     $provider = new DashMealPlanSystemProvider;
     $result = $provider->run();

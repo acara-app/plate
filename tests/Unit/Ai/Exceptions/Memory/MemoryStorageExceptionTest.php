@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Ai\Exceptions\Memory\MemoryStorageException;
 
+covers(MemoryStorageException::class);
+
 it('can be created with message only', function (): void {
     $exception = new MemoryStorageException('Something went wrong');
 

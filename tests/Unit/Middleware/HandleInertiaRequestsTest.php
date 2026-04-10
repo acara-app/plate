@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Inertia\OnceProp;
 
+covers(HandleInertiaRequests::class);
+
 it('shares app name from config', function (): void {
     $middleware = new HandleInertiaRequests();
 

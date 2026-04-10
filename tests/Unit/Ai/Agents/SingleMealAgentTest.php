@@ -12,6 +12,8 @@ use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Tests\Helpers\TestJsonSchema;
 
+covers(SingleMealAgent::class);
+
 beforeEach(function (): void {
     $this->user = User::factory()->create();
 

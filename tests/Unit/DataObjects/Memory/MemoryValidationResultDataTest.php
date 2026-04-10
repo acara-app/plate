@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\DataObjects\Memory\MemoryValidationResultData;
 
+covers(MemoryValidationResultData::class);
+
 it('can be created from array using from method', function (): void {
     $data = [
         'isValid' => true,

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\DataObjects\FoodItemData;
 
+covers(FoodItemData::class);
+
 it('can be created directly with constructor', function (): void {
     $itemData = new FoodItemData(
         name: 'Grilled Chicken',

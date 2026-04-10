@@ -8,6 +8,8 @@ use App\Enums\GoalChoice;
 use App\Enums\Sex;
 use App\Models\User;
 
+covers(SingleMealPromptBuilder::class);
+
 beforeEach(function (): void {
     $this->user = User::factory()->create();
 

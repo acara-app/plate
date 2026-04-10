@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\DataObjects\MobileSync\MedicationDoseEventMetadata;
 
+covers(MedicationDoseEventMetadata::class);
+
 it('returns null for null metadata', function (): void {
     expect(MedicationDoseEventMetadata::normalize(null))->toBeNull();
 });

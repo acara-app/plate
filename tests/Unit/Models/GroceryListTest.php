@@ -10,6 +10,8 @@ use App\Models\MealPlan;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
+covers(GroceryList::class);
+
 it('has correct casts', function (): void {
     $groceryList = GroceryList::factory()->create();
 

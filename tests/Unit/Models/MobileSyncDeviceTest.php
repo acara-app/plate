@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Models\MobileSyncDevice;
 use App\Models\User;
 
+covers(MobileSyncDevice::class);
+
 it('has correct casts', function (): void {
     $device = new MobileSyncDevice();
     $casts = $device->casts();

@@ -11,11 +11,13 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
+covers(LogHealthEntry::class);
+
 it('has correct name and description', function (): void {
     $tool = new LogHealthEntry;
 
-    expect($tool->name())->toBe('log_health_entry');
-    expect($tool->description())->toContain('Log a health entry');
+    expect($tool->name())->toBe('log_health_entry')
+        ->and($tool->description())->toContain('Log a health entry');
 });
 
 it('has valid schema with enum constraints', function (): void {
@@ -69,8 +71,8 @@ it('logs a glucose entry successfully', function (): void {
         ->where('type_identifier', HealthSyncType::BloodGlucose->value)
         ->first();
 
-    expect($sample->value)->toBe(140.0);
-    expect($sample->entry_source)->toBe(HealthEntrySource::Chat);
+    expect($sample->value)->toBe(140.0)
+        ->and($sample->entry_source)->toBe(HealthEntrySource::Chat);
 });
 
 it('logs a food entry with notes', function (): void {
@@ -93,9 +95,9 @@ it('logs a food entry with notes', function (): void {
         ->where('type_identifier', HealthSyncType::Carbohydrates->value)
         ->first();
 
-    expect((float) $sample->value)->toBe(45.0);
-    expect($sample->notes)->toBe('tsuivan');
-    expect($sample->entry_source)->toBe(HealthEntrySource::Chat);
+    expect((float) $sample->value)->toBe(45.0)
+        ->and($sample->notes)->toBe('tsuivan')
+        ->and($sample->entry_source)->toBe(HealthEntrySource::Chat);
 });
 
 it('logs a vitals entry with weight', function (): void {
@@ -117,8 +119,8 @@ it('logs a vitals entry with weight', function (): void {
         ->where('type_identifier', HealthSyncType::Weight->value)
         ->first();
 
-    expect($sample->value)->toBe(81.65);
-    expect($sample->entry_source)->toBe(HealthEntrySource::Chat);
+    expect($sample->value)->toBe(81.65)
+        ->and($sample->entry_source)->toBe(HealthEntrySource::Chat);
 });
 
 it('logs an exercise entry', function (): void {
@@ -141,9 +143,9 @@ it('logs an exercise entry', function (): void {
         ->where('type_identifier', HealthSyncType::ExerciseMinutes->value)
         ->first();
 
-    expect($sample->value)->toBe(30.0);
-    expect($sample->entry_source)->toBe(HealthEntrySource::Chat);
-    expect($sample->metadata['exercise_type'])->toBe('walking');
+    expect($sample->value)->toBe(30.0)
+        ->and($sample->entry_source)->toBe(HealthEntrySource::Chat)
+        ->and($sample->metadata['exercise_type'])->toBe('walking');
 });
 
 it('logs a food entry with only notes and no macros', function (): void {
@@ -165,8 +167,8 @@ it('logs a food entry with only notes and no macros', function (): void {
         ->where('type_identifier', HealthSyncType::DietaryEnergy->value)
         ->first();
 
-    expect($sample->value)->toBe(0.0);
-    expect($sample->notes)->toBe('apple');
+    expect($sample->value)->toBe(0.0)
+        ->and($sample->notes)->toBe('apple');
 });
 
 it('returns error when vitals entry has no data', function (): void {
@@ -205,7 +207,7 @@ it('logs a medication entry', function (): void {
         ->where('type_identifier', HealthSyncType::Medication->value)
         ->first();
 
-    expect($sample->metadata['medication_name'])->toBe('metformin');
-    expect($sample->metadata['medication_dosage'])->toBe('500mg');
-    expect($sample->entry_source)->toBe(HealthEntrySource::Chat);
+    expect($sample->metadata['medication_name'])->toBe('metformin')
+        ->and($sample->metadata['medication_dosage'])->toBe('500mg')
+        ->and($sample->entry_source)->toBe(HealthEntrySource::Chat);
 });

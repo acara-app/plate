@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\AnimalProductChoice;
 
+covers(AnimalProductChoice::class);
+
 it('has correct values', function (): void {
     expect(AnimalProductChoice::Omnivore->value)->toBe('omnivore')
         ->and(AnimalProductChoice::Pescatarian->value)->toBe('pescatarian')

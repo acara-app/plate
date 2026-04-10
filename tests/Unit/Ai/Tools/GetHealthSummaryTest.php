@@ -8,6 +8,8 @@ use App\Models\User;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
+covers(GetHealthSummary::class);
+
 beforeEach(function (): void {
     $this->tool = new GetHealthSummary();
 });

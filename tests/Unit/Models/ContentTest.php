@@ -9,6 +9,8 @@ use App\Models\Content;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+covers(Content::class);
+
 it('casts type to ContentType enum', function (): void {
     $content = Content::factory()->create(['slug' => Str::uuid()->toString()]);
 

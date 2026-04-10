@@ -7,71 +7,60 @@ use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
 
+covers(BuildConversationMessagesAction::class);
+
 beforeEach(function (): void {
     $this->action = resolve(BuildConversationMessagesAction::class);
+    $this->user = User::factory()->create();
+    $this->conversation = Conversation::factory()->create(['user_id' => $this->user->id]);
 });
 
 it('returns empty array when conversation is null', function (): void {
-    $result = $this->action->handle(null);
-
-    expect($result)->toBe([]);
+    expect($this->action->handle(null))->toBe([]);
 });
 
 it('returns empty array when conversation has no messages', function (): void {
-    $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $this->conversation->load('messages');
 
-    $conversation->load('messages');
-
-    $result = $this->action->handle($conversation);
-
-    expect($result)->toBe([]);
+    expect($this->action->handle($this->conversation))->toBe([]);
 });
 
 it('maps a text-only history message to the correct structure', function (): void {
-    $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
     $history = History::factory()->create([
-        'conversation_id' => $conversation->id,
+        'conversation_id' => $this->conversation->id,
         'role' => 'user',
         'content' => 'Hello world',
     ]);
 
-    $conversation->load('messages');
+    $this->conversation->load('messages');
+    $result = $this->action->handle($this->conversation);
 
-    $result = $this->action->handle($conversation);
-
-    expect($result)->toHaveCount(1);
-    expect($result[0]['id'])->toBe($history->id);
-    expect($result[0]['role'])->toBe('user');
-    expect($result[0]['parts'])->toHaveCount(1);
-    expect($result[0]['parts'][0])->toBe(['type' => 'text', 'text' => 'Hello world']);
+    expect($result)->toHaveCount(1)
+        ->and($result[0]['id'])->toBe($history->id)
+        ->and($result[0]['role'])->toBe('user')
+        ->and($result[0]['parts'])->toHaveCount(1)
+        ->and($result[0]['parts'][0])->toBe(['type' => 'text', 'text' => 'Hello world']);
 });
 
 it('maps assistant role correctly', function (): void {
-    $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
     History::factory()->create([
-        'conversation_id' => $conversation->id,
+        'conversation_id' => $this->conversation->id,
         'role' => 'assistant',
         'content' => 'How can I help?',
     ]);
 
-    $conversation->load('messages');
+    $this->conversation->load('messages');
+    $result = $this->action->handle($this->conversation);
 
-    $result = $this->action->handle($conversation);
-
-    expect($result[0]['role'])->toBe('assistant');
-    expect($result[0]['parts'][0]['text'])->toBe('How can I help?');
+    expect($result[0]['role'])->toBe('assistant')
+        ->and($result[0]['parts'][0]['text'])->toBe('How can I help?');
 });
 
 it('maps image attachments as file parts after the text part', function (): void {
-    $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
     $base64 = base64_encode('fake-image-data');
 
     History::factory()->create([
-        'conversation_id' => $conversation->id,
+        'conversation_id' => $this->conversation->id,
         'role' => 'user',
         'content' => 'What food is this?',
         'attachments' => [
@@ -79,26 +68,23 @@ it('maps image attachments as file parts after the text part', function (): void
         ],
     ]);
 
-    $conversation->load('messages');
+    $this->conversation->load('messages');
+    $result = $this->action->handle($this->conversation);
 
-    $result = $this->action->handle($conversation);
-
-    expect($result[0]['parts'])->toHaveCount(2);
-    expect($result[0]['parts'][0])->toBe(['type' => 'text', 'text' => 'What food is this?']);
-    expect($result[0]['parts'][1])->toBe([
-        'type' => 'file',
-        'mediaType' => 'image/png',
-        'url' => 'data:image/png;base64,'.$base64,
-    ]);
+    expect($result[0]['parts'])->toHaveCount(2)
+        ->and($result[0]['parts'][0])->toBe(['type' => 'text', 'text' => 'What food is this?'])
+        ->and($result[0]['parts'][1])->toBe([
+            'type' => 'file',
+            'mediaType' => 'image/png',
+            'url' => 'data:image/png;base64,'.$base64,
+        ]);
 });
 
 it('falls back to image/jpeg mime when attachment mime is missing', function (): void {
-    $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
     $base64 = base64_encode('raw-bytes');
 
     History::factory()->create([
-        'conversation_id' => $conversation->id,
+        'conversation_id' => $this->conversation->id,
         'role' => 'user',
         'content' => 'Look at this',
         'attachments' => [
@@ -106,20 +92,16 @@ it('falls back to image/jpeg mime when attachment mime is missing', function ():
         ],
     ]);
 
-    $conversation->load('messages');
+    $this->conversation->load('messages');
+    $result = $this->action->handle($this->conversation);
 
-    $result = $this->action->handle($conversation);
-
-    expect($result[0]['parts'][1]['mediaType'])->toBe('image/jpeg');
-    expect($result[0]['parts'][1]['url'])->toBe('data:image/jpeg;base64,'.$base64);
+    expect($result[0]['parts'][1]['mediaType'])->toBe('image/jpeg')
+        ->and($result[0]['parts'][1]['url'])->toBe('data:image/jpeg;base64,'.$base64);
 });
 
 it('falls back to empty string when attachment base64 is missing', function (): void {
-    $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
-
     History::factory()->create([
-        'conversation_id' => $conversation->id,
+        'conversation_id' => $this->conversation->id,
         'role' => 'user',
         'content' => 'Blank attachment',
         'attachments' => [
@@ -127,33 +109,28 @@ it('falls back to empty string when attachment base64 is missing', function (): 
         ],
     ]);
 
-    $conversation->load('messages');
-
-    $result = $this->action->handle($conversation);
+    $this->conversation->load('messages');
+    $result = $this->action->handle($this->conversation);
 
     expect($result[0]['parts'][1]['url'])->toBe('data:image/gif;base64,');
 });
 
 it('maps multiple messages in order', function (): void {
-    $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
-
     History::factory()->create([
-        'conversation_id' => $conversation->id,
+        'conversation_id' => $this->conversation->id,
         'role' => 'user',
         'content' => 'First message',
     ]);
     History::factory()->create([
-        'conversation_id' => $conversation->id,
+        'conversation_id' => $this->conversation->id,
         'role' => 'assistant',
         'content' => 'Second message',
     ]);
 
-    $conversation->load('messages');
+    $this->conversation->load('messages');
+    $result = $this->action->handle($this->conversation);
 
-    $result = $this->action->handle($conversation);
-
-    expect($result)->toHaveCount(2);
-    expect($result[0]['parts'][0]['text'])->toBe('First message');
-    expect($result[1]['parts'][0]['text'])->toBe('Second message');
+    expect($result)->toHaveCount(2)
+        ->and($result[0]['parts'][0]['text'])->toBe('First message')
+        ->and($result[1]['parts'][0]['text'])->toBe('Second message');
 });

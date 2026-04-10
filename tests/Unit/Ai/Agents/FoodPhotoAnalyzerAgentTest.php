@@ -7,6 +7,8 @@ use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Spatie\LaravelData\Exceptions\CannotCreateData;
 
+covers(FoodPhotoAnalyzerAgent::class);
+
 beforeEach(function (): void {
     $this->agent = new FoodPhotoAnalyzerAgent;
 });
@@ -53,13 +55,13 @@ it('analyzes food photo and returns analysis data', function (): void {
     $imageBase64 = base64_encode('fake-image-data');
     $result = $this->agent->analyze($imageBase64, 'image/jpeg');
 
-    expect($result->totalCalories)->toBe(165.0);
-    expect($result->totalProtein)->toBe(31.0);
-    expect($result->totalCarbs)->toBe(0.0);
-    expect($result->totalFat)->toBe(3.6);
-    expect($result->confidence)->toBe(85);
-    expect($result->items)->toHaveCount(1);
-    expect($result->items->first()->name)->toBe('Grilled Chicken');
+    expect($result->totalCalories)->toBe(165.0)
+        ->and($result->totalProtein)->toBe(31.0)
+        ->and($result->totalCarbs)->toBe(0.0)
+        ->and($result->totalFat)->toBe(3.6)
+        ->and($result->confidence)->toBe(85)
+        ->and($result->items)->toHaveCount(1)
+        ->and($result->items->first()->name)->toBe('Grilled Chicken');
 });
 
 it('analyzes food photo with multiple items', function (): void {
@@ -80,10 +82,10 @@ it('analyzes food photo with multiple items', function (): void {
     $imageBase64 = base64_encode('fake-image-data');
     $result = $this->agent->analyze($imageBase64, 'image/png');
 
-    expect($result->totalCalories)->toBe(295.0);
-    expect($result->items)->toHaveCount(2);
-    expect($result->items->first()->name)->toBe('Rice');
-    expect($result->items->last()->name)->toBe('Chicken');
+    expect($result->totalCalories)->toBe(295.0)
+        ->and($result->items)->toHaveCount(2)
+        ->and($result->items->first()->name)->toBe('Rice')
+        ->and($result->items->last()->name)->toBe('Chicken');
 });
 
 it('handles empty food detection', function (): void {
@@ -101,9 +103,9 @@ it('handles empty food detection', function (): void {
     $imageBase64 = base64_encode('fake-image-data');
     $result = $this->agent->analyze($imageBase64, 'image/jpeg');
 
-    expect($result->totalCalories)->toBe(0.0);
-    expect($result->confidence)->toBe(0);
-    expect($result->items)->toHaveCount(0);
+    expect($result->totalCalories)->toBe(0.0)
+        ->and($result->confidence)->toBe(0)
+        ->and($result->items)->toHaveCount(0);
 });
 
 it('throws exception when structured data is empty', function (): void {

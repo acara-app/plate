@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\HealthSyncType;
 
+covers(HealthSyncType::class);
+
 it('returns correct units for all types', function (HealthSyncType $type, string $expectedUnit): void {
     expect($type->unit())->toBe($expectedUnit);
 })->with([

@@ -6,6 +6,8 @@ namespace Tests\Unit\Utilities;
 
 use App\Utilities\ConfigHelper;
 
+covers(ConfigHelper::class);
+
 it('returns integer for numeric string config value', function (): void {
     config(['test.numeric_string' => '42']);
 

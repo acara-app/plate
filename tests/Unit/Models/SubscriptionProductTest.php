@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use App\Models\SubscriptionProduct;
 
-test('to array', function (): void {
+covers(SubscriptionProduct::class);
+
+it('to array', function (): void {
     $product = SubscriptionProduct::factory()->create()->refresh();
 
     expect(array_keys($product->toArray()))
@@ -30,7 +32,7 @@ test('to array', function (): void {
         ]);
 });
 
-test('get stripe price id returns monthly by default', function (): void {
+it('get stripe price id returns monthly by default', function (): void {
     $product = SubscriptionProduct::factory()->create([
         'stripe_price_id' => 'price_monthly',
         'yearly_stripe_price_id' => 'price_yearly',
@@ -39,7 +41,7 @@ test('get stripe price id returns monthly by default', function (): void {
     expect($product->getStripePriceId())->toBe('price_monthly');
 });
 
-test('get stripe price id returns yearly when interval is year', function (): void {
+it('get stripe price id returns yearly when interval is year', function (): void {
     $product = SubscriptionProduct::factory()->create([
         'stripe_price_id' => 'price_monthly',
         'yearly_stripe_price_id' => 'price_yearly',
@@ -48,7 +50,7 @@ test('get stripe price id returns yearly when interval is year', function (): vo
     expect($product->getStripePriceId('year'))->toBe('price_yearly');
 });
 
-test('get price for interval returns monthly price by default', function (): void {
+it('get price for interval returns monthly price by default', function (): void {
     $product = SubscriptionProduct::factory()->create([
         'price' => 10.00,
         'yearly_price' => 100.00,
@@ -57,7 +59,7 @@ test('get price for interval returns monthly price by default', function (): voi
     expect($product->getPriceForInterval())->toBe(10.00);
 });
 
-test('get price for interval returns yearly price when interval is year', function (): void {
+it('get price for interval returns yearly price when interval is year', function (): void {
     $product = SubscriptionProduct::factory()->create([
         'price' => 10.00,
         'yearly_price' => 100.00,
@@ -66,7 +68,7 @@ test('get price for interval returns yearly price when interval is year', functi
     expect($product->getPriceForInterval('year'))->toBe(100.00);
 });
 
-test('get price for interval calculates yearly when yearly price is null', function (): void {
+it('get price for interval calculates yearly when yearly price is null', function (): void {
     $product = SubscriptionProduct::factory()->create([
         'price' => 10.00,
         'yearly_price' => null,
@@ -75,7 +77,7 @@ test('get price for interval calculates yearly when yearly price is null', funct
     expect($product->getPriceForInterval('year'))->toBe(120.00);
 });
 
-test('yearly savings returns zero when yearly price is null', function (): void {
+it('yearly savings returns zero when yearly price is null', function (): void {
     $product = SubscriptionProduct::factory()->create([
         'price' => 10.00,
         'yearly_price' => null,
@@ -84,7 +86,7 @@ test('yearly savings returns zero when yearly price is null', function (): void 
     expect($product->yearly_savings)->toBe(0.0);
 });
 
-test('yearly savings calculates correctly when yearly price is set', function (): void {
+it('yearly savings calculates correctly when yearly price is set', function (): void {
     $product = SubscriptionProduct::factory()->create([
         'price' => 10.00,
         'yearly_price' => 100.00,
@@ -93,7 +95,7 @@ test('yearly savings calculates correctly when yearly price is set', function ()
     expect($product->yearly_savings)->toBe(20.0);
 });
 
-test('yearly savings percentage returns zero when yearly price is null', function (): void {
+it('yearly savings percentage returns zero when yearly price is null', function (): void {
     $product = SubscriptionProduct::factory()->create([
         'price' => 10.00,
         'yearly_price' => null,
@@ -102,7 +104,7 @@ test('yearly savings percentage returns zero when yearly price is null', functio
     expect($product->yearly_savings_percentage)->toBe(0);
 });
 
-test('yearly savings percentage calculates correctly when yearly price is set', function (): void {
+it('yearly savings percentage calculates correctly when yearly price is set', function (): void {
     $product = SubscriptionProduct::factory()->create([
         'price' => 10.00,
         'yearly_price' => 100.00,

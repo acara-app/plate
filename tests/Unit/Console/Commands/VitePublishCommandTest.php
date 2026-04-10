@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Console\Commands\VitePublishCommand;
 use Illuminate\Support\Facades\Storage;
 
+covers(VitePublishCommand::class);
+
 it('publishes vite assets to cdn', function (): void {
     Storage::fake('cdn');
 
@@ -21,8 +23,8 @@ it('publishes vite assets to cdn', function (): void {
         ->expectsOutput('Vite assets published successfully!')
         ->assertSuccessful();
 
-    expect(Storage::disk('cdn')->exists('build/app.js'))->toBeTrue();
-    expect(Storage::disk('cdn')->get('build/app.js'))->toBe('console.log("test")');
+    expect(Storage::disk('cdn')->exists('build/app.js'))->toBeTrue()
+        ->and(Storage::disk('cdn')->get('build/app.js'))->toBe('console.log("test")');
 
     if (file_exists($buildPath.'/app.js')) {
         unlink($buildPath.'/app.js');
@@ -43,8 +45,8 @@ it('deletes existing build directory before publishing', function (): void {
     $this->artisan(VitePublishCommand::class)
         ->assertSuccessful();
 
-    expect(Storage::disk('cdn')->exists('build/test.js'))->toBeFalse();
-    expect(Storage::disk('cdn')->exists('build/app.js'))->toBeTrue();
+    expect(Storage::disk('cdn')->exists('build/test.js'))->toBeFalse()
+        ->and(Storage::disk('cdn')->exists('build/app.js'))->toBeTrue();
 
     if (file_exists($buildPath.'/app.js')) {
         unlink($buildPath.'/app.js');
@@ -65,8 +67,8 @@ it('publishes files with correct mime types', function (): void {
     $this->artisan(VitePublishCommand::class)
         ->assertSuccessful();
 
-    expect(Storage::disk('cdn')->exists('build/app.js'))->toBeTrue();
-    expect(Storage::disk('cdn')->exists('build/app.css'))->toBeTrue();
+    expect(Storage::disk('cdn')->exists('build/app.js'))->toBeTrue()
+        ->and(Storage::disk('cdn')->exists('build/app.css'))->toBeTrue();
 
     if (file_exists($buildPath.'/app.js')) {
         unlink($buildPath.'/app.js');

@@ -15,6 +15,8 @@ use App\DataObjects\GlucoseAnalysis\TrendData;
 use App\DataObjects\GlucoseAnalysis\VariabilityData;
 use App\DataObjects\GlucoseNotificationAnalysisData;
 
+covers(GlucoseNotificationAnalysisData::class);
+
 function createTestGlucoseAnalysisData(bool $hasData = true): GlucoseAnalysisData
 {
     return new GlucoseAnalysisData(
@@ -74,7 +76,7 @@ function createTestGlucoseAnalysisData(bool $hasData = true): GlucoseAnalysisDat
     );
 }
 
-test('it can be created with shouldNotify true', function (): void {
+it('can be created with shouldNotify true', function (): void {
     $analysisData = createTestGlucoseAnalysisData();
     $concerns = ['High readings detected', 'Post-meal spikes observed'];
 
@@ -90,7 +92,7 @@ test('it can be created with shouldNotify true', function (): void {
         ->and($result->analysisData->hasData)->toBeTrue();
 });
 
-test('it can be created with shouldNotify false', function (): void {
+it('can be created with shouldNotify false', function (): void {
     $analysisData = createTestGlucoseAnalysisData();
 
     $result = new GlucoseNotificationAnalysisData(
@@ -103,7 +105,7 @@ test('it can be created with shouldNotify false', function (): void {
         ->and($result->concerns)->toBeEmpty();
 });
 
-test('it can be converted to array', function (): void {
+it('can be converted to array', function (): void {
     $analysisData = createTestGlucoseAnalysisData();
     $concerns = ['Test concern'];
 
@@ -120,7 +122,7 @@ test('it can be converted to array', function (): void {
         ->and($array['concerns'])->toBe(['Test concern']);
 });
 
-test('it preserves analysis data integrity', function (): void {
+it('preserves analysis data integrity', function (): void {
     $analysisData = createTestGlucoseAnalysisData();
 
     $result = new GlucoseNotificationAnalysisData(

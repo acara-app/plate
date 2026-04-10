@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\DataObjects\GroceryItemResponseData;
 
+covers(GroceryItemResponseData::class);
+
 it('can be created from array using from method', function (): void {
     $data = [
         'id' => 1,

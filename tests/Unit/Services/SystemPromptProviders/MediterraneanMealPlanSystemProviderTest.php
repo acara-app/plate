@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Enums\DietType;
 use App\Services\SystemPromptProviders\MediterraneanMealPlanSystemProvider;
 
+covers(MediterraneanMealPlanSystemProvider::class);
+
 it('returns a system prompt string with Mediterranean diet content', function (): void {
     $provider = new MediterraneanMealPlanSystemProvider;
     $result = $provider->run();

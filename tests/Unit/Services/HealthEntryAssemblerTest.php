@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Services\HealthEntryAssembler;
 use Illuminate\Support\Str;
 
+covers(HealthEntryAssembler::class);
+
 it('assembles insulin samples', function (): void {
     $user = User::factory()->create();
     $sample = HealthSyncSample::factory()->insulin()->for($user)->create([

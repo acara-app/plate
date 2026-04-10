@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Ai\Exceptions\Memory\InvalidMemoryFilterException;
 
+covers(InvalidMemoryFilterException::class);
+
 it('can be created with message only', function (): void {
     $exception = new InvalidMemoryFilterException('Invalid filter');
 

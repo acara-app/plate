@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use App\DataObjects\DietIdentityData;
 
-test('it can be created with values', function (): void {
+covers(DietIdentityData::class);
+
+it('can be created with values', function (): void {
     $data = new DietIdentityData(
         goal_choice: 'Lose weight',
         animal_product_choice: 'Omnivore',
@@ -16,7 +18,7 @@ test('it can be created with values', function (): void {
         ->and($data->intensity_choice)->toBe('Moderate');
 });
 
-test('it can be created from array', function (): void {
+it('can be created from array', function (): void {
     $data = DietIdentityData::from([
         'goal_choice' => 'Gain muscle',
         'animal_product_choice' => 'Vegan',
@@ -28,7 +30,7 @@ test('it can be created from array', function (): void {
         ->and($data->intensity_choice)->toBe('High');
 });
 
-test('it can be converted to array', function (): void {
+it('can be converted to array', function (): void {
     $data = new DietIdentityData(
         goal_choice: 'Maintain',
         animal_product_choice: 'Vegetarian',

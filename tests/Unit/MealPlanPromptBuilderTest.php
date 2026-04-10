@@ -10,6 +10,8 @@ use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Models\UserProfile;
 
+covers(MealPlanPromptBuilder::class);
+
 it('includes glucose analysis in the prompt when glucose data exists', function (): void {
     /** @var User $user */
     $user = User::factory()->create();
@@ -116,8 +118,8 @@ it('auto-creates profile and generates prompt when user has no profile', functio
     $builder = resolve(MealPlanPromptBuilder::class);
     $prompt = $builder->handle($user);
 
-    expect($prompt)->toBeString()->not->toBeEmpty();
-    expect($user->refresh()->profile)->toBeInstanceOf(UserProfile::class);
+    expect($prompt)->toBeString()->not->toBeEmpty()
+        ->and($user->refresh()->profile)->toBeInstanceOf(UserProfile::class);
 });
 
 it('calculates calorie deficit for weight loss goal', function (): void {

@@ -8,6 +8,8 @@ use App\Models\GroceryList;
 use App\Models\MealPlan;
 use App\Models\User;
 
+covers(GroceryItem::class);
+
 it('has correct casts', function (): void {
     $item = GroceryItem::factory()->create();
 

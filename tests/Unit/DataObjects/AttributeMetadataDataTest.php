@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\DataObjects\AttributeMetadataData;
 
+covers(AttributeMetadataData::class);
+
 describe('AttributeMetadataData', function (): void {
     it('hydrates from a snake_case array', function (): void {
         $data = AttributeMetadataData::from([

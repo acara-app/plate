@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\DataObjects\MobileSync\BloodGlucoseMetadata;
 
+covers(BloodGlucoseMetadata::class);
+
 it('normalizes null metadata to default glucose reading type', function (): void {
     expect(BloodGlucoseMetadata::normalize(null))->toBe([
         'glucose_reading_type' => 'random',

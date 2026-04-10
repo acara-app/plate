@@ -9,6 +9,8 @@ use App\Models\User;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 
+covers(GroceryListGeneratorAgent::class);
+
 beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->agent = new GroceryListGeneratorAgent;

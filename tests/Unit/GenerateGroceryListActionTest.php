@@ -9,6 +9,8 @@ use App\Models\GroceryList;
 use App\Models\MealPlan;
 use App\Models\User;
 
+covers(GenerateGroceryListAction::class);
+
 it('creates a placeholder grocery list with generating status', function (): void {
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create([

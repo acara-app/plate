@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Models\Conversation;
 use App\Models\ConversationSummary;
 
+covers(ConversationSummary::class);
+
 it('has correct fillable attributes', function (): void {
     $summary = new ConversationSummary();
 

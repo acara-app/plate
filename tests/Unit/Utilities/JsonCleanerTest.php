@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Utilities\JsonCleaner;
 
+covers(JsonCleaner::class);
+
 it('extracts json from markdown code blocks', function (): void {
     $input = '```json
 {"key": "value"}

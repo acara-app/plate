@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Enums\DietType;
 use App\Services\SystemPromptProviders\VegetarianMealPlanSystemProvider;
 
+covers(VegetarianMealPlanSystemProvider::class);
+
 it('returns a system prompt string with Vegetarian diet content', function (): void {
     $provider = new VegetarianMealPlanSystemProvider;
     $result = $provider->run();

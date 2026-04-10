@@ -6,6 +6,8 @@ use App\Ai\Tools\GetCalorieLevelGuideline;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
+covers(GetCalorieLevelGuideline::class);
+
 it('returns dietary guidelines content', function (): void {
     $tool = new GetCalorieLevelGuideline;
 

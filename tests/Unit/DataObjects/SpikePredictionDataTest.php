@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\DataObjects\SpikePredictionData;
 use App\Enums\SpikeRiskLevel;
 
+covers(SpikePredictionData::class);
+
 it('can be created from array using from method', function (): void {
     $data = [
         'food' => '2 slices of pepperoni pizza',

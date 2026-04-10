@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Ai\SystemPrompt;
 
+covers(SystemPrompt::class);
+
 it('generates prompt with only background', function (): void {
     $prompt = new SystemPrompt(
         background: [

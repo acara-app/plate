@@ -14,6 +14,8 @@ use App\Enums\ModelName;
 use App\Models\User;
 use Laravel\Ai\Files\Base64Image;
 
+covers(AgentRunner::class);
+
 beforeEach(function (): void {
     $this->user = User::factory()->create();
 

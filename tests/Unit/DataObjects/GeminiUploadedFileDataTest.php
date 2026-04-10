@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\DataObjects\GeminiUploadedFileData;
 
+covers(GeminiUploadedFileData::class);
+
 it('can be created from object using from method', function (): void {
     $file = (object) [
         'name' => 'files/abc123',

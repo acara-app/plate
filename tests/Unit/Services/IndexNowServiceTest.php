@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Services;
-
 use App\Services\IndexNowService;
-use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+
+covers(IndexNowService::class);
 
 beforeEach(function (): void {
     Config::set('services.indexnow.key', 'test-key');
@@ -25,9 +24,9 @@ it('submits URLs successfully', function (): void {
     $service = new IndexNowService();
     $result = $service->submit(['https://www.example.org/url1']);
 
-    expect($result->success)->toBeTrue();
-    expect($result->urlsSubmitted)->toBe(1);
-    expect($result->message)->toContain('Successfully submitted 1 URLs');
+    expect($result->success)->toBeTrue()
+        ->and($result->urlsSubmitted)->toBe(1)
+        ->and($result->message)->toContain('Successfully submitted 1 URLs');
 
     Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.indexnow.org/IndexNow' &&
            $request->data()['host'] === 'www.example.org' &&
@@ -44,8 +43,8 @@ it('handles submission failure', function (): void {
     $service = new IndexNowService();
     $result = $service->submit(['https://www.example.org/url1']);
 
-    expect($result->success)->toBeFalse();
-    expect($result->errors)->not->toBeEmpty();
+    expect($result->success)->toBeFalse()
+        ->and($result->errors)->not->toBeEmpty();
 });
 
 it('skips submission if key is missing', function (): void {
@@ -54,8 +53,8 @@ it('skips submission if key is missing', function (): void {
     $service = new IndexNowService();
     $result = $service->submit(['https://www.example.org/url1']);
 
-    expect($result->success)->toBeFalse();
-    expect($result->message)->toContain('key is not configured');
+    expect($result->success)->toBeFalse()
+        ->and($result->message)->toContain('key is not configured');
     Http::assertNothingSent();
 });
 
@@ -64,8 +63,8 @@ it('returns success for empty URL list', function (): void {
     $service = new IndexNowService();
     $result = $service->submit([]);
 
-    expect($result->success)->toBeTrue();
-    expect($result->message)->toBe('No URLs to submit.');
+    expect($result->success)->toBeTrue()
+        ->and($result->message)->toBe('No URLs to submit.');
     Http::assertNothingSent();
 });
 
@@ -79,8 +78,8 @@ it('chunks large URL lists', function (): void {
     $service = new IndexNowService();
     $result = $service->submit($urls);
 
-    expect($result->success)->toBeTrue();
-    expect($result->urlsSubmitted)->toBe(10005);
+    expect($result->success)->toBeTrue()
+        ->and($result->urlsSubmitted)->toBe(10005);
 
     Http::assertSentCount(2);
 
@@ -116,8 +115,8 @@ it('handles exceptions during submission', function (): void {
     $service = new IndexNowService();
     $result = $service->submit(['https://www.example.org/url1']);
 
-    expect($result->success)->toBeFalse();
-    expect($result->errors)->not->toBeEmpty();
+    expect($result->success)->toBeFalse()
+        ->and($result->errors)->not->toBeEmpty();
 });
 
 it('handles connection timeout during submission', function (): void {
@@ -128,8 +127,8 @@ it('handles connection timeout during submission', function (): void {
     $service = new IndexNowService();
     $result = $service->submit(['https://www.example.org/url1']);
 
-    expect($result->success)->toBeFalse();
-    expect($result->errors[0])->toContain('Connection timeout');
+    expect($result->success)->toBeFalse()
+        ->and($result->errors[0])->toContain('Connection timeout');
 });
 
 it('handles partial success when some chunks fail', function (): void {
@@ -149,7 +148,7 @@ it('handles partial success when some chunks fail', function (): void {
     $service = new IndexNowService();
     $result = $service->submit($urls);
 
-    expect($result->success)->toBeFalse();
-    expect($result->urlsSubmitted)->toBe(10000);
-    expect($result->message)->toContain('Partially submitted');
+    expect($result->success)->toBeFalse()
+        ->and($result->urlsSubmitted)->toBe(10000)
+        ->and($result->message)->toContain('Partially submitted');
 });

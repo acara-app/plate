@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\DietType;
 
+covers(DietType::class);
+
 it('has correct values', function (): void {
     expect(DietType::Mediterranean->value)->toBe('mediterranean')
         ->and(DietType::LowCarb->value)->toBe('low_carb')

@@ -8,6 +8,8 @@ use App\Models\User;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
+covers(CreateMealPlan::class);
+
 beforeEach(function (): void {
     $this->agent = new class implements GeneratesMealPlans
     {
@@ -66,9 +68,9 @@ it('generates meal plan successfully', function (): void {
         ->and($json['max_allowed_days'])->toBe(7)
         ->and($json['redirect_url'])->toStartWith('http');
 
-    expect($this->agent->calls)->toHaveCount(1);
-    expect($this->agent->calls[0]['user']->id)->toBe($user->id);
-    expect($this->agent->calls[0]['totalDays'])->toBe(3);
+    expect($this->agent->calls)->toHaveCount(1)
+        ->and($this->agent->calls[0]['user']->id)->toBe($user->id)
+        ->and($this->agent->calls[0]['totalDays'])->toBe(3);
 });
 
 it('caps days to maximum of 7 and reports capping', function (): void {
@@ -83,9 +85,8 @@ it('caps days to maximum of 7 and reports capping', function (): void {
         ->and($json['total_days'])->toBe(7)
         ->and($json['requested_days'])->toBe(30)
         ->and($json['was_capped'])->toBeTrue()
-        ->and($json['max_allowed_days'])->toBe(7);
-
-    expect($this->agent->calls[0]['totalDays'])->toBe(7);
+        ->and($json['max_allowed_days'])->toBe(7)
+        ->and($this->agent->calls[0]['totalDays'])->toBe(7);
 });
 
 it('enforces minimum of 1 day', function (): void {
@@ -111,9 +112,8 @@ it('passes custom prompt to agent', function (): void {
     $json = json_decode((string) $result, true);
 
     expect($json['success'])->toBeTrue()
-        ->and($json['custom_prompt'])->toBe('Focus on Mediterranean diet');
-
-    expect($this->agent->calls[0]['customPrompt'])->toBe('Focus on Mediterranean diet');
+        ->and($json['custom_prompt'])->toBe('Focus on Mediterranean diet')
+        ->and($this->agent->calls[0]['customPrompt'])->toBe('Focus on Mediterranean diet');
 });
 
 it('handles exceptions during generation', function (): void {

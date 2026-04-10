@@ -8,6 +8,8 @@ use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
+covers(AnalyzePhoto::class);
+
 it('has the correct name', function (): void {
     $tool = new AnalyzePhoto([]);
 

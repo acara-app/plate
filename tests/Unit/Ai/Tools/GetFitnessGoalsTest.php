@@ -8,6 +8,8 @@ use App\Models\User;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
+covers(GetFitnessGoals::class);
+
 beforeEach(function (): void {
     $this->action = new class implements GetsUserProfileContext
     {

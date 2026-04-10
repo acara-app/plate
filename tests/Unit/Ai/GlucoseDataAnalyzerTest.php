@@ -10,6 +10,8 @@ use App\Services\GlucoseStatisticsService;
 
 use function Pest\Laravel\actingAs;
 
+covers(GlucoseDataAnalyzer::class);
+
 beforeEach(function (): void {
     /** @var User $user */
     $user = User::factory()->create();

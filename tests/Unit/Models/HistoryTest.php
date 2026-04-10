@@ -9,6 +9,8 @@ use App\Models\History;
 use App\Models\User;
 use Laravel\Ai\Messages\MessageRole;
 
+covers(History::class);
+
 it('has correct fillable attributes', function (): void {
     $history = new History();
 

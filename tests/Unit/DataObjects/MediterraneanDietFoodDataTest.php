@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\DataObjects\MediterraneanDietFoodData;
 
+covers(MediterraneanDietFoodData::class);
+
 it('can be created directly with constructor', function (): void {
     $foodData = new MediterraneanDietFoodData(
         name: 'Artichoke, boiled, 1 medium',

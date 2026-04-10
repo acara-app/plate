@@ -7,6 +7,8 @@ use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
 
+covers(DeleteUser::class);
+
 it('deletes a user and creates a deleted user record', function (): void {
     $user = User::factory()->create();
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Utilities\LanguageUtil;
 
+covers(LanguageUtil::class);
+
 it('returns all languages', function (): void {
     expect(LanguageUtil::all())
         ->toBe(['en' => 'English', 'fr' => 'Français', 'mn' => 'Монгол']);

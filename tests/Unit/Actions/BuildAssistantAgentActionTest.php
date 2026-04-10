@@ -9,6 +9,8 @@ use App\Http\Requests\StreamChatRequest;
 use App\Models\User;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
+covers(BuildAssistantAgentAction::class);
+
 beforeEach(function (): void {
     $this->action = resolve(BuildAssistantAgentAction::class);
 });

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\GoalChoice;
 
+covers(GoalChoice::class);
+
 it('has correct values', function (): void {
     expect(GoalChoice::Spikes->value)->toBe('spikes')
         ->and(GoalChoice::WeightLoss->value)->toBe('weight_loss')

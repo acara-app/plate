@@ -6,6 +6,8 @@ use App\DataObjects\MealData;
 use App\Enums\MealType;
 use Spatie\LaravelData\DataCollection;
 
+covers(MealData::class);
+
 it('creates meal data from array with all fields', function (): void {
     $data = [
         'day_number' => 1,

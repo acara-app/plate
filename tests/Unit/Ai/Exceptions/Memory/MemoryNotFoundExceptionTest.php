@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Ai\Exceptions\Memory\MemoryNotFoundException;
 
+covers(MemoryNotFoundException::class);
+
 it('can be created with memory id and default message', function (): void {
     $exception = new MemoryNotFoundException('mem_123');
 

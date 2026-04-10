@@ -7,6 +7,8 @@ use App\DataObjects\MealPlanData;
 use App\Enums\MealPlanType;
 use Spatie\LaravelData\DataCollection;
 
+covers(MealPlanData::class);
+
 it('creates meal plan data from array with all fields', function (): void {
     $data = [
         'type' => 'weekly',

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Utilities\EmergencyNumberUtil;
 
+covers(EmergencyNumberUtil::class);
+
 it('resolves US emergency number from American timezone', function (): void {
     expect(EmergencyNumberUtil::emergencyNumber('America/New_York'))->toBe('911');
 });

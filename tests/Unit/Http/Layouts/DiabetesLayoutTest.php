@@ -6,7 +6,9 @@ use App\Http\Layouts\DiabetesLayout;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 
-test('dashboard data uses default time period when invalid period provided', function (): void {
+covers(DiabetesLayout::class);
+
+it('dashboard data uses default time period when invalid period provided', function (): void {
     $user = User::factory()->create();
 
     $data = DiabetesLayout::dashboardData($user, 'invalid_period');
@@ -14,7 +16,7 @@ test('dashboard data uses default time period when invalid period provided', fun
     expect($data['timePeriod'])->toBe('30d');
 });
 
-test('calculate weight stats determines upward trend', function (): void {
+it('calculate weight stats determines upward trend', function (): void {
     $user = User::factory()->create();
 
     HealthSyncSample::factory()->weight()->create([
@@ -36,7 +38,7 @@ test('calculate weight stats determines upward trend', function (): void {
         ->and($stats['diff'])->toBe(1.0);
 });
 
-test('calculate weight stats determines downward trend', function (): void {
+it('calculate weight stats determines downward trend', function (): void {
     $user = User::factory()->create();
 
     HealthSyncSample::factory()->weight()->create([
@@ -58,7 +60,7 @@ test('calculate weight stats determines downward trend', function (): void {
         ->and($stats['diff'])->toBe(1.0);
 });
 
-test('calculate weight stats determines stable trend', function (): void {
+it('calculate weight stats determines stable trend', function (): void {
     $user = User::factory()->create();
 
     HealthSyncSample::factory()->weight()->create([
@@ -80,7 +82,7 @@ test('calculate weight stats determines stable trend', function (): void {
         ->and($stats['diff'])->toBe(0.0);
 });
 
-test('getRecentMedications returns recent unique medications', function (): void {
+it('getRecentMedications returns recent unique medications', function (): void {
     $user = User::factory()->create();
 
     HealthSyncSample::factory()->medication()->for($user)->create([
@@ -106,7 +108,7 @@ test('getRecentMedications returns recent unique medications', function (): void
         ->and($result[0]['dosage'])->toBeIn(['500mg', '100mg']);
 });
 
-test('getRecentInsulins returns recent unique insulin entries', function (): void {
+it('getRecentInsulins returns recent unique insulin entries', function (): void {
     $user = User::factory()->create();
 
     HealthSyncSample::factory()->insulin()->for($user)->create([
@@ -131,7 +133,7 @@ test('getRecentInsulins returns recent unique insulin entries', function (): voi
         ->and($result[0]['type'])->toBeIn(['bolus', 'basal']);
 });
 
-test('calculate streak continues if log exists yesterday but not today', function (): void {
+it('calculate streak continues if log exists yesterday but not today', function (): void {
     $user = User::factory()->create();
 
     HealthSyncSample::factory()->bloodGlucose()->create([

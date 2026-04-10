@@ -7,6 +7,8 @@ use App\Models\User;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
+covers(SuggestWellnessRoutine::class);
+
 beforeEach(function (): void {
     $this->tool = new SuggestWellnessRoutine;
 });

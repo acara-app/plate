@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Enums\DietType;
 use App\Services\SystemPromptProviders\BalancedMealPlanSystemProvider;
 
+covers(BalancedMealPlanSystemProvider::class);
+
 it('returns a system prompt string with Balanced diet content', function (): void {
     $provider = new BalancedMealPlanSystemProvider;
     $result = $provider->run();

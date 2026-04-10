@@ -9,6 +9,8 @@ use App\Enums\DietType;
 use App\Enums\Sex;
 use Carbon\Carbon;
 
+covers(MealPlanContextData::class);
+
 function buildMealPlanContextData(array $overrides = []): MealPlanContextData
 {
     return MealPlanContextData::from([
@@ -40,7 +42,7 @@ function buildMealPlanContextData(array $overrides = []): MealPlanContextData
     ]);
 }
 
-test('it casts date_of_birth with various ISO 8601 formats', function (string $dateString): void {
+it('casts date_of_birth with various ISO 8601 formats', function (string $dateString): void {
     $data = buildMealPlanContextData(['date_of_birth' => $dateString]);
 
     expect($data->dateOfBirth)->not->toBeNull()
@@ -55,7 +57,7 @@ test('it casts date_of_birth with various ISO 8601 formats', function (string $d
     'ISO 8601 with offset no microseconds' => '1984-10-08T00:00:00+00:00',
 ]);
 
-test('it builds MealPlanContextData from array with date_of_birth', function (): void {
+it('builds MealPlanContextData from array with date_of_birth', function (): void {
     $data = buildMealPlanContextData(['date_of_birth' => '1984-10-08T00:00:00.000000Z']);
 
     expect($data->dateOfBirth)->not->toBeNull()

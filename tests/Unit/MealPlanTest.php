@@ -9,43 +9,45 @@ use App\Models\User;
 
 use function Pest\Laravel\assertDatabaseHas;
 
+covers(MealPlan::class);
+
 it('belongs to a user', function (): void {
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create();
 
-    expect($mealPlan->user)->toBeInstanceOf(User::class);
-    expect($mealPlan->user_id)->toBe($user->id);
+    expect($mealPlan->user)->toBeInstanceOf(User::class)
+        ->and($mealPlan->user_id)->toBe($user->id);
 });
 
 it('has many meals', function (): void {
     $mealPlan = MealPlan::factory()->create();
     Meal::factory()->count(5)->for($mealPlan)->create();
 
-    expect($mealPlan->meals)->toHaveCount(5);
-    expect($mealPlan->meals->first())->toBeInstanceOf(Meal::class);
+    expect($mealPlan->meals)->toHaveCount(5)
+        ->and($mealPlan->meals->first())->toBeInstanceOf(Meal::class);
 });
 
 it('casts type to MealPlanType enum', function (): void {
     $mealPlan = MealPlan::factory()->create(['type' => 'weekly']);
 
-    expect($mealPlan->type)->toBeInstanceOf(MealPlanType::class);
-    expect($mealPlan->type)->toBe(MealPlanType::Weekly);
+    expect($mealPlan->type)->toBeInstanceOf(MealPlanType::class)
+        ->and($mealPlan->type)->toBe(MealPlanType::Weekly);
 });
 
 it('casts macronutrient_ratios to array', function (): void {
     $ratios = ['protein' => 30, 'carbs' => 40, 'fat' => 30];
     $mealPlan = MealPlan::factory()->create(['macronutrient_ratios' => $ratios]);
 
-    expect($mealPlan->macronutrient_ratios)->toBe($ratios);
-    expect($mealPlan->macronutrient_ratios)->toBeArray();
+    expect($mealPlan->macronutrient_ratios)->toBe($ratios)
+        ->and($mealPlan->macronutrient_ratios)->toBeArray();
 });
 
 it('casts metadata to array', function (): void {
     $metadata = ['bmi' => 22.5, 'bmr' => 1600];
     $mealPlan = MealPlan::factory()->create(['metadata' => $metadata]);
 
-    expect($mealPlan->metadata)->toBe($metadata);
-    expect($mealPlan->metadata)->toBeArray();
+    expect($mealPlan->metadata)->toBe($metadata)
+        ->and($mealPlan->metadata)->toBeArray();
 });
 
 it('can get meals for a specific day', function (): void {
@@ -58,10 +60,10 @@ it('can get meals for a specific day', function (): void {
     $day1Meals = $mealPlan->mealsForDay(1);
     $day2Meals = $mealPlan->mealsForDay(2);
 
-    expect($day1Meals)->toHaveCount(3);
-    expect($day2Meals)->toHaveCount(3);
-    expect($day1Meals->first()->day_number)->toBe(1);
-    expect($day2Meals->first()->day_number)->toBe(2);
+    expect($day1Meals)->toHaveCount(3)
+        ->and($day2Meals)->toHaveCount(3)
+        ->and($day1Meals->first()->day_number)->toBe(1)
+        ->and($day2Meals->first()->day_number)->toBe(2);
 });
 
 it('can calculate total calories for a specific day', function (): void {
@@ -75,8 +77,8 @@ it('can calculate total calories for a specific day', function (): void {
     $day1Total = $mealPlan->totalCaloriesForDay(1);
     $day2Total = $mealPlan->totalCaloriesForDay(2);
 
-    expect($day1Total)->toBe(1200.0);
-    expect($day2Total)->toBe(600.0);
+    expect($day1Total)->toBe(1200.0)
+        ->and($day2Total)->toBe(600.0);
 });
 
 it('can calculate average daily calories', function (): void {
@@ -134,22 +136,22 @@ it('cascades delete to meals when deleted', function (): void {
 it('can create weekly meal plan using factory state', function (): void {
     $mealPlan = MealPlan::factory()->weekly()->create();
 
-    expect($mealPlan->type)->toBe(MealPlanType::Weekly);
-    expect($mealPlan->duration_days)->toBe(7);
+    expect($mealPlan->type)->toBe(MealPlanType::Weekly)
+        ->and($mealPlan->duration_days)->toBe(7);
 });
 
 it('can create monthly meal plan using factory state', function (): void {
     $mealPlan = MealPlan::factory()->monthly()->create();
 
-    expect($mealPlan->type)->toBe(MealPlanType::Monthly);
-    expect($mealPlan->duration_days)->toBe(30);
+    expect($mealPlan->type)->toBe(MealPlanType::Monthly)
+        ->and($mealPlan->duration_days)->toBe(30);
 });
 
 it('can create custom meal plan using factory state', function (): void {
     $mealPlan = MealPlan::factory()->custom(14)->create();
 
-    expect($mealPlan->type)->toBe(MealPlanType::Custom);
-    expect($mealPlan->duration_days)->toBe(14);
+    expect($mealPlan->type)->toBe(MealPlanType::Custom)
+        ->and($mealPlan->duration_days)->toBe(14);
 });
 
 it('orders meals by day_number and sort_order', function (): void {
@@ -161,9 +163,9 @@ it('orders meals by day_number and sort_order', function (): void {
 
     $meals = $mealPlan->meals;
 
-    expect($meals[0]->day_number)->toBe(1);
-    expect($meals[0]->sort_order)->toBe(1);
-    expect($meals[1]->day_number)->toBe(1);
-    expect($meals[1]->sort_order)->toBe(2);
-    expect($meals[2]->day_number)->toBe(2);
+    expect($meals[0]->day_number)->toBe(1)
+        ->and($meals[0]->sort_order)->toBe(1)
+        ->and($meals[1]->day_number)->toBe(1)
+        ->and($meals[1]->sort_order)->toBe(2)
+        ->and($meals[2]->day_number)->toBe(2);
 });

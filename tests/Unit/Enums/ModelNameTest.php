@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\ModelName;
 
+covers(ModelName::class);
+
 it('has correct model values', function (): void {
     expect(ModelName::GPT_5_MINI->value)->toBe('gpt-5-mini')
         ->and(ModelName::GPT_5_NANO->value)->toBe('gpt-5-nano')

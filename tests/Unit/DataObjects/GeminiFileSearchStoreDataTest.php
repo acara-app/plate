@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\DataObjects\GeminiFileSearchStoreData;
 
+covers(GeminiFileSearchStoreData::class);
+
 it('can be created from array using from method', function (): void {
     $data = [
         'name' => 'fileSearchStores/test-store',

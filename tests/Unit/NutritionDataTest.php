@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\DataObjects\NutritionData;
 
+covers(NutritionData::class);
+
 it('creates nutrition data with all fields', function (): void {
     $data = new NutritionData(
         calories: 165.0,

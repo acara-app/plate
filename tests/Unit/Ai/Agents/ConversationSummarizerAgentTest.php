@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Ai\Agents\ConversationSummarizerAgent;
 use App\Contracts\SummarizesConversation;
 
+covers(ConversationSummarizerAgent::class);
+
 it('implements SummarizesConversation contract', function (): void {
     $agent = new ConversationSummarizerAgent();
 

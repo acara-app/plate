@@ -7,11 +7,13 @@ use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Models\TelegraphChat;
 
+covers(TelegramMessageService::class);
+
 beforeEach(function (): void {
     Telegraph::fake();
 });
 
-test('converts basic markdown to telegram compatible html', function (): void {
+it('converts basic markdown to telegram compatible html', function (): void {
     $service = new TelegramMessageService();
     $reflection = new ReflectionClass(TelegramMessageService::class);
     $method = $reflection->getMethod('convertMarkdownToHtml');
@@ -20,11 +22,11 @@ test('converts basic markdown to telegram compatible html', function (): void {
     $html = $method->invoke($service, $markdown);
 
     expect($html)->toContain('<strong>Bold</strong>')
-        ->toContain('<em>Italic</em>')
-        ->toContain('<code>code</code>');
+        ->and($html)->toContain('<em>Italic</em>')
+        ->and($html)->toContain('<code>code</code>');
 });
 
-test('converts lists to telegram compatible format', function (): void {
+it('converts lists to telegram compatible format', function (): void {
     $service = new TelegramMessageService();
     $reflection = new ReflectionClass(TelegramMessageService::class);
     $method = $reflection->getMethod('convertMarkdownToHtml');
@@ -33,10 +35,10 @@ test('converts lists to telegram compatible format', function (): void {
     $html = $method->invoke($service, $markdown);
 
     expect($html)->toContain('• Item 1')
-        ->toContain('• Item 2');
+        ->and($html)->toContain('• Item 2');
 });
 
-test('handles complex structure without excessive whitespace', function (): void {
+it('handles complex structure without excessive whitespace', function (): void {
     $service = new TelegramMessageService();
     $reflection = new ReflectionClass(TelegramMessageService::class);
     $method = $reflection->getMethod('convertMarkdownToHtml');
@@ -47,16 +49,16 @@ test('handles complex structure without excessive whitespace', function (): void
     expect($html)->not->toContain("\n\n\n");
 });
 
-test('safe message length is respected', function (): void {
+it('safe message length is respected', function (): void {
     $reflection = new ReflectionClass(TelegramMessageService::class);
     $constant = $reflection->getReflectionConstant('SAFE_MESSAGE_LENGTH');
     $safeLength = $constant->getValue();
 
-    expect($safeLength)->toBe(3800);
-    expect($safeLength)->toBeLessThan(TelegramMessageService::MAX_MESSAGE_LENGTH);
+    expect($safeLength)->toBe(3800)
+        ->and($safeLength)->toBeLessThan(TelegramMessageService::MAX_MESSAGE_LENGTH);
 });
 
-test('sends html message', function (): void {
+it('sends html message', function (): void {
     Telegraph::fake([
         DefStudio\Telegraph\Telegraph::ENDPOINT_MESSAGE => ['ok' => true, 'result' => []],
     ]);

@@ -9,6 +9,8 @@ use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Tests\Helpers\TestJsonSchema;
 
+covers(EnrichAttributeMetadataAgent::class);
+
 beforeEach(function (): void {
     $this->agent = new EnrichAttributeMetadataAgent;
 });

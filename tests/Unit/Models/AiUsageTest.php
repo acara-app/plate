@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Models\AiUsage;
 
+covers(AiUsage::class);
+
 it('calculates total tokens correctly', function (): void {
     $aiUsage = new AiUsage([
         'user_id' => 1,

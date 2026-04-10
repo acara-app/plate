@@ -9,6 +9,8 @@ use App\Models\User;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
+covers(SuggestSingleMeal::class);
+
 beforeEach(function (): void {
     $this->agent = new class implements GeneratesSingleMeals
     {
@@ -104,10 +106,10 @@ it('generates meal successfully', function (): void {
     expect($json)->toHaveKey('success', true)
         ->and($json['meal']['name'])->toBe('Taco');
 
-    expect($this->agent->calls[0]['mealType'])->toBe('lunch');
-    expect($this->agent->calls[0]['cuisine'])->toBe('Mexican');
-    expect($this->agent->calls[0]['maxCalories'])->toBe(500);
-    expect($this->agent->calls[0]['specificRequest'])->toBe('spicy');
+    expect($this->agent->calls[0]['mealType'])->toBe('lunch')
+        ->and($this->agent->calls[0]['cuisine'])->toBe('Mexican')
+        ->and($this->agent->calls[0]['maxCalories'])->toBe(500)
+        ->and($this->agent->calls[0]['specificRequest'])->toBe('spicy');
 });
 
 it('handles exceptions during generation', function (): void {

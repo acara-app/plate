@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\File;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
+covers(GetDietReference::class);
+
 beforeEach(function (): void {
     $this->tool = new GetDietReference;
 });

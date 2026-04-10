@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Validation\Rules\Password;
 
+covers(AppServiceProvider::class);
+
 it('boots models defaults', function (): void {
     $provider = new AppServiceProvider(app());
     $provider->boot();

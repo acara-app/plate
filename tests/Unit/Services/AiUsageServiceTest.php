@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Enums\ModelName;
 use App\Services\AiUsageService;
 
+covers(AiUsageService::class);
+
 it('calculates cost for gemini-3-flash model', function (): void {
     $service = new AiUsageService;
     $pricing = ModelName::GEMINI_3_FLASH->getPricing();
