@@ -35,7 +35,8 @@
 <meta name="theme-color" content="#000000" />
 
 <!-- Open Graph / Facebook -->
-<meta property="og:type" content="website" />
+<meta property="og:type" content="@yield('og_type', 'website')" />
+<meta property="og:locale" content="@yield('og_locale', 'en_US')" />
 <meta property="og:site_name" content="Acara Plate" />
 <meta property="og:url" content="{{ url()->current() }}" data-rh="true" />
 @hasSection('title')

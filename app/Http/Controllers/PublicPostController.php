@@ -101,6 +101,6 @@ final readonly class PublicPostController
             return route('blog.index', $params);
         }
 
-        return route('blog.index.locale', array_merge(['locale' => $locale], $params));
+        return route('blog.locale.index', array_merge(['locale' => $locale], $params));
     }
 }

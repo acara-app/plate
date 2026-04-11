@@ -238,6 +238,27 @@ it('excludes unpublished foods from submission', function (): void {
     });
 });
 
+it('includes blog post URLs for both english and non-english locales', function (): void {
+    Http::fake([
+        'api.indexnow.org/IndexNow' => Http::response([], 200),
+    ]);
+
+    Content::factory()->post()->create(['slug' => 'my-english-post', 'locale' => 'en', 'is_published' => true]);
+    Content::factory()->post()->create(['slug' => 'my-mongolian-post', 'locale' => 'mn', 'is_published' => true]);
+
+    $this->artisan('sitemap:indexnow', [
+        '--file' => ['non_existent.xml'],
+    ])
+        ->assertSuccessful();
+
+    Http::assertSent(function (Request $request): bool {
+        $urlList = $request->data()['urlList'];
+
+        return in_array(route('blog.show', 'my-english-post'), $urlList)
+            && in_array(route('blog.locale.show', ['locale' => 'mn', 'slug' => 'my-mongolian-post']), $urlList);
+    });
+});
+
 it('submits only food URLs when no sitemap files exist', function (): void {
     Http::fake([
         'api.indexnow.org/IndexNow' => Http::response([], 200),

@@ -13,7 +13,6 @@ use Carbon\CarbonInterface;
 use Database\Factories\ContentFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -87,21 +86,18 @@ final class Content extends Model
         return $this->hasMany(self::class, 'translation_group', 'translation_group');
     }
 
-    /**
-     * @return Attribute<FoodCategory|PostCategory|null, FoodCategory|PostCategory|string|null>
-     */
-    protected function category(): Attribute
+    protected function getCategoryAttribute(?string $value): FoodCategory|PostCategory|null
     {
-        return Attribute::make(
-            get: fn (?string $value) => match ($this->type) {
-                ContentType::Food => $value ? FoodCategory::tryFrom($value) : null,
-                ContentType::Post => $value ? PostCategory::tryFrom($value) : null,
-                default => null,
-            },
-            set: fn (FoodCategory|PostCategory|string|null $value) => $value instanceof BackedEnum
-                ? $value->value
-                : $value,
-        );
+        return match ($this->type) {
+            ContentType::Food => $value ? FoodCategory::tryFrom($value) : null,
+            ContentType::Post => $value ? PostCategory::tryFrom($value) : null,
+            default => null,
+        };
+    }
+
+    protected function setCategoryAttribute(FoodCategory|PostCategory|string|null $value): void
+    {
+        $this->attributes['category'] = $value instanceof BackedEnum ? $value->value : $value;
     }
 
     /**
@@ -173,7 +169,7 @@ final class Content extends Model
 
     protected function getMetaAttribute(): ?ContentMetaData
     {
-        $data = $this->getMetaDataAttributes();
+        $data = $this->meta_data;
 
         if ($data === null) {
             return null;
@@ -252,7 +248,13 @@ final class Content extends Model
             return $storedGi;
         }
 
-        return $this->category?->averageGlycemicIndex() ?? 50;
+        $category = $this->category;
+
+        if ($category instanceof FoodCategory) {
+            return $category->averageGlycemicIndex();
+        }
+
+        return 50;
     }
 
     protected function getGlycemicLoadAttribute(): string
@@ -302,7 +304,7 @@ final class Content extends Model
      */
     protected function getManualLinksAttribute(): array
     {
-        $metaData = $this->getMetaDataAttributes();
+        $metaData = $this->meta_data;
 
         if ($metaData === null) {
             return [];
@@ -312,26 +314,5 @@ final class Content extends Model
         $links = $metaData['manual_links'] ?? [];
 
         return $links;
-    }
-
-    /**
-     * @return array{
-     *     seo_title?: string,
-     *     seo_description?: string,
-     *     manual_links?: array<int, array{slug: string, anchor: string}>
-     * }|null
-     */
-    private function getMetaDataAttributes(): ?array
-    {
-        /**
-/** @var array{
-         *     seo_title?: string,
-         *     seo_description?: string,
-         *     manual_links?: array<int, array{slug: string, anchor: string}>
-         * }|null $metaData
-         */
-        $metaData = $this->meta_data;
-
-        return $metaData;
     }
 }

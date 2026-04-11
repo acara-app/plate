@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Content;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Response;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
@@ -18,7 +19,7 @@ final class BlogSitemapXmlController
         $posts = Content::query()
             ->published()
             ->post()
-            ->with(['translations' => fn ($query) => $query->published()])
+            ->with(['translations' => fn (Relation $query) => $query->where('is_published', true)])
             ->orderByDesc('created_at')
             ->get();
 
@@ -26,7 +27,7 @@ final class BlogSitemapXmlController
 
         foreach (self::SUPPORTED_LOCALES as $locale) {
             $sitemap->add(
-                Url::create($locale === 'en' ? route('blog.index') : route('blog.index.locale', ['locale' => $locale]))
+                Url::create($locale === 'en' ? route('blog.index') : route('blog.locale.index', ['locale' => $locale]))
                     ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
                     ->setPriority(0.8)
             );
@@ -38,7 +39,7 @@ final class BlogSitemapXmlController
             $url = Url::create(
                 $locale === 'en'
                     ? route('blog.show', $post->slug)
-                    : route('blog.show.locale', ['locale' => $locale, 'slug' => $post->slug])
+                    : route('blog.locale.show', ['locale' => $locale, 'slug' => $post->slug])
             )
                 ->setLastModificationDate($post->updated_at)
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
@@ -59,7 +60,7 @@ final class BlogSitemapXmlController
                 $transLocale = $translation->locale ?? 'en';
                 $transUrl = $transLocale === 'en'
                     ? route('blog.show', $translation->slug)
-                    : route('blog.show.locale', ['locale' => $transLocale, 'slug' => $translation->slug]);
+                    : route('blog.locale.show', ['locale' => $transLocale, 'slug' => $translation->slug]);
 
                 $url->addAlternate($transLocale, $transUrl);
             }

@@ -42,9 +42,9 @@ Route::get('/blog', [Web\PublicPostController::class, 'index'])->name('blog.inde
 Route::get('/blog/category/{category}', [Web\PublicPostController::class, 'category'])->name('blog.category');
 Route::get('/blog/{slug}', [Web\PublicPostController::class, 'show'])->name('blog.show');
 
-Route::get('/{locale}/blog', [Web\PublicPostController::class, 'index'])->where('locale', 'mn|fr')->name('blog.index.locale');
-Route::get('/{locale}/blog/{slug}', [Web\PublicPostController::class, 'show'])->where('locale', 'mn|fr')->name('blog.show.locale');
-Route::get('/{locale}/blog/category/{category}', [Web\PublicPostController::class, 'category'])->where('locale', 'mn|fr')->name('blog.category.locale');
+Route::get('/{locale}/blog', [Web\PublicPostController::class, 'index'])->where('locale', 'mn|fr')->name('blog.locale.index');
+Route::get('/{locale}/blog/{slug}', [Web\PublicPostController::class, 'show'])->where('locale', 'mn|fr')->name('blog.locale.show');
+Route::get('/{locale}/blog/category/{category}', [Web\PublicPostController::class, 'category'])->where('locale', 'mn|fr')->name('blog.locale.category');
 
 Route::get('/blog_sitemap.xml', [Web\BlogSitemapXmlController::class, 'blog'])->name('blog.sitemap');
 

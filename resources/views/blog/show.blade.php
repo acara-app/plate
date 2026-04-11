@@ -1,21 +1,37 @@
 @section('title', $content->meta_title)
 @section('meta_description', $content->meta_description)
+@section('og_type', 'article')
+@section('og_image', $content->image_url ?? asset('banner-acara-plate.webp'))
+@section('og_image_alt', $content->display_name)
 
 @php
     $displayName = $content->display_name;
     $excerpt = $content->body['excerpt'] ?? '';
     $bodyContent = $content->body['content'] ?? '';
     $readingTime = $content->body['reading_time'] ?? null;
-    $postUrl = $locale === 'en' ? route('blog.show', $content->slug) : route('blog.show.locale', ['locale' => $locale, 'slug' => $content->slug]);
+    $postUrl = $locale === 'en' ? route('blog.show', $content->slug) : route('blog.locale.show', ['locale' => $locale, 'slug' => $content->slug]);
+    $englishSlug = $locale === 'en'
+        ? $content->slug
+        : ($translations->firstWhere('locale', 'en')?->slug ?? $content->slug);
 @endphp
 
+@section('canonical_url', $postUrl)
+@section('og_locale', $locale === 'mn' ? 'mn_MN' : ($locale === 'fr' ? 'fr_FR' : 'en_US'))
+
 @section('head')
+    {{-- Article Open Graph meta tags --}}
+    <meta property="article:published_time" content="{{ $content->created_at->toIso8601String() }}" />
+    <meta property="article:modified_time" content="{{ $content->updated_at->toIso8601String() }}" />
+    @if($content->category)
+    <meta property="article:section" content="{{ $content->category->label() }}" />
+    @endif
+
     {{-- hreflang alternate links for multilingual SEO --}}
     <link rel="alternate" hreflang="{{ $locale }}" href="{{ $postUrl }}" />
     @foreach($translations as $translation)
-        <link rel="alternate" hreflang="{{ $translation->locale }}" href="{{ $translation->locale === 'en' ? route('blog.show', $translation->slug) : route('blog.show.locale', ['locale' => $translation->locale, 'slug' => $translation->slug]) }}" />
+        <link rel="alternate" hreflang="{{ $translation->locale }}" href="{{ $translation->locale === 'en' ? route('blog.show', $translation->slug) : route('blog.locale.show', ['locale' => $translation->locale, 'slug' => $translation->slug]) }}" />
     @endforeach
-    <link rel="alternate" hreflang="x-default" href="{{ route('blog.show', $content->slug) }}" />
+    <link rel="alternate" hreflang="x-default" href="{{ route('blog.show', $englishSlug) }}" />
 
     <script type="application/ld+json">
 {
@@ -42,7 +58,7 @@
     "dateModified": "{{ $content->updated_at->toIso8601String() }}",
     "mainEntityOfPage": {
         "@@type": "WebPage",
-        "@id": "{{ $postUrl }}"
+        "@@id": "{{ $postUrl }}"
     }
 }
 </script>
@@ -65,32 +81,7 @@
 @endsection
 
 <x-default-layout>
-    <header class="sticky top-0 z-50 w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800">
-        <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white">
-            <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
-            <span>Acara Plate</span>
-        </a>
-        <div class="flex items-center gap-4">
-            @if($translations->isNotEmpty())
-                <div class="flex items-center gap-2">
-                    @foreach($translations as $translation)
-                        <a href="{{ $translation->locale === 'en' ? route('blog.show', $translation->slug) : route('blog.show.locale', ['locale' => $translation->locale, 'slug' => $translation->slug]) }}"
-                           class="px-2.5 py-1 text-xs font-medium rounded-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                           lang="{{ $translation->locale }}">
-                            {{ strtoupper($translation->locale) }}
-                        </a>
-                    @endforeach
-                    <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
-                        {{ strtoupper($locale) }}
-                    </span>
-                </div>
-            @endif
-            <a href="{{ route('login') }}" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Log in</a>
-            <a href="{{ route('register') }}" class="rounded-full bg-slate-900 dark:bg-white px-5 py-2 text-sm font-semibold text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 transition-all">
-                Get Started
-            </a>
-        </div>
-    </header>
+    @include('blog._header')
 
     <div class="mx-auto my-16 max-w-3xl px-6 lg:px-8">
         <article class="mt-6">
@@ -160,13 +151,13 @@
                     Read this article in
                 </h3>
                 <div class="flex flex-wrap gap-2">
-                    <a href="{{ route('blog.show', $content->slug) }}"
+                    <a href="{{ route('blog.show', $englishSlug) }}"
                        class="px-3 py-1.5 text-sm font-medium rounded-lg {{ $locale === 'en' ? 'bg-primary text-white' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600' }} transition-colors"
                        lang="en">
                         English
                     </a>
                     @foreach($translations as $translation)
-                        <a href="{{ $translation->locale === 'en' ? route('blog.show', $translation->slug) : route('blog.show.locale', ['locale' => $translation->locale, 'slug' => $translation->slug]) }}"
+                        <a href="{{ $translation->locale === 'en' ? route('blog.show', $translation->slug) : route('blog.locale.show', ['locale' => $translation->locale, 'slug' => $translation->slug]) }}"
                            class="px-3 py-1.5 text-sm font-medium rounded-lg {{ $locale === $translation->locale ? 'bg-primary text-white' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600' }} transition-colors"
                            lang="{{ $translation->locale }}">
                             {{ strtoupper($translation->locale) }}

@@ -3,6 +3,7 @@
 /node_modules
 /public/build
 /public/hot
+/public/test_temp
 /public/storage
 /public/sw.js
 /public/workbox-*.js

@@ -71,7 +71,7 @@ it('displays posts for a specific locale', function (): void {
         'locale' => 'en',
     ]);
 
-    $this->get(route('blog.index.locale', ['locale' => 'mn']))
+    $this->get(route('blog.locale.index', ['locale' => 'mn']))
         ->assertOk()
         ->assertViewHas('posts', fn ($posts): bool => $posts->total() === 1);
 });
@@ -96,7 +96,7 @@ it('displays a locale-specific blog post via locale route', function (): void {
         'slug' => 'mn-detail-'.Str::uuid()->toString(),
     ]);
 
-    $this->get(route('blog.show.locale', ['locale' => 'mn', 'slug' => $post->slug]))
+    $this->get(route('blog.locale.show', ['locale' => 'mn', 'slug' => $post->slug]))
         ->assertOk()
         ->assertViewIs('blog.show');
 });
@@ -107,7 +107,7 @@ it('displays category page via locale route', function (): void {
         'category' => PostCategory::Lifestyle,
     ]);
 
-    $this->get(route('blog.category.locale', ['locale' => 'fr', 'category' => PostCategory::Lifestyle->value]))
+    $this->get(route('blog.locale.category', ['locale' => 'fr', 'category' => PostCategory::Lifestyle->value]))
         ->assertOk()
         ->assertViewIs('blog.index');
 });
@@ -119,4 +119,32 @@ it('resolves category as PostCategory enum for post content', function (): void 
     ]);
 
     expect($post->fresh()->category)->toBe(PostCategory::NutritionTips);
+});
+
+it('includes canonical url with page parameter for paginated index', function (): void {
+    foreach (range(1, 15) as $i) {
+        Content::factory()->post()->create([
+            'slug' => 'post-page-'.Str::uuid()->toString(),
+        ]);
+    }
+
+    $response = $this->get(route('blog.index', ['page' => 2]));
+
+    $response->assertOk()
+        ->assertViewIs('blog.index')
+        ->assertViewHas('canonicalUrl');
+});
+
+it('includes canonical url with page parameter for locale paginated index', function (): void {
+    foreach (range(1, 15) as $i) {
+        Content::factory()->post()->localized('mn')->create([
+            'slug' => 'mn-post-page-'.Str::uuid()->toString(),
+        ]);
+    }
+
+    $response = $this->get(route('blog.locale.index', ['locale' => 'mn', 'page' => 2]));
+
+    $response->assertOk()
+        ->assertViewIs('blog.index')
+        ->assertViewHas('canonicalUrl');
 });
