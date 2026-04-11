@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Contracts\Ai;
 
 use App\Ai\Agents\SingleMealAgent;
-use App\DataObjects\GeneratedMealData;
+use App\Data\GeneratedMealData;
 use App\Models\User;
 use Illuminate\Container\Attributes\Bind;
 

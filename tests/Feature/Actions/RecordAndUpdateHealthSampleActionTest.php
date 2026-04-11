@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\DeleteHealthSampleAction;
 use App\Actions\UpdateHealthSampleAction;
-use App\DataObjects\HealthLogData;
+use App\Data\HealthLogData;
 use App\Enums\HealthEntrySource;
 use App\Enums\HealthEntryType;
 use App\Enums\HealthSyncType;

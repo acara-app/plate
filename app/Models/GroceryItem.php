@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\DataObjects\GroceryItemResponseData;
+use App\Data\GroceryItemResponseData;
 use Carbon\CarbonInterface;
 use Database\Factories\GroceryItemFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

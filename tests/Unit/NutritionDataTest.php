@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\DataObjects\NutritionData;
+use App\Data\NutritionData;
 
 covers(NutritionData::class);
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\DataObjects\GeminiFileSearchStoreData;
+use App\Data\GeminiFileSearchStoreData;
 use App\Enums\SettingKey;
 use App\Models\Setting;
 use Illuminate\Console\Command;

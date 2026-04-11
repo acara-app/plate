@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contracts\Ai\Memory;
 
-use App\DataObjects\Memory\MemorySearchResultData;
+use App\Data\Memory\MemorySearchResultData;
 
 interface SearchMemoryTool
 {

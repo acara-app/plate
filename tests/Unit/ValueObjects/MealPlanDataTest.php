@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\DataObjects\MealData;
-use App\DataObjects\MealPlanData;
+use App\Data\MealData;
+use App\Data\MealPlanData;
 use App\Enums\MealPlanType;
 use Spatie\LaravelData\DataCollection;
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Ai;
 
-use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
-use App\DataObjects\MealPlanContext\MacronutrientRatiosData;
-use App\DataObjects\MealPlanContext\MealPlanContextData;
-use App\DataObjects\PreviousDayContext;
+use App\Data\GlucoseAnalysis\GlucoseAnalysisData;
+use App\Data\MealPlanContext\MacronutrientRatiosData;
+use App\Data\MealPlanContext\MealPlanContextData;
+use App\Data\PreviousDayContext;
 use App\Enums\AllergySeverity;
 use App\Enums\AnimalProductChoice;
 use App\Enums\DietType;

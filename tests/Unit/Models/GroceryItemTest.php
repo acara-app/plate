@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\DataObjects\GroceryItemResponseData;
+use App\Data\GroceryItemResponseData;
 use App\Models\GroceryItem;
 use App\Models\GroceryList;
 use App\Models\MealPlan;

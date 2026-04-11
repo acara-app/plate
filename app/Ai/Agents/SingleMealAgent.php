@@ -6,7 +6,7 @@ namespace App\Ai\Agents;
 
 use App\Ai\SingleMealPromptBuilder;
 use App\Contracts\Ai\GeneratesSingleMeals;
-use App\DataObjects\GeneratedMealData;
+use App\Data\GeneratedMealData;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Attributes\MaxTokens;

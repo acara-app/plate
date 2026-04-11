@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\DataObjects\HealthLogData;
+use App\Data\HealthLogData;
 use App\Enums\HealthEntrySource;
 use App\Models\HealthSyncSample;
 use App\Models\User;

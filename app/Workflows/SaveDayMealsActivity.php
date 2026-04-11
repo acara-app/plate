@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Workflows;
 
-use App\DataObjects\DayMealsData;
+use App\Data\DayMealsData;
 use App\Models\MealPlan;
 use Workflow\Activity;
 

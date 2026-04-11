@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\MealPlanAgent;
-use App\DataObjects\DayMealsData;
-use App\DataObjects\MealData;
-use App\DataObjects\PreviousDayContext;
-use App\DataObjects\SingleDayMealData;
+use App\Data\DayMealsData;
+use App\Data\MealData;
+use App\Data\PreviousDayContext;
+use App\Data\SingleDayMealData;
 use App\Enums\GoalChoice;
 use App\Enums\MealPlanGenerationStatus;
 use App\Enums\MealPlanType;

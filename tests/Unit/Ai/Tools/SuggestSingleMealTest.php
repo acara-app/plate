@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Ai\Tools\SuggestSingleMeal;
 use App\Contracts\Ai\GeneratesSingleMeals;
-use App\DataObjects\GeneratedMealData;
+use App\Data\GeneratedMealData;
 use App\Models\User;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;

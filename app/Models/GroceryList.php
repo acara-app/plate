@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\DataObjects\GroceryItemResponseData;
-use App\DataObjects\IngredientData;
+use App\Data\GroceryItemResponseData;
+use App\Data\IngredientData;
 use App\Enums\GroceryListStatus;
 use Carbon\CarbonInterface;
 use Database\Factories\GroceryListFactory;

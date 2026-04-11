@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contracts\Ai\Memory;
 
-use App\DataObjects\Memory\MemoryStatsData;
+use App\Data\Memory\MemoryStatsData;
 
 interface GetMemoryStatTool
 {

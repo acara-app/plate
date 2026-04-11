@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Ai\SystemPrompt;
-use App\DataObjects\AttributeMetadataData;
+use App\Data\AttributeMetadataData;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ArrayType;
 use Illuminate\JsonSchema\Types\Type;

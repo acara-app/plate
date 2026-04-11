@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Workflows;
 
-use App\DataObjects\DayMealsData;
-use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
-use App\DataObjects\MealData;
-use App\DataObjects\PreviousDayContext;
+use App\Data\DayMealsData;
+use App\Data\GlucoseAnalysis\GlucoseAnalysisData;
+use App\Data\MealData;
+use App\Data\PreviousDayContext;
 use App\Enums\DietType;
 use App\Enums\MealPlanGenerationStatus;
 use App\Enums\MealPlanType;

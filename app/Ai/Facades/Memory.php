@@ -20,11 +20,11 @@ use App\Contracts\Ai\Memory\SearchMemoryTool;
 use App\Contracts\Ai\Memory\StoreMemoryTool;
 use App\Contracts\Ai\Memory\UpdateMemoryTool;
 use App\Contracts\Ai\Memory\ValidateMemoryTool;
-use App\DataObjects\Memory\MemoryData;
-use App\DataObjects\Memory\MemorySearchResultData;
-use App\DataObjects\Memory\MemoryStatsData;
-use App\DataObjects\Memory\MemoryValidationResultData;
-use App\DataObjects\Memory\RelatedMemoryData;
+use App\Data\Memory\MemoryData;
+use App\Data\Memory\MemorySearchResultData;
+use App\Data\Memory\MemoryStatsData;
+use App\Data\Memory\MemoryValidationResultData;
+use App\Data\Memory\RelatedMemoryData;
 use BadMethodCallException;
 use DateTimeInterface;
 

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\DataObjects\DayMealsData;
-use App\DataObjects\IngredientData;
-use App\DataObjects\PreviousDayContext;
-use App\DataObjects\SingleDayMealData;
+use App\Data\DayMealsData;
+use App\Data\IngredientData;
+use App\Data\PreviousDayContext;
+use App\Data\SingleDayMealData;
 use App\Enums\GoalChoice;
 use App\Enums\MealPlanGenerationStatus;
 use App\Enums\MealType;

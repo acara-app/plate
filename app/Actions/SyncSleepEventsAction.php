@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\DataObjects\MobileSync\SleepEventData;
+use App\Data\MobileSync\SleepEventData;
 use App\Models\SleepSession;
 use App\Models\User;
 use Illuminate\Support\Facades\Date;

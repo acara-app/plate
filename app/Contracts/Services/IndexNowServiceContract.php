@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contracts\Services;
 
-use App\DataObjects\IndexNowResultData;
+use App\Data\IndexNowResultData;
 
 interface IndexNowServiceContract
 {

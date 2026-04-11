@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\DataObjects\ContentMetaData;
+use App\Data\ContentMetaData;
 use App\Enums\ContentType;
 use App\Enums\FoodCategory;
 use App\Enums\PostCategory;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Ai\Tools\PredictGlucoseSpike;
 use App\Contracts\Ai\PredictsGlucoseSpikes;
-use App\DataObjects\SpikePredictionData;
+use App\Data\SpikePredictionData;
 use App\Enums\SpikeRiskLevel;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;

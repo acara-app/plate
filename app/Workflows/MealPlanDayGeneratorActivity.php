@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Workflows;
 
 use App\Ai\Agents\MealPlanAgent;
-use App\DataObjects\DayMealsData;
-use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
-use App\DataObjects\PreviousDayContext;
+use App\Data\DayMealsData;
+use App\Data\GlucoseAnalysis\GlucoseAnalysisData;
+use App\Data\PreviousDayContext;
 use App\Enums\DietType;
 use App\Models\MealPlan;
 use App\Models\User;

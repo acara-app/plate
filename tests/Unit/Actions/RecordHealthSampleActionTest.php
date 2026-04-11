@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\RecordHealthSampleAction;
-use App\DataObjects\HealthLogData;
+use App\Data\HealthLogData;
 use App\Enums\HealthEntrySource;
 use App\Enums\HealthEntryType;
 use App\Models\User;

@@ -78,7 +78,7 @@ If statement coverage reaches 100%, output <promise>COMPLETE</promise>.
 
 - **Avoid inline closures in controller responses** - When returning data from controllers (especially with Inertia), don't use inline closures for data transformation as they are difficult to test.
 - **Extract formatting logic to models** - Instead of writing transformation closures in controllers, add dedicated methods to models (e.g., `toResponseData()`, `formattedItemsByCategory()`) that can be unit tested independently.
-- **Use DTOs for response data** - Instead of inline array type declarations like `@return array{id: int, name: string}`, create dedicated Data Transfer Objects (DTOs) in `app/DataObjects/` using Spatie Laravel Data.
+- **Use DTOs for response data** - Instead of inline array type declarations like `@return array{id: int, name: string}`, create dedicated Data Transfer Objects (DTOs) in `app/Data/` using Spatie Laravel Data.
 - **Keep controller methods thin** - Controllers should orchestrate, not transform. Move data formatting and business logic to models, actions, or dedicated service classes.
 
 ### Bad Example (untestable closure with inline array type):
@@ -99,7 +99,7 @@ return [
 ### Good Example (testable method with DTO):
 
 ```php
-// In DataObjects/ItemResponseData.php
+// In Data/ItemResponseData.php
 final class ItemResponseData extends Data
 {
     public function __construct(

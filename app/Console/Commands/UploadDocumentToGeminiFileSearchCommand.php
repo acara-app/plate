@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\DataObjects\GeminiFileSearchStoreData;
-use App\DataObjects\GeminiUploadedFileData;
+use App\Data\GeminiFileSearchStoreData;
+use App\Data\GeminiUploadedFileData;
 use App\Enums\SettingKey;
 use App\Models\Setting;
 use Exception;

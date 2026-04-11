@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\DataObjects\MobileSync\HealthEntryData;
+use App\Data\MobileSync\HealthEntryData;
 use App\Enums\HealthEntrySource;
 use App\Enums\HealthSyncType;
 use App\Exceptions\HealthUnitConversionException;

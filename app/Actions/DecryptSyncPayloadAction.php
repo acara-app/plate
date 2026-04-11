@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\DataObjects\MobileSync\DecryptedSyncPayloadData;
+use App\Data\MobileSync\DecryptedSyncPayloadData;
 use Illuminate\Support\Facades\Validator;
 
 /** @codeCoverageIgnore */

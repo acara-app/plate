@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Workflows;
 
-use App\DataObjects\DayMealsData;
-use App\DataObjects\PreviousDayContext;
+use App\Data\DayMealsData;
+use App\Data\PreviousDayContext;
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\MealPlan;
 use Generator;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\DataObjects\DietIdentityData;
+use App\Data\DietIdentityData;
 use App\Enums\AllergySeverity;
 use App\Enums\AnimalProductChoice;
 use App\Enums\BloodType;

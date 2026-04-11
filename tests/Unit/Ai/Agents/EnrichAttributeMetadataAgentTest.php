@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\EnrichAttributeMetadataAgent;
-use App\DataObjects\AttributeMetadataData;
+use App\Data\AttributeMetadataData;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;

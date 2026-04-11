@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Ai\SystemPrompt;
-use App\DataObjects\ExtractedIngredientData;
-use App\DataObjects\GroceryItemData;
-use App\DataObjects\GroceryListData;
-use App\DataObjects\IngredientData;
+use App\Data\ExtractedIngredientData;
+use App\Data\GroceryItemData;
+use App\Data\GroceryListData;
+use App\Data\IngredientData;
 use App\Models\MealPlan;
 use App\Utilities\JsonCleaner;
 use Laravel\Ai\Attributes\MaxTokens;

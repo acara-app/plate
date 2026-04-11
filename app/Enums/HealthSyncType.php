@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-use App\DataObjects\MobileSync\BloodGlucoseMetadata;
-use App\DataObjects\MobileSync\MedicationDoseEventMetadata;
-use App\DataObjects\MobileSync\MedicationMetadata;
+use App\Data\MobileSync\BloodGlucoseMetadata;
+use App\Data\MobileSync\MedicationDoseEventMetadata;
+use App\Data\MobileSync\MedicationMetadata;
 
 enum HealthSyncType: string
 {

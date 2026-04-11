@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Ai\Agents\SpikePredictorAgent;
-use App\DataObjects\SpikePredictionData;
+use App\Data\SpikePredictionData;
 
 final readonly class PredictGlucoseSpikeAction
 {

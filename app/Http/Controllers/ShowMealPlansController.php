@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\DataObjects\MealResponseData;
+use App\Data\MealResponseData;
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\Meal;
 use App\Models\MealPlan;

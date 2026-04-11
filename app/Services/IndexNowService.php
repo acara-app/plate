@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\Services\IndexNowServiceContract;
-use App\DataObjects\IndexNowResultData;
+use App\Data\IndexNowResultData;
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;

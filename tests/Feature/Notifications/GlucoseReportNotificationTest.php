@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-use App\DataObjects\GlucoseAnalysis\AveragesData;
-use App\DataObjects\GlucoseAnalysis\DateRangeData;
-use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
-use App\DataObjects\GlucoseAnalysis\GlucoseGoalsData;
-use App\DataObjects\GlucoseAnalysis\PatternsData;
-use App\DataObjects\GlucoseAnalysis\RangesData;
-use App\DataObjects\GlucoseAnalysis\TimeInRangeData;
-use App\DataObjects\GlucoseAnalysis\TimeOfDayData;
-use App\DataObjects\GlucoseAnalysis\TimeOfDayPeriodData;
-use App\DataObjects\GlucoseAnalysis\TrendData;
-use App\DataObjects\GlucoseAnalysis\VariabilityData;
-use App\DataObjects\GlucoseNotificationAnalysisData;
+use App\Data\GlucoseAnalysis\AveragesData;
+use App\Data\GlucoseAnalysis\DateRangeData;
+use App\Data\GlucoseAnalysis\GlucoseAnalysisData;
+use App\Data\GlucoseAnalysis\GlucoseGoalsData;
+use App\Data\GlucoseAnalysis\PatternsData;
+use App\Data\GlucoseAnalysis\RangesData;
+use App\Data\GlucoseAnalysis\TimeInRangeData;
+use App\Data\GlucoseAnalysis\TimeOfDayData;
+use App\Data\GlucoseAnalysis\TimeOfDayPeriodData;
+use App\Data\GlucoseAnalysis\TrendData;
+use App\Data\GlucoseAnalysis\VariabilityData;
+use App\Data\GlucoseNotificationAnalysisData;
 use App\Models\User;
 use App\Notifications\GlucoseReportNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;

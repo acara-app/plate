@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\DataObjects\MealData;
-use App\DataObjects\MealPlanData;
+use App\Data\MealData;
+use App\Data\MealPlanData;
 use App\Enums\MealPlanType;
 use App\Models\MealPlan;
 use App\Models\User;

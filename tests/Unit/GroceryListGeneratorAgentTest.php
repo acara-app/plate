@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\GroceryListGeneratorAgent;
-use App\DataObjects\GroceryListData;
+use App\Data\GroceryListData;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;

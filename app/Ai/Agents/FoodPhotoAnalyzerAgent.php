@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Ai\SystemPrompt;
-use App\DataObjects\FoodAnalysisData;
+use App\Data\FoodAnalysisData;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\JsonSchema\Types\Type;

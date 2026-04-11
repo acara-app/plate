@@ -6,7 +6,7 @@ namespace App\Ai\Agents;
 
 use App\Ai\SystemPrompt;
 use App\Contracts\Ai\PredictsGlucoseSpikes;
-use App\DataObjects\SpikePredictionData;
+use App\Data\SpikePredictionData;
 use App\Utilities\JsonCleaner;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Provider;

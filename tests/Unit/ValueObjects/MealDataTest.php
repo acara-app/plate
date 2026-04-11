@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\DataObjects\MealData;
+use App\Data\MealData;
 use App\Enums\MealType;
 use Spatie\LaravelData\DataCollection;
 

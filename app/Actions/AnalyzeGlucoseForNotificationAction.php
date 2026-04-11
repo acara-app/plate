@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Ai\GlucoseDataAnalyzer;
-use App\DataObjects\GlucoseAnalysis\GlucoseAnalysisData;
-use App\DataObjects\GlucoseNotificationAnalysisData;
-use App\DataObjects\UserSettingsData;
+use App\Data\GlucoseAnalysis\GlucoseAnalysisData;
+use App\Data\GlucoseNotificationAnalysisData;
+use App\Data\UserSettingsData;
 use App\Models\User;
 
 final readonly class AnalyzeGlucoseForNotificationAction

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Ai\Tools;
 
 use App\Actions\RecordHealthSampleAction;
-use App\DataObjects\HealthLogData;
+use App\Data\HealthLogData;
 use App\Enums\GlucoseReadingType;
 use App\Enums\HealthEntrySource;
 use App\Enums\HealthEntryType;

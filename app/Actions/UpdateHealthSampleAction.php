@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\DataObjects\HealthLogData;
+use App\Data\HealthLogData;
 use App\Models\HealthSyncSample;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;

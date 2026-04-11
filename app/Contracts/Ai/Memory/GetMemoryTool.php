@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Contracts\Ai\Memory;
 
 use App\Ai\Exceptions\Memory\MemoryNotFoundException;
-use App\DataObjects\Memory\MemoryData;
+use App\Data\Memory\MemoryData;
 
 interface GetMemoryTool
 {

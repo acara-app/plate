@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\HealthEntry;
 
 use App\Actions\RecordHealthSampleAction;
-use App\DataObjects\HealthLogData;
+use App\Data\HealthLogData;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntrySource;
 use App\Http\Requests\HealthEntryRequest;

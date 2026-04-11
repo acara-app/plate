@@ -133,7 +133,7 @@ app/Ai/
     ├── ArchiveMemories.php
     └── RestoreMemories.php
 
-app/DataObjects/Memory/         # ✅ DTOs (done)
+app/Data/Memory/         # ✅ DTOs (done)
 
 app/Services/Memory/            # 🔲 Supporting services (todo)
     ├── EmbeddingService.php    # Generate embeddings

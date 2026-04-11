@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\SpikePredictorAgent;
-use App\DataObjects\SpikePredictionData;
+use App\Data\SpikePredictionData;
 use App\Enums\SpikeRiskLevel;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
