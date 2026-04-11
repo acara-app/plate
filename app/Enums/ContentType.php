@@ -9,6 +9,7 @@ enum ContentType: string
     case Food = 'food';
     case UsdaDailyServingSize = 'usda_daily_serving_size';
     case UsdaSugarLimit = 'usda_sugar_limit';
+    case Post = 'post';
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum ContentType: string
             self::Food => 'Food',
             self::UsdaDailyServingSize => 'USDA Daily Serving Size',
             self::UsdaSugarLimit => 'USDA Sugar Limit',
+            self::Post => 'Post',
         };
     }
 }

@@ -10,3 +10,4 @@ Disallow: /food?category=
 
 Sitemap: https://plate.acara.app/sitemap.xml
 Sitemap: https://plate.acara.app/food_sitemap.xml
+Sitemap: https://plate.acara.app/post_sitemap.xml

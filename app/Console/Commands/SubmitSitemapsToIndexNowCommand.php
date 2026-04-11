@@ -45,7 +45,7 @@ final class SubmitSitemapsToIndexNowCommand extends Command
             $allUrls = array_merge($allUrls, $this->extractUrlsFromSitemap($path));
         }
 
-        $allUrls = array_merge($allUrls, $this->getFoodUrls());
+        $allUrls = array_merge($allUrls, $this->getFoodUrls(), $this->getPostUrls());
 
         $allUrls = array_unique($allUrls);
 
@@ -89,6 +89,33 @@ final class SubmitSitemapsToIndexNowCommand extends Command
             // @codeCoverageIgnoreStart
         } catch (Exception $exception) {
             $this->error('Error fetching food URLs: '.$exception->getMessage());
+
+            return [];
+        }
+
+        // @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function getPostUrls(): array
+    {
+        try {
+            return Content::query()
+                ->published()
+                ->post()
+                ->orderBy('slug')
+                ->get()
+                ->map(fn (Content $post): string => $post->locale === 'en'
+                    ? route('post.show', $post->slug)
+                    : route('post.locale.show', ['locale' => $post->locale, 'slug' => $post->slug])
+                )
+                ->values()
+                ->all();
+            // @codeCoverageIgnoreStart
+        } catch (Exception $exception) {
+            $this->error('Error fetching post URLs: '.$exception->getMessage());
 
             return [];
         }

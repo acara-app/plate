@@ -7,12 +7,15 @@ namespace App\Models;
 use App\DataObjects\ContentMetaData;
 use App\Enums\ContentType;
 use App\Enums\FoodCategory;
+use App\Enums\PostCategory;
+use BackedEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\ContentFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -26,13 +29,15 @@ use Illuminate\Support\Facades\Storage;
  *     seo_description?: string,
  *     manual_links?: array<int, array{slug: string, anchor: string}>
  * }|null $meta_data
- * @property-read FoodCategory|null $category
+ * @property-read FoodCategory|PostCategory|null $category
  * @property-read string|null $image_path
  * @property-read string|null $image_url
  * @property-read ContentMetaData|null $meta
  * @property-read string $meta_title
  * @property-read string $meta_description
  * @property-read bool $is_published
+ * @property-read string $locale
+ * @property-read string|null $translation_group
  * @property-read string $display_name
  * @property-read string|null $diabetic_insight
  * @property-read array<string, float|int|null> $nutrition
@@ -60,16 +65,39 @@ final class Content extends Model
         return [
             'id' => 'integer',
             'type' => ContentType::class,
-            'category' => FoodCategory::class,
             'slug' => 'string',
             'title' => 'string',
             'body' => 'array',
             'meta_data' => 'array',
             'image_path' => 'string',
             'is_published' => 'boolean',
+            'locale' => 'string',
+            'translation_group' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return HasMany<Content, $this>
+     */
+    public function translations(): HasMany
+    {
+        return $this->hasMany(self::class, 'translation_group', 'translation_group');
+    }
+
+    protected function getCategoryAttribute(?string $value): FoodCategory|PostCategory|null
+    {
+        return match ($this->type) {
+            ContentType::Food => $value ? FoodCategory::tryFrom($value) : null,
+            ContentType::Post => $value ? PostCategory::tryFrom($value) : null,
+            default => null,
+        };
+    }
+
+    protected function setCategoryAttribute(FoodCategory|PostCategory|string|null $value): void
+    {
+        $this->attributes['category'] = $value instanceof BackedEnum ? $value->value : $value;
     }
 
     /**
@@ -103,9 +131,27 @@ final class Content extends Model
      * @param  Builder<Content>  $query
      */
     #[Scope]
-    protected function inCategory(Builder $query, FoodCategory $category): void
+    protected function inCategory(Builder $query, FoodCategory|PostCategory $category): void
     {
         $query->where('category', $category);
+    }
+
+    /**
+     * @param  Builder<Content>  $query
+     */
+    #[Scope]
+    protected function post(Builder $query): void
+    {
+        $query->ofType(ContentType::Post);
+    }
+
+    /**
+     * @param  Builder<Content>  $query
+     */
+    #[Scope]
+    protected function inLocale(Builder $query, string $locale): void
+    {
+        $query->where('locale', $locale);
     }
 
     protected function getImageUrlAttribute(): ?string
@@ -114,12 +160,16 @@ final class Content extends Model
             return null;
         }
 
+        if (str_starts_with($this->image_path, 'https://')) {
+            return $this->image_path;
+        }
+
         return Storage::disk('s3_public')->url($this->image_path);
     }
 
     protected function getMetaAttribute(): ?ContentMetaData
     {
-        $data = $this->getMetaDataAttributes();
+        $data = $this->meta_data;
 
         if ($data === null) {
             return null;
@@ -198,7 +248,13 @@ final class Content extends Model
             return $storedGi;
         }
 
-        return $this->category?->averageGlycemicIndex() ?? 50;
+        $category = $this->category;
+
+        if ($category instanceof FoodCategory) {
+            return $category->averageGlycemicIndex();
+        }
+
+        return 50;
     }
 
     protected function getGlycemicLoadAttribute(): string
@@ -248,7 +304,7 @@ final class Content extends Model
      */
     protected function getManualLinksAttribute(): array
     {
-        $metaData = $this->getMetaDataAttributes();
+        $metaData = $this->meta_data;
 
         if ($metaData === null) {
             return [];
@@ -258,26 +314,5 @@ final class Content extends Model
         $links = $metaData['manual_links'] ?? [];
 
         return $links;
-    }
-
-    /**
-     * @return array{
-     *     seo_title?: string,
-     *     seo_description?: string,
-     *     manual_links?: array<int, array{slug: string, anchor: string}>
-     * }|null
-     */
-    private function getMetaDataAttributes(): ?array
-    {
-        /**
-/** @var array{
-         *     seo_title?: string,
-         *     seo_description?: string,
-         *     manual_links?: array<int, array{slug: string, anchor: string}>
-         * }|null $metaData
-         */
-        $metaData = $this->meta_data;
-
-        return $metaData;
     }
 }

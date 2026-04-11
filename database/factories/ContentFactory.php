@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\ContentType;
+use App\Enums\PostCategory;
 use App\Models\Content;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -59,6 +60,8 @@ final class ContentFactory extends Factory
             ],
             'image_path' => null,
             'is_published' => true,
+            'locale' => 'en',
+            'translation_group' => null,
         ];
     }
 
@@ -77,5 +80,50 @@ final class ContentFactory extends Factory
 
             return ['image_path' => 'food-images/'.Str::slug($displayName).'.png'];
         });
+    }
+
+    public function post(): static
+    {
+        return $this->state(function (array $attributes): array {
+            /** @var string $postTitle */
+            $postTitle = fake()->randomElement([
+                'How to Manage Blood Sugar Spikes After Meals',
+                '10 Low Glycemic Snacks That Actually Taste Good',
+                'Understanding the Glycemic Index: A Complete Guide',
+                "Meal Planning for Type 2 Diabetes: A Beginner's Guide",
+                'The Truth About Carbs and Diabetes',
+            ]);
+
+            /** @var PostCategory $postCategory */
+            $postCategory = fake()->randomElement(PostCategory::cases());
+
+            return [
+                'type' => ContentType::Post,
+                'slug' => Str::slug($postTitle),
+                'title' => $postTitle,
+                'category' => $postCategory,
+                'meta_data' => [
+                    'seo_title' => $postTitle.' | Acara Plate',
+                    'seo_description' => sprintf('Learn about %s and how it relates to diabetes management and nutrition.', $postTitle),
+                    'manual_links' => [],
+                ],
+                'body' => [
+                    'display_name' => $postTitle,
+                    'excerpt' => fake()->sentence(12),
+                    'content' => fake()->paragraphs(3, asText: true),
+                    'reading_time' => fake()->numberBetween(3, 12),
+                ],
+                'locale' => 'en',
+                'translation_group' => null,
+            ];
+        });
+    }
+
+    public function localized(string $locale, ?string $translationGroup = null): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'locale' => $locale,
+            'translation_group' => $translationGroup ?? fake()->uuid(),
+        ]);
     }
 }

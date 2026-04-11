@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\DataObjects\ContentMetaData;
 use App\Enums\ContentType;
 use App\Enums\FoodCategory;
+use App\Enums\PostCategory;
 use App\Models\Content;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -289,4 +290,74 @@ it('calculates glycemic load classification from numeric value', function (): vo
     ]);
 
     expect($mediumGlContent->glycemic_load)->toBe('medium');
+});
+
+it('resolves category as PostCategory for post content', function (): void {
+    $content = Content::factory()->post()->create([
+        'slug' => Str::uuid()->toString(),
+        'category' => PostCategory::NutritionTips,
+    ]);
+
+    expect($content->category)->toBe(PostCategory::NutritionTips)
+        ->and($content->category_label)->toBe('Nutrition Tips');
+});
+
+it('resolves category as null for post without category', function (): void {
+    $content = Content::factory()->post()->create([
+        'slug' => Str::uuid()->toString(),
+        'category' => null,
+    ]);
+
+    expect($content->category)->toBeNull()
+        ->and($content->category_label)->toBe('Uncategorized');
+});
+
+it('scopes to post type', function (): void {
+    Content::factory()->post()->create(['slug' => Str::uuid()->toString()]);
+    Content::factory()->create(['slug' => Str::uuid()->toString()]);
+
+    expect(Content::post()->count())->toBe(1);
+});
+
+it('scopes to specific locale', function (): void {
+    Content::factory()->post()->localized('mn')->create(['slug' => Str::uuid()->toString()]);
+    Content::factory()->post()->create(['slug' => Str::uuid()->toString(), 'locale' => 'en']);
+
+    expect(Content::inLocale('mn')->count())->toBe(1);
+});
+
+it('scopes post category using inCategory', function (): void {
+    Content::factory()->post()->create([
+        'slug' => Str::uuid()->toString(),
+        'category' => PostCategory::Recipes,
+    ]);
+    Content::factory()->post()->create([
+        'slug' => Str::uuid()->toString(),
+        'category' => PostCategory::Research,
+    ]);
+
+    expect(Content::inCategory(PostCategory::Recipes)->count())->toBe(1);
+});
+
+it('returns translations for content with translation group', function (): void {
+    $group = Str::uuid()->toString();
+
+    $enPost = Content::factory()->post()->localized('en', $group)->create([
+        'slug' => 'en-'.Str::uuid()->toString(),
+    ]);
+    Content::factory()->post()->localized('mn', $group)->create([
+        'slug' => 'mn-'.Str::uuid()->toString(),
+    ]);
+
+    expect($enPost->translations)->toHaveCount(2)
+        ->and($enPost->translations->where('id', '!=', $enPost->id))->toHaveCount(1);
+});
+
+it('returns empty translations for content without translation group', function (): void {
+    $post = Content::factory()->post()->create([
+        'slug' => Str::uuid()->toString(),
+        'translation_group' => null,
+    ]);
+
+    expect($post->translations)->toHaveCount(0);
 });
