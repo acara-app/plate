@@ -102,12 +102,12 @@ it('displays a locale-specific post via locale route', function (): void {
 });
 
 it('displays category page via locale route', function (): void {
-    Content::factory()->post()->localized('fr')->create([
-        'slug' => 'fr-cat-'.Str::uuid()->toString(),
+    Content::factory()->post()->localized('mn')->create([
+        'slug' => 'mn-cat-'.Str::uuid()->toString(),
         'category' => PostCategory::Lifestyle,
     ]);
 
-    $this->get(route('post.locale.category', ['locale' => 'fr', 'category' => PostCategory::Lifestyle->value]))
+    $this->get(route('post.locale.category', ['locale' => 'mn', 'category' => PostCategory::Lifestyle->value]))
         ->assertOk()
         ->assertViewIs('post.index');
 });
@@ -201,12 +201,12 @@ it('falls back x-default to own url when non-english post has no english transla
 });
 
 it('generates correct canonical url for locale category page', function (): void {
-    Content::factory()->post()->localized('fr')->create([
-        'slug' => 'fr-canonical-'.Str::uuid()->toString(),
+    Content::factory()->post()->localized('mn')->create([
+        'slug' => 'mn-canonical-'.Str::uuid()->toString(),
         'category' => PostCategory::Lifestyle,
     ]);
 
-    $this->get(route('post.locale.category', ['locale' => 'fr', 'category' => PostCategory::Lifestyle->value]))
+    $this->get(route('post.locale.category', ['locale' => 'mn', 'category' => PostCategory::Lifestyle->value]))
         ->assertOk()
-        ->assertViewHas('canonicalUrl', route('post.locale.category', ['locale' => 'fr', 'category' => PostCategory::Lifestyle->value]));
+        ->assertViewHas('canonicalUrl', route('post.locale.category', ['locale' => 'mn', 'category' => PostCategory::Lifestyle->value]));
 });

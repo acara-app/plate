@@ -36,8 +36,7 @@ it('includes post index locale pages for non-en locales', function (): void {
     $response = $this->get(route('post.sitemap'));
 
     $content = $response->getContent();
-    expect($content)->toContain(route('post.locale.index', ['locale' => 'mn']))
-        ->toContain(route('post.locale.index', ['locale' => 'fr']));
+    expect($content)->toContain(route('post.locale.index', ['locale' => 'mn']));
 });
 
 it('only includes published posts', function (): void {

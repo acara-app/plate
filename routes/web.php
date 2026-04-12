@@ -42,9 +42,9 @@ Route::get('/post', [Web\PublicPostController::class, 'index'])->name('post.inde
 Route::get('/post/category/{category}', [Web\PublicPostController::class, 'category'])->name('post.category');
 Route::get('/post/{slug}', [Web\PublicPostController::class, 'show'])->name('post.show');
 
-Route::get('/{locale}/post', [Web\PublicPostController::class, 'index'])->where('locale', 'mn|fr')->name('post.locale.index');
-Route::get('/{locale}/post/{slug}', [Web\PublicPostController::class, 'show'])->where('locale', 'mn|fr')->name('post.locale.show');
-Route::get('/{locale}/post/category/{category}', [Web\PublicPostController::class, 'category'])->where('locale', 'mn|fr')->name('post.locale.category');
+Route::get('/{locale}/post', [Web\PublicPostController::class, 'index'])->where('locale', 'mn')->name('post.locale.index');
+Route::get('/{locale}/post/{slug}', [Web\PublicPostController::class, 'show'])->where('locale', 'mn')->name('post.locale.show');
+Route::get('/{locale}/post/category/{category}', [Web\PublicPostController::class, 'category'])->where('locale', 'mn')->name('post.locale.category');
 
 Route::get('/post_sitemap.xml', [Web\PostSitemapXmlController::class, 'post'])->name('post.sitemap');
 

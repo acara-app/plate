@@ -17,10 +17,9 @@
         : route('post.show', $englishTranslation->slug);
     $ogLocale = match ($locale) {
         'mn' => 'mn_MN',
-        'fr' => 'fr_FR',
         default => 'en_US',
     };
-    $localeToOg = ['en' => 'en_US', 'mn' => 'mn_MN', 'fr' => 'fr_FR'];
+    $localeToOg = ['en' => 'en_US', 'mn' => 'mn_MN'];
     $indexUrl = $locale === 'en' ? route('post.index') : route('post.locale.index', ['locale' => $locale]);
 
     $articleSchema = [
