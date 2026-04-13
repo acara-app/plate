@@ -191,7 +191,7 @@ final class HealthLogData extends Data
     private function formatVitalsLog(): string
     {
         if ($this->weight !== null) {
-            return sprintf('Weight %s %s', $this->weight, $this->weightUnit?->value ?? 'kg');
+            return sprintf('Weight %s %s', $this->weight, $this->weightUnit->value ?? 'kg');
         }
 
         if ($this->bpSystolic !== null && $this->bpDiastolic !== null) {

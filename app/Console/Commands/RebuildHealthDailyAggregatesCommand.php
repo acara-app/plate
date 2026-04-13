@@ -120,6 +120,7 @@ final class RebuildHealthDailyAggregatesCommand extends Command
             $query->whereBetween(HealthDailyAggregate::UTC_DAY_COLUMN, [$from->toDateString(), $to->toDateString()]);
         }
 
+        /** @var int $deleted */
         $deleted = $query->delete();
 
         $this->info(sprintf('Cleared %d existing health_daily_aggregates rows in target scope.', $deleted));

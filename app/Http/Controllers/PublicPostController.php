@@ -123,6 +123,9 @@ final readonly class PublicPostController
             ->values();
     }
 
+    /**
+     * @param  Collection<int, Content>  $translations
+     */
     private function getXDefaultUrl(Content $content, Collection $translations): string
     {
         if ($content->locale === 'en') {
@@ -131,7 +134,7 @@ final readonly class PublicPostController
 
         $englishTranslation = $translations->firstWhere('locale', 'en');
 
-        if ($englishTranslation !== null) {
+        if ($englishTranslation instanceof Content) {
             return route('post.show', $englishTranslation->slug);
         }
 

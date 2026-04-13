@@ -75,13 +75,16 @@ final readonly class MobileSyncHealthEntriesController
             $this->updateTimezoneAction->handle($user, $timezone);
         }
 
+        /** @var list<string> $affectedUtcDates */
+        $affectedUtcDates = collect($sampleResult['affected_utc_dates'])
+            ->concat($sleepResult['affected_utc_dates'])
+            ->unique()
+            ->values()
+            ->all();
+
         $dispatchedAggregateJobs = $this->dispatchAggregateDatesAction->handle(
             $user,
-            collect($sampleResult['affected_utc_dates'])
-                ->concat($sleepResult['affected_utc_dates'])
-                ->unique()
-                ->values()
-                ->all(),
+            $affectedUtcDates,
         );
 
         return response()->json([

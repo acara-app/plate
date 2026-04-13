@@ -39,6 +39,7 @@ final readonly class DestroyHealthEntryController
             ? HealthSyncSample::query()->where('group_id', $healthSyncSample->group_id)->get()
             : new Collection([$healthSyncSample]);
 
+        /** @var list<string> */
         return $samples
             ->map(static fn (HealthSyncSample $sample): string => $sample->measured_at->copy()->utc()->toDateString())
             ->unique()
