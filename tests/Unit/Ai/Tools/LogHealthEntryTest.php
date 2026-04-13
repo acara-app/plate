@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Ai\Tools\LogHealthEntry;
 use App\Enums\HealthEntrySource;
 use App\Enums\HealthSyncType;
+use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -14,22 +15,24 @@ use Tests\Helpers\TestJsonSchema;
 covers(LogHealthEntry::class);
 
 it('has correct name and description', function (): void {
-    $tool = new LogHealthEntry;
+    $tool = resolve(LogHealthEntry::class);
 
     expect($tool->name())->toBe('log_health_entry')
         ->and($tool->description())->toContain('Log a health entry');
 });
 
 it('has valid schema with enum constraints', function (): void {
-    $tool = new LogHealthEntry;
+    $tool = resolve(LogHealthEntry::class);
     $schema = $tool->schema(new TestJsonSchema);
 
     expect($schema)
         ->toHaveKey('log_type')
         ->toHaveKey('glucose_value')
+        ->toHaveKey('glucose_unit')
         ->toHaveKey('carbs_grams')
         ->toHaveKey('notes')
         ->toHaveKey('weight')
+        ->toHaveKey('weight_unit')
         ->toHaveKey('bp_systolic')
         ->toHaveKey('bp_diastolic')
         ->toHaveKey('exercise_type')
@@ -40,7 +43,7 @@ it('has valid schema with enum constraints', function (): void {
 it('returns error if user is not authenticated', function (): void {
     Auth::shouldReceive('user')->andReturn(null);
 
-    $tool = new LogHealthEntry;
+    $tool = resolve(LogHealthEntry::class);
     $request = new Request(['log_type' => 'glucose', 'glucose_value' => 120]);
 
     $result = json_decode($tool->handle($request), true);
@@ -52,7 +55,7 @@ it('logs a glucose entry successfully', function (): void {
     $user = User::factory()->create();
     Auth::login($user);
 
-    $tool = new LogHealthEntry;
+    $tool = resolve(LogHealthEntry::class);
     $request = new Request([
         'log_type' => 'glucose',
         'glucose_value' => 140,
@@ -73,13 +76,21 @@ it('logs a glucose entry successfully', function (): void {
 
     expect($sample->value)->toBe(140.0)
         ->and($sample->entry_source)->toBe(HealthEntrySource::Chat);
+
+    $aggregate = HealthDailyAggregate::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::BloodGlucose->value)
+        ->where('local_date', now()->toDateString())
+        ->first();
+
+    expect($aggregate)->not->toBeNull();
 });
 
 it('logs a food entry with notes', function (): void {
     $user = User::factory()->create();
     Auth::login($user);
 
-    $tool = new LogHealthEntry;
+    $tool = resolve(LogHealthEntry::class);
     $request = new Request([
         'log_type' => 'food',
         'carbs_grams' => 45,
@@ -104,7 +115,7 @@ it('logs a vitals entry with weight', function (): void {
     $user = User::factory()->create();
     Auth::login($user);
 
-    $tool = new LogHealthEntry;
+    $tool = resolve(LogHealthEntry::class);
     $request = new Request([
         'log_type' => 'vitals',
         'weight' => 81.65,
@@ -127,7 +138,7 @@ it('logs an exercise entry', function (): void {
     $user = User::factory()->create();
     Auth::login($user);
 
-    $tool = new LogHealthEntry;
+    $tool = resolve(LogHealthEntry::class);
     $request = new Request([
         'log_type' => 'exercise',
         'exercise_type' => 'walking',
@@ -152,7 +163,7 @@ it('logs a food entry with only notes and no macros', function (): void {
     $user = User::factory()->create();
     Auth::login($user);
 
-    $tool = new LogHealthEntry;
+    $tool = resolve(LogHealthEntry::class);
     $request = new Request([
         'log_type' => 'food',
         'notes' => 'apple',
@@ -175,7 +186,7 @@ it('returns error when vitals entry has no data', function (): void {
     $user = User::factory()->create();
     Auth::login($user);
 
-    $tool = new LogHealthEntry;
+    $tool = resolve(LogHealthEntry::class);
     $request = new Request([
         'log_type' => 'vitals',
     ]);
@@ -191,7 +202,7 @@ it('logs a medication entry', function (): void {
     $user = User::factory()->create();
     Auth::login($user);
 
-    $tool = new LogHealthEntry;
+    $tool = resolve(LogHealthEntry::class);
     $request = new Request([
         'log_type' => 'meds',
         'medication_name' => 'metformin',
@@ -210,4 +221,80 @@ it('logs a medication entry', function (): void {
     expect($sample->metadata['medication_name'])->toBe('metformin')
         ->and($sample->metadata['medication_dosage'])->toBe('500mg')
         ->and($sample->entry_source)->toBe(HealthEntrySource::Chat);
+});
+
+it('converts mmol/L glucose values to mg/dL when unit is provided', function (): void {
+    $user = User::factory()->create();
+    Auth::login($user);
+
+    $tool = resolve(LogHealthEntry::class);
+    $request = new Request([
+        'log_type' => 'glucose',
+        'glucose_value' => 6.7,
+        'glucose_unit' => 'mmol/L',
+        'glucose_reading_type' => 'fasting',
+    ]);
+
+    $result = json_decode($tool->handle($request), true);
+
+    expect($result)->toHaveKey('success', true);
+
+    $sample = HealthSyncSample::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::BloodGlucose->value)
+        ->first();
+
+    expect($sample)->not->toBeNull()
+        ->and($sample->unit)->toBe('mg/dL')
+        ->and((float) $sample->value)->toBe(121.0);
+});
+
+it('asks for glucose unit when value looks like mmol/L but unit is missing', function (): void {
+    $user = User::factory()->create();
+    Auth::login($user);
+
+    $tool = resolve(LogHealthEntry::class);
+    $request = new Request([
+        'log_type' => 'glucose',
+        'glucose_value' => 6.7,
+        'glucose_reading_type' => 'fasting',
+    ]);
+
+    $result = json_decode($tool->handle($request), true);
+
+    expect($result)
+        ->toHaveKey('requires_clarification', true)
+        ->toHaveKey('field', 'glucose_unit');
+
+    $sample = HealthSyncSample::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::BloodGlucose->value)
+        ->first();
+
+    expect($sample)->toBeNull();
+});
+
+it('converts weight from pounds to kilograms when unit is provided', function (): void {
+    $user = User::factory()->create();
+    Auth::login($user);
+
+    $tool = resolve(LogHealthEntry::class);
+    $request = new Request([
+        'log_type' => 'vitals',
+        'weight' => 176.37,
+        'weight_unit' => 'lb',
+    ]);
+
+    $result = json_decode($tool->handle($request), true);
+
+    expect($result)->toHaveKey('success', true);
+
+    $sample = HealthSyncSample::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::Weight->value)
+        ->first();
+
+    expect($sample)->not->toBeNull()
+        ->and($sample->unit)->toBe('kg')
+        ->and(round((float) $sample->value, 1))->toBe(80.0);
 });

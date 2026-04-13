@@ -9,6 +9,7 @@ use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
 use App\Enums\HealthSyncType;
 use App\Enums\InsulinType;
+use App\Enums\WeightUnit;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Spatie\LaravelData\Data;
@@ -30,6 +31,7 @@ final class HealthLogData extends Data
         public ?string $medicationName = null,
         public ?string $medicationDosage = null,
         public ?float $weight = null,
+        public ?WeightUnit $weightUnit = null,
         public ?int $bpSystolic = null,
         public ?int $bpDiastolic = null,
         public ?float $a1cValue = null,
@@ -59,6 +61,7 @@ final class HealthLogData extends Data
             medicationName: self::toNullableString($data['medication_name'] ?? null),
             medicationDosage: self::toNullableString($data['medication_dosage'] ?? null),
             weight: self::toFloat($data['weight'] ?? null),
+            weightUnit: WeightUnit::tryFrom(self::toNullableString($data['weight_unit'] ?? null) ?? ''),
             bpSystolic: self::toInt($data['blood_pressure_systolic'] ?? $data['bp_systolic'] ?? null),
             bpDiastolic: self::toInt($data['blood_pressure_diastolic'] ?? $data['bp_diastolic'] ?? null),
             a1cValue: self::toFloat($data['a1c_value'] ?? null),
@@ -188,7 +191,7 @@ final class HealthLogData extends Data
     private function formatVitalsLog(): string
     {
         if ($this->weight !== null) {
-            return sprintf('Weight %s kg', $this->weight);
+            return sprintf('Weight %s %s', $this->weight, $this->weightUnit?->value ?? 'kg');
         }
 
         if ($this->bpSystolic !== null && $this->bpDiastolic !== null) {
@@ -281,10 +284,16 @@ final class HealthLogData extends Data
      */
     private function toGlucoseSamples(): array
     {
+        $glucoseValue = $this->glucoseValue ?? 0.0;
+
+        if ($this->glucoseUnit === GlucoseUnit::MmolL) {
+            $glucoseValue = GlucoseUnit::mmolLToMgDl($glucoseValue);
+        }
+
         return [
             [
                 'type_identifier' => HealthSyncType::BloodGlucose->value,
-                'value' => $this->glucoseValue ?? 0,
+                'value' => $glucoseValue,
                 'unit' => HealthSyncType::BloodGlucose->unit(),
                 'metadata' => array_filter([
                     'glucose_reading_type' => $this->glucoseReadingType?->value,
@@ -386,9 +395,15 @@ final class HealthLogData extends Data
         $samples = [];
 
         if ($this->weight !== null) {
+            $weightValue = $this->weight;
+
+            if ($this->weightUnit instanceof WeightUnit) {
+                $weightValue = $this->weightUnit->toKg($weightValue);
+            }
+
             $samples[] = [
                 'type_identifier' => HealthSyncType::Weight->value,
-                'value' => $this->weight,
+                'value' => round($weightValue, 4),
                 'unit' => HealthSyncType::Weight->unit(),
             ];
         }

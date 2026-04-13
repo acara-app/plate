@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\HealthEntry;
 
+use App\Actions\DispatchAggregateUserUtcDatesAction;
 use App\Actions\UpdateHealthSampleAction;
 use App\Data\HealthLogData;
 use App\Enums\GlucoseUnit;
@@ -18,12 +19,14 @@ final readonly class UpdateHealthEntryController
 {
     public function __construct(
         private UpdateHealthSampleAction $updateHealthSample,
+        private DispatchAggregateUserUtcDatesAction $dispatchAggregateUserUtcDates,
         #[CurrentUser()] private User $currentUser,
     ) {}
 
     public function __invoke(HealthEntryRequest $request, HealthSyncSample $healthSyncSample): RedirectResponse
     {
         Gate::authorize('update', $healthSyncSample);
+        $previousUtcDate = $healthSyncSample->measured_at->copy()->utc()->toDateString();
 
         $data = $request->validated();
 
@@ -39,7 +42,15 @@ final readonly class UpdateHealthEntryController
             ['is_health_data' => true],
         ));
 
-        $this->updateHealthSample->handle($healthSyncSample, $healthData);
+        $updatedSample = $this->updateHealthSample->handle($healthSyncSample, $healthData);
+
+        $this->dispatchAggregateUserUtcDates->handle(
+            $this->currentUser,
+            [
+                $previousUtcDate,
+                $updatedSample->measured_at->copy()->utc()->toDateString(),
+            ],
+        );
 
         return back()->with('success', 'Health entry updated successfully.');
     }

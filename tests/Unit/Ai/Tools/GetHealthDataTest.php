@@ -52,6 +52,9 @@ it('returns records for today by default', function (): void {
 
     expect($json)->toHaveKey('success', true)
         ->and($json['total'])->toBe(1)
+        ->and($json['returned_count'])->toBe(1)
+        ->and($json['limit'])->toBe(200)
+        ->and($json['truncated'])->toBeFalse()
         ->and($json['records'][0]['type'])->toBe('stepCount')
         ->and((float) $json['records'][0]['value'])->toBe(5000.0);
 });
@@ -298,5 +301,29 @@ it('does not include data_availability when entries are found', function (): voi
     $json = json_decode((string) $result, true);
 
     expect($json['total'])->toBe(1)
+        ->and($json['truncated'])->toBeFalse()
         ->and($json)->not->toHaveKey('data_availability');
+});
+
+it('reports truncation metadata when result set exceeds the limit', function (): void {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    foreach (range(1, 205) as $index) {
+        HealthSyncSample::factory()->stepCount()->create([
+            'user_id' => $user->id,
+            'value' => $index,
+            'measured_at' => now()->subSeconds($index),
+        ]);
+    }
+
+    $request = new Request(['type' => 'steps', 'days' => 1]);
+    $result = $this->tool->handle($request);
+    $json = json_decode((string) $result, true);
+
+    expect($json['limit'])->toBe(200)
+        ->and($json['returned_count'])->toBe(200)
+        ->and($json['total'])->toBe(200)
+        ->and($json['truncated'])->toBeTrue()
+        ->and($json['records'])->toHaveCount(200);
 });

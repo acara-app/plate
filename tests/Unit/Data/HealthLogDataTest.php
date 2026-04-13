@@ -7,6 +7,7 @@ use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
 use App\Enums\InsulinType;
+use App\Enums\WeightUnit;
 
 covers(HealthLogData::class);
 
@@ -514,4 +515,36 @@ test('fromParsedArray handles null string values', function (): void {
     expect($data)
         ->medicationName->toBeNull()
         ->medicationDosage->toBeNull();
+});
+
+test('toSampleArrays converts mmol/L glucose to mg/dL', function (): void {
+    $data = new HealthLogData(
+        isHealthData: true,
+        logType: HealthEntryType::Glucose,
+        glucoseValue: 6.7,
+        glucoseUnit: GlucoseUnit::MmolL,
+    );
+
+    $samples = $data->toSampleArrays();
+
+    expect($samples)->toHaveCount(1)
+        ->and($samples[0]['type_identifier'])->toBe('bloodGlucose')
+        ->and($samples[0]['unit'])->toBe('mg/dL')
+        ->and((float) $samples[0]['value'])->toBe(121.0);
+});
+
+test('toSampleArrays converts pounds to kilograms', function (): void {
+    $data = new HealthLogData(
+        isHealthData: true,
+        logType: HealthEntryType::Vitals,
+        weight: 176.37,
+        weightUnit: WeightUnit::Lb,
+    );
+
+    $samples = $data->toSampleArrays();
+
+    expect($samples)->toHaveCount(1)
+        ->and($samples[0]['type_identifier'])->toBe('weight')
+        ->and($samples[0]['unit'])->toBe('kg')
+        ->and(round((float) $samples[0]['value'], 1))->toBe(80.0);
 });

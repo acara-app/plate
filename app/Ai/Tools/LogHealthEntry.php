@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Actions\AggregateHealthDailySamplesAction;
 use App\Actions\RecordHealthSampleAction;
 use App\Data\HealthLogData;
 use App\Enums\GlucoseReadingType;
+use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntrySource;
 use App\Enums\HealthEntryType;
 use App\Enums\InsulinType;
+use App\Enums\WeightUnit;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
 use InvalidArgumentException;
@@ -19,6 +23,10 @@ use Laravel\Ai\Tools\Request;
 
 final readonly class LogHealthEntry implements Tool
 {
+    public function __construct(
+        private AggregateHealthDailySamplesAction $aggregateHealthDailySamplesAction,
+    ) {}
+
     public function name(): string
     {
         return 'log_health_entry';
@@ -46,6 +54,16 @@ final readonly class LogHealthEntry implements Tool
             ['is_health_data' => true],
         ));
 
+        if ($this->requiresGlucoseUnitClarification($healthData)) {
+            return (string) json_encode([
+                'error' => 'I need the glucose unit to log this accurately.',
+                'requires_clarification' => true,
+                'field' => 'glucose_unit',
+                'message' => 'Your glucose value looks like mmol/L. Please confirm whether it is mg/dL or mmol/L.',
+                'allowed_values' => ['mg/dL', 'mmol/L'],
+            ]);
+        }
+
         try {
             $action = resolve(RecordHealthSampleAction::class);
             $sample = $action->handle($healthData, $user, HealthEntrySource::Chat);
@@ -55,6 +73,10 @@ final readonly class LogHealthEntry implements Tool
                 'hint' => 'Ask the user for specific values (e.g. glucose reading, weight, blood pressure) before logging.',
             ]);
         }
+
+        $measuredAt = $healthData->measuredAt ?? CarbonImmutable::now('UTC');
+        $utcDate = $measuredAt->setTimezone('UTC')->startOfDay();
+        $this->aggregateHealthDailySamplesAction->handle($user, $utcDate);
 
         return (string) json_encode([
             'success' => true,
@@ -74,6 +96,9 @@ final readonly class LogHealthEntry implements Tool
                 ->description('Type of health entry to log.'),
             'glucose_value' => $schema->number()->required()->nullable()
                 ->description('Glucose reading value in mg/dL. Convert mmol/L to mg/dL (x 18.018).'),
+            'glucose_unit' => $schema->string()->required()->nullable()
+                ->enum(GlucoseUnit::class)
+                ->description('Unit for glucose_value. Required for mmol/L values to ensure accurate logging.'),
             'glucose_reading_type' => $schema->string()->required()->nullable()
                 ->enum(GlucoseReadingType::class)
                 ->description('When the glucose was measured.'),
@@ -98,6 +123,9 @@ final readonly class LogHealthEntry implements Tool
                 ->description('Dosage of the medication (e.g., "500mg").'),
             'weight' => $schema->number()->required()->nullable()
                 ->description('Body weight in kg. Convert lbs to kg (/ 2.205).'),
+            'weight_unit' => $schema->string()->required()->nullable()
+                ->enum(WeightUnit::class)
+                ->description('Unit for weight. Use "lb" for pounds or "kg" for kilograms.'),
             'bp_systolic' => $schema->integer()->required()->nullable()
                 ->description('Systolic blood pressure reading.'),
             'bp_diastolic' => $schema->integer()->required()->nullable()
@@ -109,5 +137,18 @@ final readonly class LogHealthEntry implements Tool
             'measured_at' => $schema->string()->required()->nullable()
                 ->description('When the measurement was taken in ISO 8601 format. Only set if the user specifies a time. Leave empty for current time.'),
         ];
+    }
+
+    private function requiresGlucoseUnitClarification(HealthLogData $healthData): bool
+    {
+        if ($healthData->logType !== HealthEntryType::Glucose) {
+            return false;
+        }
+
+        if ($healthData->glucoseValue === null || $healthData->glucoseUnit instanceof GlucoseUnit) {
+            return false;
+        }
+
+        return $healthData->glucoseValue > 0 && $healthData->glucoseValue < 20;
     }
 }

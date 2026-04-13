@@ -3,9 +3,27 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\HealthEntry\StoreHealthEntryController;
+use App\Jobs\AggregateUserDayJob;
 use App\Models\User;
+use Illuminate\Support\Facades\Queue;
 
 covers(StoreHealthEntryController::class);
+
+it('dispatches daily aggregate refresh after storing a health entry', function (): void {
+    Queue::fake();
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->post(route('health-entries.store'), [
+        'log_type' => 'glucose',
+        'glucose_value' => 6.7,
+        'glucose_reading_type' => 'fasting',
+        'measured_at' => now()->toDateTimeString(),
+    ]);
+
+    $response->assertRedirect();
+
+    Queue::assertPushed(AggregateUserDayJob::class, fn (AggregateUserDayJob $job): bool => str_contains($job->uniqueId(), $user->id.':'.now()->utc()->toDateString()));
+});
 
 it('can store a new diabetes log with glucose reading', function (): void {
     $user = User::factory()->create();

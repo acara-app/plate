@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\HealthEntry;
 
+use App\Actions\DispatchAggregateUserUtcDatesAction;
 use App\Actions\RecordHealthSampleAction;
 use App\Data\HealthLogData;
 use App\Enums\GlucoseUnit;
@@ -17,6 +18,7 @@ final readonly class StoreHealthEntryController
 {
     public function __construct(
         private RecordHealthSampleAction $recordHealthSample,
+        private DispatchAggregateUserUtcDatesAction $dispatchAggregateUserUtcDates,
         #[CurrentUser()] private User $currentUser,
     ) {}
 
@@ -36,7 +38,12 @@ final readonly class StoreHealthEntryController
             ['is_health_data' => true],
         ));
 
-        $this->recordHealthSample->handle($healthData, $this->currentUser, HealthEntrySource::Web);
+        $sample = $this->recordHealthSample->handle($healthData, $this->currentUser, HealthEntrySource::Web);
+
+        $this->dispatchAggregateUserUtcDates->handle(
+            $this->currentUser,
+            [$sample->measured_at->copy()->utc()->toDateString()],
+        );
 
         return back()->with('success', 'Health entry recorded successfully.');
     }

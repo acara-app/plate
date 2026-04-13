@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Enums\HealthAggregationFunction;
 use App\Enums\HealthSyncType;
+use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\DB;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
-use stdClass;
 
 final readonly class GetHealthSummary implements Tool
 {
@@ -45,47 +45,41 @@ final readonly class GetHealthSummary implements Tool
         /** @var string|null $date */
         $date = $request['date'] ?? null;
 
-        $endDate = $date ? Date::parse($date)->endOfDay() : Date::now()->endOfDay();
+        $endDate = ($date ? Date::parse($date) : Date::now())->endOfDay();
         $startDate = $endDate->copy()->subDays($days - 1)->startOfDay();
 
-        $typeFilter = HealthSyncSample::resolveTypeFilter($type, $user->id);
+        $typeFilter = $this->resolveTypeFilter($user, $type);
 
-        $query = $user->healthSyncSamples()
-            ->whereBetween('measured_at', [$startDate, $endDate])
+        $query = $user->healthDailyAggregates()
+            ->whereDate(HealthDailyAggregate::UTC_DAY_COLUMN, '>=', $startDate->toDateString())
+            ->whereDate(HealthDailyAggregate::UTC_DAY_COLUMN, '<=', $endDate->toDateString())
             ->whereNotIn('type_identifier', HealthSyncType::userCharacteristicValues())
-            ->select([
-                DB::raw('DATE(measured_at) as date'),
-                'type_identifier',
-                'unit',
-                DB::raw('SUM(value) as total'),
-                DB::raw('AVG(value) as avg'),
-                DB::raw('MIN(value) as min'),
-                DB::raw('MAX(value) as max'),
-                DB::raw('COUNT(*) as count'),
-            ])
-            ->groupBy('date', 'type_identifier', 'unit')
-            ->orderByDesc('date');
+            ->latest(HealthDailyAggregate::UTC_DAY_COLUMN);
 
         if ($typeFilter !== null) {
             $query->whereIn('type_identifier', $typeFilter);
         }
 
-        $summaries = $query->toBase()->get()->map(function (stdClass $row): array {
-            $total = is_numeric($row->total) ? (float) $row->total : 0.0;
-            $avg = is_numeric($row->avg) ? (float) $row->avg : 0.0;
-            $min = is_numeric($row->min) ? (float) $row->min : 0.0;
-            $max = is_numeric($row->max) ? (float) $row->max : 0.0;
-            $count = is_numeric($row->count) ? (int) $row->count : 0;
+        $summaries = $query->get()->map(function (HealthDailyAggregate $aggregate): array {
+            $total = (float) ($aggregate->value_sum ?? 0.0);
+            $avg = (float) ($aggregate->value_avg ?? 0.0);
+            $min = (float) ($aggregate->value_min ?? 0.0);
+            $max = (float) ($aggregate->value_max ?? 0.0);
+            $count = (int) $aggregate->value_count;
 
             return [
-                'date' => $row->date,
-                'type' => $row->type_identifier,
-                'unit' => $row->unit,
+                'date' => $aggregate->local_date?->toDateString() ?? $aggregate->date->toDateString(),
+                'type' => $aggregate->type_identifier,
+                'unit' => $aggregate->unit,
                 'total' => round($total, 1),
                 'avg' => round($avg, 1),
                 'min' => round($min, 1),
                 'max' => round($max, 1),
                 'count' => $count,
+                'aggregation_function' => $aggregate->aggregation_function,
+                'primary_value' => $this->primaryValue($aggregate),
+                'canonical_unit' => $aggregate->canonical_unit,
+                'source_primary' => $aggregate->source_primary,
             ];
         })->values()->all();
 
@@ -112,5 +106,49 @@ final readonly class GetHealthSummary implements Tool
             'date' => $schema->string()->required()->nullable()
                 ->description('The end date in ISO format (e.g., "2026-04-05"). Defaults to today.'),
         ];
+    }
+
+    /**
+     * @return array<int, string>|null
+     */
+    private function resolveTypeFilter(User $user, string $type): ?array
+    {
+        if ($type === 'all') {
+            return null;
+        }
+
+        $matched = $user->healthDailyAggregates()
+            ->select('type_identifier')
+            ->distinct()
+            ->get()
+            ->map(fn (HealthDailyAggregate $aggregate): string => $aggregate->type_identifier)
+            ->filter(fn (string $typeIdentifier): bool => $typeIdentifier === $type || HealthSyncSample::categoryFor($typeIdentifier) === $type)
+            ->values()
+            ->all();
+
+        return $matched !== [] ? $matched : [$type];
+    }
+
+    private function primaryValue(HealthDailyAggregate $aggregate): ?float
+    {
+        $aggregationFunction = $aggregate->aggregation_function !== null
+            ? HealthAggregationFunction::tryFrom($aggregate->aggregation_function)
+            : null;
+
+        $value = match ($aggregationFunction) {
+            HealthAggregationFunction::Sum => $aggregate->value_sum,
+            HealthAggregationFunction::Avg, HealthAggregationFunction::WeightedAvg => $aggregate->value_avg,
+            HealthAggregationFunction::Min => $aggregate->value_min,
+            HealthAggregationFunction::Max => $aggregate->value_max,
+            HealthAggregationFunction::Last => $aggregate->value_last,
+            HealthAggregationFunction::Count => (float) $aggregate->value_count,
+            HealthAggregationFunction::None, null => $aggregate->primaryValue(),
+        };
+
+        if ($value === null) {
+            return null;
+        }
+
+        return round((float) $value, 1);
     }
 }

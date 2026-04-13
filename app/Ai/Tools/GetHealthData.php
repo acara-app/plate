@@ -48,6 +48,7 @@ final readonly class GetHealthData implements Tool
         $startDate = $endDate->copy()->subDays($days - 1)->startOfDay();
 
         $typeFilter = HealthSyncSample::resolveTypeFilter($type, $user->id);
+        $limit = 200;
 
         $query = $user->healthSyncSamples()
             ->whereBetween('measured_at', [$startDate, $endDate])
@@ -58,7 +59,8 @@ final readonly class GetHealthData implements Tool
             $query->whereIn('type_identifier', $typeFilter);
         }
 
-        $samples = $query->limit(200)->get();
+        $totalMatching = (clone $query)->count();
+        $samples = $query->limit($limit)->get();
 
         $records = $samples->map(fn (HealthSyncSample $sample): array => [
             'type' => $sample->type_identifier,
@@ -69,13 +71,17 @@ final readonly class GetHealthData implements Tool
             'metadata' => $sample->metadata,
         ])->all();
 
+        $returnedCount = count($records);
         $response = [
             'success' => true,
             'date_range' => [
                 'from' => $startDate->toDateString(),
                 'to' => $endDate->toDateString(),
             ],
-            'total' => count($records),
+            'total' => $returnedCount,
+            'limit' => $limit,
+            'returned_count' => $returnedCount,
+            'truncated' => $totalMatching > $limit,
             'records' => array_values($records),
         ];
 

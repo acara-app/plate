@@ -49,6 +49,7 @@ final readonly class SleepSessionAggregator
             if ($sessionEnd->lte($dayStart)) {
                 continue;
             }
+
             if ($sessionStart->gte($dayEnd)) {
                 continue;
             }
