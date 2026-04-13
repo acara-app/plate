@@ -11,7 +11,6 @@ use App\Models\User;
 use App\Services\HealthMetricRegistry;
 use App\ValueObjects\HealthMetricDescriptorData;
 use Carbon\CarbonImmutable;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -23,12 +22,12 @@ final readonly class AggregateHealthDailySamplesAction
         private HealthMetricRegistry $registry,
     ) {}
 
-    public function handle(User $user, CarbonImmutable $localDate): int
+    public function handle(User $user, CarbonImmutable $utcDate): int
     {
-        $fallbackTz = $user->resolveTimezone();
-        $localDateString = $localDate->toDateString();
+        $utcDate = $utcDate->copy()->utc()->startOfDay();
+        $utcDateString = $utcDate->toDateString();
 
-        $samples = $this->loadSamplesForLocalDay($user, $localDate, $fallbackTz);
+        $samples = $this->loadSamplesForUtcDay($user, $utcDate);
 
         if ($samples->isEmpty()) {
             return 0;
@@ -36,7 +35,7 @@ final readonly class AggregateHealthDailySamplesAction
 
         $upserted = 0;
 
-        DB::transaction(function () use ($samples, $user, $localDateString, $fallbackTz, &$upserted): void {
+        DB::transaction(function () use ($samples, $user, $utcDateString, &$upserted): void {
             $rows = [];
 
             foreach ($samples->groupBy('type_identifier') as $typeIdentifier => $typeSamples) {
@@ -46,8 +45,7 @@ final readonly class AggregateHealthDailySamplesAction
                     descriptor: $descriptor,
                     samples: $typeSamples,
                     user: $user,
-                    localDateString: $localDateString,
-                    fallbackTz: $fallbackTz,
+                    utcDateString: $utcDateString,
                 );
 
                 if ($row !== null) {
@@ -63,7 +61,7 @@ final readonly class AggregateHealthDailySamplesAction
 
             HealthDailyAggregate::query()->upsert(
                 $rows,
-                ['user_id', 'local_date', 'type_identifier'],
+                ['user_id', HealthDailyAggregate::UTC_DAY_COLUMN, 'type_identifier'],
                 [
                     'date',
                     'timezone',
@@ -93,7 +91,8 @@ final readonly class AggregateHealthDailySamplesAction
     public function handleDateRange(User $user, CarbonImmutable $from, CarbonImmutable $to): int
     {
         $total = 0;
-        $current = $from;
+        $current = $from->copy()->utc()->startOfDay();
+        $to = $to->copy()->utc()->startOfDay();
 
         while ($current->lte($to)) {
             $total += $this->handle($user, $current);
@@ -104,12 +103,12 @@ final readonly class AggregateHealthDailySamplesAction
     }
 
     // @codeCoverageIgnoreStart
-    public function handleAllUsers(CarbonImmutable $localDate): int
+    public function handleAllUsers(CarbonImmutable $utcDate): int
     {
         $total = 0;
 
-        $rangeStart = $localDate->copy()->subDay()->startOfDay();
-        $rangeEnd = $localDate->copy()->addDays(2)->startOfDay();
+        $rangeStart = $utcDate->copy()->utc()->startOfDay();
+        $rangeEnd = $rangeStart->copy()->addDay();
 
         $userIds = DB::table('health_sync_samples')
             ->select('user_id')
@@ -126,7 +125,7 @@ final readonly class AggregateHealthDailySamplesAction
                 continue;
             }
 
-            $total += $this->handle($user, $localDate);
+            $total += $this->handle($user, $rangeStart);
         }
 
         return $total;
@@ -137,25 +136,15 @@ final readonly class AggregateHealthDailySamplesAction
     /**
      * @return Collection<int, HealthSyncSample>
      */
-    private function loadSamplesForLocalDay(User $user, CarbonImmutable $localDate, string $fallbackTz): Collection
+    private function loadSamplesForUtcDay(User $user, CarbonImmutable $utcDate): Collection
     {
-        $rangeStart = $localDate->copy()->subDay()->startOfDay();
-        $rangeEnd = $localDate->copy()->addDays(2)->startOfDay();
+        $rangeStart = $utcDate->copy()->utc()->startOfDay();
+        $rangeEnd = $rangeStart->copy()->addDay();
 
-        /** @var EloquentCollection<int, HealthSyncSample> $raw */
-        $raw = $user->healthSyncSamples()
+        return $user->healthSyncSamples()
             ->where('measured_at', '>=', $rangeStart)
             ->where('measured_at', '<', $rangeEnd)
             ->get();
-
-        $expectedLocalDate = $localDate->toDateString();
-
-        return $raw->filter(function (HealthSyncSample $sample) use ($expectedLocalDate, $fallbackTz): bool {
-            $tz = $sample->timezone !== null && $sample->timezone !== '' ? $sample->timezone : $fallbackTz;
-            $local = $sample->measured_at->copy()->setTimezone($tz);
-
-            return $local->toDateString() === $expectedLocalDate;
-        })->values();
     }
 
     /**
@@ -166,8 +155,7 @@ final readonly class AggregateHealthDailySamplesAction
         HealthMetricDescriptorData $descriptor,
         Collection $samples,
         User $user,
-        string $localDateString,
-        string $fallbackTz,
+        string $utcDateString,
     ): ?array {
         if ($descriptor->function === HealthAggregationFunction::None) {
             $lastSample = $samples->sortByDesc(
@@ -177,8 +165,7 @@ final readonly class AggregateHealthDailySamplesAction
             return $this->buildRow(
                 descriptor: $descriptor,
                 user: $user,
-                localDateString: $localDateString,
-                fallbackTz: $fallbackTz,
+                utcDateString: $utcDateString,
                 scalars: [
                     'value_sum' => null,
                     'value_sum_canonical' => null,
@@ -239,8 +226,7 @@ final readonly class AggregateHealthDailySamplesAction
         return $this->buildRow(
             descriptor: $descriptor,
             user: $user,
-            localDateString: $localDateString,
-            fallbackTz: $fallbackTz,
+            utcDateString: $utcDateString,
             scalars: $scalars,
             metadata: $metadata,
             aggregationFunction: $descriptor->function,
@@ -355,8 +341,7 @@ final readonly class AggregateHealthDailySamplesAction
     private function buildRow(
         HealthMetricDescriptorData $descriptor,
         User $user,
-        string $localDateString,
-        string $fallbackTz,
+        string $utcDateString,
         array $scalars,
         ?array $metadata,
         HealthAggregationFunction $aggregationFunction,
@@ -365,9 +350,9 @@ final readonly class AggregateHealthDailySamplesAction
 
         return [
             'user_id' => $user->id,
-            'date' => $localDateString,
-            'local_date' => $localDateString,
-            'timezone' => $fallbackTz,
+            'date' => $utcDateString,
+            HealthDailyAggregate::UTC_DAY_COLUMN => $utcDateString,
+            'timezone' => 'UTC',
             'type_identifier' => $descriptor->identifier,
             'value_sum' => $scalars['value_sum'],
             'value_sum_canonical' => $scalars['value_sum_canonical'],

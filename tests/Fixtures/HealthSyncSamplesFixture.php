@@ -103,7 +103,7 @@ final class HealthSyncSamplesFixture
         }
     }
 
-    public static function cumulativeGroundTruth(string $typeIdentifier, string $localDate, string $timezone = 'America/Regina'): float
+    public static function cumulativeGroundTruth(string $typeIdentifier, string $utcDate): float
     {
         $handle = fopen(self::CSV_PATH, 'rb');
 
@@ -128,12 +128,9 @@ final class HealthSyncSamplesFixture
                 }
 
                 $measuredAt = $row[$idx['measured_at']];
-                $tz = self::nullable($row[$idx['timezone']]) ?? $timezone;
-
                 $dt = new DateTimeImmutable($measuredAt, new DateTimeZone('UTC'));
-                $local = $dt->setTimezone(new DateTimeZone($tz));
 
-                if ($local->format('Y-m-d') !== $localDate) {
+                if ($dt->format('Y-m-d') !== $utcDate) {
                     continue;
                 }
 

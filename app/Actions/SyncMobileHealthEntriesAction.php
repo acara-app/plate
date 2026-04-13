@@ -13,6 +13,7 @@ use App\Models\MobileSyncDevice;
 use App\Models\User;
 use App\Services\HealthKitCharacteristicMapper;
 use App\Services\HealthMetricUnitConverter;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -23,11 +24,12 @@ final readonly class SyncMobileHealthEntriesAction
     public function __construct(
         private HealthKitCharacteristicMapper $characteristicMapper,
         private HealthMetricUnitConverter $unitConverter,
+        private CollectAffectedUtcDatesAction $collectAffectedUtcDates,
     ) {}
 
     /**
      * @param  list<HealthEntryData>  $entries
-     * @return array{samples_created: int, samples_updated: int, samples_dropped: int, profile_updated: bool}
+     * @return array{samples_created: int, samples_updated: int, samples_dropped: int, profile_updated: bool, affected_utc_dates: list<string>}
      */
     public function handle(User $user, MobileSyncDevice $device, array $entries, ?string $timezone = null): array
     {
@@ -42,13 +44,14 @@ final readonly class SyncMobileHealthEntriesAction
                 'samples_updated' => $sampleCounts['updated'],
                 'samples_dropped' => $sampleCounts['dropped'],
                 'profile_updated' => $profileUpdated,
+                'affected_utc_dates' => $sampleCounts['affected_utc_dates'],
             ];
         });
     }
 
     /**
      * @param  list<HealthEntryData>  $entries
-     * @return array{created: int, updated: int, dropped: int}
+     * @return array{created: int, updated: int, dropped: int, affected_utc_dates: list<string>}
      */
     private function syncSamples(User $user, MobileSyncDevice $device, array $entries, ?string $timezone): array
     {
@@ -63,7 +66,7 @@ final readonly class SyncMobileHealthEntriesAction
             }
 
             if ($syncType === HealthSyncType::BloodPressureSystolic || $syncType === HealthSyncType::BloodPressureDiastolic) {
-                $dateKey = Date::parse($entry->date)->toDateTimeString();
+                $dateKey = Date::parse($entry->date)->utc()->toDateTimeString();
                 $bpGroupIds[$dateKey] ??= (string) Str::uuid();
             }
 
@@ -71,7 +74,7 @@ final readonly class SyncMobileHealthEntriesAction
         }
 
         if ($syncableEntries === []) {
-            return ['created' => 0, 'updated' => 0, 'dropped' => 0];
+            return ['created' => 0, 'updated' => 0, 'dropped' => 0, 'affected_utc_dates' => []];
         }
 
         $cache = $this->preloadSamples($user, $syncableEntries);
@@ -80,10 +83,13 @@ final readonly class SyncMobileHealthEntriesAction
         $created = 0;
         $updated = 0;
         $dropped = 0;
+        $affectedUtcDates = [];
 
         foreach ($syncableEntries as $entry) {
-            $measuredAt = Date::parse($entry->date);
-            $endedAt = $entry->ended_at !== null ? Date::parse($entry->ended_at) : null;
+            $measuredAt = CarbonImmutable::instance(Date::parse($entry->date)->utc());
+            $endedAt = $entry->ended_at !== null
+                ? CarbonImmutable::instance(Date::parse($entry->ended_at)->utc())
+                : null;
             $key = $entry->type.'|'.$measuredAt->toDateTimeString();
 
             $syncType = HealthSyncType::tryFrom($entry->type);
@@ -126,6 +132,7 @@ final readonly class SyncMobileHealthEntriesAction
                     'type_identifier' => HealthSyncType::Medication->value,
                 ]);
                 $created++;
+                $this->collectAffectedUtcDates->handle($measuredAt, $endedAt, $affectedUtcDates);
 
                 continue;
             }
@@ -135,6 +142,7 @@ final readonly class SyncMobileHealthEntriesAction
             if ($existing instanceof HealthSyncSample) {
                 $existing->update($baseAttrs);
                 $updated++;
+                $this->collectAffectedUtcDates->handle($measuredAt, $endedAt, $affectedUtcDates);
 
                 continue;
             }
@@ -155,9 +163,15 @@ final readonly class SyncMobileHealthEntriesAction
             }
 
             $created++;
+            $this->collectAffectedUtcDates->handle($measuredAt, $endedAt, $affectedUtcDates);
         }
 
-        return ['created' => $created, 'updated' => $updated, 'dropped' => $dropped];
+        return [
+            'created' => $created,
+            'updated' => $updated,
+            'dropped' => $dropped,
+            'affected_utc_dates' => array_keys($affectedUtcDates),
+        ];
     }
 
     /**
@@ -215,7 +229,11 @@ final readonly class SyncMobileHealthEntriesAction
     private function preloadSamples(User $user, array $entries): array
     {
         $types = collect($entries)->pluck('type')->unique()->values()->all();
-        $dates = collect($entries)->map(fn (HealthEntryData $e): string => Date::parse($e->date)->toDateTimeString())->unique()->values()->all();
+        $dates = collect($entries)
+            ->map(fn (HealthEntryData $e): string => Date::parse($e->date)->utc()->toDateTimeString())
+            ->unique()
+            ->values()
+            ->all();
 
         $keyed = [];
 

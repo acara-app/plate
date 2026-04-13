@@ -7,22 +7,28 @@ namespace App\Actions;
 use App\Data\MobileSync\SleepEventData;
 use App\Models\SleepSession;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 
 /** @codeCoverageIgnore */
 final readonly class SyncSleepEventsAction
 {
+    public function __construct(
+        private CollectAffectedUtcDatesAction $collectAffectedUtcDates,
+    ) {}
+
     /**
      * @param  list<SleepEventData>  $events
-     * @return array{created: int, updated: int}
+     * @return array{created: int, updated: int, affected_utc_dates: list<string>}
      */
     public function handle(User $user, array $events, ?string $timezone = null): array
     {
         $created = 0;
         $updated = 0;
+        $affectedUtcDates = [];
 
-        DB::transaction(function () use ($user, $events, $timezone, &$created, &$updated): void {
+        DB::transaction(function () use ($user, $events, $timezone, &$created, &$updated, &$affectedUtcDates): void {
             $uuidCache = $this->preloadByUuid($user, $events);
 
             foreach ($events as $event) {
@@ -30,8 +36,8 @@ final readonly class SyncSleepEventsAction
                     continue;
                 }
 
-                $startedAt = Date::parse($event->started_at);
-                $endedAt = Date::parse($event->ended_at);
+                $startedAt = CarbonImmutable::instance(Date::parse($event->started_at)->utc());
+                $endedAt = CarbonImmutable::instance(Date::parse($event->ended_at)->utc());
 
                 $attrs = [
                     'started_at' => $startedAt,
@@ -45,6 +51,7 @@ final readonly class SyncSleepEventsAction
                 if ($event->sample_uuid !== null && isset($uuidCache[$event->sample_uuid])) {
                     $uuidCache[$event->sample_uuid]->update($attrs);
                     $updated++;
+                    $this->collectAffectedUtcDates->handle($startedAt, $endedAt, $affectedUtcDates);
 
                     continue;
                 }
@@ -57,6 +64,7 @@ final readonly class SyncSleepEventsAction
                 if ($existing !== null) {
                     $existing->update($attrs);
                     $updated++;
+                    $this->collectAffectedUtcDates->handle($startedAt, $endedAt, $affectedUtcDates);
 
                     continue;
                 }
@@ -71,10 +79,15 @@ final readonly class SyncSleepEventsAction
                 }
 
                 $created++;
+                $this->collectAffectedUtcDates->handle($startedAt, $endedAt, $affectedUtcDates);
             }
         });
 
-        return ['created' => $created, 'updated' => $updated];
+        return [
+            'created' => $created,
+            'updated' => $updated,
+            'affected_utc_dates' => array_keys($affectedUtcDates),
+        ];
     }
 
     /**

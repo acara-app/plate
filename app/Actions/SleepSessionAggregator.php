@@ -22,18 +22,18 @@ final readonly class SleepSessionAggregator
         SleepSession::STAGE_IN_BED => 'timeInBed',
     ];
 
-    public function handle(User $user, CarbonImmutable $nightDate): int
+    public function handle(User $user, CarbonImmutable $utcDate): int
     {
-        $fallbackTz = $user->resolveTimezone();
-        $localDateString = $nightDate->toDateString();
+        $utcDate = $utcDate->copy()->utc()->startOfDay();
+        $utcDateString = $utcDate->toDateString();
 
-        $nightStart = $nightDate->copy()->setTimezone($fallbackTz)->setTime(12, 0)->utc();
-        $nightEnd = $nightDate->copy()->setTimezone($fallbackTz)->addDay()->setTime(12, 0)->utc();
+        $dayStart = $utcDate;
+        $dayEnd = $dayStart->copy()->addDay();
 
         /** @var Collection<int, SleepSession> $sessions */
         $sessions = $user->sleepSessions()
-            ->where('started_at', '>=', $nightStart)
-            ->where('started_at', '<', $nightEnd)
+            ->where('started_at', '<', $dayEnd)
+            ->where('ended_at', '>', $dayStart)
             ->get();
 
         if ($sessions->isEmpty()) {
@@ -41,12 +41,35 @@ final readonly class SleepSessionAggregator
         }
 
         $durationsByStage = [];
+        $sessionsContributing = 0;
 
         foreach ($sessions as $session) {
+            $sessionStart = $session->started_at->copy()->utc();
+            $sessionEnd = $session->ended_at->copy()->utc();
+            if ($sessionEnd->lte($dayStart)) {
+                continue;
+            }
+            if ($sessionStart->gte($dayEnd)) {
+                continue;
+            }
+
+            $overlapStart = $sessionStart->gt($dayStart) ? $sessionStart : $dayStart;
+            $overlapEnd = $sessionEnd->lt($dayEnd) ? $sessionEnd : $dayEnd;
+            $overlapSeconds = $overlapStart->diffInSeconds($overlapEnd, false);
+
+            if ($overlapSeconds <= 0) {
+                continue;
+            }
+
+            $sessionsContributing++;
+            $hours = $overlapSeconds / 3600;
             $stage = $session->stage;
-            $hours = $session->durationHours();
 
             $durationsByStage[$stage] = ($durationsByStage[$stage] ?? 0.0) + $hours;
+        }
+
+        if ($durationsByStage === []) {
+            return 0;
         }
 
         $totalAsleep = 0.0;
@@ -71,11 +94,11 @@ final readonly class SleepSessionAggregator
                 continue;
             }
 
-            $rows[] = $this->buildRow($user, $localDateString, $fallbackTz, $typeIdentifier, $hours, $sessions->count());
+            $rows[] = $this->buildRow($user, $utcDateString, $typeIdentifier, $hours, $sessionsContributing);
         }
 
         if ($totalAsleep > 0.0) {
-            $rows[] = $this->buildRow($user, $localDateString, $fallbackTz, 'timeAsleep', $totalAsleep, $sessions->count());
+            $rows[] = $this->buildRow($user, $utcDateString, 'timeAsleep', $totalAsleep, $sessionsContributing);
         }
 
         if ($rows === []) {
@@ -86,7 +109,7 @@ final readonly class SleepSessionAggregator
 
         HealthDailyAggregate::query()->upsert(
             $rows,
-            ['user_id', 'local_date', 'type_identifier'],
+            ['user_id', HealthDailyAggregate::UTC_DAY_COLUMN, 'type_identifier'],
             [
                 'date',
                 'timezone',
@@ -114,8 +137,7 @@ final readonly class SleepSessionAggregator
      */
     private function buildRow(
         User $user,
-        string $localDateString,
-        string $fallbackTz,
+        string $utcDateString,
         string $typeIdentifier,
         float $hours,
         int $sessionCount,
@@ -125,9 +147,9 @@ final readonly class SleepSessionAggregator
 
         return [
             'user_id' => $user->id,
-            'date' => $localDateString,
-            'local_date' => $localDateString,
-            'timezone' => $fallbackTz,
+            'date' => $utcDateString,
+            HealthDailyAggregate::UTC_DAY_COLUMN => $utcDateString,
+            'timezone' => 'UTC',
             'type_identifier' => $typeIdentifier,
             'value_sum' => $rounded,
             'value_sum_canonical' => $rounded,
