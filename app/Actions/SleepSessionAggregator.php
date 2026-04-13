@@ -46,8 +46,10 @@ final readonly class SleepSessionAggregator
         foreach ($sessions as $session) {
             $sessionStart = $session->started_at->copy()->utc();
             $sessionEnd = $session->ended_at->copy()->utc();
-
-            if ($sessionEnd->lte($dayStart) || $sessionStart->gte($dayEnd)) {
+            if ($sessionEnd->lte($dayStart)) {
+                continue;
+            }
+            if ($sessionStart->gte($dayEnd)) {
                 continue;
             }
 
