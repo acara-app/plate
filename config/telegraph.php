@@ -87,7 +87,7 @@ return [
          * If enabled, Telegraph dumps received
          * webhook messages to logs
          */
-        'debug' => env('TELEGRAPH_WEBHOOK_DEBUG', true),
+        'debug' => env('TELEGRAPH_WEBHOOK_DEBUG', false),
     ],
 
     /*
