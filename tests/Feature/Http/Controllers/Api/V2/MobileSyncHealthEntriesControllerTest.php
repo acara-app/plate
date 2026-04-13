@@ -6,10 +6,12 @@ use App\Enums\BloodType;
 use App\Enums\HealthSyncType;
 use App\Enums\Sex;
 use App\Http\Controllers\Api\V2\MobileSyncHealthEntriesController;
+use App\Jobs\AggregateUserDayJob;
 use App\Models\HealthSyncSample;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Queue;
 
 covers(MobileSyncHealthEntriesController::class);
 
@@ -1008,6 +1010,48 @@ it('syncs without timezone for backward compatibility', function (): void {
     $sample = HealthSyncSample::query()->where('user_id', $user->id)->first();
 
     expect($sample->timezone)->toBeNull();
+});
+
+it('normalizes incoming timestamps to UTC and dispatches aggregate jobs for affected UTC days', function (): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+    $device = MobileSyncDevice::factory()->for($user)->paired()->create([
+        'device_identifier' => 'test-uuid',
+    ]);
+    $token = $user->createToken('test', ['sync:push'])->plainTextToken;
+
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
+    $this->withHeader('Authorization', 'Bearer '.$token)
+        ->postJson(route('api.v2.sync.health-entries'), [
+            'device_identifier' => 'test-uuid',
+            'timezone' => 'America/New_York',
+            'encrypted_payload' => encryptSyncPayload([
+                [
+                    'type' => 'heartRate',
+                    'value' => 72,
+                    'unit' => 'bpm',
+                    'date' => '2026-03-25T23:30:00-05:00',
+                ],
+            ], $encryptionKey),
+        ])
+        ->assertOk()
+        ->assertJson([
+            'samples_created' => 1,
+            'aggregate_jobs_dispatched' => 1,
+        ]);
+
+    $sample = HealthSyncSample::query()->where('user_id', $user->id)->first();
+
+    expect($sample)->not->toBeNull()
+        ->and($sample->measured_at->toDateTimeString())->toBe('2026-03-26 04:30:00')
+        ->and($sample->timezone)->toBe('America/New_York');
+
+    Queue::assertPushed(AggregateUserDayJob::class, function (AggregateUserDayJob $job) use ($user): bool {
+        return $job->uniqueId() === $user->id.':2026-03-26';
+    });
 });
 
 it('syncs medication dose event with camelCase metadata mapped to snake_case', function (): void {

@@ -10,93 +10,80 @@ use Carbon\CarbonImmutable;
 
 covers(SleepSessionAggregator::class);
 
-it('computes per-stage durations from raw sleep events for a single night', function (): void {
-    $user = User::factory()->create(['timezone' => 'UTC']);
+it('splits cross-midnight sleep durations by UTC day', function (): void {
+    $user = User::factory()->create(['timezone' => 'America/Regina']);
     $aggregator = resolve(SleepSessionAggregator::class);
 
     SleepSession::query()->create([
         'user_id' => $user->id,
         'started_at' => '2026-04-05 22:00:00',
-        'ended_at' => '2026-04-05 23:30:00',
+        'ended_at' => '2026-04-06 01:00:00',
         'stage' => SleepSession::STAGE_ASLEEP_CORE,
         'source' => 'Apple Watch',
     ]);
 
     SleepSession::query()->create([
         'user_id' => $user->id,
-        'started_at' => '2026-04-05 23:30:00',
-        'ended_at' => '2026-04-06 01:00:00',
+        'started_at' => '2026-04-06 01:00:00',
+        'ended_at' => '2026-04-06 03:00:00',
         'stage' => SleepSession::STAGE_ASLEEP_DEEP,
         'source' => 'Apple Watch',
     ]);
 
-    SleepSession::query()->create([
-        'user_id' => $user->id,
-        'started_at' => '2026-04-06 01:00:00',
-        'ended_at' => '2026-04-06 02:00:00',
-        'stage' => SleepSession::STAGE_ASLEEP_REM,
-        'source' => 'Apple Watch',
-    ]);
+    $upsertedDayFive = $aggregator->handle($user, CarbonImmutable::parse('2026-04-05', 'UTC'));
+    $upsertedDaySix = $aggregator->handle($user, CarbonImmutable::parse('2026-04-06', 'UTC'));
 
-    SleepSession::query()->create([
-        'user_id' => $user->id,
-        'started_at' => '2026-04-06 02:00:00',
-        'ended_at' => '2026-04-06 02:15:00',
-        'stage' => SleepSession::STAGE_AWAKE,
-        'source' => 'Apple Watch',
-    ]);
+    expect($upsertedDayFive)->toBeGreaterThan(0)
+        ->and($upsertedDaySix)->toBeGreaterThan(0);
 
-    $upserted = $aggregator->handle($user, CarbonImmutable::parse('2026-04-05'));
-
-    expect($upserted)->toBeGreaterThan(0);
-
-    $core = HealthDailyAggregate::query()
+    $dayFiveCore = HealthDailyAggregate::query()
         ->where('user_id', $user->id)
         ->where('type_identifier', 'coreSleep')
         ->where('local_date', '2026-04-05')
         ->first();
 
-    $deep = HealthDailyAggregate::query()
-        ->where('user_id', $user->id)
-        ->where('type_identifier', 'deepSleep')
-        ->where('local_date', '2026-04-05')
-        ->first();
-
-    $rem = HealthDailyAggregate::query()
-        ->where('user_id', $user->id)
-        ->where('type_identifier', 'remSleep')
-        ->where('local_date', '2026-04-05')
-        ->first();
-
-    $awake = HealthDailyAggregate::query()
-        ->where('user_id', $user->id)
-        ->where('type_identifier', 'awakeTime')
-        ->where('local_date', '2026-04-05')
-        ->first();
-
-    $totalAsleep = HealthDailyAggregate::query()
+    $dayFiveAsleep = HealthDailyAggregate::query()
         ->where('user_id', $user->id)
         ->where('type_identifier', 'timeAsleep')
         ->where('local_date', '2026-04-05')
         ->first();
 
-    expect($core)->not->toBeNull()
-        ->and((float) $core->value_last)->toBe(1.5)
-        ->and($deep)->not->toBeNull()
-        ->and((float) $deep->value_last)->toBe(1.5)
-        ->and($rem)->not->toBeNull()
-        ->and((float) $rem->value_last)->toBe(1.0)
-        ->and($awake)->not->toBeNull()
-        ->and((float) $awake->value_last)->toBe(0.25)
-        ->and($totalAsleep)->not->toBeNull()
-        ->and((float) $totalAsleep->value_last)->toBe(4.0);
+    $daySixCore = HealthDailyAggregate::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', 'coreSleep')
+        ->where('local_date', '2026-04-06')
+        ->first();
+
+    $daySixDeep = HealthDailyAggregate::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', 'deepSleep')
+        ->where('local_date', '2026-04-06')
+        ->first();
+
+    $daySixAsleep = HealthDailyAggregate::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', 'timeAsleep')
+        ->where('local_date', '2026-04-06')
+        ->first();
+
+    expect($dayFiveCore)->not->toBeNull()
+        ->and((float) $dayFiveCore->value_last)->toBe(2.0)
+        ->and($dayFiveCore->timezone)->toBe('UTC')
+        ->and($dayFiveAsleep)->not->toBeNull()
+        ->and((float) $dayFiveAsleep->value_last)->toBe(2.0)
+        ->and($daySixCore)->not->toBeNull()
+        ->and((float) $daySixCore->value_last)->toBe(1.0)
+        ->and($daySixDeep)->not->toBeNull()
+        ->and((float) $daySixDeep->value_last)->toBe(2.0)
+        ->and($daySixAsleep)->not->toBeNull()
+        ->and((float) $daySixAsleep->value_last)->toBe(3.0);
 });
 
-it('returns zero when no sleep events exist for the night', function (): void {
+it('returns zero when no sleep events exist for the UTC day', function (): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
     $aggregator = resolve(SleepSessionAggregator::class);
 
-    $upserted = $aggregator->handle($user, CarbonImmutable::parse('2026-04-05'));
+    $upserted = $aggregator->handle($user, CarbonImmutable::parse('2026-04-05', 'UTC'));
 
     expect($upserted)->toBe(0);
 });

@@ -47,6 +47,8 @@ final class HealthDailyAggregate extends Model
     /** @use HasFactory<HealthDailyAggregateFactory> */
     use HasFactory;
 
+    public const string UTC_DAY_COLUMN = 'local_date';
+
     protected $guarded = [];
 
     /**
@@ -111,14 +113,14 @@ final class HealthDailyAggregate extends Model
     #[Scope]
     protected function forDate(Builder $query, CarbonInterface $date): void
     {
-        $query->where('local_date', $date->toDateString());
+        $query->where(self::UTC_DAY_COLUMN, $date->toDateString());
     }
 
     /** @param  Builder<self>  $query */
     #[Scope]
     protected function forDateRange(Builder $query, CarbonInterface $from, CarbonInterface $to): void
     {
-        $query->whereBetween('local_date', [$from->toDateString(), $to->toDateString()]);
+        $query->whereBetween(self::UTC_DAY_COLUMN, [$from->toDateString(), $to->toDateString()]);
     }
 
     /** @param  Builder<self>  $query */

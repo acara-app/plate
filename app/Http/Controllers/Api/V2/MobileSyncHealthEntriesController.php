@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V2;
 
 use App\Actions\DecryptSyncPayloadAction;
+use App\Actions\DispatchAggregateUserUtcDatesAction;
 use App\Actions\SyncMobileHealthEntriesAction;
 use App\Actions\SyncSleepEventsAction;
 use App\Actions\UpdateUserTimezoneAction;
@@ -22,6 +23,7 @@ final readonly class MobileSyncHealthEntriesController
         private SyncMobileHealthEntriesAction $syncHealthEntriesAction,
         private SyncSleepEventsAction $syncSleepEventsAction,
         private UpdateUserTimezoneAction $updateTimezoneAction,
+        private DispatchAggregateUserUtcDatesAction $dispatchAggregateDatesAction,
     ) {}
 
     public function __invoke(StoreMobileSyncHealthEntriesRequest $request): JsonResponse
@@ -59,7 +61,7 @@ final readonly class MobileSyncHealthEntriesController
             timezone: $timezone,
         );
 
-        $sleepResult = ['created' => 0, 'updated' => 0];
+        $sleepResult = ['created' => 0, 'updated' => 0, 'affected_utc_dates' => []];
 
         if ($payload->sleep_events !== []) {
             $sleepResult = $this->syncSleepEventsAction->handle(
@@ -73,6 +75,15 @@ final readonly class MobileSyncHealthEntriesController
             $this->updateTimezoneAction->handle($user, $timezone);
         }
 
+        $dispatchedAggregateJobs = $this->dispatchAggregateDatesAction->handle(
+            $user,
+            collect($sampleResult['affected_utc_dates'])
+                ->concat($sleepResult['affected_utc_dates'])
+                ->unique()
+                ->values()
+                ->all(),
+        );
+
         return response()->json([
             'message' => 'Synced successfully.',
             'samples_created' => $sampleResult['samples_created'],
@@ -80,6 +91,7 @@ final readonly class MobileSyncHealthEntriesController
             'samples_dropped' => $sampleResult['samples_dropped'],
             'sleep_events_created' => $sleepResult['created'],
             'sleep_events_updated' => $sleepResult['updated'],
+            'aggregate_jobs_dispatched' => $dispatchedAggregateJobs,
             'profile_updated' => $sampleResult['profile_updated'],
         ]);
     }

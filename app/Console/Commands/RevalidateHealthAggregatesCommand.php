@@ -33,22 +33,22 @@ final class RevalidateHealthAggregatesCommand extends Command
 
         /** @var Builder<HealthDailyAggregate> $query */
         $query = HealthDailyAggregate::query()
-            ->select('user_id', 'local_date')
+            ->select('user_id', HealthDailyAggregate::UTC_DAY_COLUMN)
             ->where(function (Builder $q) use ($minVersion): void {
                 $q->where('aggregation_version', '<', $minVersion)
                     ->orWhereNull('aggregation_version');
             })
-            ->groupBy('user_id', 'local_date');
+            ->groupBy('user_id', HealthDailyAggregate::UTC_DAY_COLUMN);
 
         if ($userId !== null) {
             $query->where('user_id', (int) $userId);
         }
 
         if ($since !== null) {
-            $query->where('local_date', '>=', $since);
+            $query->where(HealthDailyAggregate::UTC_DAY_COLUMN, '>=', $since);
         }
 
-        /** @var Collection<int, object{user_id: int, local_date: string}> $tuples */
+        /** @var Collection<int, object{user_id: int, local_date: string}> $tuples  local_date holds UTC date via UTC_DAY_COLUMN */
         $tuples = $query->get();
 
         if ($tuples->isEmpty()) {

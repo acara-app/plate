@@ -103,7 +103,7 @@ final readonly class DiabetesLayout
 
         /** @var Collection<string, Collection<int, HealthDailyAggregate>> $aggregates */
         $aggregates = $user->healthDailyAggregates()
-            ->whereBetween('local_date', [$from, $to])
+            ->whereBetween(HealthDailyAggregate::UTC_DAY_COLUMN, [$from, $to])
             ->get()
             ->groupBy('type_identifier');
 
@@ -530,9 +530,9 @@ final readonly class DiabetesLayout
     private static function calculateStreakFromAggregates(User $user): array
     {
         $uniqueDates = $user->healthDailyAggregates()
-            ->select('local_date')
-            ->groupBy('local_date')
-            ->latest('local_date')
+            ->select(HealthDailyAggregate::UTC_DAY_COLUMN)
+            ->groupBy(HealthDailyAggregate::UTC_DAY_COLUMN)
+            ->latest(HealthDailyAggregate::UTC_DAY_COLUMN)
             ->limit(365)
             ->get();
 
@@ -541,8 +541,8 @@ final readonly class DiabetesLayout
         }
 
         $activeDays = $user->healthDailyAggregates()
-            ->distinct('local_date')
-            ->count('local_date');
+            ->distinct(HealthDailyAggregate::UTC_DAY_COLUMN)
+            ->count(HealthDailyAggregate::UTC_DAY_COLUMN);
 
         $dates = $uniqueDates->map(
             static fn (HealthDailyAggregate $agg): string => $agg->local_date?->toDateString() ?? ''

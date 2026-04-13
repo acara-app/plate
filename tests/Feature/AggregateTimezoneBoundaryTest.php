@@ -15,7 +15,7 @@ beforeEach(function (): void {
     $this->action = resolve(AggregateHealthDailySamplesAction::class);
 });
 
-it('groups samples into the user-local day, not the server day', function (): void {
+it('groups samples into UTC day regardless of user timezone', function (): void {
     $user = User::factory()->create(['timezone' => 'America/New_York']);
 
     HealthSyncSample::factory()->for($user)->heartRate()->create([
@@ -25,7 +25,7 @@ it('groups samples into the user-local day, not the server day', function (): vo
         'entry_source' => HealthEntrySource::MobileSync,
     ]);
 
-    $this->action->handle($user, CarbonImmutable::parse('2026-04-05'));
+    $this->action->handle($user, CarbonImmutable::parse('2026-04-06', 'UTC'));
 
     $aggregate = HealthDailyAggregate::query()
         ->where('user_id', $user->id)
@@ -33,31 +33,11 @@ it('groups samples into the user-local day, not the server day', function (): vo
         ->first();
 
     expect($aggregate)->not->toBeNull()
-        ->and($aggregate->local_date?->toDateString())->toBe('2026-04-05');
-});
-
-it('falls back to UTC when the user has no timezone set', function (): void {
-    $user = User::factory()->create(['timezone' => null]);
-
-    HealthSyncSample::factory()->for($user)->heartRate()->create([
-        'value' => 72,
-        'measured_at' => CarbonImmutable::parse('2026-04-05 12:00:00', 'UTC'),
-        'timezone' => null,
-        'entry_source' => HealthEntrySource::MobileSync,
-    ]);
-
-    $this->action->handle($user, CarbonImmutable::parse('2026-04-05'));
-
-    $aggregate = HealthDailyAggregate::query()
-        ->where('user_id', $user->id)
-        ->where('type_identifier', 'heartRate')
-        ->first();
-
-    expect($aggregate)->not->toBeNull()
+        ->and($aggregate->local_date?->toDateString())->toBe('2026-04-06')
         ->and($aggregate->timezone)->toBe('UTC');
 });
 
-it('prefers each samples own timezone field over the user timezone fallback', function (): void {
+it('ignores sample timezone for UTC day bucketing', function (): void {
     $user = User::factory()->create(['timezone' => 'America/New_York']);
 
     HealthSyncSample::factory()->for($user)->heartRate()->create([
@@ -67,7 +47,7 @@ it('prefers each samples own timezone field over the user timezone fallback', fu
         'entry_source' => HealthEntrySource::MobileSync,
     ]);
 
-    $this->action->handle($user, CarbonImmutable::parse('2026-04-05'));
+    $this->action->handle($user, CarbonImmutable::parse('2026-04-05', 'UTC'));
 
     $aggregate = HealthDailyAggregate::query()
         ->where('user_id', $user->id)
@@ -75,5 +55,14 @@ it('prefers each samples own timezone field over the user timezone fallback', fu
         ->first();
 
     expect($aggregate)->not->toBeNull()
-        ->and($aggregate->local_date?->toDateString())->toBe('2026-04-05');
+        ->and($aggregate->local_date?->toDateString())->toBe('2026-04-05')
+        ->and($aggregate->timezone)->toBe('UTC');
+});
+
+it('returns zero when no samples exist in the UTC date range', function (): void {
+    $user = User::factory()->create(['timezone' => null]);
+
+    $result = $this->action->handle($user, CarbonImmutable::parse('2026-04-05', 'UTC'));
+
+    expect($result)->toBe(0);
 });

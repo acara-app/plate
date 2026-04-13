@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Actions\AggregateHealthDailySamplesAction;
+use App\Actions\SleepSessionAggregator;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -24,14 +25,14 @@ final class AggregateUserDayJob implements ShouldBeUnique, ShouldQueue
 
     public function __construct(
         private readonly int $userId,
-        private readonly ?string $overrideDate = null,
+        private readonly string $utcDate,
     ) {
         $this->queue = 'default';
     }
 
     public function uniqueId(): string
     {
-        return $this->userId.':'.($this->overrideDate ?? 'yesterday');
+        return $this->userId.':'.$this->utcDate;
     }
 
     /**
@@ -42,25 +43,19 @@ final class AggregateUserDayJob implements ShouldBeUnique, ShouldQueue
         return [30, 60, 120];
     }
 
-    public function handle(AggregateHealthDailySamplesAction $action): void
-    {
+    public function handle(
+        AggregateHealthDailySamplesAction $healthAggregator,
+        SleepSessionAggregator $sleepAggregator,
+    ): void {
         $user = User::query()->find($this->userId);
 
         if ($user === null) {
             return;
         }
 
-        $localDate = $this->resolveLocalDate($user);
+        $utcDate = CarbonImmutable::parse($this->utcDate, 'UTC')->startOfDay();
 
-        $action->handle($user, $localDate);
-    }
-
-    private function resolveLocalDate(User $user): CarbonImmutable
-    {
-        if ($this->overrideDate !== null) {
-            return CarbonImmutable::parse($this->overrideDate);
-        }
-
-        return CarbonImmutable::now($user->resolveTimezone())->subDay()->startOfDay();
+        $healthAggregator->handle($user, $utcDate);
+        $sleepAggregator->handle($user, $utcDate);
     }
 }
