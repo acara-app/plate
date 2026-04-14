@@ -352,8 +352,9 @@ function GeneratingMealsState({
                     <Button variant="outline" size="sm" asChild>
                         <Link
                             href={
-                                mealPlans.index({ query: { day: dayNumber } })
-                                    .url
+                                mealPlans.index({
+                                    query: { day: dayNumber, retry: 1 },
+                                }).url
                             }
                         >
                             {t('meal_plans.generation.try_again')}

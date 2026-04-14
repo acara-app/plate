@@ -87,7 +87,12 @@ final readonly class ShowMealPlansController
         $dayNeedsGeneration = $dayMeals->isEmpty();
         $dayStatus = $this->getDayStatus($mealPlan, $currentDayNumber, $dayMeals->isEmpty());
 
-        if ($dayNeedsGeneration && $dayStatus === MealPlanGenerationStatus::Pending->value) {
+        $shouldRetry = $dayNeedsGeneration && (
+            $dayStatus === MealPlanGenerationStatus::Pending->value
+            || ($dayStatus === MealPlanGenerationStatus::Failed->value && $request->boolean('retry'))
+        );
+
+        if ($shouldRetry) {
             $mealPlan->update([
                 'metadata' => array_merge($mealPlan->metadata ?? [], [
                     sprintf('day_%d_status', $currentDayNumber) => MealPlanGenerationStatus::Generating->value,
@@ -143,12 +148,18 @@ final readonly class ShowMealPlansController
             return MealPlanGenerationStatus::Completed->value;
         }
 
-        if (($metadata['status'] ?? '') === MealPlanGenerationStatus::Generating->value) {
+        $overallStatus = $metadata['status'] ?? '';
+
+        if ($overallStatus === MealPlanGenerationStatus::Generating->value) {
             if ($this->isStaleGenerating($mealPlan)) {
                 return MealPlanGenerationStatus::Failed->value;
             }
 
             return MealPlanGenerationStatus::Generating->value;
+        }
+
+        if ($overallStatus === MealPlanGenerationStatus::Failed->value) {
+            return MealPlanGenerationStatus::Failed->value;
         }
 
         return MealPlanGenerationStatus::Pending->value;

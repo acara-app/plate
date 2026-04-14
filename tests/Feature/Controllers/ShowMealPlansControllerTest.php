@@ -6,6 +6,7 @@ use App\Http\Controllers\ShowMealPlansController;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
+use Illuminate\Support\Facades\Queue;
 
 covers(ShowMealPlansController::class);
 
@@ -619,6 +620,50 @@ it('returns failed status for stale day-specific generating status', function ()
 
     $response = $this->actingAs($user)
         ->get(route('meal-plans.index', ['day' => 3]));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('currentDay.status', 'failed')
+            ->where('currentDay.needs_generation', true));
+});
+
+it('retries generation when retry param is passed with failed status', function (): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+
+    MealPlan::factory()
+        ->weekly()
+        ->for($user)
+        ->create([
+            'metadata' => [
+                'status' => 'failed',
+            ],
+        ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('meal-plans.index', ['day' => 1, 'retry' => 1]));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('currentDay.status', 'generating')
+            ->where('currentDay.needs_generation', true));
+});
+
+it('does not retry generation without retry param when status is failed', function (): void {
+    $user = User::factory()->create();
+
+    MealPlan::factory()
+        ->weekly()
+        ->for($user)
+        ->create([
+            'metadata' => [
+                'status' => 'failed',
+            ],
+        ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('meal-plans.index', ['day' => 1]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
