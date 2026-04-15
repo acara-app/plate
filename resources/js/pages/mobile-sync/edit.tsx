@@ -203,7 +203,7 @@ export default function Edit({
                                             type="submit"
                                             disabled={processing}
                                         >
-                                            <Smartphone className="mr-2 h-4 w-4" />
+                                            <Smartphone className="h-4 w-4" />
                                             {t('mobile_sync.generate_token')}
                                         </Button>
                                     )}
@@ -233,7 +233,7 @@ export default function Edit({
                                                     type="submit"
                                                     disabled={processing}
                                                 >
-                                                    <Smartphone className="mr-2 h-4 w-4" />
+                                                    <Smartphone className="h-4 w-4" />
                                                     {t(
                                                         'mobile_sync.generate_token',
                                                     )}
@@ -277,7 +277,7 @@ export default function Edit({
                                                     type="submit"
                                                     disabled={processing}
                                                 >
-                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                    <Trash2 className="h-4 w-4" />
                                                     {t(
                                                         'mobile_sync.disconnect',
                                                     )}

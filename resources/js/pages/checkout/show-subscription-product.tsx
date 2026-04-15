@@ -504,7 +504,7 @@ export default function CashierSubscription({
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    <CreditCardIcon className="mr-2 h-4 w-4" />
+                                    <CreditCardIcon className="h-4 w-4" />
                                     {t(
                                         'checkout_subscription.manage_subscription',
                                     )}
@@ -512,7 +512,7 @@ export default function CashierSubscription({
                             </Button>
                             <Button asChild variant="outline">
                                 <Link href={billing.index().url}>
-                                    <ReceiptIcon className="mr-2 h-4 w-4" />
+                                    <ReceiptIcon className="h-4 w-4" />
                                     {t(
                                         'checkout_subscription.view_billing_history',
                                     )}

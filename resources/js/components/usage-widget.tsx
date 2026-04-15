@@ -43,7 +43,8 @@ export function UsageWidget({
             <CardContent className="gap-2">
                 <Progress
                     value={percentage}
-                    className={`h-2 ${progressColorClass}`}
+                    className="h-2"
+                    indicatorClassName={progressColorClass}
                 />
                 <div className="text-xs text-muted-foreground">
                     <span>
@@ -58,10 +59,10 @@ export function UsageWidget({
 
 function getProgressColorClass(percentage: number): string {
     if (percentage >= 90) {
-        return '[&_div]:bg-red-500';
+        return 'bg-red-500';
     }
     if (percentage >= 70) {
-        return '[&_div]:bg-yellow-500';
+        return 'bg-yellow-500';
     }
-    return '[&_div]:bg-green-500';
+    return 'bg-green-500';
 }

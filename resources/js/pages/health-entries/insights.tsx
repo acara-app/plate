@@ -224,7 +224,7 @@ export default function HealthEntriesInsights({
                                                             .url
                                                     }
                                                 >
-                                                    <Sparkles className="mr-2 h-4 w-4" />
+                                                    <Sparkles className="h-4 w-4" />
                                                     {t(
                                                         'health_entries.insights_page.improve_control.generate_button',
                                                     )}
@@ -300,7 +300,7 @@ export default function HealthEntriesInsights({
                                                         className="w-full"
                                                     >
                                                         <RefreshCw
-                                                            className={`mr-2 h-4 w-4 ${regenerateForm.processing ? 'animate-spin' : ''}`}
+                                                            className={`h-4 w-4 ${regenerateForm.processing ? 'animate-spin' : ''}`}
                                                         />
                                                         {regenerateForm.processing
                                                             ? t(

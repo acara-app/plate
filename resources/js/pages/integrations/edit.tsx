@@ -171,7 +171,7 @@ export default function Edit() {
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                             >
-                                                <ExternalLink className="mr-2 h-4 w-4" />
+                                                <ExternalLink className="h-4 w-4" />
                                                 {t(
                                                     'integrations.telegram.open_bot',
                                                 )}
@@ -186,7 +186,7 @@ export default function Edit() {
                                                     type="submit"
                                                     disabled={processing}
                                                 >
-                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                    <Trash2 className="h-4 w-4" />
                                                     {t(
                                                         'integrations.telegram.disconnect',
                                                     )}
@@ -280,7 +280,7 @@ export default function Edit() {
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
-                                            <ExternalLink className="mr-2 h-4 w-4" />
+                                            <ExternalLink className="h-4 w-4" />
                                             {t(
                                                 'integrations.telegram.open_bot',
                                             )}
@@ -301,7 +301,7 @@ export default function Edit() {
                                                 type="submit"
                                                 disabled={processing}
                                             >
-                                                <MessageCircle className="mr-2 h-4 w-4" />
+                                                <MessageCircle className="h-4 w-4" />
                                                 {t(
                                                     'integrations.telegram.connect',
                                                 )}
