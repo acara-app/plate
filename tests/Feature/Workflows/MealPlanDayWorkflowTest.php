@@ -284,6 +284,8 @@ it('generates single day workflow returns correct result structure', function ()
 });
 
 it('marks day as failed when workflow fails', function (): void {
+    WorkflowStub::fake();
+
     $mealPlan = MealPlan::factory()
         ->for($this->user)
         ->weekly()
@@ -294,11 +296,10 @@ it('marks day as failed when workflow fails', function (): void {
             ],
         ]);
 
-    $storedWorkflow = mock(\Workflow\Models\StoredWorkflow::class);
-    $storedWorkflow->expects('workflowArguments')->andReturn([$mealPlan, 2]);
-    $storedWorkflow->expects('toWorkflow')->andThrow(new \Workflow\Exceptions\TransitionNotFound('test'));
-    $storedWorkflow->expects('effectiveConnection')->andReturn(null);
-    $storedWorkflow->allows('effectiveQueue')->andReturn(null);
+    $workflowStub = WorkflowStub::make(MealPlanDayWorkflow::class);
+    $workflowStub->start($mealPlan, 2);
+
+    $storedWorkflow = \Workflow\Models\StoredWorkflow::findOrFail($workflowStub->id());
 
     $workflow = new MealPlanDayWorkflow($storedWorkflow);
     $workflow->failed(new RuntimeException('test error'));
@@ -308,11 +309,10 @@ it('marks day as failed when workflow fails', function (): void {
 });
 
 it('handles failed gracefully when arguments are missing', function (): void {
-    $storedWorkflow = mock(\Workflow\Models\StoredWorkflow::class);
-    $storedWorkflow->expects('workflowArguments')->andReturn([]);
-    $storedWorkflow->expects('toWorkflow')->andThrow(new \Workflow\Exceptions\TransitionNotFound('test'));
-    $storedWorkflow->expects('effectiveConnection')->andReturn(null);
-    $storedWorkflow->allows('effectiveQueue')->andReturn(null);
+    WorkflowStub::fake();
+
+    $workflowStub = WorkflowStub::make(MealPlanDayWorkflow::class);
+    $storedWorkflow = \Workflow\Models\StoredWorkflow::findOrFail($workflowStub->id());
 
     $workflow = new MealPlanDayWorkflow($storedWorkflow);
     $workflow->failed(new RuntimeException('test error'));

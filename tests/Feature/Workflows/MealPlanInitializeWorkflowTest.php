@@ -384,6 +384,8 @@ it('converts day meals data to meal data collection with correct properties', fu
 });
 
 it('marks meal plan as failed when workflow fails', function (): void {
+    WorkflowStub::fake();
+
     $mealPlan = App\Models\MealPlan::factory()
         ->for($this->user)
         ->weekly()
@@ -394,11 +396,10 @@ it('marks meal plan as failed when workflow fails', function (): void {
             ],
         ]);
 
-    $storedWorkflow = mock(\Workflow\Models\StoredWorkflow::class);
-    $storedWorkflow->expects('workflowArguments')->andReturn([$this->user, $mealPlan]);
-    $storedWorkflow->expects('toWorkflow')->andThrow(new \Workflow\Exceptions\TransitionNotFound('test'));
-    $storedWorkflow->expects('effectiveConnection')->andReturn(null);
-    $storedWorkflow->allows('effectiveQueue')->andReturn(null);
+    $workflowStub = WorkflowStub::make(MealPlanInitializeWorkflow::class);
+    $workflowStub->start($this->user, $mealPlan);
+
+    $storedWorkflow = \Workflow\Models\StoredWorkflow::findOrFail($workflowStub->id());
 
     $workflow = new MealPlanInitializeWorkflow($storedWorkflow);
     $workflow->failed(new RuntimeException('test error'));
@@ -408,11 +409,10 @@ it('marks meal plan as failed when workflow fails', function (): void {
 });
 
 it('handles failed gracefully when meal plan argument is missing', function (): void {
-    $storedWorkflow = mock(\Workflow\Models\StoredWorkflow::class);
-    $storedWorkflow->expects('workflowArguments')->andReturn([$this->user]);
-    $storedWorkflow->expects('toWorkflow')->andThrow(new \Workflow\Exceptions\TransitionNotFound('test'));
-    $storedWorkflow->expects('effectiveConnection')->andReturn(null);
-    $storedWorkflow->allows('effectiveQueue')->andReturn(null);
+    WorkflowStub::fake();
+
+    $workflowStub = WorkflowStub::make(MealPlanInitializeWorkflow::class);
+    $storedWorkflow = \Workflow\Models\StoredWorkflow::findOrFail($workflowStub->id());
 
     $workflow = new MealPlanInitializeWorkflow($storedWorkflow);
     $workflow->failed(new RuntimeException('test error'));
