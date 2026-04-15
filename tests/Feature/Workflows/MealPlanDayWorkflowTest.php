@@ -18,6 +18,7 @@ use App\Workflows\MealPlanDayWorkflow;
 use App\Workflows\SaveDayMealsActivity;
 use Spatie\LaravelData\DataCollection;
 use Workflow\Activity;
+use Workflow\Models\StoredWorkflow;
 use Workflow\Workflow;
 use Workflow\WorkflowStub;
 
@@ -299,7 +300,7 @@ it('marks day as failed when workflow fails', function (): void {
     $workflowStub = WorkflowStub::make(MealPlanDayWorkflow::class);
     $workflowStub->start($mealPlan, 2);
 
-    $storedWorkflow = \Workflow\Models\StoredWorkflow::findOrFail($workflowStub->id());
+    $storedWorkflow = StoredWorkflow::query()->findOrFail($workflowStub->id());
 
     $workflow = new MealPlanDayWorkflow($storedWorkflow);
     $workflow->failed(new RuntimeException('test error'));
@@ -312,7 +313,7 @@ it('handles failed gracefully when arguments are missing', function (): void {
     WorkflowStub::fake();
 
     $workflowStub = WorkflowStub::make(MealPlanDayWorkflow::class);
-    $storedWorkflow = \Workflow\Models\StoredWorkflow::findOrFail($workflowStub->id());
+    $storedWorkflow = StoredWorkflow::query()->findOrFail($workflowStub->id());
 
     $workflow = new MealPlanDayWorkflow($storedWorkflow);
     $workflow->failed(new RuntimeException('test error'));

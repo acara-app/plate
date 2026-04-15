@@ -12,12 +12,14 @@ use App\Enums\MealPlanGenerationStatus;
 use App\Enums\MealPlanType;
 use App\Enums\MealType;
 use App\Enums\Sex;
+use App\Models\MealPlan;
 use App\Models\User;
 use App\Workflows\MealPlanDayGeneratorActivity;
 use App\Workflows\MealPlanInitializeWorkflow;
 use App\Workflows\SaveDayMealsActivity;
 use Spatie\LaravelData\DataCollection;
 use Workflow\Activity;
+use Workflow\Models\StoredWorkflow;
 use Workflow\Workflow;
 use Workflow\WorkflowStub;
 
@@ -386,7 +388,7 @@ it('converts day meals data to meal data collection with correct properties', fu
 it('marks meal plan as failed when workflow fails', function (): void {
     WorkflowStub::fake();
 
-    $mealPlan = App\Models\MealPlan::factory()
+    $mealPlan = MealPlan::factory()
         ->for($this->user)
         ->weekly()
         ->create([
@@ -399,7 +401,7 @@ it('marks meal plan as failed when workflow fails', function (): void {
     $workflowStub = WorkflowStub::make(MealPlanInitializeWorkflow::class);
     $workflowStub->start($this->user, $mealPlan);
 
-    $storedWorkflow = \Workflow\Models\StoredWorkflow::findOrFail($workflowStub->id());
+    $storedWorkflow = StoredWorkflow::query()->findOrFail($workflowStub->id());
 
     $workflow = new MealPlanInitializeWorkflow($storedWorkflow);
     $workflow->failed(new RuntimeException('test error'));
@@ -412,7 +414,7 @@ it('handles failed gracefully when meal plan argument is missing', function (): 
     WorkflowStub::fake();
 
     $workflowStub = WorkflowStub::make(MealPlanInitializeWorkflow::class);
-    $storedWorkflow = \Workflow\Models\StoredWorkflow::findOrFail($workflowStub->id());
+    $storedWorkflow = StoredWorkflow::query()->findOrFail($workflowStub->id());
 
     $workflow = new MealPlanInitializeWorkflow($storedWorkflow);
     $workflow->failed(new RuntimeException('test error'));
