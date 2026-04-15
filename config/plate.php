@@ -12,6 +12,7 @@ use App\Ai\Tools\GetFitnessGoals;
 use App\Ai\Tools\GetHealthData;
 use App\Ai\Tools\GetHealthGoals;
 use App\Ai\Tools\GetHealthSummary;
+use App\Ai\Tools\GetHealthSyncSupport;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
 use App\Ai\Tools\PredictGlucoseSpike;
@@ -44,6 +45,7 @@ return [
         GetHealthGoals::class,
         GetHealthData::class,
         GetHealthSummary::class,
+        GetHealthSyncSupport::class,
         LogHealthEntry::class,
         GetFitnessGoals::class,
         GetDietReference::class,
