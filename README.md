@@ -46,7 +46,7 @@ Acara Plate is an AI-powered personalized nutrition and meal planning platform t
 
 ## Overview
 
-Acara Plate is a Laravel 12 application that pairs Inertia (React) with Tailwind CSS to deliver a seamless AI-assisted meal planning experience. Powered by PrismPHP, it generates seven-day meal plans that adapt to each user's biometric data, preferences, and goals while tracking key wellness metrics such as glucose readings.
+Acara Plate is a Laravel 13 application that pairs Inertia (React) with Tailwind CSS to deliver a seamless AI-assisted meal planning experience. Powered by PrismPHP, it generates seven-day meal plans that adapt to each user's biometric data, preferences, and goals while tracking key wellness metrics such as glucose readings.
 
 **Internationalization:** The application features comprehensive multi-language support with translations across all user-facing interfaces, including React components (via react-i18next), Laravel Blade templates, and email notifications.
 
