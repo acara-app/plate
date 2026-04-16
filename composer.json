@@ -10,7 +10,6 @@
     "license": "MIT",
     "require": {
         "php": "^8.4 || ^8.5",
-        "acara-app/plate-core": "*",
         "defstudio/telegraph": "^1.70.2",
         "inertiajs/inertia-laravel": "^3.0.1",
         "durable-workflow/workflow": "^1.0.75",
@@ -30,7 +29,11 @@
         "ryangjchandler/laravel-cloudflare-turnstile": "^3.0.3",
         "spatie/laravel-data": "^4.20.1",
         "spatie/laravel-mailcoach-mailer": "^1.6.0",
-        "spatie/laravel-sitemap": "^7.4.0"
+        "spatie/laravel-sitemap": "^7.4.0",
+        "wikimedia/composer-merge-plugin": "^2.1"
+    },
+    "suggest": {
+        "acara-app/plate-core": "Acara premium memory module (private package). See DEPLOYMENT.md."
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.7.0",
@@ -51,19 +54,6 @@
         "roave/security-advisories": "dev-latest",
         "spatie/boost-spatie-guidelines": "^1.1"
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../plate-core",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "vcs",
-            "url": "git@github.com:acara-app/plate-core.git"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "App\\": "app/",
@@ -140,6 +130,17 @@
     "extra": {
         "laravel": {
             "dont-discover": []
+        },
+        "merge-plugin": {
+            "include": [
+                "composer.local.json"
+            ],
+            "recurse": true,
+            "replace": false,
+            "ignore-duplicates": false,
+            "merge-dev": true,
+            "merge-extra": false,
+            "merge-scripts": false
         }
     },
     "config": {
@@ -148,7 +149,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "wikimedia/composer-merge-plugin": true
         }
     },
     "minimum-stability": "dev",

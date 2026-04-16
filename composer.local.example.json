@@ -1,0 +1,18 @@
+{
+    "require": {
+        "acara-app/plate-core": "*"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:acara-app/plate-core.git"
+        },
+        {
+            "type": "path",
+            "url": "../plate-core",
+            "options": {
+                "symlink": true
+            }
+        }
+    ]
+}
