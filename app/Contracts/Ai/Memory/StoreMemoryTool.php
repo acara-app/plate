@@ -16,6 +16,7 @@ interface StoreMemoryTool
      * @param  int  $importance  Score from 1-10 indicating memory priority.
      * @param  array<string>  $categories  Initial categories to assign.
      * @param  DateTimeInterface|null  $expiresAt  When memory should expire (null = never).
+     * @param  string|null  $memoryType  Optional MemoryType enum value; invalid values fall back to null.
      * @return string The unique ID of the stored memory.
      *
      * @throws MemoryStorageException When the storage operation fails.
@@ -27,5 +28,6 @@ interface StoreMemoryTool
         int $importance = 1,
         array $categories = [],
         ?DateTimeInterface $expiresAt = null,
+        ?string $memoryType = null,
     ): string;
 }

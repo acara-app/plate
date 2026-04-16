@@ -8,13 +8,11 @@ use App\Enums\AgentMode;
 use App\Models\Conversation;
 use App\Models\ConversationSummary;
 use App\Models\User;
-use App\Services\ToolRegistry;
 
 covers(AgentBuilder::class);
 
 it('includes summaries in instructions when conversationId is provided', function (): void {
-    $toolRegistry = resolve(ToolRegistry::class);
-    $builder = new AgentBuilder($toolRegistry);
+    $builder = resolve(AgentBuilder::class);
 
     $user = User::factory()->create();
     $conversation = Conversation::factory()->forUser($user)->create();

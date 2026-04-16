@@ -14,6 +14,7 @@ interface UpdateMemoryTool
      * @param  string|null  $content  New content (null to keep existing). Will regenerate embedding if changed.
      * @param  array<string, mixed>|null  $metadata  New metadata to merge with existing.
      * @param  int|null  $importance  New importance score 1-10 (null to keep existing).
+     * @param  bool|null  $isPinned  When non-null, promotes or demotes this memory as a Core Truth (immune to decay/consolidation).
      * @return bool True if the update was successful.
      *
      * @throws MemoryNotFoundException When the memory ID does not exist.
@@ -24,5 +25,6 @@ interface UpdateMemoryTool
         ?string $content = null,
         ?array $metadata = null,
         ?int $importance = null,
+        ?bool $isPinned = null,
     ): bool;
 }

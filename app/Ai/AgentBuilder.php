@@ -5,20 +5,21 @@ declare(strict_types=1);
 namespace App\Ai;
 
 use App\Actions\GetUserProfileContextAction;
-use App\Enums\AgentMode;
 use App\Models\ConversationSummary;
+use App\Models\History;
 use App\Models\User;
 use App\Services\ToolRegistry;
 use App\Utilities\EmergencyNumberUtil;
 use App\Utilities\LanguageUtil;
 use Laravel\Ai\Contracts\Tool;
-use Laravel\Ai\Files\Base64Image;
+use Laravel\Ai\Messages\MessageRole;
 use Laravel\Ai\Providers\Tools\ProviderTool;
 
 final readonly class AgentBuilder
 {
     public function __construct(
         private ToolRegistry $toolRegistry,
+        private MemoryPrompt $memoryPrompt,
     ) {}
 
     /**
@@ -26,57 +27,94 @@ final readonly class AgentBuilder
      */
     public function build(AgentPayload $payload, ?User $user = null): array
     {
-        $mode = $payload->mode;
-        $attachments = $payload->images;
-        $webSearchEnabled = $payload->shouldEnableWebSearch();
-
         return [
-            'instructions' => $this->buildInstructions($user, $mode, $payload->conversationId),
-            'tools' => $this->buildTools($attachments, $webSearchEnabled),
+            'instructions' => $this->buildInstructions($payload, $user),
+            'tools' => $this->buildTools($payload),
         ];
     }
 
-    private function buildInstructions(?User $user, AgentMode $mode, ?string $conversationId = null): string
+    public function buildInstructions(AgentPayload $payload, ?User $user): string
     {
         $profileData = $this->getProfileData($user);
         $languageCode = $user instanceof User ? ($user->preferred_language ?? 'en') : 'en';
         $timezone = $this->resolveTimezone($user);
 
-        $summaries = $conversationId !== null
-            ? ConversationSummary::getRecentForContext($conversationId)
+        $summaries = $payload->conversationId !== null
+            ? ConversationSummary::getRecentForContext($payload->conversationId)
             : collect();
 
-        return view('ai.prompts.altani-static', [
+        $instructions = view('ai.prompts.altani-static', [
             'profileContext' => $profileData['context'],
             'currentTime' => now($timezone)->format('Y-m-d H:i (l)').' ('.$timezone.')',
-            'chatMode' => $mode->value,
+            'chatMode' => $payload->mode->value,
             'languageLabel' => LanguageUtil::get($languageCode) ?? 'English',
             'languageCode' => $languageCode,
-            'isCreateMealPlanMode' => $mode->value === 'create-meal-plan',
+            'isCreateMealPlanMode' => $payload->mode->value === 'create-meal-plan',
             'summaries' => $summaries,
             'emergencyNumber' => EmergencyNumberUtil::emergencyNumber($timezone),
         ])->render();
+
+        $memories = $this->renderMemories($payload, $user);
+
+        return $memories === '' ? $instructions : $instructions.PHP_EOL.PHP_EOL.$memories;
     }
 
     /**
-     * @param  array<int, Base64Image>  $attachments
      * @return array<int, Tool|ProviderTool>
      */
-    private function buildTools(array $attachments, bool $webSearchEnabled): array
+    public function buildTools(AgentPayload $payload): array
     {
         $tools = $this->toolRegistry->getTools();
 
-        if ($attachments !== []) {
-            $imageTools = $this->toolRegistry->getImageTools($attachments);
+        if ($payload->images !== []) {
+            $imageTools = $this->toolRegistry->getImageTools($payload->images);
             $tools = [...$tools, ...$imageTools];
         }
 
-        if ($webSearchEnabled) {
+        if ($payload->shouldEnableWebSearch()) {
             $providerTools = $this->toolRegistry->getProviderTools();
             $tools = [...$tools, ...$providerTools];
         }
 
         return $tools;
+    }
+
+    private function renderMemories(AgentPayload $payload, ?User $user): string
+    {
+        if (! $user instanceof User) {
+            return '';
+        }
+
+        return $this->memoryPrompt
+            ->for($user->id, $payload->message, $this->conversationTail($payload->conversationId))
+            ->render();
+    }
+
+    /**
+     * @return array<int, array{role: string, content: string}>
+     */
+    private function conversationTail(?string $conversationId): array
+    {
+        if ($conversationId === null) {
+            return [];
+        }
+
+        /** @phpstan-ignore cast.int */
+        $limit = (int) config('memory.retrieval.context_turns', 20);
+
+        return History::query()
+            ->where('conversation_id', $conversationId)
+            ->whereIn('role', [MessageRole::User->value, MessageRole::Assistant->value])
+            ->latest('created_at')
+            ->limit($limit)
+            ->get(['role', 'content'])
+            ->reverse()
+            ->values()
+            ->map(static fn (History $history): array => [
+                'role' => $history->role->value,
+                'content' => $history->content,
+            ])
+            ->all();
     }
 
     /**

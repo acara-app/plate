@@ -21,6 +21,7 @@ it('resolves and invokes the correct tool', function (): void {
             int $importance = 1,
             array $categories = [],
             ?DateTimeInterface $expiresAt = null,
+            ?string $memoryType = null,
         ): string {
             return 'mem_123';
         }

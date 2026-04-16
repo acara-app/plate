@@ -29,13 +29,13 @@ use BadMethodCallException;
 use DateTimeInterface;
 
 /**
- * @method static string store(string $content, array<string, mixed> $metadata = [], array<float>|null $vector = null, int $importance = 1, array<string> $categories = [], DateTimeInterface|null $expiresAt = null)
+ * @method static string store(string $content, array<string, mixed> $metadata = [], array<float>|null $vector = null, int $importance = 1, array<string> $categories = [], DateTimeInterface|null $expiresAt = null, string|null $memoryType = null)
  * @method static array<int, MemorySearchResultData> search(string $query, int $limit = 5, float $minRelevance = 0.7, array<string, mixed> $filter = [], bool $includeArchived = false)
  * @method static MemoryData get(string $memoryId, bool $includeArchived = false)
- * @method static bool update(string $memoryId, string|null $content = null, array<string, mixed>|null $metadata = null, int|null $importance = null)
+ * @method static bool update(string $memoryId, string|null $content = null, array<string, mixed>|null $metadata = null, int|null $importance = null, bool|null $isPinned = null)
  * @method static int delete(string|null $memoryId = null, array<string, mixed> $filter = [])
  * @method static array<string, array<string>|null> categorize(array<string> $memoryIds, bool $persistCategories = true)
- * @method static string consolidate(array<string> $memoryIds, string $synthesizedContent, array<string, mixed>|null $metadata = null, int|null $importance = null, bool $deleteOriginals = true)
+ * @method static string consolidate(array<string> $memoryIds, string $synthesizedContent, array<string, mixed>|null $metadata = null, int|null $importance = null, bool $deleteOriginals = true, array<int, string>|null $categories = null)
  * @method static array<string> reflect(int $lookbackWindow = 50, string|null $context = null, array<string> $categories = [])
  * @method static array<int, MemoryData> getImportant(int $threshold = 8, int $limit = 10, array<string> $categories = [], bool $includeArchived = false)
  * @method static MemoryStatsData getStats()

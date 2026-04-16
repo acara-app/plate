@@ -11,14 +11,12 @@ use App\Ai\Tools\SuggestSingleMeal;
 use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Models\User;
-use App\Services\ToolRegistry;
 use Laravel\Ai\Files\Base64Image;
 
 covers(AgentBuilder::class);
 
 beforeEach(function (): void {
-    $this->toolRegistry = resolve(ToolRegistry::class);
-    $this->builder = new AgentBuilder($this->toolRegistry);
+    $this->builder = resolve(AgentBuilder::class);
 });
 
 describe('build', function (): void {

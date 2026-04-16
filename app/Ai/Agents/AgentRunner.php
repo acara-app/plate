@@ -71,7 +71,7 @@ final class AgentRunner implements Agent, Conversational, HasTools
 
         // @codeCoverageIgnoreEnd
 
-        return $this->agentBuilder->build($this->currentPayload, $this->user)['instructions'];
+        return $this->agentBuilder->buildInstructions($this->currentPayload, $this->user);
     }
 
     /**
@@ -86,7 +86,7 @@ final class AgentRunner implements Agent, Conversational, HasTools
 
         // @codeCoverageIgnoreEnd
 
-        return $this->agentBuilder->build($this->currentPayload, $this->user)['tools'];
+        return $this->agentBuilder->buildTools($this->currentPayload);
     }
 
     // @codeCoverageIgnoreStart

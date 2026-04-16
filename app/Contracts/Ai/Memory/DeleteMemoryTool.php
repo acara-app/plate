@@ -6,6 +6,7 @@ namespace App\Contracts\Ai\Memory;
 
 use App\Ai\Exceptions\Memory\InvalidMemoryFilterException;
 use App\Ai\Exceptions\Memory\MemoryNotFoundException;
+use App\Ai\Exceptions\Memory\UnscopedMemoryOperationException;
 
 interface DeleteMemoryTool
 {
@@ -15,7 +16,8 @@ interface DeleteMemoryTool
      * @return int Number of memories deleted.
      *
      * @throws InvalidMemoryFilterException When both $memoryId is null and $filter is empty.
-     * @throws MemoryNotFoundException When $memoryId is provided but does not exist.
+     * @throws MemoryNotFoundException When $memoryId is provided but does not exist (or is not owned by the scoped user).
+     * @throws UnscopedMemoryOperationException When no authenticated user is set and $filter does not carry a positive user_id.
      */
     public function execute(?string $memoryId = null, array $filter = []): int;
 }
