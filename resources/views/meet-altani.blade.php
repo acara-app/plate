@@ -178,6 +178,8 @@
                             Start Chatting
                         </a>
                     </div>
+
+                    <x-no-limits-bullets class="justify-center" />
                 </div>
             </div>
         </section>

@@ -194,6 +194,8 @@
                             Star on GitHub
                         </a>
                     </div>
+
+                    <x-no-limits-bullets class="justify-center" />
                 </div>
             </div>
         </section>

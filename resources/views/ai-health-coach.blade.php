@@ -187,6 +187,8 @@
                                 Star on GitHub
                             </a>
                         </div>
+
+                        <x-no-limits-bullets class="justify-center lg:justify-start" />
                     </div>
 
                     <!-- RIGHT COLUMN — Image with soft-fade edges -->

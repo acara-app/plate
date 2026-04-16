@@ -216,6 +216,8 @@
                             Star on GitHub
                         </a>
                     </div>
+
+                    <x-no-limits-bullets class="justify-center lg:justify-start" />
                 </div>
                 
                 <!-- Right Column - Hero Image (organic blend, no box) -->
