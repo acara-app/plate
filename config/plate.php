@@ -15,13 +15,6 @@ use App\Ai\Tools\GetHealthSummary;
 use App\Ai\Tools\GetHealthSyncSupport;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
-use App\Ai\Tools\Memory\Ai\AiDeleteMemory;
-use App\Ai\Tools\Memory\Ai\AiGetImportantMemories;
-use App\Ai\Tools\Memory\Ai\AiGetMemory;
-use App\Ai\Tools\Memory\Ai\AiLinkMemories;
-use App\Ai\Tools\Memory\Ai\AiSearchMemory;
-use App\Ai\Tools\Memory\Ai\AiStoreMemory;
-use App\Ai\Tools\Memory\Ai\AiUpdateMemory;
 use App\Ai\Tools\PredictGlucoseSpike;
 use App\Ai\Tools\SuggestSingleMeal;
 use App\Ai\Tools\SuggestWellnessRoutine;
@@ -60,13 +53,6 @@ return [
         UpdateUserProfileAttributes::class,
         UpdateUserBiometrics::class,
         UpdateHouseholdContext::class,
-        AiStoreMemory::class,
-        AiSearchMemory::class,
-        AiGetMemory::class,
-        AiUpdateMemory::class,
-        AiDeleteMemory::class,
-        AiGetImportantMemories::class,
-        AiLinkMemories::class,
     ],
 
     'image_tools' => [

@@ -36,9 +36,9 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->bind(StripeServiceContract::class, StripeService::class);
         $this->app->bind(IndexNowServiceContract::class, IndexNowService::class);
 
-        $this->app->bind(ManagesMemoryContext::class, NullMemoryContext::class);
-        $this->app->bind(DispatchesMemoryExtraction::class, NullMemoryExtractionDispatcher::class);
-        $this->app->bind(GatesPremiumFeatures::class, NullPremiumGate::class);
+        $this->app->bindIf(ManagesMemoryContext::class, NullMemoryContext::class);
+        $this->app->bindIf(DispatchesMemoryExtraction::class, NullMemoryExtractionDispatcher::class);
+        $this->app->bindIf(GatesPremiumFeatures::class, NullPremiumGate::class);
     }
 
     public function boot(): void

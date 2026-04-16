@@ -9489,7 +9489,7 @@
             "dist": {
                 "type": "path",
                 "url": "../plate-core",
-                "reference": "54a1ef037b3f174a583f2734e2cb7b7c0fa370a7"
+                "reference": "0c41be07cf9798a2b10fe9cdae22244cd0db9816"
             },
             "require": {
                 "laravel/framework": "^13.5",
@@ -9511,7 +9511,9 @@
             },
             "autoload": {
                 "psr-4": {
-                    "Acara\\PlateCore\\": "src/"
+                    "Acara\\PlateCore\\": "src/",
+                    "App\\": "src/",
+                    "Database\\Factories\\": "database/factories/"
                 }
             },
             "autoload-dev": {
