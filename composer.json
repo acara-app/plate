@@ -10,6 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.4 || ^8.5",
+        "acara-app/plate-core": "*",
         "defstudio/telegraph": "^1.70.2",
         "inertiajs/inertia-laravel": "^3.0.1",
         "durable-workflow/workflow": "^1.0.75",
@@ -32,7 +33,6 @@
         "spatie/laravel-sitemap": "^7.4.0"
     },
     "require-dev": {
-        "acara-app/plate-core": "*",
         "barryvdh/laravel-ide-helper": "^3.7.0",
         "driftingly/rector-laravel": "^2.2.0",
         "fakerphp/faker": "^1.24.1",
@@ -58,6 +58,10 @@
             "options": {
                 "symlink": true
             }
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:acara-app/plate-core.git"
         }
     ],
     "autoload": {

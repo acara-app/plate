@@ -4,8 +4,57 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e1b879a45c41a7e72cd2a122c9331a68",
+    "content-hash": "f4cc6f7aec97b808cb34798bf98e82f2",
     "packages": [
+        {
+            "name": "acara-app/plate-core",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../plate-core",
+                "reference": "70b301072150cfae1c01e5c1c8cc0089c37737fe"
+            },
+            "require": {
+                "laravel/framework": "^13.5",
+                "php": "^8.4 || ^8.5",
+                "spatie/laravel-package-tools": "^1.19"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.15",
+                "mockery/mockery": "^1.6",
+                "orchestra/testbench": "^11.0",
+                "pestphp/pest": "^4.4",
+                "pestphp/pest-plugin-laravel": "^4.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Acara\\PlateCore\\PlateCoreServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Acara\\PlateCore\\": "src/",
+                    "App\\": "src/",
+                    "Database\\Factories\\": "database/factories/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Acara\\PlateCore\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Proprietary Acara Plate premium modules (memory, billing, premium AI). Not open source.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
         {
             "name": "aws/aws-crt-php",
             "version": "v1.2.7",
@@ -9483,55 +9532,6 @@
         }
     ],
     "packages-dev": [
-        {
-            "name": "acara-app/plate-core",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "../plate-core",
-                "reference": "6c6171b1f55df5596a9d3ffd7828003dc60d9c63"
-            },
-            "require": {
-                "laravel/framework": "^13.5",
-                "php": "^8.4 || ^8.5",
-                "spatie/laravel-package-tools": "^1.19"
-            },
-            "require-dev": {
-                "laravel/pint": "^1.15",
-                "mockery/mockery": "^1.6",
-                "orchestra/testbench": "^11.0",
-                "pestphp/pest": "^4.4",
-                "pestphp/pest-plugin-laravel": "^4.1"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Acara\\PlateCore\\PlateCoreServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Acara\\PlateCore\\": "src/",
-                    "App\\": "src/",
-                    "Database\\Factories\\": "database/factories/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Acara\\PlateCore\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "description": "Proprietary Acara Plate premium modules (memory, billing, premium AI). Not open source.",
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
         {
             "name": "amphp/amp",
             "version": "v3.1.1",
