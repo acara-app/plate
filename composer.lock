@@ -9489,7 +9489,7 @@
             "dist": {
                 "type": "path",
                 "url": "../plate-core",
-                "reference": "decc120de3dd5089dd072360a3bfeda794f7a6c6"
+                "reference": "6c6171b1f55df5596a9d3ffd7828003dc60d9c63"
             },
             "require": {
                 "laravel/framework": "^13.5",
