@@ -58,31 +58,61 @@ Use a **fine-grained personal access token** with **Contents: read** scope on `a
 
 ## Community fork (no Acara credentials)
 
-Plate is open source, but `acara-app/plate-core` is private. Community users who fork `acara-app/plate` and want to run it locally have two options:
+Plate is open source, but `acara-app/plate-core` is private and follows the `spatie/laravel-multitenancy` convention — the package owns its cross-boundary contracts at `Acara\PlateCore\Contracts\Memory\*`. `composer remove acara-app/plate-core` alone will **not** produce a bootable app because `App\Ai\AgentBuilder` and `App\Actions\BuildAssistantAgentAction` type-hint interfaces that live in the missing package.
 
-### Option A — strip the premium dep
+### Option A — supply your own auth (simplest if you're on the Acara team or have a license)
+
+With a GitHub token that can read `acara-app/plate-core`:
 
 ```bash
+export COMPOSER_AUTH='{"github-oauth":{"github.com":"'"$GITHUB_TOKEN"'"}}'
 git clone https://github.com/acara-app/plate.git
 cd plate
-composer remove acara-app/plate-core --no-update
 composer install
 ```
 
-Plate boots with the null-object fallbacks from `app/Providers/AppServiceProvider.php:39-41` — memory recall and extraction silently no-op, the subscription gate treats every user as premium (`App\Services\Null\NullPremiumGate`). Everything else works.
+### Option B — ship a replacement stub package
 
-### Option B — keep it and supply your own auth
+If you don't have access to `acara-app/plate-core` but want a memoryless boot, publish a tiny public package (e.g. `yourorg/plate-core-stub`) that:
 
-If you have a GitHub token with access to `acara-app/plate-core` (Acara team members or buyers of a future premium license), set `COMPOSER_AUTH` as above and `composer install` picks it up.
+1. Declares in its `composer.json`:
+   ```json
+   {
+       "name": "yourorg/plate-core-stub",
+       "replace": { "acara-app/plate-core": "*" }
+   }
+   ```
+2. Defines the two interfaces under `Acara\PlateCore\Contracts\Memory\*` and two concrete noop classes implementing them (e.g. returning `''` from `render()` and doing nothing from `dispatchIfEligible()`).
+3. Binds the noops in a small service provider and registers it via `extra.laravel.providers`.
+
+Then in your fork:
+
+```bash
+composer require yourorg/plate-core-stub
+composer install
+```
+
+The `replace` directive tells Composer that the stub satisfies the `acara-app/plate-core` requirement; Laravel auto-discovers the stub's provider; the host resolves the noops via the same `config('memory.context_manager')` / `config('memory.extraction_dispatcher')` lookup the real package uses.
+
+### Overriding the default implementations
+
+Even in full-install mode the multitenancy-style config pattern lets you swap concretes without touching package code. Publish the config (`php artisan vendor:publish --tag=plate-core-config`), then in `config/memory.php`:
+
+```php
+'context_manager' => \App\YourCustom\ContextManager::class,
+'extraction_dispatcher' => \App\YourCustom\ExtractionDispatcher::class,
+```
+
+Your custom classes must implement `Acara\PlateCore\Contracts\Memory\ManagesMemoryContext` and `Acara\PlateCore\Contracts\Memory\DispatchesMemoryExtraction` respectively.
 
 ## Verifying the install mode
 
 ```bash
-php -r 'require "vendor/autoload.php"; $app = require "bootstrap/app.php"; $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); echo get_class(app(App\Contracts\Ai\Memory\ManagesMemoryContext::class)) . PHP_EOL;'
+php -r 'require "vendor/autoload.php"; $app = require "bootstrap/app.php"; $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); echo get_class(app(Acara\PlateCore\Contracts\Memory\ManagesMemoryContext::class)) . PHP_EOL;'
 ```
 
 - Premium mode (plate-core installed): `App\Services\Memory\MemoryPromptContext`
-- Community mode (plate-core removed): `App\Services\Null\NullMemoryContext`
+- Community mode (stub package installed): whatever noop class the stub binds via `config('memory.context_manager')`
 
 ## Troubleshooting
 

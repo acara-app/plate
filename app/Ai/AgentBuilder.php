@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Ai;
 
+use Acara\PlateCore\Contracts\Memory\ManagesMemoryContext;
 use App\Actions\GetUserProfileContextAction;
-use App\Contracts\Ai\Memory\ManagesMemoryContext;
 use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;

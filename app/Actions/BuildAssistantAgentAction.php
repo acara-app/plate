@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use Acara\PlateCore\Contracts\Memory\DispatchesMemoryExtraction;
 use App\Ai\AgentPayload;
 use App\Ai\Agents\AgentRunner;
-use App\Contracts\Ai\Memory\DispatchesMemoryExtraction;
 use App\Http\Requests\StreamChatRequest;
 use App\Jobs\SummarizeConversationJob;
 use App\Models\Conversation;
