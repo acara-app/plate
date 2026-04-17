@@ -48,6 +48,8 @@ jobs:
           restore-keys: ${{ runner.os }}-bun-
 
       - name: Install Dependencies
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
         run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-progress
 
       - name: Copy Environment File
