@@ -9,6 +9,7 @@ use App\Contracts\Memory\ManagesMemoryContext;
 use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;
+use App\Services\Memory\NullMemoryPromptContext;
 use App\Services\ToolRegistry;
 use App\Utilities\EmergencyNumberUtil;
 use App\Utilities\LanguageUtil;
@@ -51,6 +52,7 @@ final readonly class AgentBuilder
             'languageLabel' => LanguageUtil::get($languageCode) ?? 'English',
             'languageCode' => $languageCode,
             'isCreateMealPlanMode' => $payload->mode->value === 'create-meal-plan',
+            'memoryStorageEnabled' => ! $this->memoryContext instanceof NullMemoryPromptContext,
             'summaries' => $summaries,
             'emergencyNumber' => EmergencyNumberUtil::emergencyNumber($timezone),
         ])->render();
