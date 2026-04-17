@@ -3,16 +3,16 @@
 Plate is split into a public Laravel app and a private package:
 
 - `acara-app/plate` is the public app.
-- `acara-app/plate-core` is the private SaaS package.
+- `acara-app/plate-core` is the private package for Cloud SaaS and premium features.
 - `main` must stay community-safe.
-- `private/plate-core` is the SaaS/deployment branch.
+- `private/plate-core` is the Cloud/deployment branch.
 
 ## Branch Rules
 
 - Use `main` for public/community work.
-- Use `private/plate-core` for SaaS work that needs the private package.
+- Use `private/plate-core` for Cloud work that needs the private package.
 - Do not merge `private/plate-core` back into `main`.
-- Bring public changes into SaaS by merging `main` into `private/plate-core`.
+- Bring public changes into Cloud by merging `main` into `private/plate-core`.
 - Bring public-safe changes from `private/plate-core` into `main` with cherry-pick, and exclude `composer.json` and `composer.lock`.
 
 Before committing to `main`, verify that these files do not add `acara-app/plate-core`:
@@ -51,25 +51,6 @@ When adding a new private feature that needs host integration:
 3. Merge `main` into `private/plate-core`.
 4. Implement the real behavior in `acara-app/plate-core`.
 5. Update `composer.lock` on `private/plate-core` with `composer update acara-app/plate-core`.
-
-## Prompt and Tool Safety
-
-Public prompts must not assume private tools exist.
-
-For memory-specific prompt text, only render it when the real memory implementation is active. On `main`, `NullMemoryPromptContext` means memory storage is disabled and prompts must not instruct the model to call private-only tools such as `store_memory`.
-
-Private AI memory tools should be registered by `plate-core`, not hard-coded into public `config/plate.php`.
-
-## Deployment
-
-Laravel Cloud production should deploy:
-
-- repository: `acara-app/plate`
-- branch: `private/plate-core`
-
-The deployment branch contains the private Composer dependency. `main` must not.
-
-Use `GITHUB_COMPOSER_TOKEN` in Laravel Cloud so Composer can download `acara-app/plate-core`. Never commit GitHub tokens, `auth.json`, or `COMPOSER_AUTH` values.
 
 ## Local Workflow
 
