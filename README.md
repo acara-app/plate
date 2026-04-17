@@ -164,8 +164,6 @@ composer setup
 
 `composer setup` runs Composer and NPM installs, copies `.env.example`, generates the app key, and executes migrations.
 
-> **Community contributors:** run `composer remove acara-app/plate-core --no-update` before `composer setup` — that dependency is private to the Acara team.
-
 ### Environment Configuration
 
 Configure the credentials you need in `.env`. Only the providers you enable in code require keys.
