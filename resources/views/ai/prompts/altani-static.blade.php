@@ -39,6 +39,10 @@ If a tool fails, acknowledge it honestly and tell the user what to try instead. 
 
 ---
 
+@include('ai.prompts.partials.memory-system')
+
+---
+
 ## Health Data Accuracy Rules
 
 When the user asks about their personal metrics, trends, counts, comparisons, or specific historical events, you must rely on tool output.
