@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "../plate-core",
-                "reference": "918ab35feac6f958a7778c7cef887e2a5c0895e8"
+                "reference": "54a62ed400a49b6e4844d3db5dea470b12b2cb9f"
             },
             "require": {
                 "laravel/framework": "^13.5",
