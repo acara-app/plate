@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Utilities;
 
+use Illuminate\Support\Facades\File;
+
 final class LanguageUtil
 {
     /**
@@ -43,5 +45,24 @@ final class LanguageUtil
     public static function default(): string
     {
         return 'en';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function translations(string $locale): array
+    {
+        $translations = [];
+        $langPath = lang_path($locale);
+
+        if (! File::isDirectory($langPath)) {
+            return $translations;
+        }
+
+        foreach (File::files($langPath) as $file) {
+            $translations[$file->getFilenameWithoutExtension()] = require $file->getPathname();
+        }
+
+        return $translations;
     }
 }
