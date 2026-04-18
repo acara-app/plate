@@ -30,11 +30,17 @@ Memory contracts live in:
 
 - `app/Contracts/Memory/ManagesMemoryContext.php`
 - `app/Contracts/Memory/DispatchesMemoryExtraction.php`
+- `app/Contracts/Memory/PullsConversationHistory.php`
+
+Cross-boundary DTOs live in:
+
+- `app/Data/Memory/ConversationMessageData.php`
 
 Community-safe null implementations live in:
 
 - `app/Services/Memory/NullMemoryPromptContext.php`
 - `app/Services/Memory/NullMemoryExtractionDispatcher.php`
+- `app/Services/Memory/NullConversationHistoryPuller.php`
 
 Default bindings belong in `App\Providers\AppServiceProvider` using `bindIf()`. This lets the public app boot without `plate-core`, while the private package can override the bindings when installed.
 
