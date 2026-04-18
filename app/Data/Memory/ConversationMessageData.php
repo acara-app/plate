@@ -7,6 +7,9 @@ namespace App\Data\Memory;
 use DateTimeInterface;
 use Spatie\LaravelData\Data;
 
+/**
+ * @codeCoverageIgnore
+ */
 final class ConversationMessageData extends Data
 {
     public function __construct(
