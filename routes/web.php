@@ -52,6 +52,10 @@ Route::post('/profile/timezone', [Web\UserTimezoneController::class, 'update'])
     ->middleware('throttle:10,1')
     ->name('profile.timezone.update');
 
+Route::get('/translations/{locale}', Web\TranslationController::class)
+    ->whereAlpha('locale')
+    ->name('translations.show');
+
 Route::view('/ai-nutritionist', 'ai-nutritionist')->name('ai-nutritionist');
 Route::view('/ai-health-coach', 'ai-health-coach')->name('ai-health-coach');
 Route::view('/ai-personal-trainer', 'ai-personal-trainer')->name('ai-personal-trainer');

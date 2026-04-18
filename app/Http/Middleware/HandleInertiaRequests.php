@@ -7,7 +7,6 @@ namespace App\Http\Middleware;
 use App\Models\User;
 use App\Utilities\LanguageUtil;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
 use Inertia\Middleware;
 
@@ -51,25 +50,7 @@ final class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'locale' => $locale,
             'availableLanguages' => LanguageUtil::all(),
-            'translations' => Inertia::once(fn (): array => $this->getTranslations($locale)),
+            'translations' => Inertia::once(fn (): array => LanguageUtil::translations($locale)),
         ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function getTranslations(string $locale): array
-    {
-        $translations = [];
-        $langPath = lang_path($locale);
-
-        if (File::isDirectory($langPath)) {
-            foreach (File::files($langPath) as $file) {
-                $namespace = $file->getFilenameWithoutExtension();
-                $translations[$namespace] = require $file->getPathname();
-            }
-        }
-
-        return $translations;
     }
 }

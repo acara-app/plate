@@ -14,6 +14,7 @@ use App\Enums\Sex;
 use App\Enums\UserProfileAttributeCategory;
 use Carbon\CarbonInterface;
 use Database\Factories\UserProfileFactory;
+use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -50,19 +51,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read float|null $tdee
  * @property-read Collection<int, UserProfileAttribute> $attributes
  */
+#[Appends([
+    'bmi',
+    'bmr',
+    'tdee',
+])]
 final class UserProfile extends Model
 {
     /** @use HasFactory<UserProfileFactory> */
     use HasFactory;
-
-    /**
-     * @var list<string>
-     */
-    protected $appends = [
-        'bmi',
-        'bmr',
-        'tdee',
-    ];
 
     /**
      * @return array<string, string>

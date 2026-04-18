@@ -9,15 +9,14 @@ use App\Data\PreviousDayContext;
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\MealPlan;
 use Generator;
+use Illuminate\Queue\Attributes\Timeout;
 use Throwable;
 use Workflow\ActivityStub;
 use Workflow\Workflow;
 
+#[Timeout(300)]
 final class MealPlanDayWorkflow extends Workflow
 {
-    /** @var int 5 minutes per day */
-    public $timeout = 300;
-
     public function failed(Throwable $throwable): void
     {
         $arguments = $this->storedWorkflow->workflowArguments();

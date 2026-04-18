@@ -11,17 +11,17 @@ use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\MaxExceptions;
+use Illuminate\Queue\Attributes\Timeout;
+use Illuminate\Queue\Attributes\Tries;
 
 /** @codeCoverageIgnore */
+#[MaxExceptions(3)]
+#[Timeout(120)]
+#[Tries(3)]
 final class AggregateUserDayJob implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
-
-    public int $tries = 3;
-
-    public int $timeout = 120;
-
-    public int $maxExceptions = 3;
 
     public function __construct(
         private readonly int $userId,

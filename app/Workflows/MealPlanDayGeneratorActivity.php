@@ -11,16 +11,15 @@ use App\Data\PreviousDayContext;
 use App\Enums\DietType;
 use App\Models\MealPlan;
 use App\Models\User;
+use Illuminate\Queue\Attributes\Tries;
 use Workflow\Activity;
 
 /**
  * @codeCoverageIgnore Activity classes are executed by the workflow engine
  */
+#[Tries(2)]
 final class MealPlanDayGeneratorActivity extends Activity
 {
-    /** @var int */
-    public $tries = 2;
-
     public function execute(
         User $user,
         int $dayNumber,

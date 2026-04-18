@@ -14,18 +14,15 @@ use App\Enums\MealPlanType;
 use App\Models\MealPlan;
 use App\Models\User;
 use Generator;
+use Illuminate\Queue\Attributes\Timeout;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 use Workflow\ActivityStub;
 use Workflow\Workflow;
 
+#[Timeout(1800)]
 final class MealPlanInitializeWorkflow extends Workflow
 {
-    /**
-     * @var int
-     */
-    public $timeout = 1800;
-
     /**
      * @param  array<int, DayMealsData>  $allDaysMeals
      * @return DataCollection<int, MealData>

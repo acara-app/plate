@@ -1,17 +1,25 @@
 import '../css/app.css';
 
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, router } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
 import { I18nextProvider } from 'react-i18next';
 import { registerSW } from 'virtual:pwa-register';
 import { initializeTheme } from './hooks/use-appearance';
-import i18n, { loadTranslations } from './i18n';
+import i18n, { loadTranslations, reloadTranslations } from './i18n';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Acara Plate';
 
 if (typeof window !== 'undefined') {
     registerSW({ immediate: true });
 }
+
+router.on('success', (event) => {
+    const locale = event.detail.page.props.locale as string | undefined;
+
+    if (locale && i18n.language !== locale) {
+        void reloadTranslations(locale);
+    }
+});
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),

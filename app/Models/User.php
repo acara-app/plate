@@ -8,6 +8,8 @@ use App\Data\UserSettingsData;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Attributes\Appends;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Prunable;
@@ -46,6 +48,16 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read Collection<int, HealthSyncSample> $healthSyncSamples
  * @property-read bool $has_meal_plan
  */
+#[Appends([
+    'is_onboarded',
+    'has_meal_plan',
+])]
+#[Hidden([
+    'password',
+    'remember_token',
+    'two_factor_secret',
+    'two_factor_recovery_codes',
+])]
 final class User extends Authenticatable implements MustVerifyEmail
 {
     /**
@@ -53,25 +65,10 @@ final class User extends Authenticatable implements MustVerifyEmail
      */
     use Billable, HasApiTokens, HasFactory, Notifiable, Prunable, TwoFactorAuthenticatable;
 
-    protected $appends = [
-        'is_onboarded',
-        'has_meal_plan',
-    ];
-
     /**
      * @var list<string>
      */
     protected $guarded = [];
-
-    /**
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-        'two_factor_secret',
-        'two_factor_recovery_codes',
-    ];
 
     /**
      * @return Builder<self>

@@ -53,7 +53,6 @@ export default function Edit({ status }: { status?: string }) {
                         {...UserProfileController.update.form()}
                         options={{
                             preserveScroll: true,
-                            only: ['translations'],
                         }}
                         className="space-y-6"
                     >

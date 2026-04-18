@@ -9,16 +9,16 @@ use App\Models\Conversation;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\MaxExceptions;
+use Illuminate\Queue\Attributes\Timeout;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Throwable;
 
+#[MaxExceptions(3)]
+#[Timeout(120)]
 final class SummarizeConversationJob implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
-
-    public int $timeout = 120;
-
-    public int $maxExceptions = 3;
 
     public function __construct(
         public readonly Conversation $conversation,

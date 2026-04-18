@@ -8,6 +8,7 @@ use App\Utilities\ConfigHelper;
 use Carbon\CarbonInterface;
 use Database\Factories\ConversationSummaryFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -33,14 +34,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Conversation $conversation
  * @property-read ConversationSummary|null $previousSummary
  */
+#[Table(name: 'conversation_summaries')]
 final class ConversationSummary extends Model
 {
     /** @use HasFactory<ConversationSummaryFactory> */
     use HasFactory;
 
     use HasUuids;
-
-    protected $table = 'conversation_summaries';
 
     protected $guarded = [];
 

@@ -6,16 +6,15 @@ namespace App\Workflows;
 
 use App\Data\DayMealsData;
 use App\Models\MealPlan;
+use Illuminate\Queue\Attributes\Tries;
 use Workflow\Activity;
 
 /**
  * @codeCoverageIgnore Activity classes are executed by the workflow engine
  */
+#[Tries(1)]
 final class SaveDayMealsActivity extends Activity
 {
-    /** @var int */
-    public $tries = 1;
-
     /**
      * @return array{day_number: int, meals_count: int}
      */

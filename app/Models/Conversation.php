@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\ConversationFactory;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, History> $messages
  * @property-read Collection<int, ConversationSummary> $summaries
  */
+#[Table(name: 'agent_conversations')]
 final class Conversation extends Model
 {
     /** @use HasFactory<ConversationFactory> */
@@ -33,8 +35,6 @@ final class Conversation extends Model
      * @var bool
      */
     public $incrementing = false;
-
-    protected $table = 'agent_conversations';
 
     protected $guarded = [];
 

@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\SubscriptionProductFactory;
+use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -25,20 +26,19 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  */
+#[Appends([
+    'formatted_price',
+    'formatted_yearly_price',
+    'yearly_savings',
+    'yearly_savings_percentage',
+    'coming_soon',
+])]
 final class SubscriptionProduct extends Model
 {
     /** @use HasFactory<SubscriptionProductFactory> */
     use HasFactory;
 
     protected $guarded = [];
-
-    protected $appends = [
-        'formatted_price',
-        'formatted_yearly_price',
-        'yearly_savings',
-        'yearly_savings_percentage',
-        'coming_soon',
-    ];
 
     public function getStripePriceId(string $interval = 'month'): ?string
     {
