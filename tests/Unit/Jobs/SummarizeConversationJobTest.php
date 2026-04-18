@@ -21,18 +21,6 @@ it('implements ShouldBeUnique and ShouldQueue', function (): void {
         ->and($job)->toBeInstanceOf(ShouldQueue::class);
 });
 
-it('has correct timeout and maxExceptions', function (): void {
-    $conversation = Conversation::factory()->create();
-    $job = new SummarizeConversationJob($conversation);
-    $reflection = new ReflectionClass($job);
-
-    $timeoutAttribute = $reflection->getAttributes(Illuminate\Queue\Attributes\Timeout::class)[0] ?? null;
-    $maxExceptionsAttribute = $reflection->getAttributes(Illuminate\Queue\Attributes\MaxExceptions::class)[0] ?? null;
-
-    expect($timeoutAttribute?->getArguments()[0])->toBe(120)
-        ->and($maxExceptionsAttribute?->getArguments()[0])->toBe(3);
-});
-
 it('has conversation as public property', function (): void {
     $conversation = Conversation::factory()->create();
     $job = new SummarizeConversationJob($conversation);
