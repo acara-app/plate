@@ -158,15 +158,15 @@ export default function Dashboard() {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-blue-950 dark:text-blue-50">
-                                        Instant advice. Just text.
+                                        {t('dashboard_cards.telegram.title')}
                                     </h3>
                                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                                        Ask what to eat. Check sugar spikes. Get
-                                        healthy swaps instantly. All from
-                                        Telegram, the chat app you already use.
+                                        {t(
+                                            'dashboard_cards.telegram.description',
+                                        )}
                                     </p>
                                     <div className="mt-4 flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400">
-                                        Connect your message app
+                                        {t('dashboard_cards.telegram.cta')}
                                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </div>
                                 </div>

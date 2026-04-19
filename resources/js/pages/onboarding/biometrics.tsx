@@ -54,6 +54,9 @@ export default function Biometrics({
         profile?.date_of_birth ?? '',
     );
     const [age, setAge] = useState<string>(profile?.age?.toString() ?? '');
+    const [bloodType, setBloodType] = useState<string>(
+        profile?.blood_type ?? '',
+    );
 
     const handleDateOfBirthChange = (value: string) => {
         setDateOfBirth(value);
@@ -238,16 +241,30 @@ export default function Biometrics({
 
                                     {/* Blood Type */}
                                     <div className="grid gap-2">
-                                        <Label htmlFor="blood_type">
-                                            {t(
-                                                'onboarding.biometrics.blood_type',
+                                        <div className="flex items-center justify-between">
+                                            <Label htmlFor="blood_type">
+                                                {t(
+                                                    'onboarding.biometrics.blood_type',
+                                                )}
+                                            </Label>
+                                            {bloodType && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setBloodType('')
+                                                    }
+                                                    className="text-xs text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                                >
+                                                    {t(
+                                                        'onboarding.biometrics.blood_type_clear',
+                                                    )}
+                                                </button>
                                             )}
-                                        </Label>
+                                        </div>
                                         <Select
                                             name="blood_type"
-                                            defaultValue={
-                                                profile?.blood_type || ''
-                                            }
+                                            value={bloodType}
+                                            onValueChange={setBloodType}
                                         >
                                             <SelectTrigger id="blood_type">
                                                 <SelectValue

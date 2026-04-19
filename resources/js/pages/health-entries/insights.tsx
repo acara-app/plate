@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card';
 import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
+import healthEntries from '@/routes/health-entries';
 import { index as mealPlansIndex } from '@/routes/meal-plans';
 import onboarding from '@/routes/onboarding';
 import { type BreadcrumbItem } from '@/types';
@@ -20,6 +21,8 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import {
     Activity,
     AlertTriangle,
+    ArrowRight,
+    Droplets,
     RefreshCw,
     Sparkles,
     TrendingUp,
@@ -93,11 +96,32 @@ export default function HealthEntriesInsights({
                         </div>
 
                         {!glucoseAnalysis.has_data ? (
-                            <Alert>
-                                <AlertDescription>
-                                    {t('health_entries.insights_page.no_data')}
-                                </AlertDescription>
-                            </Alert>
+                            <Card className="border-dashed border-primary/30 bg-primary/5">
+                                <CardContent className="flex flex-col items-center gap-5 py-12 text-center">
+                                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 ring-4 ring-primary/5">
+                                        <Droplets className="h-8 w-8 text-primary" />
+                                    </div>
+                                    <h2 className="max-w-md text-xl font-semibold">
+                                        {t(
+                                            'health_entries.insights_page.no_data.title',
+                                        )}
+                                    </h2>
+                                    <Button
+                                        asChild
+                                        size="lg"
+                                        className="gap-2"
+                                    >
+                                        <Link
+                                            href={healthEntries.dashboard().url}
+                                        >
+                                            {t(
+                                                'health_entries.insights_page.no_data.cta',
+                                            )}
+                                            <ArrowRight className="h-4 w-4" />
+                                        </Link>
+                                    </Button>
+                                </CardContent>
+                            </Card>
                         ) : (
                             <>
                                 {/* Glucose Summary Card */}

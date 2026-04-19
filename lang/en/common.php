@@ -153,6 +153,11 @@ return [
             'title' => 'Mobile Sync',
             'description' => 'Sync health data from your phone automatically.',
         ],
+        'telegram' => [
+            'title' => 'Instant advice. Just text.',
+            'description' => 'Ask what to eat. Check sugar spikes. Get healthy swaps instantly. All from Telegram, the chat app you already use.',
+            'cta' => 'Connect your message app',
+        ],
         'chat' => [
             'title' => 'Meet Altani',
             'description' => 'Your personal AI health coach for diabetes management, nutrition advice, and daily wellness support.',
@@ -197,6 +202,7 @@ return [
             'blood_type' => 'Blood Type',
             'blood_type_placeholder' => 'Select your blood type',
             'blood_type_help' => 'Optional — synced from Apple Health if available',
+            'blood_type_clear' => 'Clear blood type',
             'exit' => 'Exit',
             'continue' => 'Continue',
         ],
@@ -630,7 +636,10 @@ return [
             'your_glucose_insights' => 'Your Glucose Insights',
             'complete_profile' => 'Complete your profile to get personalized meal recommendations',
             'analysis_from_days' => 'Analysis from your past {{days}} days',
-            'no_data' => 'No glucose data available yet. Start tracking your glucose readings to get personalized insights.',
+            'no_data' => [
+                'title' => 'No readings yet — let\'s fix that',
+                'cta' => 'Log your first reading',
+            ],
             'glucose_overview' => [
                 'title' => 'Glucose Overview',
                 'based_on_readings' => 'Based on {{count}} readings',
