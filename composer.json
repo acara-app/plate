@@ -10,7 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.4 || ^8.5",
-        "acara-app/plate-core": "dev-main",
+        "acara-app/acara-core": "dev-main",
         "defstudio/telegraph": "^1.70.2",
         "durable-workflow/waterline": "^1.0.16",
         "durable-workflow/workflow": "^1.0.75",
@@ -141,9 +141,9 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "repositories": {
-        "plate-core": {
+        "acara-core": {
             "type": "vcs",
-            "url": "https://github.com/acara-app/plate-core.git"
+            "url": "https://github.com/acara-app/acara-core.git"
         }
     }
 }
