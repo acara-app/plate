@@ -42,7 +42,7 @@ Developers get the same idea in code form: a Laravel application that shows how 
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | **Acara Plate**       | The open-source, self-hostable Laravel web app, PWA, health AI agent, health data platform, and API backend.                          |
 | **Acara Health Sync** | Native iOS companion app that reads Apple Health with permission and sends encrypted health data directly to a user's Plate instance. |
-| **Plate Core**        | Premium Acara Cloud and private modules, including long-running semantic memory for preferences, goals, relationships, and context. It is not required for community Plate installs. |
+| **Acara Core**        | Premium Acara Cloud and private modules, including long-running semantic memory for preferences, goals, relationships, and context. It is not required for community Plate installs. |
 
 ## Product Links
 
