@@ -125,6 +125,10 @@ it('returns valid pricing structure for all models', function (ModelName $model)
     'Gemini 3.1 Pro' => [ModelName::GEMINI_3_1_PRO],
 ]);
 
+it('returns the default model', function (): void {
+    expect(ModelName::default())->toBe(ModelName::GPT_5_4_MINI);
+});
+
 it('has reasonable pricing ratios', function (ModelName $model): void {
     $pricing = $model->getPricing();
 
