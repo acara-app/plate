@@ -154,6 +154,11 @@ return [
             'title' => 'Synchro mobile',
             'description' => 'Synchronisez automatiquement vos données de santé depuis votre téléphone.',
         ],
+        'telegram' => [
+            'title' => 'Des conseils instantanés. Par message.',
+            'description' => 'Demandez quoi manger. Vérifiez les pics de glucose. Obtenez des alternatives saines instantanément. Tout sur Telegram, l\'application de messagerie que vous utilisez déjà.',
+            'cta' => 'Connecter votre messagerie',
+        ],
         'chat' => [
             'title' => 'Altani',
             'description' => 'Votre coach IA personnel pour le diabète, la nutrition et le bien-être quotidien.',
@@ -198,6 +203,7 @@ return [
             'blood_type' => 'Groupe sanguin',
             'blood_type_placeholder' => 'Sélectionnez votre groupe sanguin',
             'blood_type_help' => 'Facultatif — synchronisé depuis Apple Santé si disponible',
+            'blood_type_clear' => 'Effacer le groupe sanguin',
             'exit' => 'Quitter',
             'continue' => 'Continuer',
         ],
@@ -629,7 +635,10 @@ return [
             'your_glucose_insights' => 'Vos informations sur le glucose',
             'complete_profile' => 'Complétez votre profil pour obtenir des recommandations de repas personnalisées',
             'analysis_from_days' => 'Analyse de vos {{days}} derniers jours',
-            'no_data' => 'Aucune donnée de glucose disponible pour le moment. Commencez à suivre vos lectures de glucose pour obtenir des informations personnalisées.',
+            'no_data' => [
+                'title' => 'Aucune mesure pour l\'instant',
+                'cta' => 'Enregistrer ma première mesure',
+            ],
             'glucose_overview' => [
                 'title' => 'Aperçu du glucose',
                 'based_on_readings' => 'Basé sur {{count}} lectures',

@@ -81,6 +81,30 @@ it('may store biometrics without date_of_birth and blood_type', function (): voi
         ->blood_type->toBeNull();
 });
 
+it('may clear biometrics blood_type by submitting empty string', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'age' => 30,
+        'height' => 175,
+        'weight' => 70,
+        'sex' => Sex::Male->value,
+        'blood_type' => BloodType::APositive->value,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'age' => 30,
+            'height' => 175,
+            'weight' => 70,
+            'sex' => Sex::Male->value,
+            'blood_type' => '',
+        ]);
+
+    $response->assertRedirectToRoute('onboarding.identity.show');
+
+    expect($user->profile()->first())->blood_type->toBeNull();
+});
+
 it('requires age for biometrics', function (): void {
     $user = User::factory()->create();
 
