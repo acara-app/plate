@@ -13,28 +13,31 @@ Acara Plate is a self-hostable health AI agent platform for asking health questi
 > [!IMPORTANT]
 > Acara Plate is informational and educational software, not a medical device. It does not diagnose, treat, or replace a physician, registered dietitian, diabetes educator, or emergency care. Verify AI-generated nutrition guidance before using it for health decisions.
 
-## Why Acara Exists
+## Why We Built Acara
 
-Billions of people still struggle to see a doctor, ask health questions, or get clear science-based answers when they need them. Many end up with search results full of ads, misinformation, or paywalls instead of useful guidance.
+Most people still have to fight their way through ad-heavy search pages, closed portals, or paywalled articles just to get a straight answer about their health. Seeing a clinician can take days or weeks, and many languages, regions, and everyday questions never show up in mainstream tools at all.
 
-Acara's mission is to make reliable health AI easier to reach in everyday life.
+Acara exists to make practical, science-aware health guidance easier to reach at the moment someone is actually worried, curious, or trying to change a habit.
 
-Acara Plate is the core web platform for that mission. It brings questions, health data, progress, and day-to-day guidance into one place so the AI agent can respond with more context than a generic chatbot or single-purpose tracker.
+Acara Plate is the part you can run yourself. It pulls questions, health data, and day‑to‑day check‑ins into one place so the AI agent can answer with the context of a real person instead of a blank, one-off chat window.
 
-Developers get the same idea in code form: a Laravel application that shows how to build AI agents, health data ingestion, safety-aware prompts, PWA delivery, a Telegram-based chat interface, Apple Health sync, image analysis, and structured health workflows around a privacy-first product.
+For developers, Plate is a working reference: a Laravel app that shows how to build health agents, ingest device and manual data, design safety-aware prompts, ship a PWA and Telegram chat interface, sync Apple Health, run image analysis, and coordinate structured health workflows around a privacy-first product.
 
-## What the AI Agent Does
+## How the Agent Helps
 
-- **Ask AI:** Ask about symptoms, conditions, medications, vaccines, nutrition, mental health, habits, and next steps in plain language.
-- **Use personal context:** Let the agent consider health data you choose to share, including glucose, sleep, activity, weight, blood pressure, medications, food, and lifestyle notes.
-- **Guide healthier routines:** Get support for sleep, stress, hydration, movement, and daily habits through the [AI Health Coach](https://plate.acara.app/ai-health-coach).
-- **Support nutrition decisions:** Use nutrition and meal-planning features such as the [AI Nutritionist](https://plate.acara.app/ai-nutritionist), [AI Meal Planner](https://plate.acara.app/meal-planner), grocery lists, recipes, and glucose-aware food guidance.
-- **Connect Apple Health:** Use [Acara Health Sync](https://plate.acara.app/tools/health-sync) to send Apple Health data from iPhone to Plate. The iOS app is available on the [App Store](https://apps.apple.com/us/app/acara-health-sync/id6761504525).
-- **Use Telegram as a chat interface:** Message the supported Telegram bot to ask the same health, nutrition, meal-planning, and tracking questions you ask in the web app. It can also save health entries in natural language through the [Telegram health logging tool](https://plate.acara.app/tools/telegram-health-logging), for example "fasting glucose 102" or "took 10 units insulin".
-- **Scan and understand food:** Use public [free tools](https://plate.acara.app/tools) and image analysis workflows to inspect meals, estimate nutrition, and understand food choices faster.
-- **Stay safety-aware:** When a message looks urgent, the agent is instructed to point users toward the relevant local emergency number instead of treating the chat as medical care.
-- **Work across languages:** Acara is designed for multilingual use.
-- **Keep data in your control:** Health data connections start with user consent, and self-hosting gives developers and families more control over where sensitive data lives.
+Inside Plate, the AI agent acts as a health assistant that can:
+
+- Answer health questions in plain language about symptoms, conditions, medications, vaccines, nutrition, mental health, habits, and “what should I do next?” style decisions.
+- Use only the personal context you choose to share, including glucose, sleep, activity, weight, blood pressure, medications, meals, and free-text lifestyle notes.
+- Support healthier routines for sleep, stress, hydration, movement, and daily habits through the [AI Health Coach](https://plate.acara.app/ai-health-coach).
+- Help with food decisions through the [AI Nutritionist](https://plate.acara.app/ai-nutritionist), [AI Meal Planner](https://plate.acara.app/meal-planner), grocery lists, recipes, and glucose-aware food guidance.
+- Pull in Apple Health data from iPhone via [Acara Health Sync](https://plate.acara.app/tools/health-sync), the companion iOS app available on the [App Store](https://apps.apple.com/us/app/acara-health-sync/id6761504525).
+- Work from Telegram as a chat and logging interface, using the supported bot and the [Telegram health logging tool](https://plate.acara.app/tools/telegram-health-logging) to turn natural language like “fasting glucose 102” or “took 10 units insulin” into structured entries.
+- Scan and interpret meals using public [free tools](https://plate.acara.app/tools) and image-analysis workflows to estimate nutrition and make sense of food choices more quickly.
+- Stay safety-aware by directing clearly urgent messages toward the relevant local emergency number instead of treating the chat as medical care.
+- Work across languages so people are not locked to English to use the system.
+- Keep data under the user’s control, with consent-based health data connections and the option to self-host so developers, families, and clinics can decide where sensitive data lives.
+
 
 ## Ecosystem
 
