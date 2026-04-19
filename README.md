@@ -8,7 +8,7 @@
 
 **[Try Acara Plate](https://plate.acara.app/)** | **[Read What Acara Is](https://plate.acara.app/post/what-is-acara)** | **[Get Acara Health Sync on the App Store](https://apps.apple.com/us/app/acara-health-sync/id6761504525)**
 
-Acara Plate is a self-hostable health AI agent platform for asking health questions, connecting personal health data, tracking daily signals, and turning that context into practical guidance. Nutrition, diabetes support, meal planning, coaching, scanning, the Telegram chat interface, and Apple Health sync are features inside the broader Acara health AI system, not the whole product.
+Acara Plate is a self-hostable health AI agent platform for asking health questions, connecting personal health data, tracking daily signals, and turning that context into practical guidance. Nutrition, diabetes support, meal planning, coaching, scanning, the Telegram chat interface, and Apple Health sync are features inside the broader Acara health AI system.
 
 > [!IMPORTANT]
 > Acara Plate is informational and educational software, not a medical device. It does not diagnose, treat, or replace a physician, registered dietitian, diabetes educator, or emergency care. Verify AI-generated nutrition guidance before using it for health decisions.
