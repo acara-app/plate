@@ -1,9 +1,9 @@
 import { cn } from '@/lib/utils';
 import type { ChatStatus } from '@/types/chat';
 import { type UIMessage } from '@ai-sdk/react';
+import { code } from '@streamdown/code';
 import { AlertCircle, User } from 'lucide-react';
-import Markdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { Streamdown } from 'streamdown';
 
 interface ChatMessagesProps {
     messages: UIMessage[];
@@ -93,18 +93,36 @@ function MessageAvatar({ role }: { role: string }) {
     );
 }
 
-function MessagePart({ part }: { part: UIMessage['parts'][number] }) {
+function MessagePart({
+    part,
+    isStreaming,
+}: {
+    part: UIMessage['parts'][number];
+    isStreaming?: boolean;
+}) {
     switch (part.type) {
         case 'text':
             return (
                 <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <Markdown remarkPlugins={[remarkGfm]}>{part.text}</Markdown>
+                    <Streamdown
+                        animated
+                        isAnimating={isStreaming}
+                        plugins={{ code }}
+                    >
+                        {part.text}
+                    </Streamdown>
                 </div>
             );
         case 'reasoning':
             return (
                 <div className="prose prose-sm max-w-none text-muted-foreground italic dark:prose-invert">
-                    <Markdown remarkPlugins={[remarkGfm]}>{part.text}</Markdown>
+                    <Streamdown
+                        animated
+                        isAnimating={isStreaming}
+                        plugins={{ code }}
+                    >
+                        {part.text}
+                    </Streamdown>
                 </div>
             );
         case 'source-url':
@@ -172,7 +190,13 @@ function UserBubble({ message }: { message: UIMessage }) {
     );
 }
 
-function AssistantBubble({ message }: { message: UIMessage }) {
+function AssistantBubble({
+    message,
+    isStreaming,
+}: {
+    message: UIMessage;
+    isStreaming?: boolean;
+}) {
     const renderableParts = message.parts?.filter((part) => {
         if (part.type === 'text' || part.type === 'reasoning') {
             return part.text && part.text.trim().length > 0;
@@ -193,7 +217,11 @@ function AssistantBubble({ message }: { message: UIMessage }) {
             <div className="max-w-[80%] rounded-2xl rounded-bl-md bg-muted px-4 py-3 text-foreground shadow-sm">
                 <div className="space-y-2 text-sm">
                     {renderableParts.map((part, index) => (
-                        <MessagePart key={index} part={part} />
+                        <MessagePart
+                            key={index}
+                            part={part}
+                            isStreaming={isStreaming}
+                        />
                     ))}
                 </div>
             </div>
@@ -201,11 +229,17 @@ function AssistantBubble({ message }: { message: UIMessage }) {
     );
 }
 
-function MessageBubble({ message }: { message: UIMessage }) {
+function MessageBubble({
+    message,
+    isStreaming,
+}: {
+    message: UIMessage;
+    isStreaming?: boolean;
+}) {
     return message.role === 'user' ? (
         <UserBubble message={message} />
     ) : (
-        <AssistantBubble message={message} />
+        <AssistantBubble message={message} isStreaming={isStreaming} />
     );
 }
 
@@ -254,10 +288,20 @@ export default function ChatMessages({
         return <EmptyState />;
     }
 
+    const lastIndex = messages.length - 1;
+
     return (
         <div className="flex w-full flex-1 flex-col gap-4">
-            {messages.map((message) => (
-                <MessageBubble key={message.id} message={message} />
+            {messages.map((message, index) => (
+                <MessageBubble
+                    key={message.id}
+                    message={message}
+                    isStreaming={
+                        status === 'streaming' &&
+                        index === lastIndex &&
+                        message.role === 'assistant'
+                    }
+                />
             ))}
             {isSubmitting && <ThinkingIndicator />}
             {status === 'streaming' && <StreamingIndicator />}
