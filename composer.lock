@@ -4,8 +4,89 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e9fe810fd956e5ded97d8b7d64a7ae82",
+    "content-hash": "e81120d468b639d61df8a62bb3abb570",
     "packages": [
+        {
+            "name": "acara-app/acara-core",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:acara-app/acara-core.git",
+                "reference": "07b788c35ac3ce0681e7a3590493d31d47ec5e23"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/acara-app/acara-core/zipball/07b788c35ac3ce0681e7a3590493d31d47ec5e23",
+                "reference": "07b788c35ac3ce0681e7a3590493d31d47ec5e23",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/ai": "^0.5.1",
+                "laravel/framework": "^13.5",
+                "php": "^8.4 || ^8.5",
+                "spatie/laravel-data": "^4.20",
+                "spatie/laravel-package-tools": "^1.19"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.15",
+                "mockery/mockery": "^1.6",
+                "orchestra/testbench": "^11.0",
+                "pestphp/pest": "^4.4",
+                "pestphp/pest-plugin-arch": "^4.0",
+                "pestphp/pest-plugin-laravel": "^4.1",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Acara\\AcaraCore\\AcaraCoreServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Acara\\AcaraCore\\": "src/",
+                    "App\\": "src/",
+                    "Database\\Factories\\": "database/factories/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Acara\\AcaraCore\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "post-autoload-dump": [
+                    "@php vendor/bin/testbench package:discover --ansi"
+                ],
+                "analyse": [
+                    "vendor/bin/phpstan analyse"
+                ],
+                "format": [
+                    "vendor/bin/pint"
+                ],
+                "test": [
+                    "vendor/bin/pest"
+                ],
+                "test-coverage": [
+                    "vendor/bin/pest --coverage"
+                ]
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Proprietary Acara Plate premium modules (memory, billing, premium AI). Not open source.",
+            "support": {
+                "source": "https://github.com/acara-app/acara-core/tree/main",
+                "issues": "https://github.com/acara-app/acara-core/issues"
+            },
+            "time": "2026-04-19T14:19:17+00:00"
+        },
         {
             "name": "aws/aws-crt-php",
             "version": "v1.2.7",
@@ -16230,6 +16311,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "acara-app/acara-core": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": true,
