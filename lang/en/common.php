@@ -661,6 +661,12 @@ return [
         'no_plans' => 'You don\'t have any meal plans yet. Get started by chatting with Altani or generating one instantly!',
         'create_with_altani' => 'Chat with Altani',
         'generate_now' => 'Generate Now',
+        'generate_dialog' => [
+            'title' => 'Generate a new meal plan',
+            'description' => 'Choose how many days you\'d like us to plan for. You can always regenerate individual days later.',
+            'duration_label' => 'Number of days',
+            'confirm' => 'Generate plan',
+        ],
         'days' => 'days',
         'grocery_list' => 'Grocery List',
         'print' => 'Print',

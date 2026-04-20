@@ -31,6 +31,7 @@ it('stores meal plan for authenticated user', function (): void {
 
     $response = $this->actingAs($user)
         ->post(route('meal-plans.store'), [
+            'duration_days' => 3,
             'prompt' => 'Test custom prompt',
         ]);
 
@@ -44,6 +45,7 @@ it('stores diet type from request', function (): void {
 
     $response = $this->actingAs($user)
         ->post(route('meal-plans.store'), [
+            'duration_days' => 3,
             'prompt' => 'Test custom prompt',
             'diet_type' => DietType::Mediterranean->value,
         ]);
@@ -64,6 +66,7 @@ it('uses profile diet type as fallback when not provided', function (): void {
 
     $response = $this->actingAs($user)
         ->post(route('meal-plans.store'), [
+            'duration_days' => 3,
             'prompt' => 'Test custom prompt',
         ]);
 
@@ -83,6 +86,7 @@ it('uses balanced diet type when no diet type provided and profile has none', fu
 
     $response = $this->actingAs($user)
         ->post(route('meal-plans.store'), [
+            'duration_days' => 3,
             'prompt' => 'Test custom prompt',
         ]);
 
@@ -99,6 +103,7 @@ it('creates meal plan name based on diet type', function (): void {
 
     $response = $this->actingAs($user)
         ->post(route('meal-plans.store'), [
+            'duration_days' => 3,
             'diet_type' => DietType::Keto->value,
         ]);
 
@@ -140,3 +145,27 @@ it('creates meal plan name with correct duration', function (): void {
     $mealPlan = $user->mealPlans->first();
     expect($mealPlan->name)->toBe('7-Day Keto Plan');
 });
+
+it('requires duration_days', function (): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('meal-plans.store'), []);
+
+    $response->assertSessionHasErrors('duration_days');
+});
+
+it('rejects out-of-range duration_days', function (int $invalid): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('meal-plans.store'), [
+            'duration_days' => $invalid,
+        ]);
+
+    $response->assertSessionHasErrors('duration_days');
+})->with([0, -1, 8, 30]);

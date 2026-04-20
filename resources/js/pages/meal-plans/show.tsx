@@ -14,8 +14,10 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
 import { cn, generateUUID } from '@/lib/utils';
@@ -31,7 +33,7 @@ import {
     MealPlanGenerationStatus,
     Navigation,
 } from '@/types/meal-plan';
-import { Form, Head, Link, useForm, usePoll } from '@inertiajs/react';
+import { Head, Link, useForm, usePoll } from '@inertiajs/react';
 import {
     CalendarDays,
     CheckCircle2,
@@ -110,21 +112,15 @@ export default function MealPlans({
                                             className="w-fit gap-1.5 bg-primary/10 text-primary hover:bg-primary/10 dark:bg-primary/20"
                                         >
                                             <CalendarDays className="h-3.5 w-3.5" />
-                                            {t('meal_plans.current_day')}
+                                            {t('meal_plans.day_of', {
+                                                current: currentDay.day_number,
+                                                total: navigation.total_days,
+                                            })}
                                         </Badge>
-                                        <div>
-                                            <h2 className="flex items-center gap-2 text-2xl font-semibold">
-                                                <ChefHat className="h-6 w-6 text-primary" />
-                                                {currentDay.day_name}
-                                            </h2>
-                                            <p className="mt-1 text-sm text-muted-foreground">
-                                                {t('meal_plans.day_of', {
-                                                    current:
-                                                        currentDay.day_number,
-                                                    total: navigation.total_days,
-                                                })}
-                                            </p>
-                                        </div>
+                                        <h2 className="flex items-center gap-2 text-2xl font-semibold">
+                                            <ChefHat className="h-6 w-6 text-primary" />
+                                            {currentDay.day_name}
+                                        </h2>
                                     </div>
 
                                     <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] lg:min-w-96">
@@ -273,23 +269,7 @@ function EmptyMealPlanState() {
                                 {t('meal_plans.create_with_altani')}
                             </Link>
                         </Button>
-                        <Form {...mealPlans.store.form()}>
-                            {({ processing }) => (
-                                <Button
-                                    type="submit"
-                                    variant="outline"
-                                    className="w-full sm:w-auto"
-                                    disabled={processing}
-                                >
-                                    {processing ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                        <Sparkles className="h-4 w-4" />
-                                    )}
-                                    {t('meal_plans.generate_now')}
-                                </Button>
-                            )}
-                        </Form>
+                        <GenerateMealPlanDialog />
                     </div>
                 </div>
 
@@ -329,16 +309,9 @@ function PlanSummary({ mealPlan }: PlanSummaryProps) {
                             {mealPlan.duration_days} {t('meal_plans.days')}
                         </Badge>
                     </div>
-                    <div className="space-y-2">
-                        <h1 className="max-w-4xl text-3xl font-bold tracking-tight">
-                            {mealPlan.name || t('meal_plans.fallback_name')}
-                        </h1>
-                        {mealPlan.description && (
-                            <p className="max-w-3xl text-muted-foreground">
-                                {mealPlan.description}
-                            </p>
-                        )}
-                    </div>
+                    <h1 className="max-w-4xl text-3xl font-bold tracking-tight">
+                        {mealPlan.name || t('meal_plans.fallback_name')}
+                    </h1>
                 </div>
 
                 <div className="grid gap-2 sm:flex sm:flex-wrap lg:justify-end">
@@ -664,6 +637,89 @@ function RegenerateDayButton({
                     </AlertDialogCancel>
                     <AlertDialogAction onClick={handleRegenerate}>
                         {t('meal_plans.regenerate')}
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
+}
+
+function GenerateMealPlanDialog() {
+    const { t } = useTranslation('common');
+    const form = useForm({ duration_days: 7 });
+    const dayOptions = [1, 2, 3, 4, 5, 6, 7];
+
+    const handleSubmit = () => {
+        form.post(mealPlans.store.url());
+    };
+
+    return (
+        <AlertDialog>
+            <AlertDialogTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto">
+                    <Sparkles className="h-4 w-4" />
+                    {t('meal_plans.generate_now')}
+                </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>
+                        {t('meal_plans.generate_dialog.title')}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                        {t('meal_plans.generate_dialog.description')}
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <div className="space-y-2 py-2">
+                    <Label htmlFor="meal-plan-duration">
+                        {t('meal_plans.generate_dialog.duration_label')}
+                    </Label>
+                    <ToggleGroup
+                        id="meal-plan-duration"
+                        type="single"
+                        variant="outline"
+                        joined
+                        value={String(form.data.duration_days)}
+                        onValueChange={(value) => {
+                            if (value) {
+                                form.setData('duration_days', Number(value));
+                            }
+                        }}
+                        className="w-full"
+                    >
+                        {dayOptions.map((n) => (
+                            <ToggleGroupItem
+                                key={n}
+                                value={String(n)}
+                                aria-label={`${n} ${t('meal_plans.days')}`}
+                                className="flex-1"
+                            >
+                                {n}
+                            </ToggleGroupItem>
+                        ))}
+                    </ToggleGroup>
+                    {form.errors.duration_days && (
+                        <p className="text-sm text-destructive">
+                            {form.errors.duration_days}
+                        </p>
+                    )}
+                </div>
+
+                <AlertDialogFooter>
+                    <AlertDialogCancel disabled={form.processing}>
+                        {t('meal_plans.cancel')}
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                        onClick={handleSubmit}
+                        disabled={form.processing}
+                    >
+                        {form.processing ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <Sparkles className="h-4 w-4" />
+                        )}
+                        {t('meal_plans.generate_dialog.confirm')}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

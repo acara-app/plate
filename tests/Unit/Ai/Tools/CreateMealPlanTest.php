@@ -116,6 +116,21 @@ it('passes custom prompt to agent', function (): void {
         ->and($this->agent->calls[0]['customPrompt'])->toBe('Focus on Mediterranean diet');
 });
 
+it('defaults to 7 days when total_days is omitted', function (): void {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $request = new Request([]);
+    $result = $this->tool->handle($request);
+    $json = json_decode((string) $result, true);
+
+    expect($json['success'])->toBeTrue()
+        ->and($json['total_days'])->toBe(7)
+        ->and($json['requested_days'])->toBe(7)
+        ->and($json['was_capped'])->toBeFalse()
+        ->and($this->agent->calls[0]['totalDays'])->toBe(7);
+});
+
 it('handles exceptions during generation', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);

@@ -660,6 +660,12 @@ return [
         'no_plans' => 'Vous n\'avez pas encore de plans de repas. Commencez en discutant avec Altani ou en en générant un instantanément !',
         'create_with_altani' => 'Discuter avec Altani',
         'generate_now' => 'Générer maintenant',
+        'generate_dialog' => [
+            'title' => 'Générer un nouveau plan de repas',
+            'description' => 'Choisissez le nombre de jours à planifier. Vous pourrez toujours régénérer chaque journée individuellement plus tard.',
+            'duration_label' => 'Nombre de jours',
+            'confirm' => 'Générer le plan',
+        ],
         'days' => 'jours',
         'grocery_list' => 'Liste de courses',
         'print' => 'Imprimer',

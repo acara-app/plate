@@ -18,6 +18,8 @@ final readonly class CreateMealPlan implements Tool
 
     private const int MAX_DAYS = 7;
 
+    private const int DEFAULT_DAYS = 7;
+
     public function name(): string
     {
         return 'create_meal_plan';
@@ -25,7 +27,7 @@ final readonly class CreateMealPlan implements Tool
 
     public function description(): string
     {
-        return 'Generate a complete multi-day meal plan tailored to the user\'s profile, dietary preferences, health conditions, and goals. This creates a structured meal plan that can be saved and followed. Use this when the user explicitly asks for a meal plan or when in "Generate Meal Plan" mode.';
+        return 'Generate a complete multi-day meal plan tailored to the user\'s profile, dietary preferences, health conditions, and goals. This creates a structured meal plan that can be saved and followed. Use this when the user explicitly asks for a meal plan or when in "Generate Meal Plan" mode. If the user does not specify a day count, default to 7 days.';
     }
 
     public function handle(Request $request): string
@@ -39,8 +41,8 @@ final readonly class CreateMealPlan implements Tool
             ]);
         }
 
-        $totalDaysValue = $request['total_days'] ?? 1;
-        $requestedDays = is_numeric($totalDaysValue) ? (int) $totalDaysValue : 1;
+        $totalDaysValue = $request['total_days'] ?? self::DEFAULT_DAYS;
+        $requestedDays = is_numeric($totalDaysValue) ? (int) $totalDaysValue : self::DEFAULT_DAYS;
         $totalDays = max(self::MIN_DAYS, min($requestedDays, self::MAX_DAYS));
         $wasCapped = $requestedDays !== $totalDays;
         /** @var string|null $customPrompt */
@@ -76,7 +78,7 @@ final readonly class CreateMealPlan implements Tool
     {
         return [
             'total_days' => $schema->integer()
-                ->description('Number of days for the meal plan (minimum: 1, maximum: 7). If user requests more than 7, the system caps it to 7.')
+                ->description('Number of days for the meal plan (minimum: 1, maximum: 7, default: 7 when the user does not specify). If user requests more than 7, the system caps it to 7.')
                 ->required(),
             'custom_prompt' => $schema->string()->required()->nullable()
                 ->description('Optional custom instructions or preferences for the meal plan (e.g., "focus on Mediterranean diet", "high protein for muscle building")'),
