@@ -132,11 +132,6 @@ return [
     ],
 
     'dashboard_cards' => [
-        'health_insights' => [
-            'title' => 'Aperçus du diabète',
-            'description' => 'Consultez votre analyse de glucose, vos tendances et vos recommandations personnalisées',
-            'button' => 'Voir les aperçus',
-        ],
         'health_entries' => [
             'title' => 'Journal du diabète',
             'description' => 'Suivez votre glucose, insuline, médicaments et plus encore',
@@ -629,50 +624,6 @@ return [
                 'log_exercise' => '🏃 <strong>Suggestion :</strong> Enregistrez vos séances d\'exercice pour voir comment l\'activité physique affecte votre contrôle du glucose.',
             ],
         ],
-        'insights_page' => [
-            'title' => 'Informations sur le diabète',
-            'breadcrumb' => 'Informations sur le diabète',
-            'your_glucose_insights' => 'Vos informations sur le glucose',
-            'complete_profile' => 'Complétez votre profil pour obtenir des recommandations de repas personnalisées',
-            'analysis_from_days' => 'Analyse de vos {{days}} derniers jours',
-            'no_data' => [
-                'title' => 'Aucune mesure pour l\'instant',
-                'cta' => 'Enregistrer ma première mesure',
-            ],
-            'glucose_overview' => [
-                'title' => 'Aperçu du glucose',
-                'based_on_readings' => 'Basé sur {{count}} lectures',
-                'average_glucose' => 'Glucose moyen',
-                'time_in_range' => 'Temps dans la plage',
-                'above_range' => 'Au-dessus de la plage',
-                'mg_dl' => 'mg/dL',
-                'na' => 'N/D',
-            ],
-            'concerns' => [
-                'title' => 'Domaines nécessitant une attention',
-            ],
-            'improve_control' => [
-                'title' => 'Améliorez votre contrôle du glucose',
-                'description' => 'Générez un plan de repas personnalisé conçu pour aider à stabiliser votre glycémie',
-                'details' => 'Repas personnalisés adaptés à vos schémas de glucose, en se concentrant sur les aliments qui n\'augmenteront pas votre glycémie.',
-                'generate_button' => 'Générer un plan de repas optimisé',
-            ],
-            'recommended_actions' => [
-                'title' => 'Actions recommandées',
-                'view_plan' => [
-                    'title' => 'Voir le plan actuel',
-                    'description' => 'Consultez votre plan de repas existant de {{days}} jours',
-                    'button' => 'Aller aux plans de repas',
-                ],
-                'regenerate' => [
-                    'title' => 'Régénérer avec focus glucose',
-                    'description' => 'Créez un nouveau plan de repas optimisé pour vos schémas de glucose actuels',
-                    'button' => 'Régénérer le plan complet',
-                    'generating' => 'Génération en cours...',
-                ],
-            ],
-            'tip' => '💡 <strong>Conseil :</strong> Des horaires de repas cohérents et des macronutriments équilibrés peuvent aider à réduire la variabilité du glucose. Votre plan de repas personnalisé prend ces facteurs en compte.',
-        ],
     ],
     'sidebar' => [
         'group_label' => 'Planification',
@@ -681,9 +632,9 @@ return [
             'context' => 'Contexte',
             'home' => 'Accueil',
             'meal_plans' => 'Plans de repas',
-            'health_insights' => 'Informations sur le diabète',
             'health_entries' => 'Journal du diabète',
             'update_info' => 'Mettre à jour vos informations',
+            'mobile_sync' => 'Sync mobile',
             'dietary_preferences' => 'Préférences alimentaires',
             'health_conditions' => 'Conditions de santé',
             'medications' => 'Médicaments',

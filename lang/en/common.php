@@ -131,11 +131,6 @@ return [
     ],
 
     'dashboard_cards' => [
-        'health_insights' => [
-            'title' => 'Glucose Insights',
-            'description' => 'See how your choices are affecting your health.',
-            'button' => 'Check Trends',
-        ],
         'health_entries' => [
             'title' => 'Logbook',
             'description' => 'Log your vitals, food, and meds in seconds.',
@@ -630,50 +625,6 @@ return [
                 'log_exercise' => '🏃 <strong>Suggestion:</strong> Log your exercise sessions to see how physical activity affects your glucose control.',
             ],
         ],
-        'insights_page' => [
-            'title' => 'Diabetes Insights',
-            'breadcrumb' => 'Diabetes Insights',
-            'your_glucose_insights' => 'Your Glucose Insights',
-            'complete_profile' => 'Complete your profile to get personalized meal recommendations',
-            'analysis_from_days' => 'Analysis from your past {{days}} days',
-            'no_data' => [
-                'title' => 'No readings yet — let\'s fix that',
-                'cta' => 'Log your first reading',
-            ],
-            'glucose_overview' => [
-                'title' => 'Glucose Overview',
-                'based_on_readings' => 'Based on {{count}} readings',
-                'average_glucose' => 'Average Glucose',
-                'time_in_range' => 'Time in Range',
-                'above_range' => 'Above Range',
-                'mg_dl' => 'mg/dL',
-                'na' => 'N/A',
-            ],
-            'concerns' => [
-                'title' => 'Areas Needing Attention',
-            ],
-            'improve_control' => [
-                'title' => 'Improve Your Glucose Control',
-                'description' => 'Generate a personalized meal plan designed to help stabilize your blood sugar levels',
-                'details' => 'Personalized meals tailored to your glucose patterns, focusing on foods that won\'t spike your blood sugar.',
-                'generate_button' => 'Generate Optimized Meal Plan',
-            ],
-            'recommended_actions' => [
-                'title' => 'Recommended Actions',
-                'view_plan' => [
-                    'title' => 'View Current Plan',
-                    'description' => 'Review your existing {{days}}-day meal plan',
-                    'button' => 'Go to Meal Plans',
-                ],
-                'regenerate' => [
-                    'title' => 'Regenerate with Glucose Focus',
-                    'description' => 'Create a new meal plan optimized for your current glucose patterns',
-                    'button' => 'Regenerate Entire Plan',
-                    'generating' => 'Generating...',
-                ],
-            ],
-            'tip' => '💡 <strong>Tip:</strong> Consistent meal timing and balanced macronutrients can help reduce glucose variability. Your personalized meal plan takes these factors into account.',
-        ],
     ],
     'sidebar' => [
         'group_label' => 'Start Here',
@@ -682,9 +633,9 @@ return [
             'context' => 'My Profile',
             'home' => 'Home',
             'meal_plans' => 'My Menu',
-            'health_insights' => 'Health Patterns',
             'health_entries' => 'Logbook',
             'update_info' => 'Personal Details',
+            'mobile_sync' => 'Mobile Sync',
             'dietary_preferences' => 'Food Preferences',
             'health_conditions' => 'Health Conditions',
             'medications' => 'Medications',

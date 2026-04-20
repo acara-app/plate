@@ -28,7 +28,6 @@ import {
     Send,
     Smartphone,
     Sparkles,
-    TrendingUp,
     Utensils,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -215,32 +214,6 @@ export default function Dashboard() {
                                     <p className="mt-1 text-sm text-muted-foreground">
                                         {t(
                                             'dashboard_cards.meal_plans.description',
-                                        )}
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </Link>
-
-                    {/* My Trends Card */}
-                    <Link href={healthEntries.insights().url} className="group">
-                        <Card className="h-full transition-all hover:border-primary/50 hover:shadow-md">
-                            <CardContent className="flex h-full flex-col justify-between p-5">
-                                <div className="flex items-start justify-between">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
-                                        <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                                    </div>
-                                    <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">
-                                        {t(
-                                            'dashboard_cards.health_insights.title',
-                                        )}
-                                    </h3>
-                                    <p className="mt-1 text-sm text-muted-foreground">
-                                        {t(
-                                            'dashboard_cards.health_insights.description',
                                         )}
                                     </p>
                                 </div>

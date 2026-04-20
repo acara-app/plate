@@ -173,14 +173,14 @@ it('has correct subject in mail', function (): void {
     expect($mailMessage->subject)->toBe('Your Weekly Glucose Report');
 });
 
-it('contains action button to glucose action page in mail', function (): void {
+it('contains action button to meal plans page in mail', function (): void {
     $analysisResult = createNotificationAnalysisData();
     $notification = new GlucoseReportNotification($analysisResult);
     $user = User::factory()->create();
 
     $mailMessage = $notification->toMail($user);
 
-    expect($mailMessage->viewData['mealPlanUrl'])->toContain('health-entries/insights');
+    expect($mailMessage->viewData['mealPlanUrl'])->toContain('meal-plans');
 });
 
 it('contains correct structure in database notification', function (): void {
