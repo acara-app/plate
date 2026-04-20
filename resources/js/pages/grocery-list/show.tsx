@@ -4,7 +4,6 @@ import {
     toggleItem,
 } from '@/actions/App/Http/Controllers/GroceryListController';
 import printGroceryList from '@/actions/App/Http/Controllers/PrintGroceryListController';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import mealPlans from '@/routes/meal-plans';
@@ -15,14 +14,8 @@ import {
     type GroceryList,
     type MealPlanSummary,
 } from '@/types/grocery-list';
-import { Head, Link, router, useForm, usePoll } from '@inertiajs/react';
-import {
-    ArrowLeft,
-    Loader2,
-    Printer,
-    RefreshCw,
-    ShoppingCart,
-} from 'lucide-react';
+import { Head, router, useForm, usePoll } from '@inertiajs/react';
+import { Loader2, Printer, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -91,22 +84,6 @@ export default function GroceryListPage({
                 {/* Header */}
                 <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-start sm:justify-between md:p-5">
                     <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                aria-label={t('grocery_list.back_to_meal_plan')}
-                                asChild
-                            >
-                                <Link href={mealPlans.index().url}>
-                                    <ArrowLeft className="h-4 w-4" />
-                                </Link>
-                            </Button>
-                            <Badge variant="default" className="gap-1.5">
-                                <ShoppingCart className="h-3.5 w-3.5" />
-                                {t('grocery_list.title')}
-                            </Badge>
-                        </div>
                         <h1 className="text-3xl font-bold tracking-tight">
                             {t('grocery_list.title')}
                         </h1>

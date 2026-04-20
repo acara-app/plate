@@ -94,7 +94,6 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
 
     Route::get('health-entries', Web\HealthEntry\ListHealthEntryController::class)->name('health-entries.index');
     Route::get('health-entries/tracking', Web\HealthEntry\DashboardHealthEntryController::class)->name('health-entries.dashboard');
-    Route::get('health-entries/insights', Web\HealthEntry\InsightsHealthEntryController::class)->name('health-entries.insights');
     Route::post('health-entries', Web\HealthEntry\StoreHealthEntryController::class)->name('health-entries.store');
     Route::put('health-entries/{healthSyncSample}', Web\HealthEntry\UpdateHealthEntryController::class)->name('health-entries.update');
     Route::delete('health-entries/{healthSyncSample}', Web\HealthEntry\DestroyHealthEntryController::class)->name('health-entries.destroy');

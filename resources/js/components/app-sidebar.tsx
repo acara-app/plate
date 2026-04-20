@@ -14,8 +14,8 @@ import {
 import { UpgradeButton } from '@/components/upgrade-button';
 import useSharedProps from '@/hooks/use-shared-props';
 import { dashboard, privacy, terms } from '@/routes';
-import healthEntries from '@/routes/health-entries';
 import mealPlans from '@/routes/meal-plans';
+import mobileSync from '@/routes/mobile-sync';
 import biometrics from '@/routes/onboarding/biometrics';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
@@ -25,7 +25,7 @@ import {
     FileText,
     HeartIcon,
     ShieldCheck,
-    TrendingUp,
+    Smartphone,
     UserPen,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -57,9 +57,9 @@ const getProfileNavItems = (t: (key: string) => string): NavItem[] => [
         icon: UserPen,
     },
     {
-        title: t('sidebar.nav.health_insights'),
-        href: healthEntries.insights(),
-        icon: TrendingUp,
+        title: t('sidebar.nav.mobile_sync'),
+        href: mobileSync.edit(),
+        icon: Smartphone,
     },
 ];
 
