@@ -110,9 +110,19 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                {!currentUser?.is_verified && enablePremiumUpgrades && (
-                    <UpgradeButton />
-                )}
+                <SidebarMenu>
+                    {!currentUser?.is_verified && enablePremiumUpgrades && (
+                        <SidebarMenuItem>
+                            <SidebarMenuButton
+                                asChild
+                                className="rounded-lg border border-purple-300 bg-purple-50 p-3 hover:bg-purple-100 hover:text-purple-900 dark:border-purple-700 dark:bg-purple-950/50 dark:hover:bg-purple-900/50 dark:hover:text-purple-100"
+                                tooltip={{ children: 'Upgrade' }}
+                            >
+                                <UpgradeButton />
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    )}
+                </SidebarMenu>
                 <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
