@@ -36,6 +36,7 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <env name="SIDECAR_HMAC_SECRET" value="test-secret-must-be-at-least-sixteen-chars-long"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
     </php>
 </phpunit>

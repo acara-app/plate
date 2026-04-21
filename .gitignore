@@ -1,6 +1,9 @@
 /.phpunit.cache
 /bootstrap/ssr
 /node_modules
+/sidecar/chat-sdk/node_modules
+/sidecar/chat-sdk/dist
+/sidecar/chat-sdk/.env
 /public/build
 /public/hot
 /public/test_temp

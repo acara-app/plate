@@ -164,6 +164,10 @@ php artisan telegraph:new-bot
 php artisan telegraph:set-webhook
 ```
 
+## Messaging Sidecar
+
+The repository now includes a standalone Node/TypeScript sidecar in [sidecar/chat-sdk](sidecar/chat-sdk/README.md). It is intended to own future messaging-platform transport concerns such as Discord gateway handling, WhatsApp webhooks, and platform-specific request verification, while Laravel remains the source of truth for users, conversations, health data, and AI orchestration.
+
 ## Data and Health Context
 
 Acara Plate uses structured profile data, health entries, conversation context, food references, and user-approved device data to generate more relevant AI guidance. Food data is designed around USDA FoodData Central imports and application-specific glycemic context.

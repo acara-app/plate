@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\Messaging\ChatTurnsController;
 use App\Http\Controllers\Api\V2 as ApiV2;
 use Illuminate\Support\Facades\Route;
 
@@ -16,3 +17,11 @@ Route::prefix('v2/sync')->group(function (): void {
             ->name('api.v2.sync.health-entries');
     });
 });
+
+Route::middleware('sidecar.signature')
+    ->prefix('v2/messaging/platforms/{platform}/users/{platformUserId}')
+    ->name('api.v2.messaging.')
+    ->group(function (): void {
+        Route::post('chat-turns', [ChatTurnsController::class, 'store'])
+            ->name('chat-turns.store');
+    });

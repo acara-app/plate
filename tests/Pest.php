@@ -20,3 +20,20 @@ pest()->extend(TestCase::class)
 expect()->extend('toBeOne', fn () => $this->toBe(1));
 
 function something(): void {}
+
+/**
+ * @param  array<string, mixed>|null  $body
+ * @return array{'X-Sidecar-Signature': string, 'X-Sidecar-Timestamp': string}
+ */
+function signSidecarHeaders(?array $body = null, ?string $secret = null, ?int $timestamp = null): array
+{
+    $secret ??= (string) config('plate.sidecar.hmac_secret');
+    $timestamp ??= now()->timestamp;
+    $rawBody = $body === null ? '' : json_encode($body, JSON_THROW_ON_ERROR);
+    $signature = hash_hmac('sha256', $timestamp.'.'.$rawBody, $secret);
+
+    return [
+        'X-Sidecar-Signature' => $signature,
+        'X-Sidecar-Timestamp' => (string) $timestamp,
+    ];
+}

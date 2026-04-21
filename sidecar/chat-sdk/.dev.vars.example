@@ -1,0 +1,12 @@
+# Copy this file to `.dev.vars` for local `wrangler dev`.
+# `.dev.vars` is git-ignored; never commit real secrets.
+
+# Shared secret for signing requests to Plate. Must match the value of
+# SIDECAR_HMAC_SECRET in Plate's .env.
+SIDECAR_HMAC_SECRET="dev-secret-change-me-and-keep-me-long-please"
+
+# Base URL of the Laravel app. For Herd on macOS this is usually http://plate.test.
+PLATE_APP_URL="http://plate.test"
+
+# info | debug | warn | error
+LOG_LEVEL="debug"

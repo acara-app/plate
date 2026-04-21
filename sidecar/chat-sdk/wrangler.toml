@@ -1,0 +1,24 @@
+name = "acara-chat-sdk"
+main = "src/index.ts"
+compatibility_date = "2026-04-21"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[observability]
+enabled = true
+
+# Replace ids after running:
+#   npx wrangler kv namespace create SIDECAR_USER_CACHE
+#   npx wrangler kv namespace create SIDECAR_USER_CACHE --preview
+[[kv_namespaces]]
+binding = "SIDECAR_USER_CACHE"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+preview_id = "REPLACE_WITH_PREVIEW_KV_NAMESPACE_ID"
+
+# Non-secret environment variables. Secrets go through `wrangler secret put`.
+[vars]
+LOG_LEVEL = "info"
+PLATE_APP_URL = "https://plate.example.com"
+
+# Secrets expected at runtime (set via `wrangler secret put <NAME>`):
+#   SIDECAR_HMAC_SECRET   Shared secret matching Plate's SIDECAR_HMAC_SECRET.
