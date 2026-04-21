@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Carbon\CarbonInterface;
+use Database\Factories\UserChatPlatformLinkFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -14,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int|null $user_id
  * @property string $platform
- * @property string $platform_user_id
+ * @property string|null $platform_user_id
  * @property string|null $platform_chat_id
  * @property string|null $conversation_id
  * @property string|null $linking_token
@@ -27,6 +29,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class UserChatPlatformLink extends Model
 {
+    /** @use HasFactory<UserChatPlatformLinkFactory> */
+    use HasFactory;
+
     protected $guarded = [];
 
     public function casts(): array
@@ -96,6 +101,15 @@ final class UserChatPlatformLink extends Model
     protected function forUser(Builder $query, string $platform, string $platformUserId): void
     {
         $query->where('platform', $platform)->where('platform_user_id', $platformUserId);
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function active(Builder $query): void
+    {
+        $query->where('is_active', true);
     }
 
     /**

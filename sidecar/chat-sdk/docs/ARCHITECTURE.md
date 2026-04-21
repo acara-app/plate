@@ -142,17 +142,21 @@ the sidecar; it is a symmetric machine-to-machine transport.
 - **HMAC, not Sanctum.** The sidecar is server-to-server; a symmetric shared
   secret is sufficient and matches the pattern Stripe/Slack/GitHub use for
   their own webhooks.
-- **Polymorphic `user_chat_platform_links` table.** Telegram keeps its
-  `user_telegram_chats` table (with its Telegraph FK); the new table is
-  sidecar-owned and platform-agnostic.
+- **Polymorphic `user_chat_platform_links` table.** One linking table for every
+  platform — Telegram and future sidecar platforms both live here, scoped by a
+  `platform` column. Telegram's row stores the native Telegram chat id in
+  `platform_user_id`; the Telegraph row is resolved at runtime from the webhook
+  context, so the table has no FK dependency on `defstudio/telegraph`.
 - **No Vercel AI SDK dependency (yet).** We borrow the `UIMessage` shape as
   inspiration only. If the sidecar ever needs to generate or transform AI
   output itself, add it then.
 
-## Why not migrate Telegram?
+## Telegram: shared table, in-process handling
 
-Telegram uses `defstudio/telegraph`, which depends on Plate's Eloquent models
-(`TelegraphChat`) and already has tests. Moving it to the sidecar would force
-a re-implementation of chat-id resolution and give up existing coverage. The
-sidecar is the path for _new_ platforms; Telegram stays where it is unless
-there is a concrete reason to move it.
+Telegram shares `user_chat_platform_links` with every other platform (rows
+scoped by `platform = 'telegram'`), but the webhook handler, command loop, and
+reply transport stay in Plate via `defstudio/telegraph`. Moving the transport
+itself to the sidecar would force a re-implementation of chat-id resolution
+and give up existing Pest coverage. The sidecar is the path for _new_
+platforms; Telegram's transport stays where it is unless there is a concrete
+reason to move it.

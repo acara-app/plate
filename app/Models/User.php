@@ -132,12 +132,24 @@ final class User extends Authenticatable implements MustVerifyEmail
     // @codeCoverageIgnoreEnd
 
     /**
-     * @return HasOne<UserTelegramChat, $this>
+     * @return HasOne<UserChatPlatformLink, $this>
      */
     public function telegramChat(): HasOne
     {
         // @codeCoverageIgnoreStart
-        return $this->hasOne(UserTelegramChat::class)->where('is_active', true);
+        return $this->hasOne(UserChatPlatformLink::class)
+            ->where('platform', 'telegram')
+            ->where('is_active', true);
+        // @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * @return HasMany<UserChatPlatformLink, $this>
+     */
+    public function chatPlatformLinks(): HasMany
+    {
+        // @codeCoverageIgnoreStart
+        return $this->hasMany(UserChatPlatformLink::class);
         // @codeCoverageIgnoreEnd
     }
 

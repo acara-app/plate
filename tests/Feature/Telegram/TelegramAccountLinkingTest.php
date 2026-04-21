@@ -3,43 +3,34 @@
 declare(strict_types=1);
 
 use App\Models\User;
-use App\Models\UserTelegramChat;
+use App\Models\UserChatPlatformLink;
 use App\Services\Telegram\TelegramWebhookHandler;
-use DefStudio\Telegraph\Models\TelegraphBot;
-use DefStudio\Telegraph\Models\TelegraphChat;
 
 covers(TelegramWebhookHandler::class);
 
-it('links telegram account and removes duplicates', function (): void {
+it('links telegram account and removes duplicates for the same user', function (): void {
     $user = User::factory()->create();
-    $bot = TelegraphBot::factory()->create();
 
-    $telegraphChat = TelegraphChat::factory()->for($bot, 'bot')->create([
-        'chat_id' => '123456789',
+    $existingLink = UserChatPlatformLink::factory()->telegram()->linked($user)->create([
+        'platform_user_id' => '123456789',
     ]);
 
-    $existingChat = UserTelegramChat::factory()->for($user)->create([
-        'telegraph_chat_id' => $telegraphChat->id,
-        'is_active' => true,
-        'linked_at' => now(),
-    ]);
-
-    $pendingChat = UserTelegramChat::factory()->for($user)->create([
-        'telegraph_chat_id' => null,
-        'is_active' => true,
+    $pendingLink = UserChatPlatformLink::factory()->telegram()->pending($user)->create([
         'linking_token' => 'ABC123XY',
         'token_expires_at' => now()->addHours(24),
-        'linked_at' => null,
     ]);
 
-    UserTelegramChat::query()
-        ->where('user_id', $user->id)
-        ->where('telegraph_chat_id', $telegraphChat->id)
-        ->where('id', '!=', $pendingChat->id)
+    UserChatPlatformLink::query()
+        ->where('platform', 'telegram')
+        ->where('id', '!=', $pendingLink->id)
+        ->where(function ($query) use ($pendingLink): void {
+            $query->where('user_id', $pendingLink->user_id)
+                ->orWhere('platform_user_id', '123456789');
+        })
         ->delete();
 
-    $pendingChat->update(['telegraph_chat_id' => $telegraphChat->id]);
+    $pendingLink->update(['platform_user_id' => '123456789']);
 
-    expect(UserTelegramChat::query()->find($existingChat->id))->toBeNull()
-        ->and($pendingChat->fresh()->telegraph_chat_id)->toBe($telegraphChat->id);
+    expect(UserChatPlatformLink::query()->find($existingLink->id))->toBeNull()
+        ->and($pendingLink->fresh()->platform_user_id)->toBe('123456789');
 });

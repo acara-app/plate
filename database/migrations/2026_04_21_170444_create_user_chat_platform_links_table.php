@@ -14,7 +14,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('platform', 32);
-            $table->string('platform_user_id');
+            $table->string('platform_user_id')->nullable();
             $table->string('platform_chat_id')->nullable();
             $table->string('conversation_id')->nullable();
             $table->string('linking_token', 16)->nullable();

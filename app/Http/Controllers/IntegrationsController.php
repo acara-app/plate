@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\UserTelegramChat;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,7 +21,7 @@ final class IntegrationsController
 
         return Inertia::render('integrations/edit', [
             'telegram' => [
-                'is_connected' => $telegramChat instanceof UserTelegramChat && $telegramChat->is_active && $telegramChat->linked_at !== null,
+                'is_connected' => $telegramChat?->linked_at !== null,
                 'linking_token' => $telegramChat?->linking_token,
                 'token_expires_at' => $telegramChat?->token_expires_at?->toIso8601String(),
                 'connected_at' => $telegramChat?->linked_at?->toIso8601String(),
@@ -37,21 +36,18 @@ final class IntegrationsController
 
         abort_if($user === null, 401);
 
-        $userTelegramChat = $user->telegramChat;
+        $user->telegramChat?->update(['is_active' => false]);
 
-        if ($userTelegramChat !== null) {
-            $userTelegramChat->update(['is_active' => false]);
-        }
-
-        $newUserTelegramChat = $user->telegramChat()->create([
+        $newLink = $user->chatPlatformLinks()->create([
+            'platform' => 'telegram',
             'is_active' => true,
         ]);
 
-        $token = $newUserTelegramChat->generateToken();
+        $token = $newLink->generateToken(expiresInHours: 24);
 
         return to_route('integrations.edit')->with([
             'telegram_token' => $token,
-            'token_expires_at' => $newUserTelegramChat->token_expires_at?->toIso8601String(),
+            'token_expires_at' => $newLink->token_expires_at?->toIso8601String(),
         ]);
     }
 
@@ -61,7 +57,9 @@ final class IntegrationsController
 
         abort_if($user === null, 401);
 
-        $user->telegramChat()->update(['is_active' => false]);
+        $user->chatPlatformLinks()
+            ->where('platform', 'telegram')
+            ->update(['is_active' => false]);
 
         return to_route('integrations.edit')->with('status', 'telegram-disconnected');
     }

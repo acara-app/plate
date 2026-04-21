@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\IntegrationsController;
 use App\Models\User;
-use App\Models\UserTelegramChat;
+use App\Models\UserChatPlatformLink;
 
 covers(IntegrationsController::class);
 
@@ -19,7 +19,8 @@ it('renders integrations page', function (): void {
 
 it('shows connected state when telegram is linked', function (): void {
     $user = User::factory()->create();
-    UserTelegramChat::factory()->for($user)->create([
+    UserChatPlatformLink::factory()->telegram()->create([
+        'user_id' => $user->id,
         'is_active' => true,
         'linked_at' => now(),
     ]);
@@ -55,12 +56,14 @@ it('generates telegram token', function (): void {
 
     expect($user->fresh()->telegramChat)
         ->not->toBeNull()
-        ->is_active->toBeTrue();
+        ->is_active->toBeTrue()
+        ->platform->toBe('telegram');
 });
 
 it('deactivates existing links when generating new token', function (): void {
     $user = User::factory()->create();
-    $oldLink = UserTelegramChat::factory()->for($user)->create([
+    $oldLink = UserChatPlatformLink::factory()->telegram()->create([
+        'user_id' => $user->id,
         'is_active' => true,
     ]);
 
@@ -74,7 +77,8 @@ it('deactivates existing links when generating new token', function (): void {
 
 it('disconnects telegram integration', function (): void {
     $user = User::factory()->create();
-    UserTelegramChat::factory()->for($user)->create([
+    UserChatPlatformLink::factory()->telegram()->create([
+        'user_id' => $user->id,
         'is_active' => true,
         'linked_at' => now(),
     ]);
