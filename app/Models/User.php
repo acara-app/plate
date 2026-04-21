@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Data\UserSettingsData;
+use App\Enums\ChatPlatform;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -132,13 +133,22 @@ final class User extends Authenticatable implements MustVerifyEmail
     // @codeCoverageIgnoreEnd
 
     /**
-     * @return HasOne<UserTelegramChat, $this>
+     * @return HasMany<UserChatPlatformLink, $this>
      */
-    public function telegramChat(): HasOne
+    public function chatPlatformLinks(): HasMany
     {
-        // @codeCoverageIgnoreStart
-        return $this->hasOne(UserTelegramChat::class)->where('is_active', true);
-        // @codeCoverageIgnoreEnd
+        return $this->hasMany(UserChatPlatformLink::class);
+    }
+
+    /**
+     * @return HasOne<UserChatPlatformLink, $this>
+     */
+    public function activeChatPlatformLink(ChatPlatform $platform): HasOne
+    {
+        return $this->hasOne(UserChatPlatformLink::class)
+            ->where('platform', $platform)
+            ->where('is_active', true)
+            ->latestOfMany();
     }
 
     /**

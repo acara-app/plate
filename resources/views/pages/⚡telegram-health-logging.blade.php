@@ -122,8 +122,8 @@ class extends Component
                         <div>
                             <strong class="text-slate-900 dark:text-white">Open Telegram</strong>
                             <p class="text-sm text-slate-600 dark:text-slate-400">
-                                Search for <strong>{{ config('plate.telegram_bot_username') }}</strong> or
-                                <a href="https://t.me/{{ config('plate.telegram_bot_username') }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline">click here to open</a>
+                                Search for <strong>{{ config('messaging.platforms.telegram.bot_username') }}</strong> or
+                                <a href="https://t.me/{{ config('messaging.platforms.telegram.bot_username') }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline">click here to open</a>
                             </p>
                         </div>
                     </li>

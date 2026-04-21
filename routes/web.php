@@ -141,8 +141,8 @@ Route::middleware('auth')->group(function (): void {
     Route::delete('settings/mobile-sync/{mobileSyncDevice}', [Web\MobileSyncController::class, 'disconnect'])->name('mobile-sync.destroy');
 
     Route::get('settings/integrations', [Web\IntegrationsController::class, 'edit'])->name('integrations.edit');
-    Route::post('settings/integrations/telegram/token', [Web\IntegrationsController::class, 'generateTelegramToken'])->name('integrations.telegram.token');
-    Route::delete('settings/integrations/telegram', [Web\IntegrationsController::class, 'disconnectTelegram'])->name('integrations.telegram.destroy');
+    Route::post('settings/integrations/{platform}/token', [Web\IntegrationsController::class, 'connect'])->name('integrations.platform.token');
+    Route::delete('settings/integrations/{platform}', [Web\IntegrationsController::class, 'disconnect'])->name('integrations.platform.destroy');
 
     Route::get('settings/two-factor', [Web\UserTwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');

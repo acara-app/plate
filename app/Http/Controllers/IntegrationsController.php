@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\UserTelegramChat;
+use App\Actions\Messaging\DisconnectChatPlatformLink;
+use App\Actions\Messaging\GenerateChatPlatformLinkToken;
+use App\Data\Messaging\ChatPlatformIntegrationData;
+use App\Enums\ChatPlatform;
+use App\Models\User;
+use App\Models\UserChatPlatformLink;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,55 +19,53 @@ final class IntegrationsController
 {
     public function edit(Request $request): Response
     {
+        /** @var User $user */
         $user = $request->user();
 
-        abort_if($user === null, 401);
+        $links = $user->chatPlatformLinks()
+            ->where('is_active', true)
+            ->get()
+            ->keyBy(fn (UserChatPlatformLink $link) => $link->platform->value);
 
-        $telegramChat = $user->telegramChat;
+        $platforms = collect(ChatPlatform::cases())
+            ->map(fn (ChatPlatform $platform): ChatPlatformIntegrationData => ChatPlatformIntegrationData::fromLink(
+                $platform,
+                $links->get($platform->value),
+            ))
+            ->values();
 
         return Inertia::render('integrations/edit', [
-            'telegram' => [
-                'is_connected' => $telegramChat instanceof UserTelegramChat && $telegramChat->is_active && $telegramChat->linked_at !== null,
-                'linking_token' => $telegramChat?->linking_token,
-                'token_expires_at' => $telegramChat?->token_expires_at?->toIso8601String(),
-                'connected_at' => $telegramChat?->linked_at?->toIso8601String(),
-                'bot_username' => config('plate.telegram_bot_username'),
-            ],
+            'platforms' => $platforms,
         ]);
     }
 
-    public function generateTelegramToken(Request $request): RedirectResponse
-    {
+    public function connect(
+        Request $request,
+        ChatPlatform $platform,
+        GenerateChatPlatformLinkToken $generateToken,
+    ): RedirectResponse {
+        /** @var User $user */
         $user = $request->user();
 
-        abort_if($user === null, 401);
-
-        $userTelegramChat = $user->telegramChat;
-
-        if ($userTelegramChat !== null) {
-            $userTelegramChat->update(['is_active' => false]);
-        }
-
-        $newUserTelegramChat = $user->telegramChat()->create([
-            'is_active' => true,
-        ]);
-
-        $token = $newUserTelegramChat->generateToken();
+        $result = $generateToken->handle($user, $platform);
 
         return to_route('integrations.edit')->with([
-            'telegram_token' => $token,
-            'token_expires_at' => $newUserTelegramChat->token_expires_at?->toIso8601String(),
+            'linking_platform' => $platform->value,
+            'linking_token' => $result['token'],
+            'token_expires_at' => $result['link']->token_expires_at?->toIso8601String(),
         ]);
     }
 
-    public function disconnectTelegram(Request $request): RedirectResponse
-    {
+    public function disconnect(
+        Request $request,
+        ChatPlatform $platform,
+        DisconnectChatPlatformLink $disconnect,
+    ): RedirectResponse {
+        /** @var User $user */
         $user = $request->user();
 
-        abort_if($user === null, 401);
+        $disconnect->handle($user, $platform);
 
-        $user->telegramChat()->update(['is_active' => false]);
-
-        return to_route('integrations.edit')->with('status', 'telegram-disconnected');
+        return to_route('integrations.edit')->with('status', $platform->value.'-disconnected');
     }
 }
