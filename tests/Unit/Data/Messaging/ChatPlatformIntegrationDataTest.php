@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Services\Messaging\Platforms\TelegramPlatformAdapter;
 use App\Data\Messaging\ChatPlatformIntegrationData;
 use App\Enums\ChatPlatform;
 use App\Models\User;
@@ -11,7 +12,7 @@ covers(ChatPlatformIntegrationData::class);
 
 beforeEach(function (): void {
     config([
-        'messaging.platforms.telegram.adapter' => App\Services\Messaging\Platforms\TelegramPlatformAdapter::class,
+        'messaging.platforms.telegram.adapter' => TelegramPlatformAdapter::class,
         'messaging.platforms.telegram.bot_username' => 'test_bot',
         'messaging.platforms.telegram.deep_link_url' => 'https://t.me',
     ]);
