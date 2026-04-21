@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Enums\ChatPlatform;
 use App\Models\HealthSyncSample;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
+use App\Models\UserChatPlatformLink;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -269,6 +271,19 @@ it('health sync samples relation returns related samples', function (): void {
     expect($user->healthSyncSamples)
         ->toHaveCount(1)
         ->first()->id->toBe($sample->id);
+});
+
+it('active chat platform link returns the active link for the given platform', function (): void {
+    $user = User::factory()->create();
+
+    $link = UserChatPlatformLink::factory()->linked($user)->create([
+        'platform' => ChatPlatform::Telegram,
+    ]);
+
+    $activeLink = $user->activeChatPlatformLink(ChatPlatform::Telegram)->first();
+
+    expect($activeLink)->not->toBeNull();
+    expect($activeLink->id)->toBe($link->id);
 });
 
 it('preferred_language returns null when not set', function (): void {

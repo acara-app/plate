@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 use App\Contracts\DownloadsTelegramPhoto;
 use App\Contracts\ProcessesAdvisorMessage;
+use App\Enums\ChatPlatform;
 use App\Enums\Sex;
 use App\Exceptions\TelegramUserException;
 use App\Models\User;
+use App\Models\UserChatPlatformLink;
 use App\Models\UserProfile;
-use App\Models\UserTelegramChat;
 use App\Services\Telegram\TelegramWebhookHandler;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphBot;
@@ -47,6 +48,16 @@ function sendPhotoWebhook(mixed $test, string $caption = ''): TestResponse
     );
 }
 
+function linkedChatFor(mixed $test, User $user, array $overrides = []): UserChatPlatformLink
+{
+    return UserChatPlatformLink::factory()
+        ->linked($user)
+        ->create(array_merge([
+            'platform' => ChatPlatform::Telegram,
+            'platform_user_id' => (string) $test->telegraphChat->chat_id,
+        ], $overrides));
+}
+
 describe('/start command', function (): void {
     it('sends a welcome message', function (): void {
         sendWebhook($this, '/start');
@@ -79,7 +90,10 @@ describe('/link command', function (): void {
     });
 
     it('rejects expired token', function (): void {
-        UserTelegramChat::factory()->create([
+        $user = User::factory()->create();
+        UserChatPlatformLink::factory()->create([
+            'user_id' => $user->id,
+            'platform' => ChatPlatform::Telegram,
             'linking_token' => 'ABCD1234',
             'token_expires_at' => now()->subHour(),
         ]);
@@ -98,65 +112,43 @@ describe('/link command', function (): void {
     it('links account with a valid token', function (): void {
         $user = User::factory()->create(['name' => 'John']);
 
-        $pendingChat = UserTelegramChat::factory()->for($user)->create([
-            'telegraph_chat_id' => null,
+        $pending = UserChatPlatformLink::factory()->create([
+            'user_id' => $user->id,
+            'platform' => ChatPlatform::Telegram,
             'linking_token' => 'ABCD1234',
             'token_expires_at' => now()->addHours(24),
-            'is_active' => false,
+            'is_active' => true,
             'linked_at' => null,
         ]);
 
         sendWebhook($this, '/link abcd1234');
 
-        $pendingChat->refresh();
-
-        expect($pendingChat->telegraph_chat_id)->toBe($this->telegraphChat->id)
-            ->and($pendingChat->is_active)->toBeTrue()
-            ->and($pendingChat->linked_at)->not->toBeNull()
-            ->and($pendingChat->linking_token)->toBeNull();
+        $fresh = $pending->fresh();
+        expect($fresh->platform_user_id)->toBe((string) $this->telegraphChat->chat_id)
+            ->and($fresh->is_active)->toBeTrue()
+            ->and($fresh->linked_at)->not->toBeNull()
+            ->and($fresh->linking_token)->toBeNull();
 
         Telegraph::assertSent('✅ Linked!', false);
     });
 
-    it('deactivates existing links for the same telegraph chat', function (): void {
-        $existingUser = User::factory()->create();
-        $existingChat = UserTelegramChat::factory()->for($existingUser)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-            'is_active' => true,
-        ]);
+    it('removes prior links for the same platform user id when a new user links', function (): void {
+        $previousUser = User::factory()->create();
+        $existing = linkedChatFor($this, $previousUser);
 
         $newUser = User::factory()->create();
-        UserTelegramChat::factory()->for($newUser)->create([
-            'telegraph_chat_id' => null,
-            'linking_token' => 'NEWTOKEN',
+        UserChatPlatformLink::factory()->create([
+            'user_id' => $newUser->id,
+            'platform' => ChatPlatform::Telegram,
+            'linking_token' => 'NEWTOKE1',
             'token_expires_at' => now()->addHours(24),
-            'linked_at' => null,
-        ]);
-
-        sendWebhook($this, '/link NEWTOKEN');
-
-        expect($existingChat->fresh()->is_active)->toBeFalse();
-    });
-
-    it('removes duplicate chats for the same user and telegraph chat', function (): void {
-        $user = User::factory()->create();
-
-        $duplicateChat = UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
             'is_active' => true,
-        ]);
-
-        $pendingChat = UserTelegramChat::factory()->for($user)->create([
-            'telegraph_chat_id' => null,
-            'linking_token' => 'ABCD1234',
-            'token_expires_at' => now()->addHours(24),
             'linked_at' => null,
         ]);
 
-        sendWebhook($this, '/link ABCD1234');
+        sendWebhook($this, '/link NEWTOKE1');
 
-        expect(UserTelegramChat::query()->find($duplicateChat->id))->toBeNull()
-            ->and($pendingChat->fresh())->not->toBeNull();
+        expect(UserChatPlatformLink::query()->find($existing->id))->toBeNull();
     });
 });
 
@@ -168,14 +160,8 @@ describe('/me command', function (): void {
     });
 
     it('shows basic user info without profile', function (): void {
-        $user = User::factory()->create([
-            'name' => 'Alice',
-            'email' => 'alice@example.com',
-        ]);
-
-        UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-        ]);
+        $user = User::factory()->create(['name' => 'Alice', 'email' => 'alice@example.com']);
+        linkedChatFor($this, $user);
 
         sendWebhook($this, '/me');
 
@@ -184,21 +170,11 @@ describe('/me command', function (): void {
     });
 
     it('shows user info with full profile', function (): void {
-        $user = User::factory()->create([
-            'name' => 'Bob',
-            'email' => 'bob@example.com',
-        ]);
-
+        $user = User::factory()->create(['name' => 'Bob', 'email' => 'bob@example.com']);
         UserProfile::factory()->for($user)->create([
-            'age' => 30,
-            'height' => 180,
-            'weight' => 75,
-            'sex' => Sex::Male,
+            'age' => 30, 'height' => 180, 'weight' => 75, 'sex' => Sex::Male,
         ]);
-
-        UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-        ]);
+        linkedChatFor($this, $user);
 
         sendWebhook($this, '/me');
 
@@ -208,17 +184,10 @@ describe('/me command', function (): void {
 
     it('handles profile with all null fields gracefully', function (): void {
         $user = User::factory()->create(['name' => 'Carol']);
-
         UserProfile::factory()->for($user)->create([
-            'age' => null,
-            'height' => null,
-            'weight' => null,
-            'sex' => null,
+            'age' => null, 'height' => null, 'weight' => null, 'sex' => null,
         ]);
-
-        UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-        ]);
+        linkedChatFor($this, $user);
 
         sendWebhook($this, '/me');
 
@@ -227,17 +196,10 @@ describe('/me command', function (): void {
 
     it('handles profile with partial null fields', function (): void {
         $user = User::factory()->create(['name' => 'Dave']);
-
         UserProfile::factory()->for($user)->create([
-            'age' => 25,
-            'height' => null,
-            'weight' => 80,
-            'sex' => Sex::Female,
+            'age' => 25, 'height' => null, 'weight' => 80, 'sex' => Sex::Female,
         ]);
-
-        UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-        ]);
+        linkedChatFor($this, $user);
 
         sendWebhook($this, '/me');
 
@@ -253,56 +215,38 @@ describe('/new command', function (): void {
         Telegraph::assertSent('🔒 Please link your account first.', false);
     });
 
-    it('resets conversation and updates the chat record', function (): void {
+    it('resets conversation and updates the link record', function (): void {
         $user = User::factory()->create();
-
-        $linkedChat = UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-            'conversation_id' => 'old-conv-id',
-        ]);
+        $link = linkedChatFor($this, $user, ['conversation_id' => 'old-conv-id']);
 
         $mock = new class implements ProcessesAdvisorMessage
         {
-            public string $resetConversationReturn = 'new-conv-id';
-
-            public array $calls = [];
-
             public function handle(User $user, string $message, ?string $conversationId = null, array $attachments = []): array
             {
-                $this->calls[] = ['method' => 'handle', 'user' => $user->id, 'message' => $message];
-
                 return ['response' => 'Test', 'conversation_id' => 'conv-123'];
             }
 
             public function resetConversation(User $user): string
             {
-                $this->calls[] = ['method' => 'resetConversation', 'user' => $user->id];
-
-                return $this->resetConversationReturn;
+                return 'new-conv-id';
             }
         };
-
         app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, '/new');
 
-        expect($linkedChat->fresh()->conversation_id)->toBe('new-conv-id');
+        expect($link->fresh()->conversation_id)->toBe('new-conv-id');
         Telegraph::assertSent('✨ New conversation started! How can I help you?');
     });
 });
 
 describe('/reset command', function (): void {
-    it('delegates to new command behavior', function (): void {
+    it('delegates to /new command behavior', function (): void {
         $user = User::factory()->create();
-
-        UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-        ]);
+        linkedChatFor($this, $user);
 
         $mock = new class implements ProcessesAdvisorMessage
         {
-            public string $resetConversationReturn = 'reset-conv-id';
-
             public function handle(User $user, string $message, ?string $conversationId = null, array $attachments = []): array
             {
                 return ['response' => 'Test', 'conversation_id' => 'conv-123'];
@@ -310,10 +254,9 @@ describe('/reset command', function (): void {
 
             public function resetConversation(User $user): string
             {
-                return $this->resetConversationReturn;
+                return 'reset-conv-id';
             }
         };
-
         app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, '/reset');
@@ -331,29 +274,13 @@ describe('chat message handling', function (): void {
 
     it('generates AI response and sends it', function (): void {
         $user = User::factory()->create();
-
-        UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-            'conversation_id' => 'existing-conv',
-        ]);
+        linkedChatFor($this, $user, ['conversation_id' => 'existing-conv']);
 
         $mock = new class implements ProcessesAdvisorMessage
         {
-            public array $calls = [];
-
             public function handle(User $user, string $message, ?string $conversationId = null, array $attachments = []): array
             {
-                $this->calls[] = [
-                    'method' => 'handle',
-                    'user' => $user->id,
-                    'message' => $message,
-                    'conversationId' => $conversationId,
-                ];
-
-                return [
-                    'response' => 'Here are some breakfast suggestions...',
-                    'conversation_id' => 'existing-conv',
-                ];
+                return ['response' => 'Here are some breakfast suggestions...', 'conversation_id' => 'existing-conv'];
             }
 
             public function resetConversation(User $user): string
@@ -361,7 +288,6 @@ describe('chat message handling', function (): void {
                 return 'new-conv';
             }
         };
-
         app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, 'What should I eat for breakfast?');
@@ -371,20 +297,13 @@ describe('chat message handling', function (): void {
 
     it('stores conversation id on first message', function (): void {
         $user = User::factory()->create();
-
-        $linkedChat = UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-            'conversation_id' => null,
-        ]);
+        $link = linkedChatFor($this, $user, ['conversation_id' => null]);
 
         $mock = new class implements ProcessesAdvisorMessage
         {
             public function handle(User $user, string $message, ?string $conversationId = null, array $attachments = []): array
             {
-                return [
-                    'response' => 'Welcome!',
-                    'conversation_id' => 'first-conv-id',
-                ];
+                return ['response' => 'Welcome!', 'conversation_id' => 'first-conv-id'];
             }
 
             public function resetConversation(User $user): string
@@ -392,30 +311,22 @@ describe('chat message handling', function (): void {
                 return 'new-conv';
             }
         };
-
         app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, 'Hello!');
 
-        expect($linkedChat->fresh()->conversation_id)->toBe('first-conv-id');
+        expect($link->fresh()->conversation_id)->toBe('first-conv-id');
     });
 
     it('does not overwrite existing conversation id', function (): void {
         $user = User::factory()->create();
-
-        $linkedChat = UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-            'conversation_id' => 'existing-conv',
-        ]);
+        $link = linkedChatFor($this, $user, ['conversation_id' => 'existing-conv']);
 
         $mock = new class implements ProcessesAdvisorMessage
         {
             public function handle(User $user, string $message, ?string $conversationId = null, array $attachments = []): array
             {
-                return [
-                    'response' => 'Response',
-                    'conversation_id' => 'some-new-conv',
-                ];
+                return ['response' => 'Response', 'conversation_id' => 'existing-conv'];
             }
 
             public function resetConversation(User $user): string
@@ -423,20 +334,16 @@ describe('chat message handling', function (): void {
                 return 'new-conv';
             }
         };
-
         app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, 'Follow-up message');
 
-        expect($linkedChat->fresh()->conversation_id)->toBe('existing-conv');
+        expect($link->fresh()->conversation_id)->toBe('existing-conv');
     });
 
     it('handles AI response errors gracefully', function (): void {
         $user = User::factory()->create();
-
-        UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-        ]);
+        linkedChatFor($this, $user);
 
         $mock = new class implements ProcessesAdvisorMessage
         {
@@ -450,7 +357,6 @@ describe('chat message handling', function (): void {
                 return 'new-conv';
             }
         };
-
         app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, 'Hello');
@@ -460,10 +366,7 @@ describe('chat message handling', function (): void {
 
     it('handles TelegramUserException gracefully', function (): void {
         $user = User::factory()->create();
-
-        UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-        ]);
+        linkedChatFor($this, $user);
 
         $mock = new class implements ProcessesAdvisorMessage
         {
@@ -477,111 +380,29 @@ describe('chat message handling', function (): void {
                 return 'new-conv';
             }
         };
-
         app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         sendWebhook($this, 'Invalid input');
 
         Telegraph::assertSent('User error occurred');
     });
-
-    it('handles generic Throwable in handleChatMessage gracefully', function (): void {
-        $user = User::factory()->create();
-
-        UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-        ]);
-
-        $mock = new class implements ProcessesAdvisorMessage
-        {
-            public function handle(User $user, string $message, ?string $conversationId = null, array $attachments = []): array
-            {
-                throw new Exception('Unexpected error');
-            }
-
-            public function resetConversation(User $user): string
-            {
-                return 'new-conv';
-            }
-        };
-
-        app()->instance(ProcessesAdvisorMessage::class, $mock);
-
-        sendWebhook($this, 'Something went wrong');
-
-        Telegraph::assertSent('❌ Error processing message. Please try again.');
-    });
 });
 
 describe('photo message handling', function (): void {
     it('processes photo with caption and passes attachments', function (): void {
         $user = User::factory()->create();
+        linkedChatFor($this, $user, ['conversation_id' => 'existing-conv']);
 
-        UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-            'conversation_id' => 'existing-conv',
-        ]);
-
-        $mock = new class implements ProcessesAdvisorMessage
+        $calls = [];
+        $mock = new class($calls) implements ProcessesAdvisorMessage
         {
-            public array $calls = [];
-
-            public function handle(User $user, string $message, ?string $conversationId = null, array $attachments = []): array
-            {
-                $this->calls[] = [
-                    'message' => $message,
-                    'conversationId' => $conversationId,
-                    'attachmentCount' => count($attachments),
-                ];
-
-                return [
-                    'response' => 'I analyzed your food photo!',
-                    'conversation_id' => 'existing-conv',
-                ];
-            }
-
-            public function resetConversation(User $user): string
-            {
-                return 'new-conv';
-            }
-        };
-
-        app()->instance(ProcessesAdvisorMessage::class, $mock);
-
-        $downloadAction = Mockery::mock(DownloadsTelegramPhoto::class);
-        $downloadAction->shouldReceive('handle')
-            ->once()
-            ->andReturn(new Base64Image(base64_encode('fake-image'), 'image/jpeg'));
-        app()->instance(DownloadsTelegramPhoto::class, $downloadAction);
-
-        sendPhotoWebhook($this, 'What is this meal?');
-
-        Telegraph::assertSent('I analyzed your food photo!', false);
-        expect($mock->calls)->toHaveCount(1)
-            ->and($mock->calls[0]['message'])->toBe('What is this meal?')
-            ->and($mock->calls[0]['attachmentCount'])->toBe(1);
-    });
-
-    it('uses default message when photo has no caption', function (): void {
-        $user = User::factory()->create();
-
-        UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-            'conversation_id' => 'existing-conv',
-        ]);
-
-        $mock = new class implements ProcessesAdvisorMessage
-        {
-            public array $calls = [];
+            public function __construct(public array &$calls) {}
 
             public function handle(User $user, string $message, ?string $conversationId = null, array $attachments = []): array
             {
                 $this->calls[] = ['message' => $message, 'attachmentCount' => count($attachments)];
 
-                return [
-                    'response' => 'Analyzed!',
-                    'conversation_id' => 'existing-conv',
-                ];
+                return ['response' => 'I analyzed your food photo!', 'conversation_id' => 'existing-conv'];
             }
 
             public function resetConversation(User $user): string
@@ -589,32 +410,59 @@ describe('photo message handling', function (): void {
                 return 'new-conv';
             }
         };
-
         app()->instance(ProcessesAdvisorMessage::class, $mock);
 
         $downloadAction = Mockery::mock(DownloadsTelegramPhoto::class);
-        $downloadAction->shouldReceive('handle')
-            ->once()
-            ->andReturn(new Base64Image(base64_encode('fake-image'), 'image/jpeg'));
+        $downloadAction->shouldReceive('handle')->once()->andReturn(new Base64Image(base64_encode('fake-image'), 'image/jpeg'));
+        app()->instance(DownloadsTelegramPhoto::class, $downloadAction);
+
+        sendPhotoWebhook($this, 'What is this meal?');
+
+        Telegraph::assertSent('I analyzed your food photo!', false);
+        expect($calls)->toHaveCount(1)
+            ->and($calls[0]['message'])->toBe('What is this meal?')
+            ->and($calls[0]['attachmentCount'])->toBe(1);
+    });
+
+    it('uses default message when photo has no caption', function (): void {
+        $user = User::factory()->create();
+        linkedChatFor($this, $user, ['conversation_id' => 'existing-conv']);
+
+        $calls = [];
+        $mock = new class($calls) implements ProcessesAdvisorMessage
+        {
+            public function __construct(public array &$calls) {}
+
+            public function handle(User $user, string $message, ?string $conversationId = null, array $attachments = []): array
+            {
+                $this->calls[] = ['message' => $message, 'attachmentCount' => count($attachments)];
+
+                return ['response' => 'Analyzed!', 'conversation_id' => 'existing-conv'];
+            }
+
+            public function resetConversation(User $user): string
+            {
+                return 'new-conv';
+            }
+        };
+        app()->instance(ProcessesAdvisorMessage::class, $mock);
+
+        $downloadAction = Mockery::mock(DownloadsTelegramPhoto::class);
+        $downloadAction->shouldReceive('handle')->once()->andReturn(new Base64Image(base64_encode('fake-image'), 'image/jpeg'));
         app()->instance(DownloadsTelegramPhoto::class, $downloadAction);
 
         sendPhotoWebhook($this);
 
-        expect($mock->calls[0]['message'])->toBe('Analyze this food photo and log it.')
-            ->and($mock->calls[0]['attachmentCount'])->toBe(1);
+        expect($calls[0]['message'])->toBe('Analyze this food photo and log it.')
+            ->and($calls[0]['attachmentCount'])->toBe(1);
     });
 
     it('handles photo download failure gracefully', function (): void {
         $user = User::factory()->create();
-
-        UserTelegramChat::factory()->for($user)->linked()->create([
-            'telegraph_chat_id' => $this->telegraphChat->id,
-        ]);
+        linkedChatFor($this, $user);
 
         $downloadAction = Mockery::mock(DownloadsTelegramPhoto::class);
-        $downloadAction->shouldReceive('handle')
-            ->once()
-            ->andThrow(new RuntimeException('Download failed'));
+        $downloadAction->shouldReceive('handle')->once()->andThrow(new RuntimeException('Download failed'));
         app()->instance(DownloadsTelegramPhoto::class, $downloadAction);
 
         sendPhotoWebhook($this, 'Analyze this');

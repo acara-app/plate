@@ -14,8 +14,8 @@ use App\Models\History;
 use App\Models\MealPlan;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
+use App\Models\UserChatPlatformLink;
 use App\Models\UserProfile;
-use App\Models\UserTelegramChat;
 use Illuminate\Support\Facades\DB;
 
 covers(DeleteUser::class);
@@ -38,7 +38,7 @@ it('deletes user and eventually purges all related data', function (): void {
     HealthSyncSample::factory()->heartRate()->count(2)->create(['user_id' => $userId]);
 
     $device = MobileSyncDevice::factory()->paired()->create(['user_id' => $userId]);
-    UserTelegramChat::factory()->create(['user_id' => $userId]);
+    UserChatPlatformLink::factory()->create(['user_id' => $userId]);
 
     $conversation = Conversation::factory()->forUser($user)->create();
     History::factory()->forConversation($conversation)->userMessage()->count(2)->create();
@@ -115,7 +115,7 @@ it('deletes user and eventually purges all related data', function (): void {
     $this->assertDatabaseMissing('grocery_items', ['grocery_list_id' => $groceryList->id]);
     $this->assertDatabaseMissing('health_sync_samples', ['user_id' => $userId]);
     $this->assertDatabaseMissing('mobile_sync_devices', ['user_id' => $userId]);
-    $this->assertDatabaseMissing('user_telegram_chats', ['user_id' => $userId]);
+    $this->assertDatabaseMissing('user_chat_platform_links', ['user_id' => $userId]);
 
     $this->assertDatabaseHas('agent_conversations', ['user_id' => $userId]);
     $this->assertDatabaseHas('agent_conversation_messages', ['user_id' => $userId]);
