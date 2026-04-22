@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Services\Messaging\Platforms\TelegramPlatformAdapter;
 use App\Data\Messaging\ChatPlatformIntegrationData;
 use App\Enums\ChatPlatform;
 use App\Models\User;
 use App\Models\UserChatPlatformLink;
+use App\Services\Messaging\Platforms\TelegramPlatformAdapter;
 
 covers(ChatPlatformIntegrationData::class);
 

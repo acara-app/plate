@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Notifications;
 
 use App\Data\GlucoseNotificationAnalysisData;
+use App\Utilities\StaticUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -66,6 +67,6 @@ final class GlucoseReportNotification extends Notification implements ShouldQueu
 
     private function generateMealPlanUrl(): string
     {
-        return route('meal-plans.index', absolute: true);
+        return StaticUrl::mealPlanUrl();
     }
 }
