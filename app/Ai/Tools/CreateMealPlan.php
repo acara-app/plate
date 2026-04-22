@@ -6,6 +6,7 @@ namespace App\Ai\Tools;
 
 use App\Contracts\Ai\GeneratesMealPlans;
 use App\Models\User;
+use App\Utilities\StaticUrl;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
@@ -51,7 +52,7 @@ final readonly class CreateMealPlan implements Tool
         try {
             resolve(GeneratesMealPlans::class)->handle($user, $totalDays, $customPrompt);
 
-            $mealPlansUrl = route('meal-plans.index');
+            $mealPlansUrl = StaticUrl::mealPlanUrl();
 
             return (string) json_encode([
                 'success' => true,
