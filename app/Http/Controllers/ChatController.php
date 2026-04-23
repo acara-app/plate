@@ -10,9 +10,11 @@ use App\Actions\GetOrCreateConversationAction;
 use App\Enums\AgentMode;
 use App\Http\Requests\StoreChatConversationRequest;
 use App\Http\Requests\StreamChatRequest;
+use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Ai\Responses\StreamableAgentResponse;
@@ -30,10 +32,7 @@ final readonly class ChatController
     {
         return Inertia::render('chat/index', [
             'conversations' => Inertia::scroll(
-                fn (): LengthAwarePaginator => $this->user
-                    ->conversations()
-                    ->latest()
-                    ->paginate(15)
+                fn (): LengthAwarePaginator => $this->user->paginatedConversations()
             ),
         ]);
     }
@@ -43,6 +42,7 @@ final readonly class ChatController
         string $conversationId
     ): Response {
         $conversation = $this->conversationAction->handle($conversationId, $this->user);
+        Gate::authorize('view', $conversation);
 
         return Inertia::render('chat/create-chat', [
             'conversationId' => $conversation->id,
@@ -53,8 +53,10 @@ final readonly class ChatController
 
     public function stream(
         StreamChatRequest $request,
-        string $conversationId
+        Conversation $conversation
     ): StreamableAgentResponse {
-        return $this->agentAction->handle($request, $this->user, $conversationId);
+        Gate::authorize('view', $conversation);
+
+        return $this->agentAction->handle($request, $this->user, $conversation->id);
     }
 }

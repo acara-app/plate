@@ -48,3 +48,13 @@ it('loads messages relationship', function (): void {
 
     expect($result->relationLoaded('messages'))->toBeTrue();
 });
+
+it('returns an existing conversation even when owned by another user (authorization is not this action concern)', function (): void {
+    $owner = User::factory()->create();
+    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+
+    $result = $this->action->handle($conversation->id, $this->user);
+
+    expect($result->id)->toBe($conversation->id)
+        ->and($result->user_id)->toBe($owner->id);
+});

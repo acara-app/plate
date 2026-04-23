@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\ChatPlatform;
+use App\Models\Conversation;
 use App\Models\HealthSyncSample;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
@@ -290,4 +291,28 @@ it('preferred_language returns null when not set', function (): void {
     $user = User::factory()->create(['preferred_language' => null]);
 
     expect($user->preferred_language)->toBeNull();
+});
+
+it("paginatedConversations returns only the user's own conversations ordered latest-first", function (): void {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    Conversation::factory()->count(20)->forUser($user)->create();
+    Conversation::factory()->count(3)->forUser($otherUser)->create();
+
+    $paginator = $user->paginatedConversations();
+
+    expect($paginator->total())->toBe(20)
+        ->and($paginator->perPage())->toBe(15)
+        ->and($paginator->items())->toHaveCount(15);
+});
+
+it('paginatedConversations respects a custom page size', function (): void {
+    $user = User::factory()->create();
+    Conversation::factory()->count(10)->forUser($user)->create();
+
+    $paginator = $user->paginatedConversations(perPage: 5);
+
+    expect($paginator->perPage())->toBe(5)
+        ->and($paginator->items())->toHaveCount(5);
 });

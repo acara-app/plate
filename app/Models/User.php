@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Laravel\Cashier\Billable;
 use Laravel\Cashier\Subscription;
@@ -124,13 +125,18 @@ final class User extends Authenticatable implements MustVerifyEmail
     /**
      * @return HasMany<Conversation, $this>
      */
-    // @codeCoverageIgnoreStart
     public function conversations(): HasMany
     {
         return $this->hasMany(Conversation::class)->latest();
     }
 
-    // @codeCoverageIgnoreEnd
+    /**
+     * @return LengthAwarePaginator<int, Conversation>
+     */
+    public function paginatedConversations(int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->conversations()->paginate($perPage);
+    }
 
     /**
      * @return HasMany<UserChatPlatformLink, $this>

@@ -16,8 +16,6 @@ final readonly class GetOrCreateConversationAction
             ->find($conversationId);
 
         if ($conversation instanceof Conversation) {
-            abort_if($conversation->user_id !== $user->id, 403, 'Access denied to this conversation');
-
             return $conversation;
         }
 

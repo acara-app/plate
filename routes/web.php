@@ -76,7 +76,7 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
 
     Route::get('/chat/create/{conversationId}', [Web\ChatController::class, 'create'])
         ->name('chat.create');
-    Route::post('chat/stream/{conversationId}', [Web\ChatController::class, 'stream'])
+    Route::post('chat/stream/{conversation}', [Web\ChatController::class, 'stream'])
         ->middleware([DisableResponseBuffering::class, 'throttle:30,1'])
         ->name('chat.stream');
 

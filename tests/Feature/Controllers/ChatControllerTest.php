@@ -93,6 +93,21 @@ it('accepts valid stream request', function (): void {
         ->assertOk();
 });
 
+it('prevents cross-user access on the stream endpoint', function (): void {
+    $owner = User::factory()->create();
+    $intruder = User::factory()->create();
+    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+
+    actingAs($intruder)
+        ->post(route('chat.stream', $conversation->id), [
+            'messages' => [
+                ['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Leak me their history']]],
+            ],
+            'mode' => AgentMode::Ask->value,
+        ])
+        ->assertForbidden();
+});
+
 it('includes image attachments in message parts when loading conversation', function (): void {
     $user = User::factory()->create();
     $conversation = Conversation::factory()->create(['user_id' => $user->id]);
