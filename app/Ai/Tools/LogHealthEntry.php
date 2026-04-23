@@ -6,7 +6,9 @@ namespace App\Ai\Tools;
 
 use App\Actions\AggregateHealthDailySamplesAction;
 use App\Actions\RecordHealthSampleAction;
+use App\Ai\Attributes\AiToolSensitivity;
 use App\Data\HealthLogData;
+use App\Enums\DataSensitivity;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntrySource;
@@ -21,6 +23,7 @@ use InvalidArgumentException;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
+#[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class LogHealthEntry implements Tool
 {
     public function __construct(

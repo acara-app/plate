@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Ai\Tools;
 
 use App\Actions\GetMostRecentHealthSyncSamplesByTypeAction;
+use App\Ai\Attributes\AiToolSensitivity;
+use App\Enums\DataSensitivity;
 use App\Enums\HealthSyncType;
 use App\Models\HealthSyncSample;
 use App\Models\User;
@@ -14,6 +16,7 @@ use Illuminate\Support\Facades\Date;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
+#[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class GetHealthData implements Tool
 {
     public function name(): string

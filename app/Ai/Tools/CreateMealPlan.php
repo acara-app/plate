@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Ai\Attributes\AiToolSensitivity;
 use App\Contracts\Ai\GeneratesMealPlans;
+use App\Enums\DataSensitivity;
 use App\Models\User;
 use App\Utilities\StaticUrl;
 use Exception;
@@ -13,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
+#[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class CreateMealPlan implements Tool
 {
     private const int MIN_DAYS = 1;

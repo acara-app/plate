@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Ai\Attributes\AiToolSensitivity;
 use App\Enums\AllergySeverity;
+use App\Enums\DataSensitivity;
 use App\Enums\UserProfileAttributeCategory;
 use App\Models\User;
 use App\Models\UserProfileAttribute;
@@ -13,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
+#[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class UpdateUserProfileAttributes implements Tool
 {
     public function name(): string

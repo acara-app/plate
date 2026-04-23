@@ -6,12 +6,14 @@ use App\Ai\AgentBuilder;
 use App\Ai\AgentPayload;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\CreateMealPlan;
+use App\Ai\Tools\GetCalorieLevelGuideline;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\SuggestSingleMeal;
 use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Models\User;
 use Laravel\Ai\Files\Base64Image;
+use Laravel\Ai\Providers\Tools\WebSearch;
 
 covers(AgentBuilder::class);
 
@@ -102,7 +104,7 @@ describe('tools', function (): void {
         expect($toolClasses)->toContain(AnalyzePhoto::class);
     });
 
-    it('includes provider tools when web search enabled', function (): void {
+    it('excludes WebSearch when the toolset contains a Sensitive tool', function (): void {
         $user = User::factory()->create();
         $payload = new AgentPayload(
             userId: $user->id,
@@ -113,7 +115,35 @@ describe('tools', function (): void {
 
         $result = $this->builder->build($payload, $user);
 
-        expect($result['tools'])->not->toBeEmpty();
+        $toolClasses = collect($result['tools'])
+            ->map(fn (mixed $t): string => $t::class)
+            ->all();
+
+        expect($toolClasses)
+            ->toContain(GetUserProfile::class)
+            ->not->toContain(WebSearch::class);
+    });
+
+    it('includes WebSearch when the toolset is only General-tier', function (): void {
+        config()->set('plate.tools', [GetCalorieLevelGuideline::class]);
+
+        $user = User::factory()->create();
+        $payload = new AgentPayload(
+            userId: $user->id,
+            message: 'What are calorie recommendations?',
+            mode: AgentMode::Ask,
+            modelName: ModelName::GPT_5_MINI,
+        );
+
+        $result = $this->builder->build($payload, $user);
+
+        $toolClasses = collect($result['tools'])
+            ->map(fn (mixed $t): string => $t::class)
+            ->all();
+
+        expect($toolClasses)
+            ->toContain(GetCalorieLevelGuideline::class)
+            ->toContain(WebSearch::class);
     });
 });
 

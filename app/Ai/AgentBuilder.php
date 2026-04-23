@@ -6,9 +6,11 @@ namespace App\Ai;
 
 use App\Actions\GetUserProfileContextAction;
 use App\Contracts\Memory\ManagesMemoryContext;
+use App\Enums\DataSensitivity;
 use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;
+use App\Services\Ai\ToolSensitivityReader;
 use App\Services\Memory\NullMemoryPromptContext;
 use App\Services\ToolRegistry;
 use App\Utilities\EmergencyNumberUtil;
@@ -22,6 +24,7 @@ final readonly class AgentBuilder
     public function __construct(
         private ToolRegistry $toolRegistry,
         private ManagesMemoryContext $memoryContext,
+        private ToolSensitivityReader $toolSensitivity,
     ) {}
 
     /**
@@ -74,7 +77,10 @@ final readonly class AgentBuilder
             $tools = [...$tools, ...$imageTools];
         }
 
-        if ($payload->shouldEnableWebSearch()) {
+        if (
+            $payload->shouldEnableWebSearch()
+            && $this->toolSensitivity->maxSensitivity($tools) === DataSensitivity::General
+        ) {
             $providerTools = $this->toolRegistry->getProviderTools();
             $tools = [...$tools, ...$providerTools];
         }

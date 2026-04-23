@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Ai\Attributes\AiToolSensitivity;
 use App\Contracts\Actions\GetsUserProfileContext;
+use App\Enums\DataSensitivity;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
+#[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class GetUserProfile implements Tool
 {
     public function name(): string
@@ -20,7 +23,7 @@ final readonly class GetUserProfile implements Tool
 
     public function description(): string
     {
-        return "Retrieve the current user's profile information including biometrics, dietary preferences, health conditions, medications, and goals. Use this when you need specific user data to provide personalized advice.";
+        return "Retrieve the current user's profile information: biometrics, dietary preferences, and goals. Use this when you need specific user data to provide personalized advice.";
     }
 
     public function handle(Request $request): string
@@ -39,17 +42,17 @@ final readonly class GetUserProfile implements Tool
 
         $context = resolve(GetsUserProfileContext::class)->handle($user);
 
+        /** @var array<string, mixed>|null $rawData */
+        $rawData = $context['raw_data'] ?? null;
+
         if ($section === 'all') {
             return (string) json_encode([
                 'success' => true,
                 'onboarding_completed' => $context['onboarding_completed'],
                 'missing_data' => $context['missing_data'],
-                'profile' => $context['raw_data'],
+                'profile' => $rawData,
             ]);
         }
-
-        /** @var array<string, mixed>|null $rawData */
-        $rawData = $context['raw_data'];
 
         if (! is_array($rawData)) {
             return (string) json_encode([
@@ -62,7 +65,7 @@ final readonly class GetUserProfile implements Tool
 
         if ($sectionData === null) {
             return (string) json_encode([
-                'error' => sprintf("Section '%s' not found. Available sections: biometrics, dietary_preferences, health_conditions, medications, goals", $section),
+                'error' => sprintf("Section '%s' not found. Available sections: biometrics, dietary_preferences, goals", $section),
                 'profile' => null,
             ]);
         }
@@ -81,7 +84,7 @@ final readonly class GetUserProfile implements Tool
     {
         return [
             'section' => $schema->string()
-                ->enum(['all', 'biometrics', 'dietary_preferences', 'health_conditions', 'medications', 'goals'])
+                ->enum(['all', 'biometrics', 'dietary_preferences', 'goals'])
                 ->description('Which section of the profile to retrieve. Use "all" for complete profile, or specify a section for specific data.')
                 ->required()
                 ->nullable(),

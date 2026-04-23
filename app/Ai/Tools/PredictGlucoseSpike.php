@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Ai\Attributes\AiToolSensitivity;
 use App\Contracts\Ai\PredictsGlucoseSpikes;
 use App\Data\SpikePredictionData;
+use App\Enums\DataSensitivity;
 use App\Enums\SpikeRiskLevel;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
+#[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class PredictGlucoseSpike implements Tool
 {
     public function name(): string

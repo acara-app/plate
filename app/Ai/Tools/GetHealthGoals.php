@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Ai\Attributes\AiToolSensitivity;
 use App\Contracts\Actions\GetsUserProfileContext;
+use App\Enums\DataSensitivity;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
+#[AiToolSensitivity(DataSensitivity::Personal)]
 final readonly class GetHealthGoals implements Tool
 {
     public function name(): string

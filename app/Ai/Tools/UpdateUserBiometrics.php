@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Ai\Attributes\AiToolSensitivity;
 use App\Enums\AnimalProductChoice;
 use App\Enums\BloodType;
+use App\Enums\DataSensitivity;
 use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
 use App\Enums\Sex;
@@ -18,6 +20,7 @@ use Illuminate\Support\Facades\Date;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
+#[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class UpdateUserBiometrics implements Tool
 {
     public function name(): string

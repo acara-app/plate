@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Ai\Tools;
 
 use App\Ai\Agents\EnrichAttributeMetadataAgent;
+use App\Ai\Attributes\AiToolSensitivity;
+use App\Enums\DataSensitivity;
 use App\Enums\UserProfileAttributeCategory;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 use RuntimeException;
 
+#[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class EnrichAttributeMetadata implements Tool
 {
     public function name(): string

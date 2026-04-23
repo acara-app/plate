@@ -46,9 +46,9 @@ it('returns complete profile data for onboarded user', function (): void {
 
     expect($result)
         ->onboarding_completed->toBeTrue()
-        ->raw_data->toHaveKeys(['biometrics', 'dietary_preferences', 'health_conditions', 'medications', 'goals']);
+        ->raw_data->toHaveKeys(['biometrics', 'dietary_preferences', 'goals']);
     expect($result['raw_data']['biometrics'])
-        ->toHaveKeys(['age', 'date_of_birth', 'height_cm', 'weight_kg', 'sex', 'blood_type', 'bmi', 'bmr', 'tdee']);
+        ->toHaveKeys(['age', 'height_cm', 'weight_kg', 'sex', 'bmi', 'bmr', 'tdee']);
 });
 
 it('includes dietary preferences in context', function (): void {
@@ -70,55 +70,6 @@ it('includes dietary preferences in context', function (): void {
         ->toMatchArray([
             'name' => 'Vegetarian',
             'notes' => 'No meat at all',
-        ]);
-});
-
-it('includes health conditions in context', function (): void {
-    $user = User::factory()->create();
-    $profile = UserProfile::factory()->create([
-        'user_id' => $user->id,
-        'onboarding_completed' => true,
-    ]);
-    UserProfileAttribute::factory()->healthCondition('Type 2 Diabetes')->create([
-        'user_profile_id' => $profile->id,
-        'notes' => 'Recently diagnosed',
-    ]);
-
-    $result = $this->action->handle($user);
-
-    expect($result['raw_data']['health_conditions'])
-        ->toHaveCount(1)
-        ->and($result['raw_data']['health_conditions'][0])
-        ->toMatchArray([
-            'name' => 'Type 2 Diabetes',
-            'notes' => 'Recently diagnosed',
-        ]);
-});
-
-it('includes medications in context', function (): void {
-    $user = User::factory()->create();
-    $profile = UserProfile::factory()->create([
-        'user_id' => $user->id,
-        'onboarding_completed' => true,
-    ]);
-    UserProfileAttribute::factory()->medication('Metformin', [
-        'dosage' => '500mg',
-        'frequency' => 'twice daily',
-        'purpose' => 'Blood sugar control',
-    ])->create([
-        'user_profile_id' => $profile->id,
-    ]);
-
-    $result = $this->action->handle($user);
-
-    expect($result['raw_data']['medications'])
-        ->toHaveCount(1)
-        ->and($result['raw_data']['medications'][0])
-        ->toMatchArray([
-            'name' => 'Metformin',
-            'dosage' => '500mg',
-            'frequency' => 'twice daily',
-            'purpose' => 'Blood sugar control',
         ]);
 });
 
@@ -177,7 +128,48 @@ it('identifies missing dietary preferences', function (): void {
     expect($result['missing_data'])->toContain('dietary_preferences');
 });
 
-it('includes household context in formatted output', function (): void {
+it('never exposes medications in raw_data even when the user has them', function (): void {
+    $user = User::factory()->create();
+    $profile = UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'onboarding_completed' => true,
+    ]);
+    UserProfileAttribute::factory()->medication('Metformin', [
+        'dosage' => '500mg',
+        'frequency' => 'twice daily',
+        'purpose' => 'Blood sugar control',
+    ])->create([
+        'user_profile_id' => $profile->id,
+    ]);
+
+    $result = $this->action->handle($user);
+
+    expect($result['raw_data'])->not->toHaveKey('medications');
+    expect($result['context'])
+        ->not->toContain('MEDICATIONS')
+        ->not->toContain('Metformin');
+});
+
+it('never exposes health_conditions in raw_data even when the user has them', function (): void {
+    $user = User::factory()->create();
+    $profile = UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'onboarding_completed' => true,
+    ]);
+    UserProfileAttribute::factory()->healthCondition('Type 2 Diabetes')->create([
+        'user_profile_id' => $profile->id,
+        'notes' => 'Recently diagnosed',
+    ]);
+
+    $result = $this->action->handle($user);
+
+    expect($result['raw_data'])->not->toHaveKey('health_conditions');
+    expect($result['context'])
+        ->not->toContain('HEALTH CONDITIONS')
+        ->not->toContain('Type 2 Diabetes');
+});
+
+it('never exposes household_context in raw_data or AI-facing context', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -187,26 +179,13 @@ it('includes household context in formatted output', function (): void {
 
     $result = $this->action->handle($user);
 
+    expect($result['raw_data'])->not->toHaveKey('household_context');
     expect($result['context'])
-        ->toContain('HOUSEHOLD/FAMILY: My husband Bataa is 38, has type 2 diabetes.')
-        ->and($result['raw_data']['household_context'])
-        ->toBe('My husband Bataa is 38, has type 2 diabetes. Kids: Tana (12, peanut allergy).');
+        ->not->toContain('HOUSEHOLD/FAMILY')
+        ->not->toContain('Bataa');
 });
 
-it('omits household section when context is null', function (): void {
-    $user = User::factory()->create();
-    UserProfile::factory()->create([
-        'user_id' => $user->id,
-        'onboarding_completed' => true,
-        'household_context' => null,
-    ]);
-
-    $result = $this->action->handle($user);
-
-    expect($result['context'])->not->toContain('HOUSEHOLD/FAMILY');
-});
-
-it('includes date_of_birth and blood_type in biometrics', function (): void {
+it('never exposes date_of_birth or blood_type in raw_data or AI-facing context', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -221,14 +200,17 @@ it('includes date_of_birth and blood_type in biometrics', function (): void {
     $result = $this->action->handle($user);
 
     expect($result['raw_data']['biometrics'])
-        ->date_of_birth->toBe('1996-04-04')
-        ->blood_type->toBe('A+')
-        ->and($result['context'])
-        ->toContain('Date of Birth: 1996-04-04')
-        ->toContain('Blood Type: A+');
+        ->not->toHaveKey('date_of_birth')
+        ->not->toHaveKey('blood_type');
+
+    expect($result['context'])
+        ->not->toContain('Date of Birth')
+        ->not->toContain('1996-04-04')
+        ->not->toContain('Blood Type')
+        ->not->toContain('A+');
 });
 
-it('includes full goal details including diet type and macros', function (): void {
+it('exposes additional_goals in raw_data but never in AI-facing context', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -239,8 +221,11 @@ it('includes full goal details including diet type and macros', function (): voi
 
     $result = $this->action->handle($user);
 
+    expect($result['raw_data']['goals']['additional_goals'])->toBe('Build muscle and stay hydrated');
+
     expect($result['context'])
         ->toContain('Diet Type: keto')
         ->toContain('Recommended Macros: 5% carbs, 20% protein, 75% fat')
-        ->toContain('Additional Goals: Build muscle and stay hydrated');
+        ->not->toContain('Additional Goals')
+        ->not->toContain('Build muscle and stay hydrated');
 });

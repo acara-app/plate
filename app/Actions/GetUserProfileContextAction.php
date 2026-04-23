@@ -25,10 +25,7 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
             'onboarding_completed' => $profile->onboarding_completed,
             'biometrics' => $this->getBiometrics($profile),
             'dietary_preferences' => $this->getDietaryPreferences($profile),
-            'health_conditions' => $this->getHealthConditions($profile),
-            'medications' => $this->getMedications($profile),
             'goals' => $this->getGoals($profile),
-            'household_context' => $profile->household_context,
         ];
 
         $missingData = $this->identifyMissingData($profile);
@@ -48,11 +45,9 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
     {
         return [
             'age' => $profile->age,
-            'date_of_birth' => $profile->date_of_birth?->format('Y-m-d'),
             'height_cm' => $profile->height,
             'weight_kg' => $profile->weight,
             'sex' => $profile->sex?->value,
-            'blood_type' => $profile->blood_type?->value,
             'bmi' => $profile->bmi,
             'bmr' => $profile->bmr,
             'tdee' => $profile->tdee,
@@ -69,30 +64,6 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
             'name' => $attr->value,
             'severity' => $attr->severity?->value,
             'notes' => $attr->notes,
-        ])->all());
-    }
-
-    /**
-     * @return array<int, array{name: string, notes: string|null}>
-     */
-    private function getHealthConditions(UserProfile $profile): array
-    {
-        return array_values($profile->healthConditionAttributes->map(fn (UserProfileAttribute $attr): array => [
-            'name' => $attr->value,
-            'notes' => $attr->notes,
-        ])->all());
-    }
-
-    /**
-     * @return array<int, array{name: string, dosage: string|null, frequency: string|null, purpose: string|null}>
-     */
-    private function getMedications(UserProfile $profile): array
-    {
-        return array_values($profile->medicationAttributes->map(fn (UserProfileAttribute $attr): array => [
-            'name' => $attr->value,
-            'dosage' => $attr->getMedicationDosage(),
-            'frequency' => $attr->getMedicationFrequency(),
-            'purpose' => $attr->getMedicationPurpose(),
         ])->all());
     }
 
@@ -146,7 +117,7 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
     }
 
     /**
-     * @param  array{biometrics: array<string, mixed>, dietary_preferences: array<int, array{name: string, severity: mixed, notes: mixed}>, health_conditions: array<int, array{name: string, notes: mixed}>, medications: array<int, array{name: string, dosage: mixed, frequency: mixed, purpose: mixed}>, goals: array<string, mixed>, household_context: string|null}  $context
+     * @param  array{biometrics: array<string, mixed>, dietary_preferences: array<int, array{name: string, severity: mixed, notes: mixed}>, goals: array<string, mixed>}  $context
      * @param  list<string>  $missingData
      */
     private function formatContextForAI(array $context, array $missingData): string
@@ -160,10 +131,6 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
             $bioParts[] = 'Age: '.$bio['age'];
         }
 
-        if (isset($bio['date_of_birth']) && is_scalar($bio['date_of_birth'])) {
-            $bioParts[] = 'Date of Birth: '.$bio['date_of_birth'];
-        }
-
         if (isset($bio['height_cm']) && is_scalar($bio['height_cm'])) {
             $bioParts[] = 'Height: '.$bio['height_cm'].'cm';
         }
@@ -174,10 +141,6 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
 
         if (isset($bio['sex']) && is_scalar($bio['sex'])) {
             $bioParts[] = 'Sex: '.$bio['sex'];
-        }
-
-        if (isset($bio['blood_type']) && is_scalar($bio['blood_type'])) {
-            $bioParts[] = 'Blood Type: '.$bio['blood_type'];
         }
 
         if (isset($bio['bmi']) && is_scalar($bio['bmi'])) {
@@ -204,29 +167,6 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
             $parts[] = 'DIETARY PREFERENCES/RESTRICTIONS: '.implode(', ', $prefStrings);
         }
 
-        /** @var array<int, array{name: string, notes: mixed}> $conditions */
-        $conditions = $context['health_conditions'];
-        if ($conditions !== []) {
-            $conditionStrings = array_map(function (array $c): string {
-                $notes = is_scalar($c['notes']) && (string) $c['notes'] !== '' ? ' ('.$c['notes'].')' : '';
-
-                return $c['name'].$notes;
-            }, $conditions);
-            $parts[] = 'HEALTH CONDITIONS: '.implode(', ', $conditionStrings);
-        }
-
-        /** @var array<int, array{name: string, dosage: mixed, frequency: mixed, purpose: mixed}> $medications */
-        $medications = $context['medications'];
-        if ($medications !== []) {
-            $medStrings = array_map(function (array $m): string {
-                $dosage = is_scalar($m['dosage']) && (string) $m['dosage'] !== '' ? ' '.$m['dosage'] : '';
-                $frequency = is_scalar($m['frequency']) && (string) $m['frequency'] !== '' ? ' ('.$m['frequency'].')' : '';
-
-                return $m['name'].$dosage.$frequency;
-            }, $medications);
-            $parts[] = 'MEDICATIONS: '.implode(', ', $medStrings);
-        }
-
         /** @var array<string, mixed> $goals */
         $goals = $context['goals'];
         $goalParts = [];
@@ -247,16 +187,8 @@ final readonly class GetUserProfileContextAction implements GetsUserProfileConte
             }
         }
 
-        if (isset($goals['additional_goals']) && is_scalar($goals['additional_goals'])) {
-            $goalParts[] = 'Additional Goals: '.$goals['additional_goals'];
-        }
-
         if ($goalParts !== []) {
             $parts[] = 'GOALS: '.implode(', ', $goalParts);
-        }
-
-        if (is_string($context['household_context']) && $context['household_context'] !== '') {
-            $parts[] = 'HOUSEHOLD/FAMILY: '.$context['household_context'];
         }
 
         if ($missingData !== []) {

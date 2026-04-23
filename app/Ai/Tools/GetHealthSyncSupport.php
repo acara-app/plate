@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Ai\Tools;
 
 use App\Actions\GetHealthSyncSupportContextAction;
+use App\Ai\Attributes\AiToolSensitivity;
+use App\Enums\DataSensitivity;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
+#[AiToolSensitivity(DataSensitivity::General)]
 final readonly class GetHealthSyncSupport implements Tool
 {
     public function __construct(

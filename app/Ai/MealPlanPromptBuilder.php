@@ -60,8 +60,16 @@ final readonly class MealPlanPromptBuilder
         $macroTargets = $dietType->macroTargets();
 
         return MealPlanContextData::from([
-            ...$profile->toArray(),
+            'age' => $profile->age,
+            'height' => $profile->height,
+            'weight' => $profile->weight,
+            'sex' => $profile->sex?->value,
+            'bmi' => $profile->bmi,
+            'bmr' => $profile->bmr,
+            'tdee' => $profile->tdee,
             'goal' => $profile->goal_choice?->label(),
+            'target_weight' => $profile->target_weight,
+            'additional_goals' => $profile->additional_goals,
             'dietary_preferences' => $this->enrichAttributes($profile->dietaryAttributes()->get()),
             'health_conditions' => $this->enrichAttributes($profile->healthConditionAttributes()->get()),
             'medications' => $this->enrichAttributes($profile->medicationAttributes()->get()),

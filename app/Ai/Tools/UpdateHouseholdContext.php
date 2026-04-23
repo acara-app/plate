@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Ai\Attributes\AiToolSensitivity;
+use App\Enums\DataSensitivity;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -11,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
+#[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class UpdateHouseholdContext implements Tool
 {
     public function name(): string

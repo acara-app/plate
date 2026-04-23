@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Ai\Attributes\AiToolSensitivity;
+use App\Enums\DataSensitivity;
 use App\Enums\DietType;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\File;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
+#[AiToolSensitivity(DataSensitivity::General)]
 final readonly class GetDietReference implements Tool
 {
     public function name(): string

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Ai\Attributes\AiToolSensitivity;
+use App\Enums\DataSensitivity;
 use App\Enums\HealthAggregationFunction;
 use App\Enums\HealthSyncType;
 use App\Models\HealthDailyAggregate;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\Date;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
+#[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class GetHealthSummary implements Tool
 {
     public function name(): string

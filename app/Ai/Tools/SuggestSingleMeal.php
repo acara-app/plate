@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Ai\Attributes\AiToolSensitivity;
 use App\Contracts\Ai\GeneratesSingleMeals;
+use App\Enums\DataSensitivity;
 use App\Models\User;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -12,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
+#[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class SuggestSingleMeal implements Tool
 {
     public function name(): string

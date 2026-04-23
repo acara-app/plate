@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Ai\Tools;
 
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Ai\Attributes\AiToolSensitivity;
+use App\Enums\DataSensitivity;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Tools\Request;
 
+#[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class AnalyzePhoto implements Tool
 {
     /**
