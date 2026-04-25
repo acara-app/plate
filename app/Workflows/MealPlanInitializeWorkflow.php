@@ -13,6 +13,7 @@ use App\Enums\MealPlanGenerationStatus;
 use App\Enums\MealPlanType;
 use App\Models\MealPlan;
 use App\Models\User;
+use App\Utilities\LanguageUtil;
 use Generator;
 use Illuminate\Queue\Attributes\Timeout;
 use Spatie\LaravelData\DataCollection;
@@ -52,18 +53,20 @@ final class MealPlanInitializeWorkflow extends Workflow
     public static function createMealPlan(User $user, int $totalDays = 7, ?DietType $dietType = null): MealPlan
     {
         $mealPlanType = self::getMealPlanType($totalDays);
+        $locale = self::resolveLocale($user);
 
-        // @codeCoverageIgnoreStart
         $name = $dietType instanceof DietType
-            ? sprintf('%d-Day %s Plan', $totalDays, $dietType->shortName())
-            : $totalDays.'-Day Personalized Plan';
-        // @codeCoverageIgnoreEnd
+            ? __('common.meal_plans.name_with_diet', [
+                'days' => $totalDays,
+                'diet' => __('common.meal_plans.diet_short.'.$dietType->value, [], $locale),
+            ], $locale)
+            : __('common.meal_plans.name_default', ['days' => $totalDays], $locale);
 
         /** @var MealPlan $mealPlan */
         $mealPlan = $user->mealPlans()->create([
             'type' => $mealPlanType,
             'name' => $name,
-            'description' => 'AI-generated meal plan tailored to your nutritional needs and preferences.',
+            'description' => __('common.meal_plans.default_description', [], $locale),
             'duration_days' => $totalDays,
             'target_daily_calories' => null,
             'macronutrient_ratios' => null,
@@ -141,5 +144,12 @@ final class MealPlanInitializeWorkflow extends Workflow
             'status' => MealPlanGenerationStatus::Pending->value,
             'meal_plan_id' => $mealPlan->id,
         ];
+    }
+
+    private static function resolveLocale(User $user): string
+    {
+        $code = $user->preferred_language ?? LanguageUtil::default();
+
+        return LanguageUtil::has($code) ? $code : LanguageUtil::default();
     }
 }
