@@ -25,7 +25,12 @@ final readonly class SingleMealPromptBuilder
         $contextString = $profileData['context'];
 
         $languageCode = $user->preferred_language ?? LanguageUtil::default();
-        $language = LanguageUtil::get($languageCode) ?? 'English';
+        $language = LanguageUtil::get($languageCode);
+
+        if ($language === null) {
+            $languageCode = LanguageUtil::default();
+            $language = LanguageUtil::get($languageCode) ?? 'English';
+        }
 
         return view('ai.agents.generate-single-meal', [
             'profileContext' => $contextString,

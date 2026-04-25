@@ -554,8 +554,9 @@ it('falls back to english for unsupported language code', function (): void {
     $result = $builder->handleForDay($user, 1, 7);
 
     expect($result)
-        ->toContain('(language code: `xx`)')
-        ->toContain('Generate ALL meal content in English');
+        ->toContain('(language code: `en`)')
+        ->toContain('Generate ALL meal content in English')
+        ->not->toContain('`xx`');
 });
 
 it('keeps the language directive language-agnostic for english users', function (): void {

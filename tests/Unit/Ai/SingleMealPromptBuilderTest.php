@@ -206,6 +206,7 @@ it('falls back to english for unsupported single meal language code', function (
     $prompt = $this->builder->handle($user, 'lunch');
 
     expect($prompt)
-        ->toContain('(language code: `xx`)')
-        ->toContain('Generate ALL meal content in English');
+        ->toContain('(language code: `en`)')
+        ->toContain('Generate ALL meal content in English')
+        ->not->toContain('`xx`');
 });
