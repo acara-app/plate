@@ -20,11 +20,4 @@ return new class extends Migration
             $table->dropColumn('preferred_language');
         });
     }
-
-    public function down(): void
-    {
-        Schema::table('users', function (Blueprint $table): void {
-            $table->string('preferred_language', 10)->nullable();
-        });
-    }
 };
