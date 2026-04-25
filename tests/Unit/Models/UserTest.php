@@ -33,7 +33,6 @@ it('to array', function (): void {
             'timezone',
             'is_verified',
             'settings',
-            'preferred_language',
             'locale',
             'accepted_disclaimer_at',
             'is_onboarded',
