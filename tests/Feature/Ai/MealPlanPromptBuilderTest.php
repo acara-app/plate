@@ -557,3 +557,19 @@ it('falls back to english for unsupported language code', function (): void {
         ->toContain('(language code: `xx`)')
         ->toContain('Generate ALL meal content in English');
 });
+
+it('keeps the language directive language-agnostic for english users', function (): void {
+    $user = User::factory()->create([
+        'preferred_language' => 'en',
+    ]);
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    $result = $builder->handleForDay($user, 1, 7);
+
+    expect($result)
+        ->not->toContain('Монгол')
+        ->not->toContain('Махтай шөл')
+        ->not->toContain('Тахианы мах')
+        ->not->toContain('If language is')
+        ->toContain('Use natural, idiomatic terms in English');
+});
