@@ -47,14 +47,7 @@ final readonly class EnrichAttributeMetadata implements Tool
 
         $user = Auth::user();
         if ($user instanceof User) {
-            $languageCode = $user->preferred_language ?? LanguageUtil::default();
-            $language = LanguageUtil::get($languageCode);
-
-            if ($language === null) {
-                $languageCode = LanguageUtil::default();
-                $language = LanguageUtil::get($languageCode) ?? 'English';
-            }
-
+            ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($user->preferred_language);
             $agent->withLanguage($language, $languageCode);
         }
 

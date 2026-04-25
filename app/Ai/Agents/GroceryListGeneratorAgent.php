@@ -10,7 +10,6 @@ use App\Data\GroceryItemData;
 use App\Data\GroceryListData;
 use App\Data\IngredientData;
 use App\Models\MealPlan;
-use App\Models\User;
 use App\Utilities\JsonCleaner;
 use App\Utilities\LanguageUtil;
 use Laravel\Ai\Attributes\MaxTokens;
@@ -128,9 +127,7 @@ final class GroceryListGeneratorAgent implements Agent
         }
 
         $mealPlan->loadMissing('user');
-        $user = $mealPlan->user;
-        $languageCode = $user instanceof User ? ($user->preferred_language ?? LanguageUtil::default()) : LanguageUtil::default();
-        $language = LanguageUtil::get($languageCode) ?? 'English';
+        ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($mealPlan->user?->preferred_language);
 
         return <<<PROMPT
             Please consolidate the following ingredients from a {$mealPlan->duration_days}-day meal plan into an organized grocery list.

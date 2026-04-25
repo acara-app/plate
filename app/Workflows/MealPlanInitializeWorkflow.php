@@ -53,7 +53,7 @@ final class MealPlanInitializeWorkflow extends Workflow
     public static function createMealPlan(User $user, int $totalDays = 7, ?DietType $dietType = null): MealPlan
     {
         $mealPlanType = self::getMealPlanType($totalDays);
-        $locale = self::resolveLocale($user);
+        $locale = LanguageUtil::resolve($user->preferred_language)['code'];
 
         $name = $dietType instanceof DietType
             ? __('common.meal_plans.name_with_diet', [
@@ -144,12 +144,5 @@ final class MealPlanInitializeWorkflow extends Workflow
             'status' => MealPlanGenerationStatus::Pending->value,
             'meal_plan_id' => $mealPlan->id,
         ];
-    }
-
-    private static function resolveLocale(User $user): string
-    {
-        $code = $user->preferred_language ?? LanguageUtil::default();
-
-        return LanguageUtil::has($code) ? $code : LanguageUtil::default();
     }
 }

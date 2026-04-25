@@ -37,13 +37,7 @@ final readonly class MealPlanPromptBuilder
     ): string {
         $context = $this->buildContext($user, $glucoseAnalysis);
 
-        $languageCode = $user->preferred_language ?? LanguageUtil::default();
-        $language = LanguageUtil::get($languageCode);
-
-        if ($language === null) {
-            $languageCode = LanguageUtil::default();
-            $language = LanguageUtil::get($languageCode) ?? 'English';
-        }
+        ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($user->preferred_language);
 
         return view('ai.agents.create-day-meal-plan', [
             'context' => $context,
