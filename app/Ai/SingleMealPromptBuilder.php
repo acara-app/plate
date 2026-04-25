@@ -6,6 +6,7 @@ namespace App\Ai;
 
 use App\Actions\GetUserProfileContextAction;
 use App\Models\User;
+use App\Utilities\LanguageUtil;
 
 final readonly class SingleMealPromptBuilder
 {
@@ -23,12 +24,17 @@ final readonly class SingleMealPromptBuilder
         $profileData = $this->profileContext->handle($user);
         $contextString = $profileData['context'];
 
+        $languageCode = $user->preferred_language ?? LanguageUtil::default();
+        $language = LanguageUtil::get($languageCode) ?? 'English';
+
         return view('ai.agents.generate-single-meal', [
             'profileContext' => $contextString,
             'mealType' => $mealType,
             'cuisine' => $cuisine,
             'maxCalories' => $maxCalories,
             'specificRequest' => $specificRequest,
+            'language' => $language,
+            'languageCode' => $languageCode,
         ])->render();
     }
 }

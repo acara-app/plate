@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\UserProfileAttribute;
 use App\Services\DietMapper;
+use App\Utilities\LanguageUtil;
 use Illuminate\Database\Eloquent\Collection;
 
 final readonly class MealPlanPromptBuilder
@@ -36,12 +37,17 @@ final readonly class MealPlanPromptBuilder
     ): string {
         $context = $this->buildContext($user, $glucoseAnalysis);
 
+        $languageCode = $user->preferred_language ?? LanguageUtil::default();
+        $language = LanguageUtil::get($languageCode) ?? 'English';
+
         return view('ai.agents.create-day-meal-plan', [
             'context' => $context,
             'dayNumber' => $dayNumber,
             'totalDays' => $totalDays,
             'previousDaysContext' => $previousDaysContext?->toPromptText(),
             'prompt' => $customPrompt,
+            'language' => $language,
+            'languageCode' => $languageCode,
         ])->render();
     }
 

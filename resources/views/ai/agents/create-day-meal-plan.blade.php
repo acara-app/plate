@@ -21,6 +21,22 @@ You are a nutrition assistant providing meal planning guidance. You MUST follow 
 
 ---
 
+@include('ai.prompts.partials.language', [
+    'language' => $language,
+    'languageCode' => $languageCode,
+    'contentNoun' => 'meal content',
+    'scopes' => [
+        '`name` — meal names',
+        '`description` — meal descriptions',
+        '`preparation_instructions` — cooking steps',
+        '`portion_size` — serving size descriptions',
+        '`ingredients[].name` — ingredient/food names',
+        '`metadata.preparation_notes` — batch cooking or storage notes',
+    ],
+])
+
+---
+
 ## User Profile
 
 - **Age**: {{ $context->age ?? 'Not specified' }} years
