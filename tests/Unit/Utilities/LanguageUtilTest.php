@@ -42,6 +42,21 @@ it('returns false for unknown code', function (): void {
     expect(LanguageUtil::has('xx'))->toBeFalse();
 });
 
+it('resolves a supported code to its label and code', function (string $code, string $label): void {
+    expect(LanguageUtil::resolve($code))
+        ->toBe(['label' => $label, 'code' => $code]);
+})->with('valid languages');
+
+it('resolves null to the default language', function (): void {
+    expect(LanguageUtil::resolve(null))
+        ->toBe(['label' => 'English', 'code' => 'en']);
+});
+
+it('collapses an unsupported code to the default language', function (): void {
+    expect(LanguageUtil::resolve('xx'))
+        ->toBe(['label' => 'English', 'code' => 'en']);
+});
+
 it('returns empty array when locale directory does not exist', function (): void {
     File::shouldReceive('isDirectory')->with(lang_path('xx'))->andReturn(false);
 

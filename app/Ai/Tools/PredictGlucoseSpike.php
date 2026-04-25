@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Ai\Agents\SpikePredictorAgent;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Contracts\Ai\PredictsGlucoseSpikes;
 use App\Data\SpikePredictionData;
 use App\Enums\DataSensitivity;
 use App\Enums\SpikeRiskLevel;
+use App\Models\User;
+use App\Utilities\LanguageUtil;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
@@ -42,7 +46,16 @@ final readonly class PredictGlucoseSpike implements Tool
         }
 
         try {
-            $prediction = resolve(PredictsGlucoseSpikes::class)->predict($food);
+            $predictor = resolve(PredictsGlucoseSpikes::class);
+
+            $user = Auth::user();
+            // @phpstan-ignore-next-line instanceof.alwaysTrue (test fakes bind a non-SpikePredictorAgent stub via app()->instance())
+            if ($predictor instanceof SpikePredictorAgent && $user instanceof User) {
+                ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($user->locale);
+                $predictor->withLanguage($language, $languageCode);
+            }
+
+            $prediction = $predictor->predict($food);
 
             return (string) json_encode([
                 'success' => true,

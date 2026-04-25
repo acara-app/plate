@@ -169,3 +169,48 @@ it('rejects out-of-range duration_days', function (int $invalid): void {
 
     $response->assertSessionHasErrors('duration_days');
 })->with([0, -1, 8, 30]);
+
+it('persists the custom prompt into meal plan metadata', function (): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('meal-plans.store'), [
+            'duration_days' => 3,
+            'prompt' => 'kid friendly weeknights',
+        ]);
+
+    $response->assertRedirect();
+
+    $mealPlan = $user->mealPlans->first();
+    expect($mealPlan->metadata['custom_prompt'])->toBe('kid friendly weeknights');
+});
+
+it('rejects prompts longer than 2000 characters', function (): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('meal-plans.store'), [
+            'duration_days' => 3,
+            'prompt' => str_repeat('a', 2001),
+        ]);
+
+    $response->assertSessionHasErrors('prompt');
+});
+
+it('rejects an unknown diet_type value', function (): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('meal-plans.store'), [
+            'duration_days' => 3,
+            'diet_type' => 'not-a-real-diet',
+        ]);
+
+    $response->assertSessionHasErrors('diet_type');
+});

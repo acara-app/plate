@@ -48,6 +48,23 @@ final class LanguageUtil
     }
 
     /**
+     * @return array{label: string, code: string}
+     */
+    public static function resolve(?string $code): array
+    {
+        $code ??= self::default();
+
+        if (! self::has($code)) {
+            $code = self::default();
+        }
+
+        return [
+            'label' => self::get($code) ?? 'English',
+            'code' => $code,
+        ];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public static function translations(string $locale): array

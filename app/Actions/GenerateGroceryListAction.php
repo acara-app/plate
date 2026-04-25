@@ -8,6 +8,7 @@ use App\Ai\Agents\GroceryListGeneratorAgent;
 use App\Enums\GroceryListStatus;
 use App\Models\GroceryList;
 use App\Models\MealPlan;
+use App\Utilities\LanguageUtil;
 use RuntimeException;
 use Throwable;
 
@@ -20,10 +21,13 @@ final readonly class GenerateGroceryListAction
     public function createPlaceholder(MealPlan $mealPlan): GroceryList
     {
         $mealPlan->groceryList()->delete();
+        $mealPlan->loadMissing('user');
+
+        $locale = LanguageUtil::resolve($mealPlan->user->locale)['code'];
 
         return $mealPlan->groceryList()->create([
             'user_id' => $mealPlan->user_id,
-            'name' => 'Grocery List for '.$mealPlan->name,
+            'name' => __('common.grocery_list.name_template', ['name' => $mealPlan->name], $locale),
             'status' => GroceryListStatus::Generating,
             'metadata' => [
                 'started_at' => now()->toIso8601String(),

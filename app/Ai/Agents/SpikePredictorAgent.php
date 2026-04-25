@@ -21,8 +21,48 @@ final class SpikePredictorAgent implements Agent, PredictsGlucoseSpikes
 {
     use Promptable;
 
+    private ?string $language = null;
+
+    private ?string $languageCode = null;
+
+    public function withLanguage(string $language, string $languageCode): self
+    {
+        $this->language = $language;
+        $this->languageCode = $languageCode;
+
+        return $this;
+    }
+
     public function instructions(): string
     {
+        $output = [
+            'Your response MUST be valid JSON and ONLY JSON',
+            'Start your response with { and end with }',
+            'Do NOT include markdown code blocks (no ```json)',
+            '',
+            'Return format:',
+            '{',
+            '  "risk_level": "low|medium|high",',
+            '  "estimated_gl": number (0-100),',
+            '  "explanation": "string explaining WHY (for comparisons: compare both foods)",',
+            '  "smart_fix": "string (for comparisons: recommend the winner; for single: practical tip)",',
+            '  "spike_reduction_percentage": number (10-60)',
+            '}',
+            '',
+            'For COMPARISONS: explanation should compare both foods GI/GL, smart_fix should clearly state which is better',
+            'risk_level must be exactly one of: "low", "medium", or "high"',
+            'Keep responses concise but informative',
+        ];
+
+        if ($this->language !== null && $this->languageCode !== null) {
+            $output[] = sprintf(
+                'Write `explanation` and `smart_fix` in %s (language code: `%s`). JSON keys, the `risk_level` enum value, and numeric fields stay in English. Use natural, idiomatic terms in %s — do not transliterate from English.',
+                $this->language,
+                $this->languageCode,
+                $this->language,
+            );
+        }
+
         return (string) new SystemPrompt(
             background: [
                 'You are an expert nutritionist and glycemic index specialist.',
@@ -41,24 +81,7 @@ final class SpikePredictorAgent implements Agent, PredictsGlucoseSpikes
                 '7. For comparisons: smart_fix should recommend the WINNER and why',
                 '8. For single foods: smart_fix should be a practical tip to reduce spike',
             ],
-            output: [
-                'Your response MUST be valid JSON and ONLY JSON',
-                'Start your response with { and end with }',
-                'Do NOT include markdown code blocks (no ```json)',
-                '',
-                'Return format:',
-                '{',
-                '  "risk_level": "low|medium|high",',
-                '  "estimated_gl": number (0-100),',
-                '  "explanation": "string explaining WHY (for comparisons: compare both foods)",',
-                '  "smart_fix": "string (for comparisons: recommend the winner; for single: practical tip)",',
-                '  "spike_reduction_percentage": number (10-60)',
-                '}',
-                '',
-                'For COMPARISONS: explanation should compare both foods GI/GL, smart_fix should clearly state which is better',
-                'risk_level must be exactly one of: "low", "medium", or "high"',
-                'Keep responses concise but informative',
-            ],
+            output: $output,
         );
     }
 

@@ -41,7 +41,7 @@ final readonly class AgentBuilder
     public function buildInstructions(AgentPayload $payload, ?User $user): string
     {
         $profileData = $this->getProfileData($user);
-        $languageCode = $user instanceof User ? ($user->preferred_language ?? 'en') : 'en';
+        $languageCode = $user instanceof User ? ($user->locale ?? 'en') : 'en';
         $timezone = $this->resolveTimezone($user);
 
         $summaries = $payload->conversationId !== null

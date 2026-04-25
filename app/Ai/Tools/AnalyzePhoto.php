@@ -7,7 +7,10 @@ namespace App\Ai\Tools;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Enums\DataSensitivity;
+use App\Models\User;
+use App\Utilities\LanguageUtil;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Tools\Request;
@@ -40,8 +43,15 @@ final readonly class AnalyzePhoto implements Tool
 
         $image = $this->images[0];
 
-        $analysis = resolve(FoodPhotoAnalyzerAgent::class)
-            ->analyze($image->base64, $image->mime ?? 'image/jpeg');
+        $agent = resolve(FoodPhotoAnalyzerAgent::class);
+
+        $user = Auth::user();
+        if ($user instanceof User) {
+            ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($user->locale);
+            $agent->withLanguage($language, $languageCode);
+        }
+
+        $analysis = $agent->analyze($image->base64, $image->mime ?? 'image/jpeg');
 
         return (string) json_encode($analysis->toArray());
     }

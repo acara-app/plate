@@ -9,6 +9,7 @@ use App\Models\GroceryList;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
+use App\Utilities\LanguageUtil;
 
 covers(GenerateGroceryListAction::class);
 
@@ -28,11 +29,39 @@ it('creates a placeholder grocery list', function (): void {
     expect($groceryList)->toBeInstanceOf(GroceryList::class)
         ->and($groceryList->user_id)->toBe($this->user->id)
         ->and($groceryList->meal_plan_id)->toBe($this->mealPlan->id)
-        ->and($groceryList->name)->toBe('Grocery List for '.$this->mealPlan->name)
+        ->and($groceryList->name)->toBe(__('common.grocery_list.name_template', ['name' => $this->mealPlan->name], 'en'))
         ->and($groceryList->status)->toBe(GroceryListStatus::Generating)
         ->and($groceryList->metadata)->toHaveKey('started_at')
         ->and($groceryList->metadata)->toHaveKey('meal_plan_duration_days')
         ->and($groceryList->metadata['meal_plan_duration_days'])->toBe(7);
+});
+
+it('uses the owners preferred locale for the placeholder name', function (string $locale): void {
+    $user = User::factory()->create(['locale' => $locale]);
+    $mealPlan = MealPlan::factory()->for($user)->create([
+        'duration_days' => 7,
+        'name' => 'Weekly Plan',
+    ]);
+
+    $action = resolve(GenerateGroceryListAction::class);
+    $groceryList = $action->createPlaceholder($mealPlan);
+
+    expect($groceryList->name)
+        ->toBe(__('common.grocery_list.name_template', ['name' => $mealPlan->name], $locale));
+})->with(LanguageUtil::keys());
+
+it('falls back to default locale when preferred language is unsupported', function (): void {
+    $user = User::factory()->create(['locale' => 'xx']);
+    $mealPlan = MealPlan::factory()->for($user)->create([
+        'duration_days' => 7,
+        'name' => 'Weekly Plan',
+    ]);
+
+    $action = resolve(GenerateGroceryListAction::class);
+    $groceryList = $action->createPlaceholder($mealPlan);
+
+    expect($groceryList->name)
+        ->toBe(__('common.grocery_list.name_template', ['name' => $mealPlan->name], LanguageUtil::default()));
 });
 
 it('deletes existing grocery list before creating placeholder', function (): void {

@@ -32,6 +32,29 @@ it('instructions contains glycemic analysis guidance', function (): void {
         ->toContain('smart_fix');
 });
 
+it('omits language directive when language is not set', function (): void {
+    $agent = new SpikePredictorAgent;
+
+    $instructions = $agent->instructions();
+
+    expect($instructions)
+        ->not->toContain('Write `explanation` and `smart_fix` in')
+        ->not->toContain('language code:');
+});
+
+it('appends language directive to instructions when language is set', function (): void {
+    $agent = new SpikePredictorAgent;
+    $agent->withLanguage('English', 'en');
+
+    $instructions = $agent->instructions();
+
+    expect($instructions)
+        ->toContain('Write `explanation` and `smart_fix` in English')
+        ->toContain('language code: `en`')
+        ->toContain('the `risk_level` enum value, and numeric fields stay in English')
+        ->toContain('do not transliterate from English');
+});
+
 it('predicts high spike risk for high glycemic foods', function (): void {
     $mockResponse = [
         'risk_level' => 'high',

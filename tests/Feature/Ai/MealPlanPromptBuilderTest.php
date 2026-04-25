@@ -505,3 +505,72 @@ it('generates single day meal plan prompt with all parameters', function (): voi
         ->toContain('Day 3')
         ->toContain('7');
 });
+
+it('includes language instruction in the prompt', function (): void {
+    $user = User::factory()->create();
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    $result = $builder->handleForDay($user, 1, 7);
+
+    expect($result)
+        ->toContain('## Language')
+        ->toContain('Generate ALL meal content in');
+});
+
+it('uses users preferred language in the prompt', function (): void {
+    $user = User::factory()->create([
+        'locale' => 'mn',
+    ]);
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    $result = $builder->handleForDay($user, 1, 7);
+
+    expect($result)
+        ->toContain('Монгол')
+        ->toContain('(language code: `mn`)')
+        ->toContain('Generate ALL meal content in Монгол');
+});
+
+it('defaults to english when user has no preferred language', function (): void {
+    $user = User::factory()->create([
+        'locale' => null,
+    ]);
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    $result = $builder->handleForDay($user, 1, 7);
+
+    expect($result)
+        ->toContain('English')
+        ->toContain('(language code: `en`)')
+        ->toContain('Generate ALL meal content in English');
+});
+
+it('falls back to english for unsupported language code', function (): void {
+    $user = User::factory()->create([
+        'locale' => 'xx',
+    ]);
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    $result = $builder->handleForDay($user, 1, 7);
+
+    expect($result)
+        ->toContain('(language code: `en`)')
+        ->toContain('Generate ALL meal content in English')
+        ->not->toContain('`xx`');
+});
+
+it('keeps the language directive language-agnostic for english users', function (): void {
+    $user = User::factory()->create([
+        'locale' => 'en',
+    ]);
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    $result = $builder->handleForDay($user, 1, 7);
+
+    expect($result)
+        ->not->toContain('Монгол')
+        ->not->toContain('Махтай шөл')
+        ->not->toContain('Тахианы мах')
+        ->not->toContain('If language is')
+        ->toContain('Use natural, idiomatic terms in English');
+});

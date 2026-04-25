@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('meals', function (Blueprint $table): void {
-            $table->json('dietary_restrictions')->nullable()->after('nutrients')->comment('e.g., ["halal", "kosher"]');
+            $table->json('dietary_restrictions')->nullable()->comment('e.g., ["halal", "kosher"]');
         });
     }
 };

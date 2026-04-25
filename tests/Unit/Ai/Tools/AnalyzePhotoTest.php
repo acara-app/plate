@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Ai\Tools\AnalyzePhoto;
+use App\Models\User;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
+
+use function Pest\Laravel\actingAs;
 
 covers(AnalyzePhoto::class);
 
@@ -69,4 +72,50 @@ it('has a non-empty description', function (): void {
         ->not->toBeEmpty()
         ->toContain('food photo')
         ->toContain('log_health_entry');
+});
+
+it('passes user preferred language to the agent when authenticated', function (): void {
+    FoodPhotoAnalyzerAgent::fake([[
+        'items' => [],
+        'total_calories' => 0,
+        'total_protein' => 0,
+        'total_carbs' => 0,
+        'total_fat' => 0,
+        'confidence' => 0,
+    ]]);
+
+    $agent = new FoodPhotoAnalyzerAgent;
+    app()->instance(FoodPhotoAnalyzerAgent::class, $agent);
+
+    $user = User::factory()->create(['locale' => 'en']);
+    actingAs($user);
+
+    $image = new Base64Image(base64_encode('fake-image-data'), 'image/jpeg');
+    $tool = new AnalyzePhoto([$image]);
+    $tool->handle(new Request(['query' => 'analyze']));
+
+    expect($agent->instructions())
+        ->toContain('language code: `en`')
+        ->toContain('Return all `name` and `portion` values in English');
+});
+
+it('does not pass language when no user is authenticated', function (): void {
+    FoodPhotoAnalyzerAgent::fake([[
+        'items' => [],
+        'total_calories' => 0,
+        'total_protein' => 0,
+        'total_carbs' => 0,
+        'total_fat' => 0,
+        'confidence' => 0,
+    ]]);
+
+    $agent = new FoodPhotoAnalyzerAgent;
+    app()->instance(FoodPhotoAnalyzerAgent::class, $agent);
+
+    $image = new Base64Image(base64_encode('fake-image-data'), 'image/jpeg');
+    $tool = new AnalyzePhoto([$image]);
+    $tool->handle(new Request(['query' => 'analyze']));
+
+    expect($agent->instructions())
+        ->not->toContain('Return all `name` and `portion` values in');
 });

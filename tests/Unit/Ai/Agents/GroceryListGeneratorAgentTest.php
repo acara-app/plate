@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\GroceryListGeneratorAgent;
+use App\Data\ExtractedIngredientData;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
@@ -38,6 +39,67 @@ it('returns instructions with grocery list guidance', function (): void {
         ->toContain('Produce')
         ->toContain('Dairy')
         ->toContain('Meat & Seafood');
+});
+
+it('keeps category in english while honoring language directive', function (): void {
+    $instructions = $this->agent->instructions();
+
+    expect($instructions)
+        ->toContain('"category" VALUE must be one of the English category names')
+        ->toContain('"name" and "quantity" VALUES must follow the language directive');
+});
+
+it('injects users preferred language into the grocery prompt', function (): void {
+    $user = User::factory()->create(['locale' => 'mn']);
+    $mealPlan = MealPlan::factory()->for($user)->create(['duration_days' => 3]);
+
+    Meal::factory()->for($mealPlan)->create([
+        'day_number' => 1,
+        'name' => 'Dinner',
+        'ingredients' => [
+            ['name' => 'chicken breast', 'quantity' => '2 lbs'],
+        ],
+    ]);
+
+    $reflection = new ReflectionClass($this->agent);
+    $extract = $reflection->getMethod('extractIngredients');
+    $build = $reflection->getMethod('buildPrompt');
+
+    /** @var list<ExtractedIngredientData> $ingredients */
+    $ingredients = $extract->invoke($this->agent, $mealPlan);
+    $prompt = (string) $build->invoke($this->agent, $ingredients, $mealPlan);
+
+    expect($prompt)
+        ->toContain('LANGUAGE:')
+        ->toContain('Монгол')
+        ->toContain('(language code: `mn`)')
+        ->toContain('"category" value MUST stay in English');
+});
+
+it('defaults grocery prompt language to english when user has none', function (): void {
+    $user = User::factory()->create(['locale' => null]);
+    $mealPlan = MealPlan::factory()->for($user)->create(['duration_days' => 3]);
+
+    Meal::factory()->for($mealPlan)->create([
+        'day_number' => 1,
+        'name' => 'Dinner',
+        'ingredients' => [
+            ['name' => 'rice', 'quantity' => '1 cup'],
+        ],
+    ]);
+
+    $reflection = new ReflectionClass($this->agent);
+    $extract = $reflection->getMethod('extractIngredients');
+    $build = $reflection->getMethod('buildPrompt');
+
+    /** @var list<ExtractedIngredientData> $ingredients */
+    $ingredients = $extract->invoke($this->agent, $mealPlan);
+    $prompt = (string) $build->invoke($this->agent, $ingredients, $mealPlan);
+
+    expect($prompt)
+        ->toContain('LANGUAGE:')
+        ->toContain('English')
+        ->toContain('(language code: `en`)');
 });
 
 it('generates grocery list from meal plan with ingredients', function (): void {

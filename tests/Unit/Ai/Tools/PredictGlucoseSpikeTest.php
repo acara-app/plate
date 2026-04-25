@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
+use App\Ai\Agents\SpikePredictorAgent;
 use App\Ai\Tools\PredictGlucoseSpike;
 use App\Contracts\Ai\PredictsGlucoseSpikes;
 use App\Data\SpikePredictionData;
 use App\Enums\SpikeRiskLevel;
+use App\Models\User;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
+
+use function Pest\Laravel\actingAs;
 
 covers(PredictGlucoseSpike::class);
 
@@ -149,4 +153,27 @@ it('calculates estimated glucose increase for medium risk', function (): void {
 
     expect($data['prediction']['estimated_glucose_increase_mg_dl'])->toBe(45)
         ->and($data['recommendations'])->toContain('Moderate spike: Pair with a side salad or vegetables to add fiber and slow absorption.');
+});
+
+it('passes user preferred language to the agent when authenticated', function (): void {
+    SpikePredictorAgent::fake([[
+        'risk_level' => 'low',
+        'estimated_gl' => 10,
+        'explanation' => 'ok',
+        'smart_fix' => 'ok',
+        'spike_reduction_percentage' => 10,
+    ]]);
+
+    $agent = new SpikePredictorAgent;
+    app()->instance(PredictsGlucoseSpikes::class, $agent);
+
+    $user = User::factory()->create(['locale' => 'en']);
+    actingAs($user);
+
+    $tool = new PredictGlucoseSpike;
+    $tool->handle(new Request(['food' => 'apple']));
+
+    expect($agent->instructions())
+        ->toContain('language code: `en`')
+        ->toContain('Write `explanation` and `smart_fix` in English');
 });

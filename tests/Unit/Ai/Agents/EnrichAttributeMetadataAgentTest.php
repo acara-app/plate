@@ -26,6 +26,26 @@ it('returns instructions covering nutrition expertise', function (): void {
         ->toContain('safety_level');
 });
 
+it('omits language directive when language is not set', function (): void {
+    $instructions = $this->agent->instructions();
+
+    expect($instructions)
+        ->not->toContain('Write `dietary_rules`')
+        ->not->toContain('language code:');
+});
+
+it('appends language directive to instructions when language is set', function (): void {
+    $this->agent->withLanguage('English', 'en');
+
+    $instructions = $this->agent->instructions();
+
+    expect($instructions)
+        ->toContain('Write `dietary_rules`, `foods_to_avoid`, `foods_to_prioritize`, `hidden_sources`, `requirements`, and `general_advice` values in English')
+        ->toContain('language code: `en`')
+        ->toContain('`safety_level` enum value and numeric fields stay in English')
+        ->toContain('do not transliterate from English');
+});
+
 it('has correct attributes configured', function (): void {
     $reflection = new ReflectionClass($this->agent);
 

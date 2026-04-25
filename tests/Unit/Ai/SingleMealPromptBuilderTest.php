@@ -163,3 +163,50 @@ it('includes instructions section in prompt', function (): void {
         ->toContain('Ensure the meal fits within any specified calorie limits')
         ->toContain('Use common, accessible ingredients');
 });
+
+it('includes language instruction in the single meal prompt', function (): void {
+    $prompt = $this->builder->handle($this->user, 'lunch');
+
+    expect($prompt)
+        ->toContain('## Language')
+        ->toContain('Generate ALL meal content in');
+});
+
+it('uses users preferred language for single meal prompt', function (): void {
+    $user = User::factory()->create([
+        'locale' => 'mn',
+    ]);
+
+    $prompt = $this->builder->handle($user, 'lunch');
+
+    expect($prompt)
+        ->toContain('Монгол')
+        ->toContain('(language code: `mn`)')
+        ->toContain('Generate ALL meal content in Монгол');
+});
+
+it('defaults single meal prompt to english when user has no preferred language', function (): void {
+    $user = User::factory()->create([
+        'locale' => null,
+    ]);
+
+    $prompt = $this->builder->handle($user, 'lunch');
+
+    expect($prompt)
+        ->toContain('English')
+        ->toContain('(language code: `en`)')
+        ->toContain('Generate ALL meal content in English');
+});
+
+it('falls back to english for unsupported single meal language code', function (): void {
+    $user = User::factory()->create([
+        'locale' => 'xx',
+    ]);
+
+    $prompt = $this->builder->handle($user, 'lunch');
+
+    expect($prompt)
+        ->toContain('(language code: `en`)')
+        ->toContain('Generate ALL meal content in English')
+        ->not->toContain('`xx`');
+});

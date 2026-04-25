@@ -26,6 +26,26 @@ it('returns instructions with food analysis guidance', function (): void {
         ->toContain('portion');
 });
 
+it('omits language directive when language is not set', function (): void {
+    $instructions = $this->agent->instructions();
+
+    expect($instructions)
+        ->not->toContain('Return all `name` and `portion` values in')
+        ->not->toContain('language code:');
+});
+
+it('appends language directive to instructions when language is set', function (): void {
+    $this->agent->withLanguage('English', 'en');
+
+    $instructions = $this->agent->instructions();
+
+    expect($instructions)
+        ->toContain('Return all `name` and `portion` values in English')
+        ->toContain('language code: `en`')
+        ->toContain('Numeric fields and JSON keys stay as-is')
+        ->toContain('do not transliterate from English');
+});
+
 it('has correct attributes configured', function (): void {
     $reflection = new ReflectionClass($this->agent);
 

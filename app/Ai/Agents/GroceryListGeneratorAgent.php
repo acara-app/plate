@@ -11,6 +11,7 @@ use App\Data\GroceryListData;
 use App\Data\IngredientData;
 use App\Models\MealPlan;
 use App\Utilities\JsonCleaner;
+use App\Utilities\LanguageUtil;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
@@ -52,6 +53,9 @@ final class GroceryListGeneratorAgent implements Agent
                 'Return format: {"items": [{"name": "Item Name", "quantity": "Combined Quantity", "category": "Category Name", "days": [1, 2, 3]}]}',
                 'The "days" array must contain the day numbers (1-based) where the ingredient is used',
                 'Valid categories are: Produce, Dairy, Meat & Seafood, Pantry, Frozen, Bakery, Beverages, Condiments & Sauces, Herbs & Spices, Other',
+                'The "category" VALUE must be one of the English category names listed above — do not translate it',
+                'The "name" and "quantity" VALUES must follow the language directive provided in the user prompt',
+                'JSON keys ("name", "quantity", "category", "days") always stay in English',
             ],
         );
     }
@@ -122,8 +126,17 @@ final class GroceryListGeneratorAgent implements Agent
             );
         }
 
+        $mealPlan->loadMissing('user');
+        ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($mealPlan->user->locale);
+
         return <<<PROMPT
             Please consolidate the following ingredients from a {$mealPlan->duration_days}-day meal plan into an organized grocery list.
+
+            LANGUAGE:
+            Write each item's "name" and "quantity" in {$language} (language code: `{$languageCode}`).
+            The "category" value MUST stay in English and match one of the canonical categories (Produce, Dairy, Meat & Seafood, Pantry, Frozen, Bakery, Beverages, Condiments & Sauces, Herbs & Spices, Other).
+            JSON keys ("name", "quantity", "category", "days") always stay in English.
+            Do NOT mix languages within an item's name or quantity.
 
             INGREDIENTS FROM MEAL PLAN:
             {$ingredientList}
@@ -132,7 +145,7 @@ final class GroceryListGeneratorAgent implements Agent
             1. Combine similar ingredients (e.g., if "eggs" appears multiple times, sum the quantities)
             2. Normalize ingredient names (e.g., "boneless skinless chicken breast" and "chicken breast" should be combined)
             3. Keep quantities practical (round to reasonable amounts)
-            4. Categorize each item appropriately
+            4. Categorize each item appropriately (English category name)
             5. Track which days each ingredient is used in the "days" array (use the Day numbers from above)
 
             Return a JSON object with an "items" array containing consolidated grocery items.

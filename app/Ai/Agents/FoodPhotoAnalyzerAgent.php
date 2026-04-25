@@ -24,8 +24,38 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
 {
     use Promptable;
 
+    private ?string $language = null;
+
+    private ?string $languageCode = null;
+
+    public function withLanguage(string $language, string $languageCode): self
+    {
+        $this->language = $language;
+        $this->languageCode = $languageCode;
+
+        return $this;
+    }
+
     public function instructions(): string
     {
+        $output = [
+            'Return the analysis using the provided structured format.',
+            'Each item MUST have accurate per-item values: name (food name), calories (kcal), protein (g), carbs (g), fat (g), portion (estimated size)',
+            'Do NOT put all macros in the totals only — each food item must carry its own calorie and macro breakdown',
+            'confidence is a percentage (0-100) indicating how confident you are in the analysis',
+            'All nutritional values should be rounded to 1 decimal place',
+            'If no food is detected in the image, return empty items array with zeros for totals and confidence of 0',
+        ];
+
+        if ($this->language !== null && $this->languageCode !== null) {
+            $output[] = sprintf(
+                'Return all `name` and `portion` values in %s (language code: `%s`). Numeric fields and JSON keys stay as-is. Use natural, idiomatic terms in %s — do not transliterate from English.',
+                $this->language,
+                $this->languageCode,
+                $this->language,
+            );
+        }
+
         return (string) new SystemPrompt(
             background: [
                 'You are an expert nutritionist and food recognition specialist.',
@@ -41,14 +71,7 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
                 '4. Sum up total calories and macros for the entire meal (must equal the sum of individual items)',
                 '5. Provide a confidence score based on image clarity and food recognizability',
             ],
-            output: [
-                'Return the analysis using the provided structured format.',
-                'Each item MUST have accurate per-item values: name (food name), calories (kcal), protein (g), carbs (g), fat (g), portion (estimated size)',
-                'Do NOT put all macros in the totals only — each food item must carry its own calorie and macro breakdown',
-                'confidence is a percentage (0-100) indicating how confident you are in the analysis',
-                'All nutritional values should be rounded to 1 decimal place',
-                'If no food is detected in the image, return empty items array with zeros for totals and confidence of 0',
-            ],
+            output: $output,
         );
     }
 

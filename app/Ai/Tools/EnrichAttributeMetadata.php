@@ -8,7 +8,10 @@ use App\Ai\Agents\EnrichAttributeMetadataAgent;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Enums\DataSensitivity;
 use App\Enums\UserProfileAttributeCategory;
+use App\Models\User;
+use App\Utilities\LanguageUtil;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 use RuntimeException;
@@ -40,8 +43,15 @@ final readonly class EnrichAttributeMetadata implements Tool
             'Both "category" and "value" are required to enrich metadata.',
         );
 
-        $result = resolve(EnrichAttributeMetadataAgent::class)
-            ->enrich($category->value, $value->toString());
+        $agent = resolve(EnrichAttributeMetadataAgent::class);
+
+        $user = Auth::user();
+        if ($user instanceof User) {
+            ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($user->locale);
+            $agent->withLanguage($language, $languageCode);
+        }
+
+        $result = $agent->enrich($category->value, $value->toString());
 
         return json_encode($result->toArray()) ?: '{"error":"Failed to encode result"}';
     }

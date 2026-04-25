@@ -17,6 +17,22 @@ Generate a personalized single meal suggestion for a user with the following pro
 - **Specific Request**: {{ $specificRequest }}
 @endif
 
+@include('ai.prompts.partials.language', [
+    'language' => $language,
+    'languageCode' => $languageCode,
+    'contentNoun' => 'meal content',
+    'scopes' => [
+        '`name` — meal name',
+        '`description` — meal description',
+        '`cuisine` — cuisine label',
+        '`ingredients[]` — ingredient/food names',
+        '`instructions[]` — cooking steps',
+        '`dietary_tags[]` — descriptive tags',
+        '`glycemic_index_estimate` — GI description',
+        '`glucose_impact_notes` — glucose impact notes',
+    ],
+])
+
 ## Instructions
 
 1. Create a single, complete meal suggestion appropriate for the user's dietary needs and health conditions

@@ -24,8 +24,39 @@ final class EnrichAttributeMetadataAgent implements Agent, HasStructuredOutput
 {
     use Promptable;
 
+    private ?string $language = null;
+
+    private ?string $languageCode = null;
+
+    public function withLanguage(string $language, string $languageCode): self
+    {
+        $this->language = $language;
+        $this->languageCode = $languageCode;
+
+        return $this;
+    }
+
     public function instructions(): string
     {
+        $output = [
+            'Return the metadata using the provided structured format.',
+            'Include only fields that make sense for the category:',
+            '- Health conditions: safety_level, dietary_rules, foods_to_avoid, foods_to_prioritize, carb_limit_per_meal_g, min_fibre_per_meal_g',
+            '- Allergies: safety_level, hidden_sources, dietary_rules',
+            '- Restrictions (religious/cultural): requirements',
+            '- Dietary patterns: general_advice',
+            'safety_level should be "critical" for life-threatening conditions (severe allergies, celiac), "warning" for manageable conditions, "info" for preferences',
+        ];
+
+        if ($this->language !== null && $this->languageCode !== null) {
+            $output[] = sprintf(
+                'Write `dietary_rules`, `foods_to_avoid`, `foods_to_prioritize`, `hidden_sources`, `requirements`, and `general_advice` values in %s (language code: `%s`). The `safety_level` enum value and numeric fields stay in English. JSON keys always stay in English. Use natural, idiomatic terms in %s — do not transliterate from English.',
+                $this->language,
+                $this->languageCode,
+                $this->language,
+            );
+        }
+
         return (string) new SystemPrompt(
             background: [
                 'You are an expert nutritionist specializing in dietary planning for health conditions, allergies, and dietary restrictions.',
@@ -38,15 +69,7 @@ final class EnrichAttributeMetadataAgent implements Agent, HasStructuredOutput
                 '3. Generate appropriate dietary rules, safety levels, and food guidance',
                 '4. Only include fields relevant to the category (e.g., no "carb_limit" for allergies)',
             ],
-            output: [
-                'Return the metadata using the provided structured format.',
-                'Include only fields that make sense for the category:',
-                '- Health conditions: safety_level, dietary_rules, foods_to_avoid, foods_to_prioritize, carb_limit_per_meal_g, min_fibre_per_meal_g',
-                '- Allergies: safety_level, hidden_sources, dietary_rules',
-                '- Restrictions (religious/cultural): requirements',
-                '- Dietary patterns: general_advice',
-                'safety_level should be "critical" for life-threatening conditions (severe allergies, celiac), "warning" for manageable conditions, "info" for preferences',
-            ],
+            output: $output,
         );
     }
 

@@ -78,6 +78,7 @@ export interface MealPlan {
     macronutrient_ratios: MacronutrientRatios | null;
     metadata: {
         preparation_notes?: string;
+        diet_type?: string | null;
         [key: string]: unknown;
     } | null;
     created_at: string;

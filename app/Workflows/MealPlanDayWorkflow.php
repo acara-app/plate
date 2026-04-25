@@ -57,6 +57,8 @@ final class MealPlanDayWorkflow extends Workflow
             $dayNumber,
             $totalDays,
             $previousDaysContext,
+            null,
+            $mealPlan,
         );
 
         yield ActivityStub::make(
