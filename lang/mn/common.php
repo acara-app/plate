@@ -655,8 +655,8 @@ return [
         'description' => 'Танд тохирсон хоолны менюгээ үүсгэх, удирдах',
         'empty_title' => 'Хоолны цэс үүсгэх',
         'fallback_name' => 'Хоолны цэс',
-        'name_default' => ':days-Day Personalized Plan',
-        'name_with_diet' => ':days-Day :diet Plan',
+        'name_default' => ':days-өдрийн план',
+        'name_with_diet' => ':days-өдрийн :diet план',
         'default_description' => 'AI-generated meal plan tailored to your nutritional needs and preferences.',
         'diet_short' => [
             'mediterranean' => 'Mediterranean',
@@ -765,7 +765,7 @@ return [
     ],
     'grocery_list' => [
         'title' => 'Худалдан авах зүйлс',
-        'name_template' => 'Grocery List for :name',
+        'name_template' => 'Худалдан авах зүйлс :name',
         'day_meal_plan' => '{{days}} өдрийн хоолны цэс',
         'generate' => 'Үүсгэх',
         'regenerate' => 'Дахин үүсгэх',

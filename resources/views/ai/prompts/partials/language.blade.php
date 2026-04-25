@@ -1,10 +1,10 @@
 ## Language
 
-**Generate ALL {{ $contentNoun ?? 'content' }} in {{ $language }}** (language code: `{{ $languageCode }}`).
+**Generate ALL {{ $contentNoun }} in {{ $language }}** (language code: `{{ $languageCode }}`).
 
 This applies to ALL text values in the JSON output:
 
-@foreach ($scopes ?? [] as $scope)
+@foreach ($scopes as $scope)
 - {{ $scope }}
 @endforeach
 
