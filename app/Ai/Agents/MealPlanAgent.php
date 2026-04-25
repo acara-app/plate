@@ -81,7 +81,7 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasTools
         }
 
         WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start($user, $mealPlan, $glucoseAnalysis->analysisData);
+            ->start($user, $mealPlan, $glucoseAnalysis->analysisData, $dietType);
     }
 
     public function generateForDay(

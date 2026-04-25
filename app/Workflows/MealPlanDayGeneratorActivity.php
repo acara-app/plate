@@ -32,8 +32,18 @@ final class MealPlanDayGeneratorActivity extends Activity
         /** @var MealPlanAgent $generateMealPlan */
         $generateMealPlan = resolve(MealPlanAgent::class);
 
-        if ($dietType instanceof DietType) {
-            $generateMealPlan = $generateMealPlan->withDietType($dietType);
+        $effectiveDietType = $dietType;
+
+        if (! $effectiveDietType instanceof DietType && $mealPlan instanceof MealPlan) {
+            $dietTypeValue = $mealPlan->metadata['diet_type'] ?? null;
+
+            if (is_string($dietTypeValue)) {
+                $effectiveDietType = DietType::tryFrom($dietTypeValue);
+            }
+        }
+
+        if ($effectiveDietType instanceof DietType) {
+            $generateMealPlan = $generateMealPlan->withDietType($effectiveDietType);
         }
 
         return $generateMealPlan->generateForDay(

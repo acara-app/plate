@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Data\MealResponseData;
+use App\Enums\DietType;
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\Meal;
 use App\Models\MealPlan;
@@ -33,11 +34,17 @@ final readonly class ShowMealPlansController
             ->latest()
             ->first();
 
+        $userDietType = $this->user->profile?->calculated_diet_type?->value
+            ?? DietType::Balanced->value;
+        $dietTypes = DietType::toArray();
+
         if (! $mealPlan) {
             return Inertia::render('meal-plans/show', [
                 'mealPlan' => null,
                 'currentDay' => null,
                 'navigation' => null,
+                'userDietType' => $userDietType,
+                'dietTypes' => $dietTypes,
             ]);
         }
 
@@ -121,6 +128,8 @@ final readonly class ShowMealPlansController
             'mealPlan' => $formattedMealPlan,
             'currentDay' => $currentDay,
             'navigation' => $navigation,
+            'userDietType' => $userDietType,
+            'dietTypes' => $dietTypes,
         ]);
     }
 

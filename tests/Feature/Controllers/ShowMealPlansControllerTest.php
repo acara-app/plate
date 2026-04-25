@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\DietType;
 use App\Http\Controllers\ShowMealPlansController;
 use App\Models\Meal;
 use App\Models\MealPlan;
@@ -645,4 +646,53 @@ it('shows failed status without auto-retrying when overall status is failed', fu
         ->assertInertia(fn ($page) => $page
             ->where('currentDay.status', 'failed')
             ->where('currentDay.needs_generation', true));
+});
+
+it('exposes the diet type catalog on the empty state', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->get(route('meal-plans.index'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('mealPlan', null)
+            ->where('userDietType', DietType::Balanced->value)
+            ->where('dietTypes', DietType::toArray()));
+});
+
+it('returns the user profile diet type when set', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'calculated_diet_type' => DietType::Mediterranean,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('meal-plans.index'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('userDietType', DietType::Mediterranean->value)
+            ->where('dietTypes.mediterranean', 'Mediterranean (Gold Standard)'));
+});
+
+it('exposes the diet type catalog with an existing meal plan', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'calculated_diet_type' => DietType::Keto,
+    ]);
+
+    MealPlan::factory()
+        ->weekly()
+        ->for($user)
+        ->has(Meal::factory()->breakfast()->forDay(1), 'meals')
+        ->create();
+
+    $response = $this->actingAs($user)
+        ->get(route('meal-plans.index', ['day' => 1]));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('userDietType', DietType::Keto->value)
+            ->where('dietTypes', DietType::toArray()));
 });

@@ -16,7 +16,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
@@ -56,6 +64,8 @@ interface MealPlansProps {
     mealPlan: MealPlan | null;
     currentDay: CurrentDay | null;
     navigation: Navigation | null;
+    userDietType: string;
+    dietTypes: Record<string, string>;
 }
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
@@ -69,6 +79,8 @@ export default function MealPlans({
     mealPlan,
     currentDay,
     navigation,
+    userDietType,
+    dietTypes,
 }: MealPlansProps) {
     const { currentUser } = useSharedProps();
     const { t } = useTranslation('common');
@@ -91,13 +103,19 @@ export default function MealPlans({
                 {!currentUser?.is_onboarded ? (
                     <OnboardingBanner />
                 ) : !mealPlan ? (
-                    <EmptyMealPlanState />
+                    <EmptyMealPlanState
+                        userDietType={userDietType}
+                        dietTypes={dietTypes}
+                    />
                 ) : (
                     mealPlan &&
                     currentDay &&
                     navigation && (
                         <>
-                            <PlanSummary mealPlan={mealPlan} />
+                            <PlanSummary
+                                mealPlan={mealPlan}
+                                dietTypes={dietTypes}
+                            />
 
                             <DayPagination
                                 currentDay={currentDay.day_number}
@@ -232,7 +250,15 @@ export default function MealPlans({
     );
 }
 
-function EmptyMealPlanState() {
+interface EmptyMealPlanStateProps {
+    userDietType: string;
+    dietTypes: Record<string, string>;
+}
+
+function EmptyMealPlanState({
+    userDietType,
+    dietTypes,
+}: EmptyMealPlanStateProps) {
     const { t } = useTranslation('common');
 
     return (
@@ -269,7 +295,10 @@ function EmptyMealPlanState() {
                                 {t('meal_plans.create_with_altani')}
                             </Link>
                         </Button>
-                        <GenerateMealPlanDialog />
+                        <GenerateMealPlanDialog
+                            defaultDietType={userDietType}
+                            dietTypes={dietTypes}
+                        />
                     </div>
                 </div>
 
@@ -289,10 +318,16 @@ function EmptyMealPlanState() {
 
 interface PlanSummaryProps {
     mealPlan: MealPlan;
+    dietTypes: Record<string, string>;
 }
 
-function PlanSummary({ mealPlan }: PlanSummaryProps) {
+function PlanSummary({ mealPlan, dietTypes }: PlanSummaryProps) {
     const { t } = useTranslation('common');
+    const dietTypeKey =
+        typeof mealPlan.metadata?.diet_type === 'string'
+            ? mealPlan.metadata.diet_type
+            : null;
+    const dietLabel = dietTypeKey ? (dietTypes[dietTypeKey] ?? null) : null;
 
     return (
         <section className="relative overflow-hidden rounded-xl border bg-card p-4 shadow-sm md:p-5">
@@ -308,6 +343,15 @@ function PlanSummary({ mealPlan }: PlanSummaryProps) {
                             <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                             {mealPlan.duration_days} {t('meal_plans.days')}
                         </Badge>
+                        {dietLabel && (
+                            <Badge variant="secondary" className="gap-1.5">
+                                <Utensils className="h-3.5 w-3.5" />
+                                <span className="sr-only">
+                                    {t('meal_plans.diet_badge')}:{' '}
+                                </span>
+                                {dietLabel}
+                            </Badge>
+                        )}
                     </div>
                     <h1 className="max-w-4xl text-3xl font-bold tracking-tight">
                         {mealPlan.name || t('meal_plans.fallback_name')}
@@ -644,10 +688,25 @@ function RegenerateDayButton({
     );
 }
 
-function GenerateMealPlanDialog() {
+interface GenerateMealPlanDialogProps {
+    defaultDietType: string;
+    dietTypes: Record<string, string>;
+}
+
+function GenerateMealPlanDialog({
+    defaultDietType,
+    dietTypes,
+}: GenerateMealPlanDialogProps) {
     const { t } = useTranslation('common');
-    const form = useForm({ duration_days: 7 });
+    const form = useForm({
+        duration_days: 7,
+        diet_type: defaultDietType,
+        prompt: '',
+    });
     const dayOptions = [1, 2, 3, 4, 5, 6, 7];
+    const promptMaxLength = 2000;
+    const dietTypeEntries = Object.entries(dietTypes);
+    const isDefaultDiet = form.data.diet_type === defaultDietType;
 
     const handleSubmit = () => {
         form.post(mealPlans.store.url());
@@ -671,39 +730,126 @@ function GenerateMealPlanDialog() {
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
-                <div className="space-y-2 py-2">
-                    <Label htmlFor="meal-plan-duration">
-                        {t('meal_plans.generate_dialog.duration_label')}
-                    </Label>
-                    <ToggleGroup
-                        id="meal-plan-duration"
-                        type="single"
-                        variant="outline"
-                        joined
-                        value={String(form.data.duration_days)}
-                        onValueChange={(value) => {
-                            if (value) {
-                                form.setData('duration_days', Number(value));
+                <div className="space-y-4 py-2">
+                    <div className="space-y-2">
+                        <Label htmlFor="meal-plan-duration">
+                            {t('meal_plans.generate_dialog.duration_label')}
+                        </Label>
+                        <ToggleGroup
+                            id="meal-plan-duration"
+                            type="single"
+                            variant="outline"
+                            joined
+                            value={String(form.data.duration_days)}
+                            onValueChange={(value) => {
+                                if (value) {
+                                    form.setData(
+                                        'duration_days',
+                                        Number(value),
+                                    );
+                                }
+                            }}
+                            className="w-full"
+                        >
+                            {dayOptions.map((n) => (
+                                <ToggleGroupItem
+                                    key={n}
+                                    value={String(n)}
+                                    aria-label={`${n} ${t('meal_plans.days')}`}
+                                    className="flex-1"
+                                >
+                                    {n}
+                                </ToggleGroupItem>
+                            ))}
+                        </ToggleGroup>
+                        {form.errors.duration_days && (
+                            <p className="text-sm text-destructive">
+                                {form.errors.duration_days}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="meal-plan-diet-type">
+                            {t('meal_plans.generate_dialog.diet_type_label')}
+                        </Label>
+                        <Select
+                            value={form.data.diet_type}
+                            onValueChange={(value) =>
+                                form.setData('diet_type', value)
                             }
-                        }}
-                        className="w-full"
-                    >
-                        {dayOptions.map((n) => (
-                            <ToggleGroupItem
-                                key={n}
-                                value={String(n)}
-                                aria-label={`${n} ${t('meal_plans.days')}`}
-                                className="flex-1"
+                        >
+                            <SelectTrigger
+                                id="meal-plan-diet-type"
+                                className="w-full"
                             >
-                                {n}
-                            </ToggleGroupItem>
-                        ))}
-                    </ToggleGroup>
-                    {form.errors.duration_days && (
-                        <p className="text-sm text-destructive">
-                            {form.errors.duration_days}
+                                <SelectValue
+                                    placeholder={t(
+                                        'meal_plans.generate_dialog.diet_type_placeholder',
+                                    )}
+                                />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {dietTypeEntries.map(([value, label]) => (
+                                    <SelectItem key={value} value={value}>
+                                        {label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                            {isDefaultDiet
+                                ? t(
+                                      'meal_plans.generate_dialog.diet_type_default_hint',
+                                  )
+                                : t(
+                                      'meal_plans.generate_dialog.diet_type_custom_hint',
+                                  )}
                         </p>
-                    )}
+                        {form.errors.diet_type && (
+                            <p className="text-sm text-destructive">
+                                {form.errors.diet_type}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="flex items-baseline justify-between gap-2">
+                            <Label htmlFor="meal-plan-prompt">
+                                {t('meal_plans.generate_dialog.prompt_label')}
+                            </Label>
+                            <span className="text-xs text-muted-foreground">
+                                {t(
+                                    'meal_plans.generate_dialog.prompt_optional',
+                                )}
+                            </span>
+                        </div>
+                        <Textarea
+                            id="meal-plan-prompt"
+                            rows={3}
+                            maxLength={promptMaxLength}
+                            placeholder={t(
+                                'meal_plans.generate_dialog.prompt_placeholder',
+                            )}
+                            value={form.data.prompt}
+                            onChange={(event) =>
+                                form.setData('prompt', event.target.value)
+                            }
+                        />
+                        <div className="flex items-center justify-between gap-2">
+                            <p className="text-xs text-muted-foreground">
+                                {t('meal_plans.generate_dialog.prompt_hint')}
+                            </p>
+                            <p className="text-xs text-muted-foreground tabular-nums">
+                                {form.data.prompt.length}/{promptMaxLength}
+                            </p>
+                        </div>
+                        {form.errors.prompt && (
+                            <p className="text-sm text-destructive">
+                                {form.errors.prompt}
+                            </p>
+                        )}
+                    </div>
                 </div>
 
                 <AlertDialogFooter>
