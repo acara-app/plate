@@ -21,4 +21,13 @@ class extends Component
     <p class="mt-4 text-lg text-gray-600">
         Choose your drink, tell us about you, and find your safe daily limit.
     </p>
+
+    <div
+        data-testid="caffeine-form-card"
+        class="mt-8 rounded-xl border border-gray-200 bg-white p-6 md:p-8"
+    >
+        <div data-testid="caffeine-form-rows" class="space-y-6">
+            {{-- Form rows are added by subsequent tasks (drink, weight, sensitivity, bedtime). --}}
+        </div>
+    </div>
 </div>
