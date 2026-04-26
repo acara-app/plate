@@ -36,5 +36,6 @@ The CSV columns map 1:1 to the `caffeine_drinks` migration:
 | `source`      | Origin of the figure (e.g. "USDA FoodData Central") |
 | `license_url` | Public URL describing the source's license terms   |
 | `attribution` | Human-readable credit string for the source        |
+| `verified_at` | ISO date when the row's caffeine value was verified against the source |
 
 Values reflect typical/averaged servings; brand-specific products vary by formulation and region.
