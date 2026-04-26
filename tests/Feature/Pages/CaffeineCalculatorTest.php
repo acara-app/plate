@@ -38,6 +38,18 @@ it('renders the standard form card wrapper with Acara tokens and 24px-separated 
     ], false);
 });
 
+it('renders a self-referential canonical link tag and a meta description', function (): void {
+    $response = $this->get(route('caffeine-calculator'))->assertSuccessful();
+
+    $canonicalUrl = strtok(route('caffeine-calculator'), '?');
+
+    $response->assertSee('<link rel="canonical" href="'.$canonicalUrl.'"', false)
+        ->assertSeeInOrder([
+            '<meta name="description"',
+            'content="Free caffeine calculator: estimate your safe daily caffeine dose and find out when to stop drinking coffee for better sleep."',
+        ], false);
+});
+
 it('registers the caffeine calculator route at /tools/caffeine-calculator without auth middleware', function (): void {
     $route = collect(app('router')->getRoutes())
         ->first(fn ($route) => $route->getName() === 'caffeine-calculator');
