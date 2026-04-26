@@ -97,6 +97,49 @@ it('validates inline as the weight field is updated', function (): void {
         ->assertHasNoErrors('weight');
 });
 
+it('renders a 2-segment weight unit toggle with kg active by default', function (): void {
+    $this->get(route('caffeine-calculator'))
+        ->assertSuccessful()
+        ->assertSeeInOrder([
+            'data-testid="caffeine-weight-unit-toggle"',
+            'data-testid="caffeine-weight-unit-kg"',
+            'aria-pressed="true"',
+            'bg-emerald-600',
+            'Kilos',
+            'data-testid="caffeine-weight-unit-lb"',
+            'aria-pressed="false"',
+            'Pounds',
+        ], false);
+});
+
+it('preserves the weight value when toggling units', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('setUnit', 'lb')
+        ->assertSet('weightUnit', 'lb')
+        ->assertSet('weight', '70')
+        ->call('setUnit', 'kg')
+        ->assertSet('weightUnit', 'kg')
+        ->assertSet('weight', '70');
+});
+
+it('persists the weight unit choice via the unit query param', function (): void {
+    $this->get(route('caffeine-calculator', ['unit' => 'lb']))
+        ->assertSuccessful()
+        ->assertSeeInOrder([
+            'data-testid="caffeine-weight-unit-lb"',
+            'aria-pressed="true"',
+            'bg-emerald-600',
+            'Pounds',
+        ], false);
+});
+
+it('ignores unsupported unit values', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->call('setUnit', 'stone')
+        ->assertSet('weightUnit', 'kg');
+});
+
 it('registers the caffeine calculator route at /tools/caffeine-calculator without auth middleware', function (): void {
     $route = collect(app('router')->getRoutes())
         ->first(fn ($route) => $route->getName() === 'caffeine-calculator');

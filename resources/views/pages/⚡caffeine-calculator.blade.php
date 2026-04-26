@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 new
@@ -12,6 +13,16 @@ new
 class extends Component
 {
     public ?string $weight = null;
+
+    #[Url(as: 'unit', except: 'kg')]
+    public string $weightUnit = 'kg';
+
+    public function setUnit(string $unit): void
+    {
+        if (in_array($unit, ['kg', 'lb'], true)) {
+            $this->weightUnit = $unit;
+        }
+    }
 
     /**
      * @return array<string, array<int, string>>
@@ -60,9 +71,44 @@ class extends Component
     >
         <div data-testid="caffeine-form-rows" class="space-y-6">
             <div data-testid="caffeine-form-row-weight">
-                <label for="caffeine-weight" class="block text-sm font-medium text-gray-700">
-                    Your weight
-                </label>
+                <div class="flex items-center justify-between gap-4">
+                    <label for="caffeine-weight" class="block text-sm font-medium text-gray-700">
+                        Your weight
+                    </label>
+                    <div
+                        data-testid="caffeine-weight-unit-toggle"
+                        role="group"
+                        aria-label="Weight unit"
+                        class="inline-flex gap-2"
+                    >
+                        <button
+                            type="button"
+                            wire:click="setUnit('kg')"
+                            data-testid="caffeine-weight-unit-kg"
+                            aria-pressed="{{ $weightUnit === 'kg' ? 'true' : 'false' }}"
+                            @class([
+                                'rounded-full border px-3 py-1 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-emerald-500/30',
+                                'border-emerald-600 bg-emerald-600 text-white' => $weightUnit === 'kg',
+                                'border-gray-300 bg-white text-gray-700 hover:bg-gray-50' => $weightUnit !== 'kg',
+                            ])
+                        >
+                            Kilos
+                        </button>
+                        <button
+                            type="button"
+                            wire:click="setUnit('lb')"
+                            data-testid="caffeine-weight-unit-lb"
+                            aria-pressed="{{ $weightUnit === 'lb' ? 'true' : 'false' }}"
+                            @class([
+                                'rounded-full border px-3 py-1 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-emerald-500/30',
+                                'border-emerald-600 bg-emerald-600 text-white' => $weightUnit === 'lb',
+                                'border-gray-300 bg-white text-gray-700 hover:bg-gray-50' => $weightUnit !== 'lb',
+                            ])
+                        >
+                            Pounds
+                        </button>
+                    </div>
+                </div>
                 <input
                     type="number"
                     id="caffeine-weight"
