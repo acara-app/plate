@@ -11,7 +11,39 @@ new
 #[Title('Coffee Caffeine Calculator: How Much Is Too Much?')]
 class extends Component
 {
-    //
+    public ?string $weight = null;
+
+    /**
+     * @return array<string, array<int, string>>
+     */
+    protected function rules(): array
+    {
+        return [
+            'weight' => ['required', 'numeric', 'gt:0'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function messages(): array
+    {
+        return [
+            'weight.required' => 'Enter your weight to calculate.',
+            'weight.numeric' => 'Weight must be a number.',
+            'weight.gt' => 'Weight must be greater than 0.',
+        ];
+    }
+
+    public function updatedWeight(): void
+    {
+        $this->validateOnly('weight');
+    }
+
+    public function calculate(): void
+    {
+        $this->validate();
+    }
 }; ?>
 
 <div class="mx-auto max-w-2xl px-4 py-12">
@@ -27,7 +59,35 @@ class extends Component
         class="mt-8 rounded-xl border border-gray-200 bg-white p-6 md:p-8"
     >
         <div data-testid="caffeine-form-rows" class="space-y-6">
-            {{-- Form rows are added by subsequent tasks (drink, weight, sensitivity, bedtime). --}}
+            <div data-testid="caffeine-form-row-weight">
+                <label for="caffeine-weight" class="block text-sm font-medium text-gray-700">
+                    Your weight
+                </label>
+                <input
+                    type="number"
+                    id="caffeine-weight"
+                    wire:model.blur="weight"
+                    inputmode="decimal"
+                    min="0"
+                    step="0.1"
+                    placeholder="e.g. 70"
+                    aria-describedby="caffeine-weight-error"
+                    @class([
+                        'mt-1 block w-full rounded-md border bg-white px-3.5 py-2.5 text-base text-gray-900 placeholder-gray-400 outline-none focus:ring-2',
+                        'border-gray-200 focus:border-emerald-500 focus:ring-emerald-500/15' => ! $errors->has('weight'),
+                        'border-red-600 focus:border-red-600 focus:ring-red-600/15' => $errors->has('weight'),
+                    ])
+                />
+                @error('weight')
+                    <p
+                        id="caffeine-weight-error"
+                        data-testid="caffeine-weight-error"
+                        class="mt-1 text-sm text-red-600"
+                    >
+                        {{ $message }}
+                    </p>
+                @enderror
+            </div>
         </div>
     </div>
 </div>

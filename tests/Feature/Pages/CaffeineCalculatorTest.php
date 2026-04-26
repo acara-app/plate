@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Livewire\Livewire;
+
 it('returns 200 for the caffeine calculator route without authentication', function (): void {
     $this->get(route('caffeine-calculator'))
         ->assertSuccessful();
@@ -48,6 +50,51 @@ it('renders a self-referential canonical link tag and a meta description', funct
             '<meta name="description"',
             'content="Free caffeine calculator: estimate your safe daily caffeine dose and find out when to stop drinking coffee for better sleep."',
         ], false);
+});
+
+it('renders a number input bound to the weight property with an inline error slot', function (): void {
+    $this->get(route('caffeine-calculator'))
+        ->assertSuccessful()
+        ->assertSeeInOrder([
+            'data-testid="caffeine-form-row-weight"',
+            'for="caffeine-weight"',
+            'Your weight',
+            'type="number"',
+            'id="caffeine-weight"',
+            'wire:model.blur="weight"',
+        ], false);
+});
+
+it('blocks calculation and shows an inline message when weight is blank', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '')
+        ->call('calculate')
+        ->assertHasErrors(['weight' => 'required'])
+        ->assertSee('Enter your weight to calculate.');
+});
+
+it('blocks calculation and shows an inline message when weight is non-numeric', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->set('weight', 'abc')
+        ->call('calculate')
+        ->assertHasErrors(['weight' => 'numeric'])
+        ->assertSee('Weight must be a number.');
+});
+
+it('blocks calculation and shows an inline message when weight is negative', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '-5')
+        ->call('calculate')
+        ->assertHasErrors(['weight' => 'gt'])
+        ->assertSee('Weight must be greater than 0.');
+});
+
+it('validates inline as the weight field is updated', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '')
+        ->assertHasErrors(['weight' => 'required'])
+        ->set('weight', '70')
+        ->assertHasNoErrors('weight');
 });
 
 it('registers the caffeine calculator route at /tools/caffeine-calculator without auth middleware', function (): void {
