@@ -14,6 +14,17 @@ it('renders the caffeine calculator under the mini-app layout with the expected 
         ->assertSee('Caffeine Calculator');
 });
 
+it('renders the H1 and subheading copy', function (): void {
+    $this->get(route('caffeine-calculator'))
+        ->assertSuccessful()
+        ->assertSeeInOrder([
+            '<h1',
+            'Coffee Caffeine Calculator: How Much Is Too Much?',
+            '</h1>',
+            'Choose your drink, tell us about you, and find your safe daily limit.',
+        ], false);
+});
+
 it('registers the caffeine calculator route at /tools/caffeine-calculator without auth middleware', function (): void {
     $route = collect(app('router')->getRoutes())
         ->first(fn ($route) => $route->getName() === 'caffeine-calculator');
