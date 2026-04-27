@@ -901,6 +901,38 @@ it('does not render the sign-up CTA before a successful calculation', function (
         ->assertDontSee('data-testid="caffeine-signup-cta"', false);
 });
 
+it('renders the tiny 12px disclaimer footer below the result after a successful calculation', function (): void {
+    $drink = CaffeineDrink::factory()->create([
+        'name' => 'Americano',
+        'slug' => 'americano',
+        'caffeine_mg' => 150,
+    ]);
+
+    $html = Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('calculate')
+        ->html();
+
+    expect($html)
+        ->toContain('data-testid="caffeine-disclaimer"')
+        ->toContain('text-xs')
+        ->toContain('Estimates from public sources. Talk to a clinician for medical caffeine guidance.');
+
+    $resultPos = mb_strpos($html, 'data-testid="caffeine-result-panel"');
+    $disclaimerPos = mb_strpos($html, 'data-testid="caffeine-disclaimer"');
+
+    expect($resultPos)->not->toBeFalse()
+        ->and($disclaimerPos)->not->toBeFalse()
+        ->and($disclaimerPos)->toBeGreaterThan($resultPos);
+});
+
+it('does not render the disclaimer footer before a successful calculation', function (): void {
+    $this->get(route('caffeine-calculator'))
+        ->assertSuccessful()
+        ->assertDontSee('data-testid="caffeine-disclaimer"', false);
+});
+
 it('registers the caffeine calculator route at /tools/caffeine-calculator without auth middleware', function (): void {
     $route = collect(app('router')->getRoutes())
         ->first(fn ($route) => $route->getName() === 'caffeine-calculator');

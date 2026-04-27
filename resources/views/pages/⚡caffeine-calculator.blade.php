@@ -690,6 +690,13 @@ class extends Component
                     </div>
                 @endif
             </div>
+
+            <p
+                data-testid="caffeine-disclaimer"
+                class="mt-4 text-xs text-gray-500 dark:text-slate-400"
+            >
+                Estimates from public sources. Talk to a clinician for medical caffeine guidance.
+            </p>
         @endif
 
         <x-json-ld.caffeine-calculator />
