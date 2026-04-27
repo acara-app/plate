@@ -415,6 +415,45 @@ it('ignores selectDrink calls for unknown drink ids', function (): void {
         ->assertSet('drinkQuery', '');
 });
 
+it('logs a page_view tool event once when the component is mounted', function (): void {
+    Livewire::test('pages::caffeine-calculator');
+
+    $rows = DB::table('tool_events')
+        ->where('event_name', 'page_view')
+        ->where('tool_name', 'caffeine-calculator')
+        ->get();
+
+    expect($rows)->toHaveCount(1);
+});
+
+it('logs a drink_picked tool event with the drink slug when a drink is selected', function (): void {
+    $drink = CaffeineDrink::factory()->create(['name' => 'Americano', 'slug' => 'americano']);
+
+    Livewire::test('pages::caffeine-calculator')
+        ->call('selectDrink', $drink->id);
+
+    $row = DB::table('tool_events')
+        ->where('event_name', 'drink_picked')
+        ->latest('id')
+        ->first();
+
+    expect($row)->not->toBeNull()
+        ->and($row->tool_name)->toBe('caffeine-calculator');
+
+    $properties = json_decode($row->properties, true);
+
+    expect($properties)->toHaveKey('drink', 'americano')
+        ->and($properties)->not->toHaveKey('name')
+        ->and($properties)->not->toHaveKey('id');
+});
+
+it('does not log a drink_picked tool event when selectDrink is called with an unknown id', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->call('selectDrink', 999_999);
+
+    expect(DB::table('tool_events')->where('event_name', 'drink_picked')->count())->toBe(0);
+});
+
 it('registers the caffeine calculator route at /tools/caffeine-calculator without auth middleware', function (): void {
     $route = collect(app('router')->getRoutes())
         ->first(fn ($route) => $route->getName() === 'caffeine-calculator');

@@ -28,6 +28,11 @@ class extends Component
 
     public ?int $drinkId = null;
 
+    public function mount(): void
+    {
+        app(LogToolEvent::class)->handle('caffeine-calculator', 'page_view');
+    }
+
     public function setUnit(string $unit): void
     {
         if (! in_array($unit, ['kg', 'lb'], true)) {
@@ -146,6 +151,10 @@ class extends Component
 
         $this->drinkId = $drink->id;
         $this->drinkQuery = $drink->name;
+
+        app(LogToolEvent::class)->handle('caffeine-calculator', 'drink_picked', [
+            'drink' => $drink->slug,
+        ]);
     }
 
     public function clearDrink(): void
