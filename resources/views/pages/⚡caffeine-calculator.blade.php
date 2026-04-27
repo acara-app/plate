@@ -261,7 +261,18 @@ class extends Component
 
         if (! $this->optimiseForSleep) {
             $this->bedtime = null;
+
+            return;
         }
+
+        app(LogToolEvent::class)->handle('caffeine-calculator', 'sleep_disclosure_opened');
+    }
+
+    public function signupCtaClicked(): mixed
+    {
+        app(LogToolEvent::class)->handle('caffeine-calculator', 'signup_cta_clicked');
+
+        return $this->redirect(route('register').'?source=caffeine_calculator');
     }
 
     #[Computed]
@@ -654,6 +665,7 @@ class extends Component
                     </p>
                     <a
                         href="{{ route('register') }}?source=caffeine_calculator"
+                        wire:click="signupCtaClicked"
                         data-testid="caffeine-signup-cta-button"
                         class="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-emerald-500 px-6 py-3 text-base font-semibold text-white transition duration-150 hover:-translate-y-px hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 active:translate-y-0 active:bg-emerald-700 sm:w-auto dark:hover:bg-emerald-400 dark:focus:ring-offset-slate-900"
                     >

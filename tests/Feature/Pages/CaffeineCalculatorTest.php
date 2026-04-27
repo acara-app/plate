@@ -1115,6 +1115,104 @@ it('does not log a calculation_completed tool event when the calculation does no
     expect(DB::table('tool_events')->where('event_name', 'calculation_completed')->count())->toBe(0);
 });
 
+it('logs a sleep_disclosure_opened tool event when the optimise-for-sleep disclosure is opened', function (): void {
+    $drink = CaffeineDrink::factory()->create([
+        'name' => 'Americano',
+        'slug' => 'americano',
+        'caffeine_mg' => 100,
+    ]);
+
+    Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('calculate')
+        ->call('toggleOptimiseForSleep');
+
+    $row = DB::table('tool_events')
+        ->where('event_name', 'sleep_disclosure_opened')
+        ->latest('id')
+        ->first();
+
+    expect($row)->not->toBeNull()
+        ->and($row->tool_name)->toBe('caffeine-calculator');
+
+    $properties = json_decode($row->properties, true);
+
+    expect($properties)
+        ->not->toHaveKey('bedtime')
+        ->not->toHaveKey('weight')
+        ->not->toHaveKey('weight_kg')
+        ->not->toHaveKey('ip')
+        ->not->toHaveKey('user_agent');
+});
+
+it('does not log a sleep_disclosure_opened tool event when the disclosure is closed', function (): void {
+    $drink = CaffeineDrink::factory()->create([
+        'name' => 'Americano',
+        'slug' => 'americano',
+        'caffeine_mg' => 100,
+    ]);
+
+    Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('calculate')
+        ->call('toggleOptimiseForSleep')
+        ->call('toggleOptimiseForSleep');
+
+    expect(DB::table('tool_events')->where('event_name', 'sleep_disclosure_opened')->count())->toBe(1);
+});
+
+it('logs a signup_cta_clicked tool event when the sign-up CTA is clicked', function (): void {
+    $drink = CaffeineDrink::factory()->create([
+        'name' => 'Americano',
+        'slug' => 'americano',
+        'caffeine_mg' => 150,
+    ]);
+
+    Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('calculate')
+        ->call('signupCtaClicked');
+
+    $row = DB::table('tool_events')
+        ->where('event_name', 'signup_cta_clicked')
+        ->latest('id')
+        ->first();
+
+    expect($row)->not->toBeNull()
+        ->and($row->tool_name)->toBe('caffeine-calculator');
+
+    $properties = json_decode($row->properties, true);
+
+    expect($properties)
+        ->not->toHaveKey('email')
+        ->not->toHaveKey('user_id')
+        ->not->toHaveKey('ip')
+        ->not->toHaveKey('user_agent')
+        ->not->toHaveKey('weight')
+        ->not->toHaveKey('weight_kg');
+});
+
+it('wires the sign-up CTA anchor to the signupCtaClicked Livewire handler', function (): void {
+    $drink = CaffeineDrink::factory()->create([
+        'name' => 'Americano',
+        'slug' => 'americano',
+        'caffeine_mg' => 150,
+    ]);
+
+    $html = Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('calculate')
+        ->html();
+
+    expect($html)
+        ->toContain('data-testid="caffeine-signup-cta-button"')
+        ->toContain('wire:click="signupCtaClicked"');
+});
+
 it('registers the caffeine calculator route at /tools/caffeine-calculator without auth middleware', function (): void {
     $route = collect(app('router')->getRoutes())
         ->first(fn ($route) => $route->getName() === 'caffeine-calculator');
