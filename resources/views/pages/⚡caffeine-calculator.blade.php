@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Actions\LogToolEvent;
+use App\Utilities\WeightConverter;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -21,9 +23,19 @@ class extends Component
 
     public function setUnit(string $unit): void
     {
-        if (in_array($unit, ['kg', 'lb'], true)) {
-            $this->weightUnit = $unit;
+        if (! in_array($unit, ['kg', 'lb'], true)) {
+            return;
         }
+
+        if ($this->weightUnit === $unit) {
+            return;
+        }
+
+        $this->weightUnit = $unit;
+
+        app(LogToolEvent::class)->handle('caffeine-calculator', 'unit_toggled', [
+            'unit' => $unit,
+        ]);
     }
 
     public function setSensitivity(int $step): void
@@ -58,6 +70,16 @@ class extends Component
     public function updatedWeight(): void
     {
         $this->validateOnly('weight');
+
+        if (! is_numeric($this->weight) || (float) $this->weight <= 0) {
+            return;
+        }
+
+        $weightKg = WeightConverter::convertToKg((float) $this->weight, $this->weightUnit);
+
+        app(LogToolEvent::class)->handle('caffeine-calculator', 'weight_entered', [
+            'weight_kg' => $weightKg,
+        ]);
     }
 
     public function calculate(): void

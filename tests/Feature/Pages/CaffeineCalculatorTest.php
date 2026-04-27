@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 it('returns 200 for the caffeine calculator route without authentication', function (): void {
@@ -235,6 +236,89 @@ it('emits parseable WebApplication and FAQPage JSON-LD blocks', function (): voi
         ->and($faq['mainEntity'] ?? null)->toBeArray()->not->toBeEmpty()
         ->and($faq['mainEntity'][0]['@type'] ?? null)->toBe('Question')
         ->and($faq['mainEntity'][0]['acceptedAnswer']['text'] ?? null)->toBeString()->not->toBe('');
+});
+
+it('logs a weight_entered tool event with the bucketed kilogram weight only', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '72');
+
+    $row = DB::table('tool_events')
+        ->where('event_name', 'weight_entered')
+        ->latest('id')
+        ->first();
+
+    expect($row)->not->toBeNull()
+        ->and($row->tool_name)->toBe('caffeine-calculator');
+
+    $properties = json_decode($row->properties, true);
+
+    expect($properties)->toHaveKey('weight_kg', '70-79')
+        ->and($properties)->not->toHaveKey('weight');
+});
+
+it('does not log a weight_entered tool event when the weight is invalid', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '');
+
+    expect(DB::table('tool_events')->where('event_name', 'weight_entered')->count())->toBe(0);
+});
+
+it('logs a weight_entered tool event with a kilogram bucket converted from pounds', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->set('weightUnit', 'lb')
+        ->set('weight', '154');
+
+    $row = DB::table('tool_events')
+        ->where('event_name', 'weight_entered')
+        ->latest('id')
+        ->first();
+
+    expect($row)->not->toBeNull();
+
+    $properties = json_decode($row->properties, true);
+
+    expect($properties)->toHaveKey('weight_kg', '60-69');
+});
+
+it('logs a unit_toggled tool event recording lb when switching to pounds', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->call('setUnit', 'lb');
+
+    $row = DB::table('tool_events')
+        ->where('event_name', 'unit_toggled')
+        ->latest('id')
+        ->first();
+
+    expect($row)->not->toBeNull()
+        ->and($row->tool_name)->toBe('caffeine-calculator');
+
+    $properties = json_decode($row->properties, true);
+
+    expect($properties)->toHaveKey('unit', 'lb');
+});
+
+it('logs a unit_toggled tool event recording kg when switching back to kilograms', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->set('weightUnit', 'lb')
+        ->call('setUnit', 'kg');
+
+    $row = DB::table('tool_events')
+        ->where('event_name', 'unit_toggled')
+        ->latest('id')
+        ->first();
+
+    expect($row)->not->toBeNull();
+
+    $properties = json_decode($row->properties, true);
+
+    expect($properties)->toHaveKey('unit', 'kg');
+});
+
+it('does not log a unit_toggled tool event when the unit value is unsupported', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->call('setUnit', 'stone');
+
+    expect(DB::table('tool_events')->where('event_name', 'unit_toggled')->count())->toBe(0);
 });
 
 it('registers the caffeine calculator route at /tools/caffeine-calculator without auth middleware', function (): void {
