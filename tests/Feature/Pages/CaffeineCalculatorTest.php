@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use App\Actions\CalculateCaffeineSafeDose;
+use App\Actions\CalculateCaffeineSleepCutoff;
 use App\Models\CaffeineDrink;
 use App\Models\User;
 use App\Utilities\WeightConverter;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
@@ -818,6 +820,87 @@ it('hides the bedtime input again when the disclosure is toggled closed', functi
         ->assertSet('bedtime', null);
 
     expect($component->html())->not->toContain('caffeine-bedtime-input');
+});
+
+it('renders the sleep cutoff line using CalculateCaffeineSleepCutoff when bedtime is in the future', function (): void {
+    CarbonImmutable::setTestNow(CarbonImmutable::create(2026, 4, 27, 10, 0, 0));
+
+    $drink = CaffeineDrink::factory()->create([
+        'caffeine_mg' => 100,
+    ]);
+
+    $component = Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('calculate')
+        ->call('toggleOptimiseForSleep')
+        ->set('bedtime', '22:00');
+
+    $bedtimeToday = CarbonImmutable::now()->setTimeFromTimeString('22:00');
+    $expected = app(CalculateCaffeineSleepCutoff::class)->handle(
+        $bedtimeToday,
+        100.0,
+        $component->get('safeCups'),
+    );
+
+    expect($expected)->toBeInstanceOf(CarbonImmutable::class);
+
+    $html = $component->html();
+
+    expect($html)
+        ->toContain('data-testid="caffeine-sleep-cutoff"')
+        ->toContain('Stop drinking after')
+        ->toContain('to be below 50mg at bedtime.')
+        ->toContain($expected->format('g:i A'))
+        ->not->toContain('NaN')
+        ->not->toContain('Invalid Date');
+
+    CarbonImmutable::setTestNow();
+});
+
+it('renders the empty state when the chosen bedtime is already in the past today', function (): void {
+    CarbonImmutable::setTestNow(CarbonImmutable::create(2026, 4, 27, 23, 0, 0));
+
+    $drink = CaffeineDrink::factory()->create([
+        'caffeine_mg' => 100,
+    ]);
+
+    $component = Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('calculate')
+        ->call('toggleOptimiseForSleep')
+        ->set('bedtime', '07:00');
+
+    $html = $component->html();
+
+    expect($html)
+        ->toContain('data-testid="caffeine-sleep-cutoff-empty"')
+        ->toContain("Pick tonight's bedtime.")
+        ->not->toContain('data-testid="caffeine-sleep-cutoff"')
+        ->not->toContain('NaN')
+        ->not->toContain('Invalid Date');
+
+    CarbonImmutable::setTestNow();
+});
+
+it('does not render the sleep cutoff line when bedtime is empty', function (): void {
+    $drink = CaffeineDrink::factory()->create([
+        'caffeine_mg' => 100,
+    ]);
+
+    $html = Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('calculate')
+        ->call('toggleOptimiseForSleep')
+        ->html();
+
+    expect($html)
+        ->not->toContain('data-testid="caffeine-sleep-cutoff"')
+        ->not->toContain('data-testid="caffeine-sleep-cutoff-empty"')
+        ->not->toContain('NaN')
+        ->not->toContain('Invalid Date');
 });
 
 it('renders the How we calculated this disclosure inline as a details element after calculating', function (): void {

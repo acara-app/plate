@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use App\Actions\CalculateCaffeineSafeDose;
+use App\Actions\CalculateCaffeineSleepCutoff;
 use App\Actions\LogToolEvent;
 use App\Data\SafeDoseData;
 use App\Models\CaffeineDrink;
 use App\Utilities\WeightConverter;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -252,6 +254,46 @@ class extends Component
         }
 
         return CaffeineDrink::query()->find($this->drinkId);
+    }
+
+    /**
+     * @return array{state: string, time?: string}|null
+     */
+    #[Computed]
+    public function sleepCutoff(): ?array
+    {
+        if ($this->bedtime === null || $this->bedtime === '') {
+            return null;
+        }
+
+        if (! preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $this->bedtime)) {
+            return null;
+        }
+
+        if ($this->perCupMg === null || $this->safeCups === null) {
+            return null;
+        }
+
+        $bedtimeToday = CarbonImmutable::now()->setTimeFromTimeString($this->bedtime);
+
+        if ($bedtimeToday->isPast()) {
+            return ['state' => 'past'];
+        }
+
+        $cutoff = app(CalculateCaffeineSleepCutoff::class)->handle(
+            $bedtimeToday,
+            $this->perCupMg,
+            $this->safeCups,
+        );
+
+        if (! $cutoff instanceof CarbonImmutable) {
+            return null;
+        }
+
+        return [
+            'state' => 'cutoff',
+            'time' => $cutoff->format('g:i A'),
+        ];
     }
 }; ?>
 
@@ -689,6 +731,23 @@ class extends Component
                             wire:model.blur="bedtime"
                             class="mt-1 block w-full rounded-md border border-gray-200 bg-white px-3.5 py-2.5 text-base text-gray-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 sm:w-auto dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50"
                         />
+                        @if ($this->sleepCutoff !== null)
+                            @if ($this->sleepCutoff['state'] === 'past')
+                                <p
+                                    data-testid="caffeine-sleep-cutoff-empty"
+                                    class="mt-3 text-sm text-amber-700 dark:text-amber-400"
+                                >
+                                    Pick tonight's bedtime.
+                                </p>
+                            @elseif ($this->sleepCutoff['state'] === 'cutoff')
+                                <p
+                                    data-testid="caffeine-sleep-cutoff"
+                                    class="mt-3 text-sm text-gray-700 dark:text-slate-300"
+                                >
+                                    Stop drinking after &approx; <span class="font-semibold tabular-nums">{{ $this->sleepCutoff['time'] }}</span> to be below 50mg at bedtime.
+                                </p>
+                            @endif
+                        @endif
                     </div>
                 @endif
             </div>
