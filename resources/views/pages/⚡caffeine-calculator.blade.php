@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use App\Actions\LogToolEvent;
+use App\Models\CaffeineDrink;
 use App\Utilities\WeightConverter;
+use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -20,6 +23,10 @@ class extends Component
     public string $weightUnit = 'kg';
 
     public int $sensitivity = 3;
+
+    public string $drinkQuery = '';
+
+    public ?int $drinkId = null;
 
     public function setUnit(string $unit): void
     {
@@ -85,6 +92,66 @@ class extends Component
     public function calculate(): void
     {
         $this->validate();
+    }
+
+    /**
+     * @return Collection<int, array{id: int, name: string, category: ?string, caffeine_mg: float, rank: int}>
+     */
+    #[Computed]
+    public function drinkOptions(): Collection
+    {
+        $query = mb_strtolower(mb_trim($this->drinkQuery));
+
+        if ($query === '') {
+            return collect();
+        }
+
+        return CaffeineDrink::query()
+            ->orderBy('name')
+            ->get(['id', 'name', 'category', 'caffeine_mg'])
+            ->map(function (CaffeineDrink $drink) use ($query): ?array {
+                $name = mb_strtolower($drink->name);
+
+                $rank = match (true) {
+                    $name === $query => 0,
+                    str_starts_with($name, $query) => 1,
+                    str_contains($name, $query) => 2,
+                    default => null,
+                };
+
+                if ($rank === null) {
+                    return null;
+                }
+
+                return [
+                    'id' => $drink->id,
+                    'name' => $drink->name,
+                    'category' => $drink->category,
+                    'caffeine_mg' => (float) $drink->caffeine_mg,
+                    'rank' => $rank,
+                ];
+            })
+            ->filter()
+            ->sortBy([['rank', 'asc'], ['name', 'asc']])
+            ->values();
+    }
+
+    public function selectDrink(int $id): void
+    {
+        $drink = CaffeineDrink::query()->find($id);
+
+        if ($drink === null) {
+            return;
+        }
+
+        $this->drinkId = $drink->id;
+        $this->drinkQuery = $drink->name;
+    }
+
+    public function clearDrink(): void
+    {
+        $this->drinkId = null;
+        $this->drinkQuery = '';
     }
 }; ?>
 
@@ -165,6 +232,89 @@ class extends Component
                             {{ $message }}
                         </p>
                     @enderror
+                </div>
+
+                <div data-testid="caffeine-form-row-drink">
+                    <label for="caffeine-drink" class="block text-sm font-medium text-gray-700 dark:text-slate-200">
+                        Choose a coffee
+                    </label>
+                    <div
+                        x-data="{
+                            open: false,
+                            active: 0,
+                            optionCount: () => ($refs.list ? $refs.list.children.length : 0),
+                            move(delta) {
+                                const total = this.optionCount();
+                                if (total === 0) { return; }
+                                this.active = (this.active + delta + total) % total;
+                            },
+                            choose() {
+                                const total = this.optionCount();
+                                if (total === 0) { return; }
+                                const el = $refs.list.children[this.active];
+                                if (el) { el.click(); }
+                                this.open = false;
+                            },
+                        }"
+                        @click.outside="open = false"
+                        @keydown.escape.window="open = false"
+                        class="relative mt-1"
+                    >
+                        <input
+                            type="text"
+                            id="caffeine-drink"
+                            data-testid="caffeine-drink-input"
+                            wire:model.live.debounce.150ms="drinkQuery"
+                            x-on:focus="open = true"
+                            x-on:input="open = true; active = 0"
+                            x-on:keydown.arrow-down.prevent="open = true; move(1)"
+                            x-on:keydown.arrow-up.prevent="open = true; move(-1)"
+                            x-on:keydown.enter.prevent="choose()"
+                            x-on:keydown.escape.prevent="open = false"
+                            role="combobox"
+                            autocomplete="off"
+                            aria-autocomplete="list"
+                            aria-controls="caffeine-drink-listbox"
+                            x-bind:aria-expanded="open && {{ count($this->drinkOptions) }} > 0 ? 'true' : 'false'"
+                            x-bind:aria-activedescendant="open ? 'caffeine-drink-option-' + active : null"
+                            placeholder="eg. Americano"
+                            class="block w-full rounded-md border border-gray-200 bg-white px-3.5 py-2.5 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder-slate-500"
+                        />
+
+                        @if ($drinkQuery !== '' && count($this->drinkOptions) > 0)
+                            <ul
+                                x-show="open"
+                                x-cloak
+                                x-transition.opacity.duration.150ms
+                                x-ref="list"
+                                id="caffeine-drink-listbox"
+                                data-testid="caffeine-drink-listbox"
+                                role="listbox"
+                                class="absolute left-0 right-0 z-10 mt-1 max-h-64 overflow-y-auto rounded-md border border-gray-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
+                            >
+                                @foreach ($this->drinkOptions as $index => $option)
+                                    <li
+                                        id="caffeine-drink-option-{{ $index }}"
+                                        data-testid="caffeine-drink-option-{{ $option['id'] }}"
+                                        role="option"
+                                        x-bind:aria-selected="active === {{ $index }} ? 'true' : 'false'"
+                                        x-on:mouseenter="active = {{ $index }}"
+                                        x-on:mousedown.prevent
+                                        x-on:click="open = false"
+                                        wire:click="selectDrink({{ $option['id'] }})"
+                                        x-bind:class="active === {{ $index }}
+                                            ? 'cursor-pointer px-3 py-2 text-sm bg-emerald-50 text-emerald-900 dark:bg-slate-700 dark:text-slate-50'
+                                            : 'cursor-pointer px-3 py-2 text-sm text-gray-900 dark:text-slate-100'"
+                                    >
+                                        <span class="font-medium">{{ $option['name'] }}</span>
+                                        <span class="ml-2 text-xs text-gray-500 dark:text-slate-400">
+                                            {{ (int) round($option['caffeine_mg']) }} mg
+                                        </span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
                 </div>
 
                 <div data-testid="caffeine-form-row-sensitivity">

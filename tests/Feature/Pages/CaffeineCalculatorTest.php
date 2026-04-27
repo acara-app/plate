@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\CaffeineDrink;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
@@ -319,6 +320,99 @@ it('does not log a unit_toggled tool event when the unit value is unsupported', 
         ->call('setUnit', 'stone');
 
     expect(DB::table('tool_events')->where('event_name', 'unit_toggled')->count())->toBe(0);
+});
+
+it('renders the drink typeahead with the Choose a coffee label and Americano placeholder', function (): void {
+    $this->get(route('caffeine-calculator'))
+        ->assertSuccessful()
+        ->assertSeeInOrder([
+            'data-testid="caffeine-form-row-drink"',
+            'for="caffeine-drink"',
+            'Choose a coffee',
+            'id="caffeine-drink"',
+            'role="combobox"',
+            'aria-autocomplete="list"',
+            'aria-controls="caffeine-drink-listbox"',
+            'placeholder="eg. Americano"',
+        ], false);
+});
+
+it('ranks drink typeahead matches as exact, then prefix, then substring', function (): void {
+    CaffeineDrink::factory()->create(['name' => 'Caramel Americano', 'slug' => 'caramel-americano']);
+    CaffeineDrink::factory()->create(['name' => 'Iced Americano', 'slug' => 'iced-americano']);
+    CaffeineDrink::factory()->create(['name' => 'Americano', 'slug' => 'americano']);
+    CaffeineDrink::factory()->create(['name' => 'Americano with Milk', 'slug' => 'americano-milk']);
+    CaffeineDrink::factory()->create(['name' => 'Latte', 'slug' => 'latte']);
+
+    $component = Livewire::test('pages::caffeine-calculator')
+        ->set('drinkQuery', 'ameri');
+
+    $names = collect($component->instance()->drinkOptions)
+        ->pluck('name')
+        ->all();
+
+    expect($names)->toBe([
+        'Americano',
+        'Americano with Milk',
+        'Caramel Americano',
+        'Iced Americano',
+    ]);
+});
+
+it('does not render the drink dropdown listbox when the query is empty', function (): void {
+    CaffeineDrink::factory()->create(['name' => 'Americano', 'slug' => 'americano']);
+
+    $this->get(route('caffeine-calculator'))
+        ->assertSuccessful()
+        ->assertDontSee('id="caffeine-drink-listbox"', false);
+});
+
+it('renders the drink dropdown with floating shadow and listbox semantics when the query has matches', function (): void {
+    CaffeineDrink::factory()->create(['name' => 'Americano', 'slug' => 'americano']);
+    CaffeineDrink::factory()->create(['name' => 'Iced Americano', 'slug' => 'iced-americano']);
+
+    $html = Livewire::test('pages::caffeine-calculator')
+        ->set('drinkQuery', 'ameri')
+        ->html();
+
+    expect($html)
+        ->toContain('id="caffeine-drink-listbox"')
+        ->toContain('role="listbox"')
+        ->toContain('shadow-lg')
+        ->toContain('role="option"')
+        ->toContain('Americano')
+        ->toContain('Iced Americano');
+
+    expect(mb_strpos($html, 'id="caffeine-drink-listbox"'))
+        ->toBeLessThan(mb_strpos($html, 'role="option"'));
+    expect(mb_strpos($html, 'Americano'))
+        ->toBeLessThan(mb_strpos($html, 'Iced Americano'));
+});
+
+it('selects a drink when selectDrink is called and reflects it in the input value', function (): void {
+    $drink = CaffeineDrink::factory()->create(['name' => 'Americano', 'slug' => 'americano']);
+
+    Livewire::test('pages::caffeine-calculator')
+        ->set('drinkQuery', 'ameri')
+        ->call('selectDrink', $drink->id)
+        ->assertSet('drinkId', $drink->id)
+        ->assertSet('drinkQuery', 'Americano');
+});
+
+it('wires the drink typeahead input for keyboard accessibility', function (): void {
+    $this->get(route('caffeine-calculator'))
+        ->assertSuccessful()
+        ->assertSee('x-on:keydown.arrow-down.prevent', false)
+        ->assertSee('x-on:keydown.arrow-up.prevent', false)
+        ->assertSee('x-on:keydown.enter.prevent', false)
+        ->assertSee('x-on:keydown.escape.prevent', false);
+});
+
+it('ignores selectDrink calls for unknown drink ids', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->call('selectDrink', 999_999)
+        ->assertSet('drinkId', null)
+        ->assertSet('drinkQuery', '');
 });
 
 it('registers the caffeine calculator route at /tools/caffeine-calculator without auth middleware', function (): void {
