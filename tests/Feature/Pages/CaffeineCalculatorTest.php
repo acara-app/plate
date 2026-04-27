@@ -771,6 +771,54 @@ it('clears the fallback panel and renders results when switching to a drink with
         ->assertSet('perCupMg', 150.0);
 });
 
+it('does not render the bedtime input until the optimise-for-sleep disclosure is opened', function (): void {
+    $drink = CaffeineDrink::factory()->create([
+        'caffeine_mg' => 100,
+    ]);
+
+    $component = Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('calculate')
+        ->assertSet('optimiseForSleep', false);
+
+    $html = $component->html();
+
+    expect($html)
+        ->toContain('caffeine-optimise-sleep-toggle')
+        ->toContain('Also, when should I stop drinking?')
+        ->not->toContain('caffeine-bedtime-input')
+        ->not->toContain('id="caffeine-bedtime"');
+
+    $component->call('toggleOptimiseForSleep')
+        ->assertSet('optimiseForSleep', true);
+
+    $openHtml = $component->html();
+
+    expect($openHtml)
+        ->toContain('caffeine-bedtime-input')
+        ->toContain('id="caffeine-bedtime"')
+        ->toContain('type="time"');
+});
+
+it('hides the bedtime input again when the disclosure is toggled closed', function (): void {
+    $drink = CaffeineDrink::factory()->create([
+        'caffeine_mg' => 100,
+    ]);
+
+    $component = Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('calculate')
+        ->call('toggleOptimiseForSleep')
+        ->assertSet('optimiseForSleep', true)
+        ->call('toggleOptimiseForSleep')
+        ->assertSet('optimiseForSleep', false)
+        ->assertSet('bedtime', null);
+
+    expect($component->html())->not->toContain('caffeine-bedtime-input');
+});
+
 it('registers the caffeine calculator route at /tools/caffeine-calculator without auth middleware', function (): void {
     $route = collect(app('router')->getRoutes())
         ->first(fn ($route) => $route->getName() === 'caffeine-calculator');

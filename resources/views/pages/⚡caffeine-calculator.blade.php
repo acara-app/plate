@@ -42,6 +42,10 @@ class extends Component
 
     public bool $lacksCaffeineEstimate = false;
 
+    public bool $optimiseForSleep = false;
+
+    public ?string $bedtime = null;
+
     public function mount(): void
     {
         app(LogToolEvent::class)->handle('caffeine-calculator', 'page_view');
@@ -229,6 +233,15 @@ class extends Component
     {
         $this->drinkId = null;
         $this->drinkQuery = '';
+    }
+
+    public function toggleOptimiseForSleep(): void
+    {
+        $this->optimiseForSleep = ! $this->optimiseForSleep;
+
+        if (! $this->optimiseForSleep) {
+            $this->bedtime = null;
+        }
     }
 }; ?>
 
@@ -553,6 +566,42 @@ class extends Component
                 >
                     &approx; <span class="tabular-nums">{{ $perCupRounded }}</span> mg per cup &times; <span class="tabular-nums">{{ $safeCups }}</span> {{ $safeCups === 1 ? 'cup' : 'cups' }} &approx; <span class="tabular-nums">{{ $breakdownTotal }}</span> mg
                 </p>
+            </div>
+        @endif
+
+        @if ($safeMg !== null && $safeCups !== null && $perCupMg !== null)
+            <div data-testid="caffeine-optimise-sleep" class="mt-4">
+                <button
+                    type="button"
+                    wire:click="toggleOptimiseForSleep"
+                    data-testid="caffeine-optimise-sleep-toggle"
+                    aria-expanded="{{ $optimiseForSleep ? 'true' : 'false' }}"
+                    aria-controls="caffeine-bedtime-panel"
+                    class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-transparent px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                    Also, when should I stop drinking?
+                </button>
+                @if ($optimiseForSleep)
+                    <div
+                        id="caffeine-bedtime-panel"
+                        data-testid="caffeine-bedtime-panel"
+                        class="mt-4 rounded-xl border border-gray-200 bg-white p-4 md:p-6 dark:border-slate-700 dark:bg-slate-800"
+                    >
+                        <label
+                            for="caffeine-bedtime"
+                            class="block text-sm font-medium text-gray-700 dark:text-slate-200"
+                        >
+                            What time do you go to bed?
+                        </label>
+                        <input
+                            type="time"
+                            id="caffeine-bedtime"
+                            data-testid="caffeine-bedtime-input"
+                            wire:model.blur="bedtime"
+                            class="mt-1 block w-full rounded-md border border-gray-200 bg-white px-3.5 py-2.5 text-base text-gray-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 sm:w-auto dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50"
+                        />
+                    </div>
+                @endif
             </div>
         @endif
 
