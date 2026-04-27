@@ -34,6 +34,8 @@ class extends Component
 
     public ?int $safeCups = null;
 
+    public ?float $perCupMg = null;
+
     public function mount(): void
     {
         app(LogToolEvent::class)->handle('caffeine-calculator', 'page_view');
@@ -126,6 +128,7 @@ class extends Component
 
         $this->safeMg = $result->safeMg;
         $this->safeCups = $result->cups;
+        $this->perCupMg = (float) $drink->caffeine_mg;
     }
 
     /**
@@ -435,6 +438,39 @@ class extends Component
                 How Much Coffee?
             </button>
         </div>
+
+        @if ($safeMg !== null && $safeCups !== null && $perCupMg !== null)
+            @php
+                $perCupRounded = (int) round($perCupMg);
+                $safeMgRounded = (int) round($safeMg);
+                $breakdownTotal = (int) round($perCupMg * $safeCups);
+            @endphp
+            <div
+                data-testid="caffeine-result-panel"
+                role="status"
+                aria-live="polite"
+                class="mt-6 rounded-xl border border-gray-200 border-t-4 border-t-emerald-500 bg-white p-6 md:p-8 dark:border-slate-700 dark:border-t-emerald-500 dark:bg-slate-800"
+            >
+                <p
+                    data-testid="caffeine-result-cups"
+                    class="text-5xl font-bold leading-none tracking-tight text-gray-900 tabular-nums md:text-6xl dark:text-slate-50"
+                >
+                    &approx; {{ $safeCups }} {{ $safeCups === 1 ? 'cup' : 'cups' }}
+                </p>
+                <p
+                    data-testid="caffeine-result-safe-mg"
+                    class="mt-3 text-lg text-gray-700 dark:text-slate-300"
+                >
+                    Your safe daily limit is about <span class="font-semibold tabular-nums">{{ $safeMgRounded }} mg</span> of caffeine.
+                </p>
+                <p
+                    data-testid="caffeine-result-breakdown"
+                    class="mt-2 text-sm text-gray-500 dark:text-slate-400"
+                >
+                    &approx; <span class="tabular-nums">{{ $perCupRounded }}</span> mg per cup &times; <span class="tabular-nums">{{ $safeCups }}</span> {{ $safeCups === 1 ? 'cup' : 'cups' }} &approx; <span class="tabular-nums">{{ $breakdownTotal }}</span> mg
+                </p>
+            </div>
+        @endif
 
         <x-json-ld.caffeine-calculator />
     </div>

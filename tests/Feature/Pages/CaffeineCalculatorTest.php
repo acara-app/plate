@@ -525,6 +525,56 @@ it('produces a SafeDoseData result on submit using the shared LB_TO_KG conversio
         ->assertSet('safeCups', $expected->cups);
 });
 
+it('renders the result panel with cups, safe_mg, and breakdown after calculating', function (): void {
+    $drink = CaffeineDrink::factory()->create([
+        'name' => 'Americano',
+        'slug' => 'americano',
+        'caffeine_mg' => 150,
+    ]);
+
+    $html = Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('setSensitivity', 3)
+        ->call('calculate')
+        ->html();
+
+    $expected = (new CalculateCaffeineSafeDose)->handle(
+        weightKg: 70.0,
+        sensitivityStep: 2,
+        perCupMg: 150.0,
+    );
+
+    $cups = $expected->cups;
+    $safeMg = (int) round($expected->safeMg);
+    $breakdownTotal = 150 * $cups;
+
+    expect($html)
+        ->toContain('data-testid="caffeine-result-panel"')
+        ->toContain('border-t-4')
+        ->toContain('border-t-emerald-500')
+        ->toContain('data-testid="caffeine-result-cups"')
+        ->toContain('tabular-nums')
+        ->toContain((string) $cups.' cups')
+        ->toContain('data-testid="caffeine-result-safe-mg"')
+        ->toContain((string) $safeMg.' mg')
+        ->toContain('data-testid="caffeine-result-breakdown"')
+        ->toContain('150')
+        ->toContain('mg per cup')
+        ->toContain((string) $breakdownTotal);
+
+    expect(mb_strpos($html, 'data-testid="caffeine-result-cups"'))
+        ->toBeLessThan(mb_strpos($html, 'data-testid="caffeine-result-safe-mg"'));
+    expect(mb_strpos($html, 'data-testid="caffeine-result-safe-mg"'))
+        ->toBeLessThan(mb_strpos($html, 'data-testid="caffeine-result-breakdown"'));
+});
+
+it('does not render the result panel before the user has calculated', function (): void {
+    $this->get(route('caffeine-calculator'))
+        ->assertSuccessful()
+        ->assertDontSee('data-testid="caffeine-result-panel"', false);
+});
+
 it('does not store a safe dose result when no drink is selected', function (): void {
     Livewire::test('pages::caffeine-calculator')
         ->set('weight', '70')
