@@ -876,6 +876,31 @@ it('places the self-reported phrase near the sensitivity multiplier in the discl
     expect($selfReportedPos)->toBeGreaterThan($sensitivityPos);
 });
 
+it('renders a sign-up CTA card linking to register with source=caffeine_calculator after a successful calculation', function (): void {
+    $drink = CaffeineDrink::factory()->create([
+        'name' => 'Americano',
+        'slug' => 'americano',
+        'caffeine_mg' => 150,
+    ]);
+
+    $html = Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('calculate')
+        ->html();
+
+    expect($html)
+        ->toContain('data-testid="caffeine-signup-cta"')
+        ->toContain('data-testid="caffeine-signup-cta-button"')
+        ->toContain(route('register').'?source=caffeine_calculator');
+});
+
+it('does not render the sign-up CTA before a successful calculation', function (): void {
+    $this->get(route('caffeine-calculator'))
+        ->assertSuccessful()
+        ->assertDontSee('data-testid="caffeine-signup-cta"', false);
+});
+
 it('registers the caffeine calculator route at /tools/caffeine-calculator without auth middleware', function (): void {
     $route = collect(app('router')->getRoutes())
         ->first(fn ($route) => $route->getName() === 'caffeine-calculator');

@@ -577,6 +577,28 @@ class extends Component
                     &approx; <span class="tabular-nums">{{ $perCupRounded }}</span> mg per cup &times; <span class="tabular-nums">{{ $safeCups }}</span> {{ $safeCups === 1 ? 'cup' : 'cups' }} &approx; <span class="tabular-nums">{{ $breakdownTotal }}</span> mg
                 </p>
             </div>
+
+            <div
+                data-testid="caffeine-signup-cta"
+                class="mt-4 rounded-xl border border-gray-200 bg-white p-6 md:p-8 dark:border-slate-700 dark:bg-slate-800"
+            >
+                <p
+                    data-testid="caffeine-signup-cta-headline"
+                    class="text-lg font-semibold text-gray-900 dark:text-slate-50"
+                >
+                    Save your results and track your daily caffeine.
+                </p>
+                <p class="mt-2 text-sm text-gray-600 dark:text-slate-400">
+                    Create a free account to log drinks, watch your sleep cutoff, and see how your habits change over time.
+                </p>
+                <a
+                    href="{{ route('register') }}?source=caffeine_calculator"
+                    data-testid="caffeine-signup-cta-button"
+                    class="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-emerald-500 px-6 py-3 text-base font-semibold text-white transition duration-150 hover:-translate-y-px hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 active:translate-y-0 active:bg-emerald-700 sm:w-auto dark:hover:bg-emerald-400 dark:focus:ring-offset-slate-900"
+                >
+                    Create a free account
+                </a>
+            </div>
         @endif
 
         @if ($safeMg !== null && $safeCups !== null && $perCupMg !== null)
