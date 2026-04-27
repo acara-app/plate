@@ -212,6 +212,31 @@ it('does not use a gradient on the primary CTA background', function (): void {
     $response->assertDontSee('bg-gradient', false);
 });
 
+it('emits parseable WebApplication and FAQPage JSON-LD blocks', function (): void {
+    $html = $this->get(route('caffeine-calculator'))
+        ->assertSuccessful()
+        ->getContent();
+
+    preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', (string) $html, $matches);
+
+    $blocks = collect($matches[1])
+        ->map(fn (string $json): ?array => json_decode(mb_trim($json), true))
+        ->filter();
+
+    expect($blocks)->not->toBeEmpty();
+
+    $webApp = $blocks->firstWhere('@type', 'WebApplication');
+    expect($webApp)->not->toBeNull()
+        ->and($webApp['name'] ?? null)->toBeString()->not->toBe('')
+        ->and($webApp['applicationCategory'] ?? null)->toBe('HealthApplication');
+
+    $faq = $blocks->firstWhere('@type', 'FAQPage');
+    expect($faq)->not->toBeNull()
+        ->and($faq['mainEntity'] ?? null)->toBeArray()->not->toBeEmpty()
+        ->and($faq['mainEntity'][0]['@type'] ?? null)->toBe('Question')
+        ->and($faq['mainEntity'][0]['acceptedAnswer']['text'] ?? null)->toBeString()->not->toBe('');
+});
+
 it('registers the caffeine calculator route at /tools/caffeine-calculator without auth middleware', function (): void {
     $route = collect(app('router')->getRoutes())
         ->first(fn ($route) => $route->getName() === 'caffeine-calculator');

@@ -193,4 +193,6 @@ class extends Component
             How Much Coffee?
         </button>
     </div>
+
+    <x-json-ld.caffeine-calculator />
 </div>
