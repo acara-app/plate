@@ -72,9 +72,19 @@ class extends Component
 
     public function setSensitivity(int $step): void
     {
-        if ($step >= 1 && $step <= 5) {
-            $this->sensitivity = $step;
+        if ($step < 1 || $step > 5) {
+            return;
         }
+
+        if ($this->sensitivity === $step) {
+            return;
+        }
+
+        $this->sensitivity = $step;
+
+        app(LogToolEvent::class)->handle('caffeine-calculator', 'sensitivity_changed', [
+            'sensitivity_step' => $step,
+        ]);
     }
 
     /**
@@ -153,6 +163,14 @@ class extends Component
         $this->safeMg = $result->safeMg;
         $this->safeCups = $result->cups;
         $this->perCupMg = (float) $drink->caffeine_mg;
+
+        $logger = app(LogToolEvent::class);
+
+        $logger->handle('caffeine-calculator', 'calculation_completed', [
+            'sensitivity_step' => $this->sensitivity,
+            'safe_mg_bucket' => $logger->bucketSafeMg($result->safeMg),
+            'cups_bucket' => $logger->bucketCups($result->cups),
+        ]);
     }
 
     #[Computed]

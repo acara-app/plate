@@ -1036,6 +1036,85 @@ it('does not render the disclaimer footer before a successful calculation', func
         ->assertDontSee('data-testid="caffeine-disclaimer"', false);
 });
 
+it('logs a sensitivity_changed tool event with the bucketed sensitivity step', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->call('setSensitivity', 5);
+
+    $row = DB::table('tool_events')
+        ->where('event_name', 'sensitivity_changed')
+        ->latest('id')
+        ->first();
+
+    expect($row)->not->toBeNull()
+        ->and($row->tool_name)->toBe('caffeine-calculator');
+
+    $properties = json_decode($row->properties, true);
+
+    expect($properties)->toHaveKey('sensitivity_step', 5);
+});
+
+it('does not log a sensitivity_changed tool event when the step is unchanged or out of range', function (): void {
+    Livewire::test('pages::caffeine-calculator')
+        ->call('setSensitivity', 3)
+        ->call('setSensitivity', 0)
+        ->call('setSensitivity', 6);
+
+    expect(DB::table('tool_events')->where('event_name', 'sensitivity_changed')->count())->toBe(0);
+});
+
+it('logs a calculation_completed tool event with sensitivity_step, safe_mg_bucket, and cups_bucket', function (): void {
+    $drink = CaffeineDrink::factory()->create([
+        'name' => 'Americano',
+        'slug' => 'americano',
+        'caffeine_mg' => 150,
+    ]);
+
+    Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('calculate');
+
+    $row = DB::table('tool_events')
+        ->where('event_name', 'calculation_completed')
+        ->latest('id')
+        ->first();
+
+    expect($row)->not->toBeNull()
+        ->and($row->tool_name)->toBe('caffeine-calculator');
+
+    $properties = json_decode($row->properties, true);
+
+    $expected = (new CalculateCaffeineSafeDose)->handle(
+        weightKg: 70.0,
+        sensitivityStep: 2,
+        perCupMg: 150.0,
+    );
+
+    $logger = app(App\Actions\LogToolEvent::class);
+
+    expect($properties)
+        ->toHaveKey('sensitivity_step', 3)
+        ->toHaveKey('safe_mg_bucket', $logger->bucketSafeMg($expected->safeMg))
+        ->toHaveKey('cups_bucket', $logger->bucketCups($expected->cups))
+        ->not->toHaveKey('safe_mg')
+        ->not->toHaveKey('cups');
+});
+
+it('does not log a calculation_completed tool event when the calculation does not succeed', function (): void {
+    $drink = CaffeineDrink::factory()->create([
+        'name' => 'Mystery Brew',
+        'slug' => 'mystery-brew',
+        'caffeine_mg' => 0,
+    ]);
+
+    Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('calculate');
+
+    expect(DB::table('tool_events')->where('event_name', 'calculation_completed')->count())->toBe(0);
+});
+
 it('registers the caffeine calculator route at /tools/caffeine-calculator without auth middleware', function (): void {
     $route = collect(app('router')->getRoutes())
         ->first(fn ($route) => $route->getName() === 'caffeine-calculator');
