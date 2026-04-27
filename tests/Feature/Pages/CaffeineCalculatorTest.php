@@ -819,6 +819,63 @@ it('hides the bedtime input again when the disclosure is toggled closed', functi
     expect($component->html())->not->toContain('caffeine-bedtime-input');
 });
 
+it('renders the How we calculated this disclosure inline as a details element after calculating', function (): void {
+    $drink = CaffeineDrink::factory()->create([
+        'name' => 'Americano',
+        'slug' => 'americano',
+        'caffeine_mg' => 150,
+        'source' => 'USDA FoodData Central',
+        'license_url' => 'https://fdc.nal.usda.gov/',
+        'attribution' => 'U.S. Department of Agriculture',
+    ]);
+
+    $html = Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('setSensitivity', 3)
+        ->call('calculate')
+        ->html();
+
+    expect($html)
+        ->toContain('<details')
+        ->toContain('data-testid="caffeine-how-calculated"')
+        ->toContain('How we calculated this')
+        ->toContain('self-reported')
+        ->toContain('400 mg/day')
+        ->toContain('FDA')
+        ->toContain('USDA FoodData Central')
+        ->toContain('150 mg');
+});
+
+it('does not render the How we calculated this disclosure before a successful calculation', function (): void {
+    $this->get(route('caffeine-calculator'))
+        ->assertSuccessful()
+        ->assertDontSee('data-testid="caffeine-how-calculated"', false)
+        ->assertDontSee('How we calculated this');
+});
+
+it('places the self-reported phrase near the sensitivity multiplier in the disclosure', function (): void {
+    $drink = CaffeineDrink::factory()->create([
+        'name' => 'Americano',
+        'slug' => 'americano',
+        'caffeine_mg' => 150,
+    ]);
+
+    $html = Livewire::test('pages::caffeine-calculator')
+        ->set('weight', '70')
+        ->call('selectDrink', $drink->id)
+        ->call('setSensitivity', 3)
+        ->call('calculate')
+        ->html();
+
+    $sensitivityPos = mb_strpos($html, 'data-testid="caffeine-how-calculated-sensitivity"');
+    $selfReportedPos = mb_strpos($html, 'self-reported');
+
+    expect($sensitivityPos)->not->toBeFalse();
+    expect($selfReportedPos)->not->toBeFalse();
+    expect($selfReportedPos)->toBeGreaterThan($sensitivityPos);
+});
+
 it('registers the caffeine calculator route at /tools/caffeine-calculator without auth middleware', function (): void {
     $route = collect(app('router')->getRoutes())
         ->first(fn ($route) => $route->getName() === 'caffeine-calculator');

@@ -243,6 +243,16 @@ class extends Component
             $this->bedtime = null;
         }
     }
+
+    #[Computed]
+    public function selectedDrink(): ?CaffeineDrink
+    {
+        if ($this->drinkId === null) {
+            return null;
+        }
+
+        return CaffeineDrink::query()->find($this->drinkId);
+    }
 }; ?>
 
 <div class="min-h-screen w-full bg-gray-50 dark:bg-slate-900">
@@ -570,6 +580,61 @@ class extends Component
         @endif
 
         @if ($safeMg !== null && $safeCups !== null && $perCupMg !== null)
+            @php
+                $sensitivityMultipliers = [1 => 0.7, 2 => 0.85, 3 => 1.0, 4 => 1.15, 5 => 1.3];
+                $currentMultiplier = $sensitivityMultipliers[$sensitivity] ?? 1.0;
+                $drink = $this->selectedDrink;
+            @endphp
+            <details
+                data-testid="caffeine-how-calculated"
+                class="mt-4 rounded-xl border border-gray-200 bg-white p-4 md:p-6 dark:border-slate-700 dark:bg-slate-800"
+            >
+                <summary
+                    data-testid="caffeine-how-calculated-summary"
+                    class="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:text-slate-200 dark:hover:text-slate-50"
+                >
+                    How we calculated this
+                </summary>
+                <div class="mt-3 space-y-3 text-sm text-gray-700 dark:text-slate-300">
+                    <p data-testid="caffeine-how-calculated-formula">
+                        <span class="font-semibold">Formula:</span>
+                        safe daily mg = weight (kg) &times; 5.7 mg/kg &times; sensitivity multiplier.
+                        With your inputs: <span class="tabular-nums">{{ $weight }}</span> {{ $weightUnit }} &times; 5.7 &times; <span class="tabular-nums">{{ $currentMultiplier }}</span> &approx; <span class="tabular-nums">{{ (int) round($safeMg) }}</span> mg.
+                    </p>
+                    <p data-testid="caffeine-how-calculated-sensitivity">
+                        Your sensitivity multiplier (<span class="tabular-nums">{{ $currentMultiplier }}</span>) is based on your self-reported caffeine sensitivity step.
+                    </p>
+                    <p data-testid="caffeine-how-calculated-fda">
+                        <span class="font-semibold">FDA reference:</span>
+                        the U.S. Food &amp; Drug Administration considers up to 400 mg/day of caffeine generally safe for healthy adults.
+                        <a
+                            href="https://www.fda.gov/consumers/consumer-updates/spilling-beans-how-much-caffeine-too-much"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-emerald-600 underline hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+                        >
+                            FDA: Spilling the Beans &mdash; How Much Caffeine is Too Much?
+                        </a>
+                    </p>
+                    @if ($drink !== null)
+                        <p data-testid="caffeine-how-calculated-drink-citation">
+                            <span class="font-semibold">Per-drink caffeine ({{ $drink->name }}, {{ (int) round((float) $drink->caffeine_mg) }} mg):</span>
+                            sourced from {{ $drink->source ?? 'public-domain nutrition data' }}@if ($drink->attribution), {{ $drink->attribution }}@endif.
+                            @if ($drink->license_url)
+                                <a
+                                    href="{{ $drink->license_url }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="text-emerald-600 underline hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+                                >
+                                    View source
+                                </a>
+                            @endif
+                        </p>
+                    @endif
+                </div>
+            </details>
+
             <div data-testid="caffeine-optimise-sleep" class="mt-4">
                 <button
                     type="button"
