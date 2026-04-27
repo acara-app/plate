@@ -28,4 +28,29 @@ final class CaffeineAssessmentRequest extends FormRequest
             'context' => ['nullable', 'string', 'max:1000'],
         ];
     }
+
+    public function heightCm(): int
+    {
+        $heightCm = $this->validated('height_cm');
+
+        assert(is_int($heightCm) || is_string($heightCm));
+
+        return (int) $heightCm;
+    }
+
+    public function sensitivity(): string
+    {
+        $sensitivity = $this->validated('sensitivity');
+
+        assert(is_string($sensitivity));
+
+        return $sensitivity;
+    }
+
+    public function context(): ?string
+    {
+        $context = $this->validated('context');
+
+        return is_string($context) ? $context : null;
+    }
 }

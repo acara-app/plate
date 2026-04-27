@@ -27,15 +27,15 @@ final readonly class CaffeineCalculatorController
 
     public function plan(CaffeineAssessmentRequest $request): JsonResponse
     {
-        $context = $request->validated('context');
+        $context = $request->context();
         $limit = resolve(ResolveCaffeineLimit::class)->handle(
-            heightCm: (int) $request->validated('height_cm'),
-            sensitivity: (string) $request->validated('sensitivity'),
-            context: is_string($context) ? $context : null,
+            heightCm: $request->heightCm(),
+            sensitivity: $request->sensitivity(),
+            context: $context,
         );
         $guidance = resolve(CaffeineGuidanceAgent::class)->assess(
             limit: $limit,
-            context: is_string($context) ? $context : null,
+            context: $context,
         );
         $spec = resolve(BuildCaffeineGuidanceSpec::class)->handle($guidance);
 
