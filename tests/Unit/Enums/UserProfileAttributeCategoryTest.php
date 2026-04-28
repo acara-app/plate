@@ -22,6 +22,22 @@ it('has correct string values', function (UserProfileAttributeCategory $case, st
     [UserProfileAttributeCategory::Medication, 'medication'],
 ]);
 
+it('groups dietary preference categories and values', function (): void {
+    expect(UserProfileAttributeCategory::dietaryPreferences())->toEqual([
+        UserProfileAttributeCategory::Allergy,
+        UserProfileAttributeCategory::Intolerance,
+        UserProfileAttributeCategory::DietaryPattern,
+        UserProfileAttributeCategory::Dislike,
+        UserProfileAttributeCategory::Restriction,
+    ])->and(UserProfileAttributeCategory::dietaryPreferenceValues())->toEqual([
+        'allergy',
+        'intolerance',
+        'dietary_pattern',
+        'dislike',
+        'restriction',
+    ]);
+});
+
 it('has labels for all cases', function (): void {
     foreach (UserProfileAttributeCategory::cases() as $case) {
         expect($case->label())->toBeString()->not->toBeEmpty();
