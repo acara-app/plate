@@ -6,7 +6,6 @@ namespace App\Models;
 
 use App\Enums\AllergySeverity;
 use App\Enums\UserProfileAttributeCategory;
-use Carbon\CarbonInterface;
 use Database\Factories\UserProfileAttributeFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
