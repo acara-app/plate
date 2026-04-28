@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 type Drink = {
     nameKey: string;
+    servingKey: string;
     ml: number;
     mg: number;
     Icon: ComponentType<SVGProps<SVGSVGElement>>;
@@ -131,12 +132,48 @@ function ColaIcon(props: SVGProps<SVGSVGElement>) {
 }
 
 const DRINKS: Drink[] = [
-    { nameKey: 'drink_espresso', ml: 30, mg: 63, Icon: EspressoIcon },
-    { nameKey: 'drink_drip_coffee', ml: 250, mg: 95, Icon: DripCoffeeIcon },
-    { nameKey: 'drink_latte', ml: 350, mg: 150, Icon: LatteIcon },
-    { nameKey: 'drink_energy_drink', ml: 250, mg: 80, Icon: EnergyDrinkIcon },
-    { nameKey: 'drink_black_tea', ml: 250, mg: 47, Icon: BlackTeaIcon },
-    { nameKey: 'drink_cola', ml: 355, mg: 34, Icon: ColaIcon },
+    {
+        nameKey: 'drink_espresso',
+        servingKey: 'drink_serving_espresso',
+        ml: 30,
+        mg: 63,
+        Icon: EspressoIcon,
+    },
+    {
+        nameKey: 'drink_drip_coffee',
+        servingKey: 'drink_serving_drip_coffee',
+        ml: 250,
+        mg: 95,
+        Icon: DripCoffeeIcon,
+    },
+    {
+        nameKey: 'drink_latte',
+        servingKey: 'drink_serving_latte',
+        ml: 350,
+        mg: 150,
+        Icon: LatteIcon,
+    },
+    {
+        nameKey: 'drink_energy_drink',
+        servingKey: 'drink_serving_energy_drink',
+        ml: 250,
+        mg: 80,
+        Icon: EnergyDrinkIcon,
+    },
+    {
+        nameKey: 'drink_black_tea',
+        servingKey: 'drink_serving_black_tea',
+        ml: 250,
+        mg: 47,
+        Icon: BlackTeaIcon,
+    },
+    {
+        nameKey: 'drink_cola',
+        servingKey: 'drink_serving_cola',
+        ml: 355,
+        mg: 34,
+        Icon: ColaIcon,
+    },
 ];
 
 export function DrinkSizeGrid({
@@ -175,13 +212,20 @@ export function DrinkSizeGrid({
                                     {t(drink.nameKey)}
                                 </p>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    {drink.ml} ml · {drink.mg} mg
+                                    {t(drink.servingKey)} · {drink.ml} ml
+                                </p>
+                                <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                    {t('drink_caffeine_amount', {
+                                        mg: drink.mg,
+                                    })}
                                 </p>
                             </div>
                             <div className="w-full">
                                 <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                                     <span>{percentage}%</span>
-                                    <span>{t('drink_percentage_of_limit')}</span>
+                                    <span>
+                                        {t('drink_percentage_of_limit')}
+                                    </span>
                                 </div>
                                 <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                                     <div

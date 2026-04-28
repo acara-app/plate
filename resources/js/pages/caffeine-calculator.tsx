@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { Head, useHttp, usePage, Link } from '@inertiajs/react';
+import { Head, Link, useHttp, usePage } from '@inertiajs/react';
 import type { Spec } from '@json-render/core';
 import {
     Activity,
@@ -83,9 +83,21 @@ const SENSITIVITY_OPTIONS: Array<{
     labelKey: string;
     detailKey: string;
 }> = [
-    { value: 'low', labelKey: 'sensitivity_low', detailKey: 'sensitivity_low_detail' },
-    { value: 'normal', labelKey: 'sensitivity_normal', detailKey: 'sensitivity_normal_detail' },
-    { value: 'high', labelKey: 'sensitivity_high', detailKey: 'sensitivity_high_detail' },
+    {
+        value: 'low',
+        labelKey: 'sensitivity_low',
+        detailKey: 'sensitivity_low_detail',
+    },
+    {
+        value: 'normal',
+        labelKey: 'sensitivity_normal',
+        detailKey: 'sensitivity_normal_detail',
+    },
+    {
+        value: 'high',
+        labelKey: 'sensitivity_high',
+        detailKey: 'sensitivity_high_detail',
+    },
 ];
 
 const SEX_OPTIONS: Array<{
@@ -355,7 +367,9 @@ export default function CaffeineCalculator() {
                                                     event.target.value,
                                                 )
                                             }
-                                            placeholder={t('height_cm_placeholder')}
+                                            placeholder={t(
+                                                'height_cm_placeholder',
+                                            )}
                                             className="h-11 bg-white pr-14 pl-10 text-base dark:bg-slate-950"
                                             aria-invalid={
                                                 form.errors.height_cm
@@ -387,7 +401,9 @@ export default function CaffeineCalculator() {
                                                         event.target.value,
                                                     )
                                                 }
-                                                placeholder={t('height_ft_placeholder')}
+                                                placeholder={t(
+                                                    'height_ft_placeholder',
+                                                )}
                                                 className="h-11 bg-white pr-14 pl-10 text-base dark:bg-slate-950"
                                             />
                                             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-slate-500 dark:text-slate-400">
@@ -408,7 +424,9 @@ export default function CaffeineCalculator() {
                                                         event.target.value,
                                                     )
                                                 }
-                                                placeholder={t('height_in_placeholder')}
+                                                placeholder={t(
+                                                    'height_in_placeholder',
+                                                )}
                                                 className="h-11 bg-white pr-14 text-base dark:bg-slate-950"
                                             />
                                             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-slate-500 dark:text-slate-400">
@@ -450,7 +468,9 @@ export default function CaffeineCalculator() {
                                                     event.target.value,
                                                 )
                                             }
-                                            placeholder={t('weight_kg_placeholder')}
+                                            placeholder={t(
+                                                'weight_kg_placeholder',
+                                            )}
                                             className="h-11 bg-white pr-14 pl-10 text-base dark:bg-slate-950"
                                             aria-invalid={
                                                 form.errors.weight_kg
@@ -481,7 +501,9 @@ export default function CaffeineCalculator() {
                                                     event.target.value,
                                                 )
                                             }
-                                            placeholder={t('weight_lb_placeholder')}
+                                            placeholder={t(
+                                                'weight_lb_placeholder',
+                                            )}
                                             className="h-11 bg-white pr-14 pl-10 text-base dark:bg-slate-950"
                                             aria-invalid={
                                                 form.errors.weight_kg
