@@ -58,12 +58,12 @@ interface AssessmentFormData {
 const CONDITION_OPTIONS: Array<{ value: ConditionKey; label: string }> = [
     { value: 'pregnancy', label: 'Pregnant' },
     { value: 'breastfeeding', label: 'Breastfeeding' },
-    { value: 'trying_to_conceive', label: 'Trying to conceive' },
-    { value: 'heart_condition', label: 'Heart condition' },
+    { value: 'trying_to_conceive', label: 'Trying to get pregnant' },
+    { value: 'heart_condition', label: 'Heart or blood pressure condition' },
     { value: 'medication', label: 'Taking medication' },
-    { value: 'anxiety', label: 'Anxiety' },
-    { value: 'insomnia', label: 'Insomnia / poor sleep' },
-    { value: 'gerd', label: 'GERD / acid reflux' },
+    { value: 'anxiety', label: 'Anxiety or panic' },
+    { value: 'insomnia', label: 'Trouble sleeping' },
+    { value: 'gerd', label: 'Acid reflux / GERD' },
 ];
 
 interface CaffeineCalculatorPageProps {
@@ -80,9 +80,9 @@ const SENSITIVITY_OPTIONS: Array<{
     label: string;
     detail: string;
 }> = [
-    { value: 'low', label: 'Low', detail: 'Tolerant' },
-    { value: 'normal', label: 'Normal', detail: 'Typical' },
-    { value: 'high', label: 'High', detail: 'Sensitive' },
+    { value: 'low', label: 'Low', detail: 'You rarely notice it' },
+    { value: 'normal', label: 'Normal', detail: 'About average' },
+    { value: 'high', label: 'High', detail: 'A little hits hard' },
 ];
 
 const SEX_OPTIONS: Array<{
@@ -224,11 +224,11 @@ export default function CaffeineCalculator() {
 
     return (
         <>
-            <Head title="Caffeine Calculator: How Much Is Too Much?">
+            <Head title="Caffeine Calculator: Find Your Daily Limit">
                 <meta
                     head-key="description"
                     name="description"
-                    content="Enter height, weight, age, and caffeine sensitivity to get a personalized daily caffeine limit with AI-written guidance."
+                    content="Estimate a daily caffeine limit based on your weight, age, sensitivity, and health context."
                 />
                 <meta
                     head-key="keywords"
@@ -272,11 +272,16 @@ export default function CaffeineCalculator() {
                             </span>
                             <div>
                                 <p className="text-sm font-semibold text-emerald-700 uppercase dark:text-emerald-300">
-                                    Caffeine limit
+                                    Daily caffeine guide
                                 </p>
                                 <h1 className="text-3xl leading-tight font-bold tracking-tight md:text-4xl">
-                                    How Much Is Too Much?
+                                    Find your personal caffeine limit
                                 </h1>
+                                <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                                    Answer a few quick questions to get a daily
+                                    limit in milligrams, plus guidance that fits
+                                    your routine, sleep, and health context.
+                                </p>
                             </div>
                         </div>
 
@@ -287,8 +292,8 @@ export default function CaffeineCalculator() {
                                 className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900"
                             >
                                 {unitSystem === 'metric'
-                                    ? 'Switch to Imperial'
-                                    : 'Switch to Metric'}
+                                    ? 'Use ft/in + lb'
+                                    : 'Use cm + kg'}
                             </button>
                         </div>
 
@@ -518,6 +523,10 @@ export default function CaffeineCalculator() {
                                         </p>
                                     )}
                                 </div>
+                                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                    Used only to fine-tune the metabolism
+                                    estimate.
+                                </p>
                                 <div
                                     className="mt-2 grid grid-cols-3 gap-2"
                                     role="radiogroup"
@@ -558,7 +567,7 @@ export default function CaffeineCalculator() {
                             <div>
                                 <div className="flex items-center justify-between gap-3">
                                     <label className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                                        Sensitivity
+                                        How caffeine usually feels for you
                                     </label>
                                     {form.errors.sensitivity && (
                                         <p className="text-sm text-red-600 dark:text-red-400">
@@ -609,10 +618,12 @@ export default function CaffeineCalculator() {
 
                             <div>
                                 <label className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                                    Anything else? (optional)
+                                    Anything that changes your caffeine
+                                    tolerance?
                                 </label>
                                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                    Pick any that apply for tailored guidance.
+                                    Select anything that applies so the guidance
+                                    is safer and more relevant.
                                 </p>
                                 <div
                                     className="mt-2 grid grid-cols-2 gap-2"
@@ -669,9 +680,14 @@ export default function CaffeineCalculator() {
                                         htmlFor="context"
                                         className="text-sm font-semibold text-slate-800 dark:text-slate-100"
                                     >
-                                        Drink or personal context
+                                        Your caffeine routine or anything
+                                        important
                                     </label>
                                 </div>
+                                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                    Share what you usually drink or anything
+                                    that makes caffeine feel different for you.
+                                </p>
                                 <Textarea
                                     id="context"
                                     value={form.data.context}
@@ -681,7 +697,7 @@ export default function CaffeineCalculator() {
                                             event.target.value,
                                         )
                                     }
-                                    placeholder="Example: morning latte, two Americanos, pregnant, anxiety, heart medication, or caffeine makes me jittery"
+                                    placeholder="Example: I usually have a morning latte and an afternoon tea. Caffeine makes me shaky, and I am taking heart medication."
                                     rows={4}
                                     maxLength={1000}
                                     className="mt-2 bg-white text-base dark:bg-slate-950"
@@ -714,8 +730,8 @@ export default function CaffeineCalculator() {
                                     />
                                 )}
                                 {form.processing
-                                    ? 'Checking limit'
-                                    : 'Show my limit'}
+                                    ? 'Calculating your limit'
+                                    : 'Get my daily limit'}
                             </Button>
                         </form>
                     </section>
@@ -745,9 +761,9 @@ function createWebApplicationSchema(seo: CaffeineCalculatorPageProps['seo']) {
     return {
         '@context': 'https://schema.org',
         '@type': 'WebApplication',
-        name: 'Caffeine Calculator: How Much Is Too Much?',
+        name: 'Caffeine Calculator: Find Your Daily Limit',
         description:
-            'Free caffeine calculator: enter height, weight, age, and sensitivity to get a personalized daily caffeine limit.',
+            'Free caffeine calculator that estimates a daily limit from your weight, age, sensitivity, and health context.',
         url: seo.canonicalUrl,
         applicationCategory: 'HealthApplication',
         operatingSystem: 'Any',
@@ -771,18 +787,18 @@ function createFaqSchema() {
         mainEntity: [
             {
                 '@type': 'Question',
-                name: 'How much caffeine is safe per day?',
+                name: 'How much caffeine is usually safe in a day?',
                 acceptedAnswer: {
                     '@type': 'Answer',
-                    text: 'For most healthy adults, up to 400 mg per day is a common reference point. This calculator uses the EFSA guideline of 3 mg per kg of body weight, then adjusts for age, sex, height, and sensitivity.',
+                    text: 'For many healthy adults, up to 400 mg a day is a common reference point. This calculator starts with the EFSA guideline of 3 mg per kg of body weight, then adjusts for age, sex, height, and sensitivity.',
                 },
             },
             {
                 '@type': 'Question',
-                name: 'How does the caffeine calculator work?',
+                name: 'What does this calculator use to estimate my limit?',
                 acceptedAnswer: {
                     '@type': 'Answer',
-                    text: 'The calculator uses your weight as the primary factor (3 mg/kg per EFSA), then adjusts for age, sex, height, and self-reported sensitivity. It also lowers the limit for context such as pregnancy or breastfeeding.',
+                    text: 'It uses weight as the starting point, then fine-tunes the estimate with age, sex, height, sensitivity, and context like pregnancy or breastfeeding.',
                 },
             },
             {
@@ -795,7 +811,7 @@ function createFaqSchema() {
             },
             {
                 '@type': 'Question',
-                name: 'Is this caffeine calculator a substitute for medical advice?',
+                name: 'Is this the same as medical advice?',
                 acceptedAnswer: {
                     '@type': 'Answer',
                     text: 'No. This tool provides educational guidance only. People who are pregnant, breastfeeding, trying to conceive, taking medications, or managing a health condition should follow clinician guidance.',
@@ -803,7 +819,7 @@ function createFaqSchema() {
             },
             {
                 '@type': 'Question',
-                name: 'Does caffeine affect everyone the same way?',
+                name: 'Does caffeine hit everyone the same way?',
                 acceptedAnswer: {
                     '@type': 'Answer',
                     text: 'No. Weight, age, sex, sensitivity, sleep, medications, health conditions, pregnancy, and breastfeeding can all change how caffeine feels and how much is too much.',
@@ -840,11 +856,12 @@ function EmptyResult() {
                     <Sparkles className="size-5" aria-hidden="true" />
                 </span>
                 <h2 className="mt-4 text-xl font-bold text-slate-900 dark:text-slate-50">
-                    Your limit appears here
+                    Your estimate shows up here
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                    The answer starts with a daily milligram limit adjusted by
-                    weight, age, sex, and sensitivity.
+                    You will see a daily mg target, drink-by-drink context, and
+                    extra notes for things like sleep, pregnancy, anxiety, or
+                    medication.
                 </p>
             </div>
         </div>

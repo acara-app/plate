@@ -41,7 +41,7 @@ export function VerdictCard({
                         {props.limit_mg === null ? '0' : props.limit_mg}
                     </div>
                     <div className="text-xs font-medium opacity-75">
-                        {props.limit_mg === null ? 'routine mg' : 'mg / day'}
+                        mg / day
                     </div>
                 </div>
             </div>

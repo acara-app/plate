@@ -150,8 +150,11 @@ export function DrinkSizeGrid({
     return (
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                What {limit} mg looks like
+                What {limit} mg can look like in real drinks
             </h3>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Typical caffeine can vary by brand and serving size.
+            </p>
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {DRINKS.map((drink) => {
                     const percentage = Math.min(
@@ -176,7 +179,7 @@ export function DrinkSizeGrid({
                             <div className="w-full">
                                 <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                                     <span>{percentage}%</span>
-                                    <span>of limit</span>
+                                    <span>of your limit</span>
                                 </div>
                                 <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                                     <div
