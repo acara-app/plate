@@ -1,7 +1,8 @@
 import type { ComponentType, SVGProps } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Drink = {
-    name: string;
+    nameKey: string;
     ml: number;
     mg: number;
     Icon: ComponentType<SVGProps<SVGSVGElement>>;
@@ -130,12 +131,12 @@ function ColaIcon(props: SVGProps<SVGSVGElement>) {
 }
 
 const DRINKS: Drink[] = [
-    { name: 'Espresso', ml: 30, mg: 63, Icon: EspressoIcon },
-    { name: 'Drip Coffee', ml: 250, mg: 95, Icon: DripCoffeeIcon },
-    { name: 'Latte', ml: 350, mg: 150, Icon: LatteIcon },
-    { name: 'Energy Drink', ml: 250, mg: 80, Icon: EnergyDrinkIcon },
-    { name: 'Black Tea', ml: 250, mg: 47, Icon: BlackTeaIcon },
-    { name: 'Cola', ml: 355, mg: 34, Icon: ColaIcon },
+    { nameKey: 'drink_espresso', ml: 30, mg: 63, Icon: EspressoIcon },
+    { nameKey: 'drink_drip_coffee', ml: 250, mg: 95, Icon: DripCoffeeIcon },
+    { nameKey: 'drink_latte', ml: 350, mg: 150, Icon: LatteIcon },
+    { nameKey: 'drink_energy_drink', ml: 250, mg: 80, Icon: EnergyDrinkIcon },
+    { nameKey: 'drink_black_tea', ml: 250, mg: 47, Icon: BlackTeaIcon },
+    { nameKey: 'drink_cola', ml: 355, mg: 34, Icon: ColaIcon },
 ];
 
 export function DrinkSizeGrid({
@@ -145,15 +146,16 @@ export function DrinkSizeGrid({
         limit_mg: number | null;
     };
 }) {
+    const { t } = useTranslation('caffeine');
     const limit = props.limit_mg ?? DEFAULT_LIMIT_MG;
 
     return (
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                What {limit} mg can look like in real drinks
+                {t('drink_grid_title', { limit })}
             </h3>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Typical caffeine can vary by brand and serving size.
+                {t('drink_grid_subtitle')}
             </p>
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {DRINKS.map((drink) => {
@@ -164,13 +166,13 @@ export function DrinkSizeGrid({
 
                     return (
                         <div
-                            key={drink.name}
+                            key={drink.nameKey}
                             className="flex flex-col items-center gap-2 rounded-lg border border-slate-100 p-3 text-center dark:border-slate-800"
                         >
                             <drink.Icon className="size-8 text-slate-700 dark:text-slate-200" />
                             <div>
                                 <p className="text-xs font-semibold text-slate-900 dark:text-slate-50">
-                                    {drink.name}
+                                    {t(drink.nameKey)}
                                 </p>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
                                     {drink.ml} ml · {drink.mg} mg
@@ -179,7 +181,7 @@ export function DrinkSizeGrid({
                             <div className="w-full">
                                 <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                                     <span>{percentage}%</span>
-                                    <span>of your limit</span>
+                                    <span>{t('drink_percentage_of_limit')}</span>
                                 </div>
                                 <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                                     <div

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { Head, useHttp, usePage } from '@inertiajs/react';
+import { Head, useHttp, usePage, Link } from '@inertiajs/react';
 import type { Spec } from '@json-render/core';
 import {
     Activity,
@@ -17,6 +17,7 @@ import {
     Weight,
 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface AssessmentResponse {
     summary: string;
@@ -53,17 +54,18 @@ interface AssessmentFormData {
     sensitivity: 'low' | 'normal' | 'high';
     context: string;
     unit_system: 'metric' | 'imperial';
+    locale: string;
 }
 
-const CONDITION_OPTIONS: Array<{ value: ConditionKey; label: string }> = [
-    { value: 'pregnancy', label: 'Pregnant' },
-    { value: 'breastfeeding', label: 'Breastfeeding' },
-    { value: 'trying_to_conceive', label: 'Trying to get pregnant' },
-    { value: 'heart_condition', label: 'Heart or blood pressure condition' },
-    { value: 'medication', label: 'Taking medication' },
-    { value: 'anxiety', label: 'Anxiety or panic' },
-    { value: 'insomnia', label: 'Trouble sleeping' },
-    { value: 'gerd', label: 'Acid reflux / GERD' },
+const CONDITION_OPTIONS: Array<{ value: ConditionKey; labelKey: string }> = [
+    { value: 'pregnancy', labelKey: 'condition_pregnancy' },
+    { value: 'breastfeeding', labelKey: 'condition_breastfeeding' },
+    { value: 'trying_to_conceive', labelKey: 'condition_trying_to_conceive' },
+    { value: 'heart_condition', labelKey: 'condition_heart_condition' },
+    { value: 'medication', labelKey: 'condition_medication' },
+    { value: 'anxiety', labelKey: 'condition_anxiety' },
+    { value: 'insomnia', labelKey: 'condition_insomnia' },
+    { value: 'gerd', labelKey: 'condition_gerd' },
 ];
 
 interface CaffeineCalculatorPageProps {
@@ -72,26 +74,27 @@ interface CaffeineCalculatorPageProps {
         appUrl: string;
         canonicalUrl: string;
     };
+    locale: string;
     [key: string]: unknown;
 }
 
 const SENSITIVITY_OPTIONS: Array<{
     value: AssessmentFormData['sensitivity'];
-    label: string;
-    detail: string;
+    labelKey: string;
+    detailKey: string;
 }> = [
-    { value: 'low', label: 'Low', detail: 'You rarely notice it' },
-    { value: 'normal', label: 'Normal', detail: 'About average' },
-    { value: 'high', label: 'High', detail: 'A little hits hard' },
+    { value: 'low', labelKey: 'sensitivity_low', detailKey: 'sensitivity_low_detail' },
+    { value: 'normal', labelKey: 'sensitivity_normal', detailKey: 'sensitivity_normal_detail' },
+    { value: 'high', labelKey: 'sensitivity_high', detailKey: 'sensitivity_high_detail' },
 ];
 
 const SEX_OPTIONS: Array<{
     value: AssessmentFormData['sex'];
-    label: string;
+    labelKey: string;
 }> = [
-    { value: 'male', label: 'Male' },
-    { value: 'female', label: 'Female' },
-    { value: 'decline', label: 'Prefer not to say' },
+    { value: 'male', labelKey: 'sex_male' },
+    { value: 'female', labelKey: 'sex_female' },
+    { value: 'decline', labelKey: 'sex_decline' },
 ];
 
 function cmToFtIn(cm: number): { ft: number; inch: number } {
@@ -114,7 +117,8 @@ function lbToKg(lb: number): number {
 }
 
 export default function CaffeineCalculator() {
-    const { seo } = usePage<CaffeineCalculatorPageProps>().props;
+    const { t } = useTranslation('caffeine');
+    const { seo, locale } = usePage<CaffeineCalculatorPageProps>().props;
     const form = useHttp<AssessmentFormData, AssessmentResponse>(planRoute(), {
         height_cm: '',
         height_ft: '',
@@ -126,6 +130,7 @@ export default function CaffeineCalculator() {
         sensitivity: 'normal',
         context: '',
         unit_system: 'metric',
+        locale: locale ?? 'en',
     });
 
     const [unitSystem, setUnitSystem] = useState<'metric' | 'imperial'>(
@@ -206,6 +211,7 @@ export default function CaffeineCalculator() {
             sensitivity: data.sensitivity,
             context: data.context.trim() === '' ? null : data.context.trim(),
             conditions: selectedConditions,
+            locale: data.locale,
         }));
 
         void form.submit();
@@ -224,16 +230,16 @@ export default function CaffeineCalculator() {
 
     return (
         <>
-            <Head title="Caffeine Calculator: Find Your Daily Limit">
+            <Head title={t('page_title')}>
                 <meta
                     head-key="description"
                     name="description"
-                    content="Estimate a daily caffeine limit based on your weight, age, sensitivity, and health context."
+                    content={t('meta_description')}
                 />
                 <meta
                     head-key="keywords"
                     name="keywords"
-                    content="caffeine calculator, how much caffeine is too much, caffeine limit by weight, caffeine sensitivity, EFSA caffeine guideline"
+                    content={t('meta_keywords')}
                 />
                 <script
                     head-key="caffeine-calculator-web-application"
@@ -272,28 +278,53 @@ export default function CaffeineCalculator() {
                             </span>
                             <div>
                                 <p className="text-sm font-semibold text-emerald-700 uppercase dark:text-emerald-300">
-                                    Daily caffeine guide
+                                    {t('tagline')}
                                 </p>
                                 <h1 className="text-3xl leading-tight font-bold tracking-tight md:text-4xl">
-                                    Find your personal caffeine limit
+                                    {t('heading')}
                                 </h1>
                                 <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                                    Answer a few quick questions to get a daily
-                                    limit in milligrams, plus guidance that fits
-                                    your routine, sleep, and health context.
+                                    {t('subheading')}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="mt-5 flex justify-end">
+                        <div className="mt-5 flex items-center justify-between">
+                            <div className="flex items-center gap-1 text-sm">
+                                <Link
+                                    href="/tools/caffeine-calculator"
+                                    className={cn(
+                                        'rounded-md px-2 py-1 font-semibold transition',
+                                        locale === 'en'
+                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200',
+                                    )}
+                                >
+                                    {t('language_switcher_en')}
+                                </Link>
+                                <span className="text-slate-300 dark:text-slate-700">
+                                    |
+                                </span>
+                                <Link
+                                    href="/mn/tools/caffeine-calculator"
+                                    className={cn(
+                                        'rounded-md px-2 py-1 font-semibold transition',
+                                        locale === 'mn'
+                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200',
+                                    )}
+                                >
+                                    {t('language_switcher_mn')}
+                                </Link>
+                            </div>
                             <button
                                 type="button"
                                 onClick={toggleUnitSystem}
                                 className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900"
                             >
                                 {unitSystem === 'metric'
-                                    ? 'Use ft/in + lb'
-                                    : 'Use cm + kg'}
+                                    ? t('unit_toggle_metric')
+                                    : t('unit_toggle_imperial')}
                             </button>
                         </div>
 
@@ -303,7 +334,7 @@ export default function CaffeineCalculator() {
                                     htmlFor="height_cm"
                                     className="text-sm font-semibold text-slate-800 dark:text-slate-100"
                                 >
-                                    Height
+                                    {t('height')}
                                 </label>
                                 {unitSystem === 'metric' ? (
                                     <div className="relative mt-2">
@@ -324,7 +355,7 @@ export default function CaffeineCalculator() {
                                                     event.target.value,
                                                 )
                                             }
-                                            placeholder="170"
+                                            placeholder={t('height_cm_placeholder')}
                                             className="h-11 bg-white pr-14 pl-10 text-base dark:bg-slate-950"
                                             aria-invalid={
                                                 form.errors.height_cm
@@ -356,7 +387,7 @@ export default function CaffeineCalculator() {
                                                         event.target.value,
                                                     )
                                                 }
-                                                placeholder="5"
+                                                placeholder={t('height_ft_placeholder')}
                                                 className="h-11 bg-white pr-14 pl-10 text-base dark:bg-slate-950"
                                             />
                                             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-slate-500 dark:text-slate-400">
@@ -377,7 +408,7 @@ export default function CaffeineCalculator() {
                                                         event.target.value,
                                                     )
                                                 }
-                                                placeholder="8"
+                                                placeholder={t('height_in_placeholder')}
                                                 className="h-11 bg-white pr-14 text-base dark:bg-slate-950"
                                             />
                                             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-slate-500 dark:text-slate-400">
@@ -398,7 +429,7 @@ export default function CaffeineCalculator() {
                                     htmlFor="weight"
                                     className="text-sm font-semibold text-slate-800 dark:text-slate-100"
                                 >
-                                    Weight
+                                    {t('weight')}
                                 </label>
                                 {unitSystem === 'metric' ? (
                                     <div className="relative mt-2">
@@ -419,7 +450,7 @@ export default function CaffeineCalculator() {
                                                     event.target.value,
                                                 )
                                             }
-                                            placeholder="70"
+                                            placeholder={t('weight_kg_placeholder')}
                                             className="h-11 bg-white pr-14 pl-10 text-base dark:bg-slate-950"
                                             aria-invalid={
                                                 form.errors.weight_kg
@@ -450,7 +481,7 @@ export default function CaffeineCalculator() {
                                                     event.target.value,
                                                 )
                                             }
-                                            placeholder="154"
+                                            placeholder={t('weight_lb_placeholder')}
                                             className="h-11 bg-white pr-14 pl-10 text-base dark:bg-slate-950"
                                             aria-invalid={
                                                 form.errors.weight_kg
@@ -475,7 +506,7 @@ export default function CaffeineCalculator() {
                                     htmlFor="age"
                                     className="text-sm font-semibold text-slate-800 dark:text-slate-100"
                                 >
-                                    Age
+                                    {t('age')}
                                 </label>
                                 <div className="relative mt-2">
                                     <Calendar
@@ -495,14 +526,14 @@ export default function CaffeineCalculator() {
                                                 event.target.value,
                                             )
                                         }
-                                        placeholder="30"
+                                        placeholder={t('age_placeholder')}
                                         className="h-11 bg-white pr-14 pl-10 text-base dark:bg-slate-950"
                                         aria-invalid={
                                             form.errors.age ? 'true' : undefined
                                         }
                                     />
                                     <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-slate-500 dark:text-slate-400">
-                                        years
+                                        {t('age_unit')}
                                     </span>
                                 </div>
                                 {form.errors.age && (
@@ -515,7 +546,7 @@ export default function CaffeineCalculator() {
                             <div>
                                 <div className="flex items-center justify-between gap-3">
                                     <label className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                                        Sex
+                                        {t('sex')}
                                     </label>
                                     {form.errors.sex && (
                                         <p className="text-sm text-red-600 dark:text-red-400">
@@ -524,13 +555,12 @@ export default function CaffeineCalculator() {
                                     )}
                                 </div>
                                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                    Used only to fine-tune the metabolism
-                                    estimate.
+                                    {t('sex_description')}
                                 </p>
                                 <div
                                     className="mt-2 grid grid-cols-3 gap-2"
                                     role="radiogroup"
-                                    aria-label="Sex"
+                                    aria-label={t('sex')}
                                 >
                                     {SEX_OPTIONS.map((option) => {
                                         const selected =
@@ -556,7 +586,7 @@ export default function CaffeineCalculator() {
                                                 )}
                                             >
                                                 <span className="block text-sm font-semibold">
-                                                    {option.label}
+                                                    {t(option.labelKey)}
                                                 </span>
                                             </button>
                                         );
@@ -567,7 +597,7 @@ export default function CaffeineCalculator() {
                             <div>
                                 <div className="flex items-center justify-between gap-3">
                                     <label className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                                        How caffeine usually feels for you
+                                        {t('sensitivity')}
                                     </label>
                                     {form.errors.sensitivity && (
                                         <p className="text-sm text-red-600 dark:text-red-400">
@@ -578,7 +608,7 @@ export default function CaffeineCalculator() {
                                 <div
                                     className="mt-2 grid grid-cols-3 gap-2"
                                     role="radiogroup"
-                                    aria-label="Caffeine sensitivity"
+                                    aria-label={t('sensitivity')}
                                 >
                                     {SENSITIVITY_OPTIONS.map((option) => {
                                         const selected =
@@ -605,10 +635,10 @@ export default function CaffeineCalculator() {
                                                 )}
                                             >
                                                 <span className="block text-sm font-semibold">
-                                                    {option.label}
+                                                    {t(option.labelKey)}
                                                 </span>
                                                 <span className="mt-0.5 block text-xs opacity-70">
-                                                    {option.detail}
+                                                    {t(option.detailKey)}
                                                 </span>
                                             </button>
                                         );
@@ -618,17 +648,15 @@ export default function CaffeineCalculator() {
 
                             <div>
                                 <label className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                                    Anything that changes your caffeine
-                                    tolerance?
+                                    {t('conditions')}
                                 </label>
                                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                    Select anything that applies so the guidance
-                                    is safer and more relevant.
+                                    {t('conditions_description')}
                                 </p>
                                 <div
                                     className="mt-2 grid grid-cols-2 gap-2"
                                     role="group"
-                                    aria-label="Health conditions"
+                                    aria-label={t('conditions')}
                                 >
                                     {CONDITION_OPTIONS.map((option) => {
                                         const checked =
@@ -657,7 +685,7 @@ export default function CaffeineCalculator() {
                                                     }
                                                 />
                                                 <span className="font-medium">
-                                                    {option.label}
+                                                    {t(option.labelKey)}
                                                 </span>
                                             </label>
                                         );
@@ -680,13 +708,11 @@ export default function CaffeineCalculator() {
                                         htmlFor="context"
                                         className="text-sm font-semibold text-slate-800 dark:text-slate-100"
                                     >
-                                        Your caffeine routine or anything
-                                        important
+                                        {t('context_label')}
                                     </label>
                                 </div>
                                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                    Share what you usually drink or anything
-                                    that makes caffeine feel different for you.
+                                    {t('context_description')}
                                 </p>
                                 <Textarea
                                     id="context"
@@ -697,7 +723,7 @@ export default function CaffeineCalculator() {
                                             event.target.value,
                                         )
                                     }
-                                    placeholder="Example: I usually have a morning latte and an afternoon tea. Caffeine makes me shaky, and I am taking heart medication."
+                                    placeholder={t('context_placeholder')}
                                     rows={4}
                                     maxLength={1000}
                                     className="mt-2 bg-white text-base dark:bg-slate-950"
@@ -730,8 +756,8 @@ export default function CaffeineCalculator() {
                                     />
                                 )}
                                 {form.processing
-                                    ? 'Calculating your limit'
-                                    : 'Get my daily limit'}
+                                    ? t('submit_loading')
+                                    : t('submit_button')}
                             </Button>
                         </form>
                     </section>
@@ -849,6 +875,8 @@ function LoadingResult() {
 }
 
 function EmptyResult() {
+    const { t } = useTranslation('caffeine');
+
     return (
         <div className="flex min-h-full items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="max-w-sm">
@@ -856,12 +884,10 @@ function EmptyResult() {
                     <Sparkles className="size-5" aria-hidden="true" />
                 </span>
                 <h2 className="mt-4 text-xl font-bold text-slate-900 dark:text-slate-50">
-                    Your estimate shows up here
+                    {t('empty_result_title')}
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                    You will see a daily mg target, drink-by-drink context, and
-                    extra notes for things like sleep, pregnancy, anxiety, or
-                    medication.
+                    {t('empty_result_description')}
                 </p>
             </div>
         </div>

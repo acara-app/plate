@@ -99,15 +99,15 @@ final class CaffeineGuidanceAgent implements Agent, HasStructuredOutput
         ];
     }
 
-    public function assess(CaffeineLimitData $limit, ?string $context): CaffeineGuidanceData
+    public function assess(CaffeineLimitData $limit, ?string $context, string $locale = 'en'): CaffeineGuidanceData
     {
         /** @var StructuredAgentResponse $response */
-        $response = $this->prompt($this->buildPrompt($limit, $context));
+        $response = $this->prompt($this->buildPrompt($limit, $context, $locale));
 
         return CaffeineGuidanceData::from($response->toArray());
     }
 
-    private function buildPrompt(CaffeineLimitData $limit, ?string $context): string
+    private function buildPrompt(CaffeineLimitData $limit, ?string $context, string $locale): string
     {
         $payload = [
             'assessment' => $limit->toArray(),
@@ -122,6 +122,10 @@ final class CaffeineGuidanceAgent implements Agent, HasStructuredOutput
                 'address_detected_conditions_personally' => true,
                 'never_recommend_a_specific_brand_or_product' => true,
             ],
+            'locale' => $locale,
+            'language_instruction' => $locale === 'mn'
+                ? 'Respond entirely in Mongolian using clear, professional, and friendly medical tone. Use Mongolian medical terminology where appropriate.'
+                : 'Respond in English.',
         ];
 
         return "Create the caffeine guidance UI copy from this deterministic assessment JSON:\n"

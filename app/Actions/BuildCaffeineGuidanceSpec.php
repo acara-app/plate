@@ -43,7 +43,7 @@ final readonly class BuildCaffeineGuidanceSpec
             ],
         ];
 
-        foreach ($guidance->conditionSections as $index => $section) {
+        foreach (($guidance->conditionSections ?? []) as $index => $section) {
             $key = "condition_{$index}";
             $elements['root']['children'][] = $key;
             $elements[$key] = [

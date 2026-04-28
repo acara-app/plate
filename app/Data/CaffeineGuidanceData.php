@@ -19,7 +19,7 @@ final class CaffeineGuidanceData extends Data
      * @param  array{label: string, value_label: string, limit_mg: int|null, max_mg: int, tone: string, caption: string}  $limitGauge
      * @param  array{title: string, items: array<int, string>}  $guidanceList
      * @param  array{title: string, body: string, items: array<int, string>}  $safetyNote
-     * @param  array<int, array{condition: string, title: string, body: string, tone: string, link_url?: string|null, link_label?: string|null}>  $conditionSections
+     * @param  array<int, array{condition: string, title: string, body: string, tone: string, link_url?: string|null, link_label?: string|null}>|null  $conditionSections
      */
     public function __construct(
         public string $summary,
@@ -27,6 +27,6 @@ final class CaffeineGuidanceData extends Data
         public array $limitGauge,
         public array $guidanceList,
         public array $safetyNote,
-        public array $conditionSections = [],
+        public ?array $conditionSections = [],
     ) {}
 }

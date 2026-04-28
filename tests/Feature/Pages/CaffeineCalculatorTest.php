@@ -12,9 +12,21 @@ it('returns 200 for the caffeine calculator route without authentication', funct
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
             ->component('caffeine-calculator')
+            ->where('locale', 'en')
             ->where('seo.appName', config('app.name'))
             ->where('seo.appUrl', url('/'))
             ->where('seo.canonicalUrl', route('caffeine-calculator')));
+});
+
+it('returns 200 for the mongolian caffeine calculator route without authentication', function (): void {
+    $this->get(route('caffeine-calculator.locale', ['locale' => 'mn']))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('caffeine-calculator')
+            ->where('locale', 'mn')
+            ->where('seo.appName', config('app.name'))
+            ->where('seo.appUrl', url('/'))
+            ->where('seo.canonicalUrl', route('caffeine-calculator.locale', ['locale' => 'mn'])));
 });
 
 it('rejects the assessment endpoint when required inputs are missing', function (): void {
