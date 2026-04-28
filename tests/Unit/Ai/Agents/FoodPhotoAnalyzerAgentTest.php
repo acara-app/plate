@@ -42,7 +42,7 @@ it('appends language directive to instructions when language is set', function (
     expect($instructions)
         ->toContain('Return all `name` and `portion` values in English')
         ->toContain('language code: `en`')
-        ->toContain('Numeric fields and JSON keys stay as-is')
+        ->toContain('Numeric fields and structured field names stay as-is')
         ->toContain('do not transliterate from English');
 });
 

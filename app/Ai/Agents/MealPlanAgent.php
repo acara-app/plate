@@ -11,24 +11,30 @@ use App\Data\DayMealsData;
 use App\Data\GlucoseAnalysis\GlucoseAnalysisData;
 use App\Data\PreviousDayContext;
 use App\Enums\DietType;
+use App\Enums\MealType;
 use App\Models\MealPlan;
 use App\Models\User;
 use App\Services\SystemPromptProviderResolver;
 use App\Services\ToolRegistry;
-use App\Utilities\JsonCleaner;
 use App\Workflows\MealPlanInitializeWorkflow;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\Types\ArrayType;
+use Illuminate\JsonSchema\Types\ObjectType;
+use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Providers\Tools\ProviderTool;
+use Laravel\Ai\Responses\StructuredAgentResponse;
 use Workflow\WorkflowStub;
 
 #[MaxTokens(64000)]
 #[Timeout(180)]
-final class MealPlanAgent implements Agent, GeneratesMealPlans, HasTools
+final class MealPlanAgent implements Agent, GeneratesMealPlans, HasStructuredOutput, HasTools
 {
     use Promptable;
 
@@ -64,6 +70,43 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasTools
     public function tools(): array
     {
         return $this->toolRegistry->getMealPlanTools();
+    }
+
+    /**
+     * @return array<string, Type>
+     */
+    public function schema(JsonSchema $schema): array
+    {
+        $ingredientSchema = new ObjectType([
+            'name' => $schema->string()->required(),
+            'quantity' => $schema->string()->required(),
+            'specificity' => $schema->string()->nullable(),
+            'barcode' => $schema->string()->nullable(),
+        ])->withoutAdditionalProperties();
+
+        $mealSchema = new ObjectType([
+            'type' => $schema->string()->enum(MealType::class)->required(),
+            'name' => $schema->string()->required(),
+            'description' => $schema->string()->nullable()->required(),
+            'preparation_instructions' => $schema->string()->nullable()->required(),
+            'ingredients' => (new ArrayType)->items($ingredientSchema)->nullable()->required(),
+            'portion_size' => $schema->string()->nullable()->required(),
+            'calories' => $schema->number()->required(),
+            'protein_grams' => $schema->number()->nullable()->required(),
+            'carbs_grams' => $schema->number()->nullable()->required(),
+            'fat_grams' => $schema->number()->nullable()->required(),
+            'preparation_time_minutes' => $schema->integer()->nullable()->required(),
+            'sort_order' => $schema->integer()->required(),
+        ])->withoutAdditionalProperties();
+
+        $metadataSchema = new ObjectType([
+            'preparation_notes' => $schema->string()->nullable(),
+        ])->withoutAdditionalProperties();
+
+        return [
+            'meals' => (new ArrayType)->items($mealSchema)->required(),
+            'metadata' => $metadataSchema->nullable(),
+        ];
     }
 
     public function handle(User $user, int $totalDays = 7, ?string $customPrompt = null): void
@@ -106,12 +149,9 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasTools
             $customPrompt,
         );
 
+        /** @var StructuredAgentResponse $response */
         $response = $this->prompt($prompt);
 
-        $cleanedJsonText = JsonCleaner::extractAndValidateJson((string) $response);
-
-        $data = json_decode($cleanedJsonText, true, 512, JSON_THROW_ON_ERROR);
-
-        return DayMealsData::from($data);
+        return DayMealsData::from($response->toArray());
     }
 }

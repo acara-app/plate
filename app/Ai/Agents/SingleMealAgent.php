@@ -9,11 +9,14 @@ use App\Contracts\Ai\GeneratesSingleMeals;
 use App\Data\GeneratedMealData;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\Types\ArrayType;
+use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
+use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(8000)]
 #[Timeout(60)]
@@ -31,28 +34,28 @@ final class SingleMealAgent implements Agent, GeneratesSingleMeals, HasStructure
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<string, Type>
      */
     public function schema(JsonSchema $schema): array
     {
         return [
             'name' => $schema->string()->required(),
-            'description' => $schema->string(),
+            'description' => $schema->string()->nullable()->required(),
             'meal_type' => $schema->string()->required(),
-            'cuisine' => $schema->string(),
+            'cuisine' => $schema->string()->nullable()->required(),
             'calories' => $schema->number()->required(),
             'protein_grams' => $schema->number()->required(),
             'carbs_grams' => $schema->number()->required(),
             'fat_grams' => $schema->number()->required(),
-            'fiber_grams' => $schema->number(),
-            'ingredients' => $schema->array(),
-            'instructions' => $schema->array(),
-            'prep_time_minutes' => $schema->integer(),
-            'cook_time_minutes' => $schema->integer(),
+            'fiber_grams' => $schema->number()->nullable(),
+            'ingredients' => (new ArrayType)->items($schema->string())->nullable(),
+            'instructions' => (new ArrayType)->items($schema->string())->nullable(),
+            'prep_time_minutes' => $schema->integer()->nullable(),
+            'cook_time_minutes' => $schema->integer()->nullable(),
             'servings' => $schema->integer(),
-            'dietary_tags' => $schema->array(),
-            'glycemic_index_estimate' => $schema->string(),
-            'glucose_impact_notes' => $schema->string(),
+            'dietary_tags' => (new ArrayType)->items($schema->string())->nullable(),
+            'glycemic_index_estimate' => $schema->string()->nullable(),
+            'glucose_impact_notes' => $schema->string()->nullable(),
         ];
     }
 
@@ -71,11 +74,11 @@ final class SingleMealAgent implements Agent, GeneratesSingleMeals, HasStructure
             $specificRequest,
         );
 
+        /** @var StructuredAgentResponse $response */
         $response = $this->prompt($prompt);
 
         /** @var array<string, mixed> $responseArray */
-        // @phpstan-ignore argument.type
-        $responseArray = json_decode(json_encode($response), true);
+        $responseArray = $response->toArray();
 
         return GeneratedMealData::from($responseArray);
     }

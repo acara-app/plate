@@ -90,6 +90,18 @@ class extends Component
                 ],
             ],
             [
+                'name' => 'Caffeine Calculator',
+                'description' => 'Find how much caffeine is too much based on height, sensitivity, and optional personal context.',
+                'icon' => '☕',
+                'route' => route('caffeine-calculator'),
+                'badge' => 'New',
+                'features' => [
+                    'Height-adjusted daily limit',
+                    'Sensitivity adjustment',
+                    'AI-written guidance',
+                ],
+            ],
+            [
                 'name' => 'AI Meal Planner',
                 'description' => 'Get personalized 7-day meal plans tailored to your diabetes type, diet preferences, and glucose goals.',
                 'icon' => '📅',

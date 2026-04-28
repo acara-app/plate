@@ -11,5 +11,8 @@ use Illuminate\Container\Attributes\Bind;
 #[Bind(ConversationSummarizerAgent::class)]
 interface SummarizesConversation
 {
-    public function summarize(string $conversationText, ?ConversationSummary $previousSummary): string;
+    /**
+     * @return array{summary: string, topics: array<int, string>, key_facts: array<int, string>, unresolved_threads: array<int, string>, resolved_threads: array<int, string>}
+     */
+    public function summarize(string $conversationText, ?ConversationSummary $previousSummary): array;
 }

@@ -64,6 +64,13 @@
             {
                 "@@type": "ListItem",
                 "position": 6,
+                "name": "Caffeine Calculator",
+                "description": "Find how much caffeine is too much based on height and sensitivity",
+                "url": "{{ route('caffeine-calculator') }}"
+            },
+            {
+                "@@type": "ListItem",
+                "position": 7,
                 "name": "AI Meal Planner",
                 "description": "Get personalized 7-day meal plans tailored to your diabetes type and goals",
                 "url": "{{ route('meal-planner') }}"

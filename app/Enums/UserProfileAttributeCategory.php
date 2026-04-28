@@ -14,6 +14,31 @@ enum UserProfileAttributeCategory: string
     case HealthCondition = 'health_condition';
     case Medication = 'medication';
 
+    /**
+     * @return array<int, self>
+     */
+    public static function dietaryPreferences(): array
+    {
+        return [
+            self::Allergy,
+            self::Intolerance,
+            self::DietaryPattern,
+            self::Dislike,
+            self::Restriction,
+        ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function dietaryPreferenceValues(): array
+    {
+        return array_map(
+            fn (self $category): string => $category->value,
+            self::dietaryPreferences(),
+        );
+    }
+
     public function label(): string
     {
         return match ($this) {

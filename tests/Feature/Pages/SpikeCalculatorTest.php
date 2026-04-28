@@ -67,7 +67,13 @@ it('displays result after successful prediction', function (): void {
     fakeTurnstile();
 
     SpikePredictorAgent::fake([
-        '{"risk_level": "high", "estimated_gl": 43, "explanation": "White rice is a refined carbohydrate.", "smart_fix": "Try cauliflower rice instead.", "spike_reduction_percentage": 40}',
+        [
+            'risk_level' => 'high',
+            'estimated_gl' => 43,
+            'explanation' => 'White rice is a refined carbohydrate.',
+            'smart_fix' => 'Try cauliflower rice instead.',
+            'spike_reduction_percentage' => 40,
+        ],
     ]);
 
     Livewire::test('pages::spike-calculator')
@@ -94,7 +100,13 @@ it('shows all risk levels correctly', function (string $riskLevel, string $label
     fakeTurnstile();
 
     SpikePredictorAgent::fake([
-        '{"risk_level": "'.$riskLevel.'", "estimated_gl": 25, "explanation": "Test explanation.", "smart_fix": "Test smart fix.", "spike_reduction_percentage": 20}',
+        [
+            'risk_level' => $riskLevel,
+            'estimated_gl' => 25,
+            'explanation' => 'Test explanation.',
+            'smart_fix' => 'Test smart fix.',
+            'spike_reduction_percentage' => 20,
+        ],
     ]);
 
     Livewire::test('pages::spike-calculator')

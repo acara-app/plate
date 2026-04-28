@@ -93,13 +93,13 @@ describe('handle', function (): void {
         $mockAgent = Mockery::mock(SummarizesConversation::class);
         $mockAgent->shouldReceive('summarize')
             ->once()
-            ->andReturn(json_encode([
+            ->andReturn([
                 'summary' => 'The user discussed nutrition and meal planning.',
                 'topics' => ['nutrition', 'meal planning'],
                 'key_facts' => ['User prefers vegetarian meals'],
                 'unresolved_threads' => ['Weekly grocery list'],
                 'resolved_threads' => ['Daily calorie target set'],
-            ]));
+            ]);
 
         $action = new SummarizeConversationAction($mockAgent);
         $summary = $action->handle($conversation);
@@ -156,13 +156,13 @@ describe('handle', function (): void {
         $mockAgent = Mockery::mock(SummarizesConversation::class);
         $mockAgent->shouldReceive('summarize')
             ->once()
-            ->andReturn(json_encode([
+            ->andReturn([
                 'summary' => 'Second summary continuing discussion.',
                 'topics' => ['fitness', 'diet'],
                 'key_facts' => [],
                 'unresolved_threads' => [],
                 'resolved_threads' => ['workout plan'],
-            ]));
+            ]);
 
         $action = new SummarizeConversationAction($mockAgent);
         $summary = $action->handle($conversation);
@@ -204,14 +204,16 @@ describe('handle', function (): void {
         expect($result)->toBeNull();
     });
 
-    it('returns null when agent returns invalid JSON', function (): void {
+    it('returns null when agent returns incomplete structured data', function (): void {
         $user = User::factory()->create();
         $conversation = createConversationWithMessages($user, 50);
 
         $mockAgent = Mockery::mock(SummarizesConversation::class);
         $mockAgent->shouldReceive('summarize')
             ->once()
-            ->andReturn('not valid json {{{');
+            ->andReturn([
+                'topics' => ['nutrition'],
+            ]);
 
         $action = new SummarizeConversationAction($mockAgent);
         $result = $action->handle($conversation);

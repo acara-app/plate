@@ -42,7 +42,7 @@ it('appends language directive to instructions when language is set', function (
     expect($instructions)
         ->toContain('Write `dietary_rules`, `foods_to_avoid`, `foods_to_prioritize`, `hidden_sources`, `requirements`, and `general_advice` values in English')
         ->toContain('language code: `en`')
-        ->toContain('`safety_level` enum value and numeric fields stay in English')
+        ->toContain('`safety_level` enum value, structured field names, and numeric fields stay in English')
         ->toContain('do not transliterate from English');
 });
 

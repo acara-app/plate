@@ -28,16 +28,6 @@ This is a continuation. Here's what came before:
 
 ## Output Format
 
-You MUST respond with valid JSON only. No markdown, no explanation. The JSON must match this structure:
-
-```
-{
-    "summary": "150-300 word narrative summary",
-    "topics": ["topic1", "topic2"],
-    "key_facts": ["fact1", "fact2"],
-    "unresolved_threads": ["thread1", "thread2"],
-    "resolved_threads": ["thread1", "thread2"]
-}
-```
+Return the requested structured fields: summary, topics, key_facts, unresolved_threads, and resolved_threads.
 
 ## Conversation to Summarize

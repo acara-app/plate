@@ -10,19 +10,24 @@ use App\Data\GroceryItemData;
 use App\Data\GroceryListData;
 use App\Data\IngredientData;
 use App\Models\MealPlan;
-use App\Utilities\JsonCleaner;
 use App\Utilities\LanguageUtil;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\Types\ArrayType;
+use Illuminate\JsonSchema\Types\ObjectType;
+use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
+use Laravel\Ai\Responses\StructuredAgentResponse;
 use Spatie\LaravelData\DataCollection;
 
 #[Provider('gemini')]
 #[MaxTokens(67000)]
 #[Timeout(120)]
-final class GroceryListGeneratorAgent implements Agent
+final class GroceryListGeneratorAgent implements Agent, HasStructuredOutput
 {
     use Promptable;
 
@@ -43,21 +48,42 @@ final class GroceryListGeneratorAgent implements Agent
                 '5. Return a clean, consolidated grocery list',
             ],
             output: [
-                'Your response MUST be valid JSON and ONLY JSON',
-                'Start your response with { and end with }',
-                'Do NOT include markdown code blocks (no ```json)',
-                'Do NOT include explanatory text before or after the JSON',
-                'The JSON must be parseable by json_decode()',
-                'Use double quotes for all strings',
-                'Ensure all brackets and braces are properly closed',
-                'Return format: {"items": [{"name": "Item Name", "quantity": "Combined Quantity", "category": "Category Name", "days": [1, 2, 3]}]}',
+                'Return the grocery list using the provided structured format.',
                 'The "days" array must contain the day numbers (1-based) where the ingredient is used',
                 'Valid categories are: Produce, Dairy, Meat & Seafood, Pantry, Frozen, Bakery, Beverages, Condiments & Sauces, Herbs & Spices, Other',
                 'The "category" VALUE must be one of the English category names listed above — do not translate it',
                 'The "name" and "quantity" VALUES must follow the language directive provided in the user prompt',
-                'JSON keys ("name", "quantity", "category", "days") always stay in English',
+                'Structured field names ("name", "quantity", "category", "days") always stay in English',
             ],
         );
+    }
+
+    /**
+     * @return array<string, Type>
+     */
+    public function schema(JsonSchema $schema): array
+    {
+        $itemSchema = new ObjectType([
+            'name' => $schema->string()->required(),
+            'quantity' => $schema->string()->required(),
+            'category' => $schema->string()->enum([
+                'Produce',
+                'Dairy',
+                'Meat & Seafood',
+                'Pantry',
+                'Frozen',
+                'Bakery',
+                'Beverages',
+                'Condiments & Sauces',
+                'Herbs & Spices',
+                'Other',
+            ])->required(),
+            'days' => (new ArrayType)->items($schema->integer())->required(),
+        ])->withoutAdditionalProperties();
+
+        return [
+            'items' => (new ArrayType)->items($itemSchema)->required(),
+        ];
     }
 
     public function generate(MealPlan $mealPlan): GroceryListData
@@ -71,12 +97,9 @@ final class GroceryListGeneratorAgent implements Agent
         }
 
         $prompt = $this->buildPrompt($ingredients, $mealPlan);
-        $jsonText = $this->generateGroceryListJson($prompt);
-        $cleanedJsonText = JsonCleaner::extractAndValidateJson($jsonText);
+        $data = $this->generateStructuredGroceryList($prompt);
 
-        /** @var array{items: array<int, array{name: string, quantity: string, category: string}>} $data */
-        $data = json_decode($cleanedJsonText, true, 512, JSON_THROW_ON_ERROR);
-
+        /** @var array{items: array<int, array{name: string, quantity: string, category: string, days: array<int>}>} $data */
         return GroceryListData::from($data);
     }
 
@@ -135,7 +158,7 @@ final class GroceryListGeneratorAgent implements Agent
             LANGUAGE:
             Write each item's "name" and "quantity" in {$language} (language code: `{$languageCode}`).
             The "category" value MUST stay in English and match one of the canonical categories (Produce, Dairy, Meat & Seafood, Pantry, Frozen, Bakery, Beverages, Condiments & Sauces, Herbs & Spices, Other).
-            JSON keys ("name", "quantity", "category", "days") always stay in English.
+            Structured field names ("name", "quantity", "category", "days") always stay in English.
             Do NOT mix languages within an item's name or quantity.
 
             INGREDIENTS FROM MEAL PLAN:
@@ -148,15 +171,20 @@ final class GroceryListGeneratorAgent implements Agent
             4. Categorize each item appropriately (English category name)
             5. Track which days each ingredient is used in the "days" array (use the Day numbers from above)
 
-            Return a JSON object with an "items" array containing consolidated grocery items.
+            Return an "items" array containing consolidated grocery items.
             Each item must include a "days" array with the day numbers where it is used.
             PROMPT;
     }
 
-    private function generateGroceryListJson(string $prompt): string
+    /**
+     * @return array{items: array<int, array{name: string, quantity: string, category: string, days: array<int>}>}
+     */
+    private function generateStructuredGroceryList(string $prompt): array
     {
+        /** @var StructuredAgentResponse $response */
         $response = $this->prompt($prompt);
 
-        return (string) $response;
+        /** @var array{items: array<int, array{name: string, quantity: string, category: string, days: array<int>}>} */
+        return $response->toArray();
     }
 }

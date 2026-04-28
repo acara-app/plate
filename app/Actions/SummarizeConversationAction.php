@@ -9,7 +9,6 @@ use App\Models\Conversation;
 use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Utilities\ConfigHelper;
-use App\Utilities\JsonCleaner;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -33,11 +32,11 @@ final readonly class SummarizeConversationAction
 
             $previousSummary = ConversationSummary::getLatestForConversation($conversation->id);
             $conversationText = $this->formatMessages($messages);
-            $rawResponse = $this->agent->summarize($conversationText, $previousSummary);
-            $cleanedJson = JsonCleaner::extractAndValidateJson($rawResponse);
+            $summaryData = $this->agent->summarize($conversationText, $previousSummary);
 
-            /** @var array{summary: string, topics: array<string>, key_facts: array<string>, unresolved_threads: array<string>, resolved_threads: array<string>} $summaryData */
-            $summaryData = json_decode($cleanedJson, true, 512, JSON_THROW_ON_ERROR);
+            if (! $this->hasRequiredSummary($summaryData)) {
+                return null;
+            }
 
             return $this->createSummary($conversation, $messages, $summaryData, $previousSummary);
         } catch (Throwable) {
@@ -91,6 +90,14 @@ final readonly class SummarizeConversationAction
         return $messages
             ->map(fn (History $m): string => sprintf('[%s] %s: %s', $m->created_at->format('M j, g:ia'), $m->role->value, $m->content))
             ->join("\n\n");
+    }
+
+    /**
+     * @param  array<string, mixed>  $summaryData
+     */
+    private function hasRequiredSummary(array $summaryData): bool
+    {
+        return is_string($summaryData['summary'] ?? null) && $summaryData['summary'] !== '';
     }
 
     /**

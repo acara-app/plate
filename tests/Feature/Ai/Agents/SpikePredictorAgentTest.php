@@ -123,12 +123,14 @@ it('predicts medium spike risk for moderate glycemic foods', function (): void {
         ->estimatedGlycemicLoad->toBe(28);
 });
 
-it('handles json response with markdown code blocks', function (): void {
-    SpikePredictorAgent::fake([
-        '```json
-{"risk_level": "high", "estimated_gl": 50, "explanation": "Sugary soda causes rapid glucose spike.", "smart_fix": "Switch to sparkling water with lemon.", "spike_reduction_percentage": 35}
-```',
-    ]);
+it('maps structured output into spike prediction data', function (): void {
+    SpikePredictorAgent::fake([[
+        'risk_level' => 'high',
+        'estimated_gl' => 50,
+        'explanation' => 'Sugary soda causes rapid glucose spike.',
+        'smart_fix' => 'Switch to sparkling water with lemon.',
+        'spike_reduction_percentage' => 35,
+    ]]);
 
     $agent = new SpikePredictorAgent;
     $result = $agent->predict('can of soda');
@@ -137,10 +139,3 @@ it('handles json response with markdown code blocks', function (): void {
         ->toBeInstanceOf(SpikePredictionData::class)
         ->riskLevel->toBe(SpikeRiskLevel::High);
 });
-
-it('throws exception for invalid json response', function (): void {
-    SpikePredictorAgent::fake(['This is not valid JSON']);
-
-    $agent = new SpikePredictorAgent;
-    $agent->predict('some food');
-})->throws(InvalidArgumentException::class);

@@ -49,7 +49,8 @@
             }
         </style>
 
-        <title inertia>Acara Plate</title>
+        <title inertia>{{ config('app.name') }}</title>
+        @inertiaHead
 
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicons/favicon-32x32.png" type="image/png">
@@ -62,7 +63,6 @@
 
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
-        @inertiaHead
     </head>
     <body class="font-sans antialiased">
         @inertia

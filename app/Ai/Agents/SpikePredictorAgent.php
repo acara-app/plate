@@ -7,17 +7,21 @@ namespace App\Ai\Agents;
 use App\Ai\SystemPrompt;
 use App\Contracts\Ai\PredictsGlucoseSpikes;
 use App\Data\SpikePredictionData;
-use App\Utilities\JsonCleaner;
+use App\Enums\SpikeRiskLevel;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
+use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[Provider('openai')]
 #[MaxTokens(2000)]
 #[Timeout(120)]
-final class SpikePredictorAgent implements Agent, PredictsGlucoseSpikes
+final class SpikePredictorAgent implements Agent, HasStructuredOutput, PredictsGlucoseSpikes
 {
     use Promptable;
 
@@ -36,27 +40,19 @@ final class SpikePredictorAgent implements Agent, PredictsGlucoseSpikes
     public function instructions(): string
     {
         $output = [
-            'Your response MUST be valid JSON and ONLY JSON',
-            'Start your response with { and end with }',
-            'Do NOT include markdown code blocks (no ```json)',
-            '',
-            'Return format:',
-            '{',
-            '  "risk_level": "low|medium|high",',
-            '  "estimated_gl": number (0-100),',
-            '  "explanation": "string explaining WHY (for comparisons: compare both foods)",',
-            '  "smart_fix": "string (for comparisons: recommend the winner; for single: practical tip)",',
-            '  "spike_reduction_percentage": number (10-60)',
-            '}',
-            '',
+            'Return the structured response requested by the schema.',
+            'risk_level must be exactly one of: "low", "medium", or "high".',
+            'estimated_gl must be a whole number from 0 to 100.',
+            'spike_reduction_percentage must be a whole number from 0 to 100.',
+            'explanation should explain WHY; for comparisons, compare both foods.',
+            'smart_fix should be a practical tip for single foods and recommend the winner for comparisons.',
             'For COMPARISONS: explanation should compare both foods GI/GL, smart_fix should clearly state which is better',
-            'risk_level must be exactly one of: "low", "medium", or "high"',
             'Keep responses concise but informative',
         ];
 
         if ($this->language !== null && $this->languageCode !== null) {
             $output[] = sprintf(
-                'Write `explanation` and `smart_fix` in %s (language code: `%s`). JSON keys, the `risk_level` enum value, and numeric fields stay in English. Use natural, idiomatic terms in %s — do not transliterate from English.',
+                'Write `explanation` and `smart_fix` in %s (language code: `%s`). Structured field names, the `risk_level` enum value, and numeric fields stay in English. Use natural, idiomatic terms in %s — do not transliterate from English.',
                 $this->language,
                 $this->languageCode,
                 $this->language,
@@ -85,17 +81,27 @@ final class SpikePredictorAgent implements Agent, PredictsGlucoseSpikes
         );
     }
 
+    /**
+     * @return array<string, Type>
+     */
+    public function schema(JsonSchema $schema): array
+    {
+        return [
+            'risk_level' => $schema->string()->enum(SpikeRiskLevel::class)->required(),
+            'estimated_gl' => $schema->integer()->min(0)->max(100)->required(),
+            'explanation' => $schema->string()->required(),
+            'smart_fix' => $schema->string()->required(),
+            'spike_reduction_percentage' => $schema->integer()->min(0)->max(100)->required(),
+        ];
+    }
+
     public function predict(string $food): SpikePredictionData
     {
         $prompt = sprintf('Analyze this food for glucose spike risk: "%s"', $food);
 
+        /** @var StructuredAgentResponse $response */
         $response = $this->prompt($prompt);
 
-        $cleanedJsonText = JsonCleaner::extractAndValidateJson((string) $response);
-
-        /** @var array<string, mixed> $data */
-        $data = json_decode($cleanedJsonText, true, 512, JSON_THROW_ON_ERROR);
-
-        return SpikePredictionData::from([...$data, 'food' => $food]);
+        return SpikePredictionData::from([...$response->toArray(), 'food' => $food]);
     }
 }

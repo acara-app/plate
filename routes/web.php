@@ -26,6 +26,11 @@ Route::livewire('/tools/snap-to-track', 'pages::snap-to-track')->name('snap-to-t
 Route::livewire('/tools/usda-daily-servings-calculator', 'pages::usda-daily-servings-calculator')->name('usda-servings-calculator');
 Route::livewire('/tools/telegram-health-logging', 'pages::telegram-health-logging')->name('telegram-health-logging');
 
+Route::get('/tools/caffeine-calculator', [Web\CaffeineCalculatorController::class, 'create'])->name('caffeine-calculator');
+Route::post('/tools/caffeine-calculator/plan', [Web\CaffeineCalculatorController::class, 'plan'])
+    ->middleware('throttle:10,1')
+    ->name('caffeine-calculator.plan');
+
 Route::get('/tools/health-sync', [Web\HealthSyncPageController::class, 'index'])->name('health-sync');
 Route::get('/tools/health-sync/setup', [Web\HealthSyncPageController::class, 'setup'])->name('health-sync.setup');
 

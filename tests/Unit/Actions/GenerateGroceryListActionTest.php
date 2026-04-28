@@ -75,9 +75,12 @@ it('deletes existing grocery list before creating placeholder', function (): voi
 });
 
 it('generates items for grocery list successfully', function (): void {
-    GroceryListGeneratorAgent::fake([
-        '{"items": [{"name": "Chicken Breast", "quantity": "2 lbs", "category": "Meat & Seafood"}, {"name": "Olive Oil", "quantity": "2 tbsp", "category": "Condiments & Sauces"}]}',
-    ]);
+    GroceryListGeneratorAgent::fake([[
+        'items' => [
+            ['name' => 'Chicken Breast', 'quantity' => '2 lbs', 'category' => 'Meat & Seafood', 'days' => [1]],
+            ['name' => 'Olive Oil', 'quantity' => '2 tbsp', 'category' => 'Condiments & Sauces', 'days' => [1]],
+        ],
+    ]]);
 
     Meal::factory()->for($this->mealPlan)->create([
         'ingredients' => [
@@ -110,9 +113,9 @@ it('generates items for grocery list successfully', function (): void {
 });
 
 it('generates items with no ingredients returns empty list', function (): void {
-    GroceryListGeneratorAgent::fake([
-        '{"items": []}',
-    ]);
+    GroceryListGeneratorAgent::fake([[
+        'items' => [],
+    ]]);
 
     $groceryList = GroceryList::factory()
         ->for($this->mealPlan)
@@ -129,7 +132,7 @@ it('generates items with no ingredients returns empty list', function (): void {
 
 it('handles generation failure gracefully', function (): void {
     GroceryListGeneratorAgent::fake(function (): void {
-        throw new Exception('Invalid JSON response');
+        throw new Exception('AI response failed');
     });
 
     Meal::factory()->for($this->mealPlan)->create([
@@ -152,9 +155,11 @@ it('handles generation failure gracefully', function (): void {
 });
 
 it('handles full generation with handle method', function (): void {
-    GroceryListGeneratorAgent::fake([
-        '{"items": [{"name": "Eggs", "quantity": "12", "category": "Dairy"}]}',
-    ]);
+    GroceryListGeneratorAgent::fake([[
+        'items' => [
+            ['name' => 'Eggs', 'quantity' => '12', 'category' => 'Dairy', 'days' => [1]],
+        ],
+    ]]);
 
     Meal::factory()->for($this->mealPlan)->create([
         'ingredients' => [

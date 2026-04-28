@@ -35,7 +35,7 @@ it('returns instructions with grocery list guidance', function (): void {
     expect($instructions)
         ->toContain('grocery list optimizer')
         ->toContain('consolidate ingredients')
-        ->toContain('valid JSON')
+        ->toContain('structured format')
         ->toContain('Produce')
         ->toContain('Dairy')
         ->toContain('Meat & Seafood');
@@ -105,8 +105,8 @@ it('defaults grocery prompt language to english when user has none', function ()
 it('generates grocery list from meal plan with ingredients', function (): void {
     $mockResponse = [
         'items' => [
-            ['name' => 'Chicken Breast', 'quantity' => '2 lbs', 'category' => 'Meat & Seafood'],
-            ['name' => 'Olive Oil', 'quantity' => '2 tbsp', 'category' => 'Condiments & Sauces'],
+            ['name' => 'Chicken Breast', 'quantity' => '2 lbs', 'category' => 'Meat & Seafood', 'days' => [1]],
+            ['name' => 'Olive Oil', 'quantity' => '2 tbsp', 'category' => 'Condiments & Sauces', 'days' => [1]],
         ],
     ];
 
@@ -170,8 +170,8 @@ it('returns empty list when meals have empty ingredients array', function (): vo
 it('extracts ingredients from multiple meals', function (): void {
     $mockResponse = [
         'items' => [
-            ['name' => 'Eggs', 'quantity' => '18', 'category' => 'Dairy'],
-            ['name' => 'Bread', 'quantity' => '1 loaf', 'category' => 'Bakery'],
+            ['name' => 'Eggs', 'quantity' => '18', 'category' => 'Dairy', 'days' => [1, 2, 3]],
+            ['name' => 'Bread', 'quantity' => '1 loaf', 'category' => 'Bakery', 'days' => [2]],
         ],
     ];
 
@@ -209,10 +209,10 @@ it('extracts ingredients from multiple meals', function (): void {
     expect($result->items)->toHaveCount(2);
 });
 
-it('handles json with markdown code blocks', function (): void {
+it('maps structured output into grocery list data', function (): void {
     $mockResponse = [
         'items' => [
-            ['name' => 'Rice', 'quantity' => '2 cups', 'category' => 'Pantry'],
+            ['name' => 'Rice', 'quantity' => '2 cups', 'category' => 'Pantry', 'days' => [1]],
         ],
     ];
 

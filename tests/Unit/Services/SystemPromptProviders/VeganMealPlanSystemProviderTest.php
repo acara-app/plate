@@ -43,8 +43,8 @@ it('includes output instructions', function (): void {
 
     expect($result)
         ->toContain('OUTPUT INSTRUCTIONS')
-        ->and($result)->toContain('valid JSON and ONLY JSON')
-        ->and($result)->toContain('json_decode()');
+        ->and($result)->toContain('structured response requested by the schema')
+        ->and($result)->toContain('correctly typed nutrition values');
 });
 
 it('includes tools usage rules', function (): void {

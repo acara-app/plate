@@ -56,6 +56,35 @@ it('metadata is nullable', function (): void {
     expect($attribute->metadata)->toBeNull();
 });
 
+it('scopes dietary preferences', function (): void {
+    $profile = UserProfile::factory()->create();
+
+    UserProfileAttribute::factory()->allergy('Peanuts')->create([
+        'user_profile_id' => $profile->id,
+    ]);
+    UserProfileAttribute::factory()->dietaryPattern('Vegetarian')->create([
+        'user_profile_id' => $profile->id,
+    ]);
+    UserProfileAttribute::factory()->healthCondition('Type 2 Diabetes')->create([
+        'user_profile_id' => $profile->id,
+    ]);
+    UserProfileAttribute::factory()->medication('Metformin')->create([
+        'user_profile_id' => $profile->id,
+    ]);
+
+    $categories = UserProfileAttribute::query()
+        ->whereBelongsTo($profile)
+        ->dietaryPreferences()
+        ->get()
+        ->pluck('category')
+        ->all();
+
+    expect($categories)
+        ->toHaveCount(2)
+        ->toContain(UserProfileAttributeCategory::Allergy)
+        ->toContain(UserProfileAttributeCategory::DietaryPattern);
+});
+
 it('factory creates valid allergy', function (): void {
     $attribute = UserProfileAttribute::factory()->allergy('Shellfish', AllergySeverity::Moderate)->create();
 

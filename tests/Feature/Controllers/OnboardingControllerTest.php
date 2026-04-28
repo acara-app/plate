@@ -411,6 +411,7 @@ it('renders dietary preferences page', function (): void {
         ->assertInertia(fn ($page) => $page
             ->component('onboarding/dietary-preferences')
             ->has('categories')
+            ->where('categories.2.value', UserProfileAttributeCategory::DietaryPattern->value)
             ->has('severityOptions')
         );
 });
@@ -448,6 +449,41 @@ it('may store dietary preferences with allergies and complete onboarding', funct
     expect($profile->attributes)->toHaveCount(2)
         ->and($profile->attributes->first()->value)->toBe('Peanuts')
         ->and($profile->attributes->first()->severity)->toBe(AllergySeverity::Severe);
+});
+
+it('deduplicates repeated dietary preferences when completing onboarding', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([]);
+
+    $response = $this->actingAs($user)
+        ->post(route('onboarding.dietary.store'), [
+            'attributes' => [
+                [
+                    'category' => UserProfileAttributeCategory::Allergy->value,
+                    'value' => 'Vegetarian',
+                    'severity' => AllergySeverity::Mild->value,
+                    'notes' => 'User follows a vegetarian diet.',
+                ],
+                [
+                    'category' => UserProfileAttributeCategory::Allergy->value,
+                    'value' => 'Vegetarian',
+                    'severity' => AllergySeverity::Mild->value,
+                    'notes' => 'User follows a vegetarian diet.',
+                ],
+            ],
+        ]);
+
+    $response->assertRedirectToRoute('dashboard');
+
+    $profile = $user->profile()->first();
+    $attribute = $profile->attributes()->sole();
+
+    expect($profile)
+        ->onboarding_completed->toBeTrue()
+        ->attributes->toHaveCount(1);
+
+    expect($attribute->value)->toBe('Vegetarian')
+        ->and($attribute->notes)->toBe('User follows a vegetarian diet.');
 });
 
 it('may skip dietary preferences and complete onboarding', function (): void {

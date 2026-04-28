@@ -16,6 +16,7 @@ use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Promptable;
+use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[Provider('gemini')]
 #[MaxTokens(35000)]
@@ -49,7 +50,7 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
 
         if ($this->language !== null && $this->languageCode !== null) {
             $output[] = sprintf(
-                'Return all `name` and `portion` values in %s (language code: `%s`). Numeric fields and JSON keys stay as-is. Use natural, idiomatic terms in %s — do not transliterate from English.',
+                'Return all `name` and `portion` values in %s (language code: `%s`). Numeric fields and structured field names stay as-is. Use natural, idiomatic terms in %s — do not transliterate from English.',
                 $this->language,
                 $this->languageCode,
                 $this->language,
@@ -81,13 +82,13 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
     public function schema(JsonSchema $schema): array
     {
         $foodItemSchema = new ObjectType([
-            'name' => $schema->string(),
-            'calories' => $schema->number(),
-            'protein' => $schema->number(),
-            'carbs' => $schema->number(),
-            'fat' => $schema->number(),
-            'portion' => $schema->string(),
-        ]);
+            'name' => $schema->string()->required(),
+            'calories' => $schema->number()->required(),
+            'protein' => $schema->number()->required(),
+            'carbs' => $schema->number()->required(),
+            'fat' => $schema->number()->required(),
+            'portion' => $schema->string()->required(),
+        ])->withoutAdditionalProperties();
 
         return [
             'items' => $schema->array()->items($foodItemSchema)->required(),
@@ -101,6 +102,7 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
 
     public function analyze(string $imageBase64, string $mimeType): FoodAnalysisData
     {
+        /** @var StructuredAgentResponse $response */
         $response = $this->prompt(
             'Analyze this food photo and provide nutritional breakdown for all food items visible.',
             attachments: [
@@ -109,7 +111,7 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
         );
 
         /** @var array<string, mixed> $data */
-        $data = json_decode((string) json_encode($response), true);
+        $data = $response->toArray();
 
         return FoodAnalysisData::from($data);
     }

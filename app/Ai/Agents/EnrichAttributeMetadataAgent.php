@@ -50,7 +50,7 @@ final class EnrichAttributeMetadataAgent implements Agent, HasStructuredOutput
 
         if ($this->language !== null && $this->languageCode !== null) {
             $output[] = sprintf(
-                'Write `dietary_rules`, `foods_to_avoid`, `foods_to_prioritize`, `hidden_sources`, `requirements`, and `general_advice` values in %s (language code: `%s`). The `safety_level` enum value and numeric fields stay in English. JSON keys always stay in English. Use natural, idiomatic terms in %s — do not transliterate from English.',
+                'Write `dietary_rules`, `foods_to_avoid`, `foods_to_prioritize`, `hidden_sources`, `requirements`, and `general_advice` values in %s (language code: `%s`). The `safety_level` enum value, structured field names, and numeric fields stay in English. Use natural, idiomatic terms in %s — do not transliterate from English.',
                 $this->language,
                 $this->languageCode,
                 $this->language,
@@ -80,14 +80,14 @@ final class EnrichAttributeMetadataAgent implements Agent, HasStructuredOutput
     {
         return [
             'safety_level' => $schema->string()->enum(['critical', 'warning', 'info'])->required(),
-            'dietary_rules' => new ArrayType()->items($schema->string())->description('List of dietary rules or guidelines to follow'),
-            'foods_to_avoid' => new ArrayType()->items($schema->string())->description('List of foods that should be avoided'),
-            'foods_to_prioritize' => new ArrayType()->items($schema->string())->description('List of foods that should be prioritized'),
-            'carb_limit_per_meal_g' => $schema->integer()->description('Maximum carbohydrates per meal in grams (for diabetes-related conditions)'),
-            'min_fibre_per_meal_g' => $schema->integer()->description('Minimum fiber per meal in grams'),
-            'hidden_sources' => new ArrayType()->items($schema->string())->description('Common hidden sources of allergens in processed foods'),
-            'requirements' => new ArrayType()->items($schema->string())->description('Requirements for religious/cultural dietary restrictions'),
-            'general_advice' => $schema->string()->description('General dietary advice or notes'),
+            'dietary_rules' => (new ArrayType)->items($schema->string())->nullable()->required()->description('List of dietary rules or guidelines to follow'),
+            'foods_to_avoid' => (new ArrayType)->items($schema->string())->nullable()->required()->description('List of foods that should be avoided'),
+            'foods_to_prioritize' => (new ArrayType)->items($schema->string())->nullable()->required()->description('List of foods that should be prioritized'),
+            'carb_limit_per_meal_g' => $schema->integer()->nullable()->required()->description('Maximum carbohydrates per meal in grams (for diabetes-related conditions)'),
+            'min_fibre_per_meal_g' => $schema->integer()->nullable()->required()->description('Minimum fiber per meal in grams'),
+            'hidden_sources' => (new ArrayType)->items($schema->string())->nullable()->required()->description('Common hidden sources of allergens in processed foods'),
+            'requirements' => (new ArrayType)->items($schema->string())->nullable()->required()->description('Requirements for religious/cultural dietary restrictions'),
+            'general_advice' => $schema->string()->nullable()->required()->description('General dietary advice or notes'),
         ];
     }
 

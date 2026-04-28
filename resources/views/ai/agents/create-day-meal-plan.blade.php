@@ -312,10 +312,9 @@ Ingredients MUST be returned as a structured array of objects, NOT as text strin
 
 ## Output Format
 
-**CRITICAL: Return ONLY valid JSON. No markdown code blocks, no preambles like "Here is the JSON:", no explanations.**
-**Start directly with `{` and end with `}`. The response must be parseable by json_decode().**
+Return the requested structured meal plan fields. The schema controls the exact response shape, field names, and value types.
 
-### Required JSON Structure:
+### Required Structure:
 
 ```json
 {
