@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 return [
-    'page_title' => 'Caffeine Calculator: Find Your Daily Limit',
+    'page_title' => 'Coffee Caffeine Calculator: Find Your Daily Limit',
     'meta_description' => 'Estimate a daily caffeine limit based on your weight, age, sensitivity, and health context.',
     'meta_keywords' => 'caffeine calculator, how much caffeine is too much, caffeine limit by weight, caffeine sensitivity, EFSA caffeine guideline',
-    'tagline' => 'Daily caffeine guide',
-    'heading' => 'Find your personal caffeine limit',
+    'tagline' => 'Coffee Caffeine Calculator',
+    'heading' => 'Your personal caffeine limit',
     'subheading' => 'Answer a few quick questions to get a daily limit in milligrams, plus guidance that fits your routine, sleep, and health context.',
     'unit_toggle_metric' => 'Use ft/in + lb',
     'unit_toggle_imperial' => 'Use cm + kg',

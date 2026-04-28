@@ -292,7 +292,7 @@ export default function CaffeineCalculator() {
                                 <p className="text-sm font-semibold text-emerald-700 uppercase dark:text-emerald-300">
                                     {t('tagline')}
                                 </p>
-                                <h1 className="text-3xl leading-tight font-bold tracking-tight md:text-4xl">
+                                <h1 className="text-3xl leading-tight font-bold tracking-tight md:text-3xl">
                                     {t('heading')}
                                 </h1>
                                 <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
