@@ -17,7 +17,7 @@ final readonly class BuildCaffeineGuidanceSpec
             'root' => [
                 'type' => 'Stack',
                 'props' => (object) [],
-                'children' => ['verdict', 'gauge', 'guidance'],
+                'children' => ['verdict', 'gauge', 'drinks', 'guidance'],
             ],
             'verdict' => [
                 'type' => 'VerdictCard',
@@ -29,6 +29,13 @@ final readonly class BuildCaffeineGuidanceSpec
                 'props' => $guidance->limitGauge,
                 'children' => [],
             ],
+            'drinks' => [
+                'type' => 'DrinkSizeGrid',
+                'props' => [
+                    'limit_mg' => $guidance->limitGauge['limit_mg'] ?? null,
+                ],
+                'children' => [],
+            ],
             'guidance' => [
                 'type' => 'GuidanceList',
                 'props' => $guidance->guidanceList,
@@ -36,11 +43,12 @@ final readonly class BuildCaffeineGuidanceSpec
             ],
         ];
 
-        if ($guidance->contextNote !== null) {
-            $elements['root']['children'][] = 'context';
-            $elements['context'] = [
-                'type' => 'ContextNote',
-                'props' => $guidance->contextNote,
+        foreach ($guidance->conditionSections as $index => $section) {
+            $key = "condition_{$index}";
+            $elements['root']['children'][] = $key;
+            $elements[$key] = [
+                'type' => 'ConditionCard',
+                'props' => $section,
                 'children' => [],
             ];
         }

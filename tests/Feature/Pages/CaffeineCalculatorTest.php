@@ -20,7 +20,20 @@ it('returns 200 for the caffeine calculator route without authentication', funct
 it('rejects the assessment endpoint when required inputs are missing', function (): void {
     $this->postJson(route('caffeine-calculator.plan'), [])
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['height_cm', 'sensitivity']);
+        ->assertJsonValidationErrors(['height_cm', 'weight_kg', 'age', 'sex', 'sensitivity']);
+});
+
+it('rejects unknown values in the conditions array', function (): void {
+    $this->postJson(route('caffeine-calculator.plan'), [
+        'height_cm' => 170,
+        'weight_kg' => 70,
+        'age' => 30,
+        'sex' => 'female',
+        'sensitivity' => 'normal',
+        'conditions' => ['evil_condition'],
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['conditions.0']);
 });
 
 it('returns a caffeine guidance spec from the agent', function (): void {
@@ -40,26 +53,26 @@ it('returns a caffeine guidance spec from the agent', function (): void {
                 'limit_mg' => 150,
                 'max_mg' => 400,
                 'tone' => 'amber',
-                'caption' => 'Adjusted from the adult reference limit.',
+                'caption' => 'Adjusted from the EFSA weight-based guideline.',
             ],
             'guidance_list' => [
                 'title' => 'What to do today',
                 'items' => ['Stay below 150 mg.', 'Stop if you feel jittery.'],
-            ],
-            'context_note' => [
-                'title' => 'Context changed the limit',
-                'body' => 'Pregnancy or breastfeeding context lowers the starting ceiling.',
             ],
             'safety_note' => [
                 'title' => 'Safety note',
                 'body' => 'This is educational guidance, not medical advice.',
                 'items' => ['Medication interactions', 'Heart symptoms'],
             ],
+            'condition_sections' => [],
         ],
     ]);
 
     $this->postJson(route('caffeine-calculator.plan'), [
         'height_cm' => 170,
+        'weight_kg' => 70,
+        'age' => 30,
+        'sex' => 'female',
         'sensitivity' => 'normal',
         'context' => 'Breastfeeding',
     ])
@@ -74,5 +87,6 @@ it('returns a caffeine guidance spec from the agent', function (): void {
         ->assertJsonPath('spec.elements.root.type', 'Stack')
         ->assertJsonPath('spec.elements.verdict.type', 'VerdictCard')
         ->assertJsonPath('spec.elements.gauge.type', 'LimitGauge')
+        ->assertJsonPath('spec.elements.drinks.type', 'DrinkSizeGrid')
         ->assertJsonPath('spec.elements.guidance.type', 'GuidanceList');
 });

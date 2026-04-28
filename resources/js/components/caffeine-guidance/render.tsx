@@ -1,6 +1,7 @@
 import { createRenderer } from '@json-render/react';
 import { caffeineGuidanceCatalog } from './catalog';
-import { ContextNote } from './components/context-note';
+import { ConditionCard } from './components/condition-card';
+import { DrinkSizeGrid } from './components/drink-size-grid';
 import { GuidanceList } from './components/guidance-list';
 import { LimitGauge } from './components/limit-gauge';
 import { SafetyNote } from './components/safety-note';
@@ -13,8 +14,9 @@ export const CaffeineGuidanceRenderer = createRenderer(
         Stack: ({ children }) => <Stack>{children}</Stack>,
         VerdictCard: ({ element }) => <VerdictCard props={element.props} />,
         LimitGauge: ({ element }) => <LimitGauge props={element.props} />,
+        DrinkSizeGrid: ({ element }) => <DrinkSizeGrid props={element.props} />,
         GuidanceList: ({ element }) => <GuidanceList props={element.props} />,
-        ContextNote: ({ element }) => <ContextNote props={element.props} />,
+        ConditionCard: ({ element }) => <ConditionCard props={element.props} />,
         SafetyNote: ({ element }) => <SafetyNote props={element.props} />,
     },
 );

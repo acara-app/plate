@@ -1,9 +1,10 @@
-type Tone = 'green' | 'amber' | 'red' | 'slate';
+type Tone = 'green' | 'amber' | 'red' | 'blue' | 'slate';
 
 const BAR_CLASSES: Record<Tone, string> = {
     green: 'bg-emerald-500',
     amber: 'bg-amber-500',
     red: 'bg-red-500',
+    blue: 'bg-sky-500',
     slate: 'bg-slate-500',
 };
 

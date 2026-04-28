@@ -30,8 +30,12 @@ final readonly class CaffeineCalculatorController
         $context = $request->context();
         $limit = resolve(ResolveCaffeineLimit::class)->handle(
             heightCm: $request->heightCm(),
+            weightKg: $request->weightKg(),
+            age: $request->age(),
+            sex: $request->sex(),
             sensitivity: $request->sensitivity(),
             context: $context,
+            conditions: $request->conditions(),
         );
         $guidance = resolve(CaffeineGuidanceAgent::class)->assess(
             limit: $limit,
