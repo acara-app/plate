@@ -6,8 +6,9 @@ namespace App\Models;
 
 use App\Enums\AllergySeverity;
 use App\Enums\UserProfileAttributeCategory;
-use Carbon\CarbonInterface;
 use Database\Factories\UserProfileAttributeFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,6 +24,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read UserProfile $userProfile
+ */
+
+/**
+ * @codeCoverageIgnore
  */
 final class UserProfileAttribute extends Model
 {
@@ -53,7 +58,6 @@ final class UserProfileAttribute extends Model
         return $this->belongsTo(UserProfile::class);
     }
 
-    // @codeCoverageIgnoreStart
     public function getMedicationDosage(): ?string
     {
         return $this->getMetadataString('dosage');
@@ -69,12 +73,19 @@ final class UserProfileAttribute extends Model
         return $this->getMetadataString('purpose');
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function dietaryPreferences(Builder $query): void
+    {
+        $query->whereIn('category', UserProfileAttributeCategory::dietaryPreferenceValues());
+    }
+
     private function getMetadataString(string $key): ?string
     {
         $value = $this->metadata[$key] ?? null;
 
         return is_scalar($value) ? (string) $value : null;
     }
-
-    // @codeCoverageIgnoreEnd
 }

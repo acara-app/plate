@@ -16,10 +16,12 @@ use App\Http\Requests\StoreBiometricsRequest;
 use App\Http\Requests\StoreDietaryPreferencesRequest;
 use App\Http\Requests\StoreIdentityRequest;
 use App\Models\User;
+use App\Models\UserProfileAttribute;
 use App\Services\DietMapper;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -113,12 +115,7 @@ final readonly class OnboardingController
 
         return Inertia::render('onboarding/dietary-preferences', [
             'existingAttributes' => $existingAttributes,
-            'categories' => collect([
-                UserProfileAttributeCategory::Allergy,
-                UserProfileAttributeCategory::Intolerance,
-                UserProfileAttributeCategory::Dislike,
-                UserProfileAttributeCategory::Restriction,
-            ])->map(fn (UserProfileAttributeCategory $cat): array => [
+            'categories' => collect(UserProfileAttributeCategory::dietaryPreferences())->map(fn (UserProfileAttributeCategory $cat): array => [
                 'value' => $cat->value,
                 'label' => $cat->label(),
             ]),
@@ -134,31 +131,39 @@ final readonly class OnboardingController
         $user = $this->user;
         $profile = $user->profile()->firstOrFail();
 
-        $profile->attributes()
-            ->whereIn('category', [
-                UserProfileAttributeCategory::Allergy,
-                UserProfileAttributeCategory::Intolerance,
-                UserProfileAttributeCategory::Dislike,
-                UserProfileAttributeCategory::Restriction,
-            ])
-            ->delete();
+        /** @var array<int, array{category: string, value: string, severity?: string|null, notes?: string|null}> $validatedAttributes */
+        $validatedAttributes = $request->validated('attributes', []);
 
-        /** @var array<int, array{category: string, value: string, severity?: string|null, notes?: string|null}> $attributes */
-        $attributes = $request->validated('attributes', []);
-
-        foreach ($attributes as $attr) {
-            $profile->attributes()->create([
+        $attributes = collect($validatedAttributes)
+            ->map(fn (array $attr): array => [
+                'user_profile_id' => $profile->id,
                 'category' => $attr['category'],
                 'value' => $attr['value'],
                 'severity' => $attr['severity'] ?? null,
                 'notes' => $attr['notes'] ?? null,
-            ]);
-        }
+            ])
+            ->keyBy(fn (array $attr): string => $attr['category'].'|'.$attr['value'])
+            ->values()
+            ->all();
 
-        $profile->update([
-            'onboarding_completed' => true,
-            'onboarding_completed_at' => now(),
-        ]);
+        DB::transaction(function () use ($profile, $attributes): void {
+            $profile->attributes()
+                ->dietaryPreferences()
+                ->delete();
+
+            if ($attributes !== []) {
+                UserProfileAttribute::query()->upsert(
+                    $attributes,
+                    ['user_profile_id', 'category', 'value'],
+                    ['severity', 'notes'],
+                );
+            }
+
+            $profile->update([
+                'onboarding_completed' => true,
+                'onboarding_completed_at' => now(),
+            ]);
+        });
 
         return to_route('dashboard');
     }
