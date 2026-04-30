@@ -27,9 +27,11 @@ final readonly class CaffeineCalculatorController
             'seo' => [
                 'appName' => config('app.name'),
                 'appUrl' => url('/'),
-                'canonicalUrl' => $locale === 'en'
-                    ? route('caffeine-calculator')
-                    : route('caffeine-calculator.locale', ['locale' => $locale]),
+                'canonicalUrl' => $this->getCanonicalUrl($locale),
+                'toolsUrl' => route('tools.index'),
+                'imageUrl' => asset('banner-acara-plate.webp'),
+                'hreflangLinks' => $this->getHreflangLinks('caffeine-calculator', 'caffeine-calculator.locale'),
+                'xDefaultUrl' => $this->getXDefaultUrl('caffeine-calculator'),
             ],
         ]);
     }
@@ -61,5 +63,38 @@ final readonly class CaffeineCalculatorController
             'limit' => $limit->toArray(),
             'spec' => $spec,
         ]);
+    }
+
+    private function getXDefaultUrl(string $enRoute): string
+    {
+        return route($enRoute);
+    }
+
+    /**
+     * @return array<int, array{locale: string, url: string}>
+     */
+    private function getHreflangLinks(string $enRoute, string $localeRoute): array
+    {
+        $links = [];
+
+        foreach (LanguageUtil::keys() as $hrefLocale) {
+            $links[] = [
+                'locale' => $hrefLocale,
+                'url' => $hrefLocale === 'en'
+                    ? route($enRoute)
+                    : route($localeRoute, ['locale' => $hrefLocale]),
+            ];
+        }
+
+        return $links;
+    }
+
+    private function getCanonicalUrl(string $locale): string
+    {
+        if ($locale === 'en') {
+            return route('caffeine-calculator');
+        }
+
+        return route('caffeine-calculator.locale', ['locale' => $locale]);
     }
 }

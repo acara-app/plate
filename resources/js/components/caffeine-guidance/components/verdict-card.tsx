@@ -7,7 +7,7 @@ const TONE_CLASSES: Record<Tone, string> = {
     amber: 'border-amber-200 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-50',
     red: 'border-red-200 bg-red-50 text-red-950 dark:border-red-900 dark:bg-red-950/40 dark:text-red-50',
     blue: 'border-sky-200 bg-sky-50 text-sky-950 dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-50',
-    slate: 'border-slate-200 bg-slate-50 text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50',
+    slate: 'border-gray-200 bg-gray-50 text-gray-950 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-50',
 };
 
 export function VerdictCard({
@@ -25,7 +25,7 @@ export function VerdictCard({
 
     return (
         <section
-            className={`rounded-2xl border p-5 shadow-sm ${TONE_CLASSES[props.tone] ?? TONE_CLASSES.slate}`}
+            className={`rounded-xl border p-5 shadow-none ${TONE_CLASSES[props.tone] ?? TONE_CLASSES.slate}`}
         >
             <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-2">

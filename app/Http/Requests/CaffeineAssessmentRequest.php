@@ -101,11 +101,18 @@ final class CaffeineAssessmentRequest extends FormRequest
     /**
      * @return array<int, string>
      */
+    /**
+     * @return array<int, string>
+     */
     public function conditions(): array
     {
         $conditions = $this->validated('conditions');
 
-        return is_array($conditions) ? $conditions : [];
+        if (! is_array($conditions)) {
+            return [];
+        }
+
+        return array_values(array_filter($conditions, is_string(...)));
     }
 
     public function locale(): string

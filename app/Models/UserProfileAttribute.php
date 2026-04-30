@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\AllergySeverity;
 use App\Enums\UserProfileAttributeCategory;
+use Carbon\CarbonInterface;
 use Database\Factories\UserProfileAttributeFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,9 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read UserProfile $userProfile
- */
-
-/**
+ *
  * @codeCoverageIgnore
  */
 final class UserProfileAttribute extends Model

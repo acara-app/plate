@@ -187,11 +187,11 @@ export function DrinkSizeGrid({
     const limit = props.limit_mg ?? DEFAULT_LIMIT_MG;
 
     return (
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
+        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-none dark:border-slate-700 dark:bg-slate-800">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50">
                 {t('drink_grid_title', { limit })}
             </h3>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
                 {t('drink_grid_subtitle')}
             </p>
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -204,30 +204,30 @@ export function DrinkSizeGrid({
                     return (
                         <div
                             key={drink.nameKey}
-                            className="flex flex-col items-center gap-2 rounded-lg border border-slate-100 p-3 text-center dark:border-slate-800"
+                            className="flex flex-col items-center gap-2 rounded-lg border border-gray-100 p-3 text-center dark:border-slate-700"
                         >
-                            <drink.Icon className="size-8 text-slate-700 dark:text-slate-200" />
+                            <drink.Icon className="size-8 text-gray-700 dark:text-slate-300" />
                             <div>
-                                <p className="text-xs font-semibold text-slate-900 dark:text-slate-50">
+                                <p className="text-xs font-semibold text-gray-900 dark:text-gray-50">
                                     {t(drink.nameKey)}
                                 </p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                <p className="text-xs text-gray-500 dark:text-slate-400">
                                     {t(drink.servingKey)} · {drink.ml} ml
                                 </p>
-                                <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                <p className="text-xs font-medium text-gray-700 dark:text-slate-300">
                                     {t('drink_caffeine_amount', {
                                         mg: drink.mg,
                                     })}
                                 </p>
                             </div>
                             <div className="w-full">
-                                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-slate-400">
                                     <span>{percentage}%</span>
                                     <span>
                                         {t('drink_percentage_of_limit')}
                                     </span>
                                 </div>
-                                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-slate-700">
                                     <div
                                         className="h-full rounded-full bg-emerald-500"
                                         style={{ width: `${percentage}%` }}
