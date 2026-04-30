@@ -241,6 +241,7 @@ final readonly class ResolveCaffeineLimit
         if ($matched === []) {
             return 'Context detected';
         }
+
         // @codeCoverageIgnoreEnd
 
         $humanLabels = array_map(
