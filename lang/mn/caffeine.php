@@ -68,4 +68,8 @@ return [
     'drink_percentage_of_limit' => 'таны хязгаар',
     'language_switcher_en' => 'EN',
     'language_switcher_mn' => 'MN',
+    'gauge_your_limit' => 'Таны өдрийн хязгаар',
+    'gauge_general_max' => 'Ерөнхий насанд хүрэгчдийн дээд хэмжээ',
+    'gauge_comparison' => 'Таны мэдээллийн дагуу, таны хязгаар нь ерөнхий насанд хүрэгчдийн дээд хэмжээний ойролцоо :percentage% юм.',
+    'gauge_avoid' => 'Таны мэдээллийн дагуу, кофейн хэрэглэхийг зөвлөхгүй байна.',
 ];

@@ -8,7 +8,6 @@ import type { Spec } from '@json-render/core';
 import {
     Activity,
     Calendar,
-    Coffee,
     LoaderCircle,
     MessageSquareText,
     Ruler,
@@ -286,12 +285,6 @@ export default function CaffeineCalculator() {
                     <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-none dark:border-slate-700 dark:bg-slate-800">
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex items-center gap-3">
-                                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
-                                    <Coffee
-                                        className="size-5"
-                                        aria-hidden="true"
-                                    />
-                                </span>
                                 <div>
                                     <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
                                         {t('tagline')}

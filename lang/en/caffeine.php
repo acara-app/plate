@@ -68,4 +68,8 @@ return [
     'drink_percentage_of_limit' => 'of your limit',
     'language_switcher_en' => 'EN',
     'language_switcher_mn' => 'MN',
+    'gauge_your_limit' => 'Your daily limit',
+    'gauge_general_max' => 'General adult maximum',
+    'gauge_comparison' => 'Based on your profile, your limit is about :percentage% of the general adult maximum.',
+    'gauge_avoid' => 'Based on your profile, caffeine intake is not recommended.',
 ];
