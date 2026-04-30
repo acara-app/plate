@@ -29,14 +29,20 @@ it('builds a json-render spec matching the caffeine guidance catalog', function 
             'title' => 'Next steps',
             'items' => ['Stay under the limit.', 'Choose decaf if symptoms show up.'],
         ],
-        'context_note' => [
-            'title' => 'Context note',
-            'body' => 'Your context changed the wording.',
-        ],
         'safety_note' => [
             'title' => 'Safety note',
             'body' => 'Ask a clinician for medical guidance.',
             'items' => ['Pregnancy', 'Medication interactions'],
+        ],
+        'condition_sections' => [
+            [
+                'condition' => 'anxiety',
+                'title' => 'Anxiety note',
+                'body' => 'Caffeine can worsen anxiety symptoms.',
+                'tone' => 'blue',
+                'link_url' => null,
+                'link_label' => null,
+            ],
         ],
     ]);
 
@@ -44,11 +50,12 @@ it('builds a json-render spec matching the caffeine guidance catalog', function 
 
     expect($spec['root'])->toBe('root')
         ->and($spec['elements']['root']['type'])->toBe('Stack')
-        ->and($spec['elements']['root']['children'])->toBe(['verdict', 'gauge', 'guidance', 'context', 'safety'])
         ->and($spec['elements']['verdict']['type'])->toBe('VerdictCard')
-        ->and($spec['elements']['verdict']['props']['limit_mg'])->toBe(200)
         ->and($spec['elements']['gauge']['type'])->toBe('LimitGauge')
+        ->and($spec['elements']['drinks']['type'])->toBe('DrinkSizeGrid')
+        ->and($spec['elements']['drinks']['props'])->toBe(['limit_mg' => 200])
         ->and($spec['elements']['guidance']['type'])->toBe('GuidanceList')
-        ->and($spec['elements']['context']['type'])->toBe('ContextNote')
-        ->and($spec['elements']['safety']['type'])->toBe('SafetyNote');
+        ->and($spec['elements']['condition_0']['type'])->toBe('ConditionCard')
+        ->and($spec['elements']['safety']['type'])->toBe('SafetyNote')
+        ->and($spec['elements'])->not->toHaveKey('context');
 });
