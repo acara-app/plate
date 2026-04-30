@@ -19,7 +19,7 @@ const TONE_CLASSES: Record<Tone, string> = {
     amber: 'border-amber-200 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-50',
     red: 'border-red-200 bg-red-50 text-red-950 dark:border-red-900 dark:bg-red-950/40 dark:text-red-50',
     blue: 'border-sky-200 bg-sky-50 text-sky-950 dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-50',
-    slate: 'border-slate-200 bg-slate-50 text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50',
+    slate: 'border-gray-200 bg-gray-50 text-gray-950 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-50',
 };
 
 const TONE_ICON_CLASSES: Record<Tone, string> = {
@@ -27,7 +27,7 @@ const TONE_ICON_CLASSES: Record<Tone, string> = {
     amber: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
     red: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
     blue: 'bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300',
-    slate: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+    slate: 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300',
 };
 
 const CONDITION_ICONS: Record<
