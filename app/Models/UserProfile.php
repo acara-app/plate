@@ -50,6 +50,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read float|null $bmr
  * @property-read float|null $tdee
  * @property-read Collection<int, UserProfileAttribute> $attributes
+ * @property-read Collection<int, UserProfileAttribute> $dietaryAttributes
+ * @property-read Collection<int, UserProfileAttribute> $healthConditionAttributes
+ * @property-read Collection<int, UserProfileAttribute> $medicationAttributes
  */
 #[Appends([
     'bmi',
