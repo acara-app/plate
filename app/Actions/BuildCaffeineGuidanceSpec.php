@@ -13,11 +13,20 @@ final readonly class BuildCaffeineGuidanceSpec
      */
     public function handle(CaffeineGuidanceData $guidance): array
     {
+        $children = ['verdict', 'gauge', 'drinks', 'guidance'];
+
+        foreach (($guidance->conditionSections ?? []) as $index => $section) {
+            $children[] = 'condition_'.$index;
+        }
+
+        $children[] = 'safety';
+
+        /** @var array<string, array{type: string, props: array<string, mixed>|object, children: list<string>}> $elements */
         $elements = [
             'root' => [
                 'type' => 'Stack',
                 'props' => (object) [],
-                'children' => ['verdict', 'gauge', 'drinks', 'guidance'],
+                'children' => $children,
             ],
             'verdict' => [
                 'type' => 'VerdictCard',
@@ -44,16 +53,13 @@ final readonly class BuildCaffeineGuidanceSpec
         ];
 
         foreach (($guidance->conditionSections ?? []) as $index => $section) {
-            $key = 'condition_'.$index;
-            $elements['root']['children'][] = $key;
-            $elements[$key] = [
+            $elements['condition_'.$index] = [
                 'type' => 'ConditionCard',
                 'props' => $section,
                 'children' => [],
             ];
         }
 
-        $elements['root']['children'][] = 'safety';
         $elements['safety'] = [
             'type' => 'SafetyNote',
             'props' => $guidance->safetyNote,
