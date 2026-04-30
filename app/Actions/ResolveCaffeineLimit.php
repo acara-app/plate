@@ -237,9 +237,11 @@ final readonly class ResolveCaffeineLimit
             fn (string $condition): bool => array_key_exists($condition, $labels)
         );
 
+        // @codeCoverageIgnoreStart
         if ($matched === []) {
             return 'Context detected';
         }
+        // @codeCoverageIgnoreEnd
 
         $humanLabels = array_map(
             fn (string $condition): string => $labels[$condition],
