@@ -27,6 +27,9 @@ Route::livewire('/tools/usda-daily-servings-calculator', 'pages::usda-daily-serv
 Route::livewire('/tools/telegram-health-logging', 'pages::telegram-health-logging')->name('telegram-health-logging');
 
 Route::get('/tools/caffeine-calculator', [Web\CaffeineCalculatorController::class, 'create'])->name('caffeine-calculator');
+Route::get('/{locale}/tools/caffeine-calculator', [Web\CaffeineCalculatorController::class, 'create'])
+    ->whereIn('locale', ['mn'])
+    ->name('caffeine-calculator.locale');
 Route::post('/tools/caffeine-calculator/plan', [Web\CaffeineCalculatorController::class, 'plan'])
     ->middleware('throttle:10,1')
     ->name('caffeine-calculator.plan');
