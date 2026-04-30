@@ -9,6 +9,9 @@ Acara Plate is an advanced nutrition intelligence engine designed to support hea
 3. **Adherence Tracking**: Monitors patient engagement with prescribed plans and nutritional targets.
 4. **Cross-Platform Accessibility**: Deployed as a Progressive Web App (PWA), enabling native-like installation and offline capabilities on iOS, Android, and desktop environments.
 
+## Public Health Tools
+- **Caffeine Calculator**: `/tools/caffeine-calculator` estimates a daily caffeine limit in milligrams from weight, age, sex, height, self-reported caffeine sensitivity, and caution contexts such as pregnancy, breastfeeding, trying to conceive, anxiety, insomnia, GERD, heart or blood pressure concerns, and medication use. It is also available in Mongolian at `/mn/tools/caffeine-calculator`.
+
 ## Data Domain & Terminology
 
 ### Data Provenance

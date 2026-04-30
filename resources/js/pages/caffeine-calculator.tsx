@@ -7,7 +7,10 @@ import { Head, useHttp, usePage } from '@inertiajs/react';
 import type { Spec } from '@json-render/core';
 import {
     Activity,
+    BookOpen,
     Calendar,
+    ChevronRight,
+    ExternalLink,
     LoaderCircle,
     MessageSquareText,
     Ruler,
@@ -71,6 +74,13 @@ interface CaffeineCalculatorPageProps {
         appName: string;
         appUrl: string;
         canonicalUrl: string;
+        toolsUrl: string;
+        imageUrl: string;
+        hreflangLinks: Array<{
+            locale: string;
+            url: string;
+        }>;
+        xDefaultUrl: string;
     };
     locale: string;
     [key: string]: unknown;
@@ -106,6 +116,44 @@ const SEX_OPTIONS: Array<{
     { value: 'female', labelKey: 'sex_female' },
     { value: 'decline', labelKey: 'sex_decline' },
 ];
+
+const SOURCE_LINKS = [
+    {
+        labelKey: 'seo_source_fda',
+        url: 'https://www.fda.gov/consumers/consumer-updates/spilling-beans-how-much-caffeine-too-much',
+    },
+    {
+        labelKey: 'seo_source_efsa',
+        url: 'https://www.efsa.europa.eu/en/topics/topic/caffeine',
+    },
+    {
+        labelKey: 'seo_source_acog',
+        url: 'https://www.acog.org/womens-health/experts-and-stories/ask-acog/how-much-coffee-can-i-drink-while-pregnant',
+    },
+] as const;
+
+const FAQ_KEYS = [
+    {
+        questionKey: 'seo_faq_safe_amount_question',
+        answerKey: 'seo_faq_safe_amount_answer',
+    },
+    {
+        questionKey: 'seo_faq_estimate_question',
+        answerKey: 'seo_faq_estimate_answer',
+    },
+    {
+        questionKey: 'seo_faq_weight_question',
+        answerKey: 'seo_faq_weight_answer',
+    },
+    {
+        questionKey: 'seo_faq_medical_advice_question',
+        answerKey: 'seo_faq_medical_advice_answer',
+    },
+    {
+        questionKey: 'seo_faq_sensitivity_question',
+        answerKey: 'seo_faq_sensitivity_answer',
+    },
+] as const;
 
 function cmToFtIn(cm: number): { ft: number; inch: number } {
     const totalInches = Math.round(cm / 2.54);
@@ -232,38 +280,120 @@ export default function CaffeineCalculator() {
             ? form.data.height_cm.trim() !== '' &&
               form.data.weight_kg.trim() !== ''
             : form.data.height_ft.trim() !== '' &&
-              form.data.weight_lb.trim() !== '') &&
-        form.data.age.trim() !== '';
+              form.data.weight_lb.trim() !== '') && form.data.age.trim() !== '';
 
     const conditionsError = (form.errors as Record<string, string | undefined>)[
         'conditions.0'
     ];
+    const pageTitle = t('page_title');
+    const metaDescription = t('meta_description');
+    const faqItems = createFaqItems(t);
+    const openGraphLocale = locale === 'mn' ? 'mn_MN' : 'en_US';
+    const alternateOpenGraphLocale = locale === 'mn' ? 'en_US' : 'mn_MN';
 
     return (
         <>
-            <Head title={t('page_title')}>
+            <Head title={pageTitle}>
                 <meta
                     head-key="description"
                     name="description"
-                    content={t('meta_description')}
+                    content={metaDescription}
                 />
                 <meta
                     head-key="keywords"
                     name="keywords"
                     content={t('meta_keywords')}
                 />
-                <script
-                    head-key="caffeine-calculator-web-application"
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{
-                        __html: toJsonLd(createWebApplicationSchema(seo)),
-                    }}
+                <meta
+                    head-key="robots"
+                    name="robots"
+                    content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"
+                />
+                {seo.hreflangLinks.map((link) => (
+                    <link
+                        key={link.locale}
+                        head-key={`alternate-${link.locale}`}
+                        rel="alternate"
+                        hrefLang={link.locale}
+                        href={link.url}
+                    />
+                ))}
+                <link
+                    head-key="alternate-x-default"
+                    rel="alternate"
+                    hrefLang="x-default"
+                    href={seo.xDefaultUrl}
+                />
+                <meta
+                    head-key="og-title"
+                    property="og:title"
+                    content={pageTitle}
+                />
+                <meta
+                    head-key="og-description"
+                    property="og:description"
+                    content={metaDescription}
+                />
+                <meta
+                    head-key="og-url"
+                    property="og:url"
+                    content={seo.canonicalUrl}
+                />
+                <meta head-key="og-type" property="og:type" content="website" />
+                <meta
+                    head-key="og-site-name"
+                    property="og:site_name"
+                    content={seo.appName}
+                />
+                <meta
+                    head-key="og-locale"
+                    property="og:locale"
+                    content={openGraphLocale}
+                />
+                <meta
+                    head-key="og-locale-alternate"
+                    property="og:locale:alternate"
+                    content={alternateOpenGraphLocale}
+                />
+                <meta
+                    head-key="og-image"
+                    property="og:image"
+                    content={seo.imageUrl}
+                />
+                <meta
+                    head-key="twitter-card"
+                    name="twitter:card"
+                    content="summary_large_image"
+                />
+                <meta
+                    head-key="twitter-title"
+                    name="twitter:title"
+                    content={pageTitle}
+                />
+                <meta
+                    head-key="twitter-description"
+                    name="twitter:description"
+                    content={metaDescription}
+                />
+                <meta
+                    head-key="twitter-image"
+                    name="twitter:image"
+                    content={seo.imageUrl}
                 />
                 <script
-                    head-key="caffeine-calculator-faq"
+                    head-key="caffeine-calculator-structured-data"
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{
-                        __html: toJsonLd(createFaqSchema()),
+                        __html: toJsonLd(
+                            createStructuredDataSchema(
+                                seo,
+                                locale ?? 'en',
+                                pageTitle,
+                                metaDescription,
+                                faqItems,
+                                t,
+                            ),
+                        ),
                     }}
                 />
             </Head>
@@ -281,12 +411,14 @@ export default function CaffeineCalculator() {
             `}</style>
 
             <div className="min-h-screen bg-gray-50 px-4 py-6 text-gray-900 md:py-10 dark:bg-slate-900 dark:text-gray-50">
+                <Breadcrumbs seo={seo} />
+
                 <main className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
                     <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-none dark:border-slate-700 dark:bg-slate-800">
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex items-center gap-3">
                                 <div>
-                                    <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+                                    <p className="text-sm font-semibold tracking-wide text-emerald-700 uppercase dark:text-emerald-300">
                                         {t('tagline')}
                                     </p>
                                     <h1 className="text-3xl leading-tight font-bold tracking-tight md:text-4xl">
@@ -519,9 +651,7 @@ export default function CaffeineCalculator() {
                                         placeholder={t('age_placeholder')}
                                         className="h-11 rounded-lg border-gray-200 bg-white pr-14 pl-10 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
                                         aria-invalid={
-                                            form.errors.age
-                                                ? 'true'
-                                                : undefined
+                                            form.errors.age ? 'true' : undefined
                                         }
                                     />
                                     <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
@@ -571,7 +701,7 @@ export default function CaffeineCalculator() {
                                                     )
                                                 }
                                                 className={cn(
-                                                    'rounded-xl border px-3 py-3 text-left transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:ring-2 focus:ring-emerald-500/40',
+                                                    'rounded-xl border px-3 py-3 text-left transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:ring-2 focus:ring-emerald-500/40 focus:outline-none',
                                                     selected
                                                         ? 'border-emerald-500 bg-emerald-50 text-gray-900 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-gray-50'
                                                         : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600',
@@ -620,7 +750,7 @@ export default function CaffeineCalculator() {
                                                     )
                                                 }
                                                 className={cn(
-                                                    'rounded-xl border px-3 py-3 text-left transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:outline-none focus:ring-2 focus:ring-emerald-500/40',
+                                                    'rounded-xl border px-3 py-3 text-left transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:ring-2 focus:ring-emerald-500/40 focus:outline-none',
                                                     selected
                                                         ? 'border-emerald-500 bg-emerald-50 text-gray-900 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-gray-50'
                                                         : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600',
@@ -660,7 +790,7 @@ export default function CaffeineCalculator() {
                                             <label
                                                 key={option.value}
                                                 className={cn(
-                                                    'flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-sm transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus-within:outline-none focus-within:ring-2 focus-within:ring-emerald-500/40',
+                                                    'flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-sm transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus-within:ring-2 focus-within:ring-emerald-500/40 focus-within:outline-none',
                                                     checked
                                                         ? 'border-emerald-500 bg-emerald-50 text-gray-900 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-gray-50'
                                                         : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600',
@@ -720,9 +850,7 @@ export default function CaffeineCalculator() {
                                     maxLength={1000}
                                     className="mt-2 rounded-lg border-gray-200 bg-white text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
                                     aria-invalid={
-                                        form.errors.context
-                                            ? 'true'
-                                            : undefined
+                                        form.errors.context ? 'true' : undefined
                                     }
                                 />
                                 {form.errors.context && (
@@ -735,7 +863,7 @@ export default function CaffeineCalculator() {
                             <button
                                 type="submit"
                                 disabled={!canSubmit || form.processing}
-                                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-6 text-base font-semibold text-white shadow-none transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:bg-emerald-600 active:translate-y-0 active:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-slate-900"
+                                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-6 text-base font-semibold text-white shadow-none transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:bg-emerald-600 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none active:translate-y-0 active:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-slate-900"
                             >
                                 {form.processing ? (
                                     <LoaderCircle
@@ -771,87 +899,286 @@ export default function CaffeineCalculator() {
                         {!form.processing && !form.response && <EmptyResult />}
                     </section>
                 </main>
+
+                <CaffeineSeoSection faqItems={faqItems} />
             </div>
         </>
     );
 }
 
-function createWebApplicationSchema(
-    seo: CaffeineCalculatorPageProps['seo'],
-) {
-    return {
-        '@context': 'https://schema.org',
-        '@type': 'WebApplication',
-        name: 'Caffeine Calculator: Find Your Daily Limit',
-        description:
-            'Free caffeine calculator that estimates a daily limit from your weight, age, sensitivity, and health context.',
-        url: seo.canonicalUrl,
-        applicationCategory: 'HealthApplication',
-        operatingSystem: 'Any',
-        offers: {
-            '@type': 'Offer',
-            price: '0',
-            priceCurrency: 'USD',
-        },
-        author: {
-            '@type': 'Organization',
-            name: seo.appName,
-            url: seo.appUrl,
-        },
-    };
+interface FaqItem {
+    question: string;
+    answer: string;
 }
 
-function createFaqSchema() {
+type Translate = (key: string) => string;
+
+function createStructuredDataSchema(
+    seo: CaffeineCalculatorPageProps['seo'],
+    locale: string,
+    pageTitle: string,
+    metaDescription: string,
+    faqItems: FaqItem[],
+    t: Translate,
+) {
+    const pageId = `${seo.canonicalUrl}#webpage`;
+    const calculatorId = `${seo.canonicalUrl}#calculator`;
+    const faqId = `${seo.canonicalUrl}#faq`;
+    const breadcrumbId = `${seo.canonicalUrl}#breadcrumb`;
+    const language = locale === 'mn' ? 'mn-MN' : 'en-US';
+
     return {
         '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: [
+        '@graph': [
             {
-                '@type': 'Question',
-                name: 'How much caffeine is usually safe in a day?',
-                acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: 'For many healthy adults, up to 400 mg a day is a common reference point. This calculator starts with the EFSA guideline of 3 mg per kg of body weight, then adjusts for age, sex, height, and sensitivity.',
+                '@type': 'WebPage',
+                '@id': pageId,
+                url: seo.canonicalUrl,
+                name: pageTitle,
+                description: metaDescription,
+                inLanguage: language,
+                isPartOf: {
+                    '@type': 'WebSite',
+                    '@id': `${seo.appUrl}#website`,
+                    name: seo.appName,
+                    url: seo.appUrl,
                 },
+                breadcrumb: {
+                    '@id': breadcrumbId,
+                },
+                mainEntity: {
+                    '@id': calculatorId,
+                },
+                citation: createSourceLinks(t).map((source) => ({
+                    '@type': 'CreativeWork',
+                    name: source.label,
+                    url: source.url,
+                })),
             },
             {
-                '@type': 'Question',
-                name: 'What does this calculator use to estimate my limit?',
-                acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: 'It uses weight as the starting point, then fine-tunes the estimate with age, sex, height, sensitivity, and context like pregnancy or breastfeeding.',
+                '@type': 'WebApplication',
+                '@id': calculatorId,
+                name: pageTitle,
+                description: metaDescription,
+                url: seo.canonicalUrl,
+                applicationCategory: 'HealthApplication',
+                operatingSystem: 'Any',
+                isAccessibleForFree: true,
+                inLanguage: language,
+                offers: {
+                    '@type': 'Offer',
+                    price: '0',
+                    priceCurrency: 'USD',
                 },
+                publisher: {
+                    '@type': 'Organization',
+                    name: seo.appName,
+                    url: seo.appUrl,
+                },
+                featureList: [
+                    t('seo_feature_weight'),
+                    t('seo_feature_sensitivity'),
+                    t('seo_feature_context'),
+                ],
             },
             {
-                '@type': 'Question',
-                name: 'Why does weight matter for caffeine?',
-                acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: 'Weight is the most reliable body-size proxy for caffeine tolerance. The European Food Safety Authority uses 3 mg per kg of body weight as a safe daily intake reference.',
+                '@type': 'FAQPage',
+                '@id': faqId,
+                inLanguage: language,
+                mainEntityOfPage: {
+                    '@id': pageId,
                 },
+                mainEntity: faqItems.map((item) => ({
+                    '@type': 'Question',
+                    name: item.question,
+                    acceptedAnswer: {
+                        '@type': 'Answer',
+                        text: item.answer,
+                    },
+                })),
             },
             {
-                '@type': 'Question',
-                name: 'Is this the same as medical advice?',
-                acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: 'No. This tool provides educational guidance only. People who are pregnant, breastfeeding, trying to conceive, taking medications, or managing a health condition should follow clinician guidance.',
-                },
-            },
-            {
-                '@type': 'Question',
-                name: 'Does caffeine hit everyone the same way?',
-                acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: 'No. Weight, age, sex, sensitivity, sleep, medications, health conditions, pregnancy, and breastfeeding can all change how caffeine feels and how much is too much.',
-                },
+                '@type': 'BreadcrumbList',
+                '@id': breadcrumbId,
+                itemListElement: [
+                    {
+                        '@type': 'ListItem',
+                        position: 1,
+                        name: t('breadcrumb_home'),
+                        item: seo.appUrl,
+                    },
+                    {
+                        '@type': 'ListItem',
+                        position: 2,
+                        name: t('breadcrumb_tools'),
+                        item: seo.toolsUrl,
+                    },
+                    {
+                        '@type': 'ListItem',
+                        position: 3,
+                        name: t('breadcrumb_current'),
+                        item: seo.canonicalUrl,
+                    },
+                ],
             },
         ],
     };
 }
 
+function createFaqItems(t: Translate): FaqItem[] {
+    return FAQ_KEYS.map((item) => ({
+        question: t(item.questionKey),
+        answer: t(item.answerKey),
+    }));
+}
+
+function createSourceLinks(t: Translate) {
+    return SOURCE_LINKS.map((source) => ({
+        label: t(source.labelKey),
+        url: source.url,
+    }));
+}
+
 function toJsonLd(data: Record<string, unknown>): string {
     return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
+function Breadcrumbs({ seo }: { seo: CaffeineCalculatorPageProps['seo'] }) {
+    const { t } = useTranslation('caffeine');
+
+    return (
+        <nav
+            aria-label={t('breadcrumb_label')}
+            className="mx-auto mb-4 flex max-w-7xl items-center gap-2 text-sm text-gray-500 lg:px-8 dark:text-slate-400"
+        >
+            <a
+                href={seo.appUrl}
+                className="font-medium text-gray-600 transition hover:text-emerald-700 dark:text-slate-300 dark:hover:text-emerald-300"
+            >
+                {t('breadcrumb_home')}
+            </a>
+            <ChevronRight className="size-4" aria-hidden="true" />
+            <a
+                href={seo.toolsUrl}
+                className="font-medium text-gray-600 transition hover:text-emerald-700 dark:text-slate-300 dark:hover:text-emerald-300"
+            >
+                {t('breadcrumb_tools')}
+            </a>
+            <ChevronRight className="size-4" aria-hidden="true" />
+            <span className="font-semibold text-gray-900 dark:text-gray-50">
+                {t('breadcrumb_current')}
+            </span>
+        </nav>
+    );
+}
+
+function CaffeineSeoSection({ faqItems }: { faqItems: FaqItem[] }) {
+    const { t } = useTranslation('caffeine');
+    const sources = createSourceLinks(t);
+
+    return (
+        <section className="mx-auto mt-8 max-w-7xl lg:px-8">
+            <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+                <article className="rounded-xl border border-gray-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
+                    <p className="text-sm font-semibold tracking-wide text-emerald-700 uppercase dark:text-emerald-300">
+                        {t('seo_guide_label')}
+                    </p>
+                    <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">
+                        {t('seo_guide_heading')}
+                    </h2>
+                    <p className="mt-3 max-w-3xl text-base leading-relaxed text-gray-600 dark:text-slate-400">
+                        {t('seo_guide_summary')}
+                    </p>
+                    <div className="mt-6 grid gap-3 md:grid-cols-3">
+                        <SeoStep
+                            title={t('seo_step_weight_title')}
+                            body={t('seo_step_weight_body')}
+                        />
+                        <SeoStep
+                            title={t('seo_step_context_title')}
+                            body={t('seo_step_context_body')}
+                        />
+                        <SeoStep
+                            title={t('seo_step_sensitivity_title')}
+                            body={t('seo_step_sensitivity_body')}
+                        />
+                    </div>
+                </article>
+
+                <aside className="rounded-xl border border-gray-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
+                    <div className="flex items-center gap-2">
+                        <BookOpen
+                            className="size-5 text-emerald-700 dark:text-emerald-300"
+                            aria-hidden="true"
+                        />
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50">
+                            {t('seo_sources_heading')}
+                        </h2>
+                    </div>
+                    <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-slate-400">
+                        {t('seo_sources_description')}
+                    </p>
+                    <ul className="mt-5 space-y-3">
+                        {sources.map((source) => (
+                            <li key={source.url}>
+                                <a
+                                    href={source.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-900 dark:text-emerald-300 dark:hover:text-emerald-200"
+                                >
+                                    {source.label}
+                                    <ExternalLink
+                                        className="size-3.5"
+                                        aria-hidden="true"
+                                    />
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </aside>
+            </div>
+
+            <section className="mt-6 rounded-xl border border-gray-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
+                <div className="max-w-3xl">
+                    <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">
+                        {t('faq_heading')}
+                    </h2>
+                    <p className="mt-2 text-base leading-relaxed text-gray-600 dark:text-slate-400">
+                        {t('faq_intro')}
+                    </p>
+                </div>
+                <div className="mt-6 grid gap-5 md:grid-cols-2">
+                    {faqItems.map((item) => (
+                        <article
+                            key={item.question}
+                            className="border-t border-gray-200 pt-4 dark:border-slate-700"
+                        >
+                            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-50">
+                                {item.question}
+                            </h3>
+                            <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-slate-400">
+                                {item.answer}
+                            </p>
+                        </article>
+                    ))}
+                </div>
+            </section>
+        </section>
+    );
+}
+
+function SeoStep({ title, body }: { title: string; body: string }) {
+    return (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-slate-700 dark:bg-slate-900">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {title}
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-slate-400">
+                {body}
+            </p>
+        </div>
+    );
 }
 
 function LoadingResult() {
