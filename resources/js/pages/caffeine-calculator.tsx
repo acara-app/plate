@@ -429,19 +429,17 @@ export default function CaffeineCalculator() {
 
                     <main className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
                         <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-none dark:border-slate-700 dark:bg-slate-800">
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="flex items-center gap-3">
-                                    <div>
-                                        <p className="text-sm font-semibold tracking-wide text-emerald-700 uppercase dark:text-emerald-300">
-                                            {t('tagline')}
-                                        </p>
-                                        <h1 className="text-3xl leading-tight font-bold tracking-tight md:text-4xl">
-                                            {t('heading')}
-                                        </h1>
-                                        <p className="mt-2 max-w-xl text-base leading-relaxed text-gray-600 dark:text-slate-400">
-                                            {t('subheading')}
-                                        </p>
-                                    </div>
+                            <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between">
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-semibold tracking-wide text-emerald-700 uppercase dark:text-emerald-300">
+                                        {t('tagline')}
+                                    </p>
+                                    <h1 className="text-2xl leading-tight font-bold tracking-tight text-balance sm:text-3xl md:text-4xl">
+                                        {t('heading')}
+                                    </h1>
+                                    <p className="mt-2 max-w-xl text-base leading-relaxed text-gray-600 dark:text-slate-400">
+                                        {t('subheading')}
+                                    </p>
                                 </div>
                                 <button
                                     type="button"
