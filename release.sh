@@ -84,7 +84,14 @@ echo "Releasing $TAG..."
 echo ""
 
 echo "Installing frontend dependencies..."
-bun install --frozen-lockfile
+PRE_LOCK_HASH=$(git hash-object bun.lock 2>/dev/null || echo "missing")
+bun install
+POST_LOCK_HASH=$(git hash-object bun.lock 2>/dev/null || echo "missing")
+if [ "$PRE_LOCK_HASH" != "$POST_LOCK_HASH" ]; then
+    echo "Error: bun.lock changed during install. Commit the updated lockfile before releasing:" >&2
+    echo "  git add bun.lock && git commit -m 'Update bun.lock' && git push origin $BRANCH" >&2
+    exit 1
+fi
 echo ""
 
 echo "Verifying build..."
