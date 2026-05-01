@@ -3,14 +3,11 @@ import { useTranslation } from 'react-i18next';
 type Tone = 'green' | 'amber' | 'red' | 'blue' | 'slate';
 
 const TONE_BORDER: Record<Tone, string> = {
-    green:
-        'border-emerald-500 bg-emerald-50 text-emerald-950 dark:border-emerald-500 dark:bg-emerald-950/40 dark:text-emerald-50',
-    amber:
-        'border-amber-500 bg-amber-50 text-amber-950 dark:border-amber-500 dark:bg-amber-950/40 dark:text-amber-50',
+    green: 'border-emerald-500 bg-emerald-50 text-emerald-950 dark:border-emerald-500 dark:bg-emerald-950/40 dark:text-emerald-50',
+    amber: 'border-amber-500 bg-amber-50 text-amber-950 dark:border-amber-500 dark:bg-amber-950/40 dark:text-amber-50',
     red: 'border-red-500 bg-red-50 text-red-950 dark:border-red-500 dark:bg-red-950/40 dark:text-red-50',
     blue: 'border-sky-500 bg-sky-50 text-sky-950 dark:border-sky-500 dark:bg-sky-950/40 dark:text-sky-50',
-    slate:
-        'border-gray-500 bg-gray-50 text-gray-950 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-50',
+    slate: 'border-gray-500 bg-gray-50 text-gray-950 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-50',
 };
 
 const TONE_NUMBER: Record<Tone, string> = {
@@ -40,8 +37,7 @@ export function LimitGauge({
             ? 0
             : Math.round((props.limit_mg / props.max_mg) * 100);
 
-    const limitDisplay =
-        props.limit_mg === null ? '0' : String(props.limit_mg);
+    const limitDisplay = props.limit_mg === null ? '0' : String(props.limit_mg);
 
     return (
         <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-none dark:border-slate-700 dark:bg-slate-800">
@@ -62,7 +58,7 @@ export function LimitGauge({
                     >
                         {limitDisplay}
                     </div>
-                    <div className="mt-1 text-xs font-semibold uppercase tracking-wide opacity-75">
+                    <div className="mt-1 text-xs font-semibold tracking-wide uppercase opacity-75">
                         mg / day
                     </div>
                     <div className="mt-2 text-sm font-semibold">
@@ -72,10 +68,10 @@ export function LimitGauge({
 
                 {/* General adult maximum */}
                 <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 text-center dark:border-slate-700 dark:bg-slate-800">
-                    <div className="text-3xl font-bold tabular-nums text-gray-700 md:text-4xl dark:text-slate-300">
+                    <div className="text-3xl font-bold text-gray-700 tabular-nums md:text-4xl dark:text-slate-300">
                         {props.max_mg}
                     </div>
-                    <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-500 opacity-75 dark:text-slate-400">
+                    <div className="mt-1 text-xs font-semibold tracking-wide text-gray-500 uppercase opacity-75 dark:text-slate-400">
                         mg / day
                     </div>
                     <div className="mt-2 text-sm font-semibold text-gray-700 dark:text-slate-300">

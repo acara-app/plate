@@ -1,5 +1,6 @@
 import { plan as planRoute } from '@/actions/App/Http/Controllers/CaffeineCalculatorController';
 import { CaffeineGuidanceRenderer } from '@/components/caffeine-guidance/render';
+import PageHeader from '@/components/page-header';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
@@ -410,497 +411,572 @@ export default function CaffeineCalculator() {
                 }
             `}</style>
 
-            <div className="min-h-screen bg-gray-50 px-4 py-6 text-gray-900 md:py-10 dark:bg-slate-900 dark:text-gray-50">
-                <Breadcrumbs seo={seo} />
+            <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-slate-900 dark:text-gray-50">
+                <PageHeader />
 
-                <main className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
-                    <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-none dark:border-slate-700 dark:bg-slate-800">
-                        <div className="flex items-start justify-between gap-4">
-                            <div className="flex items-center gap-3">
-                                <div>
-                                    <p className="text-sm font-semibold tracking-wide text-emerald-700 uppercase dark:text-emerald-300">
-                                        {t('tagline')}
-                                    </p>
-                                    <h1 className="text-3xl leading-tight font-bold tracking-tight md:text-4xl">
-                                        {t('heading')}
-                                    </h1>
-                                    <p className="mt-2 max-w-xl text-base leading-relaxed text-gray-600 dark:text-slate-400">
-                                        {t('subheading')}
-                                    </p>
-                                </div>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={toggleUnitSystem}
-                                className="shrink-0 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-900 transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] hover:border-emerald-500 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-50 dark:hover:border-emerald-500 dark:hover:bg-emerald-900/30"
-                            >
-                                {unitSystem === 'metric'
-                                    ? t('unit_toggle_metric')
-                                    : t('unit_toggle_imperial')}
-                            </button>
-                        </div>
+                <div className="px-4 py-6 md:py-10">
+                    <Breadcrumbs seo={seo} />
 
-                        <form onSubmit={onSubmit} className="mt-6 space-y-6">
-                            <div>
-                                <label
-                                    htmlFor="height_cm"
-                                    className="text-sm font-semibold text-gray-900 dark:text-gray-50"
-                                >
-                                    {t('height')}
-                                </label>
-                                {unitSystem === 'metric' ? (
-                                    <div className="relative mt-2">
-                                        <Ruler
-                                            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
-                                            aria-hidden="true"
-                                        />
-                                        <Input
-                                            id="height_cm"
-                                            type="number"
-                                            inputMode="numeric"
-                                            min={90}
-                                            max={230}
-                                            value={form.data.height_cm}
-                                            onChange={(event) =>
-                                                form.setData(
-                                                    'height_cm',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder={t(
-                                                'height_cm_placeholder',
-                                            )}
-                                            className="h-11 rounded-lg border-gray-200 bg-white pr-14 pl-10 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
-                                            aria-invalid={
-                                                form.errors.height_cm
-                                                    ? 'true'
-                                                    : undefined
-                                            }
-                                        />
-                                        <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
-                                            cm
-                                        </span>
+                    <main className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
+                        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-none dark:border-slate-700 dark:bg-slate-800">
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div>
+                                        <p className="text-sm font-semibold tracking-wide text-emerald-700 uppercase dark:text-emerald-300">
+                                            {t('tagline')}
+                                        </p>
+                                        <h1 className="text-3xl leading-tight font-bold tracking-tight md:text-4xl">
+                                            {t('heading')}
+                                        </h1>
+                                        <p className="mt-2 max-w-xl text-base leading-relaxed text-gray-600 dark:text-slate-400">
+                                            {t('subheading')}
+                                        </p>
                                     </div>
-                                ) : (
-                                    <div className="mt-2 flex gap-2">
-                                        <div className="relative flex-1">
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={toggleUnitSystem}
+                                    className="shrink-0 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-900 transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] hover:border-emerald-500 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-50 dark:hover:border-emerald-500 dark:hover:bg-emerald-900/30"
+                                >
+                                    {unitSystem === 'metric'
+                                        ? t('unit_toggle_metric')
+                                        : t('unit_toggle_imperial')}
+                                </button>
+                            </div>
+
+                            <form
+                                onSubmit={onSubmit}
+                                className="mt-6 space-y-6"
+                            >
+                                <div>
+                                    <label
+                                        htmlFor="height_cm"
+                                        className="text-sm font-semibold text-gray-900 dark:text-gray-50"
+                                    >
+                                        {t('height')}
+                                    </label>
+                                    {unitSystem === 'metric' ? (
+                                        <div className="relative mt-2">
                                             <Ruler
                                                 className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
                                                 aria-hidden="true"
                                             />
                                             <Input
-                                                id="height_ft"
+                                                id="height_cm"
                                                 type="number"
                                                 inputMode="numeric"
-                                                min={2}
-                                                max={7}
-                                                value={form.data.height_ft}
+                                                min={90}
+                                                max={230}
+                                                value={form.data.height_cm}
                                                 onChange={(event) =>
                                                     form.setData(
-                                                        'height_ft',
+                                                        'height_cm',
                                                         event.target.value,
                                                     )
                                                 }
                                                 placeholder={t(
-                                                    'height_ft_placeholder',
+                                                    'height_cm_placeholder',
                                                 )}
                                                 className="h-11 rounded-lg border-gray-200 bg-white pr-14 pl-10 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
+                                                aria-invalid={
+                                                    form.errors.height_cm
+                                                        ? 'true'
+                                                        : undefined
+                                                }
                                             />
                                             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
-                                                ft
+                                                cm
                                             </span>
                                         </div>
-                                        <div className="relative flex-1">
+                                    ) : (
+                                        <div className="mt-2 flex gap-2">
+                                            <div className="relative flex-1">
+                                                <Ruler
+                                                    className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
+                                                    aria-hidden="true"
+                                                />
+                                                <Input
+                                                    id="height_ft"
+                                                    type="number"
+                                                    inputMode="numeric"
+                                                    min={2}
+                                                    max={7}
+                                                    value={form.data.height_ft}
+                                                    onChange={(event) =>
+                                                        form.setData(
+                                                            'height_ft',
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                    placeholder={t(
+                                                        'height_ft_placeholder',
+                                                    )}
+                                                    className="h-11 rounded-lg border-gray-200 bg-white pr-14 pl-10 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
+                                                />
+                                                <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
+                                                    ft
+                                                </span>
+                                            </div>
+                                            <div className="relative flex-1">
+                                                <Input
+                                                    id="height_in"
+                                                    type="number"
+                                                    inputMode="numeric"
+                                                    min={0}
+                                                    max={11}
+                                                    value={form.data.height_in}
+                                                    onChange={(event) =>
+                                                        form.setData(
+                                                            'height_in',
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                    placeholder={t(
+                                                        'height_in_placeholder',
+                                                    )}
+                                                    className="h-11 rounded-lg border-gray-200 bg-white pr-14 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
+                                                />
+                                                <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
+                                                    in
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {form.errors.height_cm && (
+                                        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                                            {form.errors.height_cm}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label
+                                        htmlFor="weight"
+                                        className="text-sm font-semibold text-gray-900 dark:text-gray-50"
+                                    >
+                                        {t('weight')}
+                                    </label>
+                                    {unitSystem === 'metric' ? (
+                                        <div className="relative mt-2">
+                                            <Weight
+                                                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
+                                                aria-hidden="true"
+                                            />
                                             <Input
-                                                id="height_in"
+                                                id="weight_kg"
                                                 type="number"
                                                 inputMode="numeric"
-                                                min={0}
-                                                max={11}
-                                                value={form.data.height_in}
+                                                min={30}
+                                                max={300}
+                                                value={form.data.weight_kg}
                                                 onChange={(event) =>
                                                     form.setData(
-                                                        'height_in',
+                                                        'weight_kg',
                                                         event.target.value,
                                                     )
                                                 }
                                                 placeholder={t(
-                                                    'height_in_placeholder',
+                                                    'weight_kg_placeholder',
                                                 )}
-                                                className="h-11 rounded-lg border-gray-200 bg-white pr-14 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
+                                                className="h-11 rounded-lg border-gray-200 bg-white pr-14 pl-10 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
+                                                aria-invalid={
+                                                    form.errors.weight_kg
+                                                        ? 'true'
+                                                        : undefined
+                                                }
                                             />
                                             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
-                                                in
+                                                kg
                                             </span>
                                         </div>
-                                    </div>
-                                )}
-                                {form.errors.height_cm && (
-                                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                                        {form.errors.height_cm}
-                                    </p>
-                                )}
-                            </div>
+                                    ) : (
+                                        <div className="relative mt-2">
+                                            <Weight
+                                                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
+                                                aria-hidden="true"
+                                            />
+                                            <Input
+                                                id="weight_lb"
+                                                type="number"
+                                                inputMode="numeric"
+                                                min={66}
+                                                max={660}
+                                                value={form.data.weight_lb}
+                                                onChange={(event) =>
+                                                    form.setData(
+                                                        'weight_lb',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder={t(
+                                                    'weight_lb_placeholder',
+                                                )}
+                                                className="h-11 rounded-lg border-gray-200 bg-white pr-14 pl-10 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
+                                                aria-invalid={
+                                                    form.errors.weight_kg
+                                                        ? 'true'
+                                                        : undefined
+                                                }
+                                            />
+                                            <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
+                                                lb
+                                            </span>
+                                        </div>
+                                    )}
+                                    {form.errors.weight_kg && (
+                                        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                                            {form.errors.weight_kg}
+                                        </p>
+                                    )}
+                                </div>
 
-                            <div>
-                                <label
-                                    htmlFor="weight"
-                                    className="text-sm font-semibold text-gray-900 dark:text-gray-50"
-                                >
-                                    {t('weight')}
-                                </label>
-                                {unitSystem === 'metric' ? (
+                                <div>
+                                    <label
+                                        htmlFor="age"
+                                        className="text-sm font-semibold text-gray-900 dark:text-gray-50"
+                                    >
+                                        {t('age')}
+                                    </label>
                                     <div className="relative mt-2">
-                                        <Weight
+                                        <Calendar
                                             className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
                                             aria-hidden="true"
                                         />
                                         <Input
-                                            id="weight_kg"
+                                            id="age"
                                             type="number"
                                             inputMode="numeric"
-                                            min={30}
-                                            max={300}
-                                            value={form.data.weight_kg}
+                                            min={13}
+                                            max={120}
+                                            value={form.data.age}
                                             onChange={(event) =>
                                                 form.setData(
-                                                    'weight_kg',
+                                                    'age',
                                                     event.target.value,
                                                 )
                                             }
-                                            placeholder={t(
-                                                'weight_kg_placeholder',
-                                            )}
+                                            placeholder={t('age_placeholder')}
                                             className="h-11 rounded-lg border-gray-200 bg-white pr-14 pl-10 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
                                             aria-invalid={
-                                                form.errors.weight_kg
+                                                form.errors.age
                                                     ? 'true'
                                                     : undefined
                                             }
                                         />
                                         <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
-                                            kg
+                                            {t('age_unit')}
                                         </span>
                                     </div>
-                                ) : (
-                                    <div className="relative mt-2">
-                                        <Weight
-                                            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
-                                            aria-hidden="true"
-                                        />
-                                        <Input
-                                            id="weight_lb"
-                                            type="number"
-                                            inputMode="numeric"
-                                            min={66}
-                                            max={660}
-                                            value={form.data.weight_lb}
-                                            onChange={(event) =>
-                                                form.setData(
-                                                    'weight_lb',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder={t(
-                                                'weight_lb_placeholder',
-                                            )}
-                                            className="h-11 rounded-lg border-gray-200 bg-white pr-14 pl-10 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
-                                            aria-invalid={
-                                                form.errors.weight_kg
-                                                    ? 'true'
-                                                    : undefined
-                                            }
-                                        />
-                                        <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
-                                            lb
-                                        </span>
-                                    </div>
-                                )}
-                                {form.errors.weight_kg && (
-                                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                                        {form.errors.weight_kg}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div>
-                                <label
-                                    htmlFor="age"
-                                    className="text-sm font-semibold text-gray-900 dark:text-gray-50"
-                                >
-                                    {t('age')}
-                                </label>
-                                <div className="relative mt-2">
-                                    <Calendar
-                                        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
-                                        aria-hidden="true"
-                                    />
-                                    <Input
-                                        id="age"
-                                        type="number"
-                                        inputMode="numeric"
-                                        min={13}
-                                        max={120}
-                                        value={form.data.age}
-                                        onChange={(event) =>
-                                            form.setData(
-                                                'age',
-                                                event.target.value,
-                                            )
-                                        }
-                                        placeholder={t('age_placeholder')}
-                                        className="h-11 rounded-lg border-gray-200 bg-white pr-14 pl-10 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
-                                        aria-invalid={
-                                            form.errors.age ? 'true' : undefined
-                                        }
-                                    />
-                                    <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
-                                        {t('age_unit')}
-                                    </span>
-                                </div>
-                                {form.errors.age && (
-                                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                                        {form.errors.age}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div>
-                                <div className="flex items-center justify-between gap-3">
-                                    <label className="text-sm font-semibold text-gray-900 dark:text-gray-50">
-                                        {t('sex')}
-                                    </label>
-                                    {form.errors.sex && (
-                                        <p className="text-sm text-red-600 dark:text-red-400">
-                                            {form.errors.sex}
+                                    {form.errors.age && (
+                                        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                                            {form.errors.age}
                                         </p>
                                     )}
                                 </div>
-                                <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-                                    {t('sex_description')}
-                                </p>
-                                <div
-                                    className="mt-2 grid grid-cols-3 gap-2"
-                                    role="radiogroup"
-                                    aria-label={t('sex')}
-                                >
-                                    {SEX_OPTIONS.map((option) => {
-                                        const selected =
-                                            form.data.sex === option.value;
 
-                                        return (
-                                            <button
-                                                key={option.value}
-                                                type="button"
-                                                role="radio"
-                                                aria-checked={selected}
-                                                onClick={() =>
-                                                    form.setData(
-                                                        'sex',
-                                                        option.value,
-                                                    )
-                                                }
-                                                className={cn(
-                                                    'rounded-xl border px-3 py-3 text-left transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:ring-2 focus:ring-emerald-500/40 focus:outline-none',
-                                                    selected
-                                                        ? 'border-emerald-500 bg-emerald-50 text-gray-900 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-gray-50'
-                                                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600',
-                                                )}
-                                            >
-                                                <span className="block text-sm font-semibold">
-                                                    {t(option.labelKey)}
-                                                </span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                                <div>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <label className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                                            {t('sex')}
+                                        </label>
+                                        {form.errors.sex && (
+                                            <p className="text-sm text-red-600 dark:text-red-400">
+                                                {form.errors.sex}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
+                                        {t('sex_description')}
+                                    </p>
+                                    <div
+                                        className="mt-2 grid grid-cols-3 gap-2"
+                                        role="radiogroup"
+                                        aria-label={t('sex')}
+                                    >
+                                        {SEX_OPTIONS.map((option) => {
+                                            const selected =
+                                                form.data.sex === option.value;
 
-                            <div>
-                                <div className="flex items-center justify-between gap-3">
-                                    <label className="text-sm font-semibold text-gray-900 dark:text-gray-50">
-                                        {t('sensitivity')}
-                                    </label>
-                                    {form.errors.sensitivity && (
-                                        <p className="text-sm text-red-600 dark:text-red-400">
-                                            {form.errors.sensitivity}
-                                        </p>
-                                    )}
-                                </div>
-                                <div
-                                    className="mt-2 grid grid-cols-3 gap-2"
-                                    role="radiogroup"
-                                    aria-label={t('sensitivity')}
-                                >
-                                    {SENSITIVITY_OPTIONS.map((option) => {
-                                        const selected =
-                                            form.data.sensitivity ===
-                                            option.value;
-
-                                        return (
-                                            <button
-                                                key={option.value}
-                                                type="button"
-                                                role="radio"
-                                                aria-checked={selected}
-                                                onClick={() =>
-                                                    form.setData(
-                                                        'sensitivity',
-                                                        option.value,
-                                                    )
-                                                }
-                                                className={cn(
-                                                    'rounded-xl border px-3 py-3 text-left transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:ring-2 focus:ring-emerald-500/40 focus:outline-none',
-                                                    selected
-                                                        ? 'border-emerald-500 bg-emerald-50 text-gray-900 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-gray-50'
-                                                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600',
-                                                )}
-                                            >
-                                                <span className="block text-sm font-semibold">
-                                                    {t(option.labelKey)}
-                                                </span>
-                                                <span className="mt-0.5 block text-xs opacity-70">
-                                                    {t(option.detailKey)}
-                                                </span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="text-sm font-semibold text-gray-900 dark:text-gray-50">
-                                    {t('conditions')}
-                                </label>
-                                <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-                                    {t('conditions_description')}
-                                </p>
-                                <div
-                                    className="mt-2 grid grid-cols-2 gap-2"
-                                    role="group"
-                                    aria-label={t('conditions')}
-                                >
-                                    {CONDITION_OPTIONS.map((option) => {
-                                        const checked =
-                                            selectedConditions.includes(
-                                                option.value,
-                                            );
-
-                                        return (
-                                            <label
-                                                key={option.value}
-                                                className={cn(
-                                                    'flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-sm transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus-within:ring-2 focus-within:ring-emerald-500/40 focus-within:outline-none',
-                                                    checked
-                                                        ? 'border-emerald-500 bg-emerald-50 text-gray-900 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-gray-50'
-                                                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600',
-                                                )}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    className="size-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:border-slate-600"
-                                                    checked={checked}
-                                                    onChange={() =>
-                                                        toggleCondition(
+                                            return (
+                                                <button
+                                                    key={option.value}
+                                                    type="button"
+                                                    role="radio"
+                                                    aria-checked={selected}
+                                                    onClick={() =>
+                                                        form.setData(
+                                                            'sex',
                                                             option.value,
                                                         )
                                                     }
-                                                />
-                                                <span className="font-medium">
-                                                    {t(option.labelKey)}
-                                                </span>
-                                            </label>
-                                        );
-                                    })}
+                                                    className={cn(
+                                                        'rounded-xl border px-3 py-3 text-left transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:ring-2 focus:ring-emerald-500/40 focus:outline-none',
+                                                        selected
+                                                            ? 'border-emerald-500 bg-emerald-50 text-gray-900 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-gray-50'
+                                                            : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600',
+                                                    )}
+                                                >
+                                                    <span className="block text-sm font-semibold">
+                                                        {t(option.labelKey)}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                                {conditionsError && (
-                                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                                        {conditionsError}
-                                    </p>
-                                )}
-                            </div>
 
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <MessageSquareText
-                                        className="size-4 text-emerald-700 dark:text-emerald-300"
-                                        aria-hidden="true"
-                                    />
-                                    <label
-                                        htmlFor="context"
-                                        className="text-sm font-semibold text-gray-900 dark:text-gray-50"
+                                <div>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <label className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                                            {t('sensitivity')}
+                                        </label>
+                                        {form.errors.sensitivity && (
+                                            <p className="text-sm text-red-600 dark:text-red-400">
+                                                {form.errors.sensitivity}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div
+                                        className="mt-2 grid grid-cols-3 gap-2"
+                                        role="radiogroup"
+                                        aria-label={t('sensitivity')}
                                     >
-                                        {t('context_label')}
-                                    </label>
+                                        {SENSITIVITY_OPTIONS.map((option) => {
+                                            const selected =
+                                                form.data.sensitivity ===
+                                                option.value;
+
+                                            return (
+                                                <button
+                                                    key={option.value}
+                                                    type="button"
+                                                    role="radio"
+                                                    aria-checked={selected}
+                                                    onClick={() =>
+                                                        form.setData(
+                                                            'sensitivity',
+                                                            option.value,
+                                                        )
+                                                    }
+                                                    className={cn(
+                                                        'rounded-xl border px-3 py-3 text-left transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:ring-2 focus:ring-emerald-500/40 focus:outline-none',
+                                                        selected
+                                                            ? 'border-emerald-500 bg-emerald-50 text-gray-900 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-gray-50'
+                                                            : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600',
+                                                    )}
+                                                >
+                                                    <span className="block text-sm font-semibold">
+                                                        {t(option.labelKey)}
+                                                    </span>
+                                                    <span className="mt-0.5 block text-xs opacity-70">
+                                                        {t(option.detailKey)}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                                <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-                                    {t('context_description')}
-                                </p>
-                                <Textarea
-                                    id="context"
-                                    value={form.data.context}
-                                    onChange={(event) =>
-                                        form.setData(
-                                            'context',
-                                            event.target.value,
-                                        )
-                                    }
-                                    placeholder={t('context_placeholder')}
-                                    rows={4}
-                                    maxLength={1000}
-                                    className="mt-2 rounded-lg border-gray-200 bg-white text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
-                                    aria-invalid={
-                                        form.errors.context ? 'true' : undefined
-                                    }
-                                />
-                                {form.errors.context && (
-                                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                                        {form.errors.context}
+
+                                <div>
+                                    <label className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                                        {t('conditions')}
+                                    </label>
+                                    <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
+                                        {t('conditions_description')}
                                     </p>
-                                )}
-                            </div>
+                                    <div
+                                        className="mt-2 grid grid-cols-2 gap-2"
+                                        role="group"
+                                        aria-label={t('conditions')}
+                                    >
+                                        {CONDITION_OPTIONS.map((option) => {
+                                            const checked =
+                                                selectedConditions.includes(
+                                                    option.value,
+                                                );
 
-                            <button
-                                type="submit"
-                                disabled={!canSubmit || form.processing}
-                                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-6 text-base font-semibold text-white shadow-none transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:bg-emerald-600 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none active:translate-y-0 active:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-slate-900"
-                            >
-                                {form.processing ? (
-                                    <LoaderCircle
-                                        className="size-4 animate-spin"
-                                        aria-hidden="true"
-                                    />
-                                ) : (
-                                    <Activity
-                                        className="size-4"
-                                        aria-hidden="true"
-                                    />
-                                )}
-                                {form.processing
-                                    ? t('submit_loading')
-                                    : t('submit_button')}
-                            </button>
-                        </form>
-                    </section>
+                                            return (
+                                                <label
+                                                    key={option.value}
+                                                    className={cn(
+                                                        'flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-sm transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus-within:ring-2 focus-within:ring-emerald-500/40 focus-within:outline-none',
+                                                        checked
+                                                            ? 'border-emerald-500 bg-emerald-50 text-gray-900 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-gray-50'
+                                                            : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600',
+                                                    )}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        className="size-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:border-slate-600"
+                                                        checked={checked}
+                                                        onChange={() =>
+                                                            toggleCondition(
+                                                                option.value,
+                                                            )
+                                                        }
+                                                    />
+                                                    <span className="font-medium">
+                                                        {t(option.labelKey)}
+                                                    </span>
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                    {conditionsError && (
+                                        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                                            {conditionsError}
+                                        </p>
+                                    )}
+                                </div>
 
-                    <section
-                        data-caffeine-result
-                        aria-live="polite"
-                        aria-label={
-                            form.response?.summary ?? 'Caffeine limit result'
-                        }
-                    >
-                        {form.processing && <LoadingResult />}
-                        {!form.processing && form.response && (
-                            <CaffeineGuidanceRenderer
-                                spec={form.response.spec}
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <MessageSquareText
+                                            className="size-4 text-emerald-700 dark:text-emerald-300"
+                                            aria-hidden="true"
+                                        />
+                                        <label
+                                            htmlFor="context"
+                                            className="text-sm font-semibold text-gray-900 dark:text-gray-50"
+                                        >
+                                            {t('context_label')}
+                                        </label>
+                                    </div>
+                                    <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
+                                        {t('context_description')}
+                                    </p>
+                                    <Textarea
+                                        id="context"
+                                        value={form.data.context}
+                                        onChange={(event) =>
+                                            form.setData(
+                                                'context',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder={t('context_placeholder')}
+                                        rows={4}
+                                        maxLength={1000}
+                                        className="mt-2 rounded-lg border-gray-200 bg-white text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
+                                        aria-invalid={
+                                            form.errors.context
+                                                ? 'true'
+                                                : undefined
+                                        }
+                                    />
+                                    {form.errors.context && (
+                                        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                                            {form.errors.context}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={!canSubmit || form.processing}
+                                    className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-6 text-base font-semibold text-white shadow-none transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:bg-emerald-600 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none active:translate-y-0 active:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-slate-900"
+                                >
+                                    {form.processing ? (
+                                        <LoaderCircle
+                                            className="size-4 animate-spin"
+                                            aria-hidden="true"
+                                        />
+                                    ) : (
+                                        <Activity
+                                            className="size-4"
+                                            aria-hidden="true"
+                                        />
+                                    )}
+                                    {form.processing
+                                        ? t('submit_loading')
+                                        : t('submit_button')}
+                                </button>
+                            </form>
+                        </section>
+
+                        <section
+                            data-caffeine-result
+                            aria-live="polite"
+                            aria-label={
+                                form.response?.summary ??
+                                'Caffeine limit result'
+                            }
+                        >
+                            {form.processing && <LoadingResult />}
+                            {!form.processing && form.response && (
+                                <CaffeineGuidanceRenderer
+                                    spec={form.response.spec}
+                                />
+                            )}
+                            {!form.processing && !form.response && (
+                                <EmptyResult />
+                            )}
+                        </section>
+                    </main>
+
+                    <CaffeineSeoSection faqItems={faqItems} />
+
+                    {/* CTA Section */}
+                    <section className="mx-auto mt-12 max-w-7xl lg:px-8">
+                        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#FFF5EE] via-[#FFFBF5] to-[#FFEFE5] p-8 shadow-sm ring-1 ring-[#FF6B4A]/10 sm:p-10">
+                            <div
+                                className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-[#FF6B4A]/6 blur-3xl"
+                                aria-hidden="true"
                             />
-                        )}
-                        {!form.processing && !form.response && <EmptyResult />}
-                    </section>
-                </main>
+                            <div
+                                className="pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-[#FFBFA9]/10 blur-2xl"
+                                aria-hidden="true"
+                            />
 
-                <CaffeineSeoSection faqItems={faqItems} />
+                            <div className="relative z-10 flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
+                                <div className="shrink-0">
+                                    <div className="rounded-full bg-gradient-to-br from-[#FF6B4A]/20 to-[#FFBFA9]/30 p-1">
+                                        <img
+                                            src="https://pub-plate-assets.acara.app/images/altani_with_hand_on_chin_considering_expression_thought-1024.webp"
+                                            alt="Altani, your personal AI health coach"
+                                            className="h-24 w-24 rounded-full object-cover ring-2 ring-white sm:h-28 sm:w-28"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex-1 text-center sm:text-left">
+                                    <h3 className="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
+                                        Meet Altani — Your Personal AI Health
+                                        Coach
+                                    </h3>
+                                    <p className="mt-2 text-sm leading-relaxed text-slate-500 sm:text-base">
+                                        Altani helps you plan meals, predict
+                                        glucose responses, and stay on track
+                                        with your health goals. She&apos;s
+                                        available 24/7 and learns what works
+                                        best for your body.
+                                    </p>
+                                    <div className="mt-6">
+                                        <a
+                                            href="/meet-altani"
+                                            className="group inline-flex items-center justify-center gap-2 rounded-full bg-[#FF6B4A] px-7 py-3 text-sm font-semibold text-white shadow-md shadow-[#FF6B4A]/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#E85A3A] hover:shadow-lg hover:shadow-[#FF6B4A]/25"
+                                        >
+                                            Chat with Altani
+                                            <svg
+                                                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                                                />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
             </div>
         </>
     );
