@@ -29,7 +29,7 @@ final readonly class CaffeineCalculatorController
                 'appUrl' => url('/'),
                 'canonicalUrl' => $this->getCanonicalUrl($locale),
                 'toolsUrl' => route('tools.index'),
-                'imageUrl' => asset('banner-acara-plate.webp'),
+                'imageUrl' => 'https://pub-plate-assets.acara.app/images/coffee-cup-silhouette.png',
                 'hreflangLinks' => $this->getHreflangLinks('caffeine-calculator', 'caffeine-calculator.locale'),
                 'xDefaultUrl' => $this->getXDefaultUrl('caffeine-calculator'),
             ],
