@@ -1,9 +1,18 @@
 import { plan as planRoute } from '@/actions/App/Http/Controllers/CaffeineCalculatorController';
+import AppLogoIcon from '@/components/app-logo-icon';
 import { CaffeineGuidanceRenderer } from '@/components/caffeine-guidance/render';
 import PageHeader from '@/components/page-header';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import {
+    aiNutritionist,
+    mealPlanner,
+    privacy,
+    register,
+    terms,
+    usdaServingsCalculator,
+} from '@/routes';
 import { Head, useHttp, usePage } from '@inertiajs/react';
 import type { Spec } from '@json-render/core';
 import {
@@ -12,6 +21,7 @@ import {
     Calendar,
     ChevronRight,
     ExternalLink,
+    Home,
     LoaderCircle,
     MessageSquareText,
     Ruler,
@@ -977,6 +987,8 @@ export default function CaffeineCalculator() {
                         </div>
                     </section>
                 </div>
+
+                <CaffeineFooter />
             </div>
         </>
     );
@@ -1129,9 +1141,10 @@ function Breadcrumbs({ seo }: { seo: CaffeineCalculatorPageProps['seo'] }) {
         >
             <a
                 href={seo.appUrl}
-                className="font-medium text-gray-600 transition hover:text-emerald-700 dark:text-slate-300 dark:hover:text-emerald-300"
+                aria-label={t('breadcrumb_home')}
+                className="text-gray-600 transition hover:text-emerald-700 dark:text-slate-300 dark:hover:text-emerald-300"
             >
-                {t('breadcrumb_home')}
+                <Home className="size-4" aria-hidden="true" />
             </a>
             <ChevronRight className="size-4" aria-hidden="true" />
             <a
@@ -1289,5 +1302,87 @@ function EmptyResult() {
                 </p>
             </div>
         </div>
+    );
+}
+
+function CaffeineFooter() {
+    const { t } = useTranslation('caffeine');
+
+    const tools = [
+        { label: t('footer_tool_meal_planner'), href: mealPlanner.url() },
+        { label: t('footer_tool_ask_ai'), href: register.url() },
+        { label: t('footer_tool_ai_nutritionist'), href: aiNutritionist.url() },
+        {
+            label: t('footer_tool_usda_calculator'),
+            href: usdaServingsCalculator.url(),
+        },
+    ];
+
+    return (
+        <footer className="border-t border-gray-200 bg-white py-20 dark:border-slate-700 dark:bg-slate-900">
+            <div className="mx-auto flex max-w-7xl flex-col items-center px-4 text-center lg:px-8">
+                {/* Branding */}
+                <div className="flex w-full items-center gap-6">
+                    <div className="h-px flex-1 bg-gray-200 dark:bg-slate-700" />
+                    <div className="flex items-center gap-3">
+                        <AppLogoIcon className="size-12" aria-hidden="true" />
+                        <div className="flex flex-col items-start leading-none">
+                            <span className="text-sm text-gray-500 dark:text-slate-400">
+                                {t('footer_powered_by_label')}
+                            </span>
+                            <span className="text-2xl font-bold text-gray-900 dark:text-gray-50">
+                                {t('footer_powered_by_brand')}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="h-px flex-1 bg-gray-200 dark:bg-slate-700" />
+                </div>
+
+                {/* Tagline */}
+                <div className="mt-12 space-y-2">
+                    <p className="text-base leading-relaxed text-gray-600 dark:text-slate-400">
+                        {t('footer_tagline_line1')}
+                    </p>
+                    <p className="text-base leading-relaxed text-gray-600 dark:text-slate-400">
+                        {t('footer_tagline_line2')}
+                    </p>
+                </div>
+
+                {/* Legal links */}
+                <div className="mt-6 flex items-center gap-3 text-sm text-gray-400 dark:text-slate-500">
+                    <a
+                        href={terms.url()}
+                        className="transition hover:text-gray-700 dark:hover:text-slate-300"
+                    >
+                        {t('footer_terms')}
+                    </a>
+                    <span aria-hidden="true">&bull;</span>
+                    <a
+                        href={privacy.url()}
+                        className="transition hover:text-gray-700 dark:hover:text-slate-300"
+                    >
+                        {t('footer_privacy')}
+                    </a>
+                </div>
+
+                {/* More Useful Tools */}
+                <div className="mt-20">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-50">
+                        {t('footer_more_tools_heading')}
+                    </h3>
+                    <nav className="mt-6 flex flex-col items-center gap-3">
+                        {tools.map((tool) => (
+                            <a
+                                key={tool.href}
+                                href={tool.href}
+                                className="text-base text-gray-600 transition hover:text-gray-900 dark:text-slate-400 dark:hover:text-gray-50"
+                            >
+                                {tool.label}
+                            </a>
+                        ))}
+                    </nav>
+                </div>
+            </div>
+        </footer>
     );
 }
