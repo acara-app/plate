@@ -7,6 +7,7 @@ export default function GoogleOAuthButton() {
     return (
         <a
             type="button"
+            data-umami-event="google_oauth_click"
             className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
             href={google.redirect.url()}
         >

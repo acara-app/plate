@@ -21,6 +21,8 @@
                         Sign in
                     </a>
                     <a href="{{ route('register') }}"
+                        data-umami-event="meal_planner_cta_click"
+                        data-umami-event-location="header"
                         class="inline-flex items-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800">
                         Start for Free
                     </a>
@@ -137,6 +139,8 @@
         </div>
         <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <a href="{{ route('register') }}"
+                data-umami-event="meal_planner_cta_click"
+                data-umami-event-location="hero"
                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:bg-slate-800 hover:shadow-xl">
                 Create Your Free Meal Plan
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -510,6 +514,8 @@
         </p>
         <div class="mt-6 text-center">
             <a href="{{ route('register') }}"
+                data-umami-event="meal_planner_cta_click"
+                data-umami-event-location="sample_plan"
                 class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50">
                 Get Your Personalized Plan
             </a>
@@ -653,6 +659,8 @@
             <p class="mt-2 text-slate-600 max-w-xl mx-auto">Join thousands of people managing their diabetes with meal plans that actually fit their life.</p>
             <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a href="{{ route('register') }}"
+                    data-umami-event="meal_planner_cta_click"
+                    data-umami-event-location="final_cta"
                     class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-8 py-4 text-base font-bold text-white shadow-lg transition-all hover:bg-emerald-500 hover:shadow-xl">
                     Create Free Account
                 </a>

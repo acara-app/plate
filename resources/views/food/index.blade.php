@@ -419,6 +419,8 @@
                         @endif
                     </p>
                     <a href="{{ route('spike-calculator') }}"
+                        data-umami-event="food_spike_cta_click"
+                        data-umami-event-location="food_index"
                         class="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold shadow-lg hover:shadow-xl">
                         <svg class="size-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

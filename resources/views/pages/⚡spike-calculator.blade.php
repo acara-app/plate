@@ -137,6 +137,8 @@ class extends Component
             >
             <button
                 type="submit"
+                data-umami-event="spike_calculator_submit"
+                data-umami-event-location="main_form"
                 class="absolute right-2 top-2 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600 text-white transition-all hover:bg-blue-700 hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
                 @disabled($loading || empty(trim($food)))
             >
@@ -174,7 +176,11 @@ class extends Component
         {{-- Results Section --}}
         @if ($result)
             @php $riskLevel = $this->getRiskLevel(); @endphp
-            <div class="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
+            <div
+                x-data
+                x-init="window.acaraTrack?.('spike_calculator_result_viewed', { risk_level: @js($result['riskLevel']) })"
+                class="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800"
+            >
                 
                 {{-- Spike Gauge Section --}}
                 <div class="bg-slate-50 p-6 text-center dark:bg-slate-800/50">
@@ -226,6 +232,8 @@ class extends Component
                     {{-- CTA Button --}}
                     <a 
                         href="{{ route('register') }}"
+                        data-umami-event="signup_cta_click"
+                        data-umami-event-location="spike_calculator_result"
                         class="block w-full rounded-xl bg-slate-900 py-3 text-center text-sm font-bold text-white transition-transform hover:scale-[1.02] dark:bg-white dark:text-slate-900"
                     >
                         Build your meal plan →

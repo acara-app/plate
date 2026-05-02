@@ -150,6 +150,8 @@
                             Sign in
                         </a>
                         <a href="{{ route('register') }}"
+                            data-umami-event="signup_cta_click"
+                            data-umami-event-location="home_header"
                             class="inline-flex items-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800">
                             Start for Free
                         </a>
@@ -204,12 +206,16 @@
                         {{-- CTA (natural eye-flow endpoint) --}}
                         <div class="mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
                             <a href="{{ route('register') }}"
+                               data-umami-event="signup_cta_click"
+                               data-umami-event-location="home_hero"
                                class="w-full sm:w-auto rounded-full bg-[#FF6B4A] px-8 py-3.5 text-center text-base font-semibold text-white shadow-lg shadow-[#FF6B4A]/20 hover:bg-[#E85A3A] hover:shadow-[#FF6B4A]/30 hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF6B4A]">
                                 Start Your Free Plan
                             </a>
                             <a href="https://github.com/acara-app/plate"
                                target="_blank"
                                rel="noopener noreferrer"
+                               data-umami-event="github_cta_click"
+                               data-umami-event-location="home_hero"
                                aria-label="Star on GitHub (opens in a new tab)"
                                class="group w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-base font-medium text-slate-600 shadow-sm ring-1 ring-slate-200 transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 hover:-translate-y-0.5">
                                 <svg class="h-5 w-5 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">

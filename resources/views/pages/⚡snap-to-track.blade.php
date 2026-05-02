@@ -278,6 +278,8 @@ class extends Component
                         >
                         <label
                             for="photo-upload"
+                            data-umami-event="snap_to_track_upload_click"
+                            data-umami-event-location="main_form"
                             class="flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 transition-colors hover:border-blue-500 hover:bg-blue-50/50 dark:border-slate-600 dark:bg-slate-900 dark:hover:border-blue-500 dark:hover:bg-blue-900/20"
                         >
                             <div class="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50">
@@ -340,6 +342,8 @@ class extends Component
                     {{-- Analyze Button --}}
                     <button
                         type="submit"
+                        data-umami-event="snap_to_track_analyze_click"
+                        data-umami-event-location="main_form"
                         class="w-full min-h-14 rounded-xl bg-blue-600 py-4 text-center font-bold text-white transition-all hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
                         @disabled($loading)
                     >
@@ -374,7 +378,7 @@ class extends Component
             {{-- Real Results --}}
             <div
                 x-data
-                x-init="$el.classList.remove('opacity-0', 'translate-y-4')"
+                x-init="window.acaraTrack?.('snap_to_track_result_viewed', { confidence: @js($result['confidence']), items_count: @js(count($result['items'])) }); $el.classList.remove('opacity-0', 'translate-y-4')"
                 class="overflow-hidden rounded-2xl border border-slate-100 bg-white opacity-0 translate-y-4 shadow-lg transition-all duration-500 ease-out dark:border-slate-700 dark:bg-slate-800"
             >
                 {{-- Total Macros Header --}}
@@ -476,6 +480,8 @@ class extends Component
                     </div>
                     <a
                         href="{{ route('register') }}"
+                        data-umami-event="signup_cta_click"
+                        data-umami-event-location="snap_to_track_result"
                         class="block w-full rounded-xl bg-blue-600 py-3.5 text-center text-sm font-bold text-white transition-all hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98]"
                     >
                         Sign up for sharper analysis →
@@ -519,6 +525,8 @@ class extends Component
         @if ($result === null)
             <a
                 href="{{ route('register') }}"
+                data-umami-event="signup_cta_click"
+                data-umami-event-location="snap_to_track_empty_state"
                 class="block w-full rounded-xl bg-blue-600 py-3.5 text-center text-sm font-bold text-white transition-all hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98]"
             >
                 Sign up to start analyzing →
@@ -654,6 +662,8 @@ class extends Component
                 Get personalized meal plans tailored to your glucose levels and taste preferences.
             </p>
             <a href="{{ route('register') }}"
+               data-umami-event="signup_cta_click"
+               data-umami-event-location="snap_to_track_bottom_promo"
                class="inline-flex w-full items-center justify-center rounded-xl bg-white py-3.5 text-sm font-bold text-slate-900 transition-transform hover:scale-[1.02] hover:bg-slate-50">
                 Get Started
             </a>

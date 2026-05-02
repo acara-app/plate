@@ -159,6 +159,9 @@ class extends Component
             @foreach ($this->getTools() as $tool)
                 <a 
                     href="{{ $tool['route'] }}" 
+                    data-umami-event="tool_card_click"
+                    data-umami-event-tool="{{ Str::slug($tool['name']) }}"
+                    data-umami-event-location="tools_index"
                     class="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-lg transition-all hover:shadow-xl hover:ring-2 hover:ring-emerald-500 dark:bg-slate-800"
                 >
                     {{-- Badge --}}
@@ -213,6 +216,8 @@ class extends Component
             <p class="mt-2 text-emerald-100">Get AI-generated diabetic-friendly meals tailored to your preferences and health goals.</p>
             <a
                 href="{{ route('register') }}"
+                data-umami-event="signup_cta_click"
+                data-umami-event-location="tools_index_bottom"
                 class="mt-6 inline-block rounded-xl bg-white px-8 py-3 font-bold text-emerald-600 transition-transform hover:scale-105"
             >
                 Create Free Account
