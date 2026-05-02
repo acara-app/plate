@@ -103,7 +103,7 @@ return [
     'language_switcher_mn' => 'MN',
     'gauge_your_limit' => 'Your daily limit',
     'gauge_general_max' => 'General adult maximum',
-    'gauge_comparison' => 'Based on your profile, your limit is about :percentage% of the general adult maximum.',
+    'gauge_comparison' => 'Based on your profile, your limit is about {{percentage}}% of the general adult maximum.',
     'gauge_avoid' => 'Based on your profile, caffeine intake is not recommended.',
     'footer_tagline_line1' => 'Small steps to better health.',
     'footer_tagline_line2' => 'Free tools for everyday wellness.',

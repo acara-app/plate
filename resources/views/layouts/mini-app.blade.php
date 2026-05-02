@@ -2,6 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('layouts.components.head')
+        {{ $jsonLd ?? '' }}
     </head>
     <body>
         <livewire:flash-messages.show />

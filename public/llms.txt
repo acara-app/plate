@@ -11,6 +11,8 @@ Acara Plate is an advanced nutrition intelligence engine designed to support hea
 
 ## Public Health Tools
 - **Caffeine Calculator**: `/tools/caffeine-calculator` estimates a daily caffeine limit in milligrams from weight, age, sex, height, self-reported caffeine sensitivity, and caution contexts such as pregnancy, breastfeeding, trying to conceive, anxiety, insomnia, GERD, heart or blood pressure concerns, and medication use. It is also available in Mongolian at `/mn/tools/caffeine-calculator`.
+- **Snap to Track (AI Food Photo Analyzer)**: `/tools/snap-to-track` accepts a single food photo and returns a per-ingredient breakdown of estimated calories, protein, carbs, and fat plus meal totals and a 0–100% confidence score. Recognition uses AI vision analysis and USDA-aligned nutrition references. The tool is free, no signup is required to try it, and uploaded images are processed as temporary uploads that are deleted as soon as the result or error is returned. Cloudflare Turnstile plus per-IP rate limiting (5 uploads/hour and 5 analyses/hour) keep abuse and AI cost bounded.
+- **Blood Sugar Spike Checker**: `/tools/spike-calculator` accepts a free-text food name and returns a glycemic risk level (Low/Medium/High) with an estimated glycemic load, an explanation, and a suggested smart swap that reduces the predicted glucose impact.
 
 ## Data Domain & Terminology
 
