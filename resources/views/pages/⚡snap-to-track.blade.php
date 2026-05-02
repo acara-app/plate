@@ -533,7 +533,7 @@ class extends Component
                 <strong>Disclaimer:</strong> These are AI estimates. Actual nutrition depends on how the food was made.
             </p>
             <p>
-                Powered by Google Gemini vision · Reference values aligned with USDA FoodData Central
+                AI vision analysis · USDA-aligned nutrition references
             </p>
             <p>
                 <time datetime="{{ now()->toDateString() }}">Last updated: {{ now()->format('F Y') }}</time>
