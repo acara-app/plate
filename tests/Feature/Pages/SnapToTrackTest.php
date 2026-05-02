@@ -218,8 +218,8 @@ it('renders the seo definition block', function (): void {
 
 it('renders authority and freshness signals', function (): void {
     Livewire::test('pages::snap-to-track')
-        ->assertSee('Powered by Google Gemini')
-        ->assertSee('USDA FoodData Central')
+        ->assertSee('AI vision analysis')
+        ->assertSee('USDA-aligned nutrition references')
         ->assertSee('Last updated:');
 });
 
