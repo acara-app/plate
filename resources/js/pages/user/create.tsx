@@ -164,6 +164,8 @@ export default function Register() {
                                 className="mt-2 w-full"
                                 tabIndex={6}
                                 data-test="register-user-button"
+                                data-umami-event="signup_form_submit"
+                                data-umami-event-method="email"
                             >
                                 {processing && (
                                     <LoaderCircle className="h-4 w-4 animate-spin" />
