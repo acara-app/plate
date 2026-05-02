@@ -9,6 +9,9 @@ use App\Models\SubscriptionProduct;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @codeCoverageIgnore
+ */
 final class SyncStripePricesCommand extends Command
 {
     protected $signature = 'billing:sync-stripe-prices
