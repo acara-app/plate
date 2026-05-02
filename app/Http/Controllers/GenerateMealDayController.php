@@ -4,19 +4,32 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Billing\AuthorizeGatedFeature;
+use App\Enums\GatedFeature;
 use App\Enums\MealPlanGenerationStatus;
 use App\Models\MealPlan;
+use App\Models\User;
 use App\Workflows\MealPlanDayWorkflow;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Workflow\WorkflowStub;
 
-final class GenerateMealDayController
+final readonly class GenerateMealDayController
 {
+    public function __construct(
+        #[CurrentUser] private User $user,
+        private AuthorizeGatedFeature $authorize,
+    ) {
+        //
+    }
+
     public function __invoke(Request $request, MealPlan $mealPlan): JsonResponse
     {
         Gate::authorize('update', $mealPlan);
+
+        $this->authorize->handle($this->user, GatedFeature::MealPlanner);
 
         $dayNumber = $request->integer('day', 1);
 

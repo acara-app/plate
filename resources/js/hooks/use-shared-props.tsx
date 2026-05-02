@@ -1,5 +1,7 @@
 import { usePage } from '@inertiajs/react';
 
+import type { Entitlement } from '@/types/billing';
+
 export default function useSharedProps() {
     const page = usePage();
 
@@ -14,5 +16,6 @@ export default function useSharedProps() {
             string,
             string
         >,
+        entitlement: page.props.entitlement as Entitlement | null,
     };
 }

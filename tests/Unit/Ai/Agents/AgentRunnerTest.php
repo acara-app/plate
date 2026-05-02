@@ -20,7 +20,7 @@ beforeEach(function (): void {
     $this->user = User::factory()->create();
 
     $this->agentBuilder = resolve(AgentBuilder::class);
-    $this->agent = new AgentRunner($this->agentBuilder);
+    $this->agent = resolve(AgentRunner::class);
 });
 
 describe('instructions', function (): void {

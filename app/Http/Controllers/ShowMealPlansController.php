@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Billing\ResolvesUserTier;
+use App\Contracts\Telemetry\EmitsPaywallEvents;
 use App\Data\MealResponseData;
 use App\Enums\DietType;
+use App\Enums\GatedFeature;
 use App\Enums\MealPlanGenerationStatus;
+use App\Enums\Telemetry\PaywallEvent;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
@@ -16,6 +20,7 @@ use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 use Workflow\WorkflowStub;
@@ -23,7 +28,9 @@ use Workflow\WorkflowStub;
 final readonly class ShowMealPlansController
 {
     public function __construct(
-        #[CurrentUser] private User $user
+        #[CurrentUser] private User $user,
+        private ResolvesUserTier $tierResolver,
+        private EmitsPaywallEvents $telemetry,
     ) {
         //
     }
@@ -37,6 +44,14 @@ final readonly class ShowMealPlansController
         $userDietType = ($this->user->profile->calculated_diet_type ?? DietType::Balanced)->value;
         $dietTypes = DietType::toArray();
 
+        $entitlement = $this->tierResolver->resolve($this->user);
+        $mealPlannerLocked = ! $entitlement->isUnrestricted()
+            && ! $entitlement->isAtLeast(GatedFeature::MealPlanner->requiredTier());
+
+        if ($mealPlannerLocked) {
+            $this->emitFeatureAttemptOncePerDay($entitlement->tier->value);
+        }
+
         if (! $mealPlan) {
             return Inertia::render('meal-plans/show', [
                 'mealPlan' => null,
@@ -44,6 +59,8 @@ final readonly class ShowMealPlansController
                 'navigation' => null,
                 'userDietType' => $userDietType,
                 'dietTypes' => $dietTypes,
+                'mealPlannerLocked' => $mealPlannerLocked,
+                'requiredTier' => GatedFeature::MealPlanner->requiredTier()->value,
             ]);
         }
 
@@ -129,6 +146,8 @@ final readonly class ShowMealPlansController
             'navigation' => $navigation,
             'userDietType' => $userDietType,
             'dietTypes' => $dietTypes,
+            'mealPlannerLocked' => $mealPlannerLocked,
+            'requiredTier' => GatedFeature::MealPlanner->requiredTier()->value,
         ]);
     }
 
@@ -171,5 +190,32 @@ final readonly class ShowMealPlansController
     private function isStaleGenerating(MealPlan $mealPlan): bool
     {
         return $mealPlan->updated_at->isBefore(now()->subMinutes(30));
+    }
+
+    private function emitFeatureAttemptOncePerDay(string $tierValue): void
+    {
+        $cacheKey = sprintf(
+            'gated_feature_attempt:%s:%d:%s',
+            GatedFeature::MealPlanner->value,
+            $this->user->id,
+            now()->toDateString(),
+        );
+
+        if (Cache::has($cacheKey)) {
+            return;
+        }
+
+        Cache::put($cacheKey, true, now()->endOfDay());
+
+        $this->telemetry->emit(
+            event: PaywallEvent::GatedFeatureAttempt,
+            user: $this->user,
+            payload: [
+                'tier_current' => $tierValue,
+                'tier_required' => GatedFeature::MealPlanner->requiredTier()->value,
+                'feature' => GatedFeature::MealPlanner->value,
+                'surface' => 'meal_plans_page',
+            ],
+        );
     }
 }

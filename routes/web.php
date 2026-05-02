@@ -125,6 +125,10 @@ Route::middleware(['auth', 'verified'])->prefix('onboarding')->name('onboarding.
 Route::middleware('auth')->group(function (): void {
     Route::delete('user', [Web\UserController::class, 'destroy'])->name('user.destroy');
 
+    Route::post('telemetry/paywall', Web\Telemetry\RecordPaywallEventController::class)
+        ->middleware('throttle:60,1')
+        ->name('telemetry.paywall.record');
+
     Route::redirect('settings', '/settings/profile');
     Route::get('settings/profile', [Web\UserProfileController::class, 'edit'])->name('user-profile.edit');
     Route::patch('settings/profile', [Web\UserProfileController::class, 'update'])->name('user-profile.update');

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\AnalyzeGlucoseForNotificationAction;
+use App\Actions\Billing\AuthorizeGatedFeature;
 use App\Enums\DietType;
+use App\Enums\GatedFeature;
 use App\Models\User;
 use App\Workflows\MealPlanInitializeWorkflow;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -19,12 +21,15 @@ final readonly class RegenerateMealPlanController
     public function __construct(
         #[CurrentUser] private User $user,
         private AnalyzeGlucoseForNotificationAction $analyzeGlucose,
+        private AuthorizeGatedFeature $authorize,
     ) {
         //
     }
 
     public function store(): RedirectResponse
     {
+        $this->authorize->handle($this->user, GatedFeature::MealPlanner);
+
         $this->user->mealPlans()->delete();
 
         $glucoseAnalysis = $this->analyzeGlucose->handle($this->user);

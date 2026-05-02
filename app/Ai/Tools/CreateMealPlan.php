@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Actions\Billing\AuthorizeGatedFeature;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Contracts\Ai\GeneratesMealPlans;
 use App\Enums\DataSensitivity;
+use App\Enums\GatedFeature;
+use App\Exceptions\Billing\FeatureGateException;
 use App\Models\User;
 use App\Utilities\StaticUrl;
 use Exception;
@@ -41,6 +44,22 @@ final readonly class CreateMealPlan implements Tool
         if (! $user instanceof User) {
             return (string) json_encode([
                 'error' => 'User not authenticated',
+                'meal_plan' => null,
+            ]);
+        }
+
+        try {
+            resolve(AuthorizeGatedFeature::class)->handle($user, GatedFeature::MealPlanner);
+        } catch (FeatureGateException $featureGateException) {
+            return (string) json_encode([
+                'error' => $featureGateException->toPayload()['error'],
+                'feature' => $featureGateException->feature->value,
+                'required_tier' => $featureGateException->requiredTier->value,
+                'required_tier_label' => $featureGateException->requiredTier->label(),
+                'message' => sprintf(
+                    'Meal Planner is part of the %s plan. Tell the user to upgrade in their billing settings to generate a meal plan.',
+                    $featureGateException->requiredTier->label(),
+                ),
                 'meal_plan' => null,
             ]);
         }

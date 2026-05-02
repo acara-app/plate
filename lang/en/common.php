@@ -813,6 +813,62 @@ return [
             'monthly' => 'Monthly Usage',
             'resets_in' => 'Resets in {{time}}',
             'credits_used' => '{{current}} / {{limit}} credits',
+            'over_limit' => '· over limit',
+            'over_limit_tooltip' => '{{current}} of {{limit}} credits used ({{percentage}}%)',
+        ],
+        'tier' => [
+            'current_plan' => 'Current plan',
+            'payment_pending' => 'Payment pending — your access will activate momentarily.',
+            'labels' => [
+                'free' => 'Free',
+                'basic' => 'Basic',
+                'plus' => 'Plus',
+            ],
+        ],
+        'lifecycle' => [
+            'payment_pending_heading' => 'Your payment is processing',
+            'payment_pending_body' => "Stripe is still verifying your card. Premium features will activate as soon as it's confirmed.",
+            'payment_pending_action' => 'Complete payment',
+            'grace_period_heading' => 'Subscription canceled — access ends {{date}}',
+            'grace_period_body' => 'You can keep using {{tier}} features until then. Renew anytime to avoid losing access.',
+            'grace_period_action' => 'Renew subscription',
+        ],
+        'warning' => [
+            'heading' => "You've used {{percentage}}% of your {{limit}}",
+            'body' => '{{current}} of {{total}} credits used. Resets in {{time}}.',
+            'see_upgrade_options' => 'See upgrade options',
+        ],
+        'paywall' => [
+            'cap_title' => "You've hit your {{tier}} {{limit}} cap",
+            'cap_description' => '{{current}} of {{total}} credits used. Resets in {{time}}.',
+            'feature_title' => 'Upgrade to use {{feature}}',
+            'feature_description' => '{{feature}} is part of {{tier}}. Upgrade to unlock it.',
+            'compare_plans' => 'Compare plans',
+            'upgrade_to' => 'Upgrade to {{tier}}',
+            'plans' => [
+                'basic' => [
+                    'name' => 'Basic',
+                    'price' => '$9/mo',
+                    'pitch' => 'Higher limits, meal planner, and meal photo analysis.',
+                ],
+                'plus' => [
+                    'name' => 'Plus',
+                    'price' => '$18/mo',
+                    'pitch' => 'Memory, Apple Health sync, and the highest limits.',
+                ],
+            ],
+            'features' => [
+                'meal_planner' => 'Meal Planner',
+                'image_analysis' => 'Meal photo analysis',
+                'memory' => 'Memory',
+                'health_sync' => 'Apple Health sync',
+            ],
+        ],
+        'upsell' => [
+            'card_eyebrow' => 'Part of {{tier}}',
+            'card_title' => 'Unlock {{feature}}',
+            'card_description' => 'Upgrade to {{tier}} ({{price}}) to use {{feature}} and more.',
+            'upgrade_button' => 'Upgrade to {{tier}}',
         ],
         'history' => [
             'title' => 'Invoice History',

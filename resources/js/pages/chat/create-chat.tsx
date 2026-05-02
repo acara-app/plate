@@ -1,8 +1,11 @@
+import { CreditWarningBanner } from '@/components/billing/credit-warning-banner';
+import { PaywallModal } from '@/components/billing/paywall-modal';
 import { useChatStream } from '@/hooks/use-chat-stream';
 import AppLayout from '@/layouts/app-layout';
 import { generateUUID } from '@/lib/utils';
+import billing from '@/routes/billing';
 import chat from '@/routes/chat';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, CreditWarning } from '@/types';
 import type { ChatPageProps, UIMessage } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
@@ -19,16 +22,30 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function CreateChat() {
+    const page = usePage<
+        ChatPageProps & { creditWarning?: CreditWarning | null }
+    >();
     const {
         conversationId: initialConversationId,
         messages: messageHistories,
         mode: initialMode,
-    } = usePage<ChatPageProps>().props;
+        creditWarning: sharedCreditWarning,
+    } = page.props;
 
     const [conversationId, setConversationId] = useState<string>(
         initialConversationId,
     );
     const [mode, setMode] = useState<ChatMode>(initialMode ?? 'ask');
+    // Track which warning the user has dismissed by its period anchor (resets_at).
+    // When the server delivers a new warning (different resets_at), it shows again.
+    const [dismissedWarningAt, setDismissedWarningAt] = useState<string | null>(
+        null,
+    );
+    const visibleCreditWarning =
+        sharedCreditWarning &&
+        sharedCreditWarning.resets_at !== dismissedWarningAt
+            ? sharedCreditWarning
+            : null;
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const lastMessageRef = useRef<{
@@ -38,6 +55,10 @@ export default function CreateChat() {
 
     const initialMessages = (messageHistories ?? []) as UIMessage[];
 
+    const handleStreamFinish = useCallback(() => {
+        router.reload({ only: ['creditWarning'] });
+    }, []);
+
     const {
         messages,
         sendMessage,
@@ -46,10 +67,13 @@ export default function CreateChat() {
         error,
         isStreaming,
         isSubmitting,
+        usageLimitTrigger,
+        clearUsageLimitTrigger,
     } = useChatStream({
         conversationId,
         mode,
         initialMessages,
+        onFinish: handleStreamFinish,
     });
 
     useEffect(() => {
@@ -105,17 +129,36 @@ export default function CreateChat() {
                             status={status}
                             isSubmitting={showThinkingIndicator}
                         />
-                        <ChatErrorBanner
-                            error={error}
-                            onRetry={
-                                lastMessageRef.current ? handleRetry : undefined
-                            }
-                        />
+                        {!usageLimitTrigger && (
+                            <ChatErrorBanner
+                                error={error}
+                                onRetry={
+                                    lastMessageRef.current
+                                        ? handleRetry
+                                        : undefined
+                                }
+                            />
+                        )}
                         <div ref={messagesEndRef} />
                     </div>
                 </div>
 
-                <div className="shrink-0 bg-background">
+                <div className="shrink-0 space-y-2 bg-background">
+                    {visibleCreditWarning && (
+                        <div className="mx-auto w-full max-w-3xl px-4">
+                            <CreditWarningBanner
+                                warning={visibleCreditWarning}
+                                onDismiss={() =>
+                                    setDismissedWarningAt(
+                                        visibleCreditWarning.resets_at,
+                                    )
+                                }
+                                onUpgradeClick={() => {
+                                    router.visit(billing.index().url);
+                                }}
+                            />
+                        </div>
+                    )}
                     <ChatInput
                         className="w-full"
                         onSubmit={handleSubmit}
@@ -131,6 +174,19 @@ export default function CreateChat() {
                     </p>
                 </div>
             </section>
+
+            {usageLimitTrigger && (
+                <PaywallModal
+                    open
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            clearUsageLimitTrigger();
+                            clearError();
+                        }
+                    }}
+                    trigger={usageLimitTrigger}
+                />
+            )}
         </AppLayout>
     );
 }

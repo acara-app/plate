@@ -125,6 +125,14 @@ return [
             'handler' => NullHandler::class,
         ],
 
+        'paywall' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/paywall-events.log'),
+            'level' => env('PAYWALL_LOG_LEVEL', 'info'),
+            'days' => env('PAYWALL_LOG_DAYS', 90),
+            'replace_placeholders' => true,
+        ],
+
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],

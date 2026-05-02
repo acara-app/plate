@@ -15,6 +15,7 @@ it('creates monthly subscription checkout successfully', function (): void {
     $product = SubscriptionProduct::factory()->create([
         'name' => 'Premium Plan',
         'stripe_price_id' => 'price_monthly_test',
+        'stripe_lookup_key' => 'lookup_premium_monthly',
     ]);
 
     $stripeMock = new class implements StripeServiceContract
@@ -63,6 +64,11 @@ it('creates monthly subscription checkout successfully', function (): void {
         {
             return null;
         }
+
+        public function getIncompletePaymentUrlForUser(User $user): ?string
+        {
+            return null;
+        }
     };
 
     app()->instance(StripeServiceContract::class, $stripeMock);
@@ -80,6 +86,7 @@ it('creates yearly subscription checkout successfully', function (): void {
     $product = SubscriptionProduct::factory()->create([
         'name' => 'Pro Plan',
         'yearly_stripe_price_id' => 'price_yearly_test',
+        'yearly_stripe_lookup_key' => 'lookup_pro_yearly',
     ]);
 
     $stripeMock = new class implements StripeServiceContract
@@ -112,6 +119,11 @@ it('creates yearly subscription checkout successfully', function (): void {
         }
 
         public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+
+        public function getIncompletePaymentUrlForUser(User $user): ?string
         {
             return null;
         }
@@ -164,6 +176,11 @@ it('redirects when user already has active subscription', function (): void {
         {
             return null;
         }
+
+        public function getIncompletePaymentUrlForUser(User $user): ?string
+        {
+            return null;
+        }
     };
 
     app()->instance(StripeServiceContract::class, $stripeMock);
@@ -180,7 +197,9 @@ it('redirects when user already has active subscription', function (): void {
 it('redirects when price lookup key not found', function (): void {
     $user = User::factory()->create();
     $product = SubscriptionProduct::factory()->create([
+        'name' => 'Mystery Plan',
         'stripe_price_id' => 'price_invalid',
+        'stripe_lookup_key' => 'lookup_mystery_monthly',
     ]);
 
     $stripeMock = new class implements StripeServiceContract
@@ -213,6 +232,11 @@ it('redirects when price lookup key not found', function (): void {
         }
 
         public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+
+        public function getIncompletePaymentUrlForUser(User $user): ?string
         {
             return null;
         }
@@ -271,11 +295,14 @@ it('requires authentication', function (): void {
     $response->assertRedirect(route('login'));
 });
 
-it('handles missing yearly price id gracefully', function (): void {
+it('handles missing yearly lookup key gracefully', function (): void {
     $user = User::factory()->create();
     $product = SubscriptionProduct::factory()->create([
+        'name' => 'Monthly-Only Plan',
         'stripe_price_id' => 'price_monthly',
+        'stripe_lookup_key' => 'lookup_monthly_only',
         'yearly_stripe_price_id' => null,
+        'yearly_stripe_lookup_key' => null,
     ]);
 
     $stripeMock = new class implements StripeServiceContract
@@ -308,6 +335,11 @@ it('handles missing yearly price id gracefully', function (): void {
         }
 
         public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+
+        public function getIncompletePaymentUrlForUser(User $user): ?string
         {
             return null;
         }

@@ -39,16 +39,16 @@ final readonly class CashierSubscriptionController
                     ->with('error', 'You already have an active subscription. Use the billing portal to manage it.');
             }
 
-            $stripePriceId = $data['billing_interval'] === 'yearly'
-                ? $product->yearly_stripe_price_id
-                : $product->stripe_price_id;
-
             $billingInterval = $data['billing_interval'];
-            throw_unless($stripePriceId, Exception::class, sprintf('No %s price ID configured for product: %s', $billingInterval, $product->name));
+            $lookupKey = $billingInterval === 'yearly'
+                ? $product->yearly_stripe_lookup_key
+                : $product->stripe_lookup_key;
 
-            $actualPriceId = $this->stripeService->getPriceIdFromLookupKey($stripePriceId);
+            throw_unless($lookupKey, Exception::class, sprintf('No %s lookup key configured for product: %s', $billingInterval, $product->name));
 
-            throw_unless($actualPriceId, Exception::class, 'No price found with lookup_key: '.$stripePriceId);
+            $actualPriceId = $this->stripeService->getPriceIdFromLookupKey($lookupKey);
+
+            throw_unless($actualPriceId, Exception::class, 'No Stripe price found with lookup_key: '.$lookupKey);
 
             $subscriptionType = str($product->name)->slug()->toString();
 

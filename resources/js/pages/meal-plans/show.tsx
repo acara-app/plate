@@ -1,4 +1,5 @@
 import { show as showGroceryList } from '@/actions/App/Http/Controllers/GroceryListController';
+import { UpsellCard } from '@/components/billing/upsell-card';
 import { OnboardingBanner } from '@/components/onboarding-banner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
@@ -33,7 +34,7 @@ import { MealCard } from '@/pages/meal-plans/elements/meal-card';
 import { NutritionStats } from '@/pages/meal-plans/elements/nutrition-stats';
 import chat from '@/routes/chat';
 import mealPlans from '@/routes/meal-plans';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type PaidSubscriptionTier } from '@/types';
 import {
     CurrentDay,
     GenerationStatus,
@@ -66,6 +67,8 @@ interface MealPlansProps {
     navigation: Navigation | null;
     userDietType: string;
     dietTypes: Record<string, string>;
+    mealPlannerLocked: boolean;
+    requiredTier: PaidSubscriptionTier;
 }
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
@@ -81,6 +84,8 @@ export default function MealPlans({
     navigation,
     userDietType,
     dietTypes,
+    mealPlannerLocked,
+    requiredTier,
 }: MealPlansProps) {
     const { currentUser } = useSharedProps();
     const { t } = useTranslation('common');
@@ -106,6 +111,8 @@ export default function MealPlans({
                     <EmptyMealPlanState
                         userDietType={userDietType}
                         dietTypes={dietTypes}
+                        mealPlannerLocked={mealPlannerLocked}
+                        requiredTier={requiredTier}
                     />
                 ) : (
                     mealPlan &&
@@ -153,11 +160,13 @@ export default function MealPlans({
                                                 }
                                             />
                                         )}
-                                        <RegenerateDayButton
-                                            mealPlan={mealPlan}
-                                            currentDay={currentDay}
-                                            onRegenerateStart={startPolling}
-                                        />
+                                        {!mealPlannerLocked && (
+                                            <RegenerateDayButton
+                                                mealPlan={mealPlan}
+                                                currentDay={currentDay}
+                                                onRegenerateStart={startPolling}
+                                            />
+                                        )}
                                     </div>
                                 </div>
 
@@ -253,11 +262,15 @@ export default function MealPlans({
 interface EmptyMealPlanStateProps {
     userDietType: string;
     dietTypes: Record<string, string>;
+    mealPlannerLocked: boolean;
+    requiredTier: PaidSubscriptionTier;
 }
 
 function EmptyMealPlanState({
     userDietType,
     dietTypes,
+    mealPlannerLocked,
+    requiredTier,
 }: EmptyMealPlanStateProps) {
     const { t } = useTranslation('common');
 
@@ -273,45 +286,52 @@ function EmptyMealPlanState({
                 </p>
             </div>
 
-            <section className="grid gap-6 rounded-xl border bg-card p-5 shadow-sm md:p-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
-                <div className="space-y-5">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                        <Sparkles className="h-6 w-6" />
+            {mealPlannerLocked ? (
+                <UpsellCard
+                    feature="meal_planner"
+                    requiredTier={requiredTier}
+                />
+            ) : (
+                <section className="grid gap-6 rounded-xl border bg-card p-5 shadow-sm md:p-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
+                    <div className="space-y-5">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                            <Sparkles className="h-6 w-6" />
+                        </div>
+                        <div className="space-y-2">
+                            <h2 className="text-2xl font-semibold">
+                                {t('meal_plans.empty_title')}
+                            </h2>
+                            <p className="max-w-xl text-muted-foreground">
+                                {t('meal_plans.no_plans')}
+                            </p>
+                        </div>
+                        <div className="grid gap-3 sm:flex sm:flex-wrap">
+                            <Button className="w-full sm:w-auto" asChild>
+                                <Link
+                                    href={`${chat.create(generateUUID()).url}?mode=create-meal-plan`}
+                                >
+                                    <MessageSquare className="h-4 w-4" />
+                                    {t('meal_plans.create_with_altani')}
+                                </Link>
+                            </Button>
+                            <GenerateMealPlanDialog
+                                defaultDietType={userDietType}
+                                dietTypes={dietTypes}
+                            />
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <h2 className="text-2xl font-semibold">
-                            {t('meal_plans.empty_title')}
-                        </h2>
-                        <p className="max-w-xl text-muted-foreground">
-                            {t('meal_plans.no_plans')}
-                        </p>
-                    </div>
-                    <div className="grid gap-3 sm:flex sm:flex-wrap">
-                        <Button className="w-full sm:w-auto" asChild>
-                            <Link
-                                href={`${chat.create(generateUUID()).url}?mode=create-meal-plan`}
-                            >
-                                <MessageSquare className="h-4 w-4" />
-                                {t('meal_plans.create_with_altani')}
-                            </Link>
-                        </Button>
-                        <GenerateMealPlanDialog
-                            defaultDietType={userDietType}
-                            dietTypes={dietTypes}
+
+                    <div className="mx-auto hidden w-full max-w-64 lg:block">
+                        <img
+                            src="/images/altani/altani_holding_plate-320.webp"
+                            alt=""
+                            aria-hidden="true"
+                            loading="lazy"
+                            className="h-auto w-full"
                         />
                     </div>
-                </div>
-
-                <div className="mx-auto hidden w-full max-w-64 lg:block">
-                    <img
-                        src="/images/altani/altani_holding_plate-320.webp"
-                        alt=""
-                        aria-hidden="true"
-                        loading="lazy"
-                        className="h-auto w-full"
-                    />
-                </div>
-            </section>
+                </section>
+            )}
         </>
     );
 }

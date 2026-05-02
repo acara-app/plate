@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Config;
 use Inertia\OnceProp;
 
@@ -175,6 +176,47 @@ it('loads common translations', function (): void {
         ->and($translations['common'])->toBeArray();
 });
 
+it('shares creditWarning from session flash when present', function (): void {
+    $middleware = new HandleInertiaRequests();
+
+    $request = Request::create('/', 'GET');
+    $request->setLaravelSession(resolve(Store::class));
+    $request->session()->put('credit_warning', [
+        'limit_type' => 'rolling',
+        'tier' => 'free',
+        'tier_label' => 'Free',
+        'current_credits' => 85,
+        'limit_credits' => 100,
+        'percentage' => 85,
+        'resets_at' => '2026-05-03T00:00:00+00:00',
+        'resets_in' => '23 hours 59 minutes',
+    ]);
+
+    $shared = $middleware->share($request);
+
+    expect($shared)->toHaveKey('creditWarning')
+        ->and($shared['creditWarning'])->toMatchArray([
+            'limit_type' => 'rolling',
+            'tier' => 'free',
+            'tier_label' => 'Free',
+            'current_credits' => 85,
+            'limit_credits' => 100,
+            'percentage' => 85,
+        ]);
+});
+
+it('shares creditWarning as null when session flash is empty', function (): void {
+    $middleware = new HandleInertiaRequests();
+
+    $request = Request::create('/', 'GET');
+    $request->setLaravelSession(resolve(Store::class));
+
+    $shared = $middleware->share($request);
+
+    expect($shared)->toHaveKey('creditWarning')
+        ->and($shared['creditWarning'])->toBeNull();
+});
+
 it('shares enablePremiumUpgrades from config', function (): void {
     Config::set('plate.enable_premium_upgrades', true);
     $middleware = new HandleInertiaRequests();
@@ -189,4 +231,54 @@ it('shares enablePremiumUpgrades from config', function (): void {
     $shared = $middleware->share($request);
     expect($shared)->toHaveKey('enablePremiumUpgrades')
         ->and($shared['enablePremiumUpgrades'])->toBeFalse();
+});
+
+it('shares null entitlement when no user is authenticated', function (): void {
+    $middleware = new HandleInertiaRequests();
+
+    $shared = $middleware->share(Request::create('/', 'GET'));
+
+    expect($shared)->toHaveKey('entitlement')
+        ->and($shared['entitlement'])->toBeNull();
+});
+
+it('shares the resolved entitlement for authenticated users', function (): void {
+    Config::set('plate.enable_premium_upgrades', true);
+
+    $user = User::factory()->create();
+
+    $middleware = new HandleInertiaRequests();
+    $request = Request::create('/', 'GET');
+    $request->setUserResolver(fn () => $user);
+
+    $shared = $middleware->share($request);
+
+    expect($shared)->toHaveKey('entitlement')
+        ->and($shared['entitlement'])->toMatchArray([
+            'tier' => 'free',
+            'tier_label' => 'Free',
+            'payment_pending' => false,
+            'payment_recovery_url' => null,
+            'premium_enforcement_active' => true,
+            'on_grace_period' => false,
+            'grace_period_ends_at' => null,
+        ]);
+});
+
+it('marks the entitlement as unrestricted when premium upgrades are off', function (): void {
+    Config::set('plate.enable_premium_upgrades', false);
+
+    $user = User::factory()->create();
+
+    $middleware = new HandleInertiaRequests();
+    $request = Request::create('/', 'GET');
+    $request->setUserResolver(fn () => $user);
+
+    $shared = $middleware->share($request);
+
+    expect($shared['entitlement'])->toMatchArray([
+        'tier' => 'free',
+        'premium_enforcement_active' => false,
+        'payment_pending' => false,
+    ]);
 });

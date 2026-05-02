@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 
 import HeadingSmall from '@/components/heading-small';
+import { Badge } from '@/components/ui/badge';
 import { UsageWidget } from '@/components/usage-widget';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
@@ -22,9 +23,14 @@ interface AiUsageData {
     limit: number;
     percentage: number;
     resets_in: string;
+    over_limit: boolean;
 }
 
 interface AiUsage {
+    tier: 'free' | 'basic' | 'plus';
+    tier_label: string;
+    payment_pending: boolean;
+    premium_enforcement_active: boolean;
     rolling: AiUsageData;
     weekly: AiUsageData;
     monthly: AiUsageData;
@@ -44,6 +50,9 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
 
 export default function Index({ billingHistory, aiUsage }: Props) {
     const { t } = useTranslation('common');
+
+    const showTierBadge = aiUsage?.premium_enforcement_active === true;
+
     return (
         <AppLayout breadcrumbs={getBreadcrumbs(t)}>
             <Head title={t('billing.title')} />
@@ -56,25 +65,46 @@ export default function Index({ billingHistory, aiUsage }: Props) {
                     />
 
                     {aiUsage && (
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            <UsageWidget
-                                title={t('billing.usage.rolling')}
-                                currentAmount={aiUsage.rolling.current}
-                                limit={aiUsage.rolling.limit}
-                                resetsIn={aiUsage.rolling.resets_in}
-                            />
-                            <UsageWidget
-                                title={t('billing.usage.weekly')}
-                                currentAmount={aiUsage.weekly.current}
-                                limit={aiUsage.weekly.limit}
-                                resetsIn={aiUsage.weekly.resets_in}
-                            />
-                            <UsageWidget
-                                title={t('billing.usage.monthly')}
-                                currentAmount={aiUsage.monthly.current}
-                                limit={aiUsage.monthly.limit}
-                                resetsIn={aiUsage.monthly.resets_in}
-                            />
+                        <div className="space-y-4">
+                            {showTierBadge && (
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="text-xs font-medium text-muted-foreground">
+                                        {t('billing.tier.current_plan')}
+                                    </span>
+                                    <Badge variant="secondary">
+                                        {aiUsage.tier_label}
+                                    </Badge>
+                                    {aiUsage.payment_pending && (
+                                        <Badge variant="destructive">
+                                            {t('billing.tier.payment_pending')}
+                                        </Badge>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                <UsageWidget
+                                    title={t('billing.usage.rolling')}
+                                    currentAmount={aiUsage.rolling.current}
+                                    limit={aiUsage.rolling.limit}
+                                    resetsIn={aiUsage.rolling.resets_in}
+                                    overLimit={aiUsage.rolling.over_limit}
+                                />
+                                <UsageWidget
+                                    title={t('billing.usage.weekly')}
+                                    currentAmount={aiUsage.weekly.current}
+                                    limit={aiUsage.weekly.limit}
+                                    resetsIn={aiUsage.weekly.resets_in}
+                                    overLimit={aiUsage.weekly.over_limit}
+                                />
+                                <UsageWidget
+                                    title={t('billing.usage.monthly')}
+                                    currentAmount={aiUsage.monthly.current}
+                                    limit={aiUsage.monthly.limit}
+                                    resetsIn={aiUsage.monthly.resets_in}
+                                    overLimit={aiUsage.monthly.over_limit}
+                                />
+                            </div>
                         </div>
                     )}
 
