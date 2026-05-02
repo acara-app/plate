@@ -21,9 +21,7 @@ final readonly class StoreMealPlanController
         #[CurrentUser] private User $user,
         private AnalyzeGlucoseForNotificationAction $analyzeGlucose,
         private AuthorizeGatedFeature $authorize,
-    ) {
-        //
-    }
+    ) {}
 
     public function __invoke(StoreMealPlanRequest $request): RedirectResponse
     {

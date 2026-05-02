@@ -32,13 +32,16 @@ final readonly class GetAiUsageForBillingAction
         $entitlement = $this->resolveUserTier->resolve($user);
         $limits = $this->limitsForTier($entitlement->tier);
         $multiplier = (int) config('plate.credit_multiplier'); /** @phpstan-ignore cast.int */
-        $rollingPeriodStart = now()->subHours((int) $limits['rolling']['period_hours']);
+        $now = CarbonImmutable::now();
+        $rollingHours = (int) $limits['rolling']['period_hours'];
+        $rollingPeriodStart = $now->subHours($rollingHours);
         $subscription = $user->activeSubscription();
         $periodStart = $this->getPeriodStart($subscription);
         $periodEnd = $this->getPeriodEnd($subscription);
 
-        $rollingCost = $this->getCostForPeriod($user, $rollingPeriodStart, now());
-        $periodCost = $this->getCostForPeriod($user, $periodStart, now());
+        $rollingCost = $this->getCostForPeriod($user, $rollingPeriodStart, $now);
+        $periodCost = $this->getCostForPeriod($user, $periodStart, $now);
+        $rollingResetsAt = $this->rollingResetsAt($user, $now, $rollingPeriodStart, $rollingHours);
 
         return [
             'tier' => $entitlement->tier->value,
@@ -49,7 +52,7 @@ final readonly class GetAiUsageForBillingAction
                 $rollingCost,
                 (float) $limits['rolling']['limit'],
                 $multiplier,
-                now()->addHours((int) $limits['rolling']['period_hours']),
+                $rollingResetsAt,
             ),
             'weekly' => $this->buildBucket(
                 $periodCost,
@@ -125,6 +128,19 @@ final readonly class GetAiUsageForBillingAction
             ->where('created_at', '>=', $start)
             ->where('created_at', '<=', $end)
             ->sum('cost');
+    }
+
+    private function rollingResetsAt(User $user, CarbonImmutable $now, CarbonImmutable $periodStart, int $hours): CarbonImmutable
+    {
+        $oldest = AiUsage::query()
+            ->forUser($user)
+            ->where('created_at', '>=', $periodStart)
+            ->where('created_at', '<=', $now)
+            ->min('created_at');
+
+        return is_string($oldest)
+            ? CarbonImmutable::parse($oldest)->addHours($hours)
+            : $now->addHours($hours);
     }
 
     private function toCredits(float $dollars, int $multiplier): int

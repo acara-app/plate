@@ -188,3 +188,42 @@ it('exposes the resets_at timestamp on the exception for the breached window', f
         expect(now()->diffInHours($usageLimitExceededException->resetsAt, true))->toBeGreaterThanOrEqual(23);
     }
 });
+
+it('reports the rolling resets_at as the oldest in-window usage plus period_hours', function (): void {
+    $user = User::factory()->create();
+
+    $oldestAt = now()->subHours(6);
+
+    AiUsage::factory()->create([
+        'user_id' => $user->id,
+        'cost' => 0.099,
+        'created_at' => $oldestAt,
+    ]);
+
+    try {
+        enforceUsage()->handle($user, ModelName::GPT_5_4_MINI);
+        expect(false)->toBeTrue('expected UsageLimitExceededException to be thrown');
+    } catch (UsageLimitExceededException $exception) {
+        expect($exception->limitType)->toBe('rolling');
+
+        $expectedResetsAt = $oldestAt->copy()->addHours(24);
+        expect($exception->resetsAt->timestamp)
+            ->toBeGreaterThan(now()->addHours(17)->timestamp)
+            ->toBeLessThan(now()->addHours(19)->timestamp)
+            ->and(abs($exception->resetsAt->timestamp - $expectedResetsAt->timestamp))->toBeLessThan(5);
+    }
+});
+
+it('falls back to now+period_hours for the rolling reset when no in-window usage exists', function (): void {
+    $user = User::factory()->create();
+
+    Config::set('plate.tier_limits.free.rolling.limit', 0.001);
+
+    try {
+        enforceUsage()->handle($user, ModelName::GPT_5_4_MINI);
+        expect(false)->toBeTrue('expected UsageLimitExceededException to be thrown');
+    } catch (UsageLimitExceededException $exception) {
+        expect($exception->limitType)->toBe('rolling')
+            ->and(now()->diffInHours($exception->resetsAt, true))->toBeGreaterThanOrEqual(23);
+    }
+});

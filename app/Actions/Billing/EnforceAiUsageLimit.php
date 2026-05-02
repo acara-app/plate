@@ -40,7 +40,7 @@ final readonly class EnforceAiUsageLimit
         foreach (['rolling', 'weekly', 'monthly'] as $window) {
             $windowConfig = $limits[$window];
             $periodStart = $this->periodStart($now, $window, $windowConfig);
-            $periodEnd = $this->periodEnd($now, $window, $windowConfig);
+            $periodEnd = $this->periodEnd($user, $now, $window, $windowConfig, $periodStart);
             $current = $this->getCostForPeriod($user, $periodStart, $now);
             $limit = (float) $windowConfig['limit'];
 
@@ -114,10 +114,22 @@ final readonly class EnforceAiUsageLimit
     /**
      * @param  array<string, float|int>  $windowConfig
      */
-    private function periodEnd(CarbonImmutable $now, string $window, array $windowConfig): CarbonImmutable
+    private function periodEnd(User $user, CarbonImmutable $now, string $window, array $windowConfig, CarbonImmutable $periodStart): CarbonImmutable
     {
+        if ($window === 'rolling') {
+            $hours = (int) $windowConfig['period_hours'];
+            $oldest = AiUsage::query()
+                ->forUser($user)
+                ->where('created_at', '>=', $periodStart)
+                ->where('created_at', '<=', $now)
+                ->min('created_at');
+
+            return is_string($oldest)
+                ? CarbonImmutable::parse($oldest)->addHours($hours)
+                : $now->addHours($hours);
+        }
+
         return match ($window) {
-            'rolling' => $now->addHours((int) $windowConfig['period_hours']),
             'weekly' => $now->addDays((int) $windowConfig['period_days']),
             'monthly' => $now->addDays((int) $windowConfig['period_days']),
             default => $now,

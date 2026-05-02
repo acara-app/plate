@@ -14,10 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 final readonly class CashierSubscriptionController
 {
-    public function __construct(private StripeServiceContract $stripeService)
-    {
-        //
-    }
+    public function __construct(private StripeServiceContract $stripeService) {}
 
     public function __invoke(CreateSubscriptionRequest $request): RedirectResponse|Response
     {

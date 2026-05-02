@@ -22,9 +22,7 @@ final readonly class RegenerateMealPlanController
         #[CurrentUser] private User $user,
         private AnalyzeGlucoseForNotificationAction $analyzeGlucose,
         private AuthorizeGatedFeature $authorize,
-    ) {
-        //
-    }
+    ) {}
 
     public function store(): RedirectResponse
     {

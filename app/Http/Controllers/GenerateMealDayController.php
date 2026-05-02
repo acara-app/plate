@@ -21,9 +21,7 @@ final readonly class GenerateMealDayController
     public function __construct(
         #[CurrentUser] private User $user,
         private AuthorizeGatedFeature $authorize,
-    ) {
-        //
-    }
+    ) {}
 
     public function __invoke(Request $request, MealPlan $mealPlan): JsonResponse
     {

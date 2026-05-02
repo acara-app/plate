@@ -20,9 +20,7 @@ final readonly class RegenerateMealPlanDayController
     public function __construct(
         #[CurrentUser] private User $user,
         private AuthorizeGatedFeature $authorize,
-    ) {
-        //
-    }
+    ) {}
 
     public function __invoke(RegenerateMealPlanDayRequest $request, MealPlan $mealPlan): RedirectResponse
     {

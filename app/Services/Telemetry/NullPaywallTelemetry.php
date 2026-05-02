@@ -15,8 +15,5 @@ final readonly class NullPaywallTelemetry implements EmitsPaywallEvents
      *
      * @codeCoverageIgnore
      */
-    public function emit(PaywallEvent $event, ?User $user = null, array $payload = []): void
-    {
-        //
-    }
+    public function emit(PaywallEvent $event, ?User $user = null, array $payload = []): void {}
 }

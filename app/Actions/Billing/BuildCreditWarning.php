@@ -45,11 +45,8 @@ final readonly class BuildCreditWarning
                 continue;
             }
 
-            $cost = $this->getCostForPeriod(
-                $user,
-                $this->periodStart($now, $window, $windowConfig),
-                $now,
-            );
+            $periodStart = $this->periodStart($now, $window, $windowConfig);
+            $cost = $this->getCostForPeriod($user, $periodStart, $now);
 
             $ratio = $cost / $limit;
             if ($ratio < self::WARNING_THRESHOLD) {
@@ -66,7 +63,7 @@ final readonly class BuildCreditWarning
                 continue;
             }
 
-            $resetsAt = $this->periodEnd($now, $window, $windowConfig);
+            $resetsAt = $this->periodEnd($user, $now, $window, $windowConfig, $periodStart);
             $candidatePercentage = $percentage;
             $candidateWindow = $window;
             $candidate = new CreditWarning(
@@ -137,10 +134,22 @@ final readonly class BuildCreditWarning
     /**
      * @param  array<string, float|int>  $windowConfig
      */
-    private function periodEnd(CarbonImmutable $now, string $window, array $windowConfig): CarbonImmutable
+    private function periodEnd(User $user, CarbonImmutable $now, string $window, array $windowConfig, CarbonImmutable $periodStart): CarbonImmutable
     {
+        if ($window === 'rolling') {
+            $hours = (int) $windowConfig['period_hours'];
+            $oldest = AiUsage::query()
+                ->forUser($user)
+                ->where('created_at', '>=', $periodStart)
+                ->where('created_at', '<=', $now)
+                ->min('created_at');
+
+            return is_string($oldest)
+                ? CarbonImmutable::parse($oldest)->addHours($hours)
+                : $now->addHours($hours);
+        }
+
         return match ($window) {
-            'rolling' => $now->addHours((int) $windowConfig['period_hours']),
             'weekly' => $now->addDays((int) $windowConfig['period_days']),
             'monthly' => $now->addDays((int) $windowConfig['period_days']),
             default => $now,

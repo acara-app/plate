@@ -31,9 +31,7 @@ final readonly class ShowMealPlansController
         #[CurrentUser] private User $user,
         private ResolvesUserTier $tierResolver,
         private EmitsPaywallEvents $telemetry,
-    ) {
-        //
-    }
+    ) {}
 
     public function __invoke(Request $request): Response
     {
