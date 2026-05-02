@@ -203,14 +203,14 @@ it('reports the rolling resets_at as the oldest in-window usage plus period_hour
     try {
         enforceUsage()->handle($user, ModelName::GPT_5_4_MINI);
         expect(false)->toBeTrue('expected UsageLimitExceededException to be thrown');
-    } catch (UsageLimitExceededException $exception) {
-        expect($exception->limitType)->toBe('rolling');
+    } catch (UsageLimitExceededException $usageLimitExceededException) {
+        expect($usageLimitExceededException->limitType)->toBe('rolling');
 
         $expectedResetsAt = $oldestAt->copy()->addHours(24);
-        expect($exception->resetsAt->timestamp)
+        expect($usageLimitExceededException->resetsAt->timestamp)
             ->toBeGreaterThan(now()->addHours(17)->timestamp)
             ->toBeLessThan(now()->addHours(19)->timestamp)
-            ->and(abs($exception->resetsAt->timestamp - $expectedResetsAt->timestamp))->toBeLessThan(5);
+            ->and(abs($usageLimitExceededException->resetsAt->timestamp - $expectedResetsAt->timestamp))->toBeLessThan(5);
     }
 });
 
@@ -222,8 +222,8 @@ it('falls back to now+period_hours for the rolling reset when no in-window usage
     try {
         enforceUsage()->handle($user, ModelName::GPT_5_4_MINI);
         expect(false)->toBeTrue('expected UsageLimitExceededException to be thrown');
-    } catch (UsageLimitExceededException $exception) {
-        expect($exception->limitType)->toBe('rolling')
-            ->and(now()->diffInHours($exception->resetsAt, true))->toBeGreaterThanOrEqual(23);
+    } catch (UsageLimitExceededException $usageLimitExceededException) {
+        expect($usageLimitExceededException->limitType)->toBe('rolling')
+            ->and(now()->diffInHours($usageLimitExceededException->resetsAt, true))->toBeGreaterThanOrEqual(23);
     }
 });
