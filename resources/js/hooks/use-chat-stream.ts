@@ -36,9 +36,7 @@ interface UsageLimitExceededPayload {
     resets_in: string;
 }
 
-function isUsageLimitPayload(
-    body: unknown,
-): body is UsageLimitExceededPayload {
+function isUsageLimitPayload(body: unknown): body is UsageLimitExceededPayload {
     if (typeof body !== 'object' || body === null) {
         return false;
     }
@@ -68,9 +66,7 @@ export function useChatStream({
 
                     if (response.status === 402) {
                         try {
-                            const body: unknown = await response
-                                .clone()
-                                .json();
+                            const body: unknown = await response.clone().json();
                             if (isUsageLimitPayload(body)) {
                                 setUsageLimitTrigger({
                                     kind: 'cap',
