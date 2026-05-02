@@ -271,7 +271,6 @@ class extends Component
                             type="file"
                             wire:model="photo"
                             accept="image/*"
-                            capture="environment"
                             class="hidden"
                             id="photo-upload"
                             @disabled($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))
