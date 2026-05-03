@@ -14,22 +14,16 @@ it('exposes paywall plan copy for both paid tiers', function (string $tier): voi
         ->and(Lang::has(sprintf('common.billing.paywall.plans.%s.pitch', $tier)))->toBeTrue();
 })->with(['basic', 'plus']);
 
-it('exposes paywall feature copy for every gated feature', function (string $feature): void {
-    expect(Lang::has('common.billing.paywall.features.'.$feature))->toBeTrue()
-        ->and(__('common.billing.paywall.features.'.$feature))->not->toBeEmpty();
-})->with(['meal_planner', 'image_analysis', 'memory', 'health_sync']);
-
 it('exposes cap-trigger paywall headings and the upgrade-to copy', function (): void {
     expect(Lang::has('common.billing.paywall.cap_title'))->toBeTrue()
         ->and(Lang::has('common.billing.paywall.cap_description'))->toBeTrue()
         ->and(Lang::has('common.billing.paywall.upgrade_to'))->toBeTrue();
 });
 
-it('exposes upsell-card copy for the inline feature gate', function (): void {
-    expect(Lang::has('common.billing.upsell.card_eyebrow'))->toBeTrue()
-        ->and(Lang::has('common.billing.upsell.card_title'))->toBeTrue()
-        ->and(Lang::has('common.billing.upsell.card_description'))->toBeTrue()
-        ->and(Lang::has('common.billing.upsell.upgrade_button'))->toBeTrue();
+it('exposes pro-model upsell copy for the meal planner banner', function (): void {
+    expect(Lang::has('common.billing.pro_model_upsell.title'))->toBeTrue()
+        ->and(Lang::has('common.billing.pro_model_upsell.body'))->toBeTrue()
+        ->and(Lang::has('common.billing.pro_model_upsell.cta'))->toBeTrue();
 });
 
 it('exposes a label for every subscription tier', function (string $tier): void {

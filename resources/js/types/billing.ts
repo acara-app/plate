@@ -11,11 +11,6 @@ export interface Entitlement {
 export type SubscriptionTier = 'free' | 'basic' | 'plus';
 export type PaidSubscriptionTier = Exclude<SubscriptionTier, 'free'>;
 export type LimitType = 'rolling' | 'weekly' | 'monthly';
-export type GatedFeature =
-    | 'meal_planner'
-    | 'image_analysis'
-    | 'memory'
-    | 'health_sync';
 
 export interface CreditWarning {
     limit_type: LimitType;
@@ -36,12 +31,3 @@ export interface PaywallCapTrigger {
     limitCredits: number;
     resetsIn: string;
 }
-
-export interface PaywallFeatureTrigger {
-    kind: 'feature';
-    feature: GatedFeature;
-    requiredTier: PaidSubscriptionTier;
-    currentTier: SubscriptionTier;
-}
-
-export type PaywallTrigger = PaywallCapTrigger | PaywallFeatureTrigger;

@@ -1,5 +1,5 @@
 import { show as showGroceryList } from '@/actions/App/Http/Controllers/GroceryListController';
-import { UpsellCard } from '@/components/billing/upsell-card';
+import { ProModelUpsellBanner } from '@/components/billing/pro-model-upsell-banner';
 import { OnboardingBanner } from '@/components/onboarding-banner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
@@ -34,7 +34,7 @@ import { MealCard } from '@/pages/meal-plans/elements/meal-card';
 import { NutritionStats } from '@/pages/meal-plans/elements/nutrition-stats';
 import chat from '@/routes/chat';
 import mealPlans from '@/routes/meal-plans';
-import { type BreadcrumbItem, type PaidSubscriptionTier } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import {
     CurrentDay,
     GenerationStatus,
@@ -67,8 +67,7 @@ interface MealPlansProps {
     navigation: Navigation | null;
     userDietType: string;
     dietTypes: Record<string, string>;
-    mealPlannerLocked: boolean;
-    requiredTier: PaidSubscriptionTier;
+    proModelUpsell: boolean;
 }
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
@@ -84,8 +83,7 @@ export default function MealPlans({
     navigation,
     userDietType,
     dietTypes,
-    mealPlannerLocked,
-    requiredTier,
+    proModelUpsell,
 }: MealPlansProps) {
     const { currentUser } = useSharedProps();
     const { t } = useTranslation('common');
@@ -105,14 +103,13 @@ export default function MealPlans({
             <Head title={t('meal_plans.title')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-hidden p-4 md:p-6">
+                {proModelUpsell && <ProModelUpsellBanner />}
                 {!currentUser?.is_onboarded ? (
                     <OnboardingBanner />
                 ) : !mealPlan ? (
                     <EmptyMealPlanState
                         userDietType={userDietType}
                         dietTypes={dietTypes}
-                        mealPlannerLocked={mealPlannerLocked}
-                        requiredTier={requiredTier}
                     />
                 ) : (
                     mealPlan &&
@@ -160,13 +157,11 @@ export default function MealPlans({
                                                 }
                                             />
                                         )}
-                                        {!mealPlannerLocked && (
-                                            <RegenerateDayButton
-                                                mealPlan={mealPlan}
-                                                currentDay={currentDay}
-                                                onRegenerateStart={startPolling}
-                                            />
-                                        )}
+                                        <RegenerateDayButton
+                                            mealPlan={mealPlan}
+                                            currentDay={currentDay}
+                                            onRegenerateStart={startPolling}
+                                        />
                                     </div>
                                 </div>
 
@@ -262,15 +257,11 @@ export default function MealPlans({
 interface EmptyMealPlanStateProps {
     userDietType: string;
     dietTypes: Record<string, string>;
-    mealPlannerLocked: boolean;
-    requiredTier: PaidSubscriptionTier;
 }
 
 function EmptyMealPlanState({
     userDietType,
     dietTypes,
-    mealPlannerLocked,
-    requiredTier,
 }: EmptyMealPlanStateProps) {
     const { t } = useTranslation('common');
 
@@ -286,13 +277,7 @@ function EmptyMealPlanState({
                 </p>
             </div>
 
-            {mealPlannerLocked ? (
-                <UpsellCard
-                    feature="meal_planner"
-                    requiredTier={requiredTier}
-                />
-            ) : (
-                <section className="grid gap-6 rounded-xl border bg-card p-5 shadow-sm md:p-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
+            <section className="grid gap-6 rounded-xl border bg-card p-5 shadow-sm md:p-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
                     <div className="space-y-5">
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                             <Sparkles className="h-6 w-6" />
@@ -331,7 +316,6 @@ function EmptyMealPlanState({
                         />
                     </div>
                 </section>
-            )}
         </>
     );
 }

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\Billing\AuthorizeGatedFeature;
-use App\Enums\GatedFeature;
 use App\Enums\MealPlanGenerationStatus;
 use App\Http\Requests\RegenerateMealPlanDayRequest;
 use App\Models\MealPlan;
@@ -19,13 +17,10 @@ final readonly class RegenerateMealPlanDayController
 {
     public function __construct(
         #[CurrentUser] private User $user,
-        private AuthorizeGatedFeature $authorize,
     ) {}
 
     public function __invoke(RegenerateMealPlanDayRequest $request, MealPlan $mealPlan): RedirectResponse
     {
-        $this->authorize->handle($this->user, GatedFeature::MealPlanner);
-
         $dayNumber = $request->integer('day', 1);
 
         $mealPlan->meals()

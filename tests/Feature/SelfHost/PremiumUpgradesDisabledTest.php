@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Actions\Billing\AuthorizeGatedFeature;
 use App\Actions\Billing\BuildCreditWarning;
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
@@ -12,7 +11,6 @@ use App\Contracts\Ai\GeneratesMealPlans;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Contracts\Telemetry\EmitsPaywallEvents;
 use App\Enums\AgentMode;
-use App\Enums\GatedFeature;
 use App\Enums\ModelName;
 use App\Enums\SubscriptionTier;
 use App\Models\AiUsage;
@@ -64,7 +62,7 @@ it('does not gate the meal planner UI when the flag is off', function (): void {
 
     $response->assertSuccessful()
         ->assertInertia(fn ($page) => $page
-            ->where('mealPlannerLocked', false)
+            ->where('proModelUpsell', false)
             ->where('entitlement.premium_enforcement_active', false)
             ->where('entitlement.tier', 'free')
         );
@@ -123,16 +121,6 @@ it('returns no 402 from chat stream preflight when the flag is off', function ()
     ]);
 
     expect($response->getStatusCode())->not->toBe(402);
-});
-
-it('treats AuthorizeGatedFeature as always allowed when the flag is off', function (): void {
-    $user = User::factory()->create();
-    $gate = resolve(AuthorizeGatedFeature::class);
-
-    foreach (GatedFeature::cases() as $feature) {
-        $gate->handle($user, $feature);
-        expect($gate->check($user, $feature))->toBeTrue();
-    }
 });
 
 it('returns null from BuildCreditWarning when the flag is off', function (): void {
@@ -208,7 +196,6 @@ it('does not emit paywall telemetry events when the flag is off', function (): v
 
     resolve(EnforceAiUsageLimit::class)->handle($user, ModelName::GPT_5_4_MINI);
     resolve(BuildCreditWarning::class)->handle($user);
-    resolve(AuthorizeGatedFeature::class)->handle($user, GatedFeature::Memory);
 
     expect($fake->emitted)->toBeEmpty();
 });

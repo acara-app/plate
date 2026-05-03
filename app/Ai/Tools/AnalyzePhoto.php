@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Actions\Billing\AuthorizeGatedFeature;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Enums\DataSensitivity;
-use App\Enums\GatedFeature;
-use App\Exceptions\Billing\FeatureGateException;
 use App\Models\User;
 use App\Utilities\LanguageUtil;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -45,23 +42,6 @@ final readonly class AnalyzePhoto implements Tool
         }
 
         $user = Auth::user();
-
-        if ($user instanceof User) {
-            try {
-                resolve(AuthorizeGatedFeature::class)->handle($user, GatedFeature::ImageAnalysis);
-            } catch (FeatureGateException $exception) {
-                return (string) json_encode([
-                    'error' => $exception->toPayload()['error'],
-                    'feature' => $exception->feature->value,
-                    'required_tier' => $exception->requiredTier->value,
-                    'required_tier_label' => $exception->requiredTier->label(),
-                    'message' => sprintf(
-                        'Meal photo analysis is part of the %s plan. Tell the user to upgrade in their billing settings to scan their meal photos.',
-                        $exception->requiredTier->label(),
-                    ),
-                ]);
-            }
-        }
 
         $image = $this->images[0];
 

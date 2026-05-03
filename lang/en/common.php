@@ -845,26 +845,19 @@ return [
                 'basic' => [
                     'name' => 'Basic',
                     'price' => '$9/mo',
-                    'pitch' => 'Higher limits, meal planner, and meal photo analysis.',
+                    'pitch' => 'More AI credits each period — keep going past the free cap.',
                 ],
                 'plus' => [
                     'name' => 'Plus',
                     'price' => '$18/mo',
-                    'pitch' => 'Memory, Apple Health sync, and the highest limits.',
+                    'pitch' => 'Highest credits, plus Memory and Apple Health sync.',
                 ],
             ],
-            'features' => [
-                'meal_planner' => 'Meal Planner',
-                'image_analysis' => 'Meal photo analysis',
-                'memory' => 'Memory',
-                'health_sync' => 'Apple Health sync',
-            ],
         ],
-        'upsell' => [
-            'card_eyebrow' => 'Part of {{tier}}',
-            'card_title' => 'Unlock {{feature}}',
-            'card_description' => 'Upgrade to {{tier}} ({{price}}) to use {{feature}} and more.',
-            'upgrade_button' => 'Upgrade to {{tier}}',
+        'pro_model_upsell' => [
+            'title' => 'Upgrade for the Pro model',
+            'body' => 'Get smarter, more accurate meal-plan recommendations on every generation.',
+            'cta' => 'See plans',
         ],
         'history' => [
             'title' => 'Invoice History',

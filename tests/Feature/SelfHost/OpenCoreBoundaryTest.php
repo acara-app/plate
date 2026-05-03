@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Actions\Billing\AuthorizeGatedFeature;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Contracts\Memory\DispatchesMemoryExtraction;
 use App\Contracts\Memory\ManagesMemoryContext;
 use App\Contracts\Memory\PullsConversationHistory;
-use App\Enums\GatedFeature;
 use App\Enums\SubscriptionTier;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
@@ -45,13 +43,6 @@ it('resolves tiers from Stripe even when the legacy is_verified flag is true', f
         ->create();
 
     expect(resolve(ResolvesUserTier::class)->resolve($user->fresh())->tier)->toBe(SubscriptionTier::Basic);
-});
-
-it('does not honor is_verified for new feature gates', function (): void {
-    $user = User::factory()->verified()->create();
-
-    expect(resolve(AuthorizeGatedFeature::class)->check($user, GatedFeature::MealPlanner))->toBeFalse()
-        ->and(resolve(AuthorizeGatedFeature::class)->check($user, GatedFeature::Memory))->toBeFalse();
 });
 
 it('keeps null memory implementations available as community-safe fallbacks', function (): void {

@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\AnalyzeGlucoseForNotificationAction;
-use App\Actions\Billing\AuthorizeGatedFeature;
 use App\Enums\DietType;
-use App\Enums\GatedFeature;
 use App\Http\Requests\StoreMealPlanRequest;
 use App\Models\User;
 use App\Workflows\MealPlanInitializeWorkflow;
@@ -20,14 +18,11 @@ final readonly class StoreMealPlanController
     public function __construct(
         #[CurrentUser] private User $user,
         private AnalyzeGlucoseForNotificationAction $analyzeGlucose,
-        private AuthorizeGatedFeature $authorize,
     ) {}
 
     public function __invoke(StoreMealPlanRequest $request): RedirectResponse
     {
         $user = $this->user;
-
-        $this->authorize->handle($user, GatedFeature::MealPlanner);
 
         $glucoseAnalysis = $this->analyzeGlucose->handle($user);
         $dietTypeInput = $request->string('diet_type')->toString();
