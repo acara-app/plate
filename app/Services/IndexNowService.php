@@ -25,17 +25,15 @@ final readonly class IndexNowService implements IndexNowServiceContract
 
     public function __construct()
     {
-        /** @var string|null $configHost */
         $configHost = config('services.indexnow.host');
-        /** @var string $appUrl */
-        $appUrl = config('app.url');
-        $this->host = $configHost ?? (string) parse_url($appUrl, PHP_URL_HOST);
-        /** @var string|null $key */
+        $appUrl = config()->string('app.url');
+        $this->host = is_string($configHost) ? $configHost : (string) parse_url($appUrl, PHP_URL_HOST);
+
         $key = config('services.indexnow.key');
-        $this->key = $key;
-        /** @var string|null $keyLocation */
+        $this->key = is_string($key) ? $key : null;
+
         $keyLocation = config('services.indexnow.key_location');
-        $this->keyLocation = $keyLocation;
+        $this->keyLocation = is_string($keyLocation) ? $keyLocation : null;
     }
 
     /**

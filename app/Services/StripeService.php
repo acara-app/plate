@@ -6,9 +6,11 @@ namespace App\Services;
 
 use App\Contracts\Services\StripeServiceContract;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Laravel\Cashier\Payment;
 use Laravel\Cashier\Subscription;
 use RuntimeException;
+use Stripe\Exception\ApiErrorException;
 use Stripe\Price;
 use Stripe\Stripe;
 
@@ -95,5 +97,23 @@ final readonly class StripeService implements StripeServiceContract
         $url = $latestPayment->hosted_invoice_url ?? null;
 
         return is_string($url) ? $url : null;
+    }
+
+    public function getIncompletePaymentUrlForUser(User $user): ?string
+    {
+        /** @var Collection<int, Subscription> $subscriptions */
+        $subscriptions = $user->subscriptions()->get();
+
+        $incomplete = $subscriptions->first(fn (Subscription $subscription): bool => $subscription->incomplete());
+
+        if (! $incomplete instanceof Subscription) {
+            return null;
+        }
+
+        try {
+            return $this->getIncompletePaymentUrl($incomplete);
+        } catch (ApiErrorException) {
+            return null;
+        }
     }
 }

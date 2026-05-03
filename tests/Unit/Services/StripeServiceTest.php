@@ -221,3 +221,11 @@ it('returns null when hosted invoice url is not a string', function (): void {
 
     expect($url)->toBeNull();
 });
+
+it('returns null from getIncompletePaymentUrlForUser when the user has no incomplete subscription', function (): void {
+    $user = User::factory()->create();
+
+    $service = new StripeService();
+
+    expect($service->getIncompletePaymentUrlForUser($user))->toBeNull();
+});

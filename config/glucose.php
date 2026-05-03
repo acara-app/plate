@@ -13,9 +13,9 @@ return [
     |
     */
 
-    'hyperglycemia_threshold' => env('GLUCOSE_HYPERGLYCEMIA_THRESHOLD', 140),
+    'hyperglycemia_threshold' => (int) env('GLUCOSE_HYPERGLYCEMIA_THRESHOLD', 140),
 
-    'hypoglycemia_threshold' => env('GLUCOSE_HYPOGLYCEMIA_THRESHOLD', 70),
+    'hypoglycemia_threshold' => (int) env('GLUCOSE_HYPOGLYCEMIA_THRESHOLD', 70),
 
     /*
     |--------------------------------------------------------------------------
@@ -26,7 +26,7 @@ return [
     |
     */
 
-    'high_readings_percent_trigger' => env('GLUCOSE_HIGH_READINGS_TRIGGER', 30),
+    'high_readings_percent_trigger' => (float) env('GLUCOSE_HIGH_READINGS_TRIGGER', 30),
 
-    'analysis_window_days' => env('GLUCOSE_ANALYSIS_WINDOW_DAYS', 7),
+    'analysis_window_days' => (int) env('GLUCOSE_ANALYSIS_WINDOW_DAYS', 7),
 ];

@@ -19,8 +19,7 @@ it('returns empty billing history when user is null', function (): void {
         }
     };
 
-    $action = new GetAiUsageForBillingAction();
-    $controller = new BillingHistoryController($action);
+    $controller = new BillingHistoryController(resolve(GetAiUsageForBillingAction::class));
     $response = $controller->index($request);
 
     expect($response)->toBeInstanceOf(InertiaResponse::class);
@@ -39,8 +38,7 @@ it('returns billing history for authenticated user', function (): void {
         }
     };
 
-    $action = new GetAiUsageForBillingAction();
-    $controller = new BillingHistoryController($action);
+    $controller = new BillingHistoryController(resolve(GetAiUsageForBillingAction::class));
 
     $response = $controller->index($request);
 
@@ -60,8 +58,7 @@ it('returns empty billing history when exception occurs fetching invoices', func
         }
     };
 
-    $action = new GetAiUsageForBillingAction();
-    $controller = new BillingHistoryController($action);
+    $controller = new BillingHistoryController(resolve(GetAiUsageForBillingAction::class));
     $response = $controller->index($request);
 
     expect($response)->toBeInstanceOf(InertiaResponse::class);

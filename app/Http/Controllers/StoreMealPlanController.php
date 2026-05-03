@@ -18,9 +18,7 @@ final readonly class StoreMealPlanController
     public function __construct(
         #[CurrentUser] private User $user,
         private AnalyzeGlucoseForNotificationAction $analyzeGlucose,
-    ) {
-        //
-    }
+    ) {}
 
     public function __invoke(StoreMealPlanRequest $request): RedirectResponse
     {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\Billing\ResolvesUserTier;
 use App\Contracts\Memory\DispatchesMemoryExtraction;
 use App\Contracts\Memory\ManagesMemoryContext;
 use App\Contracts\Memory\PullsConversationHistory;
@@ -11,6 +12,7 @@ use App\Contracts\Services\IndexNowServiceContract;
 use App\Contracts\Services\StripeServiceContract;
 use App\Listeners\TrackAiUsage;
 use App\Models\User;
+use App\Services\Billing\SubscriptionTierResolver;
 use App\Services\IndexNowService;
 use App\Services\Memory\NullConversationHistoryPuller;
 use App\Services\Memory\NullMemoryExtractionDispatcher;
@@ -35,6 +37,7 @@ final class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(StripeServiceContract::class, StripeService::class);
         $this->app->bind(IndexNowServiceContract::class, IndexNowService::class);
+        $this->app->bind(ResolvesUserTier::class, SubscriptionTierResolver::class);
         $this->app->bindIf(ManagesMemoryContext::class, NullMemoryPromptContext::class);
         $this->app->bindIf(DispatchesMemoryExtraction::class, NullMemoryExtractionDispatcher::class);
         $this->app->bindIf(PullsConversationHistory::class, NullConversationHistoryPuller::class);

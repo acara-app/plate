@@ -25,7 +25,7 @@ final readonly class CaffeineCalculatorController
             'locale' => $locale,
             'translations' => LanguageUtil::translations($locale),
             'seo' => [
-                'appName' => config('app.name'),
+                'appName' => config()->string('app.name'),
                 'appUrl' => url('/'),
                 'canonicalUrl' => $this->getCanonicalUrl($locale),
                 'toolsUrl' => route('tools.index'),

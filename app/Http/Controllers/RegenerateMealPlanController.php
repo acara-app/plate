@@ -19,9 +19,7 @@ final readonly class RegenerateMealPlanController
     public function __construct(
         #[CurrentUser] private User $user,
         private AnalyzeGlucoseForNotificationAction $analyzeGlucose,
-    ) {
-        //
-    }
+    ) {}
 
     public function store(): RedirectResponse
     {

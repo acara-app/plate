@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Ai\AgentBuilder;
 use App\Ai\AgentPayload;
 use App\Enums\ModelName;
@@ -31,6 +32,7 @@ final class AgentRunner implements Agent, Conversational, HasTools
 
     public function __construct(
         private readonly AgentBuilder $agentBuilder,
+        private readonly EnforceAiUsageLimit $enforceAiUsageLimit,
     ) {}
 
     public function run(AgentPayload $payload, User $user): StreamableAgentResponse
@@ -38,17 +40,19 @@ final class AgentRunner implements Agent, Conversational, HasTools
         return $this->execute($payload, $user, '');
     }
 
-    // @codeCoverageIgnoreStart
     public function runWithConversation(AgentPayload $payload, User $user, string $conversationId): StreamableAgentResponse
     {
         return $this->execute($payload, $user, $conversationId);
     }
 
+    // @codeCoverageIgnoreStart
     public function runSync(AgentPayload $payload, User $user, ?string $conversationId = null): AgentResponse
     {
+        $modelName = $payload->modelName ?? ModelName::GPT_5_4_MINI;
+        $this->enforceAiUsageLimit->handle($user, $modelName);
+
         $this->currentPayload = $payload;
         $this->user = $user;
-        $modelName = $payload->modelName ?? ModelName::GPT_5_4_MINI;
 
         return $this
             ->continue($conversationId ?? '', as: $user)
@@ -99,9 +103,11 @@ final class AgentRunner implements Agent, Conversational, HasTools
 
     private function execute(AgentPayload $payload, User $user, string $conversationId): StreamableAgentResponse
     {
+        $modelName = $payload->modelName ?? ModelName::GPT_5_4_MINI;
+        $this->enforceAiUsageLimit->handle($user, $modelName);
+
         $this->currentPayload = $payload;
         $this->user = $user;
-        $modelName = $payload->modelName ?? ModelName::GPT_5_4_MINI;
 
         return $this
             ->continue($conversationId, as: $user)

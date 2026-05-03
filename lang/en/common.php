@@ -810,9 +810,54 @@ return [
         'usage' => [
             'rolling' => 'Rolling Usage',
             'weekly' => 'Weekly Usage',
-            'monthly' => 'Monthly Usage',
             'resets_in' => 'Resets in {{time}}',
             'credits_used' => '{{current}} / {{limit}} credits',
+            'over_limit' => '· over limit',
+            'over_limit_tooltip' => '{{current}} of {{limit}} credits used ({{percentage}}%)',
+        ],
+        'tier' => [
+            'current_plan' => 'Current plan',
+            'payment_pending' => 'Payment pending — your access will activate momentarily.',
+            'labels' => [
+                'free' => 'Free',
+                'basic' => 'Basic',
+                'plus' => 'Plus',
+            ],
+        ],
+        'lifecycle' => [
+            'payment_pending_heading' => 'Your payment is processing',
+            'payment_pending_body' => "Stripe is still verifying your card. Premium features will activate as soon as it's confirmed.",
+            'payment_pending_action' => 'Complete payment',
+            'grace_period_heading' => 'Subscription canceled — access ends {{date}}',
+            'grace_period_body' => 'You can keep using {{tier}} features until then. Renew anytime to avoid losing access.',
+            'grace_period_action' => 'Renew subscription',
+        ],
+        'warning' => [
+            'heading' => "You've used {{percentage}}% of your {{limit}}",
+            'body' => '{{current}} of {{total}} credits used. Resets in {{time}}.',
+            'see_upgrade_options' => 'See upgrade options',
+        ],
+        'paywall' => [
+            'cap_title' => "You've hit your {{tier}} {{limit}} cap",
+            'cap_description' => '{{current}} of {{total}} credits used. Resets in {{time}}.',
+            'upgrade_to' => 'Upgrade to {{tier}}',
+            'plans' => [
+                'basic' => [
+                    'name' => 'Basic',
+                    'price' => '$9/mo',
+                    'pitch' => 'More AI credits each period — keep going past the free cap.',
+                ],
+                'plus' => [
+                    'name' => 'Plus',
+                    'price' => '$18/mo',
+                    'pitch' => 'Highest credits, plus Memory and Apple Health sync.',
+                ],
+            ],
+        ],
+        'pro_model_upsell' => [
+            'title' => 'Upgrade for the Pro model',
+            'body' => 'Get smarter, more accurate meal-plan recommendations on every generation.',
+            'cta' => 'See plans',
         ],
         'history' => [
             'title' => 'Invoice History',
@@ -926,6 +971,8 @@ return [
         'processing' => 'Processing...',
         'choose_plan_button' => 'Choose Plan',
         'stripe_price_required' => 'Stripe Price ID required',
+        'free_plan_label' => 'Free plan — no checkout needed',
+        'current_plan_label' => 'Current plan',
         'manage_subscription' => 'Manage Subscription',
         'view_billing_history' => 'View Billing History',
         'trial_info_title' => '🌱 Why we charge a small subscription fee',

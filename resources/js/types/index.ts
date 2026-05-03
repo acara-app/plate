@@ -1,6 +1,7 @@
 export type Nullable<T> = T | null;
 
 export type * from './auth';
+export type * from './billing';
 export type * from './chat';
 export type * from './diabetes';
 export type * from './grocery-list';

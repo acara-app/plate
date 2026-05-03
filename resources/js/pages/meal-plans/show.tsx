@@ -1,4 +1,5 @@
 import { show as showGroceryList } from '@/actions/App/Http/Controllers/GroceryListController';
+import { ProModelUpsellBanner } from '@/components/billing/pro-model-upsell-banner';
 import { OnboardingBanner } from '@/components/onboarding-banner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
@@ -66,6 +67,7 @@ interface MealPlansProps {
     navigation: Navigation | null;
     userDietType: string;
     dietTypes: Record<string, string>;
+    proModelUpsell: boolean;
 }
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
@@ -81,6 +83,7 @@ export default function MealPlans({
     navigation,
     userDietType,
     dietTypes,
+    proModelUpsell,
 }: MealPlansProps) {
     const { currentUser } = useSharedProps();
     const { t } = useTranslation('common');
@@ -100,6 +103,7 @@ export default function MealPlans({
             <Head title={t('meal_plans.title')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-hidden p-4 md:p-6">
+                {proModelUpsell && <ProModelUpsellBanner />}
                 {!currentUser?.is_onboarded ? (
                     <OnboardingBanner />
                 ) : !mealPlan ? (

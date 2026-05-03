@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Models\User;
+use App\Services\Billing\PremiumRolloutGate;
 use Inertia\Inertia;
 
 if (! function_exists('getMimeType')) {
@@ -112,6 +114,13 @@ if (! function_exists('toast')) {
 if (! function_exists('enable_premium_upgrades')) {
     function enable_premium_upgrades(): bool
     {
-        return (bool) config('plate.enable_premium_upgrades', false);
+        return config()->boolean('plate.enable_premium_upgrades', false);
+    }
+}
+
+if (! function_exists('enable_premium_upgrades_for')) {
+    function enable_premium_upgrades_for(?User $user = null): bool
+    {
+        return resolve(PremiumRolloutGate::class)->isActiveFor($user);
     }
 }

@@ -22,7 +22,7 @@ final readonly class ToolRegistry
     public function getTools(): array
     {
         /** @var array<int, class-string> $classes */
-        $classes = config('plate.tools', []);
+        $classes = config()->array('plate.tools', []);
 
         return $this->buildTools($classes);
     }
@@ -34,7 +34,7 @@ final readonly class ToolRegistry
     public function getImageTools(array $images): array
     {
         /** @var array<int, class-string> $classes */
-        $classes = config('plate.image_tools', []);
+        $classes = config()->array('plate.image_tools', []);
 
         return $this->buildTools($classes, ['images' => $images]);
     }
@@ -45,7 +45,7 @@ final readonly class ToolRegistry
     public function getMealPlanTools(): array
     {
         /** @var array<int, class-string> $classes */
-        $classes = config('plate.meal_plan_tools', []);
+        $classes = config()->array('plate.meal_plan_tools', []);
 
         return $this->buildTools($classes);
     }
@@ -56,7 +56,7 @@ final readonly class ToolRegistry
     public function getProviderTools(): array
     {
         /** @var array<int, class-string<ProviderTool>> $classes */
-        $classes = config('plate.provider_tools', []);
+        $classes = config()->array('plate.provider_tools', []);
 
         /** @var array<int, ProviderTool> */
         return $this->buildTools($classes);
