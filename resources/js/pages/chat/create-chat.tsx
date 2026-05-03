@@ -3,8 +3,8 @@ import { UsageLimitNotice } from '@/components/billing/usage-limit-notice';
 import { useChatStream } from '@/hooks/use-chat-stream';
 import AppLayout from '@/layouts/app-layout';
 import { generateUUID } from '@/lib/utils';
-import billing from '@/routes/billing';
 import chat from '@/routes/chat';
+import checkout from '@/routes/checkout';
 import type { BreadcrumbItem, CreditWarning } from '@/types';
 import type { ChatPageProps, UIMessage } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
@@ -165,7 +165,7 @@ export default function CreateChat() {
                                     )
                                 }
                                 onUpgradeClick={() => {
-                                    router.visit(billing.index().url);
+                                    router.visit(checkout.subscription().url);
                                 }}
                             />
                         </div>
