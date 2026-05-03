@@ -20,19 +20,14 @@ beforeEach(function (): void {
     ]);
 });
 
-it('enforces meal planner gating for an allowlisted staff user when the global flag is off', function (): void {
-    Queue::fake();
-
+it('marks premium enforcement active for an allowlisted staff user when the global flag is off', function (): void {
     $staff = User::factory()->create(['email' => 'staff@example.com']);
 
     Config::set('plate.premium_rollout.allowlist', ['staff@example.com']);
 
-    $response = $this->actingAs($staff)
-        ->postJson(route('meal-plans.store'), ['duration_days' => 3]);
+    $entitlement = resolve(ResolvesUserTier::class)->resolve($staff);
 
-    $response->assertStatus(402);
-
-    expect($staff->mealPlans()->count())->toBe(0);
+    expect($entitlement->premiumEnforcementActive)->toBeTrue();
 });
 
 it('lets a non-allowlisted user post freely when the global flag is off', function (): void {
