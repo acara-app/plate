@@ -1,5 +1,5 @@
 import { CreditWarningBanner } from '@/components/billing/credit-warning-banner';
-import { PaywallModal } from '@/components/billing/paywall-modal';
+import { UsageLimitNotice } from '@/components/billing/usage-limit-notice';
 import { useChatStream } from '@/hooks/use-chat-stream';
 import AppLayout from '@/layouts/app-layout';
 import { generateUUID } from '@/lib/utils';
@@ -139,6 +139,17 @@ export default function CreateChat() {
                                 }
                             />
                         )}
+                        {usageLimitTrigger && (
+                            <div className="mt-4">
+                                <UsageLimitNotice
+                                    trigger={usageLimitTrigger}
+                                    onDismiss={() => {
+                                        clearUsageLimitTrigger();
+                                        clearError();
+                                    }}
+                                />
+                            </div>
+                        )}
                         <div ref={messagesEndRef} />
                     </div>
                 </div>
@@ -174,19 +185,6 @@ export default function CreateChat() {
                     </p>
                 </div>
             </section>
-
-            {usageLimitTrigger && (
-                <PaywallModal
-                    open
-                    onOpenChange={(open) => {
-                        if (!open) {
-                            clearUsageLimitTrigger();
-                            clearError();
-                        }
-                    }}
-                    trigger={usageLimitTrigger}
-                />
-            )}
         </AppLayout>
     );
 }
