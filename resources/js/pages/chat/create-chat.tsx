@@ -36,8 +36,6 @@ export default function CreateChat() {
         initialConversationId,
     );
     const [mode, setMode] = useState<ChatMode>(initialMode ?? 'ask');
-    // Track which warning the user has dismissed by its period anchor (resets_at).
-    // When the server delivers a new warning (different resets_at), it shows again.
     const [dismissedWarningAt, setDismissedWarningAt] = useState<string | null>(
         null,
     );
