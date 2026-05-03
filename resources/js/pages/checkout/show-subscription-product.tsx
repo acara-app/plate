@@ -442,6 +442,20 @@ export default function CashierSubscription({
                                                             )}
                                                         </a>
                                                     </Button>
+                                                ) : product.price === 0 ? (
+                                                    <Button
+                                                        disabled
+                                                        variant="outline"
+                                                        className="w-full"
+                                                    >
+                                                        {currentSubscription
+                                                            ? t(
+                                                                  'checkout_subscription.free_plan_label',
+                                                              )
+                                                            : t(
+                                                                  'checkout_subscription.current_plan_label',
+                                                              )}
+                                                    </Button>
                                                 ) : (
                                                     <>
                                                         <Button

@@ -982,6 +982,8 @@ return [
         'processing' => 'Processing...',
         'choose_plan_button' => 'Choose Plan',
         'stripe_price_required' => 'Stripe Price ID required',
+        'free_plan_label' => 'Free plan — no checkout needed',
+        'current_plan_label' => 'Current plan',
         'manage_subscription' => 'Manage Subscription',
         'view_billing_history' => 'View Billing History',
         'trial_info_title' => '🌱 Why we charge a small subscription fee',
