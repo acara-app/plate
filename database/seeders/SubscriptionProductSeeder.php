@@ -11,63 +11,70 @@ final class SubscriptionProductSeeder extends Seeder
 {
     public function run(): void
     {
-        SubscriptionProduct::query()->where('name', 'Personal')->delete();
+        SubscriptionProduct::query()->whereIn('name', ['Personal', 'Basic', 'Plus'])->delete();
 
         $products = [
             [
                 'name' => 'Free',
-                'description' => 'Start with Altani for everyday health questions.',
+                'description' => 'Use every open Acara Cloud feature with a limited included AI credit budget.',
                 'features' => [
-                    '10 chats a day with Altani',
-                    'Plain-language answers',
-                    'Guidance shaped by your profile',
+                    'All open Acara Cloud features',
+                    '1,000 monthly AI credits',
+                    '100 rolling daily AI credits',
                     'No credit card required',
                 ],
                 'price' => 0.00,
                 'yearly_price' => null,
                 'stripe_price_id' => null,
+                'stripe_lookup_key' => null,
                 'yearly_stripe_price_id' => null,
+                'yearly_stripe_lookup_key' => null,
                 'billing_interval' => null,
                 'product_group' => 'free',
                 'popular' => false,
                 'coming_soon' => false,
             ],
             [
-                'name' => 'Basic',
-                'description' => 'Unlimited conversations for ongoing personal health guidance.',
+                'name' => 'Supporter',
+                'description' => 'More Cloud AI credits for regular use while supporting open-source Plate.',
                 'features' => [
-                    'Unlimited chat with Altani',
-                    'Answers shaped by your profile and goals',
-                    'Support for daily decisions',
-                    'Guidance for habits, routines, and progress',
+                    'All open Acara Cloud features',
+                    '6,000 monthly AI credits',
+                    '500 rolling daily AI credits',
+                    'Higher weekly AI credit limit',
+                    'Supports open-source Plate',
                 ],
                 'price' => 9.00,
-                'yearly_price' => 89.90,
-                'stripe_price_id' => 'acara-plate-personal-monthly',
-                'yearly_stripe_price_id' => 'acara-plate-personal-yearly',
+                'yearly_price' => 89.00,
+                'stripe_price_id' => null,
+                'stripe_lookup_key' => 'acara-plate-supporter-monthly-v1',
+                'yearly_stripe_price_id' => null,
+                'yearly_stripe_lookup_key' => 'acara-plate-supporter-yearly-v1',
                 'billing_interval' => 'monthly',
                 'product_group' => 'subscription',
-                'popular' => false,
+                'popular' => true,
                 'coming_soon' => false,
             ],
             [
-                'name' => 'Plus',
-                'description' => 'Health AI that remembers your context and adapts over time.',
+                'name' => 'Pro',
+                'description' => 'Highest Cloud AI limits and premium model access for daily planning and analysis.',
                 'features' => [
-                    'Everything in Basic',
-                    'Memory for your preferences, goals, and context',
-                    'Guidance that evolves with your goals and routines',
-                    "Syncs with your iPhone's Health app",
-                    'Fastest, smartest AI responses',
-                    '7-day free trial',
+                    'All open Acara Cloud features',
+                    '10,000 monthly AI credits',
+                    '1,000 rolling daily AI credits',
+                    'Highest weekly AI credit limit',
+                    'Pro model access when available',
+                    'Priority Cloud capacity',
                 ],
-                'price' => 18.00,
-                'yearly_price' => 179.00,
-                'stripe_price_id' => 'acara-plate-plus-monthly',
-                'yearly_stripe_price_id' => 'acara-plate-plus-yearly',
+                'price' => 19.00,
+                'yearly_price' => 190.00,
+                'stripe_price_id' => null,
+                'stripe_lookup_key' => 'acara-plate-pro-monthly-v1',
+                'yearly_stripe_price_id' => null,
+                'yearly_stripe_lookup_key' => 'acara-plate-pro-yearly-v1',
                 'billing_interval' => 'monthly',
-                'product_group' => 'trial',
-                'popular' => true,
+                'product_group' => 'subscription',
+                'popular' => false,
                 'coming_soon' => false,
             ],
         ];
@@ -75,7 +82,7 @@ final class SubscriptionProductSeeder extends Seeder
         foreach ($products as $product) {
             SubscriptionProduct::query()->updateOrCreate(
                 ['name' => $product['name']],
-                $product
+                $product,
             );
         }
     }

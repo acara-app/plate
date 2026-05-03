@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Workflow\WorkflowStub;
 
-final class GenerateMealDayController
+final readonly class GenerateMealDayController
 {
     public function __invoke(Request $request, MealPlan $mealPlan): JsonResponse
     {

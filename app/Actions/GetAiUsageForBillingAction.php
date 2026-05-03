@@ -4,54 +4,94 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Contracts\Billing\ResolvesUserTier;
+use App\Enums\SubscriptionTier;
 use App\Models\AiUsage;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 
 final readonly class GetAiUsageForBillingAction
 {
+    public function __construct(
+        private ResolvesUserTier $resolveUserTier,
+    ) {}
+
     /**
-     * @return array{rolling: array{current: int, limit: int, percentage: int, resets_in: string}, weekly: array{current: int, limit: int, percentage: int, resets_in: string}, monthly: array{current: int, limit: int, percentage: int, resets_in: string}}
+     * @return array{
+     *     tier: string,
+     *     tier_label: string,
+     *     payment_pending: bool,
+     *     premium_enforcement_active: bool,
+     *     rolling: array{current: int, limit: int, percentage: int, resets_in: string, over_limit: bool},
+     *     weekly: array{current: int, limit: int, percentage: int, resets_in: string, over_limit: bool},
+     *     monthly: array{current: int, limit: int, percentage: int, resets_in: string, over_limit: bool}
+     * }
      */
     public function handle(User $user): array
     {
-        /** @var array{rolling: array{period_hours: int, limit: float}, weekly: array{limit: float}, monthly: array{limit: float}} $limits */
-        $limits = config('plate.ai_usage_limits');
-
-        $multiplier = (int) config('plate.credit_multiplier'); /** @phpstan-ignore cast.int */
-        $rollingPeriodStart = now()->subHours($limits['rolling']['period_hours']);
-        $rollingLimit = (float) $limits['rolling']['limit'];
-
+        $entitlement = $this->resolveUserTier->resolve($user);
+        $limits = $this->limitsForTier($entitlement->tier);
+        $multiplier = config()->integer('plate.credit_multiplier', 1);
+        $now = CarbonImmutable::now();
+        $rollingHours = (int) $limits['rolling']['period_hours'];
+        $rollingPeriodStart = $now->subHours($rollingHours);
         $subscription = $user->activeSubscription();
         $periodStart = $this->getPeriodStart($subscription);
         $periodEnd = $this->getPeriodEnd($subscription);
 
-        $weeklyLimit = (float) $limits['weekly']['limit'];
-        $monthlyLimit = (float) $limits['monthly']['limit'];
-
-        $rollingCost = $this->getCostForPeriod($user, $rollingPeriodStart, now());
-        $periodCost = $this->getCostForPeriod($user, $periodStart, now());
+        $rollingCost = $this->getCostForPeriod($user, $rollingPeriodStart, $now);
+        $periodCost = $this->getCostForPeriod($user, $periodStart, $now);
+        $rollingResetsAt = $this->rollingResetsAt($user, $now, $rollingPeriodStart, $rollingHours);
 
         return [
-            'rolling' => [
-                'current' => $this->toCredits($rollingCost, $multiplier),
-                'limit' => $this->toCredits($rollingLimit, $multiplier),
-                'percentage' => $this->calculatePercentage($rollingCost, $rollingLimit),
-                'resets_in' => $this->formatResetsIn(now()->addHours($limits['rolling']['period_hours'])),
-            ],
-            'weekly' => [
-                'current' => $this->toCredits($periodCost, $multiplier),
-                'limit' => $this->toCredits($weeklyLimit, $multiplier),
-                'percentage' => $this->calculatePercentage($periodCost, $weeklyLimit),
-                'resets_in' => $this->formatResetsIn($periodEnd),
-            ],
-            'monthly' => [
-                'current' => $this->toCredits($periodCost, $multiplier),
-                'limit' => $this->toCredits($monthlyLimit, $multiplier),
-                'percentage' => $this->calculatePercentage($periodCost, $monthlyLimit),
-                'resets_in' => $this->formatResetsIn($periodEnd),
-            ],
+            'tier' => $entitlement->tier->value,
+            'tier_label' => $entitlement->tier->label(),
+            'payment_pending' => $entitlement->isPaymentPending(),
+            'premium_enforcement_active' => $entitlement->premiumEnforcementActive,
+            'rolling' => $this->buildBucket(
+                $rollingCost,
+                (float) $limits['rolling']['limit'],
+                $multiplier,
+                $rollingResetsAt,
+            ),
+            'weekly' => $this->buildBucket(
+                $periodCost,
+                (float) $limits['weekly']['limit'],
+                $multiplier,
+                $periodEnd,
+            ),
+            'monthly' => $this->buildBucket(
+                $periodCost,
+                (float) $limits['monthly']['limit'],
+                $multiplier,
+                $periodEnd,
+            ),
         ];
+    }
+
+    /**
+     * @return array{current: int, limit: int, percentage: int, resets_in: string, over_limit: bool}
+     */
+    private function buildBucket(float $cost, float $limit, int $multiplier, CarbonImmutable $resetTime): array
+    {
+        return [
+            'current' => $this->toCredits($cost, $multiplier),
+            'limit' => $this->toCredits($limit, $multiplier),
+            'percentage' => $this->calculatePercentage($cost, $limit),
+            'resets_in' => $this->formatResetsIn($resetTime),
+            'over_limit' => $limit > 0 && $cost > $limit,
+        ];
+    }
+
+    /**
+     * @return array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}, monthly: array{limit: float, period_days: int}}
+     */
+    private function limitsForTier(SubscriptionTier $tier): array
+    {
+        /** @var array<string, array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}, monthly: array{limit: float, period_days: int}}> $tierLimits */
+        $tierLimits = config()->array('plate.tier_limits', []);
+
+        return $tierLimits[$tier->value] ?? $tierLimits[SubscriptionTier::Free->value];
     }
 
     // @codeCoverageIgnoreStart
@@ -88,6 +128,19 @@ final readonly class GetAiUsageForBillingAction
             ->where('created_at', '>=', $start)
             ->where('created_at', '<=', $end)
             ->sum('cost');
+    }
+
+    private function rollingResetsAt(User $user, CarbonImmutable $now, CarbonImmutable $periodStart, int $hours): CarbonImmutable
+    {
+        $oldest = AiUsage::query()
+            ->forUser($user)
+            ->where('created_at', '>=', $periodStart)
+            ->where('created_at', '<=', $now)
+            ->min('created_at');
+
+        return is_string($oldest)
+            ? CarbonImmutable::parse($oldest)->addHours($hours)
+            : $now->addHours($hours);
     }
 
     private function toCredits(float $dollars, int $multiplier): int

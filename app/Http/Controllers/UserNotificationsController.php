@@ -18,8 +18,8 @@ final readonly class UserNotificationsController
         return Inertia::render('user-notifications/edit', [
             'notificationSettings' => $user->notification_settings,
             'defaultThresholds' => [
-                'low' => config('glucose.hypoglycemia_threshold'),
-                'high' => config('glucose.hyperglycemia_threshold'),
+                'low' => config()->integer('glucose.hypoglycemia_threshold'),
+                'high' => config()->integer('glucose.hyperglycemia_threshold'),
             ],
         ]);
     }

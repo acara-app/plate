@@ -33,10 +33,12 @@ final class SubscriptionProductFactory extends Factory
             'description' => fake()->optional(0.8)->sentence(),
             'popular' => fake()->boolean(20),
             'stripe_price_id' => fake()->optional(0.7)->regexify('price_[a-zA-Z0-9]{24}'),
+            'stripe_lookup_key' => fake()->optional(0.7)->slug(2),
             'billing_interval' => fake()->randomElement(['month', 'year', 'week']),
             'product_group' => fake()->optional(0.6)->randomElement(['subscription', 'addon', 'premium']),
             'yearly_price' => fake()->optional(0.7)->passthrough($yearlyPrice),
             'yearly_stripe_price_id' => fake()->optional(0.7)->regexify('price_[a-zA-Z0-9]{24}'),
+            'yearly_stripe_lookup_key' => fake()->optional(0.7)->slug(2),
             'features' => fake()->optional(0.8)->passthrough([
                 fake()->sentence(3),
                 fake()->sentence(3),
@@ -68,6 +70,7 @@ final class SubscriptionProductFactory extends Factory
             return [
                 'yearly_price' => $price * 10,
                 'yearly_stripe_price_id' => fake()->regexify('price_[a-zA-Z0-9]{24}'),
+                'yearly_stripe_lookup_key' => fake()->slug(2),
             ];
         });
     }

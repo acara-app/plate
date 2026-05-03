@@ -25,9 +25,11 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
 
     public function handle(): void
     {
-        /** @var string $filePath */
-        $filePath = $this->option('file-path')
-            ?? config('gemini.default_upload_file_path', storage_path('sources/FoodData_Central_foundation_food_json_2025-04-24 3.json'));
+        $optionFilePath = $this->option('file-path');
+        $defaultFilePath = config('gemini.default_upload_file_path', storage_path('sources/FoodData_Central_foundation_food_json_2025-04-24 3.json'));
+        $filePath = is_string($optionFilePath) && $optionFilePath !== ''
+            ? $optionFilePath
+            : (is_string($defaultFilePath) ? $defaultFilePath : '');
 
         if (! File::exists($filePath)) {
             $this->error('File not found: '.$filePath);
@@ -47,8 +49,8 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             return;
         }
 
-        /** @var string $baseUrl */
-        $baseUrl = config('gemini.base_url');
+        $baseUrlValue = config('gemini.base_url');
+        $baseUrl = is_string($baseUrlValue) ? $baseUrlValue : '';
 
         $storeName = $this->getOrCreateStore($apiKey, $baseUrl);
         if (! $storeName) {
@@ -253,8 +255,7 @@ final class UploadDocumentToGeminiFileSearchCommand extends Command
             $isDone = $response->json('done', false);
 
             if (! $isDone) {
-                /** @var int $pollingInterval */
-                $pollingInterval = config('gemini.polling_interval', 10);
+                $pollingInterval = config()->integer('gemini.polling_interval', 10);
                 Sleep::sleep($pollingInterval);
 
                 continue;

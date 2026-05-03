@@ -2,6 +2,7 @@ import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
+import { LifecycleBanner } from '@/components/billing/lifecycle-banner';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
 import { type PropsWithChildren } from 'react';
@@ -27,6 +28,7 @@ export default function AppSidebarLayout({
                 )}
             >
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
+                <LifecycleBanner className="mx-4 mt-4" />
                 {children}
             </AppContent>
         </AppShell>

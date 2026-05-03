@@ -1,8 +1,11 @@
+import { CreditWarningBanner } from '@/components/billing/credit-warning-banner';
+import { UsageLimitNotice } from '@/components/billing/usage-limit-notice';
 import { useChatStream } from '@/hooks/use-chat-stream';
 import AppLayout from '@/layouts/app-layout';
 import { generateUUID } from '@/lib/utils';
 import chat from '@/routes/chat';
-import type { BreadcrumbItem } from '@/types';
+import checkout from '@/routes/checkout';
+import type { BreadcrumbItem, CreditWarning } from '@/types';
 import type { ChatPageProps, UIMessage } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
@@ -19,16 +22,28 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function CreateChat() {
+    const page = usePage<
+        ChatPageProps & { creditWarning?: CreditWarning | null }
+    >();
     const {
         conversationId: initialConversationId,
         messages: messageHistories,
         mode: initialMode,
-    } = usePage<ChatPageProps>().props;
+        creditWarning: sharedCreditWarning,
+    } = page.props;
 
     const [conversationId, setConversationId] = useState<string>(
         initialConversationId,
     );
     const [mode, setMode] = useState<ChatMode>(initialMode ?? 'ask');
+    const [dismissedWarningAt, setDismissedWarningAt] = useState<string | null>(
+        null,
+    );
+    const visibleCreditWarning =
+        sharedCreditWarning &&
+        sharedCreditWarning.resets_at !== dismissedWarningAt
+            ? sharedCreditWarning
+            : null;
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const lastMessageRef = useRef<{
@@ -38,6 +53,10 @@ export default function CreateChat() {
 
     const initialMessages = (messageHistories ?? []) as UIMessage[];
 
+    const handleStreamFinish = useCallback(() => {
+        router.reload({ only: ['creditWarning'] });
+    }, []);
+
     const {
         messages,
         sendMessage,
@@ -46,10 +65,13 @@ export default function CreateChat() {
         error,
         isStreaming,
         isSubmitting,
+        usageLimitTrigger,
+        clearUsageLimitTrigger,
     } = useChatStream({
         conversationId,
         mode,
         initialMessages,
+        onFinish: handleStreamFinish,
     });
 
     useEffect(() => {
@@ -105,17 +127,47 @@ export default function CreateChat() {
                             status={status}
                             isSubmitting={showThinkingIndicator}
                         />
-                        <ChatErrorBanner
-                            error={error}
-                            onRetry={
-                                lastMessageRef.current ? handleRetry : undefined
-                            }
-                        />
+                        {!usageLimitTrigger && (
+                            <ChatErrorBanner
+                                error={error}
+                                onRetry={
+                                    lastMessageRef.current
+                                        ? handleRetry
+                                        : undefined
+                                }
+                            />
+                        )}
+                        {usageLimitTrigger && (
+                            <div className="mt-4">
+                                <UsageLimitNotice
+                                    trigger={usageLimitTrigger}
+                                    onDismiss={() => {
+                                        clearUsageLimitTrigger();
+                                        clearError();
+                                    }}
+                                />
+                            </div>
+                        )}
                         <div ref={messagesEndRef} />
                     </div>
                 </div>
 
-                <div className="shrink-0 bg-background">
+                <div className="shrink-0 space-y-2 bg-background">
+                    {visibleCreditWarning && (
+                        <div className="mx-auto w-full max-w-3xl px-4">
+                            <CreditWarningBanner
+                                warning={visibleCreditWarning}
+                                onDismiss={() =>
+                                    setDismissedWarningAt(
+                                        visibleCreditWarning.resets_at,
+                                    )
+                                }
+                                onUpgradeClick={() => {
+                                    router.visit(checkout.subscription().url);
+                                }}
+                            />
+                        </div>
+                    )}
                     <ChatInput
                         className="w-full"
                         onSubmit={handleSubmit}

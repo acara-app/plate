@@ -41,11 +41,12 @@ final readonly class AnalyzePhoto implements Tool
             ]);
         }
 
+        $user = Auth::user();
+
         $image = $this->images[0];
 
         $agent = resolve(FoodPhotoAnalyzerAgent::class);
 
-        $user = Auth::user();
         if ($user instanceof User) {
             ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($user->locale);
             $agent->withLanguage($language, $languageCode);

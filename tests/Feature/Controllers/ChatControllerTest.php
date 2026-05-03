@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 use App\Enums\AgentMode;
 use App\Http\Controllers\ChatController;
+use App\Models\AiUsage;
 use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
+use Illuminate\Support\Facades\Config;
 
 use function Pest\Laravel\actingAs;
 
@@ -106,6 +108,68 @@ it('prevents cross-user access on the stream endpoint', function (): void {
             'mode' => AgentMode::Ask->value,
         ])
         ->assertForbidden();
+});
+
+it('returns the credit warning derived from current usage when over 80%', function (): void {
+    Config::set('plate.enable_premium_upgrades', true);
+
+    $user = User::factory()->create();
+    AiUsage::factory()->create([
+        'user_id' => $user->id,
+        'cost' => 0.085,
+    ]);
+
+    $conversationId = (string) fake()->uuid();
+
+    actingAs($user)
+        ->get(route('chat.create', ['conversationId' => $conversationId, 'mode' => AgentMode::Ask->value]))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('creditWarning.limit_type', 'rolling')
+            ->where('creditWarning.percentage', 85)
+            ->where('creditWarning.current_credits', 85)
+            ->where('creditWarning.limit_credits', 100)
+        );
+});
+
+it('returns a credit warning capped at 100% when usage is over the cap', function (): void {
+    Config::set('plate.enable_premium_upgrades', true);
+
+    $user = User::factory()->create();
+    AiUsage::factory()->create([
+        'user_id' => $user->id,
+        'cost' => 0.126,
+    ]);
+
+    $conversationId = (string) fake()->uuid();
+
+    actingAs($user)
+        ->get(route('chat.create', ['conversationId' => $conversationId, 'mode' => AgentMode::Ask->value]))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('creditWarning.limit_type', 'rolling')
+            ->where('creditWarning.percentage', 100)
+            ->where('creditWarning.current_credits', 126)
+        );
+});
+
+it('returns null creditWarning when usage is below 80%', function (): void {
+    Config::set('plate.enable_premium_upgrades', true);
+
+    $user = User::factory()->create();
+    AiUsage::factory()->create([
+        'user_id' => $user->id,
+        'cost' => 0.05,
+    ]);
+
+    $conversationId = (string) fake()->uuid();
+
+    actingAs($user)
+        ->get(route('chat.create', ['conversationId' => $conversationId, 'mode' => AgentMode::Ask->value]))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('creditWarning', null)
+        );
 });
 
 it('includes image attachments in message parts when loading conversation', function (): void {

@@ -25,11 +25,19 @@ use App\Ai\Tools\UpdateUserProfileAttributes;
 use Laravel\Ai\Providers\Tools\WebSearch;
 
 return [
-    'enable_premium_upgrades' => env('PLATE_ENABLE_PREMIUM_UPGRADES', false),
+    'enable_premium_upgrades' => (bool) env('PLATE_ENABLE_PREMIUM_UPGRADES', false),
+
+    'premium_rollout' => [
+        'allowlist' => array_values(array_filter(array_map(
+            trim(...),
+            explode(',', (string) env('PLATE_PREMIUM_ROLLOUT_ALLOWLIST', '')),
+        ))),
+        'percentage' => (int) env('PLATE_PREMIUM_ROLLOUT_PERCENTAGE', 0),
+    ],
 
     'health_sync' => [
-        'app_store_url' => env('HEALTH_SYNC_APP_STORE_URL', 'https://apps.apple.com/us/app/acara-health-sync/id6761504525'),
-        'minimum_ios_version' => env('HEALTH_SYNC_MIN_IOS_VERSION', '18.0'),
+        'app_store_url' => (string) env('HEALTH_SYNC_APP_STORE_URL', 'https://apps.apple.com/us/app/acara-health-sync/id6761504525'),
+        'minimum_ios_version' => (string) env('HEALTH_SYNC_MIN_IOS_VERSION', '18.0'),
     ],
 
     'tools' => [
@@ -66,22 +74,31 @@ return [
         WebSearch::class,
     ],
 
-    // Converts internal cost units to user-facing credits (1 unit = 1,000 credits).
     'credit_multiplier' => 1_000,
 
-    // Limits are stored as internal cost units; displayed as credits to users.
-    'ai_usage_limits' => [
-        'rolling' => [
-            'limit' => 0.5,
-            'period_hours' => 24,
+    'ai_usage_preflight' => [
+        'token_budget' => [
+            'input' => 2_000,
+            'output' => 1_000,
         ],
-        'weekly' => [
-            'limit' => 2.5,
-            'period_days' => 7,
+        'fallback_estimate' => 0.01,
+    ],
+
+    'tier_limits' => [
+        'free' => [
+            'rolling' => ['limit' => 0.10, 'period_hours' => 24],
+            'weekly' => ['limit' => 0.35, 'period_days' => 7],
+            'monthly' => ['limit' => 1.00, 'period_days' => 30],
         ],
-        'monthly' => [
-            'limit' => 5,
-            'period_days' => 30,
+        'basic' => [
+            'rolling' => ['limit' => 0.50, 'period_hours' => 24],
+            'weekly' => ['limit' => 2.00, 'period_days' => 7],
+            'monthly' => ['limit' => 6.00, 'period_days' => 30],
+        ],
+        'plus' => [
+            'rolling' => ['limit' => 1.00, 'period_hours' => 24],
+            'weekly' => ['limit' => 4.00, 'period_days' => 7],
+            'monthly' => ['limit' => 10.00, 'period_days' => 30],
         ],
     ],
 ];

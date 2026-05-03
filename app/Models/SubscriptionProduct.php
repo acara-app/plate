@@ -17,10 +17,12 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string|null $description
  * @property-read bool $popular
  * @property-read string|null $stripe_price_id
+ * @property-read string|null $stripe_lookup_key
  * @property-read string|null $billing_interval
  * @property-read string|null $product_group
  * @property-read float|null $yearly_price
  * @property-read string|null $yearly_stripe_price_id
+ * @property-read string|null $yearly_stripe_lookup_key
  * @property-read array<int, string>|null $features
  * @property-read bool $coming_soon
  * @property-read CarbonInterface $created_at
@@ -62,10 +64,12 @@ final class SubscriptionProduct extends Model
             'description' => 'string',
             'popular' => 'boolean',
             'stripe_price_id' => 'string',
+            'stripe_lookup_key' => 'string',
             'billing_interval' => 'string',
             'product_group' => 'string',
             'yearly_price' => 'float',
             'yearly_stripe_price_id' => 'string',
+            'yearly_stripe_lookup_key' => 'string',
             'features' => 'array',
             'coming_soon' => 'boolean',
             'created_at' => 'datetime',

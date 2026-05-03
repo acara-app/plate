@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Billing\BuildCreditWarning;
 use App\Actions\BuildAssistantAgentAction;
 use App\Actions\BuildConversationMessagesAction;
 use App\Actions\GetOrCreateConversationAction;
@@ -26,6 +27,7 @@ final readonly class ChatController
         private BuildConversationMessagesAction $messagesAction,
         private BuildAssistantAgentAction $agentAction,
         private GetOrCreateConversationAction $conversationAction,
+        private BuildCreditWarning $buildCreditWarning,
     ) {}
 
     public function index(): Response
@@ -48,6 +50,9 @@ final readonly class ChatController
             'conversationId' => $conversation->id,
             'messages' => $this->messagesAction->handle($conversation),
             'mode' => $request->enum('mode', AgentMode::class),
+            'creditWarning' => $this->buildCreditWarning
+                ->currentState($this->user)
+                ?->toArray(),
         ]);
     }
 

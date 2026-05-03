@@ -32,6 +32,6 @@ final readonly class RequireSubscription
 
     private function requiresSubscription(User $user): bool
     {
-        return enable_premium_upgrades() && ! $user->is_verified;
+        return enable_premium_upgrades_for($user) && ! $user->is_verified;
     }
 }

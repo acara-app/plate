@@ -25,4 +25,6 @@ interface StripeServiceContract
     public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string;
 
     public function getIncompletePaymentUrl(Subscription $subscription): ?string;
+
+    public function getIncompletePaymentUrlForUser(User $user): ?string;
 }

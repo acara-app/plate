@@ -58,6 +58,11 @@ it('calls stripe service for user without stripe id', function (): void {
         {
             return null;
         }
+
+        public function getIncompletePaymentUrlForUser(User $user): ?string
+        {
+            return null;
+        }
     };
 
     app()->instance(StripeServiceContract::class, $stripeMock);
@@ -143,6 +148,11 @@ it('renders subscription with active subscription', function (): void {
         }
 
         public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+
+        public function getIncompletePaymentUrlForUser(User $user): ?string
         {
             return null;
         }
@@ -235,6 +245,11 @@ it('detects yearly subscription correctly', function (): void {
         {
             return null;
         }
+
+        public function getIncompletePaymentUrlForUser(User $user): ?string
+        {
+            return null;
+        }
     };
 
     app()->instance(StripeServiceContract::class, $stripeMock);
@@ -291,6 +306,11 @@ it('renders page when user has no active subscription', function (): void {
         }
 
         public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+
+        public function getIncompletePaymentUrlForUser(User $user): ?string
         {
             return null;
         }
@@ -370,6 +390,11 @@ it('renders subscription when no subscription items exist', function (): void {
         }
 
         public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+
+        public function getIncompletePaymentUrlForUser(User $user): ?string
         {
             return null;
         }
@@ -463,6 +488,11 @@ it('renders subscription when product does not match price id', function (): voi
         {
             return null;
         }
+
+        public function getIncompletePaymentUrlForUser(User $user): ?string
+        {
+            return null;
+        }
     };
 
     app()->instance(StripeServiceContract::class, $stripeMock);
@@ -534,6 +564,11 @@ it('returns null for incomplete payment url when has incomplete payment is false
         }
 
         public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+
+        public function getIncompletePaymentUrlForUser(User $user): ?string
         {
             return null;
         }
@@ -625,6 +660,11 @@ it('returns incomplete payment url when payment is incomplete', function (): voi
 
             return 'https://invoice.stripe.com/test_invoice';
         }
+
+        public function getIncompletePaymentUrlForUser(User $user): ?string
+        {
+            return null;
+        }
     };
 
     app()->instance(StripeServiceContract::class, $stripeMock);
@@ -714,6 +754,11 @@ it('renders subscription page with trialing subscription', function (): void {
         }
 
         public function getIncompletePaymentUrl(Subscription $subscription): ?string
+        {
+            return null;
+        }
+
+        public function getIncompletePaymentUrlForUser(User $user): ?string
         {
             return null;
         }
