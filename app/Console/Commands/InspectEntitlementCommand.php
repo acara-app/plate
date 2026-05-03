@@ -12,6 +12,9 @@ use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
 use Laravel\Cashier\Subscription;
 
+/**
+ * @codeCoverageIgnore
+ */
 final class InspectEntitlementCommand extends Command
 {
     protected $signature = 'billing:inspect-entitlement
