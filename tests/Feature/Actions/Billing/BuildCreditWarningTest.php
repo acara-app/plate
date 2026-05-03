@@ -8,6 +8,7 @@ use App\Enums\SubscriptionTier;
 use App\Models\AiUsage;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Config;
 use Laravel\Cashier\Subscription;
 
@@ -162,6 +163,29 @@ it('picks the monthly window when only monthly is over 80%', function (): void {
 
     expect($warning)->toBeInstanceOf(CreditWarning::class)
         ->and($warning->limitType)->toBe('monthly');
+});
+
+it('reports the monthly resets_at as the oldest in-window usage plus period_days', function (): void {
+    $user = User::factory()->create();
+
+    $oldestAt = CarbonImmutable::now()->subDays(20);
+
+    AiUsage::factory()->create([
+        'user_id' => $user->id,
+        'cost' => 0.50,
+        'created_at' => $oldestAt,
+    ]);
+
+    AiUsage::factory()->create([
+        'user_id' => $user->id,
+        'cost' => 0.31,
+        'created_at' => now()->subDays(15),
+    ]);
+
+    $warning = buildWarning()->currentState($user);
+
+    expect($warning?->limitType)->toBe('monthly')
+        ->and($warning->resetsAt->timestamp)->toBe($oldestAt->addDays(30)->timestamp);
 });
 
 it('produces a human-readable resets_in string', function (): void {
