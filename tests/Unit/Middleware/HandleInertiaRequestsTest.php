@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Config;
 use Inertia\OnceProp;
 
@@ -174,47 +173,6 @@ it('loads common translations', function (): void {
 
     expect($translations)->toHaveKey('common')
         ->and($translations['common'])->toBeArray();
-});
-
-it('shares creditWarning from session flash when present', function (): void {
-    $middleware = new HandleInertiaRequests();
-
-    $request = Request::create('/', 'GET');
-    $request->setLaravelSession(resolve(Store::class));
-    $request->session()->put('credit_warning', [
-        'limit_type' => 'rolling',
-        'tier' => 'free',
-        'tier_label' => 'Free',
-        'current_credits' => 85,
-        'limit_credits' => 100,
-        'percentage' => 85,
-        'resets_at' => '2026-05-03T00:00:00+00:00',
-        'resets_in' => '23 hours 59 minutes',
-    ]);
-
-    $shared = $middleware->share($request);
-
-    expect($shared)->toHaveKey('creditWarning')
-        ->and($shared['creditWarning'])->toMatchArray([
-            'limit_type' => 'rolling',
-            'tier' => 'free',
-            'tier_label' => 'Free',
-            'current_credits' => 85,
-            'limit_credits' => 100,
-            'percentage' => 85,
-        ]);
-});
-
-it('shares creditWarning as null when session flash is empty', function (): void {
-    $middleware = new HandleInertiaRequests();
-
-    $request = Request::create('/', 'GET');
-    $request->setLaravelSession(resolve(Store::class));
-
-    $shared = $middleware->share($request);
-
-    expect($shared)->toHaveKey('creditWarning')
-        ->and($shared['creditWarning'])->toBeNull();
 });
 
 it('shares enablePremiumUpgrades from config', function (): void {

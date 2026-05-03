@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Actions\Billing\BuildCreditWarning;
-use App\Data\Billing\CreditWarning;
 use App\Models\AiUsage;
 use App\Models\User;
 use App\Services\AiUsageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Session;
 use Laravel\Ai\Events\AgentPrompted;
 use ReflectionClass;
 use Throwable;
@@ -68,11 +66,7 @@ final readonly class TrackAiUsage
         ]);
 
         if ($user instanceof User) {
-            $warning = $this->buildCreditWarning->handle($user);
-
-            if ($warning instanceof CreditWarning) {
-                Session::flash('credit_warning', $warning->toArray());
-            }
+            $this->buildCreditWarning->handle($user);
         }
     }
 

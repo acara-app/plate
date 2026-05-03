@@ -21,7 +21,7 @@ final readonly class BuildCreditWarning
 
     public function __construct(private EmitsPaywallEvents $telemetry) {}
 
-    public function handle(User $user): ?CreditWarning
+    public function currentState(User $user): ?CreditWarning
     {
         $entitlement = resolve(ResolvesUserTier::class)->resolve($user);
 
@@ -34,8 +34,7 @@ final readonly class BuildCreditWarning
         $multiplier = $this->multiplier();
 
         $candidate = null;
-        $candidatePercentage = 0;
-        $candidateWindow = null;
+        $candidateRatio = 0.0;
 
         foreach (['rolling', 'weekly', 'monthly'] as $window) {
             $windowConfig = $limits[$window];
@@ -53,31 +52,31 @@ final readonly class BuildCreditWarning
                 continue;
             }
 
-            if ($ratio >= 1.0) {
-                continue;
-            }
-
-            $percentage = min(99, (int) floor($ratio * 100));
-
-            if ($percentage <= $candidatePercentage) {
+            if ($ratio <= $candidateRatio) {
                 continue;
             }
 
             $resetsAt = $this->periodEnd($user, $now, $window, $windowConfig, $periodStart);
-            $candidatePercentage = $percentage;
-            $candidateWindow = $window;
+            $candidateRatio = $ratio;
             $candidate = new CreditWarning(
                 limitType: $window,
                 tier: $entitlement->tier,
                 currentCredits: (int) round($cost * $multiplier),
                 limitCredits: (int) round($limit * $multiplier),
-                percentage: $percentage,
+                percentage: min(100, (int) floor($ratio * 100)),
                 resetsAt: $resetsAt,
                 resetsIn: $this->formatResetsIn($resetsAt),
             );
         }
 
-        if (! $candidate instanceof CreditWarning || $candidateWindow === null) {
+        return $candidate;
+    }
+
+    public function handle(User $user): ?CreditWarning
+    {
+        $candidate = $this->currentState($user);
+
+        if (! $candidate instanceof CreditWarning) {
             return null;
         }
 
@@ -87,10 +86,12 @@ final readonly class BuildCreditWarning
             return null;
         }
 
+        $limits = $this->limitsForTier($candidate->tier);
+
         Cache::put(
             $cacheKey,
             true,
-            $this->ttlForWindow($candidateWindow, $limits[$candidateWindow]),
+            $this->ttlForWindow($candidate->limitType, $limits[$candidate->limitType]),
         );
 
         $this->telemetry->emit(

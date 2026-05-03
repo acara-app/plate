@@ -61,7 +61,6 @@ final class HandleInertiaRequests extends Middleware
             'locale' => $locale,
             'availableLanguages' => LanguageUtil::all(),
             'translations' => Inertia::once(fn (): array => LanguageUtil::translations($locale)),
-            'creditWarning' => $request->hasSession() ? $request->session()->get('credit_warning') : null,
             'entitlement' => $this->buildEntitlement($user),
         ];
     }

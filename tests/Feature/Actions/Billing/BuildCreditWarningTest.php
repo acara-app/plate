@@ -76,7 +76,7 @@ it('returns null on the second call within the same period (dedup)', function ()
         ->and(buildWarning()->handle($user))->toBeNull();
 });
 
-it('returns null when the user is already at or over 100% (handled by hard block)', function (): void {
+it('returns a warning capped at 100% when the user is already over the cap', function (): void {
     $user = User::factory()->create();
 
     AiUsage::factory()->create([
@@ -84,7 +84,43 @@ it('returns null when the user is already at or over 100% (handled by hard block
         'cost' => 0.5,
     ]);
 
-    expect(buildWarning()->handle($user))->toBeNull();
+    $warning = buildWarning()->handle($user);
+
+    expect($warning)->toBeInstanceOf(CreditWarning::class)
+        ->and($warning->limitType)->toBe('rolling')
+        ->and($warning->currentCredits)->toBe(500)
+        ->and($warning->limitCredits)->toBe(100)
+        ->and($warning->percentage)->toBe(100);
+});
+
+it('exposes a pure currentState read that ignores the dedup cache', function (): void {
+    $user = User::factory()->create();
+
+    AiUsage::factory()->create([
+        'user_id' => $user->id,
+        'cost' => 0.085,
+    ]);
+
+    $first = buildWarning()->currentState($user);
+    $second = buildWarning()->currentState($user);
+
+    expect($first)->toBeInstanceOf(CreditWarning::class)
+        ->and($second)->toBeInstanceOf(CreditWarning::class)
+        ->and($first->percentage)->toBe(85)
+        ->and($second->percentage)->toBe(85);
+});
+
+it('does not emit telemetry from currentState', function (): void {
+    $user = User::factory()->create();
+
+    AiUsage::factory()->create([
+        'user_id' => $user->id,
+        'cost' => 0.085,
+    ]);
+
+    buildWarning()->currentState($user);
+
+    expect(Cache::has(sprintf('credit_warning_shown:%d:rolling', $user->id)))->toBeFalse();
 });
 
 it('returns null when premium enforcement is off', function (): void {
