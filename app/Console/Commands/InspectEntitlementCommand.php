@@ -75,7 +75,7 @@ final class InspectEntitlementCommand extends Command
             ['Reason', $rolloutReason],
             ['Active', $rolloutGate->isActiveFor($user) ? 'yes' : 'no'],
             ['Global flag', config()->boolean('plate.enable_premium_upgrades', false) ? 'on' : 'off'],
-            ['Allowlist size', count((array) config('plate.premium_rollout.allowlist', []))],
+            ['Allowlist size', count(config()->array('plate.premium_rollout.allowlist', []))],
             ['Percentage cohort', config()->integer('plate.premium_rollout.percentage', 0).'%'],
         ]);
 

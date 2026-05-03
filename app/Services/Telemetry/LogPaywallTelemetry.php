@@ -30,8 +30,7 @@ final readonly class LogPaywallTelemetry implements EmitsPaywallEvents
             $context['tier_current'] = $this->resolveUserTier->resolve($user)->tier->value;
         }
 
-        /** @var string $channel */
-        $channel = config('plate.telemetry.channel', 'paywall');
+        $channel = config()->string('plate.telemetry.channel', 'paywall');
 
         Log::channel($channel)->info($event->value, $context);
     }

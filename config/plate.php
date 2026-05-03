@@ -25,7 +25,7 @@ use App\Ai\Tools\UpdateUserProfileAttributes;
 use Laravel\Ai\Providers\Tools\WebSearch;
 
 return [
-    'enable_premium_upgrades' => env('PLATE_ENABLE_PREMIUM_UPGRADES', false),
+    'enable_premium_upgrades' => (bool) env('PLATE_ENABLE_PREMIUM_UPGRADES', false),
 
     'premium_rollout' => [
         'allowlist' => array_values(array_filter(array_map(
@@ -36,8 +36,8 @@ return [
     ],
 
     'health_sync' => [
-        'app_store_url' => env('HEALTH_SYNC_APP_STORE_URL', 'https://apps.apple.com/us/app/acara-health-sync/id6761504525'),
-        'minimum_ios_version' => env('HEALTH_SYNC_MIN_IOS_VERSION', '18.0'),
+        'app_store_url' => (string) env('HEALTH_SYNC_APP_STORE_URL', 'https://apps.apple.com/us/app/acara-health-sync/id6761504525'),
+        'minimum_ios_version' => (string) env('HEALTH_SYNC_MIN_IOS_VERSION', '18.0'),
     ],
 
     'tools' => [
@@ -85,7 +85,7 @@ return [
     ],
 
     'telemetry' => [
-        'channel' => env('PAYWALL_LOG_CHANNEL', 'paywall'),
+        'channel' => (string) env('PAYWALL_LOG_CHANNEL', 'paywall'),
     ],
 
     'tier_limits' => [

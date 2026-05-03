@@ -110,8 +110,7 @@ final readonly class AgentBuilder
             return [];
         }
 
-        /** @phpstan-ignore cast.int */
-        $limit = (int) config('memory.retrieval.context_turns', 20);
+        $limit = config()->integer('memory.retrieval.context_turns', 20);
 
         return History::query()
             ->where('conversation_id', $conversationId)

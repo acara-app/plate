@@ -51,7 +51,7 @@ final class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
+            'name' => config()->string('app.name'),
             'auth' => [
                 'user' => $user,
                 'subscribed' => $user?->hasActiveSubscription() ?? false,

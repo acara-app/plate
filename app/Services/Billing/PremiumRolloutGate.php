@@ -11,7 +11,7 @@ final readonly class PremiumRolloutGate
 {
     public function isActiveFor(?User $user = null): bool
     {
-        if ((bool) Config::get('plate.enable_premium_upgrades', false)) {
+        if (Config::boolean('plate.enable_premium_upgrades', false)) {
             return true;
         }
 
@@ -28,7 +28,7 @@ final readonly class PremiumRolloutGate
 
     public function reasonFor(?User $user = null): string
     {
-        if ((bool) Config::get('plate.enable_premium_upgrades', false)) {
+        if (Config::boolean('plate.enable_premium_upgrades', false)) {
             return 'global_flag';
         }
 
@@ -50,7 +50,7 @@ final readonly class PremiumRolloutGate
     private function isInAllowlist(User $user): bool
     {
         /** @var array<int, string> $allowlist */
-        $allowlist = (array) Config::get('plate.premium_rollout.allowlist', []);
+        $allowlist = Config::array('plate.premium_rollout.allowlist', []);
 
         if ($allowlist === []) {
             return false;

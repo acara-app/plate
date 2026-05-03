@@ -102,15 +102,11 @@ final readonly class AnalyzeGlucoseForNotificationAction
 
     private function getAnalysisWindowDays(): int
     {
-        $value = config('glucose.analysis_window_days');
-
-        return is_int($value) ? $value : 7;
+        return config()->integer('glucose.analysis_window_days', 7);
     }
 
     private function getHighReadingsPercentTrigger(): float
     {
-        $value = config('glucose.high_readings_percent_trigger');
-
-        return is_numeric($value) ? (float) $value : 30.0;
+        return config()->float('glucose.high_readings_percent_trigger', 30.0);
     }
 }

@@ -21,23 +21,13 @@ final class UserSettingsData extends Data
 
     public function effectiveLowThreshold(): int
     {
-        if ($this->glucoseNotificationLowThreshold !== null) {
-            return $this->glucoseNotificationLowThreshold;
-        }
-
-        $default = config('glucose.hypoglycemia_threshold');
-
-        return is_int($default) ? $default : 70;
+        return $this->glucoseNotificationLowThreshold
+            ?? config()->integer('glucose.hypoglycemia_threshold', 70);
     }
 
     public function effectiveHighThreshold(): int
     {
-        if ($this->glucoseNotificationHighThreshold !== null) {
-            return $this->glucoseNotificationHighThreshold;
-        }
-
-        $default = config('glucose.hyperglycemia_threshold');
-
-        return is_int($default) ? $default : 140;
+        return $this->glucoseNotificationHighThreshold
+            ?? config()->integer('glucose.hyperglycemia_threshold', 140);
     }
 }

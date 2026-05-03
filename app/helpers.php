@@ -114,7 +114,7 @@ if (! function_exists('toast')) {
 if (! function_exists('enable_premium_upgrades')) {
     function enable_premium_upgrades(): bool
     {
-        return (bool) config('plate.enable_premium_upgrades', false);
+        return config()->boolean('plate.enable_premium_upgrades', false);
     }
 }
 

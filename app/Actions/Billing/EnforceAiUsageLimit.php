@@ -74,7 +74,7 @@ final readonly class EnforceAiUsageLimit
     private function limitsForTier(SubscriptionTier $tier): array
     {
         /** @var array<string, array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}, monthly: array{limit: float, period_days: int}}> $tierLimits */
-        $tierLimits = config('plate.tier_limits', []);
+        $tierLimits = config()->array('plate.tier_limits', []);
 
         return $tierLimits[$tier->value] ?? $tierLimits[SubscriptionTier::Free->value];
     }
@@ -82,7 +82,7 @@ final readonly class EnforceAiUsageLimit
     private function estimateCallCost(?ModelName $model): float
     {
         /** @var array{token_budget: array{input: int, output: int}, fallback_estimate: float} $config */
-        $config = config('plate.ai_usage_preflight', [
+        $config = config()->array('plate.ai_usage_preflight', [
             'token_budget' => ['input' => 2_000, 'output' => 1_000],
             'fallback_estimate' => 0.01,
         ]);

@@ -89,7 +89,7 @@ final readonly class GetAiUsageForBillingAction
     private function limitsForTier(SubscriptionTier $tier): array
     {
         /** @var array<string, array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}, monthly: array{limit: float, period_days: int}}> $tierLimits */
-        $tierLimits = config('plate.tier_limits', []);
+        $tierLimits = config()->array('plate.tier_limits', []);
 
         return $tierLimits[$tier->value] ?? $tierLimits[SubscriptionTier::Free->value];
     }

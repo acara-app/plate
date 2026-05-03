@@ -24,7 +24,7 @@ return [
     | If you need a specific base URL for the Gemini API, you can provide it here.
     | Otherwise, leave empty to use the default value.
     */
-    'base_url' => env('GEMINI_BASE_URL'),
+    'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
 
     /*
     |--------------------------------------------------------------------------
@@ -35,7 +35,7 @@ return [
     | for a response. By default, the client will time out after 30 seconds.
     */
 
-    'request_timeout' => env('GEMINI_REQUEST_TIMEOUT', 30),
+    'request_timeout' => (int) env('GEMINI_REQUEST_TIMEOUT', 30),
 
     /*
     |--------------------------------------------------------------------------
@@ -46,6 +46,6 @@ return [
     | polling_interval: Number of seconds to wait between polling attempts
     */
 
-    'polling_interval' => env('GEMINI_POLLING_INTERVAL', 10),
+    'polling_interval' => (int) env('GEMINI_POLLING_INTERVAL', 10),
     'default_upload_file_path' => env('GEMINI_DEFAULT_UPLOAD_FILE_PATH'),
 ];
