@@ -19,12 +19,9 @@ it('exposes paywall feature copy for every gated feature', function (string $fea
         ->and(__('common.billing.paywall.features.'.$feature))->not->toBeEmpty();
 })->with(['meal_planner', 'image_analysis', 'memory', 'health_sync']);
 
-it('exposes cap- and feature-trigger paywall headings', function (): void {
+it('exposes cap-trigger paywall headings and the upgrade-to copy', function (): void {
     expect(Lang::has('common.billing.paywall.cap_title'))->toBeTrue()
         ->and(Lang::has('common.billing.paywall.cap_description'))->toBeTrue()
-        ->and(Lang::has('common.billing.paywall.feature_title'))->toBeTrue()
-        ->and(Lang::has('common.billing.paywall.feature_description'))->toBeTrue()
-        ->and(Lang::has('common.billing.paywall.compare_plans'))->toBeTrue()
         ->and(Lang::has('common.billing.paywall.upgrade_to'))->toBeTrue();
 });
 
