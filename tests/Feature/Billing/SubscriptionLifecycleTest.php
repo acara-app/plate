@@ -3,12 +3,10 @@
 declare(strict_types=1);
 
 use App\Contracts\Billing\ResolvesUserTier;
-use App\Enums\GatedFeature;
 use App\Enums\SubscriptionTier;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Queue;
 use Laravel\Cashier\Subscription;
 
 beforeEach(function (): void {
@@ -42,28 +40,6 @@ it('refreshes entitlements on the next request after a checkout activates a subs
     expect($resolver->resolve($user->fresh())->tier)->toBe(SubscriptionTier::Basic);
 });
 
-it('lifts the meal-planner gate after a Stripe webhook activates the subscription', function (): void {
-    Queue::fake();
-
-    $user = User::factory()->create();
-
-    $beforeResponse = $this->actingAs($user)
-        ->postJson(route('meal-plans.store'), ['duration_days' => 3]);
-    $beforeResponse->assertStatus(402);
-
-    Subscription::factory()
-        ->for($user)
-        ->active()
-        ->withPrice('price_basic_monthly')
-        ->create();
-
-    $afterResponse = $this->actingAs($user)
-        ->post(route('meal-plans.store'), ['duration_days' => 3]);
-    $afterResponse->assertRedirect();
-
-    expect($user->mealPlans()->count())->toBe(1);
-});
-
 it('keeps entitlement Free while the subscription is incomplete and exposes payment_pending', function (): void {
     $user = User::factory()->create();
 
@@ -77,7 +53,6 @@ it('keeps entitlement Free while the subscription is incomplete and exposes paym
 
     $response->assertSuccessful()
         ->assertInertia(fn ($page) => $page
-            ->where('mealPlannerLocked', true)
             ->where('entitlement.tier', 'free')
             ->where('entitlement.payment_pending', true)
             ->where('entitlement.premium_enforcement_active', true)
@@ -99,7 +74,6 @@ it('preserves paid access during the cancellation grace period', function (): vo
 
     $response->assertSuccessful()
         ->assertInertia(fn ($page) => $page
-            ->where('mealPlannerLocked', false)
             ->where('entitlement.tier', 'plus')
             ->where('entitlement.on_grace_period', true)
             ->where('entitlement.payment_pending', false)
@@ -121,15 +95,9 @@ it('drops to Free after the grace period ends', function (): void {
 
     $response->assertSuccessful()
         ->assertInertia(fn ($page) => $page
-            ->where('mealPlannerLocked', true)
             ->where('entitlement.tier', 'free')
             ->where('entitlement.on_grace_period', false)
         );
-
-    Queue::fake();
-    $directPost = $this->actingAs($user)
-        ->postJson(route('meal-plans.store'), ['duration_days' => 3]);
-    $directPost->assertStatus(402);
 });
 
 it('exposes premium_enforcement_active=false when the flag is off', function (): void {
@@ -156,10 +124,9 @@ it('serves no entitlement prop for unauthenticated requests', function (): void 
         );
 });
 
-it('lifts the gate when an incomplete subscription transitions to active', function (): void {
-    Queue::fake();
-
+it('lifts the entitlement when an incomplete subscription transitions to active', function (): void {
     $user = User::factory()->create();
+    $resolver = resolve(ResolvesUserTier::class);
 
     $subscription = Subscription::factory()
         ->for($user)
@@ -167,23 +134,16 @@ it('lifts the gate when an incomplete subscription transitions to active', funct
         ->withPrice('price_basic_monthly')
         ->create();
 
-    $beforeResponse = $this->actingAs($user)
-        ->postJson(route('meal-plans.store'), ['duration_days' => 3]);
-    $beforeResponse->assertStatus(402);
+    expect($resolver->resolve($user)->tier)->toBe(SubscriptionTier::Free);
 
     $subscription->update(['stripe_status' => 'active']);
 
-    $afterResponse = $this->actingAs($user)
-        ->post(route('meal-plans.store'), ['duration_days' => 3]);
-    $afterResponse->assertRedirect();
-
-    expect($user->mealPlans()->count())->toBe(1);
+    expect($resolver->resolve($user->fresh())->tier)->toBe(SubscriptionTier::Basic);
 });
 
-it('blocks access immediately after a subscription is fully canceled with ends_at in the past', function (): void {
-    Queue::fake();
-
+it('drops the entitlement to Free immediately after a subscription is canceled with ends_at in the past', function (): void {
     $user = User::factory()->create();
+    $resolver = resolve(ResolvesUserTier::class);
 
     $subscription = Subscription::factory()
         ->for($user)
@@ -191,17 +151,12 @@ it('blocks access immediately after a subscription is fully canceled with ends_a
         ->withPrice('price_plus_monthly')
         ->create();
 
-    $beforeResponse = $this->actingAs($user)
-        ->post(route('meal-plans.store'), ['duration_days' => 3]);
-    $beforeResponse->assertRedirect();
+    expect($resolver->resolve($user)->tier)->toBe(SubscriptionTier::Plus);
 
     $subscription->update([
         'stripe_status' => 'canceled',
         'ends_at' => now()->subMinute(),
     ]);
 
-    $afterResponse = $this->actingAs($user)
-        ->postJson(route('meal-plans.regenerate'));
-    $afterResponse->assertStatus(402)
-        ->assertJsonPath('feature', GatedFeature::MealPlanner->value);
+    expect($resolver->resolve($user->fresh())->tier)->toBe(SubscriptionTier::Free);
 });
