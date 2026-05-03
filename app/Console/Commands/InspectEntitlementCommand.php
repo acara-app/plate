@@ -74,9 +74,9 @@ final class InspectEntitlementCommand extends Command
         $this->table(['Field', 'Value'], [
             ['Reason', $rolloutReason],
             ['Active', $rolloutGate->isActiveFor($user) ? 'yes' : 'no'],
-            ['Global flag', config('plate.enable_premium_upgrades') ? 'on' : 'off'],
+            ['Global flag', config()->boolean('plate.enable_premium_upgrades', false) ? 'on' : 'off'],
             ['Allowlist size', count((array) config('plate.premium_rollout.allowlist', []))],
-            ['Percentage cohort', config('plate.premium_rollout.percentage', 0).'%'],
+            ['Percentage cohort', config()->integer('plate.premium_rollout.percentage', 0).'%'],
         ]);
 
         $this->newLine();
@@ -134,7 +134,7 @@ final class InspectEntitlementCommand extends Command
             ['Has subscription', 'yes'],
             ['Stripe ID', (string) $subscription->stripe_id],
             ['Status', (string) $subscription->stripe_status],
-            ['Stripe price', (string) ($subscription->stripe_price ?? $subscription->items()->value('stripe_price'))],
+            ['Stripe price', is_string($subscription->stripe_price) && $subscription->stripe_price !== '' ? $subscription->stripe_price : (is_string($subscription->items()->value('stripe_price')) ? $subscription->items()->value('stripe_price') : '—')],
             ['Ends at', $subscription->ends_at instanceof CarbonInterface
                 ? $subscription->ends_at->toIso8601String() // @codeCoverageIgnore
                 : '—'],

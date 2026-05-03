@@ -114,7 +114,7 @@ final readonly class BuildCreditWarning
     private function limitsForTier(SubscriptionTier $tier): array
     {
         /** @var array<string, array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}, monthly: array{limit: float, period_days: int}}> $tierLimits */
-        $tierLimits = config('plate.tier_limits', []); // @phpstan-ignore-line
+        $tierLimits = config('plate.tier_limits', []);
 
         return $tierLimits[$tier->value] ?? $tierLimits[SubscriptionTier::Free->value];
     }
@@ -181,7 +181,7 @@ final readonly class BuildCreditWarning
 
     private function multiplier(): int
     {
-        return (int) config('plate.credit_multiplier'); // @phpstan-ignore cast.int
+        return config()->integer('plate.credit_multiplier', 1);
     }
 
     private function cacheKey(User $user, string $limitType): string

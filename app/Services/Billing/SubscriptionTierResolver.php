@@ -46,7 +46,7 @@ final readonly class SubscriptionTierResolver implements ResolvesUserTier
     private function findRelevantSubscription(User $user): ?Subscription
     {
         /** @var Collection<int, Subscription> $subscriptions */
-        $subscriptions = $user->subscriptions()->get(); // @phpstan-ignore-line
+        $subscriptions = $user->subscriptions()->get();
 
         $valid = $subscriptions->first(fn (Subscription $subscription): bool => $subscription->valid());
 

@@ -136,7 +136,7 @@ final class BootstrapStripeProductsCommand extends Command
             $price = Cashier::stripe()->prices->create([
                 'product' => $stripeProduct->id,
                 'unit_amount' => $unitAmount,
-                'currency' => mb_strtolower((string) (config('cashier.currency', 'usd'))),
+                'currency' => mb_strtolower(config()->string('cashier.currency', 'usd')),
                 'recurring' => ['interval' => $interval === 'yearly' ? 'year' : 'month'],
                 'lookup_key' => $lookupKey,
             ]);

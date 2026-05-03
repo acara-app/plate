@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Illuminate\Database\Eloquent\Collection;
 use App\Contracts\Services\StripeServiceContract;
 use App\Models\User;
 use Laravel\Cashier\Payment;
@@ -100,10 +101,10 @@ final readonly class StripeService implements StripeServiceContract
 
     public function getIncompletePaymentUrlForUser(User $user): ?string
     {
-        /** @var Subscription|null $incomplete */
-        $incomplete = $user->subscriptions()
-            ->get()
-            ->first(fn (Subscription $subscription): bool => $subscription->incomplete());
+        /** @var Collection<int, Subscription> $subscriptions */
+        $subscriptions = $user->subscriptions()->get();
+
+        $incomplete = $subscriptions->first(fn (Subscription $subscription): bool => $subscription->incomplete());
 
         if (! $incomplete instanceof Subscription) {
             return null;

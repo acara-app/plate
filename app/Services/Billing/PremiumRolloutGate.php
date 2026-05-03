@@ -76,7 +76,7 @@ final readonly class PremiumRolloutGate
 
     private function isInRolloutPercentile(User $user): bool
     {
-        $percentage = (int) Config::get('plate.premium_rollout.percentage', 0);
+        $percentage = Config::integer('plate.premium_rollout.percentage', 0);
 
         if ($percentage <= 0) {
             return false;

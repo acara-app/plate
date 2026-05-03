@@ -18,6 +18,7 @@ final readonly class EmitPaywallEventsFromWebhook
 
     public function handle(WebhookHandled $event): void
     {
+        /** @var array<string, mixed> $payload */
         $payload = $event->payload;
 
         /** @var string|null $type */
@@ -36,9 +37,14 @@ final readonly class EmitPaywallEventsFromWebhook
      */
     private function handleSubscriptionWritten(array $payload): void
     {
+        $rawData = $payload['data'] ?? null;
+        if (! is_array($rawData)) {
+            return; // @codeCoverageIgnore
+        }
+
         /** @var array<string, mixed>|null $object */
-        $object = $payload['data']['object'] ?? null;
-        if ($object === null) {
+        $object = $rawData['object'] ?? null;
+        if (! is_array($object)) {
             return; // @codeCoverageIgnore
         }
 
@@ -73,9 +79,14 @@ final readonly class EmitPaywallEventsFromWebhook
      */
     private function handleSubscriptionDeleted(array $payload): void
     {
+        $rawData = $payload['data'] ?? null;
+        if (! is_array($rawData)) {
+            return; // @codeCoverageIgnore
+        }
+
         /** @var array<string, mixed>|null $object */
-        $object = $payload['data']['object'] ?? null;
-        if ($object === null) {
+        $object = $rawData['object'] ?? null;
+        if (! is_array($object)) {
             return; // @codeCoverageIgnore
         }
 
@@ -103,9 +114,10 @@ final readonly class EmitPaywallEventsFromWebhook
             return null; // @codeCoverageIgnore
         }
 
+        /** @var User|null $model */
         $model = Cashier::findBillable($stripeCustomerId);
 
-        return $model instanceof User ? $model : null;
+        return $model;
     }
 
     /**
@@ -113,13 +125,27 @@ final readonly class EmitPaywallEventsFromWebhook
      */
     private function resolveStripePriceId(array $object): ?string
     {
-        /** @var array<int, array<string, mixed>>|null $items */
-        $items = $object['items']['data'] ?? null;
-        if (! is_array($items) || $items === []) {
+        $rawItems = $object['items'] ?? null;
+        if (! is_array($rawItems)) {
             return null; // @codeCoverageIgnore
         }
 
-        $priceId = $items[0]['price']['id'] ?? null;
+        $itemsData = $rawItems['data'] ?? null;
+        if (! is_array($itemsData) || $itemsData === []) {
+            return null; // @codeCoverageIgnore
+        }
+
+        $firstItem = $itemsData[0] ?? null;
+        if (! is_array($firstItem)) {
+            return null; // @codeCoverageIgnore
+        }
+
+        $price = $firstItem['price'] ?? null;
+        if (! is_array($price)) {
+            return null; // @codeCoverageIgnore
+        }
+
+        $priceId = $price['id'] ?? null;
 
         return is_string($priceId) ? $priceId : null;
     }

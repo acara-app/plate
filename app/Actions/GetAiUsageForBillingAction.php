@@ -31,7 +31,7 @@ final readonly class GetAiUsageForBillingAction
     {
         $entitlement = $this->resolveUserTier->resolve($user);
         $limits = $this->limitsForTier($entitlement->tier);
-        $multiplier = (int) config('plate.credit_multiplier'); /** @phpstan-ignore cast.int */
+        $multiplier = config()->integer('plate.credit_multiplier', 1);
         $now = CarbonImmutable::now();
         $rollingHours = (int) $limits['rolling']['period_hours'];
         $rollingPeriodStart = $now->subHours($rollingHours);
@@ -89,7 +89,7 @@ final readonly class GetAiUsageForBillingAction
     private function limitsForTier(SubscriptionTier $tier): array
     {
         /** @var array<string, array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}, monthly: array{limit: float, period_days: int}}> $tierLimits */
-        $tierLimits = config('plate.tier_limits', []); // @phpstan-ignore-line
+        $tierLimits = config('plate.tier_limits', []);
 
         return $tierLimits[$tier->value] ?? $tierLimits[SubscriptionTier::Free->value];
     }
