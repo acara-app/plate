@@ -96,22 +96,18 @@ final readonly class BuildCreditWarning
      */
     private function periodEnd(User $user, CarbonImmutable $now, string $window, array $windowConfig, CarbonImmutable $periodStart): CarbonImmutable
     {
-        if ($window === 'rolling') {
-            $hours = (int) $windowConfig['period_hours'];
-            $oldest = AiUsage::query()
-                ->forUser($user)
-                ->where('created_at', '>=', $periodStart)
-                ->where('created_at', '<=', $now)
-                ->min('created_at');
+        $oldest = AiUsage::query()
+            ->forUser($user)
+            ->where('created_at', '>=', $periodStart)
+            ->where('created_at', '<=', $now)
+            ->min('created_at');
 
-            return is_string($oldest)
-                ? CarbonImmutable::parse($oldest)->addHours($hours)
-                : $now->addHours($hours);
-        }
+        $oldestAt = is_string($oldest) ? CarbonImmutable::parse($oldest) : $now;
 
         return match ($window) {
-            'weekly' => $now->addDays((int) $windowConfig['period_days']),
-            'monthly' => $now->addDays((int) $windowConfig['period_days']),
+            'rolling' => $oldestAt->addHours((int) $windowConfig['period_hours']),
+            'weekly' => $oldestAt->addDays((int) $windowConfig['period_days']),
+            'monthly' => $oldestAt->addDays((int) $windowConfig['period_days']),
             default => $now,
         };
     }

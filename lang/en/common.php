@@ -810,6 +810,7 @@ return [
         'usage' => [
             'rolling' => 'Rolling Usage',
             'weekly' => 'Weekly Usage',
+            'monthly' => 'Monthly Usage',
             'resets_in' => 'Resets in {{time}}',
             'credits_used' => '{{current}} / {{limit}} credits',
             'over_limit' => '· over limit',
@@ -820,8 +821,8 @@ return [
             'payment_pending' => 'Payment pending — your access will activate momentarily.',
             'labels' => [
                 'free' => 'Free',
-                'basic' => 'Basic',
-                'plus' => 'Plus',
+                'basic' => 'Supporter',
+                'plus' => 'Pro',
             ],
         ],
         'lifecycle' => [
@@ -843,13 +844,13 @@ return [
             'upgrade_to' => 'Upgrade to {{tier}}',
             'plans' => [
                 'basic' => [
-                    'name' => 'Basic',
+                    'name' => 'Supporter',
                     'price' => '$9/mo',
                     'pitch' => 'More AI credits each period — keep going past the free cap.',
                 ],
                 'plus' => [
-                    'name' => 'Plus',
-                    'price' => '$18/mo',
+                    'name' => 'Pro',
+                    'price' => '$19/mo',
                     'pitch' => 'Highest credits, plus Memory and Apple Health sync.',
                 ],
             ],
