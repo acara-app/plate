@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 
 use App\Models\SubscriptionProduct;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Laravel\Cashier\Cashier;
 use Stripe\Exception\ApiErrorException;
@@ -24,7 +25,7 @@ final class BootstrapStripeProductsCommand extends Command
     {
         /** @var Collection<int, SubscriptionProduct> $products */
         $products = SubscriptionProduct::query()
-            ->where(function ($query): void {
+            ->where(function (Builder $query): void {
                 $query->whereNotNull('stripe_lookup_key')
                     ->orWhereNotNull('yearly_stripe_lookup_key');
             })
