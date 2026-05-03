@@ -1,6 +1,6 @@
 import type { ChatMode } from '@/pages/chat/chat-input';
 import { stream } from '@/routes/chat';
-import type { PaywallTrigger, SubscriptionTier } from '@/types';
+import type { PaywallCapTrigger, SubscriptionTier } from '@/types';
 import type { ChatStatus } from '@/types/chat';
 import { useChat, type UIMessage } from '@ai-sdk/react';
 import type { ChatOnFinishCallback, FileUIPart } from 'ai';
@@ -23,7 +23,7 @@ interface UseChatStreamReturn {
     isStreaming: boolean;
     isSubmitting: boolean;
     initialMessages: UIMessage[];
-    usageLimitTrigger: PaywallTrigger | null;
+    usageLimitTrigger: PaywallCapTrigger | null;
     clearUsageLimitTrigger: () => void;
 }
 
@@ -54,7 +54,7 @@ export function useChatStream({
     modeRef.current = { mode };
     const [networkError, setNetworkError] = useState<Error | undefined>();
     const [usageLimitTrigger, setUsageLimitTrigger] =
-        useState<PaywallTrigger | null>(null);
+        useState<PaywallCapTrigger | null>(null);
 
     const transport = useMemo(
         () =>
