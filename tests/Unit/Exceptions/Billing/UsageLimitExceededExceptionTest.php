@@ -42,7 +42,7 @@ it('exposes structured fields directly on the exception for non-HTTP callers', f
         limitType: 'monthly',
         tier: SubscriptionTier::Plus,
         currentCredits: 9_500,
-        limitCredits: 9_000,
+        limitCredits: 10_000,
         resetsAt: now()->addDays(2),
     );
 
@@ -50,7 +50,7 @@ it('exposes structured fields directly on the exception for non-HTTP callers', f
 
     expect($payload['limit_type'])->toBe('monthly')
         ->and($payload['tier'])->toBe('plus')
-        ->and($payload['tier_label'])->toBe('Plus')
+        ->and($payload['tier_label'])->toBe('Pro')
         ->and($payload['current_credits'])->toBe(9_500)
-        ->and($payload['limit_credits'])->toBe(9_000);
+        ->and($payload['limit_credits'])->toBe(10_000);
 });

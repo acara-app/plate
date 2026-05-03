@@ -97,8 +97,8 @@ return [
         ],
         'plus' => [
             'rolling' => ['limit' => 1.00, 'period_hours' => 24],
-            'weekly' => ['limit' => 3.50, 'period_days' => 7],
-            'monthly' => ['limit' => 9.00, 'period_days' => 30],
+            'weekly' => ['limit' => 4.00, 'period_days' => 7],
+            'monthly' => ['limit' => 10.00, 'period_days' => 30],
         ],
     ],
 ];

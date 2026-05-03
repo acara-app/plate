@@ -90,7 +90,7 @@ it('uses Basic-tier limits for users with an active Basic subscription', functio
     $result = billingUsageAction()->handle($user);
 
     expect($result['tier'])->toBe(SubscriptionTier::Basic->value)
-        ->and($result['tier_label'])->toBe('Basic')
+        ->and($result['tier_label'])->toBe('Supporter')
         ->and($result['rolling']['limit'])->toBe(500)
         ->and($result['weekly']['limit'])->toBe(2000)
         ->and($result['monthly']['limit'])->toBe(6000);
@@ -108,10 +108,10 @@ it('uses Plus-tier limits for users with an active Plus subscription', function 
     $result = billingUsageAction()->handle($user);
 
     expect($result['tier'])->toBe(SubscriptionTier::Plus->value)
-        ->and($result['tier_label'])->toBe('Plus')
+        ->and($result['tier_label'])->toBe('Pro')
         ->and($result['rolling']['limit'])->toBe(1000)
-        ->and($result['weekly']['limit'])->toBe(3500)
-        ->and($result['monthly']['limit'])->toBe(9000);
+        ->and($result['weekly']['limit'])->toBe(4000)
+        ->and($result['monthly']['limit'])->toBe(10000);
 });
 
 it('caps the displayed percentage at 100 but preserves the raw credit count', function (): void {

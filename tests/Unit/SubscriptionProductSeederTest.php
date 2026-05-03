@@ -7,7 +7,11 @@ use Database\Seeders\SubscriptionProductSeeder;
 
 covers(SubscriptionProductSeeder::class);
 
-it('seeds the subscription catalog for the current monetization model', function (): void {
+it('seeds the open-feature Cloud subscription catalog', function (): void {
+    SubscriptionProduct::factory()->create(['name' => 'Personal']);
+    SubscriptionProduct::factory()->create(['name' => 'Basic']);
+    SubscriptionProduct::factory()->create(['name' => 'Plus']);
+
     $this->seed(SubscriptionProductSeeder::class);
 
     $products = SubscriptionProduct::query()
@@ -15,44 +19,40 @@ it('seeds the subscription catalog for the current monetization model', function
         ->get()
         ->keyBy('name');
 
-    expect($products->keys()->all())->toBe(['Free', 'Basic', 'Plus']);
+    expect($products->keys()->all())->toBe(['Free', 'Supporter', 'Pro'])
+        ->and(SubscriptionProduct::query()->whereIn('name', ['Personal', 'Basic', 'Plus'])->exists())->toBeFalse();
 
-    expect($products['Free'])
-        ->product_group->toBe('free')
-        ->popular->toBeFalse()
-        ->features->toContain('Limited free credits each month');
+    expect($products['Free']->features)
+        ->toContain('All open Acara Cloud features', '1,000 monthly AI credits');
 
-    expect($products['Basic'])
-        ->product_group->toBe('subscription')
+    expect($products['Supporter'])
+        ->price->toBe(9.00)
+        ->yearly_price->toBe(89.00)
+        ->stripe_lookup_key->toBe('acara-plate-supporter-monthly-v1')
+        ->yearly_stripe_lookup_key->toBe('acara-plate-supporter-yearly-v1')
         ->popular->toBeTrue()
-        ->features->toContain('AI Meal Planner', 'Meal photo analysis')
-        ->features->not->toContain('Unlimited chat with Altani');
+        ->product_group->toBe('subscription');
 
-    expect($products['Plus'])
-        ->product_group->toBe('trial')
+    expect($products['Pro'])
+        ->price->toBe(19.00)
+        ->yearly_price->toBe(190.00)
+        ->stripe_lookup_key->toBe('acara-plate-pro-monthly-v1')
+        ->yearly_stripe_lookup_key->toBe('acara-plate-pro-yearly-v1')
         ->popular->toBeFalse()
-        ->features->toContain(
-            'Memory for your preferences, goals, and context',
-            "Syncs with your iPhone's Health app",
-            'Highest chat limits',
-        );
+        ->product_group->toBe('subscription');
 });
 
-it('seeds lookup keys but leaves price IDs null for production sync', function (): void {
+it('does not sell open product features as paid-only gates', function (): void {
     $this->seed(SubscriptionProductSeeder::class);
 
-    $basic = SubscriptionProduct::query()->where('name', 'Basic')->firstOrFail();
-    $plus = SubscriptionProduct::query()->where('name', 'Plus')->firstOrFail();
+    $paidFeatureCopy = SubscriptionProduct::query()
+        ->whereIn('name', ['Supporter', 'Pro'])
+        ->get()
+        ->flatMap(fn (SubscriptionProduct $product): array => $product->features ?? []);
 
-    expect($basic)
-        ->stripe_lookup_key->toBe('acara-plate-personal-monthly')
-        ->yearly_stripe_lookup_key->toBe('acara-plate-personal-yearly')
-        ->stripe_price_id->toBeNull()
-        ->yearly_stripe_price_id->toBeNull();
-
-    expect($plus)
-        ->stripe_lookup_key->toBe('acara-plate-plus-monthly')
-        ->yearly_stripe_lookup_key->toBe('acara-plate-plus-yearly')
-        ->stripe_price_id->toBeNull()
-        ->yearly_stripe_price_id->toBeNull();
+    expect($paidFeatureCopy)
+        ->toContain('All open Acara Cloud features')
+        ->not->toContain('AI Meal Planner')
+        ->not->toContain('Meal photo analysis')
+        ->not->toContain("Syncs with your iPhone's Health app");
 });

@@ -14,8 +14,8 @@ enum SubscriptionTier: string
     {
         return match (mb_strtolower((string) $name)) {
             'free' => self::Free,
-            'basic' => self::Basic,
-            'plus' => self::Plus,
+            'basic', 'supporter' => self::Basic,
+            'plus', 'pro' => self::Plus,
             default => null, // @codeCoverageIgnore
         };
     }
@@ -24,8 +24,8 @@ enum SubscriptionTier: string
     {
         return match ($this) {
             self::Free => 'Free',
-            self::Basic => 'Basic',
-            self::Plus => 'Plus',
+            self::Basic => 'Supporter',
+            self::Plus => 'Pro',
         };
     }
 }

@@ -70,7 +70,7 @@ it('shows the resolved tier limits for a Basic subscriber', function (): void {
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('aiUsage.tier', SubscriptionTier::Basic->value)
-            ->where('aiUsage.tier_label', 'Basic')
+            ->where('aiUsage.tier_label', 'Supporter')
             ->where('aiUsage.rolling.limit', 500)
             ->where('aiUsage.weekly.limit', 2000)
             ->where('aiUsage.monthly.limit', 6000));
