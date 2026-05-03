@@ -46,7 +46,6 @@ it('returns usage data for user with no usage', function (): void {
             'premium_enforcement_active',
             'rolling',
             'weekly',
-            'monthly',
         ])
         ->and($result['tier'])->toBe(SubscriptionTier::Free->value)
         ->and($result['tier_label'])->toBe('Free')
@@ -54,7 +53,6 @@ it('returns usage data for user with no usage', function (): void {
         ->and($result['premium_enforcement_active'])->toBeTrue()
         ->and($result['rolling']['current'])->toBe(0)
         ->and($result['weekly']['current'])->toBe(0)
-        ->and($result['monthly']['current'])->toBe(0)
         ->and($result['rolling']['percentage'])->toBe(0)
         ->and($result['rolling']['over_limit'])->toBeFalse()
         ->and($result['rolling']['resets_in'])->toBeString();
@@ -73,7 +71,6 @@ it('uses Free-tier limits for users without an active subscription', function ()
     expect($result['tier'])->toBe(SubscriptionTier::Free->value)
         ->and($result['rolling']['limit'])->toBe(100)
         ->and($result['weekly']['limit'])->toBe(350)
-        ->and($result['monthly']['limit'])->toBe(1000)
         ->and($result['rolling']['current'])->toBe(50)
         ->and($result['rolling']['percentage'])->toBe(50);
 });
@@ -92,8 +89,7 @@ it('uses Basic-tier limits for users with an active Basic subscription', functio
     expect($result['tier'])->toBe(SubscriptionTier::Basic->value)
         ->and($result['tier_label'])->toBe('Supporter')
         ->and($result['rolling']['limit'])->toBe(500)
-        ->and($result['weekly']['limit'])->toBe(2000)
-        ->and($result['monthly']['limit'])->toBe(6000);
+        ->and($result['weekly']['limit'])->toBe(2000);
 });
 
 it('uses Plus-tier limits for users with an active Plus subscription', function (): void {
@@ -110,8 +106,7 @@ it('uses Plus-tier limits for users with an active Plus subscription', function 
     expect($result['tier'])->toBe(SubscriptionTier::Plus->value)
         ->and($result['tier_label'])->toBe('Pro')
         ->and($result['rolling']['limit'])->toBe(1000)
-        ->and($result['weekly']['limit'])->toBe(4000)
-        ->and($result['monthly']['limit'])->toBe(10000);
+        ->and($result['weekly']['limit'])->toBe(4000);
 });
 
 it('caps the displayed percentage at 100 but preserves the raw credit count', function (): void {
@@ -140,8 +135,8 @@ it('marks under-limit buckets as not over_limit', function (): void {
 
     $result = billingUsageAction()->handle($user);
 
-    expect($result['monthly']['percentage'])->toBe(1)
-        ->and($result['monthly']['over_limit'])->toBeFalse();
+    expect($result['weekly']['percentage'])->toBe(1)
+        ->and($result['weekly']['over_limit'])->toBeFalse();
 });
 
 it('flags payment_pending when the user has only an incomplete subscription', function (): void {
@@ -186,15 +181,14 @@ it('returns credits as integers using configured multiplier', function (): void 
         ->and($result['rolling']['current'])->toBeInt()
         ->and($result['rolling']['limit'])->toBeInt()
         ->and($result['rolling']['limit'])->toBe(100)
-        ->and($result['weekly']['limit'])->toBe(350)
-        ->and($result['monthly']['limit'])->toBe(1000);
+        ->and($result['weekly']['limit'])->toBe(350);
 });
 
 it('returns usage data for guest user with default limits', function (): void {
     $result = billingUsageAction()->handle(new User);
 
     expect($result)->toBeArray()
-        ->toHaveKeys(['tier', 'rolling', 'weekly', 'monthly'])
+        ->toHaveKeys(['tier', 'rolling', 'weekly'])
         ->and($result['tier'])->toBe(SubscriptionTier::Free->value)
         ->and($result['rolling']['current'])->toBe(0);
 });

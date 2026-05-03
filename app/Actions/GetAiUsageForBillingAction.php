@@ -23,8 +23,7 @@ final readonly class GetAiUsageForBillingAction
      *     payment_pending: bool,
      *     premium_enforcement_active: bool,
      *     rolling: array{current: int, limit: int, percentage: int, resets_in: string, over_limit: bool},
-     *     weekly: array{current: int, limit: int, percentage: int, resets_in: string, over_limit: bool},
-     *     monthly: array{current: int, limit: int, percentage: int, resets_in: string, over_limit: bool}
+     *     weekly: array{current: int, limit: int, percentage: int, resets_in: string, over_limit: bool}
      * }
      */
     public function handle(User $user): array
@@ -60,12 +59,6 @@ final readonly class GetAiUsageForBillingAction
                 $multiplier,
                 $periodEnd,
             ),
-            'monthly' => $this->buildBucket(
-                $periodCost,
-                (float) $limits['monthly']['limit'],
-                $multiplier,
-                $periodEnd,
-            ),
         ];
     }
 
@@ -84,11 +77,11 @@ final readonly class GetAiUsageForBillingAction
     }
 
     /**
-     * @return array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}, monthly: array{limit: float, period_days: int}}
+     * @return array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}}
      */
     private function limitsForTier(SubscriptionTier $tier): array
     {
-        /** @var array<string, array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}, monthly: array{limit: float, period_days: int}}> $tierLimits */
+        /** @var array<string, array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}}> $tierLimits */
         $tierLimits = config()->array('plate.tier_limits', []);
 
         return $tierLimits[$tier->value] ?? $tierLimits[SubscriptionTier::Free->value];

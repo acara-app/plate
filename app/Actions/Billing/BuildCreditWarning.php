@@ -31,7 +31,7 @@ final readonly class BuildCreditWarning
         $candidate = null;
         $candidateRatio = 0.0;
 
-        foreach (['rolling', 'weekly', 'monthly'] as $window) {
+        foreach (['rolling', 'weekly'] as $window) {
             $windowConfig = $limits[$window];
             $limit = (float) $windowConfig['limit'];
 
@@ -68,11 +68,11 @@ final readonly class BuildCreditWarning
     }
 
     /**
-     * @return array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}, monthly: array{limit: float, period_days: int}}
+     * @return array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}}
      */
     private function limitsForTier(SubscriptionTier $tier): array
     {
-        /** @var array<string, array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}, monthly: array{limit: float, period_days: int}}> $tierLimits */
+        /** @var array<string, array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}}> $tierLimits */
         $tierLimits = config()->array('plate.tier_limits', []);
 
         return $tierLimits[$tier->value] ?? $tierLimits[SubscriptionTier::Free->value];
@@ -86,7 +86,6 @@ final readonly class BuildCreditWarning
         return match ($window) {
             'rolling' => $now->subHours((int) $windowConfig['period_hours']),
             'weekly' => $now->subDays((int) $windowConfig['period_days']),
-            'monthly' => $now->subDays((int) $windowConfig['period_days']),
             default => $now,
         };
     }
@@ -107,7 +106,6 @@ final readonly class BuildCreditWarning
         return match ($window) {
             'rolling' => $oldestAt->addHours((int) $windowConfig['period_hours']),
             'weekly' => $oldestAt->addDays((int) $windowConfig['period_days']),
-            'monthly' => $oldestAt->addDays((int) $windowConfig['period_days']),
             default => $now,
         };
     }

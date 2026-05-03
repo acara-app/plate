@@ -77,18 +77,6 @@ it('throws when the weekly window cost plus estimate would exceed the cap', func
         ->toThrow(UsageLimitExceededException::class);
 });
 
-it('throws when the monthly window cost plus estimate would exceed the cap', function (): void {
-    $user = User::factory()->create();
-
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 0.999,
-    ]);
-
-    expect(fn (): mixed => enforceUsage()->handle($user, ModelName::GPT_5_4_MINI))
-        ->toThrow(UsageLimitExceededException::class);
-});
-
 it('throws at the 99% mark when the next call would push the user past 100', function (): void {
     $user = User::factory()->create();
 

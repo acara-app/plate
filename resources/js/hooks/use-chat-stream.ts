@@ -29,7 +29,7 @@ interface UseChatStreamReturn {
 
 interface UsageLimitExceededPayload {
     error: 'usage_limit_exceeded';
-    limit_type: 'rolling' | 'weekly' | 'monthly';
+    limit_type: 'rolling' | 'weekly';
     tier: SubscriptionTier;
     current_credits: number;
     limit_credits: number;
