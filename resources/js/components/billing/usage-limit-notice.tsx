@@ -52,7 +52,7 @@ export function UsageLimitNotice({
         <div
             role="status"
             aria-live="polite"
-            className="flex w-full items-start gap-3 rounded-xl border border-amber-300/70 bg-amber-50/70 p-4 dark:border-amber-900/60 dark:bg-amber-950/30 sm:p-5"
+            className="flex w-full items-start gap-3 rounded-xl border border-amber-300/70 bg-amber-50/70 p-4 sm:p-5 dark:border-amber-900/60 dark:bg-amber-950/30"
         >
             <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
                 <Lock className="size-4" />
@@ -67,9 +67,7 @@ export function UsageLimitNotice({
                         onClick={() => handleUpgrade(targetTier)}
                     >
                         {t('billing.paywall.upgrade_to', {
-                            tier: t(
-                                `billing.paywall.plans.${targetTier}.name`,
-                            ),
+                            tier: t(`billing.paywall.plans.${targetTier}.name`),
                         })}
                     </Button>
                 )}

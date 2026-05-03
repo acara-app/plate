@@ -278,44 +278,44 @@ function EmptyMealPlanState({
             </div>
 
             <section className="grid gap-6 rounded-xl border bg-card p-5 shadow-sm md:p-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
-                    <div className="space-y-5">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                            <Sparkles className="h-6 w-6" />
-                        </div>
-                        <div className="space-y-2">
-                            <h2 className="text-2xl font-semibold">
-                                {t('meal_plans.empty_title')}
-                            </h2>
-                            <p className="max-w-xl text-muted-foreground">
-                                {t('meal_plans.no_plans')}
-                            </p>
-                        </div>
-                        <div className="grid gap-3 sm:flex sm:flex-wrap">
-                            <Button className="w-full sm:w-auto" asChild>
-                                <Link
-                                    href={`${chat.create(generateUUID()).url}?mode=create-meal-plan`}
-                                >
-                                    <MessageSquare className="h-4 w-4" />
-                                    {t('meal_plans.create_with_altani')}
-                                </Link>
-                            </Button>
-                            <GenerateMealPlanDialog
-                                defaultDietType={userDietType}
-                                dietTypes={dietTypes}
-                            />
-                        </div>
+                <div className="space-y-5">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <Sparkles className="h-6 w-6" />
                     </div>
-
-                    <div className="mx-auto hidden w-full max-w-64 lg:block">
-                        <img
-                            src="/images/altani/altani_holding_plate-320.webp"
-                            alt=""
-                            aria-hidden="true"
-                            loading="lazy"
-                            className="h-auto w-full"
+                    <div className="space-y-2">
+                        <h2 className="text-2xl font-semibold">
+                            {t('meal_plans.empty_title')}
+                        </h2>
+                        <p className="max-w-xl text-muted-foreground">
+                            {t('meal_plans.no_plans')}
+                        </p>
+                    </div>
+                    <div className="grid gap-3 sm:flex sm:flex-wrap">
+                        <Button className="w-full sm:w-auto" asChild>
+                            <Link
+                                href={`${chat.create(generateUUID()).url}?mode=create-meal-plan`}
+                            >
+                                <MessageSquare className="h-4 w-4" />
+                                {t('meal_plans.create_with_altani')}
+                            </Link>
+                        </Button>
+                        <GenerateMealPlanDialog
+                            defaultDietType={userDietType}
+                            dietTypes={dietTypes}
                         />
                     </div>
-                </section>
+                </div>
+
+                <div className="mx-auto hidden w-full max-w-64 lg:block">
+                    <img
+                        src="/images/altani/altani_holding_plate-320.webp"
+                        alt=""
+                        aria-hidden="true"
+                        loading="lazy"
+                        className="h-auto w-full"
+                    />
+                </div>
+            </section>
         </>
     );
 }

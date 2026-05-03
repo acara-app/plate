@@ -7,18 +7,12 @@ namespace App\Http\Controllers;
 use App\Enums\MealPlanGenerationStatus;
 use App\Http\Requests\RegenerateMealPlanDayRequest;
 use App\Models\MealPlan;
-use App\Models\User;
 use App\Workflows\MealPlanDayWorkflow;
-use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Workflow\WorkflowStub;
 
 final readonly class RegenerateMealPlanDayController
 {
-    public function __construct(
-        #[CurrentUser] private User $user,
-    ) {}
-
     public function __invoke(RegenerateMealPlanDayRequest $request, MealPlan $mealPlan): RedirectResponse
     {
         $dayNumber = $request->integer('day', 1);
