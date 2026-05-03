@@ -840,9 +840,6 @@ return [
         'paywall' => [
             'cap_title' => "You've hit your {{tier}} {{limit}} cap",
             'cap_description' => '{{current}} of {{total}} credits used. Resets in {{time}}.',
-            'feature_title' => 'Upgrade to use {{feature}}',
-            'feature_description' => '{{feature}} is part of {{tier}}. Upgrade to unlock it.',
-            'compare_plans' => 'Compare plans',
             'upgrade_to' => 'Upgrade to {{tier}}',
             'plans' => [
                 'basic' => [
