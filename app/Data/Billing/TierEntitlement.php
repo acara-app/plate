@@ -51,9 +51,4 @@ final readonly class TierEntitlement
     {
         return $this->gracePeriodEndsAt instanceof CarbonInterface;
     }
-
-    public function isAtLeast(SubscriptionTier $tier): bool
-    {
-        return $this->tier->isAtLeast($tier);
-    }
 }

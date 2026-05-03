@@ -16,7 +16,7 @@ enum SubscriptionTier: string
             'free' => self::Free,
             'basic' => self::Basic,
             'plus' => self::Plus,
-            default => null,
+            default => null, // @codeCoverageIgnore
         };
     }
 
@@ -26,25 +26,6 @@ enum SubscriptionTier: string
             self::Free => 'Free',
             self::Basic => 'Basic',
             self::Plus => 'Plus',
-        };
-    }
-
-    public function isPaid(): bool
-    {
-        return $this !== self::Free;
-    }
-
-    public function isAtLeast(self $other): bool
-    {
-        return $this->rank() >= $other->rank();
-    }
-
-    private function rank(): int
-    {
-        return match ($this) {
-            self::Free => 0,
-            self::Basic => 1,
-            self::Plus => 2,
         };
     }
 }

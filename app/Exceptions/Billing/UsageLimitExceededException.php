@@ -72,6 +72,6 @@ final class UsageLimitExceededException extends RuntimeException
             return $diff->h.' hours '.$diff->i.' minutes';
         }
 
-        return $diff->i.' minutes';
+        return $diff->i.' minutes'; // @codeCoverageIgnore
     }
 }

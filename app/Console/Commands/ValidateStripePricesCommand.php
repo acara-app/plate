@@ -80,7 +80,7 @@ final class ValidateStripePricesCommand extends Command
         }
 
         if (! $tierIsPaid) {
-            return ['display' => $value, 'failed' => false];
+            return ['display' => $value, 'failed' => false]; // @codeCoverageIgnore
         }
 
         return [

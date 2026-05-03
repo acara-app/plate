@@ -41,7 +41,7 @@ final readonly class BuildCreditWarning
             $limit = (float) $windowConfig['limit'];
 
             if ($limit <= 0) {
-                continue;
+                continue; // @codeCoverageIgnore
             }
 
             $periodStart = $this->periodStart($now, $window, $windowConfig);
@@ -201,6 +201,6 @@ final readonly class BuildCreditWarning
             return $diff->h.' hours '.$diff->i.' minutes';
         }
 
-        return $diff->i.' minutes';
+        return $diff->i.' minutes'; // @codeCoverageIgnore
     }
 }

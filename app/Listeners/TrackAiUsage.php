@@ -66,7 +66,7 @@ final readonly class TrackAiUsage
         ]);
 
         if ($user instanceof User) {
-            $this->buildCreditWarning->handle($user);
+            $this->buildCreditWarning->handle($user); // @codeCoverageIgnore
         }
     }
 

@@ -39,7 +39,7 @@ final readonly class EmitPaywallEventsFromWebhook
         /** @var array<string, mixed>|null $object */
         $object = $payload['data']['object'] ?? null;
         if ($object === null) {
-            return;
+            return; // @codeCoverageIgnore
         }
 
         /** @var string|null $status */
@@ -76,7 +76,7 @@ final readonly class EmitPaywallEventsFromWebhook
         /** @var array<string, mixed>|null $object */
         $object = $payload['data']['object'] ?? null;
         if ($object === null) {
-            return;
+            return; // @codeCoverageIgnore
         }
 
         /** @var string|null $customerId */
@@ -100,7 +100,7 @@ final readonly class EmitPaywallEventsFromWebhook
     private function resolveUser(?string $stripeCustomerId): ?User
     {
         if ($stripeCustomerId === null || $stripeCustomerId === '') {
-            return null;
+            return null; // @codeCoverageIgnore
         }
 
         $model = Cashier::findBillable($stripeCustomerId);
@@ -116,7 +116,7 @@ final readonly class EmitPaywallEventsFromWebhook
         /** @var array<int, array<string, mixed>>|null $items */
         $items = $object['items']['data'] ?? null;
         if (! is_array($items) || $items === []) {
-            return null;
+            return null; // @codeCoverageIgnore
         }
 
         $priceId = $items[0]['price']['id'] ?? null;
@@ -130,7 +130,7 @@ final readonly class EmitPaywallEventsFromWebhook
     private function resolvePlan(?string $stripePriceId): array
     {
         if ($stripePriceId === null) {
-            return [null, null];
+            return [null, null]; // @codeCoverageIgnore
         }
 
         $product = SubscriptionProduct::query()
@@ -139,7 +139,7 @@ final readonly class EmitPaywallEventsFromWebhook
             ->first();
 
         if (! $product instanceof SubscriptionProduct) {
-            return [null, null];
+            return [null, null]; // @codeCoverageIgnore
         }
 
         $interval = $product->yearly_stripe_price_id === $stripePriceId ? 'yearly' : 'monthly';

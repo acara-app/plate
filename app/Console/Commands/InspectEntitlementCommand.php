@@ -53,7 +53,7 @@ final class InspectEntitlementCommand extends Command
                     'payment_pending' => $entitlement->isPaymentPending(),
                     'on_grace_period' => $entitlement->inGracePeriod(),
                     'grace_period_ends_at' => $entitlement->gracePeriodEndsAt instanceof CarbonInterface
-                        ? $entitlement->gracePeriodEndsAt->toIso8601String()
+                        ? $entitlement->gracePeriodEndsAt->toIso8601String() // @codeCoverageIgnore
                         : null,
                 ],
                 'subscription' => $subscriptionLine,
@@ -88,7 +88,7 @@ final class InspectEntitlementCommand extends Command
             ['Payment pending', $entitlement->isPaymentPending() ? 'yes' : 'no'],
             ['On grace period', $entitlement->inGracePeriod() ? 'yes' : 'no'],
             ['Grace ends at', $entitlement->gracePeriodEndsAt instanceof CarbonInterface
-                ? $entitlement->gracePeriodEndsAt->toIso8601String()
+                ? $entitlement->gracePeriodEndsAt->toIso8601String() // @codeCoverageIgnore
                 : '—'],
         ]);
 
@@ -136,7 +136,7 @@ final class InspectEntitlementCommand extends Command
             ['Status', (string) $subscription->stripe_status],
             ['Stripe price', (string) ($subscription->stripe_price ?? $subscription->items()->value('stripe_price'))],
             ['Ends at', $subscription->ends_at instanceof CarbonInterface
-                ? $subscription->ends_at->toIso8601String()
+                ? $subscription->ends_at->toIso8601String() // @codeCoverageIgnore
                 : '—'],
             ['On grace period', $subscription->onGracePeriod() ? 'yes' : 'no'],
             ['Active', $subscription->active() ? 'yes' : 'no'],

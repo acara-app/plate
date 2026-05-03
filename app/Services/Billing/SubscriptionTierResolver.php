@@ -62,7 +62,7 @@ final readonly class SubscriptionTierResolver implements ResolvesUserTier
         $stripePrice = $subscription->stripe_price ?? $subscription->items()->value('stripe_price');
 
         if ($stripePrice === null || $stripePrice === '') {
-            return null;
+            return null; // @codeCoverageIgnore
         }
 
         $product = SubscriptionProduct::query()

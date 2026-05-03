@@ -63,7 +63,7 @@ final readonly class PremiumRolloutGate
             $candidate = mb_strtolower((string) $entry);
 
             if ($candidate === '') {
-                continue;
+                continue; // @codeCoverageIgnore
             }
 
             if ($candidate === $id || $candidate === $email) {

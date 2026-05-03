@@ -195,6 +195,23 @@ it('picks the most-restrictive window when multiple are over 80%', function (): 
         ->and($warning->percentage)->toBe(90);
 });
 
+it('picks the monthly window when only monthly is over 80%', function (): void {
+    $user = User::factory()->create();
+
+    AiUsage::factory()->create([
+        'user_id' => $user->id,
+        'cost' => 0.81,
+        'created_at' => now()->subDays(20),
+    ]);
+
+    Cache::flush();
+
+    $warning = buildWarning()->handle($user);
+
+    expect($warning)->toBeInstanceOf(CreditWarning::class)
+        ->and($warning->limitType)->toBe('monthly');
+});
+
 it('produces a human-readable resets_in string', function (): void {
     $user = User::factory()->create();
 
