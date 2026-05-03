@@ -88,17 +88,14 @@ return [
         'free' => [
             'rolling' => ['limit' => 0.10, 'period_hours' => 24],
             'weekly' => ['limit' => 0.35, 'period_days' => 7],
-            'monthly' => ['limit' => 1.00, 'period_days' => 30],
         ],
         'basic' => [
             'rolling' => ['limit' => 0.50, 'period_hours' => 24],
             'weekly' => ['limit' => 2.00, 'period_days' => 7],
-            'monthly' => ['limit' => 6.00, 'period_days' => 30],
         ],
         'plus' => [
             'rolling' => ['limit' => 1.00, 'period_hours' => 24],
             'weekly' => ['limit' => 4.00, 'period_days' => 7],
-            'monthly' => ['limit' => 10.00, 'period_days' => 30],
         ],
     ],
 ];

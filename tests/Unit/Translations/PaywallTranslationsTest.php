@@ -35,7 +35,7 @@ it('exposes a label for every subscription tier', function (string $tier): void 
 it('exposes a usage-window label for every limit type', function (string $window): void {
     expect(Lang::has('common.billing.usage.'.$window))->toBeTrue()
         ->and(__('common.billing.usage.'.$window))->not->toBeEmpty();
-})->with(['rolling', 'weekly', 'monthly']);
+})->with(['rolling', 'weekly']);
 
 it('aligns billing.tier.labels with the canonical SubscriptionTier label', function (SubscriptionTier $tier): void {
     expect(__('common.billing.tier.labels.'.$tier->value))->toBe($tier->label());

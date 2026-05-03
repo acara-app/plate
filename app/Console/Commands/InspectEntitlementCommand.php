@@ -63,7 +63,6 @@ final class InspectEntitlementCommand extends Command
                 'usage' => [
                     'rolling' => $usageSnapshot['rolling'],
                     'weekly' => $usageSnapshot['weekly'],
-                    'monthly' => $usageSnapshot['monthly'],
                 ],
             ], JSON_PRETTY_PRINT));
 
@@ -106,7 +105,6 @@ final class InspectEntitlementCommand extends Command
             [
                 ['rolling', $usageSnapshot['rolling']['current'], $usageSnapshot['rolling']['limit'], $usageSnapshot['rolling']['percentage'].'%', $usageSnapshot['rolling']['resets_in'], $usageSnapshot['rolling']['over_limit'] ? 'yes' : 'no'],
                 ['weekly', $usageSnapshot['weekly']['current'], $usageSnapshot['weekly']['limit'], $usageSnapshot['weekly']['percentage'].'%', $usageSnapshot['weekly']['resets_in'], $usageSnapshot['weekly']['over_limit'] ? 'yes' : 'no'],
-                ['monthly', $usageSnapshot['monthly']['current'], $usageSnapshot['monthly']['limit'], $usageSnapshot['monthly']['percentage'].'%', $usageSnapshot['monthly']['resets_in'], $usageSnapshot['monthly']['over_limit'] ? 'yes' : 'no'],
             ],
         );
 

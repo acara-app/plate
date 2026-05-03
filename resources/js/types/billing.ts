@@ -10,7 +10,7 @@ export interface Entitlement {
 
 export type SubscriptionTier = 'free' | 'basic' | 'plus';
 export type PaidSubscriptionTier = Exclude<SubscriptionTier, 'free'>;
-export type LimitType = 'rolling' | 'weekly' | 'monthly';
+export type LimitType = 'rolling' | 'weekly';
 
 export interface CreditWarning {
     limit_type: LimitType;
