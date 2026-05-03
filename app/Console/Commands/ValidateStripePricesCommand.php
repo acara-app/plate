@@ -8,6 +8,9 @@ use App\Models\SubscriptionProduct;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @codeCoverageIgnore
+ */
 final class ValidateStripePricesCommand extends Command
 {
     protected $signature = 'billing:validate-stripe-prices
