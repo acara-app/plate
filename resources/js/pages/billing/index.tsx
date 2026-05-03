@@ -33,7 +33,6 @@ interface AiUsage {
     premium_enforcement_active: boolean;
     rolling: AiUsageData;
     weekly: AiUsageData;
-    monthly: AiUsageData;
 }
 
 interface Props {
@@ -82,7 +81,7 @@ export default function Index({ billingHistory, aiUsage }: Props) {
                                 </div>
                             )}
 
-                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid gap-4 sm:grid-cols-2">
                                 <UsageWidget
                                     title={t('billing.usage.rolling')}
                                     currentAmount={aiUsage.rolling.current}
@@ -96,13 +95,6 @@ export default function Index({ billingHistory, aiUsage }: Props) {
                                     limit={aiUsage.weekly.limit}
                                     resetsIn={aiUsage.weekly.resets_in}
                                     overLimit={aiUsage.weekly.over_limit}
-                                />
-                                <UsageWidget
-                                    title={t('billing.usage.monthly')}
-                                    currentAmount={aiUsage.monthly.current}
-                                    limit={aiUsage.monthly.limit}
-                                    resetsIn={aiUsage.monthly.resets_in}
-                                    overLimit={aiUsage.monthly.over_limit}
                                 />
                             </div>
                         </div>

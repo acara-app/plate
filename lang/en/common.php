@@ -810,7 +810,6 @@ return [
         'usage' => [
             'rolling' => 'Rolling Usage',
             'weekly' => 'Weekly Usage',
-            'monthly' => 'Monthly Usage',
             'resets_in' => 'Resets in {{time}}',
             'credits_used' => '{{current}} / {{limit}} credits',
             'over_limit' => '· over limit',
