@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Contracts\Services\StripeServiceContract;
 use App\Models\SubscriptionProduct;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -23,7 +24,7 @@ final class SyncStripePricesCommand extends Command
     {
         /** @var Collection<int, SubscriptionProduct> $products */
         $products = SubscriptionProduct::query()
-            ->where(function ($query): void {
+            ->where(function (Builder $query): void {
                 $query->whereNotNull('stripe_lookup_key')
                     ->orWhereNotNull('yearly_stripe_lookup_key');
             })
