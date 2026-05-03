@@ -42,7 +42,7 @@ final class SubscriptionProductSeeder extends Seeder
                     '6,000 monthly AI credits',
                     '500 rolling daily AI credits',
                     'Higher weekly AI credit limit',
-                    'Supports open-source Plate',
+                    'Supports open-source Acara Cloud',
                 ],
                 'price' => 9.00,
                 'yearly_price' => 89.00,
