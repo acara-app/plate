@@ -84,10 +84,6 @@ return [
         'fallback_estimate' => 0.01,
     ],
 
-    'telemetry' => [
-        'channel' => (string) env('PAYWALL_LOG_CHANNEL', 'paywall'),
-    ],
-
     'tier_limits' => [
         'free' => [
             'rolling' => ['limit' => 0.10, 'period_hours' => 24],

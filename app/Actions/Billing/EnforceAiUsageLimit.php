@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\Billing;
 
 use App\Contracts\Billing\ResolvesUserTier;
-use App\Contracts\Telemetry\EmitsPaywallEvents;
 use App\Enums\ModelName;
 use App\Enums\SubscriptionTier;
-use App\Enums\Telemetry\PaywallEvent;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Models\AiUsage;
 use App\Models\User;
@@ -18,7 +16,6 @@ final readonly class EnforceAiUsageLimit
 {
     public function __construct(
         private ResolvesUserTier $resolveUserTier,
-        private EmitsPaywallEvents $telemetry,
     ) {}
 
     /**
@@ -45,18 +42,6 @@ final readonly class EnforceAiUsageLimit
             $limit = (float) $windowConfig['limit'];
 
             if ($current + $estimate > $limit) {
-                $this->telemetry->emit(
-                    event: PaywallEvent::UsageLimitExceeded,
-                    user: $user,
-                    payload: [
-                        'tier_current' => $entitlement->tier->value,
-                        'limit_type' => $window,
-                        'current_credits' => (int) round($current * $multiplier),
-                        'limit_credits' => (int) round($limit * $multiplier),
-                        'period_resets_at' => $periodEnd->toIso8601String(),
-                    ],
-                );
-
                 throw new UsageLimitExceededException(
                     limitType: $window,
                     tier: $entitlement->tier,

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
-use App\Actions\Billing\BuildCreditWarning;
 use App\Models\AiUsage;
 use App\Models\User;
 use App\Services\AiUsageService;
@@ -18,7 +17,6 @@ final readonly class TrackAiUsage
 {
     public function __construct(
         private Request $request,
-        private BuildCreditWarning $buildCreditWarning,
     ) {}
 
     public function handle(AgentPrompted $event): void
@@ -64,10 +62,6 @@ final readonly class TrackAiUsage
             'reasoning_tokens' => $usage->reasoningTokens,
             'cost' => $cost,
         ]);
-
-        if ($user instanceof User) {
-            $this->buildCreditWarning->handle($user); // @codeCoverageIgnore
-        }
     }
 
     private function getUserFromAgent(object $agent): ?User

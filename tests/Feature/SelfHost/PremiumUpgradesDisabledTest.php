@@ -9,7 +9,6 @@ use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\CreateMealPlan;
 use App\Contracts\Ai\GeneratesMealPlans;
 use App\Contracts\Billing\ResolvesUserTier;
-use App\Contracts\Telemetry\EmitsPaywallEvents;
 use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Enums\SubscriptionTier;
@@ -23,7 +22,6 @@ use Illuminate\Support\Facades\Queue;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Tools\Request;
 use Laravel\Cashier\Subscription;
-use Tests\Helpers\FakePaywallTelemetry;
 
 beforeEach(function (): void {
     Config::set('plate.enable_premium_upgrades', false);
@@ -131,7 +129,7 @@ it('returns null from BuildCreditWarning when the flag is off', function (): voi
         'cost' => 10.0,
     ]);
 
-    $warning = resolve(BuildCreditWarning::class)->handle($user);
+    $warning = resolve(BuildCreditWarning::class)->currentState($user);
 
     expect($warning)->toBeNull();
 });
@@ -176,28 +174,6 @@ it('exposes premium_enforcement_active=false on the shared entitlement prop ever
                 ->where('enablePremiumUpgrades', false)
             );
     }
-});
-
-it('does not emit paywall telemetry events when the flag is off', function (): void {
-    $fake = new FakePaywallTelemetry();
-    $this->app->instance(EmitsPaywallEvents::class, $fake);
-
-    Queue::fake();
-    $user = User::factory()->create();
-
-    $this->actingAs($user)
-        ->post(route('meal-plans.store'), ['duration_days' => 3])
-        ->assertRedirect();
-
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 50.0,
-    ]);
-
-    resolve(EnforceAiUsageLimit::class)->handle($user, ModelName::GPT_5_4_MINI);
-    resolve(BuildCreditWarning::class)->handle($user);
-
-    expect($fake->emitted)->toBeEmpty();
 });
 
 it('does not require subscription middleware to gate verified=null users when the flag is off', function (): void {

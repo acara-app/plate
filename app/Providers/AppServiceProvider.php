@@ -10,8 +10,6 @@ use App\Contracts\Memory\ManagesMemoryContext;
 use App\Contracts\Memory\PullsConversationHistory;
 use App\Contracts\Services\IndexNowServiceContract;
 use App\Contracts\Services\StripeServiceContract;
-use App\Contracts\Telemetry\EmitsPaywallEvents;
-use App\Listeners\EmitPaywallEventsFromWebhook;
 use App\Listeners\TrackAiUsage;
 use App\Models\User;
 use App\Services\Billing\SubscriptionTierResolver;
@@ -20,7 +18,6 @@ use App\Services\Memory\NullConversationHistoryPuller;
 use App\Services\Memory\NullMemoryExtractionDispatcher;
 use App\Services\Memory\NullMemoryPromptContext;
 use App\Services\StripeService;
-use App\Services\Telemetry\LogPaywallTelemetry;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -33,7 +30,6 @@ use Illuminate\Validation\Rules\Password;
 use Laravel\Ai\Events\AgentPrompted;
 use Laravel\Ai\Events\AgentStreamed;
 use Laravel\Cashier\Cashier;
-use Laravel\Cashier\Events\WebhookHandled;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -42,7 +38,6 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->bind(StripeServiceContract::class, StripeService::class);
         $this->app->bind(IndexNowServiceContract::class, IndexNowService::class);
         $this->app->bind(ResolvesUserTier::class, SubscriptionTierResolver::class);
-        $this->app->bindIf(EmitsPaywallEvents::class, LogPaywallTelemetry::class);
         $this->app->bindIf(ManagesMemoryContext::class, NullMemoryPromptContext::class);
         $this->app->bindIf(DispatchesMemoryExtraction::class, NullMemoryExtractionDispatcher::class);
         $this->app->bindIf(PullsConversationHistory::class, NullConversationHistoryPuller::class);
@@ -105,6 +100,5 @@ final class AppServiceProvider extends ServiceProvider
     {
         Event::listen(AgentPrompted::class, TrackAiUsage::class);
         Event::listen(AgentStreamed::class, TrackAiUsage::class);
-        Event::listen(WebhookHandled::class, EmitPaywallEventsFromWebhook::class);
     }
 }

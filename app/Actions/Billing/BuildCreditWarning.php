@@ -5,21 +5,16 @@ declare(strict_types=1);
 namespace App\Actions\Billing;
 
 use App\Contracts\Billing\ResolvesUserTier;
-use App\Contracts\Telemetry\EmitsPaywallEvents;
 use App\Data\Billing\CreditWarning;
 use App\Enums\SubscriptionTier;
-use App\Enums\Telemetry\PaywallEvent;
 use App\Models\AiUsage;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Facades\Cache;
 
 final readonly class BuildCreditWarning
 {
     private const float WARNING_THRESHOLD = 0.80;
-
-    public function __construct(private EmitsPaywallEvents $telemetry) {}
 
     public function currentState(User $user): ?CreditWarning
     {
@@ -68,42 +63,6 @@ final readonly class BuildCreditWarning
                 resetsIn: $this->formatResetsIn($resetsAt),
             );
         }
-
-        return $candidate;
-    }
-
-    public function handle(User $user): ?CreditWarning
-    {
-        $candidate = $this->currentState($user);
-
-        if (! $candidate instanceof CreditWarning) {
-            return null;
-        }
-
-        $cacheKey = $this->cacheKey($user, $candidate->limitType);
-
-        if (Cache::has($cacheKey)) {
-            return null;
-        }
-
-        $limits = $this->limitsForTier($candidate->tier);
-
-        Cache::put(
-            $cacheKey,
-            true,
-            $this->ttlForWindow($candidate->limitType, $limits[$candidate->limitType]),
-        );
-
-        $this->telemetry->emit(
-            event: PaywallEvent::CreditWarningShown,
-            user: $user,
-            payload: [
-                'tier_current' => $candidate->tier->value,
-                'limit_type' => $candidate->limitType,
-                'percentage' => $candidate->percentage,
-                'period_resets_at' => $candidate->resetsAt->toIso8601String(),
-            ],
-        );
 
         return $candidate;
     }
@@ -157,19 +116,6 @@ final readonly class BuildCreditWarning
         };
     }
 
-    /**
-     * @param  array<string, float|int>  $windowConfig
-     */
-    private function ttlForWindow(string $window, array $windowConfig): CarbonInterface
-    {
-        return match ($window) {
-            'rolling' => CarbonImmutable::now()->addHours((int) $windowConfig['period_hours']),
-            'weekly' => CarbonImmutable::now()->addDays((int) $windowConfig['period_days']),
-            'monthly' => CarbonImmutable::now()->addDays((int) $windowConfig['period_days']),
-            default => CarbonImmutable::now()->addDay(),
-        };
-    }
-
     private function getCostForPeriod(User $user, CarbonImmutable $start, CarbonImmutable $end): float
     {
         return (float) AiUsage::query()
@@ -182,11 +128,6 @@ final readonly class BuildCreditWarning
     private function multiplier(): int
     {
         return config()->integer('plate.credit_multiplier', 1);
-    }
-
-    private function cacheKey(User $user, string $limitType): string
-    {
-        return sprintf('credit_warning_shown:%d:%s', $user->id, $limitType);
     }
 
     private function formatResetsIn(CarbonInterface $resetTime): string

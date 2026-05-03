@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Illuminate\Database\Eloquent\Collection;
 use App\Contracts\Services\StripeServiceContract;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Laravel\Cashier\Payment;
 use Laravel\Cashier\Subscription;
 use RuntimeException;
