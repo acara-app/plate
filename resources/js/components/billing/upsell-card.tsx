@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { usePaywallTelemetry } from '@/hooks/use-paywall-telemetry';
 import checkout from '@/routes/checkout';
 import type { GatedFeature, PaidSubscriptionTier } from '@/types';
 
@@ -12,7 +11,6 @@ interface UpsellCardProps {
     feature: GatedFeature;
     requiredTier: PaidSubscriptionTier;
     className?: string;
-    surface?: string;
     onUpgradeClick?: () => void;
 }
 
@@ -20,26 +18,14 @@ export function UpsellCard({
     feature,
     requiredTier,
     className,
-    surface = 'upsell_card',
     onUpgradeClick,
 }: UpsellCardProps) {
     const { t } = useTranslation('common');
-    const { emit } = usePaywallTelemetry();
 
     const tierName = t(`billing.paywall.plans.${requiredTier}.name`);
     const tierPrice = t(`billing.paywall.plans.${requiredTier}.price`);
     const featureName = t(`billing.paywall.features.${feature}`);
     const tierPitch = t(`billing.paywall.plans.${requiredTier}.pitch`);
-
-    const handleClick = () => {
-        emit('upgrade_clicked', {
-            trigger: 'feature',
-            feature,
-            tier_target: requiredTier,
-            surface,
-        });
-        onUpgradeClick?.();
-    };
 
     return (
         <div
@@ -71,7 +57,7 @@ export function UpsellCard({
                     </p>
                 </div>
                 <p className="text-xs text-muted-foreground">{tierPitch}</p>
-                <Button asChild onClick={handleClick}>
+                <Button asChild onClick={onUpgradeClick}>
                     <Link href={checkout.subscription().url}>
                         {t('billing.upsell.upgrade_button', {
                             tier: tierName,

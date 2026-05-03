@@ -19,13 +19,13 @@ it('writes the event name plus payload to the configured log channel', function 
     $channel = Mockery::mock();
     $channel->shouldReceive('info')
         ->once()
-        ->withArgs(fn (string $event, array $context): bool => $event === 'paywall_shown'
+        ->withArgs(fn (string $event, array $context): bool => $event === 'credit_warning_shown'
             && $context['feature'] === 'meal_planner'
             && $context['tier_target'] === 'basic');
     Log::shouldReceive('channel')->with('paywall')->andReturn($channel);
 
     resolve(LogPaywallTelemetry::class)->emit(
-        event: PaywallEvent::PaywallShown,
+        event: PaywallEvent::CreditWarningShown,
         user: $user,
         payload: [
             'tier_current' => 'free',
@@ -42,13 +42,13 @@ it('decorates the payload with tier_current when not already present', function 
     $logger = Log::spy();
     $channel = Mockery::mock();
     $channel->shouldReceive('info')->once()->andReturnUsing(function (string $event, array $context): void {
-        expect($event)->toBe('paywall_shown')
+        expect($event)->toBe('credit_warning_shown')
             ->and($context['tier_current'])->toBe('free');
     });
     $logger->shouldReceive('channel')->andReturn($channel);
 
     resolve(LogPaywallTelemetry::class)->emit(
-        event: PaywallEvent::PaywallShown,
+        event: PaywallEvent::CreditWarningShown,
         user: $user,
         payload: [],
     );
@@ -64,7 +64,7 @@ it('keeps caller-supplied tier_current and skips re-resolution', function (): vo
     $logger->shouldReceive('channel')->andReturn($channel);
 
     resolve(LogPaywallTelemetry::class)->emit(
-        event: PaywallEvent::UpgradeClicked,
+        event: PaywallEvent::UsageLimitExceeded,
         user: $user,
         payload: ['tier_current' => 'basic'],
     );
