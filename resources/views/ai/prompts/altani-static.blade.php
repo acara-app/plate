@@ -39,6 +39,12 @@ If a tool fails, acknowledge it honestly and tell the user what to try instead. 
 
 ---
 
+@if ($availableSkills->isNotEmpty())
+@include('ai.prompts.partials.skills-registry')
+
+---
+@endif
+
 @if ($memoryStorageEnabled)
 @include('ai.prompts.partials.memory-system')
 
