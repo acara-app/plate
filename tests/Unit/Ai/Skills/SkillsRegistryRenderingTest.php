@@ -15,6 +15,8 @@ use Illuminate\Support\Collection;
 covers(AgentBuilder::class);
 
 it('omits the skills registry block when the null loader is bound', function (): void {
+    app()->instance(LoadsSkills::class, new NullSkillLoader);
+
     $user = User::factory()->create();
     $payload = new AgentPayload(
         userId: $user->id,
@@ -65,6 +67,7 @@ it('renders the skills registry block when a loader returns skills', function ()
         ->toContain('activate_skill');
 });
 
-it('binds the null loader by default so plate boots without acara-core', function (): void {
-    expect(resolve(LoadsSkills::class))->toBeInstanceOf(NullSkillLoader::class);
+it('keeps the null skill loader available as a community-safe fallback', function (): void {
+    expect(class_exists(NullSkillLoader::class))->toBeTrue();
+    expect(new NullSkillLoader)->toBeInstanceOf(LoadsSkills::class);
 });
