@@ -6,6 +6,7 @@ namespace App\Ai;
 
 use App\Actions\GetUserProfileContextAction;
 use App\Contracts\Memory\ManagesMemoryContext;
+use App\Contracts\Skills\LoadsSkills;
 use App\Enums\DataSensitivity;
 use App\Models\ConversationSummary;
 use App\Models\History;
@@ -25,6 +26,7 @@ final readonly class AgentBuilder
         private ToolRegistry $toolRegistry,
         private ManagesMemoryContext $memoryContext,
         private ToolSensitivityReader $toolSensitivity,
+        private LoadsSkills $skillLoader,
     ) {}
 
     /**
@@ -58,6 +60,7 @@ final readonly class AgentBuilder
             'memoryStorageEnabled' => ! $this->memoryContext instanceof NullMemoryPromptContext,
             'summaries' => $summaries,
             'emergencyNumber' => EmergencyNumberUtil::emergencyNumber($timezone),
+            'availableSkills' => $this->skillLoader->loadAll(),
         ])->render();
 
         $memories = $this->renderMemories($payload, $user);
