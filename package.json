@@ -22,7 +22,7 @@
         "vite-plugin-pwa": "^1.2.0"
     },
     "dependencies": {
-        "@ai-sdk/react": "^3.0.176",
+        "@ai-sdk/react": "^3.0.177",
         "@headlessui/react": "^2.2.10",
         "@inertiajs/react": "^3.0.3",
         "@inertiajs/vite": "^3.0.3",

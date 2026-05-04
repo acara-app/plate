@@ -14,7 +14,7 @@
         "durable-workflow/waterline": "^1.0.16",
         "durable-workflow/workflow": "^1.0.75",
         "inertiajs/inertia-laravel": "^3.0.6",
-        "laravel/ai": "^0.5.1",
+        "laravel/ai": "^0.6.6",
         "laravel/cashier": "^16.5.1",
         "laravel/fortify": "^1.36.2",
         "laravel/framework": "^13.5",
