@@ -19,6 +19,7 @@ final readonly class NullSkillLoader implements LoadsSkills
      */
     public function loadAll(): Collection
     {
+        /** @var Collection<int, SkillSummary> */
         return collect();
     }
 
