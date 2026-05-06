@@ -299,8 +299,13 @@ export default function CaffeineCalculator() {
     const pageTitle = t('page_title');
     const metaDescription = t('meta_description');
     const faqItems = createFaqItems(t);
-    const openGraphLocale = locale === 'mn' ? 'mn_MN' : 'en_US';
-    const alternateOpenGraphLocale = locale === 'mn' ? 'en_US' : 'mn_MN';
+    const localeToOg: Record<string, string> = {
+        en: 'en_US',
+        mn: 'mn_MN',
+        fr: 'fr_FR',
+    };
+    const openGraphLocale = localeToOg[locale] ?? 'en_US';
+    const alternateOpenGraphLocale = locale === 'en' ? 'mn_MN' : 'en_US';
 
     return (
         <>
@@ -1011,7 +1016,7 @@ function createStructuredDataSchema(
     const calculatorId = `${seo.canonicalUrl}#calculator`;
     const faqId = `${seo.canonicalUrl}#faq`;
     const breadcrumbId = `${seo.canonicalUrl}#breadcrumb`;
-    const language = locale === 'mn' ? 'mn-MN' : 'en-US';
+    const language = locale === 'mn' ? 'mn-MN' : locale === 'fr' ? 'fr-FR' : 'en-US';
 
     return {
         '@context': 'https://schema.org',

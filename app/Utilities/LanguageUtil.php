@@ -14,6 +14,7 @@ final class LanguageUtil
     private const array OPTIONS = [
         'en' => 'English',
         'mn' => 'Монгол',
+        'fr' => 'Français',
     ];
 
     /**
