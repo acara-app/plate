@@ -15,7 +15,7 @@
         'mn' => 'mn_MN',
         default => 'en_US',
     };
-    $localeToOg = ['en' => 'en_US', 'mn' => 'mn_MN'];
+    $localeToOg = ['en' => 'en_US', 'mn' => 'mn_MN', 'fr' => 'fr_FR'];
     $indexUrl = $locale === 'en' ? route('post.index') : route('post.locale.index', ['locale' => $locale]);
 
     $articleSchema = [

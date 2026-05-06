@@ -42,7 +42,7 @@ final class CaffeineAssessmentRequest extends FormRequest
             'context' => ['nullable', 'string', 'max:1000'],
             'conditions' => ['nullable', 'array', 'max:'.count(self::ALLOWED_CONDITIONS)],
             'conditions.*' => ['string', Rule::in(self::ALLOWED_CONDITIONS)],
-            'locale' => ['nullable', 'string', Rule::in(['en', 'mn'])],
+            'locale' => ['nullable', 'string', Rule::in(['en', 'mn', 'fr'])],
         ];
     }
 
