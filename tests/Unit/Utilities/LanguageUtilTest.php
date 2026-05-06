@@ -10,11 +10,11 @@ covers(LanguageUtil::class);
 
 it('returns all languages', function (): void {
     expect(LanguageUtil::all())
-        ->toBe(['en' => 'English', 'mn' => 'Монгол']);
+        ->toBe(['en' => 'English', 'mn' => 'Монгол', 'fr' => 'Français']);
 });
 
 it('returns language keys', function (): void {
-    expect(LanguageUtil::keys())->toBe(['en', 'mn']);
+    expect(LanguageUtil::keys())->toBe(['en', 'mn', 'fr']);
 });
 
 it('returns default language', function (): void {
@@ -24,6 +24,7 @@ it('returns default language', function (): void {
 dataset('valid languages', [
     'English' => ['en', 'English'],
     'Монгол' => ['mn', 'Монгол'],
+    'Français' => ['fr', 'Français'],
 ]);
 
 it('gets language by code', function (string $code, string $label): void {

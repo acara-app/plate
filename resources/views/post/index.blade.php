@@ -9,7 +9,7 @@
         'mn' => 'mn_MN',
         default => 'en_US',
     };
-    $localeToOg = ['en' => 'en_US', 'mn' => 'mn_MN'];
+    $localeToOg = ['en' => 'en_US', 'mn' => 'mn_MN', 'fr' => 'fr_FR'];
     $jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG;
 
     $collectionSchema = [

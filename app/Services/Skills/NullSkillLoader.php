@@ -9,6 +9,9 @@ use App\Data\Skills\SkillContent;
 use App\Data\Skills\SkillSummary;
 use Illuminate\Support\Collection;
 
+/**
+ * @codeCoverageIgnore
+ */
 final readonly class NullSkillLoader implements LoadsSkills
 {
     /**
@@ -16,6 +19,7 @@ final readonly class NullSkillLoader implements LoadsSkills
      */
     public function loadAll(): Collection
     {
+        /** @var Collection<int, SkillSummary> */
         return collect();
     }
 
