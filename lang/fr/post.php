@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 return [
+    'breadcrumb_home' => 'Accueil',
+
     'page_title' => 'Articles',
     'page_description' => 'Articles pratiques sur la nutrition, une alimentation saine et le bien-être — soutenus par les dernières recherches en santé.',
     'seo_title' => 'Articles | Acara Plate',
@@ -47,5 +49,5 @@ return [
     'category_desc_recipes' => 'Des recettes délicieuses et saines, conçues pour vous nourrir sans sacrifier la saveur.',
     'category_desc_research' => 'Résumés des dernières recherches en science de la nutrition, santé métabolique et bien-être.',
     'category_desc_lifestyle' => 'Conseils pour l\'exercice, un meilleur sommeil et la gestion du stress — les fondements d\'une vie saine.',
-    'category_desc_diabetes_management' => 'Guides pratiques pour gérer le diabète, surveiller la glycémie et prévenir les pics de glucose.',
+    'category_desc_diabetes_management' => 'Guides pratiques pour gérer le diabète, surveiller la glycémie et prévenir les pics de glycémie.',
 ];
