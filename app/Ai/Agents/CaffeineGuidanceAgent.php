@@ -9,6 +9,7 @@ use App\Data\CaffeineGuidanceData;
 use App\Data\CaffeineLimitData;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ArrayType;
+use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
@@ -22,6 +23,11 @@ use Laravel\Ai\Responses\StructuredAgentResponse;
 final class CaffeineGuidanceAgent implements Agent, HasStructuredOutput
 {
     use Promptable;
+
+    /**
+     * @var array<int, string>
+     */
+    private const array TONES = ['green', 'amber', 'red', 'blue', 'slate'];
 
     public function instructions(): string
     {
@@ -42,6 +48,7 @@ final class CaffeineGuidanceAgent implements Agent, HasStructuredOutput
             ],
             output: [
                 'Return only the structured response requested by the schema.',
+                'Always return every required top-level field: summary, verdict_card, limit_gauge, timing_card, guidance_list, safety_note. condition_sections is the only optional field and may be an empty array or null when no conditions are detected.',
                 'Component copy must fit compact UI cards.',
                 'Use the exact provided limit_mg value when present.',
                 'For condition_sections, only include conditions that are actually detected in the assessment.',
@@ -57,53 +64,14 @@ final class CaffeineGuidanceAgent implements Agent, HasStructuredOutput
      */
     public function schema(JsonSchema $schema): array
     {
-        $tone = ['green', 'amber', 'red', 'blue', 'slate'];
-        $stringList = new ArrayType()->items($schema->string())->min(2)->max(4);
-
         return [
-            'summary' => $schema->string()->required()->description('One concise sentence summarizing the caffeine limit.'),
-            'verdict_card' => $schema->object(fn (JsonSchema $s): array => [
-                'title' => $s->string()->required(),
-                'body' => $s->string()->required(),
-                'badge' => $s->string()->required(),
-                'tone' => $s->string()->enum($tone)->required(),
-                'limit_mg' => $s->integer()->required()->nullable(),
-            ])->withoutAdditionalProperties()->required(),
-            'limit_gauge' => $schema->object(fn (JsonSchema $s): array => [
-                'label' => $s->string()->required(),
-                'value_label' => $s->string()->required(),
-                'limit_mg' => $s->integer()->required()->nullable(),
-                'max_mg' => $s->integer()->required(),
-                'tone' => $s->string()->enum($tone)->required(),
-                'caption' => $s->string()->required(),
-            ])->withoutAdditionalProperties()->required(),
-            'timing_card' => $schema->object(fn (JsonSchema $s): array => [
-                'title' => $s->string()->required(),
-                'body' => $s->string()->required(),
-                'cutoff_label' => $s->string()->required(),
-                'bedtime_label' => $s->string()->required(),
-                'cutoff_24h' => $s->integer()->min(0)->max(23)->required(),
-                'bedtime_24h' => $s->integer()->min(0)->max(23)->required(),
-            ])->withoutAdditionalProperties()->required(),
-            'guidance_list' => $schema->object(fn (JsonSchema $s): array => [
-                'title' => $s->string()->required(),
-                'items' => $stringList->required(),
-            ])->withoutAdditionalProperties()->required(),
-            'safety_note' => $schema->object(fn (JsonSchema $s): array => [
-                'title' => $s->string()->required(),
-                'body' => $s->string()->required(),
-                'items' => (new ArrayType)->items($s->string())->min(2)->max(3)->required(),
-            ])->withoutAdditionalProperties()->required(),
-            'condition_sections' => (new ArrayType)->items(
-                $schema->object(fn (JsonSchema $s): array => [
-                    'condition' => $s->string()->required(),
-                    'title' => $s->string()->required(),
-                    'body' => $s->string()->required(),
-                    'tone' => $s->string()->enum($tone)->required(),
-                    'link_url' => $s->string()->nullable(),
-                    'link_label' => $s->string()->nullable(),
-                ])->withoutAdditionalProperties()
-            )->nullable(),
+            'summary' => $this->summarySchema($schema),
+            'verdict_card' => $this->verdictCardSchema($schema),
+            'limit_gauge' => $this->limitGaugeSchema($schema),
+            'timing_card' => $this->timingCardSchema($schema),
+            'guidance_list' => $this->guidanceListSchema($schema),
+            'safety_note' => $this->safetyNoteSchema($schema),
+            'condition_sections' => $this->conditionSectionsSchema($schema),
         ];
     }
 
@@ -113,6 +81,87 @@ final class CaffeineGuidanceAgent implements Agent, HasStructuredOutput
         $response = $this->prompt($this->buildPrompt($limit, $context, $locale));
 
         return CaffeineGuidanceData::from($response->toArray());
+    }
+
+    private function summarySchema(JsonSchema $schema): Type
+    {
+        return $schema->string()
+            ->required()
+            ->description('One concise sentence summarizing the caffeine limit.');
+    }
+
+    private function verdictCardSchema(JsonSchema $schema): ObjectType
+    {
+        return $schema->object(fn (JsonSchema $s): array => [
+            'title' => $s->string()->required(),
+            'body' => $s->string()->required(),
+            'badge' => $s->string()->required(),
+            'tone' => $s->string()->enum(self::TONES)->required(),
+            'limit_mg' => $s->integer()->required()->nullable(),
+        ])->withoutAdditionalProperties()->required();
+    }
+
+    private function limitGaugeSchema(JsonSchema $schema): ObjectType
+    {
+        return $schema->object(fn (JsonSchema $s): array => [
+            'label' => $s->string()->required(),
+            'value_label' => $s->string()->required(),
+            'limit_mg' => $s->integer()->required()->nullable(),
+            'max_mg' => $s->integer()->required(),
+            'tone' => $s->string()->enum(self::TONES)->required(),
+            'caption' => $s->string()->required(),
+        ])->withoutAdditionalProperties()->required();
+    }
+
+    private function timingCardSchema(JsonSchema $schema): ObjectType
+    {
+        return $schema->object(fn (JsonSchema $s): array => [
+            'title' => $s->string()->required(),
+            'body' => $s->string()->required(),
+            'cutoff_label' => $s->string()->required(),
+            'bedtime_label' => $s->string()->required(),
+            'cutoff_24h' => $s->integer()->min(0)->max(23)->required(),
+            'bedtime_24h' => $s->integer()->min(0)->max(23)->required(),
+        ])->withoutAdditionalProperties()->required();
+    }
+
+    private function guidanceListSchema(JsonSchema $schema): ObjectType
+    {
+        return $schema->object(fn (JsonSchema $s): array => [
+            'title' => $s->string()->required(),
+            'items' => (new ArrayType)
+                ->items($s->string())
+                ->min(2)
+                ->max(4)
+                ->required(),
+        ])->withoutAdditionalProperties()->required();
+    }
+
+    private function safetyNoteSchema(JsonSchema $schema): ObjectType
+    {
+        return $schema->object(fn (JsonSchema $s): array => [
+            'title' => $s->string()->required(),
+            'body' => $s->string()->required(),
+            'items' => (new ArrayType)
+                ->items($s->string())
+                ->min(2)
+                ->max(3)
+                ->required(),
+        ])->withoutAdditionalProperties()->required();
+    }
+
+    private function conditionSectionsSchema(JsonSchema $schema): ArrayType
+    {
+        return (new ArrayType)->items(
+            $schema->object(fn (JsonSchema $s): array => [
+                'condition' => $s->string()->required(),
+                'title' => $s->string()->required(),
+                'body' => $s->string()->required(),
+                'tone' => $s->string()->enum(self::TONES)->required(),
+                'link_url' => $s->string()->nullable(),
+                'link_label' => $s->string()->nullable(),
+            ])->withoutAdditionalProperties()
+        )->nullable();
     }
 
     private function buildPrompt(CaffeineLimitData $limit, ?string $context, string $locale): string
