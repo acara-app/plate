@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Ai\Agents\CaffeineGuidanceAgent;
 use App\Data\CaffeineGuidanceData;
 use Illuminate\JsonSchema\JsonSchemaTypeFactory;
+use Illuminate\Support\Str;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Tests\Fixtures\CaffeineGuidanceFixture;
@@ -71,6 +72,25 @@ it('defines schema fields matching the caffeine guidance data shape', function (
         ->and($safetyNote['properties']['items']['minItems'])->toBe(2)
         ->and($safetyNote['properties']['items']['maxItems'])->toBe(3)
         ->and($conditionSections['items']['properties'])->toHaveKeys(['condition', 'title', 'body', 'tone', 'link_url', 'link_label']);
+});
+
+it('keeps the schema snake_case keys aligned with the DTO camelCase properties', function (): void {
+    $schema = (new CaffeineGuidanceAgent)->schema(new JsonSchemaTypeFactory);
+
+    $dtoProperties = array_map(
+        fn (ReflectionParameter $parameter): string => $parameter->getName(),
+        (new ReflectionClass(CaffeineGuidanceData::class))->getConstructor()?->getParameters() ?? [],
+    );
+
+    $schemaPropertiesAsCamelCase = array_map(
+        fn (string $key): string => Str::camel($key),
+        array_keys($schema),
+    );
+
+    sort($dtoProperties);
+    sort($schemaPropertiesAsCamelCase);
+
+    expect($schemaPropertiesAsCamelCase)->toBe($dtoProperties);
 });
 
 it('assesses deterministic limits with structured agent output', function (): void {
