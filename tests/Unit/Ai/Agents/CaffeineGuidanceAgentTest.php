@@ -20,7 +20,8 @@ it('has conservative caffeine guidance instructions', function (): void {
         ->toContain('deterministic caffeine limits')
         ->toContain('personalize the wording only')
         ->toContain('structured response requested by the schema')
-        ->toContain('Do not recommend drink schedules');
+        ->toContain('extract bedtime_24h')
+        ->toContain('cutoff_24h');
 });
 
 it('has correct attributes configured', function (): void {
@@ -42,6 +43,7 @@ it('defines schema fields matching the caffeine guidance data shape', function (
         'summary',
         'verdict_card',
         'limit_gauge',
+        'timing_card',
         'guidance_list',
         'safety_note',
         'condition_sections',
@@ -50,6 +52,7 @@ it('defines schema fields matching the caffeine guidance data shape', function (
 
     $verdictCard = $schema['verdict_card']->toArray();
     $limitGauge = $schema['limit_gauge']->toArray();
+    $timingCard = $schema['timing_card']->toArray();
     $guidanceList = $schema['guidance_list']->toArray();
     $safetyNote = $schema['safety_note']->toArray();
     $conditionSections = $schema['condition_sections']->toArray();
@@ -57,6 +60,10 @@ it('defines schema fields matching the caffeine guidance data shape', function (
     expect($verdictCard['properties'])->toHaveKeys(['title', 'body', 'badge', 'tone', 'limit_mg'])
         ->and($verdictCard['additionalProperties'])->toBeFalse()
         ->and($limitGauge['properties'])->toHaveKeys(['label', 'value_label', 'limit_mg', 'max_mg', 'tone', 'caption'])
+        ->and($timingCard['properties'])->toHaveKeys(['title', 'body', 'cutoff_label', 'bedtime_label', 'cutoff_24h', 'bedtime_24h'])
+        ->and($timingCard['additionalProperties'])->toBeFalse()
+        ->and($timingCard['properties']['cutoff_24h']['minimum'])->toBe(0)
+        ->and($timingCard['properties']['cutoff_24h']['maximum'])->toBe(23)
         ->and($guidanceList['properties'])->toHaveKeys(['title', 'items'])
         ->and($guidanceList['properties']['items']['minItems'])->toBe(2)
         ->and($guidanceList['properties']['items']['maxItems'])->toBe(4)

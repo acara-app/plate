@@ -25,6 +25,14 @@ it('builds a json-render spec matching the caffeine guidance catalog', function 
             'tone' => 'red',
             'caption' => 'Adjusted for sensitivity.',
         ],
+        'timing_card' => [
+            'title' => 'Last drink by 5:00 pm.',
+            'body' => 'Stop about 6 hours before bed.',
+            'cutoff_label' => '5:00 pm',
+            'bedtime_label' => '11:00 pm',
+            'cutoff_24h' => 17,
+            'bedtime_24h' => 23,
+        ],
         'guidance_list' => [
             'title' => 'Next steps',
             'items' => ['Stay under the limit.', 'Choose decaf if symptoms show up.'],
@@ -50,10 +58,13 @@ it('builds a json-render spec matching the caffeine guidance catalog', function 
 
     expect($spec['root'])->toBe('root')
         ->and($spec['elements']['root']['type'])->toBe('Stack')
+        ->and($spec['elements']['root']['children'])->toBe(['verdict', 'gauge', 'drinks', 'timing', 'guidance', 'condition_0', 'safety'])
         ->and($spec['elements']['verdict']['type'])->toBe('VerdictCard')
         ->and($spec['elements']['gauge']['type'])->toBe('LimitGauge')
         ->and($spec['elements']['drinks']['type'])->toBe('DrinkSizeGrid')
         ->and($spec['elements']['drinks']['props'])->toBe(['limit_mg' => 200])
+        ->and($spec['elements']['timing']['type'])->toBe('TimingCard')
+        ->and($spec['elements']['timing']['props'])->toHaveKeys(['title', 'body', 'cutoff_label', 'bedtime_label', 'cutoff_24h', 'bedtime_24h'])
         ->and($spec['elements']['guidance']['type'])->toBe('GuidanceList')
         ->and($spec['elements']['condition_0']['type'])->toBe('ConditionCard')
         ->and($spec['elements']['safety']['type'])->toBe('SafetyNote')

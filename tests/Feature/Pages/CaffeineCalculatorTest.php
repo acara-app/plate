@@ -32,14 +32,12 @@ it('returns 200 for the mongolian caffeine calculator route without authenticati
 it('rejects the assessment endpoint when required inputs are missing', function (): void {
     $this->postJson(route('caffeine-calculator.plan'), [])
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['height_cm', 'weight_kg', 'age', 'sex', 'sensitivity']);
+        ->assertJsonValidationErrors(['weight_kg', 'sex', 'sensitivity']);
 });
 
 it('rejects unknown values in the conditions array', function (): void {
     $this->postJson(route('caffeine-calculator.plan'), [
-        'height_cm' => 170,
         'weight_kg' => 70,
-        'age' => 30,
         'sex' => 'female',
         'sensitivity' => 'normal',
         'conditions' => ['evil_condition'],
@@ -67,6 +65,14 @@ it('returns a caffeine guidance spec from the agent', function (): void {
                 'tone' => 'amber',
                 'caption' => 'Adjusted from the EFSA weight-based guideline.',
             ],
+            'timing_card' => [
+                'title' => 'Last drink by 5:00 pm.',
+                'body' => "Caffeine's half-life is about five hours.",
+                'cutoff_label' => '5:00 pm',
+                'bedtime_label' => '11:00 pm',
+                'cutoff_24h' => 17,
+                'bedtime_24h' => 23,
+            ],
             'guidance_list' => [
                 'title' => 'What to do today',
                 'items' => ['Stay below 150 mg.', 'Stop if you feel jittery.'],
@@ -81,9 +87,7 @@ it('returns a caffeine guidance spec from the agent', function (): void {
     ]);
 
     $this->postJson(route('caffeine-calculator.plan'), [
-        'height_cm' => 170,
         'weight_kg' => 70,
-        'age' => 30,
         'sex' => 'female',
         'sensitivity' => 'normal',
         'context' => 'Breastfeeding',
@@ -100,5 +104,6 @@ it('returns a caffeine guidance spec from the agent', function (): void {
         ->assertJsonPath('spec.elements.verdict.type', 'VerdictCard')
         ->assertJsonPath('spec.elements.gauge.type', 'LimitGauge')
         ->assertJsonPath('spec.elements.drinks.type', 'DrinkSizeGrid')
+        ->assertJsonPath('spec.elements.timing.type', 'TimingCard')
         ->assertJsonPath('spec.elements.guidance.type', 'GuidanceList');
 });

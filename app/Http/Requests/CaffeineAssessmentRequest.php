@@ -34,9 +34,7 @@ final class CaffeineAssessmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'height_cm' => ['required', 'integer', 'min:90', 'max:230'],
             'weight_kg' => ['required', 'numeric', 'min:30', 'max:300'],
-            'age' => ['required', 'integer', 'min:13', 'max:120'],
             'sex' => ['required', 'string', Rule::in(['male', 'female', 'decline'])],
             'sensitivity' => ['required', 'string', Rule::in(['low', 'normal', 'high'])],
             'context' => ['nullable', 'string', 'max:1000'],
@@ -46,15 +44,6 @@ final class CaffeineAssessmentRequest extends FormRequest
         ];
     }
 
-    public function heightCm(): int
-    {
-        $heightCm = $this->validated('height_cm');
-
-        assert(is_int($heightCm) || is_string($heightCm));
-
-        return (int) $heightCm;
-    }
-
     public function weightKg(): float
     {
         $weightKg = $this->validated('weight_kg');
@@ -62,15 +51,6 @@ final class CaffeineAssessmentRequest extends FormRequest
         assert(is_numeric($weightKg));
 
         return (float) $weightKg;
-    }
-
-    public function age(): int
-    {
-        $age = $this->validated('age');
-
-        assert(is_int($age) || is_string($age));
-
-        return (int) $age;
     }
 
     public function sex(): string
@@ -98,9 +78,6 @@ final class CaffeineAssessmentRequest extends FormRequest
         return is_string($context) ? $context : null;
     }
 
-    /**
-     * @return array<int, string>
-     */
     /**
      * @return array<int, string>
      */

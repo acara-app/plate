@@ -9,11 +9,12 @@ covers(ResolveCaffeineLimit::class);
 
 it('resolves deterministic caffeine limits', function (
     array $profile,
+    array $conditions,
     int $expectedLimit,
     string $expectedStatus = 'weight_adjusted_limit',
     bool $expectedCautionContext = false,
 ): void {
-    $result = resolveCaffeineLimit($profile);
+    $result = resolveCaffeineLimit($profile, $conditions);
 
     expect($result->limitMg)->toBe($expectedLimit)
         ->and($result->status)->toBe($expectedStatus)
@@ -21,16 +22,13 @@ it('resolves deterministic caffeine limits', function (
         ->and($result->reasons)->not->toBeEmpty()
         ->and($result->formulaUsed)->toBe('efsa_weight_based');
 })->with([
-    'reference weight low sensitivity' => [['sensitivity' => 'low'], 200],
-    'reference weight normal sensitivity' => [[], 150],
-    'reference weight high sensitivity' => [['sensitivity' => 'high'], 100],
-    'shorter height normal sensitivity' => [['heightCm' => 150, 'weightKg' => 60, 'sex' => 'female'], 125],
-    'taller weight low sensitivity' => [['heightCm' => 190, 'weightKg' => 90, 'sensitivity' => 'low'], 250],
-    'high weight saturates absolute cap' => [['weightKg' => 200, 'sensitivity' => 'low'], 500],
-    'mid-high weight passes former 400 cap' => [['weightKg' => 150, 'sex' => 'female', 'sensitivity' => 'low'], 450],
-    'senior age uses 0.80 modifier' => [['age' => 65], 125],
-    'female 50+ uses 0.85 modifier' => [['age' => 50, 'sex' => 'female', 'sensitivity' => 'low'], 175],
-    'pregnancy context before sensitivity' => [['sex' => 'female', 'context' => 'Trying to conceive'], 150, 'context_limited', true],
+    'reference weight low sensitivity' => [['sensitivity' => 'low'], [], 200],
+    'reference weight normal sensitivity' => [[], [], 150],
+    'reference weight high sensitivity' => [['sensitivity' => 'high'], [], 100],
+    'high weight saturates absolute cap' => [['weightKg' => 200, 'sensitivity' => 'low'], [], 500],
+    'mid-high weight low sensitivity' => [['weightKg' => 150, 'sex' => 'female', 'sensitivity' => 'low'], [], 450],
+    'pregnancy context detected via text' => [['sex' => 'female', 'context' => 'Trying to conceive'], [], 150, 'context_limited', true],
+    'pregnancy condition explicitly passed' => [['sex' => 'female', 'sensitivity' => 'normal'], ['pregnancy'], 150, 'context_limited', true],
 ]);
 
 it('accepts explicit pregnancy condition without text scanning', function (): void {
@@ -57,15 +55,13 @@ it('detects health conditions from free-text context', function (string $context
 ]);
 
 /**
- * @param  array{heightCm?: int, weightKg?: int|float, age?: int, sex?: string, sensitivity?: string, context?: string|null}  $profile
+ * @param  array{weightKg?: int|float, sex?: string, sensitivity?: string, context?: string|null}  $profile
  * @param  array<int, string>  $conditions
  */
 function resolveCaffeineLimit(array $profile = [], array $conditions = []): CaffeineLimitData
 {
     return (new ResolveCaffeineLimit)->handle(
-        heightCm: $profile['heightCm'] ?? 170,
         weightKg: (float) ($profile['weightKg'] ?? 70),
-        age: $profile['age'] ?? 30,
         sex: $profile['sex'] ?? 'male',
         sensitivity: $profile['sensitivity'] ?? 'normal',
         context: $profile['context'] ?? null,

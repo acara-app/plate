@@ -6,6 +6,7 @@ import { GuidanceList } from './components/guidance-list';
 import { LimitGauge } from './components/limit-gauge';
 import { SafetyNote } from './components/safety-note';
 import { Stack } from './components/stack';
+import { TimingCard } from './components/timing-card';
 import { VerdictCard } from './components/verdict-card';
 
 export const CaffeineGuidanceRenderer = createRenderer(
@@ -15,6 +16,7 @@ export const CaffeineGuidanceRenderer = createRenderer(
         VerdictCard: ({ element }) => <VerdictCard props={element.props} />,
         LimitGauge: ({ element }) => <LimitGauge props={element.props} />,
         DrinkSizeGrid: ({ element }) => <DrinkSizeGrid props={element.props} />,
+        TimingCard: ({ element }) => <TimingCard props={element.props} />,
         GuidanceList: ({ element }) => <GuidanceList props={element.props} />,
         ConditionCard: ({ element }) => <ConditionCard props={element.props} />,
         SafetyNote: ({ element }) => <SafetyNote props={element.props} />,

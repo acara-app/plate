@@ -13,7 +13,7 @@ final readonly class BuildCaffeineGuidanceSpec
      */
     public function handle(CaffeineGuidanceData $guidance): array
     {
-        $children = ['verdict', 'gauge', 'drinks', 'guidance'];
+        $children = ['verdict', 'gauge', 'drinks', 'timing', 'guidance'];
 
         foreach (($guidance->conditionSections ?? []) as $index => $section) {
             $children[] = 'condition_'.$index;
@@ -43,6 +43,11 @@ final readonly class BuildCaffeineGuidanceSpec
                 'props' => [
                     'limit_mg' => $guidance->limitGauge['limit_mg'] ?? null,
                 ],
+                'children' => [],
+            ],
+            'timing' => [
+                'type' => 'TimingCard',
+                'props' => $guidance->timingCard,
                 'children' => [],
             ],
             'guidance' => [

@@ -32,6 +32,18 @@ export const caffeineGuidanceCatalog = defineCatalog(schema, {
             }),
             description: 'Visual caffeine limit meter.',
         },
+        TimingCard: {
+            props: z.object({
+                title: z.string(),
+                body: z.string(),
+                cutoff_label: z.string(),
+                bedtime_label: z.string(),
+                cutoff_24h: z.number().min(0).max(23),
+                bedtime_24h: z.number().min(0).max(23),
+            }),
+            description:
+                'Timing card with cutoff/bedtime markers on a 24h timeline.',
+        },
         DrinkSizeGrid: {
             props: z.object({
                 limit_mg: z.number().nullable(),
