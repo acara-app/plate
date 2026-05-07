@@ -1,9 +1,9 @@
 import { plan as planRoute } from '@/actions/App/Http/Controllers/CaffeineCalculatorController';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { CaffeineGuidanceRenderer } from '@/components/caffeine-guidance/render';
-import PageHeader from '@/components/page-header';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
 import {
     aiNutritionist,
@@ -15,28 +15,31 @@ import {
 } from '@/routes';
 import { Head, useHttp, usePage } from '@inertiajs/react';
 import type { Spec } from '@json-render/core';
-import {
-    Activity,
-    BookOpen,
-    Calendar,
-    ChevronRight,
-    ExternalLink,
-    Home,
-    LoaderCircle,
-    MessageSquareText,
-    Ruler,
-    Sparkles,
-    Weight,
-} from 'lucide-react';
+import { ChevronRight, Coffee, Home, LoaderCircle, Plus } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+
+const PAPER = 'bg-[#F2EBDD]';
+const PAPER_2 = 'bg-[#EBE2D0]';
+const INK = 'text-[#1A1814]';
+const INK_2 = 'text-[#3D3833]';
+const INK_3 = 'text-[#6E665C]';
+const RULE = 'border-[#D9CFBC]';
+const ACCENT = 'text-[#C4623A]';
+const ACCENT_BG = 'bg-[#C4623A]';
+const FONT_DISPLAY = 'font-bold';
+const FONT_MONO = 'font-mono';
+
+const EYEBROW = cn(
+    FONT_MONO,
+    INK_3,
+    'text-[11px] uppercase tracking-[0.18em]',
+);
 
 interface AssessmentResponse {
     summary: string;
     limit: {
-        heightCm: number;
         weightKg: number;
-        age: number;
         sex: string;
         sensitivity: string;
         limitMg: number | null;
@@ -56,12 +59,8 @@ type ConditionKey =
     | 'medication';
 
 interface AssessmentFormData {
-    height_cm: string;
-    height_ft: string;
-    height_in: string;
     weight_kg: string;
     weight_lb: string;
-    age: string;
     sex: 'male' | 'female' | 'decline';
     sensitivity: 'low' | 'normal' | 'high';
     context: string;
@@ -166,17 +165,6 @@ const FAQ_KEYS = [
     },
 ] as const;
 
-function cmToFtIn(cm: number): { ft: number; inch: number } {
-    const totalInches = Math.round(cm / 2.54);
-    const ft = Math.floor(totalInches / 12);
-    const inch = totalInches % 12;
-    return { ft, inch };
-}
-
-function ftInToCm(ft: number, inch: number): number {
-    return Math.round(ft * 30.48 + inch * 2.54);
-}
-
 function kgToLb(kg: number): number {
     return Math.round(kg * 2.20462);
 }
@@ -185,16 +173,18 @@ function lbToKg(lb: number): number {
     return Math.round((lb / 2.20462) * 10) / 10;
 }
 
+const inputClass = cn(
+    'h-11 rounded-none border bg-[#F2EBDD] text-base text-[#1A1814] placeholder:text-[#6E665C]',
+    RULE,
+    'focus-visible:border-[#1A1814] focus-visible:ring-[#1A1814]/15',
+);
+
 export default function CaffeineCalculator() {
     const { t } = useTranslation('caffeine');
     const { seo, locale } = usePage<CaffeineCalculatorPageProps>().props;
     const form = useHttp<AssessmentFormData, AssessmentResponse>(planRoute(), {
-        height_cm: '',
-        height_ft: '',
-        height_in: '',
         weight_kg: '',
         weight_lb: '',
-        age: '',
         sex: 'decline',
         sensitivity: 'normal',
         context: '',
@@ -217,37 +207,25 @@ export default function CaffeineCalculator() {
         );
     }
 
-    function toggleUnitSystem(): void {
-        const newSystem = unitSystem === 'metric' ? 'imperial' : 'metric';
-        setUnitSystem(newSystem);
-        form.setData('unit_system', newSystem);
+    function toggleUnitSystem(system: 'metric' | 'imperial'): void {
+        if (system === unitSystem) {
+            return;
+        }
+        setUnitSystem(system);
+        form.setData('unit_system', system);
 
-        if (newSystem === 'imperial') {
-            if (form.data.height_cm) {
-                const { ft, inch } = cmToFtIn(Number(form.data.height_cm));
-                form.setData('height_ft', String(ft));
-                form.setData('height_in', String(inch));
-            }
+        if (system === 'imperial') {
             if (form.data.weight_kg) {
                 form.setData(
                     'weight_lb',
                     String(kgToLb(Number(form.data.weight_kg))),
                 );
             }
-        } else {
-            if (form.data.height_ft || form.data.height_in) {
-                const cm = ftInToCm(
-                    Number(form.data.height_ft) || 0,
-                    Number(form.data.height_in) || 0,
-                );
-                form.setData('height_cm', String(cm));
-            }
-            if (form.data.weight_lb) {
-                form.setData(
-                    'weight_kg',
-                    String(lbToKg(Number(form.data.weight_lb))),
-                );
-            }
+        } else if (form.data.weight_lb) {
+            form.setData(
+                'weight_kg',
+                String(lbToKg(Number(form.data.weight_lb))),
+            );
         }
     }
 
@@ -257,25 +235,18 @@ export default function CaffeineCalculator() {
             return;
         }
 
-        let heightCm = Number(form.data.height_cm);
         let weightKg = Number(form.data.weight_kg);
 
         if (unitSystem === 'imperial') {
-            heightCm = ftInToCm(
-                Number(form.data.height_ft) || 0,
-                Number(form.data.height_in) || 0,
-            );
             weightKg = lbToKg(Number(form.data.weight_lb) || 0);
         }
 
-        if (!heightCm || !weightKg || !form.data.age) {
+        if (!weightKg) {
             return;
         }
 
         form.transform((data) => ({
-            height_cm: heightCm,
             weight_kg: weightKg,
-            age: Number(data.age),
             sex: data.sex,
             sensitivity: data.sensitivity,
             context: data.context.trim() === '' ? null : data.context.trim(),
@@ -287,11 +258,9 @@ export default function CaffeineCalculator() {
     }
 
     const canSubmit =
-        (unitSystem === 'metric'
-            ? form.data.height_cm.trim() !== '' &&
-              form.data.weight_kg.trim() !== ''
-            : form.data.height_ft.trim() !== '' &&
-              form.data.weight_lb.trim() !== '') && form.data.age.trim() !== '';
+        unitSystem === 'metric'
+            ? form.data.weight_kg.trim() !== ''
+            : form.data.weight_lb.trim() !== '';
 
     const conditionsError = (form.errors as Record<string, string | undefined>)[
         'conditions.0'
@@ -299,6 +268,7 @@ export default function CaffeineCalculator() {
     const pageTitle = t('page_title');
     const metaDescription = t('meta_description');
     const faqItems = createFaqItems(t);
+    const sources = createSourceLinks(t);
     const localeToOg: Record<string, string> = {
         en: 'en_US',
         mn: 'mn_MN',
@@ -413,493 +383,262 @@ export default function CaffeineCalculator() {
                     }}
                 />
             </Head>
-            <style>{`
-                @keyframes caffeine-result-in {
-                    from { opacity: 0; transform: translateY(8px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                [data-caffeine-result] {
-                    animation: caffeine-result-in 220ms ease-out both;
-                }
-                @media (prefers-reduced-motion: reduce) {
-                    [data-caffeine-result] { animation: none; }
-                }
-            `}</style>
 
-            <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-slate-900 dark:text-gray-50">
-                <PageHeader />
+            <div className={cn('min-h-screen', PAPER, INK)}>
+                <BrewlineHeader />
 
-                <div className="px-4 py-6 md:py-10">
+                <div className="px-4 py-8 md:py-12">
                     <Breadcrumbs seo={seo} />
 
-                    <main className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
-                        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-none dark:border-slate-700 dark:bg-slate-800">
-                            <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between">
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-semibold tracking-wide text-emerald-700 uppercase dark:text-emerald-300">
-                                        {t('tagline')}
-                                    </p>
-                                    <h1 className="text-2xl leading-tight font-bold tracking-tight text-balance sm:text-3xl md:text-4xl">
-                                        {t('heading')}
-                                    </h1>
-                                    <p className="mt-2 max-w-xl text-base leading-relaxed text-gray-600 dark:text-slate-400">
-                                        {t('subheading')}
-                                    </p>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={toggleUnitSystem}
-                                    className="shrink-0 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-900 transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] hover:border-emerald-500 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-50 dark:hover:border-emerald-500 dark:hover:bg-emerald-900/30"
+                    <header className="mx-auto mt-6 max-w-7xl lg:px-8">
+                        <h1
+                            className={cn(
+                                FONT_DISPLAY,
+                                INK,
+                                'text-[clamp(40px,5vw,68px)] leading-[1.02] tracking-[-0.02em] text-balance',
+                            )}
+                        >
+                            {t('heading')}
+                        </h1>
+                        <p
+                            className={cn(
+                                INK_2,
+                                'mt-5 max-w-2xl text-base leading-relaxed sm:text-lg',
+                            )}
+                        >
+                            {t('subheading')}
+                        </p>
+                    </header>
+
+                    <main className="mx-auto mt-8 grid max-w-7xl gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
+                        <section
+                            className={cn(
+                                PAPER_2,
+                                'border',
+                                RULE,
+                                'rounded-none p-6 sm:p-8',
+                            )}
+                        >
+                            <div className="flex items-center justify-between gap-4 pb-5">
+                                <p className={EYEBROW}>{t('form_title')}</p>
+                                <div
+                                    className={cn(
+                                        'inline-flex border',
+                                        RULE,
+                                        'rounded-none',
+                                    )}
+                                    role="radiogroup"
+                                    aria-label="Unit system"
                                 >
-                                    {unitSystem === 'metric'
-                                        ? t('unit_toggle_metric')
-                                        : t('unit_toggle_imperial')}
-                                </button>
+                                    <button
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={unitSystem === 'metric'}
+                                        onClick={() =>
+                                            toggleUnitSystem('metric')
+                                        }
+                                        className={cn(
+                                            FONT_MONO,
+                                            'px-4 py-2 text-[11px] tracking-[0.14em] uppercase transition',
+                                            unitSystem === 'metric'
+                                                ? 'bg-[#1A1814] text-[#F2EBDD]'
+                                                : 'text-[#3D3833] hover:bg-[#F2EBDD]',
+                                        )}
+                                    >
+                                        kg
+                                    </button>
+                                    <button
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={unitSystem === 'imperial'}
+                                        onClick={() =>
+                                            toggleUnitSystem('imperial')
+                                        }
+                                        className={cn(
+                                            FONT_MONO,
+                                            'px-4 py-2 text-[11px] tracking-[0.14em] uppercase transition',
+                                            unitSystem === 'imperial'
+                                                ? 'bg-[#1A1814] text-[#F2EBDD]'
+                                                : 'text-[#3D3833] hover:bg-[#F2EBDD]',
+                                        )}
+                                    >
+                                        lb
+                                    </button>
+                                </div>
                             </div>
 
-                            <form
-                                onSubmit={onSubmit}
-                                className="mt-6 space-y-6"
-                            >
-                                <div>
-                                    <label
-                                        htmlFor="height_cm"
-                                        className="text-sm font-semibold text-gray-900 dark:text-gray-50"
+                            <form onSubmit={onSubmit} className="space-y-7">
+                                {/* Region 1: body */}
+                                <div className="space-y-5 border-t border-[#D9CFBC] pt-6">
+                                    <FieldShell
+                                        label={t('weight')}
+                                        error={form.errors.weight_kg}
                                     >
-                                        {t('height')}
-                                    </label>
-                                    {unitSystem === 'metric' ? (
-                                        <div className="relative mt-2">
-                                            <Ruler
-                                                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
-                                                aria-hidden="true"
-                                            />
-                                            <Input
-                                                id="height_cm"
-                                                type="number"
-                                                inputMode="numeric"
-                                                min={90}
-                                                max={230}
-                                                value={form.data.height_cm}
-                                                onChange={(event) =>
-                                                    form.setData(
-                                                        'height_cm',
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                placeholder={t(
-                                                    'height_cm_placeholder',
-                                                )}
-                                                className="h-11 rounded-lg border-gray-200 bg-white pr-14 pl-10 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
-                                                aria-invalid={
-                                                    form.errors.height_cm
-                                                        ? 'true'
-                                                        : undefined
-                                                }
-                                            />
-                                            <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
-                                                cm
-                                            </span>
-                                        </div>
-                                    ) : (
-                                        <div className="mt-2 flex gap-2">
-                                            <div className="relative flex-1">
-                                                <Ruler
-                                                    className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
-                                                    aria-hidden="true"
-                                                />
-                                                <Input
-                                                    id="height_ft"
-                                                    type="number"
-                                                    inputMode="numeric"
-                                                    min={2}
-                                                    max={7}
-                                                    value={form.data.height_ft}
-                                                    onChange={(event) =>
-                                                        form.setData(
-                                                            'height_ft',
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                    placeholder={t(
-                                                        'height_ft_placeholder',
-                                                    )}
-                                                    className="h-11 rounded-lg border-gray-200 bg-white pr-14 pl-10 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
-                                                />
-                                                <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
-                                                    ft
-                                                </span>
-                                            </div>
-                                            <div className="relative flex-1">
-                                                <Input
-                                                    id="height_in"
-                                                    type="number"
-                                                    inputMode="numeric"
-                                                    min={0}
-                                                    max={11}
-                                                    value={form.data.height_in}
-                                                    onChange={(event) =>
-                                                        form.setData(
-                                                            'height_in',
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                    placeholder={t(
-                                                        'height_in_placeholder',
-                                                    )}
-                                                    className="h-11 rounded-lg border-gray-200 bg-white pr-14 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
-                                                />
-                                                <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
-                                                    in
-                                                </span>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {form.errors.height_cm && (
-                                        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                                            {form.errors.height_cm}
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <label
-                                        htmlFor="weight"
-                                        className="text-sm font-semibold text-gray-900 dark:text-gray-50"
-                                    >
-                                        {t('weight')}
-                                    </label>
-                                    {unitSystem === 'metric' ? (
-                                        <div className="relative mt-2">
-                                            <Weight
-                                                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
-                                                aria-hidden="true"
-                                            />
-                                            <Input
+                                        {unitSystem === 'metric' ? (
+                                            <UnitInput
                                                 id="weight_kg"
-                                                type="number"
-                                                inputMode="numeric"
-                                                min={30}
-                                                max={300}
                                                 value={form.data.weight_kg}
-                                                onChange={(event) =>
-                                                    form.setData(
-                                                        'weight_kg',
-                                                        event.target.value,
-                                                    )
+                                                onChange={(v) =>
+                                                    form.setData('weight_kg', v)
                                                 }
                                                 placeholder={t(
                                                     'weight_kg_placeholder',
                                                 )}
-                                                className="h-11 rounded-lg border-gray-200 bg-white pr-14 pl-10 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
+                                                suffix="kg"
+                                                min={30}
+                                                max={300}
                                                 aria-invalid={
                                                     form.errors.weight_kg
                                                         ? 'true'
                                                         : undefined
                                                 }
                                             />
-                                            <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
-                                                kg
-                                            </span>
-                                        </div>
-                                    ) : (
-                                        <div className="relative mt-2">
-                                            <Weight
-                                                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
-                                                aria-hidden="true"
-                                            />
-                                            <Input
+                                        ) : (
+                                            <UnitInput
                                                 id="weight_lb"
-                                                type="number"
-                                                inputMode="numeric"
-                                                min={66}
-                                                max={660}
                                                 value={form.data.weight_lb}
-                                                onChange={(event) =>
-                                                    form.setData(
-                                                        'weight_lb',
-                                                        event.target.value,
-                                                    )
+                                                onChange={(v) =>
+                                                    form.setData('weight_lb', v)
                                                 }
                                                 placeholder={t(
                                                     'weight_lb_placeholder',
                                                 )}
-                                                className="h-11 rounded-lg border-gray-200 bg-white pr-14 pl-10 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
+                                                suffix="lb"
+                                                min={66}
+                                                max={660}
                                                 aria-invalid={
                                                     form.errors.weight_kg
                                                         ? 'true'
                                                         : undefined
                                                 }
                                             />
-                                            <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
-                                                lb
-                                            </span>
-                                        </div>
-                                    )}
-                                    {form.errors.weight_kg && (
-                                        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                                            {form.errors.weight_kg}
-                                        </p>
-                                    )}
+                                        )}
+                                    </FieldShell>
+
+                                    <FieldShell
+                                        label={t('sex')}
+                                        hint={t('sex_description')}
+                                        error={form.errors.sex}
+                                    >
+                                        <ChipGroup
+                                            ariaLabel={t('sex')}
+                                            options={SEX_OPTIONS.map((o) => ({
+                                                value: o.value,
+                                                label: t(o.labelKey),
+                                            }))}
+                                            value={form.data.sex}
+                                            onChange={(v) =>
+                                                form.setData(
+                                                    'sex',
+                                                    v as AssessmentFormData['sex'],
+                                                )
+                                            }
+                                        />
+                                    </FieldShell>
                                 </div>
 
-                                <div>
-                                    <label
-                                        htmlFor="age"
-                                        className="text-sm font-semibold text-gray-900 dark:text-gray-50"
+                                {/* Region 2: sensitivity */}
+                                <div className="space-y-3 border-t border-[#D9CFBC] pt-6">
+                                    <FieldShell
+                                        label={t('sensitivity')}
+                                        error={form.errors.sensitivity}
                                     >
-                                        {t('age')}
-                                    </label>
-                                    <div className="relative mt-2">
-                                        <Calendar
-                                            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400"
-                                            aria-hidden="true"
+                                        <ChipGroup
+                                            ariaLabel={t('sensitivity')}
+                                            options={SENSITIVITY_OPTIONS.map(
+                                                (o) => ({
+                                                    value: o.value,
+                                                    label: t(o.labelKey),
+                                                    detail: t(o.detailKey),
+                                                }),
+                                            )}
+                                            value={form.data.sensitivity}
+                                            onChange={(v) =>
+                                                form.setData(
+                                                    'sensitivity',
+                                                    v as AssessmentFormData['sensitivity'],
+                                                )
+                                            }
                                         />
-                                        <Input
-                                            id="age"
-                                            type="number"
-                                            inputMode="numeric"
-                                            min={13}
-                                            max={120}
-                                            value={form.data.age}
+                                    </FieldShell>
+                                </div>
+
+                                {/* Region 3: conditions */}
+                                <div className="space-y-3 border-t border-[#D9CFBC] pt-6">
+                                    <FieldShell
+                                        label={t('conditions')}
+                                        hint={t('conditions_description')}
+                                        error={conditionsError}
+                                    >
+                                        <ChipGroup
+                                            ariaLabel={t('conditions')}
+                                            multi
+                                            options={CONDITION_OPTIONS.map(
+                                                (o) => ({
+                                                    value: o.value,
+                                                    label: t(o.labelKey),
+                                                }),
+                                            )}
+                                            value={selectedConditions}
+                                            onChange={(v) =>
+                                                toggleCondition(
+                                                    v as ConditionKey,
+                                                )
+                                            }
+                                        />
+                                    </FieldShell>
+                                </div>
+
+                                {/* Region 4: context */}
+                                <div className="space-y-3 border-t border-[#D9CFBC] pt-6">
+                                    <FieldShell
+                                        label={t('context_label')}
+                                        hint={t('context_description')}
+                                        error={form.errors.context}
+                                    >
+                                        <Textarea
+                                            id="context"
+                                            value={form.data.context}
                                             onChange={(event) =>
                                                 form.setData(
-                                                    'age',
+                                                    'context',
                                                     event.target.value,
                                                 )
                                             }
-                                            placeholder={t('age_placeholder')}
-                                            className="h-11 rounded-lg border-gray-200 bg-white pr-14 pl-10 text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
+                                            placeholder={t(
+                                                'context_placeholder',
+                                            )}
+                                            rows={4}
+                                            maxLength={1000}
+                                            className={cn(
+                                                'rounded-none border bg-[#F2EBDD] text-base text-[#1A1814] placeholder:text-[#6E665C]',
+                                                RULE,
+                                                'focus-visible:border-[#1A1814] focus-visible:ring-[#1A1814]/15',
+                                            )}
                                             aria-invalid={
-                                                form.errors.age
+                                                form.errors.context
                                                     ? 'true'
                                                     : undefined
                                             }
                                         />
-                                        <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
-                                            {t('age_unit')}
-                                        </span>
-                                    </div>
-                                    {form.errors.age && (
-                                        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                                            {form.errors.age}
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <div className="flex items-center justify-between gap-3">
-                                        <label className="text-sm font-semibold text-gray-900 dark:text-gray-50">
-                                            {t('sex')}
-                                        </label>
-                                        {form.errors.sex && (
-                                            <p className="text-sm text-red-600 dark:text-red-400">
-                                                {form.errors.sex}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-                                        {t('sex_description')}
-                                    </p>
-                                    <div
-                                        className="mt-2 grid grid-cols-3 gap-2"
-                                        role="radiogroup"
-                                        aria-label={t('sex')}
-                                    >
-                                        {SEX_OPTIONS.map((option) => {
-                                            const selected =
-                                                form.data.sex === option.value;
-
-                                            return (
-                                                <button
-                                                    key={option.value}
-                                                    type="button"
-                                                    role="radio"
-                                                    aria-checked={selected}
-                                                    onClick={() =>
-                                                        form.setData(
-                                                            'sex',
-                                                            option.value,
-                                                        )
-                                                    }
-                                                    className={cn(
-                                                        'rounded-xl border px-3 py-3 text-left transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:ring-2 focus:ring-emerald-500/40 focus:outline-none',
-                                                        selected
-                                                            ? 'border-emerald-500 bg-emerald-50 text-gray-900 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-gray-50'
-                                                            : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600',
-                                                    )}
-                                                >
-                                                    <span className="block text-sm font-semibold">
-                                                        {t(option.labelKey)}
-                                                    </span>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div className="flex items-center justify-between gap-3">
-                                        <label className="text-sm font-semibold text-gray-900 dark:text-gray-50">
-                                            {t('sensitivity')}
-                                        </label>
-                                        {form.errors.sensitivity && (
-                                            <p className="text-sm text-red-600 dark:text-red-400">
-                                                {form.errors.sensitivity}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <div
-                                        className="mt-2 grid grid-cols-3 gap-2"
-                                        role="radiogroup"
-                                        aria-label={t('sensitivity')}
-                                    >
-                                        {SENSITIVITY_OPTIONS.map((option) => {
-                                            const selected =
-                                                form.data.sensitivity ===
-                                                option.value;
-
-                                            return (
-                                                <button
-                                                    key={option.value}
-                                                    type="button"
-                                                    role="radio"
-                                                    aria-checked={selected}
-                                                    onClick={() =>
-                                                        form.setData(
-                                                            'sensitivity',
-                                                            option.value,
-                                                        )
-                                                    }
-                                                    className={cn(
-                                                        'rounded-xl border px-3 py-3 text-left transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus:ring-2 focus:ring-emerald-500/40 focus:outline-none',
-                                                        selected
-                                                            ? 'border-emerald-500 bg-emerald-50 text-gray-900 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-gray-50'
-                                                            : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600',
-                                                    )}
-                                                >
-                                                    <span className="block text-sm font-semibold">
-                                                        {t(option.labelKey)}
-                                                    </span>
-                                                    <span className="mt-0.5 block text-xs opacity-70">
-                                                        {t(option.detailKey)}
-                                                    </span>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="text-sm font-semibold text-gray-900 dark:text-gray-50">
-                                        {t('conditions')}
-                                    </label>
-                                    <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-                                        {t('conditions_description')}
-                                    </p>
-                                    <div
-                                        className="mt-2 grid grid-cols-2 gap-2"
-                                        role="group"
-                                        aria-label={t('conditions')}
-                                    >
-                                        {CONDITION_OPTIONS.map((option) => {
-                                            const checked =
-                                                selectedConditions.includes(
-                                                    option.value,
-                                                );
-
-                                            return (
-                                                <label
-                                                    key={option.value}
-                                                    className={cn(
-                                                        'flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-sm transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] focus-within:ring-2 focus-within:ring-emerald-500/40 focus-within:outline-none',
-                                                        checked
-                                                            ? 'border-emerald-500 bg-emerald-50 text-gray-900 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-gray-50'
-                                                            : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600',
-                                                    )}
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        className="size-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:border-slate-600"
-                                                        checked={checked}
-                                                        onChange={() =>
-                                                            toggleCondition(
-                                                                option.value,
-                                                            )
-                                                        }
-                                                    />
-                                                    <span className="font-medium">
-                                                        {t(option.labelKey)}
-                                                    </span>
-                                                </label>
-                                            );
-                                        })}
-                                    </div>
-                                    {conditionsError && (
-                                        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                                            {conditionsError}
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <MessageSquareText
-                                            className="size-4 text-emerald-700 dark:text-emerald-300"
-                                            aria-hidden="true"
-                                        />
-                                        <label
-                                            htmlFor="context"
-                                            className="text-sm font-semibold text-gray-900 dark:text-gray-50"
-                                        >
-                                            {t('context_label')}
-                                        </label>
-                                    </div>
-                                    <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-                                        {t('context_description')}
-                                    </p>
-                                    <Textarea
-                                        id="context"
-                                        value={form.data.context}
-                                        onChange={(event) =>
-                                            form.setData(
-                                                'context',
-                                                event.target.value,
-                                            )
-                                        }
-                                        placeholder={t('context_placeholder')}
-                                        rows={4}
-                                        maxLength={1000}
-                                        className="mt-2 rounded-lg border-gray-200 bg-white text-base focus-visible:border-emerald-500 focus-visible:ring-emerald-500/15 dark:border-slate-700 dark:bg-slate-900"
-                                        aria-invalid={
-                                            form.errors.context
-                                                ? 'true'
-                                                : undefined
-                                        }
-                                    />
-                                    {form.errors.context && (
-                                        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                                            {form.errors.context}
-                                        </p>
-                                    )}
+                                    </FieldShell>
                                 </div>
 
                                 <button
                                     type="submit"
                                     disabled={!canSubmit || form.processing}
-                                    className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-6 text-base font-semibold text-white shadow-none transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:bg-emerald-600 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none active:translate-y-0 active:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-slate-900"
+                                    className={cn(
+                                        'inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#1A1814] px-6 text-base font-semibold text-[#F2EBDD] transition',
+                                        'hover:bg-[#3D3833] focus:ring-2 focus:ring-[#1A1814] focus:ring-offset-2 focus:ring-offset-[#EBE2D0] focus:outline-none',
+                                        'disabled:cursor-not-allowed disabled:opacity-50',
+                                    )}
                                 >
                                     {form.processing ? (
                                         <LoaderCircle
                                             className="size-4 animate-spin"
                                             aria-hidden="true"
                                         />
-                                    ) : (
-                                        <Activity
-                                            className="size-4"
-                                            aria-hidden="true"
-                                        />
-                                    )}
+                                    ) : null}
                                     {form.processing
                                         ? t('submit_loading')
                                         : t('submit_button')}
@@ -908,7 +647,6 @@ export default function CaffeineCalculator() {
                         </section>
 
                         <section
-                            data-caffeine-result
                             aria-live="polite"
                             aria-label={
                                 form.response?.summary ??
@@ -917,9 +655,11 @@ export default function CaffeineCalculator() {
                         >
                             {form.processing && <LoadingResult />}
                             {!form.processing && form.response && (
-                                <CaffeineGuidanceRenderer
-                                    spec={form.response.spec}
-                                />
+                                <div className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-200">
+                                    <CaffeineGuidanceRenderer
+                                        spec={form.response.spec}
+                                    />
+                                </div>
                             )}
                             {!form.processing && !form.response && (
                                 <EmptyResult />
@@ -927,68 +667,11 @@ export default function CaffeineCalculator() {
                         </section>
                     </main>
 
-                    <CaffeineSeoSection faqItems={faqItems} />
+                    <CaffeineMethodSection sources={sources} />
 
-                    {/* CTA Section */}
-                    <section className="mx-auto mt-12 max-w-7xl lg:px-8">
-                        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#FFF5EE] via-[#FFFBF5] to-[#FFEFE5] p-8 shadow-sm ring-1 ring-[#FF6B4A]/10 sm:p-10">
-                            <div
-                                className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-[#FF6B4A]/6 blur-3xl"
-                                aria-hidden="true"
-                            />
-                            <div
-                                className="pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-[#FFBFA9]/10 blur-2xl"
-                                aria-hidden="true"
-                            />
+                    <CaffeineFaqSection faqItems={faqItems} />
 
-                            <div className="relative z-10 flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
-                                <div className="shrink-0">
-                                    <div className="rounded-full bg-gradient-to-br from-[#FF6B4A]/20 to-[#FFBFA9]/30 p-1">
-                                        <img
-                                            src="https://pub-plate-assets.acara.app/images/altani_with_hand_on_chin_considering_expression_thought-1024.webp"
-                                            alt="Altani, your personal AI health coach"
-                                            className="h-24 w-24 rounded-full object-cover ring-2 ring-white sm:h-28 sm:w-28"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="flex-1 text-center sm:text-left">
-                                    <h3 className="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
-                                        Meet Altani — Your Personal AI Health
-                                        Coach
-                                    </h3>
-                                    <p className="mt-2 text-sm leading-relaxed text-slate-500 sm:text-base">
-                                        Altani helps you plan meals, predict
-                                        glucose responses, and stay on track
-                                        with your health goals. She&apos;s
-                                        available 24/7 and learns what works
-                                        best for your body.
-                                    </p>
-                                    <div className="mt-6">
-                                        <a
-                                            href="/meet-altani"
-                                            className="group inline-flex items-center justify-center gap-2 rounded-full bg-[#FF6B4A] px-7 py-3 text-sm font-semibold text-white shadow-md shadow-[#FF6B4A]/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#E85A3A] hover:shadow-lg hover:shadow-[#FF6B4A]/25"
-                                        >
-                                            Chat with Altani
-                                            <svg
-                                                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                                                />
-                                            </svg>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                    <CaffeineCtaSection />
                 </div>
 
                 <CaffeineFooter />
@@ -1002,7 +685,7 @@ interface FaqItem {
     answer: string;
 }
 
-type Translate = (key: string) => string;
+type Translate = (key: string, options?: Record<string, unknown>) => string;
 
 function createStructuredDataSchema(
     seo: CaffeineCalculatorPageProps['seo'],
@@ -1016,7 +699,8 @@ function createStructuredDataSchema(
     const calculatorId = `${seo.canonicalUrl}#calculator`;
     const faqId = `${seo.canonicalUrl}#faq`;
     const breadcrumbId = `${seo.canonicalUrl}#breadcrumb`;
-    const language = locale === 'mn' ? 'mn-MN' : locale === 'fr' ? 'fr-FR' : 'en-US';
+    const language =
+        locale === 'mn' ? 'mn-MN' : locale === 'fr' ? 'fr-FR' : 'en-US';
 
     return {
         '@context': 'https://schema.org',
@@ -1134,141 +818,268 @@ function toJsonLd(data: Record<string, unknown>): string {
     return JSON.stringify(data).replace(/</g, '\\u003c');
 }
 
+function BrewlineHeader() {
+    const { t } = useTranslation('caffeine');
+    const { currentUser } = useSharedProps();
+
+    return (
+        <header
+            className={cn(
+                'sticky top-0 z-50 border-b',
+                RULE,
+                'bg-[#F2EBDD]/85 backdrop-blur-md',
+            )}
+        >
+            <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+                <a
+                    href="/"
+                    className="flex items-center gap-3 transition hover:opacity-80"
+                    aria-label={t('footer_powered_by_brand')}
+                >
+                    <AppLogoIcon className="size-7" aria-hidden="true" />
+                    <span
+                        className={cn(
+                            FONT_DISPLAY,
+                            INK,
+                            'text-2xl leading-none tracking-[-0.01em]',
+                        )}
+                    >
+                        {t('footer_powered_by_brand')}
+                    </span>
+                    <Coffee
+                        className={cn('size-4', ACCENT)}
+                        aria-hidden="true"
+                    />
+                </a>
+
+                <div className="flex items-center gap-4">
+                    {currentUser ? (
+                        <a
+                            href="/dashboard"
+                            className={cn(
+                                'inline-flex items-center gap-2 rounded-none border bg-[#1A1814] px-5 py-2 text-[#F2EBDD] transition hover:bg-[#3D3833]',
+                                'border-[#1A1814]',
+                                FONT_MONO,
+                                'text-[11px] tracking-[0.16em] uppercase',
+                            )}
+                        >
+                            Dashboard →
+                        </a>
+                    ) : (
+                        <>
+                            <a
+                                href="/login"
+                                className={cn(
+                                    FONT_MONO,
+                                    INK_2,
+                                    'hidden text-[11px] tracking-[0.16em] uppercase transition hover:text-[#1A1814] sm:inline',
+                                )}
+                            >
+                                Log in
+                            </a>
+                            <a
+                                href="/register"
+                                className={cn(
+                                    'inline-flex items-center gap-2 rounded-none border px-5 py-2 transition hover:bg-[#1A1814] hover:text-[#F2EBDD]',
+                                    'border-[#1A1814] text-[#1A1814]',
+                                    FONT_MONO,
+                                    'text-[11px] tracking-[0.16em] uppercase',
+                                )}
+                            >
+                                Get started →
+                            </a>
+                        </>
+                    )}
+                </div>
+            </div>
+        </header>
+    );
+}
+
 function Breadcrumbs({ seo }: { seo: CaffeineCalculatorPageProps['seo'] }) {
     const { t } = useTranslation('caffeine');
 
     return (
         <nav
             aria-label={t('breadcrumb_label')}
-            className="mx-auto mb-4 flex max-w-7xl items-center gap-2 text-sm text-gray-500 lg:px-8 dark:text-slate-400"
+            className={cn(
+                'mx-auto flex max-w-7xl items-center gap-2',
+                FONT_MONO,
+                INK_3,
+                'text-[11px] tracking-[0.14em] uppercase lg:px-8',
+            )}
         >
             <a
                 href={seo.appUrl}
                 aria-label={t('breadcrumb_home')}
-                className="text-gray-600 transition hover:text-emerald-700 dark:text-slate-300 dark:hover:text-emerald-300"
+                className={cn(
+                    'transition hover:text-[#1A1814]',
+                    INK_3,
+                )}
             >
-                <Home className="size-4" aria-hidden="true" />
+                <Home className="size-3.5" aria-hidden="true" />
             </a>
-            <ChevronRight className="size-4" aria-hidden="true" />
+            <ChevronRight className="size-3.5" aria-hidden="true" />
             <a
                 href={seo.toolsUrl}
-                className="font-medium text-gray-600 transition hover:text-emerald-700 dark:text-slate-300 dark:hover:text-emerald-300"
+                className={cn(
+                    'transition hover:text-[#1A1814]',
+                    INK_3,
+                )}
             >
                 {t('breadcrumb_tools')}
             </a>
-            <ChevronRight className="size-4" aria-hidden="true" />
-            <span className="font-semibold text-gray-900 dark:text-gray-50">
-                {t('breadcrumb_current')}
-            </span>
+            <ChevronRight className="size-3.5" aria-hidden="true" />
+            <span className={cn(INK)}>{t('breadcrumb_current')}</span>
         </nav>
     );
 }
 
-function CaffeineSeoSection({ faqItems }: { faqItems: FaqItem[] }) {
-    const { t } = useTranslation('caffeine');
-    const sources = createSourceLinks(t);
-
+function FieldShell({
+    label,
+    hint,
+    error,
+    children,
+}: {
+    label: string;
+    hint?: string;
+    error?: string;
+    children: React.ReactNode;
+}) {
     return (
-        <section className="mx-auto mt-8 max-w-7xl lg:px-8">
-            <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-                <article className="rounded-xl border border-gray-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
-                    <p className="text-sm font-semibold tracking-wide text-emerald-700 uppercase dark:text-emerald-300">
-                        {t('seo_guide_label')}
-                    </p>
-                    <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">
-                        {t('seo_guide_heading')}
-                    </h2>
-                    <p className="mt-3 max-w-3xl text-base leading-relaxed text-gray-600 dark:text-slate-400">
-                        {t('seo_guide_summary')}
-                    </p>
-                    <div className="mt-6 grid gap-3 md:grid-cols-3">
-                        <SeoStep
-                            title={t('seo_step_weight_title')}
-                            body={t('seo_step_weight_body')}
-                        />
-                        <SeoStep
-                            title={t('seo_step_context_title')}
-                            body={t('seo_step_context_body')}
-                        />
-                        <SeoStep
-                            title={t('seo_step_sensitivity_title')}
-                            body={t('seo_step_sensitivity_body')}
-                        />
-                    </div>
-                </article>
-
-                <aside className="rounded-xl border border-gray-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
-                    <div className="flex items-center gap-2">
-                        <BookOpen
-                            className="size-5 text-emerald-700 dark:text-emerald-300"
-                            aria-hidden="true"
-                        />
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50">
-                            {t('seo_sources_heading')}
-                        </h2>
-                    </div>
-                    <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-slate-400">
-                        {t('seo_sources_description')}
-                    </p>
-                    <ul className="mt-5 space-y-3">
-                        {sources.map((source) => (
-                            <li key={source.url}>
-                                <a
-                                    href={source.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-900 dark:text-emerald-300 dark:hover:text-emerald-200"
-                                >
-                                    {source.label}
-                                    <ExternalLink
-                                        className="size-3.5"
-                                        aria-hidden="true"
-                                    />
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                </aside>
+        <div>
+            <div className="flex items-baseline justify-between gap-3">
+                <span className={EYEBROW}>{label}</span>
+                {error ? (
+                    <span
+                        className={cn(
+                            FONT_MONO,
+                            'text-[10px] tracking-[0.12em] text-[#B5482E] uppercase',
+                        )}
+                    >
+                        {error}
+                    </span>
+                ) : null}
             </div>
-
-            <section className="mt-6 rounded-xl border border-gray-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
-                <div className="max-w-3xl">
-                    <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">
-                        {t('faq_heading')}
-                    </h2>
-                    <p className="mt-2 text-base leading-relaxed text-gray-600 dark:text-slate-400">
-                        {t('faq_intro')}
-                    </p>
-                </div>
-                <div className="mt-6 grid gap-5 md:grid-cols-2">
-                    {faqItems.map((item) => (
-                        <article
-                            key={item.question}
-                            className="border-t border-gray-200 pt-4 dark:border-slate-700"
-                        >
-                            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-50">
-                                {item.question}
-                            </h3>
-                            <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-slate-400">
-                                {item.answer}
-                            </p>
-                        </article>
-                    ))}
-                </div>
-            </section>
-        </section>
+            {hint ? (
+                <p className={cn('mt-1 text-xs', INK_3)}>{hint}</p>
+            ) : null}
+            <div className="mt-3">{children}</div>
+        </div>
     );
 }
 
-function SeoStep({ title, body }: { title: string; body: string }) {
+function UnitInput({
+    id,
+    value,
+    onChange,
+    placeholder,
+    suffix,
+    min,
+    max,
+    'aria-invalid': ariaInvalid,
+}: {
+    id: string;
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+    suffix?: string;
+    min?: number;
+    max?: number;
+    'aria-invalid'?: 'true' | 'false';
+}) {
     return (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50">
-                {title}
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-slate-400">
-                {body}
-            </p>
+        <div className="relative w-full">
+            <Input
+                id={id}
+                type="number"
+                inputMode="numeric"
+                min={min}
+                max={max}
+                value={value}
+                onChange={(event) => onChange(event.target.value)}
+                placeholder={placeholder}
+                className={cn(inputClass, suffix ? 'pr-12' : '')}
+                aria-invalid={ariaInvalid}
+            />
+            {suffix ? (
+                <span
+                    className={cn(
+                        'pointer-events-none absolute top-1/2 right-3 -translate-y-1/2',
+                        FONT_MONO,
+                        INK_3,
+                        'text-[10px] tracking-[0.14em] uppercase',
+                    )}
+                >
+                    {suffix}
+                </span>
+            ) : null}
+        </div>
+    );
+}
+
+interface ChipOption {
+    value: string;
+    label: string;
+    detail?: string;
+}
+
+function ChipGroup({
+    options,
+    value,
+    onChange,
+    multi = false,
+    ariaLabel,
+}: {
+    options: ChipOption[];
+    value: string | string[];
+    onChange: (value: string) => void;
+    multi?: boolean;
+    ariaLabel?: string;
+}) {
+    const isSelected = (v: string) =>
+        Array.isArray(value) ? value.includes(v) : value === v;
+
+    return (
+        <div
+            className="flex flex-wrap gap-2"
+            role={multi ? 'group' : 'radiogroup'}
+            aria-label={ariaLabel}
+        >
+            {options.map((option) => {
+                const selected = isSelected(option.value);
+                return (
+                    <button
+                        key={option.value}
+                        type="button"
+                        role={multi ? 'checkbox' : 'radio'}
+                        aria-checked={selected}
+                        onClick={() => onChange(option.value)}
+                        className={cn(
+                            'rounded-none border px-3.5 py-2 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1A1814]/30',
+                            selected
+                                ? 'border-[#1A1814] bg-[#1A1814] text-[#F2EBDD]'
+                                : 'border-[#D9CFBC] bg-[#F2EBDD] text-[#3D3833] hover:border-[#1A1814]/40',
+                        )}
+                    >
+                        <span className="block font-medium">
+                            {option.label}
+                        </span>
+                        {option.detail ? (
+                            <span
+                                className={cn(
+                                    'mt-0.5 block text-[11px]',
+                                    selected
+                                        ? 'text-[#F2EBDD]/70'
+                                        : INK_3,
+                                )}
+                            >
+                                {option.detail}
+                            </span>
+                        ) : null}
+                    </button>
+                );
+            })}
         </div>
     );
 }
@@ -1276,14 +1087,26 @@ function SeoStep({ title, body }: { title: string; body: string }) {
 function LoadingResult() {
     return (
         <div className="flex flex-col gap-4">
-            <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
-                <div className="h-5 w-28 animate-pulse rounded-full bg-gray-200 dark:bg-slate-700" />
-                <div className="mt-6 h-8 w-3/4 animate-pulse rounded-lg bg-gray-200 dark:bg-slate-700" />
-                <div className="mt-3 h-4 w-full animate-pulse rounded bg-gray-100 dark:bg-slate-700" />
-                <div className="mt-2 h-4 w-2/3 animate-pulse rounded bg-gray-100 dark:bg-slate-700" />
+            <div className={cn('border', RULE, 'rounded-none p-6', PAPER)}>
+                <div className="h-3 w-28 animate-pulse rounded-none bg-[#D9CFBC]" />
+                <div className="mt-6 h-12 w-3/4 animate-pulse rounded-none bg-[#D9CFBC]" />
+                <div className="mt-3 h-3 w-full animate-pulse rounded-none bg-[#EBE2D0]" />
+                <div className="mt-2 h-3 w-2/3 animate-pulse rounded-none bg-[#EBE2D0]" />
             </div>
-            <div className="h-28 rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800" />
-            <div className="h-44 rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800" />
+            <div
+                className={cn(
+                    'h-28 animate-pulse rounded-none border',
+                    RULE,
+                    PAPER,
+                )}
+            />
+            <div
+                className={cn(
+                    'h-44 animate-pulse rounded-none border',
+                    RULE,
+                    PAPER,
+                )}
+            />
         </div>
     );
 }
@@ -1292,19 +1115,347 @@ function EmptyResult() {
     const { t } = useTranslation('caffeine');
 
     return (
-        <div className="flex min-h-full items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center dark:border-slate-700 dark:bg-slate-800">
+        <div
+            className={cn(
+                'flex min-h-full items-center justify-center rounded-none border-2 border-dashed p-10 text-center',
+                RULE,
+                PAPER,
+            )}
+        >
             <div className="max-w-sm">
-                <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
-                    <Sparkles className="size-5" aria-hidden="true" />
-                </span>
-                <h2 className="mt-4 text-xl font-bold text-gray-900 dark:text-gray-50">
+                <span
+                    className={cn('mx-auto block size-2 rounded-full', ACCENT_BG)}
+                    aria-hidden="true"
+                />
+                <h2
+                    className={cn(
+                        FONT_DISPLAY,
+                        INK,
+                        'mt-5 text-2xl leading-tight tracking-[-0.02em]',
+                    )}
+                >
                     {t('empty_result_title')}
                 </h2>
-                <p className="mt-2 text-sm leading-relaxed text-gray-500 dark:text-slate-400">
+                <p
+                    className={cn(
+                        INK_2,
+                        'mt-3 text-sm leading-relaxed',
+                    )}
+                >
                     {t('empty_result_description')}
                 </p>
             </div>
         </div>
+    );
+}
+
+function CaffeineMethodSection({
+    sources,
+}: {
+    sources: ReadonlyArray<{ label: string; url: string }>;
+}) {
+    const { t } = useTranslation('caffeine');
+
+    const steps = [
+        {
+            kicker: 'A',
+            title: t('seo_step_weight_title'),
+            body: t('seo_step_weight_body'),
+        },
+        {
+            kicker: 'B',
+            title: t('seo_step_context_title'),
+            body: t('seo_step_context_body'),
+        },
+        {
+            kicker: 'C',
+            title: t('seo_step_sensitivity_title'),
+            body: t('seo_step_sensitivity_body'),
+        },
+    ];
+
+    return (
+        <section className="mx-auto mt-24 max-w-7xl lg:px-8">
+            <p className={EYEBROW}>{t('seo_guide_label')}</p>
+            <h2
+                className={cn(
+                    FONT_DISPLAY,
+                    INK,
+                    'mt-4 max-w-3xl text-[clamp(28px,3.4vw,44px)] leading-[1.05] tracking-[-0.02em]',
+                )}
+            >
+                {t('seo_guide_heading')}
+            </h2>
+            <p
+                className={cn(
+                    INK_2,
+                    'mt-5 max-w-3xl text-base leading-relaxed',
+                )}
+            >
+                {t('seo_guide_summary')}
+            </p>
+
+            <div
+                className={cn(
+                    'mt-10 grid border-t',
+                    RULE,
+                    'sm:grid-cols-3 sm:divide-x sm:divide-[#D9CFBC]',
+                )}
+            >
+                {steps.map((step) => (
+                    <article
+                        key={step.kicker}
+                        className="border-b border-[#D9CFBC] px-2 pt-8 pb-10 sm:border-b-0 sm:px-7"
+                    >
+                        <div
+                            className={cn(
+                                FONT_DISPLAY,
+                                ACCENT,
+                                'text-5xl leading-none italic',
+                            )}
+                        >
+                            {step.kicker}
+                        </div>
+                        <h3
+                            className={cn(
+                                FONT_DISPLAY,
+                                INK,
+                                'mt-4 text-xl leading-tight tracking-[-0.01em]',
+                            )}
+                        >
+                            {step.title}
+                        </h3>
+                        <p
+                            className={cn(
+                                INK_2,
+                                'mt-3 text-sm leading-relaxed',
+                            )}
+                        >
+                            {step.body}
+                        </p>
+                    </article>
+                ))}
+            </div>
+
+            <aside
+                className={cn(
+                    'mt-12 grid gap-8 border-t pt-10 sm:grid-cols-[2fr_3fr]',
+                    RULE,
+                )}
+            >
+                <div>
+                    <p className={EYEBROW}>{t('seo_sources_heading')}</p>
+                    <p
+                        className={cn(
+                            INK_2,
+                            'mt-3 max-w-md text-sm leading-relaxed',
+                        )}
+                    >
+                        {t('seo_sources_description')}
+                    </p>
+                </div>
+                <ul className={cn('divide-y', RULE)}>
+                    {sources.map((source, index) => (
+                        <li key={source.url}>
+                            <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="group flex items-baseline gap-4 py-3 transition hover:bg-[#EBE2D0]"
+                            >
+                                <span
+                                    className={cn(
+                                        FONT_MONO,
+                                        ACCENT,
+                                        'text-[11px] tracking-[0.14em]',
+                                    )}
+                                    aria-hidden="true"
+                                >
+                                    {String(index + 1).padStart(2, '0')}
+                                </span>
+                                <span
+                                    className={cn(
+                                        FONT_DISPLAY,
+                                        INK,
+                                        'text-lg leading-tight transition group-hover:text-[#C4623A]',
+                                    )}
+                                >
+                                    {source.label}
+                                </span>
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </aside>
+        </section>
+    );
+}
+
+function CaffeineFaqSection({ faqItems }: { faqItems: FaqItem[] }) {
+    const { t } = useTranslation('caffeine');
+    const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+    return (
+        <section className="mx-auto mt-24 max-w-7xl lg:px-8">
+            <div className="grid gap-12 sm:grid-cols-[1fr_2fr]">
+                <div>
+                    <p className={EYEBROW}>{t('faq_heading')}</p>
+                    <h2
+                        className={cn(
+                            FONT_DISPLAY,
+                            INK,
+                            'mt-4 text-[clamp(28px,3.4vw,44px)] leading-[1.05] tracking-[-0.02em]',
+                        )}
+                    >
+                        {t('faq_heading')}
+                    </h2>
+                    <p
+                        className={cn(
+                            INK_2,
+                            'mt-3 text-sm leading-relaxed',
+                        )}
+                    >
+                        {t('faq_intro')}
+                    </p>
+                </div>
+                <div>
+                    {faqItems.map((item, index) => {
+                        const open = openIndex === index;
+                        return (
+                            <div
+                                key={item.question}
+                                className={cn(
+                                    'border-t',
+                                    index === 0 ? 'border-[#1A1814]' : RULE,
+                                    index === faqItems.length - 1
+                                        ? 'border-b border-[#D9CFBC]'
+                                        : '',
+                                )}
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setOpenIndex(open ? null : index)
+                                    }
+                                    aria-expanded={open}
+                                    className="flex w-full items-baseline justify-between gap-4 py-5 text-left"
+                                >
+                                    <div className="flex items-baseline gap-4">
+                                        <span
+                                            className={cn(
+                                                FONT_MONO,
+                                                INK_3,
+                                                'text-[11px] tracking-[0.14em]',
+                                            )}
+                                            aria-hidden="true"
+                                        >
+                                            {String(index + 1).padStart(2, '0')}
+                                        </span>
+                                        <span
+                                            className={cn(
+                                                FONT_DISPLAY,
+                                                INK,
+                                                'text-lg leading-tight tracking-[-0.01em] sm:text-xl',
+                                            )}
+                                        >
+                                            {item.question}
+                                        </span>
+                                    </div>
+                                    <Plus
+                                        className={cn(
+                                            'mt-1 size-5 shrink-0 transition-transform duration-200',
+                                            ACCENT,
+                                            open ? 'rotate-45' : '',
+                                        )}
+                                        aria-hidden="true"
+                                    />
+                                </button>
+                                <div
+                                    className={cn(
+                                        'grid transition-[grid-template-rows] duration-300 ease-out',
+                                        open
+                                            ? 'grid-rows-[1fr]'
+                                            : 'grid-rows-[0fr]',
+                                    )}
+                                >
+                                    <div className="overflow-hidden">
+                                        <p
+                                            className={cn(
+                                                INK_2,
+                                                'mt-0 mb-6 max-w-prose pl-10 text-sm leading-relaxed',
+                                            )}
+                                        >
+                                            {item.answer}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function CaffeineCtaSection() {
+    return (
+        <section className="mx-auto mt-24 max-w-7xl lg:px-8">
+            <div
+                className={cn(
+                    'border',
+                    RULE,
+                    PAPER_2,
+                    'flex flex-col items-center gap-8 rounded-none p-8 text-center sm:flex-row sm:items-center sm:gap-10 sm:p-12 sm:text-left',
+                )}
+            >
+                <div className="shrink-0">
+                    <img
+                        src="https://pub-plate-assets.acara.app/images/altani_with_hand_on_chin_considering_expression_thought-1024.webp"
+                        alt="Altani, your personal AI health coach"
+                        className={cn(
+                            'h-28 w-28 rounded-none border object-cover sm:h-32 sm:w-32',
+                            RULE,
+                        )}
+                    />
+                </div>
+                <div className="flex-1">
+                    <p className={EYEBROW}>Meet Altani</p>
+                    <h3
+                        className={cn(
+                            FONT_DISPLAY,
+                            INK,
+                            'mt-3 text-2xl leading-tight tracking-[-0.02em] sm:text-3xl',
+                        )}
+                    >
+                        Your personal AI health coach.
+                    </h3>
+                    <p
+                        className={cn(
+                            INK_2,
+                            'mt-3 max-w-xl text-sm leading-relaxed sm:text-base',
+                        )}
+                    >
+                        Altani helps you plan meals, predict glucose responses,
+                        and stay on track with your health goals. She&apos;s
+                        available 24/7 and learns what works best for your body.
+                    </p>
+                    <div className="mt-6">
+                        <a
+                            href="/meet-altani"
+                            className={cn(
+                                'inline-flex items-center gap-2 rounded-none border px-6 py-3 transition hover:bg-[#1A1814] hover:text-[#F2EBDD]',
+                                'border-[#1A1814] text-[#1A1814]',
+                                FONT_MONO,
+                                'text-[11px] tracking-[0.16em] uppercase',
+                            )}
+                        >
+                            Chat with Altani →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
     );
 }
 
@@ -1322,63 +1473,84 @@ function CaffeineFooter() {
     ];
 
     return (
-        <footer className="border-t border-gray-200 bg-white py-20 dark:border-slate-700 dark:bg-slate-900">
+        <footer className={cn('border-t', RULE, PAPER, 'mt-24 py-20')}>
             <div className="mx-auto flex max-w-7xl flex-col items-center px-4 text-center lg:px-8">
-                {/* Branding */}
                 <div className="flex w-full items-center gap-6">
-                    <div className="h-px flex-1 bg-gray-200 dark:bg-slate-700" />
+                    <div className={cn('h-px flex-1', 'bg-[#D9CFBC]')} />
                     <div className="flex items-center gap-3">
-                        <AppLogoIcon className="size-12" aria-hidden="true" />
+                        <AppLogoIcon className="size-10" aria-hidden="true" />
                         <div className="flex flex-col items-start leading-none">
-                            <span className="text-sm text-gray-500 dark:text-slate-400">
+                            <span className={cn(EYEBROW)}>
                                 {t('footer_powered_by_label')}
                             </span>
-                            <span className="text-2xl font-bold text-gray-900 dark:text-gray-50">
+                            <span
+                                className={cn(
+                                    FONT_DISPLAY,
+                                    INK,
+                                    'mt-1 text-xl tracking-[-0.01em]',
+                                )}
+                            >
                                 {t('footer_powered_by_brand')}
                             </span>
                         </div>
                     </div>
-                    <div className="h-px flex-1 bg-gray-200 dark:bg-slate-700" />
+                    <div className={cn('h-px flex-1', 'bg-[#D9CFBC]')} />
                 </div>
 
-                {/* Tagline */}
                 <div className="mt-12 space-y-2">
-                    <p className="text-base leading-relaxed text-gray-600 dark:text-slate-400">
+                    <p
+                        className={cn(
+                            INK_2,
+                            'text-base leading-relaxed',
+                        )}
+                    >
                         {t('footer_tagline_line1')}
                     </p>
-                    <p className="text-base leading-relaxed text-gray-600 dark:text-slate-400">
+                    <p
+                        className={cn(
+                            INK_2,
+                            'text-base leading-relaxed',
+                        )}
+                    >
                         {t('footer_tagline_line2')}
                     </p>
                 </div>
 
-                {/* Legal links */}
-                <div className="mt-6 flex items-center gap-3 text-sm text-gray-400 dark:text-slate-500">
+                <div
+                    className={cn(
+                        'mt-6 flex items-center gap-3',
+                        FONT_MONO,
+                        INK_3,
+                        'text-[11px] tracking-[0.14em] uppercase',
+                    )}
+                >
                     <a
                         href={terms.url()}
-                        className="transition hover:text-gray-700 dark:hover:text-slate-300"
+                        className="transition hover:text-[#1A1814]"
                     >
                         {t('footer_terms')}
                     </a>
-                    <span aria-hidden="true">&bull;</span>
+                    <span aria-hidden="true">·</span>
                     <a
                         href={privacy.url()}
-                        className="transition hover:text-gray-700 dark:hover:text-slate-300"
+                        className="transition hover:text-[#1A1814]"
                     >
                         {t('footer_privacy')}
                     </a>
                 </div>
 
-                {/* More Useful Tools */}
                 <div className="mt-20">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-50">
-                        {t('footer_more_tools_heading')}
-                    </h3>
+                    <p className={EYEBROW}>{t('footer_more_tools_heading')}</p>
                     <nav className="mt-6 flex flex-col items-center gap-3">
                         {tools.map((tool) => (
                             <a
                                 key={tool.href}
                                 href={tool.href}
-                                className="text-base text-gray-600 transition hover:text-gray-900 dark:text-slate-400 dark:hover:text-gray-50"
+                                className={cn(
+                                    FONT_DISPLAY,
+                                    INK_2,
+                                    'text-lg transition hover:text-[#1A1814]',
+                                )}
                             >
                                 {tool.label}
                             </a>

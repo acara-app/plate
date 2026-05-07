@@ -33,7 +33,7 @@ final class CaffeineGuidanceAgent implements Agent, HasStructuredOutput
                 'Never give medical diagnoses. Always recommend consulting a clinician for condition-related limits.',
             ],
             steps: [
-                '1. Read the deterministic assessment JSON including weight, age, sex, and detected conditions.',
+                '1. Read the deterministic assessment JSON including weight, sex, and detected conditions.',
                 '2. Write a direct answer to "How much is too much?" for the user.',
                 '3. Keep copy short, specific, and practical.',
                 '4. If conditions are detected (pregnancy, heart condition, anxiety, etc.), address them condition-specifically.',
@@ -44,10 +44,10 @@ final class CaffeineGuidanceAgent implements Agent, HasStructuredOutput
                 'Return only the structured response requested by the schema.',
                 'Component copy must fit compact UI cards.',
                 'Use the exact provided limit_mg value when present.',
-                'Do not recommend drink schedules, cups, coffee brands, or sleep cutoff times.',
                 'For condition_sections, only include conditions that are actually detected in the assessment.',
                 'Tone mapping for condition_sections: pregnancy/breastfeeding/trying_to_conceive use "green"; heart_condition/medication use "amber"; anxiety/insomnia/gerd use "blue"; otherwise "slate".',
                 'For pregnancy/breastfeeding/trying_to_conceive sections, set link_url to "https://www.acog.org/womens-health/faqs/moderate-caffeine-consumption-during-pregnancy" and link_label to "ACOG guidance".',
+                'For timing_card: extract bedtime_24h (0-23 integer) from optional_context if a bedtime is mentioned (e.g., "I sleep at 11pm" -> 23, "bedtime is 10:30" -> 22); otherwise default bedtime_24h to 23. Compute cutoff_24h as (bedtime_24h - 6 + 24) % 24. The title must include the cutoff time in a natural sentence; the body should briefly explain the ~5h half-life and recommend stopping ~6h before bed. cutoff_label and bedtime_label are short locale-formatted time strings (English: "5:00 pm", "11:00 pm"; Mongolian: "17:00", "23:00"). For insomnia in conditions, the body may suggest stopping earlier than 6h.',
             ],
         );
     }
@@ -76,6 +76,14 @@ final class CaffeineGuidanceAgent implements Agent, HasStructuredOutput
                 'max_mg' => $s->integer()->required(),
                 'tone' => $s->string()->enum($tone)->required(),
                 'caption' => $s->string()->required(),
+            ])->withoutAdditionalProperties()->required(),
+            'timing_card' => $schema->object(fn (JsonSchema $s): array => [
+                'title' => $s->string()->required(),
+                'body' => $s->string()->required(),
+                'cutoff_label' => $s->string()->required(),
+                'bedtime_label' => $s->string()->required(),
+                'cutoff_24h' => $s->integer()->min(0)->max(23)->required(),
+                'bedtime_24h' => $s->integer()->min(0)->max(23)->required(),
             ])->withoutAdditionalProperties()->required(),
             'guidance_list' => $schema->object(fn (JsonSchema $s): array => [
                 'title' => $s->string()->required(),

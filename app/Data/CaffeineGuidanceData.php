@@ -17,6 +17,7 @@ final class CaffeineGuidanceData extends Data
     /**
      * @param  array{title: string, body: string, badge: string, tone: string, limit_mg: int|null}  $verdictCard
      * @param  array{label: string, value_label: string, limit_mg: int|null, max_mg: int, tone: string, caption: string}  $limitGauge
+     * @param  array{title: string, body: string, cutoff_label: string, bedtime_label: string, cutoff_24h: int, bedtime_24h: int}  $timingCard
      * @param  array{title: string, items: array<int, string>}  $guidanceList
      * @param  array{title: string, body: string, items: array<int, string>}  $safetyNote
      * @param  array<int, array{condition: string, title: string, body: string, tone: string, link_url?: string|null, link_label?: string|null}>|null  $conditionSections
@@ -25,6 +26,7 @@ final class CaffeineGuidanceData extends Data
         public string $summary,
         public array $verdictCard,
         public array $limitGauge,
+        public array $timingCard,
         public array $guidanceList,
         public array $safetyNote,
         public ?array $conditionSections = [],

@@ -43,9 +43,7 @@ final readonly class CaffeineCalculatorController
         app()->setLocale($locale);
 
         $limit = resolve(ResolveCaffeineLimit::class)->handle(
-            heightCm: $request->heightCm(),
             weightKg: $request->weightKg(),
-            age: $request->age(),
             sex: $request->sex(),
             sensitivity: $request->sensitivity(),
             context: $context,

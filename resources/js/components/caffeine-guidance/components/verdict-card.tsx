@@ -2,12 +2,12 @@ import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 type Tone = 'green' | 'amber' | 'red' | 'blue' | 'slate';
 
-const TONE_CLASSES: Record<Tone, string> = {
-    green: 'border-emerald-200 bg-emerald-50 text-emerald-950 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-50',
-    amber: 'border-amber-200 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-50',
-    red: 'border-red-200 bg-red-50 text-red-950 dark:border-red-900 dark:bg-red-950/40 dark:text-red-50',
-    blue: 'border-sky-200 bg-sky-50 text-sky-950 dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-50',
-    slate: 'border-gray-200 bg-gray-50 text-gray-950 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-50',
+const TONE_ACCENT: Record<Tone, string> = {
+    green: 'text-[#6F8654]',
+    amber: 'text-[#B8843E]',
+    red: 'text-[#B5482E]',
+    blue: 'text-[#6B3F1D]',
+    slate: 'text-[#3D3833]',
 };
 
 export function VerdictCard({
@@ -22,33 +22,34 @@ export function VerdictCard({
     };
 }) {
     const Icon = props.limit_mg === null ? AlertTriangle : CheckCircle2;
+    const accent = TONE_ACCENT[props.tone] ?? TONE_ACCENT.slate;
 
     return (
-        <section
-            className={`rounded-xl border p-5 shadow-none ${TONE_CLASSES[props.tone] ?? TONE_CLASSES.slate}`}
-        >
-            <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-2">
-                    <span className="flex size-9 items-center justify-center rounded-full bg-white/70 dark:bg-white/10">
-                        <Icon className="size-5" aria-hidden="true" />
-                    </span>
-                    <span className="rounded-full border border-current/20 px-2.5 py-1 text-xs font-semibold uppercase">
+        <section className="rounded-none border border-[#D9CFBC] bg-[#F2EBDD] p-6">
+            <div className="flex items-start justify-between gap-4 border-b border-[#D9CFBC] pb-5">
+                <div className="flex items-center gap-3">
+                    <Icon className={`size-5 ${accent}`} aria-hidden={true} />
+                    <span
+                        className={`font-mono text-[11px] tracking-[0.18em] uppercase ${accent}`}
+                    >
                         {props.badge}
                     </span>
                 </div>
                 <div className="text-right">
-                    <div className="text-3xl font-bold tabular-nums md:text-4xl">
+                    <div
+                        className={`font-bold text-5xl leading-none tracking-[-0.04em] tabular-nums sm:text-6xl ${accent}`}
+                    >
                         {props.limit_mg === null ? '0' : props.limit_mg}
                     </div>
-                    <div className="text-xs font-medium opacity-75">
+                    <div className="mt-1 font-mono text-[10px] tracking-[0.18em] text-[#6E665C] uppercase">
                         mg / day
                     </div>
                 </div>
             </div>
-            <h2 className="mt-5 text-2xl leading-tight font-bold md:text-3xl">
+            <h2 className="mt-5 font-bold text-2xl leading-tight tracking-[-0.02em] text-[#1A1814] sm:text-3xl">
                 {props.title}
             </h2>
-            <p className="mt-2 text-sm leading-relaxed opacity-85">
+            <p className="mt-3 text-sm leading-relaxed text-[#3D3833]">
                 {props.body}
             </p>
         </section>

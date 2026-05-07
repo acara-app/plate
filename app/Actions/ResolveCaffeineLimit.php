@@ -10,8 +10,6 @@ use InvalidArgumentException;
 
 final readonly class ResolveCaffeineLimit
 {
-    private const int ADULT_REFERENCE_HEIGHT_CM = 170;
-
     private const int PREGNANCY_CONTEXT_CAP_MG = 200;
 
     private const int ABSOLUTE_CAP_MG = 500;
@@ -42,17 +40,13 @@ final readonly class ResolveCaffeineLimit
      * @param  array<int, string>  $conditions
      */
     public function handle(
-        int $heightCm,
         float $weightKg,
-        int $age,
         string $sex,
         string $sensitivity,
         ?string $context = null,
         array $conditions = [],
     ): CaffeineLimitData {
-        throw_if($heightCm < 90 || $heightCm > 230, InvalidArgumentException::class, 'Height must be between 90 and 230 centimeters.');
         throw_if($weightKg < 30 || $weightKg > 300, InvalidArgumentException::class, 'Weight must be between 30 and 300 kilograms.');
-        throw_if($age < 13 || $age > 120, InvalidArgumentException::class, 'Age must be between 13 and 120 years.');
         throw_unless(in_array($sex, ['male', 'female', 'decline'], true), InvalidArgumentException::class, 'Sex must be male, female, or decline.');
         throw_unless(array_key_exists($sensitivity, self::SENSITIVITY_MULTIPLIERS), InvalidArgumentException::class, 'Sensitivity must be low, normal, or high.');
 
@@ -61,7 +55,7 @@ final readonly class ResolveCaffeineLimit
         $hasCautionContext = $this->hasCautionContext($allConditions);
 
         $efsaBaseMg = $weightKg * self::EFSA_MG_PER_KG;
-        $adjustedMg = $this->weightBasedLimit($weightKg, $age, $sex, $heightCm);
+        $adjustedMg = $efsaBaseMg;
 
         if ($hasCautionContext) {
             $adjustedMg = min($adjustedMg, (float) self::PREGNANCY_CONTEXT_CAP_MG);
@@ -71,9 +65,7 @@ final readonly class ResolveCaffeineLimit
         $limitMg = min($limitMg, self::ABSOLUTE_CAP_MG);
 
         return new CaffeineLimitData(
-            heightCm: $heightCm,
             weightKg: $weightKg,
-            age: $age,
             sex: $sex,
             sensitivity: $sensitivity,
             sensitivityLabel: self::SENSITIVITY_LABELS[$sensitivity],
@@ -81,45 +73,18 @@ final readonly class ResolveCaffeineLimit
             status: $hasCautionContext ? 'context_limited' : 'weight_adjusted_limit',
             hasCautionContext: $hasCautionContext,
             contextLabel: $hasCautionContext ? $this->buildContextLabel($allConditions) : null,
-            reasons: $this->buildReasons($heightCm, $weightKg, $age, $sex, $sensitivity, $hasCautionContext, $efsaBaseMg, $adjustedMg, $limitMg),
-            sourceSummary: 'EFSA guideline uses 3 mg per kg of body weight as a safe daily intake reference, adjusted for age, sex, and height before sensitivity and context adjustment.',
+            reasons: $this->buildReasons($weightKg, $sensitivity, $hasCautionContext, $efsaBaseMg, $adjustedMg, $limitMg),
+            sourceSummary: 'EFSA guideline uses 3 mg per kg of body weight as a safe daily intake reference, capped for pregnancy or related contexts and modulated by sensitivity.',
             formulaUsed: 'efsa_weight_based',
             conditions: $allConditions,
         );
-    }
-
-    private function weightBasedLimit(float $weightKg, int $age, string $sex, int $heightCm): float
-    {
-        $baseLimit = $weightKg * self::EFSA_MG_PER_KG;
-
-        $sexModifier = 1.0;
-        if ($sex === 'male' && $age < 65) {
-            $sexModifier = 0.95;
-        } elseif ($age >= 65) {
-            $sexModifier = 0.80;
-        } elseif ($sex === 'female' && $age >= 50) {
-            $sexModifier = 0.85;
-        }
-
-        $heightModifier = 1.0;
-        $ratio = $heightCm / self::ADULT_REFERENCE_HEIGHT_CM;
-        if ($ratio < 0.9) {
-            $heightModifier += ($ratio - 0.9) * 0.5;
-        } elseif ($ratio > 1.1) {
-            $heightModifier += ($ratio - 1.1) * 0.5;
-        }
-
-        return $baseLimit * $sexModifier * $heightModifier;
     }
 
     /**
      * @return array<int, string>
      */
     private function buildReasons(
-        int $heightCm,
         float $weightKg,
-        int $age,
-        string $sex,
         string $sensitivity,
         bool $hasCautionContext,
         float $efsaBaseMg,
@@ -129,14 +94,6 @@ final readonly class ResolveCaffeineLimit
         $reasons = [
             sprintf('EFSA recommends 3 mg per kg, so your weight of %.1f kg gives a base of %d mg.', $weightKg, (int) round($efsaBaseMg)),
         ];
-
-        if ($sex !== 'decline') {
-            $reasons[] = sprintf('Being %s and %d years old adjusts the metabolism factor.', $sex, $age);
-        }
-
-        if ($heightCm !== self::ADULT_REFERENCE_HEIGHT_CM) {
-            $reasons[] = sprintf('Your height of %d cm provides a small body-size adjustment.', $heightCm);
-        }
 
         if ($hasCautionContext) {
             $reasons[] = sprintf('Pregnancy or related context lowers the cap to %d mg before sensitivity.', (int) round($adjustedMg));

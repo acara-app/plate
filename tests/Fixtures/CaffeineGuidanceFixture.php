@@ -14,9 +14,7 @@ final class CaffeineGuidanceFixture
     public static function limit(array $overrides = []): CaffeineLimitData
     {
         return new CaffeineLimitData(...array_merge([
-            'heightCm' => 170,
             'weightKg' => 70,
-            'age' => 30,
             'sex' => 'female',
             'sensitivity' => 'high',
             'sensitivityLabel' => 'High sensitivity',
@@ -53,6 +51,14 @@ final class CaffeineGuidanceFixture
                 'max_mg' => 400,
                 'tone' => 'amber',
                 'caption' => 'Adjusted from the EFSA weight-based guideline.',
+            ],
+            'timing_card' => [
+                'title' => 'Last drink, no later than 5:00 pm.',
+                'body' => "Caffeine's half-life is roughly five hours. Stop ~6 hours before bed and most of it is metabolized by lights-out.",
+                'cutoff_label' => '5:00 pm',
+                'bedtime_label' => '11:00 pm',
+                'cutoff_24h' => 17,
+                'bedtime_24h' => 23,
             ],
             'guidance_list' => [
                 'title' => 'Next steps',

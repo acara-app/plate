@@ -16,9 +16,7 @@ final class CaffeineLimitData extends Data
      * @param  array<int, string>  $conditions
      */
     public function __construct(
-        public int $heightCm,
         public float $weightKg,
-        public int $age,
         public string $sex,
         public string $sensitivity,
         public string $sensitivityLabel,

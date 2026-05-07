@@ -2,20 +2,20 @@ import { useTranslation } from 'react-i18next';
 
 type Tone = 'green' | 'amber' | 'red' | 'blue' | 'slate';
 
-const TONE_BORDER: Record<Tone, string> = {
-    green: 'border-emerald-500 bg-emerald-50 text-emerald-950 dark:border-emerald-500 dark:bg-emerald-950/40 dark:text-emerald-50',
-    amber: 'border-amber-500 bg-amber-50 text-amber-950 dark:border-amber-500 dark:bg-amber-950/40 dark:text-amber-50',
-    red: 'border-red-500 bg-red-50 text-red-950 dark:border-red-500 dark:bg-red-950/40 dark:text-red-50',
-    blue: 'border-sky-500 bg-sky-50 text-sky-950 dark:border-sky-500 dark:bg-sky-950/40 dark:text-sky-50',
-    slate: 'border-gray-500 bg-gray-50 text-gray-950 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-50',
+const TONE_ACCENT: Record<Tone, string> = {
+    green: 'text-[#6F8654]',
+    amber: 'text-[#B8843E]',
+    red: 'text-[#B5482E]',
+    blue: 'text-[#6B3F1D]',
+    slate: 'text-[#3D3833]',
 };
 
-const TONE_NUMBER: Record<Tone, string> = {
-    green: 'text-emerald-700 dark:text-emerald-300',
-    amber: 'text-amber-700 dark:text-amber-300',
-    red: 'text-red-700 dark:text-red-300',
-    blue: 'text-sky-700 dark:text-sky-300',
-    slate: 'text-gray-700 dark:text-slate-300',
+const TONE_RULE: Record<Tone, string> = {
+    green: 'border-[#6F8654]',
+    amber: 'border-[#B8843E]',
+    red: 'border-[#B5482E]',
+    blue: 'border-[#6B3F1D]',
+    slate: 'border-[#3D3833]',
 };
 
 export function LimitGauge({
@@ -38,49 +38,49 @@ export function LimitGauge({
             : Math.round((props.limit_mg / props.max_mg) * 100);
 
     const limitDisplay = props.limit_mg === null ? '0' : String(props.limit_mg);
+    const accent = TONE_ACCENT[props.tone] ?? TONE_ACCENT.slate;
+    const rule = TONE_RULE[props.tone] ?? TONE_RULE.slate;
 
     return (
-        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-none dark:border-slate-700 dark:bg-slate-800">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+        <section className="rounded-none border border-[#D9CFBC] bg-[#F2EBDD] p-6">
+            <h3 className="font-mono text-[11px] tracking-[0.18em] text-[#6E665C] uppercase">
                 {props.label}
             </h3>
-            <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
+            <p className="mt-2 text-sm leading-relaxed text-[#3D3833]">
                 {props.caption}
             </p>
 
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="mt-5 grid grid-cols-1 gap-0 border-y border-[#D9CFBC] sm:grid-cols-2 sm:divide-x sm:divide-[#D9CFBC]">
                 {/* Your daily limit */}
-                <div
-                    className={`rounded-xl border-2 p-5 text-center transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] ${TONE_BORDER[props.tone] ?? TONE_BORDER.slate}`}
-                >
+                <div className={`border-l-2 px-5 py-6 text-left ${rule}`}>
                     <div
-                        className={`text-3xl font-bold tabular-nums md:text-4xl ${TONE_NUMBER[props.tone] ?? TONE_NUMBER.slate}`}
+                        className={`font-bold text-5xl leading-none tracking-[-0.04em] tabular-nums sm:text-6xl ${accent}`}
                     >
                         {limitDisplay}
                     </div>
-                    <div className="mt-1 text-xs font-semibold tracking-wide uppercase opacity-75">
+                    <div className="mt-2 font-mono text-[10px] tracking-[0.18em] text-[#6E665C] uppercase">
                         mg / day
                     </div>
-                    <div className="mt-2 text-sm font-semibold">
+                    <div className="mt-3 font-mono text-[11px] tracking-[0.14em] text-[#1A1814] uppercase">
                         {t('gauge_your_limit')}
                     </div>
                 </div>
 
                 {/* General adult maximum */}
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 text-center dark:border-slate-700 dark:bg-slate-800">
-                    <div className="text-3xl font-bold text-gray-700 tabular-nums md:text-4xl dark:text-slate-300">
+                <div className="px-5 py-6 text-left">
+                    <div className="font-bold text-5xl leading-none tracking-[-0.04em] text-[#3D3833] tabular-nums sm:text-6xl">
                         {props.max_mg}
                     </div>
-                    <div className="mt-1 text-xs font-semibold tracking-wide text-gray-500 uppercase opacity-75 dark:text-slate-400">
+                    <div className="mt-2 font-mono text-[10px] tracking-[0.18em] text-[#6E665C] uppercase">
                         mg / day
                     </div>
-                    <div className="mt-2 text-sm font-semibold text-gray-700 dark:text-slate-300">
+                    <div className="mt-3 font-mono text-[11px] tracking-[0.14em] text-[#6E665C] uppercase">
                         {t('gauge_general_max')}
                     </div>
                 </div>
             </div>
 
-            <p className="mt-4 text-center text-sm leading-relaxed text-gray-600 dark:text-slate-400">
+            <p className="mt-5 text-sm leading-relaxed text-[#3D3833]">
                 {props.limit_mg === null || percentage === 0
                     ? t('gauge_avoid')
                     : t('gauge_comparison', { percentage })}

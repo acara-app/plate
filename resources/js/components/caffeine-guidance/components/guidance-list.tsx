@@ -1,22 +1,25 @@
-import { CheckCircle2 } from 'lucide-react';
-
 export function GuidanceList({
     props,
 }: {
     props: { title: string; items: string[] };
 }) {
     return (
-        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-none dark:border-slate-700 dark:bg-slate-800">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+        <section className="rounded-none border border-[#D9CFBC] bg-[#F2EBDD] p-5">
+            <h3 className="font-mono text-[11px] tracking-[0.18em] text-[#6E665C] uppercase">
                 {props.title}
             </h3>
-            <ul className="mt-4 space-y-3">
-                {props.items.map((item) => (
+            <ul className="mt-4 divide-y divide-[#D9CFBC]">
+                {props.items.map((item, index) => (
                     <li
                         key={item}
-                        className="flex gap-3 text-sm leading-relaxed text-gray-700 dark:text-slate-300"
+                        className="flex gap-4 py-3 text-sm leading-relaxed text-[#3D3833] first:pt-0 last:pb-0"
                     >
-                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                        <span
+                            className="mt-0.5 shrink-0 font-mono text-[11px] tracking-[0.14em] text-[#C4623A]"
+                            aria-hidden={true}
+                        >
+                            {String(index + 1).padStart(2, '0')}
+                        </span>
                         <span>{item}</span>
                     </li>
                 ))}
