@@ -54,12 +54,12 @@ export function TimingCard({
             </p>
 
             <div
-                className="relative mt-12 h-[130px]"
+                className="relative mt-12 h-32.5"
                 role="img"
                 aria-label={`Cutoff at ${props.cutoff_label}, bedtime at ${props.bedtime_label}`}
             >
                 {/* main horizontal line */}
-                <div className="absolute top-[60px] right-0 left-0 h-px bg-[#1A1814]" />
+                <div className="absolute top-15 right-0 left-0 h-px bg-[#1A1814]" />
 
                 {/* hour ticks below the line */}
                 {TICK_HOURS.map((hour) => {
@@ -67,11 +67,11 @@ export function TimingCard({
                     return (
                         <div
                             key={hour}
-                            className="absolute top-[61px] -translate-x-1/2"
+                            className="absolute top-15.25 -translate-x-1/2"
                             style={{ left: `${pct}%` }}
                         >
                             <div className="mx-auto h-2 w-px bg-[#D9CFBC]" />
-                            <div className="mt-1 font-mono text-[10px] tracking-[0.1em] whitespace-nowrap text-[#6E665C]">
+                            <div className="mt-1 font-mono text-[10px] tracking-widest whitespace-nowrap text-[#6E665C]">
                                 {tickLabel(hour)}
                             </div>
                         </div>
@@ -80,7 +80,7 @@ export function TimingCard({
 
                 {/* safe-zone bar from start to cutoff */}
                 <div
-                    className="absolute top-[58px] left-0 h-1 bg-[#6B3F1D]"
+                    className="absolute top-14.5 left-0 h-1 bg-[#6B3F1D]"
                     style={{ width: `${cutoffPct}%` }}
                 />
 
@@ -109,11 +109,7 @@ export function TimingCard({
                     <div className="mt-1 text-base leading-tight font-bold tracking-[-0.01em] text-[#1A1814]">
                         {props.bedtime_label}
                     </div>
-                    <div
-                        className={cn(
-                            'mx-auto mt-1 h-4 w-px bg-[#1A1814]',
-                        )}
-                    />
+                    <div className={cn('mx-auto mt-1 h-4 w-px bg-[#1A1814]')} />
                 </div>
             </div>
         </section>
