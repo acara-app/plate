@@ -75,7 +75,7 @@ export function ConditionCard({
 
     return (
         <section
-            className={`rounded-none border-l-2 border-y border-r border-y-[#D9CFBC] border-r-[#D9CFBC] bg-[#EBE2D0] p-5 ${rule}`}
+            className={`rounded-none border-y border-r border-l-2 border-y-[#D9CFBC] border-r-[#D9CFBC] bg-[#EBE2D0] p-5 ${rule}`}
         >
             <div className="flex gap-3">
                 <Icon
@@ -83,7 +83,7 @@ export function ConditionCard({
                     aria-hidden={true}
                 />
                 <div className="flex-1">
-                    <h3 className="font-bold text-lg leading-tight text-[#1A1814]">
+                    <h3 className="text-lg leading-tight font-bold text-[#1A1814]">
                         {props.title}
                     </h3>
                     <p className="mt-1 text-sm leading-relaxed text-[#3D3833]">

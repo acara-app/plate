@@ -121,44 +121,7 @@
             class="pointer-events-none absolute inset-x-0 top-0 h-100 bg-linear-to-br from-pink-100/40 via-transparent to-transparent">
         </div>
 
-        <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
-            <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                {{-- Logo --}}
-                <a href="{{ route('home') }}"
-                    aria-current="page"
-                    class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80">
-                    <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
-                    <span>Acara Plate</span>
-                </a>
-
-                {{-- Center promo banner --}}
-                <div class="hidden text-center text-sm text-slate-600 lg:block">
-                    Stop guessing what to eat. Personalized meal plans, <span
-                        class="font-semibold text-[#FF6B4A]">made simple</span>
-                </div>
-
-                {{-- Auth buttons --}}
-                <div class="flex items-center gap-3">
-                    @auth
-                        <a href="{{ route('dashboard') }}"
-                            class="inline-flex items-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800">
-                            Dashboard
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}"
-                            class="hidden items-center px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:text-slate-900 sm:inline-flex">
-                            Sign in
-                        </a>
-                        <a href="{{ route('register') }}"
-                            data-umami-event="signup_cta_click"
-                            data-umami-event-location="home_header"
-                            class="inline-flex items-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800">
-                            Start for Free
-                        </a>
-                    @endauth
-                </div>
-            </div>
-        </header>
+        <x-tools-header />
 
         {{-- Hero Section — F-pattern layout with fruit decorations --}}
         <section aria-label="Hero" class="relative w-full overflow-hidden bg-[#FFFBF5] pt-16 pb-20 sm:pt-24 sm:pb-32">

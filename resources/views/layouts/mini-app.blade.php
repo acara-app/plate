@@ -4,14 +4,12 @@
         @include('layouts.components.head')
         {{ $jsonLd ?? '' }}
     </head>
-    <body>
+    <body class="overflow-x-hidden bg-gray-50 text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-50">
         <livewire:flash-messages.show />
 
-        <div class="flex min-h-screen flex-col">
+        <div class="flex min-h-[100dvh] flex-col">
             <main class="grow">
-                <div class="flex min-h-screen flex-col justify-center overflow-hidden">
-                    {{ $slot }}
-                </div>
+                {{ $slot }}
             </main>
         </div>
         @livewireScriptConfig

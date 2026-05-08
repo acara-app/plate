@@ -1,4 +1,4 @@
-<footer class="border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-slate-950 w-full" aria-labelledby="footer-heading">
+<footer {{ $attributes->merge(['class' => 'border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-slate-950 w-full']) }} aria-labelledby="footer-heading">
     <h2 id="footer-heading" class="sr-only">Footer</h2>
     <div class="mx-auto max-w-6xl py-12 px-6 lg:px-0">
         <div class="xl:grid xl:grid-cols-5 xl:gap-8">

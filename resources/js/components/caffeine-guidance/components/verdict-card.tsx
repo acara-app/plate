@@ -37,7 +37,7 @@ export function VerdictCard({
                 </div>
                 <div className="text-right">
                     <div
-                        className={`font-bold text-5xl leading-none tracking-[-0.04em] tabular-nums sm:text-6xl ${accent}`}
+                        className={`text-5xl leading-none font-bold tracking-[-0.04em] tabular-nums sm:text-6xl ${accent}`}
                     >
                         {props.limit_mg === null ? '0' : props.limit_mg}
                     </div>
@@ -46,7 +46,7 @@ export function VerdictCard({
                     </div>
                 </div>
             </div>
-            <h2 className="mt-5 font-bold text-2xl leading-tight tracking-[-0.02em] text-[#1A1814] sm:text-3xl">
+            <h2 className="mt-5 text-2xl leading-tight font-bold tracking-[-0.02em] text-[#1A1814] sm:text-3xl">
                 {props.title}
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-[#3D3833]">

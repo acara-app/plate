@@ -79,11 +79,11 @@ it('keeps the schema snake_case keys aligned with the DTO camelCase properties',
 
     $dtoProperties = array_map(
         fn (ReflectionParameter $parameter): string => $parameter->getName(),
-        (new ReflectionClass(CaffeineGuidanceData::class))->getConstructor()?->getParameters() ?? [],
+        new ReflectionClass(CaffeineGuidanceData::class)->getConstructor()?->getParameters() ?? [],
     );
 
     $schemaPropertiesAsCamelCase = array_map(
-        fn (string $key): string => Str::camel($key),
+        Str::camel(...),
         array_keys($schema),
     );
 

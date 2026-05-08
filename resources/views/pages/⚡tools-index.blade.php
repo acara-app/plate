@@ -18,6 +18,18 @@ class extends Component
     {
         return [
             [
+                'name' => 'Acara Health Sync',
+                'description' => 'iPhone app that pipes Apple Health data into Plate — glucose, sleep, activity, and 100+ types — encrypted on-device with AES-256-GCM.',
+                'icon' => '📱',
+                'route' => route('health-sync'),
+                'badge' => 'iOS App',
+                'features' => [
+                    'Apple Health to Plate sync',
+                    'End-to-end encrypted',
+                    '100+ health types',
+                ],
+            ],
+            [
                 'name' => 'Glucose Spike Calculator',
                 'description' => 'Check if foods will spike your blood sugar. Get instant risk analysis and smart food swap suggestions.',
                 'icon' => '⚡',
@@ -122,121 +134,150 @@ class extends Component
     <x-json-ld.tools-index />
 </x-slot:jsonLd>
 
-<div
-    class="relative flex min-h-screen flex-col items-center overflow-hidden bg-linear-to-br from-slate-50 via-white to-emerald-50 p-4 text-slate-900 lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950 dark:text-slate-50"
->
-    {{-- Animated background elements --}}
-    <div aria-hidden="true" class="pointer-events-none absolute inset-0 overflow-hidden">
-        <div class="absolute -left-4 top-0 h-72 w-72 animate-pulse rounded-full bg-emerald-300/20 blur-3xl dark:bg-emerald-500/10"></div>
-        <div class="absolute -right-4 bottom-0 h-96 w-96 animate-pulse rounded-full bg-teal-300/20 blur-3xl dark:bg-teal-500/10"></div>
-        <div class="absolute left-1/2 top-1/3 h-64 w-64 animate-pulse rounded-full bg-amber-300/10 blur-3xl dark:bg-amber-500/5"></div>
+@php
+    $tools = $this->getTools();
+    $toolCount = count($tools);
+@endphp
+
+<div class="min-h-screen bg-[#F2EBDD] text-[#1A1814]">
+    <x-tools-header theme="cream" />
+
+    <div class="px-4 py-8 md:py-12">
+        {{-- Editorial breadcrumbs --}}
+        <nav aria-label="Breadcrumb" class="mx-auto flex max-w-7xl items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[#6E665C] lg:px-8">
+            <a href="/" aria-label="Home" class="inline-flex items-center transition hover:text-[#1A1814]">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="size-3.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+            </a>
+            <span aria-hidden="true">›</span>
+            <span aria-current="page" class="text-[#1A1814]">Tools</span>
+        </nav>
+
+        {{-- Hero --}}
+        <header class="speakable-intro mx-auto mt-6 max-w-7xl lg:px-8">
+            <div class="inline-flex items-center gap-2 border border-[#D9CFBC] bg-[#EBE2D0] px-3 py-1.5">
+                <span class="size-1.5 rounded-full bg-[#C4623A] shadow-[0_0_0_3px_rgba(196,98,58,0.18)]" aria-hidden="true"></span>
+                <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[#3D3833]">The toolkit</span>
+            </div>
+
+            <h1 class="mt-5 max-w-4xl text-balance font-bold text-[clamp(40px,5vw,72px)] leading-[1.02] tracking-[-0.02em] text-[#1A1814]">
+                Free Diabetes &amp; Nutrition Tools
+            </h1>
+            <p class="mt-4 max-w-2xl text-base leading-relaxed text-[#3D3833] sm:text-lg">
+                Science-based tools to help you manage blood sugar, make smarter food choices, and live healthier — no signup required.
+            </p>
+        </header>
+
+        {{-- Directory --}}
+        <section class="mx-auto mt-14 max-w-7xl lg:px-8" aria-labelledby="directory-heading">
+            <div class="flex flex-wrap items-baseline justify-between gap-3 border-t border-[#1A1814] pt-5">
+                <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
+                    <span class="font-bold text-[#1A1814]">{{ str_pad((string) $toolCount, 2, '0', STR_PAD_LEFT) }}</span>
+                    <span> · Free · No signup required</span>
+                </p>
+                <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
+                    Updated <time datetime="{{ now()->toDateString() }}">{{ now()->format('F Y') }}</time>
+                </p>
+            </div>
+            <h2 id="directory-heading" class="sr-only">Tool directory</h2>
+
+            <ol class="grid border-t border-[#D9CFBC] sm:grid-cols-2 sm:divide-x sm:divide-[#D9CFBC]">
+                @foreach ($tools as $i => $tool)
+                    @php $position = $i + 1; @endphp
+                    <li class="border-b border-[#D9CFBC] last:border-b-0 sm:[&:nth-last-child(-n+2)]:border-b-0">
+                        <a
+                            href="{{ $tool['route'] }}"
+                            data-umami-event="tool_card_click"
+                            data-umami-event-tool="{{ Str::slug($tool['name']) }}"
+                            data-umami-event-location="tools_index"
+                            class="group flex h-full flex-col px-2 py-8 transition-colors hover:bg-[#EBE2D0]/60 sm:px-7 sm:py-10 focus:outline-none focus-visible:bg-[#EBE2D0]"
+                        >
+                            <div class="flex items-baseline justify-between gap-4">
+                                <div class="flex items-baseline gap-3">
+                                    <span class="font-bold text-3xl italic leading-none text-[#C4623A]" aria-hidden="true">
+                                        {{ str_pad((string) $position, 2, '0', STR_PAD_LEFT) }}
+                                    </span>
+                                    @if ($tool['badge'])
+                                        <span class="border border-[#D9CFBC] bg-[#F2EBDD] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[#3D3833]">
+                                            {{ $tool['badge'] }}
+                                        </span>
+                                    @endif
+                                </div>
+                                <span class="text-3xl leading-none transition-transform duration-300 group-hover:scale-110" aria-hidden="true">
+                                    {{ $tool['icon'] }}
+                                </span>
+                            </div>
+
+                            <h3 class="mt-6 font-bold text-xl leading-tight tracking-[-0.01em] text-[#1A1814] transition-colors group-hover:text-[#C4623A] sm:text-[26px]">
+                                {{ $tool['name'] }}
+                            </h3>
+
+                            <p class="mt-3 text-sm leading-relaxed text-[#3D3833]">
+                                {{ $tool['description'] }}
+                            </p>
+
+                            <ul class="mt-5 space-y-1.5">
+                                @foreach ($tool['features'] as $feature)
+                                    <li class="flex items-start gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#6E665C]">
+                                        <span class="mt-[5px] inline-block h-px w-2.5 shrink-0 bg-[#C4623A]" aria-hidden="true"></span>
+                                        <span>{{ $feature }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+
+                            <span class="mt-auto inline-flex items-baseline gap-2 pt-6 font-mono text-[11px] uppercase tracking-[0.16em] text-[#C4623A]">
+                                Open this tool
+                                <svg class="size-3 translate-y-px transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </span>
+                        </a>
+                    </li>
+                @endforeach
+            </ol>
+        </section>
+
+        {{-- Field manual --}}
+        <section class="mx-auto mt-24 max-w-7xl lg:px-8">
+            <div class="grid gap-6 border-t border-[#D9CFBC] pt-10 sm:grid-cols-[1fr_2fr] sm:gap-12">
+                <div>
+                    <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Why these tools</p>
+                </div>
+                <p class="max-w-3xl text-base leading-relaxed text-[#3D3833] sm:text-lg">
+                    Managing diabetes is challenging. These tools are designed to make everyday decisions easier — from checking if a snack will spike your blood sugar to planning balanced meals — all built on scientific research and the most current dietary guidelines.
+                </p>
+            </div>
+        </section>
+
+        {{-- CTA: Personalized meal plan --}}
+        <section class="mx-auto mt-16 max-w-7xl lg:px-8">
+            <article class="border border-[#1A1814] bg-[#1A1814] p-8 text-[#F2EBDD] sm:p-12">
+                <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Beyond the toolkit</p>
+                <div class="mt-3 grid gap-8 sm:grid-cols-[2fr_1fr] sm:items-center">
+                    <div>
+                        <h2 class="font-bold text-2xl leading-tight tracking-[-0.02em] sm:text-3xl">
+                            Want personalized meal plans?
+                        </h2>
+                        <p class="mt-3 max-w-xl text-sm leading-relaxed text-[#F2EBDD]/80 sm:text-base">
+                            Get AI-generated, diabetic-friendly meals tailored to your preferences and health goals — built on the same science as the tools above.
+                        </p>
+                    </div>
+                    <a
+                        href="{{ route('register') }}"
+                        data-umami-event="signup_cta_click"
+                        data-umami-event-location="tools_index_bottom"
+                        class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
+                    >
+                        Create free account
+                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                    </a>
+                </div>
+            </article>
+        </section>
     </div>
 
-    {{-- Header --}}
-    <header class="relative z-10 mb-8 w-full max-w-4xl lg:mb-12">
-        <nav class="flex items-center justify-center">
-            <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80 dark:text-white">
-                <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
-                Acara Plate
-            </a>
-        </nav>
-    </header>
-
-    {{-- Main Content --}}
-    <main class="relative z-10 w-full max-w-4xl">
-
-        {{-- Hero Section --}}
-        <div class="mb-10 text-center speakable-intro">
-            <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-3xl dark:bg-emerald-900/50">🛠️</div>
-            <h1 class="text-3xl font-bold text-slate-900 dark:text-white lg:text-4xl">Free Diabetes & Nutrition Tools</h1>
-            <p class="mx-auto mt-3 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
-                Science-based tools to help you manage blood sugar, make smarter food choices, and live healthier.
-            </p>
-        </div>
-
-        {{-- Tools Grid --}}    
-        <div class="grid gap-6 md:grid-cols-2">
-            @foreach ($this->getTools() as $tool)
-                <a 
-                    href="{{ $tool['route'] }}" 
-                    data-umami-event="tool_card_click"
-                    data-umami-event-tool="{{ Str::slug($tool['name']) }}"
-                    data-umami-event-location="tools_index"
-                    class="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-lg transition-all hover:shadow-xl hover:ring-2 hover:ring-emerald-500 dark:bg-slate-800"
-                >
-                    {{-- Badge --}}
-                    @if ($tool['badge'])
-                        <div class="absolute right-4 top-4">
-                            <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">
-                                {{ $tool['badge'] }}
-                            </span>
-                        </div>
-                    @endif
-
-                    {{-- Icon & Title --}}
-                    <div class="mb-4 flex items-center gap-4">
-                        <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100 text-3xl transition-transform group-hover:scale-110 dark:bg-slate-700">
-                            {{ $tool['icon'] }}
-                        </div>
-                        <div>
-                            <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ $tool['name'] }}</h2>
-                        </div>
-                    </div>
-
-                    {{-- Description --}}
-                    <p class="mb-4 text-sm text-slate-600 dark:text-slate-400">
-                        {{ $tool['description'] }}
-                    </p>
-
-                    {{-- Features --}}
-                    <ul class="space-y-1.5">
-                        @foreach ($tool['features'] as $feature)
-                            <li class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                                <svg class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                                {{ $feature }}
-                            </li>
-                        @endforeach
-                    </ul>
-
-                    {{-- Arrow indicator --}}
-                    <div class="absolute bottom-6 right-6 text-slate-300 transition-transform group-hover:translate-x-1 dark:text-slate-600">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </div>
-                </a>
-            @endforeach
-        </div>
-
-        {{-- CTA Section --}}
-        <div class="mt-12 rounded-2xl bg-emerald-600 p-8 text-center text-white shadow-lg">
-            <h2 class="text-2xl font-bold">Want personalized meal plans?</h2>
-            <p class="mt-2 text-emerald-100">Get AI-generated diabetic-friendly meals tailored to your preferences and health goals.</p>
-            <a
-                href="{{ route('register') }}"
-                data-umami-event="signup_cta_click"
-                data-umami-event-location="tools_index_bottom"
-                class="mt-6 inline-block rounded-xl bg-white px-8 py-3 font-bold text-emerald-600 transition-transform hover:scale-105"
-            >
-                Create Free Account
-            </a>
-        </div>
-
-        {{-- Info Section --}}
-        <div class="mt-12 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
-            <div class="flex items-start gap-4">
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xl dark:bg-blue-900/50">💡</div>
-                <div>
-                    <h3 class="font-bold text-slate-900 dark:text-white">Why These Tools?</h3>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                        Managing diabetes is challenging. These tools are designed to make everyday decisions easier - from checking if a snack will spike your blood sugar to planning balanced meals. All based on scientific research and dietary guidelines.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <x-footer />
-    </main>
+    <x-footer class="bg-[#F2EBDD]! border-[#D9CFBC]!" />
 </div>
