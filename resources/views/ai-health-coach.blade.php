@@ -278,6 +278,22 @@
             </div>
         </section>
 
+        <x-related-reading
+            title="New Ways to Use Your Health Data"
+            description="Read how Acara turns logged habits, activity, sleep, and body metrics into practical progress reviews."
+            :articles="[
+                [
+                    'title' => 'Introducing the Acara Weight-Loss Analyzer',
+                    'description' => 'A structured progress-review protocol for calorie balance, plateau troubleshooting, nutrition quality, and sustainable next steps.',
+                    'url' => route('post.show', 'weightloss-analyzer-launch'),
+                    'image' => 'https://pub-plate-assets.acara.app/blog/weightloss-analyzer.png',
+                    'imageAlt' => 'Acara Weight-Loss Analyzer showing AI progress review concepts',
+                    'category' => 'Product Update',
+                    'readingTime' => '9 min read',
+                ],
+            ]"
+        />
+
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
