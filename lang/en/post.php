@@ -24,8 +24,8 @@ return [
     'cta_index_button' => 'Ask Our AI Nutritionist',
 
     'cta_show_title' => 'Have questions about :topic?',
-    'cta_show_description' => 'Our AI nutritionist can help you understand how this topic relates to your personal health goals and blood sugar management.',
-    'cta_show_button' => 'Ask Our Nutritionist',
+    'cta_show_description' => 'Your AI health assistant can help you understand how this topic relates to your personal health goals and blood sugar management.',
+    'cta_show_button' => 'Ask Your Health Assistant',
 
     'log_in' => 'Log in',
     'get_started' => 'Get Started',
