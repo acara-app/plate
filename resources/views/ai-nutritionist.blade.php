@@ -343,6 +343,22 @@
         </div>
     </section>
 
+    <x-related-reading
+        title="Nutrition and Weight-Loss Guidance, Explained"
+        description="Read how Acara connects meals, body metrics, activity, and Health Sync data into more structured coaching."
+        :articles="[
+            [
+                'title' => 'Introducing the Acara Weight-Loss Analyzer',
+                'description' => 'A closer look at the new analyzer that reviews calorie balance, plateau signals, nutrition quality, and sustainable next steps inside Plate.',
+                'url' => route('post.show', 'weightloss-analyzer-launch'),
+                'image' => 'https://pub-plate-assets.acara.app/blog/weightloss-analyzer.png',
+                'imageAlt' => 'Acara Weight-Loss Analyzer showing AI progress review concepts',
+                'category' => 'Product Update',
+                'readingTime' => '9 min read',
+            ],
+        ]"
+    />
+
     <!-- FAQ Section -->
     <section class="bg-slate-50 py-16 sm:py-24">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
