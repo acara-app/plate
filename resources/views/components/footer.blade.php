@@ -43,7 +43,7 @@
                 <h3 class="text-sm font-semibold leading-6 text-slate-900 dark:text-white">Free Tools</h3>
                 <ul role="list" class="mt-6 space-y-4">
                     <li>
-                        <a href="{{ route('tools.index') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-medium" title="View all free diabetes tools">All Tools</a>
+                        <a href="{{ route('tools.index') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-medium" title="View all free health and diabetes tools">Health &amp; Diabetes Tools</a>
                     </li>
                     <li>
                         <a href="{{ route('food.index') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Search for foods">Diabetic Food Database</a>
