@@ -54,7 +54,7 @@ export function LimitGauge({
                 {/* Your daily limit */}
                 <div className={`border-l-2 px-5 py-6 text-left ${rule}`}>
                     <div
-                        className={`font-bold text-5xl leading-none tracking-[-0.04em] tabular-nums sm:text-6xl ${accent}`}
+                        className={`text-5xl leading-none font-bold tracking-[-0.04em] tabular-nums sm:text-6xl ${accent}`}
                     >
                         {limitDisplay}
                     </div>
@@ -68,7 +68,7 @@ export function LimitGauge({
 
                 {/* General adult maximum */}
                 <div className="px-5 py-6 text-left">
-                    <div className="font-bold text-5xl leading-none tracking-[-0.04em] text-[#3D3833] tabular-nums sm:text-6xl">
+                    <div className="text-5xl leading-none font-bold tracking-[-0.04em] text-[#3D3833] tabular-nums sm:text-6xl">
                         {props.max_mg}
                     </div>
                     <div className="mt-2 font-mono text-[10px] tracking-[0.18em] text-[#6E665C] uppercase">

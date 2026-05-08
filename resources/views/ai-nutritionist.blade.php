@@ -135,18 +135,7 @@
 @endsection
 
 <x-default-layout>
-    <header class="sticky top-0 z-50 w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center bg-white backdrop-blur-md border-b border-slate-100">
-        <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900">
-            <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
-            <span>Acara Plate</span>
-        </a>
-        <div class="flex items-center gap-4">
-            <a href="{{ route('login') }}" class="text-sm font-medium text-slate-600 hover:text-slate-900">Log in</a>
-            <a href="{{ route('register') }}" class="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition-all">
-                Get Started
-            </a>
-        </div>
-    </header>
+    <x-tools-header />
     
     <!-- Hero Section - F-Pattern Design -->
     <section class="relative bg-[#FFFBF5] pt-16 pb-20 sm:pt-24 sm:pb-32 overflow-hidden">

@@ -13,7 +13,7 @@ export function SafetyNote({
                     aria-hidden={true}
                 />
                 <div>
-                    <h3 className="font-bold text-lg leading-tight text-[#1A1814]">
+                    <h3 className="text-lg leading-tight font-bold text-[#1A1814]">
                         {props.title}
                     </h3>
                     <p className="mt-1 text-sm leading-relaxed text-[#3D3833]">

@@ -30,11 +30,7 @@ const ACCENT_BG = 'bg-[#C4623A]';
 const FONT_DISPLAY = 'font-bold';
 const FONT_MONO = 'font-mono';
 
-const EYEBROW = cn(
-    FONT_MONO,
-    INK_3,
-    'text-[11px] uppercase tracking-[0.18em]',
-);
+const EYEBROW = cn(FONT_MONO, INK_3, 'text-[11px] tracking-[0.18em] uppercase');
 
 interface AssessmentResponse {
     summary: string;
@@ -655,7 +651,7 @@ export default function CaffeineCalculator() {
                         >
                             {form.processing && <LoadingResult />}
                             {!form.processing && form.response && (
-                                <div className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-200">
+                                <div className="motion-safe:duration-200 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2">
                                     <CaffeineGuidanceRenderer
                                         spec={form.response.spec}
                                     />
@@ -912,20 +908,14 @@ function Breadcrumbs({ seo }: { seo: CaffeineCalculatorPageProps['seo'] }) {
             <a
                 href={seo.appUrl}
                 aria-label={t('breadcrumb_home')}
-                className={cn(
-                    'transition hover:text-[#1A1814]',
-                    INK_3,
-                )}
+                className={cn('transition hover:text-[#1A1814]', INK_3)}
             >
                 <Home className="size-3.5" aria-hidden="true" />
             </a>
             <ChevronRight className="size-3.5" aria-hidden="true" />
             <a
                 href={seo.toolsUrl}
-                className={cn(
-                    'transition hover:text-[#1A1814]',
-                    INK_3,
-                )}
+                className={cn('transition hover:text-[#1A1814]', INK_3)}
             >
                 {t('breadcrumb_tools')}
             </a>
@@ -961,9 +951,7 @@ function FieldShell({
                     </span>
                 ) : null}
             </div>
-            {hint ? (
-                <p className={cn('mt-1 text-xs', INK_3)}>{hint}</p>
-            ) : null}
+            {hint ? <p className={cn('mt-1 text-xs', INK_3)}>{hint}</p> : null}
             <div className="mt-3">{children}</div>
         </div>
     );
@@ -1069,9 +1057,7 @@ function ChipGroup({
                             <span
                                 className={cn(
                                     'mt-0.5 block text-[11px]',
-                                    selected
-                                        ? 'text-[#F2EBDD]/70'
-                                        : INK_3,
+                                    selected ? 'text-[#F2EBDD]/70' : INK_3,
                                 )}
                             >
                                 {option.detail}
@@ -1124,7 +1110,10 @@ function EmptyResult() {
         >
             <div className="max-w-sm">
                 <span
-                    className={cn('mx-auto block size-2 rounded-full', ACCENT_BG)}
+                    className={cn(
+                        'mx-auto block size-2 rounded-full',
+                        ACCENT_BG,
+                    )}
                     aria-hidden="true"
                 />
                 <h2
@@ -1136,12 +1125,7 @@ function EmptyResult() {
                 >
                     {t('empty_result_title')}
                 </h2>
-                <p
-                    className={cn(
-                        INK_2,
-                        'mt-3 text-sm leading-relaxed',
-                    )}
-                >
+                <p className={cn(INK_2, 'mt-3 text-sm leading-relaxed')}>
                     {t('empty_result_description')}
                 </p>
             </div>
@@ -1309,12 +1293,7 @@ function CaffeineFaqSection({ faqItems }: { faqItems: FaqItem[] }) {
                     >
                         {t('faq_heading')}
                     </h2>
-                    <p
-                        className={cn(
-                            INK_2,
-                            'mt-3 text-sm leading-relaxed',
-                        )}
-                    >
+                    <p className={cn(INK_2, 'mt-3 text-sm leading-relaxed')}>
                         {t('faq_intro')}
                     </p>
                 </div>
@@ -1498,20 +1477,10 @@ function CaffeineFooter() {
                 </div>
 
                 <div className="mt-12 space-y-2">
-                    <p
-                        className={cn(
-                            INK_2,
-                            'text-base leading-relaxed',
-                        )}
-                    >
+                    <p className={cn(INK_2, 'text-base leading-relaxed')}>
                         {t('footer_tagline_line1')}
                     </p>
-                    <p
-                        className={cn(
-                            INK_2,
-                            'text-base leading-relaxed',
-                        )}
-                    >
+                    <p className={cn(INK_2, 'text-base leading-relaxed')}>
                         {t('footer_tagline_line2')}
                     </p>
                 </div>

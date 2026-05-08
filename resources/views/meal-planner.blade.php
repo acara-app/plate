@@ -3,33 +3,7 @@
 @section('meta_keywords', 'diabetes meal planner, meal planning for diabetics, AI meal planner, diabetic meal plan generator, digital meal planner diabetes')
 
 <x-default-layout>
-    <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-            <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80">
-                <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
-                <span>Acara Plate</span>
-            </a>
-            <div class="flex items-center gap-3">
-                @auth
-                    <a href="{{ route('dashboard') }}"
-                        class="inline-flex items-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800">
-                        Dashboard
-                    </a>
-                @else
-                    <a href="{{ route('login') }}"
-                        class="hidden items-center px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:text-slate-900 sm:inline-flex">
-                        Sign in
-                    </a>
-                    <a href="{{ route('register') }}"
-                        data-umami-event="meal_planner_cta_click"
-                        data-umami-event-location="header"
-                        class="inline-flex items-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800">
-                        Start for Free
-                    </a>
-                @endauth
-            </div>
-        </div>
-    </header>
+    <x-tools-header />
 
 @section('head')
     <script type="application/ld+json">

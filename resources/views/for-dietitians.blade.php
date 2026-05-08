@@ -108,19 +108,7 @@
 
 <x-default-layout>
     <div class="bg-white">
-        <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
-            <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80">
-                    <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
-                    <span>Acara Plate</span>
-                </a>
-                <div class="flex items-center gap-3">
-                    <a href="{{ route('support') }}" class="inline-flex items-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800">
-                        Contact
-                    </a>
-                </div>
-            </div>
-        </header>
+        <x-tools-header />
 
         {{-- Hero Section --}}
         <section class="relative overflow-hidden pt-12 pb-16 sm:pt-20 sm:pb-24">

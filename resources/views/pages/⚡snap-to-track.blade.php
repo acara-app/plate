@@ -215,471 +215,479 @@ class extends Component
     @endif
 @endpush
 
-<div
-    class="relative flex min-h-screen flex-col items-center overflow-hidden bg-linear-to-br from-slate-50 via-white to-blue-50 p-4 text-slate-900 lg:justify-center lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 dark:text-slate-50"
->
-    {{-- Animated background elements --}}
-    <div aria-hidden="true" class="pointer-events-none absolute inset-0 overflow-hidden">
-        <div class="absolute -left-4 top-0 h-72 w-72 animate-pulse rounded-full bg-blue-300/20 blur-3xl dark:bg-blue-500/10"></div>
-        <div class="absolute -right-4 bottom-0 h-96 w-96 animate-pulse rounded-full bg-sky-300/20 blur-3xl dark:bg-sky-500/10"></div>
-    </div>
+<div class="min-h-screen bg-[#F2EBDD] text-[#1A1814]">
+    <x-tools-header theme="cream" />
 
-    {{-- Header --}}
-    <header class="relative z-10 mb-6 w-full max-w-md lg:mb-8">
-        <nav class="flex items-center justify-center">
-            <a href="/" class="flex items-center gap-2 text-xl font-bold text-slate-900 transition-opacity hover:opacity-80 dark:text-white">
-                <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
-                Acara Plate
+    <div class="px-4 py-8 md:py-12">
+        {{-- Editorial breadcrumbs --}}
+        <nav aria-label="Breadcrumb" class="mx-auto flex max-w-7xl items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[#6E665C] lg:px-8">
+            <a href="/" aria-label="Home" class="inline-flex items-center transition hover:text-[#1A1814]">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="size-3.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
             </a>
+            <span aria-hidden="true">›</span>
+            <a href="{{ route('tools.index') }}" class="transition hover:text-[#1A1814]">Tools</a>
+            <span aria-hidden="true">›</span>
+            <span aria-current="page" class="text-[#1A1814]">Snap to Track</span>
         </nav>
-    </header>
 
-    {{-- Main Card --}}
-    <main class="relative z-10 w-full max-w-md space-y-6 rounded-3xl bg-white p-6 shadow-xl shadow-blue-500/10 dark:bg-slate-800 dark:shadow-blue-900/20">
+        {{-- Hero --}}
+        <header class="mx-auto mt-6 max-w-7xl lg:px-8">
+            <div class="inline-flex items-center gap-2 border border-[#D9CFBC] bg-[#EBE2D0] px-3 py-1.5">
+                <span class="size-1.5 rounded-full bg-[#C4623A] shadow-[0_0_0_3px_rgba(196,98,58,0.18)]" aria-hidden="true"></span>
+                <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[#3D3833]">AI Food Photo Analyzer</span>
+            </div>
 
-        {{-- Header Section --}}
-        <div class="text-center speakable-intro">
-            <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-2xl dark:bg-blue-900/50">📸</div>
-            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Snap to Track: AI Food Photo Analyzer</h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Track calories &amp; macros instantly with AI</p>
-        </div>
-
-        {{-- Definition / What is this? (AI-search extractable) --}}
-        <section aria-labelledby="what-heading" class="speakable-definition rounded-xl bg-slate-50 p-4 text-center text-sm leading-relaxed text-slate-600 dark:bg-slate-900/40 dark:text-slate-300">
-            <h2 id="what-heading" class="sr-only">What is Snap to Track?</h2>
-            <p>
-                <strong class="text-slate-900 dark:text-white">Snap to Track</strong> is a free AI food photo analyzer that estimates calories, protein, carbs, and fat for every ingredient in your meal. Upload one photo, get a per-item nutrition breakdown in about 5–15 seconds — no signup required.
+            <h1 class="mt-5 max-w-4xl text-balance font-bold text-[clamp(40px,5vw,68px)] leading-[1.02] tracking-[-0.02em] text-[#1A1814]">
+                Snap to Track
+            </h1>
+            <p class="mt-4 max-w-2xl text-base leading-relaxed text-[#3D3833] sm:text-lg">
+                Track calories &amp; macros instantly with AI. One photo, 5–15 seconds, a per-ingredient breakdown — no signup required.
             </p>
-        </section>
+        </header>
 
-        {{-- Upload + Analyze Form --}}
-        @if ($result === null)
-            <form wire:submit="analyze" class="space-y-4">
-                @if (! $photo)
-                    @if (App::environment(['production', 'testing']))
-                        <div class="flex justify-center">
-                            <x-turnstile wire:model="turnstileToken" data-theme="auto" />
+        {{-- Tool --}}
+        <section class="mx-auto mt-8 max-w-3xl lg:px-8">
+            @if ($result === null)
+                <form wire:submit="analyze" class="space-y-6">
+                    <div class="border border-[#D9CFBC] bg-[#EBE2D0] p-6 sm:p-8">
+                        <div class="flex items-center justify-between gap-4 pb-5">
+                            <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
+                                {{ $photo ? 'Step 2 · Analyze' : 'Step 1 · Upload' }}
+                            </p>
+                            <span class="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
+                                <span class="size-1.5 rounded-full bg-emerald-600" aria-hidden="true"></span>
+                                Live
+                            </span>
                         </div>
-                        @error('turnstileToken')
-                            <p class="text-center text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p>
-                        @enderror
-                    @endif
 
-                    {{-- Upload Area --}}
-                    <div class="relative {{ App::environment(['production', 'testing']) && blank($turnstileToken) ? 'opacity-50' : '' }}">
-                        <input
-                            type="file"
-                            wire:model="photo"
-                            accept="image/*"
-                            class="hidden"
-                            id="photo-upload"
-                            @disabled($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))
-                        >
-                        <label
-                            for="photo-upload"
-                            data-umami-event="snap_to_track_upload_click"
-                            data-umami-event-location="main_form"
-                            class="flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 transition-colors hover:border-blue-500 hover:bg-blue-50/50 dark:border-slate-600 dark:bg-slate-900 dark:hover:border-blue-500 dark:hover:bg-blue-900/20"
-                        >
-                            <div class="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50">
-                                <svg class="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
+                        @if (! $photo)
+                            @if (App::environment(['production', 'testing']))
+                                <div class="border-t border-[#D9CFBC] pt-6">
+                                    <div class="flex justify-center">
+                                        <x-turnstile wire:model="turnstileToken" data-theme="auto" />
+                                    </div>
+                                    @error('turnstileToken')
+                                        <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#B5482E]">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            @endif
+
+                            {{-- Upload Area --}}
+                            <div class="relative border-t border-[#D9CFBC] pt-6 {{ App::environment(['production', 'testing']) && blank($turnstileToken) ? 'opacity-50' : '' }}">
+                                <input
+                                    type="file"
+                                    wire:model="photo"
+                                    accept="image/*"
+                                    class="hidden"
+                                    id="photo-upload"
+                                    @disabled($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))
+                                >
+                                <label
+                                    for="photo-upload"
+                                    data-umami-event="snap_to_track_upload_click"
+                                    data-umami-event-location="main_form"
+                                    class="group flex min-h-60 cursor-pointer flex-col items-center justify-center border-2 border-dashed border-[#D9CFBC] bg-[#F2EBDD] p-8 text-center transition hover:border-[#1A1814] hover:bg-[#F2EBDD]/70"
+                                >
+                                    <div class="mb-5 flex size-14 items-center justify-center border border-[#1A1814] bg-[#F2EBDD] text-[#1A1814] transition group-hover:bg-[#1A1814] group-hover:text-[#F2EBDD]">
+                                        <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </div>
+                                    <span class="font-bold text-lg tracking-[-0.01em] text-[#1A1814]">Tap to take photo or upload</span>
+                                    <span class="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">JPG, PNG up to 10MB</span>
+                                </label>
+                                @error('photo')
+                                    <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#B5482E]">{{ $message }}</p>
+                                @enderror
                             </div>
-                            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Tap to take photo or upload</span>
-                            <span class="mt-1 text-xs text-slate-500 dark:text-slate-400">JPG, PNG up to 10MB</span>
-                        </label>
-                        @error('photo')
-                            <p class="mt-2 text-center text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p>
-                        @enderror
+
+                            {{-- Tips --}}
+                            <div class="mt-6 border-t border-[#D9CFBC] pt-6">
+                                <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Tips for best results</p>
+                                <ul class="mt-3 grid gap-2 sm:grid-cols-2">
+                                    @foreach ([
+                                        'Take photo in good lighting',
+                                        'Make sure all food is visible',
+                                        'Capture from directly above',
+                                        'Include a reference for scale (optional)',
+                                    ] as $tip)
+                                        <li class="flex items-start gap-3 text-sm leading-relaxed text-[#3D3833]">
+                                            <span class="mt-2 size-1 shrink-0 bg-[#C4623A]" aria-hidden="true"></span>
+                                            <span>{{ $tip }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @else
+                            {{-- Photo preview --}}
+                            <div class="border-t border-[#D9CFBC] pt-6">
+                                <div class="flex items-baseline justify-between gap-3">
+                                    <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Photo loaded</p>
+                                    <button
+                                        type="button"
+                                        wire:click="clearPhoto"
+                                        class="font-mono text-[10px] uppercase tracking-[0.16em] text-[#6E665C] transition hover:text-[#B5482E]"
+                                        title="Remove photo"
+                                        @disabled($loading)
+                                    >
+                                        Remove ×
+                                    </button>
+                                </div>
+                                <div class="mt-3 border border-[#D9CFBC] bg-[#F2EBDD] p-2">
+                                    <img
+                                        src="{{ $photo->temporaryUrl() }}"
+                                        alt="Food photo preview"
+                                        class="h-72 w-full object-cover"
+                                    >
+                                </div>
+                            </div>
+
+                            @if (App::environment(['production', 'testing']))
+                                <div class="mt-6 border-t border-[#D9CFBC] pt-6">
+                                    <div class="flex justify-center">
+                                        <x-turnstile wire:model="turnstileToken" data-theme="auto" />
+                                    </div>
+                                    @error('turnstileToken')
+                                        <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#B5482E]">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            @endif
+
+                            <div class="mt-6 border-t border-[#D9CFBC] pt-6">
+                                <button
+                                    type="submit"
+                                    data-umami-event="snap_to_track_analyze_click"
+                                    data-umami-event-location="main_form"
+                                    class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#1A1814] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#3D3833] focus:outline-none focus:ring-2 focus:ring-[#1A1814] focus:ring-offset-2 focus:ring-offset-[#EBE2D0] disabled:cursor-not-allowed disabled:opacity-50"
+                                    @disabled($loading)
+                                >
+                                    <span wire:loading.remove wire:target="analyze" class="inline-flex items-center gap-2">
+                                        Analyze Food
+                                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                        </svg>
+                                    </span>
+                                    <span wire:loading wire:target="analyze" class="inline-flex items-center gap-2">
+                                        <svg class="size-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Analyzing your meal...
+                                    </span>
+                                </button>
+
+                                <p wire:loading wire:target="analyze" class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
+                                    This usually takes 5–15 seconds. Hang tight.
+                                </p>
+                            </div>
+                        @endif
+
+                        @if ($error)
+                            <div class="mt-6 border border-[#B5482E]/40 bg-[#B5482E]/5 p-4">
+                                <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#B5482E]">Hit a snag</p>
+                                <p class="mt-2 text-sm leading-relaxed text-[#3D3833]">{{ $error }}</p>
+                            </div>
+                        @endif
                     </div>
 
-                    {{-- Tips for best results --}}
-                    <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-900/20">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-lg">💡</span>
-                            <span class="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">Tips for best results</span>
-                        </div>
-                        <ul class="space-y-1 text-sm text-blue-800 dark:text-blue-200">
-                            <li>• Take photo in good lighting</li>
-                            <li>• Make sure all food is visible</li>
-                            <li>• Capture from directly above</li>
-                            <li>• Include a reference for scale (optional)</li>
-                        </ul>
+                    {{-- Authority footer --}}
+                    <div class="flex flex-col gap-1 px-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
+                        <p><strong class="font-bold text-[#3D3833]">Disclaimer:</strong> These are AI estimates. Actual nutrition depends on how the food was made.</p>
+                        <p>AI vision analysis · USDA-aligned nutrition references</p>
+                        <p><time datetime="{{ now()->toDateString() }}">Last updated: {{ now()->format('F Y') }}</time></p>
                     </div>
-                @else
-                    {{-- Photo Preview --}}
-                    <div class="relative overflow-hidden rounded-xl">
-                        <img
-                            src="{{ $photo->temporaryUrl() }}"
-                            alt="Food photo preview"
-                            class="h-48 w-full object-cover"
-                        >
+                </form>
+            @else
+                {{-- Result --}}
+                @php
+                    $totalMacroWeight = max(1, $result['totalProtein'] + $result['totalCarbs'] + $result['totalFat']);
+                @endphp
+                <div
+                    x-data
+                    x-init="window.acaraTrack?.('snap_to_track_result_viewed', { confidence: @js($result['confidence']), items_count: @js(count($result['items'])) }); $el.classList.remove('opacity-0', 'translate-y-2')"
+                    class="opacity-0 translate-y-2 transition-all duration-500 motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0"
+                >
+                    <div class="flex flex-col gap-4">
+                        {{-- Total nutrition --}}
+                        <article class="border border-[#D9CFBC] bg-[#F2EBDD] p-6 sm:p-8">
+                            <div class="flex items-baseline justify-between gap-4">
+                                <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Total Nutrition</p>
+                                <span class="border border-[#C4623A] px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[#C4623A]">
+                                    {{ $result['confidence'] }}% confident
+                                </span>
+                            </div>
+
+                            <div class="mt-5 flex items-end gap-3">
+                                <span class="font-bold text-[clamp(56px,7vw,96px)] leading-[1] tracking-[-0.03em] text-[#1A1814]">{{ number_format($result['totalCalories'], 0) }}</span>
+                                <span class="mb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">kcal</span>
+                            </div>
+                            <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
+                                ~{{ round($result['totalCalories'] / 2000 * 100) }}% of a 2,000 kcal daily goal
+                            </p>
+                            <div class="mt-2 h-1.5 w-full overflow-hidden bg-[#D9CFBC]">
+                                <div class="h-full bg-[#C4623A] transition-[width] duration-700" style="width: {{ min(100, round($result['totalCalories'] / 2000 * 100)) }}%"></div>
+                            </div>
+
+                            {{-- Macro grid --}}
+                            <div class="mt-7 grid grid-cols-3 gap-6 border-t border-[#D9CFBC] pt-6">
+                                @foreach ([
+                                    ['label' => 'Protein', 'value' => $result['totalProtein']],
+                                    ['label' => 'Carbs', 'value' => $result['totalCarbs']],
+                                    ['label' => 'Fat', 'value' => $result['totalFat']],
+                                ] as $macro)
+                                    <div>
+                                        <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">{{ $macro['label'] }}</p>
+                                        <p class="mt-1 font-bold text-2xl leading-tight tracking-[-0.02em] text-[#1A1814]">
+                                            {{ number_format($macro['value'], 1) }}<span class="ml-1 font-mono text-xs uppercase tracking-[0.18em] text-[#6E665C]">g</span>
+                                        </p>
+                                        <div class="mt-2 h-1 w-full overflow-hidden bg-[#D9CFBC]">
+                                            <div class="h-full bg-[#1A1814] transition-[width] duration-700" style="width: {{ min(100, ($macro['value'] / $totalMacroWeight) * 100) }}%"></div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </article>
+
+                        {{-- Items list --}}
+                        <article class="border border-[#D9CFBC] bg-[#F2EBDD] p-6 sm:p-8">
+                            <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Food Items Detected</p>
+                            @if (count($result['items']) === 0)
+                                <p class="mt-4 text-sm leading-relaxed text-[#3D3833]">No food items were detected. Try a clearer photo with better lighting.</p>
+                            @else
+                                <ul class="mt-4 divide-y divide-[#D9CFBC]">
+                                    @foreach ($result['items'] as $i => $item)
+                                        <li class="flex items-start gap-4 py-4 first:pt-0 last:pb-0">
+                                            <span class="pt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#C4623A]" aria-hidden="true">
+                                                {{ str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) }}
+                                            </span>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-baseline justify-between gap-3">
+                                                    <h4 class="font-bold text-base leading-tight tracking-[-0.01em] text-[#1A1814]">{{ $item['name'] }}</h4>
+                                                    <span class="shrink-0 font-bold text-sm tracking-[-0.01em] text-[#1A1814]">{{ number_format($item['calories'], 0) }} kcal</span>
+                                                </div>
+                                                <p class="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">{{ $item['portion'] }}</p>
+                                                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.16em] text-[#6E665C]">
+                                                    <span>P {{ number_format($item['protein'], 1) }}g</span>
+                                                    <span aria-hidden="true">·</span>
+                                                    <span>C {{ number_format($item['carbs'], 1) }}g</span>
+                                                    <span aria-hidden="true">·</span>
+                                                    <span>F {{ number_format($item['fat'], 1) }}g</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </article>
+
+                        {{-- Sharper analysis upsell (dark inverse) --}}
+                        <article class="border border-[#1A1814] bg-[#1A1814] p-6 sm:p-8 text-[#F2EBDD]">
+                            <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Sharper readings</p>
+                            <h3 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.02em]">Did the AI guess on a few items?</h3>
+                            <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
+                                Mixed dishes, sauces, and oils are tough for a quick scan. Sign up for sharper analysis — and save every meal to your history.
+                            </p>
+                            <a
+                                href="{{ route('register') }}"
+                                data-umami-event="signup_cta_click"
+                                data-umami-event-location="snap_to_track_result"
+                                class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
+                            >
+                                Sign up for sharper analysis
+                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </a>
+                            <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[#F2EBDD]/70">
+                                Already a member?
+                                <a href="{{ route('login') }}" class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]">Log in</a>
+                            </p>
+                        </article>
+
+                        {{-- Analyze another --}}
                         <button
                             type="button"
                             wire:click="clearPhoto"
-                            class="absolute right-2 top-2 rounded-full bg-slate-900/70 p-2 text-white transition-colors hover:bg-slate-900"
-                            title="Remove photo"
-                            @disabled($loading)
+                            class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-none border border-[#1A1814] bg-[#F2EBDD] px-6 text-sm font-semibold text-[#1A1814] transition hover:bg-[#1A1814] hover:text-[#F2EBDD]"
                         >
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            Analyze another photo
+                            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </button>
-                    </div>
 
-                    @if (App::environment(['production', 'testing']))
-                        <div class="flex justify-center">
-                            <x-turnstile wire:model="turnstileToken" data-theme="auto" />
-                        </div>
-                        @error('turnstileToken')
-                            <p class="text-center text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p>
-                        @enderror
-                    @endif
-
-                    {{-- Analyze Button --}}
-                    <button
-                        type="submit"
-                        data-umami-event="snap_to_track_analyze_click"
-                        data-umami-event-location="main_form"
-                        class="w-full min-h-14 rounded-xl bg-blue-600 py-4 text-center font-bold text-white transition-all hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
-                        @disabled($loading)
-                    >
-                        <span wire:loading.remove wire:target="analyze" class="flex items-center justify-center gap-2">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
-                            Analyze Food
-                        </span>
-                        <span wire:loading wire:target="analyze" class="flex items-center justify-center gap-2">
-                            <svg class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Analyzing your meal...
-                        </span>
-                    </button>
-
-                    {{-- Loading progress hint --}}
-                    <div wire:loading wire:target="analyze" class="rounded-xl bg-slate-50 p-3 text-center dark:bg-slate-900/50">
-                        <p class="text-xs text-slate-500 dark:text-slate-400">This usually takes 5–15 seconds. Hang tight.</p>
-                    </div>
-                @endif
-
-                @if ($error)
-                    <div class="rounded-xl border border-rose-200 bg-rose-50 p-3 text-center dark:border-rose-900/50 dark:bg-rose-900/20">
-                        <p class="text-sm font-medium text-rose-700 dark:text-rose-300">{{ $error }}</p>
-                    </div>
-                @endif
-            </form>
-        @else
-            {{-- Real Results --}}
-            <div
-                x-data
-                x-init="window.acaraTrack?.('snap_to_track_result_viewed', { confidence: @js($result['confidence']), items_count: @js(count($result['items'])) }); $el.classList.remove('opacity-0', 'translate-y-4')"
-                class="overflow-hidden rounded-2xl border border-slate-100 bg-white opacity-0 translate-y-4 shadow-lg transition-all duration-500 ease-out dark:border-slate-700 dark:bg-slate-800"
-            >
-                {{-- Total Macros Header --}}
-                <div class="bg-slate-50 p-6 dark:bg-slate-800/50">
-                    <div class="mb-3 flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Nutrition</span>
-                        <span class="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
-                            {{ $result['confidence'] }}% confident
-                        </span>
-                    </div>
-
-                    {{-- Calorie Display --}}
-                    <div class="mb-4 text-center">
-                        <span class="text-5xl font-black text-slate-900 dark:text-white">{{ number_format($result['totalCalories'], 0) }}</span>
-                        <span class="ml-1 text-lg font-medium text-slate-400">kcal</span>
-                        <div class="mt-2">
-                            <p class="text-xs text-slate-500 dark:text-slate-400">~{{ round($result['totalCalories'] / 2000 * 100) }}% of a 2,000 kcal daily goal</p>
-                            <div class="mx-auto mt-1 h-1.5 w-3/4 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                                <div class="h-full rounded-full bg-blue-500" style="width: {{ min(100, round($result['totalCalories'] / 2000 * 100)) }}%"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Macro Bars --}}
-                    <div class="grid grid-cols-3 gap-4">
-                        {{-- Protein --}}
-                        <div class="text-center">
-                            <div class="mx-auto mb-2 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                                <div class="h-full rounded-full bg-blue-500" style="width: {{ min(100, ($result['totalProtein'] / max(1, $result['totalProtein'] + $result['totalCarbs'] + $result['totalFat'])) * 100) }}%"></div>
-                            </div>
-                            <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ number_format($result['totalProtein'], 1) }}g</span>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Protein</p>
-                        </div>
-                        {{-- Carbs --}}
-                        <div class="text-center">
-                            <div class="mx-auto mb-2 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                                <div class="h-full rounded-full bg-amber-500" style="width: {{ min(100, ($result['totalCarbs'] / max(1, $result['totalProtein'] + $result['totalCarbs'] + $result['totalFat'])) * 100) }}%"></div>
-                            </div>
-                            <span class="text-lg font-bold text-amber-600 dark:text-amber-400">{{ number_format($result['totalCarbs'], 1) }}g</span>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Carbs</p>
-                        </div>
-                        {{-- Fat --}}
-                        <div class="text-center">
-                            <div class="mx-auto mb-2 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                                <div class="h-full rounded-full bg-rose-500" style="width: {{ min(100, ($result['totalFat'] / max(1, $result['totalProtein'] + $result['totalCarbs'] + $result['totalFat'])) * 100) }}%"></div>
-                            </div>
-                            <span class="text-lg font-bold text-rose-600 dark:text-rose-400">{{ number_format($result['totalFat'], 1) }}g</span>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Fat</p>
+                        {{-- Disclaimer --}}
+                        <div class="flex flex-col gap-1 px-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
+                            <p><strong class="font-bold text-[#3D3833]">Disclaimer:</strong> These are AI estimates. Actual nutrition depends on how the food was made.</p>
+                            <p>AI vision analysis · USDA-aligned nutrition references</p>
+                            <p><time datetime="{{ now()->toDateString() }}">Last updated: {{ now()->format('F Y') }}</time></p>
                         </div>
                     </div>
                 </div>
+            @endif
+        </section>
 
-                {{-- Individual Items --}}
-                <div class="border-t border-slate-100 p-4 dark:border-slate-700">
-                    <h3 class="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">Food Items Detected</h3>
-                    @if (count($result['items']) === 0)
-                        <p class="text-center text-sm text-slate-500 dark:text-slate-400">No food items were detected. Try a clearer photo with better lighting.</p>
-                    @else
-                        <div class="space-y-3">
-                            @foreach ($result['items'] as $item)
-                                <div class="rounded-xl bg-slate-50 p-3 dark:bg-slate-900/50">
-                                    <div class="flex items-start justify-between">
-                                        <div>
-                                            <h4 class="font-semibold text-slate-900 dark:text-white">{{ $item['name'] }}</h4>
-                                            <p class="text-xs text-slate-500 dark:text-slate-400">{{ $item['portion'] }}</p>
-                                        </div>
-                                        <span class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ number_format($item['calories'], 0) }} kcal</span>
-                                    </div>
-                                    <div class="mt-2 flex flex-wrap gap-2 text-xs">
-                                        <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 font-medium text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
-                                            P {{ number_format($item['protein'], 1) }}g
-                                        </span>
-                                        <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
-                                            C {{ number_format($item['carbs'], 1) }}g
-                                        </span>
-                                        <span class="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 font-medium text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
-                                            F {{ number_format($item['fat'], 1) }}g
-                                        </span>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
+        {{-- Field manual / definition (placed below the tool so the action stays above the fold) --}}
+        <section aria-labelledby="what-heading" class="mx-auto mt-20 max-w-7xl lg:px-8">
+            <div class="speakable-definition grid gap-6 border-t border-[#D9CFBC] pt-10 sm:grid-cols-[1fr_2fr] sm:gap-12">
+                <div>
+                    <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Field manual</p>
+                    <h2 id="what-heading" class="sr-only">What is Snap to Track?</h2>
                 </div>
+                <p class="max-w-3xl text-base leading-relaxed text-[#3D3833] sm:text-lg">
+                    <strong class="font-bold text-[#1A1814]">Snap to Track</strong> is a free AI food photo analyzer that estimates calories, protein, carbs, and fat for every ingredient in your meal. Upload one photo, get a per-item nutrition breakdown in about 5–15 seconds — no signup required.
+                </p>
+            </div>
+        </section>
 
-                {{-- Sharper-analysis upsell --}}
-                <div class="space-y-3 border-t border-slate-100 p-4 dark:border-slate-700">
-                    <div class="flex items-start gap-2">
-                        <span class="text-lg" aria-hidden="true">💬</span>
-                        <div>
-                            <p class="font-semibold text-slate-900 dark:text-white">Did the AI guess on a few items?</p>
-                            <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                                Mixed dishes, sauces, and oils are tough for a quick scan. Sign up free to unlock sharper analysis — and save every meal to your history.
-                            </p>
-                        </div>
+        {{-- Method --}}
+        <section id="how-it-works" class="mx-auto mt-16 max-w-7xl lg:px-8" aria-labelledby="how-it-works-heading">
+            <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">How it works</p>
+            <h2 id="how-it-works-heading" class="mt-4 max-w-3xl font-bold text-[clamp(28px,3.4vw,44px)] leading-[1.05] tracking-[-0.02em] text-[#1A1814]">
+                Three steps from photo to plate.
+            </h2>
+            <p class="mt-5 max-w-3xl text-base leading-relaxed text-[#3D3833]">
+                From a single photo to a full nutrition breakdown. No journaling, no manual entry, no guess-the-portion games.
+            </p>
+
+            <div class="mt-10 grid border-t border-[#D9CFBC] sm:grid-cols-3 sm:divide-x sm:divide-[#D9CFBC]">
+                <article class="border-b border-[#D9CFBC] px-2 pt-8 pb-10 sm:border-b-0 sm:px-7">
+                    <div class="font-bold text-5xl italic leading-none text-[#C4623A]">A</div>
+                    <h3 class="mt-4 font-bold text-xl leading-tight tracking-[-0.01em] text-[#1A1814]">Snap a photo of your meal</h3>
+                    <p class="speakable-how-it-works mt-3 text-sm leading-relaxed text-[#3D3833]">
+                        Take a clear, well-lit photo of your food from above. The AI will scan the image for recognizable ingredients.
+                    </p>
+                </article>
+                <article class="border-b border-[#D9CFBC] px-2 pt-8 pb-10 sm:border-b-0 sm:px-7">
+                    <div class="font-bold text-5xl italic leading-none text-[#C4623A]">B</div>
+                    <h3 class="mt-4 font-bold text-xl leading-tight tracking-[-0.01em] text-[#1A1814]">AI identifies each food item</h3>
+                    <p class="speakable-how-it-works mt-3 text-sm leading-relaxed text-[#3D3833]">
+                        Our vision model recognizes individual ingredients, estimates portion sizes, and cross-references USDA nutrition data.
+                    </p>
+                </article>
+                <article class="px-2 pt-8 pb-10 sm:px-7">
+                    <div class="font-bold text-5xl italic leading-none text-[#C4623A]">C</div>
+                    <h3 class="mt-4 font-bold text-xl leading-tight tracking-[-0.01em] text-[#1A1814]">Get instant macro breakdown</h3>
+                    <p class="speakable-how-it-works mt-3 text-sm leading-relaxed text-[#3D3833]">
+                        See per-item calories, protein, carbs, and fat — plus meal totals and a confidence score for the analysis.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        {{-- More than tracking promo --}}
+        <section class="mx-auto mt-24 max-w-7xl lg:px-8">
+            <div class="border border-[#D9CFBC] bg-[#EBE2D0] p-8 sm:p-12">
+                <div class="grid gap-8 sm:grid-cols-[2fr_1fr] sm:items-center">
+                    <div>
+                        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Beyond tracking</p>
+                        <h2 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.02em] text-[#1A1814] sm:text-3xl">
+                            Need more than just tracking?
+                        </h2>
+                        <p class="mt-3 max-w-xl text-sm leading-relaxed text-[#3D3833] sm:text-base">
+                            Get personalized meal plans tailored to your glucose levels and taste preferences.
+                        </p>
                     </div>
                     <a
                         href="{{ route('register') }}"
                         data-umami-event="signup_cta_click"
-                        data-umami-event-location="snap_to_track_result"
-                        class="block w-full rounded-xl bg-blue-600 py-3.5 text-center text-sm font-bold text-white transition-all hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98]"
+                        data-umami-event-location="snap_to_track_bottom_promo"
+                        class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
                     >
-                        Sign up for sharper analysis →
+                        Get Started
+                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
                     </a>
-                    <p class="text-center text-xs text-slate-400 dark:text-slate-500">
-                        Already a member? <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400">Log in</a>
-                    </p>
                 </div>
             </div>
-
-            {{-- Analyze Another --}}
-            <button
-                type="button"
-                wire:click="clearPhoto"
-                class="w-full rounded-xl border-2 border-slate-200 py-3 text-center text-sm font-medium text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800"
-            >
-                Analyze another photo
-            </button>
-        @endif
-
-        {{-- How It Works Section --}}
-        <section id="how-it-works" class="space-y-3 speakable-how-it-works">
-            <h2 class="text-center text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">How it works</h2>
-            <ol class="grid grid-cols-3 gap-3 text-center">
-                <li class="rounded-xl bg-slate-50 p-3 dark:bg-slate-900/50">
-                    <div class="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">1</div>
-                    <p class="text-xs font-medium text-slate-700 dark:text-slate-300">Snap a photo of your meal</p>
-                </li>
-                <li class="rounded-xl bg-slate-50 p-3 dark:bg-slate-900/50">
-                    <div class="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">2</div>
-                    <p class="text-xs font-medium text-slate-700 dark:text-slate-300">AI identifies each food item</p>
-                </li>
-                <li class="rounded-xl bg-slate-50 p-3 dark:bg-slate-900/50">
-                    <div class="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">3</div>
-                    <p class="text-xs font-medium text-slate-700 dark:text-slate-300">Get instant macro breakdown</p>
-                </li>
-            </ol>
         </section>
 
-        {{-- Sign Up CTA (only when no result is shown) --}}
-        @if ($result === null)
+        {{-- FAQ --}}
+        <section class="mx-auto mt-24 max-w-7xl lg:px-8" aria-labelledby="faq-heading">
+            <div class="grid gap-12 sm:grid-cols-[1fr_2fr]">
+                <div>
+                    <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">FAQ</p>
+                    <h2 id="faq-heading" class="mt-4 font-bold text-[clamp(28px,3.4vw,44px)] leading-[1.05] tracking-[-0.02em] text-[#1A1814]">
+                        Frequently Asked Questions
+                    </h2>
+                    <p class="mt-3 text-sm leading-relaxed text-[#3D3833]">
+                        Quick context for using the analyzer as a planning aid—not a replacement for a CGM, scale, or your clinician.
+                    </p>
+                </div>
+
+                <div x-data="{ openFaq: 1 }">
+                    @php
+                    $faqs = [
+                        ['q' => 'How does the AI food photo analyzer work?', 'a' => 'Upload a photo of your meal and our AI vision model identifies each food item, estimates portion size, and calculates calories, protein, carbs, and fat for every item plus the full meal. Nutrition values are derived from USDA FoodData Central reference data, and you get a confidence score so you know how reliable each estimate is.'],
+                        ['q' => 'How accurate are calorie estimates from food photos?', 'a' => 'Accuracy depends on photo clarity, lighting, and how visible each ingredient is. In good conditions, AI photo estimates land within roughly 10–20% of actual values for whole foods, and the tool returns a confidence score (0–100%) for each meal so you can judge reliability. Mixed dishes, sauces, and oils are harder to estimate than visible whole foods.'],
+                        ['q' => 'What types of food can the AI recognize?', 'a' => 'The analyzer recognizes most common foods: fruits, vegetables, grains, meats, fish, dairy, packaged snacks, drinks, and prepared dishes from many cuisines. It works best when each item is clearly visible from above with good lighting. Hidden ingredients (oils, sauces, dressings, broths) are harder to detect, so single-ingredient and well-lit plate shots produce the most reliable results.'],
+                        ['q' => 'Is my food photo kept private?', 'a' => 'Yes. Your photo is used only to generate the nutrition analysis. Livewire stores it as a temporary upload while the scan runs, then we delete that temporary file as soon as the result or error is returned. We do not retain images, share them with third parties, or use them to train AI models. Authenticated users can opt to log meals with photos to their personal history; on this public tool, no image is saved.'],
+                        ['q' => 'How do I use Snap to Track?', 'a' => 'Open this page on your phone or laptop, tap the upload area to take a new photo or pick one from your gallery, then tap Analyze Food. In about 5–15 seconds you get a per-item breakdown of calories, protein, carbs, and fat plus meal totals. No signup is required to try it; create a free account to save and track meals over time.'],
+                    ];
+                    @endphp
+
+                    @foreach ($faqs as $index => $faq)
+                        @php $position = $index + 1; @endphp
+                        <div class="border-t {{ $loop->first ? 'border-[#1A1814]' : 'border-[#D9CFBC]' }} {{ $loop->last ? 'border-b border-[#D9CFBC]' : '' }}">
+                            <button
+                                type="button"
+                                @click="openFaq = openFaq === {{ $position }} ? null : {{ $position }}"
+                                :aria-expanded="openFaq === {{ $position }} ? 'true' : 'false'"
+                                class="flex w-full items-baseline justify-between gap-4 py-5 text-left transition hover:text-[#1A1814]"
+                            >
+                                <div class="flex items-baseline gap-4">
+                                    <span class="font-mono text-[11px] tracking-[0.14em] text-[#6E665C]" aria-hidden="true">
+                                        {{ str_pad((string) $position, 2, '0', STR_PAD_LEFT) }}
+                                    </span>
+                                    <span class="font-bold text-lg leading-tight tracking-[-0.01em] text-[#1A1814] sm:text-xl">
+                                        {{ $faq['q'] }}
+                                    </span>
+                                </div>
+                                <svg
+                                    class="mt-1 size-5 shrink-0 text-[#C4623A] transition-transform duration-200"
+                                    :class="{ 'rotate-45': openFaq === {{ $position }} }"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    aria-hidden="true"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                            </button>
+                            <div x-show="openFaq === {{ $position }}" x-collapse class="overflow-hidden">
+                                <p class="mb-6 max-w-prose pl-10 text-sm leading-relaxed text-[#3D3833]">
+                                    {{ $faq['a'] }}
+                                </p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        {{-- More tools strip --}}
+        <section class="mx-auto mt-24 max-w-7xl lg:px-8">
             <a
-                href="{{ route('register') }}"
-                data-umami-event="signup_cta_click"
-                data-umami-event-location="snap_to_track_empty_state"
-                class="block w-full rounded-xl bg-blue-600 py-3.5 text-center text-sm font-bold text-white transition-all hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98]"
+                href="{{ route('tools.index') }}"
+                class="group flex flex-col gap-4 border-t border-[#1A1814] pt-8 sm:flex-row sm:items-baseline sm:justify-between"
             >
-                Sign up to start analyzing →
+                <div>
+                    <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Explore More Tools</p>
+                    <h2 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.01em] text-[#1A1814] transition-colors group-hover:text-[#C4623A]">
+                        View All Tools →
+                    </h2>
+                </div>
+                <span class="font-mono text-[11px] uppercase tracking-[0.16em] text-[#6E665C]">
+                    Calculators · Trackers · Planners
+                </span>
             </a>
-            <p class="text-center text-xs text-slate-400 dark:text-slate-500">
-                Already have an account? <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400">Log in</a>
-            </p>
-        @endif
+        </section>
+    </div>
 
-        <div class="space-y-1 text-center text-xs text-slate-400 dark:text-slate-500">
-            <p>
-                <strong>Disclaimer:</strong> These are AI estimates. Actual nutrition depends on how the food was made.
-            </p>
-            <p>
-                AI vision analysis · USDA-aligned nutrition references
-            </p>
-            <p>
-                <time datetime="{{ now()->toDateString() }}">Last updated: {{ now()->format('F Y') }}</time>
-            </p>
-        </div>
-
-    </main>
-
-    {{-- FAQ Section --}}
-    <section class="relative z-10 mt-8 w-full max-w-md" aria-labelledby="faq-heading">
-        <h2 id="faq-heading" class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
-            Frequently Asked Questions
-        </h2>
-
-        <div class="space-y-3" x-data="{ openFaq: null }">
-            {{-- FAQ 1 --}}
-            <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
-                <button
-                    type="button"
-                    @click="openFaq = openFaq === 1 ? null : 1"
-                    class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
-                    aria-expanded="false"
-                >
-                    <span>How does the AI food photo analyzer work?</span>
-                    <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div x-show="openFaq === 1" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>Upload a photo of your meal and our AI vision model identifies each food item, estimates portion size, and calculates calories, protein, carbs, and fat for every item plus the full meal. Nutrition values are derived from USDA FoodData Central reference data, and you get a confidence score so you know how reliable each estimate is.</p>
-                </div>
-            </div>
-
-            {{-- FAQ 2 --}}
-            <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
-                <button
-                    type="button"
-                    @click="openFaq = openFaq === 2 ? null : 2"
-                    class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
-                    aria-expanded="false"
-                >
-                    <span>How accurate are calorie estimates from food photos?</span>
-                    <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div x-show="openFaq === 2" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>Accuracy depends on photo clarity, lighting, and how visible each ingredient is. In good conditions, AI photo estimates land within roughly 10–20% of actual values for whole foods, and the tool returns a confidence score (0–100%) for each meal so you can judge reliability. Mixed dishes, sauces, and oils are harder to estimate than visible whole foods.</p>
-                </div>
-            </div>
-
-            {{-- FAQ 3 --}}
-            <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
-                <button
-                    type="button"
-                    @click="openFaq = openFaq === 3 ? null : 3"
-                    class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
-                    aria-expanded="false"
-                >
-                    <span>What types of food can the AI recognize?</span>
-                    <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div x-show="openFaq === 3" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>The analyzer recognizes most common foods: fruits, vegetables, grains, meats, fish, dairy, packaged snacks, drinks, and prepared dishes from many cuisines. It works best when each item is clearly visible from above with good lighting. Hidden ingredients (oils, sauces, dressings, broths) are harder to detect, so single-ingredient and well-lit plate shots produce the most reliable results.</p>
-                </div>
-            </div>
-
-            {{-- FAQ 4 --}}
-            <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
-                <button
-                    type="button"
-                    @click="openFaq = openFaq === 4 ? null : 4"
-                    class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
-                    aria-expanded="false"
-                >
-                    <span>Is my food photo kept private?</span>
-                    <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div x-show="openFaq === 4" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>Yes. Your photo is used only to generate the nutrition analysis. Livewire stores it as a temporary upload while the scan runs, then we delete that temporary file as soon as the result or error is returned. We do not retain images, share them with third parties, or use them to train AI models. Authenticated users can opt to log meals with photos to their personal history; on this public tool, no image is saved.</p>
-                </div>
-            </div>
-
-            {{-- FAQ 5 --}}
-            <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-800">
-                <button
-                    type="button"
-                    @click="openFaq = openFaq === 5 ? null : 5"
-                    class="flex w-full items-center justify-between p-4 text-left font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:text-white dark:hover:bg-slate-700/50"
-                    aria-expanded="false"
-                >
-                    <span>How do I use Snap to Track?</span>
-                    <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="{ 'rotate-180': openFaq === 5 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div x-show="openFaq === 5" x-collapse class="border-t border-slate-100 px-4 pb-4 pt-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                    <p>Open this page on your phone or laptop, tap the upload area to take a new photo or pick one from your gallery, then tap Analyze Food. In about 5–15 seconds you get a per-item breakdown of calories, protein, carbs, and fat plus meal totals. No signup is required to try it; create a free account to save and track meals over time.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    {{-- Main App Promo --}}
-    <section class="relative z-10 mt-8 w-full max-w-md">
-        <div class="overflow-hidden rounded-2xl bg-slate-900 px-6 py-8 text-center shadow-xl shadow-slate-900/10 dark:bg-slate-800 dark:ring-1 dark:ring-white/10">
-            <div class="mb-4 flex justify-center">
-                <span class="text-4xl">🥗</span>
-            </div>
-            <h2 class="mb-3 text-xl font-bold text-white">
-                Need more than just tracking?
-            </h2>
-            <p class="mb-6 text-sm leading-relaxed text-slate-300">
-                Get personalized meal plans tailored to your glucose levels and taste preferences.
-            </p>
-            <a href="{{ route('register') }}"
-               data-umami-event="signup_cta_click"
-               data-umami-event-location="snap_to_track_bottom_promo"
-               class="inline-flex w-full items-center justify-center rounded-xl bg-white py-3.5 text-sm font-bold text-slate-900 transition-transform hover:scale-[1.02] hover:bg-slate-50">
-                Get Started
-            </a>
-        </div>
-    </section>
-
-    {{-- More Free Tools --}}
-    <section class="relative z-10 mt-12 mb-8 w-full max-w-md">
-        <h2 class="mb-4 text-center text-lg font-bold text-slate-900 dark:text-white">
-            Explore More Tools
-        </h2>
-        <a href="{{ route('tools.index') }}" class="group flex flex-col items-center rounded-xl bg-white p-6 text-center shadow-sm transition-all hover:shadow-md dark:bg-slate-800">
-            <span class="mb-2 text-3xl">🛠️</span>
-            <h3 class="font-bold text-slate-900 dark:text-white">View All Tools</h3>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Discover health trackers, calculators, and nutrition tools</p>
-        </a>
-    </section>
-
-    <x-footer />
+    <x-footer class="bg-[#F2EBDD]! border-[#D9CFBC]!" />
 </div>
