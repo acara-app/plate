@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ec65d293bd9cfb7fd4c0e6a4c292a59b",
+    "content-hash": "5d3aaf64c64deaf45b11e2a807a6b070",
     "packages": [
         {
             "name": "acara-app/acara-core",
@@ -12,16 +12,16 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:acara-app/acara-core.git",
-                "reference": "4c294901f8fc2345fad7c71062dbe92d9d41af77"
+                "reference": "a955866cc5040d5510dc1ffdff3d94b76463c1c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/acara-app/acara-core/zipball/4c294901f8fc2345fad7c71062dbe92d9d41af77",
-                "reference": "4c294901f8fc2345fad7c71062dbe92d9d41af77",
+                "url": "https://api.github.com/repos/acara-app/acara-core/zipball/a955866cc5040d5510dc1ffdff3d94b76463c1c5",
+                "reference": "a955866cc5040d5510dc1ffdff3d94b76463c1c5",
                 "shasum": ""
             },
             "require": {
-                "laravel/ai": "^0.6.0",
+                "laravel/ai": "^0.6.8",
                 "laravel/framework": "^13.5",
                 "php": "^8.4 || ^8.5",
                 "spatie/laravel-data": "^4.20",
@@ -86,7 +86,7 @@
                 "source": "https://github.com/acara-app/acara-core/tree/main",
                 "issues": "https://github.com/acara-app/acara-core/issues"
             },
-            "time": "2026-05-10T14:12:28+00:00"
+            "time": "2026-05-11T19:44:53+00:00"
         },
         {
             "name": "aws/aws-crt-php",
@@ -1794,16 +1794,16 @@
         },
         {
             "name": "laravel/ai",
-            "version": "v0.6.6",
+            "version": "v0.6.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/ai.git",
-                "reference": "f425b4f69dff713e390272c1b7b0a55147c80fb7"
+                "reference": "b457ea4c0ec0fb1bca5504666332b653f7648d7e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/ai/zipball/f425b4f69dff713e390272c1b7b0a55147c80fb7",
-                "reference": "f425b4f69dff713e390272c1b7b0a55147c80fb7",
+                "url": "https://api.github.com/repos/laravel/ai/zipball/b457ea4c0ec0fb1bca5504666332b653f7648d7e",
+                "reference": "b457ea4c0ec0fb1bca5504666332b653f7648d7e",
                 "shasum": ""
             },
             "require": {
@@ -1858,7 +1858,7 @@
                 "issues": "https://github.com/laravel/ai/issues",
                 "source": "https://github.com/laravel/ai"
             },
-            "time": "2026-05-02T11:22:04+00:00"
+            "time": "2026-05-11T10:46:54+00:00"
         },
         {
             "name": "laravel/cashier",
@@ -4631,16 +4631,16 @@
         },
         {
             "name": "phpseclib/phpseclib",
-            "version": "3.0.51",
+            "version": "3.0.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "d59c94077f9c9915abb51ddb52ce85188ece1748"
+                "reference": "2adaefc83df2ec548558307690f376dd7d4f4fce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/d59c94077f9c9915abb51ddb52ce85188ece1748",
-                "reference": "d59c94077f9c9915abb51ddb52ce85188ece1748",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/2adaefc83df2ec548558307690f376dd7d4f4fce",
+                "reference": "2adaefc83df2ec548558307690f376dd7d4f4fce",
                 "shasum": ""
             },
             "require": {
@@ -4721,7 +4721,7 @@
             ],
             "support": {
                 "issues": "https://github.com/phpseclib/phpseclib/issues",
-                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.51"
+                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.52"
             },
             "funding": [
                 {
@@ -4737,7 +4737,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-10T01:33:53+00:00"
+            "time": "2026-04-27T07:02:15+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",
