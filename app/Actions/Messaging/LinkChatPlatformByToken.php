@@ -17,7 +17,7 @@ final readonly class LinkChatPlatformByToken
             ->with('user')
             ->where('platform', $platform)
             ->where('linking_token', $token)
-            ->where('token_expires_at', '>', now())
+            ->whereFuture('token_expires_at')
             ->first();
 
         if ($pending === null || $pending->user === null) {

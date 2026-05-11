@@ -135,7 +135,7 @@ final class UserChatPlatformLink extends Model
     protected function pendingLink(Builder $query): void
     {
         $query->whereNotNull('linking_token')
-            ->where('token_expires_at', '>', now())
+            ->whereFuture('token_expires_at')
             ->whereNull('linked_at');
     }
 }

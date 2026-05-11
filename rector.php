@@ -7,6 +7,7 @@ use Rector\CodingStyle\Rector\ClassMethod\MakeInheritedMethodVisibilitySameAsPar
 use Rector\CodingStyle\Rector\Use_\SeparateMultiUseImportsRector;
 use Rector\Config\RectorConfig;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
+use RectorLaravel\Rector\MethodCall\DateWhereClauseToShorthandRector;
 use RectorLaravel\Set\LaravelSetList;
 use RectorLaravel\Set\LaravelSetProvider;
 
@@ -54,4 +55,7 @@ return RectorConfig::configure()
         earlyReturn: true,
         codingStyle: true,
     )
+    ->withRules([
+        DateWhereClauseToShorthandRector::class,
+    ])
     ->withPhpSets();
