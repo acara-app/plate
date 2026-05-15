@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Actions\BuildAiSafeUserProfile;
 use App\Ai\Attributes\AiToolSensitivity;
-use App\Contracts\Actions\GetsUserProfileContext;
+use App\Data\Ai\AiSafeUserProfileData;
 use App\Enums\DataSensitivity;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -16,6 +17,10 @@ use Laravel\Ai\Tools\Request;
 #[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class GetUserProfile implements Tool
 {
+    public function __construct(
+        private BuildAiSafeUserProfile $profileData,
+    ) {}
+
     public function name(): string
     {
         return 'get_user_profile';
@@ -23,7 +28,7 @@ final readonly class GetUserProfile implements Tool
 
     public function description(): string
     {
-        return "Retrieve the current user's profile information: biometrics, dietary preferences, and goals. Use this when you need specific user data to provide personalized advice.";
+        return "Retrieve the current user's AI-safe profile information. Use the smallest relevant section before giving personalized nutrition, fitness, health-condition, allergy, medication, household, calorie, macro, or meal advice.";
     }
 
     public function handle(Request $request): string
@@ -40,32 +45,20 @@ final readonly class GetUserProfile implements Tool
         /** @var string $section */
         $section = $request['section'] ?? 'all';
 
-        $context = resolve(GetsUserProfileContext::class)->handle($user);
-
-        /** @var array<string, mixed>|null $rawData */
-        $rawData = $context['raw_data'] ?? null;
+        $profileData = $this->profileData->handle($user);
 
         if ($section === 'all') {
             return (string) json_encode([
                 'success' => true,
-                'onboarding_completed' => $context['onboarding_completed'],
-                'missing_data' => $context['missing_data'],
-                'profile' => $rawData,
+                'onboarding_completed' => $profileData->onboardingCompleted,
+                'missing_data' => $profileData->missingData,
+                'profile' => $profileData->toArray(),
             ]);
         }
 
-        if (! is_array($rawData)) {
+        if (! $profileData->hasSection($section)) {
             return (string) json_encode([
-                'error' => 'Profile data not available',
-                'profile' => null,
-            ]);
-        }
-
-        $sectionData = $rawData[$section] ?? null;
-
-        if ($sectionData === null) {
-            return (string) json_encode([
-                'error' => sprintf("Section '%s' not found. Available sections: biometrics, dietary_preferences, goals", $section),
+                'error' => sprintf("Section '%s' not found. Available sections: %s", $section, implode(', ', AiSafeUserProfileData::supportedSections())),
                 'profile' => null,
             ]);
         }
@@ -73,7 +66,7 @@ final readonly class GetUserProfile implements Tool
         return (string) json_encode([
             'success' => true,
             'section' => $section,
-            'data' => $sectionData,
+            'data' => $profileData->section($section),
         ]);
     }
 
@@ -84,8 +77,8 @@ final readonly class GetUserProfile implements Tool
     {
         return [
             'section' => $schema->string()
-                ->enum(['all', 'biometrics', 'dietary_preferences', 'goals'])
-                ->description('Which section of the profile to retrieve. Use "all" for complete profile, or specify a section for specific data.')
+                ->enum(AiSafeUserProfileData::supportedSections())
+                ->description('Which profile section to retrieve. Use the smallest relevant section first; use "safety" for allergies, health conditions, medications, and household constraints; use "all" only when the request spans multiple profile areas.')
                 ->required()
                 ->nullable(),
         ];
