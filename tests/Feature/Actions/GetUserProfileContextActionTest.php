@@ -2,14 +2,22 @@
 
 declare(strict_types=1);
 
+use App\Actions\BuildAiSafeUserProfile;
 use App\Actions\GetUserProfileContextAction;
+use App\Data\Ai\AiSafeUserProfileData;
 use App\Enums\BloodType;
 use App\Enums\DietType;
 use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\UserProfileAttribute;
+use App\Services\Ai\UserProfileContextFormatter;
 
-covers(GetUserProfileContextAction::class);
+covers([
+    AiSafeUserProfileData::class,
+    BuildAiSafeUserProfile::class,
+    GetUserProfileContextAction::class,
+    UserProfileContextFormatter::class,
+]);
 
 beforeEach(function (): void {
     $this->action = resolve(GetUserProfileContextAction::class);
@@ -46,7 +54,14 @@ it('returns complete profile data for onboarded user', function (): void {
 
     expect($result)
         ->onboarding_completed->toBeTrue()
-        ->raw_data->toHaveKeys(['biometrics', 'dietary_preferences', 'goals']);
+        ->raw_data->toHaveKeys([
+            'biometrics',
+            'dietary_preferences',
+            'goals',
+            'health_conditions',
+            'medications',
+            'household',
+        ]);
     expect($result['raw_data']['biometrics'])
         ->toHaveKeys(['age', 'height_cm', 'weight_kg', 'sex', 'bmi', 'bmr', 'tdee']);
 });
@@ -128,7 +143,7 @@ it('identifies missing dietary preferences', function (): void {
     expect($result['missing_data'])->toContain('dietary_preferences');
 });
 
-it('never exposes medications in raw_data even when the user has them', function (): void {
+it('includes medications in the AI-safe profile sections without model internals', function (): void {
     $user = User::factory()->create();
     $profile = UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -144,13 +159,27 @@ it('never exposes medications in raw_data even when the user has them', function
 
     $result = $this->action->handle($user);
 
-    expect($result['raw_data'])->not->toHaveKey('medications');
+    expect($result['raw_data']['medications'])
+        ->toHaveCount(1)
+        ->and($result['raw_data']['medications'][0])
+        ->toMatchArray([
+            'category' => 'medication',
+            'name' => 'Metformin',
+            'metadata' => [
+                'dosage' => '500mg',
+                'frequency' => 'twice daily',
+                'purpose' => 'Blood sugar control',
+            ],
+        ])
+        ->not->toHaveKeys(['id', 'user_profile_id', 'created_at', 'updated_at']);
+
     expect($result['context'])
-        ->not->toContain('MEDICATIONS')
-        ->not->toContain('Metformin');
+        ->toContain('MEDICATIONS')
+        ->toContain('Metformin')
+        ->toContain('500mg');
 });
 
-it('never exposes health_conditions in raw_data even when the user has them', function (): void {
+it('includes health conditions in the AI-safe profile sections', function (): void {
     $user = User::factory()->create();
     $profile = UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -163,13 +192,22 @@ it('never exposes health_conditions in raw_data even when the user has them', fu
 
     $result = $this->action->handle($user);
 
-    expect($result['raw_data'])->not->toHaveKey('health_conditions');
+    expect($result['raw_data']['health_conditions'])
+        ->toHaveCount(1)
+        ->and($result['raw_data']['health_conditions'][0])
+        ->toMatchArray([
+            'category' => 'health_condition',
+            'name' => 'Type 2 Diabetes',
+            'notes' => 'Recently diagnosed',
+        ]);
+
     expect($result['context'])
-        ->not->toContain('HEALTH CONDITIONS')
-        ->not->toContain('Type 2 Diabetes');
+        ->toContain('HEALTH CONDITIONS')
+        ->toContain('Type 2 Diabetes')
+        ->toContain('Recently diagnosed');
 });
 
-it('never exposes household_context in raw_data or AI-facing context', function (): void {
+it('keeps household context out of prompt-formatted context unless explicitly requested', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -179,7 +217,11 @@ it('never exposes household_context in raw_data or AI-facing context', function 
 
     $result = $this->action->handle($user);
 
-    expect($result['raw_data'])->not->toHaveKey('household_context');
+    expect($result['raw_data']['household'])->toHaveKey(
+        'summary',
+        'My husband Bataa is 38, has type 2 diabetes. Kids: Tana (12, peanut allergy).',
+    );
+
     expect($result['context'])
         ->not->toContain('HOUSEHOLD/FAMILY')
         ->not->toContain('Bataa');
@@ -210,7 +252,7 @@ it('never exposes date_of_birth or blood_type in raw_data or AI-facing context',
         ->not->toContain('A+');
 });
 
-it('exposes additional_goals in raw_data but never in AI-facing context', function (): void {
+it('includes additional goals in explicit profile prompt context', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->create([
         'user_id' => $user->id,
@@ -226,6 +268,31 @@ it('exposes additional_goals in raw_data but never in AI-facing context', functi
     expect($result['context'])
         ->toContain('Diet Type: keto')
         ->toContain('Recommended Macros: 5% carbs, 20% protein, 75% fat')
-        ->not->toContain('Additional Goals')
-        ->not->toContain('Build muscle and stay hydrated');
+        ->toContain('Additional Goals: Build muscle and stay hydrated');
+});
+
+it('builds a safety section for tool calls from allergies health conditions medications and household', function (): void {
+    $user = User::factory()->create();
+    $profile = UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'household_context' => 'My child has a peanut allergy.',
+    ]);
+    UserProfileAttribute::factory()->allergy('Peanuts')->create([
+        'user_profile_id' => $profile->id,
+    ]);
+    UserProfileAttribute::factory()->healthCondition('Type 2 Diabetes')->create([
+        'user_profile_id' => $profile->id,
+    ]);
+    UserProfileAttribute::factory()->medication('Metformin')->create([
+        'user_profile_id' => $profile->id,
+    ]);
+
+    $result = resolve(BuildAiSafeUserProfile::class)->handle($user);
+
+    expect($result->section('safety'))
+        ->toHaveKeys(['allergies', 'health_conditions', 'medications', 'household'])
+        ->and($result->section('safety')['allergies'][0]['name'])->toBe('Peanuts')
+        ->and($result->section('safety')['health_conditions'][0]['name'])->toBe('Type 2 Diabetes')
+        ->and($result->section('safety')['medications'][0]['name'])->toBe('Metformin')
+        ->and($result->section('safety')['household']['summary'])->toBe('My child has a peanut allergy.');
 });

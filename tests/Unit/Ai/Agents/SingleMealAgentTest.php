@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Actions\GetUserProfileContextAction;
 use App\Ai\Agents\SingleMealAgent;
 use App\Ai\SingleMealPromptBuilder;
 use App\Enums\GoalChoice;
@@ -26,8 +25,7 @@ beforeEach(function (): void {
         'derived_activity_multiplier' => 1.5,
     ]);
 
-    $profileContext = new GetUserProfileContextAction;
-    $this->promptBuilder = new SingleMealPromptBuilder($profileContext);
+    $this->promptBuilder = resolve(SingleMealPromptBuilder::class);
     $this->agent = new SingleMealAgent($this->promptBuilder);
 });
 

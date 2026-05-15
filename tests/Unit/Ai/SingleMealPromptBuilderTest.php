@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Actions\GetUserProfileContextAction;
 use App\Ai\SingleMealPromptBuilder;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
@@ -13,8 +12,7 @@ covers(SingleMealPromptBuilder::class);
 beforeEach(function (): void {
     $this->user = User::factory()->create();
 
-    $this->action = new GetUserProfileContextAction;
-    $this->builder = new SingleMealPromptBuilder($this->action);
+    $this->builder = resolve(SingleMealPromptBuilder::class);
 });
 
 it('builds prompt with all parameters', function (): void {

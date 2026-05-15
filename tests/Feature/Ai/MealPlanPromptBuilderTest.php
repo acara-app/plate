@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\MealPlanPromptBuilder;
+use App\Enums\BloodType;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
@@ -60,6 +61,34 @@ it('generates meal plan context for user with complete profile', function (): vo
         ->toContain('BMI')
         ->toContain('TDEE')
         ->toContain('Daily Calorie Target');
+});
+
+it('excludes unrelated profile fields and household free text from meal plan prompts', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->create([
+        'user_id' => $user->id,
+        'age' => 30,
+        'date_of_birth' => '1996-04-04',
+        'blood_type' => BloodType::APositive,
+        'height' => 175,
+        'weight' => 80,
+        'sex' => Sex::Male,
+        'goal_choice' => GoalChoice::WeightLoss->value,
+        'household_context' => 'My husband Bataa likes extra spicy dinners.',
+    ]);
+
+    $builder = resolve(MealPlanPromptBuilder::class);
+    $result = $builder->handleForDay($user, 1, 7);
+
+    expect($result)
+        ->toContain('Age')
+        ->toContain('30 years')
+        ->not->toContain('Date of Birth')
+        ->not->toContain('1996-04-04')
+        ->not->toContain('Blood Type')
+        ->not->toContain('A+')
+        ->not->toContain('Bataa')
+        ->not->toContain('extra spicy dinners');
 });
 
 it('handles user with minimal profile data', function (): void {

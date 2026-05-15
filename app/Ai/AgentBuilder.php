@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Ai;
 
-use App\Actions\GetUserProfileContextAction;
 use App\Contracts\Memory\ManagesMemoryContext;
 use App\Contracts\Skills\LoadsSkills;
 use App\Enums\DataSensitivity;
@@ -42,7 +41,6 @@ final readonly class AgentBuilder
 
     public function buildInstructions(AgentPayload $payload, ?User $user): string
     {
-        $profileData = $this->getProfileData($user);
         $languageCode = $user instanceof User ? ($user->locale ?? 'en') : 'en';
         $timezone = $this->resolveTimezone($user);
 
@@ -51,7 +49,6 @@ final readonly class AgentBuilder
             : collect();
 
         $instructions = view('ai.prompts.altani-static', [
-            'profileContext' => $profileData['context'],
             'currentTime' => now($timezone)->format('Y-m-d H:i (l)').' ('.$timezone.')',
             'chatMode' => $payload->mode->value,
             'languageLabel' => LanguageUtil::get($languageCode) ?? 'English',
@@ -128,20 +125,6 @@ final readonly class AgentBuilder
                 'content' => $history->content,
             ])
             ->all();
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function getProfileData(?User $user): array
-    {
-        if (! $user instanceof User) {
-            return [
-                'context' => 'No user context available.',
-            ];
-        }
-
-        return resolve(GetUserProfileContextAction::class)->handle($user);
     }
 
     private function resolveTimezone(?User $user): string

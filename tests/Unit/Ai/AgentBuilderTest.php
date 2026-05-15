@@ -38,7 +38,7 @@ describe('build', function (): void {
             ->and($result['tools'])->toBeArray();
     });
 
-    it('includes profile context in instructions', function (): void {
+    it('does not include raw profile context in instructions', function (): void {
         $user = User::factory()->create();
         $payload = new AgentPayload(
             userId: $user->id,
@@ -48,7 +48,25 @@ describe('build', function (): void {
 
         $result = $this->builder->build($payload, $user);
 
-        expect($result['instructions'])->toContain('You are Altani');
+        expect($result['instructions'])
+            ->toContain('You are Altani')
+            ->not->toContain('USER PROFILE DATA');
+    });
+
+    it('instructs the agent to fetch profile context with the profile tool before personalizing advice', function (): void {
+        $user = User::factory()->create();
+        $payload = new AgentPayload(
+            userId: $user->id,
+            message: 'How much protein should I eat?',
+            mode: AgentMode::Ask,
+        );
+
+        $result = $this->builder->build($payload, $user);
+
+        expect($result['instructions'])
+            ->toContain('call `get_user_profile`')
+            ->toContain('smallest relevant section')
+            ->toContain('Use `all` only when a request spans multiple profile areas');
     });
 
     it('includes chat mode in instructions', function (): void {
@@ -156,5 +174,8 @@ it('handles null user gracefully', function (): void {
 
     $result = $this->builder->build($payload, null);
 
-    expect($result['instructions'])->toContain('No user context available');
+    expect($result['instructions'])
+        ->toContain('You are Altani')
+        ->not->toContain('No user context available')
+        ->not->toContain('USER PROFILE DATA');
 });
