@@ -1,7 +1,6 @@
 import UserProfileController from '@/actions/App/Http/Controllers/UserProfileController';
 import { send } from '@/routes/verification';
 import { type BreadcrumbItem } from '@/types';
-import { Transition } from '@headlessui/react';
 import { Form, Head, Link } from '@inertiajs/react';
 
 import DeleteUser from '@/components/delete-user';
@@ -56,7 +55,7 @@ export default function Edit({ status }: { status?: string }) {
                         }}
                         className="space-y-6"
                     >
-                        {({ processing, recentlySuccessful, errors }) => (
+                        {({ processing, errors }) => (
                             <>
                                 <div className="grid gap-2">
                                     <Label htmlFor="name">
@@ -169,18 +168,6 @@ export default function Edit({ status }: { status?: string }) {
                                     >
                                         {t('user_profile.save_button')}
                                     </Button>
-
-                                    <Transition
-                                        show={recentlySuccessful}
-                                        enter="transition ease-in-out"
-                                        enterFrom="opacity-0"
-                                        leave="transition ease-in-out"
-                                        leaveTo="opacity-0"
-                                    >
-                                        <p className="text-sm text-neutral-600">
-                                            {t('user_profile.saved')}
-                                        </p>
-                                    </Transition>
                                 </div>
                             </>
                         )}

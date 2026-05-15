@@ -1,5 +1,6 @@
 import '../css/app.css';
 
+import { Toaster } from '@/components/ui/sonner';
 import { createInertiaApp, router } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
 import { I18nextProvider } from 'react-i18next';
@@ -33,6 +34,7 @@ createInertiaApp({
         const app = (
             <I18nextProvider i18n={i18n}>
                 <App {...props} />
+                <Toaster />
             </I18nextProvider>
         );
 
