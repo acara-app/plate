@@ -45,7 +45,7 @@
                 <ul class="mt-6 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#6E665C]">
                     <li class="inline-flex items-center gap-2">
                         <span class="size-1.5 bg-[#C4623A]" aria-hidden="true"></span>
-                        End-to-end encrypted
+                        End-to-End Encrypted
                     </li>
                     <li class="inline-flex items-center gap-2">
                         <span class="size-1.5 bg-[#C4623A]" aria-hidden="true"></span>
