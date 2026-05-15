@@ -30,6 +30,8 @@ final readonly class UserNotificationsController
             'settings' => $request->validated(),
         ]);
 
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Notification preferences saved.')]);
+
         return to_route('user-notifications.edit')->with('status', 'notification-settings-updated');
     }
 }
