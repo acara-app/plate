@@ -8,7 +8,6 @@ import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import household from '@/routes/household';
 import { type BreadcrumbItem } from '@/types';
-import { Transition } from '@headlessui/react';
 import { Form, Head } from '@inertiajs/react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -48,7 +47,7 @@ export default function Edit({
                         }}
                         className="space-y-6"
                     >
-                        {({ processing, recentlySuccessful, errors }) => (
+                        {({ processing, errors }) => (
                             <>
                                 <div className="grid gap-2">
                                     <Label htmlFor="household_context">
@@ -81,18 +80,6 @@ export default function Edit({
                                     <Button disabled={processing}>
                                         {t('household.save_button')}
                                     </Button>
-
-                                    <Transition
-                                        show={recentlySuccessful}
-                                        enter="transition ease-in-out"
-                                        enterFrom="opacity-0"
-                                        leave="transition ease-in-out"
-                                        leaveTo="opacity-0"
-                                    >
-                                        <p className="text-sm text-neutral-600">
-                                            {t('household.saved')}
-                                        </p>
-                                    </Transition>
                                 </div>
                             </>
                         )}

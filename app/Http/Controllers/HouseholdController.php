@@ -28,6 +28,8 @@ final readonly class HouseholdController
 
         $profile->update($request->validated());
 
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Household context saved.')]);
+
         return to_route('household.edit');
     }
 }
