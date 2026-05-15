@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\UserProfileAttribute;
 use Laravel\Ai\Tools\Request;
+use Pest\Mixins\Expectation;
 use Tests\Helpers\TestJsonSchema;
 
 covers(GetUserProfile::class);
@@ -121,23 +122,23 @@ it('returns expanded profile sections individually', function (string $section, 
 })->with([
     'dietary preferences' => [
         'dietary_preferences',
-        fn (array $data) => expect($data[0])->toHaveKey('name', 'Vegetarian'),
+        fn (array $data): Expectation => expect($data[0])->toHaveKey('name', 'Vegetarian'),
     ],
     'goals' => [
         'goals',
-        fn (array $data) => expect($data)->toHaveKey('primary_goal', 'weight_loss'),
+        fn (array $data): Expectation => expect($data)->toHaveKey('primary_goal', 'weight_loss'),
     ],
     'health conditions' => [
         'health_conditions',
-        fn (array $data) => expect($data[0])->toHaveKey('name', 'Type 2 Diabetes'),
+        fn (array $data): Expectation => expect($data[0])->toHaveKey('name', 'Type 2 Diabetes'),
     ],
     'medications' => [
         'medications',
-        fn (array $data) => expect($data[0])->toHaveKey('name', 'Metformin'),
+        fn (array $data): Expectation => expect($data[0])->toHaveKey('name', 'Metformin'),
     ],
     'household' => [
         'household',
-        fn (array $data) => expect($data)->toHaveKey('summary', 'Cooking for two adults.'),
+        fn (array $data): Expectation => expect($data)->toHaveKey('summary', 'Cooking for two adults.'),
     ],
 ]);
 
