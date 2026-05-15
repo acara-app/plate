@@ -146,7 +146,7 @@ final readonly class BuildAiSafeUserProfile
             $missing[] = 'primary_goal';
         }
 
-        if (! $attributes->contains(fn (UserProfileAttribute $attribute): bool => $this->isDietaryAttribute($attribute))) {
+        if ($attributes->doesntContain(fn (UserProfileAttribute $attribute): bool => $this->isDietaryAttribute($attribute))) {
             $missing[] = 'dietary_preferences';
         }
 
