@@ -44,7 +44,8 @@ final readonly class SocialiteController
 
             return redirect()->intended(route('dashboard', absolute: false));
 
-        } catch (Throwable) {
+        } catch (Throwable $e) {
+            report($e);
 
             return to_route('login')->with('error', 'Something went wrong!');
         }

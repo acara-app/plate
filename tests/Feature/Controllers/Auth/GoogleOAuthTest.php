@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\SocialiteController;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Exceptions;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
@@ -199,6 +200,8 @@ it('handles missing name from Google gracefully for existing users', function ()
 })->group('oauth');
 
 it('redirects to login with error on OAuth exception', function (): void {
+    Exceptions::fake();
+
     $this->provider->exception = new Exception('OAuth Error');
 
     $response = get(route('auth.google.callback'));
@@ -207,6 +210,8 @@ it('redirects to login with error on OAuth exception', function (): void {
     $response->assertSessionHas('error', 'Something went wrong!');
 
     expect(Auth::check())->toBeFalse();
+
+    Exceptions::assertReported(Exception::class);
 })->group('oauth');
 
 it('handles duplicate Google ID gracefully', function (): void {
