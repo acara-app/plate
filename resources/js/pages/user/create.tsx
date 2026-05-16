@@ -5,25 +5,36 @@ import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
 import InputError from '@/components/input-error';
+import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 import { useTranslation } from 'react-i18next';
 
+type UmamiWindow = Window & { umami?: { track: (event: string) => void } };
+
+const trackField =
+    (event: string): (() => void) =>
+    () => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
+        (window as UmamiWindow).umami?.track(event);
+    };
+
 export default function Register() {
     const { t } = useTranslation('auth');
 
     return (
-        <AuthLayout
-            title={t('register.title')}
-            description={t('register.description')}
-        >
+        <AuthLayout title={t('register.title')}>
             <Head title={t('register.page_title')} />
             <Form
                 {...UserController.store.form()}
-                resetOnSuccess={['password', 'password_confirmation']}
+                resetOnSuccess={['password']}
                 disableWhileProcessing
                 className="flex flex-col gap-6"
             >
@@ -51,11 +62,11 @@ export default function Register() {
                                     id="name"
                                     type="text"
                                     required
-                                    autoFocus
-                                    tabIndex={1}
                                     autoComplete="name"
                                     name="name"
+                                    enterKeyHint="next"
                                     placeholder={t('register.name_placeholder')}
+                                    onBlur={trackField('signup_field_blur_name')}
                                 />
                                 <InputError
                                     message={errors.name}
@@ -71,12 +82,14 @@ export default function Register() {
                                     id="email"
                                     type="email"
                                     required
-                                    tabIndex={2}
                                     autoComplete="email"
+                                    inputMode="email"
                                     name="email"
+                                    enterKeyHint="next"
                                     placeholder={t(
                                         'register.email_placeholder',
                                     )}
+                                    onBlur={trackField('signup_field_blur_email')}
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -85,73 +98,66 @@ export default function Register() {
                                 <Label htmlFor="password">
                                     {t('register.password')}
                                 </Label>
-                                <Input
+                                <PasswordInput
                                     id="password"
-                                    type="password"
                                     required
-                                    tabIndex={3}
                                     autoComplete="new-password"
                                     name="password"
+                                    enterKeyHint="send"
                                     placeholder={t(
                                         'register.password_placeholder',
                                     )}
+                                    onBlur={trackField(
+                                        'signup_field_blur_password',
+                                    )}
                                 />
+                                <p className="text-xs text-muted-foreground">
+                                    {t('register.password_hint')}
+                                </p>
                                 <InputError message={errors.password} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation">
-                                    {t('register.password_confirmation')}
-                                </Label>
-                                <Input
-                                    id="password_confirmation"
-                                    type="password"
-                                    required
-                                    tabIndex={4}
-                                    autoComplete="new-password"
-                                    name="password_confirmation"
-                                    placeholder={t(
-                                        'register.password_confirmation_placeholder',
-                                    )}
-                                />
-                                <InputError
-                                    message={errors.password_confirmation}
-                                />
-                            </div>
-
-                            <div className="grid gap-2">
                                 <div className="flex items-start gap-2">
-                                    <input
+                                    <Checkbox
                                         id="accepted_disclaimer"
-                                        type="checkbox"
                                         name="accepted_disclaimer"
                                         value="1"
-                                        tabIndex={5}
-                                        className="mt-0.5 size-4 shrink-0 rounded border border-input accent-primary"
+                                        className="mt-0.5"
+                                        onCheckedChange={trackField(
+                                            'signup_field_change_disclaimer',
+                                        )}
                                     />
                                     <Label
                                         htmlFor="accepted_disclaimer"
-                                        className="text-xs font-normal text-muted-foreground"
+                                        className="text-xs leading-snug font-normal text-muted-foreground"
                                     >
-                                        {t('register.disclaimer_acceptance')}{' '}
-                                        <a
-                                            href={terms.url()}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="underline underline-offset-4 hover:text-foreground"
-                                        >
-                                            {t('register.terms_of_service')}
-                                        </a>{' '}
-                                        {t('register.and')}{' '}
-                                        <a
-                                            href={privacy.url()}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="underline underline-offset-4 hover:text-foreground"
-                                        >
-                                            {t('register.privacy_policy')}
-                                        </a>
-                                        .
+                                        <span className="block">
+                                            {t('register.disclaimer_acceptance')}
+                                        </span>
+                                        <span className="mt-1 block">
+                                            {t(
+                                                'register.disclaimer_terms_prefix',
+                                            )}{' '}
+                                            <a
+                                                href={terms.url()}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="underline underline-offset-4 hover:text-foreground"
+                                            >
+                                                {t('register.terms_of_service')}
+                                            </a>{' '}
+                                            {t('register.and')}{' '}
+                                            <a
+                                                href={privacy.url()}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="underline underline-offset-4 hover:text-foreground"
+                                            >
+                                                {t('register.privacy_policy')}
+                                            </a>
+                                            .
+                                        </span>
                                     </Label>
                                 </div>
                                 <InputError
@@ -161,8 +167,8 @@ export default function Register() {
 
                             <Button
                                 type="submit"
+                                variant="outline"
                                 className="mt-2 w-full"
-                                tabIndex={6}
                                 data-test="register-user-button"
                                 data-umami-event="signup_form_submit"
                                 data-umami-event-method="email"
@@ -176,7 +182,7 @@ export default function Register() {
 
                         <div className="text-center text-sm text-muted-foreground">
                             {t('register.already_have_account')}{' '}
-                            <TextLink href={login()} tabIndex={7}>
+                            <TextLink href={login()}>
                                 {t('register.log_in')}
                             </TextLink>
                         </div>

@@ -31,7 +31,6 @@ final class CreateUserRequest extends FormRequest
             ],
             'password' => [
                 'required',
-                'confirmed',
                 Password::defaults(),
             ],
             'accepted_disclaimer' => ['required', 'accepted'],
