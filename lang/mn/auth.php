@@ -21,7 +21,7 @@ return [
 
     'register' => [
         'page_title' => 'Acara Plate бүртгэл үүсгэх | Аяллаа эхлүүлээрэй',
-        'title' => 'Бүртгэл үүсгэх',
+        'title' => 'Acara-д бүртгүүлэх',
         'name' => 'Нэр',
         'name_placeholder' => 'Бүтэн нэр',
         'email' => 'Имэйл хаяг',

@@ -21,7 +21,7 @@ return [
 
     'register' => [
         'page_title' => 'Create Your Acara Plate Account | Start Your Journey',
-        'title' => 'Create an account',
+        'title' => 'Sign up for Acara',
         'name' => 'Name',
         'name_placeholder' => 'Full name',
         'email' => 'Email address',

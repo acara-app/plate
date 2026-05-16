@@ -21,7 +21,7 @@ return [
 
     'register' => [
         'page_title' => 'Créer votre compte Acara Plate | Commencez votre parcours',
-        'title' => 'Créer un compte',
+        'title' => 'Inscrivez-vous à Acara',
         'name' => 'Nom',
         'name_placeholder' => 'Nom complet',
         'email' => 'Adresse e-mail',
