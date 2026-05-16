@@ -14,17 +14,7 @@ import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 import { useTranslation } from 'react-i18next';
 
-type UmamiWindow = Window & { umami?: { track: (event: string) => void } };
-
-const trackField =
-    (event: string): (() => void) =>
-    () => {
-        if (typeof window === 'undefined') {
-            return;
-        }
-
-        (window as UmamiWindow).umami?.track(event);
-    };
+const trackField = (event: string) => () => window.umami?.track(event);
 
 export default function Register() {
     const { t } = useTranslation('auth');
