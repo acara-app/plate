@@ -31,6 +31,12 @@ it('may register a new user', function (): void {
         ]);
 
     $response->assertRedirectToRoute('dashboard');
+    $response->assertInertiaFlash('analytics', [
+        'name' => 'signup_completed',
+        'properties' => [
+            'method' => 'email',
+        ],
+    ]);
 
     $user = User::query()->where('email', 'test@example.com')->first();
 

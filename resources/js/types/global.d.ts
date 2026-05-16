@@ -18,7 +18,10 @@ declare module '@inertiajs/core' {
 declare global {
     interface Window {
         umami?: {
-            track: (event: string) => void;
+            track: (
+                event: string,
+                properties?: Record<string, boolean | number | string | null>,
+            ) => void;
         };
     }
 }

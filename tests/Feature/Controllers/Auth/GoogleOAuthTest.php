@@ -71,6 +71,12 @@ it('creates new user from Google OAuth callback with mocked provider', function 
     $response = get(route('auth.google.callback'));
 
     $response->assertRedirectToRoute('dashboard');
+    $response->assertInertiaFlash('analytics', [
+        'name' => 'signup_completed',
+        'properties' => [
+            'method' => 'google',
+        ],
+    ]);
 
     assertDatabaseHas('users', [
         'google_id' => 'google123',
@@ -116,6 +122,7 @@ it('links Google account to existing user by email and redirects to chat', funct
     $response = get(route('auth.google.callback'));
 
     $response->assertRedirectToRoute('dashboard');
+    $response->assertInertiaFlashMissing('analytics');
 
     $existingUser->refresh();
     expect($existingUser->google_id)->toBe('google456')
@@ -144,6 +151,7 @@ it('updates existing Google user information on login and redirects to chat', fu
     $response = get(route('auth.google.callback'));
 
     $response->assertRedirectToRoute('dashboard');
+    $response->assertInertiaFlashMissing('analytics');
 
     $existingUser->refresh();
     expect($existingUser->email)->toBe('newmail@example.com')

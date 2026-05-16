@@ -14,7 +14,8 @@ import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 import { useTranslation } from 'react-i18next';
 
-const trackField = (event: string) => () => window.umami?.track(event);
+const trackSignupEmailBlur = () =>
+    window.umami?.track('signup_field_blur_email');
 
 export default function Register() {
     const { t } = useTranslation('auth');
@@ -56,7 +57,6 @@ export default function Register() {
                                     name="name"
                                     enterKeyHint="next"
                                     placeholder={t('register.name_placeholder')}
-                                    onBlur={trackField('signup_field_blur_name')}
                                 />
                                 <InputError
                                     message={errors.name}
@@ -79,7 +79,7 @@ export default function Register() {
                                     placeholder={t(
                                         'register.email_placeholder',
                                     )}
-                                    onBlur={trackField('signup_field_blur_email')}
+                                    onBlur={trackSignupEmailBlur}
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -97,9 +97,6 @@ export default function Register() {
                                     placeholder={t(
                                         'register.password_placeholder',
                                     )}
-                                    onBlur={trackField(
-                                        'signup_field_blur_password',
-                                    )}
                                 />
                                 <p className="text-xs text-muted-foreground">
                                     {t('register.password_hint')}
@@ -114,16 +111,15 @@ export default function Register() {
                                         name="accepted_disclaimer"
                                         value="1"
                                         className="mt-0.5"
-                                        onCheckedChange={trackField(
-                                            'signup_field_change_disclaimer',
-                                        )}
                                     />
                                     <Label
                                         htmlFor="accepted_disclaimer"
                                         className="text-xs leading-snug font-normal text-muted-foreground"
                                     >
                                         <span className="block">
-                                            {t('register.disclaimer_acceptance')}
+                                            {t(
+                                                'register.disclaimer_acceptance',
+                                            )}
                                         </span>
                                         <span className="mt-1 block">
                                             {t(
