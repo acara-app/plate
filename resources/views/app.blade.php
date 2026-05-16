@@ -63,6 +63,10 @@
 
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
+
+        @production
+            <script defer src="https://cloud.umami.is/script.js" data-website-id="00659ffa-f13b-411a-81a7-76d2bd81d2c6"></script>
+        @endproduction
     </head>
     <body class="font-sans antialiased">
         @inertia

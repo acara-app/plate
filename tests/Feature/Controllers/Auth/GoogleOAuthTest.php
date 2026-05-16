@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\SocialiteController;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Exceptions;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
@@ -71,6 +72,12 @@ it('creates new user from Google OAuth callback with mocked provider', function 
     $response = get(route('auth.google.callback'));
 
     $response->assertRedirectToRoute('dashboard');
+    $response->assertInertiaFlash('analytics', [
+        'name' => 'signup_completed',
+        'properties' => [
+            'method' => 'google',
+        ],
+    ]);
 
     assertDatabaseHas('users', [
         'google_id' => 'google123',
@@ -116,6 +123,7 @@ it('links Google account to existing user by email and redirects to chat', funct
     $response = get(route('auth.google.callback'));
 
     $response->assertRedirectToRoute('dashboard');
+    $response->assertInertiaFlashMissing('analytics');
 
     $existingUser->refresh();
     expect($existingUser->google_id)->toBe('google456')
@@ -144,6 +152,7 @@ it('updates existing Google user information on login and redirects to chat', fu
     $response = get(route('auth.google.callback'));
 
     $response->assertRedirectToRoute('dashboard');
+    $response->assertInertiaFlashMissing('analytics');
 
     $existingUser->refresh();
     expect($existingUser->email)->toBe('newmail@example.com')
@@ -191,6 +200,8 @@ it('handles missing name from Google gracefully for existing users', function ()
 })->group('oauth');
 
 it('redirects to login with error on OAuth exception', function (): void {
+    Exceptions::fake();
+
     $this->provider->exception = new Exception('OAuth Error');
 
     $response = get(route('auth.google.callback'));
@@ -199,6 +210,8 @@ it('redirects to login with error on OAuth exception', function (): void {
     $response->assertSessionHas('error', 'Something went wrong!');
 
     expect(Auth::check())->toBeFalse();
+
+    Exceptions::assertReported(Exception::class);
 })->group('oauth');
 
 it('handles duplicate Google ID gracefully', function (): void {
