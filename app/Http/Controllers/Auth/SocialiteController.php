@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Auth;
 use App\Actions\FindOrCreateUserFromGoogleOAuth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 use Throwable;
@@ -32,9 +33,19 @@ final readonly class SocialiteController
 
             Auth::login($user);
 
+            if ($user->wasRecentlyCreated) {
+                Inertia::flash('analytics', [
+                    'name' => 'signup_completed',
+                    'properties' => [
+                        'method' => 'google',
+                    ],
+                ]);
+            }
+
             return redirect()->intended(route('dashboard', absolute: false));
 
-        } catch (Throwable) {
+        } catch (Throwable $e) {
+            report($e);
 
             return to_route('login')->with('error', 'Something went wrong!');
         }

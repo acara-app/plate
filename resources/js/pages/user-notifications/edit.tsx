@@ -1,6 +1,5 @@
 import UserNotificationsController from '@/actions/App/Http/Controllers/UserNotificationsController';
 import { type BreadcrumbItem } from '@/types';
-import { Transition } from '@headlessui/react';
 import { Form, Head } from '@inertiajs/react';
 import { useState } from 'react';
 
@@ -67,7 +66,7 @@ export default function Edit({
                         }}
                         className="space-y-6"
                     >
-                        {({ processing, recentlySuccessful, errors }) => (
+                        {({ processing, errors }) => (
                             <>
                                 <div className="flex items-center justify-between space-x-4">
                                     <div className="flex-1 space-y-1">
@@ -189,18 +188,6 @@ export default function Edit({
                                     <Button type="submit" disabled={processing}>
                                         {t('notifications.save_preferences')}
                                     </Button>
-
-                                    <Transition
-                                        show={recentlySuccessful}
-                                        enter="transition ease-in-out"
-                                        enterFrom="opacity-0"
-                                        leave="transition ease-in-out"
-                                        leaveTo="opacity-0"
-                                    >
-                                        <p className="text-sm text-muted-foreground">
-                                            {t('saved')}.
-                                        </p>
-                                    </Transition>
                                 </div>
                             </>
                         )}

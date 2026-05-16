@@ -63,6 +63,7 @@
         "react-dom": "^19.2.6",
         "react-i18next": "^17.0.8",
         "recharts": "^3.8.1",
+        "sonner": "^2.0.0",
         "streamdown": "^2.5.0",
         "tailwind-merge": "^3.6.0",
         "tailwindcss": "^4.3.0",

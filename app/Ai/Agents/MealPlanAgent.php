@@ -40,9 +40,6 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasStructuredOut
 
     private ?DietType $dietType = null;
 
-    /** @phpstan-ignore property.onlyWritten */
-    private ?User $user = null;
-
     public function __construct(
         private readonly MealPlanPromptBuilder $promptBuilder,
         private readonly AnalyzeGlucoseForNotificationAction $analyzeGlucose,
@@ -135,8 +132,6 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasStructuredOut
         ?GlucoseAnalysisData $glucoseAnalysis = null,
         ?MealPlan $mealPlan = null,
     ): DayMealsData {
-        $this->user = $user;
-
         /** @var string|null $customPrompt */
         $customPrompt = $mealPlan?->metadata['custom_prompt'] ?? null;
 

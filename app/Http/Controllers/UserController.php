@@ -39,6 +39,13 @@ final readonly class UserController
 
         $request->session()->regenerate();
 
+        Inertia::flash('analytics', [
+            'name' => 'signup_completed',
+            'properties' => [
+                'method' => 'email',
+            ],
+        ]);
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

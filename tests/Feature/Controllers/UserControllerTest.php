@@ -27,11 +27,16 @@ it('may register a new user', function (): void {
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password1234',
-            'password_confirmation' => 'password1234',
             'accepted_disclaimer' => '1',
         ]);
 
     $response->assertRedirectToRoute('dashboard');
+    $response->assertInertiaFlash('analytics', [
+        'name' => 'signup_completed',
+        'properties' => [
+            'method' => 'email',
+        ],
+    ]);
 
     $user = User::query()->where('email', 'test@example.com')->first();
 
@@ -49,8 +54,7 @@ it('requires name', function (): void {
     $response = $this->fromRoute('register')
         ->post(route('register.store'), [
             'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'password1234',
         ]);
 
     $response->assertRedirectToRoute('register')
@@ -61,8 +65,7 @@ it('requires email', function (): void {
     $response = $this->fromRoute('register')
         ->post(route('register.store'), [
             'name' => 'Test User',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'password1234',
         ]);
 
     $response->assertRedirectToRoute('register')
@@ -74,8 +77,7 @@ it('requires valid email', function (): void {
         ->post(route('register.store'), [
             'name' => 'Test User',
             'email' => 'not-an-email',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'password1234',
         ]);
 
     $response->assertRedirectToRoute('register')
@@ -89,8 +91,7 @@ it('requires unique email', function (): void {
         ->post(route('register.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'password1234',
         ]);
 
     $response->assertRedirectToRoute('register')
@@ -102,31 +103,6 @@ it('requires password', function (): void {
         ->post(route('register.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
-        ]);
-
-    $response->assertRedirectToRoute('register')
-        ->assertSessionHasErrors('password');
-});
-
-it('requires password confirmation', function (): void {
-    $response = $this->fromRoute('register')
-        ->post(route('register.store'), [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
-        ]);
-
-    $response->assertRedirectToRoute('register')
-        ->assertSessionHasErrors('password');
-});
-
-it('requires matching password confirmation', function (): void {
-    $response = $this->fromRoute('register')
-        ->post(route('register.store'), [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'different-password',
         ]);
 
     $response->assertRedirectToRoute('register')
