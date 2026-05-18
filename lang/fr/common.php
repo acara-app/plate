@@ -157,7 +157,7 @@ return [
         'chat' => [
             'title' => 'Altani',
             'description' => 'Votre coach santé IA personnel pour la gestion du diabète, les conseils nutritionnels et le bien-être quotidien.',
-            'button' => 'Discuter avec Altani',
+            'button' => 'Posez votre question',
             'recent_conversations' => 'Conversations récentes',
             'quick_actions' => [
                 'ask' => 'Poser une question',

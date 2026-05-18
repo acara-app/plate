@@ -156,7 +156,7 @@ return [
         'chat' => [
             'title' => 'Meet Altani',
             'description' => 'Эрүүл мэндийн 24/7 зөвлөх',
-            'button' => 'Чатлах',
+            'button' => 'Асуулт асуух',
             'recent_conversations' => 'Сүүлийн харилцан яриа',
             'quick_actions' => [
                 'ask' => '"Altani"-с асуух',

@@ -156,7 +156,7 @@ return [
         'chat' => [
             'title' => 'Meet Altani',
             'description' => 'Your personal AI health coach for diabetes management, nutrition advice, and daily wellness support.',
-            'button' => 'Chat with Altani',
+            'button' => 'Ask your question',
             'recent_conversations' => 'Recent Conversations',
             'quick_actions' => [
                 'ask' => 'Ask Altani',
