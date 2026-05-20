@@ -55,7 +55,7 @@ final class MobileSyncPairController
 
         $apiToken = $device->user->createToken(
             'mobile-sync:'.$device->id,
-            ['sync:push'],
+            ['sync:push', 'chat:converse'],
         );
 
         return response()->json([

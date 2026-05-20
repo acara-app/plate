@@ -16,3 +16,23 @@ Route::prefix('v2/sync')->group(function (): void {
             ->name('api.v2.sync.health-entries');
     });
 });
+
+Route::prefix('v2/chat')
+    ->middleware(['auth:sanctum', 'abilities:chat:converse'])
+    ->group(function (): void {
+        Route::get('conversations', [ApiV2\ChatController::class, 'index'])
+            ->middleware('throttle:60,1')
+            ->name('api.v2.chat.index');
+
+        Route::get('conversations/{conversation}', [ApiV2\ChatController::class, 'show'])
+            ->middleware('throttle:60,1')
+            ->name('api.v2.chat.show');
+
+        Route::post('conversations/{conversation}/stream', [ApiV2\ChatController::class, 'stream'])
+            ->middleware('throttle:30,1')
+            ->name('api.v2.chat.stream');
+
+        Route::delete('conversations/{conversation}', [ApiV2\ChatController::class, 'destroy'])
+            ->middleware('throttle:30,1')
+            ->name('api.v2.chat.destroy');
+    });
