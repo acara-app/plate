@@ -93,7 +93,7 @@
             "name": "Can I use Altani without Telegram?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Yes! You can also chat with Altani directly on our website. Both options provide the same functionality — choose whichever is more convenient for you."
+                "text": "Yes! You can also ask Altani directly on our website. Both options provide the same functionality — choose whichever is more convenient for you."
             }
         }
     ]
@@ -141,7 +141,7 @@
 <x-default-layout>
     <div class="bg-[#FFFBF5]"> <!-- Cream background color from design -->
         <x-tools-header />
-        
+
         <!-- Hero Section -->
         <section class="relative pt-16 pb-20 sm:pt-24 sm:pb-32 overflow-hidden">
             <!-- Decorative Pears -->
@@ -192,8 +192,8 @@
                     <div class="lg:col-span-7 relative">
                         <!-- Image Container with Shape -->
                         <div class="relative rounded-3xl overflow-hidden shadow-xl">
-                            <img 
-                                src="https://pub-plate-assets.acara.app/images/altani_with_eyes_closed_peaceful_smile_hands_in_relaxed-1024.webp" 
+                            <img
+                                src="https://pub-plate-assets.acara.app/images/altani_with_eyes_closed_peaceful_smile_hands_in_relaxed-1024.webp"
                                 alt="Altani the AI health coach smiling peacefully with eyes closed, expressing calm and wellness"
                                 class="w-full h-full object-cover"
                             >
@@ -232,7 +232,7 @@
                                 Every recommendation is based on nutritional science and approved guidelines for diabetes care.
                             </p>
                         </div>
-                        
+
                         <!-- Card 2 -->
                         <div class="bg-white rounded-2xl p-6 shadow-lg">
                             <span class="text-[#FF6B4A] text-xl font-bold block mb-2">02</span>
@@ -319,7 +319,7 @@
                     </div>
 
                      <!-- Sticky Note 4 (Dark Green - Optional/Extra for layout balance if needed, or keeping it 3 cols is fine. Design usually has a cluster. I'll add a 4th one centered below or offset to create that "pile" look) -->
-                     
+
                      <div class="hidden md:block absolute -right-12 top-10 md:rotate-6 w-48 opacity-20 pointer-events-none">
                         <div class="bg-[#0E3F3B] p-4 h-48"></div>
                      </div>
@@ -359,8 +359,8 @@
                     </div>
                     <div class="relative">
                          <div class="absolute -inset-4 bg-emerald-50 rounded-3xl transform rotate-2 -z-10"></div>
-                         <img 
-                            src="https://pub-plate-assets.acara.app/images/altani_holding_plate-1024.webp" 
+                         <img
+                            src="https://pub-plate-assets.acara.app/images/altani_holding_plate-1024.webp"
                             alt="Altani holding a plate of fresh, nutritious food including vegetables and lean protein"
                             class="rounded-2xl shadow-xl w-full"
                         >
@@ -371,8 +371,8 @@
                 <div class="lg:grid lg:grid-cols-2 gap-16 items-center mb-24">
                     <div class="order-2 lg:order-1 relative">
                          <div class="absolute -inset-4 bg-rose-50 rounded-2xl transform -rotate-2 -z-10"></div>
-                         <img 
-                            src="https://pub-plate-assets.acara.app/images/altani-pointing_at_floating_holographic_glucose_chart-1024.webp" 
+                         <img
+                            src="https://pub-plate-assets.acara.app/images/altani-pointing_at_floating_holographic_glucose_chart-1024.webp"
                             alt="Altani the AI health coach pointing at a holographic glucose chart showing blood sugar trends"
                             class="rounded-xl shadow-xl w-full"
                         >
@@ -423,8 +423,8 @@
                     </div>
                     <div class="relative">
                          <div class="absolute -inset-4 bg-cyan-50 rounded-2xl transform rotate-2 -z-10"></div>
-                         <img 
-                            src="https://pub-plate-assets.acara.app/images/altani_wearing_high-tech_futuristic_teal_scrubs-1024.webp" 
+                         <img
+                            src="https://pub-plate-assets.acara.app/images/altani_wearing_high-tech_futuristic_teal_scrubs-1024.webp"
                             alt="Altani the AI health coach wearing high-tech medical teal scrubs, representing technical health expertise"
                             class="rounded-xl shadow-xl w-full"
                         >
@@ -435,8 +435,8 @@
                 <div class="lg:grid lg:grid-cols-2 gap-16 items-center">
                     <div class="order-2 lg:order-1 relative">
                          <div class="absolute -inset-4 bg-amber-50 rounded-2xl transform -rotate-2 -z-10"></div>
-                         <img 
-                            src="https://pub-plate-assets.acara.app/images/altani_with_hand_on_chin_considering_expression_thought-1024.webp" 
+                         <img
+                            src="https://pub-plate-assets.acara.app/images/altani_with_hand_on_chin_considering_expression_thought-1024.webp"
                             alt="Altani the AI health coach with hand on chin in a thoughtful, analytical expression"
                             class="rounded-xl shadow-xl w-full"
                         >
@@ -463,7 +463,7 @@
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                 <h2 class="text-3xl font-bold text-slate-900 text-center mb-12">Frequently Asked Questions</h2>
-                
+
                 <div class="space-y-4">
                     <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                         <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
@@ -569,7 +569,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            Yes! You can also chat with Altani directly on our website. Both options provide the same functionality — choose whichever is more convenient for you.
+                            Yes! You can also ask Altani directly on our website. Both options provide the same functionality — choose whichever is more convenient for you.
                         </p>
                     </details>
                 </div>
@@ -593,20 +593,20 @@
             <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
                 <div class="mb-10 relative inline-block">
                      <div class="absolute inset-0 bg-white/50 blur-2xl rounded-full"></div>
-                     <img 
-                        src="https://pub-plate-assets.acara.app/images/altani-waving-hello-1024.webp" 
+                     <img
+                        src="https://pub-plate-assets.acara.app/images/altani-waving-hello-1024.webp"
                         alt="Start a conversation with Altani"
                         class="relative mx-auto w-48 h-48 object-cover rounded-full shadow-xl border-4 border-white"
                     >
                 </div>
-                
+
                 <h2 class="font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl mb-6">
                     Start a conversation<br>with Altani.
                 </h2>
                 <p class="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
                     She's ready to help you on your health journey. You can use Telegram without installing any apps. Or chat right here on the web.
                 </p>
-                
+
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-full bg-[#FF6B4A] px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-[#E85A3A] transition-all hover:-translate-y-1">
                         Chat Now
@@ -617,7 +617,7 @@
                         Find on Telegram
                     </a>
                 </div>
-                
+
                 <p class="mt-12 text-sm font-medium text-slate-500">
                     OPEN SOURCE • PRIVACY FOCUSED • COMMUNITY DRIVEN
                 </p>

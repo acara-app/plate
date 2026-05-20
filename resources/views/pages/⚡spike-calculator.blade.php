@@ -29,7 +29,6 @@ class extends Component
 
     public function mount(): void
     {
-        // If compare param is set, use it for the food input
         if ($this->compare && ($this->food === '' || $this->food === '0')) {
             $this->food = $this->compare;
         }
@@ -490,10 +489,10 @@ class extends Component
                     </p>
                     <div class="mt-6">
                         <a
-                            href="/meet-altani"
+                            href="/register"
                             class="inline-flex items-center gap-2 rounded-none border border-[#1A1814] px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-[#1A1814] transition hover:bg-[#1A1814] hover:text-[#F2EBDD]"
                         >
-                            Chat with Altani →
+                            Ask Acara What To Eat Next →
                         </a>
                     </div>
                 </div>

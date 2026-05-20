@@ -721,7 +721,7 @@
                     </a>
                 </div>
                 <p class="mt-4 text-sm text-slate-500">
-                    Free for practitioners during beta • 
+                    Free for practitioners during beta •
                     <a href="{{ route('about') }}" class="text-emerald-600 hover:underline">About the approach</a>
                 </p>
             </div>
@@ -784,7 +784,7 @@
     <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <x-cta-block
             title="Altani Can Assist Your Clients"
-            description="Your clients can chat with Altani for instant answers to nutrition questions between sessions."
+            description="Your clients can chat with Acara for instant answers to nutrition questions between sessions."
             button-text="Learn More"
         />
     </section>

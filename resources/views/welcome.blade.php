@@ -246,7 +246,7 @@
                 <x-cta-block
                     title="Meet Altani — Your Personal AI Health Coach"
                     description="Altani helps you plan meals, predict glucose responses, and stay on track with your health goals. She's available 24/7 and learns what works best for your body."
-                    buttonText="Chat with Altani"
+                    buttonText="Ask your questions"
                     buttonUrl="{{ route('meet-altani') }}"
                 />
             </section>
@@ -326,7 +326,7 @@
                             <p class="mt-2 text-sm text-slate-600">
                                 Stuck at a restaurant? Ask the AI what to order and get advice that keeps your glucose steady.
                             </p>
-                            <a href="{{ route('ai-nutritionist') }}" 
+                            <a href="{{ route('ai-nutritionist') }}"
                                class="mt-4 inline-flex items-center text-sm font-semibold text-rose-600 hover:text-rose-700"
                                aria-label="Meet Your AI Coach (AI Nutritionist)">
                                 Meet Your AI Coach
@@ -335,7 +335,7 @@
                                 </svg>
                             </a>
                         </div>
-                        
+
                         {{-- Spike Calculator Card --}}
                         <div class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-orange-300 hover:shadow-md">
                             <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-orange-600 transition-transform group-hover:scale-110">
@@ -347,7 +347,7 @@
                             <p class="mt-2 text-sm text-slate-600">
                                 Type any food and instantly see its glucose impact. No signup needed.
                             </p>
-                            <a href="{{ route('spike-calculator') }}" 
+                            <a href="{{ route('spike-calculator') }}"
                                class="mt-4 inline-flex items-center text-sm font-semibold text-orange-600 hover:text-orange-700"
                                aria-label="Check a food (Spike Calculator)">
                                 Check a food
@@ -369,7 +369,7 @@
                             <p class="mt-2 text-sm text-slate-600">
                                 Take a photo of your meal and get instant nutrition facts.
                             </p>
-                            <a href="{{ route('snap-to-track') }}" 
+                            <a href="{{ route('snap-to-track') }}"
                                class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700"
                                aria-label="Scan a meal (Snap to Track)">
                                 Scan a meal
@@ -379,7 +379,7 @@
                             </a>
                         </div>
 
-                        
+
                     </div>
                 </div>
             </section>
@@ -480,9 +480,9 @@
                                     <p class="mt-2 text-xs text-slate-600 lg:text-sm">
                                         Struggling with sleep, stress, or hydration? Your AI wellness coach provides personalized routines and guidance for a healthier lifestyle.
                                     </p>
-                                    <a href="{{ route('ai-health-coach') }}" 
+                                    <a href="{{ route('ai-health-coach') }}"
                                         class="mt-3 inline-flex items-center text-xs font-medium text-indigo-600 hover:text-indigo-700 lg:text-sm">
-                                        Meet Your Health Coach 
+                                        Meet Your Health Coach
                                         <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                         </svg>
@@ -507,9 +507,9 @@
                                     <p class="mt-2 text-xs text-slate-600 lg:text-sm">
                                         Want to build strength or improve cardio? Your AI trainer creates personalized workout plans tailored to your fitness level and goals.
                                     </p>
-                                    <a href="{{ route('ai-personal-trainer') }}" 
+                                    <a href="{{ route('ai-personal-trainer') }}"
                                         class="mt-3 inline-flex items-center text-xs font-medium text-orange-600 hover:text-orange-700 lg:text-sm">
-                                        Meet Your Trainer 
+                                        Meet Your Trainer
                                         <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                         </svg>
@@ -647,7 +647,7 @@
                         </p>
 
                         {{-- CTA Button --}}
-                        <a href="https://github.com/acara-app/plate" 
+                        <a href="https://github.com/acara-app/plate"
                             target="_blank"
                             rel="noopener noreferrer"
                             aria-label="View on GitHub (opens in a new tab)"
