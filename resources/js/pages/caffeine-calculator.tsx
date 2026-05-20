@@ -1429,7 +1429,7 @@ function CaffeineCtaSection() {
                                 'text-[11px] tracking-[0.16em] uppercase',
                             )}
                         >
-                            Chat with Altani →
+                            Ask Altani For A Better Energy Plan →
                         </a>
                     </div>
                 </div>

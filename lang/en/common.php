@@ -156,7 +156,7 @@ return [
         'chat' => [
             'title' => 'Meet Altani',
             'description' => 'Your personal AI health coach for diabetes management, nutrition advice, and daily wellness support.',
-            'button' => 'Chat with Altani',
+            'button' => 'Ask your question',
             'recent_conversations' => 'Recent Conversations',
             'quick_actions' => [
                 'ask' => 'Ask Altani',
@@ -672,7 +672,7 @@ return [
         'unlock_description' => 'Subscribe to unlock AI-powered meal plans tailored to your dietary needs, health goals, and lifestyle. Get weekly meal plans with detailed recipes, nutrition information, and shopping lists.',
         'upgrade_now' => 'Upgrade',
         'no_plans' => 'You don\'t have any meal plans yet. Get started by chatting with Altani or generating one instantly!',
-        'create_with_altani' => 'Chat with Altani',
+        'create_with_altani' => 'Ask Altani',
         'generate_now' => 'Generate Now',
         'generate_dialog' => [
             'title' => 'Generate a new meal plan',
