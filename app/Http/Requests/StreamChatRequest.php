@@ -11,7 +11,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Laravel\Ai\Files\Base64Image;
 
-final class StreamChatRequest extends FormRequest
+class StreamChatRequest extends FormRequest
 {
     public function authorize(): bool
     {
