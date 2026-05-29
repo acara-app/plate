@@ -65,3 +65,34 @@ it('passes unknown types through without complaint', function (): void {
     expect($result['value'])->toBe(42.0)
         ->and($result['canonical_unit'])->toBe('units');
 });
+
+it('converts milligram vitamin D to the microgram canonical unit', function (): void {
+    $result = $this->converter->toCanonical('vitaminD', 0.015, 'mg');
+
+    expect($result['canonical_unit'])->toBe('mcg')
+        ->and($result['value'])->toBe(15.0)
+        ->and($result['original_unit'])->toBe('mg');
+});
+
+it('converts milligram folate to micrograms', function (): void {
+    $result = $this->converter->toCanonical('folate', 0.4, 'mg');
+
+    expect($result['canonical_unit'])->toBe('mcg')
+        ->and($result['value'])->toBe(400.0);
+});
+
+it('folds the microgram sign onto the canonical mcg unit for trace minerals', function (): void {
+    $result = $this->converter->toCanonical('selenium', 55.0, 'µg');
+
+    expect($result['canonical_unit'])->toBe('mcg')
+        ->and($result['value'])->toBe(55.0)
+        ->and($result['original_unit'])->toBe('mcg');
+});
+
+it('converts sub-gram milligrams to the gram canonical unit for macronutrients', function (): void {
+    $result = $this->converter->toCanonical('fiber', 2000.0, 'mg');
+
+    expect($result['canonical_unit'])->toBe('g')
+        ->and($result['value'])->toBe(2.0)
+        ->and($result['original_unit'])->toBe('mg');
+});

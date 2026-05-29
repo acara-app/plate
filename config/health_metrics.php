@@ -129,6 +129,21 @@ $mLConversions = [
     'fl_oz' => ['multiplier' => 29.5735],
 ];
 
+$gCanonical = [
+    'mg' => ['multiplier' => 0.001],
+    'mcg' => ['multiplier' => 0.000001],
+];
+
+$mgCanonical = [
+    'g' => ['multiplier' => 1000.0],
+    'mcg' => ['multiplier' => 0.001],
+];
+
+$mcgCanonical = [
+    'g' => ['multiplier' => 1_000_000.0],
+    'mg' => ['multiplier' => 1000.0],
+];
+
 return [
 
     // ----------------------------------------------------------------
@@ -219,44 +234,44 @@ return [
     // SlowChanging/Last, producing wrong totals.
     // ----------------------------------------------------------------
     'dietaryEnergy' => $cumulative('kcal', 'Calories'),
-    'carbohydrates' => $cumulative('g', 'Carbohydrates'),
-    'protein' => $cumulative('g', 'Protein'),
-    'totalFat' => $cumulative('g', 'Total Fat'),
-    'fiber' => $cumulative('g', 'Fiber'),
-    'sugar' => $cumulative('g', 'Sugar'),
-    'saturatedFat' => $cumulative('g', 'Saturated Fat'),
-    'monounsaturatedFat' => $cumulative('g', 'Monounsaturated Fat'),
-    'polyunsaturatedFat' => $cumulative('g', 'Polyunsaturated Fat'),
-    'dietaryCholesterol' => $cumulative('mg', 'Cholesterol'),
-    'sodium' => $cumulative('mg', 'Sodium'),
-    'potassium' => $cumulative('mg', 'Potassium'),
-    'calcium' => $cumulative('mg', 'Calcium'),
-    'iron' => $cumulative('mg', 'Iron'),
-    'zinc' => $cumulative('mg', 'Zinc'),
-    'magnesium' => $cumulative('mg', 'Magnesium'),
-    'phosphorus' => $cumulative('mg', 'Phosphorus'),
-    'copper' => $cumulative('mg', 'Copper'),
-    'manganese' => $cumulative('mg', 'Manganese'),
-    'chloride' => $cumulative('mg', 'Chloride'),
-    'vitaminA' => $cumulative('mcg', 'Vitamin A'),
-    'vitaminC' => $cumulative('mg', 'Vitamin C'),
-    'vitaminD' => $cumulative('mcg', 'Vitamin D'),
-    'vitaminE' => $cumulative('mg', 'Vitamin E'),
-    'vitaminK' => $cumulative('mcg', 'Vitamin K'),
-    'vitaminB6' => $cumulative('mg', 'Vitamin B6'),
-    'vitaminB12' => $cumulative('mcg', 'Vitamin B12'),
-    'folate' => $cumulative('mcg', 'Folate'),
-    'biotin' => $cumulative('mcg', 'Biotin'),
-    'niacin' => $cumulative('mg', 'Niacin'),
-    'pantothenicAcid' => $cumulative('mg', 'Pantothenic Acid'),
-    'riboflavin' => $cumulative('mg', 'Riboflavin'),
-    'thiamin' => $cumulative('mg', 'Thiamin'),
-    'selenium' => $cumulative('mcg', 'Selenium'),
-    'chromium' => $cumulative('mcg', 'Chromium'),
-    'molybdenum' => $cumulative('mcg', 'Molybdenum'),
-    'iodine' => $cumulative('mcg', 'Iodine'),
+    'carbohydrates' => $cumulative('g', 'Carbohydrates', conversions: $gCanonical),
+    'protein' => $cumulative('g', 'Protein', conversions: $gCanonical),
+    'totalFat' => $cumulative('g', 'Total Fat', conversions: $gCanonical),
+    'fiber' => $cumulative('g', 'Fiber', conversions: $gCanonical),
+    'sugar' => $cumulative('g', 'Sugar', conversions: $gCanonical),
+    'saturatedFat' => $cumulative('g', 'Saturated Fat', conversions: $gCanonical),
+    'monounsaturatedFat' => $cumulative('g', 'Monounsaturated Fat', conversions: $gCanonical),
+    'polyunsaturatedFat' => $cumulative('g', 'Polyunsaturated Fat', conversions: $gCanonical),
+    'dietaryCholesterol' => $cumulative('mg', 'Cholesterol', conversions: $mgCanonical),
+    'sodium' => $cumulative('mg', 'Sodium', conversions: $mgCanonical),
+    'potassium' => $cumulative('mg', 'Potassium', conversions: $mgCanonical),
+    'calcium' => $cumulative('mg', 'Calcium', conversions: $mgCanonical),
+    'iron' => $cumulative('mg', 'Iron', conversions: $mgCanonical),
+    'zinc' => $cumulative('mg', 'Zinc', conversions: $mgCanonical),
+    'magnesium' => $cumulative('mg', 'Magnesium', conversions: $mgCanonical),
+    'phosphorus' => $cumulative('mg', 'Phosphorus', conversions: $mgCanonical),
+    'copper' => $cumulative('mg', 'Copper', conversions: $mgCanonical),
+    'manganese' => $cumulative('mg', 'Manganese', conversions: $mgCanonical),
+    'chloride' => $cumulative('mg', 'Chloride', conversions: $mgCanonical),
+    'vitaminA' => $cumulative('mcg', 'Vitamin A', conversions: $mcgCanonical),
+    'vitaminC' => $cumulative('mg', 'Vitamin C', conversions: $mgCanonical),
+    'vitaminD' => $cumulative('mcg', 'Vitamin D', conversions: $mcgCanonical),
+    'vitaminE' => $cumulative('mg', 'Vitamin E', conversions: $mgCanonical),
+    'vitaminK' => $cumulative('mcg', 'Vitamin K', conversions: $mcgCanonical),
+    'vitaminB6' => $cumulative('mg', 'Vitamin B6', conversions: $mgCanonical),
+    'vitaminB12' => $cumulative('mcg', 'Vitamin B12', conversions: $mcgCanonical),
+    'folate' => $cumulative('mcg', 'Folate', conversions: $mcgCanonical),
+    'biotin' => $cumulative('mcg', 'Biotin', conversions: $mcgCanonical),
+    'niacin' => $cumulative('mg', 'Niacin', conversions: $mgCanonical),
+    'pantothenicAcid' => $cumulative('mg', 'Pantothenic Acid', conversions: $mgCanonical),
+    'riboflavin' => $cumulative('mg', 'Riboflavin', conversions: $mgCanonical),
+    'thiamin' => $cumulative('mg', 'Thiamin', conversions: $mgCanonical),
+    'selenium' => $cumulative('mcg', 'Selenium', conversions: $mcgCanonical),
+    'chromium' => $cumulative('mcg', 'Chromium', conversions: $mcgCanonical),
+    'molybdenum' => $cumulative('mcg', 'Molybdenum', conversions: $mcgCanonical),
+    'iodine' => $cumulative('mcg', 'Iodine', conversions: $mcgCanonical),
     'water' => $cumulative('mL', 'Water', conversions: $mLConversions),
-    'caffeine' => $cumulative('mg', 'Caffeine'),
+    'caffeine' => $cumulative('mg', 'Caffeine', conversions: $mgCanonical),
 
     // ----------------------------------------------------------------
     // Reproductive Health — discrete categorical events

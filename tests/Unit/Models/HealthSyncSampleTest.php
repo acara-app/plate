@@ -59,6 +59,11 @@ it('returns correct category for known type identifiers', function (string $type
     ['standMinutes', 'stand_time'],
     ['walkingSpeed', 'mobility'],
     ['environmentalAudioExposure', 'environment'],
+    ['fiber', 'food'],
+    ['sodium', 'food'],
+    ['vitaminD', 'food'],
+    ['selenium', 'food'],
+    ['caffeine', 'food'],
 ]);
 
 it('returns other category for unknown type identifiers', function (): void {

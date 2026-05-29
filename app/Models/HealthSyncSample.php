@@ -60,6 +60,12 @@ final class HealthSyncSample extends Model
             'standMinutes', 'standHours' => 'stand_time',
             'walkingSpeed', 'walkingStepLength', 'walkingDoubleSupportPercentage', 'walkingAsymmetry' => 'mobility',
             'environmentalAudioExposure' => 'environment',
+            'fiber', 'sugar', 'saturatedFat', 'monounsaturatedFat', 'polyunsaturatedFat',
+            'dietaryCholesterol', 'sodium', 'potassium', 'calcium', 'iron', 'zinc', 'magnesium',
+            'phosphorus', 'copper', 'manganese', 'chloride', 'vitaminA', 'vitaminC', 'vitaminD',
+            'vitaminE', 'vitaminK', 'vitaminB6', 'vitaminB12', 'folate', 'biotin', 'niacin',
+            'pantothenicAcid', 'riboflavin', 'thiamin', 'selenium', 'chromium', 'molybdenum',
+            'iodine', 'water', 'caffeine' => 'food',
             default => 'other',
         };
     }
