@@ -60,6 +60,7 @@ final readonly class HealthMetricUnitConverter
 
         return match ($trimmed) {
             'hrs', 'hr' => 'hours',
+            'µg', 'μg', 'ug' => 'mcg',
             default => $trimmed,
         };
     }

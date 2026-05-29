@@ -280,3 +280,36 @@ it('defaults to 7 days', function (): void {
     expect($json['summaries'])->toHaveCount(1)
         ->and($json['date_range']['from'])->toBe($day->subDays(6)->toDateString());
 });
+
+it('surfaces dietary nutrients under the food category filter', function (): void {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+    $day = CarbonImmutable::parse('2026-04-10');
+
+    foreach (['dietaryEnergy', 'vitaminD', 'fiber', 'sodium'] as $nutrient) {
+        HealthDailyAggregate::factory()->for($user)->create([
+            'type_identifier' => $nutrient,
+            'local_date' => $day,
+            'date' => $day,
+            'aggregation_function' => 'sum',
+            'value_sum' => 12.0,
+            'value_count' => 1,
+        ]);
+    }
+
+    HealthDailyAggregate::factory()->for($user)->stepCount()->create([
+        'local_date' => $day,
+        'date' => $day,
+    ]);
+
+    $request = new Request(['type' => 'food', 'days' => 1, 'date' => $day->toDateString()]);
+    $json = json_decode((string) $this->tool->handle($request), true);
+    $types = array_column($json['summaries'], 'type');
+
+    expect($types)
+        ->toContain('dietaryEnergy')
+        ->toContain('vitaminD')
+        ->toContain('fiber')
+        ->toContain('sodium')
+        ->not->toContain('stepCount');
+});
