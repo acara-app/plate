@@ -79,7 +79,7 @@ it('owns exactly its configured domain tools', function (string $class, string $
 })->with('specialists');
 
 it('configures a request timeout', function (string $class): void {
-    $timeout = (new ReflectionClass($class))->getAttributes(Timeout::class);
+    $timeout = new ReflectionClass($class)->getAttributes(Timeout::class);
 
     expect($timeout)->toHaveCount(1)
         ->and($timeout[0]->newInstance()->value)->toBe(120);
@@ -93,7 +93,7 @@ it('renders language-aware instructions for the authenticated user', function (s
 
     expect(resolve($class)->instructions())
         ->toContain($label)
-        ->toContain("({$code})");
+        ->toContain(sprintf('(%s)', $code));
 })->with('specialists');
 
 it('can be faked and prompted directly as an isolated sub-agent', function (string $class): void {
