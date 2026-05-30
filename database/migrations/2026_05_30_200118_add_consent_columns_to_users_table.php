@@ -14,6 +14,7 @@ return new class extends Migration
             $table->timestamp('terms_accepted_at')->nullable();
             $table->timestamp('privacy_accepted_at')->nullable();
             $table->string('consent_version')->nullable();
+            $table->string('privacy_version')->nullable();
         });
     }
 };

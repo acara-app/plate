@@ -34,7 +34,7 @@ it('returns the user, consent state, and capabilities', function (): void {
             'user' => ['name' => 'Jane Doe'],
             'consent' => ['consent_required' => false],
             'capabilities' => [
-                'chat_first_enabled' => true,
+                'chat_first' => true,
                 'min_app_version' => '1.6.0',
             ],
         ]);

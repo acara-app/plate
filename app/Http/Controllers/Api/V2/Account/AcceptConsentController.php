@@ -20,6 +20,7 @@ final class AcceptConsentController
             'privacy_accepted_at' => now(),
             'accepted_disclaimer_at' => now(),
             'consent_version' => $request->string('terms_version')->toString(),
+            'privacy_version' => $request->string('privacy_version')->toString(),
         ]);
 
         return response()->noContent();

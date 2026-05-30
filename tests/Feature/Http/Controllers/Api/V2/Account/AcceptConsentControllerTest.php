@@ -27,7 +27,7 @@ it('records consent timestamps and version', function (): void {
     $this->withHeaders(consentBearer($user))
         ->postJson(route('api.v2.account.consent'), [
             'terms_version' => '2026-01',
-            'privacy_version' => '2026-01',
+            'privacy_version' => '2026-02',
             'medical_disclaimer' => true,
         ])->assertNoContent();
 
@@ -35,7 +35,8 @@ it('records consent timestamps and version', function (): void {
     expect($user->terms_accepted_at)->not->toBeNull()
         ->and($user->privacy_accepted_at)->not->toBeNull()
         ->and($user->accepted_disclaimer_at)->not->toBeNull()
-        ->and($user->consent_version)->toBe('2026-01');
+        ->and($user->consent_version)->toBe('2026-01')
+        ->and($user->privacy_version)->toBe('2026-02');
 });
 
 it('requires the medical disclaimer to be accepted', function (): void {

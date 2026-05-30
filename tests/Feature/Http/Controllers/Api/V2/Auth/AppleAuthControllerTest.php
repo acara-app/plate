@@ -112,6 +112,18 @@ it('links apple_id to a verified non-relay email account', function (): void {
     expect($user->fresh()->apple_id)->toBe('link-apple-sub');
 });
 
+it('rejects sign-in when Apple is not configured', function (): void {
+    config(['services.apple.client_id' => '']);
+    $nonce = MobileAuthNonce::factory()->create(['device_identifier' => 'device-uuid-1', 'nonce' => 'raw-nonce']);
+
+    $this->postJson(route('api.v2.auth.apple'), [
+        'nonce_id' => $nonce->nonce_id,
+        'identity_token' => 'unverifiable-token',
+        'device_name' => 'iPhone',
+        'device_identifier' => 'device-uuid-1',
+    ])->assertStatus(401);
+});
+
 it('refuses to link into an unverified email account', function (): void {
     User::factory()->unverified()->create(['email' => 'unverified@example.com', 'apple_id' => null]);
     $nonce = MobileAuthNonce::factory()->create(['device_identifier' => 'device-uuid-1', 'nonce' => 'raw-nonce']);

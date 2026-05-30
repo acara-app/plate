@@ -39,6 +39,7 @@ it('to array', function (): void {
             'terms_accepted_at',
             'privacy_accepted_at',
             'consent_version',
+            'privacy_version',
             'is_onboarded',
             'has_meal_plan',
             'profile',

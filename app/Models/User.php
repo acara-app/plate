@@ -50,6 +50,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read CarbonInterface|null $terms_accepted_at
  * @property-read CarbonInterface|null $privacy_accepted_at
  * @property-read string|null $consent_version
+ * @property-read string|null $privacy_version
  * @property-read Collection<int, HealthDailyAggregate> $healthDailyAggregates
  * @property-read Collection<int, HealthSyncSample> $healthSyncSamples
  * @property-read bool $has_meal_plan
@@ -107,6 +108,7 @@ final class User extends Authenticatable implements MustVerifyEmail
             'terms_accepted_at' => 'datetime',
             'privacy_accepted_at' => 'datetime',
             'consent_version' => 'string',
+            'privacy_version' => 'string',
             'settings' => 'array',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

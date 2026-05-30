@@ -48,7 +48,7 @@ return [
     ],
 
     'apple' => [
-        'client_id' => env('APPLE_CLIENT_ID', 'com.acaraplate.apple-health-sync'),
+        'client_id' => env('APPLE_CLIENT_ID', ''),
     ],
 
     'openfoodfacts' => [

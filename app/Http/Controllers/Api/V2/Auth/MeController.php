@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V2\Auth;
 
+use App\Data\MobileCapabilitiesData;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,13 +25,10 @@ final class MeController
                 'privacy_accepted_at' => $user->privacy_accepted_at?->toIso8601String(),
                 'medical_disclaimer_accepted_at' => $user->accepted_disclaimer_at?->toIso8601String(),
                 'consent_version' => $user->consent_version,
+                'privacy_version' => $user->privacy_version,
                 'consent_required' => $user->requiresConsent(),
             ],
-            'capabilities' => [
-                'chat_first_enabled' => config()->boolean('mobile.chat_first_enabled'),
-                'auth_methods' => config()->array('mobile.auth_methods'),
-                'min_app_version' => config()->string('mobile.min_app_version'),
-            ],
+            'capabilities' => MobileCapabilitiesData::fromConfig()->toArray(),
         ]);
     }
 }
