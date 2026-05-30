@@ -99,7 +99,7 @@ describe('build', function (): void {
 
         $result = $this->builder->build($payload, $user);
 
-        expect(mb_substr_count($result['instructions'], 'treat it as a failed tool'))->toBe(1);
+        expect(mb_substr_count((string) $result['instructions'], 'treat it as a failed tool'))->toBe(1);
     });
 
     it('keeps every durable write and meal-plan creation with the orchestrator', function (): void {
