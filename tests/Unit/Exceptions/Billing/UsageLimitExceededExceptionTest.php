@@ -54,3 +54,49 @@ it('exposes structured fields directly on the exception for non-HTTP callers', f
         ->and($payload['current_credits'])->toBe(9_500)
         ->and($payload['limit_credits'])->toBe(10_000);
 });
+
+it('builds a friendly daily message with an upgrade link for the free tier', function (): void {
+    $exception = new UsageLimitExceededException(
+        limitType: 'rolling',
+        tier: SubscriptionTier::Free,
+        currentCredits: 119,
+        limitCredits: 100,
+        resetsAt: now()->addHours(18)->addMinutes(45),
+    );
+
+    expect($exception->userMessage())
+        ->toContain('daily AI credits')
+        ->toContain('Free plan')
+        ->toContain('18 hours 45 minutes')
+        ->toContain(route('checkout.subscription'));
+});
+
+it('describes the weekly window when the weekly limit is exceeded', function (): void {
+    $exception = new UsageLimitExceededException(
+        limitType: 'weekly',
+        tier: SubscriptionTier::Basic,
+        currentCredits: 2_100,
+        limitCredits: 2_000,
+        resetsAt: now()->addDays(2),
+    );
+
+    expect($exception->userMessage())
+        ->toContain('weekly AI credits')
+        ->toContain('Supporter plan')
+        ->toContain(route('checkout.subscription'));
+});
+
+it('omits the upgrade link for the top tier', function (): void {
+    $exception = new UsageLimitExceededException(
+        limitType: 'rolling',
+        tier: SubscriptionTier::Plus,
+        currentCredits: 1_100,
+        limitCredits: 1_000,
+        resetsAt: now()->addHours(3),
+    );
+
+    expect($exception->userMessage())
+        ->toContain('reached your daily AI credit limit')
+        ->toContain('Pro plan')
+        ->not->toContain(route('checkout.subscription'));
+});

@@ -26,7 +26,7 @@ final readonly class ChatController
     public function index(#[CurrentUser] User $user): JsonResponse
     {
         $conversations = $user->conversations()
-            ->orderByDesc('updated_at')
+            ->latest('updated_at')
             ->limit(50)
             ->get(['id', 'title', 'updated_at'])
             ->map(fn (Conversation $conversation): array => [

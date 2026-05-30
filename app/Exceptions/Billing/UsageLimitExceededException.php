@@ -60,6 +60,31 @@ final class UsageLimitExceededException extends RuntimeException
         return new JsonResponse($this->toPayload(), Response::HTTP_PAYMENT_REQUIRED);
     }
 
+    public function userMessage(): string
+    {
+        $window = $this->limitType === 'weekly' ? 'weekly' : 'daily';
+        $resetsIn = $this->formatResetsIn();
+
+        if ($this->tier === SubscriptionTier::Plus) {
+            return sprintf(
+                "⏳ You've reached your %s AI credit limit on the %s plan.\n\nThey'll refill in %s.",
+                $window,
+                $this->tier->label(),
+                $resetsIn,
+            );
+        }
+
+        return sprintf(
+            "⏳ You've used up your %s AI credits on the %s plan.\n\nThey'll refill in %s — "
+            .'or upgrade now for a bigger %s allowance:'."\n%s",
+            $window,
+            $this->tier->label(),
+            $resetsIn,
+            $window,
+            route('checkout.subscription'),
+        );
+    }
+
     private function formatResetsIn(): string
     {
         $diff = now()->diff($this->resetsAt);
