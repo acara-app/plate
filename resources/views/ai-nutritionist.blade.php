@@ -344,9 +344,18 @@
     </section>
 
     <x-related-reading
-        title="Nutrition and Weight-Loss Guidance, Explained"
-        description="Read how Acara connects meals, body metrics, activity, and Health Sync data into more structured coaching."
+        title="Go deeper on meal data and nutrition quality"
+        description="Read how Acara turns logged meals, Health Sync data, and AI analysis into structured coaching beyond simple calorie totals."
         :articles="[
+            [
+                'title' => 'Introducing the Nutrition Analyzer: Evidence-Based Nutrient Adequacy and Food-First Coaching',
+                'description' => 'A new Acara protocol for reviewing nutrient adequacy, intake trends, diet quality, and the most useful food-first change to make next.',
+                'url' => route('post.show', 'nutrition-analyzer-launch'),
+                'image' => 'https://pub-plate-assets.acara.app/blog/nutrition-analyzer.webp',
+                'imageAlt' => 'Nutrition Analyzer reviewing food logs and nutrient adequacy',
+                'category' => 'Product Update',
+                'readingTime' => '9 min read',
+            ],
             [
                 'title' => 'Introducing the Acara Weight-Loss Analyzer',
                 'description' => 'A closer look at the new analyzer that reviews calorie balance, plateau signals, nutrition quality, and sustainable next steps inside Plate.',
