@@ -120,6 +120,21 @@ describe('build', function (): void {
             ->toContain('create_meal_plan');
     });
 
+    it('instructs the orchestrator to inline profile context into the delegated task', function (): void {
+        $user = User::factory()->create();
+        $payload = new AgentPayload(
+            userId: $user->id,
+            message: 'Hello',
+            mode: AgentMode::Ask,
+        );
+
+        $result = $this->builder->build($payload, $user);
+
+        expect($result['instructions'])
+            ->toContain('Specialists have no access to `get_user_profile`')
+            ->toContain('inline those facts verbatim into the `task`');
+    });
+
     it('does not claim a delegated domain in its own expertise banner', function (): void {
         $user = User::factory()->create();
         $payload = new AgentPayload(
