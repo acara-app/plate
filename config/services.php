@@ -41,6 +41,14 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
+        'allowed_audiences' => array_values(array_filter([
+            env('GOOGLE_CLIENT_ID'),
+            env('GOOGLE_IOS_CLIENT_ID'),
+        ])),
+    ],
+
+    'apple' => [
+        'client_id' => env('APPLE_CLIENT_ID', ''),
     ],
 
     'openfoodfacts' => [

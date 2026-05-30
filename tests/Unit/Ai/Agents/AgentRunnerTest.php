@@ -5,10 +5,14 @@ declare(strict_types=1);
 use App\Ai\AgentBuilder;
 use App\Ai\AgentPayload;
 use App\Ai\Agents\AgentRunner;
+use App\Ai\Agents\FitnessSpecialist;
+use App\Ai\Agents\HealthSpecialist;
+use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\CreateMealPlan;
 use App\Ai\Tools\GetUserProfile;
-use App\Ai\Tools\SuggestSingleMeal;
+use App\Ai\Tools\LogHealthEntry;
+use App\Ai\Tools\SuggestMeal;
 use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Models\User;
@@ -61,7 +65,7 @@ describe('instructions', function (): void {
 });
 
 describe('tools', function (): void {
-    it('returns base tools', function (): void {
+    it('returns top-level tools plus specialist sub-agents', function (): void {
         $payload = new AgentPayload(
             userId: $this->user->id,
             message: 'Hello',
@@ -76,9 +80,14 @@ describe('tools', function (): void {
             ->map(fn (mixed $t): string => $t::class)
             ->all();
 
-        expect($toolClasses)->toContain(SuggestSingleMeal::class)
+        expect($toolClasses)
             ->toContain(GetUserProfile::class)
-            ->toContain(CreateMealPlan::class);
+            ->toContain(CreateMealPlan::class)
+            ->toContain(LogHealthEntry::class)
+            ->toContain(NutritionSpecialist::class)
+            ->toContain(HealthSpecialist::class)
+            ->toContain(FitnessSpecialist::class)
+            ->not->toContain(SuggestMeal::class);
     });
 
     it('includes AnalyzePhoto tool when attachments are set', function (): void {

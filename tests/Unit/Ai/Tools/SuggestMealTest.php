@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use App\Ai\Tools\SuggestSingleMeal;
+use App\Ai\Tools\SuggestMeal;
 use App\Contracts\Ai\GeneratesSingleMeals;
 use App\Data\GeneratedMealData;
 use App\Models\User;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
-covers(SuggestSingleMeal::class);
+covers(SuggestMeal::class);
 
 beforeEach(function (): void {
     $this->agent = new class implements GeneratesSingleMeals
@@ -53,7 +53,7 @@ beforeEach(function (): void {
     };
 
     app()->instance(GeneratesSingleMeals::class, $this->agent);
-    $this->tool = new SuggestSingleMeal();
+    $this->tool = new SuggestMeal();
 });
 
 it('has correct name and description', function (): void {

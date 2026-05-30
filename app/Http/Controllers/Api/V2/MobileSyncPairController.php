@@ -4,12 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V2;
 
+use App\Actions\Auth\IssueMobileAuthToken;
+use App\Actions\Auth\RevokeDeviceTokens;
 use App\Http\Requests\Api\V2\MobileSyncPairRequest;
 use App\Models\MobileSyncDevice;
 use Illuminate\Http\JsonResponse;
 
-final class MobileSyncPairController
+final readonly class MobileSyncPairController
 {
+    public function __construct(
+        private IssueMobileAuthToken $issueMobileAuthToken,
+        private RevokeDeviceTokens $revokeDeviceTokens,
+    ) {}
+
     public function __invoke(MobileSyncPairRequest $request): JsonResponse
     {
         $device = MobileSyncDevice::query()
@@ -38,10 +45,8 @@ final class MobileSyncPairController
                 ->get();
 
             foreach ($oldDevices as $oldDevice) {
+                $this->revokeDeviceTokens->handle($oldDevice->user, $oldDevice->device_identifier, $oldDevice->id);
                 $oldDevice->update(['is_active' => false, 'device_identifier' => null]);
-                $oldDevice->user->tokens()
-                    ->where('name', 'mobile-sync:'.$oldDevice->id)
-                    ->delete();
             }
         }
 
@@ -53,10 +58,9 @@ final class MobileSyncPairController
         $encryptionKey = base64_encode(random_bytes(32));
         $device->update(['encryption_key' => $encryptionKey]);
 
-        $apiToken = $device->user->createToken(
-            'mobile-sync:'.$device->id,
-            ['sync:push', 'chat:converse'],
-        );
+        $apiToken = $deviceIdentifier !== null
+            ? $this->issueMobileAuthToken->handle($device->user, $deviceIdentifier, ['sync:push', 'chat:converse'])
+            : $device->user->createToken('mobile-sync:'.$device->id, ['sync:push', 'chat:converse']);
 
         return response()->json([
             'message' => 'Device paired successfully.',

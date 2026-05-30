@@ -77,7 +77,7 @@
 <link rel="manifest" href="/build/manifest.webmanifest" />
 
 <link rel="preconnect" href="https://fonts.bunny.net">
-<link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800|jetbrains-mono:400,500" rel="stylesheet" />
+<link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800|jetbrains-mono:400,500|playfair-display:400,500,600,700,800,900|source-serif-4:400,500,600,700" rel="stylesheet" />
 
 @livewireStyles
 

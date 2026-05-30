@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Ai\Agents\FitnessSpecialist;
+use App\Ai\Agents\HealthSpecialist;
+use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\CreateMealPlan;
 use App\Ai\Tools\EnrichAttributeMetadata;
@@ -16,7 +19,7 @@ use App\Ai\Tools\GetHealthSyncSupport;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
 use App\Ai\Tools\PredictGlucoseSpike;
-use App\Ai\Tools\SuggestSingleMeal;
+use App\Ai\Tools\SuggestMeal;
 use App\Ai\Tools\SuggestWellnessRoutine;
 use App\Ai\Tools\SuggestWorkoutRoutine;
 use App\Ai\Tools\UpdateHouseholdContext;
@@ -41,25 +44,40 @@ return [
     ],
 
     'tools' => [
-        SuggestSingleMeal::class,
         GetUserProfile::class,
         CreateMealPlan::class,
-        GetCalorieLevelGuideline::class,
-        GetDailyServingsByCalorie::class,
-        PredictGlucoseSpike::class,
-        SuggestWellnessRoutine::class,
-        SuggestWorkoutRoutine::class,
-        GetHealthGoals::class,
-        GetHealthData::class,
-        GetHealthSummary::class,
-        GetHealthSyncSupport::class,
         LogHealthEntry::class,
-        GetFitnessGoals::class,
-        GetDietReference::class,
         EnrichAttributeMetadata::class,
         UpdateUserProfileAttributes::class,
         UpdateUserBiometrics::class,
         UpdateHouseholdContext::class,
+    ],
+
+    'nutrition_tools' => [
+        SuggestMeal::class,
+        GetDietReference::class,
+        GetCalorieLevelGuideline::class,
+        GetDailyServingsByCalorie::class,
+    ],
+
+    'health_tools' => [
+        GetHealthData::class,
+        GetHealthSummary::class,
+        GetHealthGoals::class,
+        GetHealthSyncSupport::class,
+        PredictGlucoseSpike::class,
+    ],
+
+    'fitness_tools' => [
+        SuggestWorkoutRoutine::class,
+        SuggestWellnessRoutine::class,
+        GetFitnessGoals::class,
+    ],
+
+    'sub_agents' => [
+        NutritionSpecialist::class,
+        HealthSpecialist::class,
+        FitnessSpecialist::class,
     ],
 
     'image_tools' => [

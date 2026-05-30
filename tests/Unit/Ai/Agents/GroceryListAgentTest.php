@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\GroceryListGeneratorAgent;
+use App\Ai\Agents\GroceryListAgent;
 use App\Data\ExtractedIngredientData;
 use App\Models\Meal;
 use App\Models\MealPlan;
@@ -10,11 +10,11 @@ use App\Models\User;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 
-covers(GroceryListGeneratorAgent::class);
+covers(GroceryListAgent::class);
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();
-    $this->agent = new GroceryListGeneratorAgent;
+    $this->agent = new GroceryListAgent;
 });
 
 it('has correct attributes configured', function (): void {
@@ -110,7 +110,7 @@ it('generates grocery list from meal plan with ingredients', function (): void {
         ],
     ];
 
-    GroceryListGeneratorAgent::fake([$mockResponse]);
+    GroceryListAgent::fake([$mockResponse]);
 
     $mealPlan = MealPlan::factory()->for($this->user)->create(['duration_days' => 7]);
 
@@ -175,7 +175,7 @@ it('extracts ingredients from multiple meals', function (): void {
         ],
     ];
 
-    GroceryListGeneratorAgent::fake([$mockResponse]);
+    GroceryListAgent::fake([$mockResponse]);
 
     $mealPlan = MealPlan::factory()->for($this->user)->create(['duration_days' => 7]);
 
@@ -216,7 +216,7 @@ it('maps structured output into grocery list data', function (): void {
         ],
     ];
 
-    GroceryListGeneratorAgent::fake([$mockResponse]);
+    GroceryListAgent::fake([$mockResponse]);
 
     $mealPlan = MealPlan::factory()->for($this->user)->create(['duration_days' => 7]);
 

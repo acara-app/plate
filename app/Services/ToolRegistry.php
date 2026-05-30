@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use Illuminate\Contracts\Container\Container;
+use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Providers\Tools\ProviderTool;
@@ -48,6 +49,30 @@ final readonly class ToolRegistry
         $classes = config()->array('plate.meal_plan_tools', []);
 
         return $this->buildTools($classes);
+    }
+
+    /**
+     * @return array<int, Tool|ProviderTool>
+     */
+    public function getToolGroup(string $configKey): array
+    {
+        /** @var array<int, class-string> $classes */
+        $classes = config()->array($configKey, []);
+
+        return $this->buildTools($classes);
+    }
+
+    /**
+     * @return array<int, Agent>
+     */
+    public function getSubAgents(): array
+    {
+        /** @var array<int, class-string> $classes */
+        $classes = config()->array('plate.sub_agents', []);
+
+        return collect($classes)
+            ->map(fn (string $class): Agent => $this->container->make($class))
+            ->all();
     }
 
     /**

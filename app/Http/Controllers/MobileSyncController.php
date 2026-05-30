@@ -4,14 +4,20 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Auth\RevokeDeviceTokens;
 use App\Models\MobileSyncDevice;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-final class MobileSyncController
+final readonly class MobileSyncController
 {
+    public function __construct(
+        private RevokeDeviceTokens $revokeDeviceTokens,
+    ) {}
+
     public function edit(Request $request): Response
     {
         $user = $request->user();
@@ -62,6 +68,7 @@ final class MobileSyncController
 
     public function disconnect(Request $request, MobileSyncDevice $mobileSyncDevice): RedirectResponse
     {
+        /** @var User|null $user */
         $user = $request->user();
 
         abort_if($user === null, 401);
@@ -69,9 +76,7 @@ final class MobileSyncController
 
         $mobileSyncDevice->update(['is_active' => false]);
 
-        $user->tokens()
-            ->where('name', 'mobile-sync:'.$mobileSyncDevice->id)
-            ->delete();
+        $this->revokeDeviceTokens->handle($user, $mobileSyncDevice->device_identifier, $mobileSyncDevice->id);
 
         return to_route('mobile-sync.edit');
     }
