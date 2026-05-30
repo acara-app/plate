@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Ai\Agents\FitnessAgent;
+use App\Ai\Agents\HealthAgent;
+use App\Ai\Agents\NutritionAgent;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\CreateMealPlan;
 use App\Ai\Tools\EnrichAttributeMetadata;
@@ -41,25 +44,40 @@ return [
     ],
 
     'tools' => [
-        SuggestSingleMeal::class,
         GetUserProfile::class,
         CreateMealPlan::class,
-        GetCalorieLevelGuideline::class,
-        GetDailyServingsByCalorie::class,
-        PredictGlucoseSpike::class,
-        SuggestWellnessRoutine::class,
-        SuggestWorkoutRoutine::class,
-        GetHealthGoals::class,
-        GetHealthData::class,
-        GetHealthSummary::class,
-        GetHealthSyncSupport::class,
         LogHealthEntry::class,
-        GetFitnessGoals::class,
-        GetDietReference::class,
         EnrichAttributeMetadata::class,
         UpdateUserProfileAttributes::class,
         UpdateUserBiometrics::class,
         UpdateHouseholdContext::class,
+    ],
+
+    'nutrition_tools' => [
+        SuggestSingleMeal::class,
+        GetDietReference::class,
+        GetCalorieLevelGuideline::class,
+        GetDailyServingsByCalorie::class,
+    ],
+
+    'health_tools' => [
+        GetHealthData::class,
+        GetHealthSummary::class,
+        GetHealthGoals::class,
+        GetHealthSyncSupport::class,
+        PredictGlucoseSpike::class,
+    ],
+
+    'fitness_tools' => [
+        SuggestWorkoutRoutine::class,
+        SuggestWellnessRoutine::class,
+        GetFitnessGoals::class,
+    ],
+
+    'sub_agents' => [
+        NutritionAgent::class,
+        HealthAgent::class,
+        FitnessAgent::class,
     ],
 
     'image_tools' => [

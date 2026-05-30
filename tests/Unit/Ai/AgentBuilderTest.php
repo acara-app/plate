@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 use App\Ai\AgentBuilder;
 use App\Ai\AgentPayload;
+use App\Ai\Agents\FitnessAgent;
+use App\Ai\Agents\HealthAgent;
+use App\Ai\Agents\NutritionAgent;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\CreateMealPlan;
 use App\Ai\Tools\GetCalorieLevelGuideline;
 use App\Ai\Tools\GetUserProfile;
+use App\Ai\Tools\LogHealthEntry;
 use App\Ai\Tools\SuggestSingleMeal;
 use App\Enums\AgentMode;
 use App\Enums\ModelName;
@@ -69,6 +73,22 @@ describe('build', function (): void {
             ->toContain('Use `all` only when a request spans multiple profile areas');
     });
 
+    it('instructs the orchestrator to delegate to each specialist', function (): void {
+        $user = User::factory()->create();
+        $payload = new AgentPayload(
+            userId: $user->id,
+            message: 'Hello',
+            mode: AgentMode::Ask,
+        );
+
+        $result = $this->builder->build($payload, $user);
+
+        expect($result['instructions'])
+            ->toContain('nutrition_specialist')
+            ->toContain('health_specialist')
+            ->toContain('fitness_specialist');
+    });
+
     it('includes chat mode in instructions', function (): void {
         $user = User::factory()->create();
         $payload = new AgentPayload(
@@ -84,7 +104,7 @@ describe('build', function (): void {
 });
 
 describe('tools', function (): void {
-    it('returns base tools', function (): void {
+    it('returns top-level tools plus specialist sub-agents', function (): void {
         $user = User::factory()->create();
         $payload = new AgentPayload(
             userId: $user->id,
@@ -98,9 +118,14 @@ describe('tools', function (): void {
             ->map(fn (mixed $t): string => $t::class)
             ->all();
 
-        expect($toolClasses)->toContain(SuggestSingleMeal::class)
+        expect($toolClasses)
             ->toContain(GetUserProfile::class)
-            ->toContain(CreateMealPlan::class);
+            ->toContain(CreateMealPlan::class)
+            ->toContain(LogHealthEntry::class)
+            ->toContain(NutritionAgent::class)
+            ->toContain(HealthAgent::class)
+            ->toContain(FitnessAgent::class)
+            ->not->toContain(SuggestSingleMeal::class);
     });
 
     it('includes image tools when attachments present', function (): void {
@@ -142,8 +167,32 @@ describe('tools', function (): void {
             ->not->toContain(WebSearch::class);
     });
 
-    it('includes WebSearch when the toolset is only General-tier', function (): void {
+    it('excludes WebSearch when a registered sub-agent can reach a Sensitive tool', function (): void {
         config()->set('plate.tools', [GetCalorieLevelGuideline::class]);
+
+        $user = User::factory()->create();
+        $payload = new AgentPayload(
+            userId: $user->id,
+            message: 'What are calorie recommendations?',
+            mode: AgentMode::Ask,
+            modelName: ModelName::GPT_5_MINI,
+        );
+
+        $result = $this->builder->build($payload, $user);
+
+        $toolClasses = collect($result['tools'])
+            ->map(fn (mixed $t): string => $t::class)
+            ->all();
+
+        expect($toolClasses)
+            ->toContain(GetCalorieLevelGuideline::class)
+            ->toContain(NutritionAgent::class)
+            ->not->toContain(WebSearch::class);
+    });
+
+    it('includes WebSearch when no Sensitive tool is reachable, even via sub-agents', function (): void {
+        config()->set('plate.tools', [GetCalorieLevelGuideline::class]);
+        config()->set('plate.sub_agents', []);
 
         $user = User::factory()->create();
         $payload = new AgentPayload(
