@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Auth;
 
 use App\Exceptions\AuthTokenException;
-use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Cache;
-use Throwable;
 
 final class GoogleIdentityTokenVerifier extends IdentityTokenVerifier
 {
@@ -24,12 +22,7 @@ final class GoogleIdentityTokenVerifier extends IdentityTokenVerifier
 
         throw_if($allowedAudiences === [], AuthTokenException::class, 'Google authentication is not configured.');
 
-        try {
-            /** @var array<string, mixed> $decoded */
-            $decoded = (array) JWT::decode($idToken, $this->signingKeys());
-        } catch (Throwable) {
-            throw new AuthTokenException('Invalid token.');
-        }
+        $decoded = $this->decode($idToken);
 
         throw_unless(in_array($decoded['iss'] ?? null, self::ISSUERS, true), AuthTokenException::class, 'Invalid token.');
 
@@ -71,8 +64,6 @@ final class GoogleIdentityTokenVerifier extends IdentityTokenVerifier
 
         $cacheKey = 'google-idtoken:'.hash('sha256', $jti);
 
-        throw_if(Cache::has($cacheKey), AuthTokenException::class, 'Token has already been used.');
-
-        Cache::put($cacheKey, true, now()->addHour());
+        throw_unless(Cache::add($cacheKey, true, now()->addHour()), AuthTokenException::class, 'Token has already been used.');
     }
 }

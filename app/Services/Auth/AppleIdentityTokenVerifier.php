@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Auth;
 
 use App\Exceptions\AuthTokenException;
-use Firebase\JWT\JWT;
-use Throwable;
 
 final class AppleIdentityTokenVerifier extends IdentityTokenVerifier
 {
@@ -25,12 +23,7 @@ final class AppleIdentityTokenVerifier extends IdentityTokenVerifier
 
         throw_if($audience === '', AuthTokenException::class, 'Apple authentication is not configured.');
 
-        try {
-            /** @var array<string, mixed> $decoded */
-            $decoded = (array) JWT::decode($identityToken, $this->signingKeys());
-        } catch (Throwable) {
-            throw new AuthTokenException('Invalid token.');
-        }
+        $decoded = $this->decode($identityToken);
 
         throw_if(($decoded['iss'] ?? null) !== self::ISSUER, AuthTokenException::class, 'Invalid token.');
 
