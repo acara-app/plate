@@ -15,6 +15,8 @@ use App\Services\Memory\NullMemoryPromptContext;
 use App\Services\ToolRegistry;
 use App\Utilities\EmergencyNumberUtil;
 use App\Utilities\LanguageUtil;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Messages\MessageRole;
 use Laravel\Ai\Providers\Tools\ProviderTool;
@@ -29,7 +31,7 @@ final readonly class AgentBuilder
     ) {}
 
     /**
-     * @return array{instructions: string, tools: array<int, Tool|ProviderTool>}
+     * @return array{instructions: string, tools: array<int, Tool|ProviderTool|Agent>}
      */
     public function build(AgentPayload $payload, ?User $user = null): array
     {
@@ -66,7 +68,7 @@ final readonly class AgentBuilder
     }
 
     /**
-     * @return array<int, Tool|ProviderTool>
+     * @return array<int, Tool|ProviderTool|Agent>
      */
     public function buildTools(AgentPayload $payload): array
     {
@@ -77,15 +79,32 @@ final readonly class AgentBuilder
             $tools = [...$tools, ...$imageTools];
         }
 
+        $subAgents = $this->toolRegistry->getSubAgents();
+
         if (
             $payload->shouldEnableWebSearch()
-            && $this->toolSensitivity->maxSensitivity($tools) === DataSensitivity::General
+            && $this->maxReachableSensitivity($tools, $subAgents) === DataSensitivity::General
         ) {
             $providerTools = $this->toolRegistry->getProviderTools();
             $tools = [...$tools, ...$providerTools];
         }
 
-        return $tools;
+        return [...$tools, ...$subAgents];
+    }
+
+    /**
+     * @param  array<int, Tool|ProviderTool>  $tools
+     * @param  array<int, Agent>  $subAgents
+     */
+    private function maxReachableSensitivity(array $tools, array $subAgents): DataSensitivity
+    {
+        foreach ($subAgents as $subAgent) {
+            if ($subAgent instanceof HasTools) {
+                $tools = [...$tools, ...$subAgent->tools()];
+            }
+        }
+
+        return $this->toolSensitivity->maxSensitivity($tools);
     }
 
     private function renderMemories(AgentPayload $payload, ?User $user): string

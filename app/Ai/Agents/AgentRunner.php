@@ -79,7 +79,7 @@ final class AgentRunner implements Agent, Conversational, HasTools
     }
 
     /**
-     * @return array<int, Tool|ProviderTool>
+     * @return array<int, Tool|ProviderTool|Agent>
      */
     public function tools(): array
     {
