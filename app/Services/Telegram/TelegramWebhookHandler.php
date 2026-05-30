@@ -10,6 +10,7 @@ use App\Actions\Messaging\ResolveLinkedChatPlatformLink;
 use App\Contracts\DownloadsTelegramPhoto;
 use App\Contracts\ProcessesAdvisorMessage;
 use App\Enums\ChatPlatform;
+use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Exceptions\TelegramUserException;
 use App\Models\User;
 use App\Models\UserChatPlatformLink;
@@ -158,6 +159,9 @@ final class TelegramWebhookHandler extends WebhookHandler
             $this->telegramMessage->sendLongMessage($this->chat, $result['response'], true);
         } catch (TelegramUserException $e) {
             $this->chat->message($e->getMessage())->send();
+        } catch (UsageLimitExceededException $e) {
+            report($e);
+            $this->chat->message($e->userMessage())->send();
         } catch (Throwable $e) {
             report($e);
             $this->chat->message('❌ Error processing message. Please try again.')->send();

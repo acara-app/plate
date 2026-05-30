@@ -6,6 +6,8 @@ use App\Contracts\DownloadsTelegramPhoto;
 use App\Contracts\ProcessesAdvisorMessage;
 use App\Enums\ChatPlatform;
 use App\Enums\Sex;
+use App\Enums\SubscriptionTier;
+use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Exceptions\TelegramUserException;
 use App\Models\User;
 use App\Models\UserChatPlatformLink;
@@ -385,6 +387,37 @@ describe('chat message handling', function (): void {
         sendWebhook($this, 'Invalid input');
 
         Telegraph::assertSent('User error occurred');
+    });
+
+    it('shows a friendly upgrade message when the AI credit limit is exceeded', function (): void {
+        $user = User::factory()->create();
+        linkedChatFor($this, $user);
+
+        $mock = new class implements ProcessesAdvisorMessage
+        {
+            public function handle(User $user, string $message, ?string $conversationId = null, array $attachments = []): array
+            {
+                throw new UsageLimitExceededException(
+                    limitType: 'rolling',
+                    tier: SubscriptionTier::Free,
+                    currentCredits: 119,
+                    limitCredits: 100,
+                    resetsAt: now()->addHours(18)->addMinutes(45),
+                );
+            }
+
+            public function resetConversation(User $user): string
+            {
+                return 'new-conv';
+            }
+        };
+        app()->instance(ProcessesAdvisorMessage::class, $mock);
+
+        sendWebhook($this, 'What should I eat?');
+
+        Telegraph::assertSent('daily AI credits', false);
+        Telegraph::assertSent('Free plan', false);
+        Telegraph::assertSent(route('checkout.subscription'), false);
     });
 });
 
