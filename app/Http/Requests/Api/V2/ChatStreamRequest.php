@@ -6,6 +6,7 @@ namespace App\Http\Requests\Api\V2;
 
 use App\Http\Requests\StreamChatRequest;
 use App\Models\User;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 final class ChatStreamRequest extends StreamChatRequest
 {
@@ -13,7 +14,19 @@ final class ChatStreamRequest extends StreamChatRequest
     {
         $user = $this->user('sanctum');
 
-        return $user instanceof User
-            && $user->tokenCan('chat:converse');
+        if (! $user instanceof User || ! $user->tokenCan('chat:converse')) {
+            return false;
+        }
+
+        if ($user->requiresConsent()) {
+            throw new HttpResponseException(
+                response()->json([
+                    'code' => 'consent_required',
+                    'message' => __('Please accept the medical disclaimer to continue.'),
+                ], 403)
+            );
+        }
+
+        return true;
     }
 }
