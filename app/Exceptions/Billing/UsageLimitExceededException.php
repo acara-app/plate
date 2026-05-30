@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Exceptions\Billing;
 
 use App\Enums\SubscriptionTier;
+use App\Utilities\StaticUrl;
 use Carbon\CarbonInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -81,7 +82,7 @@ final class UsageLimitExceededException extends RuntimeException
             $this->tier->label(),
             $resetsIn,
             $window,
-            route('checkout.subscription'),
+            StaticUrl::checkoutUrl(),
         );
     }
 

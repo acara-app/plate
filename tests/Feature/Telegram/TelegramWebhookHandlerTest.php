@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\UserChatPlatformLink;
 use App\Models\UserProfile;
 use App\Services\Telegram\TelegramWebhookHandler;
+use App\Utilities\StaticUrl;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Models\TelegraphChat;
@@ -417,7 +418,7 @@ describe('chat message handling', function (): void {
 
         Telegraph::assertSent('daily AI credits', false);
         Telegraph::assertSent('Free plan', false);
-        Telegraph::assertSent(route('checkout.subscription'), false);
+        Telegraph::assertSent(StaticUrl::checkoutUrl(), false);
     });
 });
 
