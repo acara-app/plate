@@ -28,6 +28,7 @@ use Laravel\Sanctum\HasApiTokens;
 /**
  * @property-read int $id
  * @property-read string|null $google_id
+ * @property-read string|null $apple_id
  * @property-read string $name
  * @property-read string $email
  * @property-read CarbonInterface|null $email_verified_at
@@ -46,6 +47,9 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read Collection<int, MealPlan> $mealPlans
  * @property-read bool $is_onboarded
  * @property-read CarbonInterface|null $accepted_disclaimer_at
+ * @property-read CarbonInterface|null $terms_accepted_at
+ * @property-read CarbonInterface|null $privacy_accepted_at
+ * @property-read string|null $consent_version
  * @property-read Collection<int, HealthDailyAggregate> $healthDailyAggregates
  * @property-read Collection<int, HealthSyncSample> $healthSyncSamples
  * @property-read bool $has_meal_plan
@@ -88,6 +92,7 @@ final class User extends Authenticatable implements MustVerifyEmail
         return [
             'id' => 'integer',
             'google_id' => 'string',
+            'apple_id' => 'string',
             'name' => 'string',
             'email' => 'string',
             'email_verified_at' => 'datetime',
@@ -99,6 +104,9 @@ final class User extends Authenticatable implements MustVerifyEmail
             'is_verified' => 'boolean',
             'locale' => 'string',
             'accepted_disclaimer_at' => 'datetime',
+            'terms_accepted_at' => 'datetime',
+            'privacy_accepted_at' => 'datetime',
+            'consent_version' => 'string',
             'settings' => 'array',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
@@ -226,6 +234,11 @@ final class User extends Authenticatable implements MustVerifyEmail
         }
 
         return str($subscription->type)->title()->replace('-', ' ')->toString();
+    }
+
+    public function requiresConsent(): bool
+    {
+        return $this->accepted_disclaimer_at === null;
     }
 
     protected function getIsVerifiedAttribute(?bool $isVerified): bool
