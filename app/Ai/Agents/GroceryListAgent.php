@@ -27,7 +27,7 @@ use Spatie\LaravelData\DataCollection;
 #[Provider('gemini')]
 #[MaxTokens(67000)]
 #[Timeout(120)]
-final class GroceryListGeneratorAgent implements Agent, HasStructuredOutput
+final class GroceryListAgent implements Agent, HasStructuredOutput
 {
     use Promptable;
 

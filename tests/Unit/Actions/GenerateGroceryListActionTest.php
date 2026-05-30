@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\GenerateGroceryListAction;
-use App\Ai\Agents\GroceryListGeneratorAgent;
+use App\Ai\Agents\GroceryListAgent;
 use App\Enums\GroceryListStatus;
 use App\Models\GroceryList;
 use App\Models\Meal;
@@ -75,7 +75,7 @@ it('deletes existing grocery list before creating placeholder', function (): voi
 });
 
 it('generates items for grocery list successfully', function (): void {
-    GroceryListGeneratorAgent::fake([[
+    GroceryListAgent::fake([[
         'items' => [
             ['name' => 'Chicken Breast', 'quantity' => '2 lbs', 'category' => 'Meat & Seafood', 'days' => [1]],
             ['name' => 'Olive Oil', 'quantity' => '2 tbsp', 'category' => 'Condiments & Sauces', 'days' => [1]],
@@ -113,7 +113,7 @@ it('generates items for grocery list successfully', function (): void {
 });
 
 it('generates items with no ingredients returns empty list', function (): void {
-    GroceryListGeneratorAgent::fake([[
+    GroceryListAgent::fake([[
         'items' => [],
     ]]);
 
@@ -131,7 +131,7 @@ it('generates items with no ingredients returns empty list', function (): void {
 });
 
 it('handles generation failure gracefully', function (): void {
-    GroceryListGeneratorAgent::fake(function (): void {
+    GroceryListAgent::fake(function (): void {
         throw new Exception('AI response failed');
     });
 
@@ -155,7 +155,7 @@ it('handles generation failure gracefully', function (): void {
 });
 
 it('handles full generation with handle method', function (): void {
-    GroceryListGeneratorAgent::fake([[
+    GroceryListAgent::fake([[
         'items' => [
             ['name' => 'Eggs', 'quantity' => '12', 'category' => 'Dairy', 'days' => [1]],
         ],

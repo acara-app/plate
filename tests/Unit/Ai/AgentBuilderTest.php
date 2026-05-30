@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 use App\Ai\AgentBuilder;
 use App\Ai\AgentPayload;
-use App\Ai\Agents\FitnessAgent;
-use App\Ai\Agents\HealthAgent;
-use App\Ai\Agents\NutritionAgent;
+use App\Ai\Agents\FitnessSpecialist;
+use App\Ai\Agents\HealthSpecialist;
+use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\CreateMealPlan;
 use App\Ai\Tools\GetCalorieLevelGuideline;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
-use App\Ai\Tools\SuggestSingleMeal;
+use App\Ai\Tools\SuggestMeal;
 use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Models\User;
@@ -122,10 +122,10 @@ describe('tools', function (): void {
             ->toContain(GetUserProfile::class)
             ->toContain(CreateMealPlan::class)
             ->toContain(LogHealthEntry::class)
-            ->toContain(NutritionAgent::class)
-            ->toContain(HealthAgent::class)
-            ->toContain(FitnessAgent::class)
-            ->not->toContain(SuggestSingleMeal::class);
+            ->toContain(NutritionSpecialist::class)
+            ->toContain(HealthSpecialist::class)
+            ->toContain(FitnessSpecialist::class)
+            ->not->toContain(SuggestMeal::class);
     });
 
     it('includes image tools when attachments present', function (): void {
@@ -186,7 +186,7 @@ describe('tools', function (): void {
 
         expect($toolClasses)
             ->toContain(GetCalorieLevelGuideline::class)
-            ->toContain(NutritionAgent::class)
+            ->toContain(NutritionSpecialist::class)
             ->not->toContain(WebSearch::class);
     });
 

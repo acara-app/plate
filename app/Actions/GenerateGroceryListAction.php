@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Ai\Agents\GroceryListGeneratorAgent;
+use App\Ai\Agents\GroceryListAgent;
 use App\Enums\GroceryListStatus;
 use App\Models\GroceryList;
 use App\Models\MealPlan;
@@ -15,7 +15,7 @@ use Throwable;
 final readonly class GenerateGroceryListAction
 {
     public function __construct(
-        private GroceryListGeneratorAgent $agent,
+        private GroceryListAgent $agent,
     ) {}
 
     public function createPlaceholder(MealPlan $mealPlan): GroceryList

@@ -15,7 +15,7 @@ use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
 #[AiToolSensitivity(DataSensitivity::Sensitive)]
-final readonly class SuggestSingleMeal implements Tool
+final readonly class SuggestMeal implements Tool
 {
     public function name(): string
     {
