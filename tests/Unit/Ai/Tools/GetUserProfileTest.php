@@ -11,7 +11,7 @@ use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\UserProfileAttribute;
 use Laravel\Ai\Tools\Request;
-use Pest\Mixins\Expectation;
+use Pest\Expectation;
 use Tests\Helpers\TestJsonSchema;
 
 covers(GetUserProfile::class);

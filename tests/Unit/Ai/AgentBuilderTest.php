@@ -89,6 +89,67 @@ describe('build', function (): void {
             ->toContain('fitness_specialist');
     });
 
+    it('states the specialist failure-handling rule exactly once', function (): void {
+        $user = User::factory()->create();
+        $payload = new AgentPayload(
+            userId: $user->id,
+            message: 'Hello',
+            mode: AgentMode::Ask,
+        );
+
+        $result = $this->builder->build($payload, $user);
+
+        expect(mb_substr_count($result['instructions'], 'treat it as a failed tool'))->toBe(1);
+    });
+
+    it('keeps every durable write and meal-plan creation with the orchestrator', function (): void {
+        $user = User::factory()->create();
+        $payload = new AgentPayload(
+            userId: $user->id,
+            message: 'Hello',
+            mode: AgentMode::Ask,
+        );
+
+        $result = $this->builder->build($payload, $user);
+
+        expect($result['instructions'])
+            ->toContain('log_health_entry')
+            ->toContain('update_user_biometrics')
+            ->toContain('update_user_profile_attributes')
+            ->toContain('update_household_context')
+            ->toContain('create_meal_plan');
+    });
+
+    it('instructs the orchestrator to inline profile context into the delegated task', function (): void {
+        $user = User::factory()->create();
+        $payload = new AgentPayload(
+            userId: $user->id,
+            message: 'Hello',
+            mode: AgentMode::Ask,
+        );
+
+        $result = $this->builder->build($payload, $user);
+
+        expect($result['instructions'])
+            ->toContain('Specialists have no access to `get_user_profile`')
+            ->toContain('inline those facts verbatim into the `task`');
+    });
+
+    it('does not claim a delegated domain in its own expertise banner', function (): void {
+        $user = User::factory()->create();
+        $payload = new AgentPayload(
+            userId: $user->id,
+            message: 'Hello',
+            mode: AgentMode::Ask,
+        );
+
+        $result = $this->builder->build($payload, $user);
+
+        expect($result['instructions'])
+            ->not->toContain('glucose impact prediction')
+            ->toContain('health_specialist');
+    });
+
     it('includes chat mode in instructions', function (): void {
         $user = User::factory()->create();
         $payload = new AgentPayload(

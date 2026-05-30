@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Ai\Agents\AgentRunner;
+use App\Ai\Agents\HealthSpecialist;
+use App\Ai\Agents\NutritionSpecialist;
 use App\Models\AiUsage;
 
 covers(AiUsage::class);
@@ -39,4 +42,21 @@ it('casts prompt_tokens to integer', function (): void {
     $aiUsage->prompt_tokens = '1000';
 
     expect($aiUsage->prompt_tokens)->toBeInt();
+});
+
+it('filters usage rows to a single agent FQCN', function (): void {
+    AiUsage::factory()->create(['agent' => NutritionSpecialist::class]);
+    AiUsage::factory()->create(['agent' => HealthSpecialist::class]);
+    AiUsage::factory()->create(['agent' => AgentRunner::class]);
+
+    expect(AiUsage::query()->byAgent(NutritionSpecialist::class)->count())->toBe(1)
+        ->and(AiUsage::query()->byAgent(AgentRunner::class)->count())->toBe(1);
+});
+
+it('filters usage rows to delegated specialists only', function (): void {
+    AiUsage::factory()->create(['agent' => NutritionSpecialist::class]);
+    AiUsage::factory()->create(['agent' => HealthSpecialist::class]);
+    AiUsage::factory()->create(['agent' => AgentRunner::class]);
+
+    expect(AiUsage::query()->specialist()->count())->toBe(2);
 });

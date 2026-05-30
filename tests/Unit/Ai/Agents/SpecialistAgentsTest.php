@@ -105,3 +105,19 @@ it('can be faked and prompted directly as an isolated sub-agent', function (stri
 
     $class::assertPrompted('Handle this delegated task.');
 })->with('specialists');
+
+dataset('specialist scope keywords', [
+    'nutrition' => [NutritionSpecialist::class, ['single meals', 'create_meal_plan']],
+    'health' => [HealthSpecialist::class, ['health data', 'glucose']],
+    'fitness' => [FitnessSpecialist::class, ['workout', 'wellness']],
+]);
+
+it('keeps its routing scope and isolation marker in the description as the single source of truth', function (string $class, array $keywords): void {
+    $description = resolve($class)->description();
+
+    expect($description)->toContain('cannot see the chat history');
+
+    foreach ($keywords as $keyword) {
+        expect($description)->toContain($keyword);
+    }
+})->with('specialist scope keywords');
