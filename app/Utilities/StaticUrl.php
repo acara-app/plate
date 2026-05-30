@@ -13,4 +13,10 @@ final class StaticUrl
         return (string) Uri::of(config()->string('app.url'))
             ->withPath(route('meal-plans.index', [], false));
     }
+
+    public static function checkoutUrl(): string
+    {
+        return (string) Uri::of(config()->string('app.url'))
+            ->withPath(route('checkout.subscription', [], false));
+    }
 }

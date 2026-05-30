@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\SubscriptionTier;
 use App\Exceptions\Billing\UsageLimitExceededException;
+use App\Utilities\StaticUrl;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -68,7 +69,7 @@ it('builds a friendly daily message with an upgrade link for the free tier', fun
         ->toContain('daily AI credits')
         ->toContain('Free plan')
         ->toContain('18 hours 45 minutes')
-        ->toContain(route('checkout.subscription'));
+        ->toContain(StaticUrl::checkoutUrl());
 });
 
 it('describes the weekly window when the weekly limit is exceeded', function (): void {
@@ -83,7 +84,7 @@ it('describes the weekly window when the weekly limit is exceeded', function ():
     expect($exception->userMessage())
         ->toContain('weekly AI credits')
         ->toContain('Supporter plan')
-        ->toContain(route('checkout.subscription'));
+        ->toContain(StaticUrl::checkoutUrl());
 });
 
 it('omits the upgrade link for the top tier', function (): void {
@@ -98,5 +99,5 @@ it('omits the upgrade link for the top tier', function (): void {
     expect($exception->userMessage())
         ->toContain('reached your daily AI credit limit')
         ->toContain('Pro plan')
-        ->not->toContain(route('checkout.subscription'));
+        ->not->toContain(StaticUrl::checkoutUrl());
 });
