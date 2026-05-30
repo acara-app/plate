@@ -11,9 +11,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table): void {
-            $table->timestamp('terms_accepted_at')->nullable()->after('accepted_disclaimer_at');
-            $table->timestamp('privacy_accepted_at')->nullable()->after('terms_accepted_at');
-            $table->string('consent_version')->nullable()->after('privacy_accepted_at');
+            $table->timestamp('terms_accepted_at')->nullable();
+            $table->timestamp('privacy_accepted_at')->nullable();
+            $table->string('consent_version')->nullable();
         });
     }
 };
