@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\FitnessAgent;
-use App\Ai\Agents\HealthAgent;
-use App\Ai\Agents\NutritionAgent;
+use App\Ai\Agents\FitnessSpecialist;
+use App\Ai\Agents\HealthSpecialist;
+use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\CreateMealPlan;
 use App\Ai\Tools\EnrichAttributeMetadata;
@@ -19,7 +19,7 @@ use App\Ai\Tools\GetHealthSyncSupport;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
 use App\Ai\Tools\PredictGlucoseSpike;
-use App\Ai\Tools\SuggestSingleMeal;
+use App\Ai\Tools\SuggestMeal;
 use App\Ai\Tools\SuggestWellnessRoutine;
 use App\Ai\Tools\SuggestWorkoutRoutine;
 use App\Ai\Tools\UpdateHouseholdContext;
@@ -54,7 +54,7 @@ return [
     ],
 
     'nutrition_tools' => [
-        SuggestSingleMeal::class,
+        SuggestMeal::class,
         GetDietReference::class,
         GetCalorieLevelGuideline::class,
         GetDailyServingsByCalorie::class,
@@ -75,9 +75,9 @@ return [
     ],
 
     'sub_agents' => [
-        NutritionAgent::class,
-        HealthAgent::class,
-        FitnessAgent::class,
+        NutritionSpecialist::class,
+        HealthSpecialist::class,
+        FitnessSpecialist::class,
     ],
 
     'image_tools' => [

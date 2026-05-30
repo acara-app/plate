@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\FitnessAgent;
-use App\Ai\Agents\HealthAgent;
-use App\Ai\Agents\NutritionAgent;
+use App\Ai\Agents\FitnessSpecialist;
+use App\Ai\Agents\HealthSpecialist;
+use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\GetCalorieLevelGuideline;
 use App\Ai\Tools\GetDailyServingsByCalorie;
 use App\Ai\Tools\GetDietReference;
@@ -14,7 +14,7 @@ use App\Ai\Tools\GetHealthGoals;
 use App\Ai\Tools\GetHealthSummary;
 use App\Ai\Tools\GetHealthSyncSupport;
 use App\Ai\Tools\PredictGlucoseSpike;
-use App\Ai\Tools\SuggestSingleMeal;
+use App\Ai\Tools\SuggestMeal;
 use App\Ai\Tools\SuggestWellnessRoutine;
 use App\Ai\Tools\SuggestWorkoutRoutine;
 use App\Models\User;
@@ -24,21 +24,21 @@ use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\CanActAsTool;
 use Laravel\Ai\Contracts\HasTools;
 
-covers(NutritionAgent::class, HealthAgent::class, FitnessAgent::class);
+covers(NutritionSpecialist::class, HealthSpecialist::class, FitnessSpecialist::class);
 
 dataset('specialists', [
     'nutrition' => [
-        NutritionAgent::class,
+        NutritionSpecialist::class,
         'nutrition_specialist',
         [
-            SuggestSingleMeal::class,
+            SuggestMeal::class,
             GetDietReference::class,
             GetCalorieLevelGuideline::class,
             GetDailyServingsByCalorie::class,
         ],
     ],
     'health' => [
-        HealthAgent::class,
+        HealthSpecialist::class,
         'health_specialist',
         [
             GetHealthData::class,
@@ -49,7 +49,7 @@ dataset('specialists', [
         ],
     ],
     'fitness' => [
-        FitnessAgent::class,
+        FitnessSpecialist::class,
         'fitness_specialist',
         [
             SuggestWorkoutRoutine::class,

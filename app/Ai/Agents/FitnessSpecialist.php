@@ -7,7 +7,7 @@ namespace App\Ai\Agents;
 use Laravel\Ai\Attributes\Timeout;
 
 #[Timeout(120)]
-final class FitnessAgent extends SpecialistAgent
+final class FitnessSpecialist extends SpecialistAgent
 {
     public function name(): string
     {
