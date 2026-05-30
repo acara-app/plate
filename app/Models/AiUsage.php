@@ -85,4 +85,22 @@ final class AiUsage extends Model
             $query->where('created_at', '<=', $endDate);
         }
     }
+
+    /**
+     * @param  Builder<AiUsage>  $query
+     */
+    #[Scope]
+    protected function byAgent(Builder $query, string $agent): void
+    {
+        $query->where('agent', $agent);
+    }
+
+    /**
+     * @param  Builder<AiUsage>  $query
+     */
+    #[Scope]
+    protected function specialist(Builder $query): void
+    {
+        $query->whereIn('agent', config()->array('plate.sub_agents', []));
+    }
 }
