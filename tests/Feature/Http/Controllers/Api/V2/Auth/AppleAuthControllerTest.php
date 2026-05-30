@@ -121,7 +121,7 @@ it('rejects sign-in when Apple is not configured', function (): void {
         'identity_token' => 'unverifiable-token',
         'device_name' => 'iPhone',
         'device_identifier' => 'device-uuid-1',
-    ])->assertStatus(401);
+    ])->assertUnauthorized();
 });
 
 it('refuses to link into an unverified email account', function (): void {
@@ -139,7 +139,7 @@ it('refuses to link into an unverified email account', function (): void {
         'identity_token' => $token,
         'device_name' => 'iPhone',
         'device_identifier' => 'device-uuid-1',
-    ])->assertStatus(409)->assertJson(['code' => 'email_exists']);
+    ])->assertConflict()->assertJson(['code' => 'email_exists']);
 });
 
 it('rejects a token whose nonce does not match the stored nonce', function (): void {
@@ -151,7 +151,7 @@ it('rejects a token whose nonce does not match the stored nonce', function (): v
         'identity_token' => $token,
         'device_name' => 'iPhone',
         'device_identifier' => 'device-uuid-1',
-    ])->assertStatus(401);
+    ])->assertUnauthorized();
 });
 
 it('consumes the nonce so it cannot be replayed', function (): void {
@@ -166,7 +166,7 @@ it('consumes the nonce so it cannot be replayed', function (): void {
     ];
 
     $this->postJson(route('api.v2.auth.apple'), $payload)->assertOk();
-    $this->postJson(route('api.v2.auth.apple'), $payload)->assertStatus(401);
+    $this->postJson(route('api.v2.auth.apple'), $payload)->assertUnauthorized();
 });
 
 it('rejects an expired nonce', function (): void {
@@ -178,5 +178,5 @@ it('rejects an expired nonce', function (): void {
         'identity_token' => $token,
         'device_name' => 'iPhone',
         'device_identifier' => 'device-uuid-1',
-    ])->assertStatus(401);
+    ])->assertUnauthorized();
 });

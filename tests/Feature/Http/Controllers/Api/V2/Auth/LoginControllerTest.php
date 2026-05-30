@@ -52,7 +52,7 @@ it('returns a 2FA challenge when two-factor is enabled', function (): void {
         'device_identifier' => 'device-uuid-1',
     ]);
 
-    $response->assertStatus(409)
+    $response->assertConflict()
         ->assertJson(['two_factor_required' => true])
         ->assertJsonStructure(['challenge_token']);
 

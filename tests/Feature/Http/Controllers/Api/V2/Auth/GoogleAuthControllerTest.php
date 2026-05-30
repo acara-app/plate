@@ -104,7 +104,7 @@ it('refuses to link into an unverified email account', function (): void {
         'id_token' => $token,
         'device_name' => 'iPhone',
         'device_identifier' => 'device-uuid-1',
-    ])->assertStatus(409)->assertJson(['code' => 'email_exists']);
+    ])->assertConflict()->assertJson(['code' => 'email_exists']);
 
     expect(User::query()->where('email', 'unverified@example.com')->first()->google_id)->toBeNull();
 });
@@ -116,7 +116,7 @@ it('rejects a token with an audience that is not allowed', function (): void {
         'id_token' => $token,
         'device_name' => 'iPhone',
         'device_identifier' => 'device-uuid-1',
-    ])->assertStatus(401);
+    ])->assertUnauthorized();
 });
 
 it('rejects replaying the same token twice', function (): void {
@@ -132,5 +132,5 @@ it('rejects replaying the same token twice', function (): void {
         'id_token' => $token,
         'device_name' => 'iPhone',
         'device_identifier' => 'device-uuid-1',
-    ])->assertStatus(401);
+    ])->assertUnauthorized();
 });

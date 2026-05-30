@@ -58,6 +58,6 @@ it('blocks chat streaming until the medical disclaimer is accepted', function ()
             'mode' => 'ask',
             'messages' => [],
         ])
-        ->assertStatus(403)
+        ->assertForbidden()
         ->assertJson(['code' => 'consent_required']);
 });
