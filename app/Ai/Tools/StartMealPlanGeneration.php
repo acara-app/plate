@@ -16,7 +16,7 @@ use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 
 #[AiToolSensitivity(DataSensitivity::Sensitive)]
-final readonly class CreateMealPlan implements Tool
+final readonly class StartMealPlanGeneration implements Tool
 {
     private const int MIN_DAYS = 1;
 
@@ -26,12 +26,12 @@ final readonly class CreateMealPlan implements Tool
 
     public function name(): string
     {
-        return 'create_meal_plan';
+        return 'start_meal_plan_generation';
     }
 
     public function description(): string
     {
-        return 'Generate a complete multi-day meal plan tailored to the user\'s profile, dietary preferences, health conditions, and goals. This creates a structured meal plan that can be saved and followed. Use this when the user explicitly asks for a meal plan or when in "Generate Meal Plan" mode. If the user does not specify a day count, default to 7 days.';
+        return 'Start the asynchronous workflow that generates and saves a complete multi-day meal plan for the authenticated user. Use only after the meal-plan specialist has resolved the requested day count and custom meal-plan constraints. If the user does not specify a day count, default to 7 days.';
     }
 
     public function handle(Request $request): string

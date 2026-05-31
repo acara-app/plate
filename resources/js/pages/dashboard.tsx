@@ -24,7 +24,6 @@ import {
     ChevronRight,
     Droplets,
     History,
-    MessageSquare,
     Send,
     Smartphone,
     Sparkles,
@@ -89,44 +88,6 @@ export default function Dashboard() {
                         </CardHeader>
 
                         <CardContent className="flex flex-1 flex-col gap-4">
-                            {/* Quick Actions */}
-                            <div className="grid grid-cols-2 gap-2">
-                                <Link
-                                    href={`${chat.create(generateUUID()).url}?mode=ask`}
-                                    className="group/action"
-                                >
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-auto w-full flex-col items-start justify-start gap-1 p-3 text-left transition-colors group-hover/action:border-emerald-500 group-hover/action:bg-emerald-50"
-                                    >
-                                        <MessageSquare className="h-4 w-4 text-emerald-600" />
-                                        <span className="text-xs font-medium">
-                                            {t(
-                                                'dashboard_cards.chat.quick_actions.ask',
-                                            )}
-                                        </span>
-                                    </Button>
-                                </Link>
-                                <Link
-                                    href={`${chat.create(generateUUID()).url}?mode=create-meal-plan`}
-                                    className="group/action"
-                                >
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-auto w-full flex-col items-start justify-start gap-1 p-3 text-left transition-colors group-hover/action:border-emerald-500 group-hover/action:bg-emerald-50"
-                                    >
-                                        <Utensils className="h-4 w-4 text-emerald-600" />
-                                        <span className="text-xs font-medium">
-                                            {t(
-                                                'dashboard_cards.chat.quick_actions.meal_plan',
-                                            )}
-                                        </span>
-                                    </Button>
-                                </Link>
-                            </div>
-
                             {/* Main CTA */}
                             <div className="mt-auto pt-2">
                                 <Link href={chat.create(generateUUID()).url}>

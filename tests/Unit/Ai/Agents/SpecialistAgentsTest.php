@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Ai\Agents\FitnessSpecialist;
 use App\Ai\Agents\HealthSpecialist;
+use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\GetCalorieLevelGuideline;
 use App\Ai\Tools\GetDailyServingsByCalorie;
@@ -14,6 +15,7 @@ use App\Ai\Tools\GetHealthGoals;
 use App\Ai\Tools\GetHealthSummary;
 use App\Ai\Tools\GetHealthSyncSupport;
 use App\Ai\Tools\PredictGlucoseSpike;
+use App\Ai\Tools\StartMealPlanGeneration;
 use App\Ai\Tools\SuggestMeal;
 use App\Ai\Tools\SuggestWellnessRoutine;
 use App\Ai\Tools\SuggestWorkoutRoutine;
@@ -24,9 +26,17 @@ use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\CanActAsTool;
 use Laravel\Ai\Contracts\HasTools;
 
-covers(NutritionSpecialist::class, HealthSpecialist::class, FitnessSpecialist::class);
+covers(NutritionSpecialist::class, HealthSpecialist::class, FitnessSpecialist::class, MealPlanSpecialist::class);
 
 dataset('specialists', [
+    'meal plan' => [
+        MealPlanSpecialist::class,
+        'meal_plan_specialist',
+        [
+            StartMealPlanGeneration::class,
+            GetDietReference::class,
+        ],
+    ],
     'nutrition' => [
         NutritionSpecialist::class,
         'nutrition_specialist',
@@ -107,7 +117,8 @@ it('can be faked and prompted directly as an isolated sub-agent', function (stri
 })->with('specialists');
 
 dataset('specialist scope keywords', [
-    'nutrition' => [NutritionSpecialist::class, ['single meals', 'create_meal_plan']],
+    'meal plan' => [MealPlanSpecialist::class, ['meal plan', 'day count']],
+    'nutrition' => [NutritionSpecialist::class, ['single meals', 'meal_plan_specialist']],
     'health' => [HealthSpecialist::class, ['health data', 'glucose']],
     'fitness' => [FitnessSpecialist::class, ['workout', 'wellness']],
 ]);

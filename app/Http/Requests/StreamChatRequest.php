@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
-use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Laravel\Ai\Files\Base64Image;
 
 class StreamChatRequest extends FormRequest
@@ -32,8 +30,6 @@ class StreamChatRequest extends FormRequest
 
             'messages.*.parts.*.mediaType' => ['nullable', 'string'],
             'messages.*.parts.*.url' => ['nullable', 'string'],
-
-            'mode' => ['required', Rule::enum(AgentMode::class)],
         ];
     }
 
@@ -55,14 +51,6 @@ class StreamChatRequest extends FormRequest
             ->where('type', 'text')
             ->pluck('text')
             ->implode('');
-    }
-
-    public function mode(): AgentMode
-    {
-        /** @var string $mode */
-        $mode = $this->validated('mode');
-
-        return AgentMode::from($mode);
     }
 
     public function modelName(): ModelName
@@ -107,7 +95,6 @@ class StreamChatRequest extends FormRequest
     {
         return [
             'messages.required' => 'Messages are required',
-            'mode.required' => 'Mode is required',
         ];
     }
 }

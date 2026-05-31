@@ -6,10 +6,9 @@ use App\Actions\Billing\BuildCreditWarning;
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Ai\Tools\AnalyzePhoto;
-use App\Ai\Tools\CreateMealPlan;
+use App\Ai\Tools\StartMealPlanGeneration;
 use App\Contracts\Ai\GeneratesMealPlans;
 use App\Contracts\Billing\ResolvesUserTier;
-use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Enums\SubscriptionTier;
 use App\Models\AiUsage;
@@ -88,7 +87,7 @@ it('lets the AnalyzePhoto tool run for free users when the flag is off', functio
         ->and($result)->not->toHaveKey('error');
 });
 
-it('lets the CreateMealPlan tool run for free users when the flag is off', function (): void {
+it('lets the StartMealPlanGeneration tool run for free users when the flag is off', function (): void {
     $generator = Mockery::mock(GeneratesMealPlans::class);
     $generator->shouldReceive('handle')->once()->andReturnNull();
     $this->app->instance(GeneratesMealPlans::class, $generator);
@@ -96,7 +95,7 @@ it('lets the CreateMealPlan tool run for free users when the flag is off', funct
     $user = User::factory()->create();
     Auth::login($user);
 
-    $tool = new CreateMealPlan();
+    $tool = new StartMealPlanGeneration();
     $result = json_decode($tool->handle(new Request([])), true);
 
     expect($result)->not->toHaveKey('error');
@@ -115,7 +114,6 @@ it('returns no 402 from chat stream preflight when the flag is off', function ()
         'messages' => [
             ['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'hi']]],
         ],
-        'mode' => AgentMode::Ask->value,
     ]);
 
     expect($response->getStatusCode())->not->toBe(402);

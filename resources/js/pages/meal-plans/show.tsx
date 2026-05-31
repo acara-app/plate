@@ -264,6 +264,7 @@ function EmptyMealPlanState({
     dietTypes,
 }: EmptyMealPlanStateProps) {
     const { t } = useTranslation('common');
+    const mealPlanPrompt = encodeURIComponent('Create a 7-day meal plan');
 
     return (
         <>
@@ -293,7 +294,7 @@ function EmptyMealPlanState({
                     <div className="grid gap-3 sm:flex sm:flex-wrap">
                         <Button className="w-full sm:w-auto" asChild>
                             <Link
-                                href={`${chat.create(generateUUID()).url}?mode=create-meal-plan`}
+                                href={`${chat.create(generateUUID()).url}?prompt=${mealPlanPrompt}`}
                             >
                                 <MessageSquare className="h-4 w-4" />
                                 {t('meal_plans.create_with_altani')}

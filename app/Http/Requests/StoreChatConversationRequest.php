@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
-use App\Enums\AgentMode;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 /** @codeCoverageIgnore */
 final class StoreChatConversationRequest extends FormRequest
@@ -24,8 +22,16 @@ final class StoreChatConversationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'mode' => ['nullable', Rule::enum(AgentMode::class)],
+            'prompt' => ['nullable', 'string', 'max:500'],
         ];
+    }
+
+    public function initialPrompt(): ?string
+    {
+        /** @var string|null $prompt */
+        $prompt = $this->validated('prompt');
+
+        return $prompt === '' ? null : $prompt;
     }
 
     public function withValidator(Validator $validator): void

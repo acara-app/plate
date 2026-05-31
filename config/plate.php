@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use App\Ai\Agents\FitnessSpecialist;
 use App\Ai\Agents\HealthSpecialist;
+use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\AnalyzePhoto;
-use App\Ai\Tools\CreateMealPlan;
 use App\Ai\Tools\EnrichAttributeMetadata;
 use App\Ai\Tools\GetCalorieLevelGuideline;
 use App\Ai\Tools\GetDailyServingsByCalorie;
@@ -19,6 +19,7 @@ use App\Ai\Tools\GetHealthSyncSupport;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
 use App\Ai\Tools\PredictGlucoseSpike;
+use App\Ai\Tools\StartMealPlanGeneration;
 use App\Ai\Tools\SuggestMeal;
 use App\Ai\Tools\SuggestWellnessRoutine;
 use App\Ai\Tools\SuggestWorkoutRoutine;
@@ -45,7 +46,6 @@ return [
 
     'tools' => [
         GetUserProfile::class,
-        CreateMealPlan::class,
         LogHealthEntry::class,
         EnrichAttributeMetadata::class,
         UpdateUserProfileAttributes::class,
@@ -75,6 +75,7 @@ return [
     ],
 
     'sub_agents' => [
+        MealPlanSpecialist::class,
         NutritionSpecialist::class,
         HealthSpecialist::class,
         FitnessSpecialist::class,
@@ -85,6 +86,7 @@ return [
     ],
 
     'meal_plan_tools' => [
+        StartMealPlanGeneration::class,
         GetDietReference::class,
     ],
 

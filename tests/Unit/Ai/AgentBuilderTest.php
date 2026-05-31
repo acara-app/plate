@@ -6,14 +6,14 @@ use App\Ai\AgentBuilder;
 use App\Ai\AgentPayload;
 use App\Ai\Agents\FitnessSpecialist;
 use App\Ai\Agents\HealthSpecialist;
+use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\AnalyzePhoto;
-use App\Ai\Tools\CreateMealPlan;
 use App\Ai\Tools\GetCalorieLevelGuideline;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
+use App\Ai\Tools\StartMealPlanGeneration;
 use App\Ai\Tools\SuggestMeal;
-use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Models\User;
 use Laravel\Ai\Files\Base64Image;
@@ -31,7 +31,6 @@ describe('build', function (): void {
         $payload = new AgentPayload(
             userId: $user->id,
             message: 'Hello',
-            mode: AgentMode::Ask,
         );
 
         $result = $this->builder->build($payload, $user);
@@ -47,7 +46,6 @@ describe('build', function (): void {
         $payload = new AgentPayload(
             userId: $user->id,
             message: 'Hello',
-            mode: AgentMode::Ask,
         );
 
         $result = $this->builder->build($payload, $user);
@@ -62,7 +60,6 @@ describe('build', function (): void {
         $payload = new AgentPayload(
             userId: $user->id,
             message: 'How much protein should I eat?',
-            mode: AgentMode::Ask,
         );
 
         $result = $this->builder->build($payload, $user);
@@ -78,12 +75,12 @@ describe('build', function (): void {
         $payload = new AgentPayload(
             userId: $user->id,
             message: 'Hello',
-            mode: AgentMode::Ask,
         );
 
         $result = $this->builder->build($payload, $user);
 
         expect($result['instructions'])
+            ->toContain('meal_plan_specialist')
             ->toContain('nutrition_specialist')
             ->toContain('health_specialist')
             ->toContain('fitness_specialist');
@@ -94,7 +91,6 @@ describe('build', function (): void {
         $payload = new AgentPayload(
             userId: $user->id,
             message: 'Hello',
-            mode: AgentMode::Ask,
         );
 
         $result = $this->builder->build($payload, $user);
@@ -102,12 +98,11 @@ describe('build', function (): void {
         expect(mb_substr_count((string) $result['instructions'], 'treat it as a failed tool'))->toBe(1);
     });
 
-    it('keeps every durable write and meal-plan creation with the orchestrator', function (): void {
+    it('keeps durable writes with the orchestrator and delegates meal plans', function (): void {
         $user = User::factory()->create();
         $payload = new AgentPayload(
             userId: $user->id,
             message: 'Hello',
-            mode: AgentMode::Ask,
         );
 
         $result = $this->builder->build($payload, $user);
@@ -117,7 +112,7 @@ describe('build', function (): void {
             ->toContain('update_user_biometrics')
             ->toContain('update_user_profile_attributes')
             ->toContain('update_household_context')
-            ->toContain('create_meal_plan');
+            ->toContain('meal_plan_specialist');
     });
 
     it('instructs the orchestrator to inline profile context into the delegated task', function (): void {
@@ -125,7 +120,6 @@ describe('build', function (): void {
         $payload = new AgentPayload(
             userId: $user->id,
             message: 'Hello',
-            mode: AgentMode::Ask,
         );
 
         $result = $this->builder->build($payload, $user);
@@ -140,7 +134,6 @@ describe('build', function (): void {
         $payload = new AgentPayload(
             userId: $user->id,
             message: 'Hello',
-            mode: AgentMode::Ask,
         );
 
         $result = $this->builder->build($payload, $user);
@@ -150,17 +143,18 @@ describe('build', function (): void {
             ->toContain('health_specialist');
     });
 
-    it('includes chat mode in instructions', function (): void {
+    it('does not include chat mode instructions', function (): void {
         $user = User::factory()->create();
         $payload = new AgentPayload(
             userId: $user->id,
             message: 'Hello',
-            mode: AgentMode::CreateMealPlan,
         );
 
         $result = $this->builder->build($payload, $user);
 
-        expect($result['instructions'])->toContain('CHAT MODE: create-meal-plan');
+        expect($result['instructions'])
+            ->not->toContain('CHAT MODE:')
+            ->not->toContain('Create Meal Plan mode');
     });
 });
 
@@ -170,7 +164,6 @@ describe('tools', function (): void {
         $payload = new AgentPayload(
             userId: $user->id,
             message: 'Hello',
-            mode: AgentMode::Ask,
         );
 
         $result = $this->builder->build($payload, $user);
@@ -181,11 +174,12 @@ describe('tools', function (): void {
 
         expect($toolClasses)
             ->toContain(GetUserProfile::class)
-            ->toContain(CreateMealPlan::class)
             ->toContain(LogHealthEntry::class)
+            ->toContain(MealPlanSpecialist::class)
             ->toContain(NutritionSpecialist::class)
             ->toContain(HealthSpecialist::class)
             ->toContain(FitnessSpecialist::class)
+            ->not->toContain(StartMealPlanGeneration::class)
             ->not->toContain(SuggestMeal::class);
     });
 
@@ -196,7 +190,6 @@ describe('tools', function (): void {
             userId: $user->id,
             message: 'Analyze this',
             images: [$image],
-            mode: AgentMode::Ask,
         );
 
         $result = $this->builder->build($payload, $user);
@@ -213,7 +206,6 @@ describe('tools', function (): void {
         $payload = new AgentPayload(
             userId: $user->id,
             message: 'Search for something',
-            mode: AgentMode::Ask,
             modelName: ModelName::GPT_5_MINI,
         );
 
@@ -235,7 +227,6 @@ describe('tools', function (): void {
         $payload = new AgentPayload(
             userId: $user->id,
             message: 'What are calorie recommendations?',
-            mode: AgentMode::Ask,
             modelName: ModelName::GPT_5_MINI,
         );
 
@@ -259,7 +250,6 @@ describe('tools', function (): void {
         $payload = new AgentPayload(
             userId: $user->id,
             message: 'What are calorie recommendations?',
-            mode: AgentMode::Ask,
             modelName: ModelName::GPT_5_MINI,
         );
 
@@ -279,7 +269,6 @@ it('handles null user gracefully', function (): void {
     $payload = new AgentPayload(
         userId: 1,
         message: 'Hello',
-        mode: AgentMode::Ask,
     );
 
     $result = $this->builder->build($payload, null);

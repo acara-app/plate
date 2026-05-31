@@ -52,10 +52,8 @@ final readonly class AgentBuilder
 
         $instructions = view('ai.prompts.altani-static', [
             'currentTime' => now($timezone)->format('Y-m-d H:i (l)').' ('.$timezone.')',
-            'chatMode' => $payload->mode->value,
             'languageLabel' => LanguageUtil::get($languageCode) ?? 'English',
             'languageCode' => $languageCode,
-            'isCreateMealPlanMode' => $payload->mode->value === 'create-meal-plan',
             'memoryStorageEnabled' => ! $this->memoryContext instanceof NullMemoryPromptContext,
             'summaries' => $summaries,
             'emergencyNumber' => EmergencyNumberUtil::emergencyNumber($timezone),

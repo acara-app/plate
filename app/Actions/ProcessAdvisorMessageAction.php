@@ -7,7 +7,6 @@ namespace App\Actions;
 use App\Ai\AgentPayload;
 use App\Ai\Agents\AgentRunner;
 use App\Contracts\ProcessesAdvisorMessage;
-use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -36,7 +35,6 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
             userId: $user->id,
             message: $message,
             images: $attachments,
-            mode: AgentMode::Ask,
             modelName: ModelName::GPT_5_4_MINI,
         );
 

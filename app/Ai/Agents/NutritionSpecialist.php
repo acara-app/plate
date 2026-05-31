@@ -16,7 +16,7 @@ final class NutritionSpecialist extends SpecialistAgent
 
     public function description(): string
     {
-        return 'Delegate nutrition and meal questions to a specialist that can suggest single meals, look up diet-specific reference material, USDA calorie-level guidelines, and daily serving tables. Pass a complete, self-contained task that includes any relevant user context (allergies, diet type, calorie target, what they asked) — the specialist cannot see the chat history. Do NOT use it to create multi-day meal plans; use create_meal_plan for that.';
+        return 'Delegate nutrition and meal questions to a specialist that can suggest single meals, look up diet-specific reference material, USDA calorie-level guidelines, and daily serving tables. Pass a complete, self-contained task that includes any relevant user context (allergies, diet type, calorie target, what they asked) — the specialist cannot see the chat history. Do NOT use it to create multi-day meal plans; use meal_plan_specialist for that.';
     }
 
     protected function promptView(): string
