@@ -94,6 +94,17 @@ return [
 
     'credit_multiplier' => 1_000,
 
+    'model_pricing' => [
+        'default' => ['input' => 0.50, 'output' => 2.00, 'reasoning' => 0.0, 'cache_read' => 0.25],
+        'models' => [
+            'gpt-5-mini' => ['input' => 0.15, 'output' => 0.60, 'reasoning' => 0.0, 'cache_read' => 0.075],
+            'gpt-5-nano' => ['input' => 0.10, 'output' => 0.40, 'reasoning' => 0.0, 'cache_read' => 0.05],
+            'gpt-5.4-mini' => ['input' => 0.75, 'output' => 4.50, 'reasoning' => 0.0, 'cache_read' => 0.075],
+            'gemini-3-flash-preview' => ['input' => 0.50, 'output' => 3.00, 'reasoning' => 0.0, 'cache_read' => 0.05],
+            'gemini-3.1-pro-preview' => ['input' => 2.00, 'output' => 12.00, 'reasoning' => 0.0, 'cache_read' => 0.20],
+        ],
+    ],
+
     'ai_usage_preflight' => [
         'token_budget' => [
             'input' => 2_000,
@@ -104,16 +115,16 @@ return [
 
     'tier_limits' => [
         'free' => [
-            'rolling' => ['limit' => 0.10, 'period_hours' => 24],
-            'weekly' => ['limit' => 0.35, 'period_days' => 7],
+            'rolling' => ['limit' => 0.40, 'period_hours' => 24],
+            'weekly' => ['limit' => 1.40, 'period_days' => 7],
         ],
         'basic' => [
-            'rolling' => ['limit' => 0.50, 'period_hours' => 24],
-            'weekly' => ['limit' => 2.00, 'period_days' => 7],
+            'rolling' => ['limit' => 1.50, 'period_hours' => 24],
+            'weekly' => ['limit' => 6.00, 'period_days' => 7],
         ],
         'plus' => [
-            'rolling' => ['limit' => 1.00, 'period_hours' => 24],
-            'weekly' => ['limit' => 4.00, 'period_days' => 7],
+            'rolling' => ['limit' => 3.00, 'period_hours' => 24],
+            'weekly' => ['limit' => 12.00, 'period_days' => 7],
         ],
     ],
 ];

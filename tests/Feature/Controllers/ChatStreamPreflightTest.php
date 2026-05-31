@@ -25,7 +25,7 @@ it('returns HTTP 402 with limit metadata when a Free user is over the rolling ca
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.099,
+        'cost' => 0.396,
     ]);
 
     $countBefore = AiUsage::query()->count();

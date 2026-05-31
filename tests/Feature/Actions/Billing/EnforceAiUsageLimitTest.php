@@ -57,7 +57,7 @@ it('throws when the rolling window cost plus estimate would exceed the cap', fun
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.099,
+        'cost' => 0.396,
     ]);
 
     enforceUsage()->handle($user, ModelName::GPT_5_4_MINI);
@@ -70,7 +70,8 @@ it('throws when the weekly window cost plus estimate would exceed the cap', func
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.349,
+        'cost' => 1.41,
+        'created_at' => now()->subDays(2),
     ]);
 
     expect(fn (): mixed => enforceUsage()->handle($user, ModelName::GPT_5_4_MINI))
@@ -82,7 +83,7 @@ it('throws at the 99% mark when the next call would push the user past 100', fun
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.099,
+        'cost' => 0.396,
     ]);
 
     try {
@@ -91,8 +92,8 @@ it('throws at the 99% mark when the next call would push the user past 100', fun
     } catch (UsageLimitExceededException $usageLimitExceededException) {
         expect($usageLimitExceededException->limitType)->toBe('rolling')
             ->and($usageLimitExceededException->tier)->toBe(SubscriptionTier::Free)
-            ->and($usageLimitExceededException->limitCredits)->toBe(100)
-            ->and($usageLimitExceededException->currentCredits)->toBe(99);
+            ->and($usageLimitExceededException->limitCredits)->toBe(400)
+            ->and($usageLimitExceededException->currentCredits)->toBe(396);
     }
 });
 
@@ -116,7 +117,7 @@ it('does not write an AiUsage row when it rejects a request', function (): void 
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.099,
+        'cost' => 0.396,
     ]);
 
     $countBefore = AiUsage::query()->count();
@@ -154,7 +155,7 @@ it('uses the configured fallback estimate when no model is provided', function (
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.099,
+        'cost' => 0.396,
     ]);
 
     expect(fn (): mixed => enforceUsage()->handle($user))
@@ -166,7 +167,7 @@ it('exposes the resets_at timestamp on the exception for the breached window', f
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.099,
+        'cost' => 0.396,
     ]);
 
     try {
@@ -184,7 +185,7 @@ it('reports the rolling resets_at as the oldest in-window usage plus period_hour
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.099,
+        'cost' => 0.396,
         'created_at' => $oldestAt,
     ]);
 

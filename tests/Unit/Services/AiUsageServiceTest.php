@@ -75,6 +75,20 @@ it('calculates cost with cache reads', function (): void {
     );
 });
 
+it('prices dated model snapshots using the base model pricing', function (): void {
+    $service = new AiUsageService;
+    $pricing = ModelName::GPT_5_4_MINI->getPricing();
+
+    $usage = [
+        'prompt_tokens' => 1000000,
+        'completion_tokens' => 0,
+        'cache_read_input_tokens' => 0,
+        'reasoning_tokens' => 0,
+    ];
+
+    expect($service->calculateCost('gpt-5.4-mini-2026-03-17', $usage))->toBe($pricing['input']);
+});
+
 it('uses default pricing for unknown model', function (): void {
     $service = new AiUsageService;
 

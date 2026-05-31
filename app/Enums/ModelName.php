@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+use App\Services\ModelPricing;
 use Laravel\Ai\Enums\Lab;
 
 enum ModelName: string
@@ -125,38 +126,7 @@ enum ModelName: string
      */
     public function getPricing(): array
     {
-        return match ($this) {
-            self::GPT_5_MINI => [
-                'input' => 0.15,
-                'output' => 0.60,
-                'reasoning' => 0.0,
-                'cache_read' => 0.075,
-            ],
-            self::GPT_5_NANO => [
-                'input' => 0.10,
-                'output' => 0.40,
-                'reasoning' => 0.0,
-                'cache_read' => 0.05,
-            ],
-            self::GPT_5_4_MINI => [
-                'input' => 0.75,
-                'output' => 4.50,
-                'reasoning' => 0.0,
-                'cache_read' => 0.075,
-            ],
-            self::GEMINI_3_FLASH => [
-                'input' => 0.50,
-                'output' => 3.00,
-                'reasoning' => 0.0,
-                'cache_read' => 0.05,
-            ],
-            self::GEMINI_3_1_PRO => [
-                'input' => 2.00,
-                'output' => 12.00,
-                'reasoning' => 0.0,
-                'cache_read' => 0.20,
-            ],
-        };
+        return ModelPricing::forModel($this->value);
     }
 
     /**
