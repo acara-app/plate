@@ -10,7 +10,7 @@ import type { ChatPageProps, UIMessage } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import ChatInput, { type ChatMode } from './chat-input';
+import ChatInput from './chat-input';
 
 import ChatMessages, { ChatErrorBanner } from './chat-messages';
 
@@ -28,14 +28,13 @@ export default function CreateChat() {
     const {
         conversationId: initialConversationId,
         messages: messageHistories,
-        mode: initialMode,
+        initialPrompt,
         creditWarning: sharedCreditWarning,
     } = page.props;
 
     const [conversationId, setConversationId] = useState<string>(
         initialConversationId,
     );
-    const [mode, setMode] = useState<ChatMode>(initialMode ?? 'ask');
     const [dismissedWarningAt, setDismissedWarningAt] = useState<string | null>(
         null,
     );
@@ -69,7 +68,6 @@ export default function CreateChat() {
         clearUsageLimitTrigger,
     } = useChatStream({
         conversationId,
-        mode,
         initialMessages,
         onFinish: handleStreamFinish,
     });
@@ -172,10 +170,9 @@ export default function CreateChat() {
                         className="w-full"
                         onSubmit={handleSubmit}
                         onInputChange={handleInputChange}
-                        onModeChange={setMode}
                         disabled={isStreaming || isSubmitting}
+                        initialMessage={initialPrompt}
                         isLoading={isStreaming || isSubmitting}
-                        mode={mode}
                     />
                     <p className="px-2 pb-2 text-center text-xs text-muted-foreground sm:px-4 sm:pb-4 sm:text-sm">
                         ⚠️ For informational purposes only. Not a substitute for

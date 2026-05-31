@@ -1,45 +1,17 @@
 import { Button } from '@/components/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import type { FileUIPart } from 'ai';
-import {
-    ChevronDown,
-    Loader2,
-    MessageSquare,
-    Plus,
-    Send,
-    UtensilsCrossed,
-    X,
-} from 'lucide-react';
+import { Loader2, Plus, Send, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
-export const CHAT_MODES = {
-    ask: {
-        label: 'chat.modes.ask',
-        icon: MessageSquare,
-    },
-    'create-meal-plan': {
-        label: 'chat.modes.meal_plan',
-        icon: UtensilsCrossed,
-    },
-} as const;
-
-export type ChatMode = keyof typeof CHAT_MODES;
 
 interface Props {
     onSubmit: (message: string, files?: FileUIPart[]) => void;
     onInputChange?: () => void;
-    onModeChange: (mode: ChatMode) => void;
     className?: string;
     disabled?: boolean;
+    initialMessage?: string | null;
     isLoading?: boolean;
-    mode: ChatMode;
 }
 
 function readFileAsDataURL(file: File): Promise<FileUIPart> {
@@ -62,13 +34,12 @@ export default function ChatInput({
     className,
     onSubmit,
     onInputChange,
-    onModeChange,
     disabled = false,
+    initialMessage = null,
     isLoading = false,
-    mode,
 }: Props) {
     const { t } = useTranslation('common');
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState(initialMessage ?? '');
     const [selectedFiles, setSelectedFiles] = useState<FileUIPart[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -113,8 +84,6 @@ export default function ChatInput({
     const removeFile = (index: number) => {
         setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
     };
-
-    const SelectedModeIcon = CHAT_MODES[mode].icon;
 
     return (
         <div className="mx-auto flex w-full max-w-3xl items-end bg-background p-0.5 md:px-4 md:py-2">
@@ -161,42 +130,6 @@ export default function ChatInput({
                 </div>
                 <div className="flex items-center justify-between px-2 pb-2">
                     <div className="flex items-center gap-2">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="secondary"
-                                    size="sm"
-                                    className="gap-1.5"
-                                >
-                                    <SelectedModeIcon className="size-4" />
-                                    <span className="hidden sm:inline">
-                                        {t(CHAT_MODES[mode].label)}
-                                    </span>
-                                    <ChevronDown className="size-3.5 opacity-60" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="w-48">
-                                {Object.entries(CHAT_MODES).map(
-                                    ([key, { label, icon: Icon }]) => (
-                                        <DropdownMenuItem
-                                            key={key}
-                                            onClick={() =>
-                                                onModeChange(key as ChatMode)
-                                            }
-                                            className={cn(
-                                                'gap-2',
-                                                mode === key &&
-                                                    'bg-accent text-accent-foreground',
-                                            )}
-                                        >
-                                            <Icon className="size-4" />
-                                            <span>{t(label)}</span>
-                                        </DropdownMenuItem>
-                                    ),
-                                )}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-
                         <input
                             ref={fileInputRef}
                             type="file"

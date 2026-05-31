@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Ai;
 
-use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use Laravel\Ai\Files\Base64Image;
 
@@ -17,7 +16,6 @@ final readonly class AgentPayload
         public int $userId,
         public string $message,
         public array $images = [],
-        public AgentMode $mode = AgentMode::Ask,
         public ?ModelName $modelName = null,
         public ?string $conversationId = null,
     ) {}

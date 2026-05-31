@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Ai\Tools\CreateMealPlan;
+use App\Ai\Tools\StartMealPlanGeneration;
 use App\Contracts\Ai\GeneratesMealPlans;
 use App\Models\User;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
-covers(CreateMealPlan::class);
+covers(StartMealPlanGeneration::class);
 
 beforeEach(function (): void {
     $this->agent = new class implements GeneratesMealPlans
@@ -28,12 +28,12 @@ beforeEach(function (): void {
     };
 
     app()->instance(GeneratesMealPlans::class, $this->agent);
-    $this->tool = new CreateMealPlan();
+    $this->tool = new StartMealPlanGeneration();
 });
 
 it('has correct name and description', function (): void {
-    expect($this->tool->name())->toBe('create_meal_plan')
-        ->and($this->tool->description())->toContain('Generate a complete multi-day meal plan');
+    expect($this->tool->name())->toBe('start_meal_plan_generation')
+        ->and($this->tool->description())->toContain('Start the asynchronous workflow');
 });
 
 it('has valid schema', function (): void {

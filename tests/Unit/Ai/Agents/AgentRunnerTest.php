@@ -7,13 +7,13 @@ use App\Ai\AgentPayload;
 use App\Ai\Agents\AgentRunner;
 use App\Ai\Agents\FitnessSpecialist;
 use App\Ai\Agents\HealthSpecialist;
+use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\AnalyzePhoto;
-use App\Ai\Tools\CreateMealPlan;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
+use App\Ai\Tools\StartMealPlanGeneration;
 use App\Ai\Tools\SuggestMeal;
-use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Models\User;
 use Laravel\Ai\Files\Base64Image;
@@ -32,7 +32,6 @@ describe('instructions', function (): void {
         $payload = new AgentPayload(
             userId: $this->user->id,
             message: 'Hello',
-            mode: AgentMode::Ask,
             modelName: ModelName::GPT_5_4_MINI,
         );
 
@@ -41,15 +40,13 @@ describe('instructions', function (): void {
 
         expect($instructions)
             ->toContain('You are Altani, a comprehensive AI wellness assistant')
-            ->toContain('CHAT MODE: ask')
             ->toContain('call `get_user_profile`');
     });
 
-    it('returns instructions with CreateMealPlan mode', function (): void {
+    it('returns instructions that delegate meal planning to a specialist', function (): void {
         $payload = new AgentPayload(
             userId: $this->user->id,
             message: 'Create a meal plan',
-            mode: AgentMode::CreateMealPlan,
             modelName: ModelName::GPT_5_4_MINI,
         );
 
@@ -58,9 +55,8 @@ describe('instructions', function (): void {
 
         expect($instructions)
             ->toContain('You are Altani, a comprehensive AI wellness assistant')
-            ->toContain('CHAT MODE: create-meal-plan')
-            ->toContain('Create Meal Plan mode')
-            ->toContain('create_meal_plan');
+            ->toContain('meal_plan_specialist')
+            ->not->toContain('Create Meal Plan mode');
     });
 });
 
@@ -69,7 +65,6 @@ describe('tools', function (): void {
         $payload = new AgentPayload(
             userId: $this->user->id,
             message: 'Hello',
-            mode: AgentMode::Ask,
             modelName: ModelName::GPT_5_4_MINI,
         );
 
@@ -82,11 +77,12 @@ describe('tools', function (): void {
 
         expect($toolClasses)
             ->toContain(GetUserProfile::class)
-            ->toContain(CreateMealPlan::class)
             ->toContain(LogHealthEntry::class)
+            ->toContain(MealPlanSpecialist::class)
             ->toContain(NutritionSpecialist::class)
             ->toContain(HealthSpecialist::class)
             ->toContain(FitnessSpecialist::class)
+            ->not->toContain(StartMealPlanGeneration::class)
             ->not->toContain(SuggestMeal::class);
     });
 
@@ -96,7 +92,6 @@ describe('tools', function (): void {
             userId: $this->user->id,
             message: 'Analyze this',
             images: [$image],
-            mode: AgentMode::Ask,
             modelName: ModelName::GPT_5_4_MINI,
         );
 
@@ -114,7 +109,6 @@ describe('tools', function (): void {
         $payload = new AgentPayload(
             userId: $this->user->id,
             message: 'Search for something',
-            mode: AgentMode::Ask,
             modelName: ModelName::GPT_5_MINI,
         );
 
@@ -130,7 +124,6 @@ describe('messages', function (): void {
         $payload = new AgentPayload(
             userId: $this->user->id,
             message: 'Hello',
-            mode: AgentMode::Ask,
             modelName: ModelName::GPT_5_4_MINI,
         );
 

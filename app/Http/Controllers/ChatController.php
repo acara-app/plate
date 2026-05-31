@@ -8,7 +8,6 @@ use App\Actions\Billing\BuildCreditWarning;
 use App\Actions\BuildAssistantAgentAction;
 use App\Actions\BuildConversationMessagesAction;
 use App\Actions\GetOrCreateConversationAction;
-use App\Enums\AgentMode;
 use App\Http\Requests\StoreChatConversationRequest;
 use App\Http\Requests\StreamChatRequest;
 use App\Models\Conversation;
@@ -49,7 +48,7 @@ final readonly class ChatController
         return Inertia::render('chat/create-chat', [
             'conversationId' => $conversation->id,
             'messages' => $this->messagesAction->handle($conversation),
-            'mode' => $request->enum('mode', AgentMode::class),
+            'initialPrompt' => $request->initialPrompt(),
             'creditWarning' => $this->buildCreditWarning
                 ->currentState($this->user)
                 ?->toArray(),
