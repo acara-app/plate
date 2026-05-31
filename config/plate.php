@@ -3,26 +3,15 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\FitnessSpecialist;
+use App\Ai\Agents\GlucoseSpikeSpecialist;
 use App\Ai\Agents\HealthSpecialist;
 use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\EnrichAttributeMetadata;
-use App\Ai\Tools\GetCalorieLevelGuideline;
-use App\Ai\Tools\GetDailyServingsByCalorie;
 use App\Ai\Tools\GetDietReference;
-use App\Ai\Tools\GetFitnessGoals;
-use App\Ai\Tools\GetHealthData;
-use App\Ai\Tools\GetHealthGoals;
-use App\Ai\Tools\GetHealthSummary;
-use App\Ai\Tools\GetHealthSyncSupport;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
-use App\Ai\Tools\PredictGlucoseSpike;
-use App\Ai\Tools\StartMealPlanGeneration;
-use App\Ai\Tools\SuggestMeal;
-use App\Ai\Tools\SuggestWellnessRoutine;
-use App\Ai\Tools\SuggestWorkoutRoutine;
 use App\Ai\Tools\UpdateHouseholdContext;
 use App\Ai\Tools\UpdateUserBiometrics;
 use App\Ai\Tools\UpdateUserProfileAttributes;
@@ -53,41 +42,20 @@ return [
         UpdateHouseholdContext::class,
     ],
 
-    'nutrition_tools' => [
-        SuggestMeal::class,
+    'shared_tools' => [
         GetDietReference::class,
-        GetCalorieLevelGuideline::class,
-        GetDailyServingsByCalorie::class,
-    ],
-
-    'health_tools' => [
-        GetHealthData::class,
-        GetHealthSummary::class,
-        GetHealthGoals::class,
-        GetHealthSyncSupport::class,
-        PredictGlucoseSpike::class,
-    ],
-
-    'fitness_tools' => [
-        SuggestWorkoutRoutine::class,
-        SuggestWellnessRoutine::class,
-        GetFitnessGoals::class,
     ],
 
     'sub_agents' => [
         MealPlanSpecialist::class,
         NutritionSpecialist::class,
+        GlucoseSpikeSpecialist::class,
         HealthSpecialist::class,
         FitnessSpecialist::class,
     ],
 
     'image_tools' => [
         AnalyzePhoto::class,
-    ],
-
-    'meal_plan_tools' => [
-        StartMealPlanGeneration::class,
-        GetDietReference::class,
     ],
 
     'provider_tools' => [

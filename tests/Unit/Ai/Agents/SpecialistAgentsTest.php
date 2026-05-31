@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\FitnessSpecialist;
+use App\Ai\Agents\GlucoseSpikeSpecialist;
 use App\Ai\Agents\HealthSpecialist;
 use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
@@ -14,7 +15,7 @@ use App\Ai\Tools\GetHealthData;
 use App\Ai\Tools\GetHealthGoals;
 use App\Ai\Tools\GetHealthSummary;
 use App\Ai\Tools\GetHealthSyncSupport;
-use App\Ai\Tools\PredictGlucoseSpike;
+use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\StartMealPlanGeneration;
 use App\Ai\Tools\SuggestMeal;
 use App\Ai\Tools\SuggestWellnessRoutine;
@@ -24,9 +25,8 @@ use App\Utilities\LanguageUtil;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\CanActAsTool;
-use Laravel\Ai\Contracts\HasTools;
 
-covers(NutritionSpecialist::class, HealthSpecialist::class, FitnessSpecialist::class, MealPlanSpecialist::class);
+covers(NutritionSpecialist::class, GlucoseSpikeSpecialist::class, HealthSpecialist::class, FitnessSpecialist::class, MealPlanSpecialist::class);
 
 dataset('specialists', [
     'meal plan' => [
@@ -55,7 +55,6 @@ dataset('specialists', [
             GetHealthSummary::class,
             GetHealthGoals::class,
             GetHealthSyncSupport::class,
-            PredictGlucoseSpike::class,
         ],
     ],
     'fitness' => [
@@ -75,7 +74,6 @@ it('exposes itself to the orchestrator as a named delegatable tool', function (s
     expect($agent)
         ->toBeInstanceOf(Agent::class)
         ->toBeInstanceOf(CanActAsTool::class)
-        ->toBeInstanceOf(HasTools::class)
         ->and($agent->name())->toBe($name)
         ->and($agent->description())->toBeString()->not->toBe('');
 })->with('specialists');
@@ -87,6 +85,21 @@ it('owns exactly its configured domain tools', function (string $class, string $
 
     expect($toolClasses)->toEqualCanonicalizing($expectedTools);
 })->with('specialists');
+
+it('declares the cross-agent diet reference tool once in the shared group', function (): void {
+    expect(config()->array('plate.shared_tools', []))->toContain(GetDietReference::class);
+});
+
+it('pulls the shared tool group only for specialists that opt in', function (): void {
+    config()->set('plate.shared_tools', [GetUserProfile::class]);
+
+    $tools = fn (string $class): array => collect(resolve($class)->tools())
+        ->map(fn (mixed $tool): string => $tool::class)
+        ->all();
+
+    expect($tools(NutritionSpecialist::class))->toContain(GetUserProfile::class)
+        ->and($tools(MealPlanSpecialist::class))->toContain(GetUserProfile::class);
+});
 
 it('configures a request timeout', function (string $class): void {
     $timeout = new ReflectionClass($class)->getAttributes(Timeout::class);
@@ -117,9 +130,10 @@ it('can be faked and prompted directly as an isolated sub-agent', function (stri
 })->with('specialists');
 
 dataset('specialist scope keywords', [
+    'glucose spike' => [GlucoseSpikeSpecialist::class, ['blood sugar spike questions and worries', 'structured glucose spike risk result']],
     'meal plan' => [MealPlanSpecialist::class, ['meal plan', 'day count']],
     'nutrition' => [NutritionSpecialist::class, ['single meals', 'meal_plan_specialist']],
-    'health' => [HealthSpecialist::class, ['health data', 'glucose']],
+    'health' => [HealthSpecialist::class, ['health data', 'Health Sync']],
     'fitness' => [FitnessSpecialist::class, ['workout', 'wellness']],
 ]);
 

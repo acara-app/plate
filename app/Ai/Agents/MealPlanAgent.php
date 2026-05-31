@@ -6,6 +6,7 @@ namespace App\Ai\Agents;
 
 use App\Actions\AnalyzeGlucoseForNotificationAction;
 use App\Ai\MealPlanPromptBuilder;
+use App\Ai\Tools\StartMealPlanGeneration;
 use App\Contracts\Ai\GeneratesMealPlans;
 use App\Data\DayMealsData;
 use App\Data\GlucoseAnalysis\GlucoseAnalysisData;
@@ -66,7 +67,10 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasStructuredOut
      */
     public function tools(): array
     {
-        return $this->toolRegistry->getMealPlanTools();
+        return [
+            ...$this->toolRegistry->resolve([StartMealPlanGeneration::class]),
+            ...$this->toolRegistry->getSharedTools(),
+        ];
     }
 
     /**

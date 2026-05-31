@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\Tools\StartMealPlanGeneration;
 use Laravel\Ai\Attributes\Timeout;
 
 #[Timeout(120)]
@@ -24,8 +25,15 @@ final class MealPlanSpecialist extends SpecialistAgent
         return 'ai.prompts.meal-plan-specialist';
     }
 
-    protected function toolConfigKey(): string
+    protected function toolClasses(): array
     {
-        return 'plate.meal_plan_tools';
+        return [
+            StartMealPlanGeneration::class,
+        ];
+    }
+
+    protected function includesSharedTools(): bool
+    {
+        return true;
     }
 }
