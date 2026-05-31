@@ -7,7 +7,6 @@ namespace App\Ai\Agents;
 use App\Ai\SystemPrompt;
 use App\Contracts\Ai\PredictsGlucoseSpikes;
 use App\Data\SpikePredictionData;
-use App\Enums\SpikeRiskLevel;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
@@ -86,13 +85,7 @@ final class SpikePredictorAgent implements Agent, HasStructuredOutput, PredictsG
      */
     public function schema(JsonSchema $schema): array
     {
-        return [
-            'risk_level' => $schema->string()->enum(SpikeRiskLevel::class)->required(),
-            'estimated_gl' => $schema->integer()->min(0)->max(100)->required(),
-            'explanation' => $schema->string()->required(),
-            'smart_fix' => $schema->string()->required(),
-            'spike_reduction_percentage' => $schema->integer()->min(0)->max(100)->required(),
-        ];
+        return SpikePredictionData::jsonSchema($schema);
     }
 
     public function predict(string $food): SpikePredictionData

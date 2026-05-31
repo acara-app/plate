@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\FitnessSpecialist;
+use App\Ai\Agents\GlucoseSpikeSpecialist;
 use App\Ai\Agents\HealthSpecialist;
 use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
@@ -18,7 +19,6 @@ use App\Ai\Tools\GetHealthSummary;
 use App\Ai\Tools\GetHealthSyncSupport;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
-use App\Ai\Tools\PredictGlucoseSpike;
 use App\Ai\Tools\StartMealPlanGeneration;
 use App\Ai\Tools\SuggestMeal;
 use App\Ai\Tools\SuggestWellnessRoutine;
@@ -65,7 +65,6 @@ return [
         GetHealthSummary::class,
         GetHealthGoals::class,
         GetHealthSyncSupport::class,
-        PredictGlucoseSpike::class,
     ],
 
     'fitness_tools' => [
@@ -77,6 +76,7 @@ return [
     'sub_agents' => [
         MealPlanSpecialist::class,
         NutritionSpecialist::class,
+        GlucoseSpikeSpecialist::class,
         HealthSpecialist::class,
         FitnessSpecialist::class,
     ],

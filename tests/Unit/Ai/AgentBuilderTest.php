@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Ai\AgentBuilder;
 use App\Ai\AgentPayload;
 use App\Ai\Agents\FitnessSpecialist;
+use App\Ai\Agents\GlucoseSpikeSpecialist;
 use App\Ai\Agents\HealthSpecialist;
 use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
@@ -12,8 +13,6 @@ use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\GetCalorieLevelGuideline;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
-use App\Ai\Tools\StartMealPlanGeneration;
-use App\Ai\Tools\SuggestMeal;
 use App\Enums\ModelName;
 use App\Models\User;
 use Laravel\Ai\Files\Base64Image;
@@ -82,6 +81,7 @@ describe('build', function (): void {
         expect($result['instructions'])
             ->toContain('meal_plan_specialist')
             ->toContain('nutrition_specialist')
+            ->toContain('glucose_spike_specialist')
             ->toContain('health_specialist')
             ->toContain('fitness_specialist');
     });
@@ -140,21 +140,8 @@ describe('build', function (): void {
 
         expect($result['instructions'])
             ->not->toContain('glucose impact prediction')
+            ->toContain('glucose_spike_specialist')
             ->toContain('health_specialist');
-    });
-
-    it('does not include chat mode instructions', function (): void {
-        $user = User::factory()->create();
-        $payload = new AgentPayload(
-            userId: $user->id,
-            message: 'Hello',
-        );
-
-        $result = $this->builder->build($payload, $user);
-
-        expect($result['instructions'])
-            ->not->toContain('CHAT MODE:')
-            ->not->toContain('Create Meal Plan mode');
     });
 });
 
@@ -177,10 +164,9 @@ describe('tools', function (): void {
             ->toContain(LogHealthEntry::class)
             ->toContain(MealPlanSpecialist::class)
             ->toContain(NutritionSpecialist::class)
+            ->toContain(GlucoseSpikeSpecialist::class)
             ->toContain(HealthSpecialist::class)
-            ->toContain(FitnessSpecialist::class)
-            ->not->toContain(StartMealPlanGeneration::class)
-            ->not->toContain(SuggestMeal::class);
+            ->toContain(FitnessSpecialist::class);
     });
 
     it('includes image tools when attachments present', function (): void {

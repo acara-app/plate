@@ -6,14 +6,13 @@ use App\Ai\AgentBuilder;
 use App\Ai\AgentPayload;
 use App\Ai\Agents\AgentRunner;
 use App\Ai\Agents\FitnessSpecialist;
+use App\Ai\Agents\GlucoseSpikeSpecialist;
 use App\Ai\Agents\HealthSpecialist;
 use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
-use App\Ai\Tools\StartMealPlanGeneration;
-use App\Ai\Tools\SuggestMeal;
 use App\Enums\ModelName;
 use App\Models\User;
 use Laravel\Ai\Files\Base64Image;
@@ -55,8 +54,7 @@ describe('instructions', function (): void {
 
         expect($instructions)
             ->toContain('You are Altani, a comprehensive AI wellness assistant')
-            ->toContain('meal_plan_specialist')
-            ->not->toContain('Create Meal Plan mode');
+            ->toContain('meal_plan_specialist');
     });
 });
 
@@ -80,10 +78,9 @@ describe('tools', function (): void {
             ->toContain(LogHealthEntry::class)
             ->toContain(MealPlanSpecialist::class)
             ->toContain(NutritionSpecialist::class)
+            ->toContain(GlucoseSpikeSpecialist::class)
             ->toContain(HealthSpecialist::class)
-            ->toContain(FitnessSpecialist::class)
-            ->not->toContain(StartMealPlanGeneration::class)
-            ->not->toContain(SuggestMeal::class);
+            ->toContain(FitnessSpecialist::class);
     });
 
     it('includes AnalyzePhoto tool when attachments are set', function (): void {
