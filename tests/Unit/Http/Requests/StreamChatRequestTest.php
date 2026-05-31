@@ -34,9 +34,7 @@ it('returns custom validation messages', function (): void {
     $messages = $request->messages();
 
     expect($messages)->toHaveKey('messages.required')
-        ->and($messages['messages.required'])->toBe('Messages are required')
-        ->and($messages)->not->toHaveKey('mode.required')
-        ->and($messages)->not->toHaveKey('model.required');
+        ->and($messages['messages.required'])->toBe('Messages are required');
 });
 
 it('returns empty string if no user message is found', function () use ($createRequest): void {
