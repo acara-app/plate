@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Http\Requests\StreamChatRequest;
 use Illuminate\Support\Facades\Validator;
@@ -36,8 +35,7 @@ it('returns custom validation messages', function (): void {
 
     expect($messages)->toHaveKey('messages.required')
         ->and($messages['messages.required'])->toBe('Messages are required')
-        ->and($messages)->toHaveKey('mode.required')
-        ->and($messages['mode.required'])->toBe('Mode is required')
+        ->and($messages)->not->toHaveKey('mode.required')
         ->and($messages)->not->toHaveKey('model.required');
 });
 
@@ -51,7 +49,6 @@ it('returns empty string if no user message is found', function () use ($createR
                 ],
             ],
         ],
-        'mode' => AgentMode::Ask->value,
     ]);
 
     expect($request->userMessage())->toBe('');
@@ -75,7 +72,6 @@ it('extracts user message from conversation', function () use ($createRequest): 
 
     $request = $createRequest([
         'messages' => $messages,
-        'mode' => AgentMode::Ask->value,
     ]);
 
     expect($request->userMessage())->toBe('Hello world');
@@ -94,26 +90,22 @@ it('ignores non-text parts when extracting user message', function () use ($crea
 
     $request = $createRequest([
         'messages' => $messages,
-        'mode' => AgentMode::Ask->value,
     ]);
 
     expect($request->userMessage())->toBe('Text content');
 });
 
-it('extracts mode from request and returns default model', function () use ($createRequest): void {
+it('returns default model', function () use ($createRequest): void {
     $request = $createRequest([
         'messages' => [['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Hi']]]],
-        'mode' => AgentMode::CreateMealPlan->value,
     ]);
 
-    expect($request->mode())->toBe(AgentMode::CreateMealPlan)
-        ->and($request->modelName())->toBe(ModelName::default());
+    expect($request->modelName())->toBe(ModelName::default());
 });
 
 it('returns empty attachments when no file parts exist', function () use ($createRequest): void {
     $request = $createRequest([
         'messages' => [['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Hi']]]],
-        'mode' => AgentMode::Ask->value,
     ]);
 
     expect($request->userAttachments())->toBe([]);
@@ -133,7 +125,6 @@ it('extracts image attachments from user message', function () use ($createReque
                 ],
             ],
         ],
-        'mode' => AgentMode::Ask->value,
     ]);
 
     $attachments = $request->userAttachments();
@@ -155,7 +146,6 @@ it('ignores non-image file parts in attachments', function () use ($createReques
                 ],
             ],
         ],
-        'mode' => AgentMode::Ask->value,
     ]);
 
     expect($request->userAttachments())->toBe([]);

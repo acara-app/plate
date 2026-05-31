@@ -1,15 +1,13 @@
-import type { ChatMode } from '@/pages/chat/chat-input';
 import { stream } from '@/routes/chat';
 import type { PaywallCapTrigger, SubscriptionTier } from '@/types';
 import type { ChatStatus } from '@/types/chat';
 import { useChat, type UIMessage } from '@ai-sdk/react';
 import type { ChatOnFinishCallback, FileUIPart } from 'ai';
 import { DefaultChatTransport } from 'ai';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 interface UseChatStreamOptions {
     conversationId: string;
-    mode: ChatMode;
     initialMessages: UIMessage[];
     onFinish?: ChatOnFinishCallback<UIMessage>;
 }
@@ -46,12 +44,9 @@ function isUsageLimitPayload(body: unknown): body is UsageLimitExceededPayload {
 
 export function useChatStream({
     conversationId,
-    mode,
     initialMessages,
     onFinish,
 }: UseChatStreamOptions): UseChatStreamReturn {
-    const modeRef = useRef({ mode });
-    modeRef.current = { mode };
     const [networkError, setNetworkError] = useState<Error | undefined>();
     const [usageLimitTrigger, setUsageLimitTrigger] =
         useState<PaywallCapTrigger | null>(null);
@@ -60,7 +55,6 @@ export function useChatStream({
         () =>
             new DefaultChatTransport({
                 api: stream.url(conversationId),
-                body: () => modeRef.current,
                 fetch: async (input, init) => {
                     const response = await fetch(input, init);
 

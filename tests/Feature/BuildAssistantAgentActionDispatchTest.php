@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Actions\BuildAssistantAgentAction;
-use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use App\Http\Requests\StreamChatRequest;
 use App\Jobs\SummarizeConversationJob;
@@ -16,7 +15,6 @@ covers(BuildAssistantAgentAction::class);
 
 function makeDispatchStreamRequest(
     ModelName $model = ModelName::GPT_5_MINI,
-    AgentMode $mode = AgentMode::Ask,
     array $messages = [['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Hello']]]],
     ?string $conversationId = null,
 ): StreamChatRequest {
@@ -27,7 +25,6 @@ function makeDispatchStreamRequest(
         'POST',
         [
             'model' => $model->value,
-            'mode' => $mode->value,
             'messages' => $messages,
         ],
     );

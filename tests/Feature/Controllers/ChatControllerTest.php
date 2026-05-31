@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\AgentMode;
 use App\Http\Controllers\ChatController;
 use App\Models\AiUsage;
 use App\Models\Conversation;
@@ -23,12 +22,12 @@ it('renders chat page with correct props when no conversation id provided', func
     $conversationId = (string) fake()->uuid();
 
     actingAs($user)
-        ->get(route('chat.create', ['conversationId' => $conversationId, 'mode' => AgentMode::Ask->value]))
+        ->get(route('chat.create', ['conversationId' => $conversationId]))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('conversationId', $conversationId)
             ->has('messages', 0)
-            ->where('mode', AgentMode::Ask)
+            ->missing('mode')
         );
 });
 
@@ -50,6 +49,22 @@ it('renders chat page with correct props with conversation id', function (): voi
             ->where('messages.0.id', $history->id)
             ->where('messages.0.role', 'user')
             ->where('messages.0.parts.0.text', 'Hello')
+        );
+});
+
+it('passes an optional initial prompt to the chat page', function (): void {
+    $user = User::factory()->create();
+    $conversationId = (string) fake()->uuid();
+
+    actingAs($user)
+        ->get(route('chat.create', [
+            'conversationId' => $conversationId,
+            'prompt' => 'Create a 7-day meal plan',
+        ]))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('conversationId', $conversationId)
+            ->where('initialPrompt', 'Create a 7-day meal plan')
         );
 });
 
@@ -77,7 +92,8 @@ it('validates stream endpoint', function (): void {
 
     actingAs($user)
         ->post(route('chat.stream', $conversation->id), [])
-        ->assertSessionHasErrors(['messages', 'mode'])
+        ->assertSessionHasErrors(['messages'])
+        ->assertSessionDoesntHaveErrors(['mode'])
         ->assertSessionDoesntHaveErrors(['model']);
 });
 
@@ -90,7 +106,6 @@ it('accepts valid stream request', function (): void {
             'messages' => [
                 ['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Hello API']]],
             ],
-            'mode' => AgentMode::Ask->value,
         ])
         ->assertOk();
 });
@@ -105,7 +120,6 @@ it('prevents cross-user access on the stream endpoint', function (): void {
             'messages' => [
                 ['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Leak me their history']]],
             ],
-            'mode' => AgentMode::Ask->value,
         ])
         ->assertForbidden();
 });
@@ -122,7 +136,7 @@ it('returns the credit warning derived from current usage when over 80%', functi
     $conversationId = (string) fake()->uuid();
 
     actingAs($user)
-        ->get(route('chat.create', ['conversationId' => $conversationId, 'mode' => AgentMode::Ask->value]))
+        ->get(route('chat.create', ['conversationId' => $conversationId]))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('creditWarning.limit_type', 'rolling')
@@ -144,7 +158,7 @@ it('returns a credit warning capped at 100% when usage is over the cap', functio
     $conversationId = (string) fake()->uuid();
 
     actingAs($user)
-        ->get(route('chat.create', ['conversationId' => $conversationId, 'mode' => AgentMode::Ask->value]))
+        ->get(route('chat.create', ['conversationId' => $conversationId]))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('creditWarning.limit_type', 'rolling')
@@ -165,7 +179,7 @@ it('returns null creditWarning when usage is below 80%', function (): void {
     $conversationId = (string) fake()->uuid();
 
     actingAs($user)
-        ->get(route('chat.create', ['conversationId' => $conversationId, 'mode' => AgentMode::Ask->value]))
+        ->get(route('chat.create', ['conversationId' => $conversationId]))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('creditWarning', null)

@@ -7,7 +7,6 @@ use App\Ai\AgentPayload;
 use App\Contracts\Skills\LoadsSkills;
 use App\Data\Skills\SkillContent;
 use App\Data\Skills\SkillSummary;
-use App\Enums\AgentMode;
 use App\Models\User;
 use App\Services\Skills\NullSkillLoader;
 use Illuminate\Support\Collection;
@@ -21,7 +20,6 @@ it('omits the skills registry block when the null loader is bound', function ():
     $payload = new AgentPayload(
         userId: $user->id,
         message: 'Hello',
-        mode: AgentMode::Ask,
     );
 
     $builder = resolve(AgentBuilder::class);
@@ -53,7 +51,6 @@ it('renders the skills registry block when a loader returns skills', function ()
     $payload = new AgentPayload(
         userId: $user->id,
         message: 'Hello',
-        mode: AgentMode::Ask,
     );
 
     $builder = resolve(AgentBuilder::class);

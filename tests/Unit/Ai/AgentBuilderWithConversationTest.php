@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Ai\AgentBuilder;
 use App\Ai\AgentPayload;
-use App\Enums\AgentMode;
 use App\Models\Conversation;
 use App\Models\ConversationSummary;
 use App\Models\User;
@@ -33,7 +32,6 @@ it('includes summaries in instructions when conversationId is provided', functio
     $payload = new AgentPayload(
         userId: $user->id,
         message: 'Hello',
-        mode: AgentMode::Ask,
         conversationId: $conversation->id,
     );
 

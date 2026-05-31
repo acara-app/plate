@@ -27,7 +27,6 @@ final readonly class BuildAssistantAgentAction
             userId: $user->id,
             message: $request->userMessage(),
             images: $request->userAttachments(),
-            mode: $request->mode(),
             modelName: $request->modelName(),
             conversationId: $conversationId,
         );

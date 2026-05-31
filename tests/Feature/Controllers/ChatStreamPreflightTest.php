@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\AgentMode;
 use App\Http\Controllers\ChatController;
 use App\Models\AiUsage;
 use App\Models\Conversation;
@@ -34,7 +33,6 @@ it('returns HTTP 402 with limit metadata when a Free user is over the rolling ca
         'messages' => [
             ['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Hello, I am over cap']]],
         ],
-        'mode' => AgentMode::Ask->value,
     ]);
 
     $response->assertStatus(402)
@@ -69,7 +67,6 @@ it('does not block a Free user who is well under the cap', function (): void {
         'messages' => [
             ['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Hello, I am under cap']]],
         ],
-        'mode' => AgentMode::Ask->value,
     ]);
 
     expect($response->getStatusCode())->not->toBe(402);
@@ -90,7 +87,6 @@ it('does not enforce when premium upgrades are disabled, even for users far over
         'messages' => [
             ['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Self-host should work']]],
         ],
-        'mode' => AgentMode::Ask->value,
     ]);
 
     expect($response->getStatusCode())->not->toBe(402);

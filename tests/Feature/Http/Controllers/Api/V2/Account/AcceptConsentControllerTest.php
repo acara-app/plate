@@ -55,7 +55,6 @@ it('blocks chat streaming until the medical disclaimer is accepted', function ()
 
     $this->withHeaders(consentBearer($user))
         ->postJson(route('api.v2.chat.stream', ['conversation' => Str::uuid()->toString()]), [
-            'mode' => 'ask',
             'messages' => [],
         ])
         ->assertForbidden()

@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Ai\AgentPayload;
-use App\Enums\AgentMode;
 use App\Enums\ModelName;
 use Laravel\Ai\Files\Base64Image;
 
@@ -18,7 +17,6 @@ it('creates payload with required parameters', function (): void {
     expect($payload->userId)->toBe(1)
         ->and($payload->message)->toBe('Hello')
         ->and($payload->images)->toBe([])
-        ->and($payload->mode)->toBe(AgentMode::Ask)
         ->and($payload->modelName)->toBeNull();
 });
 
@@ -28,14 +26,12 @@ it('creates payload with all parameters', function (): void {
         userId: 1,
         message: 'Hello',
         images: $images,
-        mode: AgentMode::CreateMealPlan,
         modelName: ModelName::GPT_5_MINI,
     );
 
     expect($payload->userId)->toBe(1)
         ->and($payload->message)->toBe('Hello')
         ->and($payload->images)->toHaveCount(1)
-        ->and($payload->mode)->toBe(AgentMode::CreateMealPlan)
         ->and($payload->modelName)->toBe(ModelName::GPT_5_MINI);
 });
 
