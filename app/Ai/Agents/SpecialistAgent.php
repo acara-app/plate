@@ -27,7 +27,10 @@ abstract class SpecialistAgent implements Agent, CanActAsTool, HasTools
 
     abstract protected function promptView(): string;
 
-    abstract protected function toolConfigKey(): string;
+    /**
+     * @return array<int, class-string<Tool>>
+     */
+    abstract protected function toolClasses(): array;
 
     public function instructions(): string
     {
@@ -46,6 +49,17 @@ abstract class SpecialistAgent implements Agent, CanActAsTool, HasTools
      */
     public function tools(): array
     {
-        return $this->toolRegistry->getToolGroup($this->toolConfigKey());
+        $tools = $this->toolRegistry->resolve($this->toolClasses());
+
+        if ($this->includesSharedTools()) {
+            $tools = [...$tools, ...$this->toolRegistry->getSharedTools()];
+        }
+
+        return $tools;
+    }
+
+    protected function includesSharedTools(): bool
+    {
+        return false;
     }
 }

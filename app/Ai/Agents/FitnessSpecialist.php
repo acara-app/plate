@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\Tools\GetFitnessGoals;
+use App\Ai\Tools\SuggestWellnessRoutine;
+use App\Ai\Tools\SuggestWorkoutRoutine;
 use Laravel\Ai\Attributes\Timeout;
 
 #[Timeout(120)]
@@ -24,8 +27,12 @@ final class FitnessSpecialist extends SpecialistAgent
         return 'ai.prompts.fitness-specialist';
     }
 
-    protected function toolConfigKey(): string
+    protected function toolClasses(): array
     {
-        return 'plate.fitness_tools';
+        return [
+            SuggestWorkoutRoutine::class,
+            SuggestWellnessRoutine::class,
+            GetFitnessGoals::class,
+        ];
     }
 }

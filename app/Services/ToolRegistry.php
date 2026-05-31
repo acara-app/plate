@@ -25,7 +25,7 @@ final readonly class ToolRegistry
         /** @var array<int, class-string> $classes */
         $classes = config()->array('plate.tools', []);
 
-        return $this->buildTools($classes);
+        return $this->resolve($classes);
     }
 
     /**
@@ -37,29 +37,18 @@ final readonly class ToolRegistry
         /** @var array<int, class-string> $classes */
         $classes = config()->array('plate.image_tools', []);
 
-        return $this->buildTools($classes, ['images' => $images]);
+        return $this->resolve($classes, ['images' => $images]);
     }
 
     /**
      * @return array<int, Tool|ProviderTool>
      */
-    public function getMealPlanTools(): array
+    public function getSharedTools(): array
     {
         /** @var array<int, class-string> $classes */
-        $classes = config()->array('plate.meal_plan_tools', []);
+        $classes = config()->array('plate.shared_tools', []);
 
-        return $this->buildTools($classes);
-    }
-
-    /**
-     * @return array<int, Tool|ProviderTool>
-     */
-    public function getToolGroup(string $configKey): array
-    {
-        /** @var array<int, class-string> $classes */
-        $classes = config()->array($configKey, []);
-
-        return $this->buildTools($classes);
+        return $this->resolve($classes);
     }
 
     /**
@@ -84,7 +73,7 @@ final readonly class ToolRegistry
         $classes = config()->array('plate.provider_tools', []);
 
         /** @var array<int, ProviderTool> */
-        return $this->buildTools($classes);
+        return $this->resolve($classes);
     }
 
     /**
@@ -92,7 +81,7 @@ final readonly class ToolRegistry
      * @param  array<string, mixed>  $constructorArgs
      * @return array<int, Tool|ProviderTool>
      */
-    private function buildTools(array $classes, array $constructorArgs = []): array
+    public function resolve(array $classes, array $constructorArgs = []): array
     {
         return collect($classes)
             ->map(function (string $class) use ($constructorArgs): Tool|ProviderTool {
