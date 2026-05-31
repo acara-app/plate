@@ -33,14 +33,14 @@ final readonly class GetAiUsageForBillingAction
         $multiplier = config()->integer('plate.credit_multiplier', 1);
         $now = CarbonImmutable::now();
         $rollingHours = (int) $limits['rolling']['period_hours'];
+        $weeklyDays = (int) $limits['weekly']['period_days'];
         $rollingPeriodStart = $now->subHours($rollingHours);
-        $subscription = $user->activeSubscription();
-        $periodStart = $this->getPeriodStart($subscription);
-        $periodEnd = $this->getPeriodEnd($subscription);
+        $weeklyPeriodStart = $now->subDays($weeklyDays);
 
         $rollingCost = $this->getCostForPeriod($user, $rollingPeriodStart, $now);
-        $periodCost = $this->getCostForPeriod($user, $periodStart, $now);
-        $rollingResetsAt = $this->rollingResetsAt($user, $now, $rollingPeriodStart, $rollingHours);
+        $periodCost = $this->getCostForPeriod($user, $weeklyPeriodStart, $now);
+        $rollingResetsAt = $this->resetsAt($user, $now, $rollingPeriodStart, fn (CarbonImmutable $oldest): CarbonImmutable => $oldest->addHours($rollingHours));
+        $weeklyResetsAt = $this->resetsAt($user, $now, $weeklyPeriodStart, fn (CarbonImmutable $oldest): CarbonImmutable => $oldest->addDays($weeklyDays));
 
         return [
             'tier' => $entitlement->tier->value,
@@ -57,7 +57,7 @@ final readonly class GetAiUsageForBillingAction
                 $periodCost,
                 (float) $limits['weekly']['limit'],
                 $multiplier,
-                $periodEnd,
+                $weeklyResetsAt,
             ),
         ];
     }
@@ -87,33 +87,6 @@ final readonly class GetAiUsageForBillingAction
         return $tierLimits[$tier->value] ?? $tierLimits[SubscriptionTier::Free->value];
     }
 
-    // @codeCoverageIgnoreStart
-    private function getPeriodStart(?object $subscription): CarbonImmutable
-    {
-        if (! $subscription || ! isset($subscription->current_period_start)) {
-            return CarbonImmutable::now()->startOfWeek();
-        }
-
-        /** @var float|int|string $timestamp */
-        $timestamp = $subscription->current_period_start;
-
-        return CarbonImmutable::createFromTimestamp($timestamp);
-    }
-
-    private function getPeriodEnd(?object $subscription): CarbonImmutable
-    {
-        if (! $subscription || ! isset($subscription->current_period_end)) {
-            return CarbonImmutable::now()->endOfWeek();
-        }
-
-        /** @var float|int|string $timestamp */
-        $timestamp = $subscription->current_period_end;
-
-        return CarbonImmutable::createFromTimestamp($timestamp);
-    }
-
-    // @codeCoverageIgnoreEnd
-
     private function getCostForPeriod(User $user, CarbonImmutable $start, CarbonImmutable $end): float
     {
         return (float) AiUsage::query()
@@ -123,7 +96,10 @@ final readonly class GetAiUsageForBillingAction
             ->sum('cost');
     }
 
-    private function rollingResetsAt(User $user, CarbonImmutable $now, CarbonImmutable $periodStart, int $hours): CarbonImmutable
+    /**
+     * @param  callable(CarbonImmutable): CarbonImmutable  $advance
+     */
+    private function resetsAt(User $user, CarbonImmutable $now, CarbonImmutable $periodStart, callable $advance): CarbonImmutable
     {
         $oldest = AiUsage::query()
             ->forUser($user)
@@ -131,9 +107,7 @@ final readonly class GetAiUsageForBillingAction
             ->where('created_at', '<=', $now)
             ->min('created_at');
 
-        return is_string($oldest)
-            ? CarbonImmutable::parse($oldest)->addHours($hours)
-            : $now->addHours($hours);
+        return $advance(is_string($oldest) ? CarbonImmutable::parse($oldest) : $now);
     }
 
     private function toCredits(float $dollars, int $multiplier): int

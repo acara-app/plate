@@ -50,7 +50,7 @@ it('returns a warning when usage crosses 80% of the rolling cap', function (): v
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.085,
+        'cost' => 0.34,
     ]);
 
     $warning = buildWarning()->currentState($user);
@@ -58,8 +58,8 @@ it('returns a warning when usage crosses 80% of the rolling cap', function (): v
     expect($warning)->toBeInstanceOf(CreditWarning::class)
         ->and($warning->limitType)->toBe('rolling')
         ->and($warning->tier)->toBe(SubscriptionTier::Free)
-        ->and($warning->currentCredits)->toBe(85)
-        ->and($warning->limitCredits)->toBe(100)
+        ->and($warning->currentCredits)->toBe(340)
+        ->and($warning->limitCredits)->toBe(400)
         ->and($warning->percentage)->toBe(85);
 });
 
@@ -76,7 +76,7 @@ it('returns a warning capped at 100% when the user is already over the cap', fun
     expect($warning)->toBeInstanceOf(CreditWarning::class)
         ->and($warning->limitType)->toBe('rolling')
         ->and($warning->currentCredits)->toBe(500)
-        ->and($warning->limitCredits)->toBe(100)
+        ->and($warning->limitCredits)->toBe(400)
         ->and($warning->percentage)->toBe(100);
 });
 
@@ -85,7 +85,7 @@ it('returns the same derived warning on repeated calls', function (): void {
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.085,
+        'cost' => 0.34,
     ]);
 
     $first = buildWarning()->currentState($user);
@@ -104,7 +104,7 @@ it('returns null when premium enforcement is off', function (): void {
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.085,
+        'cost' => 0.34,
     ]);
 
     expect(buildWarning()->currentState($user))->toBeNull();
@@ -121,15 +121,15 @@ it('uses Plus-tier limits for Plus subscribers when computing the warning', func
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.85,
+        'cost' => 2.55,
     ]);
 
     $warning = buildWarning()->currentState($user);
 
     expect($warning)->toBeInstanceOf(CreditWarning::class)
         ->and($warning->tier)->toBe(SubscriptionTier::Plus)
-        ->and($warning->currentCredits)->toBe(850)
-        ->and($warning->limitCredits)->toBe(1000)
+        ->and($warning->currentCredits)->toBe(2550)
+        ->and($warning->limitCredits)->toBe(3000)
         ->and($warning->percentage)->toBe(85);
 });
 
@@ -138,7 +138,7 @@ it('picks the most-restrictive window when multiple are over 80%', function (): 
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.315,
+        'cost' => 1.26,
         'created_at' => now()->subDays(2),
     ]);
 
@@ -154,7 +154,7 @@ it('produces a human-readable resets_in string', function (): void {
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.085,
+        'cost' => 0.34,
     ]);
 
     $warning = buildWarning()->currentState($user);

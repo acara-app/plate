@@ -116,7 +116,7 @@ it('returns the credit warning derived from current usage when over 80%', functi
     $user = User::factory()->create();
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.085,
+        'cost' => 0.34,
     ]);
 
     $conversationId = (string) fake()->uuid();
@@ -127,8 +127,8 @@ it('returns the credit warning derived from current usage when over 80%', functi
         ->assertInertia(fn ($page) => $page
             ->where('creditWarning.limit_type', 'rolling')
             ->where('creditWarning.percentage', 85)
-            ->where('creditWarning.current_credits', 85)
-            ->where('creditWarning.limit_credits', 100)
+            ->where('creditWarning.current_credits', 340)
+            ->where('creditWarning.limit_credits', 400)
         );
 });
 
@@ -138,7 +138,7 @@ it('returns a credit warning capped at 100% when usage is over the cap', functio
     $user = User::factory()->create();
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.126,
+        'cost' => 0.50,
     ]);
 
     $conversationId = (string) fake()->uuid();
@@ -149,7 +149,7 @@ it('returns a credit warning capped at 100% when usage is over the cap', functio
         ->assertInertia(fn ($page) => $page
             ->where('creditWarning.limit_type', 'rolling')
             ->where('creditWarning.percentage', 100)
-            ->where('creditWarning.current_credits', 126)
+            ->where('creditWarning.current_credits', 500)
         );
 });
 

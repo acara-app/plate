@@ -19,8 +19,8 @@ final class SubscriptionProductSeeder extends Seeder
                 'description' => 'Use every open Acara Cloud feature with a limited included AI credit budget.',
                 'features' => [
                     'All open Acara Cloud features',
-                    '1,000 monthly AI credits',
-                    '100 rolling daily AI credits',
+                    '1,400 weekly AI credits',
+                    '400 rolling daily AI credits',
                     'No credit card required',
                 ],
                 'price' => 0.00,
@@ -39,8 +39,8 @@ final class SubscriptionProductSeeder extends Seeder
                 'description' => 'More Cloud AI credits for regular use while supporting open-source Plate.',
                 'features' => [
                     'All open Acara Cloud features',
-                    '6,000 monthly AI credits',
-                    '500 rolling daily AI credits',
+                    '6,000 weekly AI credits',
+                    '1,500 rolling daily AI credits',
                     'Higher weekly AI credit limit',
                     'Supports open-source Acara Cloud',
                 ],
@@ -60,8 +60,8 @@ final class SubscriptionProductSeeder extends Seeder
                 'description' => 'Highest Cloud AI limits and premium model access for daily planning and analysis.',
                 'features' => [
                     'All open Acara Cloud features',
-                    '10,000 monthly AI credits',
-                    '1,000 rolling daily AI credits',
+                    '12,000 weekly AI credits',
+                    '3,000 rolling daily AI credits',
                     'Highest weekly AI credit limit',
                     'Pro model access when available',
                     'Priority Cloud capacity',

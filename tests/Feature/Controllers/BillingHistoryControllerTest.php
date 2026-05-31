@@ -71,8 +71,8 @@ it('shows the resolved tier limits for a Basic subscriber', function (): void {
         ->assertInertia(fn ($page) => $page
             ->where('aiUsage.tier', SubscriptionTier::Basic->value)
             ->where('aiUsage.tier_label', 'Supporter')
-            ->where('aiUsage.rolling.limit', 500)
-            ->where('aiUsage.weekly.limit', 2000));
+            ->where('aiUsage.rolling.limit', 1500)
+            ->where('aiUsage.weekly.limit', 6000));
 });
 
 it("does not leak another user's subscription tier into the response", function (): void {
@@ -92,7 +92,7 @@ it("does not leak another user's subscription tier into the response", function 
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('aiUsage.tier', SubscriptionTier::Free->value)
-            ->where('aiUsage.rolling.limit', 100));
+            ->where('aiUsage.rolling.limit', 400));
 });
 
 it('flags self-host mode by setting premium_enforcement_active to false', function (): void {

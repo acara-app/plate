@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Enums\ModelName;
 use App\Models\AiUsage;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,9 +16,7 @@ final class AiUsageService
      */
     public function calculateCost(string $model, array $usage): float
     {
-        $modelEnum = ModelName::tryFrom($model);
-
-        $pricing = $modelEnum?->getPricing() ?? $this->getDefaultPricing();
+        $pricing = ModelPricing::forModel($model);
 
         $inputCost = ($usage['prompt_tokens'] ?? 0) / 1_000_000 * $pricing['input'];
         $outputCost = ($usage['completion_tokens'] ?? 0) / 1_000_000 * $pricing['output'];
@@ -83,18 +80,5 @@ final class AiUsageService
             ->forUser($user)
             ->dateRange($startDate, $endDate)
             ->sum(DB::raw('prompt_tokens + completion_tokens + cache_read_input_tokens + reasoning_tokens'));
-    }
-
-    /**
-     * @return array{input: float, output: float, reasoning: float, cache_read: float}
-     */
-    private function getDefaultPricing(): array
-    {
-        return [
-            'input' => 0.50,
-            'output' => 2.00,
-            'reasoning' => 0.0,
-            'cache_read' => 0.25,
-        ];
     }
 }
