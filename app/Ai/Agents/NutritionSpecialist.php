@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\Tools\GetCalorieLevelGuideline;
+use App\Ai\Tools\GetDailyServingsByCalorie;
+use App\Ai\Tools\SuggestMeal;
 use Laravel\Ai\Attributes\Timeout;
 
 #[Timeout(120)]
@@ -24,8 +27,17 @@ final class NutritionSpecialist extends SpecialistAgent
         return 'ai.prompts.nutrition-specialist';
     }
 
-    protected function toolConfigKey(): string
+    protected function toolClasses(): array
     {
-        return 'plate.nutrition_tools';
+        return [
+            SuggestMeal::class,
+            GetCalorieLevelGuideline::class,
+            GetDailyServingsByCalorie::class,
+        ];
+    }
+
+    protected function includesSharedTools(): bool
+    {
+        return true;
     }
 }

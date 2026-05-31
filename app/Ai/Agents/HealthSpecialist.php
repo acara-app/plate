@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\Tools\GetHealthData;
+use App\Ai\Tools\GetHealthGoals;
+use App\Ai\Tools\GetHealthSummary;
+use App\Ai\Tools\GetHealthSyncSupport;
 use Laravel\Ai\Attributes\Timeout;
 
 #[Timeout(120)]
@@ -24,8 +28,13 @@ final class HealthSpecialist extends SpecialistAgent
         return 'ai.prompts.health-specialist';
     }
 
-    protected function toolConfigKey(): string
+    protected function toolClasses(): array
     {
-        return 'plate.health_tools';
+        return [
+            GetHealthData::class,
+            GetHealthSummary::class,
+            GetHealthGoals::class,
+            GetHealthSyncSupport::class,
+        ];
     }
 }

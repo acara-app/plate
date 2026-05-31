@@ -15,6 +15,7 @@ use App\Ai\Tools\GetHealthData;
 use App\Ai\Tools\GetHealthGoals;
 use App\Ai\Tools\GetHealthSummary;
 use App\Ai\Tools\GetHealthSyncSupport;
+use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\StartMealPlanGeneration;
 use App\Ai\Tools\SuggestMeal;
 use App\Ai\Tools\SuggestWellnessRoutine;
@@ -84,6 +85,21 @@ it('owns exactly its configured domain tools', function (string $class, string $
 
     expect($toolClasses)->toEqualCanonicalizing($expectedTools);
 })->with('specialists');
+
+it('declares the cross-agent diet reference tool once in the shared group', function (): void {
+    expect(config()->array('plate.shared_tools', []))->toContain(GetDietReference::class);
+});
+
+it('pulls the shared tool group only for specialists that opt in', function (): void {
+    config()->set('plate.shared_tools', [GetUserProfile::class]);
+
+    $tools = fn (string $class): array => collect(resolve($class)->tools())
+        ->map(fn (mixed $tool): string => $tool::class)
+        ->all();
+
+    expect($tools(NutritionSpecialist::class))->toContain(GetUserProfile::class)
+        ->and($tools(MealPlanSpecialist::class))->toContain(GetUserProfile::class);
+});
 
 it('configures a request timeout', function (string $class): void {
     $timeout = new ReflectionClass($class)->getAttributes(Timeout::class);
