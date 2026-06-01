@@ -88,6 +88,15 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
         ->middleware([DisableResponseBuffering::class, 'throttle:30,1'])
         ->name('chat.stream');
 
+    Route::get('conversations/{conversation}/approvals/{approval}', [Web\ApprovalController::class, 'show'])
+        ->name('approvals.show');
+    Route::post('conversations/{conversation}/approvals/{approval}/approve', [Web\ApprovalController::class, 'approve'])
+        ->middleware('throttle:30,1')
+        ->name('approvals.approve');
+    Route::post('conversations/{conversation}/approvals/{approval}/reject', [Web\ApprovalController::class, 'reject'])
+        ->middleware('throttle:30,1')
+        ->name('approvals.reject');
+
     Route::post('meal-plans', Web\StoreMealPlanController::class)->name('meal-plans.store');
     Route::get('meal-plans', Web\ShowMealPlansController::class)->name('meal-plans.index');
     Route::get('meal-plans/{mealPlan}/print', Web\PrintMealPlanController::class)->name('meal-plans.print');

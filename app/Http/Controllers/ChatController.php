@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Approvals\BuildConversationApprovalStates;
 use App\Actions\Billing\BuildCreditWarning;
 use App\Actions\BuildAssistantAgentAction;
 use App\Actions\BuildConversationMessagesAction;
@@ -27,6 +28,7 @@ final readonly class ChatController
         private BuildAssistantAgentAction $agentAction,
         private GetOrCreateConversationAction $conversationAction,
         private BuildCreditWarning $buildCreditWarning,
+        private BuildConversationApprovalStates $approvalStates,
     ) {}
 
     public function index(): Response
@@ -47,11 +49,12 @@ final readonly class ChatController
 
         return Inertia::render('chat/create-chat', [
             'conversationId' => $conversation->id,
-            'messages' => $this->messagesAction->handle($conversation),
+            'messages' => fn (): array => $this->messagesAction->handle($conversation),
             'initialPrompt' => $request->initialPrompt(),
             'creditWarning' => $this->buildCreditWarning
                 ->currentState($this->user)
                 ?->toArray(),
+            'approvals' => fn (): array => $this->approvalStates->handle($conversation),
         ]);
     }
 

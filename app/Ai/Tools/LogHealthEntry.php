@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Ai\Tools;
 
 use App\Actions\AggregateHealthDailySamplesAction;
+use App\Actions\Approvals\CreateAgentApproval;
 use App\Actions\RecordHealthSampleAction;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Data\HealthLogData;
@@ -15,19 +16,23 @@ use App\Enums\HealthEntrySource;
 use App\Enums\HealthEntryType;
 use App\Enums\InsulinType;
 use App\Enums\WeightUnit;
+use App\Models\Conversation;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Context;
 use InvalidArgumentException;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
+use Throwable;
 
 #[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class LogHealthEntry implements Tool
 {
     public function __construct(
         private AggregateHealthDailySamplesAction $aggregateHealthDailySamplesAction,
+        private CreateAgentApproval $createAgentApproval,
     ) {}
 
     public function name(): string
@@ -67,6 +72,10 @@ final readonly class LogHealthEntry implements Tool
             ]);
         }
 
+        if (in_array(Context::get('chat.channel'), ['web', 'telegram', 'mobile'], true)) {
+            return $this->proposeApproval($request, $healthData, $user);
+        }
+
         try {
             $action = resolve(RecordHealthSampleAction::class);
             $sample = $action->handle($healthData, $user, HealthEntrySource::Chat);
@@ -97,6 +106,8 @@ final readonly class LogHealthEntry implements Tool
             'log_type' => $schema->string()->required()
                 ->enum(HealthEntryType::class)
                 ->description('Type of health entry to log.'),
+            'summary' => $schema->string()->required()->nullable()
+                ->description('A short, natural one-line summary of this entry shown to the user to confirm before saving, e.g. "4 eggs (~310 kcal) this evening". Include your best estimate of the key values and the time of day.'),
             'glucose_value' => $schema->number()->required()->nullable()
                 ->description('Glucose reading value in mg/dL. Convert mmol/L to mg/dL (x 18.018).'),
             'glucose_unit' => $schema->string()->required()->nullable()
@@ -140,6 +151,55 @@ final readonly class LogHealthEntry implements Tool
             'measured_at' => $schema->string()->required()->nullable()
                 ->description('When the measurement was taken in ISO 8601 format. Only set if the user specifies a time. Leave empty for current time.'),
         ];
+    }
+
+    private function proposeApproval(Request $request, HealthLogData $healthData, User $user): string
+    {
+        try {
+            $args = $request->toArray();
+
+            $rawSummary = $args['summary'] ?? null;
+            $summary = is_string($rawSummary) && mb_trim($rawSummary) !== ''
+                ? $rawSummary
+                : $healthData->formatForDisplay();
+
+            /** @var array<string, mixed> $payload */
+            $payload = array_merge($args, [
+                'is_health_data' => true,
+                'measured_at' => ($healthData->measuredAt ?? CarbonImmutable::now('UTC'))->toIso8601String(),
+            ]);
+
+            $conversationId = Context::get('chat.conversation_id');
+            $conversation = is_string($conversationId)
+                ? Conversation::query()->find($conversationId)
+                : null;
+
+            $channel = Context::get('chat.channel');
+
+            $approval = $this->createAgentApproval->handle(
+                'log_health_entry',
+                $payload,
+                $summary,
+                $conversation,
+                $user,
+                is_string($channel) ? $channel : null,
+            );
+
+            Context::push('chat.created_approvals', $approval->id);
+
+            return (string) json_encode([
+                'status' => 'pending_approval',
+                'approval_id' => $approval->id,
+                'message' => 'Prepared this health entry but it is NOT saved yet. Ask the user to approve it using the confirmation card; do not tell them it has been logged.',
+                'card' => $approval->toCardData()->toArray(),
+            ]);
+        } catch (Throwable $throwable) {
+            report($throwable);
+
+            return (string) json_encode([
+                'error' => 'Could not prepare the health entry for confirmation. Please try again.',
+            ]);
+        }
     }
 
     private function requiresGlucoseUnitClarification(HealthLogData $healthData): bool

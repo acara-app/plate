@@ -11,6 +11,8 @@ use App\Contracts\Memory\PullsConversationHistory;
 use App\Contracts\Services\IndexNowServiceContract;
 use App\Contracts\Services\StripeServiceContract;
 use App\Contracts\Skills\LoadsSkills;
+use App\Events\AgentApprovalResolved;
+use App\Listeners\NotifyTelegramOfApprovalOutcome;
 use App\Listeners\TrackAiUsage;
 use App\Models\User;
 use App\Services\Billing\SubscriptionTierResolver;
@@ -103,5 +105,6 @@ final class AppServiceProvider extends ServiceProvider
     {
         Event::listen(AgentPrompted::class, TrackAiUsage::class);
         Event::listen(AgentStreamed::class, TrackAiUsage::class);
+        Event::listen(AgentApprovalResolved::class, NotifyTelegramOfApprovalOutcome::class);
     }
 }

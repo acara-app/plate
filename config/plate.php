@@ -7,6 +7,7 @@ use App\Ai\Agents\GlucoseSpikeSpecialist;
 use App\Ai\Agents\HealthSpecialist;
 use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
+use App\Ai\Approvals\LogHealthEntryApprovalExecutor;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\EnrichAttributeMetadata;
 use App\Ai\Tools\GetDietReference;
@@ -60,6 +61,16 @@ return [
 
     'provider_tools' => [
         WebSearch::class,
+    ],
+
+    'approvals' => [
+        'executors' => [
+            'log_health_entry' => LogHealthEntryApprovalExecutor::class,
+        ],
+        'ttl_hours' => [
+            'default' => 24,
+            'log_health_entry' => 24,
+        ],
     ],
 
     'credit_multiplier' => 1_000,

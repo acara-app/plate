@@ -10,6 +10,7 @@ use App\Contracts\ProcessesAdvisorMessage;
 use App\Enums\ModelName;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Contracts\ConversationStore;
 use Laravel\Ai\Files\Base64Image;
 
@@ -30,6 +31,8 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
 
         $conversationId ??= $this->conversationStore->latestConversationId($user->id)
             ?? $this->conversationStore->storeConversation($user->id, 'Telegram Chat');
+
+        Context::add('chat.conversation_id', $conversationId);
 
         $payload = new AgentPayload(
             userId: $user->id,

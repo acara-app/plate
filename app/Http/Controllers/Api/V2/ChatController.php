@@ -60,7 +60,7 @@ final readonly class ChatController
         $conversation = $this->conversationAction->handle($conversationId, $user);
         Gate::authorize('view', $conversation);
 
-        return $this->agentAction->handle($request, $user, $conversation->id);
+        return $this->agentAction->handle($request, $user, $conversation->id, 'mobile');
     }
 
     public function destroy(string $conversationId): JsonResponse

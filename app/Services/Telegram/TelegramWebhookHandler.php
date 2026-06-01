@@ -4,18 +4,25 @@ declare(strict_types=1);
 
 namespace App\Services\Telegram;
 
+use App\Actions\Approvals\ApproveAgentApproval;
+use App\Actions\Approvals\RejectAgentApproval;
 use App\Actions\Messaging\DispatchChatTurnAction;
 use App\Actions\Messaging\LinkChatPlatformByToken;
 use App\Actions\Messaging\ResolveLinkedChatPlatformLink;
 use App\Contracts\DownloadsTelegramPhoto;
 use App\Contracts\ProcessesAdvisorMessage;
+use App\Enums\AgentApprovalStatus;
 use App\Enums\ChatPlatform;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Exceptions\TelegramUserException;
+use App\Models\AgentApproval;
 use App\Models\User;
 use App\Models\UserChatPlatformLink;
 use DefStudio\Telegraph\DTO\Message;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
+use DefStudio\Telegraph\Keyboard\Button;
+use DefStudio\Telegraph\Keyboard\Keyboard;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Stringable;
 use Laravel\Ai\Files\Base64Image;
 use Throwable;
@@ -29,6 +36,8 @@ final class TelegramWebhookHandler extends WebhookHandler
         private readonly LinkChatPlatformByToken $linkChatPlatformByToken,
         private readonly ResolveLinkedChatPlatformLink $resolveLinkedChatPlatformLink,
         private readonly DispatchChatTurnAction $dispatchChatTurn,
+        private readonly ApproveAgentApproval $approveAgentApproval,
+        private readonly RejectAgentApproval $rejectAgentApproval,
     ) {}
 
     public function start(): void
@@ -134,6 +143,36 @@ final class TelegramWebhookHandler extends WebhookHandler
         $this->new();
     }
 
+    public function approve(): void
+    {
+        $this->handleApprovalCallback(function (AgentApproval $approval, User $user): void {
+            $approval = $this->approveAgentApproval->handle($approval, $user);
+
+            $status = match (true) {
+                $approval->status->isInFlight() => '⏳ Saving your entry…',
+                $approval->status === AgentApprovalStatus::Executed => '✅ Saved.',
+                default => 'This request was already handled.',
+            };
+
+            $this->reply($status);
+            $this->editApprovalCard($approval, $status);
+        });
+    }
+
+    public function reject(): void
+    {
+        $this->handleApprovalCallback(function (AgentApproval $approval, User $user): void {
+            $approval = $this->rejectAgentApproval->handle($approval, $user);
+
+            $status = $approval->status === AgentApprovalStatus::Rejected
+                ? '❌ Not saved.'
+                : 'This request was already handled.';
+
+            $this->reply($status);
+            $this->editApprovalCard($approval, $status);
+        });
+    }
+
     protected function handleChatMessage(Stringable $text): void
     {
         $linkedChat = $this->resolveLinkedChat();
@@ -157,6 +196,10 @@ final class TelegramWebhookHandler extends WebhookHandler
             $result = $this->dispatchChatTurn->handle($linkedChat, $message, $attachments);
 
             $this->telegramMessage->sendLongMessage($this->chat, $result['response'], true);
+
+            foreach ($result['pending_approvals'] as $approval) {
+                $this->sendApprovalCard($approval);
+            }
         } catch (TelegramUserException $e) {
             $this->chat->message($e->getMessage())->send();
         } catch (UsageLimitExceededException $e) {
@@ -166,6 +209,63 @@ final class TelegramWebhookHandler extends WebhookHandler
             report($e);
             $this->chat->message('❌ Error processing message. Please try again.')->send();
         }
+    }
+
+    private function sendApprovalCard(AgentApproval $approval): void
+    {
+        $this->chat
+            ->html($this->approvalCardHtml($approval, 'Not saved yet — please confirm.'))
+            ->keyboard(Keyboard::make()->row([
+                Button::make('✅ Approve')->action('approve')->param('id', $approval->id),
+                Button::make('❌ Reject')->action('reject')->param('id', $approval->id),
+            ]))
+            ->dispatch();
+    }
+
+    private function handleApprovalCallback(callable $action): void
+    {
+        $approvalIdValue = $this->data->get('id');
+        $approvalId = is_string($approvalIdValue) ? $approvalIdValue : '';
+
+        if ($approvalId === '') {
+            $this->reply('This request is no longer available.');
+
+            return;
+        }
+
+        $linkedChat = $this->resolveLinkedChat();
+
+        if (! $linkedChat instanceof UserChatPlatformLink || $linkedChat->user === null) {
+            $this->reply('🔒 Please link your account first.');
+
+            return;
+        }
+
+        $approval = AgentApproval::query()->find($approvalId);
+
+        if (! $approval instanceof AgentApproval) {
+            $this->reply('This request is no longer available.');
+
+            return;
+        }
+
+        try {
+            $action($approval, $linkedChat->user);
+        } catch (AuthorizationException) {
+            $this->reply('This request is no longer available.');
+        }
+    }
+
+    private function editApprovalCard(AgentApproval $approval, string $status): void
+    {
+        $this->chat->edit($this->messageId)->html($this->approvalCardHtml($approval, $status))->dispatch();
+    }
+
+    private function approvalCardHtml(AgentApproval $approval, string $status): string
+    {
+        $summary = e((string) ($approval->summary ?? ''));
+
+        return "🩺 <b>Health log</b>\n\n{$summary}\n\n<i>{$status}</i>";
     }
 
     /**
