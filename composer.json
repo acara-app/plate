@@ -18,7 +18,7 @@
         "laravel/ai": "^0.6.8",
         "laravel/cashier": "^16.5.1",
         "laravel/fortify": "^1.36.2",
-        "laravel/framework": "^13.5",
+        "laravel/framework": "^13.13",
         "laravel/sanctum": "^4.3.1",
         "laravel/socialite": "^5.26.1",
         "laravel/tinker": "^3.0.2",
