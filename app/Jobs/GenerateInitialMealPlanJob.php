@@ -22,6 +22,7 @@ use Illuminate\Queue\Attributes\Backoff;
 use Illuminate\Queue\Attributes\Timeout;
 use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Queue\Attributes\UniqueFor;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Pipeline;
 use Throwable;
 
@@ -43,6 +44,16 @@ final class GenerateInitialMealPlanJob implements ShouldBeEncrypted, ShouldBeUni
     public function uniqueId(): string
     {
         return 'meal-plan-init:'.$this->mealPlan->id;
+    }
+
+    /**
+     * @return array<int, object>
+     */
+    public function middleware(): array
+    {
+        return [
+            new WithoutOverlapping($this->uniqueId()),
+        ];
     }
 
     public function handle(): void

@@ -15,8 +15,7 @@ final class BuildPreviousDaysContextStep
     {
         $previousMeals = $context->mealPlan->meals()
             ->where('day_number', '<', $context->dayNumber)
-            ->orderBy('day_number')
-            ->get()
+            ->get(['day_number', 'name'])
             ->groupBy('day_number');
 
         foreach ($previousMeals as $dayNumber => $meals) {

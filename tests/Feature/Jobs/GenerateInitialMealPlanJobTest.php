@@ -16,6 +16,7 @@ use App\Workflows\MealPlanPipeline\GenerateDayMealsStep;
 use App\Workflows\MealPlanPipeline\MealPlanDayContext;
 use App\Workflows\MealPlanPipeline\SaveDayMealsStep;
 use App\Workflows\SaveDayMealsActivity;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 
 covers(
     GenerateInitialMealPlanJob::class,
@@ -116,4 +117,13 @@ it('builds a stable unique id from the meal plan', function (): void {
 
     expect((new GenerateInitialMealPlanJob($this->user, $mealPlan))->uniqueId())
         ->toBe('meal-plan-init:'.$mealPlan->id);
+});
+
+it('prevents overlapping execution', function (): void {
+    $mealPlan = MealPlan::factory()->for($this->user)->weekly()->create();
+
+    $middleware = (new GenerateInitialMealPlanJob($this->user, $mealPlan))->middleware();
+
+    expect($middleware)->toHaveCount(1)
+        ->and($middleware[0])->toBeInstanceOf(WithoutOverlapping::class);
 });
