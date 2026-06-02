@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 use App\Contracts\DownloadsTelegramPhoto;
 use App\Contracts\ProcessesAdvisorMessage;
+use App\Enums\AgentApprovalStatus;
 use App\Enums\ChatPlatform;
 use App\Enums\Sex;
 use App\Enums\SubscriptionTier;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Exceptions\TelegramUserException;
+use App\Jobs\ExecuteApprovalJob;
+use App\Models\AgentApproval;
 use App\Models\User;
 use App\Models\UserChatPlatformLink;
 use App\Models\UserProfile;
@@ -17,6 +20,8 @@ use App\Utilities\StaticUrl;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Models\TelegraphChat;
+use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Testing\TestResponse;
 use Laravel\Ai\Files\Base64Image;
 use Tests\Fixtures\TelegramWebhookPayloads;
@@ -59,6 +64,14 @@ function linkedChatFor(mixed $test, User $user, array $overrides = []): UserChat
             'platform' => ChatPlatform::Telegram,
             'platform_user_id' => (string) $test->telegraphChat->chat_id,
         ], $overrides));
+}
+
+function sendCallback(mixed $test, string $action, string $approvalId): TestResponse
+{
+    return $test->postJson(
+        route('telegraph.webhook', ['token' => $test->bot->token]),
+        TelegramWebhookPayloads::callbackQuery($action, $approvalId, (string) $test->telegraphChat->chat_id),
+    );
 }
 
 describe('/start command', function (): void {
@@ -513,5 +526,104 @@ describe('photo message handling', function (): void {
         sendPhotoWebhook($this);
 
         Telegraph::assertSent('🔒 Please link your account first.', false);
+    });
+});
+
+describe('health-log approval card', function (): void {
+    it('sends an approval card with the summary and a not-saved-yet status when the agent proposes a log', function (): void {
+        $user = User::factory()->create();
+        linkedChatFor($this, $user, ['conversation_id' => 'conv-x']);
+
+        $approval = AgentApproval::factory()->telegram()->create([
+            'user_id' => $user->id,
+            'summary' => 'Glucose 140 mg/dL (fasting)',
+        ]);
+
+        $mock = new readonly class($approval->id) implements ProcessesAdvisorMessage
+        {
+            public function __construct(private string $approvalId) {}
+
+            public function handle(User $user, string $message, ?string $conversationId = null, array $attachments = []): array
+            {
+                Context::push('chat.created_approvals', $this->approvalId);
+
+                return ['response' => 'Here is what I will log:', 'conversation_id' => 'conv-x'];
+            }
+
+            public function resetConversation(User $user): string
+            {
+                return 'x';
+            }
+        };
+        app()->instance(ProcessesAdvisorMessage::class, $mock);
+
+        sendWebhook($this, 'log my glucose 140 fasting');
+
+        Telegraph::assertSent('Here is what I will log:', false);
+        Telegraph::assertSent('Glucose 140 mg/dL (fasting)', false);
+        Telegraph::assertSent('Not saved yet', false);
+    });
+});
+
+describe('approval callbacks', function (): void {
+    it('approves the entry, queues execution, and shows a saving status', function (): void {
+        Queue::fake();
+
+        $user = User::factory()->create();
+        linkedChatFor($this, $user);
+        $approval = AgentApproval::factory()->telegram()->create(['user_id' => $user->id]);
+
+        sendCallback($this, 'approve', $approval->id);
+
+        expect($approval->fresh()->status)->toBe(AgentApprovalStatus::Approved);
+        Queue::assertPushed(ExecuteApprovalJob::class, 1);
+        Telegraph::assertSentData('editMessageText', ['text' => 'Saving your entry'], false);
+    });
+
+    it('rejects the entry without queuing execution', function (): void {
+        Queue::fake();
+
+        $user = User::factory()->create();
+        linkedChatFor($this, $user);
+        $approval = AgentApproval::factory()->telegram()->create(['user_id' => $user->id]);
+
+        sendCallback($this, 'reject', $approval->id);
+
+        expect($approval->fresh()->status)->toBe(AgentApprovalStatus::Rejected);
+        Queue::assertNotPushed(ExecuteApprovalJob::class);
+        Telegraph::assertSentData('editMessageText', ['text' => 'Not saved'], false);
+    });
+
+    it('refuses to act on an approval owned by another user', function (): void {
+        Queue::fake();
+
+        $user = User::factory()->create();
+        $other = User::factory()->create();
+        linkedChatFor($this, $user);
+        $approval = AgentApproval::factory()->telegram()->create(['user_id' => $other->id]);
+
+        sendCallback($this, 'approve', $approval->id);
+
+        expect($approval->fresh()->status)->toBe(AgentApprovalStatus::Pending);
+        Queue::assertNotPushed(ExecuteApprovalJob::class);
+        Telegraph::assertSentData('answerCallbackQuery', ['text' => 'no longer available'], false);
+    });
+
+    it('replies neutrally for an unknown approval id', function (): void {
+        $user = User::factory()->create();
+        linkedChatFor($this, $user);
+
+        sendCallback($this, 'approve', '00000000-0000-0000-0000-000000000000');
+
+        Telegraph::assertSentData('answerCallbackQuery', ['text' => 'no longer available'], false);
+    });
+
+    it('asks an unlinked user to link their account first', function (): void {
+        $approval = AgentApproval::factory()->telegram()->create();
+
+        sendCallback($this, 'approve', $approval->id);
+
+        Telegraph::assertSentData('answerCallbackQuery', ['text' => 'Please link your account'], false);
+        expect($approval->fresh()->status)->toBe(AgentApprovalStatus::Pending);
     });
 });

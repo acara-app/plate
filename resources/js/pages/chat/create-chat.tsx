@@ -124,6 +124,7 @@ export default function CreateChat() {
                             messages={messages}
                             status={status}
                             isSubmitting={showThinkingIndicator}
+                            conversationId={conversationId}
                         />
                         {!usageLimitTrigger && (
                             <ChatErrorBanner

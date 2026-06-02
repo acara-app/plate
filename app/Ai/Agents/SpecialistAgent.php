@@ -52,7 +52,7 @@ abstract class SpecialistAgent implements Agent, CanActAsTool, HasTools
         $tools = $this->toolRegistry->resolve($this->toolClasses());
 
         if ($this->includesSharedTools()) {
-            $tools = [...$tools, ...$this->toolRegistry->getSharedTools()];
+            return [...$tools, ...$this->toolRegistry->getSharedTools()];
         }
 
         return $tools;
