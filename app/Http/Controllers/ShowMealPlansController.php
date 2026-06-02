@@ -9,10 +9,10 @@ use App\Data\MealResponseData;
 use App\Enums\DietType;
 use App\Enums\MealPlanGenerationStatus;
 use App\Enums\SubscriptionTier;
+use App\Jobs\GenerateMealPlanDayJob;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
-use App\Workflows\MealPlanDayWorkflow;
 use Carbon\CarbonImmutable;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Database\Eloquent\Collection;
@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Workflow\WorkflowStub;
 
 final readonly class ShowMealPlansController
 {
@@ -106,8 +105,7 @@ final readonly class ShowMealPlansController
                 ]),
             ]);
 
-            WorkflowStub::make(MealPlanDayWorkflow::class)
-                ->start($mealPlan, $currentDayNumber);
+            GenerateMealPlanDayJob::dispatch($mealPlan, $currentDayNumber);
 
             $dayStatus = MealPlanGenerationStatus::Generating->value;
         }

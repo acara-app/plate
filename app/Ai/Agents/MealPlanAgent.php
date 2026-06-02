@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Actions\AnalyzeGlucoseForNotificationAction;
+use App\Actions\CreateMealPlan;
 use App\Ai\MealPlanPromptBuilder;
 use App\Ai\Tools\StartMealPlanGeneration;
 use App\Contracts\Ai\GeneratesMealPlans;
@@ -13,11 +14,11 @@ use App\Data\GlucoseAnalysis\GlucoseAnalysisData;
 use App\Data\PreviousDayContext;
 use App\Enums\DietType;
 use App\Enums\MealType;
+use App\Jobs\GenerateInitialMealPlanJob;
 use App\Models\MealPlan;
 use App\Models\User;
 use App\Services\SystemPromptProviderResolver;
 use App\Services\ToolRegistry;
-use App\Workflows\MealPlanInitializeWorkflow;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ArrayType;
 use Illuminate\JsonSchema\Types\ObjectType;
@@ -31,7 +32,6 @@ use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Providers\Tools\ProviderTool;
 use Laravel\Ai\Responses\StructuredAgentResponse;
-use Workflow\WorkflowStub;
 
 #[MaxTokens(64000)]
 #[Timeout(180)]
@@ -116,7 +116,7 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasStructuredOut
 
         $dietType = $user->profile->calculated_diet_type ?? DietType::Balanced;
 
-        $mealPlan = MealPlanInitializeWorkflow::createMealPlan($user, $totalDays, $dietType);
+        $mealPlan = resolve(CreateMealPlan::class)->handle($user, $totalDays, $dietType);
 
         if ($customPrompt !== null && $customPrompt !== '') {
             $mealPlan->update([
@@ -124,8 +124,7 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasStructuredOut
             ]);
         }
 
-        WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start($user, $mealPlan, $glucoseAnalysis->analysisData, $dietType);
+        GenerateInitialMealPlanJob::dispatch($user, $mealPlan, $glucoseAnalysis->analysisData, $dietType);
     }
 
     public function generateForDay(

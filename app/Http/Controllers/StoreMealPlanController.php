@@ -5,19 +5,20 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\AnalyzeGlucoseForNotificationAction;
+use App\Actions\CreateMealPlan;
 use App\Enums\DietType;
 use App\Http\Requests\StoreMealPlanRequest;
+use App\Jobs\GenerateInitialMealPlanJob;
 use App\Models\User;
-use App\Workflows\MealPlanInitializeWorkflow;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
-use Workflow\WorkflowStub;
 
 final readonly class StoreMealPlanController
 {
     public function __construct(
         #[CurrentUser] private User $user,
         private AnalyzeGlucoseForNotificationAction $analyzeGlucose,
+        private CreateMealPlan $createMealPlan,
     ) {}
 
     public function __invoke(StoreMealPlanRequest $request): RedirectResponse
@@ -32,7 +33,7 @@ final readonly class StoreMealPlanController
 
         $prompt = $request->string('prompt')->toString();
         $durationDays = $request->integer('duration_days');
-        $mealPlan = MealPlanInitializeWorkflow::createMealPlan($user, $durationDays, $dietType);
+        $mealPlan = $this->createMealPlan->handle($user, $durationDays, $dietType);
 
         if ($prompt !== '') {
             $mealPlan->update([
@@ -40,13 +41,12 @@ final readonly class StoreMealPlanController
             ]);
         }
 
-        WorkflowStub::make(MealPlanInitializeWorkflow::class)
-            ->start(
-                $user,
-                $mealPlan,
-                $glucoseAnalysis->analysisData,
-                $dietType,
-            );
+        GenerateInitialMealPlanJob::dispatch(
+            $user,
+            $mealPlan,
+            $glucoseAnalysis->analysisData,
+            $dietType,
+        );
 
         return to_route('meal-plans.index');
     }
