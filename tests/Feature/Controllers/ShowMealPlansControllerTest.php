@@ -4,14 +4,20 @@ declare(strict_types=1);
 
 use App\Enums\DietType;
 use App\Http\Controllers\ShowMealPlansController;
+use App\Jobs\GenerateMealPlanDayJob;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Queue;
 use Laravel\Cashier\Subscription;
 
 covers(ShowMealPlansController::class);
+
+beforeEach(function (): void {
+    Queue::fake();
+});
 
 it('requires authentication', function (): void {
     $response = $this->get(route('meal-plans.index'));
@@ -561,6 +567,37 @@ it('returns generating status when overall plan is generating and day is empty',
         ->assertInertia(fn ($page) => $page
             ->where('currentDay.day_number', 2)
             ->where('currentDay.needs_generation', true));
+});
+
+it('dispatches the day job when navigating to a day that needs generation', function (): void {
+    $user = User::factory()->create();
+
+    $mealPlan = MealPlan::factory()
+        ->weekly()
+        ->for($user)
+        ->create([
+            'metadata' => [
+                'status' => 'pending',
+                'days_completed' => 1,
+            ],
+        ]);
+
+    Meal::factory()->for($mealPlan)->forDay(1)->create();
+
+    $this->actingAs($user)
+        ->get(route('meal-plans.index', ['day' => 2]))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('currentDay.day_number', 2)
+            ->where('currentDay.needs_generation', true)
+            ->where('currentDay.status', 'generating'));
+
+    expect($mealPlan->fresh()->metadata['day_2_status'])->toBe('generating');
+
+    Queue::assertPushed(
+        GenerateMealPlanDayJob::class,
+        fn (GenerateMealPlanDayJob $job): bool => $job->mealPlan->is($mealPlan) && $job->dayNumber === 2,
+    );
 });
 
 it('returns failed status when generating is stale for overall plan', function (): void {

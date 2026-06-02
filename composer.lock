@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "43700b83f709001130dd8ba4d52d46ff",
+    "content-hash": "ac02268c3d37bef884d261e9a7e1bcf0",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -838,128 +838,6 @@
                 }
             ],
             "time": "2025-10-31T18:51:33+00:00"
-        },
-        {
-            "name": "durable-workflow/waterline",
-            "version": "1.0.16",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/durable-workflow/waterline.git",
-                "reference": "ad29fa6e9b4aa8a72ef9baafd0d104deafc5a747"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/durable-workflow/waterline/zipball/ad29fa6e9b4aa8a72ef9baafd0d104deafc5a747",
-                "reference": "ad29fa6e9b4aa8a72ef9baafd0d104deafc5a747",
-                "shasum": ""
-            },
-            "require": {
-                "durable-workflow/workflow": "^1.0",
-                "illuminate/support": "^9.0|^10.0|^11.0|^12.0|^13.0",
-                "php": "^8.0.2"
-            },
-            "replace": {
-                "laravel-workflow/waterline": "self.version"
-            },
-            "require-dev": {
-                "fakerphp/faker": "^1.9.1",
-                "mockery/mockery": "^1.4.4",
-                "orchestra/testbench": "^7.29|^11.0",
-                "orchestra/workbench": "^7.29",
-                "phpunit/phpunit": "^9.5.10|^12.5.12"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "Waterline": "Waterline\\Waterline"
-                    },
-                    "providers": [
-                        "Waterline\\WaterlineServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Waterline\\": "app/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Richard McDaniel",
-                    "email": "richard.lee.mcdaniel@gmail.com"
-                }
-            ],
-            "description": "An elegant UI for monitoring Laravel Workflows.",
-            "support": {
-                "issues": "https://github.com/durable-workflow/waterline/issues",
-                "source": "https://github.com/durable-workflow/waterline/tree/1.0.16"
-            },
-            "time": "2026-04-13T23:25:41+00:00"
-        },
-        {
-            "name": "durable-workflow/workflow",
-            "version": "1.0.75",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/durable-workflow/workflow.git",
-                "reference": "5340b8ad2bb2fef1945b5161ea45401b15e2dbb0"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/durable-workflow/workflow/zipball/5340b8ad2bb2fef1945b5161ea45401b15e2dbb0",
-                "reference": "5340b8ad2bb2fef1945b5161ea45401b15e2dbb0",
-                "shasum": ""
-            },
-            "require": {
-                "laravel/framework": "^9.0|^10.0|^11.0|^12.0|^13.0",
-                "php": "^8.1",
-                "react/promise": "^2.9|^3.0"
-            },
-            "replace": {
-                "laravel-workflow/laravel-workflow": "self.version"
-            },
-            "require-dev": {
-                "orchestra/testbench": "^8.0",
-                "phpstan/phpstan": "^2.0",
-                "symplify/easy-coding-standard": "^11.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Workflow\\Providers\\WorkflowServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "files": [
-                    "src/functions.php"
-                ],
-                "psr-4": {
-                    "Workflow\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Durable Workflow",
-                    "email": "support@durable-workflow.com"
-                }
-            ],
-            "description": "Durable workflow engine that allows users to write long running persistent distributed workflows (orchestrations) in PHP powered by Laravel queues.",
-            "support": {
-                "issues": "https://github.com/durable-workflow/workflow/issues",
-                "source": "https://github.com/durable-workflow/workflow/tree/1.0.75"
-            },
-            "time": "2026-04-13T23:30:27+00:00"
         },
         {
             "name": "egulias/email-validator",
@@ -5449,79 +5327,6 @@
                 "source": "https://github.com/ramsey/uuid/tree/4.9.2"
             },
             "time": "2025-12-14T04:43:48+00:00"
-        },
-        {
-            "name": "react/promise",
-            "version": "v3.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/reactphp/promise.git",
-                "reference": "23444f53a813a3296c1368bb104793ce8d88f04a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/23444f53a813a3296c1368bb104793ce8d88f04a",
-                "reference": "23444f53a813a3296c1368bb104793ce8d88f04a",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.1.0"
-            },
-            "require-dev": {
-                "phpstan/phpstan": "1.12.28 || 1.4.10",
-                "phpunit/phpunit": "^9.6 || ^7.5"
-            },
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "src/functions_include.php"
-                ],
-                "psr-4": {
-                    "React\\Promise\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Jan Sorgalla",
-                    "email": "jsorgalla@gmail.com",
-                    "homepage": "https://sorgalla.com/"
-                },
-                {
-                    "name": "Christian Lück",
-                    "email": "christian@clue.engineering",
-                    "homepage": "https://clue.engineering/"
-                },
-                {
-                    "name": "Cees-Jan Kiewiet",
-                    "email": "reactphp@ceesjankiewiet.nl",
-                    "homepage": "https://wyrihaximus.net/"
-                },
-                {
-                    "name": "Chris Boden",
-                    "email": "cboden@gmail.com",
-                    "homepage": "https://cboden.dev/"
-                }
-            ],
-            "description": "A lightweight implementation of CommonJS Promises/A for PHP",
-            "keywords": [
-                "promise",
-                "promises"
-            ],
-            "support": {
-                "issues": "https://github.com/reactphp/promise/issues",
-                "source": "https://github.com/reactphp/promise/tree/v3.3.0"
-            },
-            "funding": [
-                {
-                    "url": "https://opencollective.com/reactphp",
-                    "type": "open_collective"
-                }
-            ],
-            "time": "2025-08-19T18:57:03+00:00"
         },
         {
             "name": "ryangjchandler/laravel-cloudflare-turnstile",

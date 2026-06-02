@@ -6,10 +6,11 @@ use App\Ai\Agents\MealPlanAgent;
 use App\Enums\DietType;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
+use App\Jobs\GenerateInitialMealPlanJob;
 use App\Models\User;
+use Illuminate\Support\Facades\Queue;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
-use Workflow\WorkflowStub;
 
 covers(MealPlanAgent::class);
 
@@ -32,8 +33,8 @@ it('has correct attributes configured', function (): void {
         ->and($timeout[0]->newInstance()->value)->toBe(180);
 });
 
-it('starts workflow when handle is called', function (): void {
-    WorkflowStub::fake();
+it('dispatches the initial meal plan job when handle is called', function (): void {
+    Queue::fake();
 
     $user = User::factory()->create();
 
@@ -52,10 +53,15 @@ it('starts workflow when handle is called', function (): void {
     $mealPlan = $user->mealPlans()->first();
     expect($mealPlan)->not->toBeNull()
         ->and($mealPlan->metadata['status'])->toBe('generating');
+
+    Queue::assertPushed(
+        GenerateInitialMealPlanJob::class,
+        fn (GenerateInitialMealPlanJob $job): bool => $job->mealPlan->is($mealPlan),
+    );
 });
 
 it('stores custom prompt in meal plan metadata when provided', function (): void {
-    WorkflowStub::fake();
+    Queue::fake();
 
     $user = User::factory()->create();
 

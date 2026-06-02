@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 use App\Enums\MealPlanGenerationStatus;
 use App\Http\Controllers\GenerateMealDayController;
+use App\Jobs\GenerateMealPlanDayJob;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
-use Workflow\WorkflowStub;
+use Illuminate\Support\Facades\Queue;
 
 covers(GenerateMealDayController::class);
 
@@ -62,8 +63,8 @@ it('returns generating when day is currently being generated', function (): void
         ]);
 });
 
-it('starts workflow for pending day', function (): void {
-    WorkflowStub::fake();
+it('dispatches the day job for a pending day', function (): void {
+    Queue::fake();
 
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->for($user)->create(['duration_days' => 7]);
@@ -79,4 +80,9 @@ it('starts workflow for pending day', function (): void {
 
     expect($mealPlan->fresh()->metadata['day_2_status'])
         ->toBe(MealPlanGenerationStatus::Generating->value);
+
+    Queue::assertPushed(
+        GenerateMealPlanDayJob::class,
+        fn (GenerateMealPlanDayJob $job): bool => $job->mealPlan->is($mealPlan) && $job->dayNumber === 2,
+    );
 });
