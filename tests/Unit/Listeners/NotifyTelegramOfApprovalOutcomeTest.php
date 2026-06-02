@@ -97,3 +97,43 @@ it('does nothing for a still-pending approval', function (): void {
 
     Telegraph::assertNothingSent();
 });
+
+it('does not send again when the approval was already notified', function (): void {
+    $user = User::factory()->create();
+    linkUserToTelegram($this, $user);
+
+    $approval = AgentApproval::factory()->telegram()->executed()->create([
+        'user_id' => $user->id,
+        'summary' => 'Glucose 140 mg/dL (fasting)',
+        'notified_at' => now(),
+    ]);
+
+    notify($approval->id);
+
+    Telegraph::assertNothingSent();
+});
+
+it('notifies exactly once when the resolved event fires twice', function (AgentApprovalStatus $status, string $expected): void {
+    $user = User::factory()->create();
+    linkUserToTelegram($this, $user);
+
+    $approval = AgentApproval::factory()->telegram()->create([
+        'user_id' => $user->id,
+        'status' => $status,
+        'summary' => 'Glucose 140 mg/dL (fasting)',
+    ]);
+
+    notify($approval->id);
+
+    Telegraph::assertSent($expected, false);
+
+    $firstNotifiedAt = $approval->fresh()->notified_at;
+    expect($firstNotifiedAt)->not->toBeNull();
+
+    notify($approval->id);
+
+    expect($approval->fresh()->notified_at->equalTo($firstNotifiedAt))->toBeTrue();
+})->with([
+    'executed' => [AgentApprovalStatus::Executed, 'Saved: Glucose 140 mg/dL (fasting)'],
+    'failed' => [AgentApprovalStatus::Failed, 'save that entry'],
+]);
