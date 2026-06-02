@@ -20,7 +20,7 @@ it('delegates to the advisor and persists the conversation id', function (): voi
 
     $result = resolve(DispatchChatTurnAction::class)->handle($link, 'hi');
 
-    expect($result)->toBe(['response' => 'hello!', 'conversation_id' => 'conv-42']);
+    expect($result)->toBe(['response' => 'hello!', 'conversation_id' => 'conv-42', 'pending_approvals' => []]);
     expect($link->fresh()->conversation_id)->toBe('conv-42');
 });
 

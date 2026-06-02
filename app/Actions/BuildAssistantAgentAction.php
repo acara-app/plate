@@ -12,6 +12,7 @@ use App\Jobs\SummarizeConversationJob;
 use App\Models\Conversation;
 use App\Models\User;
 use App\Utilities\ConfigHelper;
+use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
 final readonly class BuildAssistantAgentAction
@@ -21,8 +22,11 @@ final readonly class BuildAssistantAgentAction
         private DispatchesMemoryExtraction $memoryExtraction,
     ) {}
 
-    public function handle(StreamChatRequest $request, User $user, string $conversationId): StreamableAgentResponse
+    public function handle(StreamChatRequest $request, User $user, string $conversationId, string $channel = 'web'): StreamableAgentResponse
     {
+        Context::add('chat.channel', $channel);
+        Context::add('chat.conversation_id', $conversationId);
+
         $agentPayload = new AgentPayload(
             userId: $user->id,
             message: $request->userMessage(),

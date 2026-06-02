@@ -47,4 +47,25 @@ final class TelegramWebhookPayloads
 
         return array_merge(['message' => $message], $overrides);
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function callbackQuery(string $action, string $approvalId, string $chatId = '123456789', int $messageId = 100): array
+    {
+        return [
+            'callback_query' => [
+                'id' => 99,
+                'from' => ['id' => 987654321, 'is_bot' => false, 'first_name' => 'Test'],
+                'message' => [
+                    'message_id' => $messageId,
+                    'from' => ['id' => 42, 'is_bot' => true, 'first_name' => 'Bot'],
+                    'chat' => ['id' => $chatId, 'type' => 'private'],
+                    'date' => now()->timestamp,
+                    'text' => 'Health log',
+                ],
+                'data' => sprintf('action:%s;id:%s', $action, $approvalId),
+            ],
+        ];
+    }
 }

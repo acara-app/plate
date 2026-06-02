@@ -1,3 +1,9 @@
+import { ApprovalCard } from '@/components/chat/approval-card';
+import {
+    extractApprovalPayload,
+    type ApprovalPartPayload,
+} from '@/components/chat/approval-part';
+import { ChatErrorBoundary } from '@/components/chat/chat-error-boundary';
 import { cn } from '@/lib/utils';
 import type { ChatStatus } from '@/types/chat';
 import { type UIMessage } from '@ai-sdk/react';
@@ -9,6 +15,7 @@ interface ChatMessagesProps {
     messages: UIMessage[];
     status: ChatStatus;
     isSubmitting?: boolean;
+    conversationId: string;
 }
 
 export function ChatErrorBanner({
@@ -95,11 +102,25 @@ function MessageAvatar({ role }: { role: string }) {
 
 function MessagePart({
     part,
+    approval,
     isStreaming,
+    conversationId,
 }: {
     part: UIMessage['parts'][number];
+    approval: ApprovalPartPayload | null;
     isStreaming?: boolean;
+    conversationId: string;
 }) {
+    if (approval) {
+        return (
+            <ApprovalCard
+                conversationId={conversationId}
+                approvalId={approval.approvalId}
+                card={approval.card}
+            />
+        );
+    }
+
     switch (part.type) {
         case 'text':
             return (
@@ -193,21 +214,25 @@ function UserBubble({ message }: { message: UIMessage }) {
 function AssistantBubble({
     message,
     isStreaming,
+    conversationId,
 }: {
     message: UIMessage;
     isStreaming?: boolean;
+    conversationId: string;
 }) {
-    const renderableParts = message.parts?.filter((part) => {
-        if (part.type === 'text' || part.type === 'reasoning') {
-            return part.text && part.text.trim().length > 0;
-        }
-        if (part.type === 'source-url' || part.type === 'file') {
-            return true;
-        }
-        return false;
-    });
+    const renderableParts = (message.parts ?? [])
+        .map((part) => ({ part, approval: extractApprovalPayload(part) }))
+        .filter(({ part, approval }) => {
+            if (approval) {
+                return true;
+            }
+            if (part.type === 'text' || part.type === 'reasoning') {
+                return part.text && part.text.trim().length > 0;
+            }
+            return part.type === 'source-url' || part.type === 'file';
+        });
 
-    if (!renderableParts || renderableParts.length === 0) {
+    if (renderableParts.length === 0) {
         return null;
     }
 
@@ -216,11 +241,13 @@ function AssistantBubble({
             <MessageAvatar role="assistant" />
             <div className="max-w-[80%] rounded-2xl rounded-bl-md bg-muted px-4 py-3 text-foreground shadow-sm">
                 <div className="space-y-2 text-sm">
-                    {renderableParts.map((part, index) => (
+                    {renderableParts.map(({ part, approval }, index) => (
                         <MessagePart
                             key={index}
                             part={part}
+                            approval={approval}
                             isStreaming={isStreaming}
+                            conversationId={conversationId}
                         />
                     ))}
                 </div>
@@ -232,14 +259,20 @@ function AssistantBubble({
 function MessageBubble({
     message,
     isStreaming,
+    conversationId,
 }: {
     message: UIMessage;
     isStreaming?: boolean;
+    conversationId: string;
 }) {
     return message.role === 'user' ? (
         <UserBubble message={message} />
     ) : (
-        <AssistantBubble message={message} isStreaming={isStreaming} />
+        <AssistantBubble
+            message={message}
+            isStreaming={isStreaming}
+            conversationId={conversationId}
+        />
     );
 }
 
@@ -283,6 +316,7 @@ export default function ChatMessages({
     messages,
     status,
     isSubmitting,
+    conversationId,
 }: ChatMessagesProps) {
     if (messages.length === 0) {
         return <EmptyState />;
@@ -293,15 +327,17 @@ export default function ChatMessages({
     return (
         <div className="flex w-full flex-1 flex-col gap-4">
             {messages.map((message, index) => (
-                <MessageBubble
-                    key={message.id}
-                    message={message}
-                    isStreaming={
-                        status === 'streaming' &&
-                        index === lastIndex &&
-                        message.role === 'assistant'
-                    }
-                />
+                <ChatErrorBoundary key={message.id}>
+                    <MessageBubble
+                        message={message}
+                        isStreaming={
+                            status === 'streaming' &&
+                            index === lastIndex &&
+                            message.role === 'assistant'
+                        }
+                        conversationId={conversationId}
+                    />
+                </ChatErrorBoundary>
             ))}
             {isSubmitting && <ThinkingIndicator />}
             {status === 'streaming' && <StreamingIndicator />}

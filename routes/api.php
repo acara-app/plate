@@ -39,6 +39,18 @@ Route::prefix('v2/chat')
         Route::delete('conversations/{conversation}', [ApiV2\ChatController::class, 'destroy'])
             ->middleware('throttle:30,1')
             ->name('api.v2.chat.destroy');
+
+        Route::get('conversations/{conversation}/approvals/{approval}', [ApiV2\ApprovalController::class, 'show'])
+            ->middleware('throttle:60,1')
+            ->name('api.v2.chat.approvals.show');
+
+        Route::post('conversations/{conversation}/approvals/{approval}/approve', [ApiV2\ApprovalController::class, 'approve'])
+            ->middleware('throttle:30,1')
+            ->name('api.v2.chat.approvals.approve');
+
+        Route::post('conversations/{conversation}/approvals/{approval}/reject', [ApiV2\ApprovalController::class, 'reject'])
+            ->middleware('throttle:30,1')
+            ->name('api.v2.chat.approvals.reject');
     });
 
 Route::prefix('v2/auth')->group(function (): void {

@@ -10,3 +10,25 @@ export interface ChatPageProps {
     messages: UIMessage[];
     [key: string]: unknown;
 }
+
+export type ApprovalStatus =
+    | 'pending'
+    | 'approved'
+    | 'executing'
+    | 'executed'
+    | 'failed'
+    | 'rejected'
+    | 'expired';
+
+export interface ApprovalCardData {
+    status: ApprovalStatus;
+    summary: string;
+    can_approve: boolean;
+    can_reject: boolean;
+    error: string | null;
+}
+
+export interface ChatApprovalsPageProps {
+    approvals?: Record<string, ApprovalCardData>;
+    [key: string]: unknown;
+}
