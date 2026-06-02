@@ -32,7 +32,7 @@ final readonly class ApproveAgentApproval
                 'resolved_at' => now(),
             ]);
 
-            dispatch(new ExecuteApprovalJob($locked->id));
+            dispatch(new ExecuteApprovalJob($locked->id))->afterCommit();
         });
 
         return $approval->fresh() ?? $approval;

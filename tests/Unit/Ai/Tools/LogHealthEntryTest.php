@@ -163,17 +163,33 @@ it('logs an exercise entry', function (): void {
         ->and($sample->metadata['exercise_type'])->toBe('walking');
 });
 
-it('logs a food entry with only notes and no macros', function (): void {
+it('asks for a nutrition estimate when a food entry has no calories or macros', function (): void {
     $user = User::factory()->create();
     Auth::login($user);
 
     $tool = resolve(LogHealthEntry::class);
-    $request = new Request([
+    $result = json_decode($tool->handle(new Request([
         'log_type' => 'food',
         'notes' => 'apple',
-    ]);
+    ])), true);
 
-    $result = json_decode($tool->handle($request), true);
+    expect($result)
+        ->toHaveKey('requires_estimate', true)
+        ->toHaveKey('field', 'calories')
+        ->and(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(0);
+});
+
+it('logs a food entry with an estimated calorie count', function (): void {
+    $user = User::factory()->create();
+    Auth::login($user);
+
+    $tool = resolve(LogHealthEntry::class);
+    $result = json_decode($tool->handle(new Request([
+        'log_type' => 'food',
+        'calories' => 175,
+        'carbs_grams' => 30,
+        'notes' => 'Two pancakes',
+    ])), true);
 
     expect($result)->toHaveKey('success', true);
 
@@ -182,8 +198,8 @@ it('logs a food entry with only notes and no macros', function (): void {
         ->where('type_identifier', HealthSyncType::DietaryEnergy->value)
         ->first();
 
-    expect($sample->value)->toBe(0.0)
-        ->and($sample->notes)->toBe('apple');
+    expect($sample->value)->toBe(175.0)
+        ->and($sample->notes)->toBe('Two pancakes');
 });
 
 it('returns error when vitals entry has no data', function (): void {

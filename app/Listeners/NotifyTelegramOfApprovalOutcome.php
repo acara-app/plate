@@ -44,7 +44,11 @@ final class NotifyTelegramOfApprovalOutcome implements ShouldQueue
             return;
         }
 
-        $chat->message($message)->dispatch();
+        if (! $approval->claimNotification()) {
+            return;
+        }
+
+        $chat->message($message)->send();
     }
 
     private function outcomeMessage(AgentApproval $approval): ?string

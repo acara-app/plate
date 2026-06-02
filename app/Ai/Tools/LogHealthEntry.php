@@ -42,7 +42,7 @@ final readonly class LogHealthEntry implements Tool
 
     public function description(): string
     {
-        return 'Log a health entry for the current user. Use this when the user reports a health measurement like food intake, glucose reading, weight, blood pressure, insulin dose, medication, or exercise. Extract the relevant data from the user message and call this tool to save it.';
+        return 'Log a health entry for the current user. Use this when the user reports a health measurement like food intake, glucose reading, weight, blood pressure, insulin dose, medication, or exercise. Extract the relevant data from the user message and call this tool to save it. When logging food, always estimate calories and macronutrients (carbs, protein, fat) from the description — never log a food entry with no nutrition values.';
     }
 
     public function handle(Request $request): string
@@ -69,6 +69,15 @@ final readonly class LogHealthEntry implements Tool
                 'field' => 'glucose_unit',
                 'message' => 'Your glucose value looks like mmol/L. Please confirm whether it is mg/dL or mmol/L.',
                 'allowed_values' => ['mg/dL', 'mmol/L'],
+            ]);
+        }
+
+        if ($this->requiresFoodEstimate($healthData)) {
+            return (string) json_encode([
+                'error' => 'Estimate the nutrition for this food before logging.',
+                'requires_estimate' => true,
+                'field' => 'calories',
+                'message' => 'Food entries must include your best estimate of calories (and carbs, protein, and fat when relevant). Estimate from the food described — do not ask the user for exact numbers — then call log_health_entry again.',
             ]);
         }
 
@@ -123,7 +132,7 @@ final readonly class LogHealthEntry implements Tool
             'fat_grams' => $schema->number()->required()->nullable()
                 ->description('Fat intake in grams (can be decimal like 12.5).'),
             'calories' => $schema->integer()->required()->nullable()
-                ->description('Total calories.'),
+                ->description('Total calories. For food entries, always provide your best estimate (e.g. two pancakes ≈ 175 kcal) even when the user does not state it.'),
             'notes' => $schema->string()->required()->nullable()
                 ->description('Food name or additional notes.'),
             'insulin_units' => $schema->number()->required()->nullable()
@@ -213,5 +222,14 @@ final readonly class LogHealthEntry implements Tool
         }
 
         return $healthData->glucoseValue > 0 && $healthData->glucoseValue < 20;
+    }
+
+    private function requiresFoodEstimate(HealthLogData $healthData): bool
+    {
+        return $healthData->logType === HealthEntryType::Food
+            && $healthData->calories === null
+            && $healthData->carbsGrams === null
+            && $healthData->proteinGrams === null
+            && $healthData->fatGrams === null;
     }
 }
