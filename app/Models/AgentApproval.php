@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property CarbonInterface $expires_at
  * @property CarbonInterface|null $resolved_at
  * @property CarbonInterface|null $executed_at
+ * @property CarbonInterface|null $notified_at
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
  * @property-read User $user
@@ -51,6 +52,7 @@ final class AgentApproval extends Model
             'expires_at' => 'datetime',
             'resolved_at' => 'datetime',
             'executed_at' => 'datetime',
+            'notified_at' => 'datetime',
         ];
     }
 
@@ -63,6 +65,14 @@ final class AgentApproval extends Model
             canReject: $this->status->canReject(),
             error: $this->error,
         );
+    }
+
+    public function claimNotification(): bool
+    {
+        return self::query()
+            ->whereKey($this->getKey())
+            ->whereNull('notified_at')
+            ->update(['notified_at' => now()]) > 0;
     }
 
     /**

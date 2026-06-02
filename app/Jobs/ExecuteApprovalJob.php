@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Throwable;
 
 #[MaxExceptions(3)]
-#[Timeout(120)]
+#[Timeout(60)]
 final class ExecuteApprovalJob implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
