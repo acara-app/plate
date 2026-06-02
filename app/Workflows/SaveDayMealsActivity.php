@@ -6,23 +6,21 @@ namespace App\Workflows;
 
 use App\Data\DayMealsData;
 use App\Models\MealPlan;
-use Illuminate\Queue\Attributes\Tries;
-use Workflow\Activity;
 
-/**
- * @codeCoverageIgnore Activity classes are executed by the workflow engine
- */
-#[Tries(1)]
-final class SaveDayMealsActivity extends Activity
+final class SaveDayMealsActivity
 {
     /**
      * @return array{day_number: int, meals_count: int}
      */
-    public function execute(
+    public function handle(
         MealPlan $mealPlan,
         DayMealsData $dayMeals,
         int $dayNumber,
     ): array {
+        $mealPlan->meals()
+            ->where('day_number', $dayNumber)
+            ->delete();
+
         $mealsCount = 0;
 
         foreach ($dayMeals->meals as $singleDayMeal) {

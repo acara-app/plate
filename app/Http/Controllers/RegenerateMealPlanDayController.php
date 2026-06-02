@@ -6,10 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Enums\MealPlanGenerationStatus;
 use App\Http\Requests\RegenerateMealPlanDayRequest;
+use App\Jobs\GenerateMealPlanDayJob;
 use App\Models\MealPlan;
-use App\Workflows\MealPlanDayWorkflow;
 use Illuminate\Http\RedirectResponse;
-use Workflow\WorkflowStub;
 
 final readonly class RegenerateMealPlanDayController
 {
@@ -30,8 +29,7 @@ final readonly class RegenerateMealPlanDayController
             ]),
         ]);
 
-        WorkflowStub::make(MealPlanDayWorkflow::class)
-            ->start($mealPlan, $dayNumber);
+        GenerateMealPlanDayJob::dispatch($mealPlan, $dayNumber);
 
         return back();
     }

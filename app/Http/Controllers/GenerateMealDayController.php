@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\MealPlanGenerationStatus;
+use App\Jobs\GenerateMealPlanDayJob;
 use App\Models\MealPlan;
-use App\Workflows\MealPlanDayWorkflow;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Workflow\WorkflowStub;
 
 final readonly class GenerateMealDayController
 {
@@ -56,8 +55,7 @@ final readonly class GenerateMealDayController
             ]),
         ]);
 
-        WorkflowStub::make(MealPlanDayWorkflow::class)
-            ->start($mealPlan, $dayNumber);
+        GenerateMealPlanDayJob::dispatch($mealPlan, $dayNumber);
 
         return response()->json([
             'success' => true,

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 use App\Enums\MealPlanGenerationStatus;
 use App\Http\Controllers\RegenerateMealPlanDayController;
+use App\Jobs\GenerateMealPlanDayJob;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
-use Workflow\WorkflowStub;
+use Illuminate\Support\Facades\Queue;
 
 covers(RegenerateMealPlanDayController::class);
 
@@ -78,7 +79,7 @@ it('validates day number is positive', function (): void {
 });
 
 it('deletes existing meals for the specified day', function (): void {
-    WorkflowStub::fake();
+    Queue::fake();
 
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->weekly()->create([
@@ -108,7 +109,7 @@ it('deletes existing meals for the specified day', function (): void {
 });
 
 it('updates metadata with generating status', function (): void {
-    WorkflowStub::fake();
+    Queue::fake();
 
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->weekly()->create([
@@ -131,7 +132,7 @@ it('updates metadata with generating status', function (): void {
 });
 
 it('starts workflow for regenerating day', function (): void {
-    WorkflowStub::fake();
+    Queue::fake();
 
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->weekly()->create([
@@ -148,10 +149,15 @@ it('starts workflow for regenerating day', function (): void {
 
     expect($mealPlan->fresh()->metadata['day_2_status'])
         ->toBe(MealPlanGenerationStatus::Generating->value);
+
+    Queue::assertPushed(
+        GenerateMealPlanDayJob::class,
+        fn (GenerateMealPlanDayJob $job): bool => $job->mealPlan->is($mealPlan) && $job->dayNumber === 2,
+    );
 });
 
 it('redirects back after regeneration', function (): void {
-    WorkflowStub::fake();
+    Queue::fake();
 
     $user = User::factory()->create();
     $mealPlan = MealPlan::factory()->weekly()->create([
