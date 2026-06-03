@@ -5,12 +5,15 @@ declare(strict_types=1);
 use App\Console\Commands\AggregateHealthDailyCommand;
 use App\Console\Commands\ExpireStaleAgentApprovalsCommand;
 use App\Console\Commands\ProcessGlucoseNotificationsCommand;
+use App\Console\Commands\PruneExpiredStreamRunsCommand;
 use App\Console\Commands\PurgeDeletedUserDataCommand;
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('model:prune')->daily();
 
 Schedule::command(ExpireStaleAgentApprovalsCommand::class)->hourly();
+
+Schedule::command(PruneExpiredStreamRunsCommand::class)->hourly();
 
 Schedule::command(ProcessGlucoseNotificationsCommand::class)->dailyAt('08:00');
 

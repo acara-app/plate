@@ -87,6 +87,9 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
     Route::post('chat/stream/{conversation}', [Web\ChatController::class, 'stream'])
         ->middleware([DisableResponseBuffering::class, 'throttle:30,1'])
         ->name('chat.stream');
+    Route::get('chat/stream/{conversation}/runs/{run}/resume', [Web\ChatController::class, 'resume'])
+        ->middleware([DisableResponseBuffering::class, 'throttle:60,1'])
+        ->name('chat.stream.resume');
 
     Route::get('conversations/{conversation}/approvals/{approval}', [Web\ApprovalController::class, 'show'])
         ->name('approvals.show');

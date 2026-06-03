@@ -7,10 +7,13 @@ use App\Models\AiUsage;
 use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Queue;
 
 covers(ChatController::class);
 
 beforeEach(function (): void {
+    Queue::fake();
+
     Config::set('plate.enable_premium_upgrades', true);
     Config::set('plate.ai_usage_preflight', [
         'token_budget' => ['input' => 2_000, 'output' => 1_000],

@@ -4,10 +4,16 @@ export type { UIMessage } from '@ai-sdk/react';
 
 export type ChatStatus = 'ready' | 'submitted' | 'streaming' | 'error';
 
+export interface ActiveStream {
+    run_id: string;
+    prompt: string;
+}
+
 export interface ChatPageProps {
     conversationId: string;
     initialPrompt?: string | null;
     messages: UIMessage[];
+    activeStream?: ActiveStream | null;
     [key: string]: unknown;
 }
 

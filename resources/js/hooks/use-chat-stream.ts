@@ -1,6 +1,6 @@
-import { stream } from '@/routes/chat';
+import chat from '@/routes/chat';
 import type { PaywallCapTrigger, SubscriptionTier } from '@/types';
-import type { ChatStatus } from '@/types/chat';
+import type { ActiveStream, ChatStatus } from '@/types/chat';
 import { useChat, type UIMessage } from '@ai-sdk/react';
 import type { ChatOnFinishCallback, FileUIPart } from 'ai';
 import { DefaultChatTransport } from 'ai';
@@ -10,6 +10,7 @@ interface UseChatStreamOptions {
     conversationId: string;
     initialMessages: UIMessage[];
     onFinish?: ChatOnFinishCallback<UIMessage>;
+    activeStream?: ActiveStream | null;
 }
 
 interface UseChatStreamReturn {
@@ -46,15 +47,26 @@ export function useChatStream({
     conversationId,
     initialMessages,
     onFinish,
+    activeStream,
 }: UseChatStreamOptions): UseChatStreamReturn {
     const [networkError, setNetworkError] = useState<Error | undefined>();
     const [usageLimitTrigger, setUsageLimitTrigger] =
         useState<PaywallCapTrigger | null>(null);
 
+    const activeRunId = activeStream?.run_id ?? null;
+
     const transport = useMemo(
         () =>
             new DefaultChatTransport({
-                api: stream.url(conversationId),
+                api: chat.stream.url(conversationId),
+                prepareReconnectToStreamRequest: activeRunId
+                    ? () => ({
+                          api: chat.stream.resume.url({
+                              conversation: conversationId,
+                              run: activeRunId,
+                          }),
+                      })
+                    : undefined,
                 fetch: async (input, init) => {
                     const response = await fetch(input, init);
 
@@ -79,8 +91,22 @@ export function useChatStream({
                     return response;
                 },
             }),
-        [conversationId],
+        [conversationId, activeRunId],
     );
+
+    const seededMessages = useMemo<UIMessage[]>(() => {
+        if (!activeStream) {
+            return initialMessages;
+        }
+
+        const inflightUserMessage = {
+            id: `inflight-${activeStream.run_id}`,
+            role: 'user',
+            parts: [{ type: 'text', text: activeStream.prompt }],
+        } as UIMessage;
+
+        return [...initialMessages, inflightUserMessage];
+    }, [initialMessages, activeStream]);
 
     const {
         messages,
@@ -88,8 +114,9 @@ export function useChatStream({
         status,
         error,
     } = useChat({
-        messages: initialMessages,
+        messages: seededMessages,
         transport,
+        resume: Boolean(activeRunId),
         onFinish,
     });
 

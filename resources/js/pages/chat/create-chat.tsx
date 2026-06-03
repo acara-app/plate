@@ -30,6 +30,7 @@ export default function CreateChat() {
         messages: messageHistories,
         initialPrompt,
         creditWarning: sharedCreditWarning,
+        activeStream,
     } = page.props;
 
     const [conversationId, setConversationId] = useState<string>(
@@ -70,6 +71,7 @@ export default function CreateChat() {
         conversationId,
         initialMessages,
         onFinish: handleStreamFinish,
+        activeStream,
     });
 
     useEffect(() => {

@@ -36,6 +36,10 @@ Route::prefix('v2/chat')
             ->middleware('throttle:30,1')
             ->name('api.v2.chat.stream');
 
+        Route::get('conversations/{conversation}/runs/{run}/resume', [ApiV2\ChatController::class, 'resume'])
+            ->middleware('throttle:60,1')
+            ->name('api.v2.chat.stream.resume');
+
         Route::delete('conversations/{conversation}', [ApiV2\ChatController::class, 'destroy'])
             ->middleware('throttle:30,1')
             ->name('api.v2.chat.destroy');

@@ -8,6 +8,7 @@ use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Queue;
 
 use function Pest\Laravel\actingAs;
 
@@ -98,6 +99,8 @@ it('validates stream endpoint', function (): void {
 });
 
 it('accepts valid stream request', function (): void {
+    Queue::fake();
+
     $user = User::factory()->create();
     $conversation = Conversation::factory()->create(['user_id' => $user->id]);
 

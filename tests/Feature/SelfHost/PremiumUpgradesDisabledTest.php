@@ -102,6 +102,8 @@ it('lets the StartMealPlanGeneration tool run for free users when the flag is of
 });
 
 it('returns no 402 from chat stream preflight when the flag is off', function (): void {
+    Queue::fake();
+
     $user = User::factory()->create();
     $conversation = Conversation::factory()->create(['user_id' => $user->id]);
 

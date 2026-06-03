@@ -6,7 +6,8 @@ use App\Actions\BuildAssistantAgentAction;
 use App\Enums\ModelName;
 use App\Http\Requests\StreamChatRequest;
 use App\Models\User;
-use Laravel\Ai\Responses\StreamableAgentResponse;
+use Illuminate\Support\Facades\Queue;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 covers(BuildAssistantAgentAction::class);
 
@@ -39,12 +40,14 @@ function makeStreamRequest(
     return $request;
 }
 
-it('returns a StreamableAgentResponse', function (): void {
+it('returns a streamed response', function (): void {
+    Queue::fake();
+
     $user = User::factory()->create();
     $request = makeStreamRequest();
 
     $conversationId = (string) fake()->uuid();
     $response = $this->action->handle($request, $user, $conversationId);
 
-    expect($response)->toBeInstanceOf(StreamableAgentResponse::class);
+    expect($response)->toBeInstanceOf(StreamedResponse::class);
 });

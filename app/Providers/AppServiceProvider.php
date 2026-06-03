@@ -11,6 +11,7 @@ use App\Contracts\Memory\PullsConversationHistory;
 use App\Contracts\Services\IndexNowServiceContract;
 use App\Contracts\Services\StripeServiceContract;
 use App\Contracts\Skills\LoadsSkills;
+use App\Contracts\Streaming\ManagesStreamChunks;
 use App\Events\AgentApprovalResolved;
 use App\Listeners\NotifyTelegramOfApprovalOutcome;
 use App\Listeners\TrackAiUsage;
@@ -21,6 +22,7 @@ use App\Services\Memory\NullConversationHistoryPuller;
 use App\Services\Memory\NullMemoryExtractionDispatcher;
 use App\Services\Memory\NullMemoryPromptContext;
 use App\Services\Skills\NullSkillLoader;
+use App\Services\Streaming\DatabaseStreamChunkStore;
 use App\Services\StripeService;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -46,6 +48,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->bindIf(DispatchesMemoryExtraction::class, NullMemoryExtractionDispatcher::class);
         $this->app->bindIf(PullsConversationHistory::class, NullConversationHistoryPuller::class);
         $this->app->bindIf(LoadsSkills::class, NullSkillLoader::class);
+        $this->app->bindIf(ManagesStreamChunks::class, DatabaseStreamChunkStore::class);
     }
 
     public function boot(): void
