@@ -41,12 +41,7 @@ final readonly class StoreMealPlanController
             ]);
         }
 
-        GenerateInitialMealPlanJob::dispatch(
-            $user,
-            $mealPlan,
-            $glucoseAnalysis->analysisData,
-            $dietType,
-        );
+        dispatch(new GenerateInitialMealPlanJob($user, $mealPlan, $glucoseAnalysis->analysisData, $dietType));
 
         return to_route('meal-plans.index');
     }

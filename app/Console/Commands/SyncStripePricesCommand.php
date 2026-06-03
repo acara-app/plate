@@ -6,6 +6,8 @@ namespace App\Console\Commands;
 
 use App\Contracts\Services\StripeServiceContract;
 use App\Models\SubscriptionProduct;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -13,13 +15,11 @@ use Illuminate\Database\Eloquent\Collection;
 /**
  * @codeCoverageIgnore
  */
+#[Description('Resolve each subscription_product lookup key into a real price_… via the Stripe API and write it to stripe_price_id')]
+#[Signature('billing:sync-stripe-prices
+        {--dry-run : Resolve lookup keys but do not write to the database}')]
 final class SyncStripePricesCommand extends Command
 {
-    protected $signature = 'billing:sync-stripe-prices
-        {--dry-run : Resolve lookup keys but do not write to the database}';
-
-    protected $description = 'Resolve each subscription_product lookup key into a real price_… via the Stripe API and write it to stripe_price_id';
-
     public function handle(StripeServiceContract $stripe): int
     {
         /** @var Collection<int, SubscriptionProduct> $products */

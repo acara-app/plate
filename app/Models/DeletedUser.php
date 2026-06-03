@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\DeletedUserFactory;
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,12 +16,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string $email
  * @property-read CarbonInterface $deleted_at
  */
+#[WithoutTimestamps]
 final class DeletedUser extends Model
 {
     /** @use HasFactory<DeletedUserFactory> */
     use HasFactory;
-
-    public $timestamps = false;
 
     protected $guarded = [];
 

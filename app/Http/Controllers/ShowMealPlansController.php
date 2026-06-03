@@ -105,7 +105,7 @@ final readonly class ShowMealPlansController
                 ]),
             ]);
 
-            GenerateMealPlanDayJob::dispatch($mealPlan, $currentDayNumber);
+            dispatch(new GenerateMealPlanDayJob($mealPlan, $currentDayNumber));
 
             $dayStatus = MealPlanGenerationStatus::Generating->value;
         }

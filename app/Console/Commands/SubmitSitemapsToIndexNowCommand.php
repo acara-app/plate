@@ -7,15 +7,15 @@ namespace App\Console\Commands;
 use App\Contracts\Services\IndexNowServiceContract;
 use App\Models\Content;
 use Exception;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
+#[Description('Submit URLs from sitemaps to IndexNow')]
+#[Signature('sitemap:indexnow {--file=* : Specific sitemap files to process (relative to public path)}')]
 final class SubmitSitemapsToIndexNowCommand extends Command
 {
-    protected $signature = 'sitemap:indexnow {--file=* : Specific sitemap files to process (relative to public path)}';
-
-    protected $description = 'Submit URLs from sitemaps to IndexNow';
-
     public function handle(IndexNowServiceContract $indexNowService): int
     {
         $files = $this->option('file');

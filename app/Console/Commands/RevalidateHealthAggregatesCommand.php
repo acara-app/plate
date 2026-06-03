@@ -9,20 +9,20 @@ use App\Models\HealthDailyAggregate;
 use App\Models\User;
 use App\Services\HealthMetricRegistry;
 use Carbon\CarbonImmutable;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Symfony\Component\Console\Helper\ProgressBar;
 
-final class RevalidateHealthAggregatesCommand extends Command
-{
-    protected $signature = 'health:revalidate-aggregates
+#[Description('Re-aggregate stale daily health aggregates after a registry or logic change')]
+#[Signature('health:revalidate-aggregates
                             {--min-version= : Re-aggregate rows with aggregation_version below this value (defaults to current)}
                             {--user= : Limit to a specific user ID}
-                            {--since= : Only revalidate dates on or after this date (Y-m-d)}';
-
-    protected $description = 'Re-aggregate stale daily health aggregates after a registry or logic change';
-
+                            {--since= : Only revalidate dates on or after this date (Y-m-d)}')]
+final class RevalidateHealthAggregatesCommand extends Command
+{
     public function handle(AggregateHealthDailySamplesAction $action): int
     {
         $minVersion = (int) ($this->option('min-version') ?? HealthMetricRegistry::CURRENT_AGGREGATION_VERSION);

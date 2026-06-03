@@ -124,7 +124,7 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasStructuredOut
             ]);
         }
 
-        GenerateInitialMealPlanJob::dispatch($user, $mealPlan, $glucoseAnalysis->analysisData, $dietType);
+        dispatch(new GenerateInitialMealPlanJob($user, $mealPlan, $glucoseAnalysis->analysisData, $dietType));
     }
 
     public function generateForDay(

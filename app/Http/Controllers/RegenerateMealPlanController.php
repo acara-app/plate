@@ -36,7 +36,7 @@ final readonly class RegenerateMealPlanController
             $dietType,
         );
 
-        GenerateInitialMealPlanJob::dispatch($this->user, $mealPlan, $glucoseAnalysis->analysisData, $dietType);
+        dispatch(new GenerateInitialMealPlanJob($this->user, $mealPlan, $glucoseAnalysis->analysisData, $dietType));
 
         return to_route('meal-plans.index')
             ->with('success', 'Your new glucose-optimized meal plan is being generated. This may take a few minutes.');

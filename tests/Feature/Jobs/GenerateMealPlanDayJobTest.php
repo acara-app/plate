@@ -78,7 +78,7 @@ it('generates a day using prior meal context and diet from metadata then stays p
 
     Meal::factory()->for($mealPlan)->forDay(1)->create();
 
-    (new GenerateMealPlanDayJob($mealPlan, 2))->handle();
+    new GenerateMealPlanDayJob($mealPlan, 2)->handle();
 
     $fresh = $mealPlan->fresh();
 
@@ -103,7 +103,7 @@ it('marks the plan completed when the final day is generated', function (): void
 
     Meal::factory()->for($mealPlan)->forDay(1)->create();
 
-    (new GenerateMealPlanDayJob($mealPlan, 2))->handle();
+    new GenerateMealPlanDayJob($mealPlan, 2)->handle();
 
     expect($mealPlan->fresh()->metadata['status'])
         ->toBe(MealPlanGenerationStatus::Completed->value);
@@ -120,7 +120,7 @@ it('generates the first day with no prior context and no diet metadata', functio
         ],
     ]);
 
-    (new GenerateMealPlanDayJob($mealPlan, 1))->handle();
+    new GenerateMealPlanDayJob($mealPlan, 1)->handle();
 
     expect($mealPlan->fresh()->meals()->where('day_number', 1)->count())->toBe(1);
 });
@@ -133,7 +133,7 @@ it('marks the day failed when the job fails', function (): void {
         ],
     ]);
 
-    (new GenerateMealPlanDayJob($mealPlan, 2))->failed(new RuntimeException('boom'));
+    new GenerateMealPlanDayJob($mealPlan, 2)->failed(new RuntimeException('boom'));
 
     expect($mealPlan->fresh()->metadata['day_2_status'])
         ->toBe(MealPlanGenerationStatus::Failed->value);
@@ -142,14 +142,14 @@ it('marks the day failed when the job fails', function (): void {
 it('builds a stable unique id from the meal plan and day', function (): void {
     $mealPlan = MealPlan::factory()->for($this->user)->weekly()->create();
 
-    expect((new GenerateMealPlanDayJob($mealPlan, 3))->uniqueId())
+    expect(new GenerateMealPlanDayJob($mealPlan, 3)->uniqueId())
         ->toBe('meal-plan-day:'.$mealPlan->id.':3');
 });
 
 it('prevents overlapping execution', function (): void {
     $mealPlan = MealPlan::factory()->for($this->user)->weekly()->create();
 
-    $middleware = (new GenerateMealPlanDayJob($mealPlan, 2))->middleware();
+    $middleware = new GenerateMealPlanDayJob($mealPlan, 2)->middleware();
 
     expect($middleware)->toHaveCount(1)
         ->and($middleware[0])->toBeInstanceOf(WithoutOverlapping::class);
