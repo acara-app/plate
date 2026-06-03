@@ -138,9 +138,11 @@ final readonly class BuildConversationMessagesAction
             if (! is_array($toolResult)) {
                 continue;
             }
+
             if (($toolResult['name'] ?? null) !== 'log_health_entry') {
                 continue;
             }
+
             $result = $toolResult['result'] ?? null;
             $decoded = is_string($result) ? json_decode($result, true) : null;
             $approvalId = is_array($decoded) ? ($decoded['approval_id'] ?? null) : null;

@@ -7,14 +7,14 @@ namespace App\Console\Commands;
 use App\Actions\AnalyzeGlucoseForNotificationAction;
 use App\Models\User;
 use App\Notifications\GlucoseReportNotification;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
+#[Description('Process glucose readings and send notifications to users with concerning patterns')]
+#[Signature('glucose:process-notifications')]
 final class ProcessGlucoseNotificationsCommand extends Command
 {
-    protected $signature = 'glucose:process-notifications';
-
-    protected $description = 'Process glucose readings and send notifications to users with concerning patterns';
-
     public function handle(AnalyzeGlucoseForNotificationAction $action): int
     {
 

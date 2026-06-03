@@ -7,15 +7,15 @@ namespace App\Console\Commands;
 use App\Data\GeminiFileSearchStoreData;
 use App\Enums\SettingKey;
 use App\Models\Setting;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 
+#[Description('Check Gemini File Search store information')]
+#[Signature('check:gemini-file-search-store')]
 final class CheckGeminiFileSearchStoreCommand extends Command
 {
-    protected $signature = 'check:gemini-file-search-store';
-
-    protected $description = 'Check Gemini File Search store information';
-
     public function handle(): void
     {
         $storeName = Setting::get(SettingKey::GeminiFileSearchStoreName);

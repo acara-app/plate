@@ -10,20 +10,20 @@ use App\Models\HealthDailyAggregate;
 use App\Models\SleepSession;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
-final class RebuildHealthDailyAggregatesCommand extends Command
-{
-    protected $signature = 'health:rebuild-daily-aggregates
+#[Description('Rebuild health_daily_aggregates with UTC-day semantics from raw synced data')]
+#[Signature('health:rebuild-daily-aggregates
                             {--from= : Start UTC date (Y-m-d)}
                             {--to= : End UTC date (Y-m-d)}
                             {--user_id= : Restrict rebuild to one user}
-                            {--chunk=200 : User chunk size}';
-
-    protected $description = 'Rebuild health_daily_aggregates with UTC-day semantics from raw synced data';
-
+                            {--chunk=200 : User chunk size}')]
+final class RebuildHealthDailyAggregatesCommand extends Command
+{
     public function handle(
         AggregateHealthDailySamplesAction $healthAggregator,
         SleepSessionAggregator $sleepAggregator,

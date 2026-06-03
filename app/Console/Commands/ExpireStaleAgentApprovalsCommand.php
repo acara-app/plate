@@ -6,14 +6,14 @@ namespace App\Console\Commands;
 
 use App\Enums\AgentApprovalStatus;
 use App\Models\AgentApproval;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
+#[Description('Expire pending agent approvals that have passed their TTL.')]
+#[Signature('approvals:expire-stale')]
 final class ExpireStaleAgentApprovalsCommand extends Command
 {
-    protected $signature = 'approvals:expire-stale';
-
-    protected $description = 'Expire pending agent approvals that have passed their TTL.';
-
     public function handle(): int
     {
         $expired = AgentApproval::query()

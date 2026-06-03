@@ -29,7 +29,7 @@ final readonly class RegenerateMealPlanDayController
             ]),
         ]);
 
-        GenerateMealPlanDayJob::dispatch($mealPlan, $dayNumber);
+        dispatch(new GenerateMealPlanDayJob($mealPlan, $dayNumber));
 
         return back();
     }

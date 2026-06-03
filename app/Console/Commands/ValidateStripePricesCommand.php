@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Models\SubscriptionProduct;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
  * @codeCoverageIgnore
  */
+#[Description('Verify subscription_products carry production-shaped Stripe price IDs (price_…) before launch')]
+#[Signature('billing:validate-stripe-prices
+        {--strict : Treat any unconfigured paid product as a failure}')]
 final class ValidateStripePricesCommand extends Command
 {
-    protected $signature = 'billing:validate-stripe-prices
-        {--strict : Treat any unconfigured paid product as a failure}';
-
-    protected $description = 'Verify subscription_products carry production-shaped Stripe price IDs (price_…) before launch';
-
     public function handle(): int
     {
         /** @var Collection<int, SubscriptionProduct> $products */
