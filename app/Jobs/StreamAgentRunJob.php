@@ -17,6 +17,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\Timeout;
 use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -54,9 +55,6 @@ final class StreamAgentRunJob implements ShouldQueue
             return;
         }
 
-        Context::add('chat.channel', $run->channel);
-        Context::add('chat.conversation_id', $run->conversation_id);
-
         $user = User::query()->find($this->payload->userId);
 
         if (! $user instanceof User) {
@@ -65,6 +63,36 @@ final class StreamAgentRunJob implements ShouldQueue
             return;
         }
 
+        Auth::setUser($user);
+        Context::add('chat.channel', $run->channel);
+        Context::add('chat.conversation_id', $run->conversation_id);
+
+        try {
+            $this->stream($run, $user, $agentRunner, $chunks);
+        } finally {
+            Auth::forgetGuards();
+        }
+    }
+
+    public function failed(Throwable $exception): void
+    {
+        $chunks = resolve(ManagesStreamChunks::class);
+
+        $chunks->append($this->runId, $chunks->latestSequence($this->runId) + 1, new Error(
+            id: (string) Str::uuid7(),
+            type: 'stream_failed',
+            message: 'The stream failed.',
+            recoverable: false,
+            timestamp: now()->getTimestamp(),
+        ));
+
+        $this->persistPartialMessage($exception);
+
+        $chunks->markRunStatus($this->runId, AgentStreamStatus::Failed, $exception->getMessage());
+    }
+
+    private function stream(AgentStreamRun $run, User $user, AgentRunner $agentRunner, ManagesStreamChunks $chunks): void
+    {
         $run->update(['status' => AgentStreamStatus::Running]);
 
         $response = $agentRunner->runWithConversation($this->payload, $user, $run->conversation_id);
@@ -116,23 +144,6 @@ final class StreamAgentRunJob implements ShouldQueue
             $this->captureAssistantMessageId($run);
             $chunks->markRunStatus($this->runId, AgentStreamStatus::Completed);
         }
-    }
-
-    public function failed(Throwable $exception): void
-    {
-        $chunks = resolve(ManagesStreamChunks::class);
-
-        $chunks->append($this->runId, $chunks->latestSequence($this->runId) + 1, new Error(
-            id: (string) Str::uuid7(),
-            type: 'stream_failed',
-            message: 'The stream failed.',
-            recoverable: false,
-            timestamp: now()->getTimestamp(),
-        ));
-
-        $this->persistPartialMessage($exception);
-
-        $chunks->markRunStatus($this->runId, AgentStreamStatus::Failed, $exception->getMessage());
     }
 
     private function captureAssistantMessageId(AgentStreamRun $run): void
