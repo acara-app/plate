@@ -21,7 +21,12 @@
 > **Phase 2 note:** generation now runs in `StreamAgentRunJob` (the sole producer); the POST returns
 > an SSE tail (`ReplayAgentStreamAction`) over the ledger. Each chunk also stores the vendor-computed
 > `toVercelProtocolArray()` (new `vercel` column) so replay re-emits the exact wire form with zero
-> re-derivation. Requires a running queue worker in production.
+> re-derivation. Requires a running queue worker in production. Because the job runs outside the web
+> request, it re-establishes the request-scoped state the agent needs: the chat `Context`
+> (`chat.channel`/`chat.conversation_id`) and the authenticated user (`Auth::setUser`, since the agent's
+> tools and specialists resolve the current user via `Auth::user()`), forgetting guards afterward so the
+> user can't leak to the next job in a shared worker. (`acara-core` memory is unaffected — its context
+> contract takes `userId` explicitly.)
 >
 > **Phase 3 note:** added GET resume endpoints — `chat.stream.resume`
 > (`chat/stream/{conversation}/runs/{run}/resume`) and `api.v2.chat.stream.resume` — that reuse
