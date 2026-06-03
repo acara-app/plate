@@ -73,7 +73,8 @@ Core stack:
 - Laravel Sanctum, Fortify, Cashier, Socialite, Wayfinder, and Livewire
 - Inertia React 19
 - Tailwind CSS 4
-- PostgreSQL for production-like installs
+- PostgreSQL for app data, cache, queues, and sessions
+- Laravel Reverb for WebSocket broadcasting (Redis is used only where required, such as resumable AI streaming)
 - Pest, PHPStan, Pint, Rector, TypeScript, Prettier, and oxlint for quality checks
 
 ## Quick Setup
@@ -104,7 +105,13 @@ TELEGRAM_WEBHOOK_DOMAIN="${APP_URL}"
 HEALTH_SYNC_APP_STORE_URL=https://apps.apple.com/us/app/acara-health-sync/id6761504525
 ```
 
-Run the development processes:
+Start Redis with Docker for the real-time AI streaming features (no Herd Pro needed). PostgreSQL/pgvector run independently, so they are not in `docker-compose.yml`:
+
+```bash
+docker compose up -d
+```
+
+Run the development processes (app server, queue worker, Vite, logs, and the Reverb WebSocket server):
 
 ```bash
 composer run dev
