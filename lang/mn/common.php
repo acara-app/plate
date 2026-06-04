@@ -958,6 +958,7 @@ return [
 
     'chat' => [
         'placeholder' => 'AI-аас асуух',
+        'stop' => 'Зогсоох',
         'modes' => [
             'ask' => 'Асуух',
             'meal_plan' => 'Хоолны цэс',

@@ -4,23 +4,22 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V2;
 
-use App\Actions\BuildAssistantAgentAction;
 use App\Actions\BuildConversationMessagesAction;
 use App\Actions\GetOrCreateConversationAction;
+use App\Actions\StartChatStream;
 use App\Http\Requests\Api\V2\ChatStreamRequest;
 use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
-use Laravel\Ai\Responses\StreamableAgentResponse;
 
 final readonly class ChatController
 {
     public function __construct(
         private BuildConversationMessagesAction $messagesAction,
-        private BuildAssistantAgentAction $agentAction,
         private GetOrCreateConversationAction $conversationAction,
+        private StartChatStream $startChatStream,
     ) {}
 
     public function index(#[CurrentUser] User $user): JsonResponse
@@ -56,11 +55,11 @@ final readonly class ChatController
         ChatStreamRequest $request,
         #[CurrentUser] User $user,
         string $conversationId
-    ): StreamableAgentResponse {
+    ): JsonResponse {
         $conversation = $this->conversationAction->handle($conversationId, $user);
         Gate::authorize('view', $conversation);
 
-        return $this->agentAction->handle($request, $user, $conversation->id, 'mobile');
+        return $this->startChatStream->handle($request, $user, $conversation, 'mobile');
     }
 
     public function destroy(string $conversationId): JsonResponse

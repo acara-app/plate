@@ -1016,6 +1016,7 @@ return [
 
     'chat' => [
         'placeholder' => 'Ask anything',
+        'stop' => 'Stop',
         'modes' => [
             'ask' => 'Ask',
             'meal_plan' => 'Meal Plan',

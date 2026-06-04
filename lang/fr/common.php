@@ -1017,6 +1017,7 @@ return [
 
     'chat' => [
         'placeholder' => 'Posez n\'importe quelle question',
+        'stop' => 'Arrêter',
         'modes' => [
             'ask' => 'Demander',
             'meal_plan' => 'Plan de repas',

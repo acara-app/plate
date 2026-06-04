@@ -9,7 +9,7 @@ import type { BreadcrumbItem, CreditWarning } from '@/types';
 import type { ChatPageProps, UIMessage } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ChatInput from './chat-input';
 
 import ChatMessages, { ChatErrorBanner } from './chat-messages';
@@ -30,6 +30,7 @@ export default function CreateChat() {
         messages: messageHistories,
         initialPrompt,
         creditWarning: sharedCreditWarning,
+        auth,
     } = page.props;
 
     const [conversationId, setConversationId] = useState<string>(
@@ -50,7 +51,10 @@ export default function CreateChat() {
         files?: FileUIPart[];
     } | null>(null);
 
-    const initialMessages = (messageHistories ?? []) as UIMessage[];
+    const initialMessages = useMemo(
+        () => (messageHistories ?? []) as UIMessage[],
+        [messageHistories],
+    );
 
     const handleStreamFinish = useCallback(() => {
         router.reload({ only: ['creditWarning'] });
@@ -59,6 +63,7 @@ export default function CreateChat() {
     const {
         messages,
         sendMessage,
+        stop,
         clearError,
         status,
         error,
@@ -68,6 +73,7 @@ export default function CreateChat() {
         clearUsageLimitTrigger,
     } = useChatStream({
         conversationId,
+        userId: auth.user.id,
         initialMessages,
         onFinish: handleStreamFinish,
     });
@@ -170,6 +176,7 @@ export default function CreateChat() {
                     <ChatInput
                         className="w-full"
                         onSubmit={handleSubmit}
+                        onStop={stop}
                         onInputChange={handleInputChange}
                         disabled={isStreaming || isSubmitting}
                         initialMessage={initialPrompt}

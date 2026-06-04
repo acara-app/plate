@@ -6,6 +6,7 @@ use App\Models\Conversation;
 use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;
+use Laravel\Ai\Messages\MessageRole;
 
 covers(Conversation::class);
 
@@ -56,6 +57,29 @@ it('has many messages in chronological order', function (): void {
 
     expect($messages)->toHaveCount(3)
         ->and($messages->first()->created_at)->toBeLessThan($messages->last()->created_at);
+});
+
+it('orders messages with identical timestamps by id, not insertion order', function (): void {
+    $conversation = Conversation::factory()->create();
+    $sharedTimestamp = now();
+
+    History::factory()->forConversation($conversation)->assistantMessage()->create([
+        'id' => '019e8fb9-3a07-73c2-8bd8-04b6a8f3c69d',
+        'created_at' => $sharedTimestamp,
+        'content' => 'assistant reply',
+    ]);
+
+    History::factory()->forConversation($conversation)->userMessage()->create([
+        'id' => '019e8fb9-3a03-72c1-bcf8-066faa269289',
+        'created_at' => $sharedTimestamp,
+        'content' => 'user question',
+    ]);
+
+    $messages = $conversation->messages;
+
+    expect($messages->first()->role)->toBe(MessageRole::User)
+        ->and($messages->first()->content)->toBe('user question')
+        ->and($messages->last()->role)->toBe(MessageRole::Assistant);
 });
 
 it('returns empty collection when no messages exist', function (): void {

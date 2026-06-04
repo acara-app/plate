@@ -6,29 +6,29 @@ namespace App\Http\Controllers;
 
 use App\Actions\Approvals\BuildConversationApprovalStates;
 use App\Actions\Billing\BuildCreditWarning;
-use App\Actions\BuildAssistantAgentAction;
 use App\Actions\BuildConversationMessagesAction;
 use App\Actions\GetOrCreateConversationAction;
+use App\Actions\StartChatStream;
 use App\Http\Requests\StoreChatConversationRequest;
 use App\Http\Requests\StreamChatRequest;
 use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
-use Laravel\Ai\Responses\StreamableAgentResponse;
 
 final readonly class ChatController
 {
     public function __construct(
         #[CurrentUser] private User $user,
         private BuildConversationMessagesAction $messagesAction,
-        private BuildAssistantAgentAction $agentAction,
         private GetOrCreateConversationAction $conversationAction,
         private BuildCreditWarning $buildCreditWarning,
         private BuildConversationApprovalStates $approvalStates,
+        private StartChatStream $startChatStream,
     ) {}
 
     public function index(): Response
@@ -61,9 +61,9 @@ final readonly class ChatController
     public function stream(
         StreamChatRequest $request,
         Conversation $conversation
-    ): StreamableAgentResponse {
+    ): JsonResponse {
         Gate::authorize('view', $conversation);
 
-        return $this->agentAction->handle($request, $this->user, $conversation->id);
+        return $this->startChatStream->handle($request, $this->user, $conversation);
     }
 }

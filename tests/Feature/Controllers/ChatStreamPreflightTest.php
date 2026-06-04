@@ -7,6 +7,7 @@ use App\Models\AiUsage;
 use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Queue;
 
 covers(ChatController::class);
 
@@ -55,6 +56,8 @@ it('returns HTTP 402 with limit metadata when a Free user is over the rolling ca
 });
 
 it('does not block a Free user who is well under the cap', function (): void {
+    Queue::fake();
+
     $user = User::factory()->create();
     $conversation = Conversation::factory()->create(['user_id' => $user->id]);
 
@@ -69,10 +72,12 @@ it('does not block a Free user who is well under the cap', function (): void {
         ],
     ]);
 
-    expect($response->getStatusCode())->not->toBe(402);
+    expect($response->getStatusCode())->toBe(202);
 });
 
 it('does not enforce when premium upgrades are disabled, even for users far over the cap', function (): void {
+    Queue::fake();
+
     Config::set('plate.enable_premium_upgrades', false);
 
     $user = User::factory()->create();
@@ -89,5 +94,5 @@ it('does not enforce when premium upgrades are disabled, even for users far over
         ],
     ]);
 
-    expect($response->getStatusCode())->not->toBe(402);
+    expect($response->getStatusCode())->toBe(202);
 });

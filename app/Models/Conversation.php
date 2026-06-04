@@ -58,7 +58,7 @@ final class Conversation extends Model
      */
     public function messages(): HasMany
     {
-        return $this->hasMany(History::class, 'conversation_id')->oldest();
+        return $this->hasMany(History::class, 'conversation_id')->oldest()->orderBy('id');
     }
 
     /**

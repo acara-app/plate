@@ -1,12 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { FileUIPart } from 'ai';
-import { Loader2, Plus, Send, X } from 'lucide-react';
+import { Plus, Send, Square, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
     onSubmit: (message: string, files?: FileUIPart[]) => void;
+    onStop?: () => void;
     onInputChange?: () => void;
     className?: string;
     disabled?: boolean;
@@ -33,6 +34,7 @@ function readFileAsDataURL(file: File): Promise<FileUIPart> {
 export default function ChatInput({
     className,
     onSubmit,
+    onStop,
     onInputChange,
     disabled = false,
     initialMessage = null,
@@ -150,25 +152,36 @@ export default function ChatInput({
                     </div>
 
                     <div className="flex items-center gap-1">
-                        <Button
-                            variant={
-                                hasContent && !disabled ? 'default' : 'ghost'
-                            }
-                            size="icon"
-                            className={`size-9 transition-all duration-200 ${
-                                hasContent && !disabled
-                                    ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                                    : 'text-muted-foreground hover:text-foreground'
-                            }`}
-                            onClick={handleSubmit}
-                            disabled={!hasContent || disabled}
-                        >
-                            {isLoading ? (
-                                <Loader2 className="size-4 animate-spin" />
-                            ) : (
+                        {isLoading && onStop ? (
+                            <Button
+                                type="button"
+                                variant="default"
+                                size="icon"
+                                className="size-9 bg-emerald-600 text-white transition-all duration-200 hover:bg-emerald-700"
+                                onClick={onStop}
+                                aria-label={t('chat.stop')}
+                            >
+                                <Square className="size-4 fill-current" />
+                            </Button>
+                        ) : (
+                            <Button
+                                variant={
+                                    hasContent && !disabled
+                                        ? 'default'
+                                        : 'ghost'
+                                }
+                                size="icon"
+                                className={`size-9 transition-all duration-200 ${
+                                    hasContent && !disabled
+                                        ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                }`}
+                                onClick={handleSubmit}
+                                disabled={!hasContent || disabled}
+                            >
                                 <Send className="size-4" />
-                            )}
-                        </Button>
+                            </Button>
+                        )}
                     </div>
                 </div>
             </div>

@@ -36,6 +36,14 @@ Route::prefix('v2/chat')
             ->middleware('throttle:30,1')
             ->name('api.v2.chat.stream');
 
+        Route::post('conversations/{conversation}/stream/stop', ApiV2\ChatStopController::class)
+            ->middleware('throttle:30,1')
+            ->name('api.v2.chat.stream.stop');
+
+        Route::get('conversations/{conversation}/stream/events', ApiV2\ChatStreamEventsController::class)
+            ->middleware('throttle:120,1')
+            ->name('api.v2.chat.stream.events');
+
         Route::delete('conversations/{conversation}', [ApiV2\ChatController::class, 'destroy'])
             ->middleware('throttle:30,1')
             ->name('api.v2.chat.destroy');

@@ -1,26 +1,31 @@
+import ChatStopController from '@/actions/App/Http/Controllers/ChatStopController';
+import { echo, getConnectionState } from '@/lib/echo';
 import { stream } from '@/routes/chat';
 import type { PaywallCapTrigger, SubscriptionTier } from '@/types';
 import type { ChatStatus } from '@/types/chat';
-import { useChat, type UIMessage } from '@ai-sdk/react';
-import type { ChatOnFinishCallback, FileUIPart } from 'ai';
-import { DefaultChatTransport } from 'ai';
-import { useCallback, useMemo, useState } from 'react';
+import type { FileUIPart, UIMessage } from 'ai';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { chatReducer, createInitialState } from './chat/message-reducer';
+import { useStreamChannel } from './chat/use-stream-channel';
+import { useStreamRecovery } from './chat/use-stream-recovery';
 
 interface UseChatStreamOptions {
     conversationId: string;
+    userId: number;
     initialMessages: UIMessage[];
-    onFinish?: ChatOnFinishCallback<UIMessage>;
+    onFinish?: () => void;
 }
 
 interface UseChatStreamReturn {
     messages: UIMessage[];
     sendMessage: (message: { text: string; files?: FileUIPart[] }) => void;
+    stop: () => void;
     clearError: () => void;
     status: ChatStatus;
     error: Error | undefined;
     isStreaming: boolean;
     isSubmitting: boolean;
-    initialMessages: UIMessage[];
+    isConnected: boolean;
     usageLimitTrigger: PaywallCapTrigger | null;
     clearUsageLimitTrigger: () => void;
 }
@@ -35,104 +40,171 @@ interface UsageLimitExceededPayload {
 }
 
 function isUsageLimitPayload(body: unknown): body is UsageLimitExceededPayload {
-    if (typeof body !== 'object' || body === null) {
-        return false;
-    }
-    const candidate = body as Record<string, unknown>;
-    return candidate.error === 'usage_limit_exceeded';
+    return (
+        typeof body === 'object' &&
+        body !== null &&
+        (body as { error?: unknown }).error === 'usage_limit_exceeded'
+    );
 }
 
 export function useChatStream({
     conversationId,
+    userId,
     initialMessages,
     onFinish,
 }: UseChatStreamOptions): UseChatStreamReturn {
-    const [networkError, setNetworkError] = useState<Error | undefined>();
-    const [usageLimitTrigger, setUsageLimitTrigger] =
-        useState<PaywallCapTrigger | null>(null);
+    const [state, dispatch] = useReducer(
+        chatReducer,
+        initialMessages,
+        createInitialState,
+    );
 
-    const transport = useMemo(
-        () =>
-            new DefaultChatTransport({
-                api: stream.url(conversationId),
-                fetch: async (input, init) => {
-                    const response = await fetch(input, init);
+    const seenEventIdsRef = useRef<Set<string>>(new Set());
+    const streamActiveRef = useRef(false);
+    const onFinishRef = useRef(onFinish);
+    onFinishRef.current = onFinish;
 
+    const {
+        startReplayPolling,
+        stopReplayPolling,
+        finishStream,
+        resumeOnMount,
+        resetReplayState,
+    } = useStreamRecovery({
+        conversationId,
+        dispatch,
+        seenEventIdsRef,
+        streamActiveRef,
+        onFinishRef,
+    });
+
+    const { isConnected } = useStreamChannel({
+        userId,
+        status: state.status,
+        dispatch,
+        seenEventIdsRef,
+        streamActiveRef,
+        startReplayPolling,
+        stopReplayPolling,
+        finishStream,
+        resetReplayState,
+    });
+
+    useEffect(() => {
+        void resumeOnMount();
+    }, [resumeOnMount]);
+
+    useEffect(() => {
+        dispatch({ type: 'SET_MESSAGES', messages: initialMessages });
+    }, [initialMessages]);
+
+    const clearError = useCallback(() => {
+        dispatch({ type: 'CLEAR_ERROR' });
+    }, []);
+
+    const clearUsageLimitTrigger = useCallback(() => {
+        dispatch({ type: 'CLEAR_USAGE_LIMIT' });
+    }, []);
+
+    const sendMessage = useCallback(
+        (message: { text: string; files?: FileUIPart[] }) => {
+            const parts: UIMessage['parts'] = [
+                { type: 'text', text: message.text },
+                ...(message.files ?? []),
+            ];
+
+            resetReplayState();
+
+            dispatch({
+                type: 'ADD_USER_MESSAGE',
+                message: { id: `user-${Date.now()}`, role: 'user', parts },
+            });
+
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json',
+            };
+            const socketId = echo.socketId();
+
+            if (socketId) {
+                headers['X-Socket-ID'] = socketId;
+            }
+
+            void fetch(stream.url(conversationId), {
+                method: 'POST',
+                headers,
+                credentials: 'include',
+                body: JSON.stringify({ messages: [{ role: 'user', parts }] }),
+            })
+                .then(async (response) => {
                     if (response.status === 402) {
-                        try {
-                            const body: unknown = await response.clone().json();
-                            if (isUsageLimitPayload(body)) {
-                                setUsageLimitTrigger({
+                        const body: unknown = await response.clone().json();
+
+                        if (isUsageLimitPayload(body)) {
+                            dispatch({
+                                type: 'USAGE_LIMIT',
+                                trigger: {
                                     kind: 'cap',
                                     limitType: body.limit_type,
                                     currentTier: body.tier,
                                     currentCredits: body.current_credits,
                                     limitCredits: body.limit_credits,
                                     resetsIn: body.resets_in,
-                                });
-                            }
-                        } catch {
-                            // Non-JSON 402 — fall through and let useChat surface the error.
+                                },
+                            });
+
+                            return;
                         }
                     }
 
-                    return response;
-                },
-            }),
-        [conversationId],
-    );
+                    if (!response.ok) {
+                        throw new Error('Failed to send message.');
+                    }
 
-    const {
-        messages,
-        sendMessage: originalSendMessage,
-        status,
-        error,
-    } = useChat({
-        messages: initialMessages,
-        transport,
-        onFinish,
-    });
-
-    const sendMessage = useCallback(
-        (message: { text: string; files?: FileUIPart[] }) => {
-            setNetworkError(undefined);
-            setUsageLimitTrigger(null);
-
-            try {
-                originalSendMessage(message);
-            } catch (e) {
-                const errorMessage =
-                    e instanceof Error
-                        ? e.message
-                        : 'Failed to send message. Please try again.';
-                setNetworkError(new Error(errorMessage));
-            }
+                    if (getConnectionState() !== 'connected') {
+                        startReplayPolling();
+                    }
+                })
+                .catch((error: unknown) => {
+                    stopReplayPolling();
+                    dispatch({
+                        type: 'FAILED',
+                        message:
+                            error instanceof Error
+                                ? error.message
+                                : 'Failed to send message.',
+                    });
+                });
         },
-        [originalSendMessage],
+        [
+            conversationId,
+            resetReplayState,
+            startReplayPolling,
+            stopReplayPolling,
+        ],
     );
 
-    const clearError = useCallback(() => {
-        setNetworkError(undefined);
-    }, []);
+    const stop = useCallback(() => {
+        stopReplayPolling();
+        dispatch({ type: 'FINISHED' });
 
-    const clearUsageLimitTrigger = useCallback(() => {
-        setUsageLimitTrigger(null);
-    }, []);
-
-    const combinedError = error ?? networkError;
-    const isStreaming = status === 'streaming';
-    const isSubmitting = status === 'submitted';
+        void fetch(ChatStopController.url(conversationId), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+        }).catch(() => {});
+    }, [conversationId, stopReplayPolling]);
 
     return {
-        initialMessages,
-        messages,
+        messages: state.messages,
         sendMessage,
+        stop,
         clearError,
-        status: status as ChatStatus,
-        error: combinedError,
-        isStreaming,
-        isSubmitting,
-        usageLimitTrigger,
+        status: state.status,
+        error: state.error,
+        isStreaming: state.status === 'streaming',
+        isSubmitting: state.status === 'submitted',
+        isConnected,
+        usageLimitTrigger: state.usageLimitTrigger,
         clearUsageLimitTrigger,
     };
 }
