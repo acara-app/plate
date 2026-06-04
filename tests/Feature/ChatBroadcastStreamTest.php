@@ -44,6 +44,7 @@ it('dispatches web chat streams to the chat queue and returns immediately', func
         && $job->userId === $user->id
         && $job->conversationId === $conversation->id
         && $job->content === 'Hello from broadcast'
+        && $job->streamId !== ''
         && $job->channel === 'web');
 });
 
@@ -96,7 +97,8 @@ it('dispatches api v2 chat streams with the mobile channel marker', function ():
             'conversationId' => $conversation->id,
         ]);
 
-    Queue::assertPushed(ProcessChatStream::class, fn (ProcessChatStream $job): bool => $job->channel === 'mobile'
+    Queue::assertPushed(ProcessChatStream::class, fn (ProcessChatStream $job): bool => $job->streamId !== ''
+        && $job->channel === 'mobile'
         && $job->content === 'Hello mobile');
 });
 

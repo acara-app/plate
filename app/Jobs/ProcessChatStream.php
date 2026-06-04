@@ -22,6 +22,7 @@ use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Str;
 use Laravel\Ai\Files\Base64Image;
 use Throwable;
 
@@ -30,6 +31,7 @@ use Throwable;
 #[Tries(3)]
 final class ProcessChatStream implements ShouldQueue
 {
+    public $tries;
     use Queueable;
 
     /**
@@ -42,8 +44,13 @@ final class ProcessChatStream implements ShouldQueue
         public array $images,
         public string $modelName,
         public string $channel = 'web',
+        public string $streamId = '',
     ) {
         $this->onQueue('chat');
+
+        if ($this->streamId === '') {
+            $this->streamId = (string) Str::uuid7();
+        }
     }
 
     /**
@@ -114,6 +121,7 @@ final class ProcessChatStream implements ShouldQueue
             assistantText: $events->aggregateText($this->conversationId),
             toolCalls: $events->aggregateToolCalls($this->conversationId),
             toolResults: $events->aggregateToolResults($this->conversationId),
+            streamId: $this->streamId(),
         );
 
         $events->markComplete($this->conversationId);
@@ -170,6 +178,7 @@ final class ProcessChatStream implements ShouldQueue
             assistantText: $events->aggregateText($this->conversationId),
             toolCalls: $events->aggregateToolCalls($this->conversationId),
             toolResults: $events->aggregateToolResults($this->conversationId),
+            streamId: $this->streamId(),
         );
     }
 
@@ -179,5 +188,14 @@ final class ProcessChatStream implements ShouldQueue
             ->as('stream_end')
             ->with(['conversationId' => $this->conversationId])
             ->sendNow();
+    }
+
+    private function streamId(): string
+    {
+        if ($this->streamId === '') {
+            $this->streamId = (string) Str::uuid7();
+        }
+
+        return $this->streamId;
     }
 }
