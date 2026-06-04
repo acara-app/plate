@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\AgentBuilder;
-use App\Ai\AgentPayload;
+use App\Ai\AgentRequest;
 use App\Ai\Agents\AgentRunner;
 use App\Ai\Agents\FitnessSpecialist;
 use App\Ai\Agents\GlucoseSpikeSpecialist;
@@ -28,13 +28,9 @@ beforeEach(function (): void {
 
 describe('instructions', function (): void {
     it('returns instructions with default mode', function (): void {
-        $payload = new AgentPayload(
-            userId: $this->user->id,
-            message: 'Hello',
-            modelName: ModelName::GPT_5_4_MINI,
-        );
+        $request = new AgentRequest(message: 'Hello', modelName: ModelName::GPT_5_4_MINI);
 
-        $this->agent->run($payload, $this->user);
+        $this->agent->run($request, $this->user);
         $instructions = $this->agent->instructions();
 
         expect($instructions)
@@ -43,13 +39,9 @@ describe('instructions', function (): void {
     });
 
     it('returns instructions that delegate meal planning to a specialist', function (): void {
-        $payload = new AgentPayload(
-            userId: $this->user->id,
-            message: 'Create a meal plan',
-            modelName: ModelName::GPT_5_4_MINI,
-        );
+        $request = new AgentRequest(message: 'Create a meal plan', modelName: ModelName::GPT_5_4_MINI);
 
-        $this->agent->run($payload, $this->user);
+        $this->agent->run($request, $this->user);
         $instructions = $this->agent->instructions();
 
         expect($instructions)
@@ -60,13 +52,9 @@ describe('instructions', function (): void {
 
 describe('tools', function (): void {
     it('returns top-level tools plus specialist sub-agents', function (): void {
-        $payload = new AgentPayload(
-            userId: $this->user->id,
-            message: 'Hello',
-            modelName: ModelName::GPT_5_4_MINI,
-        );
+        $request = new AgentRequest(message: 'Hello', modelName: ModelName::GPT_5_4_MINI);
 
-        $this->agent->run($payload, $this->user);
+        $this->agent->run($request, $this->user);
         $tools = $this->agent->tools();
 
         $toolClasses = collect($tools)
@@ -85,14 +73,9 @@ describe('tools', function (): void {
 
     it('includes AnalyzePhoto tool when attachments are set', function (): void {
         $image = new Base64Image(base64_encode('fake-image'), 'image/jpeg');
-        $payload = new AgentPayload(
-            userId: $this->user->id,
-            message: 'Analyze this',
-            images: [$image],
-            modelName: ModelName::GPT_5_4_MINI,
-        );
+        $request = new AgentRequest(message: 'Analyze this', images: [$image], modelName: ModelName::GPT_5_4_MINI);
 
-        $this->agent->run($payload, $this->user);
+        $this->agent->run($request, $this->user);
         $tools = $this->agent->tools();
 
         $toolClasses = collect($tools)
@@ -103,13 +86,9 @@ describe('tools', function (): void {
     });
 
     it('includes provider tools when web search enabled', function (): void {
-        $payload = new AgentPayload(
-            userId: $this->user->id,
-            message: 'Search for something',
-            modelName: ModelName::GPT_5_MINI,
-        );
+        $request = new AgentRequest(message: 'Search for something', modelName: ModelName::GPT_5_MINI);
 
-        $this->agent->run($payload, $this->user);
+        $this->agent->run($request, $this->user);
         $tools = $this->agent->tools();
 
         expect($tools)->not->toBeEmpty();
@@ -118,13 +97,9 @@ describe('tools', function (): void {
 
 describe('messages', function (): void {
     it('returns empty messages when no conversation', function (): void {
-        $payload = new AgentPayload(
-            userId: $this->user->id,
-            message: 'Hello',
-            modelName: ModelName::GPT_5_4_MINI,
-        );
+        $request = new AgentRequest(message: 'Hello', modelName: ModelName::GPT_5_4_MINI);
 
-        $this->agent->run($payload, $this->user);
+        $this->agent->run($request, $this->user);
         $messages = $this->agent->messages();
 
         expect($messages)->toBeArray()

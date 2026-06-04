@@ -7,13 +7,18 @@ namespace App\Ai;
 use App\Enums\ModelName;
 use Laravel\Ai\Files\Base64Image;
 
-final readonly class AgentPayload
+/**
+ * Immutable value object representing a request to the AI agent.
+ *
+ * Transport-agnostic — carries only the data needed to run a request,
+ * with no knowledge of HTTP, WebSocket, or queue mechanics.
+ */
+final readonly class AgentRequest
 {
     /**
      * @param  array<int, Base64Image>  $images
      */
     public function __construct(
-        public int $userId,
         public string $message,
         public array $images = [],
         public ?ModelName $modelName = null,
@@ -23,6 +28,11 @@ final readonly class AgentPayload
     public function hasImages(): bool
     {
         return $this->images !== [];
+    }
+
+    public function hasExistingConversation(): bool
+    {
+        return $this->conversationId !== null;
     }
 
     public function shouldEnableWebSearch(): bool

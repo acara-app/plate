@@ -33,21 +33,21 @@ final readonly class AgentBuilder
     /**
      * @return array{instructions: string, tools: array<int, Tool|ProviderTool|Agent>}
      */
-    public function build(AgentPayload $payload, ?User $user = null): array
+    public function build(AgentRequest $request, ?User $user = null): array
     {
         return [
-            'instructions' => $this->buildInstructions($payload, $user),
-            'tools' => $this->buildTools($payload),
+            'instructions' => $this->buildInstructions($request, $user),
+            'tools' => $this->buildTools($request),
         ];
     }
 
-    public function buildInstructions(AgentPayload $payload, ?User $user): string
+    public function buildInstructions(AgentRequest $request, ?User $user): string
     {
         $languageCode = $user instanceof User ? ($user->locale ?? 'en') : 'en';
         $timezone = $this->resolveTimezone($user);
 
-        $summaries = $payload->conversationId !== null
-            ? ConversationSummary::getRecentForContext($payload->conversationId)
+        $summaries = $request->hasExistingConversation()
+            ? ConversationSummary::getRecentForContext($request->conversationId)
             : collect();
 
         $instructions = view('ai.prompts.altani-static', [
@@ -60,7 +60,7 @@ final readonly class AgentBuilder
             'availableSkills' => $this->skillLoader->loadAll(),
         ])->render();
 
-        $memories = $this->renderMemories($payload, $user);
+        $memories = $this->renderMemories($request, $user);
 
         return $memories === '' ? $instructions : $instructions.PHP_EOL.PHP_EOL.$memories;
     }
@@ -68,19 +68,19 @@ final readonly class AgentBuilder
     /**
      * @return array<int, Tool|ProviderTool|Agent>
      */
-    public function buildTools(AgentPayload $payload): array
+    public function buildTools(AgentRequest $request): array
     {
         $tools = $this->toolRegistry->getTools();
 
-        if ($payload->images !== []) {
-            $imageTools = $this->toolRegistry->getImageTools($payload->images);
+        if ($request->hasImages()) {
+            $imageTools = $this->toolRegistry->getImageTools($request->images);
             $tools = [...$tools, ...$imageTools];
         }
 
         $subAgents = $this->toolRegistry->getSubAgents();
 
         if (
-            $payload->shouldEnableWebSearch()
+            $request->shouldEnableWebSearch()
             && $this->maxReachableSensitivity($tools, $subAgents) === DataSensitivity::General
         ) {
             $providerTools = $this->toolRegistry->getProviderTools();
@@ -105,7 +105,7 @@ final readonly class AgentBuilder
         return $this->toolSensitivity->maxSensitivity($tools);
     }
 
-    private function renderMemories(AgentPayload $payload, ?User $user): string
+    private function renderMemories(AgentRequest $request, ?User $user): string
     {
         if (! $user instanceof User) {
             return '';
@@ -113,8 +113,8 @@ final readonly class AgentBuilder
 
         return $this->memoryContext->render(
             $user->id,
-            $payload->message,
-            $this->conversationTail($payload->conversationId),
+            $request->message,
+            $this->conversationTail($request->conversationId),
         );
     }
 

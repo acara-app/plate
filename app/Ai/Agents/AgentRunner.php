@@ -6,7 +6,7 @@ namespace App\Ai\Agents;
 
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Ai\AgentBuilder;
-use App\Ai\AgentPayload;
+use App\Ai\AgentRequest;
 use App\Enums\ModelName;
 use App\Models\User;
 use App\Utilities\ConfigHelper;
@@ -28,37 +28,38 @@ final class AgentRunner implements Agent, Conversational, HasTools
 
     private ?User $user = null;
 
-    private ?AgentPayload $currentPayload = null;
+    private ?AgentRequest $currentRequest = null;
 
     public function __construct(
         private readonly AgentBuilder $agentBuilder,
         private readonly EnforceAiUsageLimit $enforceAiUsageLimit,
     ) {}
 
-    public function run(AgentPayload $payload, User $user): StreamableAgentResponse
+    public function run(AgentRequest $request, User $user): StreamableAgentResponse
     {
-        return $this->execute($payload, $user, '');
-    }
+        $modelName = $this->prepare($request, $user);
 
-    public function runWithConversation(AgentPayload $payload, User $user, string $conversationId): StreamableAgentResponse
-    {
-        return $this->execute($payload, $user, $conversationId);
+        return $this
+            ->continue($request->conversationId ?? '', as: $user)
+            ->stream(
+                prompt: $request->message,
+                attachments: $request->images,
+                provider: $modelName->labProvider(),
+                model: $modelName->value,
+            )
+            ->usingVercelDataProtocol();
     }
 
     // @codeCoverageIgnoreStart
-    public function runSync(AgentPayload $payload, User $user, ?string $conversationId = null): AgentResponse
+    public function runSync(AgentRequest $request, User $user): AgentResponse
     {
-        $modelName = $payload->modelName ?? ModelName::GPT_5_4_MINI;
-        $this->enforceAiUsageLimit->handle($user, $modelName);
-
-        $this->currentPayload = $payload;
-        $this->user = $user;
+        $modelName = $this->prepare($request, $user);
 
         return $this
-            ->continue($conversationId ?? '', as: $user)
+            ->continue($request->conversationId ?? '', as: $user)
             ->prompt(
-                prompt: $payload->message,
-                attachments: $payload->images,
+                prompt: $request->message,
+                attachments: $request->images,
                 provider: $modelName->labProvider(),
                 model: $modelName->value,
             );
@@ -69,13 +70,13 @@ final class AgentRunner implements Agent, Conversational, HasTools
     public function instructions(): string
     {
         // @codeCoverageIgnoreStart
-        if (! $this->currentPayload instanceof AgentPayload) {
+        if (! $this->currentRequest instanceof AgentRequest) {
             return '';
         }
 
         // @codeCoverageIgnoreEnd
 
-        return $this->agentBuilder->buildInstructions($this->currentPayload, $this->user);
+        return $this->agentBuilder->buildInstructions($this->currentRequest, $this->user);
     }
 
     /**
@@ -84,13 +85,13 @@ final class AgentRunner implements Agent, Conversational, HasTools
     public function tools(): array
     {
         // @codeCoverageIgnoreStart
-        if (! $this->currentPayload instanceof AgentPayload) {
+        if (! $this->currentRequest instanceof AgentRequest) {
             return [];
         }
 
         // @codeCoverageIgnoreEnd
 
-        return $this->agentBuilder->buildTools($this->currentPayload);
+        return $this->agentBuilder->buildTools($this->currentRequest);
     }
 
     // @codeCoverageIgnoreStart
@@ -101,22 +102,14 @@ final class AgentRunner implements Agent, Conversational, HasTools
 
     // @codeCoverageIgnoreEnd
 
-    private function execute(AgentPayload $payload, User $user, string $conversationId): StreamableAgentResponse
+    private function prepare(AgentRequest $request, User $user): ModelName
     {
-        $modelName = $payload->modelName ?? ModelName::GPT_5_4_MINI;
+        $modelName = $request->modelName ?? ModelName::default();
         $this->enforceAiUsageLimit->handle($user, $modelName);
 
-        $this->currentPayload = $payload;
+        $this->currentRequest = $request;
         $this->user = $user;
 
-        return $this
-            ->continue($conversationId, as: $user)
-            ->stream(
-                prompt: $payload->message,
-                attachments: $payload->images,
-                provider: $modelName->labProvider(),
-                model: $modelName->value,
-            )
-            ->usingVercelDataProtocol();
+        return $modelName;
     }
 }

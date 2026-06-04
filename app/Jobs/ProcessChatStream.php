@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Actions\PersistPartialChatStream;
-use App\Ai\AgentPayload;
+use App\Ai\AgentRequest;
 use App\Ai\Agents\AgentRunner;
 use App\Enums\ModelName;
 use App\Events\ChatProcessing;
@@ -31,8 +31,9 @@ use Throwable;
 #[Tries(3)]
 final class ProcessChatStream implements ShouldQueue
 {
-    public $tries;
     use Queueable;
+
+    public $tries;
 
     /**
      * @param  list<array{type: string, name: ?string, base64: string, mime: ?string}>  $images
@@ -75,15 +76,14 @@ final class ProcessChatStream implements ShouldQueue
 
         broadcast(new ChatProcessing($this->userId, $this->conversationId));
 
-        $payload = new AgentPayload(
-            userId: $this->userId,
+        $request = new AgentRequest(
             message: $this->content,
             images: $this->base64Images(),
             modelName: ModelName::tryFrom($this->modelName) ?? ModelName::default(),
             conversationId: $this->conversationId,
         );
 
-        $stream = $agentRunner->runWithConversation($payload, $user, $this->conversationId);
+        $stream = $agentRunner->run($request, $user);
         $channel = new PrivateChannel('chat.'.$this->userId);
         $sequence = 0;
         $cancelled = false;

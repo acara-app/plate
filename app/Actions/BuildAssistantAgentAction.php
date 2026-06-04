@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Ai\AgentPayload;
+use App\Ai\AgentRequest;
 use App\Ai\Agents\AgentRunner;
 use App\Contracts\Memory\DispatchesMemoryExtraction;
 use App\Http\Requests\StreamChatRequest;
@@ -27,8 +27,7 @@ final readonly class BuildAssistantAgentAction
         Context::add('chat.channel', $channel);
         Context::add('chat.conversation_id', $conversationId);
 
-        $agentPayload = new AgentPayload(
-            userId: $user->id,
+        $agentRequest = new AgentRequest(
             message: $request->userMessage(),
             images: $request->userAttachments(),
             modelName: $request->modelName(),
@@ -38,7 +37,7 @@ final readonly class BuildAssistantAgentAction
         $this->dispatchSummarizationIfNeeded($conversationId);
         $this->memoryExtraction->dispatchIfEligible($user->id);
 
-        return $this->agentRunner->runWithConversation($agentPayload, $user, $conversationId);
+        return $this->agentRunner->run($agentRequest, $user);
     }
 
     private function dispatchSummarizationIfNeeded(string $conversationId): void

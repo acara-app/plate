@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Ai\AgentPayload;
+use App\Ai\AgentRequest;
 use App\Ai\Agents\AgentRunner;
 use App\Contracts\ProcessesAdvisorMessage;
 use App\Enums\ModelName;
@@ -34,14 +34,14 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
 
         Context::add('chat.conversation_id', $conversationId);
 
-        $payload = new AgentPayload(
-            userId: $user->id,
+        $request = new AgentRequest(
             message: $message,
             images: $attachments,
             modelName: ModelName::GPT_5_4_MINI,
+            conversationId: $conversationId,
         );
 
-        $response = $this->agentRunner->runSync($payload, $user, $conversationId);
+        $response = $this->agentRunner->runSync($request, $user);
 
         return [
             'response' => $response->text,
