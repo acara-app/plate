@@ -1,12 +1,15 @@
-import {
-    echo,
-    getConnectionState,
-    onConnectionStateChange,
-    reconnect,
-} from '@/lib/echo';
-import { useEffect, useRef, useState } from 'react';
+import { reconnect } from '@/lib/echo';
+import { useConnectionStatus, useEcho } from '@laravel/echo-react';
+import { useEffect, useRef } from 'react';
 import type { ChatAction, ChatStatus } from './message-reducer';
 import { applyStreamEvent, type RawStreamEvent } from './process-event';
+
+const STREAM_EVENTS = [
+    '.stream_start',
+    '.text_delta',
+    '.citation',
+    '.tool_result',
+];
 
 interface RetryingPayload {
     attempt?: number;
@@ -44,16 +47,16 @@ export function useStreamChannel({
     finishStream,
     resetReplayState,
 }: UseStreamChannelOptions): UseStreamChannelReturn {
-    const [isConnected, setIsConnected] = useState(
-        () => getConnectionState() === 'connected',
-    );
+    const channelName = `chat.${userId}`;
+    const connectionStatus = useConnectionStatus();
     const wasStreamingRef = useRef(false);
+    const connectionStatusRef = useRef(connectionStatus);
+    const previousConnectionStatusRef = useRef(connectionStatus);
 
-    useEffect(() => {
-        const channelName = `chat.${userId}`;
-        const channel = echo.private(channelName);
-
-        const handleStreamEvent = (raw: RawStreamEvent) => {
+    useEcho<RawStreamEvent>(
+        channelName,
+        STREAM_EVENTS,
+        (raw) => {
             stopReplayPolling();
 
             if (raw.type === 'stream_start') {
@@ -61,82 +64,82 @@ export function useStreamChannel({
             }
 
             applyStreamEvent(raw, dispatch, seenEventIdsRef.current);
-        };
+        },
+        [stopReplayPolling, streamActiveRef, dispatch, seenEventIdsRef],
+    );
 
-        channel.listen('.processing', () => {
+    useEcho(
+        channelName,
+        '.processing',
+        () => {
             streamActiveRef.current = true;
             dispatch({ type: 'PROCESSING' });
-        });
+        },
+        [streamActiveRef, dispatch],
+    );
 
-        channel.listen('.stream_start', handleStreamEvent);
-        channel.listen('.text_delta', handleStreamEvent);
-        channel.listen('.citation', handleStreamEvent);
-        channel.listen('.tool_result', handleStreamEvent);
-
-        channel.listen('.retrying', (event: RetryingPayload) => {
+    useEcho<RetryingPayload>(
+        channelName,
+        '.retrying',
+        (event) => {
             resetReplayState();
             dispatch({
                 type: 'RETRYING',
                 attempt: event.attempt ?? 1,
                 maxAttempts: event.maxAttempts ?? 3,
             });
-        });
+        },
+        [resetReplayState, dispatch],
+    );
 
-        channel.listen('.stream_end', () => {
+    useEcho(
+        channelName,
+        '.stream_end',
+        () => {
             finishStream();
-        });
+        },
+        [finishStream],
+    );
 
-        channel.listen('.error', (event: ChatErrorPayload) => {
+    useEcho<ChatErrorPayload>(
+        channelName,
+        '.error',
+        (event) => {
             stopReplayPolling();
             dispatch({
                 type: 'FAILED',
                 message: event.message ?? 'Failed to process message.',
             });
-        });
-
-        return () => {
-            channel.stopListening('.processing');
-            channel.stopListening('.stream_start');
-            channel.stopListening('.text_delta');
-            channel.stopListening('.citation');
-            channel.stopListening('.tool_result');
-            channel.stopListening('.retrying');
-            channel.stopListening('.stream_end');
-            channel.stopListening('.error');
-            echo.leave(channelName);
-        };
-    }, [
-        userId,
-        dispatch,
-        seenEventIdsRef,
-        streamActiveRef,
-        stopReplayPolling,
-        finishStream,
-        resetReplayState,
-    ]);
+        },
+        [stopReplayPolling, dispatch],
+    );
 
     useEffect(() => {
-        return onConnectionStateChange((state, previousState) => {
-            const connected = state === 'connected';
-            setIsConnected(connected);
+        connectionStatusRef.current = connectionStatus;
+    }, [connectionStatus]);
 
-            const active = status === 'streaming' || status === 'submitted';
+    useEffect(() => {
+        const connected = connectionStatus === 'connected';
+        const previousStatus = previousConnectionStatusRef.current;
 
-            if (!connected && active) {
-                wasStreamingRef.current = true;
-                startReplayPolling();
-            }
+        const active = status === 'streaming' || status === 'submitted';
 
-            if (
-                connected &&
-                previousState === 'disconnected' &&
-                wasStreamingRef.current
-            ) {
-                wasStreamingRef.current = false;
-                startReplayPolling();
-            }
-        });
-    }, [status, startReplayPolling]);
+        if (!connected && active) {
+            wasStreamingRef.current = true;
+            startReplayPolling();
+        }
+
+        if (
+            connected &&
+            previousStatus !== 'connected' &&
+            wasStreamingRef.current
+        ) {
+            wasStreamingRef.current = false;
+            startReplayPolling();
+        }
+
+        previousConnectionStatusRef.current = connectionStatus;
+    }, [connectionStatus, status, startReplayPolling]);
 
     useEffect(() => {
         const handleVisibilityChange = () => {
@@ -144,7 +147,7 @@ export function useStreamChannel({
                 return;
             }
 
-            if (getConnectionState() !== 'connected') {
+            if (connectionStatusRef.current !== 'connected') {
                 reconnect();
             }
 
@@ -181,5 +184,5 @@ export function useStreamChannel({
         };
     }, [status, startReplayPolling]);
 
-    return { isConnected };
+    return { isConnected: connectionStatus === 'connected' };
 }
