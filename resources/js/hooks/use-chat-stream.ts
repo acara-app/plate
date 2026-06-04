@@ -1,5 +1,5 @@
 import ChatStopController from '@/actions/App/Http/Controllers/ChatStopController';
-import { echo, getConnectionState } from '@/lib/echo';
+import { echo } from '@/lib/echo';
 import { stream } from '@/routes/chat';
 import type { PaywallCapTrigger, SubscriptionTier } from '@/types';
 import type { ChatStatus } from '@/types/chat';
@@ -160,9 +160,7 @@ export function useChatStream({
                         throw new Error('Failed to send message.');
                     }
 
-                    if (getConnectionState() !== 'connected') {
-                        startReplayPolling();
-                    }
+                    startReplayPolling();
                 })
                 .catch((error: unknown) => {
                     stopReplayPolling();

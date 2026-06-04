@@ -11,6 +11,7 @@ use App\Jobs\ProcessChatStream;
 use App\Jobs\SummarizeConversationJob;
 use App\Models\Conversation;
 use App\Models\User;
+use App\Services\StreamEventStore;
 use App\Utilities\ConfigHelper;
 use Illuminate\Http\JsonResponse;
 
@@ -19,6 +20,7 @@ final readonly class StartChatStream
     public function __construct(
         private EnforceAiUsageLimit $enforceAiUsageLimit,
         private DispatchesMemoryExtraction $memoryExtraction,
+        private StreamEventStore $events,
     ) {}
 
     public function handle(StreamChatRequest $request, User $user, Conversation $conversation, string $channel = 'web'): JsonResponse
@@ -28,6 +30,7 @@ final readonly class StartChatStream
 
         $this->dispatchSummarizationIfNeeded($conversation);
         $this->memoryExtraction->dispatchIfEligible($user->id);
+        $this->events->clear($conversation->id);
 
         dispatch(new ProcessChatStream(userId: $user->id, conversationId: $conversation->id, content: $request->userMessage(), images: PersistPartialChatStream::serializeAttachments($request->userAttachments()), modelName: $modelName->value, channel: $channel));
 

@@ -24,7 +24,7 @@ final readonly class ChatStreamEventsController
         $events = $this->events->eventsAfter($conversation->id, $afterSequence);
 
         return response()->json([
-            'streaming' => $this->events->hasEvents($conversation->id),
+            'streaming' => $this->events->isStreaming($conversation->id),
             'events' => $events,
             'lastSequence' => $this->events->lastSequence($conversation->id),
         ]);

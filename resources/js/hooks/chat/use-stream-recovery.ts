@@ -77,57 +77,66 @@ export function useStreamRecovery({
         onFinishRef,
     ]);
 
-    const replayEvents = useCallback(async (): Promise<boolean> => {
-        try {
-            const response = await fetch(
-                StreamEventsController.url(conversationId, {
-                    query: { after: lastSequenceRef.current },
-                }),
-                { credentials: 'include' },
-            );
+    const replayEvents = useCallback(
+        async (
+            options: { requireStreaming?: boolean } = {},
+        ): Promise<boolean> => {
+            try {
+                const response = await fetch(
+                    StreamEventsController.url(conversationId, {
+                        query: { after: lastSequenceRef.current },
+                    }),
+                    { credentials: 'include' },
+                );
 
-            if (!response.ok) {
+                if (!response.ok) {
+                    return false;
+                }
+
+                const body = (await response.json()) as StreamEventsResponse;
+
+                if (options.requireStreaming && !body.streaming) {
+                    return false;
+                }
+
+                for (const envelope of body.events) {
+                    applyStreamEvent(
+                        envelope.data,
+                        dispatch,
+                        seenEventIdsRef.current,
+                    );
+                }
+
+                if (
+                    body.events.length > 0 &&
+                    body.lastSequence > lastSequenceRef.current
+                ) {
+                    lastSequenceRef.current = body.lastSequence;
+                }
+
+                if (body.streaming) {
+                    streamActiveRef.current = true;
+
+                    return true;
+                }
+
+                if (seenEventIdsRef.current.size > 0) {
+                    finishStream();
+                }
+
+                return false;
+            } catch {
                 return false;
             }
-
-            const body = (await response.json()) as StreamEventsResponse;
-
-            for (const envelope of body.events) {
-                applyStreamEvent(
-                    envelope.data,
-                    dispatch,
-                    seenEventIdsRef.current,
-                );
-            }
-
-            if (
-                body.events.length > 0 &&
-                body.lastSequence > lastSequenceRef.current
-            ) {
-                lastSequenceRef.current = body.lastSequence;
-            }
-
-            if (body.streaming) {
-                streamActiveRef.current = true;
-
-                return true;
-            }
-
-            if (seenEventIdsRef.current.size > 0) {
-                finishStream();
-            }
-
-            return false;
-        } catch {
-            return false;
-        }
-    }, [
-        conversationId,
-        dispatch,
-        seenEventIdsRef,
-        streamActiveRef,
-        finishStream,
-    ]);
+        },
+        [
+            conversationId,
+            dispatch,
+            seenEventIdsRef,
+            streamActiveRef,
+            finishStream,
+        ],
+    );
 
     const startReplayPolling = useCallback(() => {
         if (replayTimerRef.current) {
@@ -149,7 +158,7 @@ export function useStreamRecovery({
     }, [replayEvents, stopReplayPolling]);
 
     const resumeOnMount = useCallback(async () => {
-        const streaming = await replayEvents();
+        const streaming = await replayEvents({ requireStreaming: true });
 
         if (streaming) {
             startReplayPolling();

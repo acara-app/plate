@@ -14,6 +14,8 @@ class StreamEventStore
 
     private const string CANCEL_PREFIX = 'plate:chat:stream:cancel:';
 
+    private const string COMPLETED_PREFIX = 'plate:chat:stream:completed:';
+
     private const int TTL_SECONDS = 600;
 
     public function append(string $conversationId, StreamEvent $event, int $sequence): void
@@ -75,6 +77,20 @@ class StreamEventStore
     {
         $this->redis()->del($this->streamKey($conversationId));
         $this->clearCancellation($conversationId);
+        $this->redis()->del($this->completedKey($conversationId));
+    }
+
+    public function markComplete(string $conversationId): void
+    {
+        $this->redis()->setex($this->completedKey($conversationId), self::TTL_SECONDS, '1');
+        $this->redis()->expire($this->streamKey($conversationId), self::TTL_SECONDS);
+        $this->clearCancellation($conversationId);
+    }
+
+    public function isStreaming(string $conversationId): bool
+    {
+        return $this->hasEvents($conversationId)
+            && ! $this->redis()->exists($this->completedKey($conversationId));
     }
 
     public function requestCancellation(string $conversationId): void
@@ -147,6 +163,11 @@ class StreamEventStore
     private function cancelKey(string $conversationId): string
     {
         return self::CANCEL_PREFIX.$conversationId;
+    }
+
+    private function completedKey(string $conversationId): string
+    {
+        return self::COMPLETED_PREFIX.$conversationId;
     }
 
     private function redis(): Connection

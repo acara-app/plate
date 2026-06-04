@@ -10,14 +10,18 @@ declare global {
 
 window.Pusher = Pusher;
 
+const reverbScheme = import.meta.env.VITE_REVERB_SCHEME as string | undefined;
+const forceTLS = reverbScheme === 'https';
+const reverbPort = Number(import.meta.env.VITE_REVERB_PORT);
+
 const echo = new Echo({
     broadcaster: 'reverb',
     key: import.meta.env.VITE_REVERB_APP_KEY as string,
     wsHost: import.meta.env.VITE_REVERB_HOST as string,
-    wsPort: Number(import.meta.env.VITE_REVERB_PORT) || 8080,
-    wssPort: Number(import.meta.env.VITE_REVERB_PORT) || 8080,
-    forceTLS: (import.meta.env.VITE_REVERB_SCHEME as string) === 'https',
-    enabledTransports: ['ws', 'wss'],
+    wsPort: reverbPort,
+    wssPort: reverbPort,
+    forceTLS,
+    enabledTransports: ['wss'],
 });
 
 window.Echo = echo;
@@ -58,7 +62,19 @@ export function getConnectionState(): ConnectionState {
 }
 
 export function reconnect(): void {
-    const connector = echo.connector as { pusher?: { connect?: () => void } };
+    const connector = echo.connector as {
+        pusher?: {
+            connect?: () => void;
+            connection?: { state?: ConnectionState };
+        };
+    };
+
+    const state = connector.pusher?.connection?.state;
+
+    if (state === 'connected' || state === 'connecting') {
+        return;
+    }
+
     connector.pusher?.connect?.();
 }
 

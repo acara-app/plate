@@ -97,7 +97,7 @@ final class ProcessChatStream implements ShouldQueue
             $this->broadcastStreamEnd();
         }
 
-        $events->clear($this->conversationId);
+        $events->markComplete($this->conversationId);
     }
 
     public function failed(Throwable $e): void
@@ -116,7 +116,7 @@ final class ProcessChatStream implements ShouldQueue
             toolResults: $events->aggregateToolResults($this->conversationId),
         );
 
-        $events->clear($this->conversationId);
+        $events->markComplete($this->conversationId);
 
         broadcast(new ChatStreamFailed(
             userId: $this->userId,

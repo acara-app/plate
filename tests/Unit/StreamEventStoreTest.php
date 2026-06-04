@@ -62,3 +62,35 @@ it('returns replay events after a sequence number', function (): void {
             ],
         ]);
 });
+
+it('marks completed streams without deleting replay events', function (): void {
+    $connection = Mockery::mock(Connection::class);
+
+    Redis::shouldReceive('connection')->times(5)->andReturn($connection);
+
+    $connection->shouldReceive('setex')
+        ->once()
+        ->with('plate:chat:stream:completed:conversation-1', 600, '1');
+
+    $connection->shouldReceive('expire')
+        ->once()
+        ->with('plate:chat:stream:conversation-1', 600);
+
+    $connection->shouldReceive('del')
+        ->once()
+        ->with('plate:chat:stream:cancel:conversation-1');
+
+    resolve(StreamEventStore::class)->markComplete('conversation-1');
+
+    $connection->shouldReceive('exists')
+        ->once()
+        ->with('plate:chat:stream:conversation-1')
+        ->andReturn(1);
+
+    $connection->shouldReceive('exists')
+        ->once()
+        ->with('plate:chat:stream:completed:conversation-1')
+        ->andReturn(1);
+
+    expect(resolve(StreamEventStore::class)->isStreaming('conversation-1'))->toBeFalse();
+});
