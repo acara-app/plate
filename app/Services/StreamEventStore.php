@@ -114,27 +114,6 @@ class StreamEventStore
         $this->redis()->del($this->cancelKey($conversationId));
     }
 
-    public function aggregateText(string $conversationId): string
-    {
-        return $this->aggregator->aggregateStoredEvents($this->eventsAfter($conversationId, -1))->text;
-    }
-
-    /**
-     * @return list<array{id: string, name: string, arguments: array<string, mixed>, result_id: mixed, reasoning_id: mixed, reasoning_summary: mixed}>
-     */
-    public function aggregateToolCalls(string $conversationId): array
-    {
-        return $this->aggregator->aggregateStoredEvents($this->eventsAfter($conversationId, -1))->toolCalls;
-    }
-
-    /**
-     * @return list<array{id: string, name: string, arguments: array<string, mixed>, result: mixed, result_id: mixed}>
-     */
-    public function aggregateToolResults(string $conversationId): array
-    {
-        return $this->aggregator->aggregateStoredEvents($this->eventsAfter($conversationId, -1))->toolResults;
-    }
-
     private function streamKey(string $conversationId): string
     {
         return self::KEY_PREFIX.$conversationId;

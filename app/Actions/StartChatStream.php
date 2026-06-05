@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\StreamEventStore;
 use App\Utilities\ConfigHelper;
 use Illuminate\Http\JsonResponse;
+use Laravel\Ai\Files\Base64Image;
 
 final readonly class StartChatStream
 {
@@ -33,7 +34,7 @@ final readonly class StartChatStream
         $this->memoryExtraction->dispatchIfEligible($user->id);
         $this->events->clear($conversation->id);
 
-        $attachments = PersistPartialChatStream::serializeAttachments($request->userAttachments());
+        $attachments = $this->serializeAttachments($request->userAttachments());
         $turn = $this->pendingTurn->handle($conversation, $user, $request->userMessage(), $attachments, $channel);
 
         dispatch(new ProcessChatStream(
@@ -55,6 +56,18 @@ final readonly class StartChatStream
             'userMessageId' => $turn->userMessageId,
             'assistantMessageId' => $turn->assistantMessageId,
         ], 202);
+    }
+
+    /**
+     * @param  list<Base64Image>  $images
+     * @return list<array{type: string, name: ?string, base64: string, mime: ?string}>
+     */
+    private function serializeAttachments(array $images): array
+    {
+        return array_values(array_map(
+            fn (Base64Image $image): array => $image->toArray(),
+            $images,
+        ));
     }
 
     private function dispatchSummarizationIfNeeded(Conversation $conversation): void

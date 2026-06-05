@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Actions\CompletePendingChatStreamTurn;
-use App\Actions\PersistPartialChatStream;
 use App\Ai\AgentRequest;
 use App\Ai\Agents\AgentRunner;
 use App\Connectors\Broadcast\BroadcastConnector;
@@ -27,7 +26,6 @@ use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Context;
-use Illuminate\Support\Str;
 use Laravel\Ai\Files\Base64Image;
 use Throwable;
 
@@ -49,16 +47,12 @@ final class ProcessChatStream implements ShouldQueue
         public string $content,
         public array $images,
         public string $modelName,
-        public string $channel = 'web',
-        public string $streamId = '',
-        public string $userMessageId = '',
-        public string $assistantMessageId = '',
+        public string $channel,
+        public string $streamId,
+        public string $userMessageId,
+        public string $assistantMessageId,
     ) {
         $this->onQueue('chat');
-
-        if ($this->streamId === '') {
-            $this->streamId = (string) Str::uuid7();
-        }
     }
 
     /**
@@ -74,7 +68,6 @@ final class ProcessChatStream implements ShouldQueue
         StreamEventStore $events,
         BroadcastConnector $connector,
         CompletePendingChatStreamTurn $complete,
-        PersistPartialChatStream $partial,
     ): void {
         if ($this->resetStateForRetry($events)) {
             $this->completePendingTurn($complete, new ChatStreamResult, History::STREAM_STATUS_CANCELLED);
@@ -95,21 +88,17 @@ final class ProcessChatStream implements ShouldQueue
             images: $this->base64Images(),
             modelName: ModelName::tryFrom($this->modelName) ?? ModelName::default(),
             conversationId: $this->conversationId,
-            streamId: $this->streamId(),
+            streamId: $this->streamId,
         );
 
         $stream = $agentRunner->run($request, $user);
         $delivery = $connector->deliver($stream, $this->userId, $this->conversationId);
 
-        if ($this->hasPendingTurn()) {
-            $this->completePendingTurn(
-                complete: $complete,
-                result: $delivery->result,
-                status: $delivery->cancelled ? History::STREAM_STATUS_CANCELLED : History::STREAM_STATUS_COMPLETED,
-            );
-        } else {
-            $this->persistPartial($events, $partial);
-        }
+        $this->completePendingTurn(
+            complete: $complete,
+            result: $delivery->result,
+            status: $delivery->cancelled ? History::STREAM_STATUS_CANCELLED : History::STREAM_STATUS_COMPLETED,
+        );
 
         if ($delivery->cancelled) {
             $this->broadcastStreamEnd();
@@ -125,27 +114,14 @@ final class ProcessChatStream implements ShouldQueue
         $events = resolve(StreamEventStore::class);
         $aggregator = resolve(StreamAggregator::class);
 
-        if ($this->hasPendingTurn()) {
-            resolve(CompletePendingChatStreamTurn::class)->handle(
-                conversationId: $this->conversationId,
-                userId: $this->userId,
-                userMessageId: $this->userMessageId,
-                assistantMessageId: $this->assistantMessageId,
-                result: $aggregator->aggregateStoredEvents($events->eventsAfter($this->conversationId, -1)),
-                status: History::STREAM_STATUS_FAILED,
-            );
-        } else {
-            resolve(PersistPartialChatStream::class)->handle(
-                conversationId: $this->conversationId,
-                userId: $this->userId,
-                prompt: $this->content,
-                attachments: $this->images,
-                assistantText: $events->aggregateText($this->conversationId),
-                toolCalls: $events->aggregateToolCalls($this->conversationId),
-                toolResults: $events->aggregateToolResults($this->conversationId),
-                streamId: $this->streamId(),
-            );
-        }
+        resolve(CompletePendingChatStreamTurn::class)->handle(
+            conversationId: $this->conversationId,
+            userId: $this->userId,
+            userMessageId: $this->userMessageId,
+            assistantMessageId: $this->assistantMessageId,
+            result: $aggregator->aggregateStoredEvents($events->eventsAfter($this->conversationId, -1)),
+            status: History::STREAM_STATUS_FAILED,
+        );
 
         $events->markComplete($this->conversationId);
 
@@ -193,10 +169,6 @@ final class ProcessChatStream implements ShouldQueue
 
     private function completePendingTurn(CompletePendingChatStreamTurn $complete, ChatStreamResult $result, string $status): void
     {
-        if (! $this->hasPendingTurn()) {
-            return;
-        }
-
         $complete->handle(
             conversationId: $this->conversationId,
             userId: $this->userId,
@@ -207,39 +179,11 @@ final class ProcessChatStream implements ShouldQueue
         );
     }
 
-    private function persistPartial(StreamEventStore $events, PersistPartialChatStream $partial): void
-    {
-        $partial->handle(
-            conversationId: $this->conversationId,
-            userId: $this->userId,
-            prompt: $this->content,
-            attachments: $this->images,
-            assistantText: $events->aggregateText($this->conversationId),
-            toolCalls: $events->aggregateToolCalls($this->conversationId),
-            toolResults: $events->aggregateToolResults($this->conversationId),
-            streamId: $this->streamId(),
-        );
-    }
-
     private function broadcastStreamEnd(): void
     {
         Broadcast::on(new PrivateChannel('chat.'.$this->userId))
             ->as('stream_end')
             ->with(['conversationId' => $this->conversationId])
             ->sendNow();
-    }
-
-    private function streamId(): string
-    {
-        if ($this->streamId === '') {
-            $this->streamId = (string) Str::uuid7();
-        }
-
-        return $this->streamId;
-    }
-
-    private function hasPendingTurn(): bool
-    {
-        return $this->userMessageId !== '' && $this->assistantMessageId !== '';
     }
 }
