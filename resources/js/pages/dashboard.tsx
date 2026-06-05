@@ -32,7 +32,7 @@ const promptIcons = [Droplets, Apple, HeartPulse, Activity] as const;
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
-        title: t('home'),
+        title: t('dashboard_ai.breadcrumb'),
         href: dashboard().url,
     },
 ];

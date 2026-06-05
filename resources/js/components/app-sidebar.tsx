@@ -25,8 +25,8 @@ import {
     ActivityIcon,
     CalendarHeartIcon,
     FileText,
-    HeartIcon,
     MessageCircle,
+    MessageSquarePlus,
     Plug,
     ShieldCheck,
     Smartphone,
@@ -38,9 +38,9 @@ import { Separator } from './ui/separator';
 
 const getMainNavItems = (t: (key: string) => string): NavItem[] => [
     {
-        title: t('sidebar.nav.home'),
+        title: t('sidebar.nav.new_chat'),
         href: dashboard(),
-        icon: HeartIcon,
+        icon: MessageSquarePlus,
     },
     {
         title: t('sidebar.nav.chats'),
@@ -106,9 +106,13 @@ export function AppSidebar() {
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
+                        <SidebarMenuButton
+                            size="lg"
+                            asChild
+                            className="justify-start"
+                        >
                             <Link href={dashboard()} prefetch>
-                                <AppLogo />
+                                <AppLogo showText={false} />
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -116,7 +120,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} label={t('sidebar.nav.ai')} />
+                <NavMain items={mainNavItems} />
                 <Separator />
                 <NavMain
                     items={healthNavItems}

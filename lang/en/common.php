@@ -172,6 +172,7 @@ return [
     ],
 
     'dashboard_ai' => [
+        'breadcrumb' => 'Acara',
         'eyebrow' => 'Altani is ready',
         'heading' => 'What should we work on today?',
         'description' => 'Ask about glucose, meals, medication context, synced health trends, or the next healthy choice.',
@@ -652,6 +653,7 @@ return [
             'context' => 'My Profile',
             'settings' => 'Settings',
             'home' => 'Home',
+            'new_chat' => 'New Chat',
             'chats' => 'Chats',
             'meal_plans' => 'My Menu',
             'health_entries' => 'Logbook',
@@ -1069,7 +1071,7 @@ return [
     ],
 
     'conversations' => [
-        'title' => 'Conversations',
+        'title' => 'Chats',
         'new_chat' => 'New Chat',
         'empty' => 'No conversations yet.',
         'start_first' => 'Start your first chat',

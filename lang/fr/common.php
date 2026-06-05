@@ -173,6 +173,7 @@ return [
     ],
 
     'dashboard_ai' => [
+        'breadcrumb' => 'Acara',
         'eyebrow' => 'Altani est prêt',
         'heading' => 'Sur quoi voulez-vous avancer aujourd\'hui ?',
         'description' => 'Posez une question sur la glycémie, les repas, le contexte médical, les tendances synchronisées ou le prochain choix santé.',
@@ -653,6 +654,7 @@ return [
             'context' => 'Mon profil',
             'settings' => 'Paramètres',
             'home' => 'Accueil',
+            'new_chat' => 'Nouvelle discussion',
             'chats' => 'Chats',
             'meal_plans' => 'Mon menu',
             'health_entries' => 'Carnet de suivi',
@@ -1070,7 +1072,7 @@ return [
     ],
 
     'conversations' => [
-        'title' => 'Conversations',
+        'title' => 'Discussions',
         'new_chat' => 'Nouvelle discussion',
         'empty' => 'Aucune conversation pour le moment.',
         'start_first' => 'Commencer votre première discussion',
