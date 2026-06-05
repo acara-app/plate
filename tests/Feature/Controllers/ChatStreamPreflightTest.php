@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\ChatController;
+use App\Http\Controllers\BroadcastChatController;
 use App\Models\AiUsage;
 use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
 
-covers(ChatController::class);
+covers(BroadcastChatController::class);
 
 beforeEach(function (): void {
     Config::set('plate.enable_premium_upgrades', true);

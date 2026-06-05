@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\BroadcastChatController;
 use App\Http\Controllers\ChatController;
 use App\Models\AiUsage;
 use App\Models\Conversation;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Queue;
 
 use function Pest\Laravel\actingAs;
 
-covers(ChatController::class);
+covers(ChatController::class, BroadcastChatController::class);
 
 beforeEach(function (): void {
     //

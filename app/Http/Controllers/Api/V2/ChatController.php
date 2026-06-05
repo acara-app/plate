@@ -6,8 +6,6 @@ namespace App\Http\Controllers\Api\V2;
 
 use App\Actions\BuildConversationMessagesAction;
 use App\Actions\GetOrCreateConversationAction;
-use App\Actions\StartChatStream;
-use App\Http\Requests\Api\V2\ChatStreamRequest;
 use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -19,7 +17,6 @@ final readonly class ChatController
     public function __construct(
         private BuildConversationMessagesAction $messagesAction,
         private GetOrCreateConversationAction $conversationAction,
-        private StartChatStream $startChatStream,
     ) {}
 
     public function index(#[CurrentUser] User $user): JsonResponse
@@ -49,17 +46,6 @@ final readonly class ChatController
             'title' => $conversation->title,
             'messages' => $this->messagesAction->handle($conversation),
         ]);
-    }
-
-    public function stream(
-        ChatStreamRequest $request,
-        #[CurrentUser] User $user,
-        string $conversationId
-    ): JsonResponse {
-        $conversation = $this->conversationAction->handle($conversationId, $user);
-        Gate::authorize('view', $conversation);
-
-        return $this->startChatStream->handle($request, $user, $conversation, 'mobile');
     }
 
     public function destroy(string $conversationId): JsonResponse

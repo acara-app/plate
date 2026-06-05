@@ -32,7 +32,7 @@ Route::prefix('v2/chat')
             ->middleware('throttle:60,1')
             ->name('api.v2.chat.show');
 
-        Route::post('conversations/{conversation}/stream', [ApiV2\ChatController::class, 'stream'])
+        Route::post('conversations/{conversation}/stream', ApiV2\BroadcastChatController::class)
             ->middleware('throttle:30,1')
             ->name('api.v2.chat.stream');
 
