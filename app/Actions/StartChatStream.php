@@ -21,6 +21,7 @@ final readonly class StartChatStream
         private EnforceAiUsageLimit $enforceAiUsageLimit,
         private DispatchesMemoryExtraction $memoryExtraction,
         private StreamEventStore $events,
+        private CreatePendingChatStreamTurn $pendingTurn,
     ) {}
 
     public function handle(StreamChatRequest $request, User $user, Conversation $conversation, string $channel = 'web'): JsonResponse
@@ -32,12 +33,27 @@ final readonly class StartChatStream
         $this->memoryExtraction->dispatchIfEligible($user->id);
         $this->events->clear($conversation->id);
 
-        dispatch(new ProcessChatStream(userId: $user->id, conversationId: $conversation->id, content: $request->userMessage(), images: PersistPartialChatStream::serializeAttachments($request->userAttachments()), modelName: $modelName->value, channel: $channel));
+        $attachments = PersistPartialChatStream::serializeAttachments($request->userAttachments());
+        $turn = $this->pendingTurn->handle($conversation, $user, $request->userMessage(), $attachments, $channel);
+
+        dispatch(new ProcessChatStream(
+            userId: $user->id,
+            conversationId: $conversation->id,
+            content: $request->userMessage(),
+            images: $attachments,
+            modelName: $modelName->value,
+            channel: $channel,
+            streamId: $turn->streamId,
+            userMessageId: $turn->userMessageId,
+            assistantMessageId: $turn->assistantMessageId,
+        ));
 
         return response()->json([
             'status' => 'processing',
             'channel' => 'chat.'.$user->id,
             'conversationId' => $conversation->id,
+            'userMessageId' => $turn->userMessageId,
+            'assistantMessageId' => $turn->assistantMessageId,
         ], 202);
     }
 

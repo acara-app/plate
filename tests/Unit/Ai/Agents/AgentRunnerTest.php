@@ -14,8 +14,12 @@ use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
 use App\Enums\ModelName;
+use App\Models\Conversation;
+use App\Models\History;
 use App\Models\User;
 use Laravel\Ai\Files\Base64Image;
+use Laravel\Ai\Messages\AssistantMessage;
+use Laravel\Ai\Messages\Message;
 
 covers(AgentRunner::class);
 
@@ -104,5 +108,40 @@ describe('messages', function (): void {
 
         expect($messages)->toBeArray()
             ->toHaveCount(0);
+    });
+
+    it('excludes the pending turn for the active stream from conversation context', function (): void {
+        $conversation = Conversation::factory()->forUser($this->user)->create();
+
+        History::factory()->forConversation($conversation)->userMessage()->create([
+            'content' => 'Previous question',
+        ]);
+        History::factory()->forConversation($conversation)->assistantMessage()->create([
+            'content' => 'Previous answer',
+        ]);
+        History::factory()->forConversation($conversation)->userMessage()->create([
+            'content' => 'Current question',
+            'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_SUBMITTED),
+        ]);
+        History::factory()->forConversation($conversation)->assistantMessage()->create([
+            'content' => '',
+            'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_PENDING),
+        ]);
+
+        $request = new AgentRequest(
+            message: 'Current question',
+            modelName: ModelName::GPT_5_4_MINI,
+            conversationId: $conversation->id,
+            streamId: 'stream-1',
+        );
+
+        $this->agent->run($request, $this->user);
+        $messages = $this->agent->messages();
+
+        expect($messages)->toHaveCount(2)
+            ->and($messages[0])->toBeInstanceOf(Message::class)
+            ->and($messages[0]->content)->toBe('Previous question')
+            ->and($messages[1])->toBeInstanceOf(AssistantMessage::class)
+            ->and($messages[1]->content)->toBe('Previous answer');
     });
 });

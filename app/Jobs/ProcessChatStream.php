@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Actions\CompletePendingChatStreamTurn;
 use App\Actions\PersistPartialChatStream;
 use App\Ai\AgentRequest;
 use App\Ai\Agents\AgentRunner;
+use App\Connectors\Broadcast\BroadcastConnector;
+use App\Data\ChatStreamResult;
 use App\Enums\ModelName;
 use App\Events\ChatProcessing;
 use App\Events\ChatRetrying;
 use App\Events\ChatStreamFailed;
+use App\Models\History;
 use App\Models\User;
+use App\Services\StreamAggregator;
 use App\Services\StreamEventStore;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -46,6 +51,8 @@ final class ProcessChatStream implements ShouldQueue
         public string $modelName,
         public string $channel = 'web',
         public string $streamId = '',
+        public string $userMessageId = '',
+        public string $assistantMessageId = '',
     ) {
         $this->onQueue('chat');
 
@@ -62,9 +69,16 @@ final class ProcessChatStream implements ShouldQueue
         return [5, 15, 30];
     }
 
-    public function handle(AgentRunner $agentRunner, StreamEventStore $events, PersistPartialChatStream $partial): void
-    {
+    public function handle(
+        AgentRunner $agentRunner,
+        StreamEventStore $events,
+        BroadcastConnector $connector,
+        CompletePendingChatStreamTurn $complete,
+        PersistPartialChatStream $partial,
+    ): void {
         if ($this->resetStateForRetry($events)) {
+            $this->completePendingTurn($complete, new ChatStreamResult, History::STREAM_STATUS_CANCELLED);
+
             return;
         }
 
@@ -81,26 +95,23 @@ final class ProcessChatStream implements ShouldQueue
             images: $this->base64Images(),
             modelName: ModelName::tryFrom($this->modelName) ?? ModelName::default(),
             conversationId: $this->conversationId,
+            streamId: $this->streamId(),
         );
 
         $stream = $agentRunner->run($request, $user);
-        $channel = new PrivateChannel('chat.'.$this->userId);
-        $sequence = 0;
-        $cancelled = false;
+        $delivery = $connector->deliver($stream, $this->userId, $this->conversationId);
 
-        foreach ($stream as $event) {
-            if ($events->wasCancellationRequested($this->conversationId)) {
-                $cancelled = true;
-
-                break;
-            }
-
-            $events->append($this->conversationId, $event, $sequence++);
-            $event->broadcastNow($channel);
+        if ($this->hasPendingTurn()) {
+            $this->completePendingTurn(
+                complete: $complete,
+                result: $delivery->result,
+                status: $delivery->cancelled ? History::STREAM_STATUS_CANCELLED : History::STREAM_STATUS_COMPLETED,
+            );
+        } else {
+            $this->persistPartial($events, $partial);
         }
 
-        if ($cancelled) {
-            $this->persistPartial($events, $partial);
+        if ($delivery->cancelled) {
             $this->broadcastStreamEnd();
         }
 
@@ -112,17 +123,29 @@ final class ProcessChatStream implements ShouldQueue
         report($e);
 
         $events = resolve(StreamEventStore::class);
+        $aggregator = resolve(StreamAggregator::class);
 
-        resolve(PersistPartialChatStream::class)->handle(
-            conversationId: $this->conversationId,
-            userId: $this->userId,
-            prompt: $this->content,
-            attachments: $this->images,
-            assistantText: $events->aggregateText($this->conversationId),
-            toolCalls: $events->aggregateToolCalls($this->conversationId),
-            toolResults: $events->aggregateToolResults($this->conversationId),
-            streamId: $this->streamId(),
-        );
+        if ($this->hasPendingTurn()) {
+            resolve(CompletePendingChatStreamTurn::class)->handle(
+                conversationId: $this->conversationId,
+                userId: $this->userId,
+                userMessageId: $this->userMessageId,
+                assistantMessageId: $this->assistantMessageId,
+                result: $aggregator->aggregateStoredEvents($events->eventsAfter($this->conversationId, -1)),
+                status: History::STREAM_STATUS_FAILED,
+            );
+        } else {
+            resolve(PersistPartialChatStream::class)->handle(
+                conversationId: $this->conversationId,
+                userId: $this->userId,
+                prompt: $this->content,
+                attachments: $this->images,
+                assistantText: $events->aggregateText($this->conversationId),
+                toolCalls: $events->aggregateToolCalls($this->conversationId),
+                toolResults: $events->aggregateToolResults($this->conversationId),
+                streamId: $this->streamId(),
+            );
+        }
 
         $events->markComplete($this->conversationId);
 
@@ -168,6 +191,22 @@ final class ProcessChatStream implements ShouldQueue
         return false;
     }
 
+    private function completePendingTurn(CompletePendingChatStreamTurn $complete, ChatStreamResult $result, string $status): void
+    {
+        if (! $this->hasPendingTurn()) {
+            return;
+        }
+
+        $complete->handle(
+            conversationId: $this->conversationId,
+            userId: $this->userId,
+            userMessageId: $this->userMessageId,
+            assistantMessageId: $this->assistantMessageId,
+            result: $result,
+            status: $status,
+        );
+    }
+
     private function persistPartial(StreamEventStore $events, PersistPartialChatStream $partial): void
     {
         $partial->handle(
@@ -197,5 +236,10 @@ final class ProcessChatStream implements ShouldQueue
         }
 
         return $this->streamId;
+    }
+
+    private function hasPendingTurn(): bool
+    {
+        return $this->userMessageId !== '' && $this->assistantMessageId !== '';
     }
 }

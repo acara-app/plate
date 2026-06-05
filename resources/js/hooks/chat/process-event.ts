@@ -79,5 +79,17 @@ export function applyStreamEvent(
             }
             break;
         }
+
+        case 'text_start':
+        case 'text_complete':
+        case 'thinking_start':
+        case 'thinking':
+        case 'thinking_complete':
+        case 'tool_call':
+        case 'provider_tool':
+        case 'artifact':
+        case 'stream_end':
+            seenEventIds.add(raw.id);
+            break;
     }
 }

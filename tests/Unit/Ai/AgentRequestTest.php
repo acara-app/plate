@@ -26,12 +26,14 @@ it('creates request with all parameters', function (): void {
         images: $images,
         modelName: ModelName::GPT_5_MINI,
         conversationId: 'conv-123',
+        streamId: 'stream-123',
     );
 
     expect($request->message)->toBe('Hello')
         ->and($request->images)->toHaveCount(1)
         ->and($request->modelName)->toBe(ModelName::GPT_5_MINI)
-        ->and($request->conversationId)->toBe('conv-123');
+        ->and($request->conversationId)->toBe('conv-123')
+        ->and($request->streamId)->toBe('stream-123');
 });
 
 describe('hasImages', function (): void {

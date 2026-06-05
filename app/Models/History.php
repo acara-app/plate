@@ -41,7 +41,34 @@ final class History extends Model
     /** @use HasFactory<HistoryFactory> */
     use HasFactory, HasUuids;
 
+    public const string STREAM_META_KEY = 'chat_stream';
+
+    public const string STREAM_STATUS_SUBMITTED = 'submitted';
+
+    public const string STREAM_STATUS_PENDING = 'pending';
+
+    public const string STREAM_STATUS_COMPLETED = 'completed';
+
+    public const string STREAM_STATUS_CANCELLED = 'cancelled';
+
+    public const string STREAM_STATUS_FAILED = 'failed';
+
     protected $guarded = [];
+
+    /**
+     * @param  array<string, mixed>  $extra
+     * @return array{chat_stream: array<string, mixed>}
+     */
+    public static function streamMeta(string $streamId, string $status, array $extra = []): array
+    {
+        return [
+            self::STREAM_META_KEY => [
+                'stream_id' => $streamId,
+                'status' => $status,
+                ...$extra,
+            ],
+        ];
+    }
 
     public function casts(): array
     {
@@ -56,6 +83,41 @@ final class History extends Model
             'meta' => 'array',
             'summary_id' => 'string',
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function chatStreamMeta(): array
+    {
+        $meta = $this->meta[self::STREAM_META_KEY] ?? [];
+
+        return is_array($meta) ? $meta : [];
+    }
+
+    public function chatStreamId(): ?string
+    {
+        $streamId = $this->chatStreamMeta()['stream_id'] ?? null;
+
+        return is_string($streamId) ? $streamId : null;
+    }
+
+    public function chatStreamStatus(): ?string
+    {
+        $status = $this->chatStreamMeta()['status'] ?? null;
+
+        return is_string($status) ? $status : null;
+    }
+
+    public function belongsToChatStream(string $streamId): bool
+    {
+        return $this->chatStreamId() === $streamId;
+    }
+
+    public function isPendingStreamAssistant(): bool
+    {
+        return $this->role === MessageRole::Assistant
+            && $this->chatStreamStatus() === self::STREAM_STATUS_PENDING;
     }
 
     /**

@@ -25,6 +25,7 @@ final readonly class BuildConversationMessagesAction
 
         return array_values(
             $conversation->messages
+                ->reject(fn (History $message): bool => $message->isPendingStreamAssistant())
                 ->map(fn (History $message): array => [
                     'id' => $message->id,
                     'role' => $message->role->value,

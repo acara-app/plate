@@ -5,10 +5,12 @@ declare(strict_types=1);
 use App\Jobs\ProcessChatStream;
 use App\Models\AiUsage;
 use App\Models\Conversation;
+use App\Models\History;
 use App\Models\User;
 use App\Services\StreamEventStore;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
+use Laravel\Ai\Messages\MessageRole;
 
 beforeEach(function (): void {
     Config::set('plate.enable_premium_upgrades', true);
@@ -38,13 +40,27 @@ it('dispatches web chat streams to the chat queue and returns immediately', func
             'status' => 'processing',
             'channel' => 'chat.'.$user->id,
             'conversationId' => $conversation->id,
+        ])
+        ->assertJsonStructure([
+            'userMessageId',
+            'assistantMessageId',
         ]);
+
+    $messages = $conversation->fresh()->messages()->get();
+    $userMessage = $messages->first(fn (History $message): bool => $message->role === MessageRole::User);
+    $assistantMessage = $messages->first(fn (History $message): bool => $message->role === MessageRole::Assistant);
+
+    expect($messages)->toHaveCount(2)
+        ->and($userMessage?->chatStreamStatus())->toBe(History::STREAM_STATUS_SUBMITTED)
+        ->and($assistantMessage?->chatStreamStatus())->toBe(History::STREAM_STATUS_PENDING);
 
     Queue::assertPushed(ProcessChatStream::class, fn (ProcessChatStream $job): bool => $job->queue === 'chat'
         && $job->userId === $user->id
         && $job->conversationId === $conversation->id
         && $job->content === 'Hello from broadcast'
         && $job->streamId !== ''
+        && $job->userMessageId === $userMessage?->id
+        && $job->assistantMessageId === $assistantMessage?->id
         && $job->channel === 'web');
 });
 
@@ -95,6 +111,10 @@ it('dispatches api v2 chat streams with the mobile channel marker', function ():
         ->assertJson([
             'status' => 'processing',
             'conversationId' => $conversation->id,
+        ])
+        ->assertJsonStructure([
+            'userMessageId',
+            'assistantMessageId',
         ]);
 
     Queue::assertPushed(ProcessChatStream::class, fn (ProcessChatStream $job): bool => $job->streamId !== ''

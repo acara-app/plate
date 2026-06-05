@@ -7,12 +7,6 @@ namespace App\Ai;
 use App\Enums\ModelName;
 use Laravel\Ai\Files\Base64Image;
 
-/**
- * Immutable value object representing a request to the AI agent.
- *
- * Transport-agnostic — carries only the data needed to run a request,
- * with no knowledge of HTTP, WebSocket, or queue mechanics.
- */
 final readonly class AgentRequest
 {
     /**
@@ -23,6 +17,7 @@ final readonly class AgentRequest
         public array $images = [],
         public ?ModelName $modelName = null,
         public ?string $conversationId = null,
+        public ?string $streamId = null,
     ) {}
 
     public function hasImages(): bool

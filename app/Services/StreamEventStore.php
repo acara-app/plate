@@ -18,12 +18,18 @@ class StreamEventStore
 
     private const int TTL_SECONDS = 600;
 
+    public function __construct(
+        private readonly StreamAggregator $aggregator,
+    ) {}
+
     public function append(string $conversationId, StreamEvent $event, int $sequence): void
     {
+        $normalized = $this->aggregator->normalizeEvent($event);
+
         $payload = json_encode([
             'sequence' => $sequence,
-            'type' => $event->type(),
-            'data' => $event->toArray(),
+            'type' => $normalized['type'],
+            'data' => $normalized,
             'vercel' => $event->toVercelProtocolArray(),
         ], JSON_THROW_ON_ERROR);
 
@@ -110,10 +116,7 @@ class StreamEventStore
 
     public function aggregateText(string $conversationId): string
     {
-        return collect($this->eventsAfter($conversationId, -1))
-            ->filter(fn (array $event): bool => $event['type'] === 'text_delta')
-            ->map(fn (array $event): string => (string) ($event['data']['delta'] ?? ''))
-            ->join('');
+        return $this->aggregator->aggregateStoredEvents($this->eventsAfter($conversationId, -1))->text;
     }
 
     /**
@@ -121,20 +124,7 @@ class StreamEventStore
      */
     public function aggregateToolCalls(string $conversationId): array
     {
-        return collect($this->eventsAfter($conversationId, -1))
-            ->filter(fn (array $event): bool => $event['type'] === 'tool_call')
-            ->map(fn (array $event): array => [
-                'id' => (string) $event['data']['tool_id'],
-                'name' => (string) $event['data']['tool_name'],
-                'arguments' => is_array($event['data']['arguments'] ?? null)
-                    ? $event['data']['arguments']
-                    : [],
-                'result_id' => $event['data']['result_id'] ?? null,
-                'reasoning_id' => $event['data']['reasoning_id'] ?? null,
-                'reasoning_summary' => $event['data']['reasoning_summary'] ?? null,
-            ])
-            ->values()
-            ->all();
+        return $this->aggregator->aggregateStoredEvents($this->eventsAfter($conversationId, -1))->toolCalls;
     }
 
     /**
@@ -142,17 +132,7 @@ class StreamEventStore
      */
     public function aggregateToolResults(string $conversationId): array
     {
-        return collect($this->eventsAfter($conversationId, -1))
-            ->filter(fn (array $event): bool => $event['type'] === 'tool_result')
-            ->map(fn (array $event): array => [
-                'id' => (string) $event['data']['tool_id'],
-                'name' => (string) $event['data']['tool_name'],
-                'arguments' => [],
-                'result' => $event['data']['result'] ?? null,
-                'result_id' => $event['data']['result_id'] ?? null,
-            ])
-            ->values()
-            ->all();
+        return $this->aggregator->aggregateStoredEvents($this->eventsAfter($conversationId, -1))->toolResults;
     }
 
     private function streamKey(string $conversationId): string

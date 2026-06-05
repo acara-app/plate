@@ -6,9 +6,17 @@ import { applyStreamEvent, type RawStreamEvent } from './process-event';
 
 const STREAM_EVENTS = [
     '.stream_start',
+    '.text_start',
     '.text_delta',
-    '.citation',
+    '.text_complete',
+    '.thinking_start',
+    '.thinking',
+    '.thinking_complete',
+    '.tool_call',
     '.tool_result',
+    '.provider_tool',
+    '.artifact',
+    '.citation',
 ];
 
 interface RetryingPayload {
