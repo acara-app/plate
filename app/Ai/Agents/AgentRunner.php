@@ -54,8 +54,7 @@ final class AgentRunner implements Agent, Conversational, HasTools
                 attachments: $request->images,
                 provider: $modelName->labProvider(),
                 model: $modelName->value,
-            )
-            ->usingVercelDataProtocol();
+            );
     }
 
     // @codeCoverageIgnoreStart

@@ -11,7 +11,6 @@ interface ReplayEnvelope {
     sequence: number;
     type: string;
     data: RawStreamEvent;
-    vercel: unknown;
 }
 
 interface StreamEventsResponse {

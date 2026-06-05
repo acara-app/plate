@@ -16,7 +16,6 @@ final class ChatStreamFailed implements ShouldBroadcastNow
         public readonly int $userId,
         public readonly string $conversationId,
         public readonly string $message,
-        public readonly bool $recoverable = true,
     ) {}
 
     /**
@@ -33,14 +32,13 @@ final class ChatStreamFailed implements ShouldBroadcastNow
     }
 
     /**
-     * @return array{conversationId: string, message: string, recoverable: bool}
+     * @return array{conversationId: string, message: string}
      */
     public function broadcastWith(): array
     {
         return [
             'conversationId' => $this->conversationId,
             'message' => $this->message,
-            'recoverable' => $this->recoverable,
         ];
     }
 }

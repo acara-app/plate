@@ -2,7 +2,6 @@ import ChatStopController from '@/actions/App/Http/Controllers/ChatStopControlle
 import { stream } from '@/routes/chat';
 import type { PaywallCapTrigger, SubscriptionTier } from '@/types';
 import type { ChatStatus } from '@/types/chat';
-import { useSocketId } from '@laravel/echo-react';
 import type { FileUIPart, UIMessage } from 'ai';
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { chatReducer, createInitialState } from './chat/message-reducer';
@@ -62,7 +61,6 @@ export function useChatStream({
     const seenEventIdsRef = useRef<Set<string>>(new Set());
     const streamActiveRef = useRef(false);
     const onFinishRef = useRef(onFinish);
-    const socketId = useSocketId();
     onFinishRef.current = onFinish;
 
     const {
@@ -121,17 +119,9 @@ export function useChatStream({
                 message: { id: `user-${Date.now()}`, role: 'user', parts },
             });
 
-            const headers: Record<string, string> = {
-                'Content-Type': 'application/json',
-            };
-
-            if (socketId) {
-                headers['X-Socket-ID'] = socketId;
-            }
-
             void fetch(stream.url(conversationId), {
                 method: 'POST',
-                headers,
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ messages: [{ role: 'user', parts }] }),
             })
@@ -176,7 +166,6 @@ export function useChatStream({
         [
             conversationId,
             resetReplayState,
-            socketId,
             startReplayPolling,
             stopReplayPolling,
         ],

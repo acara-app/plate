@@ -30,7 +30,6 @@ class StreamEventStore
             'sequence' => $sequence,
             'type' => $normalized['type'],
             'data' => $normalized,
-            'vercel' => $event->toVercelProtocolArray(),
         ], JSON_THROW_ON_ERROR);
 
         $this->redis()->zadd($this->streamKey($conversationId), [$payload => $sequence]);
@@ -38,7 +37,7 @@ class StreamEventStore
     }
 
     /**
-     * @return list<array{sequence: int, type: string, data: array<string, mixed>, vercel: array<string, mixed>|null}>
+     * @return list<array{sequence: int, type: string, data: array<string, mixed>}>
      */
     public function eventsAfter(string $conversationId, int $afterSequence): array
     {

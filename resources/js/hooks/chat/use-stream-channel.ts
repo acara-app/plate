@@ -15,7 +15,6 @@ const STREAM_EVENTS = [
     '.tool_call',
     '.tool_result',
     '.provider_tool',
-    '.artifact',
     '.citation',
 ];
 

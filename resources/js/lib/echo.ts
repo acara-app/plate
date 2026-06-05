@@ -1,4 +1,4 @@
-import { configureEcho, echo, echoIsConfigured } from '@laravel/echo-react';
+import { configureEcho, echo } from '@laravel/echo-react';
 
 const reverbScheme = import.meta.env.VITE_REVERB_SCHEME as string | undefined;
 const reverbPort = Number(import.meta.env.VITE_REVERB_PORT);
@@ -30,4 +30,4 @@ export function reconnect(): void {
     connector.pusher?.connect?.();
 }
 
-export { echo, echoIsConfigured };
+export { echo };

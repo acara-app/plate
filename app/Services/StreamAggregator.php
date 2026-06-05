@@ -157,12 +157,12 @@ final readonly class StreamAggregator
     }
 
     /**
-     * @param  list<array{sequence?: int, type?: string, data?: array<string, mixed>}>  $storedEvents
+     * @param  list<array{sequence: int, type: string, data: array<string, mixed>}>  $storedEvents
      */
     public function aggregateStoredEvents(array $storedEvents): ChatStreamResult
     {
         return $this->aggregateNormalized(array_values(array_map(
-            fn (array $event): array => is_array($event['data'] ?? null) ? $event['data'] : $event,
+            fn (array $event): array => $event['data'],
             $storedEvents,
         )));
     }
@@ -196,16 +196,7 @@ final readonly class StreamAggregator
     {
         return collect($events)
             ->filter(fn (array $event): bool => ($event['type'] ?? null) === 'tool_call')
-            ->map(fn (array $event): array => is_array($event['tool_call'] ?? null)
-                ? $event['tool_call']
-                : [
-                    'id' => (string) ($event['tool_id'] ?? $event['id'] ?? ''),
-                    'name' => (string) ($event['tool_name'] ?? ''),
-                    'arguments' => is_array($event['arguments'] ?? null) ? $event['arguments'] : [],
-                    'result_id' => $event['result_id'] ?? null,
-                    'reasoning_id' => $event['reasoning_id'] ?? null,
-                    'reasoning_summary' => $event['reasoning_summary'] ?? null,
-                ])
+            ->map(fn (array $event): array => $event['tool_call'])
             ->values()
             ->all();
     }
@@ -218,15 +209,7 @@ final readonly class StreamAggregator
     {
         return collect($events)
             ->filter(fn (array $event): bool => ($event['type'] ?? null) === 'tool_result')
-            ->map(fn (array $event): array => is_array($event['tool_result'] ?? null)
-                ? $event['tool_result']
-                : [
-                    'id' => (string) ($event['tool_id'] ?? $event['id'] ?? ''),
-                    'name' => (string) ($event['tool_name'] ?? ''),
-                    'arguments' => is_array($event['arguments'] ?? null) ? $event['arguments'] : [],
-                    'result' => $event['result'] ?? null,
-                    'result_id' => $event['result_id'] ?? null,
-                ])
+            ->map(fn (array $event): array => $event['tool_result'])
             ->values()
             ->all();
     }

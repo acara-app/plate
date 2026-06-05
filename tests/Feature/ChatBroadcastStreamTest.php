@@ -146,7 +146,7 @@ it('returns replay events for owned web conversations', function (): void {
         ->once()
         ->with($conversation->id, 4)
         ->andReturn([
-            ['sequence' => 5, 'type' => 'text_delta', 'data' => ['delta' => 'Hi'], 'vercel' => null],
+            ['sequence' => 5, 'type' => 'text_delta', 'data' => ['delta' => 'Hi']],
         ]);
     $store->shouldReceive('isStreaming')->once()->with($conversation->id)->andReturn(true);
     $store->shouldReceive('lastSequence')->once()->with($conversation->id)->andReturn(5);

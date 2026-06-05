@@ -42,7 +42,6 @@ it('returns replay events after a sequence number', function (): void {
         'sequence' => 3,
         'type' => 'text_delta',
         'data' => ['delta' => 'there'],
-        'vercel' => ['type' => 'text-delta', 'delta' => 'there'],
     ], JSON_THROW_ON_ERROR);
 
     Redis::shouldReceive('connection')->once()->andReturn($connection);
@@ -58,7 +57,6 @@ it('returns replay events after a sequence number', function (): void {
                 'sequence' => 3,
                 'type' => 'text_delta',
                 'data' => ['delta' => 'there'],
-                'vercel' => ['type' => 'text-delta', 'delta' => 'there'],
             ],
         ]);
 });

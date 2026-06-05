@@ -87,7 +87,6 @@ export function applyStreamEvent(
         case 'thinking_complete':
         case 'tool_call':
         case 'provider_tool':
-        case 'artifact':
         case 'stream_end':
             seenEventIds.add(raw.id);
             break;
