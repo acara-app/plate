@@ -3,7 +3,13 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V2 as ApiV2;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
+
+Route::post('v2/broadcasting/auth', fn (Request $request) => Broadcast::auth($request))
+    ->middleware(['auth:sanctum', 'throttle:60,1'])
+    ->name('api.v2.broadcasting.auth');
 
 Route::prefix('v2/sync')->group(function (): void {
     Route::post('pair', ApiV2\MobileSyncPairController::class)
