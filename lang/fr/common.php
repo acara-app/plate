@@ -172,6 +172,23 @@ return [
         ],
     ],
 
+    'dashboard_ai' => [
+        'eyebrow' => 'Altani est prêt',
+        'heading' => 'Sur quoi voulez-vous avancer aujourd\'hui ?',
+        'description' => 'Posez une question sur la glycémie, les repas, le contexte médical, les tendances synchronisées ou le prochain choix santé.',
+        'placeholder' => 'Demandez à Altani pour votre santé, vos repas, votre glycémie ou votre routine...',
+        'input_label' => 'Poser une question santé à Altani',
+        'helper' => '{{count}} caractères restants',
+        'submit' => 'Demander à Altani',
+        'disclaimer' => 'À titre informatif uniquement. Ne remplace pas un avis médical ou nutritionnel professionnel.',
+        'prompts' => [
+            'glucose' => 'Qu\'est-ce qui pourrait expliquer mes variations récentes de glycémie ?',
+            'meal' => 'Que devrais-je manger aujourd\'hui pour garder une énergie stable ?',
+            'energy' => 'Comment améliorer mon sommeil, mon activité et ma récupération cette semaine ?',
+            'sync' => 'Quels schémas de santé devrais-je chercher dans mes données synchronisées ?',
+        ],
+    ],
+
     'onboarding_banner' => [
         'text' => 'Terminez la configuration pour obtenir des recommandations nutritionnelles adaptées.',
         'complete' => 'Compléter la configuration',
@@ -630,13 +647,18 @@ return [
     'sidebar' => [
         'group_label' => 'Premiers pas',
         'nav' => [
+            'ai' => 'IA',
+            'health' => 'Santé',
             'planning' => 'Mon bien-être',
             'context' => 'Mon profil',
+            'settings' => 'Paramètres',
             'home' => 'Accueil',
+            'chats' => 'Chats',
             'meal_plans' => 'Mon menu',
             'health_entries' => 'Carnet de suivi',
             'update_info' => 'Informations personnelles',
             'mobile_sync' => 'Sync mobile',
+            'integrations' => 'Intégrations',
             'dietary_preferences' => 'Préférences alimentaires',
             'health_conditions' => 'Problèmes de santé',
             'medications' => 'Médicaments',
@@ -1049,7 +1071,6 @@ return [
 
     'conversations' => [
         'title' => 'Conversations',
-        'description' => 'Votre historique de discussion avec Altani.',
         'new_chat' => 'Nouvelle discussion',
         'empty' => 'Aucune conversation pour le moment.',
         'start_first' => 'Commencer votre première discussion',

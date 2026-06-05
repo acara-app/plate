@@ -171,6 +171,23 @@ return [
         ],
     ],
 
+    'dashboard_ai' => [
+        'eyebrow' => 'Altani is ready',
+        'heading' => 'What should we work on today?',
+        'description' => 'Ask about glucose, meals, medication context, synced health trends, or the next healthy choice.',
+        'placeholder' => 'Ask Altani about your health, meals, glucose, or routine...',
+        'input_label' => 'Ask Altani a health question',
+        'helper' => '{{count}} characters left',
+        'submit' => 'Ask Altani',
+        'disclaimer' => 'For informational purposes only. Not a substitute for professional medical or nutritional advice.',
+        'prompts' => [
+            'glucose' => 'What might explain my recent glucose swings?',
+            'meal' => 'What should I eat today to keep energy steady?',
+            'energy' => 'How can I improve sleep, movement, and recovery this week?',
+            'sync' => 'What health patterns should I look for from my synced data?',
+        ],
+    ],
+
     'onboarding_banner' => [
         'text' => 'Finish setup to get tailored nutrition recommendations.',
         'complete' => 'Complete Setup',
@@ -629,13 +646,18 @@ return [
     'sidebar' => [
         'group_label' => 'Start Here',
         'nav' => [
+            'ai' => 'AI',
+            'health' => 'Health',
             'planning' => 'My Wellness',
             'context' => 'My Profile',
+            'settings' => 'Settings',
             'home' => 'Home',
+            'chats' => 'Chats',
             'meal_plans' => 'My Menu',
             'health_entries' => 'Logbook',
             'update_info' => 'Personal Details',
             'mobile_sync' => 'Mobile Sync',
+            'integrations' => 'Integrations',
             'dietary_preferences' => 'Food Preferences',
             'health_conditions' => 'Health Conditions',
             'medications' => 'Medications',
@@ -1048,7 +1070,6 @@ return [
 
     'conversations' => [
         'title' => 'Conversations',
-        'description' => 'Your chat history with Altani.',
         'new_chat' => 'New Chat',
         'empty' => 'No conversations yet.',
         'start_first' => 'Start your first chat',

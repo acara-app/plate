@@ -14,6 +14,8 @@ import {
 import { UpgradeButton } from '@/components/upgrade-button';
 import useSharedProps from '@/hooks/use-shared-props';
 import { dashboard, privacy, terms } from '@/routes';
+import chat from '@/routes/chat';
+import integrations from '@/routes/integrations';
 import mealPlans from '@/routes/meal-plans';
 import mobileSync from '@/routes/mobile-sync';
 import biometrics from '@/routes/onboarding/biometrics';
@@ -24,6 +26,8 @@ import {
     CalendarHeartIcon,
     FileText,
     HeartIcon,
+    MessageCircle,
+    Plug,
     ShieldCheck,
     Smartphone,
     UserPen,
@@ -38,6 +42,14 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
         href: dashboard(),
         icon: HeartIcon,
     },
+    {
+        title: t('sidebar.nav.chats'),
+        href: chat.index(),
+        icon: MessageCircle,
+    },
+];
+
+const getHealthNavItems = (t: (key: string) => string): NavItem[] => [
     {
         title: t('sidebar.nav.meal_plans'),
         href: mealPlans.index(),
@@ -61,6 +73,11 @@ const getProfileNavItems = (t: (key: string) => string): NavItem[] => [
         href: mobileSync.edit(),
         icon: Smartphone,
     },
+    {
+        title: t('sidebar.nav.integrations'),
+        href: integrations.edit(),
+        icon: Plug,
+    },
 ];
 
 const getFooterNavItems = (t: (key: string) => string): NavItem[] => [
@@ -80,6 +97,7 @@ export function AppSidebar() {
     const { currentUser, enablePremiumUpgrades } = useSharedProps();
     const { t } = useTranslation('common');
     const mainNavItems = getMainNavItems(t);
+    const healthNavItems = getHealthNavItems(t);
     const profileNavItems = getProfileNavItems(t);
     const footerNavItems = getFooterNavItems(t);
 
@@ -98,14 +116,16 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
+                <NavMain items={mainNavItems} label={t('sidebar.nav.ai')} />
+                <Separator />
                 <NavMain
-                    items={mainNavItems}
-                    label={t('sidebar.nav.planning')}
+                    items={healthNavItems}
+                    label={t('sidebar.nav.health')}
                 />
                 <Separator />
                 <NavMain
                     items={profileNavItems}
-                    label={t('sidebar.nav.context')}
+                    label={t('sidebar.nav.settings')}
                 />
             </SidebarContent>
 

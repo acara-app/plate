@@ -50,11 +50,15 @@ export default function CreateChat() {
         text: string;
         files?: FileUIPart[];
     } | null>(null);
+    const autoStartedPromptRef = useRef<string | null>(null);
 
     const initialMessages = useMemo(
         () => (messageHistories ?? []) as UIMessage[],
         [messageHistories],
     );
+    const normalizedInitialPrompt = initialPrompt?.trim() ?? '';
+    const shouldAutoStartInitialPrompt =
+        normalizedInitialPrompt.length > 0 && initialMessages.length === 0;
 
     const handleStreamFinish = useCallback(() => {
         router.reload({ only: ['creditWarning'] });
@@ -83,6 +87,40 @@ export default function CreateChat() {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [messages]);
+
+    useEffect(() => {
+        if (!shouldAutoStartInitialPrompt) {
+            return;
+        }
+
+        const promptKey = `${conversationId}:${normalizedInitialPrompt}`;
+
+        if (autoStartedPromptRef.current === promptKey) {
+            return;
+        }
+
+        autoStartedPromptRef.current = promptKey;
+        lastMessageRef.current = { text: normalizedInitialPrompt };
+        sendMessage({ text: normalizedInitialPrompt });
+
+        const url = new URL(window.location.href);
+
+        if (!url.searchParams.has('prompt')) {
+            return;
+        }
+
+        url.searchParams.delete('prompt');
+        window.history.replaceState(
+            window.history.state,
+            '',
+            `${url.pathname}${url.search}${url.hash}`,
+        );
+    }, [
+        conversationId,
+        normalizedInitialPrompt,
+        sendMessage,
+        shouldAutoStartInitialPrompt,
+    ]);
 
     function handleSubmit(message: string, files?: FileUIPart[]) {
         if (!message.trim() && (!files || files.length === 0)) {
@@ -179,7 +217,9 @@ export default function CreateChat() {
                         onStop={stop}
                         onInputChange={handleInputChange}
                         disabled={isStreaming || isSubmitting}
-                        initialMessage={initialPrompt}
+                        initialMessage={
+                            shouldAutoStartInitialPrompt ? null : initialPrompt
+                        }
                         isLoading={isStreaming || isSubmitting}
                     />
                     <p className="px-2 pb-2 text-center text-xs text-muted-foreground sm:px-4 sm:pb-4 sm:text-sm">

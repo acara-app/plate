@@ -51,9 +51,6 @@ export default function ConversationsIndex({ conversations }: Props) {
                             <h1 className="text-3xl font-bold tracking-tight">
                                 {t('conversations.title')}
                             </h1>
-                            <p className="text-muted-foreground">
-                                {t('conversations.description')}
-                            </p>
                         </div>
                         <Button asChild>
                             <Link href={chat.create(generateUUID()).url}>
@@ -107,9 +104,9 @@ export default function ConversationsIndex({ conversations }: Props) {
                                                             </span>
                                                         </div>
                                                         <span className="shrink-0 text-xs text-muted-foreground">
-                                                            {
-                                                                conversation.updated_at
-                                                            }
+                                                            {new Date(
+                                                                conversation.updated_at,
+                                                            ).toLocaleString()}
                                                         </span>
                                                     </Link>
                                                 </li>
