@@ -16,7 +16,7 @@ use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[Provider('openai')]
-#[MaxTokens(100)]
+#[MaxTokens(1000)]
 #[Timeout(30)]
 final class ConversationTitleGeneratorAgent implements Agent, GeneratesConversationTitle, HasStructuredOutput
 {
