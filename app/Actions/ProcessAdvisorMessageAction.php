@@ -8,6 +8,8 @@ use App\Ai\AgentRequest;
 use App\Ai\Agents\AgentRunner;
 use App\Contracts\ProcessesAdvisorMessage;
 use App\Enums\ModelName;
+use App\Jobs\GenerateConversationTitleJob;
+use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
@@ -30,9 +32,12 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
         Auth::login($user);
 
         $conversationId ??= $this->conversationStore->latestConversationId($user->id)
-            ?? $this->conversationStore->storeConversation($user->id, 'Telegram Chat');
+            ?? $this->conversationStore->storeConversation($user->id, Conversation::DEFAULT_TITLE);
 
         Context::add('chat.conversation_id', $conversationId);
+
+        $conversation = Conversation::query()->find($conversationId);
+        $isFirstTurn = $conversation?->messages()->doesntExist() ?? false;
 
         $request = new AgentRequest(
             message: $message,
@@ -43,6 +48,10 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
 
         $response = $this->agentRunner->runSync($request, $user);
 
+        if ($isFirstTurn && $conversation instanceof Conversation) {
+            dispatch(new GenerateConversationTitleJob($conversation));
+        }
+
         return [
             'response' => $response->text,
             'conversation_id' => $conversationId,
@@ -51,6 +60,6 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
 
     public function resetConversation(User $user): string
     {
-        return $this->conversationStore->storeConversation($user->id, 'Telegram Chat');
+        return $this->conversationStore->storeConversation($user->id, Conversation::DEFAULT_TITLE);
     }
 }

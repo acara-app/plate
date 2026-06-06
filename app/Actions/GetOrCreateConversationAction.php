@@ -22,7 +22,7 @@ final readonly class GetOrCreateConversationAction
         return Conversation::query()->create([
             'id' => $conversationId,
             'user_id' => $user->id,
-            'title' => 'New Chat',
+            'title' => Conversation::DEFAULT_TITLE,
         ])->load('messages');
     }
 }

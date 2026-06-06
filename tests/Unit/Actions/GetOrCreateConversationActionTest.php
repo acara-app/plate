@@ -26,18 +26,19 @@ it('returns existing conversation when it exists', function (): void {
         ->and($result->user_id)->toBe($this->user->id);
 });
 
-it('creates new conversation with default title when it does not exist', function (): void {
+it('creates new conversation with the default title when it does not exist', function (): void {
     $conversationId = (string) fake()->uuid();
 
     $result = $this->action->handle($conversationId, $this->user);
 
     expect($result->id)->toBe($conversationId)
         ->and($result->user_id)->toBe($this->user->id)
-        ->and($result->title)->not->toBeEmpty();
+        ->and($result->title)->toBe(Conversation::DEFAULT_TITLE);
 
     $this->assertDatabaseHas('agent_conversations', [
         'id' => $conversationId,
         'user_id' => $this->user->id,
+        'title' => Conversation::DEFAULT_TITLE,
     ]);
 });
 

@@ -7,6 +7,7 @@ namespace App\Actions;
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Contracts\Memory\DispatchesMemoryExtraction;
 use App\Http\Requests\StreamChatRequest;
+use App\Jobs\GenerateConversationTitleJob;
 use App\Jobs\ProcessChatStream;
 use App\Jobs\SummarizeConversationJob;
 use App\Models\Conversation;
@@ -34,8 +35,12 @@ final readonly class StartChatStream
         $this->memoryExtraction->dispatchIfEligible($user->id);
         $this->events->clear($conversation->id);
 
+        $isFirstTurn = $conversation->messages()->doesntExist();
+
         $attachments = $this->serializeAttachments($request->userAttachments());
         $turn = $this->pendingTurn->handle($conversation, $user, $request->userMessage(), $attachments, $channel);
+
+        $this->dispatchTitleGenerationIfNeeded($conversation, $isFirstTurn);
 
         dispatch(new ProcessChatStream(
             userId: $user->id,
@@ -68,6 +73,15 @@ final readonly class StartChatStream
             fn (Base64Image $image): array => $image->toArray(),
             $images,
         ));
+    }
+
+    private function dispatchTitleGenerationIfNeeded(Conversation $conversation, bool $isFirstTurn): void
+    {
+        if (! $isFirstTurn) {
+            return;
+        }
+
+        dispatch(new GenerateConversationTitleJob($conversation));
     }
 
     private function dispatchSummarizationIfNeeded(Conversation $conversation): void

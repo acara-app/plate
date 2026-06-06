@@ -33,6 +33,8 @@ final class Conversation extends Model
     /** @use HasFactory<ConversationFactory> */
     use HasFactory, HasUuids;
 
+    public const string DEFAULT_TITLE = 'New Chat';
+
     protected $guarded = [];
 
     public function casts(): array
