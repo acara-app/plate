@@ -12,7 +12,7 @@ covers(GenerateConversationTitleAction::class);
 
 function runTitleAction(Conversation $conversation, GeneratesConversationTitle $agent): void
 {
-    (new GenerateConversationTitleAction($agent))->handle($conversation);
+    new GenerateConversationTitleAction($agent)->handle($conversation);
 }
 
 it('generates and saves a title from the first user message', function (): void {
