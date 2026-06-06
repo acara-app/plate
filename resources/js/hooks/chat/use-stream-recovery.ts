@@ -31,7 +31,7 @@ interface UseStreamRecoveryReturn {
     startReplayPolling: () => void;
     stopReplayPolling: () => void;
     finishStream: () => void;
-    resumeOnMount: () => Promise<void>;
+    resumeOnMount: (forcePoll?: boolean) => Promise<void>;
     resetReplayState: () => void;
 }
 
@@ -156,13 +156,20 @@ export function useStreamRecovery({
         }, EVENT_REPLAY_INTERVAL);
     }, [replayEvents, stopReplayPolling]);
 
-    const resumeOnMount = useCallback(async () => {
-        const streaming = await replayEvents({ requireStreaming: true });
+    const resumeOnMount = useCallback(
+        async (forcePoll = false) => {
+            const streaming = await replayEvents({ requireStreaming: true });
 
-        if (streaming) {
-            startReplayPolling();
-        }
-    }, [replayEvents, startReplayPolling]);
+            // forcePoll covers a turn that's been persisted server-side but has
+            // not buffered its first event yet, so the probe above can't see it
+            // (e.g. a chat started from the dashboard composer). Keep polling
+            // until events appear or the websocket takes over.
+            if (streaming || forcePoll) {
+                startReplayPolling();
+            }
+        },
+        [replayEvents, startReplayPolling],
+    );
 
     return {
         startReplayPolling,

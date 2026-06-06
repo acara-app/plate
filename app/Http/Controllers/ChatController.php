@@ -9,13 +9,18 @@ use App\Actions\Billing\BuildCreditWarning;
 use App\Actions\BuildConversationMessagesAction;
 use App\Actions\DeleteConversationHistory;
 use App\Actions\GetOrCreateConversationAction;
+use App\Actions\StartChatStream;
+use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Http\Requests\StoreChatConversationRequest;
+use App\Http\Requests\StreamChatRequest;
 use App\Models\Conversation;
+use App\Models\History;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -28,6 +33,7 @@ final readonly class ChatController
         private BuildCreditWarning $buildCreditWarning,
         private BuildConversationApprovalStates $approvalStates,
         private DeleteConversationHistory $deleteConversationHistory,
+        private StartChatStream $startChatStream,
     ) {}
 
     public function index(): Response
@@ -50,11 +56,32 @@ final readonly class ChatController
             'conversationId' => $conversation->id,
             'messages' => fn (): array => $this->messagesAction->handle($conversation),
             'initialPrompt' => $request->initialPrompt(),
+            'initialStreaming' => $conversation->messages->contains(
+                fn (History $message): bool => $message->isPendingStreamAssistant(),
+            ),
             'creditWarning' => $this->buildCreditWarning
                 ->currentState($this->user)
                 ?->toArray(),
             'approvals' => fn (): array => $this->approvalStates->handle($conversation),
         ]);
+    }
+
+    public function store(
+        StreamChatRequest $request,
+        string $conversationId
+    ): RedirectResponse {
+        abort_unless(Str::isUuid($conversationId), 400, 'Invalid conversation ID format');
+
+        $conversation = $this->conversationAction->handle($conversationId, $this->user);
+        Gate::authorize('view', $conversation);
+
+        try {
+            $this->startChatStream->handle($request, $this->user, $conversation);
+        } catch (UsageLimitExceededException $exception) {
+            return back()->withErrors(['message' => $exception->userMessage()]);
+        }
+
+        return to_route('chat.create', $conversation->id);
     }
 
     public function destroy(Conversation $conversation): RedirectResponse

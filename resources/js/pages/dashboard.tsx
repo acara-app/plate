@@ -1,25 +1,16 @@
 import { OnboardingBanner } from '@/components/onboarding-banner';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
 import { generateUUID } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import chat from '@/routes/chat';
 import { BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
-import {
-    Activity,
-    Apple,
-    Droplets,
-    HeartPulse,
-    Send,
-    Sparkles,
-} from 'lucide-react';
-import { FormEvent, useRef, useState } from 'react';
+import { Head, useForm } from '@inertiajs/react';
+import type { FileUIPart } from 'ai';
+import { Activity, Apple, Droplets, HeartPulse, Sparkles } from 'lucide-react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-
-const maxPromptLength = 500;
+import ChatInput, { type ChatInputHandle } from './chat/chat-input';
 
 const promptKeys = [
     'dashboard_ai.prompts.glucose',
@@ -37,40 +28,48 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     },
 ];
 
+type ChatMessagePart = {
+    type: string;
+    text?: string;
+    mediaType?: string;
+    url?: string;
+    filename?: string;
+};
+
+type ChatMessage = { role: string; parts: ChatMessagePart[] };
+
 export default function Dashboard() {
     const { t } = useTranslation('common');
     const breadcrumbs = getBreadcrumbs(t);
     const { currentUser } = useSharedProps();
-    const [prompt, setPrompt] = useState('');
-    const promptInputRef = useRef<HTMLTextAreaElement>(null);
+    const chatInputRef = useRef<ChatInputHandle>(null);
 
-    const trimmedPrompt = prompt.trim();
-    const canSubmit = trimmedPrompt.length > 0;
+    const form = useForm<{ messages: ChatMessage[] }>({ messages: [] });
 
-    function startChat(nextPrompt: string): void {
-        const normalizedPrompt = nextPrompt.trim();
+    const submitError = (form.errors as Record<string, string | undefined>)
+        .message;
 
-        if (!normalizedPrompt) {
+    function startChat(text: string, files?: FileUIPart[]): void {
+        const parts: ChatMessagePart[] = [
+            ...(text.trim() ? [{ type: 'text', text }] : []),
+            ...(files ?? []),
+        ];
+
+        if (parts.length === 0) {
             return;
         }
 
-        router.visit(
-            chat.create(generateUUID(), {
-                query: {
-                    prompt: normalizedPrompt.slice(0, maxPromptLength),
-                },
-            }).url,
-        );
+        const conversationId = generateUUID();
+
+        form.transform(() => ({
+            messages: [{ role: 'user', parts }],
+        }));
+        form.post(chat.store(conversationId).url);
     }
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>): void {
-        event.preventDefault();
-        startChat(prompt);
-    }
-
-    function selectPrompt(nextPrompt: string): void {
-        setPrompt(nextPrompt.slice(0, maxPromptLength));
-        promptInputRef.current?.focus();
+    function selectPrompt(promptText: string): void {
+        chatInputRef.current?.setMessage(promptText);
+        chatInputRef.current?.focus();
     }
 
     return (
@@ -102,38 +101,20 @@ export default function Dashboard() {
                                 </p>
                             </div>
 
-                            <form
-                                onSubmit={handleSubmit}
-                                className="rounded-xl border border-border bg-card p-1.5 shadow-sm"
-                            >
-                                <Textarea
-                                    ref={promptInputRef}
-                                    value={prompt}
-                                    onChange={(event) =>
-                                        setPrompt(
-                                            event.target.value.slice(
-                                                0,
-                                                maxPromptLength,
-                                            ),
-                                        )
-                                    }
+                            <div className="space-y-2">
+                                <ChatInput
+                                    ref={chatInputRef}
+                                    onSubmit={startChat}
+                                    disabled={form.processing}
                                     placeholder={t('dashboard_ai.placeholder')}
-                                    aria-label={t('dashboard_ai.input_label')}
-                                    maxLength={maxPromptLength}
-                                    className="min-h-16 resize-none border-0 px-3 py-3 text-sm leading-6 shadow-none focus-visible:ring-0 md:text-sm"
+                                    className="px-0 sm:px-0"
                                 />
-                                <div className="flex justify-end px-1.5 pb-1.5">
-                                    <Button
-                                        type="submit"
-                                        size="sm"
-                                        disabled={!canSubmit}
-                                        className="min-w-24"
-                                    >
-                                        <Send className="size-4" />
-                                        {t('dashboard_ai.submit')}
-                                    </Button>
-                                </div>
-                            </form>
+                                {submitError && (
+                                    <p className="px-2 text-center text-sm text-destructive">
+                                        {submitError}
+                                    </p>
+                                )}
+                            </div>
 
                             <div className="grid gap-3 sm:grid-cols-2">
                                 {promptKeys.map((key, index) => {

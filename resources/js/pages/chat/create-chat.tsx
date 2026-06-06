@@ -29,6 +29,7 @@ export default function CreateChat() {
         conversationId: initialConversationId,
         messages: messageHistories,
         initialPrompt,
+        initialStreaming,
         creditWarning: sharedCreditWarning,
         auth,
     } = page.props;
@@ -79,8 +80,19 @@ export default function CreateChat() {
         conversationId,
         userId: auth.user.id,
         initialMessages,
+        initialStreaming,
         onFinish: handleStreamFinish,
     });
+
+    const [isResuming, setIsResuming] = useState<boolean>(
+        initialStreaming ?? false,
+    );
+
+    useEffect(() => {
+        if (status !== 'ready') {
+            setIsResuming(false);
+        }
+    }, [status]);
 
     useEffect(() => {
         if (messagesEndRef.current) {
@@ -156,7 +168,8 @@ export default function CreateChat() {
         }
     }, [error, clearError]);
 
-    const showThinkingIndicator = isSubmitting && messages.length > 0;
+    const showThinkingIndicator =
+        (isSubmitting || isResuming) && messages.length > 0;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs} fixedHeight>

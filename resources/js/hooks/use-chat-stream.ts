@@ -12,6 +12,7 @@ interface UseChatStreamOptions {
     conversationId: string;
     userId: number;
     initialMessages: UIMessage[];
+    initialStreaming?: boolean;
     onFinish?: () => void;
 }
 
@@ -50,6 +51,7 @@ export function useChatStream({
     conversationId,
     userId,
     initialMessages,
+    initialStreaming = false,
     onFinish,
 }: UseChatStreamOptions): UseChatStreamReturn {
     const [state, dispatch] = useReducer(
@@ -90,8 +92,11 @@ export function useChatStream({
     });
 
     useEffect(() => {
-        void resumeOnMount();
-    }, [resumeOnMount]);
+        // initialStreaming = a turn was started server-side (e.g. from the
+        // dashboard composer); force polling because it may not have buffered
+        // its first event yet when this mounts.
+        void resumeOnMount(initialStreaming);
+    }, [resumeOnMount, initialStreaming]);
 
     useEffect(() => {
         dispatch({ type: 'SET_MESSAGES', messages: initialMessages });

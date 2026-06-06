@@ -9,6 +9,7 @@ export interface ChatPageProps {
     auth: Auth;
     conversationId: string;
     initialPrompt?: string | null;
+    initialStreaming?: boolean;
     messages: UIMessage[];
     [key: string]: unknown;
 }

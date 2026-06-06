@@ -7,7 +7,13 @@ import {
 import { cn, generateUUID } from '@/lib/utils';
 import type { FileUIPart } from 'ai';
 import { Paperclip, Send, Square, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import {
+    forwardRef,
+    useEffect,
+    useImperativeHandle,
+    useRef,
+    useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
@@ -18,6 +24,12 @@ interface Props {
     disabled?: boolean;
     initialMessage?: string | null;
     isLoading?: boolean;
+    placeholder?: string;
+}
+
+export interface ChatInputHandle {
+    setMessage: (text: string) => void;
+    focus: () => void;
 }
 
 function readFileAsDataURL(file: File): Promise<FileUIPart> {
@@ -62,15 +74,19 @@ function FilePreview({
     );
 }
 
-export default function ChatInput({
-    className,
-    onSubmit,
-    onStop,
-    onInputChange,
-    disabled = false,
-    initialMessage = null,
-    isLoading = false,
-}: Props) {
+const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
+    {
+        className,
+        onSubmit,
+        onStop,
+        onInputChange,
+        disabled = false,
+        initialMessage = null,
+        isLoading = false,
+        placeholder,
+    },
+    ref,
+) {
     const { t } = useTranslation('common');
     const [message, setMessage] = useState(initialMessage ?? '');
     const [selectedFiles, setSelectedFiles] = useState<
@@ -79,6 +95,15 @@ export default function ChatInput({
     const [isFocused, setIsFocused] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useImperativeHandle(
+        ref,
+        () => ({
+            setMessage: (text: string) => setMessage(text),
+            focus: () => textareaRef.current?.focus(),
+        }),
+        [],
+    );
 
     const hasContent = message.trim() || selectedFiles.length > 0;
 
@@ -182,7 +207,7 @@ export default function ChatInput({
                         onKeyDown={handleKeyDown}
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
-                        placeholder={t('chat.placeholder')}
+                        placeholder={placeholder ?? t('chat.placeholder')}
                         disabled={disabled}
                         aria-label="Message input"
                         aria-describedby="chat-input-hint"
@@ -278,4 +303,6 @@ export default function ChatInput({
             </div>
         </div>
     );
-}
+});
+
+export default ChatInput;
