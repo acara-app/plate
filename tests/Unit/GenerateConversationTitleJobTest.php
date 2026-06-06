@@ -57,7 +57,7 @@ it('updates the conversation title when handled', function (): void {
         ->shouldReceive('generate')->once()->andReturn('Weekly meal planning');
 
     $job = new GenerateConversationTitleJob($conversation);
-    $job->handle(app(GenerateConversationTitleAction::class));
+    $job->handle(resolve(GenerateConversationTitleAction::class));
 
     expect($conversation->refresh()->title)->toBe('Weekly meal planning');
 });
