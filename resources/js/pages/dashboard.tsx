@@ -16,7 +16,7 @@ import {
     Send,
     Sparkles,
 } from 'lucide-react';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const maxPromptLength = 500;
@@ -42,6 +42,7 @@ export default function Dashboard() {
     const breadcrumbs = getBreadcrumbs(t);
     const { currentUser } = useSharedProps();
     const [prompt, setPrompt] = useState('');
+    const promptInputRef = useRef<HTMLTextAreaElement>(null);
 
     const trimmedPrompt = prompt.trim();
     const canSubmit = trimmedPrompt.length > 0;
@@ -65,6 +66,11 @@ export default function Dashboard() {
     function handleSubmit(event: FormEvent<HTMLFormElement>): void {
         event.preventDefault();
         startChat(prompt);
+    }
+
+    function selectPrompt(nextPrompt: string): void {
+        setPrompt(nextPrompt.slice(0, maxPromptLength));
+        promptInputRef.current?.focus();
     }
 
     return (
@@ -101,6 +107,7 @@ export default function Dashboard() {
                                 className="rounded-xl border border-border bg-card p-1.5 shadow-sm"
                             >
                                 <Textarea
+                                    ref={promptInputRef}
                                     value={prompt}
                                     onChange={(event) =>
                                         setPrompt(
@@ -138,7 +145,7 @@ export default function Dashboard() {
                                             key={key}
                                             type="button"
                                             onClick={() =>
-                                                startChat(promptText)
+                                                selectPrompt(promptText)
                                             }
                                             className="group flex min-h-20 items-start gap-3 rounded-lg border border-border bg-background px-4 py-3 text-left text-sm leading-6 transition-colors hover:border-primary/40 hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                                         >
