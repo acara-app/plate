@@ -1,4 +1,15 @@
 import AdminPageWrap from '@/components/sections/admin-page-wrap';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
@@ -6,8 +17,8 @@ import { generateUUID } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import chat from '@/routes/chat';
 import { BreadcrumbItem } from '@/types';
-import { Head, InfiniteScroll, Link } from '@inertiajs/react';
-import { MessageSquare, Plus } from 'lucide-react';
+import { Head, InfiniteScroll, Link, router } from '@inertiajs/react';
+import { MessageSquare, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface Conversation {
@@ -40,6 +51,12 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
 
 export default function ConversationsIndex({ conversations }: Props) {
     const { t } = useTranslation('common');
+
+    const deleteConversation = (conversationId: string): void => {
+        router.delete(chat.destroy(conversationId), {
+            preserveScroll: true,
+        });
+    };
 
     return (
         <AppLayout breadcrumbs={getBreadcrumbs(t)}>
@@ -86,29 +103,80 @@ export default function ConversationsIndex({ conversations }: Props) {
                                         {conversations.data.map(
                                             (conversation) => (
                                                 <li key={conversation.id}>
-                                                    <Link
-                                                        href={
-                                                            chat.create(
-                                                                conversation.id,
-                                                            ).url
-                                                        }
-                                                        className="group flex items-center justify-between px-5 py-4 transition-colors hover:bg-muted/50"
-                                                    >
-                                                        <div className="flex items-center gap-3">
-                                                            <MessageSquare className="size-4 shrink-0 text-muted-foreground" />
-                                                            <span className="font-medium group-hover:text-primary">
-                                                                {conversation.title ||
-                                                                    t(
-                                                                        'conversations.untitled',
-                                                                    )}
+                                                    <div className="group flex items-center gap-3 px-5 py-4 transition-colors hover:bg-muted/50">
+                                                        <Link
+                                                            href={
+                                                                chat.create(
+                                                                    conversation.id,
+                                                                ).url
+                                                            }
+                                                            className="flex min-w-0 flex-1 items-center justify-between gap-4"
+                                                        >
+                                                            <div className="flex min-w-0 items-center gap-3">
+                                                                <MessageSquare className="size-4 shrink-0 text-muted-foreground" />
+                                                                <span className="truncate font-medium group-hover:text-primary">
+                                                                    {conversation.title ||
+                                                                        t(
+                                                                            'conversations.untitled',
+                                                                        )}
+                                                                </span>
+                                                            </div>
+                                                            <span className="shrink-0 text-xs text-muted-foreground">
+                                                                {new Date(
+                                                                    conversation.updated_at,
+                                                                ).toLocaleString()}
                                                             </span>
-                                                        </div>
-                                                        <span className="shrink-0 text-xs text-muted-foreground">
-                                                            {new Date(
-                                                                conversation.updated_at,
-                                                            ).toLocaleString()}
-                                                        </span>
-                                                    </Link>
+                                                        </Link>
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger
+                                                                asChild
+                                                            >
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="size-8 text-muted-foreground opacity-70 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
+                                                                    aria-label={t(
+                                                                        'conversations.delete_label',
+                                                                    )}
+                                                                >
+                                                                    <Trash2 className="size-4" />
+                                                                </Button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle>
+                                                                        {t(
+                                                                            'conversations.delete_title',
+                                                                        )}
+                                                                    </AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        {t(
+                                                                            'conversations.delete_description',
+                                                                        )}
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>
+                                                                        {t(
+                                                                            'cancel',
+                                                                        )}
+                                                                    </AlertDialogCancel>
+                                                                    <AlertDialogAction
+                                                                        className="bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40"
+                                                                        onClick={() =>
+                                                                            deleteConversation(
+                                                                                conversation.id,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        {t(
+                                                                            'conversations.delete_confirm',
+                                                                        )}
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
+                                                    </div>
                                                 </li>
                                             ),
                                         )}

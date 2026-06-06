@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 use App\Http\Controllers\BroadcastChatController;
 use App\Http\Controllers\ChatController;
+use App\Models\AgentApproval;
 use App\Models\AiUsage;
 use App\Models\Conversation;
+use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;
+use App\Models\UserChatPlatformLink;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
 
@@ -86,6 +89,62 @@ it('prevents access to another users conversation', function (): void {
     actingAs($intruder)
         ->get(route('chat.create', ['conversationId' => $conversation->id]))
         ->assertForbidden();
+});
+
+it('deletes a conversation history owned by the authenticated user', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    History::factory()->count(2)->create([
+        'conversation_id' => $conversation->id,
+        'user_id' => $user->id,
+    ]);
+    ConversationSummary::factory()->create([
+        'conversation_id' => $conversation->id,
+    ]);
+    AgentApproval::factory()->forConversation($conversation)->create();
+    $link = UserChatPlatformLink::factory()->linked($user)->create([
+        'conversation_id' => $conversation->id,
+    ]);
+
+    actingAs($user)
+        ->delete(route('chat.destroy', ['conversation' => $conversation->id]))
+        ->assertRedirect(route('chat.index'));
+
+    $this->assertDatabaseMissing('agent_conversations', [
+        'id' => $conversation->id,
+    ]);
+    $this->assertDatabaseMissing('agent_conversation_messages', [
+        'conversation_id' => $conversation->id,
+    ]);
+    $this->assertDatabaseMissing('conversation_summaries', [
+        'conversation_id' => $conversation->id,
+    ]);
+    $this->assertDatabaseMissing('agent_approvals', [
+        'conversation_id' => $conversation->id,
+    ]);
+
+    expect($link->fresh()->conversation_id)->toBeNull();
+});
+
+it('prevents deleting another users conversation history', function (): void {
+    $owner = User::factory()->create();
+    $intruder = User::factory()->create();
+    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+    History::factory()->create([
+        'conversation_id' => $conversation->id,
+        'user_id' => $owner->id,
+    ]);
+
+    actingAs($intruder)
+        ->delete(route('chat.destroy', ['conversation' => $conversation->id]))
+        ->assertForbidden();
+
+    $this->assertDatabaseHas('agent_conversations', [
+        'id' => $conversation->id,
+    ]);
+    $this->assertDatabaseHas('agent_conversation_messages', [
+        'conversation_id' => $conversation->id,
+    ]);
 });
 
 it('validates stream endpoint', function (): void {

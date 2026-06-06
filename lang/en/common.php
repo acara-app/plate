@@ -1076,5 +1076,9 @@ return [
         'empty' => 'No conversations yet.',
         'start_first' => 'Start your first chat',
         'untitled' => 'New Conversation',
+        'delete_label' => 'Delete conversation',
+        'delete_title' => 'Delete this chat?',
+        'delete_description' => 'This removes the conversation and its message history. This action cannot be undone.',
+        'delete_confirm' => 'Delete chat',
     ],
 ];

@@ -1077,5 +1077,9 @@ return [
         'empty' => 'Aucune conversation pour le moment.',
         'start_first' => 'Commencer votre première discussion',
         'untitled' => 'Nouvelle conversation',
+        'delete_label' => 'Supprimer la conversation',
+        'delete_title' => 'Supprimer cette discussion ?',
+        'delete_description' => 'Cela supprime la conversation et son historique de messages. Cette action est irréversible.',
+        'delete_confirm' => 'Supprimer la discussion',
     ],
 ];

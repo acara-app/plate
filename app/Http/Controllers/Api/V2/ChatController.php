@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V2;
 
 use App\Actions\BuildConversationMessagesAction;
+use App\Actions\DeleteConversationHistory;
 use App\Actions\GetOrCreateConversationAction;
 use App\Models\Conversation;
 use App\Models\User;
@@ -17,6 +18,7 @@ final readonly class ChatController
     public function __construct(
         private BuildConversationMessagesAction $messagesAction,
         private GetOrCreateConversationAction $conversationAction,
+        private DeleteConversationHistory $deleteConversationHistory,
     ) {}
 
     public function index(#[CurrentUser] User $user): JsonResponse
@@ -56,8 +58,8 @@ final readonly class ChatController
             return response()->json(['message' => 'Conversation not found.'], 404);
         }
 
-        Gate::authorize('view', $conversation);
-        $conversation->delete();
+        Gate::authorize('delete', $conversation);
+        $this->deleteConversationHistory->handle($conversation);
 
         return response()->json(['message' => 'Conversation deleted.']);
     }

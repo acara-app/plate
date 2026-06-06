@@ -7,10 +7,13 @@ namespace App\Http\Controllers;
 use App\Actions\Approvals\BuildConversationApprovalStates;
 use App\Actions\Billing\BuildCreditWarning;
 use App\Actions\BuildConversationMessagesAction;
+use App\Actions\DeleteConversationHistory;
 use App\Actions\GetOrCreateConversationAction;
 use App\Http\Requests\StoreChatConversationRequest;
+use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -24,6 +27,7 @@ final readonly class ChatController
         private GetOrCreateConversationAction $conversationAction,
         private BuildCreditWarning $buildCreditWarning,
         private BuildConversationApprovalStates $approvalStates,
+        private DeleteConversationHistory $deleteConversationHistory,
     ) {}
 
     public function index(): Response
@@ -51,5 +55,14 @@ final readonly class ChatController
                 ?->toArray(),
             'approvals' => fn (): array => $this->approvalStates->handle($conversation),
         ]);
+    }
+
+    public function destroy(Conversation $conversation): RedirectResponse
+    {
+        Gate::authorize('delete', $conversation);
+
+        $this->deleteConversationHistory->handle($conversation);
+
+        return to_route('chat.index');
     }
 }

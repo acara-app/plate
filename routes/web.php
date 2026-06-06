@@ -83,6 +83,8 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
 
     Route::get('/chat/create/{conversationId}', [Web\ChatController::class, 'create'])
         ->name('chat.create');
+    Route::delete('/chat/{conversation}', [Web\ChatController::class, 'destroy'])
+        ->name('chat.destroy');
     Route::post('chat/stream/{conversation}', Web\BroadcastChatController::class)
         ->middleware('throttle:30,1')
         ->name('chat.stream');
