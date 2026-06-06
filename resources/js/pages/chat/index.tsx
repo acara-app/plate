@@ -14,7 +14,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { generateUUID } from '@/lib/utils';
-import { dashboard } from '@/routes';
 import chat from '@/routes/chat';
 import { BreadcrumbItem } from '@/types';
 import { Head, InfiniteScroll, Link, router } from '@inertiajs/react';
@@ -39,10 +38,6 @@ interface Props {
 }
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
-    {
-        title: t('home'),
-        href: dashboard().url,
-    },
     {
         title: t('conversations.title'),
         href: chat.index().url,
