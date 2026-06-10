@@ -1,12 +1,10 @@
 import { UIMessage } from '@ai-sdk/react';
-import type { Auth } from './auth';
 
 export type { UIMessage } from '@ai-sdk/react';
 
 export type ChatStatus = 'ready' | 'submitted' | 'streaming' | 'error';
 
 export interface ChatPageProps {
-    auth: Auth;
     conversationId: string;
     initialPrompt?: string | null;
     initialStreaming?: boolean;

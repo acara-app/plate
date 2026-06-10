@@ -25,6 +25,8 @@ final readonly class BroadcastChatController
     ): JsonResponse {
         Gate::authorize('view', $conversation);
 
-        return $this->startChatStream->handle($request, $this->user, $conversation);
+        $turn = $this->startChatStream->handle($request, $this->user, $conversation);
+
+        return response()->json($turn->acceptedPayload($this->user->id, $conversation->id), 202);
     }
 }

@@ -1,5 +1,4 @@
-import { isApprovalCardData } from '@/components/chat/approval-part';
-import type { ApprovalCardData } from '@/types/chat';
+import { parseApprovalOutput } from '@/components/chat/approval-part';
 import type { ChatAction, UrlCitationPayload } from './message-reducer';
 
 export interface RawStreamEvent {
@@ -8,34 +7,6 @@ export interface RawStreamEvent {
     delta?: string;
     citation?: UrlCitationPayload;
     result?: unknown;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null;
-}
-
-function parseApproval(
-    result: unknown,
-): { approvalId: string; card: ApprovalCardData } | null {
-    let parsed = result;
-
-    if (typeof parsed === 'string') {
-        try {
-            parsed = JSON.parse(parsed);
-        } catch {
-            return null;
-        }
-    }
-
-    if (
-        isRecord(parsed) &&
-        typeof parsed.approval_id === 'string' &&
-        isApprovalCardData(parsed.card)
-    ) {
-        return { approvalId: parsed.approval_id, card: parsed.card };
-    }
-
-    return null;
 }
 
 export function applyStreamEvent(
@@ -68,7 +39,7 @@ export function applyStreamEvent(
             break;
 
         case 'tool_result': {
-            const approval = parseApproval(raw.result);
+            const approval = parseApprovalOutput(raw.result);
             if (approval) {
                 seenEventIds.add(raw.id);
                 dispatch({

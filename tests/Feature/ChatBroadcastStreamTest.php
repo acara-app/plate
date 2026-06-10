@@ -57,7 +57,6 @@ it('dispatches web chat streams to the chat queue and returns immediately', func
     Queue::assertPushed(ProcessChatStream::class, fn (ProcessChatStream $job): bool => $job->queue === 'chat'
         && $job->userId === $user->id
         && $job->conversationId === $conversation->id
-        && $job->content === 'Hello from broadcast'
         && $job->streamId !== ''
         && $job->userMessageId === $userMessage?->id
         && $job->assistantMessageId === $assistantMessage?->id
@@ -118,8 +117,7 @@ it('dispatches api v2 chat streams with the mobile channel marker', function ():
         ]);
 
     Queue::assertPushed(ProcessChatStream::class, fn (ProcessChatStream $job): bool => $job->streamId !== ''
-        && $job->channel === 'mobile'
-        && $job->content === 'Hello mobile');
+        && $job->channel === 'mobile');
 });
 
 it('requests cancellation for owned web conversations', function (): void {
@@ -149,16 +147,30 @@ it('returns replay events for owned web conversations', function (): void {
             ['sequence' => 5, 'type' => 'text_delta', 'data' => ['delta' => 'Hi']],
         ]);
     $store->shouldReceive('isStreaming')->once()->with($conversation->id)->andReturn(true);
-    $store->shouldReceive('lastSequence')->once()->with($conversation->id)->andReturn(5);
 
     $this->actingAs($user)
         ->getJson(route('chat.stream.events', ['conversation' => $conversation->id, 'after' => 4]))
         ->assertOk()
         ->assertJson([
             'streaming' => true,
-            'lastSequence' => 5,
             'events' => [
                 ['sequence' => 5, 'type' => 'text_delta', 'data' => ['delta' => 'Hi']],
             ],
         ]);
+});
+
+it('returns 404 instead of creating a conversation when mobile clients poll an unknown conversation', function (): void {
+    $user = User::factory()->create();
+    $token = $user->createToken('mobile:device-1', ['chat:converse'])->plainTextToken;
+    $conversationId = (string) fake()->uuid();
+
+    $this->withHeader('Authorization', 'Bearer '.$token)
+        ->getJson(route('api.v2.chat.stream.events', ['conversation' => $conversationId]))
+        ->assertNotFound();
+
+    $this->withHeader('Authorization', 'Bearer '.$token)
+        ->postJson(route('api.v2.chat.stream.stop', ['conversation' => $conversationId]))
+        ->assertNotFound();
+
+    expect(Conversation::query()->whereKey($conversationId)->exists())->toBeFalse();
 });

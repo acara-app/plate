@@ -24,9 +24,11 @@ final readonly class BroadcastChatController
         #[CurrentUser] User $user,
         string $conversationId
     ): JsonResponse {
-        $conversation = $this->conversationAction->handle($conversationId, $user);
+        $conversation = $this->conversationAction->handle($conversationId, $user, withMessages: false);
         Gate::authorize('view', $conversation);
 
-        return $this->startChatStream->handle($request, $user, $conversation, 'mobile');
+        $turn = $this->startChatStream->handle($request, $user, $conversation, 'mobile');
+
+        return response()->json($turn->acceptedPayload($user->id, $conversation->id), 202);
     }
 }

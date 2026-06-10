@@ -131,3 +131,17 @@ it('returns empty collection when no summaries exist', function (): void {
 
     expect($conversation->summaries)->toBeEmpty();
 });
+
+it('detects a pending chat stream among its messages', function (): void {
+    $conversation = Conversation::factory()->create();
+
+    History::factory()->forConversation($conversation)->userMessage()->create();
+
+    expect($conversation->hasPendingChatStream())->toBeFalse();
+
+    History::factory()->forConversation($conversation)->assistantMessage()->create([
+        'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_PENDING),
+    ]);
+
+    expect($conversation->refresh()->hasPendingChatStream())->toBeTrue();
+});

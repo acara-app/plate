@@ -19,28 +19,33 @@ export function isApprovalCardData(value: unknown): value is ApprovalCardData {
     );
 }
 
+export function parseApprovalOutput(
+    output: unknown,
+): ApprovalPartPayload | null {
+    if (typeof output === 'string') {
+        try {
+            output = JSON.parse(output);
+        } catch {
+            return null;
+        }
+    }
+
+    if (
+        isRecord(output) &&
+        typeof output.approval_id === 'string' &&
+        isApprovalCardData(output.card)
+    ) {
+        return { approvalId: output.approval_id, card: output.card };
+    }
+
+    return null;
+}
+
 export function extractApprovalPayload(
     part: UIMessage['parts'][number],
 ): ApprovalPartPayload | null {
     if (isToolUIPart(part) && part.state === 'output-available') {
-        let output: unknown = part.output;
-        if (typeof output === 'string') {
-            try {
-                output = JSON.parse(output);
-            } catch {
-                return null;
-            }
-        }
-
-        if (
-            isRecord(output) &&
-            typeof output.approval_id === 'string' &&
-            isApprovalCardData(output.card)
-        ) {
-            return { approvalId: output.approval_id, card: output.card };
-        }
-
-        return null;
+        return parseApprovalOutput(part.output);
     }
 
     if (part.type === 'data-approval') {

@@ -30,7 +30,7 @@ it('normalizes and aggregates rich Laravel AI stream events', function (): void 
 
     $normalized = $aggregator->normalizeEvent($providerTool);
 
-    $result = $aggregator->aggregate([
+    $events = [
         new TextDelta('text-1', 'message-1', 'Hello ', $timestamp),
         new TextDelta('text-2', 'message-1', 'there', $timestamp),
         new ReasoningDelta('thinking-1', 'reasoning-1', 'checking', $timestamp),
@@ -38,7 +38,12 @@ it('normalizes and aggregates rich Laravel AI stream events', function (): void 
         new ToolResultEvent('tool-result-event-1', new ToolResult('tool-1', 'lookup_health_metric', [], ['value' => 104]), true, null, $timestamp),
         $providerTool,
         new StreamEnd('end-1', 'stop', new Usage(promptTokens: 10, completionTokens: 5), $timestamp),
-    ]);
+    ];
+
+    $result = $aggregator->aggregateNormalized(array_map(
+        fn (object $event): array => $aggregator->normalizeEvent($event),
+        $events,
+    ));
 
     expect($normalized['type'])->toBe('provider_tool')
         ->and($normalized['tool_type'])->toBe('web_search_call')

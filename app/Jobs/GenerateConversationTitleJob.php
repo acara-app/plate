@@ -11,7 +11,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\MaxExceptions;
 use Illuminate\Queue\Attributes\Timeout;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 
 #[MaxExceptions(3)]
 #[Timeout(60)]
@@ -22,16 +21,6 @@ final class GenerateConversationTitleJob implements ShouldBeUnique, ShouldQueue
     public function __construct(
         public readonly Conversation $conversation,
     ) {}
-
-    /**
-     * @return array<int, object>
-     */
-    public function middleware(): array
-    {
-        return [
-            new WithoutOverlapping($this->conversation->id),
-        ];
-    }
 
     public function uniqueId(): string
     {

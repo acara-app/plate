@@ -1,6 +1,7 @@
 import { CreditWarningBanner } from '@/components/billing/credit-warning-banner';
 import { UsageLimitNotice } from '@/components/billing/usage-limit-notice';
 import { useChatStream } from '@/hooks/use-chat-stream';
+import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
 import { generateUUID } from '@/lib/utils';
 import chat from '@/routes/chat';
@@ -31,8 +32,8 @@ export default function CreateChat() {
         initialPrompt,
         initialStreaming,
         creditWarning: sharedCreditWarning,
-        auth,
     } = page.props;
+    const { currentUser } = useSharedProps();
 
     const [conversationId, setConversationId] = useState<string>(
         initialConversationId,
@@ -78,7 +79,7 @@ export default function CreateChat() {
         clearUsageLimitTrigger,
     } = useChatStream({
         conversationId,
-        userId: auth.user.id,
+        userId: currentUser.id,
         initialMessages,
         initialStreaming,
         onFinish: handleStreamFinish,

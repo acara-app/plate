@@ -14,7 +14,6 @@ use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Http\Requests\StoreChatConversationRequest;
 use App\Http\Requests\StreamChatRequest;
 use App\Models\Conversation;
-use App\Models\History;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
@@ -56,9 +55,7 @@ final readonly class ChatController
             'conversationId' => $conversation->id,
             'messages' => fn (): array => $this->messagesAction->handle($conversation),
             'initialPrompt' => $request->initialPrompt(),
-            'initialStreaming' => $conversation->messages->contains(
-                fn (History $message): bool => $message->isPendingStreamAssistant(),
-            ),
+            'initialStreaming' => $conversation->hasPendingChatStream(),
             'creditWarning' => $this->buildCreditWarning
                 ->currentState($this->user)
                 ?->toArray(),
@@ -72,7 +69,7 @@ final readonly class ChatController
     ): RedirectResponse {
         abort_unless(Str::isUuid($conversationId), 400, 'Invalid conversation ID format');
 
-        $conversation = $this->conversationAction->handle($conversationId, $this->user);
+        $conversation = $this->conversationAction->handle($conversationId, $this->user, withMessages: false);
         Gate::authorize('view', $conversation);
 
         try {

@@ -70,4 +70,11 @@ final class Conversation extends Model
     {
         return $this->hasMany(ConversationSummary::class, 'conversation_id');
     }
+
+    public function hasPendingChatStream(): bool
+    {
+        return $this->messages->contains(
+            fn (History $message): bool => $message->isPendingStreamAssistant(),
+        );
+    }
 }

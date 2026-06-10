@@ -1,4 +1,4 @@
-import StreamEventsController from '@/actions/App/Http/Controllers/ChatStreamEventsController';
+import { events as streamEvents } from '@/routes/chat/stream';
 import { useCallback, useRef } from 'react';
 import type { ChatAction } from './message-reducer';
 import { applyStreamEvent, type RawStreamEvent } from './process-event';
@@ -16,7 +16,6 @@ interface ReplayEnvelope {
 interface StreamEventsResponse {
     streaming: boolean;
     events: ReplayEnvelope[];
-    lastSequence: number;
 }
 
 interface UseStreamRecoveryOptions {
@@ -82,7 +81,7 @@ export function useStreamRecovery({
         ): Promise<boolean> => {
             try {
                 const response = await fetch(
-                    StreamEventsController.url(conversationId, {
+                    streamEvents.url(conversationId, {
                         query: { after: lastSequenceRef.current },
                     }),
                     { credentials: 'include' },
@@ -106,11 +105,10 @@ export function useStreamRecovery({
                     );
                 }
 
-                if (
-                    body.events.length > 0 &&
-                    body.lastSequence > lastSequenceRef.current
-                ) {
-                    lastSequenceRef.current = body.lastSequence;
+                const lastEvent = body.events.at(-1);
+
+                if (lastEvent && lastEvent.sequence > lastSequenceRef.current) {
+                    lastSequenceRef.current = lastEvent.sequence;
                 }
 
                 if (body.streaming) {

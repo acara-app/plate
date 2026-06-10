@@ -7,17 +7,14 @@ namespace App\Jobs;
 use App\Actions\CompletePendingChatStreamTurn;
 use App\Ai\AgentRequest;
 use App\Ai\Agents\AgentRunner;
-use App\Connectors\Broadcast\BroadcastConnector;
 use App\Data\ChatStreamResult;
 use App\Enums\ModelName;
-use App\Events\ChatProcessing;
-use App\Events\ChatRetrying;
-use App\Events\ChatStreamFailed;
 use App\Models\History;
 use App\Models\User;
+use App\Services\BroadcastConnector;
+use App\Services\ChatChannel;
 use App\Services\StreamAggregator;
 use App\Services\StreamEventStore;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\MaxExceptions;
@@ -31,21 +28,16 @@ use Throwable;
 
 #[MaxExceptions(3)]
 #[Timeout(300)]
-#[Tries(3)]
+#[Tries(ProcessChatStream::TRIES)]
 final class ProcessChatStream implements ShouldQueue
 {
     use Queueable;
 
-    public $tries;
+    public const int TRIES = 3;
 
-    /**
-     * @param  list<array{type: string, name: ?string, base64: string, mime: ?string}>  $images
-     */
     public function __construct(
         public int $userId,
         public string $conversationId,
-        public string $content,
-        public array $images,
         public string $modelName,
         public string $channel,
         public string $streamId,
@@ -81,11 +73,13 @@ final class ProcessChatStream implements ShouldQueue
         Context::add('chat.channel', $this->channel);
         Context::add('chat.conversation_id', $this->conversationId);
 
-        broadcast(new ChatProcessing($this->userId, $this->conversationId));
+        $this->broadcastLifecycle('processing');
+
+        $userMessage = History::query()->findOrFail($this->userMessageId);
 
         $request = new AgentRequest(
-            message: $this->content,
-            images: $this->base64Images(),
+            message: $userMessage->content,
+            images: $this->base64Images($userMessage->attachments ?? []),
             modelName: ModelName::tryFrom($this->modelName) ?? ModelName::default(),
             conversationId: $this->conversationId,
             streamId: $this->streamId,
@@ -101,7 +95,7 @@ final class ProcessChatStream implements ShouldQueue
         );
 
         if ($delivery->cancelled) {
-            $this->broadcastStreamEnd();
+            $this->broadcastLifecycle('stream_end');
         }
 
         $events->markComplete($this->conversationId);
@@ -125,22 +119,21 @@ final class ProcessChatStream implements ShouldQueue
 
         $events->markComplete($this->conversationId);
 
-        broadcast(new ChatStreamFailed(
-            userId: $this->userId,
-            conversationId: $this->conversationId,
-            message: 'Failed to process your message after multiple attempts.',
-        ));
+        $this->broadcastLifecycle('error', [
+            'message' => 'Failed to process your message after multiple attempts.',
+        ]);
     }
 
     /**
+     * @param  list<array{type?: string, name?: ?string, base64?: string, mime?: ?string}>  $attachments
      * @return list<Base64Image>
      */
-    private function base64Images(): array
+    private function base64Images(array $attachments): array
     {
-        return array_values(array_map(
-            fn (array $image): Base64Image => new Base64Image($image['base64'], $image['mime']),
-            $this->images,
-        ));
+        return array_map(
+            fn (array $image): Base64Image => new Base64Image($image['base64'] ?? '', $image['mime'] ?? null),
+            $attachments,
+        );
     }
 
     private function resetStateForRetry(StreamEventStore $events): bool
@@ -149,20 +142,17 @@ final class ProcessChatStream implements ShouldQueue
             return false;
         }
 
-        if ($events->wasCancellationRequested($this->conversationId)) {
-            $events->clear($this->conversationId);
+        $cancelled = $events->wasCancellationRequested($this->conversationId);
+        $events->clear($this->conversationId);
 
+        if ($cancelled) {
             return true;
         }
 
-        $events->clear($this->conversationId);
-
-        broadcast(new ChatRetrying(
-            userId: $this->userId,
-            conversationId: $this->conversationId,
-            attempt: $this->attempts(),
-            maxAttempts: $this->tries,
-        ));
+        $this->broadcastLifecycle('retrying', [
+            'attempt' => $this->attempts(),
+            'maxAttempts' => self::TRIES,
+        ]);
 
         return false;
     }
@@ -179,11 +169,14 @@ final class ProcessChatStream implements ShouldQueue
         );
     }
 
-    private function broadcastStreamEnd(): void
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    private function broadcastLifecycle(string $event, array $payload = []): void
     {
-        Broadcast::on(new PrivateChannel('chat.'.$this->userId))
-            ->as('stream_end')
-            ->with(['conversationId' => $this->conversationId])
+        Broadcast::on(ChatChannel::private($this->userId))
+            ->as($event)
+            ->with(['conversationId' => $this->conversationId, ...$payload])
             ->sendNow();
     }
 }

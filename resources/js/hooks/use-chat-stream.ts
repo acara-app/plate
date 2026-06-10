@@ -1,5 +1,5 @@
-import ChatStopController from '@/actions/App/Http/Controllers/ChatStopController';
 import { stream } from '@/routes/chat';
+import { stop as stopStream } from '@/routes/chat/stream';
 import type { PaywallCapTrigger, SubscriptionTier } from '@/types';
 import type { ChatStatus } from '@/types/chat';
 import type { FileUIPart, UIMessage } from 'ai';
@@ -180,7 +180,7 @@ export function useChatStream({
         stopReplayPolling();
         dispatch({ type: 'FINISHED' });
 
-        void fetch(ChatStopController.url(conversationId), {
+        void fetch(stopStream.url(conversationId), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',

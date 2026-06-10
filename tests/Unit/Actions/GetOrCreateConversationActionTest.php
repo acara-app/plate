@@ -50,6 +50,14 @@ it('loads messages relationship', function (): void {
     expect($result->relationLoaded('messages'))->toBeTrue();
 });
 
+it('skips the messages relationship when not requested', function (): void {
+    $conversation = Conversation::factory()->create(['user_id' => $this->user->id]);
+
+    $result = $this->action->handle($conversation->id, $this->user, withMessages: false);
+
+    expect($result->relationLoaded('messages'))->toBeFalse();
+});
+
 it('returns an existing conversation even when owned by another user (authorization is not this action concern)', function (): void {
     $owner = User::factory()->create();
     $conversation = Conversation::factory()->create(['user_id' => $owner->id]);

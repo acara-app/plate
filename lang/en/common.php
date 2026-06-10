@@ -130,56 +130,12 @@ return [
         'save_password' => 'Save password',
     ],
 
-    'dashboard_cards' => [
-        'health_entries' => [
-            'title' => 'Logbook',
-            'description' => 'Log your vitals, food, and meds in seconds.',
-            'button' => 'Log Entry',
-        ],
-        'meal_plans' => [
-            'title' => 'My Menu',
-            'description' => 'See what\'s on the menu.',
-            'button' => 'View Menu',
-            'create' => 'Plan My Meals',
-            'create_txt' => 'Get a fresh custom menu designed just for you.',
-            'create_button' => 'Create Menu',
-        ],
-        'mobile_sync' => [
-            'title' => 'Mobile Sync',
-            'description' => 'Sync health data from your phone automatically.',
-        ],
-        'telegram' => [
-            'title' => 'Instant advice. Just text.',
-            'description' => 'Ask what to eat. Check sugar spikes. Get healthy swaps instantly. All from Telegram, the chat app you already use.',
-            'cta' => 'Connect your message app',
-        ],
-        'chat' => [
-            'title' => 'Meet Altani',
-            'description' => 'Your personal AI health coach for diabetes management, nutrition advice, and daily wellness support.',
-            'button' => 'Ask your question',
-            'recent_conversations' => 'Recent Conversations',
-            'quick_actions' => [
-                'ask' => 'Ask Altani',
-                'meal_plan' => 'Generate Meal Plan',
-            ],
-            'prompts' => [
-                'complete_profile' => 'Complete your profile for personalized advice →',
-                'analyze_glucose' => 'Analyze your recent glucose trends →',
-                'health_conditions' => 'Get advice for your health conditions →',
-                'restaurant' => 'Ask about restaurant meals and glucose impact →',
-            ],
-        ],
-    ],
-
     'dashboard_ai' => [
         'breadcrumb' => 'Acara',
         'eyebrow' => 'Altani is ready',
         'heading' => 'What should we work on today?',
         'description' => 'Ask about glucose, meals, medication context, synced health trends, or the next healthy choice.',
         'placeholder' => 'Ask Altani about your health, meals, glucose, or routine...',
-        'input_label' => 'Ask Altani a health question',
-        'helper' => '{{count}} characters left',
-        'submit' => 'Ask Altani',
         'disclaimer' => 'For informational purposes only. Not a substitute for professional medical or nutritional advice.',
         'prompts' => [
             'glucose' => 'What might explain my recent glucose swings?',

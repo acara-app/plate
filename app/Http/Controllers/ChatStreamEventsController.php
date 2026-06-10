@@ -21,12 +21,10 @@ final readonly class ChatStreamEventsController
         Gate::authorize('view', $conversation);
 
         $afterSequence = (int) $request->query('after', '-1');
-        $events = $this->events->eventsAfter($conversation->id, $afterSequence);
 
         return response()->json([
             'streaming' => $this->events->isStreaming($conversation->id),
-            'events' => $events,
-            'lastSequence' => $this->events->lastSequence($conversation->id),
+            'events' => $this->events->eventsAfter($conversation->id, $afterSequence),
         ]);
     }
 }

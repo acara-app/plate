@@ -143,37 +143,22 @@ final readonly class StreamAggregator
     }
 
     /**
-     * @param  iterable<StreamEvent>  $events
-     */
-    public function aggregate(iterable $events): ChatStreamResult
-    {
-        $normalized = [];
-
-        foreach ($events as $event) {
-            $normalized[] = $this->normalizeEvent($event);
-        }
-
-        return $this->aggregateNormalized($normalized);
-    }
-
-    /**
      * @param  list<array{sequence: int, type: string, data: array<string, mixed>}>  $storedEvents
      */
     public function aggregateStoredEvents(array $storedEvents): ChatStreamResult
     {
-        return $this->aggregateNormalized(array_values(array_map(
+        return $this->aggregateNormalized(array_map(
             fn (array $event): array => $event['data'],
             $storedEvents,
-        )));
+        ));
     }
 
     /**
      * @param  list<array<string, mixed>>  $events
      */
-    private function aggregateNormalized(array $events): ChatStreamResult
+    public function aggregateNormalized(array $events): ChatStreamResult
     {
-        $text = collect($events)
-            ->filter(fn (array $event): bool => ($event['type'] ?? null) === 'text_delta')
+        $text = collect($this->ofType($events, 'text_delta'))
             ->map(fn (array $event): string => (string) ($event['delta'] ?? ''))
             ->join('');
 
@@ -194,10 +179,8 @@ final readonly class StreamAggregator
      */
     private function toolCalls(array $events): array
     {
-        return collect($events)
-            ->filter(fn (array $event): bool => ($event['type'] ?? null) === 'tool_call')
+        return collect($this->ofType($events, 'tool_call'))
             ->map(fn (array $event): array => $event['tool_call'])
-            ->values()
             ->all();
     }
 
@@ -207,10 +190,8 @@ final readonly class StreamAggregator
      */
     private function toolResults(array $events): array
     {
-        return collect($events)
-            ->filter(fn (array $event): bool => ($event['type'] ?? null) === 'tool_result')
+        return collect($this->ofType($events, 'tool_result'))
             ->map(fn (array $event): array => $event['tool_result'])
-            ->values()
             ->all();
     }
 
@@ -220,10 +201,7 @@ final readonly class StreamAggregator
      */
     private function providerTools(array $events): array
     {
-        return collect($events)
-            ->filter(fn (array $event): bool => ($event['type'] ?? null) === 'provider_tool')
-            ->values()
-            ->all();
+        return $this->ofType($events, 'provider_tool');
     }
 
     /**
@@ -232,8 +210,7 @@ final readonly class StreamAggregator
      */
     private function citations(array $events): array
     {
-        return collect($events)
-            ->filter(fn (array $event): bool => ($event['type'] ?? null) === 'citation')
+        return collect($this->ofType($events, 'citation'))
             ->map(fn (array $event): array => is_array($event['citation'] ?? null) ? $event['citation'] : [])
             ->filter(fn (array $citation): bool => $citation !== [])
             ->values()
@@ -246,10 +223,7 @@ final readonly class StreamAggregator
      */
     private function errors(array $events): array
     {
-        return collect($events)
-            ->filter(fn (array $event): bool => ($event['type'] ?? null) === 'error')
-            ->values()
-            ->all();
+        return $this->ofType($events, 'error');
     }
 
     /**
@@ -258,15 +232,26 @@ final readonly class StreamAggregator
      */
     private function usage(array $events): array
     {
-        $event = collect($events)
+        $event = collect($this->ofType($events, 'stream_end'))
             ->reverse()
-            ->first(fn (array $event): bool => ($event['type'] ?? null) === 'stream_end'
-                && is_array($event['usage'] ?? null));
+            ->first(fn (array $event): bool => is_array($event['usage'] ?? null));
 
         if (! is_array($event) || ! is_array($event['usage'] ?? null)) {
             return [];
         }
 
         return $event['usage'];
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $events
+     * @return list<array<string, mixed>>
+     */
+    private function ofType(array $events, string $type): array
+    {
+        return array_values(array_filter(
+            $events,
+            fn (array $event): bool => ($event['type'] ?? null) === $type,
+        ));
     }
 }

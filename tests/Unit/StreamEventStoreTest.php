@@ -5,12 +5,11 @@ declare(strict_types=1);
 use App\Services\StreamEventStore;
 use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Facades\Redis;
-use Laravel\Ai\Streaming\Events\TextDelta;
 
-it('stores stream events as ordered redis replay entries', function (): void {
+it('stores stream events as ordered redis replay entries and sets the ttl once', function (): void {
     $connection = Mockery::mock(Connection::class);
 
-    Redis::shouldReceive('connection')->twice()->andReturn($connection);
+    Redis::shouldReceive('connection')->times(3)->andReturn($connection);
 
     $connection->shouldReceive('zadd')
         ->once()
@@ -19,8 +18,8 @@ it('stores stream events as ordered redis replay entries', function (): void {
             $decoded = json_decode((string) $encoded, true, flags: JSON_THROW_ON_ERROR);
 
             return $key === 'plate:chat:stream:conversation-1'
-                && $payload[$encoded] === 7
-                && $decoded['sequence'] === 7
+                && $payload[$encoded] === 0
+                && $decoded['sequence'] === 0
                 && $decoded['type'] === 'text_delta'
                 && $decoded['data']['delta'] === 'Hello';
         });
@@ -29,11 +28,14 @@ it('stores stream events as ordered redis replay entries', function (): void {
         ->once()
         ->with('plate:chat:stream:conversation-1', 600);
 
-    resolve(StreamEventStore::class)->append(
-        'conversation-1',
-        new TextDelta('event-1', 'message-1', 'Hello', now()->timestamp),
-        7,
-    );
+    $connection->shouldReceive('zadd')
+        ->once()
+        ->withArgs(fn (string $key, array $payload): bool => $payload[array_key_first($payload)] === 7);
+
+    $store = resolve(StreamEventStore::class);
+
+    $store->append('conversation-1', ['type' => 'text_delta', 'delta' => 'Hello'], 0);
+    $store->append('conversation-1', ['type' => 'text_delta', 'delta' => ' there'], 7);
 });
 
 it('returns replay events after a sequence number', function (): void {

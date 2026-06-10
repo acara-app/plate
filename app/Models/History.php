@@ -23,7 +23,7 @@ use Laravel\Ai\Responses\Data\Usage;
  * @property string $agent
  * @property MessageRole $role
  * @property string $content
- * @property array<string, mixed> $attachments
+ * @property list<array{type?: string, name?: ?string, base64?: string, mime?: ?string}>|null $attachments
  * @property array<ToolCall> $tool_calls
  * @property array<ToolResult> $tool_results
  * @property array{Usage} $usage

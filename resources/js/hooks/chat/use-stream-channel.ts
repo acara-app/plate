@@ -57,7 +57,6 @@ export function useStreamChannel({
     const channelName = `chat.${userId}`;
     const connectionStatus = useConnectionStatus();
     const wasStreamingRef = useRef(false);
-    const connectionStatusRef = useRef(connectionStatus);
     const previousConnectionStatusRef = useRef(connectionStatus);
 
     useEcho<RawStreamEvent>(
@@ -79,10 +78,11 @@ export function useStreamChannel({
         channelName,
         '.processing',
         () => {
+            stopReplayPolling();
             streamActiveRef.current = true;
             dispatch({ type: 'PROCESSING' });
         },
-        [streamActiveRef, dispatch],
+        [stopReplayPolling, streamActiveRef, dispatch],
     );
 
     useEcho<RetryingPayload>(
@@ -122,10 +122,6 @@ export function useStreamChannel({
     );
 
     useEffect(() => {
-        connectionStatusRef.current = connectionStatus;
-    }, [connectionStatus]);
-
-    useEffect(() => {
         const connected = connectionStatus === 'connected';
         const previousStatus = previousConnectionStatusRef.current;
 
@@ -154,7 +150,7 @@ export function useStreamChannel({
                 return;
             }
 
-            if (connectionStatusRef.current !== 'connected') {
+            if (connectionStatus !== 'connected') {
                 reconnect();
             }
 
@@ -189,7 +185,7 @@ export function useStreamChannel({
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    }, [status, startReplayPolling]);
+    }, [connectionStatus, status, startReplayPolling]);
 
     return { isConnected: connectionStatus === 'connected' };
 }

@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V2 as ApiV2;
+use App\Http\Controllers\ChatStopController;
+use App\Http\Controllers\ChatStreamEventsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
@@ -42,11 +44,11 @@ Route::prefix('v2/chat')
             ->middleware('throttle:30,1')
             ->name('api.v2.chat.stream');
 
-        Route::post('conversations/{conversation}/stream/stop', ApiV2\ChatStopController::class)
+        Route::post('conversations/{conversation}/stream/stop', ChatStopController::class)
             ->middleware('throttle:30,1')
             ->name('api.v2.chat.stream.stop');
 
-        Route::get('conversations/{conversation}/stream/events', ApiV2\ChatStreamEventsController::class)
+        Route::get('conversations/{conversation}/stream/events', ChatStreamEventsController::class)
             ->middleware('throttle:120,1')
             ->name('api.v2.chat.stream.events');
 

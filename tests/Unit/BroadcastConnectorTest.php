@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Connectors\Broadcast\BroadcastConnector;
+use App\Services\BroadcastConnector;
 use App\Services\StreamAggregator;
 use App\Services\StreamEventStore;
 use Illuminate\Broadcasting\AnonymousEvent;
@@ -23,7 +23,10 @@ it('delivers stream events through redis replay and broadcast', function (): voi
         ->andReturnFalse();
     $events->shouldReceive('append')
         ->once()
-        ->with('conversation-1', $event, 0);
+        ->withArgs(fn (string $conversationId, array $payload, int $sequence): bool => $conversationId === 'conversation-1'
+            && $payload['type'] === 'text_delta'
+            && $payload['delta'] === 'Hello'
+            && $sequence === 0);
 
     $aggregator = resolve(StreamAggregator::class);
 

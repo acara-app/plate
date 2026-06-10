@@ -10,7 +10,6 @@ use App\Models\History;
 use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 
 covers(GenerateConversationTitleJob::class);
 
@@ -26,16 +25,6 @@ it('uniqueId returns the conversation id', function (): void {
     $job = new GenerateConversationTitleJob($conversation);
 
     expect($job->uniqueId())->toBe($conversation->id);
-});
-
-it('returns WithoutOverlapping middleware keyed by conversation', function (): void {
-    $conversation = Conversation::factory()->create();
-    $job = new GenerateConversationTitleJob($conversation);
-
-    $middleware = $job->middleware();
-
-    expect($middleware)->toHaveCount(1)
-        ->and($middleware[0])->toBeInstanceOf(WithoutOverlapping::class);
 });
 
 it('backoff returns exponential delays', function (): void {

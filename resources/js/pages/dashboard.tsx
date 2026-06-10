@@ -12,14 +12,12 @@ import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import ChatInput, { type ChatInputHandle } from './chat/chat-input';
 
-const promptKeys = [
-    'dashboard_ai.prompts.glucose',
-    'dashboard_ai.prompts.meal',
-    'dashboard_ai.prompts.energy',
-    'dashboard_ai.prompts.sync',
+const prompts = [
+    { key: 'dashboard_ai.prompts.glucose', icon: Droplets },
+    { key: 'dashboard_ai.prompts.meal', icon: Apple },
+    { key: 'dashboard_ai.prompts.energy', icon: HeartPulse },
+    { key: 'dashboard_ai.prompts.sync', icon: Activity },
 ] as const;
-
-const promptIcons = [Droplets, Apple, HeartPulse, Activity] as const;
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
@@ -117,8 +115,7 @@ export default function Dashboard() {
                             </div>
 
                             <div className="grid gap-3 sm:grid-cols-2">
-                                {promptKeys.map((key, index) => {
-                                    const PromptIcon = promptIcons[index];
+                                {prompts.map(({ key, icon: PromptIcon }) => {
                                     const promptText = t(key);
 
                                     return (

@@ -19,7 +19,7 @@ final readonly class CompletePendingChatStreamTurn
         string $userMessageId,
         string $assistantMessageId,
         ChatStreamResult $result,
-        string $status = History::STREAM_STATUS_COMPLETED,
+        string $status,
     ): void {
         DB::transaction(function () use ($conversationId, $userId, $userMessageId, $assistantMessageId, $result, $status): void {
             $now = now();

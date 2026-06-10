@@ -131,56 +131,12 @@ return [
         'save_password' => 'Sauvegarder le mot de passe',
     ],
 
-    'dashboard_cards' => [
-        'health_entries' => [
-            'title' => 'Carnet de suivi',
-            'description' => 'Notez vos constantes, vos repas et vos médicaments en quelques secondes.',
-            'button' => 'Ajouter une entrée',
-        ],
-        'meal_plans' => [
-            'title' => 'Mon menu',
-            'description' => 'Consultez ce qui est prévu au menu.',
-            'button' => 'Voir le menu',
-            'create' => 'Planifier mes repas',
-            'create_txt' => 'Obtenez un menu personnalisé conçu pour vous.',
-            'create_button' => 'Créer le menu',
-        ],
-        'mobile_sync' => [
-            'title' => 'Synchro mobile',
-            'description' => 'Synchronisez automatiquement vos données de santé depuis votre téléphone.',
-        ],
-        'telegram' => [
-            'title' => 'Des conseils instantanés. Par message.',
-            'description' => 'Demandez quoi manger. Vérifiez les pics de glycémie. Obtenez immédiatement des alternatives plus saines. Le tout depuis Telegram, l\'application de messagerie que vous utilisez déjà.',
-            'cta' => 'Connecter votre messagerie',
-        ],
-        'chat' => [
-            'title' => 'Altani',
-            'description' => 'Votre coach santé IA personnel pour la gestion du diabète, les conseils nutritionnels et le bien-être quotidien.',
-            'button' => 'Posez votre question',
-            'recent_conversations' => 'Conversations récentes',
-            'quick_actions' => [
-                'ask' => 'Poser une question',
-                'meal_plan' => 'Générer un plan de repas',
-            ],
-            'prompts' => [
-                'complete_profile' => 'Complétez votre profil pour des conseils personnalisés →',
-                'analyze_glucose' => 'Analyser vos tendances récentes de glycémie →',
-                'health_conditions' => 'Obtenir des conseils pour vos problèmes de santé →',
-                'restaurant' => 'Poser une question sur les repas au restaurant et leur impact sur la glycémie →',
-            ],
-        ],
-    ],
-
     'dashboard_ai' => [
         'breadcrumb' => 'Acara',
         'eyebrow' => 'Altani est prêt',
         'heading' => 'Sur quoi voulez-vous avancer aujourd\'hui ?',
         'description' => 'Posez une question sur la glycémie, les repas, le contexte médical, les tendances synchronisées ou le prochain choix santé.',
         'placeholder' => 'Demandez à Altani pour votre santé, vos repas, votre glycémie ou votre routine...',
-        'input_label' => 'Poser une question santé à Altani',
-        'helper' => '{{count}} caractères restants',
-        'submit' => 'Demander à Altani',
         'disclaimer' => 'À titre informatif uniquement. Ne remplace pas un avis médical ou nutritionnel professionnel.',
         'prompts' => [
             'glucose' => 'Qu\'est-ce qui pourrait expliquer mes variations récentes de glycémie ?',

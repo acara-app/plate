@@ -69,7 +69,6 @@ it('starts a conversation from a posted message with an image and redirects to t
         ProcessChatStream::class,
         fn (ProcessChatStream $job): bool => $job->conversationId === $conversationId
             && $job->userId === $user->id
-            && $job->content === 'Analyze this image'
             && $job->channel === 'web'
     );
 });

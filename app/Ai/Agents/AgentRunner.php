@@ -79,13 +79,14 @@ final class AgentRunner implements Agent, Conversational, HasTools
      */
     public function messages(): iterable
     {
-        if (! $this->currentRequest instanceof AgentRequest || $this->currentRequest->conversationId === null) {
+        if (! $this->currentRequest instanceof AgentRequest || ! $this->currentRequest->hasExistingConversation()) {
             return [];
         }
 
         $streamId = $this->currentRequest->streamId;
 
         return History::query()
+            ->select(['id', 'conversation_id', 'agent', 'role', 'content', 'tool_calls', 'tool_results', 'meta'])
             ->where('conversation_id', $this->currentRequest->conversationId)
             ->where('agent', self::class)
             ->orderByDesc('id')

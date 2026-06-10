@@ -6,7 +6,6 @@ namespace App\Services;
 
 use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Facades\Redis;
-use Laravel\Ai\Streaming\Events\StreamEvent;
 
 class StreamEventStore
 {
@@ -18,22 +17,22 @@ class StreamEventStore
 
     private const int TTL_SECONDS = 600;
 
-    public function __construct(
-        private readonly StreamAggregator $aggregator,
-    ) {}
-
-    public function append(string $conversationId, StreamEvent $event, int $sequence): void
+    /**
+     * @param  array<string, mixed>  $event
+     */
+    public function append(string $conversationId, array $event, int $sequence): void
     {
-        $normalized = $this->aggregator->normalizeEvent($event);
-
         $payload = json_encode([
             'sequence' => $sequence,
-            'type' => $normalized['type'],
-            'data' => $normalized,
+            'type' => $event['type'] ?? null,
+            'data' => $event,
         ], JSON_THROW_ON_ERROR);
 
         $this->redis()->zadd($this->streamKey($conversationId), [$payload => $sequence]);
-        $this->redis()->expire($this->streamKey($conversationId), self::TTL_SECONDS);
+
+        if ($sequence === 0) {
+            $this->redis()->expire($this->streamKey($conversationId), self::TTL_SECONDS);
+        }
     }
 
     /**
@@ -58,21 +57,6 @@ class StreamEventStore
         ));
     }
 
-    public function lastSequence(string $conversationId): int
-    {
-        /** @var array<int, string>|false $events */
-        $events = $this->redis()->zrevrange($this->streamKey($conversationId), 0, 0);
-
-        if ($events === false || $events === []) {
-            return 0;
-        }
-
-        /** @var array{sequence: int} $decoded */
-        $decoded = json_decode($events[0], true, flags: JSON_THROW_ON_ERROR);
-
-        return $decoded['sequence'];
-    }
-
     public function hasEvents(string $conversationId): bool
     {
         return (bool) $this->redis()->exists($this->streamKey($conversationId));
@@ -80,9 +64,11 @@ class StreamEventStore
 
     public function clear(string $conversationId): void
     {
-        $this->redis()->del($this->streamKey($conversationId));
-        $this->clearCancellation($conversationId);
-        $this->redis()->del($this->completedKey($conversationId));
+        $this->redis()->del(
+            $this->streamKey($conversationId),
+            $this->cancelKey($conversationId),
+            $this->completedKey($conversationId),
+        );
     }
 
     public function markComplete(string $conversationId): void
