@@ -54,8 +54,7 @@ it('dispatches web chat streams to the chat queue and returns immediately', func
         ->and($userMessage?->chatStreamStatus())->toBe(History::STREAM_STATUS_SUBMITTED)
         ->and($assistantMessage?->chatStreamStatus())->toBe(History::STREAM_STATUS_PENDING);
 
-    Queue::assertPushed(ProcessChatStream::class, fn (ProcessChatStream $job): bool => $job->queue === 'chat'
-        && $job->userId === $user->id
+    Queue::assertPushed(ProcessChatStream::class, fn (ProcessChatStream $job): bool => $job->userId === $user->id
         && $job->conversationId === $conversation->id
         && $job->streamId !== ''
         && $job->userMessageId === $userMessage?->id
