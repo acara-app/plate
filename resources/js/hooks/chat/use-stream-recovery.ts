@@ -5,6 +5,7 @@ import { applyStreamEvent, type RawStreamEvent } from './process-event';
 
 const EVENT_REPLAY_INTERVAL = 1_000;
 const MAX_EVENT_REPLAY_ATTEMPTS = 300;
+const MAX_IDLE_REPLAY_RESPONSES = 30;
 const NO_SEQUENCE_CONSUMED = -1;
 
 interface ReplayEnvelope {
@@ -44,6 +45,7 @@ export function useStreamRecovery({
     const lastSequenceRef = useRef(NO_SEQUENCE_CONSUMED);
     const replayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const attemptsRef = useRef(0);
+    const idleResponsesRef = useRef(0);
 
     const stopReplayPolling = useCallback(() => {
         if (replayTimerRef.current) {
@@ -51,6 +53,7 @@ export function useStreamRecovery({
             replayTimerRef.current = null;
         }
         attemptsRef.current = 0;
+        idleResponsesRef.current = 0;
     }, []);
 
     const resetReplayState = useCallback(() => {
@@ -97,6 +100,12 @@ export function useStreamRecovery({
                     return false;
                 }
 
+                if (body.streaming || body.events.length > 0) {
+                    idleResponsesRef.current = 0;
+                } else {
+                    idleResponsesRef.current += 1;
+                }
+
                 for (const envelope of body.events) {
                     applyStreamEvent(
                         envelope.data,
@@ -141,10 +150,14 @@ export function useStreamRecovery({
         }
 
         attemptsRef.current = 0;
+        idleResponsesRef.current = 0;
         replayTimerRef.current = setInterval(() => {
             attemptsRef.current += 1;
 
-            if (attemptsRef.current > MAX_EVENT_REPLAY_ATTEMPTS) {
+            if (
+                attemptsRef.current > MAX_EVENT_REPLAY_ATTEMPTS ||
+                idleResponsesRef.current >= MAX_IDLE_REPLAY_RESPONSES
+            ) {
                 stopReplayPolling();
 
                 return;
