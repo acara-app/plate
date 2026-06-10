@@ -1,4 +1,9 @@
-import { configureEcho, echo } from '@laravel/echo-react';
+import {
+    configureEcho,
+    echo,
+    type ConnectionStatus,
+} from '@laravel/echo-react';
+import { useEffect, useState } from 'react';
 
 const reverbScheme = import.meta.env.VITE_REVERB_SCHEME as string | undefined;
 const reverbPort = Number(import.meta.env.VITE_REVERB_PORT);
@@ -28,6 +33,18 @@ export function reconnect(): void {
     }
 
     connector.pusher?.connect?.();
+}
+
+export function useSsrSafeConnectionStatus(): ConnectionStatus {
+    const [status, setStatus] = useState<ConnectionStatus>('disconnected');
+
+    useEffect(() => {
+        setStatus(echo().connectionStatus());
+
+        return echo().connector.onConnectionChange(setStatus);
+    }, []);
+
+    return status;
 }
 
 export { echo };
