@@ -1,5 +1,5 @@
-import { reconnect } from '@/lib/echo';
-import { useConnectionStatus, useEcho } from '@laravel/echo-react';
+import { reconnect, useSsrSafeConnectionStatus } from '@/lib/echo';
+import { useEcho } from '@laravel/echo-react';
 import { useEffect, useRef } from 'react';
 import type { ChatAction, ChatStatus } from './message-reducer';
 import { applyStreamEvent, type RawStreamEvent } from './process-event';
@@ -55,7 +55,7 @@ export function useStreamChannel({
     resetReplayState,
 }: UseStreamChannelOptions): UseStreamChannelReturn {
     const channelName = `chat.${userId}`;
-    const connectionStatus = useConnectionStatus();
+    const connectionStatus = useSsrSafeConnectionStatus();
     const wasStreamingRef = useRef(false);
     const previousConnectionStatusRef = useRef(connectionStatus);
 
