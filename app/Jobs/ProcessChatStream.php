@@ -43,9 +43,7 @@ final class ProcessChatStream implements ShouldQueue
         public string $streamId,
         public string $userMessageId,
         public string $assistantMessageId,
-    ) {
-        $this->onQueue('chat');
-    }
+    ) {}
 
     /**
      * @return list<int>
