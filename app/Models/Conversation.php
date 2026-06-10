@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Services\StreamEventStore;
 use Carbon\CarbonInterface;
 use Database\Factories\ConversationFactory;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -73,8 +74,11 @@ final class Conversation extends Model
 
     public function hasPendingChatStream(): bool
     {
+        $liveAfter = now()->subSeconds(StreamEventStore::TTL_SECONDS);
+
         return $this->messages->contains(
-            fn (History $message): bool => $message->isPendingStreamAssistant(),
+            fn (History $message): bool => $message->isPendingStreamAssistant()
+                && $message->created_at->isAfter($liveAfter),
         );
     }
 }

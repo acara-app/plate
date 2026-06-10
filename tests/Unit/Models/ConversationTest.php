@@ -6,6 +6,7 @@ use App\Models\Conversation;
 use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;
+use App\Services\StreamEventStore;
 use Laravel\Ai\Messages\MessageRole;
 
 covers(Conversation::class);
@@ -144,4 +145,15 @@ it('detects a pending chat stream among its messages', function (): void {
     ]);
 
     expect($conversation->refresh()->hasPendingChatStream())->toBeTrue();
+});
+
+it('ignores pending chat streams older than the stream event buffer ttl', function (): void {
+    $conversation = Conversation::factory()->create();
+
+    History::factory()->forConversation($conversation)->assistantMessage()->create([
+        'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_PENDING),
+        'created_at' => now()->subSeconds(StreamEventStore::TTL_SECONDS + 1),
+    ]);
+
+    expect($conversation->hasPendingChatStream())->toBeFalse();
 });

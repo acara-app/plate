@@ -12,13 +12,13 @@ use Illuminate\Support\Facades\Redis;
  */
 class StreamEventStore
 {
+    public const int TTL_SECONDS = 600;
+
     private const string KEY_PREFIX = 'plate:chat:stream:';
 
     private const string CANCEL_PREFIX = 'plate:chat:stream:cancel:';
 
     private const string COMPLETED_PREFIX = 'plate:chat:stream:completed:';
-
-    private const int TTL_SECONDS = 600;
 
     /**
      * @param  TNormalizedEvent  $event
