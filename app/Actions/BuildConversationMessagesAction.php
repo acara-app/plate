@@ -25,6 +25,7 @@ final readonly class BuildConversationMessagesAction
 
         return array_values(
             $conversation->messages
+                ->reject(fn (History $message): bool => $message->isPendingStreamAssistant())
                 ->map(fn (History $message): array => [
                     'id' => $message->id,
                     'role' => $message->role->value,
@@ -43,19 +44,13 @@ final readonly class BuildConversationMessagesAction
         $textPart = ['type' => 'text', 'text' => $message->content];
 
         $attachmentParts = collect($message->attachments ?? [])
-            ->map(function (array $attachment): array { // @phpstan-ignore argument.type
-                $mime = isset($attachment['mime']) && is_string($attachment['mime'])
-                    ? $attachment['mime']
-                    : 'image/jpeg';
-
-                $base64 = isset($attachment['base64']) && is_string($attachment['base64'])
-                    ? $attachment['base64']
-                    : '';
+            ->map(function (array $attachment): array {
+                $mime = $attachment['mime'] ?? 'image/jpeg';
 
                 return [
                     'type' => 'file',
                     'mediaType' => $mime,
-                    'url' => sprintf('data:%s;base64,%s', $mime, $base64),
+                    'url' => sprintf('data:%s;base64,%s', $mime, $attachment['base64'] ?? ''),
                 ];
             })
             ->values()
@@ -138,9 +133,11 @@ final readonly class BuildConversationMessagesAction
             if (! is_array($toolResult)) {
                 continue;
             }
+
             if (($toolResult['name'] ?? null) !== 'log_health_entry') {
                 continue;
             }
+
             $result = $toolResult['result'] ?? null;
             $decoded = is_string($result) ? json_decode($result, true) : null;
             $approvalId = is_array($decoded) ? ($decoded['approval_id'] ?? null) : null;

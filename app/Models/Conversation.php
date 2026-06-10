@@ -7,6 +7,7 @@ namespace App\Models;
 use Carbon\CarbonInterface;
 use Database\Factories\ConversationFactory;
 use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,15 +27,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, ConversationSummary> $summaries
  */
 #[Table(name: 'agent_conversations')]
+#[WithoutIncrementing]
 final class Conversation extends Model
 {
     /** @use HasFactory<ConversationFactory> */
     use HasFactory, HasUuids;
 
-    /**
-     * @var bool
-     */
-    public $incrementing = false;
+    public const string DEFAULT_TITLE = 'New Chat';
 
     protected $guarded = [];
 
@@ -61,7 +60,7 @@ final class Conversation extends Model
      */
     public function messages(): HasMany
     {
-        return $this->hasMany(History::class, 'conversation_id')->oldest();
+        return $this->hasMany(History::class, 'conversation_id')->oldest()->orderBy('id');
     }
 
     /**
@@ -70,5 +69,12 @@ final class Conversation extends Model
     public function summaries(): HasMany
     {
         return $this->hasMany(ConversationSummary::class, 'conversation_id');
+    }
+
+    public function hasPendingChatStream(): bool
+    {
+        return $this->messages->contains(
+            fn (History $message): bool => $message->isPendingStreamAssistant(),
+        );
     }
 }

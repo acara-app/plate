@@ -7,22 +7,30 @@ namespace App\Ai;
 use App\Enums\ModelName;
 use Laravel\Ai\Files\Base64Image;
 
-final readonly class AgentPayload
+final readonly class AgentRequest
 {
     /**
      * @param  array<int, Base64Image>  $images
      */
     public function __construct(
-        public int $userId,
         public string $message,
         public array $images = [],
         public ?ModelName $modelName = null,
         public ?string $conversationId = null,
+        public ?string $streamId = null,
     ) {}
 
     public function hasImages(): bool
     {
         return $this->images !== [];
+    }
+
+    /**
+     * @phpstan-assert-if-true !null $this->conversationId
+     */
+    public function hasExistingConversation(): bool
+    {
+        return $this->conversationId !== null;
     }
 
     public function shouldEnableWebSearch(): bool

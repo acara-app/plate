@@ -71,7 +71,7 @@ it('generates and saves day one then marks the plan pending', function (): void 
         ],
     ]);
 
-    (new GenerateInitialMealPlanJob($this->user, $mealPlan, null, DietType::Mediterranean))->handle();
+    new GenerateInitialMealPlanJob($this->user, $mealPlan, null, DietType::Mediterranean)->handle();
 
     $fresh = $mealPlan->fresh();
 
@@ -92,7 +92,7 @@ it('keeps a single day plan pending rather than completed', function (): void {
         ],
     ]);
 
-    (new GenerateInitialMealPlanJob($this->user, $mealPlan))->handle();
+    new GenerateInitialMealPlanJob($this->user, $mealPlan)->handle();
 
     expect($mealPlan->fresh()->metadata['status'])
         ->toBe(MealPlanGenerationStatus::Pending->value);
@@ -106,7 +106,7 @@ it('marks the plan failed when the job fails', function (): void {
         ],
     ]);
 
-    (new GenerateInitialMealPlanJob($this->user, $mealPlan))->failed(new RuntimeException('boom'));
+    new GenerateInitialMealPlanJob($this->user, $mealPlan)->failed(new RuntimeException('boom'));
 
     expect($mealPlan->fresh()->metadata['status'])
         ->toBe(MealPlanGenerationStatus::Failed->value);
@@ -115,14 +115,14 @@ it('marks the plan failed when the job fails', function (): void {
 it('builds a stable unique id from the meal plan', function (): void {
     $mealPlan = MealPlan::factory()->for($this->user)->weekly()->create();
 
-    expect((new GenerateInitialMealPlanJob($this->user, $mealPlan))->uniqueId())
+    expect(new GenerateInitialMealPlanJob($this->user, $mealPlan)->uniqueId())
         ->toBe('meal-plan-init:'.$mealPlan->id);
 });
 
 it('prevents overlapping execution', function (): void {
     $mealPlan = MealPlan::factory()->for($this->user)->weekly()->create();
 
-    $middleware = (new GenerateInitialMealPlanJob($this->user, $mealPlan))->middleware();
+    $middleware = new GenerateInitialMealPlanJob($this->user, $mealPlan)->middleware();
 
     expect($middleware)->toHaveCount(1)
         ->and($middleware[0])->toBeInstanceOf(WithoutOverlapping::class);

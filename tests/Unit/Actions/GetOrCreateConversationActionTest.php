@@ -26,18 +26,19 @@ it('returns existing conversation when it exists', function (): void {
         ->and($result->user_id)->toBe($this->user->id);
 });
 
-it('creates new conversation with default title when it does not exist', function (): void {
+it('creates new conversation with the default title when it does not exist', function (): void {
     $conversationId = (string) fake()->uuid();
 
     $result = $this->action->handle($conversationId, $this->user);
 
     expect($result->id)->toBe($conversationId)
         ->and($result->user_id)->toBe($this->user->id)
-        ->and($result->title)->not->toBeEmpty();
+        ->and($result->title)->toBe(Conversation::DEFAULT_TITLE);
 
     $this->assertDatabaseHas('agent_conversations', [
         'id' => $conversationId,
         'user_id' => $this->user->id,
+        'title' => Conversation::DEFAULT_TITLE,
     ]);
 });
 
@@ -47,6 +48,14 @@ it('loads messages relationship', function (): void {
     $result = $this->action->handle($conversation->id, $this->user);
 
     expect($result->relationLoaded('messages'))->toBeTrue();
+});
+
+it('skips the messages relationship when not requested', function (): void {
+    $conversation = Conversation::factory()->create(['user_id' => $this->user->id]);
+
+    $result = $this->action->handle($conversation->id, $this->user, withMessages: false);
+
+    expect($result->relationLoaded('messages'))->toBeFalse();
 });
 
 it('returns an existing conversation even when owned by another user (authorization is not this action concern)', function (): void {

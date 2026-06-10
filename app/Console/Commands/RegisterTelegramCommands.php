@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use DefStudio\Telegraph\Models\TelegraphBot;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
+#[Description('Register Telegram bot menu commands')]
+#[Signature('telegram:register-commands')]
 final class RegisterTelegramCommands extends Command
 {
-    protected $signature = 'telegram:register-commands';
-
-    protected $description = 'Register Telegram bot menu commands';
-
     public function handle(): int
     {
         $bot = TelegraphBot::query()->first();

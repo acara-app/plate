@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Models\SubscriptionProduct;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -14,13 +16,11 @@ use Stripe\Exception\ApiErrorException;
 /**
  * @codeCoverageIgnore
  */
+#[Description('Idempotently create the Stripe Products and Prices for each seeded subscription_product (matched by lookup_key).')]
+#[Signature('billing:bootstrap-stripe-products
+        {--dry-run : Print the plan but do not write to Stripe}')]
 final class BootstrapStripeProductsCommand extends Command
 {
-    protected $signature = 'billing:bootstrap-stripe-products
-        {--dry-run : Print the plan but do not write to Stripe}';
-
-    protected $description = 'Idempotently create the Stripe Products and Prices for each seeded subscription_product (matched by lookup_key).';
-
     public function handle(): int
     {
         /** @var Collection<int, SubscriptionProduct> $products */

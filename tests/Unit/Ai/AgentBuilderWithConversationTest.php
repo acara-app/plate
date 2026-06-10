@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\AgentBuilder;
-use App\Ai\AgentPayload;
+use App\Ai\AgentRequest;
 use App\Models\Conversation;
 use App\Models\ConversationSummary;
 use App\Models\User;
@@ -29,13 +29,12 @@ it('includes summaries in instructions when conversationId is provided', functio
         'topics' => ['topic2'],
     ]);
 
-    $payload = new AgentPayload(
-        userId: $user->id,
+    $request = new AgentRequest(
         message: 'Hello',
         conversationId: $conversation->id,
     );
 
-    $result = $builder->build($payload, $user);
+    $result = $builder->build($request, $user);
 
     expect($result['instructions'])->toContain('First summary')
         ->toContain('Second summary');

@@ -120,6 +120,7 @@ final readonly class BuildAiSafeUserProfile
     }
 
     /**
+     * @param  Collection<int, UserProfileAttribute>  $attributes
      * @return list<string>
      */
     private function identifyMissingData(UserProfile $profile, Collection $attributes): array

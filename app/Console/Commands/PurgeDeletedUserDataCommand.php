@@ -6,16 +6,16 @@ namespace App\Console\Commands;
 
 use App\Models\DeletedUser;
 use App\Models\User;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
+#[Description('Purge orphaned data for users deleted more than 30 days ago')]
+#[Signature('users:purge-deleted-data')]
 final class PurgeDeletedUserDataCommand extends Command
 {
-    protected $signature = 'users:purge-deleted-data';
-
-    protected $description = 'Purge orphaned data for users deleted more than 30 days ago';
-
     public function handle(): int
     {
         $count = 0;

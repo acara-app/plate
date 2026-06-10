@@ -9,20 +9,20 @@ use App\Contracts\Billing\ResolvesUserTier;
 use App\Models\User;
 use App\Services\Billing\PremiumRolloutGate;
 use Carbon\CarbonInterface;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Laravel\Cashier\Subscription;
 
 /**
  * @codeCoverageIgnore
  */
+#[Description("Inspect a user's tier, premium-rollout decision, subscription state, and current usage")]
+#[Signature('billing:inspect-entitlement
+        {user : User id or email address}
+        {--json : Output as JSON instead of a human-readable table}')]
 final class InspectEntitlementCommand extends Command
 {
-    protected $signature = 'billing:inspect-entitlement
-        {user : User id or email address}
-        {--json : Output as JSON instead of a human-readable table}';
-
-    protected $description = "Inspect a user's tier, premium-rollout decision, subscription state, and current usage";
-
     public function handle(
         ResolvesUserTier $resolver,
         PremiumRolloutGate $rolloutGate,

@@ -9,20 +9,20 @@ use App\Data\GeminiUploadedFileData;
 use App\Enums\SettingKey;
 use App\Models\Setting;
 use Exception;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Sleep;
 
-final class UploadDocumentToGeminiFileSearchCommand extends Command
-{
-    protected $signature = 'upload:document-to-gemini-file-search 
+#[Description('Upload document to Gemini File Search')]
+#[Signature('upload:document-to-gemini-file-search 
         {--file-path= : Path to the file to upload}
         {--display-name= : Display name for the uploaded file}
-        {--store-name= : Display name for the file search store}';
-
-    protected $description = 'Upload document to Gemini File Search';
-
+        {--store-name= : Display name for the file search store}')]
+final class UploadDocumentToGeminiFileSearchCommand extends Command
+{
     public function handle(): void
     {
         $optionFilePath = $this->option('file-path');

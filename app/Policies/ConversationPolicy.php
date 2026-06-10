@@ -29,9 +29,9 @@ final class ConversationPolicy
         return false;
     }
 
-    public function delete(): bool
+    public function delete(User $user, Conversation $conversation): bool
     {
-        return false;
+        return $this->view($user, $conversation);
     }
 
     public function restore(): bool

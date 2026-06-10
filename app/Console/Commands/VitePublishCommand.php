@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
+#[Description('Publish the Vite build to configured CDN and invalidate CloudFront cache')]
+#[Signature('vite:publish')]
 final class VitePublishCommand extends Command
 {
-    protected $signature = 'vite:publish';
-
-    protected $description = 'Publish the Vite build to configured CDN and invalidate CloudFront cache';
-
     public function handle(): void
     {
         $this->info('Publishing assets to CDN');

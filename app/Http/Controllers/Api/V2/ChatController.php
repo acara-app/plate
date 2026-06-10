@@ -4,23 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V2;
 
-use App\Actions\BuildAssistantAgentAction;
 use App\Actions\BuildConversationMessagesAction;
+use App\Actions\DeleteConversationHistory;
 use App\Actions\GetOrCreateConversationAction;
-use App\Http\Requests\Api\V2\ChatStreamRequest;
 use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
-use Laravel\Ai\Responses\StreamableAgentResponse;
 
 final readonly class ChatController
 {
     public function __construct(
         private BuildConversationMessagesAction $messagesAction,
-        private BuildAssistantAgentAction $agentAction,
         private GetOrCreateConversationAction $conversationAction,
+        private DeleteConversationHistory $deleteConversationHistory,
     ) {}
 
     public function index(#[CurrentUser] User $user): JsonResponse
@@ -52,17 +50,6 @@ final readonly class ChatController
         ]);
     }
 
-    public function stream(
-        ChatStreamRequest $request,
-        #[CurrentUser] User $user,
-        string $conversationId
-    ): StreamableAgentResponse {
-        $conversation = $this->conversationAction->handle($conversationId, $user);
-        Gate::authorize('view', $conversation);
-
-        return $this->agentAction->handle($request, $user, $conversation->id, 'mobile');
-    }
-
     public function destroy(string $conversationId): JsonResponse
     {
         $conversation = Conversation::query()->find($conversationId);
@@ -71,8 +58,8 @@ final readonly class ChatController
             return response()->json(['message' => 'Conversation not found.'], 404);
         }
 
-        Gate::authorize('view', $conversation);
-        $conversation->delete();
+        Gate::authorize('delete', $conversation);
+        $this->deleteConversationHistory->handle($conversation);
 
         return response()->json(['message' => 'Conversation deleted.']);
     }

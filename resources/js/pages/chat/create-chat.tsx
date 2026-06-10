@@ -1,6 +1,7 @@
 import { CreditWarningBanner } from '@/components/billing/credit-warning-banner';
 import { UsageLimitNotice } from '@/components/billing/usage-limit-notice';
 import { useChatStream } from '@/hooks/use-chat-stream';
+import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
 import { generateUUID } from '@/lib/utils';
 import chat from '@/routes/chat';
@@ -9,7 +10,7 @@ import type { BreadcrumbItem, CreditWarning } from '@/types';
 import type { ChatPageProps, UIMessage } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ChatInput from './chat-input';
 
 import ChatMessages, { ChatErrorBanner } from './chat-messages';
@@ -29,8 +30,10 @@ export default function CreateChat() {
         conversationId: initialConversationId,
         messages: messageHistories,
         initialPrompt,
+        initialStreaming,
         creditWarning: sharedCreditWarning,
     } = page.props;
+    const { currentUser } = useSharedProps();
 
     const [conversationId, setConversationId] = useState<string>(
         initialConversationId,
@@ -49,8 +52,15 @@ export default function CreateChat() {
         text: string;
         files?: FileUIPart[];
     } | null>(null);
+    const autoStartedPromptRef = useRef<string | null>(null);
 
-    const initialMessages = (messageHistories ?? []) as UIMessage[];
+    const initialMessages = useMemo(
+        () => (messageHistories ?? []) as UIMessage[],
+        [messageHistories],
+    );
+    const normalizedInitialPrompt = initialPrompt?.trim() ?? '';
+    const shouldAutoStartInitialPrompt =
+        normalizedInitialPrompt.length > 0 && initialMessages.length === 0;
 
     const handleStreamFinish = useCallback(() => {
         router.reload({ only: ['creditWarning'] });
@@ -59,6 +69,7 @@ export default function CreateChat() {
     const {
         messages,
         sendMessage,
+        stop,
         clearError,
         status,
         error,
@@ -68,15 +79,61 @@ export default function CreateChat() {
         clearUsageLimitTrigger,
     } = useChatStream({
         conversationId,
+        userId: currentUser.id,
         initialMessages,
+        initialStreaming,
         onFinish: handleStreamFinish,
     });
+
+    const [isResuming, setIsResuming] = useState<boolean>(
+        initialStreaming ?? false,
+    );
+
+    useEffect(() => {
+        if (status !== 'ready') {
+            setIsResuming(false);
+        }
+    }, [status]);
 
     useEffect(() => {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [messages]);
+
+    useEffect(() => {
+        if (!shouldAutoStartInitialPrompt) {
+            return;
+        }
+
+        const promptKey = `${conversationId}:${normalizedInitialPrompt}`;
+
+        if (autoStartedPromptRef.current === promptKey) {
+            return;
+        }
+
+        autoStartedPromptRef.current = promptKey;
+        lastMessageRef.current = { text: normalizedInitialPrompt };
+        sendMessage({ text: normalizedInitialPrompt });
+
+        const url = new URL(window.location.href);
+
+        if (!url.searchParams.has('prompt')) {
+            return;
+        }
+
+        url.searchParams.delete('prompt');
+        window.history.replaceState(
+            window.history.state,
+            '',
+            `${url.pathname}${url.search}${url.hash}`,
+        );
+    }, [
+        conversationId,
+        normalizedInitialPrompt,
+        sendMessage,
+        shouldAutoStartInitialPrompt,
+    ]);
 
     function handleSubmit(message: string, files?: FileUIPart[]) {
         if (!message.trim() && (!files || files.length === 0)) {
@@ -112,7 +169,8 @@ export default function CreateChat() {
         }
     }, [error, clearError]);
 
-    const showThinkingIndicator = isSubmitting && messages.length > 0;
+    const showThinkingIndicator =
+        (isSubmitting || isResuming) && messages.length > 0;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs} fixedHeight>
@@ -170,9 +228,12 @@ export default function CreateChat() {
                     <ChatInput
                         className="w-full"
                         onSubmit={handleSubmit}
+                        onStop={stop}
                         onInputChange={handleInputChange}
                         disabled={isStreaming || isSubmitting}
-                        initialMessage={initialPrompt}
+                        initialMessage={
+                            shouldAutoStartInitialPrompt ? null : initialPrompt
+                        }
                         isLoading={isStreaming || isSubmitting}
                     />
                     <p className="px-2 pb-2 text-center text-xs text-muted-foreground sm:px-4 sm:pb-4 sm:text-sm">

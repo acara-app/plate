@@ -59,7 +59,7 @@ class StreamChatRequest extends FormRequest
     }
 
     /**
-     * @return array<int, Base64Image>
+     * @return list<Base64Image>
      */
     public function userAttachments(): array
     {
@@ -74,7 +74,7 @@ class StreamChatRequest extends FormRequest
             return []; // @codeCoverageIgnore
         } // @codeCoverageIgnoreEnd
 
-        return collect($lastUserMessage['parts'])
+        return array_values(collect($lastUserMessage['parts'])
             ->where('type', 'file')
             ->filter(fn (array $part): bool => isset($part['mediaType'], $part['url'])
                 && str_starts_with($part['mediaType'], 'image/')
@@ -87,8 +87,7 @@ class StreamChatRequest extends FormRequest
 
                 return new Base64Image($base64Data, $mediaType);
             })
-            ->values()
-            ->all();
+            ->all());
     }
 
     public function messages(): array

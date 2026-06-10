@@ -55,7 +55,7 @@ final readonly class GenerateMealDayController
             ]),
         ]);
 
-        GenerateMealPlanDayJob::dispatch($mealPlan, $dayNumber);
+        dispatch(new GenerateMealPlanDayJob($mealPlan, $dayNumber));
 
         return response()->json([
             'success' => true,

@@ -8,21 +8,21 @@ use App\Actions\AggregateHealthDailySamplesAction;
 use App\Actions\SleepSessionAggregator;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-final class AggregateHealthDailyCommand extends Command
-{
-    protected $signature = 'health:aggregate-daily
+#[Description('Aggregate raw health and sleep samples into UTC daily summaries')]
+#[Signature('health:aggregate-daily
                             {--date= : Specific UTC date to aggregate (Y-m-d)}
                             {--from= : Start UTC date for range aggregation (Y-m-d)}
                             {--to= : End UTC date for range aggregation (Y-m-d)}
                             {--user_id= : Aggregate for a specific user}
-                            {--repair-days=2 : Number of recent UTC days to repair in default mode}';
-
-    protected $description = 'Aggregate raw health and sleep samples into UTC daily summaries';
-
+                            {--repair-days=2 : Number of recent UTC days to repair in default mode}')]
+final class AggregateHealthDailyCommand extends Command
+{
     public function handle(
         AggregateHealthDailySamplesAction $healthAggregator,
         SleepSessionAggregator $sleepAggregator,
