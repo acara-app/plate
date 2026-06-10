@@ -9,6 +9,9 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Support\Facades\Broadcast;
 use Laravel\Ai\Streaming\Events\StreamEvent;
 
+/**
+ * @phpstan-import-type TNormalizedEvent from StreamAggregator
+ */
 final readonly class BroadcastConnector
 {
     private const float CANCELLATION_CHECK_SECONDS = 0.25;
@@ -53,12 +56,12 @@ final readonly class BroadcastConnector
     }
 
     /**
-     * @param  array<string, mixed>  $payload
+     * @param  TNormalizedEvent  $payload
      */
     private function broadcastEvent(array $payload, PrivateChannel $channel): void
     {
         Broadcast::on($channel)
-            ->as((string) $payload['type'])
+            ->as($payload['type'])
             ->with($payload)
             ->sendNow();
     }

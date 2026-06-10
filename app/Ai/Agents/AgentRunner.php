@@ -85,7 +85,7 @@ final class AgentRunner implements Agent, Conversational, HasTools
 
         $streamId = $this->currentRequest->streamId;
 
-        return History::query()
+        $messages = History::query()
             ->select(['id', 'conversation_id', 'agent', 'role', 'content', 'tool_calls', 'tool_results', 'meta'])
             ->where('conversation_id', $this->currentRequest->conversationId)
             ->where('agent', self::class)
@@ -96,8 +96,9 @@ final class AgentRunner implements Agent, Conversational, HasTools
             ->reject(fn (History $message): bool => $message->isPendingStreamAssistant()
                 || ($streamId !== null && $message->belongsToChatStream($streamId)))
             ->flatMap(fn (History $message): array => $this->toAiMessages($message))
-            ->values()
             ->all();
+
+        return array_values($messages);
     }
 
     public function instructions(): string
@@ -152,12 +153,12 @@ final class AgentRunner implements Agent, Conversational, HasTools
                 new AssistantMessage(
                     $message->content ?: '',
                     $toolCalls->map(fn (array $toolCall): ToolCall => new ToolCall(
-                        id: (string) $toolCall['id'],
-                        name: (string) $toolCall['name'],
-                        arguments: is_array($toolCall['arguments'] ?? null) ? $toolCall['arguments'] : [],
-                        resultId: isset($toolCall['result_id']) ? (string) $toolCall['result_id'] : null,
-                        reasoningId: isset($toolCall['reasoning_id']) ? (string) $toolCall['reasoning_id'] : null,
-                        reasoningSummary: is_array($toolCall['reasoning_summary'] ?? null) ? $toolCall['reasoning_summary'] : null,
+                        id: $toolCall['id'],
+                        name: $toolCall['name'],
+                        arguments: $toolCall['arguments'] ?? [],
+                        resultId: $toolCall['result_id'] ?? null,
+                        reasoningId: $toolCall['reasoning_id'] ?? null,
+                        reasoningSummary: $toolCall['reasoning_summary'] ?? null,
                     ))
                 ),
             ];
@@ -165,11 +166,11 @@ final class AgentRunner implements Agent, Conversational, HasTools
             if ($toolResults->isNotEmpty()) {
                 $messages[] = new ToolResultMessage(
                     $toolResults->map(fn (array $toolResult): ToolResult => new ToolResult(
-                        id: (string) $toolResult['id'],
-                        name: (string) $toolResult['name'],
-                        arguments: is_array($toolResult['arguments'] ?? null) ? $toolResult['arguments'] : [],
+                        id: $toolResult['id'],
+                        name: $toolResult['name'],
+                        arguments: $toolResult['arguments'] ?? [],
                         result: $toolResult['result'] ?? null,
-                        resultId: isset($toolResult['result_id']) ? (string) $toolResult['result_id'] : null,
+                        resultId: $toolResult['result_id'] ?? null,
                     ))
                 );
             }

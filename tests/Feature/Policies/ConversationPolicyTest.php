@@ -27,14 +27,24 @@ it('denies other users from viewing conversation', function (): void {
     expect($policy->view($other, $conversation))->toBeFalse();
 });
 
-it('denies viewAny, update, delete, restore, and forceDelete', function (): void {
+it('denies viewAny, update, restore, and forceDelete', function (): void {
     $policy = new ConversationPolicy;
 
     expect($policy->viewAny())->toBeFalse()
         ->and($policy->update())->toBeFalse()
-        ->and($policy->delete())->toBeFalse()
         ->and($policy->restore())->toBeFalse()
         ->and($policy->forceDelete())->toBeFalse();
+});
+
+it('allows owner to delete their conversation and denies others', function (): void {
+    $owner = User::factory()->create();
+    $other = User::factory()->create();
+    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+
+    $policy = new ConversationPolicy;
+
+    expect($policy->delete($owner, $conversation))->toBeTrue()
+        ->and($policy->delete($other, $conversation))->toBeFalse();
 });
 
 it('allows create', function (): void {

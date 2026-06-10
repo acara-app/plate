@@ -25,6 +25,9 @@ final readonly class AgentRequest
         return $this->images !== [];
     }
 
+    /**
+     * @phpstan-assert-if-true !null $this->conversationId
+     */
     public function hasExistingConversation(): bool
     {
         return $this->conversationId !== null;

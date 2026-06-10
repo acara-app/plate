@@ -12,9 +12,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Ai\Messages\MessageRole;
-use Laravel\Ai\Responses\Data\ToolCall;
-use Laravel\Ai\Responses\Data\ToolResult;
-use Laravel\Ai\Responses\Data\Usage;
 
 /**
  * @property string $id
@@ -24,10 +21,10 @@ use Laravel\Ai\Responses\Data\Usage;
  * @property MessageRole $role
  * @property string $content
  * @property list<array{type?: string, name?: ?string, base64?: string, mime?: ?string}>|null $attachments
- * @property array<ToolCall> $tool_calls
- * @property array<ToolResult> $tool_results
- * @property array{Usage} $usage
- * @property array<string, mixed> $meta
+ * @property list<array{id: string, name: string, arguments?: array<string, mixed>|null, result_id?: string|null, reasoning_id?: string|null, reasoning_summary?: array<int|string, mixed>|null}>|null $tool_calls
+ * @property list<array{id: string, name: string, arguments?: array<string, mixed>|null, result?: mixed, result_id?: string|null}>|null $tool_results
+ * @property array<string, mixed> $usage
+ * @property array{chat_stream?: array<string, mixed>, ...<string, mixed>}|null $meta
  * @property string|null $summary_id
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
@@ -90,9 +87,7 @@ final class History extends Model
      */
     public function chatStreamMeta(): array
     {
-        $meta = $this->meta[self::STREAM_META_KEY] ?? [];
-
-        return is_array($meta) ? $meta : [];
+        return $this->meta[self::STREAM_META_KEY] ?? [];
     }
 
     public function chatStreamId(): ?string

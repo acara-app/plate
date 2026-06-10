@@ -48,7 +48,7 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
 
         $response = $this->agentRunner->runSync($request, $user);
 
-        if ($isFirstTurn && $conversation instanceof Conversation) {
+        if ($conversation instanceof Conversation && $isFirstTurn) {
             dispatch(new GenerateConversationTitleJob($conversation));
         }
 

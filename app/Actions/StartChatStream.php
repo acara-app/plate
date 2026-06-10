@@ -64,7 +64,12 @@ final readonly class StartChatStream
     private function serializeAttachments(array $images): array
     {
         return array_map(
-            fn (Base64Image $image): array => $image->toArray(),
+            fn (Base64Image $image): array => [
+                'type' => 'base64-image',
+                'name' => $image->name(),
+                'base64' => $image->base64,
+                'mime' => $image->mime,
+            ],
             $images,
         );
     }

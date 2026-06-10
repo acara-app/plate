@@ -26,11 +26,11 @@ final readonly class GenerateConversationTitleAction
             ->orderBy('id')
             ->value('content');
 
-        if (blank($firstMessage)) {
+        if (! is_string($firstMessage) || blank($firstMessage)) {
             return;
         }
 
-        ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($conversation->user?->locale);
+        ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($conversation->user->locale);
 
         try {
             $title = mb_trim($this->agent->generate($firstMessage, $language, $languageCode));

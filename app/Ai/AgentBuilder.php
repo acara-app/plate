@@ -98,7 +98,9 @@ final readonly class AgentBuilder
     {
         foreach ($subAgents as $subAgent) {
             if ($subAgent instanceof HasTools) {
-                $tools = [...$tools, ...$subAgent->tools()];
+                foreach ($subAgent->tools() as $tool) {
+                    $tools[] = $tool;
+                }
             }
         }
 

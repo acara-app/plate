@@ -7,6 +7,9 @@ namespace App\Services;
 use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Facades\Redis;
 
+/**
+ * @phpstan-import-type TNormalizedEvent from StreamAggregator
+ */
 class StreamEventStore
 {
     private const string KEY_PREFIX = 'plate:chat:stream:';
@@ -18,13 +21,13 @@ class StreamEventStore
     private const int TTL_SECONDS = 600;
 
     /**
-     * @param  array<string, mixed>  $event
+     * @param  TNormalizedEvent  $event
      */
     public function append(string $conversationId, array $event, int $sequence): void
     {
         $payload = json_encode([
             'sequence' => $sequence,
-            'type' => $event['type'] ?? null,
+            'type' => $event['type'],
             'data' => $event,
         ], JSON_THROW_ON_ERROR);
 
@@ -36,7 +39,7 @@ class StreamEventStore
     }
 
     /**
-     * @return list<array{sequence: int, type: string, data: array<string, mixed>}>
+     * @return list<array{sequence: int, type: string, data: TNormalizedEvent}>
      */
     public function eventsAfter(string $conversationId, int $afterSequence): array
     {
@@ -52,7 +55,12 @@ class StreamEventStore
         }
 
         return array_values(array_map(
-            fn (string $event): array => json_decode($event, true, flags: JSON_THROW_ON_ERROR),
+            static function (string $event): array {
+                /** @var array{sequence: int, type: string, data: TNormalizedEvent} $decoded */
+                $decoded = json_decode($event, true, flags: JSON_THROW_ON_ERROR);
+
+                return $decoded;
+            },
             $events,
         ));
     }

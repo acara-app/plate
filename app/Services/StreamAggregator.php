@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Data\ChatStreamResult;
+use Laravel\Ai\Responses\Data\UrlCitation;
 use Laravel\Ai\Streaming\Events\Citation;
 use Laravel\Ai\Streaming\Events\Error as StreamError;
 use Laravel\Ai\Streaming\Events\ProviderToolEvent;
@@ -20,10 +21,13 @@ use Laravel\Ai\Streaming\Events\TextStart;
 use Laravel\Ai\Streaming\Events\ToolCall;
 use Laravel\Ai\Streaming\Events\ToolResult;
 
+/**
+ * @phpstan-type TNormalizedEvent array{type: string, delta?: string|null, tool_call?: array<string, mixed>, tool_result?: array<string, mixed>, citation?: array<string, mixed>, usage?: array<string, mixed>, ...<string, mixed>}
+ */
 final readonly class StreamAggregator
 {
     /**
-     * @return array<string, mixed>
+     * @return TNormalizedEvent
      */
     public function normalizeEvent(StreamEvent $event): array
     {
@@ -42,7 +46,13 @@ final readonly class StreamAggregator
                 'invocation_id' => $event->invocationId,
                 'type' => 'stream_end',
                 'reason' => $event->reason,
-                'usage' => $event->usage->toArray(),
+                'usage' => [
+                    'prompt_tokens' => $event->usage->promptTokens,
+                    'completion_tokens' => $event->usage->completionTokens,
+                    'cache_write_input_tokens' => $event->usage->cacheWriteInputTokens,
+                    'cache_read_input_tokens' => $event->usage->cacheReadInputTokens,
+                    'reasoning_tokens' => $event->usage->reasoningTokens,
+                ],
                 'timestamp' => $event->timestamp,
             ],
             $event instanceof TextStart => [
@@ -100,7 +110,14 @@ final readonly class StreamAggregator
                 'arguments' => $event->toolCall->arguments,
                 'reasoning_id' => $event->toolCall->reasoningId,
                 'timestamp' => $event->timestamp,
-                'tool_call' => $event->toolCall->toArray(),
+                'tool_call' => [
+                    'id' => $event->toolCall->id,
+                    'name' => $event->toolCall->name,
+                    'arguments' => $event->toolCall->arguments,
+                    'result_id' => $event->toolCall->resultId,
+                    'reasoning_id' => $event->toolCall->reasoningId,
+                    'reasoning_summary' => $event->toolCall->reasoningSummary,
+                ],
             ],
             $event instanceof ToolResult => [
                 'id' => $event->id,
@@ -112,7 +129,13 @@ final readonly class StreamAggregator
                 'successful' => $event->successful,
                 'error' => $event->error,
                 'timestamp' => $event->timestamp,
-                'tool_result' => $event->toolResult->toArray(),
+                'tool_result' => [
+                    'id' => $event->toolResult->id,
+                    'name' => $event->toolResult->name,
+                    'arguments' => $event->toolResult->arguments,
+                    'result' => $event->toolResult->result,
+                    'result_id' => $event->toolResult->resultId,
+                ],
             ],
             $event instanceof ProviderToolEvent => [
                 'id' => $event->id,
@@ -125,8 +148,14 @@ final readonly class StreamAggregator
                 'timestamp' => $event->timestamp,
             ],
             $event instanceof Citation => [
-                ...$event->toArray(),
+                'id' => $event->id,
+                'invocation_id' => $event->invocationId,
                 'type' => 'citation',
+                'message_id' => $event->messageId,
+                'citation' => $event->citation instanceof UrlCitation
+                    ? ['title' => $event->citation->title, 'url' => $event->citation->url]
+                    : [],
+                'timestamp' => $event->timestamp,
             ],
             $event instanceof StreamError => [
                 'id' => $event->id,
@@ -138,12 +167,15 @@ final readonly class StreamAggregator
                 'timestamp' => $event->timestamp,
                 'metadata' => $event->metadata,
             ],
-            default => $event->toArray(),
+            default => [
+                'invocation_id' => $event->invocationId,
+                'type' => $event->type(),
+            ],
         };
     }
 
     /**
-     * @param  list<array{sequence: int, type: string, data: array<string, mixed>}>  $storedEvents
+     * @param  list<array{sequence: int, type: string, data: TNormalizedEvent}>  $storedEvents
      */
     public function aggregateStoredEvents(array $storedEvents): ChatStreamResult
     {
@@ -154,13 +186,14 @@ final readonly class StreamAggregator
     }
 
     /**
-     * @param  list<array<string, mixed>>  $events
+     * @param  list<TNormalizedEvent>  $events
      */
     public function aggregateNormalized(array $events): ChatStreamResult
     {
-        $text = collect($this->ofType($events, 'text_delta'))
-            ->map(fn (array $event): string => (string) ($event['delta'] ?? ''))
-            ->join('');
+        $text = implode('', array_map(
+            fn (array $event): string => $event['delta'] ?? '',
+            $this->ofType($events, 'text_delta'),
+        ));
 
         return new ChatStreamResult(
             text: $text,
@@ -174,29 +207,31 @@ final readonly class StreamAggregator
     }
 
     /**
-     * @param  list<array<string, mixed>>  $events
+     * @param  list<TNormalizedEvent>  $events
      * @return list<array<string, mixed>>
      */
     private function toolCalls(array $events): array
     {
-        return collect($this->ofType($events, 'tool_call'))
-            ->map(fn (array $event): array => $event['tool_call'])
-            ->all();
+        return array_map(
+            fn (array $event): array => $event['tool_call'] ?? [],
+            $this->ofType($events, 'tool_call'),
+        );
     }
 
     /**
-     * @param  list<array<string, mixed>>  $events
+     * @param  list<TNormalizedEvent>  $events
      * @return list<array<string, mixed>>
      */
     private function toolResults(array $events): array
     {
-        return collect($this->ofType($events, 'tool_result'))
-            ->map(fn (array $event): array => $event['tool_result'])
-            ->all();
+        return array_map(
+            fn (array $event): array => $event['tool_result'] ?? [],
+            $this->ofType($events, 'tool_result'),
+        );
     }
 
     /**
-     * @param  list<array<string, mixed>>  $events
+     * @param  list<TNormalizedEvent>  $events
      * @return list<array<string, mixed>>
      */
     private function providerTools(array $events): array
@@ -205,20 +240,22 @@ final readonly class StreamAggregator
     }
 
     /**
-     * @param  list<array<string, mixed>>  $events
+     * @param  list<TNormalizedEvent>  $events
      * @return list<array<string, mixed>>
      */
     private function citations(array $events): array
     {
-        return collect($this->ofType($events, 'citation'))
-            ->map(fn (array $event): array => is_array($event['citation'] ?? null) ? $event['citation'] : [])
-            ->filter(fn (array $citation): bool => $citation !== [])
-            ->values()
-            ->all();
+        return array_values(array_filter(
+            array_map(
+                fn (array $event): array => $event['citation'] ?? [],
+                $this->ofType($events, 'citation'),
+            ),
+            fn (array $citation): bool => $citation !== [],
+        ));
     }
 
     /**
-     * @param  list<array<string, mixed>>  $events
+     * @param  list<TNormalizedEvent>  $events
      * @return list<array<string, mixed>>
      */
     private function errors(array $events): array
@@ -227,31 +264,31 @@ final readonly class StreamAggregator
     }
 
     /**
-     * @param  list<array<string, mixed>>  $events
+     * @param  list<TNormalizedEvent>  $events
      * @return array<string, mixed>
      */
     private function usage(array $events): array
     {
-        $event = collect($this->ofType($events, 'stream_end'))
-            ->reverse()
-            ->first(fn (array $event): bool => is_array($event['usage'] ?? null));
+        foreach (array_reverse($this->ofType($events, 'stream_end')) as $event) {
+            $usage = $event['usage'] ?? null;
 
-        if (! is_array($event) || ! is_array($event['usage'] ?? null)) {
-            return [];
+            if (is_array($usage)) {
+                return $usage;
+            }
         }
 
-        return $event['usage'];
+        return [];
     }
 
     /**
-     * @param  list<array<string, mixed>>  $events
-     * @return list<array<string, mixed>>
+     * @param  list<TNormalizedEvent>  $events
+     * @return list<TNormalizedEvent>
      */
     private function ofType(array $events, string $type): array
     {
         return array_values(array_filter(
             $events,
-            fn (array $event): bool => ($event['type'] ?? null) === $type,
+            fn (array $event): bool => $event['type'] === $type,
         ));
     }
 }
