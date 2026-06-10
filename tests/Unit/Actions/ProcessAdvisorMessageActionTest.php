@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 use App\Actions\ProcessAdvisorMessageAction;
 use App\Ai\Agents\AgentRunner;
+use App\Jobs\GenerateConversationTitleJob;
+use App\Models\Conversation;
+use App\Models\History;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Queue;
 use Laravel\Ai\Contracts\ConversationStore;
 use Laravel\Ai\Prompts\AgentPrompt;
 use Laravel\Ai\Responses\AgentResponse;
@@ -103,4 +107,42 @@ it('resets conversation', function (): void {
     $user = User::factory()->create();
 
     expect($action->resetConversation($user))->toBe('new-conv');
+});
+
+it('dispatches title generation on the first telegram turn', function (): void {
+    Queue::fake();
+    AgentRunner::fake(['Hello!']);
+
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create(['title' => Conversation::DEFAULT_TITLE]);
+
+    $action = new ProcessAdvisorMessageAction(
+        resolve(AgentRunner::class),
+        fakeConversationStore(),
+    );
+
+    $action->handle($user, 'Test message', $conversation->id);
+
+    Queue::assertPushed(
+        GenerateConversationTitleJob::class,
+        fn (GenerateConversationTitleJob $job): bool => $job->conversation->id === $conversation->id,
+    );
+});
+
+it('does not dispatch title generation on later telegram turns', function (): void {
+    Queue::fake();
+    AgentRunner::fake(['Continuing']);
+
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create(['title' => Conversation::DEFAULT_TITLE]);
+    History::factory()->forConversation($conversation)->create(['role' => 'user']);
+
+    $action = new ProcessAdvisorMessageAction(
+        resolve(AgentRunner::class),
+        fakeConversationStore(),
+    );
+
+    $action->handle($user, 'Another message', $conversation->id);
+
+    Queue::assertNotPushed(GenerateConversationTitleJob::class);
 });

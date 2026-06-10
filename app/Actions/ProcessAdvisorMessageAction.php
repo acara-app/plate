@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Ai\AgentPayload;
+use App\Ai\AgentRequest;
 use App\Ai\Agents\AgentRunner;
 use App\Contracts\ProcessesAdvisorMessage;
 use App\Enums\ModelName;
+use App\Jobs\GenerateConversationTitleJob;
+use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
@@ -30,18 +32,25 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
         Auth::login($user);
 
         $conversationId ??= $this->conversationStore->latestConversationId($user->id)
-            ?? $this->conversationStore->storeConversation($user->id, 'Telegram Chat');
+            ?? $this->conversationStore->storeConversation($user->id, Conversation::DEFAULT_TITLE);
 
         Context::add('chat.conversation_id', $conversationId);
 
-        $payload = new AgentPayload(
-            userId: $user->id,
+        $conversation = Conversation::query()->find($conversationId);
+        $isFirstTurn = $conversation?->messages()->doesntExist() ?? false;
+
+        $request = new AgentRequest(
             message: $message,
             images: $attachments,
             modelName: ModelName::GPT_5_4_MINI,
+            conversationId: $conversationId,
         );
 
-        $response = $this->agentRunner->runSync($payload, $user, $conversationId);
+        $response = $this->agentRunner->runSync($request, $user);
+
+        if ($conversation instanceof Conversation && $isFirstTurn) {
+            dispatch(new GenerateConversationTitleJob($conversation));
+        }
 
         return [
             'response' => $response->text,
@@ -51,6 +60,6 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
 
     public function resetConversation(User $user): string
     {
-        return $this->conversationStore->storeConversation($user->id, 'Telegram Chat');
+        return $this->conversationStore->storeConversation($user->id, Conversation::DEFAULT_TITLE);
     }
 }

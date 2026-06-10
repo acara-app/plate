@@ -9,20 +9,22 @@ use App\Models\User;
 
 final readonly class GetOrCreateConversationAction
 {
-    public function handle(string $conversationId, User $user): Conversation
+    public function handle(string $conversationId, User $user, bool $withMessages = true): Conversation
     {
         $conversation = Conversation::query()
-            ->with('messages')
+            ->when($withMessages, fn ($query) => $query->with('messages'))
             ->find($conversationId);
 
         if ($conversation instanceof Conversation) {
             return $conversation;
         }
 
-        return Conversation::query()->create([
+        $conversation = Conversation::query()->create([
             'id' => $conversationId,
             'user_id' => $user->id,
-            'title' => 'New Chat',
-        ])->load('messages');
+            'title' => Conversation::DEFAULT_TITLE,
+        ]);
+
+        return $withMessages ? $conversation->load('messages') : $conversation;
     }
 }

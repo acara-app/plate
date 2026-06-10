@@ -134,3 +134,21 @@ it('maps multiple messages in order', function (): void {
         ->and($result[0]['parts'][0]['text'])->toBe('First message')
         ->and($result[1]['parts'][0]['text'])->toBe('Second message');
 });
+
+it('omits pending stream assistant placeholders from initial messages', function (): void {
+    History::factory()->forConversation($this->conversation)->userMessage()->create([
+        'content' => 'Pending prompt',
+        'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_SUBMITTED),
+    ]);
+    History::factory()->forConversation($this->conversation)->assistantMessage()->create([
+        'content' => '',
+        'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_PENDING),
+    ]);
+
+    $this->conversation->load('messages');
+    $result = $this->action->handle($this->conversation);
+
+    expect($result)->toHaveCount(1)
+        ->and($result[0]['role'])->toBe('user')
+        ->and($result[0]['parts'][0]['text'])->toBe('Pending prompt');
+});

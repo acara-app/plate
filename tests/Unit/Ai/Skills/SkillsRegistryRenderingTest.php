@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\AgentBuilder;
-use App\Ai\AgentPayload;
+use App\Ai\AgentRequest;
 use App\Contracts\Skills\LoadsSkills;
 use App\Data\Skills\SkillContent;
 use App\Data\Skills\SkillSummary;
@@ -17,13 +17,12 @@ it('omits the skills registry block when the null loader is bound', function ():
     app()->instance(LoadsSkills::class, new NullSkillLoader);
 
     $user = User::factory()->create();
-    $payload = new AgentPayload(
-        userId: $user->id,
+    $request = new AgentRequest(
         message: 'Hello',
     );
 
     $builder = resolve(AgentBuilder::class);
-    $instructions = $builder->buildInstructions($payload, $user);
+    $instructions = $builder->buildInstructions($request, $user);
 
     expect($instructions)
         ->not->toContain('## Available Skills')
@@ -48,13 +47,12 @@ it('renders the skills registry block when a loader returns skills', function ()
     });
 
     $user = User::factory()->create();
-    $payload = new AgentPayload(
-        userId: $user->id,
+    $request = new AgentRequest(
         message: 'Hello',
     );
 
     $builder = resolve(AgentBuilder::class);
-    $instructions = $builder->buildInstructions($payload, $user);
+    $instructions = $builder->buildInstructions($request, $user);
 
     expect($instructions)
         ->toContain('## Available Skills')

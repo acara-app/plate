@@ -33,6 +33,8 @@ final class Conversation extends Model
     /** @use HasFactory<ConversationFactory> */
     use HasFactory, HasUuids;
 
+    public const string DEFAULT_TITLE = 'New Chat';
+
     protected $guarded = [];
 
     public function casts(): array
@@ -58,7 +60,7 @@ final class Conversation extends Model
      */
     public function messages(): HasMany
     {
-        return $this->hasMany(History::class, 'conversation_id')->oldest();
+        return $this->hasMany(History::class, 'conversation_id')->oldest()->orderBy('id');
     }
 
     /**
@@ -67,5 +69,12 @@ final class Conversation extends Model
     public function summaries(): HasMany
     {
         return $this->hasMany(ConversationSummary::class, 'conversation_id');
+    }
+
+    public function hasPendingChatStream(): bool
+    {
+        return $this->messages->contains(
+            fn (History $message): bool => $message->isPendingStreamAssistant(),
+        );
     }
 }

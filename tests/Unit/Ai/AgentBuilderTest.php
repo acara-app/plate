@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\AgentBuilder;
-use App\Ai\AgentPayload;
+use App\Ai\AgentRequest;
 use App\Ai\Agents\FitnessSpecialist;
 use App\Ai\Agents\GlucoseSpikeSpecialist;
 use App\Ai\Agents\HealthSpecialist;
@@ -27,12 +27,9 @@ beforeEach(function (): void {
 describe('build', function (): void {
     it('returns instructions and tools array', function (): void {
         $user = User::factory()->create();
-        $payload = new AgentPayload(
-            userId: $user->id,
-            message: 'Hello',
-        );
+        $request = new AgentRequest(message: 'Hello');
 
-        $result = $this->builder->build($payload, $user);
+        $result = $this->builder->build($request, $user);
 
         expect($result)
             ->toHaveKey('instructions')
@@ -42,12 +39,9 @@ describe('build', function (): void {
 
     it('does not include raw profile context in instructions', function (): void {
         $user = User::factory()->create();
-        $payload = new AgentPayload(
-            userId: $user->id,
-            message: 'Hello',
-        );
+        $request = new AgentRequest(message: 'Hello');
 
-        $result = $this->builder->build($payload, $user);
+        $result = $this->builder->build($request, $user);
 
         expect($result['instructions'])
             ->toContain('You are Altani')
@@ -56,12 +50,9 @@ describe('build', function (): void {
 
     it('instructs the agent to fetch profile context with the profile tool before personalizing advice', function (): void {
         $user = User::factory()->create();
-        $payload = new AgentPayload(
-            userId: $user->id,
-            message: 'How much protein should I eat?',
-        );
+        $request = new AgentRequest(message: 'How much protein should I eat?');
 
-        $result = $this->builder->build($payload, $user);
+        $result = $this->builder->build($request, $user);
 
         expect($result['instructions'])
             ->toContain('call `get_user_profile`')
@@ -71,12 +62,9 @@ describe('build', function (): void {
 
     it('instructs the orchestrator to delegate to each specialist', function (): void {
         $user = User::factory()->create();
-        $payload = new AgentPayload(
-            userId: $user->id,
-            message: 'Hello',
-        );
+        $request = new AgentRequest(message: 'Hello');
 
-        $result = $this->builder->build($payload, $user);
+        $result = $this->builder->build($request, $user);
 
         expect($result['instructions'])
             ->toContain('meal_plan_specialist')
@@ -88,24 +76,18 @@ describe('build', function (): void {
 
     it('states the specialist failure-handling rule exactly once', function (): void {
         $user = User::factory()->create();
-        $payload = new AgentPayload(
-            userId: $user->id,
-            message: 'Hello',
-        );
+        $request = new AgentRequest(message: 'Hello');
 
-        $result = $this->builder->build($payload, $user);
+        $result = $this->builder->build($request, $user);
 
         expect(mb_substr_count((string) $result['instructions'], 'treat it as a failed tool'))->toBe(1);
     });
 
     it('keeps durable writes with the orchestrator and delegates meal plans', function (): void {
         $user = User::factory()->create();
-        $payload = new AgentPayload(
-            userId: $user->id,
-            message: 'Hello',
-        );
+        $request = new AgentRequest(message: 'Hello');
 
-        $result = $this->builder->build($payload, $user);
+        $result = $this->builder->build($request, $user);
 
         expect($result['instructions'])
             ->toContain('log_health_entry')
@@ -117,12 +99,9 @@ describe('build', function (): void {
 
     it('instructs the orchestrator to inline profile context into the delegated task', function (): void {
         $user = User::factory()->create();
-        $payload = new AgentPayload(
-            userId: $user->id,
-            message: 'Hello',
-        );
+        $request = new AgentRequest(message: 'Hello');
 
-        $result = $this->builder->build($payload, $user);
+        $result = $this->builder->build($request, $user);
 
         expect($result['instructions'])
             ->toContain('Specialists have no access to `get_user_profile`')
@@ -131,12 +110,9 @@ describe('build', function (): void {
 
     it('does not claim a delegated domain in its own expertise banner', function (): void {
         $user = User::factory()->create();
-        $payload = new AgentPayload(
-            userId: $user->id,
-            message: 'Hello',
-        );
+        $request = new AgentRequest(message: 'Hello');
 
-        $result = $this->builder->build($payload, $user);
+        $result = $this->builder->build($request, $user);
 
         expect($result['instructions'])
             ->not->toContain('glucose impact prediction')
@@ -148,12 +124,9 @@ describe('build', function (): void {
 describe('tools', function (): void {
     it('returns top-level tools plus specialist sub-agents', function (): void {
         $user = User::factory()->create();
-        $payload = new AgentPayload(
-            userId: $user->id,
-            message: 'Hello',
-        );
+        $request = new AgentRequest(message: 'Hello');
 
-        $result = $this->builder->build($payload, $user);
+        $result = $this->builder->build($request, $user);
 
         $toolClasses = collect($result['tools'])
             ->map(fn (mixed $t): string => $t::class)
@@ -172,13 +145,9 @@ describe('tools', function (): void {
     it('includes image tools when attachments present', function (): void {
         $user = User::factory()->create();
         $image = new Base64Image(base64_encode('fake-image'), 'image/jpeg');
-        $payload = new AgentPayload(
-            userId: $user->id,
-            message: 'Analyze this',
-            images: [$image],
-        );
+        $request = new AgentRequest(message: 'Analyze this', images: [$image]);
 
-        $result = $this->builder->build($payload, $user);
+        $result = $this->builder->build($request, $user);
 
         $toolClasses = collect($result['tools'])
             ->map(fn (mixed $t): string => $t::class)
@@ -189,13 +158,9 @@ describe('tools', function (): void {
 
     it('excludes WebSearch when the toolset contains a Sensitive tool', function (): void {
         $user = User::factory()->create();
-        $payload = new AgentPayload(
-            userId: $user->id,
-            message: 'Search for something',
-            modelName: ModelName::GPT_5_MINI,
-        );
+        $request = new AgentRequest(message: 'Search for something', modelName: ModelName::GPT_5_MINI);
 
-        $result = $this->builder->build($payload, $user);
+        $result = $this->builder->build($request, $user);
 
         $toolClasses = collect($result['tools'])
             ->map(fn (mixed $t): string => $t::class)
@@ -210,13 +175,9 @@ describe('tools', function (): void {
         config()->set('plate.tools', [GetCalorieLevelGuideline::class]);
 
         $user = User::factory()->create();
-        $payload = new AgentPayload(
-            userId: $user->id,
-            message: 'What are calorie recommendations?',
-            modelName: ModelName::GPT_5_MINI,
-        );
+        $request = new AgentRequest(message: 'What are calorie recommendations?', modelName: ModelName::GPT_5_MINI);
 
-        $result = $this->builder->build($payload, $user);
+        $result = $this->builder->build($request, $user);
 
         $toolClasses = collect($result['tools'])
             ->map(fn (mixed $t): string => $t::class)
@@ -233,13 +194,9 @@ describe('tools', function (): void {
         config()->set('plate.sub_agents', []);
 
         $user = User::factory()->create();
-        $payload = new AgentPayload(
-            userId: $user->id,
-            message: 'What are calorie recommendations?',
-            modelName: ModelName::GPT_5_MINI,
-        );
+        $request = new AgentRequest(message: 'What are calorie recommendations?', modelName: ModelName::GPT_5_MINI);
 
-        $result = $this->builder->build($payload, $user);
+        $result = $this->builder->build($request, $user);
 
         $toolClasses = collect($result['tools'])
             ->map(fn (mixed $t): string => $t::class)
@@ -252,12 +209,9 @@ describe('tools', function (): void {
 });
 
 it('handles null user gracefully', function (): void {
-    $payload = new AgentPayload(
-        userId: 1,
-        message: 'Hello',
-    );
+    $request = new AgentRequest(message: 'Hello');
 
-    $result = $this->builder->build($payload, null);
+    $result = $this->builder->build($request, null);
 
     expect($result['instructions'])
         ->toContain('You are Altani')

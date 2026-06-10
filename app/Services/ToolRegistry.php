@@ -56,11 +56,14 @@ final readonly class ToolRegistry
      */
     public function getSubAgents(): array
     {
-        /** @var array<int, class-string> $classes */
+        /** @var array<int, class-string<Agent>> $classes */
         $classes = config()->array('plate.sub_agents', []);
 
         return collect($classes)
-            ->map(fn (string $class): Agent => $this->container->make($class))
+            ->map(function (string $class): Agent {
+                /** @var Agent */
+                return $this->container->make($class);
+            })
             ->all();
     }
 

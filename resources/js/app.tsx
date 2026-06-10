@@ -7,6 +7,7 @@ import { I18nextProvider } from 'react-i18next';
 import { registerSW } from 'virtual:pwa-register';
 import { initializeTheme } from './hooks/use-appearance';
 import i18n, { loadTranslations, reloadTranslations } from './i18n';
+import './lib/echo';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Acara Plate';
 

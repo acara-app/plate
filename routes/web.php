@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Http\Controllers as Web;
-use App\Http\Middleware\DisableResponseBuffering;
 use App\Http\Middleware\EnsureDisclaimerAccepted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -84,9 +83,20 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
 
     Route::get('/chat/create/{conversationId}', [Web\ChatController::class, 'create'])
         ->name('chat.create');
-    Route::post('chat/stream/{conversation}', [Web\ChatController::class, 'stream'])
-        ->middleware([DisableResponseBuffering::class, 'throttle:30,1'])
+    Route::post('/chat/create/{conversationId}', [Web\ChatController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('chat.store');
+    Route::delete('/chat/{conversation}', [Web\ChatController::class, 'destroy'])
+        ->name('chat.destroy');
+    Route::post('chat/stream/{conversation}', Web\BroadcastChatController::class)
+        ->middleware('throttle:30,1')
         ->name('chat.stream');
+    Route::post('chat/stream/{conversation}/stop', Web\ChatStopController::class)
+        ->middleware('throttle:30,1')
+        ->name('chat.stream.stop');
+    Route::get('chat/stream/{conversation}/events', Web\ChatStreamEventsController::class)
+        ->middleware('throttle:120,1')
+        ->name('chat.stream.events');
 
     Route::get('conversations/{conversation}/approvals/{approval}', [Web\ApprovalController::class, 'show'])
         ->name('approvals.show');

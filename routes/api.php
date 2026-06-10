@@ -3,7 +3,15 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V2 as ApiV2;
+use App\Http\Controllers\ChatStopController;
+use App\Http\Controllers\ChatStreamEventsController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
+
+Route::post('v2/broadcasting/auth', fn (Request $request) => Broadcast::auth($request))
+    ->middleware(['auth:sanctum', 'throttle:60,1'])
+    ->name('api.v2.broadcasting.auth');
 
 Route::prefix('v2/sync')->group(function (): void {
     Route::post('pair', ApiV2\MobileSyncPairController::class)
@@ -32,9 +40,17 @@ Route::prefix('v2/chat')
             ->middleware('throttle:60,1')
             ->name('api.v2.chat.show');
 
-        Route::post('conversations/{conversation}/stream', [ApiV2\ChatController::class, 'stream'])
+        Route::post('conversations/{conversation}/stream', ApiV2\BroadcastChatController::class)
             ->middleware('throttle:30,1')
             ->name('api.v2.chat.stream');
+
+        Route::post('conversations/{conversation}/stream/stop', ChatStopController::class)
+            ->middleware('throttle:30,1')
+            ->name('api.v2.chat.stream.stop');
+
+        Route::get('conversations/{conversation}/stream/events', ChatStreamEventsController::class)
+            ->middleware('throttle:120,1')
+            ->name('api.v2.chat.stream.events');
 
         Route::delete('conversations/{conversation}', [ApiV2\ChatController::class, 'destroy'])
             ->middleware('throttle:30,1')

@@ -130,44 +130,18 @@ return [
         'save_password' => 'Save password',
     ],
 
-    'dashboard_cards' => [
-        'health_entries' => [
-            'title' => 'Logbook',
-            'description' => 'Log your vitals, food, and meds in seconds.',
-            'button' => 'Log Entry',
-        ],
-        'meal_plans' => [
-            'title' => 'My Menu',
-            'description' => 'See what\'s on the menu.',
-            'button' => 'View Menu',
-            'create' => 'Plan My Meals',
-            'create_txt' => 'Get a fresh custom menu designed just for you.',
-            'create_button' => 'Create Menu',
-        ],
-        'mobile_sync' => [
-            'title' => 'Mobile Sync',
-            'description' => 'Sync health data from your phone automatically.',
-        ],
-        'telegram' => [
-            'title' => 'Instant advice. Just text.',
-            'description' => 'Ask what to eat. Check sugar spikes. Get healthy swaps instantly. All from Telegram, the chat app you already use.',
-            'cta' => 'Connect your message app',
-        ],
-        'chat' => [
-            'title' => 'Meet Altani',
-            'description' => 'Your personal AI health coach for diabetes management, nutrition advice, and daily wellness support.',
-            'button' => 'Ask your question',
-            'recent_conversations' => 'Recent Conversations',
-            'quick_actions' => [
-                'ask' => 'Ask Altani',
-                'meal_plan' => 'Generate Meal Plan',
-            ],
-            'prompts' => [
-                'complete_profile' => 'Complete your profile for personalized advice →',
-                'analyze_glucose' => 'Analyze your recent glucose trends →',
-                'health_conditions' => 'Get advice for your health conditions →',
-                'restaurant' => 'Ask about restaurant meals and glucose impact →',
-            ],
+    'dashboard_ai' => [
+        'breadcrumb' => 'Acara',
+        'eyebrow' => 'Altani is ready',
+        'heading' => 'What should we work on today?',
+        'description' => 'Ask about glucose, meals, medication context, synced health trends, or the next healthy choice.',
+        'placeholder' => 'Ask Altani about your health, meals, glucose, or routine...',
+        'disclaimer' => 'For informational purposes only. Not a substitute for professional medical or nutritional advice.',
+        'prompts' => [
+            'glucose' => 'What might explain my recent glucose swings?',
+            'meal' => 'What should I eat today to keep energy steady?',
+            'energy' => 'How can I improve sleep, movement, and recovery this week?',
+            'sync' => 'What health patterns should I look for from my synced data?',
         ],
     ],
 
@@ -629,13 +603,19 @@ return [
     'sidebar' => [
         'group_label' => 'Start Here',
         'nav' => [
+            'ai' => 'AI',
+            'health' => 'Health',
             'planning' => 'My Wellness',
             'context' => 'My Profile',
+            'settings' => 'Settings',
             'home' => 'Home',
+            'new_chat' => 'New Chat',
+            'chats' => 'Chats',
             'meal_plans' => 'My Menu',
             'health_entries' => 'Logbook',
             'update_info' => 'Personal Details',
             'mobile_sync' => 'Mobile Sync',
+            'integrations' => 'Integrations',
             'dietary_preferences' => 'Food Preferences',
             'health_conditions' => 'Health Conditions',
             'medications' => 'Medications',
@@ -1016,6 +996,7 @@ return [
 
     'chat' => [
         'placeholder' => 'Ask anything',
+        'stop' => 'Stop',
         'modes' => [
             'ask' => 'Ask',
             'meal_plan' => 'Meal Plan',
@@ -1046,11 +1027,14 @@ return [
     ],
 
     'conversations' => [
-        'title' => 'Conversations',
-        'description' => 'Your chat history with Altani.',
+        'title' => 'Chats',
         'new_chat' => 'New Chat',
         'empty' => 'No conversations yet.',
         'start_first' => 'Start your first chat',
         'untitled' => 'New Conversation',
+        'delete_label' => 'Delete conversation',
+        'delete_title' => 'Delete this chat?',
+        'delete_description' => 'This removes the conversation and its message history. This action cannot be undone.',
+        'delete_confirm' => 'Delete chat',
     ],
 ];
