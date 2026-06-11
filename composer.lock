@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "546c1d6aaae852b007cb10962bf576d8",
+    "content-hash": "fafc6a3ccc1e5863c630dc5361570074",
     "packages": [
         {
             "name": "acara-app/acara-core",

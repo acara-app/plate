@@ -11,7 +11,7 @@
     "require": {
         "php": "^8.4 || ^8.5",
         "acara-app/acara-core": "dev-main",
-        "aws/aws-sdk-php": "^3.384",
+        "aws/aws-sdk-php": "^3.384.6",
         "defstudio/telegraph": "^1.70.5",
         "inertiajs/inertia-laravel": "^3.1.0",
         "laravel/ai": "^0.6.8",
