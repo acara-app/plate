@@ -2,6 +2,7 @@ import DashboardHealthEntryController from '@/actions/App/Http/Controllers/Healt
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { Button } from '@/components/ui/button';
 import {
     Sidebar,
     SidebarContent,
@@ -10,9 +11,16 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { UpgradeButton } from '@/components/upgrade-button';
 import useSharedProps from '@/hooks/use-shared-props';
+import { cn } from '@/lib/utils';
 import { dashboard, privacy, terms } from '@/routes';
 import chat from '@/routes/chat';
 import integrations from '@/routes/integrations';
@@ -27,6 +35,7 @@ import {
     FileText,
     MessageCircle,
     MessageSquarePlus,
+    PanelLeftClose,
     Plug,
     ShieldCheck,
     Smartphone,
@@ -96,25 +105,62 @@ const getFooterNavItems = (t: (key: string) => string): NavItem[] => [
 export function AppSidebar() {
     const { currentUser, enablePremiumUpgrades } = useSharedProps();
     const { t } = useTranslation('common');
+    const { state, isMobile, toggleSidebar } = useSidebar();
     const mainNavItems = getMainNavItems(t);
     const healthNavItems = getHealthNavItems(t);
     const profileNavItems = getProfileNavItems(t);
     const footerNavItems = getFooterNavItems(t);
+
+    const isCollapsed = !isMobile && state === 'collapsed';
 
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton
-                            size="lg"
-                            asChild
-                            className="justify-start"
-                        >
-                            <Link href={dashboard()} prefetch>
-                                <AppLogo showText={false} />
-                            </Link>
-                        </SidebarMenuButton>
+                        {isCollapsed ? (
+                            <SidebarMenuButton
+                                size="lg"
+                                onClick={toggleSidebar}
+                                tooltip={t('sidebar.open')}
+                                aria-label={t('sidebar.open')}
+                            >
+                                <AppLogo
+                                    showText={false}
+                                    className="transition-all duration-200 hover:scale-105 hover:bg-emerald-100 hover:ring-emerald-300 hover:shadow-md dark:hover:bg-emerald-900/60 dark:hover:ring-emerald-700"
+                                />
+                            </SidebarMenuButton>
+                        ) : (
+                            <div className="flex w-full items-center justify-between gap-2">
+                                <SidebarMenuButton
+                                    size="lg"
+                                    asChild
+                                    className="justify-start"
+                                >
+                                    <Link href={dashboard()} prefetch>
+                                        <AppLogo showText={false} />
+                                    </Link>
+                                </SidebarMenuButton>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={toggleSidebar}
+                                            aria-label={t('sidebar.close')}
+                                            className={cn(
+                                                'size-7 shrink-0',
+                                            )}
+                                        >
+                                            <PanelLeftClose className="size-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="right">
+                                        {t('sidebar.close')}
+                                    </TooltipContent>
+                                </Tooltip>
+                            </div>
+                        )}
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>

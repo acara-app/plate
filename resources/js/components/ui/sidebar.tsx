@@ -2,6 +2,7 @@ import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
 import { MenuIcon } from "lucide-react"
 import * as React from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,6 +30,7 @@ const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
+const SIDEBAR_ID = "app-sidebar"
 
 type SidebarContext = {
   state: "expanded" | "collapsed"
@@ -197,7 +199,14 @@ function Sidebar({
           }
           side={side}
         >
-          <div className="flex h-full w-full flex-col">{children}</div>
+          <div
+            id={SIDEBAR_ID}
+            role="navigation"
+            aria-label="Sidebar"
+            className="flex h-full w-full flex-col"
+          >
+            {children}
+          </div>
         </SheetContent>
       </Sheet>
     )
@@ -238,6 +247,9 @@ function Sidebar({
         {...props}
       >
         <div
+          id={SIDEBAR_ID}
+          role="navigation"
+          aria-label="Sidebar"
           data-sidebar="sidebar"
           className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
         >
@@ -253,7 +265,11 @@ function SidebarTrigger({
   onClick,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, state, isMobile, openMobile } = useSidebar()
+  const { t } = useTranslation("common")
+
+  const isOpen = isMobile ? openMobile : state === "expanded"
+  const label = isOpen ? t("sidebar.close") : t("sidebar.open")
 
   return (
     <Button
@@ -266,25 +282,35 @@ function SidebarTrigger({
         onClick?.(event)
         toggleSidebar()
       }}
+      aria-label={label}
+      aria-expanded={isOpen}
+      aria-controls={SIDEBAR_ID}
+      title={`${label} (Ctrl+B)`}
       {...props}
     >
       <MenuIcon />
-      <span className="sr-only">Toggle Sidebar</span>
+      <span className="sr-only">{label}</span>
     </Button>
   )
 }
 
 function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, state } = useSidebar()
+  const { t } = useTranslation("common")
+
+  const isOpen = state === "expanded"
+  const label = isOpen ? t("sidebar.close") : t("sidebar.open")
 
   return (
     <button
       data-sidebar="rail"
       data-slot="sidebar-rail"
-      aria-label="Toggle Sidebar"
+      aria-label={label}
+      aria-expanded={isOpen}
+      aria-controls={SIDEBAR_ID}
       tabIndex={-1}
       onClick={toggleSidebar}
-      title="Toggle Sidebar"
+      title={label}
       className={cn(
         "hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 sm:flex",
         "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
