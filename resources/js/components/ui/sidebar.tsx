@@ -285,7 +285,7 @@ function SidebarTrigger({
       aria-label={label}
       aria-expanded={isOpen}
       aria-controls={SIDEBAR_ID}
-      title={`${label} (Ctrl+B)`}
+      title={isMobile ? undefined : `${label} (Ctrl+B)`}
       {...props}
     >
       <MenuIcon />

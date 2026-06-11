@@ -13,14 +13,8 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from '@/components/ui/sidebar';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { UpgradeButton } from '@/components/upgrade-button';
 import useSharedProps from '@/hooks/use-shared-props';
-import { cn } from '@/lib/utils';
 import { dashboard, privacy, terms } from '@/routes';
 import chat from '@/routes/chat';
 import integrations from '@/routes/integrations';
@@ -141,22 +135,15 @@ export function AppSidebar() {
                                         <AppLogo showText={false} />
                                     </Link>
                                 </SidebarMenuButton>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={toggleSidebar}
-                                            aria-label={t('sidebar.close')}
-                                            className={cn('size-7 shrink-0')}
-                                        >
-                                            <PanelLeftClose className="size-4" />
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="right">
-                                        {t('sidebar.close')}
-                                    </TooltipContent>
-                                </Tooltip>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={toggleSidebar}
+                                    aria-label={t('sidebar.close')}
+                                    className="size-7 shrink-0"
+                                >
+                                    <PanelLeftClose className="size-4" />
+                                </Button>
                             </div>
                         )}
                     </SidebarMenuItem>
