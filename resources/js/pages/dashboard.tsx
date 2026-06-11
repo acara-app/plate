@@ -7,7 +7,7 @@ import chat from '@/routes/chat';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
-import { Activity, Apple, Droplets, HeartPulse, Sparkles } from 'lucide-react';
+import { Activity, Apple, Droplets, HeartPulse } from 'lucide-react';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import ChatInput, { type ChatInputHandle } from './chat/chat-input';
@@ -87,10 +87,6 @@ export default function Dashboard() {
                                         className="h-full w-full object-cover"
                                     />
                                 </div>
-                                <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1 text-sm font-medium text-primary">
-                                    <Sparkles className="size-4" />
-                                    {t('dashboard_ai.eyebrow')}
-                                </p>
                                 <h1 className="text-3xl font-semibold tracking-normal text-foreground sm:text-4xl">
                                     {t('dashboard_ai.heading')}
                                 </h1>

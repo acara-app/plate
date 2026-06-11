@@ -132,7 +132,6 @@ return [
 
     'dashboard_ai' => [
         'breadcrumb' => 'Acara',
-        'eyebrow' => 'Altani is ready',
         'heading' => 'What should we work on today?',
         'description' => 'Ask about glucose, meals, medication context, synced health trends, or the next healthy choice.',
         'placeholder' => 'Ask Altani about your health, meals, glucose, or routine...',
