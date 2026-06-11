@@ -6,10 +6,7 @@ interface AppLogoProps {
     className?: string;
 }
 
-export default function AppLogo({
-    showText = true,
-    className,
-}: AppLogoProps) {
+export default function AppLogo({ showText = true, className }: AppLogoProps) {
     return (
         <>
             <div
