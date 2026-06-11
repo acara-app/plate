@@ -127,7 +127,7 @@ export function AppSidebar() {
                             >
                                 <AppLogo
                                     showText={false}
-                                    className="transition-all duration-200 hover:scale-105 hover:bg-emerald-100 hover:ring-emerald-300 hover:shadow-md dark:hover:bg-emerald-900/60 dark:hover:ring-emerald-700"
+                                    className="transition-all duration-200 hover:scale-105 hover:bg-emerald-100 hover:shadow-md hover:ring-emerald-300 dark:hover:bg-emerald-900/60 dark:hover:ring-emerald-700"
                                 />
                             </SidebarMenuButton>
                         ) : (
@@ -148,9 +148,7 @@ export function AppSidebar() {
                                             size="icon"
                                             onClick={toggleSidebar}
                                             aria-label={t('sidebar.close')}
-                                            className={cn(
-                                                'size-7 shrink-0',
-                                            )}
+                                            className={cn('size-7 shrink-0')}
                                         >
                                             <PanelLeftClose className="size-4" />
                                         </Button>
