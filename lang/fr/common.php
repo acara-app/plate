@@ -133,7 +133,6 @@ return [
 
     'dashboard_ai' => [
         'breadcrumb' => 'Acara',
-        'eyebrow' => 'Altani est prêt',
         'heading' => 'Sur quoi voulez-vous avancer aujourd\'hui ?',
         'description' => 'Posez une question sur la glycémie, les repas, le contexte médical, les tendances synchronisées ou le prochain choix santé.',
         'placeholder' => 'Demandez à Altani pour votre santé, vos repas, votre glycémie ou votre routine...',
