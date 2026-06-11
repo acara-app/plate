@@ -602,6 +602,8 @@ return [
     ],
     'sidebar' => [
         'group_label' => 'Start Here',
+        'open' => 'Open sidebar',
+        'close' => 'Close sidebar',
         'nav' => [
             'ai' => 'AI',
             'health' => 'Health',

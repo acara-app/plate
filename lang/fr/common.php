@@ -603,6 +603,8 @@ return [
     ],
     'sidebar' => [
         'group_label' => 'Premiers pas',
+        'open' => 'Ouvrir la barre latérale',
+        'close' => 'Fermer la barre latérale',
         'nav' => [
             'ai' => 'IA',
             'health' => 'Santé',
