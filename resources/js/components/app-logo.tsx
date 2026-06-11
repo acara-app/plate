@@ -1,13 +1,23 @@
+import { cn } from '@/lib/utils';
 import AppLogoIcon from './app-logo-icon';
 
 interface AppLogoProps {
     showText?: boolean;
+    className?: string;
 }
 
-export default function AppLogo({ showText = true }: AppLogoProps) {
+export default function AppLogo({
+    showText = true,
+    className,
+}: AppLogoProps) {
     return (
         <>
-            <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:ring-emerald-800">
+            <div
+                className={cn(
+                    'flex aspect-square size-8 items-center justify-center rounded-md bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:ring-emerald-800',
+                    className,
+                )}
+            >
                 <AppLogoIcon className="size-6 fill-current" />
             </div>
             {showText && (

@@ -1,12 +1,15 @@
+import { AppContent } from '@/components/app-content';
+import { AppShell } from '@/components/app-shell';
+import { AppSidebar } from '@/components/app-sidebar';
 import { CreditWarningBanner } from '@/components/billing/credit-warning-banner';
+import { LifecycleBanner } from '@/components/billing/lifecycle-banner';
 import { UsageLimitNotice } from '@/components/billing/usage-limit-notice';
 import { useChatStream } from '@/hooks/use-chat-stream';
 import useSharedProps from '@/hooks/use-shared-props';
-import AppLayout from '@/layouts/app-layout';
 import { generateUUID } from '@/lib/utils';
 import chat from '@/routes/chat';
 import checkout from '@/routes/checkout';
-import type { BreadcrumbItem, CreditWarning } from '@/types';
+import type { CreditWarning } from '@/types';
 import type { ChatPageProps, UIMessage } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
@@ -14,13 +17,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ChatInput from './chat-input';
 
 import ChatMessages, { ChatErrorBanner } from './chat-messages';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Chat (beta version)',
-        href: '#',
-    },
-];
 
 export default function CreateChat() {
     const page = usePage<
@@ -173,75 +169,87 @@ export default function CreateChat() {
         (isSubmitting || isResuming) && messages.length > 0;
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs} fixedHeight>
-            <Head title="Chat" />
-            <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth">
-                    <div className="mx-auto w-full max-w-3xl px-4 py-6">
-                        <ChatMessages
-                            messages={messages}
-                            status={status}
-                            isSubmitting={showThinkingIndicator}
-                            conversationId={conversationId}
-                        />
-                        {!usageLimitTrigger && (
-                            <ChatErrorBanner
-                                error={error}
-                                onRetry={
-                                    lastMessageRef.current
-                                        ? handleRetry
-                                        : undefined
-                                }
+        <AppShell variant="sidebar">
+            <AppSidebar />
+            <AppContent
+                variant="sidebar"
+                className="h-svh overflow-hidden overflow-x-hidden"
+            >
+                <LifecycleBanner className="mx-4 mt-4" />
+                <Head title="Chat" />
+                <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                    <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth">
+                        <div className="mx-auto w-full max-w-3xl px-4 py-6">
+                            <ChatMessages
+                                messages={messages}
+                                status={status}
+                                isSubmitting={showThinkingIndicator}
+                                conversationId={conversationId}
                             />
-                        )}
-                        {usageLimitTrigger && (
-                            <div className="mt-4">
-                                <UsageLimitNotice
-                                    trigger={usageLimitTrigger}
-                                    onDismiss={() => {
-                                        clearUsageLimitTrigger();
-                                        clearError();
+                            {!usageLimitTrigger && (
+                                <ChatErrorBanner
+                                    error={error}
+                                    onRetry={
+                                        lastMessageRef.current
+                                            ? handleRetry
+                                            : undefined
+                                    }
+                                />
+                            )}
+                            {usageLimitTrigger && (
+                                <div className="mt-4">
+                                    <UsageLimitNotice
+                                        trigger={usageLimitTrigger}
+                                        onDismiss={() => {
+                                            clearUsageLimitTrigger();
+                                            clearError();
+                                        }}
+                                    />
+                                </div>
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
+                    </div>
+
+                    <div className="shrink-0 border-t border-border/40 bg-background/80 backdrop-blur-md transition-colors duration-200 supports-[backdrop-filter]:bg-background/60">
+                        {visibleCreditWarning && (
+                            <div className="mx-auto w-full max-w-3xl px-4 pt-2">
+                                <CreditWarningBanner
+                                    warning={visibleCreditWarning}
+                                    onDismiss={() =>
+                                        setDismissedWarningAt(
+                                            visibleCreditWarning.resets_at,
+                                        )
+                                    }
+                                    onUpgradeClick={() => {
+                                        router.visit(
+                                            checkout.subscription().url,
+                                        );
                                     }}
                                 />
                             </div>
                         )}
-                        <div ref={messagesEndRef} />
+                        <ChatInput
+                            className="w-full"
+                            onSubmit={handleSubmit}
+                            onStop={stop}
+                            onInputChange={handleInputChange}
+                            disabled={isStreaming || isSubmitting}
+                            initialMessage={
+                                shouldAutoStartInitialPrompt
+                                    ? null
+                                    : initialPrompt
+                            }
+                            isLoading={isStreaming || isSubmitting}
+                        />
+                        <p className="px-2 pb-2 text-center text-xs text-muted-foreground sm:px-4 sm:pb-4 sm:text-sm">
+                            ⚠️ For informational purposes only. Not a
+                            substitute for professional medical or nutritional
+                            advice.
+                        </p>
                     </div>
-                </div>
-
-                <div className="shrink-0 space-y-2 bg-background">
-                    {visibleCreditWarning && (
-                        <div className="mx-auto w-full max-w-3xl px-4">
-                            <CreditWarningBanner
-                                warning={visibleCreditWarning}
-                                onDismiss={() =>
-                                    setDismissedWarningAt(
-                                        visibleCreditWarning.resets_at,
-                                    )
-                                }
-                                onUpgradeClick={() => {
-                                    router.visit(checkout.subscription().url);
-                                }}
-                            />
-                        </div>
-                    )}
-                    <ChatInput
-                        className="w-full"
-                        onSubmit={handleSubmit}
-                        onStop={stop}
-                        onInputChange={handleInputChange}
-                        disabled={isStreaming || isSubmitting}
-                        initialMessage={
-                            shouldAutoStartInitialPrompt ? null : initialPrompt
-                        }
-                        isLoading={isStreaming || isSubmitting}
-                    />
-                    <p className="px-2 pb-2 text-center text-xs text-muted-foreground sm:px-4 sm:pb-4 sm:text-sm">
-                        ⚠️ For informational purposes only. Not a substitute for
-                        professional medical or nutritional advice.
-                    </p>
-                </div>
-            </section>
-        </AppLayout>
+                </section>
+            </AppContent>
+        </AppShell>
     );
 }
