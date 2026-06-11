@@ -4,16 +4,24 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { CreditWarningBanner } from '@/components/billing/credit-warning-banner';
 import { LifecycleBanner } from '@/components/billing/lifecycle-banner';
 import { UsageLimitNotice } from '@/components/billing/usage-limit-notice';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useChatStream } from '@/hooks/use-chat-stream';
 import useSharedProps from '@/hooks/use-shared-props';
-import { generateUUID } from '@/lib/utils';
+import { cn, generateUUID } from '@/lib/utils';
 import chat from '@/routes/chat';
 import checkout from '@/routes/checkout';
 import type { CreditWarning } from '@/types';
 import type { ChatPageProps, UIMessage } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    type UIEvent,
+} from 'react';
 import ChatInput from './chat-input';
 
 import ChatMessages, { ChatErrorBanner } from './chat-messages';
@@ -168,6 +176,22 @@ export default function CreateChat() {
     const showThinkingIndicator =
         (isSubmitting || isResuming) && messages.length > 0;
 
+    const [isMobileNavVisible, setIsMobileNavVisible] = useState(true);
+    const lastScrollTopRef = useRef(0);
+
+    const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
+        const scrollTop = Math.max(0, event.currentTarget.scrollTop);
+        const lastScrollTop = lastScrollTopRef.current;
+
+        if (scrollTop <= 16 || scrollTop < lastScrollTop - 4) {
+            setIsMobileNavVisible(true);
+        } else if (scrollTop > lastScrollTop + 4) {
+            setIsMobileNavVisible(false);
+        }
+
+        lastScrollTopRef.current = scrollTop;
+    }, []);
+
     return (
         <AppShell variant="sidebar">
             <AppSidebar />
@@ -177,8 +201,21 @@ export default function CreateChat() {
             >
                 <LifecycleBanner className="mx-4 mt-4" />
                 <Head title="Chat" />
-                <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                    <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth">
+                <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+                    <div
+                        className={cn(
+                            'absolute top-3 left-3 z-20 transition-all duration-300 ease-out md:hidden',
+                            isMobileNavVisible
+                                ? 'translate-y-0 opacity-100'
+                                : 'pointer-events-none -translate-y-2 opacity-0',
+                        )}
+                    >
+                        <SidebarTrigger className="size-10 rounded-full border border-border/40 bg-background/80 shadow-md backdrop-blur-md supports-[backdrop-filter]:bg-background/60" />
+                    </div>
+                    <div
+                        className="min-h-0 flex-1 overflow-y-auto scroll-smooth"
+                        onScroll={handleScroll}
+                    >
                         <div className="mx-auto w-full max-w-3xl px-4 py-6">
                             <ChatMessages
                                 messages={messages}
