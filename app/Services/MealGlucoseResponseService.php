@@ -25,6 +25,8 @@ final readonly class MealGlucoseResponseService
 
     public const int PATTERN_MIN_MEALS = 3;
 
+    public const int PATTERN_CANDIDATE_LIMIT = 20;
+
     public const int PATTERN_LOOKBACK_DAYS = 90;
 
     private const array MEAL_TYPES = [
@@ -38,7 +40,7 @@ final readonly class MealGlucoseResponseService
     {
         $baseline = $this->baselineReading($user, $mealAt);
 
-        if (!$baseline instanceof HealthSyncSample) {
+        if (! $baseline instanceof HealthSyncSample) {
             return null;
         }
 
@@ -111,6 +113,7 @@ final readonly class MealGlucoseResponseService
             ->where('measured_at', '>=', now()->subDays($days))
             ->when($excludeGroupId !== null, fn (Builder $query): Builder => $query->where('group_id', '!=', $excludeGroupId))
             ->latest('measured_at')
+            ->limit(self::PATTERN_CANDIDATE_LIMIT)
             ->get();
 
         $deltas = [];

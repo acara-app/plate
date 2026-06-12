@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Services\Nutrition\ReferenceMatch;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Data\FoodAnalysisData;
 use App\Data\FoodItemData;
 use App\Enums\FoodValueProvenance;
 use App\Services\Nutrition\ReferenceFoodMatcher;
+use App\Services\Nutrition\ReferenceMatch;
 use Illuminate\Support\Facades\Log;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
@@ -127,6 +127,6 @@ final readonly class AnalyzeFoodPhotoAction
 
     private function lookupEnabled(): bool
     {
-        return (bool) config('plate.food_photo_analyzer.reference_lookup.enabled', false);
+        return config()->boolean('plate.food_photo_analyzer.reference_lookup.enabled', false);
     }
 }

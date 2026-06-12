@@ -91,7 +91,7 @@ final readonly class BenchmarkHarness
 
         return new HarnessReport(
             analyzerVersion: FoodPhotoAnalyzerAgent::version(),
-            referenceLookupEnabled: (bool) config('plate.food_photo_analyzer.reference_lookup.enabled', false),
+            referenceLookupEnabled: config()->boolean('plate.food_photo_analyzer.reference_lookup.enabled', false),
             repeats: $repeats,
             skippedMeals: $skippedMeals,
             paths: new DataCollection(PathMetrics::class, $paths),

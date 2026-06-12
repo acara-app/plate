@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use Illuminate\Support\Facades\Date;
 use App\Models\ReferenceFood;
+use Carbon\CarbonInterface;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Throwable;
@@ -198,7 +198,7 @@ final class ImportReferenceFoodsCommand extends Command
     /**
      * @param  array<array-key, mixed>  $food
      */
-    private function publicationDate(array $food): ?Carbon
+    private function publicationDate(array $food): ?CarbonInterface
     {
         $date = $food['publicationDate'] ?? null;
 
@@ -224,6 +224,6 @@ final class ImportReferenceFoodsCommand extends Command
         preg_match('/(\d{4}-\d{2}-\d{2})/', basename($path), $matches);
         $date = $matches[1] ?? null;
 
-        return mb_trim(sprintf('USDA %s%s', ucfirst($type), $date !== null ? ' ' . $date : ''));
+        return mb_trim(sprintf('USDA %s%s', ucfirst($type), $date !== null ? ' '.$date : ''));
     }
 }

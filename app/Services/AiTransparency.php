@@ -62,7 +62,7 @@ final class AiTransparency
 
     public static function usesReferenceLookup(): bool
     {
-        return (bool) config('plate.food_photo_analyzer.reference_lookup.enabled', false);
+        return config()->boolean('plate.food_photo_analyzer.reference_lookup.enabled', false);
     }
 
     /**
