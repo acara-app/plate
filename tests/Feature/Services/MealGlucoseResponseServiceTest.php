@@ -98,6 +98,20 @@ it('flags an overlapping meal inside the response window', function (): void {
     expect($response->overlapping)->toBeTrue();
 });
 
+it('flags a standalone meal entry without a group id as overlapping', function (): void {
+    seedGlucoseReading($this->user, $this->mealAt->copy()->subMinutes(30), 100);
+    seedGlucoseReading($this->user, $this->mealAt->copy()->addMinutes(60), 140);
+    HealthSyncSample::factory()->carbohydrates()->create([
+        'user_id' => $this->user->id,
+        'measured_at' => $this->mealAt->copy()->addMinutes(90),
+        'group_id' => null,
+    ]);
+
+    $response = $this->service->forMeal($this->user, $this->mealAt, excludeGroupId: 'g1');
+
+    expect($response->overlapping)->toBeTrue();
+});
+
 it("does not flag overlap for the meal's own group or meals outside the window", function (): void {
     seedGlucoseReading($this->user, $this->mealAt->copy()->subMinutes(30), 100);
     seedGlucoseReading($this->user, $this->mealAt->copy()->addMinutes(60), 140);
@@ -186,6 +200,27 @@ it('excludes overlapping comparable meals from the aggregate', function (): void
     seedMealMacroSample($this->user, now()->subDays(3)->addMinutes(60), 'big', 100.0);
 
     expect($this->service->carbBandPattern($this->user, 40.0))->toBeNull();
+});
+
+it('includes standalone comparable meals without a group id when excluding a group', function (): void {
+    seedComparableMeal($this->user, 'target', 40.0, 30, 1);
+    seedComparableMeal($this->user, 'p2', 45.0, 40, 2);
+    seedComparableMeal($this->user, 'p3', 35.0, 50, 3);
+
+    $at = now()->subDays(4);
+    HealthSyncSample::factory()->carbohydrates()->create([
+        'user_id' => $this->user->id,
+        'measured_at' => $at,
+        'group_id' => null,
+        'value' => 42.0,
+    ]);
+    seedGlucoseReading($this->user, $at->copy()->subMinutes(20), 100);
+    seedGlucoseReading($this->user, $at->copy()->addMinutes(60), 135);
+
+    $pattern = $this->service->carbBandPattern($this->user, 40.0, excludeGroupId: 'target');
+
+    expect($pattern)->not->toBeNull()
+        ->and($pattern->count)->toBe(3);
 });
 
 it("excludes the target meal's own group", function (): void {
