@@ -159,7 +159,7 @@ final class AiTransparency
 
     public static function carbBoundaryNotice(): string
     {
-        return 'Estimates, not measurements — never dose insulin or other medication from these numbers.';
+        return (string) __('tools.carb_boundary_notice');
     }
 
     /**

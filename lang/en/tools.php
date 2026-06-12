@@ -29,4 +29,5 @@ return [
     'meal_plan_specialist' => 'Planning your meals',
     'glucose_spike_specialist' => 'Predicting your glucose response',
     'web_search' => 'Searching the web',
+    'carb_boundary_notice' => 'Estimates, not measurements — never dose insulin or other medication from these numbers.',
 ];

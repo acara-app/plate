@@ -111,9 +111,7 @@ final readonly class MealGlucoseResponseService
             ->where('type_identifier', HealthSyncType::Carbohydrates->value)
             ->whereBetween('value', [$carbs * (1 - self::CARB_BAND_RATIO), $carbs * (1 + self::CARB_BAND_RATIO)])
             ->where('measured_at', '>=', now()->subDays($days))
-            ->when($excludeGroupId !== null, fn (Builder $query): Builder => $query->where(
-                fn (Builder $inner): Builder => $inner->where('group_id', '!=', $excludeGroupId)->orWhereNull('group_id'),
-            ))
+            ->excludingGroup($excludeGroupId)
             ->latest('measured_at')
             ->limit(self::PATTERN_CANDIDATE_LIMIT)
             ->get();
@@ -187,9 +185,7 @@ final readonly class MealGlucoseResponseService
             ->whereIn('type_identifier', self::MEAL_TYPES)
             ->where('measured_at', '>', $mealAt)
             ->where('measured_at', '<=', $mealAt->copy()->addMinutes(self::RESPONSE_WINDOW_END_MINUTES))
-            ->when($excludeGroupId !== null, fn (Builder $query): Builder => $query->where(
-                fn (Builder $inner): Builder => $inner->where('group_id', '!=', $excludeGroupId)->orWhereNull('group_id'),
-            ))
+            ->excludingGroup($excludeGroupId)
             ->exists();
     }
 

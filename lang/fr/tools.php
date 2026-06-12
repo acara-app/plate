@@ -29,4 +29,5 @@ return [
     'meal_plan_specialist' => 'Planification de vos repas',
     'glucose_spike_specialist' => 'Prévision de votre réponse glycémique',
     'web_search' => 'Recherche sur le Web',
+    'carb_boundary_notice' => 'Estimations, pas des mesures — ne dosez jamais l\'insuline ni d\'autres médicaments à partir de ces chiffres.',
 ];
