@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Data\ChatStreamResult;
+use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Str;
 use Laravel\Ai\Responses\Data\UrlCitation;
 use Laravel\Ai\Streaming\Events\Citation;
 use Laravel\Ai\Streaming\Events\Error as StreamError;
@@ -107,6 +109,7 @@ final readonly class StreamAggregator
                 'type' => 'tool_call',
                 'tool_id' => $event->toolCall->id,
                 'tool_name' => $event->toolCall->name,
+                'title' => $this->toolTitle($event->toolCall->name),
                 'arguments' => $event->toolCall->arguments,
                 'reasoning_id' => $event->toolCall->reasoningId,
                 'timestamp' => $event->timestamp,
@@ -125,6 +128,7 @@ final readonly class StreamAggregator
                 'type' => 'tool_result',
                 'tool_id' => $event->toolResult->id,
                 'tool_name' => $event->toolResult->name,
+                'title' => $this->toolTitle($event->toolResult->name),
                 'result' => $event->toolResult->result,
                 'successful' => $event->successful,
                 'error' => $event->error,
@@ -204,6 +208,17 @@ final readonly class StreamAggregator
             errors: $this->errors($events),
             usage: $this->usage($events),
         );
+    }
+
+    private function toolTitle(string $name): string
+    {
+        $key = "tools.{$name}";
+
+        if (Lang::has($key)) {
+            return (string) __($key);
+        }
+
+        return Str::ucfirst(str_replace('_', ' ', $name));
     }
 
     /**

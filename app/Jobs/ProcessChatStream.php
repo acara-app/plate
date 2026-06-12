@@ -15,11 +15,13 @@ use App\Services\BroadcastConnector;
 use App\Services\ChatChannel;
 use App\Services\StreamAggregator;
 use App\Services\StreamEventStore;
+use App\Utilities\LanguageUtil;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\MaxExceptions;
 use Illuminate\Queue\Attributes\Timeout;
 use Illuminate\Queue\Attributes\Tries;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Context;
@@ -67,6 +69,7 @@ final class ProcessChatStream implements ShouldQueue
 
         $user = User::query()->findOrFail($this->userId);
         Auth::login($user);
+        App::setLocale(LanguageUtil::resolve($user->locale)['code']);
 
         Context::add('chat.channel', $this->channel);
         Context::add('chat.conversation_id', $this->conversationId);

@@ -26,13 +26,14 @@ final readonly class GetUserHealthEntriesAction
     public function handle(User $user, int $perPage = 15): LengthAwarePaginatorContract
     {
         $entryTypes = HealthSyncType::entryTypeValues();
-        $entryKey = "COALESCE(group_id, '".self::STANDALONE_PREFIX."' || id)";
+        $entryKey = "COALESCE(CAST(group_id AS TEXT), '".self::STANDALONE_PREFIX."' || id)";
 
         $entries = $user->healthSyncSamples()
             ->whereIn('type_identifier', $entryTypes)
             ->selectRaw("{$entryKey} as entry_key, MAX(measured_at) as sort_at")
             ->groupByRaw($entryKey)
             ->orderByDesc('sort_at')
+            ->orderByDesc('entry_key')
             ->paginate($perPage);
 
         return new LengthAwarePaginator(
