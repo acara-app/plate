@@ -243,6 +243,11 @@ final class User extends Authenticatable implements MustVerifyEmail
         return $this->accepted_disclaimer_at === null;
     }
 
+    public function wantsGlucoseMealInsights(): bool
+    {
+        return UserSettingsData::from($this->settings ?? [])->glucoseMealInsightsEnabled;
+    }
+
     protected function getIsVerifiedAttribute(?bool $isVerified): bool
     {
         if (collect(config()->array('sponsors.admin_emails'))->contains($this->email)) {

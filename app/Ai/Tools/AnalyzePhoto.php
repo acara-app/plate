@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Actions\AnalyzeFoodPhotoAction;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Enums\DataSensitivity;
 use App\Models\User;
@@ -45,14 +45,19 @@ final readonly class AnalyzePhoto implements Tool
 
         $image = $this->images[0];
 
-        $agent = resolve(FoodPhotoAnalyzerAgent::class);
+        $language = null;
+        $languageCode = null;
 
         if ($user instanceof User) {
             ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($user->locale);
-            $agent->withLanguage($language, $languageCode);
         }
 
-        $analysis = $agent->analyze($image->base64, $image->mime ?? 'image/jpeg');
+        $analysis = resolve(AnalyzeFoodPhotoAction::class)->handle(
+            $image->base64,
+            $image->mime ?? 'image/jpeg',
+            $language,
+            $languageCode,
+        );
 
         return (string) json_encode($analysis->toArray());
     }

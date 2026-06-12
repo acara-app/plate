@@ -17,6 +17,7 @@ final class UserSettingsData extends Data
         public bool $glucoseNotificationsEnabled = true,
         public ?int $glucoseNotificationLowThreshold = null,
         public ?int $glucoseNotificationHighThreshold = null,
+        public bool $glucoseMealInsightsEnabled = false,
     ) {}
 
     public function effectiveLowThreshold(): int

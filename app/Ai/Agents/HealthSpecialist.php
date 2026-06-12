@@ -8,6 +8,7 @@ use App\Ai\Tools\GetHealthData;
 use App\Ai\Tools\GetHealthGoals;
 use App\Ai\Tools\GetHealthSummary;
 use App\Ai\Tools\GetHealthSyncSupport;
+use App\Ai\Tools\GetMealGlucoseResponse;
 use Laravel\Ai\Attributes\Timeout;
 
 #[Timeout(120)]
@@ -35,6 +36,7 @@ final class HealthSpecialist extends SpecialistAgent
             GetHealthSummary::class,
             GetHealthGoals::class,
             GetHealthSyncSupport::class,
+            GetMealGlucoseResponse::class,
         ];
     }
 }

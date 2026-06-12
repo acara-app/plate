@@ -28,7 +28,7 @@ class extends Component
 
     public bool $loading = false;
 
-    /** @var array{items: array<int, array{name: string, calories: float, protein: float, carbs: float, fat: float, portion: string}>, totalCalories: float, totalProtein: float, totalCarbs: float, totalFat: float, confidence: int}|null */
+    /** @var array{items: array<int, array{name: string, calories: float, protein: float, carbs: float, fat: float, portion: string, provenance: string}>, totalCalories: float, totalProtein: float, totalCarbs: float, totalFat: float, confidence: int}|null */
     public ?array $result = null;
 
     public ?string $error = null;
@@ -449,6 +449,10 @@ class extends Component
                                     </div>
                                 @endforeach
                             </div>
+
+                            <p class="mt-5 border-t border-[#D9CFBC] pt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
+                                {{ App\Services\AiTransparency::carbBoundaryNotice() }}
+                            </p>
                         </article>
 
                         {{-- Items list --}}
@@ -476,6 +480,11 @@ class extends Component
                                                     <span aria-hidden="true">·</span>
                                                     <span>F {{ number_format($item['fat'], 1) }}g</span>
                                                 </div>
+                                                @if (($item['provenance'] ?? 'model') === 'reference')
+                                                    <p class="mt-2 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.16em] text-[#6E665C]">
+                                                        <span class="text-[#C4623A]" aria-hidden="true">◆</span> USDA reference
+                                                    </p>
+                                                @endif
                                             </div>
                                         </li>
                                     @endforeach
@@ -616,18 +625,13 @@ class extends Component
                     </h2>
                     <p class="mt-3 text-sm leading-relaxed text-[#3D3833]">
                         Quick context for using the analyzer as a planning aid—not a replacement for a CGM, scale, or your clinician.
+                        <a href="{{ route('ai-accuracy') }}" class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#1A1814]">Read the full accuracy &amp; limitations breakdown</a>.
                     </p>
                 </div>
 
                 <div x-data="{ openFaq: 1 }">
                     @php
-                    $faqs = [
-                        ['q' => 'How does the AI food photo analyzer work?', 'a' => 'Upload a photo of your meal and our AI vision model identifies each food item, estimates portion size, and calculates calories, protein, carbs, and fat for every item plus the full meal. Nutrition values are derived from USDA FoodData Central reference data, and you get a confidence score so you know how reliable each estimate is.'],
-                        ['q' => 'How accurate are calorie estimates from food photos?', 'a' => 'Accuracy depends on photo clarity, lighting, and how visible each ingredient is. In good conditions, AI photo estimates land within roughly 10–20% of actual values for whole foods, and the tool returns a confidence score (0–100%) for each meal so you can judge reliability. Mixed dishes, sauces, and oils are harder to estimate than visible whole foods.'],
-                        ['q' => 'What types of food can the AI recognize?', 'a' => 'The analyzer recognizes most common foods: fruits, vegetables, grains, meats, fish, dairy, packaged snacks, drinks, and prepared dishes from many cuisines. It works best when each item is clearly visible from above with good lighting. Hidden ingredients (oils, sauces, dressings, broths) are harder to detect, so single-ingredient and well-lit plate shots produce the most reliable results.'],
-                        ['q' => 'Is my food photo kept private?', 'a' => 'Yes. Your photo is used only to generate the nutrition analysis. Livewire stores it as a temporary upload while the scan runs, then we delete that temporary file as soon as the result or error is returned. We do not retain images, share them with third parties, or use them to train AI models. Authenticated users can opt to log meals with photos to their personal history; on this public tool, no image is saved.'],
-                        ['q' => 'How do I use Snap to Track?', 'a' => 'Open this page on your phone or laptop, tap the upload area to take a new photo or pick one from your gallery, then tap Analyze Food. In about 5–15 seconds you get a per-item breakdown of calories, protein, carbs, and fat plus meal totals. No signup is required to try it; create a free account to save and track meals over time.'],
-                    ];
+                    $faqs = App\Services\AiTransparency::snapToTrackFaqs();
                     @endphp
 
                     @foreach ($faqs as $index => $faq)

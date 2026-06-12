@@ -82,6 +82,9 @@
                         <a href="{{ route('support') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">Help & Support</a>
                     </li>
                     <li>
+                        <a href="{{ route('ai-accuracy') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="How accurate our AI food photo analysis is, honestly">AI Accuracy &amp; Limitations</a>
+                    </li>
+                    <li>
                         <a href="{{ route('about') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">About</a>
                     </li>
                     <li>

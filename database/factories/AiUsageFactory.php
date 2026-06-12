@@ -21,7 +21,7 @@ final class AiUsageFactory extends Factory
         return [
             'user_id' => User::factory(),
             'agent' => AgentRunner::class,
-            'model' => 'gemini-3-flash-preview',
+            'model' => 'gemini-3.5-flash',
             'provider' => 'gemini',
             'prompt_tokens' => $this->faker->numberBetween(100, 10000),
             'completion_tokens' => $this->faker->numberBetween(50, 5000),

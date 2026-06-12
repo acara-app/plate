@@ -59,6 +59,7 @@ it('can be converted to array', function (): void {
         'glucose_notifications_enabled' => false,
         'glucose_notification_low_threshold' => 70,
         'glucose_notification_high_threshold' => 180,
+        'glucose_meal_insights_enabled' => false,
     ]);
 });
 
