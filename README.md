@@ -175,6 +175,12 @@ php artisan telegraph:set-webhook
 
 Acara Plate uses structured profile data, health entries, conversation context, food references, and user-approved device data to generate more relevant AI guidance. Food data is designed around USDA FoodData Central imports and application-specific glycemic context.
 
+## Food Photo Analysis
+
+Plate reads food photos with a multimodal AI pipeline: the model identifies each item and estimates its portion, and confidently matched foods have their nutrients computed from USDA FoodData Central reference values instead of recalled, with each value flagged as reference-derived or a model estimate. Results are useful estimates for awareness, not clinically validated measurements — never use them for insulin or medication dosing.
+
+We measure how accurate the analysis really is with a first-party validation benchmark. See the [validation benchmark plan](docs/plan-golden-plate-validation-benchmark.md) and the [data collection protocol](docs/golden-plate-collection-protocol.md).
+
 ## Contributing
 
 Contributions are welcome for the public Plate app. Start with the [contributing guide](CONTRIBUTING.md), follow the [code of conduct](CODE_OF_CONDUCT.md), and run the relevant tests before opening a pull request.
