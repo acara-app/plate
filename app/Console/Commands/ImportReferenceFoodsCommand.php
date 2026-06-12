@@ -150,9 +150,11 @@ final class ImportReferenceFoodsCommand extends Command
             if (! is_array($entry)) {
                 continue;
             }
+
             if (! is_array($entry['nutrient'] ?? null)) {
                 continue;
             }
+
             $number = $entry['nutrient']['number'] ?? null;
 
             if (! is_string($number) && ! is_int($number)) {

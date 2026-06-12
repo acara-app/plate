@@ -79,6 +79,7 @@ final readonly class ReferenceFoodMatcher
             if (! is_array($vector)) {
                 continue;
             }
+
             if ($vector === []) {
                 continue;
             }

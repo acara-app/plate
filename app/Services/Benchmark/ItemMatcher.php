@@ -49,9 +49,11 @@ final class ItemMatcher
             if (isset($matchedPredicted[$candidate['predicted']])) {
                 continue;
             }
+
             if (isset($matchedTruth[$candidate['truth']])) {
                 continue;
             }
+
             $matchedPredicted[$candidate['predicted']] = true;
             $matchedTruth[$candidate['truth']] = true;
         }
