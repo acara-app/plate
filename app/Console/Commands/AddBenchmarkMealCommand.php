@@ -129,10 +129,10 @@ final class AddBenchmarkMealCommand extends Command
             ];
 
             $this->warnOnAtwaterDeviation($item['name'], new NutrientValues(
-                calories: (float) $item['kcal_per_100g'],
-                protein: (float) $item['protein_per_100g'],
-                carbs: (float) $item['carbs_per_100g'],
-                fat: (float) $item['fat_per_100g'],
+                calories: $item['kcal_per_100g'],
+                protein: $item['protein_per_100g'],
+                carbs: $item['carbs_per_100g'],
+                fat: $item['fat_per_100g'],
             ));
 
             $items[] = $item;

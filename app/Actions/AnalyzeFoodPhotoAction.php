@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Services\Nutrition\ReferenceMatch;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Data\FoodAnalysisData;
 use App\Data\FoodItemData;
@@ -77,7 +78,7 @@ final readonly class AnalyzeFoodPhotoAction
         try {
             $match = $this->matcher->match($item->matchName ?? $item->name);
 
-            if ($match !== null && $item->grams !== null && $item->grams > 0.0) {
+            if ($match instanceof ReferenceMatch && $item->grams !== null && $item->grams > 0.0) {
                 $macros = $match->food->macrosFor($item->grams);
 
                 return [new FoodItemData(

@@ -8,8 +8,8 @@ use Laravel\Ai\Prompts\EmbeddingsPrompt;
 
 function fakeDimensionedEmbeddings(): void
 {
-    Embeddings::fake(fn (EmbeddingsPrompt $prompt) => array_map(
-        fn () => Embeddings::fakeEmbedding($prompt->dimensions),
+    Embeddings::fake(fn (EmbeddingsPrompt $prompt): array => array_map(
+        fn (): array => Embeddings::fakeEmbedding($prompt->dimensions),
         $prompt->inputs,
     ));
 }
@@ -33,7 +33,7 @@ it('skips foods that already have an embedding unless forced', function (): void
 
     $this->artisan('nutrition:embed-references')->assertSuccessful();
 
-    Embeddings::assertGenerated(fn (EmbeddingsPrompt $prompt) => count($prompt->inputs) === 1);
+    Embeddings::assertGenerated(fn (EmbeddingsPrompt $prompt): bool => count($prompt->inputs) === 1);
 });
 
 it('re-embeds everything when forced', function (): void {
@@ -43,7 +43,7 @@ it('re-embeds everything when forced', function (): void {
 
     $this->artisan('nutrition:embed-references', ['--force' => true])->assertSuccessful();
 
-    Embeddings::assertGenerated(fn (EmbeddingsPrompt $prompt) => count($prompt->inputs) === 2);
+    Embeddings::assertGenerated(fn (EmbeddingsPrompt $prompt): bool => count($prompt->inputs) === 2);
 });
 
 it('reports when nothing needs embedding', function (): void {

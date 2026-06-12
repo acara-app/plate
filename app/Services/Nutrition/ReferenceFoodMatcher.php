@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nutrition;
 
+use Illuminate\Database\Eloquent\Model;
 use App\Models\ReferenceFood;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -51,7 +52,7 @@ final readonly class ReferenceFoodMatcher
             }
         }
 
-        if ($best === null || $bestScore < $this->threshold()) {
+        if (!$best instanceof Model || $bestScore < $this->threshold()) {
             return null;
         }
 
@@ -75,8 +76,10 @@ final readonly class ReferenceFoodMatcher
 
         foreach ($this->vectorCandidates($queryVector) as $food) {
             $vector = $food->embedding;
-
-            if (! is_array($vector) || $vector === []) {
+            if (! is_array($vector)) {
+                continue;
+            }
+            if ($vector === []) {
                 continue;
             }
 
@@ -88,7 +91,7 @@ final readonly class ReferenceFoodMatcher
             }
         }
 
-        if ($best === null || $bestScore < $this->embeddingThreshold()) {
+        if (!$best instanceof Model || $bestScore < $this->embeddingThreshold()) {
             return null;
         }
 

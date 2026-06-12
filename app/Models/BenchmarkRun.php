@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use App\Data\Benchmark\HarnessReport;
 use Database\Factories\BenchmarkRunFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $meal_count
  * @property int $skipped_meals
  * @property array<string, mixed> $report
- * @property \Carbon\CarbonInterface $created_at
+ * @property CarbonInterface $created_at
  */
 final class BenchmarkRun extends Model
 {

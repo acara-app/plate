@@ -13,7 +13,7 @@ it('imports foundation foods with macros extracted to columns', function (): voi
     $this->artisan('nutrition:import-references', ['path' => foundationFixture()])
         ->assertSuccessful();
 
-    expect(ReferenceFood::count())->toBe(3);
+    expect(ReferenceFood::query()->count())->toBe(3);
 
     $hummus = ReferenceFood::query()->where('external_id', '321358')->sole();
 
@@ -66,7 +66,7 @@ it('is idempotent across re-imports', function (): void {
     $this->artisan('nutrition:import-references', ['path' => foundationFixture()])->assertSuccessful();
     $this->artisan('nutrition:import-references', ['path' => foundationFixture()])->assertSuccessful();
 
-    expect(ReferenceFood::count())->toBe(3);
+    expect(ReferenceFood::query()->count())->toBe(3);
 });
 
 it('lets an explicit release override the filename-derived default', function (): void {
@@ -83,5 +83,5 @@ it('fails cleanly when the export file is missing', function (): void {
     $this->artisan('nutrition:import-references', ['path' => '/no/such/export.json'])
         ->assertFailed();
 
-    expect(ReferenceFood::count())->toBe(0);
+    expect(ReferenceFood::query()->count())->toBe(0);
 });

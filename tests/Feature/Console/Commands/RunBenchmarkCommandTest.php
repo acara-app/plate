@@ -96,7 +96,7 @@ function reportWithCarbError(float $absoluteError): array
         ),
     ]);
 
-    return (new HarnessReport(
+    return new HarnessReport(
         analyzerVersion: 'gemini-3-flash-preview/p2',
         referenceLookupEnabled: true,
         repeats: 5,
@@ -105,7 +105,7 @@ function reportWithCarbError(float $absoluteError): array
             new PathMetrics(path: AnalysisPath::Raw, failedRuns: 0, metrics: $metrics),
             new PathMetrics(path: AnalysisPath::Enriched, failedRuns: 0, metrics: $metrics),
         ]),
-    ))->toArray();
+    )->toArray();
 }
 
 it('benchmarks both production paths, reports per-path metrics, and persists the run', function (): void {
@@ -147,7 +147,7 @@ it('reports deltas against the previous comparable run', function (): void {
         ->expectsOutputToContain('Saved as benchmark run #2.')
         ->assertSuccessful();
 
-    expect(BenchmarkRun::count())->toBe(2);
+    expect(BenchmarkRun::query()->count())->toBe(2);
 });
 
 it('does not compare full runs against smoke runs', function (): void {
@@ -171,7 +171,7 @@ it('aborts without spending when the cost confirmation is declined', function ()
 
     FoodPhotoAnalyzerAgent::assertNeverPrompted();
 
-    expect(BenchmarkRun::count())->toBe(0);
+    expect(BenchmarkRun::query()->count())->toBe(0);
 });
 
 it('fails fast when no benchmark meals exist', function (): void {

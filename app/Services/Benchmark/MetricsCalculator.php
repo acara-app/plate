@@ -35,9 +35,7 @@ final class MetricsCalculator
     {
         $edges = $confidenceBinEdges ?? self::DEFAULT_CONFIDENCE_BIN_EDGES;
 
-        if (count($edges) < 2) {
-            throw new InvalidArgumentException('Confidence bin edges must contain at least two values.');
-        }
+        throw_if(count($edges) < 2, InvalidArgumentException::class, 'Confidence bin edges must contain at least two values.');
 
         $meals = array_values(array_filter(
             $evaluations,
@@ -68,8 +66,10 @@ final class MetricsCalculator
     {
         $truth = $evaluation->truth;
         $truthShares = $this->energyShares($truth);
-
-        $absolute = $signed = $percent = $values = array_fill_keys(self::NUTRIENTS, []);
+        $absolute = array_fill_keys(self::NUTRIENTS, []);
+        $signed = $absolute;
+        $percent = $absolute;
+        $values = $absolute;
         $ratioDeviations = ['carbs' => [], 'protein' => [], 'fat' => []];
         $calibrationRuns = [];
         $itemRecalls = [];

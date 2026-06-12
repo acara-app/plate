@@ -98,7 +98,7 @@ it('flags an overlapping meal inside the response window', function (): void {
     expect($response->overlapping)->toBeTrue();
 });
 
-it('does not flag overlap for the meal\'s own group or meals outside the window', function (): void {
+it("does not flag overlap for the meal's own group or meals outside the window", function (): void {
     seedGlucoseReading($this->user, $this->mealAt->copy()->subMinutes(30), 100);
     seedGlucoseReading($this->user, $this->mealAt->copy()->addMinutes(60), 140);
     seedMealMacroSample($this->user, $this->mealAt->copy()->addMinutes(60), 'g1');
@@ -109,7 +109,7 @@ it('does not flag overlap for the meal\'s own group or meals outside the window'
     expect($response->overlapping)->toBeFalse();
 });
 
-it('only considers the requesting user\'s own readings', function (): void {
+it("only considers the requesting user's own readings", function (): void {
     $other = User::factory()->create();
     seedGlucoseReading($other, $this->mealAt->copy()->subMinutes(30), 100);
     seedGlucoseReading($other, $this->mealAt->copy()->addMinutes(60), 140);
@@ -188,7 +188,7 @@ it('excludes overlapping comparable meals from the aggregate', function (): void
     expect($this->service->carbBandPattern($this->user, 40.0))->toBeNull();
 });
 
-it('excludes the target meal\'s own group', function (): void {
+it("excludes the target meal's own group", function (): void {
     seedComparableMeal($this->user, 'target', 40.0, 30, 1);
     seedComparableMeal($this->user, 'p2', 45.0, 40, 2);
     seedComparableMeal($this->user, 'p3', 35.0, 50, 3);

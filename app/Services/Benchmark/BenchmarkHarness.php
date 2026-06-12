@@ -66,7 +66,7 @@ final readonly class BenchmarkHarness
                         $failures[$path->value]++;
                     }
 
-                    if ($onAnalysis !== null) {
+                    if ($onAnalysis instanceof Closure) {
                         $onAnalysis();
                     }
                 }

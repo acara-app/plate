@@ -14,7 +14,7 @@ it('keeps unbacked quantitative accuracy claims off public pages', function (str
     expect($content)
         ->not->toContain('10–20%')
         ->not->toContain('10-20%')
-        ->and(preg_match('/within roughly \d+/', $content))->toBe(0);
+        ->and(preg_match('/within roughly \d+/', (string) $content))->toBe(0);
 })->with([
     'snap to track' => '/tools/snap-to-track',
     'ai accuracy' => '/ai-accuracy',

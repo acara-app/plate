@@ -47,7 +47,7 @@ final class AiTransparency
                 'Your photo goes through Acara\'s multimodal AI pipeline — a single pass that combines image understanding with nutrition reasoning to read your meal.',
                 'In that one pass, the model identifies each distinct food item it can see, estimates its portion size and weight in grams, and proposes calories, protein, carbohydrate, and fat for every item.',
                 'Where the model confidently recognizes a food, we then replace its estimated nutrients with values computed from a reference database — USDA FoodData Central — scaled to the estimated weight. Those items are flagged as reference-derived; items we cannot confidently match keep the model\'s own estimate and are flagged as estimates, so a single meal can mix both.',
-                'Every analysis also returns a confidence score from 0 to 100, which is the model\'s own assessment of how clearly it could see and recognize the meal.',
+                "Every analysis also returns a confidence score from 0 to 100, which is the model's own assessment of how clearly it could see and recognize the meal.",
                 'The same engine powers both the free Snap to Track tool and the full app. The difference: in the full app, you review and can edit every item and portion before anything is saved to your history.',
             ];
         }
@@ -55,7 +55,7 @@ final class AiTransparency
         return [
             'Your photo goes through Acara\'s multimodal AI pipeline — a single pass that combines image understanding with nutrition reasoning to read your meal.',
             'In that one pass, the model identifies each distinct food item it can see, estimates the portion size visually, and generates calories, protein, carbohydrate, and fat for every item plus meal totals — values drawn from its training knowledge of standard nutrition references such as USDA FoodData Central, not retrieved from a database.',
-            'Every analysis also returns a confidence score from 0 to 100, which is the model\'s own assessment of how clearly it could see and recognize the meal.',
+            "Every analysis also returns a confidence score from 0 to 100, which is the model's own assessment of how clearly it could see and recognize the meal.",
             'The same engine powers both the free Snap to Track tool and the full app. The difference: in the full app, you review and can edit every item and portion before anything is saved to your history.',
         ];
     }
@@ -100,15 +100,15 @@ final class AiTransparency
             ],
             [
                 'title' => 'Hidden ingredients are invisible',
-                'detail' => 'Cooking oils, butter, dressings, and added sugars don\'t show up in a photo, so they are typically undercounted. A salad with two tablespoons of olive oil looks identical to one with none.',
+                'detail' => "Cooking oils, butter, dressings, and added sugars don't show up in a photo, so they are typically undercounted. A salad with two tablespoons of olive oil looks identical to one with none.",
             ],
             [
                 'title' => 'Mixed and layered dishes are harder',
-                'detail' => 'Curries, stews, casseroles, and anything occluded or blended reduce the model\'s ability to identify and separate individual ingredients.',
+                'detail' => "Curries, stews, casseroles, and anything occluded or blended reduce the model's ability to identify and separate individual ingredients.",
             ],
             [
                 'title' => 'Cuisine coverage is uneven',
-                'detail' => 'Foods that are well documented in the model\'s training data fare better. Regional and home-style dishes may be misidentified or mapped to the nearest familiar equivalent.',
+                'detail' => "Foods that are well documented in the model's training data fare better. Regional and home-style dishes may be misidentified or mapped to the nearest familiar equivalent.",
             ],
             [
                 'title' => 'Image conditions matter',
@@ -186,7 +186,7 @@ final class AiTransparency
     private static function photoAnalyzerFaqAnswer(): string
     {
         if (self::usesReferenceLookup()) {
-            return 'Upload a photo of your meal and our AI vision model identifies each food item, estimates its portion size and weight, and produces calories, protein, carbs, and fat for every item. For foods it can confidently match, those values are computed from USDA FoodData Central reference data and flagged as reference-derived; the rest stay as the model\'s own estimate. Every analysis includes a confidence score.';
+            return "Upload a photo of your meal and our AI vision model identifies each food item, estimates its portion size and weight, and produces calories, protein, carbs, and fat for every item. For foods it can confidently match, those values are computed from USDA FoodData Central reference data and flagged as reference-derived; the rest stay as the model's own estimate. Every analysis includes a confidence score.";
         }
 
         return 'Upload a photo of your meal and our AI vision model identifies each food item, estimates portion size, and calculates calories, protein, carbs, and fat for every item plus the full meal. The values are generated directly by the AI model — informed by standard nutrition references such as USDA FoodData Central, not looked up in a live database — and every analysis includes a confidence score.';

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use App\Data\NutrientValues;
 use App\Enums\Benchmark\CameraAngle;
 use App\Enums\Benchmark\DishType;
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id
  * @property string $code
  * @property Tranche $tranche
- * @property \Carbon\CarbonInterface $collected_on
+ * @property CarbonInterface $collected_on
  * @property string $cuisine
  * @property DishType $dish_type
  * @property Lighting $lighting

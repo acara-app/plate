@@ -38,7 +38,7 @@ final readonly class MealGlucoseResponseService
     {
         $baseline = $this->baselineReading($user, $mealAt);
 
-        if ($baseline === null) {
+        if (!$baseline instanceof HealthSyncSample) {
             return null;
         }
 
@@ -68,7 +68,7 @@ final readonly class MealGlucoseResponseService
             ->where('user_id', $user->id)
             ->whereIn('type_identifier', self::MEAL_TYPES)
             ->where('measured_at', '>=', now()->subDays($days))
-            ->orderByDesc('measured_at')
+            ->latest('measured_at')
             ->get()
             ->groupBy(fn (HealthSyncSample $sample): string => $sample->group_id ?? 'sample_'.$sample->id);
 
@@ -83,7 +83,7 @@ final readonly class MealGlucoseResponseService
             $anchor = $samples->first();
             $response = $this->forMeal($user, $anchor->measured_at, $anchor->group_id);
 
-            if ($response !== null) {
+            if ($response instanceof MealGlucoseResponseData) {
                 $carbs = $samples->firstWhere('type_identifier', HealthSyncType::Carbohydrates->value)?->value;
 
                 $responses[] = [
@@ -110,7 +110,7 @@ final readonly class MealGlucoseResponseService
             ->whereBetween('value', [$carbs * (1 - self::CARB_BAND_RATIO), $carbs * (1 + self::CARB_BAND_RATIO)])
             ->where('measured_at', '>=', now()->subDays($days))
             ->when($excludeGroupId !== null, fn (Builder $query): Builder => $query->where('group_id', '!=', $excludeGroupId))
-            ->orderByDesc('measured_at')
+            ->latest('measured_at')
             ->get();
 
         $deltas = [];
@@ -118,7 +118,7 @@ final readonly class MealGlucoseResponseService
         foreach ($candidates as $candidate) {
             $response = $this->forMeal($user, $candidate->measured_at, $candidate->group_id);
 
-            if ($response !== null && ! $response->overlapping) {
+            if ($response instanceof MealGlucoseResponseData && ! $response->overlapping) {
                 $deltas[] = $response->delta;
             }
         }
@@ -158,7 +158,7 @@ final readonly class MealGlucoseResponseService
                 $mealAt->copy()->subMinutes(self::BASELINE_WINDOW_MINUTES),
                 $mealAt,
             ])
-            ->orderByDesc('measured_at')
+            ->latest('measured_at')
             ->first();
     }
 

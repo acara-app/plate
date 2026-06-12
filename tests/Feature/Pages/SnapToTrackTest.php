@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\ReferenceFood;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -372,9 +373,9 @@ it('flags reference-derived items in the result when the lookup is enabled', fun
     config()->set('plate.food_photo_analyzer.reference_lookup.enabled', true);
     fakeTurnstileForSnapToTrack();
 
-    App\Models\ReferenceFood::factory()->create([
+    ReferenceFood::factory()->create([
         'description' => 'Hummus, commercial',
-        'match_name' => App\Models\ReferenceFood::normalizeName('Hummus, commercial'),
+        'match_name' => ReferenceFood::normalizeName('Hummus, commercial'),
         'calories_per_100g' => 166,
         'protein_per_100g' => 7.9,
         'carbs_per_100g' => 14.3,

@@ -36,9 +36,7 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
     {
         $model = config('plate.food_photo_analyzer.model');
 
-        if (! is_string($model) || $model === '') {
-            throw new RuntimeException('No model is pinned for the food photo analyzer. Set plate.food_photo_analyzer.model.');
-        }
+        throw_if(! is_string($model) || $model === '', RuntimeException::class, 'No model is pinned for the food photo analyzer. Set plate.food_photo_analyzer.model.');
 
         return $model;
     }

@@ -46,10 +46,12 @@ final class ItemMatcher
         $matchedTruth = [];
 
         foreach ($candidates as $candidate) {
-            if (isset($matchedPredicted[$candidate['predicted']]) || isset($matchedTruth[$candidate['truth']])) {
+            if (isset($matchedPredicted[$candidate['predicted']])) {
                 continue;
             }
-
+            if (isset($matchedTruth[$candidate['truth']])) {
+                continue;
+            }
             $matchedPredicted[$candidate['predicted']] = true;
             $matchedTruth[$candidate['truth']] = true;
         }

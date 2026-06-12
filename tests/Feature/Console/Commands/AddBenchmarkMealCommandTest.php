@@ -129,7 +129,7 @@ it('discards the meal when item weights disagree with the total and the collecto
         ->expectsConfirmation('Record the meal anyway?', 'no')
         ->assertFailed();
 
-    expect(BenchmarkMeal::count())->toBe(0);
+    expect(BenchmarkMeal::query()->count())->toBe(0);
 
     Storage::disk('local')->assertMissing('benchmark/golden-plates/m0001.jpg');
 });
@@ -140,7 +140,7 @@ it('rejects a photo that is not jpg or png', function (): void {
 
     $this->artisan('benchmark:add-meal', ['photo' => $heicPath])->assertFailed();
 
-    expect(BenchmarkMeal::count())->toBe(0);
+    expect(BenchmarkMeal::query()->count())->toBe(0);
 
     File::delete($heicPath);
 });

@@ -11,7 +11,7 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
 use Laravel\Ai\Embeddings;
 
-#[Description('Generate and store vector embeddings for reference foods, enabling the matcher\'s semantic fallback.')]
+#[Description("Generate and store vector embeddings for reference foods, enabling the matcher's semantic fallback.")]
 #[Signature('nutrition:embed-references {--force : Re-embed foods that already have an embedding} {--chunk=100 : Number of foods to embed per provider call}')]
 final class EmbedReferenceFoodsCommand extends Command
 {

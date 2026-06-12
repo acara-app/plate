@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use Illuminate\Support\Facades\Date;
 use App\Models\ReferenceFood;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
@@ -146,10 +147,12 @@ final class ImportReferenceFoodsCommand extends Command
         $map = [];
 
         foreach ($foodNutrients as $entry) {
-            if (! is_array($entry) || ! is_array($entry['nutrient'] ?? null)) {
+            if (! is_array($entry)) {
                 continue;
             }
-
+            if (! is_array($entry['nutrient'] ?? null)) {
+                continue;
+            }
             $number = $entry['nutrient']['number'] ?? null;
 
             if (! is_string($number) && ! is_int($number)) {
@@ -204,7 +207,7 @@ final class ImportReferenceFoodsCommand extends Command
         }
 
         try {
-            return Carbon::parse($date);
+            return Date::parse($date);
         } catch (Throwable) {
             return null;
         }
@@ -221,6 +224,6 @@ final class ImportReferenceFoodsCommand extends Command
         preg_match('/(\d{4}-\d{2}-\d{2})/', basename($path), $matches);
         $date = $matches[1] ?? null;
 
-        return mb_trim(sprintf('USDA %s%s', ucfirst($type), $date !== null ? " {$date}" : ''));
+        return mb_trim(sprintf('USDA %s%s', ucfirst($type), $date !== null ? ' ' . $date : ''));
     }
 }

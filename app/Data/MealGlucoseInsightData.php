@@ -53,7 +53,7 @@ final class MealGlucoseInsightData extends Data
             summary: $summary,
             overlapping: $response->overlapping,
             notice: AiTransparency::carbBoundaryNotice(),
-            comparable: $pattern !== null ? self::comparableSummary($pattern, $unit) : null,
+            comparable: $pattern instanceof MealGlucosePatternData ? self::comparableSummary($pattern, $unit) : null,
         );
     }
 

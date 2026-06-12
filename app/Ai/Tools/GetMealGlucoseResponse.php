@@ -67,7 +67,7 @@ final readonly class GetMealGlucoseResponse implements Tool
             'success' => true,
             'insights' => $insights,
             'notice' => AiTransparency::carbBoundaryNotice(),
-            'guidance' => 'Descriptive observations of the user\'s own past glucose only. Never frame them as a prediction or as dosing guidance.',
+            'guidance' => "Descriptive observations of the user's own past glucose only. Never frame them as a prediction or as dosing guidance.",
             'message' => $insights === []
                 ? 'No comparable glucose data around the user\'s recent meals yet — there isn\'t enough surrounding glucose to describe a response.'
                 : null,

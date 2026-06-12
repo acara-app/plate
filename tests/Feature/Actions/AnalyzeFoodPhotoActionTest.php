@@ -29,7 +29,7 @@ function seedActionReferenceFood(string $description, array $macros): ReferenceF
 }
 
 beforeEach(function (): void {
-    $this->action = app(AnalyzeFoodPhotoAction::class);
+    $this->action = resolve(AnalyzeFoodPhotoAction::class);
 });
 
 it('replaces matched item macros with computed reference values when enabled', function (): void {

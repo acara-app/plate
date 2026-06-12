@@ -35,7 +35,7 @@ it('renders assembled health entries, not raw samples, on the index', function (
         );
 });
 
-it('merges a food meal\'s macro samples into a single assembled entry', function (): void {
+it("merges a food meal's macro samples into a single assembled entry", function (): void {
     $user = User::factory()->create();
 
     HealthSyncSample::factory()->carbohydrates()->create(['user_id' => $user->id, 'value' => 45, 'group_id' => 'meal-1', 'measured_at' => now()]);

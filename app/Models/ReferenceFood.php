@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Table;
+use Carbon\CarbonInterface;
 use App\Data\NutrientValues;
 use Database\Factories\ReferenceFoodFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -27,14 +29,13 @@ use Illuminate\Support\Str;
  * @property array<string, mixed> $nutrients
  * @property list<float>|null $embedding
  * @property string $release
- * @property \Carbon\CarbonInterface|null $publication_date
+ * @property CarbonInterface|null $publication_date
  */
+#[Table(name: 'reference_foods')]
 final class ReferenceFood extends Model
 {
     /** @use HasFactory<ReferenceFoodFactory> */
     use HasFactory;
-
-    protected $table = 'reference_foods';
 
     protected $guarded = [];
 

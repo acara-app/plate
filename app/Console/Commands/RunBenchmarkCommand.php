@@ -90,7 +90,7 @@ final class RunBenchmarkCommand extends Command
 
         $this->render($report);
 
-        if ($previous !== null) {
+        if ($previous instanceof BenchmarkRun) {
             $this->renderComparison($report, $previous);
         }
 
