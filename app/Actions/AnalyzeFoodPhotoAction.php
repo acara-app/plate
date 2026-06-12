@@ -59,10 +59,10 @@ final readonly class AnalyzeFoodPhotoAction
 
         return new FoodAnalysisData(
             items: new DataCollection(FoodItemData::class, $items),
-            totalCalories: $this->sum($items, 'calories'),
-            totalProtein: $this->sum($items, 'protein'),
-            totalCarbs: $this->sum($items, 'carbs'),
-            totalFat: $this->sum($items, 'fat'),
+            totalCalories: $this->sum($items, fn (FoodItemData $item): float => $item->calories),
+            totalProtein: $this->sum($items, fn (FoodItemData $item): float => $item->protein),
+            totalCarbs: $this->sum($items, fn (FoodItemData $item): float => $item->carbs),
+            totalFat: $this->sum($items, fn (FoodItemData $item): float => $item->fat),
             confidence: $analysis->confidence,
             analyzerVersion: $analysis->analyzerVersion,
             referenceRelease: $referenceRelease,
@@ -101,10 +101,11 @@ final readonly class AnalyzeFoodPhotoAction
 
     /**
      * @param  list<FoodItemData>  $items
+     * @param  callable(FoodItemData): float  $macro
      */
-    private function sum(array $items, string $macro): float
+    private function sum(array $items, callable $macro): float
     {
-        return round(array_sum(array_map(fn (FoodItemData $item): float => $item->{$macro}, $items)), 1);
+        return round(array_sum(array_map($macro, $items)), 1);
     }
 
     /**

@@ -17,7 +17,7 @@ final class ReferenceFoodFactory extends Factory
      */
     public function definition(): array
     {
-        $description = ucfirst(fake()->unique()->words(2, true));
+        $description = ucfirst(fake()->unique()->word().' '.fake()->word());
 
         return [
             'source' => 'usda',

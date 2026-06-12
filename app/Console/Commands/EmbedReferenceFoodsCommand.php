@@ -17,7 +17,7 @@ final class EmbedReferenceFoodsCommand extends Command
 {
     public function handle(): int
     {
-        $dimensions = (int) config('plate.food_photo_analyzer.reference_lookup.embeddings.dimensions', 1536);
+        $dimensions = config()->integer('plate.food_photo_analyzer.reference_lookup.embeddings.dimensions', 1536);
         $chunk = max(1, (int) $this->option('chunk'));
 
         $query = ReferenceFood::query()->orderBy('id');

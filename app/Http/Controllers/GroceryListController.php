@@ -68,9 +68,11 @@ final readonly class GroceryListController
         $checkedCount = $groceryList->items()->where('is_checked', true)->count();
         $totalCount = $groceryList->items()->count();
 
-        if ($checkedCount === $totalCount && $groceryList->status !== GroceryListStatus::Completed) {
-            $groceryList->update(['status' => GroceryListStatus::Completed]);
-        } elseif ($checkedCount < $totalCount && $groceryList->status === GroceryListStatus::Completed) {
+        if ($checkedCount === $totalCount) {
+            if ($groceryList->status !== GroceryListStatus::Completed) {
+                $groceryList->update(['status' => GroceryListStatus::Completed]);
+            }
+        } elseif ($groceryList->status === GroceryListStatus::Completed) {
             $groceryList->update(['status' => GroceryListStatus::Active]);
         }
 

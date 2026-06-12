@@ -48,9 +48,11 @@ final class BenchmarkMeal extends Model
 
     public static function nextCode(): string
     {
-        $last = (string) self::query()->max('code');
+        $last = self::query()->max('code');
 
-        return sprintf('m%04d', $last === '' ? 1 : (int) mb_substr($last, 1) + 1);
+        $next = is_string($last) ? (int) mb_substr($last, 1) + 1 : 1;
+
+        return sprintf('m%04d', $next);
     }
 
     /**

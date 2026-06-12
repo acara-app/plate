@@ -50,7 +50,7 @@ final readonly class GetMealGlucoseResponse implements Tool
         $daysInput = $request['days'] ?? 7;
         $days = max(1, is_numeric($daysInput) ? (int) $daysInput : 7);
 
-        $unit = $user->profile?->units_preference ?? GlucoseUnit::MmolL;
+        $unit = $user->profile->units_preference ?? GlucoseUnit::MmolL;
 
         $insights = array_map(
             function (array $entry) use ($user, $unit): array {

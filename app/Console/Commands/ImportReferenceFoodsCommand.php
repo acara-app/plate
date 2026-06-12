@@ -77,9 +77,12 @@ final class ImportReferenceFoodsCommand extends Command
     private function readFoods(string $path): ?array
     {
         try {
-            /** @var array<string, mixed> $payload */
             $payload = json_decode(File::get($path), true, flags: JSON_THROW_ON_ERROR);
         } catch (Throwable) {
+            return null;
+        }
+
+        if (! is_array($payload)) {
             return null;
         }
 
@@ -93,29 +96,42 @@ final class ImportReferenceFoodsCommand extends Command
     }
 
     /**
-     * @param  array<string, mixed>  $food
+     * @param  array<array-key, mixed>  $food
      */
     private function upsert(array $food, string $source, string $type, string $release): void
     {
-        $description = (string) ($food['description'] ?? '');
+        $description = $this->stringValue($food['description'] ?? null);
         $nutrients = $this->mapNutrients($food['foodNutrients'] ?? []);
 
         ReferenceFood::query()->updateOrCreate(
-            ['source' => $source, 'external_id' => (string) $food['fdcId']],
+            ['source' => $source, 'external_id' => $this->stringValue($food['fdcId'] ?? null)],
             [
                 'data_type' => $type,
                 'description' => $description,
                 'match_name' => ReferenceFood::normalizeName($description),
                 'food_category' => $this->foodCategory($food),
                 'calories_per_100g' => $this->energy($nutrients),
-                'protein_per_100g' => $nutrients[self::PROTEIN]['amount'] ?? null,
-                'carbs_per_100g' => $nutrients[self::CARBS]['amount'] ?? null,
-                'fat_per_100g' => $nutrients[self::FAT]['amount'] ?? null,
+                'protein_per_100g' => $this->nutrientAmount($nutrients, self::PROTEIN),
+                'carbs_per_100g' => $this->nutrientAmount($nutrients, self::CARBS),
+                'fat_per_100g' => $this->nutrientAmount($nutrients, self::FAT),
                 'nutrients' => $nutrients,
                 'release' => $release,
                 'publication_date' => $this->publicationDate($food),
             ],
         );
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
+    }
+
+    /**
+     * @param  array<string, array{name: string|null, amount: float|null, unit: string|null}>  $nutrients
+     */
+    private function nutrientAmount(array $nutrients, string $number): ?float
+    {
+        return $nutrients[$number]['amount'] ?? null;
     }
 
     /**
@@ -143,9 +159,9 @@ final class ImportReferenceFoodsCommand extends Command
             $amount = $entry['amount'] ?? null;
 
             $map[(string) $number] = [
-                'name' => isset($entry['nutrient']['name']) ? (string) $entry['nutrient']['name'] : null,
+                'name' => isset($entry['nutrient']['name']) ? $this->stringValue($entry['nutrient']['name']) : null,
                 'amount' => is_numeric($amount) ? (float) $amount : null,
-                'unit' => isset($entry['nutrient']['unitName']) ? (string) $entry['nutrient']['unitName'] : null,
+                'unit' => isset($entry['nutrient']['unitName']) ? $this->stringValue($entry['nutrient']['unitName']) : null,
             ];
         }
 
@@ -157,28 +173,27 @@ final class ImportReferenceFoodsCommand extends Command
      */
     private function energy(array $nutrients): ?float
     {
-        return $nutrients[self::ENERGY_KCAL]['amount']
-            ?? $nutrients[self::ENERGY_ATWATER_GENERAL]['amount']
-            ?? $nutrients[self::ENERGY_ATWATER_SPECIFIC]['amount']
-            ?? null;
+        return $this->nutrientAmount($nutrients, self::ENERGY_KCAL)
+            ?? $this->nutrientAmount($nutrients, self::ENERGY_ATWATER_GENERAL)
+            ?? $this->nutrientAmount($nutrients, self::ENERGY_ATWATER_SPECIFIC);
     }
 
     /**
-     * @param  array<string, mixed>  $food
+     * @param  array<array-key, mixed>  $food
      */
     private function foodCategory(array $food): ?string
     {
         $category = $food['foodCategory'] ?? null;
 
         if (is_array($category) && isset($category['description'])) {
-            return (string) $category['description'];
+            return $this->stringValue($category['description']);
         }
 
         return null;
     }
 
     /**
-     * @param  array<string, mixed>  $food
+     * @param  array<array-key, mixed>  $food
      */
     private function publicationDate(array $food): ?Carbon
     {

@@ -51,11 +51,10 @@ final readonly class BenchmarkHarness
 
             [$imageBase64, $mimeType] = $photo;
             $truth = $meal->truthTotals();
-            $truthNames = $meal->items
+            $truthNames = array_values($meal->items
                 ->filter(fn (BenchmarkMealItem $item): bool => $item->visible)
                 ->map(fn (BenchmarkMealItem $item): string => $item->name)
-                ->values()
-                ->all();
+                ->all());
 
             foreach (AnalysisPath::cases() as $path) {
                 $runs = [];

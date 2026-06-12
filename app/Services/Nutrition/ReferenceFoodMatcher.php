@@ -164,7 +164,7 @@ final readonly class ReferenceFoodMatcher
 
             $vector = $response->embeddings[0] ?? null;
 
-            return is_array($vector) && $vector !== [] ? $vector : null;
+            return is_array($vector) && $vector !== [] ? array_values($vector) : null;
         } catch (Throwable) {
             return null;
         }
@@ -201,21 +201,21 @@ final readonly class ReferenceFoodMatcher
 
     private function threshold(): float
     {
-        return (float) config('plate.food_photo_analyzer.reference_lookup.match_threshold', 0.5);
+        return config()->float('plate.food_photo_analyzer.reference_lookup.match_threshold', 0.5);
     }
 
     private function embeddingsEnabled(): bool
     {
-        return (bool) config('plate.food_photo_analyzer.reference_lookup.embeddings.enabled', false);
+        return config()->boolean('plate.food_photo_analyzer.reference_lookup.embeddings.enabled', false);
     }
 
     private function embeddingDimensions(): int
     {
-        return (int) config('plate.food_photo_analyzer.reference_lookup.embeddings.dimensions', 1536);
+        return config()->integer('plate.food_photo_analyzer.reference_lookup.embeddings.dimensions', 1536);
     }
 
     private function embeddingThreshold(): float
     {
-        return (float) config('plate.food_photo_analyzer.reference_lookup.embeddings.threshold', 0.8);
+        return config()->float('plate.food_photo_analyzer.reference_lookup.embeddings.threshold', 0.8);
     }
 }

@@ -23,8 +23,15 @@ final readonly class GetUserHealthEntriesAction
             ->latest('measured_at')
             ->paginate($perPage);
 
-        return $paginator->setCollection(
-            $this->assembler->assemble($paginator->getCollection())->values()
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $this->assembler->assemble($paginator->getCollection())->values(),
+            $paginator->total(),
+            $paginator->perPage(),
+            $paginator->currentPage(),
+            [
+                'path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath(),
+                'pageName' => 'page',
+            ],
         );
     }
 }

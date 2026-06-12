@@ -26,6 +26,9 @@ use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
+/**
+ * @phpstan-type GatheredItem array{name: string, visible: bool, weight_g: float, kcal_per_100g: float, carbs_per_100g: float, protein_per_100g: float, fat_per_100g: float, truth_source: int|string, truth_ref: string|null}
+ */
 #[Description('Interactively record a golden-plate benchmark meal: ground truth into the database, photo onto the benchmark disk.')]
 #[Signature('benchmark:add-meal {photo : Path to the meal photo (jpg, jpeg, or png)}')]
 final class AddBenchmarkMealCommand extends Command
@@ -58,18 +61,19 @@ final class AddBenchmarkMealCommand extends Command
         if ($meal['truth_scope'] === TruthScope::PerItem->value) {
             $items = $this->gatherItems();
 
-            if (! $this->confirmItemWeights($items, (float) $meal['total_weight_g'])) {
+            if (! $this->confirmItemWeights($items, $meal['total_weight_g'])) {
                 $this->info('Meal discarded. Nothing was saved.');
 
                 return self::FAILURE;
             }
         } else {
-            $meal = [...$meal, ...$this->gatherMealOnlyTruth()];
+            $mealOnly = $this->gatherMealOnlyTruth();
+            $meal = [...$meal, ...$mealOnly];
             $this->warnOnAtwaterDeviation('Meal totals', new NutrientValues(
-                calories: (float) $meal['total_kcal'],
-                protein: (float) $meal['total_protein_g'],
-                carbs: (float) $meal['total_carbs_g'],
-                fat: (float) $meal['total_fat_g'],
+                calories: $mealOnly['total_kcal'],
+                protein: $mealOnly['total_protein_g'],
+                carbs: $mealOnly['total_carbs_g'],
+                fat: $mealOnly['total_fat_g'],
             ));
         }
 
@@ -82,7 +86,7 @@ final class AddBenchmarkMealCommand extends Command
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{tranche: int|string, collected_on: string, cuisine: string, dish_type: int|string, lighting: int|string, angle: int|string, truth_scope: int|string, total_weight_g: float}
      */
     private function gatherMeal(): array
     {
@@ -103,7 +107,7 @@ final class AddBenchmarkMealCommand extends Command
     }
 
     /**
-     * @return list<array<string, mixed>>
+     * @return list<GatheredItem>
      */
     private function gatherItems(): array
     {
@@ -138,7 +142,7 @@ final class AddBenchmarkMealCommand extends Command
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{total_kcal: float, total_carbs_g: float, total_protein_g: float, total_fat_g: float, truth_source: int|string, truth_ref: string}
      */
     private function gatherMealOnlyTruth(): array
     {
@@ -153,11 +157,11 @@ final class AddBenchmarkMealCommand extends Command
     }
 
     /**
-     * @param  list<array<string, mixed>>  $items
+     * @param  list<GatheredItem>  $items
      */
     private function confirmItemWeights(array $items, float $totalWeight): bool
     {
-        $sum = array_sum(array_map(fn (array $item): float => (float) $item['weight_g'], $items));
+        $sum = array_sum(array_map(fn (array $item): float => $item['weight_g'], $items));
         $deviation = abs($sum - $totalWeight) / $totalWeight;
 
         if ($deviation <= self::WEIGHT_SUM_TOLERANCE) {
@@ -194,7 +198,7 @@ final class AddBenchmarkMealCommand extends Command
     private function persist(array $meal, array $items, string $photoPath, string $extension): BenchmarkMeal
     {
         $code = BenchmarkMeal::nextCode();
-        $disk = (string) config('plate.benchmark.photo_disk');
+        $disk = config()->string('plate.benchmark.photo_disk');
 
         $storedPath = Storage::disk($disk)->putFileAs(
             BenchmarkMeal::PHOTO_DIRECTORY,

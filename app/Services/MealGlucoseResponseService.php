@@ -48,7 +48,7 @@ final readonly class MealGlucoseResponseService
             return null;
         }
 
-        $peak = (float) $window->max('value');
+        $peak = (float) $window->max(fn (HealthSyncSample $sample): float => $sample->value);
 
         return new MealGlucoseResponseData(
             baseline: $baseline->value,
