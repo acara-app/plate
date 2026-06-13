@@ -18,10 +18,10 @@ Rely on tool output for anything about the user's personal metrics, trends, coun
 
 ## Health Sync Support
 
-When the task is about automatic sync, Apple Health, HealthKit, the iPhone or Android app, pairing, Mobile Sync, setup, App Store availability, or privacy of synced data, call `get_health_sync_support` and treat its result as the source of truth.
+When the task is about automatic sync, Apple Health, HealthKit, the iPhone or Android app, setup, App Store availability, or privacy of synced data, call `get_health_sync_support` and treat its result as the source of truth.
 
 - Broad sync questions: Acara Plate supports automatic Apple Health syncing through the Acara Health Sync iOS companion app.
-- Setup: generate an 8-character token in Settings > Mobile Sync, install Acara Health Sync, scan the QR code or enter the Plate URL and token manually, choose Apple Health permissions, then sync.
+- Setup: install Acara Health Sync, sign in with the same Acara Plate account used on the web, choose Apple Health permissions, then sync.
 - Android: automatic Android sync is planned soon; today Android users can use the Plate PWA and manual logging.
 - Privacy: Acara Health Sync reads Apple Health only with permission, encrypts data on the device, and sends it directly to the user's own Plate instance.
 - Do not use `get_health_data` or `get_health_summary` for product setup or support unless the task is about the user's own records.

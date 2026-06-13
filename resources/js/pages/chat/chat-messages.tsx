@@ -27,7 +27,7 @@ import type {
 } from '@/types/chat';
 import { type UIMessage } from '@ai-sdk/react';
 import { code } from '@streamdown/code';
-import { AlertCircle, User } from 'lucide-react';
+import { AlertCircle, Sparkles, User } from 'lucide-react';
 import { memo } from 'react';
 import { Streamdown } from 'streamdown';
 
@@ -50,8 +50,8 @@ export function ChatErrorBanner({
     }
 
     return (
-        <div className="flex w-full items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-950/50">
-            <AlertCircle className="mt-0.5 size-5 shrink-0 text-red-600 dark:text-red-400" />
+        <div className="my-4 flex w-full items-start gap-3 rounded-xl border border-red-200/60 bg-red-50/80 p-4 backdrop-blur-sm dark:border-red-900/40 dark:bg-red-950/60">
+            <AlertCircle className="mt-0.5 size-5 shrink-0 text-red-500 dark:text-red-400" />
             <div className="flex-1 space-y-2">
                 <p className="text-sm font-medium text-red-800 dark:text-red-200">
                     Something went wrong
@@ -63,7 +63,7 @@ export function ChatErrorBanner({
                     <button
                         type="button"
                         onClick={onRetry}
-                        className="text-sm font-medium text-red-700 underline hover:text-red-900 dark:text-red-300 dark:hover:text-red-100"
+                        className="text-sm font-medium text-red-600 underline hover:text-red-800 dark:text-red-300 dark:hover:text-red-100"
                     >
                         Try again
                     </button>
@@ -76,17 +76,20 @@ export function ChatErrorBanner({
 function EmptyState() {
     return (
         <div className="flex flex-1 flex-col items-center justify-center text-center">
-            <div className="mb-4 overflow-hidden rounded-full ring-4 ring-emerald-100">
-                <img
-                    src="https://pub-plate-assets.acara.app/images/altani_with_hand_on_chin_considering_expression_thought-1024.webp"
-                    alt="Altani"
-                    className="size-20 object-cover"
-                />
+            <div className="group relative mb-6">
+                <div className="absolute -inset-4 rounded-full bg-linear-to-br from-emerald-100 to-teal-100 opacity-50 blur-xl dark:from-emerald-900/20 dark:to-teal-900/20" />
+                <div className="relative overflow-hidden rounded-full ring-4 ring-emerald-100/50 dark:ring-emerald-800/20">
+                    <img
+                        src="https://pub-plate-assets.acara.app/images/altani_with_hand_on_chin_considering_expression_thought-1024.webp"
+                        alt="Altani"
+                        className="size-20 object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                </div>
             </div>
-            <h2 className="mb-2 text-xl font-semibold text-foreground">
+            <h2 className="mb-2 text-2xl font-semibold tracking-tight text-foreground">
                 How are you feeling today?
             </h2>
-            <p className="max-w-md text-sm text-muted-foreground">
+            <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
                 Your personal AI health coach is here to help with nutrition,
                 meal planning, glucose predictions, or just to chat.
             </p>
@@ -103,8 +106,8 @@ function MessageAvatar({ role }: { role: string }) {
                 'flex shrink-0 items-center justify-center overflow-hidden rounded-full',
                 isUser ? 'size-8' : 'size-10',
                 isUser
-                    ? 'bg-primary text-primary-foreground'
-                    : 'ring-2 ring-emerald-100',
+                    ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
+                    : 'bg-linear-to-br from-emerald-400 to-teal-500 text-white shadow-lg shadow-emerald-500/20',
             )}
         >
             {isUser ? (
@@ -146,12 +149,15 @@ function MessagePart({
                     <img
                         src={part.url}
                         alt={part.filename ?? 'Uploaded image'}
-                        className="max-h-64 max-w-full rounded-lg object-contain"
+                        className="max-h-64 max-w-full rounded-xl object-contain shadow-sm"
                     />
                 );
             }
             return (
-                <div className="text-muted-foreground">📎 {part.filename}</div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="text-base">📎</span>
+                    <span className="text-sm">{part.filename}</span>
+                </div>
             );
         default:
             return null;
@@ -169,8 +175,8 @@ function UserBubble({ message }: { message: UIMessage }) {
     );
 
     return (
-        <div className="flex justify-end gap-3">
-            <div className="max-w-[80%] rounded-2xl rounded-br-md bg-primary px-4 py-3 text-primary-foreground shadow-sm">
+        <div className="flex justify-end gap-3 duration-300 animate-in fade-in slide-in-from-bottom-2">
+            <div className="max-w-[85%] rounded-3xl rounded-br-md bg-linear-to-br from-emerald-500 to-emerald-600 px-4 py-3 text-primary-foreground shadow-lg shadow-emerald-500/20">
                 {imageParts && imageParts.length > 0 && (
                     <div className="mb-2 flex flex-wrap gap-2">
                         {imageParts.map((part, index) => (
@@ -178,12 +184,14 @@ function UserBubble({ message }: { message: UIMessage }) {
                                 key={index}
                                 src={part.type === 'file' ? part.url : ''}
                                 alt="Uploaded image"
-                                className="max-h-48 max-w-full rounded-lg object-contain"
+                                className="max-h-48 max-w-full rounded-xl object-contain shadow-sm"
                             />
                         ))}
                     </div>
                 )}
-                {textContent && <p className="text-sm">{textContent}</p>}
+                {textContent && (
+                    <p className="text-[15px] leading-relaxed">{textContent}</p>
+                )}
             </div>
             <MessageAvatar role="user" />
         </div>
@@ -314,10 +322,10 @@ function AssistantBubble({
     }
 
     return (
-        <div className="flex gap-3">
+        <div className="flex gap-3 duration-300 animate-in fade-in slide-in-from-bottom-2">
             <MessageAvatar role="assistant" />
-            <div className="max-w-[80%] rounded-2xl rounded-bl-md bg-muted px-4 py-3 text-foreground shadow-sm">
-                <div className="space-y-2 text-sm">
+            <div className="max-w-[85%] rounded-3xl rounded-bl-md border border-border/60 bg-muted/80 px-4 py-3 text-foreground shadow-sm backdrop-blur-sm">
+                <div className="space-y-3 text-sm">
                     {reasoning.map((data) => (
                         <ReasoningBlock
                             key={data.reasoningId}
@@ -377,9 +385,11 @@ const MessageBubble = memo(function MessageBubble({
 function WorkingIndicator() {
     return (
         <div className="flex gap-3 duration-300 animate-in fade-in slide-in-from-bottom-2">
-            <MessageAvatar role="assistant" />
-            <div className="flex items-center gap-2 rounded-2xl rounded-bl-md bg-muted px-4 py-3">
-                <span className="text-sm text-muted-foreground">On it…</span>
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-emerald-400 to-teal-500 text-white shadow-lg shadow-emerald-500/20">
+                <Sparkles className="size-5" />
+            </div>
+            <div className="flex items-center gap-2.5 rounded-2xl rounded-bl-md border border-border/60 bg-muted/80 px-4 py-3 shadow-sm backdrop-blur-sm">
+                <span className="text-sm text-muted-foreground">Thinking</span>
                 <RunningDots />
             </div>
         </div>
@@ -404,7 +414,7 @@ export default function ChatMessages({
         !assistantIsRendering && (isSubmitting || status === 'streaming');
 
     return (
-        <div className="flex w-full flex-1 flex-col gap-4">
+        <div className="flex w-full flex-1 flex-col gap-5">
             {messages.map((message, index) => (
                 <ChatErrorBoundary key={message.id}>
                     <MessageBubble

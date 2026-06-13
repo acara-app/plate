@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 /**
  * @property int $id
@@ -106,6 +107,28 @@ final class HealthSyncSample extends Model
         ];
     }
 
+    public function medicationName(): ?string
+    {
+        $metadata = $this->metadata ?? [];
+        $name = $metadata['medication_name']
+            ?? $metadata['name']
+            ?? $metadata['display_text']
+            ?? null;
+
+        return is_string($name) ? $name : null;
+    }
+
+    public function medicationDosage(): ?string
+    {
+        $explicit = ($this->metadata ?? [])['medication_dosage'] ?? null;
+
+        if (is_string($explicit) && $explicit !== '') {
+            return $explicit;
+        }
+
+        return $this->composeMedicationDosage();
+    }
+
     /**
      * @return BelongsTo<User, $this>
      */
@@ -155,5 +178,25 @@ final class HealthSyncSample extends Model
         $query->where(
             fn (Builder $inner): Builder => $inner->where('group_id', '!=', $groupId)->orWhereNull('group_id'),
         );
+    }
+
+    private function composeMedicationDosage(): ?string
+    {
+        $rawForm = ($this->metadata ?? [])['form'] ?? null;
+        $form = is_string($rawForm) && $rawForm !== '' ? $rawForm : $this->unit;
+
+        if ($form === '') {
+            return null;
+        }
+
+        $quantity = mb_rtrim(mb_rtrim(number_format($this->value, 4, '.', ''), '0'), '.');
+
+        if ($form === HealthSyncType::Medication->unit()) {
+            return (float) $quantity > 1
+                ? $quantity.' '.Str::plural($form, (int) ceil((float) $quantity))
+                : null;
+        }
+
+        return $quantity.' '.$form;
     }
 }

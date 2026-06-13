@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Enums\HealthEntryType;
-use App\Services\AiTransparency;
 use App\Enums\AgentApprovalStatus;
+use App\Enums\HealthEntryType;
 use App\Models\AgentApproval;
 use App\Models\Conversation;
 use App\Models\User;
+use App\Services\AiTransparency;
 use Illuminate\Support\Facades\DB;
 
 covers(AgentApproval::class);

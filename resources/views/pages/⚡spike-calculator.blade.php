@@ -318,10 +318,10 @@ class extends Component
                             <article class="border border-[#D9CFBC] bg-[#EBE2D0] p-6 sm:p-8">
                                 <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Next move</p>
                                 <h3 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.02em] text-[#1A1814]">
-                                    Stop guessing. Start eating with confidence.
+                                    Turn this spike check into advice Acara remembers.
                                 </h3>
                                 <p class="mt-3 text-sm leading-relaxed text-[#3D3833]">
-                                    Get a personalized 7-day meal plan with low-spike alternatives to {{ $result['food'] }}.
+                                    Save your goals, food preferences, and low-spike swaps so future meal ideas build on what you have already checked.
                                 </p>
                                 <a
                                     href="{{ route('register') }}"
@@ -421,6 +421,7 @@ class extends Component
                         ['q' => 'What foods cause the highest blood sugar spikes?', 'a' => 'High-glycemic foods include white rice, white bread, pastries, sugar-sweetened beverages, candy, and fruit juices. These refined carbohydrates digest quickly, causing fast blood sugar elevation. Whole grains, legumes, non-starchy vegetables, and lean proteins generally have lower impact.'],
                         ['q' => 'How can I reduce meal glycemic impact naturally?', 'a' => 'Pair carbohydrates with protein, healthy fats, or fiber-rich vegetables to slow sugar absorption. Choose whole grains over refined options, eat smaller portions, and take a 10-15 minute walk after meals to improve insulin sensitivity. Our tool suggests specific swaps to maximize these benefits.'],
                         ['q' => 'Can I use this tool for pre-diabetes or Type 2 diabetes management?', 'a' => 'Yes! This tool is designed for pre-diabetes and Type 2 diabetes meal planning. However, it provides educational estimates only and is not a substitute for professional medical advice or glucose monitoring. Always consult your healthcare provider for personalized guidance.'],
+                        ['q' => 'Will Acara remember foods I check here?', 'a' => 'The free public checker gives an instant estimate without saving long-term context. With an Acara Cloud account, stable food preferences, goals, and low-spike swaps can be saved so future chats start with more useful context.'],
                     ];
                     @endphp
 
@@ -485,7 +486,7 @@ class extends Component
                         Spike checks are just the start.
                     </h3>
                     <p class="mt-3 max-w-xl text-sm leading-relaxed text-[#3D3833] sm:text-base">
-                        Altani is your AI health coach. She'll plan meals around your goals, predict glucose responses, and learn what works for your body—24/7.
+                        Acara can remember your low-spike swaps, food preferences, and goals so each check becomes part of your bigger nutrition plan.
                     </p>
                     <div class="mt-6">
                         <a

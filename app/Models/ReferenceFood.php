@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Table;
-use Carbon\CarbonInterface;
 use App\Data\NutrientValues;
+use Carbon\CarbonInterface;
 use Database\Factories\ReferenceFoodFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

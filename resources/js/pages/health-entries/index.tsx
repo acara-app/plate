@@ -1,4 +1,3 @@
-import DashboardHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/DashboardHealthEntryController';
 import DestroyHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/DestroyHealthEntryController';
 import ListHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/ListHealthEntryController';
 import AdminPageWrap from '@/components/sections/admin-page-wrap';
@@ -12,7 +11,6 @@ import {
 } from '@/components/ui/card';
 import useModalToggle, { useModalValueToggle } from '@/hooks/use-modal-toggle';
 import AppLayout from '@/layouts/app-layout';
-import { convertGlucoseValue } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
 import {
     HealthEntry,
@@ -20,11 +18,12 @@ import {
     RecentInsulin,
     RecentMedication,
     TodaysMeal,
-    type GlucoseUnitType,
 } from '@/types/diabetes';
-import { Head, InfiniteScroll, Link, router } from '@inertiajs/react';
-import { BarChart3, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Head, InfiniteScroll, router } from '@inertiajs/react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import EntryValueBadges from './components/entry-value-badges';
+import SourceBadge from './components/source-badge';
 import HealthEntriesDialog from './health-entries-dialog';
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
@@ -86,16 +85,6 @@ export default function HealthEntriesIndex({
                             </p>
                         </div>
                         <div className="flex gap-2">
-                            <Button variant="outline" asChild>
-                                <Link
-                                    href={DashboardHealthEntryController().url}
-                                >
-                                    <BarChart3 className="mr-2 size-4" />
-                                    {t(
-                                        'health_entries.index_page.view_dashboard',
-                                    )}
-                                </Link>
-                            </Button>
                             <Button onClick={() => createModal.open()}>
                                 <Plus className="mr-2 size-4" />
                                 {t('health_entries.index_page.add_entry')}
@@ -162,77 +151,28 @@ export default function HealthEntriesIndex({
                                                 key={log.id}
                                                 className="flex items-start justify-between rounded-lg border p-4"
                                             >
-                                                <div className="space-y-1">
-                                                    <div className="flex flex-wrap items-center gap-2">
-                                                        {log.glucose_value && (
-                                                            <>
-                                                                <span className="text-2xl font-bold">
-                                                                    {convertGlucoseValue(
-                                                                        log.glucose_value,
-                                                                        glucoseUnit as GlucoseUnitType,
-                                                                    )}
-                                                                </span>
-                                                                <span className="text-sm text-muted-foreground">
-                                                                    {
-                                                                        glucoseUnit
-                                                                    }
-                                                                </span>
-                                                                {log.glucose_reading_type && (
-                                                                    <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-                                                                        {
-                                                                            log.glucose_reading_type
-                                                                        }
-                                                                    </span>
-                                                                )}
-                                                            </>
-                                                        )}
-                                                        {log.insulin_units && (
-                                                            <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
-                                                                {
-                                                                    log.insulin_units
-                                                                }
-                                                                {t(
-                                                                    'health_entries.index_page.units_label',
-                                                                )}{' '}
-                                                                {
-                                                                    log.insulin_type
-                                                                }
-                                                            </span>
-                                                        )}
-                                                        {log.weight && (
-                                                            <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">
-                                                                {log.weight}{' '}
-                                                                {t(
-                                                                    'health_entries.index_page.lbs_label',
-                                                                )}
-                                                            </span>
-                                                        )}
-                                                        {log.blood_pressure_systolic &&
-                                                            log.blood_pressure_diastolic && (
-                                                                <span className="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-700">
-                                                                    {
-                                                                        log.blood_pressure_systolic
-                                                                    }
-                                                                    /
-                                                                    {
-                                                                        log.blood_pressure_diastolic
-                                                                    }{' '}
-                                                                    {t(
-                                                                        'health_entries.index_page.bp_label',
-                                                                    )}
-                                                                </span>
-                                                            )}
-                                                    </div>
-                                                    <time
-                                                        className="block text-sm text-muted-foreground"
-                                                        dateTime={
-                                                            log.measured_at
+                                                <div className="space-y-1.5">
+                                                    <EntryValueBadges
+                                                        entry={log}
+                                                        glucoseUnit={
+                                                            glucoseUnit
                                                         }
-                                                    >
-                                                        {new Date(
-                                                            log.measured_at,
-                                                        ).toLocaleString()}
-                                                    </time>
+                                                    />
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <time
+                                                            className="text-sm text-muted-foreground"
+                                                            dateTime={
+                                                                log.measured_at
+                                                            }
+                                                        >
+                                                            {new Date(
+                                                                log.measured_at,
+                                                            ).toLocaleString()}
+                                                        </time>
+                                                        <SourceBadge
+                                                            source={log.source}
+                                                        />
+                                                    </div>
                                                     {log.notes && (
                                                         <p className="text-sm">
                                                             {log.notes}

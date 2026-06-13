@@ -50,6 +50,14 @@
         },
         {
             "@@type": "Question",
+            "name": "Can Acara remember my equipment, limitations, and progress?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "On Acara Cloud, stable training context like available equipment, fitness level, workout feedback, recovery patterns, and limitations you share can be saved for future chats. Injury and health details should still be treated as profile or clinician-guided context, not a diagnosis."
+            }
+        },
+        {
+            "@@type": "Question",
             "name": "Do I need gym equipment?",
             "acceptedAnswer": {
                 "@@type": "Answer",
@@ -276,6 +284,41 @@
             </div>
         </section>
 
+        <section class="bg-white py-16 sm:py-24">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="grid gap-10 rounded-3xl border border-emerald-100 bg-emerald-50 p-8 sm:p-12 lg:grid-cols-[1fr_1.2fr] lg:items-center">
+                    <div>
+                        <p class="text-sm font-bold uppercase tracking-[0.18em] text-emerald-700">Acara Cloud Memory</p>
+                        <h2 class="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                            A trainer that remembers your last workout.
+                        </h2>
+                        <p class="mt-4 text-lg leading-relaxed text-slate-600">
+                            Acara can keep stable training context across future chats: the equipment you have, your current level, feedback from recent workouts, recovery patterns, and limitations you choose to share.
+                        </p>
+                    </div>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="rounded-2xl bg-white p-5 shadow-sm">
+                            <h3 class="font-semibold text-slate-900">Equipment access</h3>
+                            <p class="mt-2 text-sm leading-relaxed text-slate-600">Bodyweight only, dumbbells, bands, home gym, or full gym can stay in context.</p>
+                        </div>
+                        <div class="rounded-2xl bg-white p-5 shadow-sm">
+                            <h3 class="font-semibold text-slate-900">Workout feedback</h3>
+                            <p class="mt-2 text-sm leading-relaxed text-slate-600">Too easy, too hard, sore, rushed, or skipped can guide the next recommendation.</p>
+                        </div>
+                        <div class="rounded-2xl bg-white p-5 shadow-sm">
+                            <h3 class="font-semibold text-slate-900">Limitations</h3>
+                            <p class="mt-2 text-sm leading-relaxed text-slate-600">Recurring constraints can be remembered without pretending to diagnose injuries.</p>
+                        </div>
+                        <div class="rounded-2xl bg-white p-5 shadow-sm">
+                            <h3 class="font-semibold text-slate-900">Progression</h3>
+                            <p class="mt-2 text-sm leading-relaxed text-slate-600">Future chats can build from your training level instead of restarting at day one.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
@@ -316,6 +359,18 @@
                         </summary>
                         <p class="mt-4 text-slate-600">
                             Yes. The whole thing's on GitHub. You can see exactly how workouts are generated, verify the privacy controls, and even contribute if you're a developer. We welcome audits and contributions from the community.
+                        </p>
+                    </details>
+
+                    <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+                        <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
+                            Can Acara remember my equipment, limitations, and progress?
+                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="mt-4 text-slate-600">
+                            On Acara Cloud, stable training context like available equipment, fitness level, workout feedback, recovery patterns, and limitations you share can be saved for future chats. Injury and health details should still be treated as profile or clinician-guided context, not a diagnosis.
                         </p>
                     </details>
 

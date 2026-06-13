@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Models\ReferenceFood;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Models\ReferenceFood;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use RyanChandler\LaravelCloudflareTurnstile\Contracts\ClientInterface;
 use RyanChandler\LaravelCloudflareTurnstile\Facades\Turnstile;
@@ -28,6 +29,18 @@ function verifiedTurnstileTokenForSnapToTrack(): string
     Cache::put('snap-to-track-turnstile:'.sha1($token).':127.0.0.1', true, now()->addMinutes(10));
 
     return $token;
+}
+
+function analyzePhotoForSnapToTrack(array $analysis, string $fileName = 'food.jpg'): Testable
+{
+    fakeTurnstileForSnapToTrack();
+
+    FoodPhotoAnalyzerAgent::fake([$analysis]);
+
+    return Livewire::test('pages::snap-to-track')
+        ->set('photo', UploadedFile::fake()->image($fileName))
+        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
+        ->call('analyze');
 }
 
 beforeEach(function (): void {
@@ -101,27 +114,16 @@ it('can clear photo and reset state', function (): void {
 });
 
 it('displays result after successful analysis', function (): void {
-    fakeTurnstileForSnapToTrack();
-
-    FoodPhotoAnalyzerAgent::fake([
-        [
-            'items' => [
-                ['name' => 'Grilled Chicken', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'portion' => '100g'],
-            ],
-            'total_calories' => 165,
-            'total_protein' => 31,
-            'total_carbs' => 0,
-            'total_fat' => 3.6,
-            'confidence' => 85,
+    analyzePhotoForSnapToTrack([
+        'items' => [
+            ['name' => 'Grilled Chicken', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'portion' => '100g'],
         ],
-    ]);
-
-    $file = UploadedFile::fake()->image('food.jpg');
-
-    Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
-        ->call('analyze')
+        'total_calories' => 165,
+        'total_protein' => 31,
+        'total_carbs' => 0,
+        'total_fat' => 3.6,
+        'confidence' => 85,
+    ])
         ->assertSet('result.totalCalories', 165.0)
         ->assertSet('result.totalProtein', 31.0)
         ->assertSet('result.totalCarbs', 0.0)
@@ -134,28 +136,17 @@ it('displays result after successful analysis', function (): void {
 });
 
 it('displays multiple food items in result', function (): void {
-    fakeTurnstileForSnapToTrack();
-
-    FoodPhotoAnalyzerAgent::fake([
-        [
-            'items' => [
-                ['name' => 'Rice', 'calories' => 130, 'protein' => 2.7, 'carbs' => 28, 'fat' => 0.3, 'portion' => '100g'],
-                ['name' => 'Chicken', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'portion' => '100g'],
-            ],
-            'total_calories' => 295,
-            'total_protein' => 33.7,
-            'total_carbs' => 28,
-            'total_fat' => 3.9,
-            'confidence' => 90,
+    analyzePhotoForSnapToTrack([
+        'items' => [
+            ['name' => 'Rice', 'calories' => 130, 'protein' => 2.7, 'carbs' => 28, 'fat' => 0.3, 'portion' => '100g'],
+            ['name' => 'Chicken', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'portion' => '100g'],
         ],
-    ]);
-
-    $file = UploadedFile::fake()->image('food.jpg');
-
-    Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
-        ->call('analyze')
+        'total_calories' => 295,
+        'total_protein' => 33.7,
+        'total_carbs' => 28,
+        'total_fat' => 3.9,
+        'confidence' => 90,
+    ])
         ->assertSee('Rice')
         ->assertSee('Chicken')
         ->assertSee('295')
@@ -225,55 +216,33 @@ it('renders authority and freshness signals', function (): void {
 });
 
 it('shows sharper-analysis upsell after result', function (): void {
-    fakeTurnstileForSnapToTrack();
-
-    FoodPhotoAnalyzerAgent::fake([
-        [
-            'items' => [
-                ['name' => 'Apple', 'calories' => 52, 'protein' => 0.3, 'carbs' => 14, 'fat' => 0.2, 'portion' => '1 medium'],
-            ],
-            'total_calories' => 52,
-            'total_protein' => 0.3,
-            'total_carbs' => 14,
-            'total_fat' => 0.2,
-            'confidence' => 95,
+    analyzePhotoForSnapToTrack([
+        'items' => [
+            ['name' => 'Apple', 'calories' => 52, 'protein' => 0.3, 'carbs' => 14, 'fat' => 0.2, 'portion' => '1 medium'],
         ],
-    ]);
-
-    $file = UploadedFile::fake()->image('food.jpg');
-
-    Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
-        ->call('analyze')
+        'total_calories' => 52,
+        'total_protein' => 0.3,
+        'total_carbs' => 14,
+        'total_fat' => 0.2,
+        'confidence' => 95,
+    ])
         ->assertSee('Did the AI guess on a few items?')
         ->assertSee('Mixed dishes, sauces, and oils are tough for a quick scan')
         ->assertSee('Sign up for sharper analysis')
-        ->assertSee('save every meal to your history')
+        ->assertSee('save meals, build meal history')
         ->assertSee('Analyze another photo')
         ->assertDontSee('Altani');
 });
 
 it('handles empty food detection gracefully', function (): void {
-    fakeTurnstileForSnapToTrack();
-
-    FoodPhotoAnalyzerAgent::fake([
-        [
-            'items' => [],
-            'total_calories' => 0,
-            'total_protein' => 0,
-            'total_carbs' => 0,
-            'total_fat' => 0,
-            'confidence' => 0,
-        ],
-    ]);
-
-    $file = UploadedFile::fake()->image('empty.jpg');
-
-    Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
-        ->call('analyze')
+    analyzePhotoForSnapToTrack([
+        'items' => [],
+        'total_calories' => 0,
+        'total_protein' => 0,
+        'total_carbs' => 0,
+        'total_fat' => 0,
+        'confidence' => 0,
+    ], 'empty.jpg')
         ->assertSet('result.totalCalories', 0.0)
         ->assertSet('result.confidence', 0)
         ->assertSee('No food items were detected');
@@ -345,33 +314,21 @@ it('blocks the analyze call once the per-IP rate limit is exhausted', function (
 });
 
 it('shows the carb boundary notice with analysis results', function (): void {
-    fakeTurnstileForSnapToTrack();
-
-    FoodPhotoAnalyzerAgent::fake([
-        [
-            'items' => [
-                ['name' => 'Rice', 'calories' => 130, 'protein' => 2.7, 'carbs' => 28, 'fat' => 0.3, 'portion' => '100g'],
-            ],
-            'total_calories' => 130,
-            'total_protein' => 2.7,
-            'total_carbs' => 28,
-            'total_fat' => 0.3,
-            'confidence' => 90,
+    analyzePhotoForSnapToTrack([
+        'items' => [
+            ['name' => 'Rice', 'calories' => 130, 'protein' => 2.7, 'carbs' => 28, 'fat' => 0.3, 'portion' => '100g'],
         ],
-    ]);
-
-    $file = UploadedFile::fake()->image('food.jpg');
-
-    Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
-        ->call('analyze')
+        'total_calories' => 130,
+        'total_protein' => 2.7,
+        'total_carbs' => 28,
+        'total_fat' => 0.3,
+        'confidence' => 90,
+    ])
         ->assertSee('never dose insulin');
 });
 
 it('flags reference-derived items in the result when the lookup is enabled', function (): void {
     config()->set('plate.food_photo_analyzer.reference_lookup.enabled', true);
-    fakeTurnstileForSnapToTrack();
 
     ReferenceFood::factory()->create([
         'description' => 'Hummus, commercial',
@@ -382,7 +339,7 @@ it('flags reference-derived items in the result when the lookup is enabled', fun
         'fat_per_100g' => 9.6,
     ]);
 
-    FoodPhotoAnalyzerAgent::fake([[
+    analyzePhotoForSnapToTrack([
         'items' => [
             ['name' => 'Hummus', 'calories' => 200, 'protein' => 5, 'carbs' => 10, 'fat' => 15, 'portion' => '100g', 'grams' => 100, 'match_name' => 'hummus commercial'],
         ],
@@ -391,14 +348,7 @@ it('flags reference-derived items in the result when the lookup is enabled', fun
         'total_carbs' => 10,
         'total_fat' => 15,
         'confidence' => 80,
-    ]]);
-
-    $file = UploadedFile::fake()->image('food.jpg');
-
-    Livewire::test('pages::snap-to-track')
-        ->set('photo', $file)
-        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
-        ->call('analyze')
+    ])
         ->assertSee('USDA reference');
 });
 

@@ -56,19 +56,19 @@ function FilePreview({
     onRemove: () => void;
 }) {
     return (
-        <div className="relative duration-200 animate-in fade-in-0 zoom-in-95">
+        <div className="group relative duration-200 animate-in fade-in-0 zoom-in-95">
             <img
                 src={file.url}
                 alt={file.filename ?? 'Attached image'}
-                className="size-16 rounded-lg border border-border object-cover shadow-sm sm:size-20"
+                className="size-16 rounded-xl border border-border/60 object-cover shadow-sm transition-shadow group-hover:shadow-md sm:size-20"
             />
             <button
                 type="button"
                 onClick={onRemove}
                 aria-label={`Remove ${file.filename ?? 'attached image'}`}
-                className="absolute -top-2 -right-2 flex size-7 items-center justify-center rounded-full border-2 border-card bg-destructive text-white shadow-md transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 sm:size-6"
+                className="absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full border-2 border-background bg-destructive text-white shadow-md transition-all duration-200 hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95"
             >
-                <X className="size-4 sm:size-3.5" strokeWidth={2.5} />
+                <X className="size-3.5" strokeWidth={2.5} />
             </button>
         </div>
     );
@@ -168,22 +168,14 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
             role="group"
             aria-label="Message composer"
             className={cn(
-                'mx-auto flex w-full max-w-3xl items-end px-2 py-2 sm:px-4 sm:py-3',
+                'mx-auto flex w-full items-end px-2 py-2 sm:px-4 sm:py-3',
                 className,
             )}
         >
-            <div
-                className={cn(
-                    'w-full rounded-2xl border bg-card shadow-sm transition-all duration-200',
-                    isFocused && !disabled
-                        ? 'border-emerald-500/50 shadow-[0_0_0_3px_rgba(16,185,129,0.1)] dark:border-emerald-400/40 dark:shadow-[0_0_0_3px_rgba(52,211,153,0.08)]'
-                        : 'border-border',
-                    disabled && 'opacity-60',
-                )}
-            >
+            <div className="flex w-full flex-col gap-2">
                 {selectedFiles.length > 0 && (
                     <div
-                        className="flex flex-wrap gap-2 px-3 pt-3 sm:px-4 sm:pt-4"
+                        className="flex flex-wrap gap-2 px-2"
                         aria-label={`${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''} attached`}
                     >
                         {selectedFiles.map((file) => (
@@ -196,7 +188,40 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                     </div>
                 )}
 
-                <div className="px-3 pt-3 pb-1 sm:px-4 sm:pt-4 sm:pb-2">
+                <div
+                    className={cn(
+                        'flex w-full items-end rounded-2xl border bg-card shadow-sm transition-all duration-200',
+                        isFocused && !disabled
+                            ? 'border-emerald-500/50 shadow-[0_0_0_3px_rgba(16,185,129,0.12),0_4px_20px_rgba(0,0,0,0.08)] dark:border-emerald-400/40 dark:shadow-[0_0_0_3px_rgba(52,211,153,0.08)]'
+                            : 'border-border/60 shadow-sm',
+                        disabled && 'opacity-60',
+                    )}
+                >
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        aria-hidden="true"
+                    />
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="m-1 size-9 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:scale-95 sm:size-8"
+                                disabled={disabled}
+                                onClick={() => fileInputRef.current?.click()}
+                                aria-label="Attach image"
+                            >
+                                <Paperclip className="size-[18px]" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">Attach image</TooltipContent>
+                    </Tooltip>
+
                     <textarea
                         ref={textareaRef}
                         value={message}
@@ -211,95 +236,61 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                         disabled={disabled}
                         aria-label="Message input"
                         aria-describedby="chat-input-hint"
-                        className="max-h-[200px] w-full resize-none bg-transparent text-base leading-relaxed text-foreground placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed"
+                        className="max-h-[200px] min-h-6 w-full flex-1 resize-none bg-transparent py-2 text-base leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:outline-none disabled:cursor-not-allowed"
                         rows={1}
                     />
-                    <span id="chat-input-hint" className="sr-only">
-                        Press Enter to send, Shift+Enter for a new line
-                    </span>
-                </div>
 
-                <div className="flex items-center justify-between px-2 pb-2 sm:px-3 sm:pb-3">
-                    <div className="flex items-center gap-1">
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={handleFileSelect}
-                            className="hidden"
-                            aria-hidden="true"
-                        />
+                    {isLoading && onStop ? (
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
-                                    variant="ghost"
+                                    type="button"
+                                    variant="default"
                                     size="icon"
-                                    className="size-10 rounded-xl text-muted-foreground hover:text-foreground active:scale-95 sm:size-9"
-                                    disabled={disabled}
-                                    onClick={() =>
-                                        fileInputRef.current?.click()
-                                    }
-                                    aria-label="Attach image"
+                                    className="m-1 size-9 shrink-0 rounded-xl bg-linear-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25 transition-all duration-200 hover:from-red-600 hover:to-red-700 hover:shadow-red-500/30 active:scale-95 sm:size-8"
+                                    onClick={onStop}
+                                    aria-label="Stop generating"
                                 >
-                                    <Paperclip className="size-[18px]" />
+                                    <Square className="size-4 fill-current" />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent side="top">
-                                Attach image
+                                Stop generating
                             </TooltipContent>
                         </Tooltip>
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                        {isLoading && onStop ? (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        type="button"
-                                        variant="default"
-                                        size="icon"
-                                        className="size-10 rounded-xl bg-emerald-600 text-white shadow-md shadow-emerald-600/20 transition-all duration-200 hover:bg-emerald-700 active:scale-95 sm:size-9"
-                                        onClick={onStop}
-                                        aria-label="Stop generating"
-                                    >
-                                        <Square className="size-4 fill-current" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top">
-                                    Stop generating
-                                </TooltipContent>
-                            </Tooltip>
-                        ) : (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        variant={
-                                            hasContent && !disabled
-                                                ? 'default'
-                                                : 'ghost'
-                                        }
-                                        size="icon"
-                                        className={cn(
-                                            'size-10 rounded-xl transition-all duration-200 active:scale-95 sm:size-9',
-                                            hasContent && !disabled
-                                                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 hover:bg-emerald-700'
-                                                : 'text-muted-foreground',
-                                        )}
-                                        onClick={handleSubmit}
-                                        disabled={!hasContent || disabled}
-                                        aria-label="Send message"
-                                    >
-                                        <Send className="size-4" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top">
-                                    Send message
-                                </TooltipContent>
-                            </Tooltip>
-                        )}
-                    </div>
+                    ) : (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant={
+                                        hasContent && !disabled
+                                            ? 'default'
+                                            : 'ghost'
+                                    }
+                                    size="icon"
+                                    className={cn(
+                                        'm-1 size-9 shrink-0 rounded-xl transition-all duration-200 active:scale-95 sm:size-8',
+                                        hasContent && !disabled
+                                            ? 'bg-linear-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-emerald-500/30'
+                                            : 'text-muted-foreground',
+                                    )}
+                                    onClick={handleSubmit}
+                                    disabled={!hasContent || disabled}
+                                    aria-label="Send message"
+                                >
+                                    <Send className="size-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                                Send message
+                            </TooltipContent>
+                        </Tooltip>
+                    )}
                 </div>
+
+                <span id="chat-input-hint" className="sr-only">
+                    Press Enter to send, Shift+Enter for a new line
+                </span>
             </div>
         </div>
     );

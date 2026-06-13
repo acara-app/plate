@@ -147,14 +147,13 @@ If you are working on the public app, install from `main` and treat premium beha
 
 Acara Health Sync connects iPhone health data to Plate because web apps cannot read HealthKit directly.
 
-The pairing flow is:
+The sync flow is:
 
-1. A user opens Plate and generates a Mobile Sync pairing token.
-2. The user installs Acara Health Sync from the App Store.
-3. The iOS app pairs with the user's Plate instance using the token.
-4. The app stores credentials in the iOS Keychain.
-5. Health data is encrypted on device and sent to Plate through the sync API.
-6. Plate stores the readings and makes them available to dashboards and AI agent context.
+1. The user installs Acara Health Sync from the App Store.
+2. The iOS app authenticates with the user's Plate account.
+3. The app provisions secure sync credentials and stores them in the iOS Keychain.
+4. Health data is encrypted on device and sent to Plate through the sync API.
+5. Plate stores the readings and makes them available to dashboards and AI agent context.
 
 The public Plate app owns the API and storage side of this flow. The iOS source repository is not public yet.
 

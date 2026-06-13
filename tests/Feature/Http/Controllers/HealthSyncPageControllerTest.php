@@ -27,7 +27,7 @@ it('landing page contains expected SEO content', function (): void {
 it('setup page contains expected SEO content', function (): void {
     $this->get(route('health-sync.setup'))
         ->assertSee('Set Up Health Sync')
-        ->assertSee('Generate a Pairing Token');
+        ->assertSee('Sign In');
 });
 
 it('landing page links to setup guide', function (): void {

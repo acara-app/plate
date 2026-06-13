@@ -34,6 +34,14 @@
         },
         {
             "@@type": "Question",
+            "name": "Does Acara remember what I tell it?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "On Acara Cloud, stable preferences, goals, routines, and recurring food patterns can be saved so future chats start with useful context. Safety-critical details like allergies, medications, health conditions, biometrics, and household context are kept in structured profile data."
+            }
+        },
+        {
+            "@@type": "Question",
             "name": "Do I need a CGM device?",
             "acceptedAnswer": {
                 "@@type": "Answer",
@@ -213,7 +221,7 @@
                             Your Health<br>Responsibility
                         </h2>
                         <p class="text-lg leading-relaxed text-emerald-100/90 mb-8">
-                            Altani uses medical knowledge and AI to give you helpful guidance. She learns from your data to predict blood sugar trends and suggest meals that work for your body.
+                            Acara combines medical knowledge, AI, structured profile data, and Cloud memory to give you helpful guidance. It can use stable context from past chats to suggest meals and routines that fit your life.
                         </p>
                         <div class="inline-flex items-center gap-2 text-white font-medium border-b border-[#FF6B4A] pb-1">
                             <span>Explore features</span>
@@ -257,6 +265,15 @@
                             <h3 class="font-bold text-slate-900 text-lg mb-3">Privacy First</h3>
                             <p class="text-slate-600 text-sm leading-relaxed">
                                 We are open source and privacy-focused. Your health data belongs to you. It is not sold to advertisers or other companies.
+                            </p>
+                        </div>
+
+                        <!-- Card 5 -->
+                        <div class="bg-white rounded-2xl p-6 shadow-lg md:col-span-2 md:mt-8">
+                            <span class="text-[#FF6B4A] text-xl font-bold block mb-2">05</span>
+                            <h3 class="font-bold text-slate-900 text-lg mb-3">Long-Term Memory</h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">
+                                Acara Cloud can remember stable preferences, goals, routines, and food patterns so future chats start with context instead of starting over.
                             </p>
                         </div>
                     </div>
@@ -474,6 +491,18 @@
                         </summary>
                         <p class="mt-4 text-slate-600">
                             Altani is your AI health coach. Just chat with her naturally — tell her what you ate, your glucose readings, or ask questions about nutrition. She analyzes your data and provides personalized guidance based on your unique biometrics and goals.
+                        </p>
+                    </details>
+
+                    <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+                        <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
+                            Does Acara remember what I tell it?
+                            <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="mt-4 text-slate-600">
+                            On Acara Cloud, stable preferences, goals, routines, and recurring food patterns can be saved so future chats start with useful context. Safety-critical details like allergies, medications, health conditions, biometrics, and household context are kept in structured profile data.
                         </p>
                     </details>
 

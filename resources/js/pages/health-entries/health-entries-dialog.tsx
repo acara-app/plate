@@ -13,8 +13,7 @@ import {
     TodaysMeal,
 } from '@/types/diabetes';
 import { useTranslation } from 'react-i18next';
-import CreateHealthEntryForm from './add-form';
-import EditHealthEntryForm from './edit-form';
+import HealthEntryForm from './health-entry-form';
 
 interface DialogProps {
     mode: 'create' | 'edit';
@@ -42,6 +41,11 @@ export default function HealthEntriesDialog({
     logEntry,
 }: DialogProps) {
     const { t } = useTranslation('common');
+
+    if (mode === 'edit' && !logEntry) {
+        return null;
+    }
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
@@ -57,30 +61,17 @@ export default function HealthEntriesDialog({
                             : t('health_entries.dialog.edit_description')}
                     </DialogDescription>
                 </DialogHeader>
-                {mode === 'create' ? (
-                    <CreateHealthEntryForm
-                        glucoseReadingTypes={glucoseReadingTypes}
-                        insulinTypes={insulinTypes}
-                        glucoseUnit={glucoseUnit}
-                        recentMedications={recentMedications}
-                        recentInsulins={recentInsulins}
-                        todaysMeals={todaysMeals}
-                        onCancel={() => onOpenChange(false)}
-                    />
-                ) : (
-                    logEntry && (
-                        <EditHealthEntryForm
-                            glucoseReadingTypes={glucoseReadingTypes}
-                            insulinTypes={insulinTypes}
-                            glucoseUnit={glucoseUnit}
-                            logEntry={logEntry}
-                            recentMedications={recentMedications}
-                            recentInsulins={recentInsulins}
-                            todaysMeals={todaysMeals}
-                            onCancel={() => onOpenChange(false)}
-                        />
-                    )
-                )}
+                <HealthEntryForm
+                    mode={mode}
+                    glucoseReadingTypes={glucoseReadingTypes}
+                    insulinTypes={insulinTypes}
+                    glucoseUnit={glucoseUnit}
+                    recentMedications={recentMedications}
+                    recentInsulins={recentInsulins}
+                    todaysMeals={todaysMeals}
+                    entry={logEntry}
+                    onCancel={() => onOpenChange(false)}
+                />
             </DialogContent>
         </Dialog>
     );
