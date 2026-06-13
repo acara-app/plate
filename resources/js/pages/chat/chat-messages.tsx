@@ -175,7 +175,7 @@ function UserBubble({ message }: { message: UIMessage }) {
     );
 
     return (
-        <div className="flex justify-end gap-3 animate-in slide-in-from-bottom-2 fade-in duration-300">
+        <div className="flex justify-end gap-3 duration-300 animate-in fade-in slide-in-from-bottom-2">
             <div className="max-w-[85%] rounded-3xl rounded-br-md bg-linear-to-br from-emerald-500 to-emerald-600 px-4 py-3 text-primary-foreground shadow-lg shadow-emerald-500/20">
                 {imageParts && imageParts.length > 0 && (
                     <div className="mb-2 flex flex-wrap gap-2">
@@ -322,7 +322,7 @@ function AssistantBubble({
     }
 
     return (
-        <div className="flex gap-3 animate-in slide-in-from-bottom-2 fade-in duration-300">
+        <div className="flex gap-3 duration-300 animate-in fade-in slide-in-from-bottom-2">
             <MessageAvatar role="assistant" />
             <div className="max-w-[85%] rounded-3xl rounded-bl-md border border-border/60 bg-muted/80 px-4 py-3 text-foreground shadow-sm backdrop-blur-sm">
                 <div className="space-y-3 text-sm">
@@ -384,7 +384,7 @@ const MessageBubble = memo(function MessageBubble({
 
 function WorkingIndicator() {
     return (
-        <div className="flex gap-3 animate-in slide-in-from-bottom-2 fade-in duration-300">
+        <div className="flex gap-3 duration-300 animate-in fade-in slide-in-from-bottom-2">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-emerald-400 to-teal-500 text-white shadow-lg shadow-emerald-500/20">
                 <Sparkles className="size-5" />
             </div>

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\CarbonInterface;
 use App\Data\NutrientValues;
 use App\Enums\Benchmark\CameraAngle;
 use App\Enums\Benchmark\DishType;
@@ -12,6 +11,7 @@ use App\Enums\Benchmark\Lighting;
 use App\Enums\Benchmark\Tranche;
 use App\Enums\Benchmark\TruthScope;
 use App\Enums\Benchmark\TruthSource;
+use Carbon\CarbonInterface;
 use Database\Factories\BenchmarkMealFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

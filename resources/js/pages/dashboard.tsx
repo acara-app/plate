@@ -123,7 +123,7 @@ export default function Dashboard() {
                                             onClick={() =>
                                                 selectPrompt(promptText)
                                             }
-                                            className="group relative flex min-h-[88px] items-start gap-3 rounded-xl border border-border/60 bg-card p-4 text-left text-sm leading-6 shadow-sm transition-all duration-200 hover:border-primary/30 hover:bg-primary/5 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm"
+                                            className="group relative flex min-h-[88px] items-start gap-3 rounded-xl border border-border/60 bg-card p-4 text-left text-sm leading-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:bg-primary/5 hover:shadow-md active:translate-y-0 active:shadow-sm"
                                         >
                                             <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-emerald-400 to-teal-500 text-white shadow-sm transition-transform duration-200 group-hover:scale-110">
                                                 <PromptIcon className="size-4" />

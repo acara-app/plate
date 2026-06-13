@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Layouts;
 
-use Inertia\DeferProp;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthSyncType;
@@ -13,6 +12,7 @@ use App\Models\HealthSyncSample;
 use App\Models\Meal;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Inertia\DeferProp;
 use Inertia\Inertia;
 
 /** @codeCoverageIgnore */
