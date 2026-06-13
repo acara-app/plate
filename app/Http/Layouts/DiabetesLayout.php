@@ -12,6 +12,7 @@ use App\Models\HealthSyncSample;
 use App\Models\Meal;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Inertia\Inertia;
 
 /** @codeCoverageIgnore */
 final readonly class DiabetesLayout
@@ -21,9 +22,9 @@ final readonly class DiabetesLayout
      *     glucoseReadingTypes: Collection<int, array{value: string, label: string}>,
      *     insulinTypes: Collection<int, array{value: string, label: string}>,
      *     glucoseUnit: string,
-     *     recentMedications: array<int, array{name: string, dosage: string, label: string}>,
-     *     recentInsulins: array<int, array{units: float, type: string, label: string}>,
-     *     todaysMeals: array<int, array{id: int, name: string, type: string, carbs: float, label: string}>
+     *     recentMedications: \Inertia\DeferProp,
+     *     recentInsulins: \Inertia\DeferProp,
+     *     todaysMeals: \Inertia\DeferProp
      * }
      */
     public static function props(User $user): array
@@ -38,9 +39,9 @@ final readonly class DiabetesLayout
                 'label' => ucfirst($type->value),
             ]),
             'glucoseUnit' => $user->profile?->units_preference->value ?? GlucoseUnit::MmolL->value,
-            'recentMedications' => self::getRecentMedications($user),
-            'recentInsulins' => self::getRecentInsulins($user),
-            'todaysMeals' => self::getTodaysMeals($user),
+            'recentMedications' => Inertia::defer(fn (): array => self::getRecentMedications($user)),
+            'recentInsulins' => Inertia::defer(fn (): array => self::getRecentInsulins($user)),
+            'todaysMeals' => Inertia::defer(fn (): array => self::getTodaysMeals($user)),
         ];
     }
 
@@ -55,28 +56,17 @@ final readonly class DiabetesLayout
             ->latest()
             ->take(20)
             ->get()
-            ->filter(function (HealthSyncSample $s): bool {
-                $meta = $s->metadata ?? [];
-
-                return isset($meta['medication_name'], $meta['medication_dosage']);
-            })
-            ->unique(function (HealthSyncSample $s): string {
-                $meta = $s->metadata ?? [];
-                $name = is_string($meta['medication_name'] ?? null) ? $meta['medication_name'] : '';
-                $dosage = is_string($meta['medication_dosage'] ?? null) ? $meta['medication_dosage'] : '';
-
-                return sprintf('%s|%s', $name, $dosage);
-            })
+            ->filter(fn (HealthSyncSample $s): bool => $s->medicationName() !== null)
+            ->unique(fn (HealthSyncSample $s): string => sprintf('%s|%s', $s->medicationName() ?? '', $s->medicationDosage() ?? ''))
             ->take(5)
             ->map(function (HealthSyncSample $s): array {
-                $meta = $s->metadata ?? [];
-                $name = is_string($meta['medication_name'] ?? null) ? $meta['medication_name'] : '';
-                $dosage = is_string($meta['medication_dosage'] ?? null) ? $meta['medication_dosage'] : '';
+                $name = $s->medicationName() ?? '';
+                $dosage = $s->medicationDosage() ?? '';
 
                 return [
                     'name' => $name,
                     'dosage' => $dosage,
-                    'label' => sprintf('%s %s', $name, $dosage),
+                    'label' => mb_trim(sprintf('%s %s', $name, $dosage)),
                 ];
             })
             ->values()

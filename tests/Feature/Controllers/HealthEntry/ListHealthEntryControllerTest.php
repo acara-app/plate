@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Http\Controllers\HealthEntry\ListHealthEntryController;
 use App\Models\HealthSyncSample;
-use App\Models\Meal;
-use App\Models\MealPlan;
 use App\Models\User;
 
 covers(ListHealthEntryController::class);
@@ -54,15 +52,15 @@ it('displays user diabetes logs', function (): void {
             ->has('logs.data', 3));
 });
 
-it('includes todays meals on index page', function (): void {
+it('defers dialog helper props so they are skipped on partial reloads', function (): void {
     $user = User::factory()->create();
-    $mealPlan = MealPlan::factory()->create(['user_id' => $user->id]);
-    Meal::factory()->count(2)->create(['meal_plan_id' => $mealPlan->id, 'day_number' => 1]);
 
     $response = $this->actingAs($user)
         ->get(route('health-entries.index'));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->has('todaysMeals'));
+            ->missing('recentMedications')
+            ->missing('recentInsulins')
+            ->missing('todaysMeals'));
 });

@@ -78,7 +78,12 @@ export function getPrimaryType(entry: HealthEntry): LogTypeValue {
     if (entry.glucose_value !== null) {
         return LogType.Glucose;
     }
-    if (entry.carbs_grams !== null) {
+    if (
+        entry.carbs_grams !== null ||
+        entry.protein_grams !== null ||
+        entry.fat_grams !== null ||
+        entry.calories !== null
+    ) {
         return LogType.Food;
     }
     if (entry.insulin_units !== null) {
@@ -117,6 +122,17 @@ const BADGE_ACCENT = {
     exercise: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300',
 } as const;
 
+const MACRO_BADGES = [
+    { key: 'carbs', field: 'carbs_grams', accent: BADGE_ACCENT.carbs },
+    { key: 'protein', field: 'protein_grams', accent: BADGE_ACCENT.protein },
+    { key: 'fat', field: 'fat_grams', accent: BADGE_ACCENT.fat },
+    { key: 'calories', field: 'calories', accent: BADGE_ACCENT.calories },
+] as const satisfies ReadonlyArray<{
+    key: string;
+    field: keyof HealthEntry;
+    accent: string;
+}>;
+
 export interface EntryBadge {
     key: string;
     label: string;
@@ -146,42 +162,15 @@ export function getEntryBadges(
         }
     }
 
-    if (entry.carbs_grams !== null) {
-        badges.push({
-            key: 'carbs',
-            label: t('health_entries.badges.carbs', {
-                value: entry.carbs_grams,
-            }),
-            className: BADGE_ACCENT.carbs,
-        });
-    }
-
-    if (entry.protein_grams !== null) {
-        badges.push({
-            key: 'protein',
-            label: t('health_entries.badges.protein', {
-                value: entry.protein_grams,
-            }),
-            className: BADGE_ACCENT.protein,
-        });
-    }
-
-    if (entry.fat_grams !== null) {
-        badges.push({
-            key: 'fat',
-            label: t('health_entries.badges.fat', { value: entry.fat_grams }),
-            className: BADGE_ACCENT.fat,
-        });
-    }
-
-    if (entry.calories !== null) {
-        badges.push({
-            key: 'calories',
-            label: t('health_entries.badges.calories', {
-                value: entry.calories,
-            }),
-            className: BADGE_ACCENT.calories,
-        });
+    for (const macro of MACRO_BADGES) {
+        const value = entry[macro.field];
+        if (value !== null) {
+            badges.push({
+                key: macro.key,
+                label: t(`health_entries.badges.${macro.key}`, { value }),
+                className: macro.accent,
+            });
+        }
     }
 
     if (entry.insulin_units !== null) {
@@ -207,18 +196,20 @@ export function getEntryBadges(
     if (entry.weight !== null) {
         badges.push({
             key: 'weight',
-            label: `${entry.weight} ${t('health_entries.index_page.lbs_label')}`,
+            label: `${entry.weight} ${t('health_entries.index_page.kg_label')}`,
             className: BADGE_ACCENT.weight,
         });
     }
 
     if (
-        entry.blood_pressure_systolic !== null &&
+        entry.blood_pressure_systolic !== null ||
         entry.blood_pressure_diastolic !== null
     ) {
+        const systolic = entry.blood_pressure_systolic ?? '–';
+        const diastolic = entry.blood_pressure_diastolic ?? '–';
         badges.push({
             key: 'bp',
-            label: `${entry.blood_pressure_systolic}/${entry.blood_pressure_diastolic} ${t('health_entries.index_page.bp_label')}`,
+            label: `${systolic}/${diastolic} ${t('health_entries.index_page.bp_label')}`,
             className: BADGE_ACCENT.bp,
         });
     }

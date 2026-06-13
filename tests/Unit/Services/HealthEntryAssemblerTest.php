@@ -79,6 +79,19 @@ it('leaves medication dosage blank when there is no dosage, form, or device-spec
     expect($result->first()['medication_dosage'])->toBeNull();
 });
 
+it('keeps the dose count for dose-counted medications without an explicit dosage', function (): void {
+    $user = User::factory()->create();
+    $sample = HealthSyncSample::factory()->medication()->for($user)->create([
+        'value' => 2,
+        'metadata' => ['medication_name' => 'Vitamin D'],
+    ]);
+
+    $assembler = new HealthEntryAssembler;
+    $result = $assembler->assemble(collect([$sample]));
+
+    expect($result->first()['medication_dosage'])->toBe('2 doses');
+});
+
 it('assembles exercise samples', function (): void {
     $user = User::factory()->create();
     $sample = HealthSyncSample::factory()->exercise()->for($user)->create([

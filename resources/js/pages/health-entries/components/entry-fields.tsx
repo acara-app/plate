@@ -125,15 +125,6 @@ function FoodFields({
     const [carbsGrams, setCarbsGrams] = useState(
         entry?.carbs_grams != null ? String(entry.carbs_grams) : '',
     );
-    const [proteinGrams, setProteinGrams] = useState(
-        entry?.protein_grams != null ? String(entry.protein_grams) : '',
-    );
-    const [fatGrams, setFatGrams] = useState(
-        entry?.fat_grams != null ? String(entry.fat_grams) : '',
-    );
-    const [calories, setCalories] = useState(
-        entry?.calories != null ? String(entry.calories) : '',
-    );
 
     return (
         <div className="space-y-4">
@@ -188,8 +179,7 @@ function FoodFields({
                             'health_entries.food.protein_placeholder',
                             'e.g., 25',
                         )}
-                        value={proteinGrams}
-                        onChange={(e) => setProteinGrams(e.target.value)}
+                        defaultValue={entry?.protein_grams ?? ''}
                     />
                     <InputError message={errors.protein_grams} />
                 </div>
@@ -205,8 +195,7 @@ function FoodFields({
                             'health_entries.food.fat_placeholder',
                             'e.g., 15',
                         )}
-                        value={fatGrams}
-                        onChange={(e) => setFatGrams(e.target.value)}
+                        defaultValue={entry?.fat_grams ?? ''}
                     />
                     <InputError message={errors.fat_grams} />
                 </div>
@@ -222,8 +211,7 @@ function FoodFields({
                             'health_entries.food.calories_placeholder',
                             'e.g., 400',
                         )}
-                        value={calories}
-                        onChange={(e) => setCalories(e.target.value)}
+                        defaultValue={entry?.calories ?? ''}
                     />
                     <InputError message={errors.calories} />
                 </div>
