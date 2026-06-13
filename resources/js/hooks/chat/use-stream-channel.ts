@@ -2,7 +2,11 @@ import { reconnect, useSsrSafeConnectionStatus } from '@/lib/echo';
 import { useEcho } from '@laravel/echo-react';
 import { useEffect, useRef } from 'react';
 import type { ChatAction, ChatStatus } from './message-reducer';
-import { applyStreamEvent, type RawStreamEvent } from './process-event';
+import {
+    applyStreamEvent,
+    type RawStreamEvent,
+    type StreamTracking,
+} from './process-event';
 
 const STREAM_EVENTS = [
     '.stream_start',
@@ -32,6 +36,7 @@ interface UseStreamChannelOptions {
     status: ChatStatus;
     dispatch: React.Dispatch<ChatAction>;
     seenEventIdsRef: React.RefObject<Set<string>>;
+    trackingRef: React.RefObject<StreamTracking>;
     streamActiveRef: React.RefObject<boolean>;
     startReplayPolling: () => void;
     stopReplayPolling: () => void;
@@ -48,6 +53,7 @@ export function useStreamChannel({
     status,
     dispatch,
     seenEventIdsRef,
+    trackingRef,
     streamActiveRef,
     startReplayPolling,
     stopReplayPolling,
@@ -69,9 +75,20 @@ export function useStreamChannel({
                 streamActiveRef.current = true;
             }
 
-            applyStreamEvent(raw, dispatch, seenEventIdsRef.current);
+            applyStreamEvent(
+                raw,
+                dispatch,
+                seenEventIdsRef.current,
+                trackingRef.current,
+            );
         },
-        [stopReplayPolling, streamActiveRef, dispatch, seenEventIdsRef],
+        [
+            stopReplayPolling,
+            streamActiveRef,
+            dispatch,
+            seenEventIdsRef,
+            trackingRef,
+        ],
     );
 
     useEcho(
