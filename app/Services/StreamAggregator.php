@@ -230,7 +230,7 @@ final readonly class StreamAggregator
 
     private function toolTitle(string $name): string
     {
-        $key = "tools.{$name}";
+        $key = 'tools.' . $name;
 
         if (Lang::has($key)) {
             return (string) __($key);

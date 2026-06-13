@@ -30,9 +30,9 @@ final readonly class GetUserHealthEntriesAction
 
         $entries = $user->healthSyncSamples()
             ->whereIn('type_identifier', $entryTypes)
-            ->selectRaw("{$entryKey} as entry_key, MAX(measured_at) as sort_at")
+            ->selectRaw($entryKey . ' as entry_key, MAX(measured_at) as sort_at')
             ->groupByRaw($entryKey)
-            ->orderByDesc('sort_at')
+            ->latest('sort_at')
             ->orderByDesc('entry_key')
             ->paginate($perPage);
 

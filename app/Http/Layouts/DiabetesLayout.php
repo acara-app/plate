@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Layouts;
 
+use Inertia\DeferProp;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthSyncType;
@@ -18,14 +19,7 @@ use Inertia\Inertia;
 final readonly class DiabetesLayout
 {
     /**
-     * @return array{
-     *     glucoseReadingTypes: Collection<int, array{value: string, label: string}>,
-     *     insulinTypes: Collection<int, array{value: string, label: string}>,
-     *     glucoseUnit: string,
-     *     recentMedications: \Inertia\DeferProp,
-     *     recentInsulins: \Inertia\DeferProp,
-     *     todaysMeals: \Inertia\DeferProp
-     * }
+     * @return array{glucoseReadingTypes: Collection<int, array{value: string, label: string}>, insulinTypes: Collection<int, array{value: string, label: string}>, glucoseUnit: string, recentMedications: DeferProp, recentInsulins: DeferProp, todaysMeals: DeferProp}
      */
     public static function props(User $user): array
     {
