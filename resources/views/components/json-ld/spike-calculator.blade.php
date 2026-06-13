@@ -60,6 +60,14 @@
                 "@@type": "Answer",
                 "text": "Pair carbohydrates with protein, healthy fats, or fiber-rich vegetables to slow sugar absorption. Choose whole grains, eat smaller portions, and take a 10-15 minute walk after meals to improve insulin sensitivity."
             }
+        },
+        {
+            "@@type": "Question",
+            "name": "Will Acara remember foods I check here?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "The free public checker gives an instant estimate without saving long-term context. With an Acara Cloud account, stable food preferences, goals, and low-spike swaps can be saved so future chats start with more useful context."
+            }
         }
     ]
 }

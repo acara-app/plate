@@ -497,7 +497,7 @@ class extends Component
                             <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Sharper readings</p>
                             <h3 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.02em]">Did the AI guess on a few items?</h3>
                             <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
-                                Mixed dishes, sauces, and oils are tough for a quick scan. Sign up for sharper analysis — and save every meal to your history.
+                                Mixed dishes, sauces, and oils are tough for a quick scan. Sign up to save meals, build meal history, and help Acara remember what you actually eat.
                             </p>
                             <a
                                 href="{{ route('register') }}"
@@ -597,7 +597,7 @@ class extends Component
                             Need more than just tracking?
                         </h2>
                         <p class="mt-3 max-w-xl text-sm leading-relaxed text-[#3D3833] sm:text-base">
-                            Get personalized meal plans tailored to your glucose levels and taste preferences.
+                            Acara Cloud can use saved meals, logged history, and stable preferences to make future meal planning feel less generic.
                         </p>
                     </div>
                     <a

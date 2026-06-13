@@ -38,6 +38,14 @@
         },
         {
             "@@type": "Question",
+            "name": "Does Acara remember my nutrition preferences?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "On Acara Cloud, stable nutrition preferences, recurring goals, favorite meals, and low-spike swaps can be saved so future guidance starts with context. Allergies, medications, conditions, biometrics, and household details are handled as structured profile data."
+            }
+        },
+        {
+            "@@type": "Question",
             "name": "Is this tool really open source?",
             "acceptedAnswer": {
                 "@@type": "Answer",
@@ -343,6 +351,41 @@
         </div>
     </section>
 
+    <section class="bg-white py-20 sm:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-3xl text-center">
+                <span class="text-[#FF6B4A] font-bold tracking-wider uppercase text-sm">Acara Cloud Memory</span>
+                <h2 class="font-display mt-3 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+                    Nutrition advice that does not reset every chat.
+                </h2>
+                <p class="mt-5 text-lg leading-relaxed text-slate-600">
+                    Acara can keep stable food context across future chats, so meal ideas can reflect what you have already shared instead of asking the same setup questions again.
+                </p>
+            </div>
+
+            <div class="mt-12 grid gap-6 md:grid-cols-3">
+                <div class="rounded-2xl border border-orange-100 bg-orange-50 p-6">
+                    <h3 class="text-lg font-bold text-slate-900">Remembers your food preferences</h3>
+                    <p class="mt-3 text-sm leading-relaxed text-slate-600">
+                        Cooking style, favorite cuisines, food dislikes, prep time, and the meals you are willing to repeat can stay part of future guidance.
+                    </p>
+                </div>
+                <div class="rounded-2xl border border-rose-100 bg-rose-50 p-6">
+                    <h3 class="text-lg font-bold text-slate-900">Learns your low-spike swaps</h3>
+                    <p class="mt-3 text-sm leading-relaxed text-slate-600">
+                        When a swap works for you, Acara can carry that saved context into future meal planning and restaurant questions.
+                    </p>
+                </div>
+                <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-6">
+                    <h3 class="text-lg font-bold text-slate-900">Keeps your goals in context</h3>
+                    <p class="mt-3 text-sm leading-relaxed text-slate-600">
+                        Protein targets, glucose goals, hydration habits, and nutrition priorities can shape future chats without becoming medical claims.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <x-related-reading
         title="Go deeper on meal data and nutrition quality"
         description="Read how Acara turns logged meals, Health Sync data, and AI analysis into structured coaching beyond simple calorie totals."
@@ -397,6 +440,18 @@
                     </summary>
                     <p class="mt-4 text-slate-600">
                         Yes. The whole codebase lives on GitHub. You can see exactly how the analysis works, verify the privacy controls, and even contribute if you're a developer. Health tools shouldn't be black boxes—that's the whole point.
+                    </p>
+                </details>
+
+                <details class="group rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+                    <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
+                        Does Acara remember my nutrition preferences?
+                        <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </summary>
+                    <p class="mt-4 text-slate-600">
+                        On Acara Cloud, stable nutrition preferences, recurring goals, favorite meals, and low-spike swaps can be saved so future guidance starts with context. Allergies, medications, conditions, biometrics, and household details are handled as structured profile data.
                     </p>
                 </details>
 

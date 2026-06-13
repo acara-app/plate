@@ -251,6 +251,44 @@
                 />
             </section>
 
+            <section class="w-full max-w-6xl">
+                <div class="overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-sm">
+                    <div class="grid gap-8 p-8 sm:p-12 lg:grid-cols-[1.1fr_1fr] lg:items-center">
+                        <div>
+                            <p class="text-sm font-bold uppercase tracking-[0.18em] text-[#FF6B4A]">Acara Cloud Memory</p>
+                            <h2 class="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                                Acara remembers what works for you.
+                            </h2>
+                            <p class="mt-4 text-lg leading-relaxed text-slate-600">
+                                Acara Cloud keeps a saved health context across future chats: food preferences, goals, routines, household constraints, cooking limits, recurring patterns, and feedback you have already shared.
+                            </p>
+                            <p class="mt-4 text-sm leading-relaxed text-slate-500">
+                                If you self-host Plate, you still get the transparent open-source foundation. If you use Acara Cloud, long-term memory is handled for you so guidance can feel more personal without making you repeat yourself.
+                            </p>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div class="rounded-2xl bg-orange-50 p-5">
+                                <h3 class="font-semibold text-slate-900">Stable preferences</h3>
+                                <p class="mt-2 text-sm leading-relaxed text-slate-600">Meals you like, foods you avoid, and the cooking style you keep coming back to.</p>
+                            </div>
+                            <div class="rounded-2xl bg-emerald-50 p-5">
+                                <h3 class="font-semibold text-slate-900">Goals in context</h3>
+                                <p class="mt-2 text-sm leading-relaxed text-slate-600">Blood sugar, protein, hydration, activity, and routine targets can stay part of future chats.</p>
+                            </div>
+                            <div class="rounded-2xl bg-slate-50 p-5">
+                                <h3 class="font-semibold text-slate-900">Less repeating</h3>
+                                <p class="mt-2 text-sm leading-relaxed text-slate-600">Advice can start from what Acara already knows instead of asking the same questions again.</p>
+                            </div>
+                            <div class="rounded-2xl bg-rose-50 p-5">
+                                <h3 class="font-semibold text-slate-900">Profile-safe</h3>
+                                <p class="mt-2 text-sm leading-relaxed text-slate-600">Allergies, medications, conditions, biometrics, and household context stay structured.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {{-- Acara Health Sync Launch Announcement --}}
             <section aria-labelledby="health-sync-launch-heading" class="w-full max-w-6xl">
                 <div class="relative overflow-hidden rounded-3xl border border-emerald-100 bg-linear-to-br from-emerald-50 via-white to-emerald-50/40 p-8 shadow-sm sm:p-12">
@@ -643,7 +681,9 @@
                         <p class="mb-10 max-w-2xl text-lg leading-relaxed text-slate-400">
                             Acara Plate is open source and 100% free to self-host. Whether you want to customize the
                             platform for your specific needs or simply prefer running your own instance, the choice is
-                            yours. Have a feature in mind? We welcome pull requests to improve the product for everyone.
+                            yours. Self-host Plate for full control, or use Acara Cloud when you want managed
+                            long-term memory included. Have a feature in mind? We welcome pull requests to improve
+                            the product for everyone.
                         </p>
 
                         {{-- CTA Button --}}

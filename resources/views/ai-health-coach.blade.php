@@ -50,6 +50,14 @@
         },
         {
             "@@type": "Question",
+            "name": "Can Acara remember my routines and check-ins?",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "On Acara Cloud, stable routine context like sleep struggles, caffeine patterns, hydration goals, stress triggers, and habit check-ins can be saved for future chats. Safety-critical health details remain structured profile data."
+            }
+        },
+        {
+            "@@type": "Question",
             "name": "Is my health data secure?",
             "acceptedAnswer": {
                 "@@type": "Answer",
@@ -340,8 +348,43 @@
                         </div>
                         <h3 class="font-display text-xl font-bold text-[#f7f3ed] mb-3">Track Progress Without the Friction</h3>
                         <p class="text-[#f7f3ed]/60 leading-relaxed font-serif">
-                            Check in naturally over time. The system remembers your context and adjusts recommendations as your habits shift. No manual tracking required unless you want it.
+                            Check in naturally over time. Acara Cloud can remember stable routine context and adjust recommendations as your habits shift. No manual tracking required unless you want it.
                         </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="relative bg-[#f7f3ed] py-16 sm:py-24">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="grid gap-8 lg:grid-cols-[1fr_1.3fr] lg:items-center">
+                    <div>
+                        <p class="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-[#bc4749]">Acara Cloud Memory</p>
+                        <h2 class="font-display mt-4 text-3xl font-bold tracking-tight text-[#1a1a1a] sm:text-4xl">
+                            Wellness guidance with your routine in mind.
+                        </h2>
+                        <p class="mt-4 text-lg leading-relaxed text-[#1a1a1a]/65 font-serif">
+                            Sleep, stress, hydration, caffeine timing, and habit check-ins are easier to improve when Acara can keep stable context from future chat to future chat.
+                        </p>
+                    </div>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="bg-white p-6 shadow-[0_4px_24px_-8px_rgba(26,26,26,0.12)]" style="border-radius: 2px 22px 2px 22px;">
+                            <h3 class="font-display text-lg font-bold text-[#1a1a1a]">Sleep patterns</h3>
+                            <p class="mt-2 text-sm leading-relaxed text-[#1a1a1a]/60 font-serif">Acara can remember recurring blockers like late caffeine, screen habits, or wake-up timing.</p>
+                        </div>
+                        <div class="bg-white p-6 shadow-[0_4px_24px_-8px_rgba(26,26,26,0.12)]" style="border-radius: 2px 22px 2px 22px;">
+                            <h3 class="font-display text-lg font-bold text-[#1a1a1a]">Stress context</h3>
+                            <p class="mt-2 text-sm leading-relaxed text-[#1a1a1a]/60 font-serif">Saved routine context helps future suggestions fit real workdays, travel days, and recovery days.</p>
+                        </div>
+                        <div class="bg-white p-6 shadow-[0_4px_24px_-8px_rgba(26,26,26,0.12)]" style="border-radius: 2px 22px 2px 22px;">
+                            <h3 class="font-display text-lg font-bold text-[#1a1a1a]">Hydration goals</h3>
+                            <p class="mt-2 text-sm leading-relaxed text-[#1a1a1a]/60 font-serif">Acara can keep practical goals in context without turning wellness into endless manual logging.</p>
+                        </div>
+                        <div class="bg-white p-6 shadow-[0_4px_24px_-8px_rgba(26,26,26,0.12)]" style="border-radius: 2px 22px 2px 22px;">
+                            <h3 class="font-display text-lg font-bold text-[#1a1a1a]">Profile-safe data</h3>
+                            <p class="mt-2 text-sm leading-relaxed text-[#1a1a1a]/60 font-serif">Allergies, medications, conditions, biometrics, and household context stay structured.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -416,6 +459,20 @@
                         </summary>
                         <p class="px-6 pb-6 text-[#1a1a1a]/60 leading-relaxed font-serif">
                             Yep. The code's on GitHub. You can verify how recommendations are generated, check the privacy controls, and even fork it if you want to build your own version. We welcome contributions from developers and health enthusiasts alike.
+                        </p>
+                    </details>
+
+                    <details class="group relative overflow-hidden bg-white shadow-[0_2px_12px_-4px_rgba(26,26,26,0.08)] transition-all duration-300"
+                             style="border-radius: 2px 16px 2px 16px;">
+                        <div class="absolute top-0 left-5 right-5 h-px bg-gradient-to-r from-transparent via-[#bc4749]/20 to-transparent"></div>
+                        <summary class="flex cursor-pointer items-center justify-between p-6 font-display text-lg font-bold text-[#1a1a1a]">
+                            Can Acara remember my routines and check-ins?
+                            <svg class="h-5 w-5 text-[#1a1a1a]/30 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="px-6 pb-6 text-[#1a1a1a]/60 leading-relaxed font-serif">
+                            On Acara Cloud, stable routine context like sleep struggles, caffeine patterns, hydration goals, stress triggers, and habit check-ins can be saved for future chats. Safety-critical health details remain structured profile data.
                         </p>
                     </details>
 

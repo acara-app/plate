@@ -34,6 +34,10 @@ final class AiTransparency
                 'q' => 'How do I use Snap to Track?',
                 'a' => 'Open this page on your phone or laptop, tap the upload area to take a new photo or pick one from your gallery, then tap Analyze Food. In about 5–15 seconds you get a per-item breakdown of calories, protein, carbs, and fat plus meal totals. No signup is required to try it; create a free account to save and track meals over time.',
             ],
+            [
+                'q' => 'Can Acara remember meals I scan?',
+                'a' => 'The free public analyzer runs an instant scan without saving long-term context. With an Acara Cloud account, saved meals, meal history, stable preferences, and recurring goals can help future chats start with more useful context.',
+            ],
         ];
     }
 
