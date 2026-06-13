@@ -1,4 +1,5 @@
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 import type { ToolCallData } from '@/types/chat';
 import {
     Check,
@@ -95,33 +96,43 @@ export function ToolCallCard({
         <Dialog>
             <DialogTrigger
                 aria-haspopup="dialog"
-                className="flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-left text-xs transition-colors outline-none hover:bg-muted/60 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-xs transition-all duration-200 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
-                <Icon
-                    className="size-3.5 shrink-0 text-muted-foreground"
-                    aria-hidden="true"
-                />
-                <span className="min-w-0 flex-1 truncate">
+                <div
+                    className={cn(
+                        'flex size-7 shrink-0 items-center justify-center rounded-md transition-colors duration-200',
+                        tool.status === 'complete'
+                            ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400'
+                            : tool.status === 'error'
+                              ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400'
+                              : interrupted
+                                ? 'bg-muted text-muted-foreground'
+                                : 'bg-primary/10 text-primary',
+                    )}
+                >
+                    <Icon className="size-3.5" aria-hidden="true" />
+                </div>
+                <span className="min-w-0 flex-1">
                     <span className="font-medium text-foreground">{label}</span>
                     {preview && (
-                        <span className="ml-1 text-muted-foreground">
+                        <span className="ml-1.5 text-muted-foreground">
                             {preview}
                         </span>
                     )}
                 </span>
                 {tool.status === 'complete' ? (
                     <Check
-                        className="size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
+                        className="size-3.5 shrink-0 text-emerald-500"
                         aria-label="Completed"
                     />
                 ) : tool.status === 'error' ? (
                     <X
-                        className="size-3.5 shrink-0 text-red-600 dark:text-red-400"
+                        className="size-3.5 shrink-0 text-red-500"
                         aria-label="Failed"
                     />
                 ) : interrupted ? (
                     <span
-                        className="size-1.5 shrink-0 rounded-full bg-muted-foreground/50"
+                        className="size-1.5 shrink-0 rounded-full bg-muted-foreground/40"
                         aria-label="Stopped"
                     />
                 ) : (

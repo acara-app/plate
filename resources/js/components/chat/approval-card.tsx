@@ -32,19 +32,19 @@ interface StatusPresentation {
 const SAVING_PRESENTATION = {
     badgeLabel: 'Saving…',
     badgeClassName:
-        'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200',
+        'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
     footerLabel: 'Saving…',
-    footerClassName: 'text-emerald-700 dark:text-emerald-300',
+    footerClassName: 'text-amber-600 dark:text-amber-400',
     FooterIcon: Loader2,
     footerSpin: true,
 } satisfies StatusPresentation;
 
 const STATUS_PRESENTATION: Record<ApprovalStatus, StatusPresentation> = {
     pending: {
-        badgeLabel: 'Not saved yet',
+        badgeLabel: 'Awaiting review',
         badgeClassName:
-            'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
-        footerLabel: 'Awaiting your confirmation.',
+            'bg-muted text-muted-foreground',
+        footerLabel: 'Please approve or dismiss.',
         footerClassName: 'text-muted-foreground',
         FooterIcon: Clock,
     },
@@ -52,30 +52,30 @@ const STATUS_PRESENTATION: Record<ApprovalStatus, StatusPresentation> = {
     executing: SAVING_PRESENTATION,
     executed: {
         badgeLabel: 'Saved',
-        badgeClassName: 'bg-emerald-600 text-white',
-        footerLabel: 'Saved.',
-        footerClassName: 'text-emerald-700 dark:text-emerald-300',
+        badgeClassName: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+        footerLabel: 'Saved successfully.',
+        footerClassName: 'text-emerald-600 dark:text-emerald-400',
         FooterIcon: Check,
     },
     failed: {
-        badgeLabel: 'Not saved',
+        badgeLabel: 'Failed',
         badgeClassName:
-            'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-200',
-        footerLabel: 'This could not be saved.',
+            'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+        footerLabel: 'Could not be saved.',
         footerClassName: 'text-red-600 dark:text-red-400',
         FooterIcon: AlertCircle,
     },
     rejected: {
         badgeLabel: 'Dismissed',
         badgeClassName: 'bg-muted text-muted-foreground',
-        footerLabel: 'Dismissed — nothing was saved.',
+        footerLabel: 'Nothing was saved.',
         footerClassName: 'text-muted-foreground',
         FooterIcon: X,
     },
     expired: {
         badgeLabel: 'Expired',
         badgeClassName: 'bg-muted text-muted-foreground',
-        footerLabel: 'This request expired and was not saved.',
+        footerLabel: 'This request expired.',
         footerClassName: 'text-muted-foreground',
         FooterIcon: Clock,
     },
@@ -147,33 +147,33 @@ export function ApprovalCard({
     }
 
     return (
-        <Card className="my-1 gap-3 border-emerald-200 bg-emerald-50/60 py-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
-            <CardContent className="px-4">
+        <Card className="my-2 gap-0 overflow-hidden border border-border/60 bg-card/80 backdrop-blur-sm">
+            <CardContent className="px-4 py-3">
                 <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm text-emerald-900 dark:text-emerald-100">
+                    <p className="text-sm text-foreground">
                         {state.summary}
                     </p>
                     <StatusBadge status={state.status} />
                 </div>
                 {state.notice && (
-                    <p className="mt-2 text-xs text-emerald-800/80 dark:text-emerald-200/70">
+                    <p className="mt-2 text-xs text-muted-foreground">
                         {state.notice}
                     </p>
                 )}
                 {state.error && (
-                    <p className="mt-2 flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
+                    <p className="mt-2 flex items-center gap-1.5 text-xs text-red-500 dark:text-red-400">
                         <AlertCircle className="size-3.5 shrink-0" />
                         {state.error}
                     </p>
                 )}
             </CardContent>
 
-            <CardFooter className="px-4">
+            <CardFooter className="border-t border-border/40 px-4 py-2.5">
                 {state.can_approve || state.can_reject ? (
                     <div className="flex w-full gap-2">
                         <Button
                             size="sm"
-                            className="flex-1 bg-emerald-600 text-white hover:bg-emerald-700"
+                            className="flex-1 bg-linear-to-br from-emerald-500 to-emerald-600 text-white shadow-sm transition-all hover:from-emerald-600 hover:to-emerald-700 hover:shadow-md active:scale-[0.98]"
                             disabled={action.processing || !state.can_approve}
                             onClick={() => void act('approve')}
                         >
@@ -187,12 +187,12 @@ export function ApprovalCard({
                         <Button
                             size="sm"
                             variant="outline"
-                            className="flex-1 border-emerald-200 dark:border-emerald-900/50"
+                            className="flex-1 transition-all hover:bg-destructive/5 hover:text-destructive active:scale-[0.98]"
                             disabled={action.processing || !state.can_reject}
                             onClick={() => void act('reject')}
                         >
                             <X className="size-4" />
-                            Reject
+                            Dismiss
                         </Button>
                     </div>
                 ) : (
