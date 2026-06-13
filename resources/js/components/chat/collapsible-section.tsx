@@ -9,8 +9,8 @@ import { type ReactNode, useState } from 'react';
 
 const TONE_CLASSES = {
     muted: 'text-muted-foreground',
-    active: 'text-emerald-700 dark:text-emerald-300',
-    error: 'text-red-600 dark:text-red-400',
+    active: 'text-emerald-600 dark:text-emerald-400',
+    error: 'text-red-500 dark:text-red-400',
 } as const;
 
 export function CollapsibleSection({
@@ -53,29 +53,30 @@ export function CollapsibleSection({
         <Collapsible
             open={open}
             onOpenChange={handleOpenChange}
-            className="rounded-lg border border-border/60 bg-muted/40 dark:bg-muted/20"
+            className="rounded-lg border border-border/40 bg-muted/30 backdrop-blur-sm transition-colors duration-200"
         >
             <CollapsibleTrigger
                 aria-label={label}
                 className={cn(
-                    'group flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium transition-colors outline-none hover:bg-foreground/[0.03] focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                    'group flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium transition-all duration-200 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
                     TONE_CLASSES[tone],
                 )}
             >
+                <span className="shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180 motion-reduce:transition-none">
+                    <ChevronDown className="size-3.5" aria-hidden="true" />
+                </span>
                 {icon}
                 <span className={cn('min-w-0 flex-1 truncate', labelClassName)}>
                     {label}
                 </span>
                 {trailing}
-                <ChevronDown
-                    className="size-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180 motion-reduce:transition-none"
-                    aria-hidden="true"
-                />
             </CollapsibleTrigger>
 
             {!open && preview}
 
-            <CollapsibleContent>{children}</CollapsibleContent>
+            <CollapsibleContent className="overflow-hidden motion-reduce:animate-none data-[state=closed]:animate-collapse-up data-[state=open]:animate-collapse-down">
+                {children}
+            </CollapsibleContent>
 
             {announce && (
                 <span role="status" className="sr-only">

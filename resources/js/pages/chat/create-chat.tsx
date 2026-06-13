@@ -248,9 +248,9 @@ export default function CreateChat() {
                         </div>
                     </div>
 
-                    <div className="shrink-0 border-t border-border/40 bg-background/80 backdrop-blur-md transition-colors duration-200 supports-[backdrop-filter]:bg-background/60">
+                    <div className="mx-auto flex w-full max-w-3xl shrink-0 flex-col bg-background/80 backdrop-blur-md transition-colors duration-200 supports-[backdrop-filter]:bg-background/60">
                         {visibleCreditWarning && (
-                            <div className="mx-auto w-full max-w-3xl px-4 pt-2">
+                            <div className="px-4 pt-2">
                                 <CreditWarningBanner
                                     warning={visibleCreditWarning}
                                     onDismiss={() =>

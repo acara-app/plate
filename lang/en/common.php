@@ -1037,5 +1037,9 @@ return [
         'delete_title' => 'Delete this chat?',
         'delete_description' => 'This removes the conversation and its message history. This action cannot be undone.',
         'delete_confirm' => 'Delete chat',
+        'just_now' => 'Just now',
+        'minutes_ago' => ':countm ago',
+        'hours_ago' => ':counth ago',
+        'days_ago' => ':countd ago',
     ],
 ];

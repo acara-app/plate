@@ -979,5 +979,9 @@ return [
         'delete_title' => 'Энэ чатыг устгах уу?',
         'delete_description' => 'Энэ нь чат болон мессежийн түүхийг устгана. Энэ үйлдлийг буцаах боломжгүй.',
         'delete_confirm' => 'Чатыг устгах',
+        'just_now' => 'Дөнгөж сая',
+        'minutes_ago' => ':count мин өмнө',
+        'hours_ago' => ':count цагийн өмнө',
+        'days_ago' => ':count өдрийн өмнө',
     ],
 ];

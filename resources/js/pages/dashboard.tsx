@@ -74,28 +74,30 @@ export default function Dashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('dashboard')} />
             <main className="flex min-h-[calc(100svh-8rem)] flex-1 flex-col overflow-x-hidden bg-background">
-                <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
+                <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
                     {!currentUser?.is_onboarded && <OnboardingBanner />}
 
-                    <section className="flex flex-1 items-center justify-center py-6">
-                        <div className="w-full max-w-3xl space-y-7">
-                            <div className="text-center">
-                                <div className="mx-auto mb-5 flex size-16 items-center justify-center overflow-hidden rounded-full border border-primary/20 bg-primary/10 shadow-sm">
+                    <section className="flex flex-1 items-center justify-center py-4">
+                        <div className="w-full max-w-3xl space-y-6">
+                            <div className="flex items-center gap-3">
+                                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-emerald-400 to-teal-500 text-white shadow-md shadow-emerald-500/20">
                                     <img
                                         src="https://pub-plate-assets.acara.app/images/altani-waving-hello-320.webp"
                                         alt="Altani"
-                                        className="h-full w-full object-cover"
+                                        className="size-10 rounded-full object-cover"
                                     />
                                 </div>
-                                <h1 className="text-3xl font-semibold tracking-normal text-foreground sm:text-4xl">
-                                    {t('dashboard_ai.heading')}
-                                </h1>
-                                <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
-                                    {t('dashboard_ai.description')}
-                                </p>
+                                <div>
+                                    <h1 className="text-xl font-semibold tracking-tight text-foreground">
+                                        {t('dashboard_ai.heading')}
+                                    </h1>
+                                    <p className="text-sm text-muted-foreground">
+                                        {t('dashboard_ai.description')}
+                                    </p>
+                                </div>
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 <ChatInput
                                     ref={chatInputRef}
                                     onSubmit={startChat}
@@ -121,12 +123,12 @@ export default function Dashboard() {
                                             onClick={() =>
                                                 selectPrompt(promptText)
                                             }
-                                            className="group flex min-h-20 items-start gap-3 rounded-lg border border-border bg-background px-4 py-3 text-left text-sm leading-6 transition-colors hover:border-primary/40 hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                            className="group relative flex min-h-[88px] items-start gap-3 rounded-xl border border-border/60 bg-card p-4 text-left text-sm leading-6 shadow-sm transition-all duration-200 hover:border-primary/30 hover:bg-primary/5 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm"
                                         >
-                                            <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+                                            <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-emerald-400 to-teal-500 text-white shadow-sm transition-transform duration-200 group-hover:scale-110">
                                                 <PromptIcon className="size-4" />
                                             </span>
-                                            <span className="text-foreground">
+                                            <span className="flex-1 text-foreground">
                                                 {promptText}
                                             </span>
                                         </button>
@@ -134,9 +136,12 @@ export default function Dashboard() {
                                 })}
                             </div>
 
-                            <p className="text-center text-xs leading-6 text-muted-foreground sm:text-sm">
-                                {t('dashboard_ai.disclaimer')}
-                            </p>
+                            <div className="relative pt-2">
+                                <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-border to-transparent" />
+                                <p className="text-center text-xs leading-6 text-muted-foreground sm:text-sm">
+                                    {t('dashboard_ai.disclaimer')}
+                                </p>
+                            </div>
                         </div>
                     </section>
                 </div>
