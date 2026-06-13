@@ -78,7 +78,7 @@ final readonly class HealthEntryAssembler
             HealthSyncType::BloodPressureDiastolic->value => $entry['blood_pressure_diastolic'] = (int) $sample->value,
             HealthSyncType::A1c->value => $entry['a1c_value'] = $sample->value,
             HealthSyncType::Insulin->value => $this->mapInsulin($sample, $metadata, $entry),
-            HealthSyncType::Medication->value, HealthSyncType::MedicationDoseEvent->value => $this->mapMedication($metadata, $entry),
+            HealthSyncType::Medication->value, HealthSyncType::MedicationDoseEvent->value => $this->mapMedication($sample, $metadata, $entry),
             HealthSyncType::ExerciseMinutes->value, HealthSyncType::Workouts->value => $this->mapExercise($sample, $metadata, $entry),
             default => null,
         };
@@ -110,10 +110,31 @@ final readonly class HealthEntryAssembler
      * @param  array<string, mixed>  $metadata
      * @param  array<string, mixed>  $entry
      */
-    private function mapMedication(array $metadata, array &$entry): void
+    private function mapMedication(HealthSyncSample $sample, array $metadata, array &$entry): void
     {
-        $entry['medication_name'] = $metadata['medication_name'] ?? null;
-        $entry['medication_dosage'] = $metadata['medication_dosage'] ?? null;
+        $entry['medication_name'] = $metadata['medication_name']
+            ?? $metadata['name']
+            ?? $metadata['display_text']
+            ?? null;
+        $entry['medication_dosage'] = $metadata['medication_dosage']
+            ?? $this->composeMedicationDosage($sample, $metadata);
+    }
+
+    /**
+     * @param  array<string, mixed>  $metadata
+     */
+    private function composeMedicationDosage(HealthSyncSample $sample, array $metadata): ?string
+    {
+        $rawForm = $metadata['form'] ?? null;
+        $form = is_string($rawForm) && $rawForm !== '' ? $rawForm : $sample->unit;
+
+        if ($form === '' || $form === HealthSyncType::Medication->unit()) {
+            return null;
+        }
+
+        $quantity = mb_rtrim(mb_rtrim(number_format($sample->value, 4, '.', ''), '0'), '.');
+
+        return $quantity.' '.$form;
     }
 
     /**
@@ -123,6 +144,8 @@ final readonly class HealthEntryAssembler
     private function mapExercise(HealthSyncSample $sample, array $metadata, array &$entry): void
     {
         $entry['exercise_duration_minutes'] = (int) $sample->value;
-        $entry['exercise_type'] = $metadata['exercise_type'] ?? $sample->type_identifier;
+        $entry['exercise_type'] = $metadata['exercise_type']
+            ?? HealthSyncType::tryFrom($sample->type_identifier)?->label()
+            ?? $sample->type_identifier;
     }
 }

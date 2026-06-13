@@ -70,12 +70,31 @@ it('reuses the existing encryption key on re-registration', function (): void {
     expect($second->json('encryption_key'))->toBe($first->json('encryption_key'));
 });
 
+it('revokes legacy pairing tokens when re-registering a device', function (): void {
+    $user = User::factory()->create();
+    $device = MobileSyncDevice::factory()->for($user)->paired()->create([
+        'device_identifier' => 'device-uuid-1',
+    ]);
+    $user->createToken('mobile-sync:'.$device->id, ['sync:push', 'chat:converse']);
+    $token = $user->createToken('mobile:device-uuid-1', ['chat:converse'])->plainTextToken;
+
+    $this->withHeader('Authorization', 'Bearer '.$token)
+        ->postJson(route('api.v2.sync.devices'), [
+            'device_name' => 'iPhone',
+            'device_identifier' => 'device-uuid-1',
+        ])->assertOk();
+
+    expect($user->tokens()->where('name', 'mobile-sync:'.$device->id)->count())->toBe(0)
+        ->and($user->tokens()->where('name', 'mobile:device-uuid-1')->count())->toBe(1);
+});
+
 it('reassigns a device identifier from another user and revokes their tokens', function (): void {
     $otherUser = User::factory()->create();
     $otherDevice = MobileSyncDevice::factory()->for($otherUser)->paired()->create([
         'device_identifier' => 'shared-uuid',
     ]);
     $otherUser->createToken('mobile:shared-uuid', ['chat:converse', 'sync:push']);
+    $otherUser->createToken('mobile-sync:'.$otherDevice->id, ['sync:push', 'chat:converse']);
 
     $user = User::factory()->create();
     $token = $user->createToken('mobile:shared-uuid', ['chat:converse'])->plainTextToken;
@@ -89,5 +108,6 @@ it('reassigns a device identifier from another user and revokes their tokens', f
     expect($otherDevice->fresh()->is_active)->toBeFalse()
         ->and($otherDevice->fresh()->device_identifier)->toBeNull()
         ->and($otherUser->tokens()->where('name', 'mobile:shared-uuid')->count())->toBe(0)
+        ->and($otherUser->tokens()->where('name', 'mobile-sync:'.$otherDevice->id)->count())->toBe(0)
         ->and($user->mobileSyncDevices()->where('device_identifier', 'shared-uuid')->where('is_active', true)->count())->toBe(1);
 });

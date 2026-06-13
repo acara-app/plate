@@ -86,7 +86,7 @@ it('falls back to overview for unknown topic', function (): void {
         ->and($result['context'])->toHaveKey('links');
 });
 
-it('includes setup steps with pairing token details', function (): void {
+it('includes setup steps without pairing token details', function (): void {
     $tool = new GetHealthSyncSupport(resolve(GetHealthSyncSupportContextAction::class));
 
     $request = new Request(['topic' => 'setup']);
@@ -94,9 +94,9 @@ it('includes setup steps with pairing token details', function (): void {
 
     $setup = $result['context']['setup'];
 
-    expect($setup)->toHaveKeys(['steps', 'pairing_token'])
-        ->and($setup['pairing_token'])->toHaveKeys(['length', 'expires_after'])
-        ->and($setup['pairing_token']['length'])->toBe(8);
+    expect($setup)->toHaveKey('steps')
+        ->and($setup)->not->toHaveKey('pairing_token')
+        ->and($setup['steps'])->toContain('Sign in with the same Acara Plate account you use on the web.');
 });
 
 it('includes platform support details', function (): void {
@@ -131,5 +131,5 @@ it('includes troubleshooting steps', function (): void {
 
     $troubleshooting = $result['context']['troubleshooting'];
 
-    expect($troubleshooting)->toHaveKeys(['token_expired', 'pairing_fails', 'no_data_showing', 'sync_fails', 'support']);
+    expect($troubleshooting)->toHaveKeys(['sign_in_fails', 'no_data_showing', 'sync_fails', 'support']);
 });

@@ -14,10 +14,6 @@ Route::post('v2/broadcasting/auth', fn (Request $request) => Broadcast::auth($re
     ->name('api.v2.broadcasting.auth');
 
 Route::prefix('v2/sync')->group(function (): void {
-    Route::post('pair', ApiV2\MobileSyncPairController::class)
-        ->middleware('throttle:5,1')
-        ->name('api.v2.sync.pair');
-
     Route::post('devices', ApiV2\MobileSyncDeviceRegistrationController::class)
         ->middleware(['auth:sanctum', 'throttle:10,1'])
         ->name('api.v2.sync.devices');

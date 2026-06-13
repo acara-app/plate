@@ -38,6 +38,47 @@ it('assembles medication samples', function (): void {
         ->and($result->first()['medication_dosage'])->toBe('500mg');
 });
 
+it('assembles iOS medication samples that store the name under the HealthKit "name" key', function (): void {
+    $user = User::factory()->create();
+    $sample = HealthSyncSample::factory()->medication()->for($user)->create([
+        'metadata' => ['name' => 'Melatonin', 'form' => 'capsule'],
+    ]);
+
+    $assembler = new HealthEntryAssembler;
+    $result = $assembler->assemble(collect([$sample]));
+
+    expect($result->first()['medication_name'])->toBe('Melatonin')
+        ->and($result->first()['medication_dosage'])->toBe('1 capsule');
+});
+
+it('composes a medication dose from value and unit when the device omits an explicit dosage', function (): void {
+    $user = User::factory()->create();
+    $sample = HealthSyncSample::factory()->for($user)->create([
+        'type_identifier' => HealthSyncType::MedicationDoseEvent->value,
+        'value' => 1,
+        'unit' => 'mL',
+        'metadata' => ['medication_name' => 'Cough syrup'],
+    ]);
+
+    $assembler = new HealthEntryAssembler;
+    $result = $assembler->assemble(collect([$sample]));
+
+    expect($result->first()['medication_name'])->toBe('Cough syrup')
+        ->and($result->first()['medication_dosage'])->toBe('1 mL');
+});
+
+it('leaves medication dosage blank when there is no dosage, form, or device-specific unit', function (): void {
+    $user = User::factory()->create();
+    $sample = HealthSyncSample::factory()->medication()->for($user)->create([
+        'metadata' => ['medication_name' => 'Aspirin'],
+    ]);
+
+    $assembler = new HealthEntryAssembler;
+    $result = $assembler->assemble(collect([$sample]));
+
+    expect($result->first()['medication_dosage'])->toBeNull();
+});
+
 it('assembles exercise samples', function (): void {
     $user = User::factory()->create();
     $sample = HealthSyncSample::factory()->exercise()->for($user)->create([
@@ -52,7 +93,7 @@ it('assembles exercise samples', function (): void {
         ->and($result->first()['exercise_type'])->toBe('Running');
 });
 
-it('assembles exercise sample without metadata falls back to type_identifier', function (): void {
+it('assembles exercise sample without metadata falls back to the type label', function (): void {
     $user = User::factory()->create();
     $sample = HealthSyncSample::factory()->exercise()->for($user)->create([
         'value' => 15,
@@ -62,7 +103,7 @@ it('assembles exercise sample without metadata falls back to type_identifier', f
     $assembler = new HealthEntryAssembler;
     $result = $assembler->assemble(collect([$sample]));
 
-    expect($result->first()['exercise_type'])->toBe($sample->type_identifier);
+    expect($result->first()['exercise_type'])->toBe(HealthSyncType::ExerciseMinutes->label());
 });
 
 it('ignores unknown type identifiers gracefully', function (): void {

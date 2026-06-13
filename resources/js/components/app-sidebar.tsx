@@ -1,4 +1,4 @@
-import DashboardHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/DashboardHealthEntryController';
+import ListHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/ListHealthEntryController';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -19,7 +19,6 @@ import { dashboard, privacy, terms } from '@/routes';
 import chat from '@/routes/chat';
 import integrations from '@/routes/integrations';
 import mealPlans from '@/routes/meal-plans';
-import mobileSync from '@/routes/mobile-sync';
 import biometrics from '@/routes/onboarding/biometrics';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
@@ -32,7 +31,6 @@ import {
     PanelLeftClose,
     Plug,
     ShieldCheck,
-    Smartphone,
     UserPen,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -50,9 +48,6 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
         href: chat.index(),
         icon: MessageCircle,
     },
-];
-
-const getHealthNavItems = (t: (key: string) => string): NavItem[] => [
     {
         title: t('sidebar.nav.meal_plans'),
         href: mealPlans.index(),
@@ -60,7 +55,7 @@ const getHealthNavItems = (t: (key: string) => string): NavItem[] => [
     },
     {
         title: t('sidebar.nav.health_entries'),
-        href: DashboardHealthEntryController().url,
+        href: ListHealthEntryController().url,
         icon: ActivityIcon,
     },
 ];
@@ -70,11 +65,6 @@ const getProfileNavItems = (t: (key: string) => string): NavItem[] => [
         title: t('sidebar.nav.update_info'),
         href: biometrics.show(),
         icon: UserPen,
-    },
-    {
-        title: t('sidebar.nav.mobile_sync'),
-        href: mobileSync.edit(),
-        icon: Smartphone,
     },
     {
         title: t('sidebar.nav.integrations'),
@@ -101,7 +91,6 @@ export function AppSidebar() {
     const { t } = useTranslation('common');
     const { state, isMobile, toggleSidebar } = useSidebar();
     const mainNavItems = getMainNavItems(t);
-    const healthNavItems = getHealthNavItems(t);
     const profileNavItems = getProfileNavItems(t);
     const footerNavItems = getFooterNavItems(t);
 
@@ -152,11 +141,6 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
-                <Separator />
-                <NavMain
-                    items={healthNavItems}
-                    label={t('sidebar.nav.health')}
-                />
                 <Separator />
                 <NavMain
                     items={profileNavItems}

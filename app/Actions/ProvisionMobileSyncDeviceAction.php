@@ -28,7 +28,7 @@ final readonly class ProvisionMobileSyncDeviceAction
                 ->first();
 
             if ($device instanceof MobileSyncDevice && $device->user_id !== $user->id) {
-                $this->revokeDeviceTokens->handle($device->user, $device->device_identifier, $device->id);
+                $this->revokeDeviceTokens->handle($device->user, $deviceIdentifier, $device->id);
                 $device->update(['is_active' => false, 'device_identifier' => null]);
                 $device = null;
             }
@@ -49,7 +49,7 @@ final readonly class ProvisionMobileSyncDeviceAction
             ]);
             $device->save();
 
-            $this->revokeDeviceTokens->handle($user, $deviceIdentifier);
+            $this->revokeDeviceTokens->handle($user, $deviceIdentifier, $device->id);
             $apiToken = $this->issueMobileAuthToken->handle($user, $deviceIdentifier, ['chat:converse', 'sync:push']);
 
             return [
