@@ -5,6 +5,10 @@ import type { ChatStatus } from '@/types/chat';
 import type { FileUIPart, UIMessage } from 'ai';
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { chatReducer, createInitialState } from './chat/message-reducer';
+import {
+    createStreamTracking,
+    type StreamTracking,
+} from './chat/process-event';
 import { useStreamChannel } from './chat/use-stream-channel';
 import { useStreamRecovery } from './chat/use-stream-recovery';
 
@@ -61,6 +65,7 @@ export function useChatStream({
     );
 
     const seenEventIdsRef = useRef<Set<string>>(new Set());
+    const trackingRef = useRef<StreamTracking>(createStreamTracking());
     const streamActiveRef = useRef(false);
     const onFinishRef = useRef(onFinish);
     onFinishRef.current = onFinish;
@@ -75,6 +80,7 @@ export function useChatStream({
         conversationId,
         dispatch,
         seenEventIdsRef,
+        trackingRef,
         streamActiveRef,
         onFinishRef,
     });
@@ -84,6 +90,7 @@ export function useChatStream({
         status: state.status,
         dispatch,
         seenEventIdsRef,
+        trackingRef,
         streamActiveRef,
         startReplayPolling,
         stopReplayPolling,

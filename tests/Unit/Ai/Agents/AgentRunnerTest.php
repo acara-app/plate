@@ -17,6 +17,7 @@ use App\Enums\ModelName;
 use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
+use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Messages\AssistantMessage;
 use Laravel\Ai\Messages\Message;
@@ -143,5 +144,20 @@ describe('messages', function (): void {
             ->and($messages[0]->content)->toBe('Previous question')
             ->and($messages[1])->toBeInstanceOf(AssistantMessage::class)
             ->and($messages[1]->content)->toBe('Previous answer');
+    });
+});
+
+describe('providerOptions', function (): void {
+    it('requests Gemini thinking config for a thinking-capable model', function (): void {
+        $request = new AgentRequest(message: 'Hello', modelName: ModelName::GEMINI_3_5_FLASH);
+
+        $this->agent->run($request, $this->user);
+
+        expect($this->agent->providerOptions(Lab::Gemini))->toBe([
+            'thinkingConfig' => [
+                'thinkingBudget' => 8192,
+                'includeThoughts' => true,
+            ],
+        ]);
     });
 });

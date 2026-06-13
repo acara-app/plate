@@ -7,6 +7,7 @@ namespace App\Ai\Agents;
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Ai\AgentBuilder;
 use App\Ai\AgentRequest;
+use App\Ai\ThinkingOptions;
 use App\Enums\ModelName;
 use App\Models\History;
 use App\Models\User;
@@ -15,8 +16,10 @@ use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
+use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Messages\AssistantMessage;
 use Laravel\Ai\Messages\Message;
 use Laravel\Ai\Messages\MessageRole;
@@ -29,7 +32,7 @@ use Laravel\Ai\Responses\Data\ToolResult;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
 #[Timeout(120)]
-final class AgentRunner implements Agent, Conversational, HasTools
+final class AgentRunner implements Agent, Conversational, HasProviderOptions, HasTools
 {
     use Promptable, RemembersConversations;
 
@@ -126,6 +129,23 @@ final class AgentRunner implements Agent, Conversational, HasTools
         // @codeCoverageIgnoreEnd
 
         return $this->agentBuilder->buildTools($this->currentRequest);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function providerOptions(Lab|string $provider): array
+    {
+        // @codeCoverageIgnoreStart
+        if (! $this->currentRequest instanceof AgentRequest) {
+            return [];
+        }
+
+        // @codeCoverageIgnoreEnd
+
+        $modelName = $this->currentRequest->modelName ?? ModelName::default();
+
+        return ThinkingOptions::forModel($modelName, $provider);
     }
 
     // @codeCoverageIgnoreStart

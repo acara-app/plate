@@ -4,11 +4,31 @@ import {
     type ApprovalPartPayload,
 } from '@/components/chat/approval-part';
 import { ChatErrorBoundary } from '@/components/chat/chat-error-boundary';
+import { ProviderToolRow } from '@/components/chat/provider-tool-row';
+import { ReasoningBlock } from '@/components/chat/reasoning-block';
+import { RunningDots } from '@/components/chat/running-dots';
+import {
+    SourcesSection,
+    type SourceLink,
+} from '@/components/chat/sources-section';
+import {
+    approvalOwnerToolId,
+    providerToolData,
+    reasoningData,
+    toolCallData,
+} from '@/components/chat/stream-parts';
+import { ToolCallSection } from '@/components/chat/tool-call-section';
 import { cn } from '@/lib/utils';
-import type { ChatStatus } from '@/types/chat';
+import type {
+    ChatStatus,
+    ProviderToolData,
+    ReasoningData,
+    ToolCallData,
+} from '@/types/chat';
 import { type UIMessage } from '@ai-sdk/react';
 import { code } from '@streamdown/code';
 import { AlertCircle, User } from 'lucide-react';
+import { memo } from 'react';
 import { Streamdown } from 'streamdown';
 
 interface ChatMessagesProps {
@@ -102,25 +122,11 @@ function MessageAvatar({ role }: { role: string }) {
 
 function MessagePart({
     part,
-    approval,
     isStreaming,
-    conversationId,
 }: {
     part: UIMessage['parts'][number];
-    approval: ApprovalPartPayload | null;
     isStreaming?: boolean;
-    conversationId: string;
 }) {
-    if (approval) {
-        return (
-            <ApprovalCard
-                conversationId={conversationId}
-                approvalId={approval.approvalId}
-                card={approval.card}
-            />
-        );
-    }
-
     switch (part.type) {
         case 'text':
             return (
@@ -133,29 +139,6 @@ function MessagePart({
                         {part.text}
                     </Streamdown>
                 </div>
-            );
-        case 'reasoning':
-            return (
-                <div className="prose prose-sm max-w-none text-muted-foreground italic dark:prose-invert">
-                    <Streamdown
-                        animated
-                        isAnimating={isStreaming}
-                        plugins={{ code }}
-                    >
-                        {part.text}
-                    </Streamdown>
-                </div>
-            );
-        case 'source-url':
-            return (
-                <a
-                    href={part.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary underline"
-                >
-                    {part.title ?? part.url}
-                </a>
             );
         case 'file':
             if (part.mediaType?.startsWith('image/')) {
@@ -170,10 +153,6 @@ function MessagePart({
             return (
                 <div className="text-muted-foreground">📎 {part.filename}</div>
             );
-        case 'step-start':
-        case 'source-document':
-        case 'dynamic-tool':
-            return null;
         default:
             return null;
     }
@@ -211,6 +190,106 @@ function UserBubble({ message }: { message: UIMessage }) {
     );
 }
 
+interface AssistantParts {
+    reasoning: ReasoningData[];
+    toolCalls: ToolCallData[];
+    providerTools: ProviderToolData[];
+    approvals: ApprovalPartPayload[];
+    sources: SourceLink[];
+    body: UIMessage['parts'];
+    hasContent: boolean;
+}
+
+function partitionAssistantParts(message: UIMessage): AssistantParts {
+    const parts = message.parts ?? [];
+
+    const ownerToolIds = new Set(
+        parts
+            .map(approvalOwnerToolId)
+            .filter((id): id is string => id !== null),
+    );
+
+    const reasoning = parts
+        .map(reasoningData)
+        .filter((data): data is ReasoningData => data !== null);
+
+    const toolCalls = parts
+        .map(toolCallData)
+        .filter((data): data is ToolCallData => data !== null)
+        .filter((data) => !ownerToolIds.has(data.toolId));
+
+    const providerTools = parts
+        .map(providerToolData)
+        .filter((data): data is ProviderToolData => data !== null);
+
+    const approvals = parts
+        .map((part) => extractApprovalPayload(part))
+        .filter(
+            (approval): approval is ApprovalPartPayload => approval !== null,
+        );
+
+    const sources: SourceLink[] = parts
+        .filter((part) => part.type === 'source-url')
+        .map((part) => {
+            const source = part as { url: string; title?: string | null };
+
+            return { url: source.url, title: source.title ?? source.url };
+        });
+
+    const body = parts.filter(
+        (part) => part.type === 'text' || part.type === 'file',
+    );
+
+    const hasBody = body.some(
+        (part) =>
+            part.type === 'file' ||
+            (part.type === 'text' && part.text.trim().length > 0),
+    );
+
+    const hasContent =
+        reasoning.length > 0 ||
+        toolCalls.length > 0 ||
+        providerTools.length > 0 ||
+        approvals.length > 0 ||
+        sources.length > 0 ||
+        hasBody;
+
+    return {
+        reasoning,
+        toolCalls,
+        providerTools,
+        approvals,
+        sources,
+        body,
+        hasContent,
+    };
+}
+
+function hasRenderableContent(message: UIMessage): boolean {
+    for (const part of message.parts ?? []) {
+        if (part.type === 'text') {
+            if (part.text.trim().length > 0) {
+                return true;
+            }
+
+            continue;
+        }
+
+        if (
+            part.type === 'file' ||
+            part.type === 'data-reasoning' ||
+            part.type === 'data-tool-call' ||
+            part.type === 'data-provider-tool' ||
+            part.type === 'data-approval' ||
+            part.type === 'source-url'
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 function AssistantBubble({
     message,
     isStreaming,
@@ -220,19 +299,17 @@ function AssistantBubble({
     isStreaming?: boolean;
     conversationId: string;
 }) {
-    const renderableParts = (message.parts ?? [])
-        .map((part) => ({ part, approval: extractApprovalPayload(part) }))
-        .filter(({ part, approval }) => {
-            if (approval) {
-                return true;
-            }
-            if (part.type === 'text' || part.type === 'reasoning') {
-                return part.text && part.text.trim().length > 0;
-            }
-            return part.type === 'source-url' || part.type === 'file';
-        });
+    const {
+        reasoning,
+        toolCalls,
+        providerTools,
+        approvals,
+        sources,
+        body,
+        hasContent,
+    } = partitionAssistantParts(message);
 
-    if (renderableParts.length === 0) {
+    if (!hasContent) {
         return null;
     }
 
@@ -241,13 +318,34 @@ function AssistantBubble({
             <MessageAvatar role="assistant" />
             <div className="max-w-[80%] rounded-2xl rounded-bl-md bg-muted px-4 py-3 text-foreground shadow-sm">
                 <div className="space-y-2 text-sm">
-                    {renderableParts.map(({ part, approval }, index) => (
+                    {reasoning.map((data) => (
+                        <ReasoningBlock
+                            key={data.reasoningId}
+                            data={data}
+                            isStreaming={isStreaming}
+                        />
+                    ))}
+                    <ToolCallSection
+                        tools={toolCalls}
+                        isStreaming={isStreaming}
+                    />
+                    {providerTools.map((data) => (
+                        <ProviderToolRow key={data.itemId} tool={data} />
+                    ))}
+                    {body.map((part, index) => (
                         <MessagePart
                             key={index}
                             part={part}
-                            approval={approval}
                             isStreaming={isStreaming}
+                        />
+                    ))}
+                    <SourcesSection sources={sources} />
+                    {approvals.map((approval) => (
+                        <ApprovalCard
+                            key={approval.approvalId}
                             conversationId={conversationId}
+                            approvalId={approval.approvalId}
+                            card={approval.card}
                         />
                     ))}
                 </div>
@@ -256,7 +354,7 @@ function AssistantBubble({
     );
 }
 
-function MessageBubble({
+const MessageBubble = memo(function MessageBubble({
     message,
     isStreaming,
     conversationId,
@@ -274,39 +372,15 @@ function MessageBubble({
             conversationId={conversationId}
         />
     );
-}
+});
 
-function ThinkingIndicator() {
+function WorkingIndicator() {
     return (
         <div className="flex gap-3 duration-300 animate-in fade-in slide-in-from-bottom-2">
             <MessageAvatar role="assistant" />
-            <div className="flex items-center gap-2 rounded-2xl bg-muted px-4 py-3">
-                <div className="flex items-center gap-1">
-                    <span className="size-2 animate-pulse rounded-full bg-emerald-500" />
-                    <span className="size-2 animate-pulse rounded-full bg-emerald-500 [animation-delay:150ms]" />
-                    <span className="size-2 animate-pulse rounded-full bg-emerald-500 [animation-delay:300ms]" />
-                </div>
-                <span className="text-sm text-muted-foreground">
-                    Altani is thinking...
-                </span>
-            </div>
-        </div>
-    );
-}
-
-function StreamingIndicator() {
-    return (
-        <div className="flex gap-3 duration-300 animate-in fade-in slide-in-from-bottom-2">
-            <MessageAvatar role="assistant" />
-            <div className="flex items-center gap-2 rounded-2xl bg-muted px-4 py-3">
-                <div className="flex items-center gap-1">
-                    <span className="size-2 animate-bounce rounded-full bg-emerald-500 [animation-delay:-0.3s]" />
-                    <span className="size-2 animate-bounce rounded-full bg-emerald-500 [animation-delay:-0.15s]" />
-                    <span className="size-2 animate-bounce rounded-full bg-emerald-500" />
-                </div>
-                <span className="text-sm text-muted-foreground">
-                    Altani is typing...
-                </span>
+            <div className="flex items-center gap-2 rounded-2xl rounded-bl-md bg-muted px-4 py-3">
+                <span className="text-sm text-muted-foreground">On it…</span>
+                <RunningDots />
             </div>
         </div>
     );
@@ -323,6 +397,11 @@ export default function ChatMessages({
     }
 
     const lastIndex = messages.length - 1;
+    const lastMessage = messages[lastIndex];
+    const assistantIsRendering =
+        lastMessage?.role === 'assistant' && hasRenderableContent(lastMessage);
+    const showWorking =
+        !assistantIsRendering && (isSubmitting || status === 'streaming');
 
     return (
         <div className="flex w-full flex-1 flex-col gap-4">
@@ -339,8 +418,7 @@ export default function ChatMessages({
                     />
                 </ChatErrorBoundary>
             ))}
-            {isSubmitting && <ThinkingIndicator />}
-            {status === 'streaming' && <StreamingIndicator />}
+            {showWorking && <WorkingIndicator />}
         </div>
     );
 }
