@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\DataCollection;
 
 beforeEach(function (): void {
-    config()->set('plate.benchmark.photo_disk', 'local');
     Storage::fake('local');
 });
 

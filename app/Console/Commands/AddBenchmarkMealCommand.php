@@ -198,19 +198,18 @@ final class AddBenchmarkMealCommand extends Command
     private function persist(array $meal, array $items, string $photoPath, string $extension): BenchmarkMeal
     {
         $code = BenchmarkMeal::nextCode();
-        $disk = config()->string('plate.benchmark.photo_disk');
 
-        $storedPath = Storage::disk($disk)->putFileAs(
+        $storedPath = Storage::putFileAs(
             BenchmarkMeal::PHOTO_DIRECTORY,
             new PhotoFile($photoPath),
             sprintf('%s.%s', $code, $extension),
         );
 
-        return DB::transaction(function () use ($meal, $items, $code, $disk, $storedPath): BenchmarkMeal {
+        return DB::transaction(function () use ($meal, $items, $code, $storedPath): BenchmarkMeal {
             $stored = BenchmarkMeal::query()->create([
                 ...$meal,
                 'code' => $code,
-                'photo_disk' => $disk,
+                'photo_disk' => Storage::getDefaultDriver(),
                 'photo_path' => $storedPath,
             ]);
 

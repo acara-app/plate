@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 beforeEach(function (): void {
-    config()->set('plate.benchmark.photo_disk', 'local');
+    config()->set('filesystems.default', 'local');
     Storage::fake('local');
 
     $this->photoPath = sys_get_temp_dir().'/golden-plate-'.Str::random(8).'.jpg';

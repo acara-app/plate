@@ -49,10 +49,6 @@ return [
         ],
     ],
 
-    'benchmark' => [
-        'photo_disk' => (string) env('BENCHMARK_PHOTO_DISK', (string) env('FILESYSTEM_DISK', 'local')),
-    ],
-
     'tools' => [
         GetUserProfile::class,
         LogHealthEntry::class,
