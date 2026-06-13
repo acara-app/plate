@@ -74,8 +74,8 @@ final readonly class ChatController
 
         try {
             $this->startChatStream->handle($request, $this->user, $conversation);
-        } catch (UsageLimitExceededException $exception) {
-            return back()->withErrors(['message' => $exception->userMessage()]);
+        } catch (UsageLimitExceededException $usageLimitExceededException) {
+            return back()->withErrors(['message' => $usageLimitExceededException->userMessage()]);
         }
 
         return to_route('chat.create', $conversation->id);

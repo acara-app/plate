@@ -76,7 +76,7 @@
 
                 <h3>How accurate is the nutrition data?</h3>
                 <p>
-                    All nutrition data comes from USDA FoodData Central, providing accurate nutritional information for thousands of ingredients. The platform uses verified, science-based data to ensure reliable nutrition tracking and meal planning.
+                    It depends on the feature. Meal planning and the food database are grounded in USDA FoodData Central reference data. Photo-based meal analysis works differently: those values are AI-generated estimates, not database lookups, and they come with real limitations. We explain exactly how that works — and where it fails — on our <a href="{{ route('ai-accuracy') }}">AI Accuracy &amp; Limitations</a> page.
                 </p>
 
                 <h3>Can I export my health data?</h3>

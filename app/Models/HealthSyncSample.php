@@ -141,4 +141,19 @@ final class HealthSyncSample extends Model
     {
         $query->where('entry_source', $source->value);
     }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function excludingGroup(Builder $query, ?string $groupId): void
+    {
+        if ($groupId === null) {
+            return;
+        }
+
+        $query->where(
+            fn (Builder $inner): Builder => $inner->where('group_id', '!=', $groupId)->orWhereNull('group_id'),
+        );
+    }
 }

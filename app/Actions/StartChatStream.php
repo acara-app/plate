@@ -26,7 +26,7 @@ final readonly class StartChatStream
         private CreatePendingChatStreamTurn $pendingTurn,
     ) {}
 
-    public function handle(StreamChatRequest $request, User $user, Conversation $conversation, string $channel = 'web'): ChatStreamTurn
+    public function handle(StreamChatRequest $request, User $user, Conversation $conversation, string $channel = 'web', ?string $locale = null): ChatStreamTurn
     {
         $modelName = $request->modelName();
         $this->enforceAiUsageLimit->handle($user, $modelName);
@@ -52,6 +52,7 @@ final readonly class StartChatStream
             streamId: $turn->streamId,
             userMessageId: $turn->userMessageId,
             assistantMessageId: $turn->assistantMessageId,
+            locale: $locale,
         ));
 
         return $turn;

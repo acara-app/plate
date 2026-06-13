@@ -8,6 +8,7 @@ use App\Actions\GetOrCreateConversationAction;
 use App\Actions\StartChatStream;
 use App\Http\Requests\Api\V2\ChatStreamRequest;
 use App\Models\User;
+use App\Utilities\LanguageUtil;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
@@ -27,7 +28,11 @@ final readonly class BroadcastChatController
         $conversation = $this->conversationAction->handle($conversationId, $user, withMessages: false);
         Gate::authorize('view', $conversation);
 
-        $turn = $this->startChatStream->handle($request, $user, $conversation, 'mobile');
+        $locale = $request->hasHeader('Accept-Language')
+            ? $request->getPreferredLanguage(LanguageUtil::keys())
+            : null;
+
+        $turn = $this->startChatStream->handle($request, $user, $conversation, 'mobile', $locale);
 
         return response()->json($turn->acceptedPayload($user->id, $conversation->id), 202);
     }

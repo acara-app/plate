@@ -41,7 +41,7 @@ it('normalizes and aggregates rich Laravel AI stream events', function (): void 
     ];
 
     $result = $aggregator->aggregateNormalized(array_map(
-        fn (object $event): array => $aggregator->normalizeEvent($event),
+        $aggregator->normalizeEvent(...),
         $events,
     ));
 

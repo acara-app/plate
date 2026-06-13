@@ -14,5 +14,6 @@ final class ApprovalCardData extends Data
         public bool $canApprove,
         public bool $canReject,
         public ?string $error = null,
+        public ?string $notice = null,
     ) {}
 }

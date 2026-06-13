@@ -155,6 +155,11 @@ export function ApprovalCard({
                     </p>
                     <StatusBadge status={state.status} />
                 </div>
+                {state.notice && (
+                    <p className="mt-2 text-xs text-emerald-800/80 dark:text-emerald-200/70">
+                        {state.notice}
+                    </p>
+                )}
                 {state.error && (
                     <p className="mt-2 flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
                         <AlertCircle className="size-3.5 shrink-0" />
