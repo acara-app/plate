@@ -25,7 +25,7 @@ final readonly class GetHealthSyncSupport implements Tool
 
     public function description(): string
     {
-        return 'Retrieve authoritative Acara Health Sync product support details. Use for questions about automatic health data sync, Apple Health, HealthKit, the iPhone app, Android sync status, pairing, Mobile Sync, setup, App Store links, privacy, troubleshooting, or whether Acara Plate has a sync solution.';
+        return 'Retrieve authoritative Acara Health Sync product support details. Use for questions about automatic health data sync, Apple Health, HealthKit, the iPhone app, Android sync status, setup, App Store links, privacy, troubleshooting, or whether Acara Plate has a sync solution.';
     }
 
     public function handle(Request $request): string

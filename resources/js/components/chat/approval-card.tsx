@@ -42,8 +42,7 @@ const SAVING_PRESENTATION = {
 const STATUS_PRESENTATION: Record<ApprovalStatus, StatusPresentation> = {
     pending: {
         badgeLabel: 'Awaiting review',
-        badgeClassName:
-            'bg-muted text-muted-foreground',
+        badgeClassName: 'bg-muted text-muted-foreground',
         footerLabel: 'Please approve or dismiss.',
         footerClassName: 'text-muted-foreground',
         FooterIcon: Clock,
@@ -52,7 +51,8 @@ const STATUS_PRESENTATION: Record<ApprovalStatus, StatusPresentation> = {
     executing: SAVING_PRESENTATION,
     executed: {
         badgeLabel: 'Saved',
-        badgeClassName: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+        badgeClassName:
+            'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
         footerLabel: 'Saved successfully.',
         footerClassName: 'text-emerald-600 dark:text-emerald-400',
         FooterIcon: Check,
@@ -150,9 +150,7 @@ export function ApprovalCard({
         <Card className="my-2 gap-0 overflow-hidden border border-border/60 bg-card/80 backdrop-blur-sm">
             <CardContent className="px-4 py-3">
                 <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm text-foreground">
-                        {state.summary}
-                    </p>
+                    <p className="text-sm text-foreground">{state.summary}</p>
                     <StatusBadge status={state.status} />
                 </div>
                 {state.notice && (

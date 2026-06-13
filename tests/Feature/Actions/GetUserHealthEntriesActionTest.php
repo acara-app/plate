@@ -29,7 +29,7 @@ it('counts a multi-sample meal as one entry, not one row per sample', function (
         'measured_at' => now()->subHours(2),
     ]);
 
-    $paginator = app(GetUserHealthEntriesAction::class)->handle($user);
+    $paginator = resolve(GetUserHealthEntriesAction::class)->handle($user);
 
     expect($paginator->total())->toBe(2)
         ->and($paginator->items())->toHaveCount(2);
@@ -40,7 +40,7 @@ it('keeps every sample of a meal on the same page', function (): void {
     seedMeal($user, 'meal-a', now()->subHour());
     seedMeal($user, 'meal-b', now()->subHours(3));
 
-    $page = app(GetUserHealthEntriesAction::class)->handle($user, perPage: 1);
+    $page = resolve(GetUserHealthEntriesAction::class)->handle($user, perPage: 1);
 
     expect($page->total())->toBe(2)
         ->and($page->lastPage())->toBe(2)
@@ -62,7 +62,7 @@ it('orders entries by most recent first and scopes to the requesting user', func
     seedMeal($user, 'newer', now()->subHour());
     seedMeal($other, 'theirs', now());
 
-    $paginator = app(GetUserHealthEntriesAction::class)->handle($user);
+    $paginator = resolve(GetUserHealthEntriesAction::class)->handle($user);
 
     expect($paginator->total())->toBe(2)
         ->and($paginator->items()[0]['group_id'])->toBe('newer')

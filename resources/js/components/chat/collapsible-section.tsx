@@ -58,7 +58,7 @@ export function CollapsibleSection({
             <CollapsibleTrigger
                 aria-label={label}
                 className={cn(
-                    'group flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium transition-all duration-200 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+                    'group flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium transition-all duration-200 hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none',
                     TONE_CLASSES[tone],
                 )}
             >
@@ -74,7 +74,7 @@ export function CollapsibleSection({
 
             {!open && preview}
 
-            <CollapsibleContent className="overflow-hidden motion-reduce:animate-none data-[state=closed]:animate-collapse-up data-[state=open]:animate-collapse-down">
+            <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapse-up data-[state=open]:animate-collapse-down motion-reduce:animate-none">
                 {children}
             </CollapsibleContent>
 

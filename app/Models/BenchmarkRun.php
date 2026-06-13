@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\CarbonInterface;
 use App\Data\Benchmark\HarnessReport;
+use Carbon\CarbonInterface;
 use Database\Factories\BenchmarkRunFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

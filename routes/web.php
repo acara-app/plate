@@ -116,7 +116,6 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
     Route::patch('grocery-items/{groceryItem}/toggle', [Web\GroceryListController::class, 'toggleItem'])->name('grocery-items.toggle');
 
     Route::get('health-entries', Web\HealthEntry\ListHealthEntryController::class)->name('health-entries.index');
-    Route::get('health-entries/tracking', Web\HealthEntry\DashboardHealthEntryController::class)->name('health-entries.dashboard');
     Route::post('health-entries', Web\HealthEntry\StoreHealthEntryController::class)->name('health-entries.store');
     Route::put('health-entries/{healthSyncSample}', Web\HealthEntry\UpdateHealthEntryController::class)->name('health-entries.update');
     Route::delete('health-entries/{healthSyncSample}', Web\HealthEntry\DestroyHealthEntryController::class)->name('health-entries.destroy');
@@ -158,10 +157,6 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('settings/household', [Web\HouseholdController::class, 'edit'])->name('household.edit');
     Route::patch('settings/household', [Web\HouseholdController::class, 'update'])->name('household.update');
-
-    Route::get('settings/mobile-sync', [Web\MobileSyncController::class, 'edit'])->name('mobile-sync.edit');
-    Route::post('settings/mobile-sync/token', [Web\MobileSyncController::class, 'generateToken'])->name('mobile-sync.token');
-    Route::delete('settings/mobile-sync/{mobileSyncDevice}', [Web\MobileSyncController::class, 'disconnect'])->name('mobile-sync.destroy');
 
     Route::get('settings/integrations', [Web\IntegrationsController::class, 'edit'])->name('integrations.edit');
     Route::post('settings/integrations/{platform}/token', [Web\IntegrationsController::class, 'connect'])->name('integrations.platform.token');

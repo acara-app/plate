@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\Nutrition;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\ReferenceFood;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Laravel\Ai\Embeddings;
 use Throwable;
@@ -52,7 +52,7 @@ final readonly class ReferenceFoodMatcher
             }
         }
 
-        if (!$best instanceof Model || $bestScore < $this->threshold()) {
+        if (! $best instanceof Model || $bestScore < $this->threshold()) {
             return null;
         }
 
@@ -92,7 +92,7 @@ final readonly class ReferenceFoodMatcher
             }
         }
 
-        if (!$best instanceof Model || $bestScore < $this->embeddingThreshold()) {
+        if (! $best instanceof Model || $bestScore < $this->embeddingThreshold()) {
             return null;
         }
 

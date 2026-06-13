@@ -27,16 +27,10 @@ final readonly class GetHealthSyncSupportContextAction
             ],
             'setup' => [
                 'steps' => [
-                    'Open the Plate dashboard and go to Settings > Mobile Sync.',
-                    'Generate an 8-character pairing token.',
                     'Install Acara Health Sync on the iPhone.',
-                    'Connect by scanning the QR code or manually entering the Plate URL and pairing token.',
+                    'Sign in with the same Acara Plate account you use on the web.',
                     'Choose the Apple Health data permissions to share.',
                     'Sync from the app; data will flow into Plate automatically when the app runs.',
-                ],
-                'pairing_token' => [
-                    'length' => 8,
-                    'expires_after' => '24 hours',
                 ],
             ],
             'platform_support' => [
@@ -58,17 +52,15 @@ final readonly class GetHealthSyncSupportContextAction
                 'apple_health_write_access' => 'Acara Health Sync does not write data to Apple Health.',
             ],
             'troubleshooting' => [
-                'token_expired' => 'Generate a fresh token from Settings > Mobile Sync. Pairing tokens last 24 hours.',
-                'pairing_fails' => 'Check the Plate instance URL and make sure the token is current.',
+                'sign_in_fails' => 'Confirm the account credentials are correct and try signing in again from the iOS app.',
                 'no_data_showing' => 'Confirm Apple Health has data and HealthKit permissions are enabled in Acara Health Sync.',
                 'sync_fails' => 'Make sure the Plate instance is online, then try Sync Now in the app.',
-                'support' => 'Email support@acara.app for pairing, syncing, or HealthKit permission help.',
+                'support' => 'Email support@acara.app for sign-in, syncing, or HealthKit permission help.',
             ],
             'links' => [
                 'app_store_url' => config()->string('plate.health_sync.app_store_url'),
                 'health_sync_url' => route('health-sync'),
                 'setup_guide_url' => route('health-sync.setup'),
-                'mobile_sync_settings_url' => route('mobile-sync.edit'),
                 'install_app_url' => route('install-app'),
                 'support_email' => 'support@acara.app',
             ],

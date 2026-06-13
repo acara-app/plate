@@ -213,17 +213,13 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                                 size="icon"
                                 className="m-1 size-9 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:scale-95 sm:size-8"
                                 disabled={disabled}
-                                onClick={() =>
-                                    fileInputRef.current?.click()
-                                }
+                                onClick={() => fileInputRef.current?.click()}
                                 aria-label="Attach image"
                             >
                                 <Paperclip className="size-[18px]" />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="top">
-                            Attach image
-                        </TooltipContent>
+                        <TooltipContent side="top">Attach image</TooltipContent>
                     </Tooltip>
 
                     <textarea
