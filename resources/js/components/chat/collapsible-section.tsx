@@ -74,7 +74,7 @@ export function CollapsibleSection({
 
             {!open && preview}
 
-            <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapse-up data-[state=open]:animate-collapse-down">
+            <CollapsibleContent className="overflow-hidden motion-reduce:animate-none data-[state=closed]:animate-collapse-up data-[state=open]:animate-collapse-down">
                 {children}
             </CollapsibleContent>
 
