@@ -1038,8 +1038,8 @@ return [
         'delete_description' => 'This removes the conversation and its message history. This action cannot be undone.',
         'delete_confirm' => 'Delete chat',
         'just_now' => 'Just now',
-        'minutes_ago' => ':countm ago',
-        'hours_ago' => ':counth ago',
-        'days_ago' => ':countd ago',
+        'minutes_ago' => '{{count}}m ago',
+        'hours_ago' => '{{count}}h ago',
+        'days_ago' => '{{count}}d ago',
     ],
 ];
