@@ -62,7 +62,7 @@ final readonly class BroadcastConnector
     {
         Broadcast::on($channel)
             ->as($payload['type'])
-            ->with($payload)
+            ->with($this->aggregator->broadcastPayload($payload))
             ->sendNow();
     }
 }

@@ -1,7 +1,11 @@
 import { events as streamEvents } from '@/routes/chat/stream';
 import { useCallback, useRef } from 'react';
 import type { ChatAction } from './message-reducer';
-import { applyStreamEvent, type RawStreamEvent } from './process-event';
+import {
+    applyStreamEvent,
+    type RawStreamEvent,
+    type StreamTracking,
+} from './process-event';
 
 const EVENT_REPLAY_INTERVAL = 1_000;
 const MAX_EVENT_REPLAY_ATTEMPTS = 300;
@@ -23,6 +27,7 @@ interface UseStreamRecoveryOptions {
     conversationId: string;
     dispatch: React.Dispatch<ChatAction>;
     seenEventIdsRef: React.RefObject<Set<string>>;
+    trackingRef: React.RefObject<StreamTracking>;
     streamActiveRef: React.RefObject<boolean>;
     onFinishRef: React.RefObject<(() => void) | undefined>;
 }
@@ -39,6 +44,7 @@ export function useStreamRecovery({
     conversationId,
     dispatch,
     seenEventIdsRef,
+    trackingRef,
     streamActiveRef,
     onFinishRef,
 }: UseStreamRecoveryOptions): UseStreamRecoveryReturn {
@@ -59,7 +65,9 @@ export function useStreamRecovery({
     const resetReplayState = useCallback(() => {
         lastSequenceRef.current = NO_SEQUENCE_CONSUMED;
         seenEventIdsRef.current.clear();
-    }, [seenEventIdsRef]);
+        trackingRef.current.startedReasoningIds.clear();
+        trackingRef.current.startedProviderToolIds.clear();
+    }, [seenEventIdsRef, trackingRef]);
 
     const finishStream = useCallback(() => {
         stopReplayPolling();
@@ -111,6 +119,7 @@ export function useStreamRecovery({
                         envelope.data,
                         dispatch,
                         seenEventIdsRef.current,
+                        trackingRef.current,
                     );
                 }
 
@@ -139,6 +148,7 @@ export function useStreamRecovery({
             conversationId,
             dispatch,
             seenEventIdsRef,
+            trackingRef,
             streamActiveRef,
             finishStream,
         ],

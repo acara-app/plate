@@ -29,6 +29,24 @@ use Laravel\Ai\Streaming\Events\ToolResult;
 final readonly class StreamAggregator
 {
     /**
+     * @var list<string>
+     */
+    private const array AGGREGATION_ONLY_KEYS = ['tool_call', 'tool_result', 'summary', 'metadata'];
+
+    /**
+     * @param  TNormalizedEvent  $payload
+     * @return array{type: string, ...<string, mixed>}
+     */
+    public function broadcastPayload(array $payload): array
+    {
+        foreach (self::AGGREGATION_ONLY_KEYS as $key) {
+            unset($payload[$key]);
+        }
+
+        return $payload;
+    }
+
+    /**
      * @return TNormalizedEvent
      */
     public function normalizeEvent(StreamEvent $event): array

@@ -45,7 +45,7 @@ return [
                     'verify_peer_name' => false,
                 ],
             ],
-            'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
+            'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 256_000),
             'scaling' => [
                 'enabled' => env('REVERB_SCALING_ENABLED', false),
                 'channel' => env('REVERB_SCALING_CHANNEL', 'reverb'),

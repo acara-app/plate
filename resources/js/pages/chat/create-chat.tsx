@@ -173,7 +173,7 @@ export default function CreateChat() {
         }
     }, [error, clearError]);
 
-    const showThinkingIndicator =
+    const showWorkingIndicator =
         (isSubmitting || isResuming) && messages.length > 0;
 
     const [isMobileNavVisible, setIsMobileNavVisible] = useState(true);
@@ -220,7 +220,7 @@ export default function CreateChat() {
                             <ChatMessages
                                 messages={messages}
                                 status={status}
-                                isSubmitting={showThinkingIndicator}
+                                isSubmitting={showWorkingIndicator}
                                 conversationId={conversationId}
                             />
                             {!usageLimitTrigger && (
