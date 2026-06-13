@@ -36,10 +36,14 @@ return [
             'path' => env('REVERB_SERVER_PATH', ''),
             'hostname' => env('REVERB_HOST'),
             'options' => [
-                'tls' => array_filter([
-                    'local_cert' => env('REVERB_TLS_CERT'),
-                    'local_pk' => env('REVERB_TLS_KEY'),
-                ]),
+                'tls' => [
+                    ...array_filter([
+                        'local_cert' => env('REVERB_TLS_CERT'),
+                        'local_pk' => env('REVERB_TLS_KEY'),
+                    ]),
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                ],
             ],
             'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
             'scaling' => [

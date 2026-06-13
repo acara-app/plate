@@ -33,39 +33,30 @@ Route::prefix('v2/chat')
     ->middleware(['auth:sanctum', 'abilities:chat:converse'])
     ->group(function (): void {
         Route::get('conversations', [ApiV2\ChatController::class, 'index'])
-            ->middleware('throttle:60,1')
             ->name('api.v2.chat.index');
 
         Route::get('conversations/{conversation}', [ApiV2\ChatController::class, 'show'])
-            ->middleware('throttle:60,1')
             ->name('api.v2.chat.show');
 
         Route::post('conversations/{conversation}/stream', ApiV2\BroadcastChatController::class)
-            ->middleware('throttle:30,1')
             ->name('api.v2.chat.stream');
 
         Route::post('conversations/{conversation}/stream/stop', ChatStopController::class)
-            ->middleware('throttle:30,1')
             ->name('api.v2.chat.stream.stop');
 
         Route::get('conversations/{conversation}/stream/events', ChatStreamEventsController::class)
-            ->middleware('throttle:120,1')
             ->name('api.v2.chat.stream.events');
 
         Route::delete('conversations/{conversation}', [ApiV2\ChatController::class, 'destroy'])
-            ->middleware('throttle:30,1')
             ->name('api.v2.chat.destroy');
 
         Route::get('conversations/{conversation}/approvals/{approval}', [ApiV2\ApprovalController::class, 'show'])
-            ->middleware('throttle:60,1')
             ->name('api.v2.chat.approvals.show');
 
         Route::post('conversations/{conversation}/approvals/{approval}/approve', [ApiV2\ApprovalController::class, 'approve'])
-            ->middleware('throttle:30,1')
             ->name('api.v2.chat.approvals.approve');
 
         Route::post('conversations/{conversation}/approvals/{approval}/reject', [ApiV2\ApprovalController::class, 'reject'])
-            ->middleware('throttle:30,1')
             ->name('api.v2.chat.approvals.reject');
     });
 

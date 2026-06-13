@@ -13,6 +13,7 @@ Route::view('/privacy-policy', 'privacy-policy')->name('privacy');
 Route::view('/terms-of-service', 'terms-of-service')->name('terms');
 Route::view('/about', 'about')->name('about');
 Route::view('/support', 'support')->name('support');
+Route::view('/ai-accuracy', 'ai-accuracy')->name('ai-accuracy');
 Route::view('/install-app', 'install-app')->name('install-app');
 Route::view('/diabetes-log-book', 'diabetes-log-book')->name('diabetes-log-book');
 Route::view('/diabetes-log-book-info', 'diabetes-log-book-info')->name('diabetes-log-book-info');
@@ -89,22 +90,17 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
     Route::delete('/chat/{conversation}', [Web\ChatController::class, 'destroy'])
         ->name('chat.destroy');
     Route::post('chat/stream/{conversation}', Web\BroadcastChatController::class)
-        ->middleware('throttle:30,1')
         ->name('chat.stream');
     Route::post('chat/stream/{conversation}/stop', Web\ChatStopController::class)
-        ->middleware('throttle:30,1')
         ->name('chat.stream.stop');
     Route::get('chat/stream/{conversation}/events', Web\ChatStreamEventsController::class)
-        ->middleware('throttle:120,1')
         ->name('chat.stream.events');
 
     Route::get('conversations/{conversation}/approvals/{approval}', [Web\ApprovalController::class, 'show'])
         ->name('approvals.show');
     Route::post('conversations/{conversation}/approvals/{approval}/approve', [Web\ApprovalController::class, 'approve'])
-        ->middleware('throttle:30,1')
         ->name('approvals.approve');
     Route::post('conversations/{conversation}/approvals/{approval}/reject', [Web\ApprovalController::class, 'reject'])
-        ->middleware('throttle:30,1')
         ->name('approvals.reject');
 
     Route::post('meal-plans', Web\StoreMealPlanController::class)->name('meal-plans.store');

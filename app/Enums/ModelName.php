@@ -12,7 +12,7 @@ enum ModelName: string
     case GPT_5_MINI = 'gpt-5-mini';
     case GPT_5_4_MINI = 'gpt-5.4-mini';
     case GPT_5_NANO = 'gpt-5-nano';
-    case GEMINI_3_FLASH = 'gemini-3-flash-preview';
+    case GEMINI_3_5_FLASH = 'gemini-3.5-flash';
     case GEMINI_3_1_PRO = 'gemini-3.1-pro-preview';
 
     public static function default(): self
@@ -37,7 +37,7 @@ enum ModelName: string
             self::GPT_5_MINI => 'GPT-5 mini',
             self::GPT_5_4_MINI => 'GPT-5.4 mini',
             self::GPT_5_NANO => 'GPT-5 Nano',
-            self::GEMINI_3_FLASH => 'Gemini 3 Flash',
+            self::GEMINI_3_5_FLASH => 'Gemini 3.5 Flash',
             self::GEMINI_3_1_PRO => 'Gemini 3.1 Pro',
         };
     }
@@ -48,7 +48,7 @@ enum ModelName: string
             self::GPT_5_MINI => 'Cheapest model, best for smarter tasks',
             self::GPT_5_4_MINI => 'Strongest mini model for coding, agents, and high-volume workloads',
             self::GPT_5_NANO => 'Cheapest model, best for simpler tasks',
-            self::GEMINI_3_FLASH => 'Google\'s latest model with frontier intelligence built for speed that helps everyone learn, build, and plan anything — faster',
+            self::GEMINI_3_5_FLASH => 'Google\'s latest model with frontier intelligence built for speed that helps everyone learn, build, and plan anything — faster',
             self::GEMINI_3_1_PRO => "Google's latest Pro model with advanced reasoning and frontier capabilities",
         };
     }
@@ -57,7 +57,7 @@ enum ModelName: string
     {
         return match ($this) {
             self::GPT_5_MINI, self::GPT_5_4_MINI, self::GPT_5_NANO => 'openai',
-            self::GEMINI_3_FLASH, self::GEMINI_3_1_PRO => 'google',
+            self::GEMINI_3_5_FLASH, self::GEMINI_3_1_PRO => 'google',
         };
     }
 
@@ -84,7 +84,7 @@ enum ModelName: string
     public function requiresThinkingMode(): bool
     {
         return match ($this) {
-            self::GEMINI_3_FLASH, self::GEMINI_3_1_PRO => true,
+            self::GEMINI_3_5_FLASH, self::GEMINI_3_1_PRO => true,
             default => false,
         };
     }
@@ -92,7 +92,7 @@ enum ModelName: string
     public function getThinkingBudget(): ?int
     {
         return match ($this) {
-            self::GEMINI_3_FLASH, self::GEMINI_3_1_PRO => 8192,
+            self::GEMINI_3_5_FLASH, self::GEMINI_3_1_PRO => 8192,
             default => null,
         };
     }
@@ -108,7 +108,7 @@ enum ModelName: string
     public function getRecommendedTemperature(): float
     {
         return match ($this) {
-            self::GEMINI_3_FLASH, self::GEMINI_3_1_PRO => 1.0,
+            self::GEMINI_3_5_FLASH, self::GEMINI_3_1_PRO => 1.0,
             default => 0.7,
         };
     }
@@ -116,7 +116,7 @@ enum ModelName: string
     public function getMinMaxTokens(): int
     {
         return match ($this) {
-            self::GEMINI_3_FLASH, self::GEMINI_3_1_PRO => 16384,
+            self::GEMINI_3_5_FLASH, self::GEMINI_3_1_PRO => 16384,
             default => 8000,
         };
     }

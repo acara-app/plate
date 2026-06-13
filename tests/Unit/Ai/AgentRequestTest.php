@@ -89,7 +89,7 @@ describe('shouldEnableWebSearch', function (): void {
     it('returns false for Gemini models that do not support web search', function (): void {
         $request = new AgentRequest(
             message: 'Hello',
-            modelName: ModelName::GEMINI_3_FLASH,
+            modelName: ModelName::GEMINI_3_5_FLASH,
         );
 
         expect($request->shouldEnableWebSearch())->toBeFalse();

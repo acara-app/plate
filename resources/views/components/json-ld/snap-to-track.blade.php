@@ -21,54 +21,21 @@
     }]
 }
 </script>
-<script type="application/ld+json">
-{
-    "@@context": "https://schema.org",
-    "@@type": "FAQPage",
-    "mainEntity": [
-        {
-            "@@type": "Question",
-            "name": "How does the AI food photo analyzer work?",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "Upload a photo of your meal and our AI vision model identifies each food item, estimates portion size, and calculates calories, protein, carbs, and fat for every item plus the full meal. Nutrition values are derived from USDA FoodData Central reference data, and you get a confidence score so you know how reliable each estimate is."
-            }
-        },
-        {
-            "@@type": "Question",
-            "name": "How accurate are calorie estimates from food photos?",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "Accuracy depends on photo clarity, lighting, and how visible each ingredient is. In good conditions, AI photo estimates land within roughly 10–20% of actual values for whole foods, and the tool returns a confidence score (0–100%) for each meal so you can judge reliability. Mixed dishes, sauces, and oils are harder to estimate than visible whole foods."
-            }
-        },
-        {
-            "@@type": "Question",
-            "name": "What types of food can the AI recognize?",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "The analyzer recognizes most common foods: fruits, vegetables, grains, meats, fish, dairy, packaged snacks, drinks, and prepared dishes from many cuisines. It works best when each item is clearly visible from above with good lighting. Hidden ingredients (oils, sauces, dressings, broths) are harder to detect, so single-ingredient and well-lit plate shots produce the most reliable results."
-            }
-        },
-        {
-            "@@type": "Question",
-            "name": "Is my food photo kept private?",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "Yes. Your photo is used only to generate the nutrition analysis. Livewire stores it as a temporary upload while the scan runs, then we delete that temporary file as soon as the result or error is returned. We do not retain images, share them with third parties, or use them to train AI models. Authenticated users can opt to log meals with photos to their personal history; on this public tool, no image is saved."
-            }
-        },
-        {
-            "@@type": "Question",
-            "name": "How do I use Snap to Track?",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "Open this page on your phone or laptop, tap the upload area to take a new photo or pick one from your gallery, then tap Analyze Food. In about 5–15 seconds you get a per-item breakdown of calories, protein, carbs, and fat plus meal totals. No signup is required to try it; create a free account to save and track meals over time."
-            }
-        }
-    ]
-}
-</script>
+@php
+$faqPage = [
+    '@context' => 'https://schema.org',
+    '@type' => 'FAQPage',
+    'mainEntity' => collect(App\Services\AiTransparency::snapToTrackFaqs())->map(fn (array $faq): array => [
+        '@type' => 'Question',
+        'name' => $faq['q'],
+        'acceptedAnswer' => [
+            '@type' => 'Answer',
+            'text' => $faq['a'],
+        ],
+    ])->all(),
+];
+@endphp
+<script type="application/ld+json">{!! json_encode($faqPage, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 <script type="application/ld+json">
 {
     "@@context": "https://schema.org",

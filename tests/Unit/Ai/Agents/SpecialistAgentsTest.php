@@ -15,6 +15,7 @@ use App\Ai\Tools\GetHealthData;
 use App\Ai\Tools\GetHealthGoals;
 use App\Ai\Tools\GetHealthSummary;
 use App\Ai\Tools\GetHealthSyncSupport;
+use App\Ai\Tools\GetMealGlucoseResponse;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\StartMealPlanGeneration;
 use App\Ai\Tools\SuggestMeal;
@@ -55,6 +56,7 @@ dataset('specialists', [
             GetHealthSummary::class,
             GetHealthGoals::class,
             GetHealthSyncSupport::class,
+            GetMealGlucoseResponse::class,
         ],
     ],
     'fitness' => [

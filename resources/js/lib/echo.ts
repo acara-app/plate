@@ -6,7 +6,7 @@ import {
 import { useEffect, useState } from 'react';
 
 const reverbScheme = import.meta.env.VITE_REVERB_SCHEME as string | undefined;
-const reverbPort = Number(import.meta.env.VITE_REVERB_PORT);
+const reverbPort = Number(import.meta.env.VITE_REVERB_PORT) || 8080;
 
 configureEcho({
     broadcaster: 'reverb',
@@ -15,7 +15,7 @@ configureEcho({
     wsPort: reverbPort,
     wssPort: reverbPort,
     forceTLS: reverbScheme === 'https',
-    enabledTransports: ['wss'],
+    enabledTransports: ['ws', 'wss'],
 });
 
 export function reconnect(): void {

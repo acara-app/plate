@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Enums\HealthEntryType;
+use App\Services\AiTransparency;
 use App\Enums\AgentApprovalStatus;
 use App\Models\AgentApproval;
 use App\Models\Conversation;
@@ -81,4 +83,17 @@ it('builds generic card data from the summary and status', function (): void {
         ->and($card->canReject)->toBeTrue();
 
     expect(AgentApproval::factory()->executed()->create()->toCardData()->canApprove)->toBeFalse();
+});
+
+it('includes the carb boundary notice on food entry cards', function (): void {
+    $approval = AgentApproval::factory()->create([
+        'payload' => ['log_type' => HealthEntryType::Food->value, 'calories' => 310],
+        'summary' => '4 eggs (~310 kcal) this evening',
+    ]);
+
+    expect($approval->toCardData()->notice)->toBe(AiTransparency::carbBoundaryNotice());
+});
+
+it('omits the boundary notice on non-food entry cards', function (): void {
+    expect(AgentApproval::factory()->create()->toCardData()->notice)->toBeNull();
 });

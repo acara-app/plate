@@ -34,6 +34,21 @@ return [
         'minimum_ios_version' => (string) env('HEALTH_SYNC_MIN_IOS_VERSION', '18.0'),
     ],
 
+    'food_photo_analyzer' => [
+        'model' => (string) env('FOOD_PHOTO_ANALYZER_MODEL', 'gemini-3.5-flash'),
+
+        'reference_lookup' => [
+            'enabled' => (bool) env('FOOD_REFERENCE_LOOKUP_ENABLED', true),
+            'match_threshold' => (float) env('FOOD_REFERENCE_MATCH_THRESHOLD', 0.5),
+
+            'embeddings' => [
+                'enabled' => (bool) env('FOOD_REFERENCE_EMBEDDINGS_ENABLED', false),
+                'dimensions' => (int) env('FOOD_REFERENCE_EMBEDDINGS_DIMENSIONS', 1536),
+                'threshold' => (float) env('FOOD_REFERENCE_EMBEDDINGS_THRESHOLD', 0.8),
+            ],
+        ],
+    ],
+
     'tools' => [
         GetUserProfile::class,
         LogHealthEntry::class,
@@ -82,6 +97,7 @@ return [
             'gpt-5-nano' => ['input' => 0.10, 'output' => 0.40, 'reasoning' => 0.0, 'cache_read' => 0.05],
             'gpt-5.4-mini' => ['input' => 0.75, 'output' => 4.50, 'reasoning' => 0.0, 'cache_read' => 0.075],
             'gemini-3-flash-preview' => ['input' => 0.50, 'output' => 3.00, 'reasoning' => 0.0, 'cache_read' => 0.05],
+            'gemini-3.5-flash' => ['input' => 0.50, 'output' => 3.00, 'reasoning' => 0.0, 'cache_read' => 0.05],
             'gemini-3.1-pro-preview' => ['input' => 2.00, 'output' => 12.00, 'reasoning' => 0.0, 'cache_read' => 0.20],
         ],
     ],

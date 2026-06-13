@@ -13,6 +13,13 @@ beforeEach(function (): void {
     $this->agent = new FoodPhotoAnalyzerAgent;
 });
 
+it('keeps the prompt accuracy framing non-clinical', function (): void {
+    expect($this->agent->instructions())
+        ->toContain('users track per-item carbohydrate values closely')
+        ->not->toContain('diabetes management')
+        ->not->toContain('depend on per-item carb counts');
+});
+
 it('returns instructions with food analysis guidance', function (): void {
     $instructions = $this->agent->instructions();
 
@@ -135,3 +142,33 @@ it('throws exception when structured data is empty', function (): void {
 
     $this->agent->analyze($imageBase64, 'image/jpeg');
 })->throws(CannotCreateData::class);
+
+it('stamps the analyzer version on analysis results', function (): void {
+    FoodPhotoAnalyzerAgent::fake([
+        [
+            'items' => [],
+            'total_calories' => 0,
+            'total_protein' => 0,
+            'total_carbs' => 0,
+            'total_fat' => 0,
+            'confidence' => 0.0,
+        ],
+    ]);
+
+    $result = $this->agent->analyze(base64_encode('fake-image-data'), 'image/jpeg');
+
+    expect($result->analyzerVersion)->toBe(FoodPhotoAnalyzerAgent::version());
+});
+
+it('resolves the pinned model and version from configuration', function (): void {
+    config()->set('plate.food_photo_analyzer.model', 'gemini-test-model');
+
+    expect(FoodPhotoAnalyzerAgent::pinnedModel())->toBe('gemini-test-model')
+        ->and(FoodPhotoAnalyzerAgent::version())->toBe('gemini-test-model/p'.FoodPhotoAnalyzerAgent::PROMPT_VERSION);
+});
+
+it('fails loudly when no model is pinned', function (): void {
+    config()->set('plate.food_photo_analyzer.model', '');
+
+    FoodPhotoAnalyzerAgent::pinnedModel();
+})->throws(RuntimeException::class, 'No model is pinned for the food photo analyzer.');

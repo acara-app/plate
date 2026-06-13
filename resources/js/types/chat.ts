@@ -27,6 +27,7 @@ export interface ApprovalCardData {
     can_approve: boolean;
     can_reject: boolean;
     error: string | null;
+    notice: string | null;
 }
 
 export interface ChatApprovalsPageProps {

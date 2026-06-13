@@ -7,9 +7,9 @@ use App\Services\AiUsageService;
 
 covers(AiUsageService::class);
 
-it('calculates cost for gemini-3-flash model', function (): void {
+it('calculates cost for gemini-3.5-flash model', function (): void {
     $service = new AiUsageService;
-    $pricing = ModelName::GEMINI_3_FLASH->getPricing();
+    $pricing = ModelName::GEMINI_3_5_FLASH->getPricing();
 
     $usage = [
         'prompt_tokens' => 1000000,
@@ -18,7 +18,7 @@ it('calculates cost for gemini-3-flash model', function (): void {
         'reasoning_tokens' => 0,
     ];
 
-    $cost = $service->calculateCost('gemini-3-flash-preview', $usage);
+    $cost = $service->calculateCost('gemini-3.5-flash', $usage);
 
     expect($cost)->toBe($pricing['input'] + ($pricing['output'] * 0.5));
 });
@@ -57,7 +57,7 @@ it('calculates cost for gpt-5-mini model', function (): void {
 
 it('calculates cost with cache reads', function (): void {
     $service = new AiUsageService;
-    $pricing = ModelName::GEMINI_3_FLASH->getPricing();
+    $pricing = ModelName::GEMINI_3_5_FLASH->getPricing();
 
     $usage = [
         'prompt_tokens' => 500000,
@@ -66,7 +66,7 @@ it('calculates cost with cache reads', function (): void {
         'reasoning_tokens' => 0,
     ];
 
-    $cost = $service->calculateCost('gemini-3-flash-preview', $usage);
+    $cost = $service->calculateCost('gemini-3.5-flash', $usage);
 
     expect($cost)->toBe(
         ($pricing['input'] * 0.5) +
@@ -114,14 +114,14 @@ it('calculates cost with zero tokens', function (): void {
         'reasoning_tokens' => 0,
     ];
 
-    $cost = $service->calculateCost('gemini-3-flash-preview', $usage);
+    $cost = $service->calculateCost('gemini-3.5-flash', $usage);
 
     expect($cost)->toBe(0.0);
 });
 
 it('calculates cost with partial tokens', function (): void {
     $service = new AiUsageService;
-    $pricing = ModelName::GEMINI_3_FLASH->getPricing();
+    $pricing = ModelName::GEMINI_3_5_FLASH->getPricing();
 
     $usage = [
         'prompt_tokens' => 1000,
@@ -130,7 +130,7 @@ it('calculates cost with partial tokens', function (): void {
         'reasoning_tokens' => 0,
     ];
 
-    $cost = $service->calculateCost('gemini-3-flash-preview', $usage);
+    $cost = $service->calculateCost('gemini-3.5-flash', $usage);
 
     $expectedCost = (1000 / 1000000 * $pricing['input']) +
                     (500 / 1000000 * $pricing['output']);

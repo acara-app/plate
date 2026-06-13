@@ -15,11 +15,13 @@ use App\Services\BroadcastConnector;
 use App\Services\ChatChannel;
 use App\Services\StreamAggregator;
 use App\Services\StreamEventStore;
+use App\Utilities\LanguageUtil;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\MaxExceptions;
 use Illuminate\Queue\Attributes\Timeout;
 use Illuminate\Queue\Attributes\Tries;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Context;
@@ -43,6 +45,7 @@ final class ProcessChatStream implements ShouldQueue
         public string $streamId,
         public string $userMessageId,
         public string $assistantMessageId,
+        public ?string $locale = null,
     ) {}
 
     /**
@@ -59,44 +62,51 @@ final class ProcessChatStream implements ShouldQueue
         BroadcastConnector $connector,
         CompletePendingChatStreamTurn $complete,
     ): void {
-        if ($this->resetStateForRetry($events)) {
-            $this->completePendingTurn($complete, new ChatStreamResult, History::STREAM_STATUS_CANCELLED);
+        $previousLocale = App::getLocale();
 
-            return;
+        try {
+            if ($this->resetStateForRetry($events)) {
+                $this->completePendingTurn($complete, new ChatStreamResult, History::STREAM_STATUS_CANCELLED);
+
+                return;
+            }
+
+            $user = User::query()->findOrFail($this->userId);
+            Auth::login($user);
+            App::setLocale(LanguageUtil::resolve($this->locale ?? $user->locale)['code']);
+
+            Context::add('chat.channel', $this->channel);
+            Context::add('chat.conversation_id', $this->conversationId);
+
+            $this->broadcastLifecycle('processing');
+
+            $userMessage = History::query()->findOrFail($this->userMessageId);
+
+            $request = new AgentRequest(
+                message: $userMessage->content,
+                images: $this->base64Images($userMessage->attachments ?? []),
+                modelName: ModelName::tryFrom($this->modelName) ?? ModelName::default(),
+                conversationId: $this->conversationId,
+                streamId: $this->streamId,
+            );
+
+            $stream = $agentRunner->run($request, $user);
+            $delivery = $connector->deliver($stream, $this->userId, $this->conversationId);
+
+            $this->completePendingTurn(
+                complete: $complete,
+                result: $delivery->result,
+                status: $delivery->cancelled ? History::STREAM_STATUS_CANCELLED : History::STREAM_STATUS_COMPLETED,
+            );
+
+            if ($delivery->cancelled) {
+                $this->broadcastLifecycle('stream_end');
+            }
+
+            $events->markComplete($this->conversationId);
+        } finally {
+            App::setLocale($previousLocale);
         }
-
-        $user = User::query()->findOrFail($this->userId);
-        Auth::login($user);
-
-        Context::add('chat.channel', $this->channel);
-        Context::add('chat.conversation_id', $this->conversationId);
-
-        $this->broadcastLifecycle('processing');
-
-        $userMessage = History::query()->findOrFail($this->userMessageId);
-
-        $request = new AgentRequest(
-            message: $userMessage->content,
-            images: $this->base64Images($userMessage->attachments ?? []),
-            modelName: ModelName::tryFrom($this->modelName) ?? ModelName::default(),
-            conversationId: $this->conversationId,
-            streamId: $this->streamId,
-        );
-
-        $stream = $agentRunner->run($request, $user);
-        $delivery = $connector->deliver($stream, $this->userId, $this->conversationId);
-
-        $this->completePendingTurn(
-            complete: $complete,
-            result: $delivery->result,
-            status: $delivery->cancelled ? History::STREAM_STATUS_CANCELLED : History::STREAM_STATUS_COMPLETED,
-        );
-
-        if ($delivery->cancelled) {
-            $this->broadcastLifecycle('stream_end');
-        }
-
-        $events->markComplete($this->conversationId);
     }
 
     public function failed(Throwable $e): void

@@ -1,0 +1,37 @@
+{
+  "FoundationFoods": [
+    {
+      "fdcId": 321358,
+      "description": "Hummus, commercial",
+      "publicationDate": "4/27/2026",
+      "foodCategory": { "description": "Legumes and Legume Products" },
+      "foodNutrients": [
+        { "nutrient": { "number": "203", "name": "Protein", "unitName": "g" }, "amount": 7.35 },
+        { "nutrient": { "number": "204", "name": "Total lipid (fat)", "unitName": "g" }, "amount": 17.1 },
+        { "nutrient": { "number": "205", "name": "Carbohydrate, by difference", "unitName": "g" }, "amount": 14.9 },
+        { "nutrient": { "number": "208", "name": "Energy", "unitName": "kcal" }, "amount": 229 }
+      ]
+    },
+    {
+      "fdcId": 999001,
+      "description": "Spinach, raw",
+      "publicationDate": "4/27/2026",
+      "foodCategory": null,
+      "foodNutrients": [
+        null,
+        { "nutrient": { "number": "203", "name": "Protein", "unitName": "g" }, "amount": 2.86 },
+        { "nutrient": { "number": "205", "name": "Carbohydrate, by difference", "unitName": "g" }, "amount": 3.63 },
+        { "nutrient": { "number": "208", "name": "Energy", "unitName": "kcal" }, "amount": 23 }
+      ]
+    },
+    {
+      "fdcId": 999002,
+      "description": "Oil, olive, extra virgin",
+      "foodCategory": { "description": "Fats and Oils" },
+      "foodNutrients": [
+        { "nutrient": { "number": "204", "name": "Total lipid (fat)", "unitName": "g" }, "amount": 100 },
+        { "nutrient": { "number": "957", "name": "Energy (Atwater General Factors)", "unitName": "kcal" }, "amount": 884 }
+      ]
+    }
+  ]
+}

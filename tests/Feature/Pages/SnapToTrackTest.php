@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\ReferenceFood;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -341,6 +342,64 @@ it('blocks the analyze call once the per-IP rate limit is exhausted', function (
         ->call('analyze')
         ->assertSet('error', 'Too many requests. Please try again later.')
         ->assertSet('result', null);
+});
+
+it('shows the carb boundary notice with analysis results', function (): void {
+    fakeTurnstileForSnapToTrack();
+
+    FoodPhotoAnalyzerAgent::fake([
+        [
+            'items' => [
+                ['name' => 'Rice', 'calories' => 130, 'protein' => 2.7, 'carbs' => 28, 'fat' => 0.3, 'portion' => '100g'],
+            ],
+            'total_calories' => 130,
+            'total_protein' => 2.7,
+            'total_carbs' => 28,
+            'total_fat' => 0.3,
+            'confidence' => 90,
+        ],
+    ]);
+
+    $file = UploadedFile::fake()->image('food.jpg');
+
+    Livewire::test('pages::snap-to-track')
+        ->set('photo', $file)
+        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
+        ->call('analyze')
+        ->assertSee('never dose insulin');
+});
+
+it('flags reference-derived items in the result when the lookup is enabled', function (): void {
+    config()->set('plate.food_photo_analyzer.reference_lookup.enabled', true);
+    fakeTurnstileForSnapToTrack();
+
+    ReferenceFood::factory()->create([
+        'description' => 'Hummus, commercial',
+        'match_name' => ReferenceFood::normalizeName('Hummus, commercial'),
+        'calories_per_100g' => 166,
+        'protein_per_100g' => 7.9,
+        'carbs_per_100g' => 14.3,
+        'fat_per_100g' => 9.6,
+    ]);
+
+    FoodPhotoAnalyzerAgent::fake([[
+        'items' => [
+            ['name' => 'Hummus', 'calories' => 200, 'protein' => 5, 'carbs' => 10, 'fat' => 15, 'portion' => '100g', 'grams' => 100, 'match_name' => 'hummus commercial'],
+        ],
+        'total_calories' => 200,
+        'total_protein' => 5,
+        'total_carbs' => 10,
+        'total_fat' => 15,
+        'confidence' => 80,
+    ]]);
+
+    $file = UploadedFile::fake()->image('food.jpg');
+
+    Livewire::test('pages::snap-to-track')
+        ->set('photo', $file)
+        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
+        ->call('analyze')
+        ->assertSee('USDA reference');
 });
 
 it('shows how it works section', function (): void {

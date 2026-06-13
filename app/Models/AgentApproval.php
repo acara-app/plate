@@ -6,6 +6,8 @@ namespace App\Models;
 
 use App\Data\ApprovalCardData;
 use App\Enums\AgentApprovalStatus;
+use App\Enums\HealthEntryType;
+use App\Services\AiTransparency;
 use Carbon\CarbonInterface;
 use Database\Factories\AgentApprovalFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -64,6 +66,7 @@ final class AgentApproval extends Model
             canApprove: $this->status->canApprove(),
             canReject: $this->status->canReject(),
             error: $this->error,
+            notice: $this->carbBoundaryNotice(),
         );
     }
 
@@ -104,5 +107,13 @@ final class AgentApproval extends Model
     {
         $query->where('status', AgentApprovalStatus::Pending)
             ->wherePast('expires_at');
+    }
+
+    private function carbBoundaryNotice(): ?string
+    {
+        $isFoodEntry = $this->tool_name === 'log_health_entry'
+            && ($this->payload['log_type'] ?? null) === HealthEntryType::Food->value;
+
+        return $isFoodEntry ? AiTransparency::carbBoundaryNotice() : null;
     }
 }
