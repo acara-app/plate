@@ -1039,8 +1039,8 @@ return [
         'delete_description' => 'Cela supprime la conversation et son historique de messages. Cette action est irréversible.',
         'delete_confirm' => 'Supprimer la discussion',
         'just_now' => 'À l’instant',
-        'minutes_ago' => 'il y a :count min',
-        'hours_ago' => 'il y a :count h',
-        'days_ago' => 'il y a :count j',
+        'minutes_ago' => 'il y a {{count}} min',
+        'hours_ago' => 'il y a {{count}} h',
+        'days_ago' => 'il y a {{count}} j',
     ],
 ];
