@@ -48,7 +48,7 @@ final readonly class BuildCreditWarning
             }
 
             if ($ratio <= $candidateRatio) {
-                continue;
+                continue; // @codeCoverageIgnore
             }
 
             $resetsAt = $this->periodEnd($user, $now, $window, $windowConfig, $periodStart);

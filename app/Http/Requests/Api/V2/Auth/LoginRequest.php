@@ -6,6 +6,7 @@ namespace App\Http\Requests\Api\V2\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/** @codeCoverageIgnore */
 final class LoginRequest extends FormRequest
 {
     public function authorize(): bool

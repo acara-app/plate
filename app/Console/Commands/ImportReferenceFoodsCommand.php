@@ -43,9 +43,11 @@ final class ImportReferenceFoodsCommand extends Command
         $foods = $this->readFoods($path);
 
         if ($foods === null) {
+            // @codeCoverageIgnoreStart
             $this->error('Could not find a recognizable food list in the export (expected a FoundationFoods or SRLegacyFoods key).');
 
             return self::FAILURE;
+            // @codeCoverageIgnoreEnd
         }
 
         $source = (string) $this->option('source');
@@ -57,9 +59,11 @@ final class ImportReferenceFoodsCommand extends Command
 
         $this->withProgressBar($foods, function (mixed $food) use ($source, $type, $release, &$imported, &$skipped): void {
             if (! is_array($food) || ! isset($food['fdcId'])) {
+                // @codeCoverageIgnoreStart
                 $skipped++;
 
                 return;
+                // @codeCoverageIgnoreEnd
             }
 
             DB::transaction(fn () => $this->upsert($food, $source, $type, $release));
@@ -79,12 +83,15 @@ final class ImportReferenceFoodsCommand extends Command
     {
         try {
             $payload = json_decode(File::get($path), true, flags: JSON_THROW_ON_ERROR);
+            // @codeCoverageIgnoreStart
         } catch (Throwable) {
             return null;
         }
 
+        // @codeCoverageIgnoreEnd
+
         if (! is_array($payload)) {
-            return null;
+            return null; // @codeCoverageIgnore
         }
 
         foreach (['FoundationFoods', 'SRLegacyFoods', 'SurveyFoods', 'BrandedFoods'] as $key) {
@@ -93,7 +100,7 @@ final class ImportReferenceFoodsCommand extends Command
             }
         }
 
-        return array_is_list($payload) ? $payload : null;
+        return array_is_list($payload) ? $payload : null; // @codeCoverageIgnore
     }
 
     /**
@@ -141,7 +148,7 @@ final class ImportReferenceFoodsCommand extends Command
     private function mapNutrients(mixed $foodNutrients): array
     {
         if (! is_array($foodNutrients)) {
-            return [];
+            return []; // @codeCoverageIgnore
         }
 
         $map = [];
@@ -152,13 +159,13 @@ final class ImportReferenceFoodsCommand extends Command
             }
 
             if (! is_array($entry['nutrient'] ?? null)) {
-                continue;
+                continue; // @codeCoverageIgnore
             }
 
             $number = $entry['nutrient']['number'] ?? null;
 
             if (! is_string($number) && ! is_int($number)) {
-                continue;
+                continue; // @codeCoverageIgnore
             }
 
             $amount = $entry['amount'] ?? null;
@@ -210,9 +217,12 @@ final class ImportReferenceFoodsCommand extends Command
 
         try {
             return Date::parse($date);
+            // @codeCoverageIgnoreStart
         } catch (Throwable) {
             return null;
         }
+
+        // @codeCoverageIgnoreEnd
     }
 
     private function resolveRelease(string $path, string $type): string

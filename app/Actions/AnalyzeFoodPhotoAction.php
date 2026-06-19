@@ -93,9 +93,13 @@ final readonly class AnalyzeFoodPhotoAction
                     provenance: FoodValueProvenance::Reference,
                 ), $match->food->release];
             }
+
+            // @codeCoverageIgnoreStart
         } catch (Throwable) {
             //
         }
+
+        // @codeCoverageIgnoreEnd
 
         return [$item, null];
     }

@@ -88,7 +88,7 @@ it('lists conversations with pinned ones first and an is_pinned flag', function 
         ->assertJsonPath('data.1.is_pinned', false);
 });
 
-it('forbids pinning another user\'s conversation', function (): void {
+it("forbids pinning another user's conversation", function (): void {
     $owner = User::factory()->create();
     $other = User::factory()->create();
     $conversation = Conversation::factory()->create(['user_id' => $owner->id]);

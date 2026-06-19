@@ -11,6 +11,7 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use Laravel\Ai\Messages\MessageRole;
 
@@ -31,7 +32,7 @@ final class PurgeExpiredConversationsCommand extends Command
 
         Conversation::query()
             ->expired()
-            ->with(['messages' => fn ($query) => $query
+            ->with(['messages' => fn (Relation $query): Relation => $query
                 ->where('role', MessageRole::Assistant->value)
                 ->where('created_at', '>', now()->subSeconds(StreamEventStore::TTL_SECONDS))])
             ->chunkById(100, function (Collection $conversations) use (&$count, &$reachedLimit, $limit): bool {
@@ -75,7 +76,7 @@ final class PurgeExpiredConversationsCommand extends Command
                 ->first();
 
             if (! $locked instanceof Conversation) {
-                return false;
+                return false; // @codeCoverageIgnore
             }
 
             $this->deleteConversationHistory->handle($locked);

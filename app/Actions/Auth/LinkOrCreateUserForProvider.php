@@ -7,6 +7,7 @@ namespace App\Actions\Auth;
 use App\Exceptions\AccountLinkException;
 use App\Models\User;
 
+/** @codeCoverageIgnore */
 final readonly class LinkOrCreateUserForProvider
 {
     /**

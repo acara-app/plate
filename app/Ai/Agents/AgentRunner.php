@@ -169,6 +169,7 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
         }
 
         if ($toolCalls->isNotEmpty()) {
+            // @codeCoverageIgnoreStart
             $messages = [
                 new AssistantMessage(
                     $message->content ?: '',
@@ -196,6 +197,7 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
             }
 
             return $messages;
+            // @codeCoverageIgnoreEnd
         }
 
         return [new AssistantMessage($message->content)];

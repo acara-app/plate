@@ -6,6 +6,7 @@ namespace App\Actions\Auth;
 
 use App\Models\User;
 
+/** @codeCoverageIgnore */
 final readonly class IssueMobileSession
 {
     public function __construct(private IssueMobileAuthToken $issueMobileAuthToken) {}

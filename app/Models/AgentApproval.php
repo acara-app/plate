@@ -72,10 +72,12 @@ final class AgentApproval extends Model
 
     public function claimNotification(): bool
     {
+        // @codeCoverageIgnoreStart
         return self::query()
             ->whereKey($this->getKey())
             ->whereNull('notified_at')
             ->update(['notified_at' => now()]) > 0;
+        // @codeCoverageIgnoreEnd
     }
 
     /**

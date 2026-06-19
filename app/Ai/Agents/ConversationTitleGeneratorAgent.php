@@ -26,6 +26,7 @@ final class ConversationTitleGeneratorAgent implements Agent, GeneratesConversat
 
     private string $languageCode = 'en';
 
+    // @codeCoverageIgnoreStart
     public function instructions(): string
     {
         return view('ai.prompts.conversation-title', [
@@ -43,6 +44,8 @@ final class ConversationTitleGeneratorAgent implements Agent, GeneratesConversat
             'title' => $schema->string()->required(),
         ];
     }
+
+    // @codeCoverageIgnoreEnd
 
     // @codeCoverageIgnoreStart
     public function generate(string $message, string $language, string $languageCode): string

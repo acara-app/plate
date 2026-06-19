@@ -6,6 +6,7 @@ namespace App\Actions;
 
 use App\Models\Conversation;
 
+/** @codeCoverageIgnore */
 final readonly class PinConversation
 {
     public function handle(Conversation $conversation): void

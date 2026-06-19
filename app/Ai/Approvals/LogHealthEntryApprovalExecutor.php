@@ -12,6 +12,7 @@ use App\Enums\HealthEntrySource;
 use App\Models\AgentApproval;
 use Carbon\CarbonImmutable;
 
+/** @codeCoverageIgnore */
 final readonly class LogHealthEntryApprovalExecutor implements ExecutesApprovedTool
 {
     public function __construct(

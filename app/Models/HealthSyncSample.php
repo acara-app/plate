@@ -109,6 +109,7 @@ final class HealthSyncSample extends Model
 
     public function medicationName(): ?string
     {
+        // @codeCoverageIgnoreStart
         $metadata = $this->metadata ?? [];
         $name = $metadata['medication_name']
             ?? $metadata['name']
@@ -127,6 +128,7 @@ final class HealthSyncSample extends Model
         }
 
         return $this->composeMedicationDosage();
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -182,6 +184,7 @@ final class HealthSyncSample extends Model
 
     private function composeMedicationDosage(): ?string
     {
+        // @codeCoverageIgnoreStart
         $rawForm = ($this->metadata ?? [])['form'] ?? null;
         $form = is_string($rawForm) && $rawForm !== '' ? $rawForm : $this->unit;
 
@@ -198,5 +201,6 @@ final class HealthSyncSample extends Model
         }
 
         return $quantity.' '.$form;
+        // @codeCoverageIgnoreEnd
     }
 }

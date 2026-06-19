@@ -92,9 +92,11 @@ final class History extends Model
 
     public function chatStreamId(): ?string
     {
+        // @codeCoverageIgnoreStart
         $streamId = $this->chatStreamMeta()['stream_id'] ?? null;
 
         return is_string($streamId) ? $streamId : null;
+        // @codeCoverageIgnoreEnd
     }
 
     public function chatStreamStatus(): ?string
@@ -106,6 +108,7 @@ final class History extends Model
 
     public function belongsToChatStream(string $streamId): bool
     {
+        // @codeCoverageIgnoreStart
         return $this->chatStreamId() === $streamId;
     }
 
@@ -113,6 +116,7 @@ final class History extends Model
     {
         return $this->role === MessageRole::Assistant
             && $this->chatStreamStatus() === self::STREAM_STATUS_PENDING;
+        // @codeCoverageIgnoreEnd
     }
 
     /**

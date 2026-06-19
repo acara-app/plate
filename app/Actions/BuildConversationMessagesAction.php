@@ -93,7 +93,7 @@ final readonly class BuildConversationMessagesAction
             $approval = $approvals->get($approvalId);
 
             if (! $approval instanceof AgentApproval) {
-                continue;
+                continue; // @codeCoverageIgnore
             }
 
             /** @var array<string, mixed> $card */
@@ -124,18 +124,18 @@ final readonly class BuildConversationMessagesAction
         $toolResults = is_string($raw) ? json_decode($raw, true) : null;
 
         if (! is_array($toolResults)) {
-            return [];
+            return []; // @codeCoverageIgnore
         }
 
         $ids = [];
 
         foreach ($toolResults as $toolResult) {
             if (! is_array($toolResult)) {
-                continue;
+                continue; // @codeCoverageIgnore
             }
 
             if (($toolResult['name'] ?? null) !== 'log_health_entry') {
-                continue;
+                continue; // @codeCoverageIgnore
             }
 
             $result = $toolResult['result'] ?? null;

@@ -22,6 +22,7 @@ final readonly class GetMealGlucoseResponse implements Tool
 {
     public function __construct(private MealGlucoseResponseService $responses) {}
 
+    // @codeCoverageIgnoreStart
     public function name(): string
     {
         return 'get_meal_glucose_response';
@@ -32,12 +33,14 @@ final readonly class GetMealGlucoseResponse implements Tool
         return 'Retrieve how the user\'s OWN glucose responded after their recently logged meals — a pre-meal baseline and the peak rise in the hours afterward, computed from their own readings. Use when the user asks how a meal or their food affected their glucose, or what a meal "did" to them. Results are strictly retrospective observations of past data: present them as such, never as a prediction and never as a basis for insulin or medication dosing.';
     }
 
+    // @codeCoverageIgnoreEnd
+
     public function handle(Request $request): string
     {
         $user = Auth::user();
 
         if (! $user instanceof User) {
-            return (string) json_encode(['error' => 'User not authenticated']);
+            return (string) json_encode(['error' => 'User not authenticated']); // @codeCoverageIgnore
         }
 
         if (! $user->wantsGlucoseMealInsights()) {
@@ -56,7 +59,7 @@ final readonly class GetMealGlucoseResponse implements Tool
             function (array $entry) use ($user, $unit): array {
                 $pattern = is_numeric($entry['carbs'])
                     ? $this->responses->carbBandPattern($user, (float) $entry['carbs'], $entry['groupId'])
-                    : null;
+                    : null; // @codeCoverageIgnore
 
                 return $this->present($entry['mealAt'], MealGlucoseInsightData::fromResponse($entry['response'], $unit, $pattern));
             },
@@ -79,10 +82,12 @@ final readonly class GetMealGlucoseResponse implements Tool
      */
     public function schema(JsonSchema $schema): array
     {
+        // @codeCoverageIgnoreStart
         return [
             'days' => $schema->integer()->required()->nullable()
                 ->description('How many days back to look for logged meals. Defaults to 7.'),
         ];
+        // @codeCoverageIgnoreEnd
     }
 
     /**

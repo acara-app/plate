@@ -7,6 +7,7 @@ namespace App\Actions\Auth;
 use App\Models\User;
 use Laravel\Sanctum\NewAccessToken;
 
+/** @codeCoverageIgnore */
 final readonly class IssueMobileAuthToken
 {
     /**

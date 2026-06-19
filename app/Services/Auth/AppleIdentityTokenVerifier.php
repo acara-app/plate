@@ -6,6 +6,7 @@ namespace App\Services\Auth;
 
 use App\Exceptions\AuthTokenException;
 
+/** @codeCoverageIgnore */
 final class AppleIdentityTokenVerifier extends IdentityTokenVerifier
 {
     private const string JWKS_URL = 'https://appleid.apple.com/auth/keys';

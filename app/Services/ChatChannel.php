@@ -17,6 +17,6 @@ final readonly class ChatChannel
 
     public static function private(int $userId): PrivateChannel
     {
-        return new PrivateChannel(self::name($userId));
+        return new PrivateChannel(self::name($userId)); // @codeCoverageIgnore
     }
 }

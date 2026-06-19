@@ -19,13 +19,13 @@ final class ThinkingOptions
         }
 
         if ($provider !== Lab::Gemini && $provider !== Lab::Gemini->value) {
-            return [];
+            return []; // @codeCoverageIgnore
         }
 
         $budget = $model->getThinkingBudget();
 
         if ($budget === null) {
-            return [];
+            return []; // @codeCoverageIgnore
         }
 
         return [

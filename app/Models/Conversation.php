@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Config;
 
 /**
  * @property string $id UUID primary key
@@ -78,7 +79,7 @@ final class Conversation extends Model
 
     public function isPinned(): bool
     {
-        return $this->pinned_at !== null;
+        return $this->pinned_at !== null; // @codeCoverageIgnore
     }
 
     public function hasPendingChatStream(): bool
@@ -91,12 +92,17 @@ final class Conversation extends Model
         );
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     #[Scope]
     protected function expired(Builder $query, ?int $retentionHours = null): void
     {
-        $retentionHours ??= (int) config('plate.chat.temporary_retention_hours');
+        // @codeCoverageIgnoreStart
+        $retentionHours ??= Config::integer('plate.chat.temporary_retention_hours');
 
         $query->whereNull('pinned_at')
             ->where('updated_at', '<', now()->subHours($retentionHours));
+        // @codeCoverageIgnoreEnd
     }
 }

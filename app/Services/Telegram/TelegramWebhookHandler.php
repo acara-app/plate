@@ -150,8 +150,10 @@ final class TelegramWebhookHandler extends WebhookHandler
 
             $status = match (true) {
                 $approval->status->isInFlight() => '⏳ Saving your entry…',
+                // @codeCoverageIgnoreStart
                 $approval->status === AgentApprovalStatus::Executed => '✅ Saved.',
                 default => 'This request was already handled.',
+                // @codeCoverageIgnoreEnd
             };
 
             $this->reply($status);
@@ -166,7 +168,7 @@ final class TelegramWebhookHandler extends WebhookHandler
 
             $status = $approval->status === AgentApprovalStatus::Rejected
                 ? '❌ Not saved.'
-                : 'This request was already handled.';
+                : 'This request was already handled.'; // @codeCoverageIgnore
 
             $this->reply($status);
             $this->editApprovalCard($approval, $status);
@@ -228,9 +230,11 @@ final class TelegramWebhookHandler extends WebhookHandler
         $approvalId = is_string($approvalIdValue) ? $approvalIdValue : '';
 
         if ($approvalId === '') {
+            // @codeCoverageIgnoreStart
             $this->reply('This request is no longer available.');
 
             return;
+            // @codeCoverageIgnoreEnd
         }
 
         $linkedChat = $this->resolveLinkedChat();

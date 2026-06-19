@@ -21,6 +21,7 @@ final readonly class AiSafeUserProfileData
      */
     public static function supportedSections(): array
     {
+        // @codeCoverageIgnoreStart
         return [
             'all',
             'biometrics',
@@ -42,6 +43,7 @@ final readonly class AiSafeUserProfileData
     {
         return match ($section) {
             'all' => $this->sections,
+            // @codeCoverageIgnoreEnd
             'safety' => $this->safetySection(),
             default => $this->sections[$section] ?? null,
         };

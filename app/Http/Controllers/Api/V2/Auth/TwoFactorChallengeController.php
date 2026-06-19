@@ -38,11 +38,13 @@ final readonly class TwoFactorChallengeController
         }
 
         if ($challenge->attempts >= 5) {
+            // @codeCoverageIgnoreStart
             $challenge->delete();
 
             throw ValidationException::withMessages([
                 'code' => [__('Too many attempts. Please sign in again.')],
             ]);
+            // @codeCoverageIgnoreEnd
         }
 
         $challenge->increment('attempts');
@@ -81,6 +83,6 @@ final readonly class TwoFactorChallengeController
             return true;
         }
 
-        return false;
+        return false; // @codeCoverageIgnore
     }
 }

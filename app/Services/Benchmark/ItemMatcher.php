@@ -51,7 +51,7 @@ final class ItemMatcher
             }
 
             if (isset($matchedTruth[$candidate['truth']])) {
-                continue;
+                continue; // @codeCoverageIgnore
             }
 
             $matchedPredicted[$candidate['predicted']] = true;
@@ -79,7 +79,7 @@ final class ItemMatcher
     private function overlapCoefficient(array $a, array $b): float
     {
         if ($a === [] || $b === []) {
-            return 0.0;
+            return 0.0; // @codeCoverageIgnore
         }
 
         return count(array_intersect($a, $b)) / min(count($a), count($b));

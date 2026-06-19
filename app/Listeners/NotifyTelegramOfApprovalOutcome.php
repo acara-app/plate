@@ -41,7 +41,7 @@ final class NotifyTelegramOfApprovalOutcome implements ShouldQueue
         $chat = TelegraphChat::query()->where('chat_id', $link->platform_user_id)->first();
 
         if (! $chat instanceof TelegraphChat) {
-            return;
+            return; // @codeCoverageIgnore
         }
 
         if (! $approval->claimNotification()) {

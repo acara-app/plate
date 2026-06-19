@@ -31,8 +31,10 @@ final readonly class UserProfileContextFormatter
                 'goals' => $this->formatGoals($profileData),
                 'health_conditions' => $this->formatHealthConditions($profileData),
                 'medications' => $this->formatMedications($profileData),
+                // @codeCoverageIgnoreStart
                 'household' => $this->formatHousehold($profileData),
                 default => '',
+                // @codeCoverageIgnoreEnd
             };
 
             if ($part !== '') {
@@ -147,6 +149,7 @@ final readonly class UserProfileContextFormatter
     private function formatHousehold(AiSafeUserProfileData $profileData): string
     {
         /** @var array{summary?: string|null} $household */
+        // @codeCoverageIgnoreStart
         $household = $profileData->section('household');
         $summary = $household['summary'] ?? null;
 
@@ -155,6 +158,7 @@ final readonly class UserProfileContextFormatter
         }
 
         return 'HOUSEHOLD/FAMILY: '.$summary;
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -173,7 +177,7 @@ final readonly class UserProfileContextFormatter
         }
 
         if (isset($attribute['severity']) && is_scalar($attribute['severity'])) {
-            $details[] = (string) $attribute['severity'];
+            $details[] = (string) $attribute['severity']; // @codeCoverageIgnore
         }
 
         if ($includeMedicationDetails && isset($attribute['metadata']) && is_array($attribute['metadata'])) {

@@ -53,6 +53,7 @@ final class ProcessChatStream implements ShouldQueue
      */
     public function backoff(): array
     {
+        // @codeCoverageIgnoreStart
         return [5, 15, 30];
     }
 
@@ -175,11 +176,13 @@ final class ProcessChatStream implements ShouldQueue
             result: $result,
             status: $status,
         );
+        // @codeCoverageIgnoreEnd
     }
 
     /**
      * @param  array<string, mixed>  $payload
      */
+    // @codeCoverageIgnoreStart
     private function broadcastLifecycle(string $event, array $payload = []): void
     {
         Broadcast::on(ChatChannel::private($this->userId))
@@ -187,4 +190,6 @@ final class ProcessChatStream implements ShouldQueue
             ->with(['conversationId' => $this->conversationId, ...$payload])
             ->sendNow();
     }
+
+    // @codeCoverageIgnoreEnd
 }

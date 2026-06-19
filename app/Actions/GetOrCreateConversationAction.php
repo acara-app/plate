@@ -6,13 +6,14 @@ namespace App\Actions;
 
 use App\Models\Conversation;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
 final readonly class GetOrCreateConversationAction
 {
     public function handle(string $conversationId, User $user, bool $withMessages = true): Conversation
     {
         $conversation = Conversation::query()
-            ->when($withMessages, fn ($query) => $query->with('messages'))
+            ->when($withMessages, fn (Builder $query): Builder => $query->with('messages'))
             ->find($conversationId);
 
         if ($conversation instanceof Conversation) {
