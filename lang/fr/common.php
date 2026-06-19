@@ -138,7 +138,6 @@ return [
         'placeholder' => 'Demandez à Acara',
         'disclaimer' => 'À titre informatif uniquement. Ne remplace pas un avis médical ou nutritionnel professionnel.',
         'privacy_notice' => 'Vos discussions sont privées. Nous les supprimons automatiquement après 48 heures, sauf si vous les épinglez.',
-        'privacy_link' => 'Lire notre politique de confidentialité',
     ],
 
     'onboarding_banner' => [

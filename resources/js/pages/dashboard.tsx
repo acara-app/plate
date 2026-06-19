@@ -2,10 +2,10 @@ import { OnboardingBanner } from '@/components/onboarding-banner';
 import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
 import { generateUUID } from '@/lib/utils';
-import { dashboard, privacy } from '@/routes';
+import { dashboard } from '@/routes';
 import chat from '@/routes/chat';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
 import { ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -86,13 +86,7 @@ export default function Dashboard() {
                             <div className="mx-auto flex max-w-xl items-start gap-2.5 rounded-xl border border-border/60 bg-muted/30 px-4 py-3">
                                 <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-500" />
                                 <p className="text-xs leading-6 text-muted-foreground sm:text-sm">
-                                    {t('dashboard_ai.privacy_notice')}{' '}
-                                    <Link
-                                        href={privacy.url()}
-                                        className="font-medium text-primary underline-offset-4 hover:underline"
-                                    >
-                                        {t('dashboard_ai.privacy_link')}
-                                    </Link>
+                                    {t('dashboard_ai.privacy_notice')}
                                 </p>
                             </div>
 

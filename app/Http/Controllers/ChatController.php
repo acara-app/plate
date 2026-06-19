@@ -103,7 +103,7 @@ final readonly class ChatController
 
         $this->pinConversation->handle($conversation);
 
-        toast(__('conversations.pinned_toast'));
+        toast(__('common.conversations.pinned_toast'));
 
         return back();
     }
@@ -114,7 +114,7 @@ final readonly class ChatController
 
         $this->unpinConversation->handle($conversation);
 
-        toast(__('conversations.unpinned_toast'));
+        toast(__('common.conversations.unpinned_toast'));
 
         return back();
     }

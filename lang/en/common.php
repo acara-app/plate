@@ -137,7 +137,6 @@ return [
         'placeholder' => 'Ask Acara',
         'disclaimer' => 'For informational purposes only. Not a substitute for professional medical or nutritional advice.',
         'privacy_notice' => 'Your chats are private. We automatically delete them after 48 hours unless you pin them to keep.',
-        'privacy_link' => 'Read our Privacy Policy',
     ],
 
     'onboarding_banner' => [

@@ -285,7 +285,11 @@ it('pins a conversation owned by the authenticated user', function (): void {
     actingAs($user)
         ->from(route('chat.index'))
         ->patch(route('chat.pin', ['conversation' => $conversation->id]))
-        ->assertRedirect(route('chat.index'));
+        ->assertRedirect(route('chat.index'))
+        ->assertInertiaFlash('toast', [
+            'message' => __('common.conversations.pinned_toast'),
+            'type' => 'success',
+        ]);
 
     expect($conversation->fresh()->pinned_at)->not->toBeNull();
 });
@@ -297,7 +301,11 @@ it('unpins a conversation and refreshes its activity timestamp', function (): vo
     actingAs($user)
         ->from(route('chat.index'))
         ->patch(route('chat.unpin', ['conversation' => $conversation->id]))
-        ->assertRedirect(route('chat.index'));
+        ->assertRedirect(route('chat.index'))
+        ->assertInertiaFlash('toast', [
+            'message' => __('common.conversations.unpinned_toast'),
+            'type' => 'success',
+        ]);
 
     $fresh = $conversation->fresh();
 
