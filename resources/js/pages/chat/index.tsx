@@ -10,18 +10,25 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import { generateUUID } from '@/lib/utils';
 import chat from '@/routes/chat';
 import { BreadcrumbItem } from '@/types';
 import { Head, InfiniteScroll, Link, router } from '@inertiajs/react';
-import { MessageSquare, Plus, Trash2 } from 'lucide-react';
+import { MessageSquare, Pin, PinOff, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface Conversation {
     id: string;
     title: string;
+    pinned_at: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -34,6 +41,7 @@ interface Props {
         per_page: number;
         total: number;
     };
+    temporaryRetentionHours: number;
 }
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
@@ -78,13 +86,22 @@ function formatRelativeTime(
     });
 }
 
-export default function ConversationsIndex({ conversations }: Props) {
+export default function ConversationsIndex({
+    conversations,
+    temporaryRetentionHours,
+}: Props) {
     const { t } = useTranslation('common');
 
     const deleteConversation = (conversationId: string): void => {
         router.delete(chat.destroy(conversationId), {
             preserveScroll: true,
         });
+    };
+
+    const togglePin = (conversation: Conversation): void => {
+        const action = conversation.pinned_at ? chat.unpin : chat.pin;
+
+        router.patch(action(conversation.id).url, {}, { preserveScroll: true });
     };
 
     return (
@@ -153,66 +170,137 @@ export default function ConversationsIndex({ conversations }: Props) {
                                                             <MessageSquare className="size-4" />
                                                         </div>
                                                         <div className="min-w-0">
-                                                            <p className="truncate font-medium text-foreground transition-colors group-hover:text-primary">
-                                                                {conversation.title ||
-                                                                    t(
-                                                                        'conversations.untitled',
-                                                                    )}
-                                                            </p>
-                                                            <p className="mt-0.5 text-xs text-muted-foreground">
-                                                                {formatRelativeTime(
-                                                                    conversation.updated_at,
-                                                                    t,
+                                                            <div className="flex min-w-0 items-center gap-1.5">
+                                                                {conversation.pinned_at && (
+                                                                    <Pin className="size-3.5 shrink-0 fill-current text-primary" />
                                                                 )}
-                                                            </p>
+                                                                <p className="truncate font-medium text-foreground transition-colors group-hover:text-primary">
+                                                                    {conversation.title ||
+                                                                        t(
+                                                                            'conversations.untitled',
+                                                                        )}
+                                                                </p>
+                                                            </div>
+                                                            <div className="mt-0.5 flex items-center gap-2">
+                                                                <p className="text-xs text-muted-foreground">
+                                                                    {formatRelativeTime(
+                                                                        conversation.updated_at,
+                                                                        t,
+                                                                    )}
+                                                                </p>
+                                                                {!conversation.pinned_at && (
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger
+                                                                            asChild
+                                                                        >
+                                                                            <span>
+                                                                                <Badge
+                                                                                    variant="secondary"
+                                                                                    className="h-5 px-1.5 text-[10px] font-normal text-muted-foreground"
+                                                                                >
+                                                                                    {t(
+                                                                                        'conversations.temporary_badge',
+                                                                                    )}
+                                                                                </Badge>
+                                                                            </span>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            {t(
+                                                                                'conversations.temporary_tooltip',
+                                                                                {
+                                                                                    hours: temporaryRetentionHours,
+                                                                                },
+                                                                            )}
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </Link>
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="size-8 text-muted-foreground opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive sm:size-8"
-                                                            aria-label={t(
-                                                                'conversations.delete_label',
-                                                            )}
-                                                        >
-                                                            <Trash2 className="size-4" />
-                                                        </Button>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                        <AlertDialogHeader>
-                                                            <AlertDialogTitle>
-                                                                {t(
-                                                                    'conversations.delete_title',
+                                                <div className="flex shrink-0 items-center gap-1">
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="size-8 text-muted-foreground opacity-0 transition-all duration-200 group-hover:opacity-100 hover:text-primary"
+                                                                aria-label={t(
+                                                                    conversation.pinned_at
+                                                                        ? 'conversations.unpin'
+                                                                        : 'conversations.pin',
                                                                 )}
-                                                            </AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                {t(
-                                                                    'conversations.delete_description',
-                                                                )}
-                                                            </AlertDialogDescription>
-                                                        </AlertDialogHeader>
-                                                        <AlertDialogFooter>
-                                                            <AlertDialogCancel>
-                                                                {t('cancel')}
-                                                            </AlertDialogCancel>
-                                                            <AlertDialogAction
-                                                                className="bg-destructive text-white hover:bg-destructive/90"
                                                                 onClick={() =>
-                                                                    deleteConversation(
-                                                                        conversation.id,
+                                                                    togglePin(
+                                                                        conversation,
                                                                     )
                                                                 }
                                                             >
-                                                                {t(
-                                                                    'conversations.delete_confirm',
+                                                                {conversation.pinned_at ? (
+                                                                    <PinOff className="size-4" />
+                                                                ) : (
+                                                                    <Pin className="size-4" />
                                                                 )}
-                                                            </AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            {t(
+                                                                conversation.pinned_at
+                                                                    ? 'conversations.unpin'
+                                                                    : 'conversations.pin',
+                                                            )}
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger
+                                                            asChild
+                                                        >
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="size-8 text-muted-foreground opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive sm:size-8"
+                                                                aria-label={t(
+                                                                    'conversations.delete_label',
+                                                                )}
+                                                            >
+                                                                <Trash2 className="size-4" />
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>
+                                                                    {t(
+                                                                        'conversations.delete_title',
+                                                                    )}
+                                                                </AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    {t(
+                                                                        'conversations.delete_description',
+                                                                    )}
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>
+                                                                    {t(
+                                                                        'cancel',
+                                                                    )}
+                                                                </AlertDialogCancel>
+                                                                <AlertDialogAction
+                                                                    className="bg-destructive text-white hover:bg-destructive/90"
+                                                                    onClick={() =>
+                                                                        deleteConversation(
+                                                                            conversation.id,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    {t(
+                                                                        'conversations.delete_confirm',
+                                                                    )}
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                </div>
                                             </div>
                                         </li>
                                     ))}

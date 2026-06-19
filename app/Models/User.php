@@ -144,7 +144,11 @@ final class User extends Authenticatable implements MustVerifyEmail
      */
     public function paginatedConversations(int $perPage = 15): LengthAwarePaginator
     {
-        return $this->conversations()->paginate($perPage);
+        return $this->conversations()
+            ->reorder()
+            ->orderByRaw('pinned_at is null')
+            ->latest('updated_at')
+            ->paginate($perPage);
     }
 
     /**

@@ -6,6 +6,8 @@ export type ChatStatus = 'ready' | 'submitted' | 'streaming' | 'error';
 
 export interface ChatPageProps {
     conversationId: string;
+    isPinned?: boolean;
+    temporaryRetentionHours?: number;
     initialPrompt?: string | null;
     initialStreaming?: boolean;
     messages: UIMessage[];

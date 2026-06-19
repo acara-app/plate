@@ -4,7 +4,13 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { CreditWarningBanner } from '@/components/billing/credit-warning-banner';
 import { LifecycleBanner } from '@/components/billing/lifecycle-banner';
 import { UsageLimitNotice } from '@/components/billing/usage-limit-notice';
+import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useChatStream } from '@/hooks/use-chat-stream';
 import useSharedProps from '@/hooks/use-shared-props';
 import { cn, generateUUID } from '@/lib/utils';
@@ -14,6 +20,7 @@ import type { CreditWarning } from '@/types';
 import type { ChatPageProps, UIMessage } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
+import { Pin } from 'lucide-react';
 import {
     useCallback,
     useEffect,
@@ -22,6 +29,8 @@ import {
     useState,
     type UIEvent,
 } from 'react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import ChatInput from './chat-input';
 
 import ChatMessages, { ChatErrorBanner } from './chat-messages';
@@ -35,13 +44,17 @@ export default function CreateChat() {
         messages: messageHistories,
         initialPrompt,
         initialStreaming,
+        isPinned,
+        temporaryRetentionHours,
         creditWarning: sharedCreditWarning,
     } = page.props;
     const { currentUser } = useSharedProps();
+    const { t } = useTranslation('common');
 
     const [conversationId, setConversationId] = useState<string>(
         initialConversationId,
     );
+    const [pinned, setPinned] = useState<boolean>(isPinned ?? false);
     const [dismissedWarningAt, setDismissedWarningAt] = useState<string | null>(
         null,
     );
@@ -69,6 +82,23 @@ export default function CreateChat() {
     const handleStreamFinish = useCallback(() => {
         router.reload({ only: ['creditWarning'] });
     }, []);
+
+    const togglePin = useCallback(() => {
+        const next = !pinned;
+        setPinned(next);
+
+        const action = next ? chat.pin : chat.unpin;
+
+        router.patch(
+            action(conversationId).url,
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onError: () => setPinned(!next),
+            },
+        );
+    }, [pinned, conversationId]);
 
     const {
         messages,
@@ -104,6 +134,13 @@ export default function CreateChat() {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [messages]);
+
+    useEffect(() => {
+        if (error?.message === 'conversation_expired') {
+            toast.error(t('conversations.chat_expired'));
+            router.visit(chat.create(generateUUID()).url);
+        }
+    }, [error, t]);
 
     useEffect(() => {
         if (!shouldAutoStartInitialPrompt) {
@@ -213,10 +250,57 @@ export default function CreateChat() {
                         <SidebarTrigger className="size-10 rounded-full border border-border/40 bg-background/80 shadow-md backdrop-blur-md supports-[backdrop-filter]:bg-background/60" />
                     </div>
                     <div
+                        className={cn(
+                            'absolute top-3 right-3 z-20 transition-all duration-300 ease-out',
+                            isMobileNavVisible
+                                ? 'translate-y-0 opacity-100'
+                                : 'pointer-events-none -translate-y-2 opacity-0 md:pointer-events-auto md:translate-y-0 md:opacity-100',
+                        )}
+                    >
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={togglePin}
+                                    aria-label={
+                                        pinned
+                                            ? t('conversations.unpin')
+                                            : t('conversations.pin')
+                                    }
+                                    className="size-10 rounded-full border-border/40 bg-background/80 px-0 shadow-md backdrop-blur-md supports-[backdrop-filter]:bg-background/60 md:h-9 md:w-auto md:gap-1.5 md:px-3"
+                                >
+                                    <Pin
+                                        className={cn(
+                                            'size-4',
+                                            pinned
+                                                ? 'fill-current text-primary'
+                                                : 'text-muted-foreground',
+                                        )}
+                                    />
+                                    <span className="hidden text-xs md:inline">
+                                        {pinned
+                                            ? t('conversations.pinned')
+                                            : t(
+                                                  'conversations.temporary_badge',
+                                              )}
+                                    </span>
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                {pinned
+                                    ? t('conversations.unpin')
+                                    : t('conversations.temporary_tooltip', {
+                                          hours: temporaryRetentionHours,
+                                      })}
+                            </TooltipContent>
+                        </Tooltip>
+                    </div>
+                    <div
                         className="min-h-0 flex-1 overflow-y-auto scroll-smooth"
                         onScroll={handleScroll}
                     >
-                        <div className="mx-auto w-full max-w-3xl px-4 py-6">
+                        <div className="mx-auto w-full max-w-3xl px-4 pt-16 pb-6 md:py-6">
                             <ChatMessages
                                 messages={messages}
                                 status={status}
