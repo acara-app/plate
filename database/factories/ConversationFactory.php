@@ -41,4 +41,18 @@ final class ConversationFactory extends Factory
             'title' => $title,
         ]);
     }
+
+    public function pinned(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'pinned_at' => now(),
+        ]);
+    }
+
+    public function stale(int $days = 3): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'updated_at' => now()->subDays($days),
+        ]);
+    }
 }

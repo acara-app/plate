@@ -277,3 +277,50 @@ it('includes image attachments in message parts when loading conversation', func
             ->where('messages.0.parts.1.url', 'data:image/jpeg;base64,'.$base64Content)
         );
 });
+
+it('pins a conversation owned by the authenticated user', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+
+    actingAs($user)
+        ->from(route('chat.index'))
+        ->patch(route('chat.pin', ['conversation' => $conversation->id]))
+        ->assertRedirect(route('chat.index'))
+        ->assertInertiaFlash('toast', [
+            'message' => __('common.conversations.pinned_toast'),
+            'type' => 'success',
+        ]);
+
+    expect($conversation->fresh()->pinned_at)->not->toBeNull();
+});
+
+it('unpins a conversation and refreshes its activity timestamp', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->pinned()->stale(5)->create(['user_id' => $user->id]);
+
+    actingAs($user)
+        ->from(route('chat.index'))
+        ->patch(route('chat.unpin', ['conversation' => $conversation->id]))
+        ->assertRedirect(route('chat.index'))
+        ->assertInertiaFlash('toast', [
+            'message' => __('common.conversations.unpinned_toast'),
+            'type' => 'success',
+        ]);
+
+    $fresh = $conversation->fresh();
+
+    expect($fresh->pinned_at)->toBeNull()
+        ->and($fresh->updated_at->isAfter(now()->subMinute()))->toBeTrue();
+});
+
+it('prevents pinning another users conversation', function (): void {
+    $owner = User::factory()->create();
+    $intruder = User::factory()->create();
+    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+
+    actingAs($intruder)
+        ->patch(route('chat.pin', ['conversation' => $conversation->id]))
+        ->assertForbidden();
+
+    expect($conversation->fresh()->pinned_at)->toBeNull();
+});

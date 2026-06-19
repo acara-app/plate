@@ -158,6 +158,10 @@ export function useChatStream({
                         }
                     }
 
+                    if (response.status === 404) {
+                        throw new Error('conversation_expired');
+                    }
+
                     if (!response.ok) {
                         throw new Error('Failed to send message.');
                     }

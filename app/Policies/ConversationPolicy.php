@@ -34,6 +34,11 @@ final class ConversationPolicy
         return $this->view($user, $conversation);
     }
 
+    public function pin(User $user, Conversation $conversation): bool
+    {
+        return $this->view($user, $conversation);
+    }
+
     public function restore(): bool
     {
         return false;
