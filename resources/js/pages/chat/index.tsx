@@ -269,7 +269,7 @@ export default function ConversationsIndex({
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="icon"
-                                                                    className="size-8 text-muted-foreground opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
+                                                                    className="size-8 text-muted-foreground opacity-100 transition-all duration-200 hover:bg-destructive/10 hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100"
                                                                     aria-label={t(
                                                                         'conversations.delete_label',
                                                                     )}
