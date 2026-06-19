@@ -29,6 +29,7 @@ import { type UIMessage } from '@ai-sdk/react';
 import { code } from '@streamdown/code';
 import { AlertCircle, Sparkles, User } from 'lucide-react';
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Streamdown } from 'streamdown';
 
 interface ChatMessagesProps {
@@ -74,6 +75,8 @@ export function ChatErrorBanner({
 }
 
 function EmptyState() {
+    const { t } = useTranslation('common');
+
     return (
         <div className="flex flex-1 flex-col items-center justify-center text-center">
             <div className="group relative mb-6">
@@ -86,12 +89,8 @@ function EmptyState() {
                     />
                 </div>
             </div>
-            <h2 className="mb-2 text-2xl font-semibold tracking-tight text-foreground">
-                How are you feeling today?
-            </h2>
-            <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-                Your personal AI health coach is here to help with nutrition,
-                meal planning, glucose predictions, or just to chat.
+            <p className="max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
+                {t('dashboard_ai.description')}
             </p>
         </div>
     );

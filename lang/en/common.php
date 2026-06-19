@@ -132,11 +132,9 @@ return [
 
     'dashboard_ai' => [
         'breadcrumb' => 'Acara',
-        'heading' => 'What should we work on today?',
-        'description' => 'Your private AI health coach for glucose, meals, medication context, and synced health trends.',
+        'description' => 'Your private health coach. Chats clear after 48 hours — pin any you want to keep.',
         'placeholder' => 'Ask Acara',
         'disclaimer' => 'For informational purposes only. Not a substitute for professional medical or nutritional advice.',
-        'privacy_notice' => 'Your chats are private. We automatically delete them after 48 hours unless you pin them to keep.',
     ],
 
     'onboarding_banner' => [
@@ -855,6 +853,7 @@ return [
         'title' => 'Chats',
         'new_chat' => 'New Chat',
         'empty' => 'No conversations yet.',
+        'empty_description' => 'Start a new chat with your AI health coach.',
         'start_first' => 'Start your first chat',
         'untitled' => 'New Conversation',
         'delete_label' => 'Delete conversation',
