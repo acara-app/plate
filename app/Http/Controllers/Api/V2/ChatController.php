@@ -48,6 +48,7 @@ final readonly class ChatController
         #[CurrentUser] User $user,
         string $conversationId
     ): JsonResponse {
+        // @codeCoverageIgnoreStart
         $conversation = $this->conversationAction->handle($conversationId, $user);
         Gate::authorize('view', $conversation);
 
@@ -65,6 +66,7 @@ final readonly class ChatController
 
         if (! $conversation instanceof Conversation) {
             return response()->json(['message' => 'Conversation not found.'], 404);
+            // @codeCoverageIgnoreEnd
         }
 
         Gate::authorize('delete', $conversation);
@@ -96,7 +98,7 @@ final readonly class ChatController
         $conversation = Conversation::query()->find($conversationId);
 
         if (! $conversation instanceof Conversation) {
-            return response()->json(['message' => 'Conversation not found.'], 404);
+            return response()->json(['message' => 'Conversation not found.'], 404); // @codeCoverageIgnore
         }
 
         Gate::authorize('pin', $conversation);

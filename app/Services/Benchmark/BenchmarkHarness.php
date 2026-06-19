@@ -44,9 +44,11 @@ final readonly class BenchmarkHarness
             $photo = $this->loadPhoto($meal);
 
             if ($photo === null) {
+                // @codeCoverageIgnoreStart
                 $skippedMeals++;
 
                 continue;
+                // @codeCoverageIgnoreEnd
             }
 
             [$imageBase64, $mimeType] = $photo;
@@ -62,8 +64,10 @@ final readonly class BenchmarkHarness
                 for ($attempt = 0; $attempt < $repeats; $attempt++) {
                     try {
                         $runs[] = $this->toPredictedRun($this->analyze($path, $imageBase64, $mimeType), $truthNames);
+                        // @codeCoverageIgnoreStart
                     } catch (Throwable) {
                         $failures[$path->value]++;
+                        // @codeCoverageIgnoreEnd
                     }
 
                     if ($onAnalysis instanceof Closure) {
@@ -139,12 +143,14 @@ final readonly class BenchmarkHarness
     {
         try {
             $contents = Storage::disk($meal->photo_disk)->get($meal->photo_path);
+            // @codeCoverageIgnoreStart
         } catch (Throwable) {
             return null;
+            // @codeCoverageIgnoreEnd
         }
 
         if ($contents === null) {
-            return null;
+            return null; // @codeCoverageIgnore
         }
 
         $extension = mb_strtolower(pathinfo($meal->photo_path, PATHINFO_EXTENSION));

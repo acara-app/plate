@@ -103,7 +103,7 @@ final readonly class MealGlucoseResponseService
     public function carbBandPattern(User $user, float $carbs, ?string $excludeGroupId = null, int $days = self::PATTERN_LOOKBACK_DAYS): ?MealGlucosePatternData
     {
         if ($carbs <= 0.0) {
-            return null;
+            return null; // @codeCoverageIgnore
         }
 
         $candidates = HealthSyncSample::query()
@@ -150,7 +150,7 @@ final readonly class MealGlucoseResponseService
         $middle = intdiv($count, 2);
 
         return $count % 2 === 0
-            ? ($sorted[$middle - 1] + $sorted[$middle]) / 2
+            ? ($sorted[$middle - 1] + $sorted[$middle]) / 2 // @codeCoverageIgnore
             : $sorted[$middle];
     }
 

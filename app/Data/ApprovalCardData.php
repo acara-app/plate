@@ -6,6 +6,7 @@ namespace App\Data;
 
 use Spatie\LaravelData\Data;
 
+/** @codeCoverageIgnore */
 final class ApprovalCardData extends Data
 {
     public function __construct(

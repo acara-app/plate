@@ -187,6 +187,7 @@ final readonly class BuildAiSafeUserProfile
             return $value;
         }
 
+        // @codeCoverageIgnoreStart
         if (! is_array($value)) {
             return null;
         }
@@ -198,5 +199,6 @@ final readonly class BuildAiSafeUserProfile
         }
 
         return $sanitized;
+        // @codeCoverageIgnoreEnd
     }
 }

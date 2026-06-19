@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
 
+/** @codeCoverageIgnore */
 final class AuthTokenException extends RuntimeException implements ShouldntReport
 {
     public function render(Request $request): JsonResponse

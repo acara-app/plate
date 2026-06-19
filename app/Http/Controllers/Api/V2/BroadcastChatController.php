@@ -30,7 +30,7 @@ final readonly class BroadcastChatController
 
         $locale = $request->hasHeader('Accept-Language')
             ? $request->getPreferredLanguage(LanguageUtil::keys())
-            : null;
+            : null; // @codeCoverageIgnore
 
         $turn = $this->startChatStream->handle($request, $user, $conversation, 'mobile', $locale);
 

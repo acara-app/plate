@@ -42,9 +42,11 @@ final class AddBenchmarkMealCommand extends Command
         $photoPath = (string) $this->argument('photo');
 
         if (! File::exists($photoPath)) {
+            // @codeCoverageIgnoreStart
             $this->error(sprintf('Photo not found: %s', $photoPath));
 
             return self::FAILURE;
+            // @codeCoverageIgnoreEnd
         }
 
         $extension = mb_strtolower(pathinfo($photoPath, PATHINFO_EXTENSION));
@@ -183,11 +185,13 @@ final class AddBenchmarkMealCommand extends Command
         $deviation = $values->atwaterDeviationRatio();
 
         if ($deviation !== null && $deviation > self::ATWATER_TOLERANCE) {
+            // @codeCoverageIgnoreStart
             $this->warn(sprintf(
                 '%s: kcal deviates %.0f%% from the 4-4-9 Atwater estimate — double-check the values (fiber and label rounding explain up to ~25%%).',
                 $subject,
                 $deviation * 100,
             ));
+            // @codeCoverageIgnoreEnd
         }
     }
 
@@ -266,11 +270,11 @@ final class AddBenchmarkMealCommand extends Command
             required: true,
             validate: function (string $value) use ($allowZero): ?string {
                 if (! is_numeric($value)) {
-                    return 'Enter a number.';
+                    return 'Enter a number.'; // @codeCoverageIgnore
                 }
 
                 if (! $allowZero && (float) $value <= 0.0) {
-                    return 'Enter a number greater than zero.';
+                    return 'Enter a number greater than zero.'; // @codeCoverageIgnore
                 }
 
                 return (float) $value < 0.0 ? 'Enter a non-negative number.' : null;

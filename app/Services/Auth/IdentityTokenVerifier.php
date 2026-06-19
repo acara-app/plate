@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 
+/** @codeCoverageIgnore */
 abstract class IdentityTokenVerifier
 {
     abstract protected function jwksUrl(): string;

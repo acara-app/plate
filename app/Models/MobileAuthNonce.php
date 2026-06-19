@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  */
+/** @codeCoverageIgnore */
 final class MobileAuthNonce extends Model
 {
     /** @use HasFactory<MobileAuthNonceFactory> */

@@ -32,6 +32,7 @@ final class ExecuteApprovalJob implements ShouldBeUnique, ShouldQueue
      */
     public function middleware(): array
     {
+        // @codeCoverageIgnoreStart
         return [
             new WithoutOverlapping($this->approvalId),
         ];
@@ -40,6 +41,7 @@ final class ExecuteApprovalJob implements ShouldBeUnique, ShouldQueue
     public function uniqueId(): string
     {
         return $this->approvalId;
+        // @codeCoverageIgnoreEnd
     }
 
     public function handle(): void

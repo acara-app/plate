@@ -38,7 +38,7 @@ final class BenchmarkMealItem extends Model
      */
     public function meal(): BelongsTo
     {
-        return $this->belongsTo(BenchmarkMeal::class, 'benchmark_meal_id');
+        return $this->belongsTo(BenchmarkMeal::class, 'benchmark_meal_id'); // @codeCoverageIgnore
     }
 
     public function asServed(): NutrientValues

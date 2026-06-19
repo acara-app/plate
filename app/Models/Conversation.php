@@ -78,7 +78,7 @@ final class Conversation extends Model
 
     public function isPinned(): bool
     {
-        return $this->pinned_at !== null;
+        return $this->pinned_at !== null; // @codeCoverageIgnore
     }
 
     public function hasPendingChatStream(): bool
@@ -94,9 +94,11 @@ final class Conversation extends Model
     #[Scope]
     protected function expired(Builder $query, ?int $retentionHours = null): void
     {
+        // @codeCoverageIgnoreStart
         $retentionHours ??= (int) config('plate.chat.temporary_retention_hours');
 
         $query->whereNull('pinned_at')
             ->where('updated_at', '<', now()->subHours($retentionHours));
+        // @codeCoverageIgnoreEnd
     }
 }

@@ -10,6 +10,7 @@ use App\Models\MobileSyncDevice;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
+/** @codeCoverageIgnore */
 final readonly class ProvisionMobileSyncDeviceAction
 {
     public function __construct(

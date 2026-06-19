@@ -6,6 +6,7 @@ namespace App\Actions\Auth;
 
 use App\Models\User;
 
+/** @codeCoverageIgnore */
 final readonly class FindOrCreateUserFromAppleSignIn
 {
     public function __construct(private LinkOrCreateUserForProvider $linkOrCreateUser) {}

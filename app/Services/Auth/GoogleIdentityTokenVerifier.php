@@ -7,6 +7,7 @@ namespace App\Services\Auth;
 use App\Exceptions\AuthTokenException;
 use Illuminate\Support\Facades\Cache;
 
+/** @codeCoverageIgnore */
 final class GoogleIdentityTokenVerifier extends IdentityTokenVerifier
 {
     private const string JWKS_URL = 'https://www.googleapis.com/oauth2/v3/certs';

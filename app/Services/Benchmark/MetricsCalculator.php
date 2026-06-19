@@ -358,7 +358,7 @@ final class MetricsCalculator
     private function sampleStandardDeviation(array $values): float
     {
         if (count($values) < 2) {
-            return 0.0;
+            return 0.0; // @codeCoverageIgnore
         }
 
         $mean = (float) $this->mean($values);

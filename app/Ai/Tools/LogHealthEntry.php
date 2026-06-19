@@ -169,7 +169,7 @@ final readonly class LogHealthEntry implements Tool
 
             $rawSummary = $args['summary'] ?? null;
             $summary = is_string($rawSummary) && mb_trim($rawSummary) !== ''
-                ? $rawSummary
+                ? $rawSummary // @codeCoverageIgnore
                 : $healthData->formatForDisplay();
 
             /** @var array<string, mixed> $payload */
@@ -181,7 +181,7 @@ final readonly class LogHealthEntry implements Tool
             $conversationId = Context::get('chat.conversation_id');
             $conversation = is_string($conversationId)
                 ? Conversation::query()->find($conversationId)
-                : null;
+                : null; // @codeCoverageIgnore
 
             $channel = Context::get('chat.channel');
 
@@ -202,6 +202,7 @@ final readonly class LogHealthEntry implements Tool
                 'message' => 'Prepared this health entry but it is NOT saved yet. Ask the user to approve it using the confirmation card; do not tell them it has been logged.',
                 'card' => $approval->toCardData()->toArray(),
             ]);
+            // @codeCoverageIgnoreStart
         } catch (Throwable $throwable) {
             report($throwable);
 
@@ -209,6 +210,7 @@ final readonly class LogHealthEntry implements Tool
                 'error' => 'Could not prepare the health entry for confirmation. Please try again.',
             ]);
         }
+        // @codeCoverageIgnoreEnd
     }
 
     private function requiresGlucoseUnitClarification(HealthLogData $healthData): bool

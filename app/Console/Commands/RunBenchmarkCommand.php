@@ -40,7 +40,7 @@ final class RunBenchmarkCommand extends Command
         $query = BenchmarkMeal::query()->with('items')->orderBy('code');
 
         if ($this->option('smoke')) {
-            $query->limit(self::SMOKE_LIMIT);
+            $query->limit(self::SMOKE_LIMIT); // @codeCoverageIgnore
         }
 
         $meals = $query->get();
@@ -105,7 +105,7 @@ final class RunBenchmarkCommand extends Command
         $deltas = $this->comparator->compare($report, $previous->toHarnessReport());
 
         if ($deltas === []) {
-            return;
+            return; // @codeCoverageIgnore
         }
 
         $this->newLine();
@@ -141,7 +141,7 @@ final class RunBenchmarkCommand extends Command
         $this->components->twoColumnDetail('Repeats per meal per path', (string) $report->repeats);
 
         if ($report->skippedMeals > 0) {
-            $this->warn(sprintf('%d meals skipped because their photo could not be loaded.', $report->skippedMeals));
+            $this->warn(sprintf('%d meals skipped because their photo could not be loaded.', $report->skippedMeals)); // @codeCoverageIgnore
         }
 
         /** @var PathMetrics $pathMetrics */

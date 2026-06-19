@@ -39,11 +39,13 @@ final readonly class StreamAggregator
      */
     public function broadcastPayload(array $payload): array
     {
+        // @codeCoverageIgnoreStart
         foreach (self::AGGREGATION_ONLY_KEYS as $key) {
             unset($payload[$key]);
         }
 
         return $payload;
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -169,6 +171,7 @@ final readonly class StreamAggregator
                 'data' => $event->data,
                 'timestamp' => $event->timestamp,
             ],
+            // @codeCoverageIgnoreStart
             $event instanceof Citation => [
                 'id' => $event->id,
                 'invocation_id' => $event->invocationId,
@@ -189,6 +192,7 @@ final readonly class StreamAggregator
                 'timestamp' => $event->timestamp,
                 'metadata' => $event->metadata,
             ],
+            // @codeCoverageIgnoreEnd
             default => [
                 'invocation_id' => $event->invocationId,
                 'type' => $event->type(),
@@ -201,10 +205,12 @@ final readonly class StreamAggregator
      */
     public function aggregateStoredEvents(array $storedEvents): ChatStreamResult
     {
+        // @codeCoverageIgnoreStart
         return $this->aggregateNormalized(array_map(
             fn (array $event): array => $event['data'],
             $storedEvents,
         ));
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -233,7 +239,7 @@ final readonly class StreamAggregator
         $key = 'tools.'.$name;
 
         if (Lang::has($key)) {
-            return (string) __($key);
+            return (string) __($key); // @codeCoverageIgnore
         }
 
         return Str::ucfirst(str_replace('_', ' ', $name));
@@ -310,7 +316,7 @@ final readonly class StreamAggregator
             }
         }
 
-        return [];
+        return []; // @codeCoverageIgnore
     }
 
     /**

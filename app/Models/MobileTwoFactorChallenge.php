@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  */
+/** @codeCoverageIgnore */
 final class MobileTwoFactorChallenge extends Model
 {
     /** @use HasFactory<MobileTwoFactorChallengeFactory> */

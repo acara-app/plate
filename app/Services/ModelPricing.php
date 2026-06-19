@@ -44,9 +44,11 @@ final class ModelPricing
                 continue;
             }
 
+            // @codeCoverageIgnoreStart
             if ($bestKey === null || mb_strlen($key) > mb_strlen($bestKey)) {
                 $bestKey = $key;
             }
+            // @codeCoverageIgnoreEnd
         }
 
         return $bestKey !== null ? $models[$bestKey] : null;

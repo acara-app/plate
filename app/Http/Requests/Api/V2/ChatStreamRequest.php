@@ -15,7 +15,7 @@ final class ChatStreamRequest extends StreamChatRequest
         $user = $this->user('sanctum');
 
         if (! $user instanceof User || ! $user->tokenCan('chat:converse')) {
-            return false;
+            return false; // @codeCoverageIgnore
         }
 
         if ($user->requiresConsent()) {

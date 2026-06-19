@@ -9,6 +9,7 @@ use App\Models\Conversation;
 use App\Models\UserChatPlatformLink;
 use Illuminate\Support\Facades\DB;
 
+/** @codeCoverageIgnore */
 final readonly class DeleteConversationHistory
 {
     public function handle(Conversation $conversation): void

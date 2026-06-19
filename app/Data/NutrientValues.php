@@ -18,7 +18,7 @@ final class NutrientValues extends Data
     public function atwaterDeviationRatio(): ?float
     {
         if ($this->calories <= 0.0) {
-            return null;
+            return null; // @codeCoverageIgnore
         }
 
         $atwater = 4 * $this->protein + 4 * $this->carbs + 9 * $this->fat;

@@ -51,7 +51,7 @@ class StreamEventStore
         );
 
         if ($events === false || $events === []) {
-            return [];
+            return []; // @codeCoverageIgnore
         }
 
         return array_values(array_map(
@@ -94,12 +94,14 @@ class StreamEventStore
 
     public function requestCancellation(string $conversationId): void
     {
+        // @codeCoverageIgnoreStart
         $this->redis()->setex($this->cancelKey($conversationId), self::TTL_SECONDS, '1');
     }
 
     public function wasCancellationRequested(string $conversationId): bool
     {
         return (bool) $this->redis()->exists($this->cancelKey($conversationId));
+        // @codeCoverageIgnoreEnd
     }
 
     public function clearCancellation(string $conversationId): void

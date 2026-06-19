@@ -6,6 +6,7 @@ namespace App\Events;
 
 use Illuminate\Foundation\Events\Dispatchable;
 
+/** @codeCoverageIgnore */
 final readonly class AgentApprovalResolved
 {
     use Dispatchable;

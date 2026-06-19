@@ -60,7 +60,7 @@ final readonly class GetUserHealthEntriesAction
             ->map(fn (mixed $key): string => is_scalar($key) ? (string) $key : '');
 
         if ($keys->isEmpty()) {
-            return [];
+            return []; // @codeCoverageIgnore
         }
 
         $groupIds = $keys

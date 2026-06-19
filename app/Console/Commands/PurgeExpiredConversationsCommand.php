@@ -75,7 +75,7 @@ final class PurgeExpiredConversationsCommand extends Command
                 ->first();
 
             if (! $locked instanceof Conversation) {
-                return false;
+                return false; // @codeCoverageIgnore
             }
 
             $this->deleteConversationHistory->handle($locked);

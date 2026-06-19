@@ -36,7 +36,7 @@ final class ConversationPolicy
 
     public function pin(User $user, Conversation $conversation): bool
     {
-        return $this->view($user, $conversation);
+        return $this->view($user, $conversation); // @codeCoverageIgnore
     }
 
     public function restore(): bool

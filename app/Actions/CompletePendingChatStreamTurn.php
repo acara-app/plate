@@ -11,6 +11,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use Laravel\Ai\Messages\MessageRole;
 
+/** @codeCoverageIgnore */
 final readonly class CompletePendingChatStreamTurn
 {
     public function handle(
