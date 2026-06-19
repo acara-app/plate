@@ -133,11 +133,9 @@ return [
 
     'dashboard_ai' => [
         'breadcrumb' => 'Acara',
-        'heading' => 'Sur quoi voulez-vous avancer aujourd\'hui ?',
-        'description' => 'Votre coach santé IA privé pour la glycémie, les repas, le contexte médical et les tendances synchronisées.',
+        'description' => 'Votre coach santé privé. Les discussions s\'effacent après 48 heures — épinglez celles que vous souhaitez garder.',
         'placeholder' => 'Demandez à Acara',
         'disclaimer' => 'À titre informatif uniquement. Ne remplace pas un avis médical ou nutritionnel professionnel.',
-        'privacy_notice' => 'Vos discussions sont privées. Nous les supprimons automatiquement après 48 heures, sauf si vous les épinglez.',
     ],
 
     'onboarding_banner' => [
@@ -856,6 +854,7 @@ return [
         'title' => 'Discussions',
         'new_chat' => 'Nouvelle discussion',
         'empty' => 'Aucune conversation pour le moment.',
+        'empty_description' => 'Lancez une nouvelle discussion avec votre coach santé IA.',
         'start_first' => 'Commencer votre première discussion',
         'untitled' => 'Nouvelle conversation',
         'delete_label' => 'Supprimer la conversation',
