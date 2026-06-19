@@ -29,6 +29,10 @@ return [
         'percentage' => (int) env('PLATE_PREMIUM_ROLLOUT_PERCENTAGE', 0),
     ],
 
+    'chat' => [
+        'temporary_retention_hours' => (int) env('CHAT_TEMPORARY_RETENTION_HOURS', 48),
+    ],
+
     'health_sync' => [
         'app_store_url' => (string) env('HEALTH_SYNC_APP_STORE_URL', 'https://apps.apple.com/us/app/acara-health-sync/id6761504525'),
         'minimum_ios_version' => (string) env('HEALTH_SYNC_MIN_IOS_VERSION', '18.0'),

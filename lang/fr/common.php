@@ -134,15 +134,11 @@ return [
     'dashboard_ai' => [
         'breadcrumb' => 'Acara',
         'heading' => 'Sur quoi voulez-vous avancer aujourd\'hui ?',
-        'description' => 'Posez une question sur la glycémie, les repas, le contexte médical, les tendances synchronisées ou le prochain choix santé.',
-        'placeholder' => 'Demandez à Altani pour votre santé, vos repas, votre glycémie ou votre routine...',
+        'description' => 'Votre coach santé IA privé pour la glycémie, les repas, le contexte médical et les tendances synchronisées.',
+        'placeholder' => 'Demandez à Acara',
         'disclaimer' => 'À titre informatif uniquement. Ne remplace pas un avis médical ou nutritionnel professionnel.',
-        'prompts' => [
-            'glucose' => 'Qu\'est-ce qui pourrait expliquer mes variations récentes de glycémie ?',
-            'meal' => 'Que devrais-je manger aujourd\'hui pour garder une énergie stable ?',
-            'energy' => 'Comment améliorer mon sommeil, mon activité et ma récupération cette semaine ?',
-            'sync' => 'Quels schémas de santé devrais-je chercher dans mes données synchronisées ?',
-        ],
+        'privacy_notice' => 'Vos discussions sont privées. Nous les supprimons automatiquement après 48 heures, sauf si vous les épinglez.',
+        'privacy_link' => 'Lire notre politique de confidentialité',
     ],
 
     'onboarding_banner' => [
@@ -871,5 +867,13 @@ return [
         'minutes_ago' => 'il y a {{count}} min',
         'hours_ago' => 'il y a {{count}} h',
         'days_ago' => 'il y a {{count}} j',
+        'temporary_badge' => 'Temporaire',
+        'temporary_tooltip' => 'Supprimée automatiquement après {{hours}} h d’inactivité, sauf si épinglée',
+        'pin' => 'Épingler la discussion',
+        'unpin' => 'Désépingler la discussion',
+        'pinned' => 'Épinglée',
+        'pinned_toast' => 'Discussion épinglée — elle ne sera pas supprimée.',
+        'unpinned_toast' => 'Discussion désépinglée — elle redevient temporaire.',
+        'chat_expired' => 'Cette discussion a expiré et a été supprimée.',
     ],
 ];

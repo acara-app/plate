@@ -133,15 +133,11 @@ return [
     'dashboard_ai' => [
         'breadcrumb' => 'Acara',
         'heading' => 'What should we work on today?',
-        'description' => 'Ask about glucose, meals, medication context, synced health trends, or the next healthy choice.',
-        'placeholder' => 'Ask Altani about your health, meals, glucose, or routine...',
+        'description' => 'Your private AI health coach for glucose, meals, medication context, and synced health trends.',
+        'placeholder' => 'Ask Acara',
         'disclaimer' => 'For informational purposes only. Not a substitute for professional medical or nutritional advice.',
-        'prompts' => [
-            'glucose' => 'What might explain my recent glucose swings?',
-            'meal' => 'What should I eat today to keep energy steady?',
-            'energy' => 'How can I improve sleep, movement, and recovery this week?',
-            'sync' => 'What health patterns should I look for from my synced data?',
-        ],
+        'privacy_notice' => 'Your chats are private. We automatically delete them after 48 hours unless you pin them to keep.',
+        'privacy_link' => 'Read our Privacy Policy',
     ],
 
     'onboarding_banner' => [
@@ -870,5 +866,13 @@ return [
         'minutes_ago' => '{{count}}m ago',
         'hours_ago' => '{{count}}h ago',
         'days_ago' => '{{count}}d ago',
+        'temporary_badge' => 'Temporary',
+        'temporary_tooltip' => 'Auto-deletes after {{hours}}h of inactivity unless pinned',
+        'pin' => 'Pin chat',
+        'unpin' => 'Unpin chat',
+        'pinned' => 'Pinned',
+        'pinned_toast' => 'Chat pinned — it won\'t be deleted.',
+        'unpinned_toast' => 'Chat unpinned — it\'s temporary again.',
+        'chat_expired' => 'This chat expired and was deleted.',
     ],
 ];

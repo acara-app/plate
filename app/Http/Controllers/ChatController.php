@@ -9,7 +9,9 @@ use App\Actions\Billing\BuildCreditWarning;
 use App\Actions\BuildConversationMessagesAction;
 use App\Actions\DeleteConversationHistory;
 use App\Actions\GetOrCreateConversationAction;
+use App\Actions\PinConversation;
 use App\Actions\StartChatStream;
+use App\Actions\UnpinConversation;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Http\Requests\StoreChatConversationRequest;
 use App\Http\Requests\StreamChatRequest;
@@ -33,6 +35,8 @@ final readonly class ChatController
         private BuildConversationApprovalStates $approvalStates,
         private DeleteConversationHistory $deleteConversationHistory,
         private StartChatStream $startChatStream,
+        private PinConversation $pinConversation,
+        private UnpinConversation $unpinConversation,
     ) {}
 
     public function index(): Response
@@ -41,6 +45,7 @@ final readonly class ChatController
             'conversations' => Inertia::scroll(
                 fn (): LengthAwarePaginator => $this->user->paginatedConversations()
             ),
+            'temporaryRetentionHours' => (int) config('plate.chat.temporary_retention_hours'),
         ]);
     }
 
@@ -53,6 +58,8 @@ final readonly class ChatController
 
         return Inertia::render('chat/create-chat', [
             'conversationId' => $conversation->id,
+            'isPinned' => $conversation->isPinned(),
+            'temporaryRetentionHours' => (int) config('plate.chat.temporary_retention_hours'),
             'messages' => fn (): array => $this->messagesAction->handle($conversation),
             'initialPrompt' => $request->initialPrompt(),
             'initialStreaming' => $conversation->hasPendingChatStream(),
@@ -88,5 +95,27 @@ final readonly class ChatController
         $this->deleteConversationHistory->handle($conversation);
 
         return to_route('chat.index');
+    }
+
+    public function pin(Conversation $conversation): RedirectResponse
+    {
+        Gate::authorize('pin', $conversation);
+
+        $this->pinConversation->handle($conversation);
+
+        toast(__('conversations.pinned_toast'));
+
+        return back();
+    }
+
+    public function unpin(Conversation $conversation): RedirectResponse
+    {
+        Gate::authorize('pin', $conversation);
+
+        $this->unpinConversation->handle($conversation);
+
+        toast(__('conversations.unpinned_toast'));
+
+        return back();
     }
 }

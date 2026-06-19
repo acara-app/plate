@@ -57,6 +57,14 @@ final class HistoryFactory extends Factory
         ]);
     }
 
+    public function pendingStream(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'role' => MessageRole::Assistant,
+            'meta' => History::streamMeta((string) Str::uuid7(), History::STREAM_STATUS_PENDING),
+        ]);
+    }
+
     public function forConversation(Conversation $conversation): static
     {
         return $this->state(fn (array $attributes): array => [

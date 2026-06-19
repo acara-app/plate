@@ -7,8 +7,10 @@ namespace App\Models;
 use App\Services\StreamEventStore;
 use Carbon\CarbonInterface;
 use Database\Factories\ConversationFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $id UUID primary key
  * @property int $user_id ID of the user who owns this conversation
  * @property string $title Conversation title/summary
+ * @property CarbonInterface|null $pinned_at When set, the conversation is pinned and exempt from temporary-chat pruning
  * @property CarbonInterface|null $summarization_dispatched_at
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
@@ -42,6 +45,7 @@ final class Conversation extends Model
     {
         return [
             'id' => 'string',
+            'pinned_at' => 'datetime',
             'summarization_dispatched_at' => 'datetime',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
@@ -72,6 +76,11 @@ final class Conversation extends Model
         return $this->hasMany(ConversationSummary::class, 'conversation_id');
     }
 
+    public function isPinned(): bool
+    {
+        return $this->pinned_at !== null;
+    }
+
     public function hasPendingChatStream(): bool
     {
         $liveAfter = now()->subSeconds(StreamEventStore::TTL_SECONDS);
@@ -80,5 +89,14 @@ final class Conversation extends Model
             fn (History $message): bool => $message->isPendingStreamAssistant()
                 && $message->created_at->isAfter($liveAfter),
         );
+    }
+
+    #[Scope]
+    protected function expired(Builder $query, ?int $retentionHours = null): void
+    {
+        $retentionHours ??= (int) config('plate.chat.temporary_retention_hours');
+
+        $query->whereNull('pinned_at')
+            ->where('updated_at', '<', now()->subHours($retentionHours));
     }
 }

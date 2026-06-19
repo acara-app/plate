@@ -46,6 +46,12 @@ Route::prefix('v2/chat')
         Route::delete('conversations/{conversation}', [ApiV2\ChatController::class, 'destroy'])
             ->name('api.v2.chat.destroy');
 
+        Route::patch('conversations/{conversation}/pin', [ApiV2\ChatController::class, 'pin'])
+            ->name('api.v2.chat.pin');
+
+        Route::patch('conversations/{conversation}/unpin', [ApiV2\ChatController::class, 'unpin'])
+            ->name('api.v2.chat.unpin');
+
         Route::get('conversations/{conversation}/approvals/{approval}', [ApiV2\ApprovalController::class, 'show'])
             ->name('api.v2.chat.approvals.show');
 

@@ -89,6 +89,10 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
         ->name('chat.store');
     Route::delete('/chat/{conversation}', [Web\ChatController::class, 'destroy'])
         ->name('chat.destroy');
+    Route::patch('/chat/{conversation}/pin', [Web\ChatController::class, 'pin'])
+        ->name('chat.pin');
+    Route::patch('/chat/{conversation}/unpin', [Web\ChatController::class, 'unpin'])
+        ->name('chat.unpin');
     Route::post('chat/stream/{conversation}', Web\BroadcastChatController::class)
         ->name('chat.stream');
     Route::post('chat/stream/{conversation}/stop', Web\ChatStopController::class)
