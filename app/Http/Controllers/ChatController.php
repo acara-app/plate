@@ -20,6 +20,7 @@ use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -45,7 +46,7 @@ final readonly class ChatController
             'conversations' => Inertia::scroll(
                 fn (): LengthAwarePaginator => $this->user->paginatedConversations()
             ),
-            'temporaryRetentionHours' => (int) config('plate.chat.temporary_retention_hours'),
+            'temporaryRetentionHours' => Config::integer('plate.chat.temporary_retention_hours'),
         ]);
     }
 
@@ -59,7 +60,7 @@ final readonly class ChatController
         return Inertia::render('chat/create-chat', [
             'conversationId' => $conversation->id,
             'isPinned' => $conversation->isPinned(),
-            'temporaryRetentionHours' => (int) config('plate.chat.temporary_retention_hours'),
+            'temporaryRetentionHours' => Config::integer('plate.chat.temporary_retention_hours'),
             'messages' => fn (): array => $this->messagesAction->handle($conversation),
             'initialPrompt' => $request->initialPrompt(),
             'initialStreaming' => $conversation->hasPendingChatStream(),
