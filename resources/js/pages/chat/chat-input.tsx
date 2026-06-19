@@ -113,7 +113,7 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
             return;
         }
         textarea.style.height = 'auto';
-        textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+        textarea.style.height = `${Math.min(textarea.scrollHeight, 240)}px`;
     }, [message]);
 
     const handleSubmit = () => {
@@ -168,7 +168,7 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
             role="group"
             aria-label="Message composer"
             className={cn(
-                'mx-auto flex w-full items-end px-2 py-2 sm:px-4 sm:py-3',
+                'mx-auto flex w-full items-end px-2 py-3 sm:px-4 sm:py-4',
                 className,
             )}
         >
@@ -190,10 +190,10 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
 
                 <div
                     className={cn(
-                        'flex w-full items-end rounded-2xl border bg-card shadow-sm transition-all duration-200',
+                        'flex w-full items-end rounded-3xl border bg-card shadow-md transition-all duration-200',
                         isFocused && !disabled
                             ? 'border-emerald-500/50 shadow-[0_0_0_3px_rgba(16,185,129,0.12),0_4px_20px_rgba(0,0,0,0.08)] dark:border-emerald-400/40 dark:shadow-[0_0_0_3px_rgba(52,211,153,0.08)]'
-                            : 'border-border/60 shadow-sm',
+                            : 'border-border shadow-md',
                         disabled && 'opacity-60',
                     )}
                 >
@@ -211,12 +211,12 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="m-1 size-9 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:scale-95 sm:size-8"
+                                className="m-1.5 size-11 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:scale-95"
                                 disabled={disabled}
                                 onClick={() => fileInputRef.current?.click()}
                                 aria-label="Attach image"
                             >
-                                <Paperclip className="size-[18px]" />
+                                <Paperclip className="size-5" />
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent side="top">Attach image</TooltipContent>
@@ -236,7 +236,7 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                         disabled={disabled}
                         aria-label="Message input"
                         aria-describedby="chat-input-hint"
-                        className="max-h-[200px] min-h-6 w-full flex-1 resize-none bg-transparent py-2 text-base leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:outline-none disabled:cursor-not-allowed"
+                        className="max-h-[240px] min-h-12 w-full flex-1 resize-none bg-transparent py-3.5 text-base leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:outline-none disabled:cursor-not-allowed"
                         rows={1}
                     />
 
@@ -247,11 +247,11 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                                     type="button"
                                     variant="default"
                                     size="icon"
-                                    className="m-1 size-9 shrink-0 rounded-xl bg-linear-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25 transition-all duration-200 hover:from-red-600 hover:to-red-700 hover:shadow-red-500/30 active:scale-95 sm:size-8"
+                                    className="m-1.5 size-11 shrink-0 rounded-xl bg-linear-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25 transition-all duration-200 hover:from-red-600 hover:to-red-700 hover:shadow-red-500/30 active:scale-95"
                                     onClick={onStop}
                                     aria-label="Stop generating"
                                 >
-                                    <Square className="size-4 fill-current" />
+                                    <Square className="size-5 fill-current" />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent side="top">
@@ -269,7 +269,7 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                                     }
                                     size="icon"
                                     className={cn(
-                                        'm-1 size-9 shrink-0 rounded-xl transition-all duration-200 active:scale-95 sm:size-8',
+                                        'm-1.5 size-11 shrink-0 rounded-xl transition-all duration-200 active:scale-95',
                                         hasContent && !disabled
                                             ? 'bg-linear-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-emerald-500/30'
                                             : 'text-muted-foreground',
@@ -278,7 +278,7 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                                     disabled={!hasContent || disabled}
                                     aria-label="Send message"
                                 >
-                                    <Send className="size-4" />
+                                    <Send className="size-5" />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent side="top">
