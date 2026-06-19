@@ -210,6 +210,7 @@ final readonly class LogHealthEntry implements Tool
                 'error' => 'Could not prepare the health entry for confirmation. Please try again.',
             ]);
         }
+
         // @codeCoverageIgnoreEnd
     }
 

@@ -190,5 +190,6 @@ final class ProcessChatStream implements ShouldQueue
             ->with(['conversationId' => $this->conversationId, ...$payload])
             ->sendNow();
     }
+
     // @codeCoverageIgnoreEnd
 }

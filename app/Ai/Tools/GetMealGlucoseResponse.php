@@ -32,6 +32,7 @@ final readonly class GetMealGlucoseResponse implements Tool
     {
         return 'Retrieve how the user\'s OWN glucose responded after their recently logged meals — a pre-meal baseline and the peak rise in the hours afterward, computed from their own readings. Use when the user asks how a meal or their food affected their glucose, or what a meal "did" to them. Results are strictly retrospective observations of past data: present them as such, never as a prediction and never as a basis for insulin or medication dosing.';
     }
+
     // @codeCoverageIgnoreEnd
 
     public function handle(Request $request): string

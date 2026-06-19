@@ -48,6 +48,7 @@ final class ModelPricing
             if ($bestKey === null || mb_strlen($key) > mb_strlen($bestKey)) {
                 $bestKey = $key;
             }
+
             // @codeCoverageIgnoreEnd
         }
 

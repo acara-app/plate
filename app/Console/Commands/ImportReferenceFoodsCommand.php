@@ -87,6 +87,7 @@ final class ImportReferenceFoodsCommand extends Command
         } catch (Throwable) {
             return null;
         }
+
         // @codeCoverageIgnoreEnd
 
         if (! is_array($payload)) {
@@ -220,6 +221,7 @@ final class ImportReferenceFoodsCommand extends Command
         } catch (Throwable) {
             return null;
         }
+
         // @codeCoverageIgnoreEnd
     }
 
