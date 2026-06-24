@@ -39,6 +39,11 @@ final class ConversationPolicy
         return $this->view($user, $conversation); // @codeCoverageIgnore
     }
 
+    public function keep(User $user, Conversation $conversation): bool
+    {
+        return $this->view($user, $conversation); // @codeCoverageIgnore
+    }
+
     public function restore(): bool
     {
         return false;

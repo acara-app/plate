@@ -6,6 +6,7 @@ namespace App\Actions\Messaging;
 
 use App\Contracts\ProcessesAdvisorMessage;
 use App\Models\AgentApproval;
+use App\Models\Conversation;
 use App\Models\User;
 use App\Models\UserChatPlatformLink;
 use Illuminate\Support\Facades\Context;
@@ -40,6 +41,11 @@ final readonly class DispatchChatTurnAction
         if ($link->conversation_id !== $result['conversation_id']) {
             $link->update(['conversation_id' => $result['conversation_id']]);
         }
+
+        Conversation::query()
+            ->whereKey($result['conversation_id'])
+            ->whereNull('kept_at')
+            ->update(['kept_at' => now()]);
 
         return [
             ...$result,
