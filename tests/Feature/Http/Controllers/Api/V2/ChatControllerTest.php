@@ -107,3 +107,57 @@ it('returns 404 when pinning a missing conversation', function (): void {
         ->patchJson(route('api.v2.chat.pin', ['conversation' => (string) Str::uuid7()]))
         ->assertNotFound();
 });
+
+it('keeps a conversation through the mobile API', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+
+    $this->withHeaders(chatAuthHeaders($user))
+        ->patchJson(route('api.v2.chat.keep', ['conversation' => $conversation->id]))
+        ->assertOk()
+        ->assertJson(['id' => $conversation->id, 'is_kept' => true]);
+
+    expect($conversation->fresh()->kept_at)->not->toBeNull();
+});
+
+it('unkeeps a conversation through the mobile API', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->kept()->create(['user_id' => $user->id]);
+
+    $this->withHeaders(chatAuthHeaders($user))
+        ->patchJson(route('api.v2.chat.unkeep', ['conversation' => $conversation->id]))
+        ->assertOk()
+        ->assertJson(['id' => $conversation->id, 'is_kept' => false]);
+
+    expect($conversation->fresh()->kept_at)->toBeNull();
+});
+
+it('exposes an is_kept flag when listing conversations', function (): void {
+    $user = User::factory()->create();
+    Conversation::factory()->kept()->create(['user_id' => $user->id]);
+
+    $this->withHeaders(chatAuthHeaders($user))
+        ->getJson(route('api.v2.chat.index'))
+        ->assertOk()
+        ->assertJsonPath('data.0.is_kept', true);
+});
+
+it("forbids keeping another user's conversation", function (): void {
+    $owner = User::factory()->create();
+    $other = User::factory()->create();
+    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+
+    $this->withHeaders(chatAuthHeaders($other))
+        ->patchJson(route('api.v2.chat.keep', ['conversation' => $conversation->id]))
+        ->assertForbidden();
+
+    expect($conversation->fresh()->kept_at)->toBeNull();
+});
+
+it('returns 404 when keeping a missing conversation', function (): void {
+    $user = User::factory()->create();
+
+    $this->withHeaders(chatAuthHeaders($user))
+        ->patchJson(route('api.v2.chat.keep', ['conversation' => (string) Str::uuid7()]))
+        ->assertNotFound();
+});
