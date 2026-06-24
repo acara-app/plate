@@ -93,6 +93,10 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
         ->name('chat.pin');
     Route::patch('/chat/{conversation}/unpin', [Web\ChatController::class, 'unpin'])
         ->name('chat.unpin');
+    Route::patch('/chat/{conversation}/keep', [Web\ChatController::class, 'keep'])
+        ->name('chat.keep');
+    Route::patch('/chat/{conversation}/unkeep', [Web\ChatController::class, 'unkeep'])
+        ->name('chat.unkeep');
     Route::post('chat/stream/{conversation}', Web\BroadcastChatController::class)
         ->name('chat.stream');
     Route::post('chat/stream/{conversation}/stop', Web\ChatStopController::class)

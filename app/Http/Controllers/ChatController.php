@@ -9,8 +9,10 @@ use App\Actions\Billing\BuildCreditWarning;
 use App\Actions\BuildConversationMessagesAction;
 use App\Actions\DeleteConversationHistory;
 use App\Actions\GetOrCreateConversationAction;
+use App\Actions\KeepConversation;
 use App\Actions\PinConversation;
 use App\Actions\StartChatStream;
+use App\Actions\UnkeepConversation;
 use App\Actions\UnpinConversation;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Http\Requests\StoreChatConversationRequest;
@@ -38,6 +40,8 @@ final readonly class ChatController
         private StartChatStream $startChatStream,
         private PinConversation $pinConversation,
         private UnpinConversation $unpinConversation,
+        private KeepConversation $keepConversation,
+        private UnkeepConversation $unkeepConversation,
     ) {}
 
     public function index(): Response
@@ -60,6 +64,7 @@ final readonly class ChatController
         return Inertia::render('chat/create-chat', [
             'conversationId' => $conversation->id,
             'isPinned' => $conversation->isPinned(),
+            'isKept' => $conversation->isKept(),
             'temporaryRetentionHours' => Config::integer('plate.chat.temporary_retention_hours'),
             'messages' => fn (): array => $this->messagesAction->handle($conversation),
             'initialPrompt' => $request->initialPrompt(),
@@ -116,6 +121,28 @@ final readonly class ChatController
         $this->unpinConversation->handle($conversation);
 
         toast(__('common.conversations.unpinned_toast'));
+
+        return back();
+    }
+
+    public function keep(Conversation $conversation): RedirectResponse
+    {
+        Gate::authorize('keep', $conversation);
+
+        $this->keepConversation->handle($conversation);
+
+        toast(__('common.conversations.kept_toast'));
+
+        return back();
+    }
+
+    public function unkeep(Conversation $conversation): RedirectResponse
+    {
+        Gate::authorize('keep', $conversation);
+
+        $this->unkeepConversation->handle($conversation);
+
+        toast(__('common.conversations.unkept_toast'));
 
         return back();
     }

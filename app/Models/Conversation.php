@@ -23,7 +23,8 @@ use Illuminate\Support\Facades\Config;
  * @property string $id UUID primary key
  * @property int $user_id ID of the user who owns this conversation
  * @property string $title Conversation title/summary
- * @property CarbonInterface|null $pinned_at When set, the conversation is pinned and exempt from temporary-chat pruning
+ * @property CarbonInterface|null $pinned_at When set, the conversation is pinned to the top of the list and exempt from temporary-chat pruning
+ * @property CarbonInterface|null $kept_at When set, the conversation is permanent and exempt from temporary-chat pruning
  * @property CarbonInterface|null $summarization_dispatched_at
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
@@ -47,6 +48,7 @@ final class Conversation extends Model
         return [
             'id' => 'string',
             'pinned_at' => 'datetime',
+            'kept_at' => 'datetime',
             'summarization_dispatched_at' => 'datetime',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
@@ -82,6 +84,16 @@ final class Conversation extends Model
         return $this->pinned_at !== null; // @codeCoverageIgnore
     }
 
+    public function isKept(): bool
+    {
+        return $this->kept_at !== null; // @codeCoverageIgnore
+    }
+
+    public function isPermanent(): bool
+    {
+        return $this->isPinned() || $this->isKept(); // @codeCoverageIgnore
+    }
+
     public function hasPendingChatStream(): bool
     {
         $liveAfter = now()->subSeconds(StreamEventStore::TTL_SECONDS);
@@ -102,6 +114,7 @@ final class Conversation extends Model
         $retentionHours ??= Config::integer('plate.chat.temporary_retention_hours');
 
         $query->whereNull('pinned_at')
+            ->whereNull('kept_at')
             ->where('updated_at', '<', now()->subHours($retentionHours));
         // @codeCoverageIgnoreEnd
     }
