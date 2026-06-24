@@ -28,7 +28,7 @@ import type {
 import { type UIMessage } from '@ai-sdk/react';
 import { code } from '@streamdown/code';
 import { AlertCircle, Sparkles, User } from 'lucide-react';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Streamdown } from 'streamdown';
 
@@ -381,14 +381,31 @@ const MessageBubble = memo(function MessageBubble({
     );
 });
 
+const THINKING_LABEL_DELAY_MS = 4000;
+
 function WorkingIndicator() {
+    const [showLabel, setShowLabel] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(
+            () => setShowLabel(true),
+            THINKING_LABEL_DELAY_MS,
+        );
+
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
         <div className="flex gap-3 duration-300 animate-in fade-in slide-in-from-bottom-2">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-emerald-400 to-teal-500 text-white shadow-lg shadow-emerald-500/20">
                 <Sparkles className="size-5" />
             </div>
             <div className="flex items-center gap-2.5 rounded-2xl rounded-bl-md border border-border/60 bg-muted/80 px-4 py-3 shadow-sm backdrop-blur-sm">
-                <span className="text-sm text-muted-foreground">Thinking</span>
+                {showLabel && (
+                    <span className="text-sm text-muted-foreground duration-300 animate-in fade-in">
+                        Thinking
+                    </span>
+                )}
                 <RunningDots />
             </div>
         </div>
