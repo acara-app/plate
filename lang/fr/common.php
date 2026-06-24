@@ -133,7 +133,7 @@ return [
 
     'dashboard_ai' => [
         'breadcrumb' => 'Acara',
-        'description' => 'Votre coach santé privé. Les discussions s\'effacent après 48 heures — épinglez celles que vous souhaitez garder.',
+        'description' => 'Votre coach santé privé. Les discussions s\'effacent après 48 heures — appuyez sur Conserver pour garder celles que vous voulez.',
         'placeholder' => 'Demandez à Acara',
         'disclaimer' => 'À titre informatif uniquement. Ne remplace pas un avis médical ou nutritionnel professionnel.',
     ],

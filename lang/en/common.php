@@ -132,7 +132,7 @@ return [
 
     'dashboard_ai' => [
         'breadcrumb' => 'Acara',
-        'description' => 'Your private health coach. Chats clear after 48 hours — pin any you want to keep.',
+        'description' => 'Your private health coach. Chats clear after 48 hours — hit Keep on any you want to hold onto.',
         'placeholder' => 'Ask Acara',
         'disclaimer' => 'For informational purposes only. Not a substitute for professional medical or nutritional advice.',
     ],
