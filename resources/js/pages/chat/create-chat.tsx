@@ -5,6 +5,7 @@ import { CreditWarningBanner } from '@/components/billing/credit-warning-banner'
 import { LifecycleBanner } from '@/components/billing/lifecycle-banner';
 import { UsageLimitNotice } from '@/components/billing/usage-limit-notice';
 import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -275,73 +276,75 @@ export default function CreateChat() {
                     </div>
                     <div
                         className={cn(
-                            'absolute top-3 right-3 z-20 flex items-center gap-2 transition-all duration-300 ease-out',
+                            'absolute top-3 right-3 z-20 transition-all duration-300 ease-out',
                             isMobileNavVisible
                                 ? 'translate-y-0 opacity-100'
                                 : 'pointer-events-none -translate-y-2 opacity-0 md:pointer-events-auto md:translate-y-0 md:opacity-100',
                         )}
                     >
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() =>
-                                        router.visit(
-                                            chat.create(generateUUID()).url,
-                                        )
-                                    }
-                                    aria-label={t('conversations.new_chat')}
-                                    className="size-10 rounded-full border-border/40 bg-background/80 shadow-md backdrop-blur-md supports-[backdrop-filter]:bg-background/60"
-                                >
-                                    <SquarePen className="size-4 text-muted-foreground" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                {t('conversations.new_chat')}
-                            </TooltipContent>
-                        </Tooltip>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    aria-label={t('conversations.actions')}
-                                    className="size-10 rounded-full border-border/40 bg-background/80 shadow-md backdrop-blur-md data-[state=open]:bg-muted supports-[backdrop-filter]:bg-background/60"
-                                >
-                                    <MoreHorizontal className="size-4 text-muted-foreground" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-44">
-                                <DropdownMenuItem onSelect={toggleKeep}>
-                                    <Bookmark
-                                        className={cn(
-                                            'size-4',
-                                            kept && 'fill-current text-primary',
+                        <ButtonGroup className="rounded-full border border-border/40 bg-background/80 shadow-md backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() =>
+                                            router.visit(
+                                                chat.create(generateUUID()).url,
+                                            )
+                                        }
+                                        aria-label={t('conversations.new_chat')}
+                                        className="size-10 text-muted-foreground"
+                                    >
+                                        <SquarePen className="size-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {t('conversations.new_chat')}
+                                </TooltipContent>
+                            </Tooltip>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        aria-label={t('conversations.actions')}
+                                        className="size-10 text-muted-foreground data-[state=open]:bg-accent"
+                                    >
+                                        <MoreHorizontal className="size-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-44">
+                                    <DropdownMenuItem onSelect={toggleKeep}>
+                                        <Bookmark
+                                            className={cn(
+                                                'size-4',
+                                                kept && 'fill-current text-primary',
+                                            )}
+                                        />
+                                        {t(
+                                            kept
+                                                ? 'conversations.unkeep'
+                                                : 'conversations.keep',
                                         )}
-                                    />
-                                    {t(
-                                        kept
-                                            ? 'conversations.unkeep'
-                                            : 'conversations.keep',
-                                    )}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onSelect={togglePin}>
-                                    <Pin
-                                        className={cn(
-                                            'size-4',
-                                            pinned &&
-                                                'fill-current text-primary',
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onSelect={togglePin}>
+                                        <Pin
+                                            className={cn(
+                                                'size-4',
+                                                pinned &&
+                                                    'fill-current text-primary',
+                                            )}
+                                        />
+                                        {t(
+                                            pinned
+                                                ? 'conversations.unpin'
+                                                : 'conversations.pin',
                                         )}
-                                    />
-                                    {t(
-                                        pinned
-                                            ? 'conversations.unpin'
-                                            : 'conversations.pin',
-                                    )}
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </ButtonGroup>
                     </div>
                     <div
                         className="min-h-0 flex-1 overflow-y-auto scroll-smooth"
