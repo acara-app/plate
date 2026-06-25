@@ -7,7 +7,9 @@ namespace App\Http\Controllers\Api\V2;
 use App\Actions\BuildConversationMessagesAction;
 use App\Actions\DeleteConversationHistory;
 use App\Actions\GetOrCreateConversationAction;
+use App\Actions\KeepConversation;
 use App\Actions\PinConversation;
+use App\Actions\UnkeepConversation;
 use App\Actions\UnpinConversation;
 use App\Models\Conversation;
 use App\Models\User;
@@ -23,6 +25,8 @@ final readonly class ChatController
         private DeleteConversationHistory $deleteConversationHistory,
         private PinConversation $pinConversation,
         private UnpinConversation $unpinConversation,
+        private KeepConversation $keepConversation,
+        private UnkeepConversation $unkeepConversation,
     ) {}
 
     public function index(#[CurrentUser] User $user): JsonResponse
@@ -32,13 +36,15 @@ final readonly class ChatController
             ->orderByRaw('pinned_at is null')
             ->latest('updated_at')
             ->limit(50)
-            ->get(['id', 'title', 'pinned_at', 'updated_at'])
+            ->get(['id', 'title', 'pinned_at', 'kept_at', 'updated_at'])
             ->map(fn (Conversation $conversation): array => [
                 'id' => $conversation->id,
                 'title' => $conversation->title,
                 'updated_at' => $conversation->updated_at->toIso8601String(),
                 'is_pinned' => $conversation->isPinned(),
                 'pinned_at' => $conversation->pinned_at?->toIso8601String(),
+                'is_kept' => $conversation->isKept(),
+                'kept_at' => $conversation->kept_at?->toIso8601String(),
             ]);
 
         return response()->json(['data' => $conversations]);
@@ -56,6 +62,7 @@ final readonly class ChatController
             'id' => $conversation->id,
             'title' => $conversation->title,
             'is_pinned' => $conversation->isPinned(),
+            'is_kept' => $conversation->isKept(),
             'messages' => $this->messagesAction->handle($conversation),
         ]);
     }
@@ -108,6 +115,42 @@ final readonly class ChatController
             'id' => $conversation->id,
             'is_pinned' => $conversation->isPinned(),
             'pinned_at' => $conversation->pinned_at?->toIso8601String(),
+        ]);
+    }
+
+    public function keep(string $conversationId): JsonResponse
+    {
+        $conversation = Conversation::query()->find($conversationId);
+
+        if (! $conversation instanceof Conversation) {
+            return response()->json(['message' => 'Conversation not found.'], 404);
+        }
+
+        Gate::authorize('keep', $conversation);
+        $this->keepConversation->handle($conversation);
+
+        return response()->json([
+            'id' => $conversation->id,
+            'is_kept' => $conversation->isKept(),
+            'kept_at' => $conversation->kept_at?->toIso8601String(),
+        ]);
+    }
+
+    public function unkeep(string $conversationId): JsonResponse
+    {
+        $conversation = Conversation::query()->find($conversationId);
+
+        if (! $conversation instanceof Conversation) {
+            return response()->json(['message' => 'Conversation not found.'], 404); // @codeCoverageIgnore
+        }
+
+        Gate::authorize('keep', $conversation);
+        $this->unkeepConversation->handle($conversation);
+
+        return response()->json([
+            'id' => $conversation->id,
+            'is_kept' => $conversation->isKept(),
+            'kept_at' => $conversation->kept_at?->toIso8601String(),
         ]);
     }
 }

@@ -132,7 +132,7 @@ return [
 
     'dashboard_ai' => [
         'breadcrumb' => 'Acara',
-        'description' => 'Your private health coach. Chats clear after 48 hours — pin any you want to keep.',
+        'description' => 'Your private health coach. Chats clear after 48 hours — hit Keep on any you want to hold onto.',
         'placeholder' => 'Ask Acara',
         'disclaimer' => 'For informational purposes only. Not a substitute for professional medical or nutritional advice.',
     ],
@@ -869,8 +869,16 @@ return [
         'pin' => 'Pin chat',
         'unpin' => 'Unpin chat',
         'pinned' => 'Pinned',
+        'pinned_tooltip' => 'Pinned to the top',
         'pinned_toast' => 'Chat pinned — it won\'t be deleted.',
         'unpinned_toast' => 'Chat unpinned — it\'s temporary again.',
+        'actions' => 'More actions',
+        'keep' => 'Keep chat',
+        'unkeep' => 'Make temporary',
+        'kept_badge' => 'Saved',
+        'kept_tooltip' => 'Kept permanently — won\'t be auto-deleted',
+        'kept_toast' => 'Chat saved — it won\'t be deleted.',
+        'unkept_toast' => 'Chat is temporary again.',
         'chat_expired' => 'This chat expired and was deleted.',
     ],
 ];

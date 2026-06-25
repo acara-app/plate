@@ -324,3 +324,50 @@ it('prevents pinning another users conversation', function (): void {
 
     expect($conversation->fresh()->pinned_at)->toBeNull();
 });
+
+it('keeps a conversation owned by the authenticated user', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+
+    actingAs($user)
+        ->from(route('chat.index'))
+        ->patch(route('chat.keep', ['conversation' => $conversation->id]))
+        ->assertRedirect(route('chat.index'))
+        ->assertInertiaFlash('toast', [
+            'message' => __('common.conversations.kept_toast'),
+            'type' => 'success',
+        ]);
+
+    expect($conversation->fresh()->kept_at)->not->toBeNull();
+});
+
+it('unkeeps a conversation and refreshes its activity timestamp', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->kept()->stale(5)->create(['user_id' => $user->id]);
+
+    actingAs($user)
+        ->from(route('chat.index'))
+        ->patch(route('chat.unkeep', ['conversation' => $conversation->id]))
+        ->assertRedirect(route('chat.index'))
+        ->assertInertiaFlash('toast', [
+            'message' => __('common.conversations.unkept_toast'),
+            'type' => 'success',
+        ]);
+
+    $fresh = $conversation->fresh();
+
+    expect($fresh->kept_at)->toBeNull()
+        ->and($fresh->updated_at->isAfter(now()->subMinute()))->toBeTrue();
+});
+
+it('prevents keeping another users conversation', function (): void {
+    $owner = User::factory()->create();
+    $intruder = User::factory()->create();
+    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+
+    actingAs($intruder)
+        ->patch(route('chat.keep', ['conversation' => $conversation->id]))
+        ->assertForbidden();
+
+    expect($conversation->fresh()->kept_at)->toBeNull();
+});

@@ -52,6 +52,12 @@ Route::prefix('v2/chat')
         Route::patch('conversations/{conversation}/unpin', [ApiV2\ChatController::class, 'unpin'])
             ->name('api.v2.chat.unpin');
 
+        Route::patch('conversations/{conversation}/keep', [ApiV2\ChatController::class, 'keep'])
+            ->name('api.v2.chat.keep');
+
+        Route::patch('conversations/{conversation}/unkeep', [ApiV2\ChatController::class, 'unkeep'])
+            ->name('api.v2.chat.unkeep');
+
         Route::get('conversations/{conversation}/approvals/{approval}', [ApiV2\ApprovalController::class, 'show'])
             ->name('api.v2.chat.approvals.show');
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Messaging\DispatchChatTurnAction;
 use App\Contracts\ProcessesAdvisorMessage;
+use App\Models\Conversation;
 use App\Models\User;
 use App\Models\UserChatPlatformLink;
 
@@ -36,6 +37,21 @@ it('does not touch conversation_id when advisor returns the same id', function (
     resolve(DispatchChatTurnAction::class)->handle($link, 'hi');
 
     expect($link->fresh()->updated_at->equalTo($updatedAtBefore))->toBeTrue();
+});
+
+it('marks the conversation permanent so it survives purging', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->stale(10)->create(['user_id' => $user->id]);
+    $link = UserChatPlatformLink::factory()->linked($user)->create(['conversation_id' => null]);
+
+    $advisor = Mockery::mock(ProcessesAdvisorMessage::class);
+    $advisor->shouldReceive('handle')
+        ->andReturn(['response' => 'ok', 'conversation_id' => $conversation->id]);
+    app()->instance(ProcessesAdvisorMessage::class, $advisor);
+
+    resolve(DispatchChatTurnAction::class)->handle($link, 'hi');
+
+    expect($conversation->fresh()->kept_at)->not->toBeNull();
 });
 
 it('refuses to dispatch when the link has no user', function (): void {

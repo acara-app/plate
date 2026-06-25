@@ -8,10 +8,16 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
     Tooltip,
     TooltipContent,
@@ -22,13 +28,22 @@ import { cn, generateUUID } from '@/lib/utils';
 import chat from '@/routes/chat';
 import { BreadcrumbItem } from '@/types';
 import { Head, InfiniteScroll, Link, router } from '@inertiajs/react';
-import { MessageSquare, Pin, Plus, Trash2 } from 'lucide-react';
+import {
+    Bookmark,
+    MessageSquare,
+    MoreHorizontal,
+    Pin,
+    Plus,
+    Trash2,
+} from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface Conversation {
     id: string;
     title: string;
     pinned_at: string | null;
+    kept_at: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -91,6 +106,7 @@ export default function ConversationsIndex({
     temporaryRetentionHours,
 }: Props) {
     const { t } = useTranslation('common');
+    const [deleteTarget, setDeleteTarget] = useState<Conversation | null>(null);
 
     const deleteConversation = (conversationId: string): void => {
         router.delete(chat.destroy(conversationId), {
@@ -100,6 +116,12 @@ export default function ConversationsIndex({
 
     const togglePin = (conversation: Conversation): void => {
         const action = conversation.pinned_at ? chat.unpin : chat.pin;
+
+        router.patch(action(conversation.id).url, {}, { preserveScroll: true });
+    };
+
+    const toggleKeep = (conversation: Conversation): void => {
+        const action = conversation.kept_at ? chat.unkeep : chat.keep;
 
         router.patch(action(conversation.id).url, {}, { preserveScroll: true });
     };
@@ -122,12 +144,24 @@ export default function ConversationsIndex({
                                 </span>
                             </div>
                         </div>
-                        <Button asChild>
-                            <Link href={chat.create(generateUUID()).url}>
-                                <Plus className="mr-2 size-4" />
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    asChild
+                                    size="icon"
+                                    aria-label={t('conversations.new_chat')}
+                                >
+                                    <Link
+                                        href={chat.create(generateUUID()).url}
+                                    >
+                                        <Plus className="size-4" />
+                                    </Link>
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
                                 {t('conversations.new_chat')}
-                            </Link>
-                        </Button>
+                            </TooltipContent>
+                        </Tooltip>
                     </div>
 
                     {conversations.data.length === 0 ? (
@@ -162,6 +196,9 @@ export default function ConversationsIndex({
                                         const pinned = Boolean(
                                             conversation.pinned_at,
                                         );
+                                        const kept = Boolean(
+                                            conversation.kept_at,
+                                        );
 
                                         return (
                                             <li key={conversation.id}>
@@ -191,7 +228,7 @@ export default function ConversationsIndex({
                                                                         t,
                                                                     )}
                                                                 </p>
-                                                                {!pinned && (
+                                                                {pinned && (
                                                                     <Tooltip>
                                                                         <TooltipTrigger
                                                                             asChild
@@ -199,119 +236,149 @@ export default function ConversationsIndex({
                                                                             <span>
                                                                                 <Badge
                                                                                     variant="secondary"
-                                                                                    className="h-5 px-1.5 text-[10px] font-normal text-muted-foreground"
+                                                                                    className="h-5 gap-1 px-1.5 text-[10px] font-normal text-primary"
                                                                                 >
+                                                                                    <Pin className="size-2.5 fill-current" />
                                                                                     {t(
-                                                                                        'conversations.temporary_badge',
+                                                                                        'conversations.pinned',
                                                                                     )}
                                                                                 </Badge>
                                                                             </span>
                                                                         </TooltipTrigger>
                                                                         <TooltipContent>
                                                                             {t(
-                                                                                'conversations.temporary_tooltip',
-                                                                                {
-                                                                                    hours: temporaryRetentionHours,
-                                                                                },
+                                                                                'conversations.pinned_tooltip',
                                                                             )}
                                                                         </TooltipContent>
                                                                     </Tooltip>
                                                                 )}
+                                                                {kept &&
+                                                                    !pinned && (
+                                                                        <Tooltip>
+                                                                            <TooltipTrigger
+                                                                                asChild
+                                                                            >
+                                                                                <span>
+                                                                                    <Badge
+                                                                                        variant="secondary"
+                                                                                        className="h-5 px-1.5 text-[10px] font-normal text-primary"
+                                                                                    >
+                                                                                        {t(
+                                                                                            'conversations.kept_badge',
+                                                                                        )}
+                                                                                    </Badge>
+                                                                                </span>
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent>
+                                                                                {t(
+                                                                                    'conversations.kept_tooltip',
+                                                                                )}
+                                                                            </TooltipContent>
+                                                                        </Tooltip>
+                                                                    )}
+                                                                {!pinned &&
+                                                                    !kept && (
+                                                                        <Tooltip>
+                                                                            <TooltipTrigger
+                                                                                asChild
+                                                                            >
+                                                                                <span>
+                                                                                    <Badge
+                                                                                        variant="secondary"
+                                                                                        className="h-5 px-1.5 text-[10px] font-normal text-muted-foreground"
+                                                                                    >
+                                                                                        {t(
+                                                                                            'conversations.temporary_badge',
+                                                                                        )}
+                                                                                    </Badge>
+                                                                                </span>
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent>
+                                                                                {t(
+                                                                                    'conversations.temporary_tooltip',
+                                                                                    {
+                                                                                        hours: temporaryRetentionHours,
+                                                                                    },
+                                                                                )}
+                                                                            </TooltipContent>
+                                                                        </Tooltip>
+                                                                    )}
                                                             </div>
                                                         </div>
                                                     </Link>
-                                                    <div className="flex shrink-0 items-center gap-1">
-                                                        <Tooltip>
-                                                            <TooltipTrigger
-                                                                asChild
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger
+                                                            asChild
+                                                        >
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="size-8 shrink-0 text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground data-[state=open]:bg-muted data-[state=open]:text-foreground"
+                                                                aria-label={t(
+                                                                    'conversations.actions',
+                                                                )}
                                                             >
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
+                                                                <MoreHorizontal className="size-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent
+                                                            align="end"
+                                                            className="w-44"
+                                                        >
+                                                            <DropdownMenuItem
+                                                                onSelect={() =>
+                                                                    toggleKeep(
+                                                                        conversation,
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Bookmark
                                                                     className={cn(
-                                                                        'size-8 transition-colors',
-                                                                        pinned
-                                                                            ? 'text-primary hover:bg-primary/10 hover:text-primary'
-                                                                            : 'text-muted-foreground/50 hover:bg-muted hover:text-foreground',
+                                                                        'size-4',
+                                                                        kept &&
+                                                                            'fill-current text-primary',
                                                                     )}
-                                                                    aria-label={t(
-                                                                        pinned
-                                                                            ? 'conversations.unpin'
-                                                                            : 'conversations.pin',
+                                                                />
+                                                                {t(
+                                                                    kept
+                                                                        ? 'conversations.unkeep'
+                                                                        : 'conversations.keep',
+                                                                )}
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                onSelect={() =>
+                                                                    togglePin(
+                                                                        conversation,
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Pin
+                                                                    className={cn(
+                                                                        'size-4',
+                                                                        pinned &&
+                                                                            'fill-current text-primary',
                                                                     )}
-                                                                    onClick={() =>
-                                                                        togglePin(
-                                                                            conversation,
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <Pin
-                                                                        className={cn(
-                                                                            'size-4',
-                                                                            pinned &&
-                                                                                'fill-current',
-                                                                        )}
-                                                                    />
-                                                                </Button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
+                                                                />
                                                                 {t(
                                                                     pinned
                                                                         ? 'conversations.unpin'
                                                                         : 'conversations.pin',
                                                                 )}
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                        <AlertDialog>
-                                                            <AlertDialogTrigger
-                                                                asChild
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem
+                                                                className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                                                                onSelect={() =>
+                                                                    setDeleteTarget(
+                                                                        conversation,
+                                                                    )
+                                                                }
                                                             >
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    className="size-8 text-muted-foreground opacity-100 transition-all duration-200 hover:bg-destructive/10 hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100"
-                                                                    aria-label={t(
-                                                                        'conversations.delete_label',
-                                                                    )}
-                                                                >
-                                                                    <Trash2 className="size-4" />
-                                                                </Button>
-                                                            </AlertDialogTrigger>
-                                                            <AlertDialogContent>
-                                                                <AlertDialogHeader>
-                                                                    <AlertDialogTitle>
-                                                                        {t(
-                                                                            'conversations.delete_title',
-                                                                        )}
-                                                                    </AlertDialogTitle>
-                                                                    <AlertDialogDescription>
-                                                                        {t(
-                                                                            'conversations.delete_description',
-                                                                        )}
-                                                                    </AlertDialogDescription>
-                                                                </AlertDialogHeader>
-                                                                <AlertDialogFooter>
-                                                                    <AlertDialogCancel>
-                                                                        {t(
-                                                                            'cancel',
-                                                                        )}
-                                                                    </AlertDialogCancel>
-                                                                    <AlertDialogAction
-                                                                        className="bg-destructive text-white hover:bg-destructive/90"
-                                                                        onClick={() =>
-                                                                            deleteConversation(
-                                                                                conversation.id,
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        {t(
-                                                                            'conversations.delete_confirm',
-                                                                        )}
-                                                                    </AlertDialogAction>
-                                                                </AlertDialogFooter>
-                                                            </AlertDialogContent>
-                                                        </AlertDialog>
-                                                    </div>
+                                                                <Trash2 className="size-4 text-destructive" />
+                                                                {t('delete')}
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
                                                 </div>
                                             </li>
                                         );
@@ -321,6 +388,39 @@ export default function ConversationsIndex({
                         </InfiniteScroll>
                     )}
                 </div>
+
+                <AlertDialog
+                    open={deleteTarget !== null}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setDeleteTarget(null);
+                        }
+                    }}
+                >
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                {t('conversations.delete_title')}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                {t('conversations.delete_description')}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                            <AlertDialogAction
+                                className="bg-destructive text-white hover:bg-destructive/90"
+                                onClick={() => {
+                                    if (deleteTarget) {
+                                        deleteConversation(deleteTarget.id);
+                                    }
+                                }}
+                            >
+                                {t('conversations.delete_confirm')}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </AdminPageWrap>
         </AppLayout>
     );

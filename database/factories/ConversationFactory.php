@@ -49,6 +49,13 @@ final class ConversationFactory extends Factory
         ]);
     }
 
+    public function kept(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'kept_at' => now(),
+        ]);
+    }
+
     public function stale(int $days = 3): static
     {
         return $this->state(fn (array $attributes): array => [

@@ -133,7 +133,7 @@ return [
 
     'dashboard_ai' => [
         'breadcrumb' => 'Acara',
-        'description' => 'Votre coach santé privé. Les discussions s\'effacent après 48 heures — épinglez celles que vous souhaitez garder.',
+        'description' => 'Votre coach santé privé. Les discussions s\'effacent après 48 heures — appuyez sur Conserver pour garder celles que vous voulez.',
         'placeholder' => 'Demandez à Acara',
         'disclaimer' => 'À titre informatif uniquement. Ne remplace pas un avis médical ou nutritionnel professionnel.',
     ],
@@ -870,8 +870,16 @@ return [
         'pin' => 'Épingler la discussion',
         'unpin' => 'Désépingler la discussion',
         'pinned' => 'Épinglée',
+        'pinned_tooltip' => 'Épinglée en haut',
         'pinned_toast' => 'Discussion épinglée — elle ne sera pas supprimée.',
         'unpinned_toast' => 'Discussion désépinglée — elle redevient temporaire.',
+        'actions' => 'Plus d’actions',
+        'keep' => 'Conserver la discussion',
+        'unkeep' => 'Rendre temporaire',
+        'kept_badge' => 'Conservée',
+        'kept_tooltip' => 'Conservée définitivement — ne sera pas supprimée automatiquement',
+        'kept_toast' => 'Discussion conservée — elle ne sera pas supprimée.',
+        'unkept_toast' => 'La discussion redevient temporaire.',
         'chat_expired' => 'Cette discussion a expiré et a été supprimée.',
     ],
 ];

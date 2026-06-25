@@ -5,6 +5,12 @@ import { CreditWarningBanner } from '@/components/billing/credit-warning-banner'
 import { LifecycleBanner } from '@/components/billing/lifecycle-banner';
 import { UsageLimitNotice } from '@/components/billing/usage-limit-notice';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import {
     Tooltip,
@@ -20,7 +26,7 @@ import type { CreditWarning } from '@/types';
 import type { ChatPageProps, UIMessage } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
-import { Pin } from 'lucide-react';
+import { Bookmark, MoreHorizontal, Pin, SquarePen } from 'lucide-react';
 import {
     useCallback,
     useEffect,
@@ -45,7 +51,7 @@ export default function CreateChat() {
         initialPrompt,
         initialStreaming,
         isPinned,
-        temporaryRetentionHours,
+        isKept,
         creditWarning: sharedCreditWarning,
     } = page.props;
     const { currentUser } = useSharedProps();
@@ -55,6 +61,7 @@ export default function CreateChat() {
         initialConversationId,
     );
     const [pinned, setPinned] = useState<boolean>(isPinned ?? false);
+    const [kept, setKept] = useState<boolean>(isKept ?? false);
     const [dismissedWarningAt, setDismissedWarningAt] = useState<string | null>(
         null,
     );
@@ -99,6 +106,23 @@ export default function CreateChat() {
             },
         );
     }, [pinned, conversationId]);
+
+    const toggleKeep = useCallback(() => {
+        const next = !kept;
+        setKept(next);
+
+        const action = next ? chat.keep : chat.unkeep;
+
+        router.patch(
+            action(conversationId).url,
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onError: () => setKept(!next),
+            },
+        );
+    }, [kept, conversationId]);
 
     const {
         messages,
@@ -251,7 +275,7 @@ export default function CreateChat() {
                     </div>
                     <div
                         className={cn(
-                            'absolute top-3 right-3 z-20 transition-all duration-300 ease-out',
+                            'absolute top-3 right-3 z-20 flex items-center gap-2 transition-all duration-300 ease-out',
                             isMobileNavVisible
                                 ? 'translate-y-0 opacity-100'
                                 : 'pointer-events-none -translate-y-2 opacity-0 md:pointer-events-auto md:translate-y-0 md:opacity-100',
@@ -261,40 +285,63 @@ export default function CreateChat() {
                             <TooltipTrigger asChild>
                                 <Button
                                     variant="outline"
-                                    size="sm"
-                                    onClick={togglePin}
-                                    aria-label={
-                                        pinned
-                                            ? t('conversations.unpin')
-                                            : t('conversations.pin')
+                                    size="icon"
+                                    onClick={() =>
+                                        router.visit(
+                                            chat.create(generateUUID()).url,
+                                        )
                                     }
-                                    className="size-10 rounded-full border-border/40 bg-background/80 px-0 shadow-md backdrop-blur-md supports-[backdrop-filter]:bg-background/60 md:h-9 md:w-auto md:gap-1.5 md:px-3"
+                                    aria-label={t('conversations.new_chat')}
+                                    className="size-10 rounded-full border-border/40 bg-background/80 shadow-md backdrop-blur-md supports-[backdrop-filter]:bg-background/60"
                                 >
-                                    <Pin
-                                        className={cn(
-                                            'size-4',
-                                            pinned
-                                                ? 'fill-current text-primary'
-                                                : 'text-muted-foreground',
-                                        )}
-                                    />
-                                    <span className="hidden text-xs md:inline">
-                                        {pinned
-                                            ? t('conversations.pinned')
-                                            : t(
-                                                  'conversations.temporary_badge',
-                                              )}
-                                    </span>
+                                    <SquarePen className="size-4 text-muted-foreground" />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                {pinned
-                                    ? t('conversations.unpin')
-                                    : t('conversations.temporary_tooltip', {
-                                          hours: temporaryRetentionHours,
-                                      })}
+                                {t('conversations.new_chat')}
                             </TooltipContent>
                         </Tooltip>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    aria-label={t('conversations.actions')}
+                                    className="size-10 rounded-full border-border/40 bg-background/80 shadow-md backdrop-blur-md data-[state=open]:bg-muted supports-[backdrop-filter]:bg-background/60"
+                                >
+                                    <MoreHorizontal className="size-4 text-muted-foreground" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-44">
+                                <DropdownMenuItem onSelect={toggleKeep}>
+                                    <Bookmark
+                                        className={cn(
+                                            'size-4',
+                                            kept && 'fill-current text-primary',
+                                        )}
+                                    />
+                                    {t(
+                                        kept
+                                            ? 'conversations.unkeep'
+                                            : 'conversations.keep',
+                                    )}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onSelect={togglePin}>
+                                    <Pin
+                                        className={cn(
+                                            'size-4',
+                                            pinned &&
+                                                'fill-current text-primary',
+                                        )}
+                                    />
+                                    {t(
+                                        pinned
+                                            ? 'conversations.unpin'
+                                            : 'conversations.pin',
+                                    )}
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                     <div
                         className="min-h-0 flex-1 overflow-y-auto scroll-smooth"

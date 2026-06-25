@@ -28,6 +28,14 @@ it('preserves pinned conversations even when stale', function (): void {
     $this->assertModelExists($pinned);
 });
 
+it('preserves kept conversations even when stale', function (): void {
+    $kept = Conversation::factory()->kept()->stale(10)->create();
+
+    $this->artisan('conversations:purge-expired')->assertSuccessful();
+
+    $this->assertModelExists($kept);
+});
+
 it('preserves conversations within the retention window', function (): void {
     $recent = Conversation::factory()->create();
 
