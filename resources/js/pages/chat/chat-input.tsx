@@ -6,7 +6,7 @@ import {
 } from '@/components/ui/tooltip';
 import { cn, generateUUID } from '@/lib/utils';
 import type { FileUIPart } from 'ai';
-import { Paperclip, Send, Square, X } from 'lucide-react';
+import { ArrowUp, Paperclip, Square, X } from 'lucide-react';
 import {
     forwardRef,
     useEffect,
@@ -247,11 +247,11 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                                     type="button"
                                     variant="default"
                                     size="icon"
-                                    className="m-1.5 size-11 shrink-0 rounded-xl bg-linear-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25 transition-all duration-200 hover:from-red-600 hover:to-red-700 hover:shadow-red-500/30 active:scale-95"
+                                    className="m-1.5 size-11 shrink-0 rounded-full bg-linear-to-br from-red-500 to-rose-600 text-white shadow-lg ring-1 shadow-red-500/30 ring-white/20 transition-all duration-200 ring-inset hover:scale-105 hover:from-red-600 hover:to-rose-700 hover:shadow-red-500/40 active:scale-95"
                                     onClick={onStop}
                                     aria-label="Stop generating"
                                 >
-                                    <Square className="size-5 fill-current" />
+                                    <Square className="size-4 fill-current" />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent side="top">
@@ -262,6 +262,7 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
+                                    type="button"
                                     variant={
                                         hasContent && !disabled
                                             ? 'default'
@@ -269,16 +270,19 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                                     }
                                     size="icon"
                                     className={cn(
-                                        'm-1.5 size-11 shrink-0 rounded-xl transition-all duration-200 active:scale-95',
+                                        'group m-1.5 size-11 shrink-0 rounded-full transition-all duration-200 active:scale-90',
                                         hasContent && !disabled
-                                            ? 'bg-linear-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-emerald-500/30'
-                                            : 'text-muted-foreground',
+                                            ? 'bg-linear-to-br from-emerald-500 to-teal-600 text-white shadow-lg ring-1 shadow-emerald-500/30 ring-white/20 ring-inset hover:scale-105 hover:from-emerald-400 hover:to-teal-500 hover:shadow-emerald-400/40'
+                                            : 'text-muted-foreground/70 hover:text-muted-foreground',
                                     )}
                                     onClick={handleSubmit}
                                     disabled={!hasContent || disabled}
                                     aria-label="Send message"
                                 >
-                                    <Send className="size-5" />
+                                    <ArrowUp
+                                        className="size-5 transition-transform duration-200 group-enabled:group-hover:-translate-y-0.5"
+                                        strokeWidth={2.5}
+                                    />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent side="top">
