@@ -276,10 +276,24 @@ class extends Component
         <section class="mx-auto mt-8 max-w-3xl lg:px-8">
             @if ($result === null)
                 <form wire:submit="analyze" class="space-y-6">
-                    <div class="border border-[#D9CFBC] bg-[#EBE2D0] p-6 sm:p-8">
+                    <div
+                        x-data="{ uploading: false, uploadFailed: false, progress: 0, fileName: '' }"
+                        x-on:livewire-upload-start="uploading = true; uploadFailed = false; progress = 0"
+                        x-on:livewire-upload-progress="progress = $event.detail.progress"
+                        x-on:livewire-upload-finish="progress = 100"
+                        x-on:livewire-upload-cancel="uploading = false; progress = 0"
+                        x-on:livewire-upload-error="uploading = false; uploadFailed = true; progress = 0; $event.target.value = null"
+                        x-bind:aria-busy="uploading"
+                        class="border border-[#D9CFBC] bg-[#EBE2D0] p-6 sm:p-8"
+                    >
                         <div class="flex items-center justify-between gap-4 pb-5">
                             <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
-                                {{ $photo ? 'Step 2 · Analyze' : 'Step 1 · Upload' }}
+                                @if ($photo)
+                                    Step 2 · Analyze
+                                @else
+                                    <span x-show="! uploading">Step 1 · Upload</span>
+                                    <span x-show="uploading" style="display: none;">Step 1 · Uploading</span>
+                                @endif
                             </p>
                             <span class="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
                                 <span class="size-1.5 rounded-full bg-emerald-600" aria-hidden="true"></span>
@@ -307,22 +321,74 @@ class extends Component
                                     accept="image/*"
                                     class="hidden"
                                     id="photo-upload"
+                                    x-on:change="fileName = $event.target.files[0]?.name ?? ''"
                                     @disabled($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))
                                 >
                                 <label
                                     for="photo-upload"
                                     data-umami-event="snap_to_track_upload_click"
                                     data-umami-event-location="main_form"
+                                    x-on:click="if (uploading) $event.preventDefault()"
+                                    x-bind:aria-disabled="uploading"
                                     class="group flex min-h-60 cursor-pointer flex-col items-center justify-center border-2 border-dashed border-[#D9CFBC] bg-[#F2EBDD] p-8 text-center transition hover:border-[#1A1814] hover:bg-[#F2EBDD]/70"
                                 >
-                                    <div class="mb-5 flex size-14 items-center justify-center border border-[#1A1814] bg-[#F2EBDD] text-[#1A1814] transition group-hover:bg-[#1A1814] group-hover:text-[#F2EBDD]">
-                                        <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
+                                    <div x-show="! uploading && ! uploadFailed" class="flex flex-col items-center">
+                                        <div class="mb-5 flex size-14 items-center justify-center border border-[#1A1814] bg-[#F2EBDD] text-[#1A1814] transition group-hover:bg-[#1A1814] group-hover:text-[#F2EBDD]">
+                                            <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                        </div>
+                                        <span class="font-bold text-lg tracking-[-0.01em] text-[#1A1814]">Tap to take photo or upload</span>
+                                        <span class="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">JPG, PNG up to 10MB</span>
                                     </div>
-                                    <span class="font-bold text-lg tracking-[-0.01em] text-[#1A1814]">Tap to take photo or upload</span>
-                                    <span class="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">JPG, PNG up to 10MB</span>
+
+                                    <div
+                                        x-show="uploading"
+                                        style="display: none;"
+                                        class="flex w-full max-w-sm flex-col items-center"
+                                    >
+                                        <div class="mb-5 flex size-14 items-center justify-center border border-[#C4623A] bg-[#C4623A] text-[#F2EBDD]">
+                                            <svg class="size-6 motion-safe:animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 15v3a2 2 0 002 2h10a2 2 0 002-2v-3" />
+                                            </svg>
+                                        </div>
+                                        <span
+                                            x-text="progress < 100 ? 'Uploading photo · ' + progress + '%' : 'Preparing preview…'"
+                                            class="font-bold text-lg tracking-[-0.01em] text-[#1A1814]"
+                                        >Uploading photo…</span>
+                                        <span
+                                            x-text="progress < 100 ? 'Uploading photo. Please wait.' : 'Upload complete. Preparing preview.'"
+                                            class="sr-only"
+                                            role="status"
+                                            aria-live="polite"
+                                        ></span>
+                                        <span x-show="fileName" x-text="fileName" class="mt-2 max-w-full truncate font-mono text-[10px] uppercase tracking-[0.14em] text-[#6E665C]"></span>
+                                        <div
+                                            role="progressbar"
+                                            aria-label="Photo upload progress"
+                                            aria-valuemin="0"
+                                            aria-valuemax="100"
+                                            x-bind:aria-valuenow="progress"
+                                            class="mt-5 h-1.5 w-full overflow-hidden bg-[#D9CFBC]"
+                                        >
+                                            <div
+                                                x-bind:style="'width: ' + progress + '%'"
+                                                class="h-full bg-[#C4623A] transition-[width] duration-200 motion-reduce:transition-none"
+                                            ></div>
+                                        </div>
+                                        <span class="mt-3 text-sm leading-relaxed text-[#3D3833]">Keep this tab open. Your preview is next.</span>
+                                    </div>
+
+                                    <div x-show="uploadFailed" style="display: none;" class="flex flex-col items-center" role="alert">
+                                        <div class="mb-5 flex size-14 items-center justify-center border border-[#B5482E] bg-[#B5482E]/5 text-[#B5482E]">
+                                            <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 3.84L2.82 17a2 2 0 001.74 3h14.88a2 2 0 001.74-3L13.7 3.84a2 2 0 00-3.4 0z" />
+                                            </svg>
+                                        </div>
+                                        <span class="font-bold text-lg tracking-[-0.01em] text-[#1A1814]">Upload didn’t finish</span>
+                                        <span class="mt-2 text-sm leading-relaxed text-[#3D3833]">Tap here and choose the photo again to retry.</span>
+                                    </div>
                                 </label>
                                 @error('photo')
                                     <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#B5482E]">{{ $message }}</p>
@@ -386,7 +452,7 @@ class extends Component
                                     type="submit"
                                     data-umami-event="snap_to_track_analyze_click"
                                     data-umami-event-location="main_form"
-                                    class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#1A1814] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#3D3833] focus:outline-none focus:ring-2 focus:ring-[#1A1814] focus:ring-offset-2 focus:ring-offset-[#EBE2D0] disabled:cursor-not-allowed disabled:opacity-50"
+                                    class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#1A1814] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#3D3833] focus:outline-none focus:ring-2 focus:ring-[#1A1814] focus:ring-offset-2 focus:ring-offset-[#EBE2D0] disabled:cursor-wait disabled:bg-[#1A1814] disabled:text-[#F2EBDD]"
                                     @disabled($loading)
                                 >
                                     <span wire:loading.remove wire:target="analyze" class="inline-flex items-center gap-2">
@@ -395,8 +461,8 @@ class extends Component
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                         </svg>
                                     </span>
-                                    <span wire:loading wire:target="analyze" class="inline-flex items-center gap-2">
-                                        <svg class="size-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                    <span wire:loading.inline-flex wire:target="analyze" class="items-center gap-2">
+                                        <svg class="size-4 motion-safe:animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
