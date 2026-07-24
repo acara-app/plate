@@ -37,8 +37,6 @@ function reviewedMealPayload(array $overrides = []): array
 }
 
 beforeEach(function (): void {
-    config()->set('plate.snap_to_track.activation_funnel', true);
-
     $this->user = User::factory()->create();
 });
 
@@ -152,14 +150,4 @@ it('stores raw item names without interpreting markup', function (): void {
 
     expect($sample->metadata['snap_to_track']['items'][0]['name'])->toBe('<script>alert(1)</script>')
         ->and($sample->notes)->toBe('<script>alert(1)</script>');
-});
-
-it('returns not found when the activation funnel is disabled', function (): void {
-    config()->set('plate.snap_to_track.activation_funnel', false);
-
-    [$token] = storableDraftFor($this->user);
-
-    actingAs($this->user)
-        ->post(route('snap-to-track.review.store', ['draft' => $token]), reviewedMealPayload())
-        ->assertNotFound();
 });

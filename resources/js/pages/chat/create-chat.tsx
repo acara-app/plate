@@ -62,7 +62,7 @@ export default function CreateChat() {
         isKept,
         creditWarning: sharedCreditWarning,
     } = page.props;
-    const { currentUser, snapToTrackActivation } = useSharedProps();
+    const { currentUser } = useSharedProps();
     const { t } = useTranslation('common');
 
     const [conversationId, setConversationId] = useState<string>(
@@ -310,31 +310,28 @@ export default function CreateChat() {
                                     {t('conversations.new_chat')}
                                 </TooltipContent>
                             </Tooltip>
-                            {snapToTrackActivation && (
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() =>
-                                                router.visit(
-                                                    ShowSnapToTrackController()
-                                                        .url,
-                                                )
-                                            }
-                                            aria-label={t(
-                                                'sidebar.nav.snap_to_track',
-                                            )}
-                                            className="size-10 text-muted-foreground"
-                                        >
-                                            <ScanLine className="size-4" />
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        {t('sidebar.nav.snap_to_track')}
-                                    </TooltipContent>
-                                </Tooltip>
-                            )}
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() =>
+                                            router.visit(
+                                                ShowSnapToTrackController().url,
+                                            )
+                                        }
+                                        aria-label={t(
+                                            'sidebar.nav.snap_to_track',
+                                        )}
+                                        className="size-10 text-muted-foreground"
+                                    >
+                                        <ScanLine className="size-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {t('sidebar.nav.snap_to_track')}
+                                </TooltipContent>
+                            </Tooltip>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button

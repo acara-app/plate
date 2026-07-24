@@ -56,7 +56,6 @@ class extends Component
         $this->draftToken = null;
 
         if (RateLimiter::tooManyAttempts($this->analysisRateLimitKey(), 5)) {
-            $this->error = 'Too many requests. Please try again later.';
             $this->deleteTemporaryPhoto(resetUploadChallenge: true);
 
             return;
@@ -121,10 +120,33 @@ class extends Component
         $this->draftToken = null;
     }
 
+    public function limitReachedGate(): ?string
+    {
+        if (RateLimiter::tooManyAttempts($this->uploadRateLimitKey(), 5)) {
+            return 'upload';
+        }
+
+        if (RateLimiter::tooManyAttempts($this->analysisRateLimitKey(), 5)) {
+            return 'analysis';
+        }
+
+        return null;
+    }
+
+    public function continueInApp(string $intent): void
+    {
+        if (! in_array($intent, ['register', 'login'], true) || auth()->check()) {
+            return;
+        }
+
+        session()->put('url.intended', route('snap-to-track.index', absolute: false));
+        session()->put('snap_to_track.auth_path', $intent);
+
+        $this->redirect(route($intent));
+    }
+
     public function saveMeal(string $intent, CreateAnalysisDraftAction $action): void
     {
-        abort_unless(snap_to_track_activation_enabled(), 404);
-
         if ($this->result === null || ! in_array($intent, ['register', 'login'], true)) {
             return;
         }
@@ -179,7 +201,7 @@ class extends Component
     {
         if (RateLimiter::tooManyAttempts($this->uploadRateLimitKey(), 5)) {
             throw ValidationException::withMessages([
-                'photo' => 'Too many uploads. Please try again later.',
+                'photo' => "That's this hour's free scans.",
             ]);
         }
 
@@ -275,6 +297,58 @@ class extends Component
         {{-- Tool --}}
         <section class="mx-auto mt-8 max-w-3xl lg:px-8">
             @if ($result === null)
+                @php
+                    $limitGate = $this->limitReachedGate();
+                @endphp
+                @if ($limitGate !== null)
+                    {{-- Limit recovery (dark inverse) --}}
+                    <article
+                        x-data
+                        x-init="window.acaraTrack?.('snap_to_track_limit_reached', { source: 'public_snap_to_track', gate: @js($limitGate), authenticated: @js(auth()->check()) })"
+                        class="mb-6 border border-[#1A1814] bg-[#1A1814] p-6 sm:p-8 text-[#F2EBDD]"
+                    >
+                        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Free scans used</p>
+                        <h3 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.02em]">You're on a roll.</h3>
+                        @auth
+                            <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
+                                You've maxed the public scanner. Your account has its own — pick up right where you left off.
+                            </p>
+                            <a
+                                href="{{ route('snap-to-track.index') }}"
+                                class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
+                            >
+                                Open Snap to Track
+                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </a>
+                        @else
+                            <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
+                                That's this hour's free scans from this network. Create a free account and keep analyzing in the app — your results become meals you can save.
+                            </p>
+                            <button
+                                type="button"
+                                wire:click="continueInApp('register')"
+                                x-on:click="window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'register' })"
+                                class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
+                            >
+                                Keep analyzing — free
+                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </button>
+                            <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[#F2EBDD]/70">
+                                Already a member?
+                                <button
+                                    type="button"
+                                    wire:click="continueInApp('login')"
+                                    x-on:click="window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'login' })"
+                                    class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]"
+                                >Log in</button>
+                            </p>
+                        @endauth
+                    </article>
+                @endif
                 <form wire:submit="analyze" class="space-y-6">
                     <div
                         x-data="{ uploading: false, uploadFailed: false, progress: 0, fileName: '' }"
@@ -584,60 +658,34 @@ class extends Component
                             @endif
                         </article>
 
-                        @if (snap_to_track_activation_enabled())
-                            {{-- Save this meal (dark inverse) --}}
-                            <article class="border border-[#1A1814] bg-[#1A1814] p-6 sm:p-8 text-[#F2EBDD]">
-                                <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Keep this result</p>
-                                <h3 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.02em]">Don't let this meal disappear.</h3>
-                                <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
-                                    Save the full breakdown, fix anything the AI got wrong, and start building your real food history — free.
-                                </p>
+                        {{-- Save this meal (dark inverse) --}}
+                        <article class="border border-[#1A1814] bg-[#1A1814] p-6 sm:p-8 text-[#F2EBDD]">
+                            <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Keep this result</p>
+                            <h3 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.02em]">Don't let this meal disappear.</h3>
+                            <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
+                                Save the full breakdown, fix anything the AI got wrong, and start building your real food history — free.
+                            </p>
+                            <button
+                                type="button"
+                                wire:click="saveMeal('register')"
+                                x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', authenticated: @js(auth()->check()) })@guest; window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'register' })@endguest"
+                                class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
+                            >
+                                Save this meal free
+                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </button>
+                            <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[#F2EBDD]/70">
+                                Already a member?
                                 <button
                                     type="button"
-                                    wire:click="saveMeal('register')"
-                                    x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', authenticated: @js(auth()->check()) })@guest; window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'register' })@endguest"
-                                    class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
-                                >
-                                    Save this meal free
-                                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                    </svg>
-                                </button>
-                                <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[#F2EBDD]/70">
-                                    Already a member?
-                                    <button
-                                        type="button"
-                                        wire:click="saveMeal('login')"
-                                        x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', authenticated: @js(auth()->check()) })@guest; window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'login' })@endguest"
-                                        class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]"
-                                    >Log in</button>
-                                </p>
-                            </article>
-                        @else
-                            {{-- Sharper analysis upsell (dark inverse) --}}
-                            <article class="border border-[#1A1814] bg-[#1A1814] p-6 sm:p-8 text-[#F2EBDD]">
-                                <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Sharper readings</p>
-                                <h3 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.02em]">Did the AI guess on a few items?</h3>
-                                <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
-                                    Mixed dishes, sauces, and oils are tough for a quick scan. Sign up to save meals, build meal history, and help Acara remember what you actually eat.
-                                </p>
-                                <a
-                                    href="{{ route('register') }}"
-                                    data-umami-event="signup_cta_click"
-                                    data-umami-event-location="snap_to_track_result"
-                                    class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
-                                >
-                                    Sign up for sharper analysis
-                                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                    </svg>
-                                </a>
-                                <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[#F2EBDD]/70">
-                                    Already a member?
-                                    <a href="{{ route('login') }}" class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]">Log in</a>
-                                </p>
-                            </article>
-                        @endif
+                                    wire:click="saveMeal('login')"
+                                    x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', authenticated: @js(auth()->check()) })@guest; window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'login' })@endguest"
+                                    class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]"
+                                >Log in</button>
+                            </p>
+                        </article>
 
                         {{-- Analyze another --}}
                         <button

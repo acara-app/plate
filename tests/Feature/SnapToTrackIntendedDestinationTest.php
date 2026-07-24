@@ -58,8 +58,6 @@ function fakeGoogleUserForIntended(string $googleId, string $email): void
 
 beforeEach(function (): void {
     $this->withoutVite();
-
-    config()->set('plate.snap_to_track.activation_funnel', true);
 });
 
 it('carries a guest draft through email registration and verification to the review page', function (): void {

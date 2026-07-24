@@ -54,7 +54,12 @@ return [
     ],
 
     'snap_to_track' => [
-        'activation_funnel' => (bool) env('PLATE_SNAP_TO_TRACK_ACTIVATION_FUNNEL', false),
+        'burst_caps' => [
+            'default' => (int) env('SNAP_TO_TRACK_BURST_CAP_DEFAULT', 5),
+            'free' => (int) env('SNAP_TO_TRACK_BURST_CAP_FREE', 5),
+            'basic' => (int) env('SNAP_TO_TRACK_BURST_CAP_BASIC', 15),
+            'plus' => (int) env('SNAP_TO_TRACK_BURST_CAP_PLUS', 30),
+        ],
     ],
 
     'tools' => [

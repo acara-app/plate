@@ -65,9 +65,36 @@ final class AppServiceProvider extends ServiceProvider
 
     private function bootRateLimiters(): void
     {
-        RateLimiter::for(
-            'snap-to-track-analyze',
-            fn (Request $request): Limit => Limit::perHour(5)->by('snap-to-track-analyze:'.($request->user()->id ?? $request->ip())),
+        RateLimiter::for('snap-to-track-analyze', function (Request $request): Limit {
+            $user = $request->user();
+
+            if (! $user instanceof User) {
+                return Limit::perHour($this->snapToTrackBurstCap(null))
+                    ->by('snap-to-track-analyze:'.$request->ip());
+            }
+
+            return Limit::perHour($this->snapToTrackBurstCap($user))
+                ->by('snap-to-track-analyze:'.$user->id);
+        });
+    }
+
+    private function snapToTrackBurstCap(?User $user): int
+    {
+        $default = config()->integer('plate.snap_to_track.burst_caps.default', 5);
+
+        if (! $user instanceof User) {
+            return $default;
+        }
+
+        $entitlement = resolve(ResolvesUserTier::class)->resolve($user);
+
+        if ($entitlement->isUnrestricted()) {
+            return $default;
+        }
+
+        return config()->integer(
+            'plate.snap_to_track.burst_caps.'.$entitlement->tier->value,
+            $default,
         );
     }
 

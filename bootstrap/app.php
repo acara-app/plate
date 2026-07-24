@@ -9,6 +9,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -55,6 +56,21 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return $request->expectsJson();
+        });
+
+        $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
+            if (! $request->routeIs('snap-to-track.analyze')) {
+                return null;
+            }
+
+            $retryAfter = $e->getHeaders()['Retry-After'] ?? null;
+            $seconds = is_numeric($retryAfter) ? (int) $retryAfter : 3600;
+
+            return back()->withErrors([
+                'photo' => __('common.snap_to_track.burst_limit', [
+                    'minutes' => max(1, (int) ceil($seconds / 60)),
+                ]),
+            ]);
         });
 
         $exceptions->report(function (RequestException $e): void {

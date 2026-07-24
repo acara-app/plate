@@ -13,17 +13,30 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
+import checkout from '@/routes/checkout';
 import { type BreadcrumbItem } from '@/types';
 import { Form, Head, Link } from '@inertiajs/react';
-import { CheckCircle2, ScanLine } from 'lucide-react';
+import { CheckCircle2, Gauge, ScanLine } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+type CreditLimit = {
+    limit_type: string;
+    tier: string;
+    tier_label: string;
+    current_credits: number;
+    limit_credits: number;
+    resets_at: string;
+    resets_in: string;
+};
 
 interface SnapToTrackIndexProps {
     savedGroupId: string | null;
+    creditLimit: CreditLimit | null;
 }
 
 export default function SnapToTrackIndex({
     savedGroupId,
+    creditLimit,
 }: SnapToTrackIndexProps) {
     const { t } = useTranslation('common');
 
@@ -56,6 +69,39 @@ export default function SnapToTrackIndex({
                                 </Link>
                             </Button>
                         </CardContent>
+                    </Card>
+                )}
+
+                {creditLimit !== null && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Gauge className="size-5 text-amber-600 dark:text-amber-500" />
+                                {creditLimit.tier === 'plus'
+                                    ? t('snap_to_track.credit.pro_heading')
+                                    : t('snap_to_track.credit.heading')}
+                            </CardTitle>
+                            <CardDescription>
+                                {t('snap_to_track.credit.body', {
+                                    used: creditLimit.current_credits,
+                                    limit: creditLimit.limit_credits,
+                                    time: creditLimit.resets_in,
+                                })}
+                            </CardDescription>
+                        </CardHeader>
+                        {creditLimit.tier !== 'plus' && (
+                            <CardContent className="flex flex-col gap-3 sm:flex-row">
+                                <Button asChild>
+                                    <Link
+                                        href={checkout.subscription().url}
+                                        data-umami-event="snap_to_track_upgrade_click"
+                                        data-umami-event-tier={creditLimit.tier}
+                                    >
+                                        {t('snap_to_track.credit.upgrade')}
+                                    </Link>
+                                </Button>
+                            </CardContent>
+                        )}
                     </Card>
                 )}
 

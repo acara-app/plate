@@ -450,6 +450,13 @@ return [
     ],
     'snap_to_track' => [
         'title' => 'Snap to Track',
+        'burst_limit' => "You've hit this hour's scan limit. You can scan again in about :minutes minutes.",
+        'credit' => [
+            'heading' => "You've used your AI credits for now.",
+            'pro_heading' => "You've hit today's fair-use ceiling.",
+            'body' => '{{used}} of {{limit}} credits used · refreshes in {{time}}.',
+            'upgrade' => 'See plans',
+        ],
         'launcher' => [
             'title' => 'Snap to Track',
             'subtitle' => 'Photo in, logged meal out — no typing.',

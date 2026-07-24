@@ -27,19 +27,7 @@ function reviewDraftToken(array $attributes = []): array
 beforeEach(function (): void {
     $this->withoutVite();
 
-    config()->set('plate.snap_to_track.activation_funnel', true);
-
     $this->user = User::factory()->create();
-});
-
-it('returns not found when the activation funnel is disabled', function (): void {
-    config()->set('plate.snap_to_track.activation_funnel', false);
-
-    [$token] = reviewDraftToken();
-
-    actingAs($this->user)
-        ->get(route('snap-to-track.review', ['draft' => $token]))
-        ->assertNotFound();
 });
 
 it('restores a valid draft into the review page and claims it', function (): void {

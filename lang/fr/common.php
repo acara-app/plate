@@ -451,6 +451,13 @@ return [
     ],
     'snap_to_track' => [
         'title' => 'Snap to Track',
+        'burst_limit' => 'Vous avez atteint la limite de scans pour cette heure. Réessayez dans environ :minutes minutes.',
+        'credit' => [
+            'heading' => 'Vos crédits IA sont épuisés pour le moment.',
+            'pro_heading' => "Vous avez atteint le plafond d'utilisation du jour.",
+            'body' => '{{used}} crédits sur {{limit}} utilisés · recharge dans {{time}}.',
+            'upgrade' => 'Voir les offres',
+        ],
         'launcher' => [
             'title' => 'Snap to Track',
             'subtitle' => 'Une photo, un repas enregistré — sans rien taper.',

@@ -13,8 +13,6 @@ covers(ShowSnapToTrackController::class);
 beforeEach(function (): void {
     $this->withoutVite();
 
-    config()->set('plate.snap_to_track.activation_funnel', true);
-
     $this->user = User::factory()->create();
 });
 
@@ -35,10 +33,25 @@ it('exposes the saved entry group after a meal was logged', function (): void {
             ->where('savedGroupId', 'group-uuid'));
 });
 
-it('returns not found when the activation funnel is disabled', function (): void {
-    config()->set('plate.snap_to_track.activation_funnel', false);
-
+it('exposes the credit limit panel data after a blocked scan', function (): void {
     actingAs($this->user)
+        ->withSession(['snap_to_track_credit_limit' => ['tier' => 'free', 'limit_credits' => 400, 'current_credits' => 401, 'resets_in' => '3 hours 10 minutes']])
         ->get(route('snap-to-track.index'))
-        ->assertNotFound();
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->where('creditLimit.tier', 'free')
+            ->where('creditLimit.limit_credits', 400)
+            ->where('creditLimit.current_credits', 401));
+});
+
+it('completes the auth funnel when a limit-recovery signup lands on the module', function (): void {
+    $response = actingAs($this->user)
+        ->withSession(['snap_to_track.auth_path' => 'register'])
+        ->get(route('snap-to-track.index'));
+
+    $response->assertSessionMissing('snap_to_track.auth_path');
+
+    expect(data_get($response->inertiaPage(), 'flash.analytics'))->toBe([
+        'name' => 'snap_to_track_auth_completed',
+        'properties' => ['auth_path' => 'register'],
+    ]);
 });

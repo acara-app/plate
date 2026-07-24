@@ -39,10 +39,7 @@ import { useTranslation } from 'react-i18next';
 import AppLogo from './app-logo';
 import { Separator } from './ui/separator';
 
-const getMainNavItems = (
-    t: (key: string) => string,
-    showSnapToTrack: boolean,
-): NavItem[] => [
+const getMainNavItems = (t: (key: string) => string): NavItem[] => [
     {
         title: t('sidebar.nav.new_chat'),
         href: dashboard(),
@@ -63,15 +60,11 @@ const getMainNavItems = (
         href: ListHealthEntryController().url,
         icon: ActivityIcon,
     },
-    ...(showSnapToTrack
-        ? [
-              {
-                  title: t('sidebar.nav.snap_to_track'),
-                  href: ShowSnapToTrackController().url,
-                  icon: ScanLine,
-              },
-          ]
-        : []),
+    {
+        title: t('sidebar.nav.snap_to_track'),
+        href: ShowSnapToTrackController().url,
+        icon: ScanLine,
+    },
 ];
 
 const getProfileNavItems = (t: (key: string) => string): NavItem[] => [
@@ -101,11 +94,10 @@ const getFooterNavItems = (t: (key: string) => string): NavItem[] => [
 ];
 
 export function AppSidebar() {
-    const { currentUser, enablePremiumUpgrades, snapToTrackActivation } =
-        useSharedProps();
+    const { currentUser, enablePremiumUpgrades } = useSharedProps();
     const { t } = useTranslation('common');
     const { state, isMobile, toggleSidebar } = useSidebar();
-    const mainNavItems = getMainNavItems(t, snapToTrackActivation);
+    const mainNavItems = getMainNavItems(t);
     const profileNavItems = getProfileNavItems(t);
     const footerNavItems = getFooterNavItems(t);
 

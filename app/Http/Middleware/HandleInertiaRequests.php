@@ -57,7 +57,6 @@ final class HandleInertiaRequests extends Middleware
                 'subscribed' => $user?->hasActiveSubscription() ?? false,
             ],
             'enablePremiumUpgrades' => enable_premium_upgrades_for($user instanceof User ? $user : null),
-            'snapToTrackActivation' => snap_to_track_activation_enabled(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'locale' => $locale,
             'availableLanguages' => LanguageUtil::all(),

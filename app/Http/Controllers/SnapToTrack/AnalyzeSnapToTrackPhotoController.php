@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\SnapToTrack;
 
 use App\Actions\AnalyzeFoodPhotoAction;
+use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\CreateAnalysisDraftAction;
 use App\Enums\AnalysisDraftSource;
 use App\Enums\ConfidenceBand;
+use App\Enums\ModelName;
+use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Http\Requests\SnapToTrack\AnalyzeSnapToTrackPhotoRequest;
 use App\Models\User;
 use App\Utilities\LanguageUtil;
@@ -22,6 +25,7 @@ final readonly class AnalyzeSnapToTrackPhotoController
     public function __construct(
         private AnalyzeFoodPhotoAction $analyzeFoodPhoto,
         private CreateAnalysisDraftAction $createAnalysisDraft,
+        private EnforceAiUsageLimit $enforceAiUsageLimit,
         #[CurrentUser()] private User $currentUser,
     ) {}
 
@@ -31,6 +35,27 @@ final readonly class AnalyzeSnapToTrackPhotoController
 
         if (! $photo instanceof UploadedFile) {
             return back()->withErrors(['photo' => __('Please select a photo to analyze.')]);
+        }
+
+        try {
+            $this->enforceAiUsageLimit->handle(
+                $this->currentUser,
+                ModelName::tryFrom(config()->string('plate.food_photo_analyzer.model')),
+            );
+        } catch (UsageLimitExceededException $usageLimitExceededException) {
+            $this->deleteUploadedPhoto($photo);
+
+            Inertia::flash('analytics', [
+                'name' => 'snap_to_track_limit_reached',
+                'properties' => [
+                    'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
+                    'gate' => 'credits',
+                    'tier' => $usageLimitExceededException->tier->value,
+                ],
+            ]);
+
+            return to_route('snap-to-track.index')
+                ->with('snap_to_track_credit_limit', $usageLimitExceededException->toPayload());
         }
 
         try {

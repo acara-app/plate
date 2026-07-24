@@ -9,7 +9,6 @@ declare module '@inertiajs/core' {
             locale: string;
             translations: Record<string, unknown>;
             enablePremiumUpgrades: boolean;
-            snapToTrackActivation: boolean;
 
             [key: string]: unknown;
         };
