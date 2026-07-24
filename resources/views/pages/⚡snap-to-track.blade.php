@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Actions\AnalyzeFoodPhotoAction;
+use App\Actions\CreateAnalysisDraftAction;
+use App\Data\FoodAnalysisData;
+use App\Enums\AnalysisDraftSource;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
@@ -28,10 +31,12 @@ class extends Component
 
     public bool $loading = false;
 
-    /** @var array{items: array<int, array{name: string, calories: float, protein: float, carbs: float, fat: float, portion: string, provenance: string}>, totalCalories: float, totalProtein: float, totalCarbs: float, totalFat: float, confidence: int}|null */
+    /** @var array{items: array<int, array<string, mixed>>, total_calories: float, total_protein: float, total_carbs: float, total_fat: float, confidence: int, analyzer_version: string|null, reference_release: string|null}|null */
     public ?array $result = null;
 
     public ?string $error = null;
+
+    public ?string $draftToken = null;
 
     public function _startUpload($name, $fileInfo, $isMultiple): void
     {
@@ -48,6 +53,7 @@ class extends Component
     {
         $this->error = null;
         $this->result = null;
+        $this->draftToken = null;
 
         if (RateLimiter::tooManyAttempts($this->analysisRateLimitKey(), 5)) {
             $this->error = 'Too many requests. Please try again later.';
@@ -93,17 +99,7 @@ class extends Component
 
             $analysis = $action->handle($base64, $mimeType);
 
-            /** @var array<int, array{name: string, calories: float, protein: float, carbs: float, fat: float, portion: string}> $items */
-            $items = $analysis->items->toArray();
-
-            $this->result = [
-                'items' => $items,
-                'totalCalories' => $analysis->totalCalories,
-                'totalProtein' => $analysis->totalProtein,
-                'totalCarbs' => $analysis->totalCarbs,
-                'totalFat' => $analysis->totalFat,
-                'confidence' => $analysis->confidence,
-            ];
+            $this->result = $analysis->toArray();
         } catch (ValidationException $e) {
             $this->deleteTemporaryPhoto(resetUploadChallenge: true);
 
@@ -122,6 +118,35 @@ class extends Component
         $this->deleteTemporaryPhoto(resetUploadChallenge: true);
         $this->result = null;
         $this->error = null;
+        $this->draftToken = null;
+    }
+
+    public function saveMeal(string $intent, CreateAnalysisDraftAction $action): void
+    {
+        abort_unless(snap_to_track_activation_enabled(), 404);
+
+        if ($this->result === null || ! in_array($intent, ['register', 'login'], true)) {
+            return;
+        }
+
+        $this->draftToken ??= $action->handle(
+            FoodAnalysisData::from($this->result),
+            AnalysisDraftSource::PublicSnapToTrack,
+            auth()->id(),
+        );
+
+        $reviewUrl = route('snap-to-track.review', ['draft' => $this->draftToken], absolute: false);
+
+        if (auth()->check()) {
+            $this->redirect($reviewUrl);
+
+            return;
+        }
+
+        session()->put('url.intended', $reviewUrl);
+        session()->put('snap_to_track.auth_path', $intent);
+
+        $this->redirect(route($intent));
     }
 
     private function validateUploadChallenge(): void
@@ -403,11 +428,12 @@ class extends Component
             @else
                 {{-- Result --}}
                 @php
-                    $totalMacroWeight = max(1, $result['totalProtein'] + $result['totalCarbs'] + $result['totalFat']);
+                    $totalMacroWeight = max(1, $result['total_protein'] + $result['total_carbs'] + $result['total_fat']);
+                    $confidenceBand = App\Enums\ConfidenceBand::fromScore($result['confidence'])->value;
                 @endphp
                 <div
                     x-data
-                    x-init="window.acaraTrack?.('snap_to_track_result_viewed', { confidence: @js($result['confidence']), items_count: @js(count($result['items'])) }); $el.classList.remove('opacity-0', 'translate-y-2')"
+                    x-init="window.acaraTrack?.('snap_to_track_result_viewed', { source: 'public_snap_to_track', confidence_band: @js($confidenceBand), items_count: @js(count($result['items'])) }); $el.classList.remove('opacity-0', 'translate-y-2')"
                     class="opacity-0 translate-y-2 transition-all duration-500 motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0"
                 >
                     <div class="flex flex-col gap-4">
@@ -421,22 +447,22 @@ class extends Component
                             </div>
 
                             <div class="mt-5 flex items-end gap-3">
-                                <span class="font-bold text-[clamp(56px,7vw,96px)] leading-[1] tracking-[-0.03em] text-[#1A1814]">{{ number_format($result['totalCalories'], 0) }}</span>
+                                <span class="font-bold text-[clamp(56px,7vw,96px)] leading-[1] tracking-[-0.03em] text-[#1A1814]">{{ number_format($result['total_calories'], 0) }}</span>
                                 <span class="mb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">kcal</span>
                             </div>
                             <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
-                                ~{{ round($result['totalCalories'] / 2000 * 100) }}% of a 2,000 kcal daily goal
+                                ~{{ round($result['total_calories'] / 2000 * 100) }}% of a 2,000 kcal daily goal
                             </p>
                             <div class="mt-2 h-1.5 w-full overflow-hidden bg-[#D9CFBC]">
-                                <div class="h-full bg-[#C4623A] transition-[width] duration-700" style="width: {{ min(100, round($result['totalCalories'] / 2000 * 100)) }}%"></div>
+                                <div class="h-full bg-[#C4623A] transition-[width] duration-700" style="width: {{ min(100, round($result['total_calories'] / 2000 * 100)) }}%"></div>
                             </div>
 
                             {{-- Macro grid --}}
                             <div class="mt-7 grid grid-cols-3 gap-6 border-t border-[#D9CFBC] pt-6">
                                 @foreach ([
-                                    ['label' => 'Protein', 'value' => $result['totalProtein']],
-                                    ['label' => 'Carbs', 'value' => $result['totalCarbs']],
-                                    ['label' => 'Fat', 'value' => $result['totalFat']],
+                                    ['label' => 'Protein', 'value' => $result['total_protein']],
+                                    ['label' => 'Carbs', 'value' => $result['total_carbs']],
+                                    ['label' => 'Fat', 'value' => $result['total_fat']],
                                 ] as $macro)
                                     <div>
                                         <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">{{ $macro['label'] }}</p>
@@ -492,29 +518,60 @@ class extends Component
                             @endif
                         </article>
 
-                        {{-- Sharper analysis upsell (dark inverse) --}}
-                        <article class="border border-[#1A1814] bg-[#1A1814] p-6 sm:p-8 text-[#F2EBDD]">
-                            <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Sharper readings</p>
-                            <h3 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.02em]">Did the AI guess on a few items?</h3>
-                            <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
-                                Mixed dishes, sauces, and oils are tough for a quick scan. Sign up to save meals, build meal history, and help Acara remember what you actually eat.
-                            </p>
-                            <a
-                                href="{{ route('register') }}"
-                                data-umami-event="signup_cta_click"
-                                data-umami-event-location="snap_to_track_result"
-                                class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
-                            >
-                                Sign up for sharper analysis
-                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                </svg>
-                            </a>
-                            <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[#F2EBDD]/70">
-                                Already a member?
-                                <a href="{{ route('login') }}" class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]">Log in</a>
-                            </p>
-                        </article>
+                        @if (snap_to_track_activation_enabled())
+                            {{-- Save this meal (dark inverse) --}}
+                            <article class="border border-[#1A1814] bg-[#1A1814] p-6 sm:p-8 text-[#F2EBDD]">
+                                <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Keep this result</p>
+                                <h3 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.02em]">Don't let this meal disappear.</h3>
+                                <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
+                                    Save the full breakdown, fix anything the AI got wrong, and start building your real food history — free.
+                                </p>
+                                <button
+                                    type="button"
+                                    wire:click="saveMeal('register')"
+                                    x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', authenticated: @js(auth()->check()) })@guest; window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'register' })@endguest"
+                                    class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
+                                >
+                                    Save this meal free
+                                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                    </svg>
+                                </button>
+                                <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[#F2EBDD]/70">
+                                    Already a member?
+                                    <button
+                                        type="button"
+                                        wire:click="saveMeal('login')"
+                                        x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', authenticated: @js(auth()->check()) })@guest; window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'login' })@endguest"
+                                        class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]"
+                                    >Log in</button>
+                                </p>
+                            </article>
+                        @else
+                            {{-- Sharper analysis upsell (dark inverse) --}}
+                            <article class="border border-[#1A1814] bg-[#1A1814] p-6 sm:p-8 text-[#F2EBDD]">
+                                <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Sharper readings</p>
+                                <h3 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.02em]">Did the AI guess on a few items?</h3>
+                                <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
+                                    Mixed dishes, sauces, and oils are tough for a quick scan. Sign up to save meals, build meal history, and help Acara remember what you actually eat.
+                                </p>
+                                <a
+                                    href="{{ route('register') }}"
+                                    data-umami-event="signup_cta_click"
+                                    data-umami-event-location="snap_to_track_result"
+                                    class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
+                                >
+                                    Sign up for sharper analysis
+                                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                    </svg>
+                                </a>
+                                <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[#F2EBDD]/70">
+                                    Already a member?
+                                    <a href="{{ route('login') }}" class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]">Log in</a>
+                                </p>
+                            </article>
+                        @endif
 
                         {{-- Analyze another --}}
                         <button

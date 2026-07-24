@@ -24,10 +24,13 @@ use App\Services\Skills\NullSkillLoader;
 use App\Services\StripeService;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -55,8 +58,17 @@ final class AppServiceProvider extends ServiceProvider
         $this->bootVerificationDefaults();
         $this->bootCashierDefaults();
         $this->bootUrlDefaults();
+        $this->bootRateLimiters();
         $this->configureDates();
         $this->registerEventListeners();
+    }
+
+    private function bootRateLimiters(): void
+    {
+        RateLimiter::for(
+            'snap-to-track-analyze',
+            fn (Request $request): Limit => Limit::perHour(5)->by('snap-to-track-analyze:'.($request->user()->id ?? $request->ip())),
+        );
     }
 
     private function bootModelsDefaults(): void

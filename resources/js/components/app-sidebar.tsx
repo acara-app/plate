@@ -1,4 +1,5 @@
 import ListHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/ListHealthEntryController';
+import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackController';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -30,6 +31,7 @@ import {
     MessageSquarePlus,
     PanelLeftClose,
     Plug,
+    ScanLine,
     ShieldCheck,
     UserPen,
 } from 'lucide-react';
@@ -37,7 +39,10 @@ import { useTranslation } from 'react-i18next';
 import AppLogo from './app-logo';
 import { Separator } from './ui/separator';
 
-const getMainNavItems = (t: (key: string) => string): NavItem[] => [
+const getMainNavItems = (
+    t: (key: string) => string,
+    showSnapToTrack: boolean,
+): NavItem[] => [
     {
         title: t('sidebar.nav.new_chat'),
         href: dashboard(),
@@ -58,6 +63,15 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
         href: ListHealthEntryController().url,
         icon: ActivityIcon,
     },
+    ...(showSnapToTrack
+        ? [
+              {
+                  title: t('sidebar.nav.snap_to_track'),
+                  href: ShowSnapToTrackController().url,
+                  icon: ScanLine,
+              },
+          ]
+        : []),
 ];
 
 const getProfileNavItems = (t: (key: string) => string): NavItem[] => [
@@ -87,10 +101,11 @@ const getFooterNavItems = (t: (key: string) => string): NavItem[] => [
 ];
 
 export function AppSidebar() {
-    const { currentUser, enablePremiumUpgrades } = useSharedProps();
+    const { currentUser, enablePremiumUpgrades, snapToTrackActivation } =
+        useSharedProps();
     const { t } = useTranslation('common');
     const { state, isMobile, toggleSidebar } = useSidebar();
-    const mainNavItems = getMainNavItems(t);
+    const mainNavItems = getMainNavItems(t, snapToTrackActivation);
     const profileNavItems = getProfileNavItems(t);
     const footerNavItems = getFooterNavItems(t);
 

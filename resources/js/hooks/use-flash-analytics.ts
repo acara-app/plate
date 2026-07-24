@@ -10,13 +10,23 @@ export function useFlashAnalytics(): void {
     useEffect(() => {
         return router.on('flash', (event) => {
             const flash = (event as CustomEvent).detail?.flash;
-            const analytics = flash?.analytics as AnalyticsEvent | undefined;
+            const analytics = flash?.analytics as
+                | AnalyticsEvent
+                | AnalyticsEvent[]
+                | undefined;
 
             if (!analytics) {
                 return;
             }
 
-            window.umami?.track(analytics.name, analytics.properties);
+            const events = Array.isArray(analytics) ? analytics : [analytics];
+
+            for (const analyticsEvent of events) {
+                window.umami?.track(
+                    analyticsEvent.name,
+                    analyticsEvent.properties,
+                );
+            }
         });
     }, []);
 }

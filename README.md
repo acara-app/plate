@@ -77,6 +77,76 @@ Core stack:
 - Laravel Reverb for WebSocket broadcasting (Redis is used only where required, such as resumable AI streaming)
 - Pest, PHPStan, Pint, Rector, TypeScript, Prettier, and oxlint for quality checks
 
+## Architecture
+
+The architecture is shaped by three constraints: agent responses take tens of seconds of model and tool calls, clients expect token-level streaming while they wait, and a privacy-first health product has to stay simple enough for one person to self-host. Plate answers them with a deliberate monolith built around a single hard boundary — synchronous request handling versus asynchronous agent execution. The web tier does the minimum on-request (authenticate, persist, enqueue) and stays stateless; queue workers absorb all AI-provider latency and stream results back over WebSockets; PostgreSQL holds every fact the system depends on, keeping health data transactionally consistent. Every infrastructure role — queue, cache, WebSockets, object storage — is a Laravel driver binding, which is why the same codebase runs unchanged from a laptop to a managed platform.
+
+```mermaid
+flowchart LR
+    subgraph clients["Clients"]
+        web["Web app + PWA<br/>Inertia · React 19"]
+        ios["Acara Health Sync<br/>iOS · Apple Health"]
+        tguser["Telegram user"]
+    end
+
+    subgraph plate["Acara App"]
+        subgraph entry["Entry"]
+            https["HTTPS entry<br/>TLS termination · load balancing"]
+        end
+        subgraph application["Application"]
+            app["Web tier<br/>Laravel 13 · stateless"]
+            q[["Job queue"]]
+            workers["Queue workers<br/>AI agent jobs · imports"]
+        end
+        subgraph state["Data & realtime"]
+            db[("PostgreSQL<br/>source of truth · pgvector")]
+            cache[("Cache<br/>Redis-compatible · resumable AI streams")]
+            ws["Reverb<br/>WebSocket broadcasting"]
+        end
+        s3[("Object storage<br/>S3-compatible · private + public buckets")]
+    end
+
+    subgraph ext["External services"]
+        ai["AI providers<br/>OpenAI · Anthropic · Gemini"]
+        tgapi["Telegram Bot API"]
+        usda["USDA FoodData Central"]
+        stripe["Stripe billing"]
+    end
+
+    web -->|"HTTPS"| https
+    ios -->|"encrypted health sync API"| https
+    tguser --- tgapi
+    tgapi -->|"webhook updates"| https
+    https --> app
+    app -->|"enqueue AI + import jobs"| q
+    q --> workers
+    app --> db
+    workers --> db
+    app --> cache
+    workers --> cache
+    workers -->|"broadcast AI stream"| ws
+    ws -.->|"live tokens + tool events"| web
+    app & workers --> s3
+    app & workers -->|"model + tool calls"| ai
+    app -->|"bot replies"| tgapi
+    workers -->|"nutrition imports"| usda
+    app --> stripe
+```
+
+How a chat message moves through the system:
+
+1. The client sends the message over HTTPS to the web tier, which authenticates the request, persists the conversation, and enqueues an AI job so long-running agent work never blocks a web request.
+2. A queue worker runs the agent loop — health context assembly, tool calls, model requests — and broadcasts tokens, reasoning, and tool events over WebSockets as they stream.
+3. The browser renders the stream live, and the cache keeps resumable stream state so a dropped connection replays instead of losing the response. Telegram users reach the same agent through bot API replies.
+4. PostgreSQL remains the single source of truth for conversations, health entries, and USDA-derived food reference data, while object storage holds uploaded food photos and benchmark datasets.
+
+Design principles:
+
+- The web tier is stateless, so replicas scale horizontally (or to zero) without session affinity; all state lives in PostgreSQL, the cache, and object storage.
+- AI work is async-first: every model call runs on the queue, which isolates provider latency and lets workers scale independently of web traffic.
+- Realtime is push-based over WebSockets rather than polling, with an event-replay fallback when a socket cannot connect.
+- Infrastructure roles are swappable bindings: the queue backend, cache, WebSocket server, and object store are configured through Laravel drivers, so deployments differ by configuration, not code.
+
 ## Quick Setup
 
 ```bash

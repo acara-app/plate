@@ -124,3 +124,10 @@ if (! function_exists('enable_premium_upgrades_for')) {
         return resolve(PremiumRolloutGate::class)->isActiveFor($user);
     }
 }
+
+if (! function_exists('snap_to_track_activation_enabled')) {
+    function snap_to_track_activation_enabled(): bool
+    {
+        return config()->boolean('plate.snap_to_track.activation_funnel', false);
+    }
+}

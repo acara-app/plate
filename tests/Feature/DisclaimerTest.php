@@ -67,6 +67,30 @@ it('allows access to dashboard when disclaimer is accepted', function (): void {
         ->assertOk();
 });
 
+it('preserves the intended destination through the disclaimer gate', function (): void {
+    $user = User::factory()->create([
+        'accepted_disclaimer_at' => null,
+    ]);
+
+    actingAs($user)
+        ->get(route('dashboard'))
+        ->assertRedirect(route('disclaimer.show'));
+
+    expect(session('url.intended'))->toBe(route('dashboard'));
+});
+
+it('redirects to the intended destination after accepting the disclaimer', function (): void {
+    $user = User::factory()->create([
+        'accepted_disclaimer_at' => null,
+    ]);
+
+    actingAs($user)->get(route('dashboard'));
+
+    actingAs($user)
+        ->post(route('disclaimer.accept'), ['accepted' => '1'])
+        ->assertRedirect(route('dashboard'));
+});
+
 it('accepts disclaimer and redirects to dashboard', function (): void {
     $user = User::factory()->create([
         'accepted_disclaimer_at' => null,

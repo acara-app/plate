@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers as Web;
 use App\Http\Middleware\EnsureDisclaimerAccepted;
+use App\Http\Middleware\EnsureSnapToTrackActivationEnabled;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -127,6 +128,18 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
     Route::post('health-entries', Web\HealthEntry\StoreHealthEntryController::class)->name('health-entries.store');
     Route::put('health-entries/{healthSyncSample}', Web\HealthEntry\UpdateHealthEntryController::class)->name('health-entries.update');
     Route::delete('health-entries/{healthSyncSample}', Web\HealthEntry\DestroyHealthEntryController::class)->name('health-entries.destroy');
+
+    Route::middleware(EnsureSnapToTrackActivationEnabled::class)
+        ->prefix('app/snap-to-track')
+        ->name('snap-to-track.')
+        ->group(function (): void {
+            Route::get('/', Web\SnapToTrack\ShowSnapToTrackController::class)->name('index');
+            Route::post('analyze', Web\SnapToTrack\AnalyzeSnapToTrackPhotoController::class)
+                ->middleware('throttle:snap-to-track-analyze')
+                ->name('analyze');
+            Route::get('review/{draft}', Web\SnapToTrack\ShowSnapToTrackReviewController::class)->name('review');
+            Route::post('review/{draft}', Web\SnapToTrack\StoreSnapToTrackMealController::class)->name('review.store');
+        });
 });
 
 Route::middleware(['auth', 'verified'])->prefix('onboarding')->name('onboarding.')->group(function (): void {

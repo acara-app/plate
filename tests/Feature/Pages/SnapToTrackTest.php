@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Models\AnalysisDraft;
 use App\Models\ReferenceFood;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
@@ -44,6 +46,8 @@ function analyzePhotoForSnapToTrack(array $analysis, string $fileName = 'food.jp
 }
 
 beforeEach(function (): void {
+    config()->set('plate.snap_to_track.activation_funnel', false);
+
     RateLimiter::clear('snap-to-track:127.0.0.1');
     RateLimiter::clear('snap-to-track-upload:127.0.0.1');
     Cache::forget('snap-to-track-turnstile:'.sha1(ClientInterface::RESPONSE_DUMMY_TOKEN).':127.0.0.1');
@@ -124,10 +128,10 @@ it('displays result after successful analysis', function (): void {
         'total_fat' => 3.6,
         'confidence' => 85,
     ])
-        ->assertSet('result.totalCalories', 165.0)
-        ->assertSet('result.totalProtein', 31.0)
-        ->assertSet('result.totalCarbs', 0.0)
-        ->assertSet('result.totalFat', 3.6)
+        ->assertSet('result.total_calories', 165.0)
+        ->assertSet('result.total_protein', 31.0)
+        ->assertSet('result.total_carbs', 0.0)
+        ->assertSet('result.total_fat', 3.6)
         ->assertSet('result.confidence', 85)
         ->assertSet('photo', null)
         ->assertSee('165')
@@ -243,7 +247,7 @@ it('handles empty food detection gracefully', function (): void {
         'total_fat' => 0,
         'confidence' => 0,
     ], 'empty.jpg')
-        ->assertSet('result.totalCalories', 0.0)
+        ->assertSet('result.total_calories', 0.0)
         ->assertSet('result.confidence', 0)
         ->assertSee('No food items were detected');
 });
@@ -370,4 +374,99 @@ it('shows explore more tools section', function (): void {
     Livewire::test('pages::snap-to-track')
         ->assertSee('Explore More Tools')
         ->assertSee('View All Tools');
+});
+
+function saveMealAnalysisFixture(): array
+{
+    return [
+        'items' => [
+            ['name' => 'Grilled Chicken', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'portion' => '100g'],
+        ],
+        'total_calories' => 165,
+        'total_protein' => 31,
+        'total_carbs' => 0,
+        'total_fat' => 3.6,
+        'confidence' => 85,
+    ];
+}
+
+it('shows the save meal CTA instead of the upsell when the activation funnel is enabled', function (): void {
+    config()->set('plate.snap_to_track.activation_funnel', true);
+
+    analyzePhotoForSnapToTrack(saveMealAnalysisFixture())
+        ->assertSee('Save this meal free')
+        ->assertDontSee('Sign up for sharper analysis');
+});
+
+it('creates a draft and seeds the intended destination for a guest saving a meal', function (): void {
+    config()->set('plate.snap_to_track.activation_funnel', true);
+
+    $component = analyzePhotoForSnapToTrack(saveMealAnalysisFixture())
+        ->call('saveMeal', 'register')
+        ->assertRedirect(route('register'));
+
+    $token = $component->instance()->draftToken;
+    $draft = AnalysisDraft::query()->sole();
+
+    expect($draft->token_hash)->toBe(AnalysisDraft::hashToken($token))
+        ->and($draft->user_id)->toBeNull()
+        ->and(session('url.intended'))->toBe(route('snap-to-track.review', ['draft' => $token], absolute: false))
+        ->and(session('snap_to_track.auth_path'))->toBe('register');
+});
+
+it('sends a guest choosing the login path to the login page', function (): void {
+    config()->set('plate.snap_to_track.activation_funnel', true);
+
+    analyzePhotoForSnapToTrack(saveMealAnalysisFixture())
+        ->call('saveMeal', 'login')
+        ->assertRedirect(route('login'));
+
+    expect(session('snap_to_track.auth_path'))->toBe('login');
+});
+
+it('sends an authenticated user straight to the claimed draft review', function (): void {
+    config()->set('plate.snap_to_track.activation_funnel', true);
+
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $component = analyzePhotoForSnapToTrack(saveMealAnalysisFixture())
+        ->call('saveMeal', 'register');
+
+    $token = $component->instance()->draftToken;
+
+    $component->assertRedirect(route('snap-to-track.review', ['draft' => $token], absolute: false));
+
+    $draft = AnalysisDraft::query()->sole();
+
+    expect($draft->user_id)->toBe($user->id)
+        ->and($draft->claimed_at)->not->toBeNull()
+        ->and(session('snap_to_track.auth_path'))->toBeNull();
+});
+
+it('reuses the minted draft token on repeated save clicks', function (): void {
+    config()->set('plate.snap_to_track.activation_funnel', true);
+
+    analyzePhotoForSnapToTrack(saveMealAnalysisFixture())
+        ->call('saveMeal', 'register')
+        ->call('saveMeal', 'login');
+
+    expect(AnalysisDraft::query()->count())->toBe(1);
+});
+
+it('does not create a draft without an analysis result', function (): void {
+    config()->set('plate.snap_to_track.activation_funnel', true);
+
+    Livewire::test('pages::snap-to-track')
+        ->call('saveMeal', 'register');
+
+    expect(AnalysisDraft::query()->count())->toBe(0);
+});
+
+it('rejects the save meal action when the activation funnel is disabled', function (): void {
+    analyzePhotoForSnapToTrack(saveMealAnalysisFixture())
+        ->call('saveMeal', 'register')
+        ->assertStatus(404);
+
+    expect(AnalysisDraft::query()->count())->toBe(0);
 });

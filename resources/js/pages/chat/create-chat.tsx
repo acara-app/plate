@@ -1,3 +1,4 @@
+import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackController';
 import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
@@ -27,7 +28,13 @@ import type { CreditWarning } from '@/types';
 import type { ChatPageProps, UIMessage } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
-import { Bookmark, MoreHorizontal, Pin, SquarePen } from 'lucide-react';
+import {
+    Bookmark,
+    MoreHorizontal,
+    Pin,
+    ScanLine,
+    SquarePen,
+} from 'lucide-react';
 import {
     useCallback,
     useEffect,
@@ -55,7 +62,7 @@ export default function CreateChat() {
         isKept,
         creditWarning: sharedCreditWarning,
     } = page.props;
-    const { currentUser } = useSharedProps();
+    const { currentUser, snapToTrackActivation } = useSharedProps();
     const { t } = useTranslation('common');
 
     const [conversationId, setConversationId] = useState<string>(
@@ -303,6 +310,31 @@ export default function CreateChat() {
                                     {t('conversations.new_chat')}
                                 </TooltipContent>
                             </Tooltip>
+                            {snapToTrackActivation && (
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() =>
+                                                router.visit(
+                                                    ShowSnapToTrackController()
+                                                        .url,
+                                                )
+                                            }
+                                            aria-label={t(
+                                                'sidebar.nav.snap_to_track',
+                                            )}
+                                            className="size-10 text-muted-foreground"
+                                        >
+                                            <ScanLine className="size-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        {t('sidebar.nav.snap_to_track')}
+                                    </TooltipContent>
+                                </Tooltip>
+                            )}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button
@@ -314,12 +346,16 @@ export default function CreateChat() {
                                         <MoreHorizontal className="size-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44">
+                                <DropdownMenuContent
+                                    align="end"
+                                    className="w-44"
+                                >
                                     <DropdownMenuItem onSelect={toggleKeep}>
                                         <Bookmark
                                             className={cn(
                                                 'size-4',
-                                                kept && 'fill-current text-primary',
+                                                kept &&
+                                                    'fill-current text-primary',
                                             )}
                                         />
                                         {t(

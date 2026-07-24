@@ -16,6 +16,9 @@ use Spatie\LaravelData\Data;
 
 final class HealthLogData extends Data
 {
+    /**
+     * @param  list<array<string, mixed>>|null  $foodItems
+     */
     public function __construct(
         public bool $isHealthData,
         public HealthEntryType $logType,
@@ -39,6 +42,11 @@ final class HealthLogData extends Data
         public ?int $exerciseDurationMinutes = null,
         public ?CarbonImmutable $measuredAt = null,
         public ?string $notes = null,
+        public ?array $foodItems = null,
+        public ?int $confidence = null,
+        public ?string $analyzerVersion = null,
+        public ?string $foodSource = null,
+        public ?string $draftReference = null,
     ) {}
 
     /**
@@ -307,49 +315,69 @@ final class HealthLogData extends Data
      */
     private function toFoodSamples(): array
     {
+        $metadata = $this->foodItemsMetadata();
         $samples = [];
 
         if ($this->carbsGrams !== null) {
-            $samples[] = [
-                'type_identifier' => HealthSyncType::Carbohydrates->value,
-                'value' => $this->carbsGrams,
-                'unit' => HealthSyncType::Carbohydrates->unit(),
-            ];
+            $samples[] = $this->foodSample(HealthSyncType::Carbohydrates, $this->carbsGrams, $metadata);
         }
 
         if ($this->proteinGrams !== null) {
-            $samples[] = [
-                'type_identifier' => HealthSyncType::Protein->value,
-                'value' => $this->proteinGrams,
-                'unit' => HealthSyncType::Protein->unit(),
-            ];
+            $samples[] = $this->foodSample(HealthSyncType::Protein, $this->proteinGrams, $metadata);
         }
 
         if ($this->fatGrams !== null) {
-            $samples[] = [
-                'type_identifier' => HealthSyncType::TotalFat->value,
-                'value' => $this->fatGrams,
-                'unit' => HealthSyncType::TotalFat->unit(),
-            ];
+            $samples[] = $this->foodSample(HealthSyncType::TotalFat, $this->fatGrams, $metadata);
         }
 
         if ($this->calories !== null) {
-            $samples[] = [
-                'type_identifier' => HealthSyncType::DietaryEnergy->value,
-                'value' => $this->calories,
-                'unit' => HealthSyncType::DietaryEnergy->unit(),
-            ];
+            $samples[] = $this->foodSample(HealthSyncType::DietaryEnergy, $this->calories, $metadata);
         }
 
         if ($samples === []) {
-            $samples[] = [
-                'type_identifier' => HealthSyncType::DietaryEnergy->value,
-                'value' => 0,
-                'unit' => HealthSyncType::DietaryEnergy->unit(),
-            ];
+            $samples[] = $this->foodSample(HealthSyncType::DietaryEnergy, 0, $metadata);
         }
 
         return $samples;
+    }
+
+    /**
+     * @param  array{snap_to_track: array<string, mixed>}|null  $metadata
+     * @return array{type_identifier: string, value: float|int, unit: string, metadata?: array<string, mixed>}
+     */
+    private function foodSample(HealthSyncType $type, float|int $value, ?array $metadata): array
+    {
+        $sample = [
+            'type_identifier' => $type->value,
+            'value' => $value,
+            'unit' => $type->unit(),
+        ];
+
+        if ($metadata !== null) {
+            $sample['metadata'] = $metadata;
+        }
+
+        return $sample;
+    }
+
+    /**
+     * @return array{snap_to_track: array<string, mixed>}|null
+     */
+    private function foodItemsMetadata(): ?array
+    {
+        if ($this->foodItems === null) {
+            return null;
+        }
+
+        return [
+            'snap_to_track' => [
+                'source' => $this->foodSource,
+                'confidence' => $this->confidence,
+                'analyzer_version' => $this->analyzerVersion,
+                'draft_reference' => $this->draftReference,
+                'items' => $this->foodItems,
+            ],
+        ];
     }
 
     /**

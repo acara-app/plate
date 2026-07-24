@@ -11,6 +11,7 @@ export default function useSharedProps() {
         currentUser: props.auth.user,
         sidebarOpen: page.props.sidebarOpen as boolean,
         enablePremiumUpgrades: page.props.enablePremiumUpgrades as boolean,
+        snapToTrackActivation: page.props.snapToTrackActivation as boolean,
         locale: page.props.locale as string,
         availableLanguages: page.props.availableLanguages as Record<
             string,
