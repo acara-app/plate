@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:acara-app/acara-core.git",
-                "reference": "40997100bb92b3a439e32378ea04d3305fa254f0"
+                "reference": "4147e521c0077f2ee74ec9f7dc4d99ff2365ee09"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/acara-app/acara-core/zipball/40997100bb92b3a439e32378ea04d3305fa254f0",
-                "reference": "40997100bb92b3a439e32378ea04d3305fa254f0",
+                "url": "https://api.github.com/repos/acara-app/acara-core/zipball/4147e521c0077f2ee74ec9f7dc4d99ff2365ee09",
+                "reference": "4147e521c0077f2ee74ec9f7dc4d99ff2365ee09",
                 "shasum": ""
             },
             "require": {
@@ -86,7 +86,7 @@
                 "source": "https://github.com/acara-app/acara-core/tree/main",
                 "issues": "https://github.com/acara-app/acara-core/issues"
             },
-            "time": "2026-08-06T02:52:44+00:00"
+            "time": "2026-08-06T03:02:10+00:00"
         },
         {
             "name": "aws/aws-crt-php",
