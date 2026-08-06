@@ -31,7 +31,7 @@ final class AnalyzeSnapToTrackPhotoRequest extends FormRequest
         ];
     }
 
-    public function image(): Base64Image
+    public function decodedImage(): Base64Image
     {
         if ($this->decoded instanceof Base64Image) {
             return $this->decoded;

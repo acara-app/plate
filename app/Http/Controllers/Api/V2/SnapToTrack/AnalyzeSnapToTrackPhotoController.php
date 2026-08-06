@@ -32,7 +32,7 @@ final readonly class AnalyzeSnapToTrackPhotoController
             ModelName::tryFrom(config()->string('plate.food_photo_analyzer.model')),
         );
 
-        $image = $request->image();
+        $image = $request->decodedImage();
 
         ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve(
             $this->requestedLocale($request) ?? $user->locale,
