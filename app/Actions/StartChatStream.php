@@ -38,7 +38,7 @@ final readonly class StartChatStream
         $this->events->clear($conversation->id);
 
         $attachments = $this->serializeAttachments($request->userAttachments());
-        $turn = $this->pendingTurn->handle($conversation, $user, $request->userMessage(), $attachments, $channel);
+        $turn = $this->pendingTurn->handle($conversation, $user, $request->userMessage(), $attachments, $channel, $modelName->value);
 
         if ($messageCount === 0) {
             dispatch(new GenerateConversationTitleJob($conversation->withoutRelations()));

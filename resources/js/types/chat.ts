@@ -16,26 +16,20 @@ export interface ChatPageProps {
 }
 
 export type ApprovalStatus =
-    | 'pending'
-    | 'approved'
-    | 'executing'
-    | 'executed'
-    | 'failed'
-    | 'rejected'
-    | 'expired';
+    'pending' | 'submitted' | 'approved' | 'rejected' | 'abandoned';
+
+export type ApprovalDecisionsPayload = Record<
+    string,
+    { action: 'approve' | 'reject'; result?: string }
+>;
 
 export interface ApprovalCardData {
+    toolCallId: string;
+    tool: string;
+    reason: string | null;
+    arguments: Record<string, unknown>;
     status: ApprovalStatus;
-    summary: string;
-    can_approve: boolean;
-    can_reject: boolean;
-    error: string | null;
-    notice: string | null;
-}
-
-export interface ChatApprovalsPageProps {
-    approvals?: Record<string, ApprovalCardData>;
-    [key: string]: unknown;
+    ownerToolId?: string | null;
 }
 
 export interface ReasoningData {

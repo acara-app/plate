@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Ai\Tools;
 
 use App\Actions\AggregateHealthDailySamplesAction;
-use App\Actions\Approvals\CreateAgentApproval;
 use App\Actions\RecordHealthSampleAction;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Data\HealthLogData;
@@ -16,23 +15,32 @@ use App\Enums\HealthEntrySource;
 use App\Enums\HealthEntryType;
 use App\Enums\InsulinType;
 use App\Enums\WeightUnit;
-use App\Models\Conversation;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
 use InvalidArgumentException;
+use Laravel\Ai\Approvals\Approval;
+use Laravel\Ai\Concerns\InteractsWithApprovals;
+use Laravel\Ai\Contracts\Approvable;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 use Throwable;
 
 #[AiToolSensitivity(DataSensitivity::Sensitive)]
-final readonly class LogHealthEntry implements Tool
+final class LogHealthEntry implements Approvable, Tool
 {
+    use InteractsWithApprovals;
+
+    /**
+     * @var list<string>
+     */
+    private const array APPROVAL_CHANNELS = ['web', 'telegram', 'mobile'];
+
     public function __construct(
-        private AggregateHealthDailySamplesAction $aggregateHealthDailySamplesAction,
-        private CreateAgentApproval $createAgentApproval,
+        private readonly AggregateHealthDailySamplesAction $aggregateHealthDailySamplesAction,
+        private readonly RecordHealthSampleAction $recordHealthSampleAction,
     ) {}
 
     public function name(): string
@@ -55,12 +63,7 @@ final readonly class LogHealthEntry implements Tool
             ]);
         }
 
-        /** @var array<string, mixed> $requestData */
-        $requestData = $request->toArray();
-        $healthData = HealthLogData::fromParsedArray(array_merge(
-            $requestData,
-            ['is_health_data' => true],
-        ));
+        $healthData = $this->healthData($request);
 
         if ($this->requiresGlucoseUnitClarification($healthData)) {
             return (string) json_encode([
@@ -81,13 +84,8 @@ final readonly class LogHealthEntry implements Tool
             ]);
         }
 
-        if (in_array(Context::get('chat.channel'), ['web', 'telegram', 'mobile'], true)) {
-            return $this->proposeApproval($request, $healthData, $user);
-        }
-
         try {
-            $action = resolve(RecordHealthSampleAction::class);
-            $sample = $action->handle($healthData, $user, HealthEntrySource::Chat);
+            $sample = $this->recordHealthSampleAction->handle($healthData, $user, HealthEntrySource::Chat);
         } catch (InvalidArgumentException $invalidArgumentException) {
             return (string) json_encode([
                 'error' => $invalidArgumentException->getMessage(),
@@ -162,56 +160,45 @@ final readonly class LogHealthEntry implements Tool
         ];
     }
 
-    private function proposeApproval(Request $request, HealthLogData $healthData, User $user): string
+    protected function needsApproval(Request $request): Approval|bool
     {
+        if (! in_array(Context::get('chat.channel'), self::APPROVAL_CHANNELS, true)) {
+            return false;
+        }
+
         try {
-            $args = $request->toArray();
+            $healthData = $this->healthData($request);
 
-            $rawSummary = $args['summary'] ?? null;
-            $summary = is_string($rawSummary) && mb_trim($rawSummary) !== ''
-                ? $rawSummary // @codeCoverageIgnore
-                : $healthData->formatForDisplay();
+            if ($this->requiresGlucoseUnitClarification($healthData) || $this->requiresFoodEstimate($healthData)) {
+                return false;
+            }
 
-            /** @var array<string, mixed> $payload */
-            $payload = array_merge($args, [
-                'is_health_data' => true,
-                'measured_at' => ($healthData->measuredAt ?? CarbonImmutable::now('UTC'))->toIso8601String(),
-            ]);
-
-            $conversationId = Context::get('chat.conversation_id');
-            $conversation = is_string($conversationId)
-                ? Conversation::query()->find($conversationId)
-                : null; // @codeCoverageIgnore
-
-            $channel = Context::get('chat.channel');
-
-            $approval = $this->createAgentApproval->handle(
-                'log_health_entry',
-                $payload,
-                $summary,
-                $conversation,
-                $user,
-                is_string($channel) ? $channel : null,
-            );
-
-            Context::push('chat.created_approvals', $approval->id);
-
-            return (string) json_encode([
-                'status' => 'pending_approval',
-                'approval_id' => $approval->id,
-                'message' => 'Prepared this health entry but it is NOT saved yet. Ask the user to approve it using the confirmation card; do not tell them it has been logged.',
-                'card' => $approval->toCardData()->toArray(),
-            ]);
-            // @codeCoverageIgnoreStart
+            return Approval::required($this->summaryFor($request, $healthData));
         } catch (Throwable $throwable) {
             report($throwable);
 
-            return (string) json_encode([
-                'error' => 'Could not prepare the health entry for confirmation. Please try again.',
-            ]);
+            return true;
         }
+    }
 
-        // @codeCoverageIgnoreEnd
+    private function healthData(Request $request): HealthLogData
+    {
+        /** @var array<string, mixed> $requestData */
+        $requestData = $request->toArray();
+
+        return HealthLogData::fromParsedArray(array_merge(
+            $requestData,
+            ['is_health_data' => true],
+        ));
+    }
+
+    private function summaryFor(Request $request, HealthLogData $healthData): string
+    {
+        $summary = $request->toArray()['summary'] ?? null;
+
+        return is_string($summary) && mb_trim($summary) !== ''
+            ? $summary
+            : $healthData->formatForDisplay();
     }
 
     private function requiresGlucoseUnitClarification(HealthLogData $healthData): bool

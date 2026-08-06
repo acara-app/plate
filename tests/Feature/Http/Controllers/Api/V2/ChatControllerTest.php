@@ -21,7 +21,7 @@ function chatAuthHeaders(User $user, array $abilities = ['chat:converse']): arra
 
 it('deletes conversation history through the mobile API', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
     History::factory()->count(2)->forConversation($conversation)->create();
     ConversationSummary::factory()->create([
         'conversation_id' => $conversation->id,
@@ -46,7 +46,7 @@ it('deletes conversation history through the mobile API', function (): void {
 
 it('pins a conversation through the mobile API', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     $this->withHeaders(chatAuthHeaders($user))
         ->patchJson(route('api.v2.chat.pin', ['conversation' => $conversation->id]))
@@ -58,7 +58,7 @@ it('pins a conversation through the mobile API', function (): void {
 
 it('unpins a conversation through the mobile API', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->pinned()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->pinned()->create(Conversation::participantAttributes($user));
 
     $this->withHeaders(chatAuthHeaders($user))
         ->patchJson(route('api.v2.chat.unpin', ['conversation' => $conversation->id]))
@@ -71,11 +71,11 @@ it('unpins a conversation through the mobile API', function (): void {
 it('lists conversations with pinned ones first and an is_pinned flag', function (): void {
     $user = User::factory()->create();
     $recent = Conversation::factory()->create([
-        'user_id' => $user->id,
+        ...Conversation::participantAttributes($user),
         'updated_at' => now(),
     ]);
     $pinned = Conversation::factory()->pinned()->create([
-        'user_id' => $user->id,
+        ...Conversation::participantAttributes($user),
         'updated_at' => now()->subDays(2),
     ]);
 
@@ -91,7 +91,7 @@ it('lists conversations with pinned ones first and an is_pinned flag', function 
 it("forbids pinning another user's conversation", function (): void {
     $owner = User::factory()->create();
     $other = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($owner));
 
     $this->withHeaders(chatAuthHeaders($other))
         ->patchJson(route('api.v2.chat.pin', ['conversation' => $conversation->id]))
@@ -110,7 +110,7 @@ it('returns 404 when pinning a missing conversation', function (): void {
 
 it('keeps a conversation through the mobile API', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     $this->withHeaders(chatAuthHeaders($user))
         ->patchJson(route('api.v2.chat.keep', ['conversation' => $conversation->id]))
@@ -122,7 +122,7 @@ it('keeps a conversation through the mobile API', function (): void {
 
 it('unkeeps a conversation through the mobile API', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->kept()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->kept()->create(Conversation::participantAttributes($user));
 
     $this->withHeaders(chatAuthHeaders($user))
         ->patchJson(route('api.v2.chat.unkeep', ['conversation' => $conversation->id]))
@@ -134,7 +134,7 @@ it('unkeeps a conversation through the mobile API', function (): void {
 
 it('exposes an is_kept flag when listing conversations', function (): void {
     $user = User::factory()->create();
-    Conversation::factory()->kept()->create(['user_id' => $user->id]);
+    Conversation::factory()->kept()->create(Conversation::participantAttributes($user));
 
     $this->withHeaders(chatAuthHeaders($user))
         ->getJson(route('api.v2.chat.index'))
@@ -145,7 +145,7 @@ it('exposes an is_kept flag when listing conversations', function (): void {
 it("forbids keeping another user's conversation", function (): void {
     $owner = User::factory()->create();
     $other = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($owner));
 
     $this->withHeaders(chatAuthHeaders($other))
         ->patchJson(route('api.v2.chat.keep', ['conversation' => $conversation->id]))

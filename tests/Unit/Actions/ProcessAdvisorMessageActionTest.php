@@ -25,24 +25,29 @@ function fakeConversationStore(?string $latestId = null, string $newId = 'conv-1
             private string $newId,
         ) {}
 
-        public function latestConversationId(string|int $userId): ?string
+        public function latestConversationId(string $participantType, string|int $participantId): ?string
         {
             return $this->latestId;
         }
 
-        public function storeConversation(string|int|null $userId, string $title): string
+        public function storeConversation(?string $participantType, string|int|null $participantId, string $title): string
         {
             return $this->newId;
         }
 
-        public function storeUserMessage(string $conversationId, string|int|null $userId, AgentPrompt $prompt): string
+        public function storeUserMessage(string $conversationId, ?string $participantType, string|int|null $participantId, AgentPrompt $prompt): string
         {
             return 'msg-1';
         }
 
-        public function storeAssistantMessage(string $conversationId, string|int|null $userId, AgentPrompt $prompt, AgentResponse $response): string
+        public function storeAssistantMessage(string $conversationId, ?string $participantType, string|int|null $participantId, AgentPrompt $prompt, AgentResponse $response): ?string
         {
             return 'msg-2';
+        }
+
+        public function storeApprovalResults(string $conversationId, ?string $participantType, string|int|null $participantId, array $toolResults): void
+        {
+            //
         }
 
         public function getLatestConversationMessages(string $conversationId, int $limit): Collection

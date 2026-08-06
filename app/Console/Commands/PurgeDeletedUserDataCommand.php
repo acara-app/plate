@@ -40,7 +40,8 @@ final class PurgeDeletedUserDataCommand extends Command
     {
         DB::transaction(function () use ($deletedUser): void {
             $conversationIds = DB::table('agent_conversations')
-                ->where('user_id', $deletedUser->user_id)
+                ->where('participant_type', 'user')
+                ->where('participant_id', $deletedUser->user_id)
                 ->pluck('id');
 
             if ($conversationIds->isNotEmpty()) {
@@ -50,11 +51,13 @@ final class PurgeDeletedUserDataCommand extends Command
             }
 
             DB::table('agent_conversation_messages')
-                ->where('user_id', $deletedUser->user_id)
+                ->where('participant_type', 'user')
+                ->where('participant_id', $deletedUser->user_id)
                 ->delete();
 
             DB::table('agent_conversations')
-                ->where('user_id', $deletedUser->user_id)
+                ->where('participant_type', 'user')
+                ->where('participant_id', $deletedUser->user_id)
                 ->delete();
 
             $subscriptionIds = DB::table('subscriptions')

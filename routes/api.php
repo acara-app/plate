@@ -58,14 +58,8 @@ Route::prefix('v2/chat')
         Route::patch('conversations/{conversation}/unkeep', [ApiV2\ChatController::class, 'unkeep'])
             ->name('api.v2.chat.unkeep');
 
-        Route::get('conversations/{conversation}/approvals/{approval}', [ApiV2\ApprovalController::class, 'show'])
-            ->name('api.v2.chat.approvals.show');
-
-        Route::post('conversations/{conversation}/approvals/{approval}/approve', [ApiV2\ApprovalController::class, 'approve'])
-            ->name('api.v2.chat.approvals.approve');
-
-        Route::post('conversations/{conversation}/approvals/{approval}/reject', [ApiV2\ApprovalController::class, 'reject'])
-            ->name('api.v2.chat.approvals.reject');
+        Route::post('conversations/{conversation}/approvals', ApiV2\ApprovalDecisionController::class)
+            ->name('api.v2.chat.approvals.decide');
     });
 
 Route::prefix('v2/auth')->group(function (): void {
@@ -106,4 +100,16 @@ Route::prefix('v2/account')
         Route::post('consent', ApiV2\Account\AcceptConsentController::class)
             ->middleware('throttle:30,1')
             ->name('api.v2.account.consent');
+    });
+
+Route::prefix('v2/snap-to-track')
+    ->middleware('auth:sanctum')
+    ->group(function (): void {
+        Route::post('analyze', ApiV2\SnapToTrack\AnalyzeSnapToTrackPhotoController::class)
+            ->middleware('throttle:snap-to-track-analyze')
+            ->name('api.v2.snap-to-track.analyze');
+
+        Route::post('drafts/{draft}/meal', ApiV2\SnapToTrack\StoreSnapToTrackMealController::class)
+            ->middleware('throttle:60,1')
+            ->name('api.v2.snap-to-track.meal');
     });

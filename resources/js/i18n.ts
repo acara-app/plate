@@ -6,7 +6,7 @@ i18n.use(initReactI18next).init({
     resources: {},
     lng: 'en', // Default language
     fallbackLng: 'en',
-    ns: ['auth', 'common', 'validation', 'passwords', 'pagination'],
+    ns: ['auth', 'common', 'validation', 'passwords', 'pagination', 'tools'],
     defaultNS: 'common',
     interpolation: {
         escapeValue: false,

@@ -54,7 +54,7 @@ it('starts a conversation from a posted message with an image and redirects to t
     $conversation = Conversation::query()->find($conversationId);
 
     expect($conversation)->not->toBeNull()
-        ->and($conversation->user_id)->toBe($user->id);
+        ->and($conversation->participant_id)->toBe($user->id);
 
     $userMessage = $conversation->messages()
         ->where('role', MessageRole::User)
@@ -116,7 +116,7 @@ it('forbids starting a turn in another users conversation', function (): void {
 
     $owner = User::factory()->create();
     $intruder = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($owner));
 
     $this->actingAs($intruder)
         ->postJson(route('chat.store', $conversation->id), [

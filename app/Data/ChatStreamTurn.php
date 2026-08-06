@@ -10,12 +10,12 @@ final readonly class ChatStreamTurn
 {
     public function __construct(
         public string $streamId,
-        public string $userMessageId,
+        public ?string $userMessageId,
         public string $assistantMessageId,
     ) {}
 
     /**
-     * @return array{status: string, channel: string, conversationId: string, userMessageId: string, assistantMessageId: string}
+     * @return array{status: string, channel: string, conversationId: string, userMessageId: string|null, assistantMessageId: string}
      */
     public function acceptedPayload(int $userId, string $conversationId): array
     {

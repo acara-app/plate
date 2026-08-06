@@ -22,7 +22,7 @@ final readonly class GetOrCreateConversationAction
 
         $conversation = Conversation::query()->create([
             'id' => $conversationId,
-            'user_id' => $user->id,
+            ...Conversation::participantAttributes($user),
             'title' => Conversation::DEFAULT_TITLE,
         ]);
 

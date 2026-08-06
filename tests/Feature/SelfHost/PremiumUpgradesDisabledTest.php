@@ -105,7 +105,7 @@ it('returns no 402 from chat stream preflight when the flag is off', function ()
     Queue::fake();
 
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     AiUsage::factory()->create([
         'user_id' => $user->id,

@@ -1,11 +1,7 @@
-import type { ApprovalCardData } from '@/types/chat';
+import type { ApprovalCardData, ApprovalStatus } from '@/types/chat';
 import type { UIMessage } from '@ai-sdk/react';
-import { isToolUIPart } from 'ai';
 
-export interface ApprovalPartPayload {
-    approvalId: string;
-    card: ApprovalCardData;
-}
+const STATUSES: ApprovalStatus[] = ['pending', 'approved', 'rejected'];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;
@@ -14,50 +10,34 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 export function isApprovalCardData(value: unknown): value is ApprovalCardData {
     return (
         isRecord(value) &&
-        typeof value.status === 'string' &&
-        typeof value.summary === 'string'
+        typeof value.toolCallId === 'string' &&
+        STATUSES.includes(value.status as ApprovalStatus)
     );
 }
 
-export function parseApprovalOutput(
-    output: unknown,
-): ApprovalPartPayload | null {
-    if (typeof output === 'string') {
-        try {
-            output = JSON.parse(output);
-        } catch {
-            return null;
-        }
+/**
+ * Normalize one entry of a `tool_approval_request` stream event.
+ */
+export function parseApprovalRequest(value: unknown): ApprovalCardData | null {
+    if (!isRecord(value) || typeof value.id !== 'string') {
+        return null;
     }
 
-    if (
-        isRecord(output) &&
-        typeof output.approval_id === 'string' &&
-        isApprovalCardData(output.card)
-    ) {
-        return { approvalId: output.approval_id, card: output.card };
-    }
-
-    return null;
+    return {
+        toolCallId: value.id,
+        tool: typeof value.tool === 'string' ? value.tool : '',
+        reason: typeof value.reason === 'string' ? value.reason : null,
+        arguments: isRecord(value.arguments) ? value.arguments : {},
+        status: 'pending',
+    };
 }
 
 export function extractApprovalPayload(
     part: UIMessage['parts'][number],
-): ApprovalPartPayload | null {
-    if (isToolUIPart(part) && part.state === 'output-available') {
-        return parseApprovalOutput(part.output);
+): ApprovalCardData | null {
+    if (part.type !== 'data-approval' || !('data' in part)) {
+        return null;
     }
 
-    if (part.type === 'data-approval') {
-        const data = part.data;
-        if (
-            isRecord(data) &&
-            typeof data.approvalId === 'string' &&
-            isApprovalCardData(data.card)
-        ) {
-            return { approvalId: data.approvalId, card: data.card };
-        }
-    }
-
-    return null;
+    return isApprovalCardData(part.data) ? part.data : null;
 }

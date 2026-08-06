@@ -1,7 +1,8 @@
+import { decide } from '@/routes/approvals';
 import { stream } from '@/routes/chat';
 import { stop as stopStream } from '@/routes/chat/stream';
 import type { PaywallCapTrigger, SubscriptionTier } from '@/types';
-import type { ChatStatus } from '@/types/chat';
+import type { ApprovalDecisionsPayload, ChatStatus } from '@/types/chat';
 import type { FileUIPart, UIMessage } from 'ai';
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { chatReducer, createInitialState } from './chat/message-reducer';
@@ -23,6 +24,9 @@ interface UseChatStreamOptions {
 interface UseChatStreamReturn {
     messages: UIMessage[];
     sendMessage: (message: { text: string; files?: FileUIPart[] }) => void;
+    submitApprovalDecisions: (
+        decisions: ApprovalDecisionsPayload,
+    ) => Promise<'resumed' | 'recorded'>;
     stop: () => void;
     clearError: () => void;
     status: ChatStatus;
@@ -187,6 +191,49 @@ export function useChatStream({
         ],
     );
 
+    // A decision only queues a turn, so the outcome has to arrive through the same
+    // streaming/replay lifecycle as any other turn rather than from this response.
+    const submitApprovalDecisions = useCallback(
+        async (
+            decisions: ApprovalDecisionsPayload,
+        ): Promise<'resumed' | 'recorded'> => {
+            resetReplayState();
+
+            const response = await fetch(
+                decide.url({ conversation: conversationId }),
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ decisions }),
+                },
+            );
+
+            if (!response.ok) {
+                throw new Error('Failed to submit the decision.');
+            }
+
+            const body: unknown = await response.json();
+            const recorded =
+                typeof body === 'object' &&
+                body !== null &&
+                (body as { status?: unknown }).status === 'recorded';
+
+            if (recorded) {
+                return 'recorded';
+            }
+
+            dispatch({ type: 'PROCESSING' });
+            startReplayPolling();
+
+            return 'resumed';
+        },
+        [conversationId, resetReplayState, startReplayPolling],
+    );
+
     const stop = useCallback(() => {
         stopReplayPolling();
         dispatch({ type: 'FINISHED' });
@@ -201,6 +248,7 @@ export function useChatStream({
     return {
         messages: state.messages,
         sendMessage,
+        submitApprovalDecisions,
         stop,
         clearError,
         status: state.status,

@@ -117,8 +117,8 @@ it('deletes user and eventually purges all related data', function (): void {
     $this->assertDatabaseMissing('mobile_sync_devices', ['user_id' => $userId]);
     $this->assertDatabaseMissing('user_chat_platform_links', ['user_id' => $userId]);
 
-    $this->assertDatabaseHas('agent_conversations', ['user_id' => $userId]);
-    $this->assertDatabaseHas('agent_conversation_messages', ['user_id' => $userId]);
+    $this->assertDatabaseHas('agent_conversations', ['participant_type' => 'user', 'participant_id' => $userId]);
+    $this->assertDatabaseHas('agent_conversation_messages', ['participant_type' => 'user', 'participant_id' => $userId]);
     $this->assertDatabaseHas('conversation_summaries', ['conversation_id' => $conversation->id]);
     $this->assertDatabaseHas('subscriptions', ['user_id' => $userId]);
     $this->assertDatabaseHas('subscription_items', ['subscription_id' => $subscriptionId]);
@@ -136,8 +136,8 @@ it('deletes user and eventually purges all related data', function (): void {
     $this->artisan(PurgeDeletedUserDataCommand::class)
         ->assertSuccessful();
 
-    $this->assertDatabaseMissing('agent_conversations', ['user_id' => $userId]);
-    $this->assertDatabaseMissing('agent_conversation_messages', ['user_id' => $userId]);
+    $this->assertDatabaseMissing('agent_conversations', ['participant_type' => 'user', 'participant_id' => $userId]);
+    $this->assertDatabaseMissing('agent_conversation_messages', ['participant_type' => 'user', 'participant_id' => $userId]);
     $this->assertDatabaseMissing('conversation_summaries', ['conversation_id' => $conversation->id]);
     $this->assertDatabaseMissing('subscriptions', ['user_id' => $userId]);
     $this->assertDatabaseMissing('subscription_items', ['subscription_id' => $subscriptionId]);
@@ -183,7 +183,7 @@ it('does not affect another user when deleting and purging', function (): void {
     expect($otherUser->fresh())->not->toBeNull();
     $this->assertDatabaseHas('user_profiles', ['user_id' => $otherUser->id]);
     $this->assertDatabaseHas('health_sync_samples', ['user_id' => $otherUser->id]);
-    $this->assertDatabaseHas('agent_conversations', ['user_id' => $otherUser->id]);
-    $this->assertDatabaseHas('agent_conversation_messages', ['user_id' => $otherUser->id]);
+    $this->assertDatabaseHas('agent_conversations', ['participant_type' => 'user', 'participant_id' => $otherUser->id]);
+    $this->assertDatabaseHas('agent_conversation_messages', ['participant_type' => 'user', 'participant_id' => $otherUser->id]);
     $this->assertDatabaseHas('sessions', ['user_id' => $otherUser->id]);
 });

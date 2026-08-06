@@ -30,4 +30,10 @@ return [
     'glucose_spike_specialist' => 'Predicting your glucose response',
     'web_search' => 'Searching the web',
     'carb_boundary_notice' => 'Estimates, not measurements — never dose insulin or other medication from these numbers.',
+    'approval_not_confirmed' => 'The user did not confirm this entry, so nothing was saved.',
+    'approval_awaiting' => 'Not saved yet — please confirm.',
+    'approval_approved' => 'Saved.',
+    'approval_rejected' => 'Dismissed — nothing was saved.',
+    'approval_recorded' => 'Recorded — waiting on the other entries.',
+    'approval_failed' => 'Could not be saved. Please try again.',
 ];

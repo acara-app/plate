@@ -11,10 +11,9 @@ use App\Contracts\Memory\PullsConversationHistory;
 use App\Contracts\Services\IndexNowServiceContract;
 use App\Contracts\Services\StripeServiceContract;
 use App\Contracts\Skills\LoadsSkills;
-use App\Events\AgentApprovalResolved;
-use App\Listeners\NotifyTelegramOfApprovalOutcome;
 use App\Listeners\TrackAiUsage;
 use App\Models\User;
+use App\Services\Ai\PlateConversationStore;
 use App\Services\Billing\SubscriptionTierResolver;
 use App\Services\IndexNowService;
 use App\Services\Memory\NullConversationHistoryPuller;
@@ -27,6 +26,7 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Ai\Contracts\ConversationStore;
 use Laravel\Ai\Events\AgentPrompted;
 use Laravel\Ai\Events\AgentStreamed;
 use Laravel\Cashier\Cashier;
@@ -49,6 +50,11 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->bindIf(DispatchesMemoryExtraction::class, NullMemoryExtractionDispatcher::class);
         $this->app->bindIf(PullsConversationHistory::class, NullConversationHistoryPuller::class);
         $this->app->bindIf(LoadsSkills::class, NullSkillLoader::class);
+
+        $this->app->singleton(
+            ConversationStore::class,
+            fn (): PlateConversationStore => new PlateConversationStore(config()->string('ai.conversations.connection', config()->string('database.default'))),
+        );
     }
 
     public function boot(): void
@@ -102,6 +108,8 @@ final class AppServiceProvider extends ServiceProvider
     {
         Model::unguard();
         Model::shouldBeStrict(! $this->app->isProduction());
+
+        Relation::morphMap(['user' => User::class]);
     }
 
     private function bootPasswordDefaults(): void
@@ -144,6 +152,5 @@ final class AppServiceProvider extends ServiceProvider
     {
         Event::listen(AgentPrompted::class, TrackAiUsage::class);
         Event::listen(AgentStreamed::class, TrackAiUsage::class);
-        Event::listen(AgentApprovalResolved::class, NotifyTelegramOfApprovalOutcome::class);
     }
 }

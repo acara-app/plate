@@ -51,7 +51,7 @@ final class TelegramWebhookPayloads
     /**
      * @return array<string, mixed>
      */
-    public static function callbackQuery(string $action, string $approvalId, string $chatId = '123456789', int $messageId = 100): array
+    public static function callbackQuery(string $action, string $approvalToken, string $chatId = '123456789', int $messageId = 100): array
     {
         return [
             'callback_query' => [
@@ -64,7 +64,7 @@ final class TelegramWebhookPayloads
                     'date' => now()->timestamp,
                     'text' => 'Health log',
                 ],
-                'data' => sprintf('action:%s;id:%s', $action, $approvalId),
+                'data' => sprintf('action:%s;c:%s', $action, $approvalToken),
             ],
         ];
     }

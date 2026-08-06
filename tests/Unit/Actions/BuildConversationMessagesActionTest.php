@@ -12,7 +12,7 @@ covers(BuildConversationMessagesAction::class);
 beforeEach(function (): void {
     $this->action = resolve(BuildConversationMessagesAction::class);
     $this->user = User::factory()->create();
-    $this->conversation = Conversation::factory()->create(['user_id' => $this->user->id]);
+    $this->conversation = Conversation::factory()->create(Conversation::participantAttributes($this->user));
 });
 
 it('returns empty array when conversation is null', function (): void {

@@ -1,6 +1,7 @@
 import type { PaywallCapTrigger } from '@/types';
 import type {
     ApprovalCardData,
+    ApprovalStatus,
     ChatStatus,
     ProviderToolData,
     ProviderToolKind,
@@ -32,9 +33,13 @@ export type ChatAction =
     | { type: 'ADD_CITATION'; citation: UrlCitationPayload }
     | {
           type: 'ADD_APPROVAL';
-          approvalId: string;
-          card: ApprovalCardData;
+          approval: ApprovalCardData;
           ownerToolId?: string | null;
+      }
+    | {
+          type: 'RESOLVE_APPROVAL';
+          toolCallId: string;
+          status: ApprovalStatus;
       }
     | { type: 'REASONING_START'; reasoningId: string; at: number }
     | {
@@ -222,18 +227,39 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
             return {
                 ...state,
                 messages: updateLastAssistant(state.messages, (message) =>
-                    upsertDataPart(
+                    upsertDataPart<ApprovalCardData>(
                         message,
                         'data-approval',
-                        action.approvalId,
+                        action.approval.toolCallId,
                         () => ({
-                            approvalId: action.approvalId,
-                            card: action.card,
+                            ...action.approval,
                             ownerToolId: action.ownerToolId ?? null,
                         }),
                         (data) => data,
                     ),
                 ),
+            };
+
+        case 'RESOLVE_APPROVAL':
+            return {
+                ...state,
+                messages: state.messages.map((message) => ({
+                    ...message,
+                    parts: (message.parts ?? []).map((part) =>
+                        part.type === 'data-approval' &&
+                        'data' in part &&
+                        (part.data as ApprovalCardData).toolCallId ===
+                            action.toolCallId
+                            ? {
+                                  ...part,
+                                  data: {
+                                      ...(part.data as ApprovalCardData),
+                                      status: action.status,
+                                  },
+                              }
+                            : part,
+                    ),
+                })),
             };
 
         case 'REASONING_START':

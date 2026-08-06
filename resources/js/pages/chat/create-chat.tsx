@@ -135,6 +135,7 @@ export default function CreateChat() {
     const {
         messages,
         sendMessage,
+        submitApprovalDecisions,
         stop,
         clearError,
         status,
@@ -388,7 +389,7 @@ export default function CreateChat() {
                                 messages={messages}
                                 status={status}
                                 isSubmitting={showWorkingIndicator}
-                                conversationId={conversationId}
+                                onApprovalDecision={submitApprovalDecisions}
                             />
                             {!usageLimitTrigger && (
                                 <ChatErrorBanner

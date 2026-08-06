@@ -1,8 +1,5 @@
 import { ApprovalCard } from '@/components/chat/approval-card';
-import {
-    extractApprovalPayload,
-    type ApprovalPartPayload,
-} from '@/components/chat/approval-part';
+import { extractApprovalPayload } from '@/components/chat/approval-part';
 import { ChatErrorBoundary } from '@/components/chat/chat-error-boundary';
 import { ProviderToolRow } from '@/components/chat/provider-tool-row';
 import { ReasoningBlock } from '@/components/chat/reasoning-block';
@@ -20,6 +17,8 @@ import {
 import { ToolCallSection } from '@/components/chat/tool-call-section';
 import { cn } from '@/lib/utils';
 import type {
+    ApprovalCardData,
+    ApprovalDecisionsPayload,
     ChatStatus,
     ProviderToolData,
     ReasoningData,
@@ -36,7 +35,9 @@ interface ChatMessagesProps {
     messages: UIMessage[];
     status: ChatStatus;
     isSubmitting?: boolean;
-    conversationId: string;
+    onApprovalDecision?: (
+        decisions: ApprovalDecisionsPayload,
+    ) => Promise<'resumed' | 'recorded'>;
 }
 
 export function ChatErrorBanner({
@@ -201,7 +202,7 @@ interface AssistantParts {
     reasoning: ReasoningData[];
     toolCalls: ToolCallData[];
     providerTools: ProviderToolData[];
-    approvals: ApprovalPartPayload[];
+    approvals: ApprovalCardData[];
     sources: SourceLink[];
     body: UIMessage['parts'];
     hasContent: boolean;
@@ -231,9 +232,7 @@ function partitionAssistantParts(message: UIMessage): AssistantParts {
 
     const approvals = parts
         .map((part) => extractApprovalPayload(part))
-        .filter(
-            (approval): approval is ApprovalPartPayload => approval !== null,
-        );
+        .filter((approval): approval is ApprovalCardData => approval !== null);
 
     const sources: SourceLink[] = parts
         .filter((part) => part.type === 'source-url')
@@ -300,11 +299,13 @@ function hasRenderableContent(message: UIMessage): boolean {
 function AssistantBubble({
     message,
     isStreaming,
-    conversationId,
+    onDecide,
 }: {
     message: UIMessage;
     isStreaming?: boolean;
-    conversationId: string;
+    onDecide?: (
+        decisions: ApprovalDecisionsPayload,
+    ) => Promise<'resumed' | 'recorded'>;
 }) {
     const {
         reasoning,
@@ -349,10 +350,9 @@ function AssistantBubble({
                     <SourcesSection sources={sources} />
                     {approvals.map((approval) => (
                         <ApprovalCard
-                            key={approval.approvalId}
-                            conversationId={conversationId}
-                            approvalId={approval.approvalId}
-                            card={approval.card}
+                            key={approval.toolCallId}
+                            approval={approval}
+                            onDecide={onDecide}
                         />
                     ))}
                 </div>
@@ -364,11 +364,13 @@ function AssistantBubble({
 const MessageBubble = memo(function MessageBubble({
     message,
     isStreaming,
-    conversationId,
+    onDecide,
 }: {
     message: UIMessage;
     isStreaming?: boolean;
-    conversationId: string;
+    onDecide?: (
+        decisions: ApprovalDecisionsPayload,
+    ) => Promise<'resumed' | 'recorded'>;
 }) {
     return message.role === 'user' ? (
         <UserBubble message={message} />
@@ -376,7 +378,7 @@ const MessageBubble = memo(function MessageBubble({
         <AssistantBubble
             message={message}
             isStreaming={isStreaming}
-            conversationId={conversationId}
+            onDecide={onDecide}
         />
     );
 });
@@ -416,7 +418,7 @@ export default function ChatMessages({
     messages,
     status,
     isSubmitting,
-    conversationId,
+    onApprovalDecision,
 }: ChatMessagesProps) {
     if (messages.length === 0) {
         return <EmptyState />;
@@ -440,7 +442,7 @@ export default function ChatMessages({
                             index === lastIndex &&
                             message.role === 'assistant'
                         }
-                        conversationId={conversationId}
+                        onDecide={onApprovalDecision}
                     />
                 </ChatErrorBoundary>
             ))}

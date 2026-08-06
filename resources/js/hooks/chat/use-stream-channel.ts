@@ -18,6 +18,7 @@ const STREAM_EVENTS = [
     '.thinking_complete',
     '.tool_call',
     '.tool_result',
+    '.tool_approval_request',
     '.provider_tool',
     '.citation',
 ];

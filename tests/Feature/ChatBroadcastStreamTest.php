@@ -24,7 +24,7 @@ it('dispatches web chat streams to the chat queue and returns immediately', func
     Queue::fake();
 
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     $store = $this->mock(StreamEventStore::class);
     $store->shouldReceive('clear')->once()->with($conversation->id);
@@ -66,7 +66,7 @@ it('keeps usage-limit preflight synchronous for web chat streams', function (): 
     Queue::fake();
 
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
@@ -93,7 +93,7 @@ it('dispatches api v2 chat streams with the mobile channel marker', function ():
     Queue::fake();
 
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
     $token = $user->createToken('mobile:device-1', ['chat:converse'])->plainTextToken;
 
     $store = $this->mock(StreamEventStore::class);
@@ -121,7 +121,7 @@ it('dispatches api v2 chat streams with the mobile channel marker', function ():
 
 it('requests cancellation for owned web conversations', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     $store = $this->mock(StreamEventStore::class);
     $store->shouldReceive('requestCancellation')->once()->with($conversation->id);
@@ -136,7 +136,7 @@ it('requests cancellation for owned web conversations', function (): void {
 
 it('returns replay events for owned web conversations', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     $store = $this->mock(StreamEventStore::class);
     $store->shouldReceive('eventsAfter')

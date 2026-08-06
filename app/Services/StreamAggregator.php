@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Data\ChatStreamResult;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
+use Laravel\Ai\Approvals\PendingApproval;
 use Laravel\Ai\Responses\Data\UrlCitation;
 use Laravel\Ai\Streaming\Events\Citation;
 use Laravel\Ai\Streaming\Events\Error as StreamError;
@@ -20,11 +21,12 @@ use Laravel\Ai\Streaming\Events\StreamStart;
 use Laravel\Ai\Streaming\Events\TextDelta;
 use Laravel\Ai\Streaming\Events\TextEnd;
 use Laravel\Ai\Streaming\Events\TextStart;
+use Laravel\Ai\Streaming\Events\ToolApprovalRequest;
 use Laravel\Ai\Streaming\Events\ToolCall;
 use Laravel\Ai\Streaming\Events\ToolResult;
 
 /**
- * @phpstan-type TNormalizedEvent array{type: string, delta?: string|null, tool_call?: array<string, mixed>, tool_result?: array<string, mixed>, citation?: array<string, mixed>, usage?: array<string, mixed>, ...<string, mixed>}
+ * @phpstan-type TNormalizedEvent array{type: string, delta?: string|null, tool_call?: array<string, mixed>, tool_result?: array<string, mixed>, citation?: array<string, mixed>, usage?: array<string, mixed>, approvals?: list<array{id: string, tool: string, arguments: array<string, mixed>, reason: string|null}>, ...<string, mixed>}
  */
 final readonly class StreamAggregator
 {
@@ -151,6 +153,7 @@ final readonly class StreamAggregator
                 'title' => $this->toolTitle($event->toolResult->name),
                 'result' => $event->toolResult->result,
                 'successful' => $event->successful,
+                'denied' => $event->toolResult->denied,
                 'error' => $event->error,
                 'timestamp' => $event->timestamp,
                 'tool_result' => [
@@ -160,6 +163,20 @@ final readonly class StreamAggregator
                     'result' => $event->toolResult->result,
                     'result_id' => $event->toolResult->resultId,
                 ],
+            ],
+            $event instanceof ToolApprovalRequest => [
+                'id' => $event->id,
+                'invocation_id' => $event->invocationId,
+                'type' => 'tool_approval_request',
+                'approvals' => array_values($event->pendingApprovals->map(
+                    fn (PendingApproval $approval): array => [
+                        'id' => $approval->id,
+                        'tool' => $approval->tool,
+                        'arguments' => $approval->arguments,
+                        'reason' => $approval->reason,
+                    ],
+                )->all()),
+                'timestamp' => $event->timestamp,
             ],
             $event instanceof ProviderToolEvent => [
                 'id' => $event->id,
@@ -231,7 +248,25 @@ final readonly class StreamAggregator
             citations: $this->citations($events),
             errors: $this->errors($events),
             usage: $this->usage($events),
+            pendingApprovals: $this->pendingApprovals($events),
         );
+    }
+
+    /**
+     * @param  list<TNormalizedEvent>  $events
+     * @return array<string, string|null>
+     */
+    private function pendingApprovals(array $events): array
+    {
+        $pending = [];
+
+        foreach ($this->ofType($events, 'tool_approval_request') as $event) {
+            foreach ($event['approvals'] ?? [] as $approval) {
+                $pending[$approval['id']] = $approval['reason'];
+            }
+        }
+
+        return $pending;
     }
 
     private function toolTitle(string $name): string

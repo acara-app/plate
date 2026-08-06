@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -132,11 +133,11 @@ final class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * @return HasMany<Conversation, $this>
+     * @return MorphMany<Conversation, $this>
      */
-    public function conversations(): HasMany
+    public function conversations(): MorphMany
     {
-        return $this->hasMany(Conversation::class)->latest();
+        return $this->morphMany(Conversation::class, 'participant')->latest();
     }
 
     /**

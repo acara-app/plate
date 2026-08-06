@@ -91,6 +91,12 @@
       "sourceType": "github",
       "computedHash": "bbaf0d378114c7f1581ec63218c9061da983afc1e30887af69ba6ce7ce9cd4c1"
     },
+    "composer-upgrade": {
+      "source": "peterfox/agent-skills",
+      "sourceType": "github",
+      "skillPath": "composer-upgrade/SKILL.md",
+      "computedHash": "82f7b2b25e70a00d7bd1579a04f749c51b8a79bf3de365e6e6814bf4585794c0"
+    },
     "content-strategy": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",

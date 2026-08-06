@@ -11,9 +11,7 @@ export function useFlashAnalytics(): void {
         return router.on('flash', (event) => {
             const flash = (event as CustomEvent).detail?.flash;
             const analytics = flash?.analytics as
-                | AnalyticsEvent
-                | AnalyticsEvent[]
-                | undefined;
+                AnalyticsEvent | AnalyticsEvent[] | undefined;
 
             if (!analytics) {
                 return;

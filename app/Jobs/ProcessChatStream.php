@@ -7,6 +7,7 @@ namespace App\Jobs;
 use App\Actions\CompletePendingChatStreamTurn;
 use App\Ai\AgentRequest;
 use App\Ai\Agents\AgentRunner;
+use App\Data\ChatStreamDelivery;
 use App\Data\ChatStreamResult;
 use App\Enums\ModelName;
 use App\Models\History;
@@ -25,6 +26,8 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Context;
+use Laravel\Ai\Approvals\Decision;
+use Laravel\Ai\Approvals\Decisions;
 use Laravel\Ai\Files\Base64Image;
 use Throwable;
 
@@ -37,15 +40,19 @@ final class ProcessChatStream implements ShouldQueue
 
     public const int TRIES = 3;
 
+    /**
+     * @param  list<array{id: string, action: string, result?: string|null}>|null  $decisions  tool approval decisions that resume a paused turn
+     */
     public function __construct(
         public int $userId,
         public string $conversationId,
         public string $modelName,
         public string $channel,
         public string $streamId,
-        public string $userMessageId,
+        public ?string $userMessageId,
         public string $assistantMessageId,
         public ?string $locale = null,
+        public ?array $decisions = null,
     ) {}
 
     /**
@@ -66,13 +73,19 @@ final class ProcessChatStream implements ShouldQueue
         $previousLocale = App::getLocale();
 
         try {
+            $user = User::query()->findOrFail($this->userId);
+
             if ($this->resetStateForRetry($events)) {
-                $this->completePendingTurn($complete, new ChatStreamResult, History::STREAM_STATUS_CANCELLED);
+                $this->completePendingTurn(
+                    complete: $complete,
+                    user: $user,
+                    delivery: new ChatStreamDelivery(new ChatStreamResult, cancelled: true),
+                    status: History::STREAM_STATUS_CANCELLED,
+                );
 
                 return;
             }
 
-            $user = User::query()->findOrFail($this->userId);
             Auth::login($user);
             App::setLocale(LanguageUtil::resolve($this->locale ?? $user->locale)['code']);
 
@@ -81,22 +94,30 @@ final class ProcessChatStream implements ShouldQueue
 
             $this->broadcastLifecycle('processing');
 
-            $userMessage = History::query()->findOrFail($this->userMessageId);
+            $userMessage = $this->userMessageId === null
+                ? null
+                : History::query()->findOrFail($this->userMessageId);
 
             $request = new AgentRequest(
-                message: $userMessage->content,
+                message: $userMessage->content ?? '',
                 images: $this->base64Images($userMessage->attachments ?? []),
                 modelName: ModelName::tryFrom($this->modelName) ?? ModelName::default(),
                 conversationId: $this->conversationId,
                 streamId: $this->streamId,
             );
 
-            $stream = $agentRunner->run($request, $user);
+            $decisions = $this->approvalDecisions();
+
+            $stream = $decisions instanceof Decisions
+                ? $agentRunner->resume($request, $user, $decisions)
+                : $agentRunner->run($request, $user);
+
             $delivery = $connector->deliver($stream, $this->userId, $this->conversationId);
 
             $this->completePendingTurn(
                 complete: $complete,
-                result: $delivery->result,
+                user: $user,
+                delivery: $delivery,
                 status: $delivery->cancelled ? History::STREAM_STATUS_CANCELLED : History::STREAM_STATUS_COMPLETED,
             );
 
@@ -116,15 +137,18 @@ final class ProcessChatStream implements ShouldQueue
 
         $events = resolve(StreamEventStore::class);
         $aggregator = resolve(StreamAggregator::class);
+        $user = User::query()->find($this->userId);
 
-        resolve(CompletePendingChatStreamTurn::class)->handle(
-            conversationId: $this->conversationId,
-            userId: $this->userId,
-            userMessageId: $this->userMessageId,
-            assistantMessageId: $this->assistantMessageId,
-            result: $aggregator->aggregateStoredEvents($events->eventsAfter($this->conversationId, -1)),
-            status: History::STREAM_STATUS_FAILED,
-        );
+        if ($user instanceof User) {
+            resolve(CompletePendingChatStreamTurn::class)->handle(
+                conversationId: $this->conversationId,
+                user: $user,
+                userMessageId: $this->userMessageId,
+                assistantMessageId: $this->assistantMessageId,
+                result: $aggregator->aggregateStoredEvents($events->eventsAfter($this->conversationId, -1)),
+                status: History::STREAM_STATUS_FAILED,
+            );
+        }
 
         $events->markComplete($this->conversationId);
 
@@ -166,17 +190,34 @@ final class ProcessChatStream implements ShouldQueue
         return false;
     }
 
-    private function completePendingTurn(CompletePendingChatStreamTurn $complete, ChatStreamResult $result, string $status): void
+    private function completePendingTurn(CompletePendingChatStreamTurn $complete, User $user, ChatStreamDelivery $delivery, string $status): void
     {
         $complete->handle(
             conversationId: $this->conversationId,
-            userId: $this->userId,
+            user: $user,
             userMessageId: $this->userMessageId,
             assistantMessageId: $this->assistantMessageId,
-            result: $result,
+            result: $delivery->result,
             status: $status,
+            providerContentBlocks: $delivery->providerContentBlocks,
+            provider: $delivery->provider,
         );
         // @codeCoverageIgnoreEnd
+    }
+
+    private function approvalDecisions(): ?Decisions
+    {
+        if ($this->decisions === null || $this->decisions === []) {
+            return null;
+        }
+
+        return Decisions::from(collect($this->decisions)
+            ->mapWithKeys(fn (array $decision): array => [
+                $decision['id'] => $decision['action'] === 'approve'
+                    ? Decision::approve()
+                    : Decision::reject($decision['result'] ?? null),
+            ])
+            ->all());
     }
 
     /**

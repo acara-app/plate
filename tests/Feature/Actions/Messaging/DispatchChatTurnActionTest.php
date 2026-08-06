@@ -16,7 +16,7 @@ it('delegates to the advisor and persists the conversation id', function (): voi
     $advisor->shouldReceive('handle')
         ->once()
         ->withArgs(fn (User $u, string $m, ?string $cid, array $atts): bool => $u->is($user) && $m === 'hi' && $cid === null && $atts === [])
-        ->andReturn(['response' => 'hello!', 'conversation_id' => 'conv-42']);
+        ->andReturn(['response' => 'hello!', 'conversation_id' => 'conv-42', 'pending_approvals' => []]);
     app()->instance(ProcessesAdvisorMessage::class, $advisor);
 
     $result = resolve(DispatchChatTurnAction::class)->handle($link, 'hi');
@@ -41,7 +41,7 @@ it('does not touch conversation_id when advisor returns the same id', function (
 
 it('marks the conversation permanent so it survives purging', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->stale(10)->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->stale(10)->create(Conversation::participantAttributes($user));
     $link = UserChatPlatformLink::factory()->linked($user)->create(['conversation_id' => null]);
 
     $advisor = Mockery::mock(ProcessesAdvisorMessage::class);

@@ -3,15 +3,12 @@
 declare(strict_types=1);
 
 use App\Console\Commands\AggregateHealthDailyCommand;
-use App\Console\Commands\ExpireStaleAgentApprovalsCommand;
 use App\Console\Commands\ProcessGlucoseNotificationsCommand;
 use App\Console\Commands\PurgeDeletedUserDataCommand;
 use App\Console\Commands\PurgeExpiredConversationsCommand;
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('model:prune')->daily();
-
-Schedule::command(ExpireStaleAgentApprovalsCommand::class)->hourly();
 
 Schedule::command(PurgeExpiredConversationsCommand::class)->hourly()->withoutOverlapping();
 

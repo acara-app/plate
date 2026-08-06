@@ -15,7 +15,7 @@ beforeEach(function (): void {
 
 it('returns existing conversation when it exists', function (): void {
     $conversation = Conversation::factory()->create([
-        'user_id' => $this->user->id,
+        ...Conversation::participantAttributes($this->user),
         'title' => 'Existing Chat',
     ]);
 
@@ -23,7 +23,7 @@ it('returns existing conversation when it exists', function (): void {
 
     expect($result->id)->toBe($conversation->id)
         ->and($result->title)->toBe('Existing Chat')
-        ->and($result->user_id)->toBe($this->user->id);
+        ->and($result->participant_id)->toBe($this->user->id);
 });
 
 it('creates new conversation with the default title when it does not exist', function (): void {
@@ -32,18 +32,19 @@ it('creates new conversation with the default title when it does not exist', fun
     $result = $this->action->handle($conversationId, $this->user);
 
     expect($result->id)->toBe($conversationId)
-        ->and($result->user_id)->toBe($this->user->id)
+        ->and($result->participant_id)->toBe($this->user->id)
         ->and($result->title)->toBe(Conversation::DEFAULT_TITLE);
 
     $this->assertDatabaseHas('agent_conversations', [
         'id' => $conversationId,
-        'user_id' => $this->user->id,
+        'participant_type' => 'user',
+        'participant_id' => $this->user->id,
         'title' => Conversation::DEFAULT_TITLE,
     ]);
 });
 
 it('loads messages relationship', function (): void {
-    $conversation = Conversation::factory()->create(['user_id' => $this->user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($this->user));
 
     $result = $this->action->handle($conversation->id, $this->user);
 
@@ -51,7 +52,7 @@ it('loads messages relationship', function (): void {
 });
 
 it('skips the messages relationship when not requested', function (): void {
-    $conversation = Conversation::factory()->create(['user_id' => $this->user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($this->user));
 
     $result = $this->action->handle($conversation->id, $this->user, withMessages: false);
 
@@ -60,10 +61,10 @@ it('skips the messages relationship when not requested', function (): void {
 
 it('returns an existing conversation even when owned by another user (authorization is not this action concern)', function (): void {
     $owner = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($owner));
 
     $result = $this->action->handle($conversation->id, $this->user);
 
     expect($result->id)->toBe($conversation->id)
-        ->and($result->user_id)->toBe($owner->id);
+        ->and($result->participant_id)->toBe($owner->id);
 });

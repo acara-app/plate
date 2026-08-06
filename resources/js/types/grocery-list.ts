@@ -1,8 +1,5 @@
 export type GroceryListStatus =
-    | 'generating'
-    | 'active'
-    | 'completed'
-    | 'failed';
+    'generating' | 'active' | 'completed' | 'failed';
 
 export const GroceryStatus = {
     Generating: 'generating',

@@ -10,4 +10,5 @@ enum HealthEntrySource: string
     case Chat = 'chat';
     case Telegram = 'telegram';
     case MobileSync = 'mobile_sync';
+    case Mobile = 'mobile';
 }

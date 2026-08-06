@@ -8,6 +8,8 @@ use App\Data\ChatStreamDelivery;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Support\Facades\Broadcast;
 use Laravel\Ai\Streaming\Events\StreamEvent;
+use Laravel\Ai\Streaming\Events\StreamStart;
+use Laravel\Ai\Streaming\Events\ToolApprovalRequest;
 
 /**
  * @phpstan-import-type TNormalizedEvent from StreamAggregator
@@ -31,8 +33,18 @@ final readonly class BroadcastConnector
         $cancelled = false;
         $lastCancellationCheck = 0.0;
         $payloads = [];
+        $providerContentBlocks = [];
+        $provider = null;
 
         foreach ($stream as $event) {
+            if ($event instanceof StreamStart) {
+                $provider = $event->provider;
+            }
+
+            if ($event instanceof ToolApprovalRequest) {
+                $providerContentBlocks = array_values($event->providerContentBlocks);
+            }
+
             if (microtime(true) - $lastCancellationCheck >= self::CANCELLATION_CHECK_SECONDS) {
                 $lastCancellationCheck = microtime(true);
 
@@ -52,6 +64,8 @@ final readonly class BroadcastConnector
         return new ChatStreamDelivery(
             result: $this->aggregator->aggregateNormalized($payloads),
             cancelled: $cancelled,
+            providerContentBlocks: $providerContentBlocks,
+            provider: $provider,
         );
     }
 

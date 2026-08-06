@@ -9,12 +9,17 @@ use App\Data\ChatStreamTurn;
 use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Ai\Messages\MessageRole;
 
 final readonly class CreatePendingChatStreamTurn
 {
+    public function __construct(
+        private AbandonPendingApprovals $abandonPendingApprovals,
+    ) {}
+
     /**
      * @param  list<array{type: string, name: ?string, base64: string, mime: ?string}>  $attachments
      */
@@ -24,22 +29,20 @@ final readonly class CreatePendingChatStreamTurn
         string $prompt,
         array $attachments,
         string $channel,
+        ?string $model = null,
     ): ChatStreamTurn {
-        return DB::transaction(function () use ($conversation, $user, $prompt, $attachments, $channel): ChatStreamTurn {
+        return DB::transaction(function () use ($conversation, $user, $prompt, $attachments, $channel, $model): ChatStreamTurn {
             $streamId = (string) Str::uuid7();
             $userMessageId = (string) Str::uuid7();
-            $assistantMessageId = (string) Str::uuid7();
             $now = now();
 
-            $conversation = Conversation::query()
-                ->whereKey($conversation->id)
-                ->where('user_id', $user->id)
-                ->lockForUpdate()
-                ->firstOrFail();
+            $conversation = $this->lockConversation($conversation, $user);
+
+            $this->abandonPendingApprovals->handle($conversation->id);
 
             $conversation->messages()->create([
                 'id' => $userMessageId,
-                'user_id' => $user->id,
+                ...Conversation::participantAttributes($user),
                 'agent' => AgentRunner::class,
                 'role' => MessageRole::User,
                 'content' => $prompt,
@@ -54,23 +57,7 @@ final readonly class CreatePendingChatStreamTurn
                 'updated_at' => $now,
             ]);
 
-            $conversation->messages()->create([
-                'id' => $assistantMessageId,
-                'user_id' => $user->id,
-                'agent' => AgentRunner::class,
-                'role' => MessageRole::Assistant,
-                'content' => '',
-                'attachments' => [],
-                'tool_calls' => [],
-                'tool_results' => [],
-                'usage' => [],
-                'meta' => History::streamMeta($streamId, History::STREAM_STATUS_PENDING, [
-                    'channel' => $channel,
-                    'user_message_id' => $userMessageId,
-                ]),
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]);
+            $assistantMessageId = $this->createAssistantPlaceholder($conversation, $user, $streamId, $channel, $model, $userMessageId, $now);
 
             $conversation->forceFill(['updated_at' => $now])->save();
 
@@ -80,5 +67,71 @@ final readonly class CreatePendingChatStreamTurn
                 assistantMessageId: $assistantMessageId,
             );
         });
+    }
+
+    public function forResume(
+        Conversation $conversation,
+        User $user,
+        string $channel,
+        ?string $model = null,
+    ): ChatStreamTurn {
+        return DB::transaction(function () use ($conversation, $user, $channel, $model): ChatStreamTurn {
+            $streamId = (string) Str::uuid7();
+            $now = now();
+
+            $conversation = $this->lockConversation($conversation, $user);
+
+            $assistantMessageId = $this->createAssistantPlaceholder($conversation, $user, $streamId, $channel, $model, null, $now);
+
+            $conversation->forceFill(['updated_at' => $now])->save();
+
+            return new ChatStreamTurn(
+                streamId: $streamId,
+                userMessageId: null,
+                assistantMessageId: $assistantMessageId,
+            );
+        });
+    }
+
+    private function lockConversation(Conversation $conversation, User $user): Conversation
+    {
+        return Conversation::query()
+            ->whereKey($conversation->id)
+            ->forUser($user)
+            ->lockForUpdate()
+            ->firstOrFail();
+    }
+
+    private function createAssistantPlaceholder(
+        Conversation $conversation,
+        User $user,
+        string $streamId,
+        string $channel,
+        ?string $model,
+        ?string $userMessageId,
+        CarbonInterface $now,
+    ): string {
+        $assistantMessageId = (string) Str::uuid7();
+
+        $conversation->messages()->create([
+            'id' => $assistantMessageId,
+            ...Conversation::participantAttributes($user),
+            'agent' => AgentRunner::class,
+            'role' => MessageRole::Assistant,
+            'content' => '',
+            'attachments' => [],
+            'tool_calls' => [],
+            'tool_results' => [],
+            'usage' => [],
+            'meta' => History::streamMeta($streamId, History::STREAM_STATUS_PENDING, array_filter([
+                'channel' => $channel,
+                'model' => $model,
+                'user_message_id' => $userMessageId,
+            ], fn (mixed $value): bool => $value !== null)),
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        return $assistantMessageId;
     }
 }

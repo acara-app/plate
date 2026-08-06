@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Http\Controllers\BroadcastChatController;
 use App\Http\Controllers\ChatController;
-use App\Models\AgentApproval;
 use App\Models\AiUsage;
 use App\Models\Conversation;
 use App\Models\ConversationSummary;
@@ -38,7 +37,7 @@ it('renders chat page with correct props when no conversation id provided', func
 
 it('renders chat page with correct props with conversation id', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
     $history = History::factory()->create([
         'conversation_id' => $conversation->id,
         'role' => 'user',
@@ -84,7 +83,7 @@ it('returns 400 for invalid UUID format', function (): void {
 it('prevents access to another users conversation', function (): void {
     $owner = User::factory()->create();
     $intruder = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($owner));
 
     actingAs($intruder)
         ->get(route('chat.create', ['conversationId' => $conversation->id]))
@@ -93,15 +92,14 @@ it('prevents access to another users conversation', function (): void {
 
 it('deletes a conversation history owned by the authenticated user', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
     History::factory()->count(2)->create([
         'conversation_id' => $conversation->id,
-        'user_id' => $user->id,
+        ...Conversation::participantAttributes($user),
     ]);
     ConversationSummary::factory()->create([
         'conversation_id' => $conversation->id,
     ]);
-    AgentApproval::factory()->forConversation($conversation)->create();
     $link = UserChatPlatformLink::factory()->linked($user)->create([
         'conversation_id' => $conversation->id,
     ]);
@@ -119,9 +117,6 @@ it('deletes a conversation history owned by the authenticated user', function ()
     $this->assertDatabaseMissing('conversation_summaries', [
         'conversation_id' => $conversation->id,
     ]);
-    $this->assertDatabaseMissing('agent_approvals', [
-        'conversation_id' => $conversation->id,
-    ]);
 
     expect($link->fresh()->conversation_id)->toBeNull();
 });
@@ -129,10 +124,10 @@ it('deletes a conversation history owned by the authenticated user', function ()
 it('prevents deleting another users conversation history', function (): void {
     $owner = User::factory()->create();
     $intruder = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($owner));
     History::factory()->create([
         'conversation_id' => $conversation->id,
-        'user_id' => $owner->id,
+        ...Conversation::participantAttributes($owner),
     ]);
 
     actingAs($intruder)
@@ -149,7 +144,7 @@ it('prevents deleting another users conversation history', function (): void {
 
 it('validates stream endpoint', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     actingAs($user)
         ->post(route('chat.stream', $conversation->id), [])
@@ -162,7 +157,7 @@ it('accepts valid stream request', function (): void {
     Queue::fake();
 
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     actingAs($user)
         ->post(route('chat.stream', $conversation->id), [
@@ -176,7 +171,7 @@ it('accepts valid stream request', function (): void {
 it('prevents cross-user access on the stream endpoint', function (): void {
     $owner = User::factory()->create();
     $intruder = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($owner));
 
     actingAs($intruder)
         ->post(route('chat.stream', $conversation->id), [
@@ -251,7 +246,7 @@ it('returns null creditWarning when usage is below 80%', function (): void {
 
 it('includes image attachments in message parts when loading conversation', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     $base64Content = base64_encode('fake-image-data');
     $history = History::factory()->create([
@@ -280,7 +275,7 @@ it('includes image attachments in message parts when loading conversation', func
 
 it('pins a conversation owned by the authenticated user', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     actingAs($user)
         ->from(route('chat.index'))
@@ -296,7 +291,7 @@ it('pins a conversation owned by the authenticated user', function (): void {
 
 it('unpins a conversation and refreshes its activity timestamp', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->pinned()->stale(5)->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->pinned()->stale(5)->create(Conversation::participantAttributes($user));
 
     actingAs($user)
         ->from(route('chat.index'))
@@ -316,7 +311,7 @@ it('unpins a conversation and refreshes its activity timestamp', function (): vo
 it('prevents pinning another users conversation', function (): void {
     $owner = User::factory()->create();
     $intruder = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($owner));
 
     actingAs($intruder)
         ->patch(route('chat.pin', ['conversation' => $conversation->id]))
@@ -327,7 +322,7 @@ it('prevents pinning another users conversation', function (): void {
 
 it('keeps a conversation owned by the authenticated user', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     actingAs($user)
         ->from(route('chat.index'))
@@ -343,7 +338,7 @@ it('keeps a conversation owned by the authenticated user', function (): void {
 
 it('unkeeps a conversation and refreshes its activity timestamp', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->kept()->stale(5)->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->kept()->stale(5)->create(Conversation::participantAttributes($user));
 
     actingAs($user)
         ->from(route('chat.index'))
@@ -363,7 +358,7 @@ it('unkeeps a conversation and refreshes its activity timestamp', function (): v
 it('prevents keeping another users conversation', function (): void {
     $owner = User::factory()->create();
     $intruder = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($owner));
 
     actingAs($intruder)
         ->patch(route('chat.keep', ['conversation' => $conversation->id]))

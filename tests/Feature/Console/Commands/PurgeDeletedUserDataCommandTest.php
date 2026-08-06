@@ -65,8 +65,8 @@ it('purges orphaned data for users deleted over 30 days ago', function (): void 
     $this->artisan(PurgeDeletedUserDataCommand::class)
         ->assertSuccessful();
 
-    $this->assertDatabaseMissing('agent_conversations', ['user_id' => $userId]);
-    $this->assertDatabaseMissing('agent_conversation_messages', ['user_id' => $userId]);
+    $this->assertDatabaseMissing('agent_conversations', ['participant_type' => 'user', 'participant_id' => $userId]);
+    $this->assertDatabaseMissing('agent_conversation_messages', ['participant_type' => 'user', 'participant_id' => $userId]);
     $this->assertDatabaseMissing('sessions', ['user_id' => $userId]);
     $this->assertDatabaseMissing('notifications', ['notifiable_id' => $userId, 'notifiable_type' => User::class]);
     $this->assertDatabaseMissing('personal_access_tokens', ['tokenable_id' => $userId, 'tokenable_type' => User::class]);
@@ -91,7 +91,7 @@ it('does not purge data for users deleted less than 30 days ago', function (): v
     $this->artisan(PurgeDeletedUserDataCommand::class)
         ->assertSuccessful();
 
-    $this->assertDatabaseHas('agent_conversations', ['user_id' => $userId]);
+    $this->assertDatabaseHas('agent_conversations', ['participant_type' => 'user', 'participant_id' => $userId]);
     $this->assertDatabaseHas('deleted_users', ['user_id' => $userId]);
 });
 
@@ -113,7 +113,7 @@ it('does not affect other users data', function (): void {
     $this->artisan(PurgeDeletedUserDataCommand::class)
         ->assertSuccessful();
 
-    $this->assertDatabaseHas('agent_conversations', ['user_id' => $otherUser->id]);
+    $this->assertDatabaseHas('agent_conversations', ['participant_type' => 'user', 'participant_id' => $otherUser->id]);
     expect($otherUser->fresh())->not->toBeNull();
 });
 

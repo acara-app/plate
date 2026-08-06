@@ -41,10 +41,10 @@ it('uses agent_conversations table', function (): void {
     expect($conversation->getTable())->toBe('agent_conversations');
 });
 
-it('belongs to a user', function (): void {
+it('belongs to a participant', function (): void {
     $conversation = Conversation::factory()->create();
 
-    expect($conversation->user)->toBeInstanceOf(User::class);
+    expect($conversation->participant)->toBeInstanceOf(User::class);
 });
 
 it('has many messages in chronological order', function (): void {
@@ -95,11 +95,12 @@ it('can create conversation with specific title', function (): void {
     expect($conversation->title)->toBe('Test Conversation Title');
 });
 
-it('can create conversation for specific user', function (): void {
+it('can create conversation for specific participant', function (): void {
     $user = User::factory()->create();
     $conversation = Conversation::factory()->forUser($user)->create();
 
-    expect($conversation->user_id)->toBe($user->id);
+    expect($conversation->participant_type)->toBe('user')
+        ->and($conversation->participant_id)->toBe($user->id);
 });
 
 it('generates UUID on creation', function (): void {
@@ -114,7 +115,7 @@ it('factory creates valid conversation', function (): void {
 
     expect($conversation->exists)->toBeTrue()
         ->and($conversation->title)->toBeString()
-        ->and($conversation->user_id)->toBeInt();
+        ->and($conversation->participant_id)->toBeInt();
 });
 
 it('has many summaries', function (): void {

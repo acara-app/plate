@@ -16,7 +16,8 @@ final class ConversationPolicy
 
     public function view(User $user, Conversation $conversation): bool
     {
-        return $user->id === $conversation->user_id;
+        return $conversation->participant_type === $user->getMorphClass()
+            && $conversation->participant_id === $user->id;
     }
 
     public function create(): bool

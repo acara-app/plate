@@ -15,20 +15,21 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Config;
 
 /**
  * @property string $id UUID primary key
- * @property int $user_id ID of the user who owns this conversation
+ * @property string|null $participant_type Morph alias of the model that owns this conversation
+ * @property int|null $participant_id Key of the model that owns this conversation
  * @property string $title Conversation title/summary
  * @property CarbonInterface|null $pinned_at When set, the conversation is pinned to the top of the list and exempt from temporary-chat pruning
  * @property CarbonInterface|null $kept_at When set, the conversation is permanent and exempt from temporary-chat pruning
  * @property CarbonInterface|null $summarization_dispatched_at
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
- * @property-read User $user
+ * @property-read Model|null $participant
  * @property-read Collection<int, History> $messages
  * @property-read Collection<int, ConversationSummary> $summaries
  */
@@ -43,6 +44,17 @@ final class Conversation extends Model
 
     protected $guarded = [];
 
+    /**
+     * @return array{participant_type: string, participant_id: int}
+     */
+    public static function participantAttributes(User $user): array
+    {
+        return [
+            'participant_type' => $user->getMorphClass(),
+            'participant_id' => $user->id,
+        ];
+    }
+
     public function casts(): array
     {
         return [
@@ -56,11 +68,11 @@ final class Conversation extends Model
     }
 
     /**
-     * @return BelongsTo<User, $this>
+     * @return MorphTo<Model, $this>
      */
-    public function user(): BelongsTo
+    public function participant(): MorphTo
     {
-        return $this->belongsTo(User::class);
+        return $this->morphTo();
     }
 
     /**
@@ -94,6 +106,15 @@ final class Conversation extends Model
         return $this->isPinned() || $this->isKept(); // @codeCoverageIgnore
     }
 
+    public function pausedApprovalTurn(): ?History
+    {
+        return $this->messages()
+            ->whereNotNull('approval_state')
+            ->reorder('id', 'desc')
+            ->get()
+            ->first(fn (History $message): bool => $message->hasPendingApprovals());
+    }
+
     public function hasPendingChatStream(): bool
     {
         $liveAfter = now()->subSeconds(StreamEventStore::TTL_SECONDS);
@@ -102,6 +123,15 @@ final class Conversation extends Model
             fn (History $message): bool => $message->isPendingStreamAssistant()
                 && $message->created_at->isAfter($liveAfter),
         );
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function forUser(Builder $query, User $user): void
+    {
+        $query->whereMorphedTo('participant', $user);
     }
 
     /**

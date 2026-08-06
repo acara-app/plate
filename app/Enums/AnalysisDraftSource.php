@@ -8,4 +8,5 @@ enum AnalysisDraftSource: string
 {
     case PublicSnapToTrack = 'public_snap_to_track';
     case AuthenticatedSnapToTrack = 'authenticated_snap_to_track';
+    case MobileSnapToTrack = 'mobile_snap_to_track';
 }

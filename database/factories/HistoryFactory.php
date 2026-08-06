@@ -27,7 +27,8 @@ final class HistoryFactory extends Factory
         return [
             'id' => (string) Str::uuid7(),
             'conversation_id' => Conversation::factory(),
-            'user_id' => User::factory(),
+            'participant_type' => 'user',
+            'participant_id' => User::factory(),
             'agent' => AgentRunner::class,
             'role' => fake()->randomElement([MessageRole::User, MessageRole::Assistant]),
             'content' => fake()->paragraph(),
@@ -69,14 +70,24 @@ final class HistoryFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'conversation_id' => $conversation->id,
-            'user_id' => $conversation->user_id,
+            'participant_type' => $conversation->participant_type,
+            'participant_id' => $conversation->participant_id,
         ]);
     }
 
     public function forUser(User $user): static
     {
+        return $this->state(fn (array $attributes): array => Conversation::participantAttributes($user));
+    }
+
+    /**
+     * @param  array<string, string|null>  $pending
+     */
+    public function awaitingApproval(array $pending): static
+    {
         return $this->state(fn (array $attributes): array => [
-            'user_id' => $user->id,
+            'role' => MessageRole::Assistant,
+            'approval_state' => ['pending' => $pending],
         ]);
     }
 

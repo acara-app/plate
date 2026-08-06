@@ -3,16 +3,14 @@
 declare(strict_types=1);
 
 use App\Ai\Tools\LogHealthEntry;
-use App\Enums\AgentApprovalStatus;
 use App\Enums\HealthEntrySource;
 use App\Enums\HealthSyncType;
-use App\Models\AgentApproval;
-use App\Models\Conversation;
 use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
+use Laravel\Ai\Approvals\Approval;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
@@ -319,121 +317,95 @@ it('converts weight from pounds to kilograms when unit is provided', function ()
         ->and(round((float) $sample->value, 1))->toBe(80.0);
 });
 
-it('proposes an approval instead of writing a sample in web chat', function (): void {
+it('requires approval before writing a health entry on conversational channels', function (string $channel): void {
     $user = User::factory()->create();
     Auth::login($user);
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
 
-    Context::add('chat.channel', 'web');
-    Context::add('chat.conversation_id', $conversation->id);
+    Context::add('chat.channel', $channel);
 
-    $tool = resolve(LogHealthEntry::class);
-    $result = json_decode($tool->handle(new Request([
+    $approval = resolve(LogHealthEntry::class)->shouldRequestApproval(new Request([
         'log_type' => 'glucose',
         'glucose_value' => 140,
         'glucose_reading_type' => 'fasting',
-    ])), true);
+        'summary' => 'Glucose 140 mg/dL, fasting',
+    ]));
 
-    expect($result)
-        ->toHaveKey('status', 'pending_approval')
-        ->toHaveKey('approval_id')
-        ->and($result['card']['status'])->toBe('pending')
-        ->and($result['card']['summary'])->toContain('Glucose')
-        ->and($result['card']['can_approve'])->toBeTrue()
+    expect($approval)->toBeInstanceOf(Approval::class)
+        ->and($approval->reason)->toBe('Glucose 140 mg/dL, fasting')
         ->and(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(0);
+})->with(['web', 'telegram', 'mobile']);
 
-    $approval = AgentApproval::query()->find($result['approval_id']);
-
-    expect($approval)->not->toBeNull()
-        ->and($approval->status)->toBe(AgentApprovalStatus::Pending)
-        ->and($approval->conversation_id)->toBe($conversation->id)
-        ->and($approval->tool_name)->toBe('log_health_entry');
-});
-
-it('asks for the glucose unit before proposing an approval in web chat', function (): void {
+it('falls back to a formatted summary when the model provides none', function (): void {
     $user = User::factory()->create();
     Auth::login($user);
 
     Context::add('chat.channel', 'web');
 
-    $tool = resolve(LogHealthEntry::class);
-    $result = json_decode($tool->handle(new Request([
+    $approval = resolve(LogHealthEntry::class)->shouldRequestApproval(new Request([
         'log_type' => 'glucose',
-        'glucose_value' => 6.7,
+        'glucose_value' => 140,
         'glucose_reading_type' => 'fasting',
-    ])), true);
+    ]));
 
-    expect($result)->toHaveKey('requires_clarification', true)
-        ->and(AgentApproval::query()->count())->toBe(0)
-        ->and(HealthSyncSample::query()->count())->toBe(0);
+    expect($approval->reason)->toContain('Glucose');
 });
 
-it('writes directly and creates no approval when not in web chat', function (): void {
+it('writes directly without approval outside conversational channels', function (): void {
     $user = User::factory()->create();
     Auth::login($user);
 
     $tool = resolve(LogHealthEntry::class);
-    $result = json_decode($tool->handle(new Request([
+    $request = new Request([
         'log_type' => 'glucose',
         'glucose_value' => 140,
         'glucose_reading_type' => 'fasting',
-    ])), true);
+    ]);
+
+    expect($tool->shouldRequestApproval($request))->toBeNull();
+
+    $result = json_decode($tool->handle($request), true);
 
     expect($result)->toHaveKey('success', true)
-        ->and(AgentApproval::query()->count())->toBe(0)
         ->and(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(1);
 });
 
-it('proposes an approval tagged telegram and surfaces it via context on telegram', function (): void {
+it('asks the model for the glucose unit instead of asking the user to approve', function (): void {
     $user = User::factory()->create();
     Auth::login($user);
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
 
-    Context::add('chat.channel', 'telegram');
-    Context::add('chat.conversation_id', $conversation->id);
+    Context::add('chat.channel', 'web');
 
     $tool = resolve(LogHealthEntry::class);
-    $result = json_decode($tool->handle(new Request([
+    $request = new Request([
         'log_type' => 'glucose',
-        'glucose_value' => 140,
+        'glucose_value' => 6.7,
         'glucose_reading_type' => 'fasting',
-    ])), true);
+    ]);
 
-    expect($result)
-        ->toHaveKey('status', 'pending_approval')
-        ->and(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(0);
+    expect($tool->shouldRequestApproval($request))->toBeNull();
 
-    $approval = AgentApproval::query()->find($result['approval_id']);
+    $result = json_decode($tool->handle($request), true);
 
-    expect($approval->channel)->toBe('telegram')
-        ->and($approval->status)->toBe(AgentApprovalStatus::Pending)
-        ->and($approval->conversation_id)->toBe($conversation->id)
-        ->and(Context::get('chat.created_approvals'))->toContain($approval->id);
+    expect($result)->toHaveKey('requires_clarification', true)
+        ->and(HealthSyncSample::query()->count())->toBe(0);
 });
 
-it('proposes an approval tagged mobile and surfaces it via context on mobile', function (): void {
+it('asks the model for a nutrition estimate instead of asking the user to approve', function (): void {
     $user = User::factory()->create();
     Auth::login($user);
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
 
-    Context::add('chat.channel', 'mobile');
-    Context::add('chat.conversation_id', $conversation->id);
+    Context::add('chat.channel', 'web');
 
     $tool = resolve(LogHealthEntry::class);
-    $result = json_decode($tool->handle(new Request([
-        'log_type' => 'glucose',
-        'glucose_value' => 140,
-        'glucose_reading_type' => 'fasting',
-    ])), true);
+    $request = new Request([
+        'log_type' => 'food',
+        'notes' => 'two pancakes',
+    ]);
 
-    expect($result)
-        ->toHaveKey('status', 'pending_approval')
-        ->and(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(0);
+    expect($tool->shouldRequestApproval($request))->toBeNull();
 
-    $approval = AgentApproval::query()->find($result['approval_id']);
+    $result = json_decode($tool->handle($request), true);
 
-    expect($approval->channel)->toBe('mobile')
-        ->and($approval->status)->toBe(AgentApprovalStatus::Pending)
-        ->and($approval->conversation_id)->toBe($conversation->id)
-        ->and(Context::get('chat.created_approvals'))->toContain($approval->id);
+    expect($result)->toHaveKey('requires_estimate', true)
+        ->and(HealthSyncSample::query()->count())->toBe(0);
 });

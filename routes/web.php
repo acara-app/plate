@@ -104,12 +104,8 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
     Route::get('chat/stream/{conversation}/events', Web\ChatStreamEventsController::class)
         ->name('chat.stream.events');
 
-    Route::get('conversations/{conversation}/approvals/{approval}', [Web\ApprovalController::class, 'show'])
-        ->name('approvals.show');
-    Route::post('conversations/{conversation}/approvals/{approval}/approve', [Web\ApprovalController::class, 'approve'])
-        ->name('approvals.approve');
-    Route::post('conversations/{conversation}/approvals/{approval}/reject', [Web\ApprovalController::class, 'reject'])
-        ->name('approvals.reject');
+    Route::post('conversations/{conversation}/approvals', Web\ApprovalDecisionController::class)
+        ->name('approvals.decide');
 
     Route::post('meal-plans', Web\StoreMealPlanController::class)->name('meal-plans.store');
     Route::get('meal-plans', Web\ShowMealPlansController::class)->name('meal-plans.index');

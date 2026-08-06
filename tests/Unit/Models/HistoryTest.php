@@ -46,10 +46,10 @@ it('belongs to a conversation', function (): void {
         ->and($history->conversation->id)->toBe($conversation->id);
 });
 
-it('belongs to a user', function (): void {
+it('belongs to a participant', function (): void {
     $history = History::factory()->create();
 
-    expect($history->user)->toBeInstanceOf(User::class);
+    expect($history->participant)->toBeInstanceOf(User::class);
 });
 
 it('casts role to MessageRole enum', function (): void {
@@ -110,14 +110,15 @@ it('can create history for specific conversation', function (): void {
     $history = History::factory()->forConversation($conversation)->create();
 
     expect($history->conversation_id)->toBe($conversation->id)
-        ->and($history->user_id)->toBe($conversation->user_id);
+        ->and($history->participant_id)->toBe($conversation->participant_id);
 });
 
-it('can create history for specific user', function (): void {
+it('can create history for specific participant', function (): void {
     $user = User::factory()->create();
     $history = History::factory()->forUser($user)->create();
 
-    expect($history->user_id)->toBe($user->id);
+    expect($history->participant_type)->toBe('user')
+        ->and($history->participant_id)->toBe($user->id);
 });
 
 it('generates UUID id on creation', function (): void {
@@ -134,7 +135,7 @@ it('factory creates valid history', function (): void {
         ->and($history->content)->toBeString()
         ->and($history->agent)->toBeString()
         ->and($history->conversation_id)->toBeString()
-        ->and($history->user_id)->toBeInt();
+        ->and($history->participant_id)->toBeInt();
 });
 
 it('stores content correctly', function (): void {

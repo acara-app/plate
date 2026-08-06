@@ -11,7 +11,10 @@ use App\Ai\ThinkingOptions;
 use App\Enums\ModelName;
 use App\Models\History;
 use App\Models\User;
+use App\Services\Ai\PlateConversationStore;
 use App\Utilities\ConfigHelper;
+use Illuminate\Support\Facades\Context;
+use Laravel\Ai\Approvals\Decisions;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
@@ -47,11 +50,10 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
 
     public function run(AgentRequest $request, User $user): StreamableAgentResponse
     {
-        $modelName = $this->prepare($request, $user);
-        $this->conversationId = $request->conversationId;
-        $this->conversationUser = null;
+        $modelName = $this->prepare($request, $user, appManagedPersistence: true);
 
         return $this
+            ->continue($request->conversationId ?? '', as: $user)
             ->stream(
                 prompt: $request->message,
                 attachments: $request->images,
@@ -60,16 +62,42 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
             );
     }
 
+    public function resume(AgentRequest $request, User $user, Decisions $decisions): StreamableAgentResponse
+    {
+        $modelName = $this->prepare($request, $user, appManagedPersistence: true);
+
+        return $this
+            ->continue($request->conversationId ?? '', as: $user)
+            ->stream(
+                prompt: $decisions,
+                provider: $modelName->labProvider(),
+                model: $modelName->value,
+            );
+    }
+
     // @codeCoverageIgnoreStart
     public function runSync(AgentRequest $request, User $user): AgentResponse
     {
-        $modelName = $this->prepare($request, $user);
+        $modelName = $this->prepare($request, $user, appManagedPersistence: false);
 
         return $this
             ->continue($request->conversationId ?? '', as: $user)
             ->prompt(
                 prompt: $request->message,
                 attachments: $request->images,
+                provider: $modelName->labProvider(),
+                model: $modelName->value,
+            );
+    }
+
+    public function resumeSync(AgentRequest $request, User $user, Decisions $decisions): AgentResponse
+    {
+        $modelName = $this->prepare($request, $user, appManagedPersistence: false);
+
+        return $this
+            ->continue($request->conversationId ?? '', as: $user)
+            ->prompt(
+                prompt: $decisions,
                 provider: $modelName->labProvider(),
                 model: $modelName->value,
             );
@@ -89,7 +117,7 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
         $streamId = $this->currentRequest->streamId;
 
         $messages = History::query()
-            ->select(['id', 'conversation_id', 'agent', 'role', 'content', 'tool_calls', 'tool_results', 'meta'])
+            ->select(['id', 'conversation_id', 'agent', 'role', 'content', 'tool_calls', 'tool_results', 'meta', 'approval_state'])
             ->where('conversation_id', $this->currentRequest->conversationId)
             ->where('agent', self::class)
             ->orderByDesc('id')
@@ -170,6 +198,8 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
 
         if ($toolCalls->isNotEmpty()) {
             // @codeCoverageIgnoreStart
+            $pending = $message->pendingApprovals();
+
             $messages = [
                 new AssistantMessage(
                     $message->content ?: '',
@@ -180,7 +210,9 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
                         resultId: $toolCall['result_id'] ?? null,
                         reasoningId: $toolCall['reasoning_id'] ?? null,
                         reasoningSummary: $toolCall['reasoning_summary'] ?? null,
-                    ))
+                    )),
+                    $pending === [] ? [] : $message->providerContentBlocks(),
+                    $pending === [] ? null : $message->provider(),
                 ),
             ];
 
@@ -203,13 +235,19 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
         return [new AssistantMessage($message->content)];
     }
 
-    private function prepare(AgentRequest $request, User $user): ModelName
+    private function prepare(AgentRequest $request, User $user, bool $appManagedPersistence): ModelName
     {
         $modelName = $request->modelName ?? ModelName::default();
         $this->enforceAiUsageLimit->handle($user, $modelName);
 
         $this->currentRequest = $request;
         $this->user = $user;
+
+        if ($appManagedPersistence) {
+            Context::add(PlateConversationStore::APP_MANAGED, true);
+        } else {
+            Context::forget(PlateConversationStore::APP_MANAGED);
+        }
 
         return $modelName;
     }

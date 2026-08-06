@@ -23,16 +23,15 @@ final class ConversationFactory extends Factory
     {
         return [
             'id' => (string) Str::uuid7(),
-            'user_id' => User::factory(),
+            'participant_type' => 'user',
+            'participant_id' => User::factory(),
             'title' => fake()->sentence(),
         ];
     }
 
     public function forUser(User $user): static
     {
-        return $this->state(fn (array $attributes): array => [
-            'user_id' => $user->id,
-        ]);
+        return $this->state(fn (array $attributes): array => Conversation::participantAttributes($user));
     }
 
     public function withTitle(string $title): static

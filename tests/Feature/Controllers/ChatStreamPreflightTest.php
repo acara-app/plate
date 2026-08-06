@@ -21,7 +21,7 @@ beforeEach(function (): void {
 
 it('returns HTTP 402 with limit metadata when a Free user is over the rolling cap', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
@@ -59,7 +59,7 @@ it('does not block a Free user who is well under the cap', function (): void {
     Queue::fake();
 
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
@@ -81,7 +81,7 @@ it('does not enforce when premium upgrades are disabled, even for users far over
     Config::set('plate.enable_premium_upgrades', false);
 
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     AiUsage::factory()->create([
         'user_id' => $user->id,

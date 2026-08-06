@@ -19,9 +19,13 @@ final readonly class LogReviewedMealAction
         private DispatchAggregateUserUtcDatesAction $dispatchAggregateUserUtcDates,
     ) {}
 
-    public function handle(AnalysisDraft $draft, HealthLogData $data, User $user): string
-    {
-        $sample = DB::transaction(function () use ($draft, $data, $user): HealthSyncSample|string {
+    public function handle(
+        AnalysisDraft $draft,
+        HealthLogData $data,
+        User $user,
+        HealthEntrySource $source = HealthEntrySource::Web,
+    ): string {
+        $sample = DB::transaction(function () use ($draft, $data, $user, $source): HealthSyncSample|string {
             $consumed = AnalysisDraft::query()
                 ->whereKey($draft->id)
                 ->where('user_id', $user->id)
@@ -32,7 +36,7 @@ final readonly class LogReviewedMealAction
                 return $this->previouslyRecordedGroupId($draft, $user);
             }
 
-            $recorded = $this->recordHealthSample->handle($data, $user, HealthEntrySource::Web);
+            $recorded = $this->recordHealthSample->handle($data, $user, $source);
 
             AnalysisDraft::query()
                 ->whereKey($draft->id)

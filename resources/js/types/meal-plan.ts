@@ -3,11 +3,7 @@ export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 export type MealPlanType = 'weekly' | 'monthly' | 'custom';
 
 export type MealPlanGenerationStatus =
-    | 'pending'
-    | 'generating'
-    | 'completed'
-    | 'failed'
-    | 'paused';
+    'pending' | 'generating' | 'completed' | 'failed' | 'paused';
 
 export const GenerationStatus = {
     Pending: 'pending',

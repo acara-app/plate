@@ -10,7 +10,7 @@ covers(ConversationPolicy::class);
 
 it('allows owner to view their conversation', function (): void {
     $user = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $user->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     $policy = new ConversationPolicy;
 
@@ -20,7 +20,7 @@ it('allows owner to view their conversation', function (): void {
 it('denies other users from viewing conversation', function (): void {
     $owner = User::factory()->create();
     $other = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($owner));
 
     $policy = new ConversationPolicy;
 
@@ -39,7 +39,7 @@ it('denies viewAny, update, restore, and forceDelete', function (): void {
 it('allows owner to delete their conversation and denies others', function (): void {
     $owner = User::factory()->create();
     $other = User::factory()->create();
-    $conversation = Conversation::factory()->create(['user_id' => $owner->id]);
+    $conversation = Conversation::factory()->create(Conversation::participantAttributes($owner));
 
     $policy = new ConversationPolicy;
 

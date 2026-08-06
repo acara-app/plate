@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Models\AgentApproval;
 use App\Models\Conversation;
 use App\Models\History;
 use Illuminate\Support\Collection;
@@ -21,25 +20,22 @@ final readonly class BuildConversationMessagesAction
             return [];
         }
 
-        $approvals = $this->loadApprovals($conversation);
-
         return array_values(
             $conversation->messages
                 ->reject(fn (History $message): bool => $message->isPendingStreamAssistant())
                 ->map(fn (History $message): array => [
                     'id' => $message->id,
                     'role' => $message->role->value,
-                    'parts' => $this->buildParts($message, $approvals),
+                    'parts' => $this->buildParts($message),
                 ])
                 ->all()
         );
     }
 
     /**
-     * @param  Collection<string, AgentApproval>  $approvals
      * @return list<array<string, mixed>>
      */
-    private function buildParts(History $message, Collection $approvals): array
+    private function buildParts(History $message): array
     {
         $textPart = ['type' => 'text', 'text' => $message->content];
 
@@ -56,54 +52,45 @@ final readonly class BuildConversationMessagesAction
             ->values()
             ->all();
 
-        return [$textPart, ...$attachmentParts, ...$this->approvalParts($message, $approvals)];
+        return [$textPart, ...$attachmentParts, ...$this->approvalParts($message)];
     }
 
     /**
-     * @return Collection<string, AgentApproval>
-     */
-    private function loadApprovals(Conversation $conversation): Collection
-    {
-        $ids = $conversation->messages
-            ->flatMap(fn (History $message): array => $this->approvalIds($message))
-            ->unique()
-            ->all();
-
-        /** @var Collection<string, AgentApproval> $approvals */
-        $approvals = $ids === []
-            ? collect()
-            : AgentApproval::query()
-                ->whereKey($ids)
-                ->where('user_id', $conversation->user_id)
-                ->get()
-                ->keyBy('id');
-
-        return $approvals;
-    }
-
-    /**
-     * @param  Collection<string, AgentApproval>  $approvals
      * @return list<array<string, mixed>>
      */
-    private function approvalParts(History $message, Collection $approvals): array
+    private function approvalParts(History $message): array
     {
+        if ($message->role !== MessageRole::Assistant) {
+            return [];
+        }
+
+        $requested = $message->requestedApprovals();
+
+        if ($requested === []) {
+            return [];
+        }
+
+        $pending = $message->pendingApprovals();
+        $recorded = $message->recordedApprovalDecisions();
+
+        $toolCalls = collect($message->tool_calls ?? [])->keyBy('id');
+
+        $results = collect($message->tool_results ?? [])->keyBy('id');
+
         $parts = [];
 
-        foreach ($this->approvalIds($message) as $approvalId) {
-            $approval = $approvals->get($approvalId);
-
-            if (! $approval instanceof AgentApproval) {
-                continue; // @codeCoverageIgnore
-            }
-
-            /** @var array<string, mixed> $card */
-            $card = $approval->toCardData()->toArray();
+        foreach ($requested as $toolCallId => $reason) {
+            /** @var array<string, mixed> $toolCall */
+            $toolCall = $toolCalls->get($toolCallId, []);
 
             $parts[] = [
                 'type' => 'data-approval',
                 'data' => [
-                    'approvalId' => $approval->id,
-                    'card' => $card,
+                    'toolCallId' => $toolCallId,
+                    'tool' => $toolCall['name'] ?? '',
+                    'reason' => $reason,
+                    'arguments' => $toolCall['arguments'] ?? [],
+                    'status' => $this->statusFor($toolCallId, $pending, $recorded, $results),
                 ],
             ];
         }
@@ -112,41 +99,22 @@ final readonly class BuildConversationMessagesAction
     }
 
     /**
-     * @return list<string>
+     * @param  array<string, string|null>  $pending
+     * @param  array<string, array{action: string, result?: string|null}>  $recorded
+     * @param  Collection<int|string, array{id: string, name: string, arguments?: array<string, mixed>|null, result?: mixed, result_id?: string|null, denied?: bool}>  $results
      */
-    private function approvalIds(History $message): array
+    private function statusFor(string $toolCallId, array $pending, array $recorded, Collection $results): string
     {
-        if ($message->role !== MessageRole::Assistant) {
-            return [];
+        if (array_key_exists($toolCallId, $pending)) {
+            return array_key_exists($toolCallId, $recorded) ? 'submitted' : 'pending';
         }
 
-        $raw = $message->getRawOriginal('tool_results');
-        $toolResults = is_string($raw) ? json_decode($raw, true) : null;
+        $result = $results->get($toolCallId);
 
-        if (! is_array($toolResults)) {
-            return []; // @codeCoverageIgnore
-        }
-
-        $ids = [];
-
-        foreach ($toolResults as $toolResult) {
-            if (! is_array($toolResult)) {
-                continue; // @codeCoverageIgnore
-            }
-
-            if (($toolResult['name'] ?? null) !== 'log_health_entry') {
-                continue; // @codeCoverageIgnore
-            }
-
-            $result = $toolResult['result'] ?? null;
-            $decoded = is_string($result) ? json_decode($result, true) : null;
-            $approvalId = is_array($decoded) ? ($decoded['approval_id'] ?? null) : null;
-
-            if (is_string($approvalId)) {
-                $ids[] = $approvalId;
-            }
-        }
-
-        return $ids;
+        return match (true) {
+            $result === null => 'abandoned',
+            ($result['denied'] ?? false) === true => 'rejected',
+            default => 'approved',
+        };
     }
 }

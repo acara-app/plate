@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\Approvals\BuildConversationApprovalStates;
 use App\Actions\Billing\BuildCreditWarning;
 use App\Actions\BuildConversationMessagesAction;
 use App\Actions\DeleteConversationHistory;
@@ -35,7 +34,6 @@ final readonly class ChatController
         private BuildConversationMessagesAction $messagesAction,
         private GetOrCreateConversationAction $conversationAction,
         private BuildCreditWarning $buildCreditWarning,
-        private BuildConversationApprovalStates $approvalStates,
         private DeleteConversationHistory $deleteConversationHistory,
         private StartChatStream $startChatStream,
         private PinConversation $pinConversation,
@@ -72,7 +70,6 @@ final readonly class ChatController
             'creditWarning' => $this->buildCreditWarning
                 ->currentState($this->user)
                 ?->toArray(),
-            'approvals' => fn (): array => $this->approvalStates->handle($conversation),
         ]);
     }
 

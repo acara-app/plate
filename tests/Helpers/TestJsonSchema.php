@@ -6,6 +6,7 @@ namespace Tests\Helpers;
 
 use Closure;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\Types\AnyOfType;
 use Illuminate\JsonSchema\Types\ArrayType;
 use Illuminate\JsonSchema\Types\BooleanType;
 use Illuminate\JsonSchema\Types\IntegerType;
@@ -49,5 +50,10 @@ final class TestJsonSchema implements JsonSchema
     public function union(array $types): UnionType
     {
         return new UnionType($types);
+    }
+
+    public function anyOf(Closure|array $schemas): AnyOfType
+    {
+        return new AnyOfType($schemas);
     }
 }
