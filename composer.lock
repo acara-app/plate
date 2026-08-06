@@ -12,30 +12,30 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:acara-app/acara-core.git",
-                "reference": "a0e3611b0984309ad65e7a5cfa19d0dd02f89be9"
+                "reference": "1f4f39b56a96053ffe0e18bfd16d4ce1c028fa7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/acara-app/acara-core/zipball/a0e3611b0984309ad65e7a5cfa19d0dd02f89be9",
-                "reference": "a0e3611b0984309ad65e7a5cfa19d0dd02f89be9",
+                "url": "https://api.github.com/repos/acara-app/acara-core/zipball/1f4f39b56a96053ffe0e18bfd16d4ce1c028fa7d",
+                "reference": "1f4f39b56a96053ffe0e18bfd16d4ce1c028fa7d",
                 "shasum": ""
             },
             "require": {
-                "laravel/ai": "^0.6.8 || ^0.7.0 || ^0.10.0",
-                "laravel/framework": "^13.13",
+                "laravel/ai": "^0.10.2",
+                "laravel/framework": "^13.23",
                 "php": "^8.4 || ^8.5",
-                "spatie/laravel-data": "^4.20",
-                "spatie/laravel-package-tools": "^1.19",
+                "spatie/laravel-data": "^4.23",
+                "spatie/laravel-package-tools": "^1.93",
                 "symfony/yaml": "^7.0 || ^8.0"
             },
             "require-dev": {
-                "larastan/larastan": "^3.0",
-                "laravel/pint": "^1.15",
-                "mockery/mockery": "^1.6",
-                "orchestra/testbench": "^11.0",
-                "pestphp/pest": "^4.4",
-                "pestphp/pest-plugin-arch": "^4.0",
-                "pestphp/pest-plugin-laravel": "^4.1",
+                "larastan/larastan": "^3.10",
+                "laravel/pint": "^1.30",
+                "mockery/mockery": "^1.6.12",
+                "orchestra/testbench": "^11.1",
+                "pestphp/pest": "^5.0.3",
+                "pestphp/pest-plugin-arch": "^5.0",
+                "pestphp/pest-plugin-laravel": "^5.0.1",
                 "phpstan/extension-installer": "^1.4",
                 "phpstan/phpstan-deprecation-rules": "^2.0",
                 "phpstan/phpstan-phpunit": "^2.0"
@@ -86,7 +86,7 @@
                 "source": "https://github.com/acara-app/acara-core/tree/main",
                 "issues": "https://github.com/acara-app/acara-core/issues"
             },
-            "time": "2026-08-06T02:04:22+00:00"
+            "time": "2026-08-06T02:22:52+00:00"
         },
         {
             "name": "aws/aws-crt-php",
