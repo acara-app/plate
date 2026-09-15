@@ -74,7 +74,6 @@ final readonly class BenchmarkHarness
 
                 for ($attempt = 0; $attempt < $repeats; $attempt++) {
                     $group = (string) Str::uuid();
-                    $previousGroup = Context::get('photo_usage_group');
                     Context::add('photo_usage_group', $group);
                     $started = hrtime(true);
                     try {
@@ -89,12 +88,10 @@ final readonly class BenchmarkHarness
                     } finally {
                         $timings[$path->value][] = (hrtime(true) - $started) / 1_000_000;
                         $usage = AiUsage::query()->where('usage_group', $group)->get();
-                        foreach ($usage as $record) {
-                            $costs[$path->value] = ($costs[$path->value] ?? 0.0) + $record->cost;
-                        }
+                        $costs[$path->value] = ($costs[$path->value] ?? 0.0) + $usage->sum(fn (AiUsage $record): float => $record->cost);
 
                         $unmetered[$path->value] = ($unmetered[$path->value] ?? 0) + ($usage->isEmpty() || $usage->sum('prompt_tokens') === 0 ? 1 : 0);
-                        $previousGroup === null ? Context::forget('photo_usage_group') : Context::add('photo_usage_group', $previousGroup);
+                        Context::forget('photo_usage_group');
                     }
 
                     if ($onAnalysis instanceof Closure) {
@@ -124,7 +121,7 @@ final readonly class BenchmarkHarness
         );
 
         return new HarnessReport(
-            analyzerVersion: $model->model.'/p3',
+            analyzerVersion: FoodPhotoAnalyzerAgent::version($model->model),
             referenceLookupEnabled: config()->boolean('plate.food_photo_analyzer.reference_lookup.enabled', false),
             repeats: $repeats,
             skippedMeals: $skippedMeals,

@@ -103,11 +103,7 @@ final class Conversation extends Model
 
     public function isPermanent(): bool
     {
-        if ($this->isPinned()) {
-            return true;
-        }
-        return $this->isKept();
-        // @codeCoverageIgnore
+        return $this->isPinned() || $this->isKept(); // @codeCoverageIgnore
     }
 
     public function pausedApprovalTurn(): ?History

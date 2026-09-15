@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Models\SubscriptionProduct;
-use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Contracts\Billing\OffersSubscriptions;
+use App\Models\SubscriptionProduct;
 use App\Services\Billing\NullPhotoAnalyses;
 
 it('keeps community photo analysis available without Cloud quota tables', function (): void {

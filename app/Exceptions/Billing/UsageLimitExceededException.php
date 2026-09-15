@@ -63,14 +63,13 @@ final class UsageLimitExceededException extends RuntimeException
 
     public function userMessage(): string
     {
-        $window = match ($this->limitType) {
-            'monthly' => 'monthly', 'weekly' => 'weekly', default => 'daily'
-        };
         $resetsIn = $this->formatResetsIn();
 
         if ($this->limitType === 'monthly') {
             return "Your monthly AI allowance is used up. It refills in {$resetsIn}. Photo scans have a separate allowance.";
         }
+
+        $window = $this->limitType === 'weekly' ? 'weekly' : 'daily';
 
         if ($this->tier === SubscriptionTier::Plus) {
             return sprintf(

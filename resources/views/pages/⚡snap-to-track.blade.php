@@ -41,23 +41,32 @@ class extends Component
     #[\Livewire\Attributes\Locked]
     public ?string $analysisRequestId = null;
 
+    #[\Livewire\Attributes\Computed]
     public function photoAllowance(): \App\Data\Billing\PhotoEntitlement
     {
         return resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement(auth()->user(), \App\Data\Billing\PhotoAnalysisContext::guestId(request()));
     }
 
-    public function upgrade(): void
+    private function ensureDraftToken(CreateAnalysisDraftAction $action): ?string
     {
-        if ($this->result !== null && $this->draftToken === null) {
-            $this->draftToken = resolve(CreateAnalysisDraftAction::class)->handle(
-                FoodAnalysisData::from($this->result), AnalysisDraftSource::PublicSnapToTrack, auth()->id(),
-            );
+        if ($this->result === null) {
+            return null;
         }
-        if ($this->draftToken !== null) {
+
+        return $this->draftToken ??= $action->handle(
+            FoodAnalysisData::from($this->result),
+            AnalysisDraftSource::PublicSnapToTrack,
+            auth()->id(),
+        );
+    }
+
+    public function upgrade(CreateAnalysisDraftAction $action): void
+    {
+        if ($this->ensureDraftToken($action) !== null) {
             session()->put('snap_to_track.upgrade_draft', $this->draftToken);
         }
         session()->put('url.intended', route('checkout.subscription', absolute: false));
-        $offer = $this->photoAllowance()->offer;
+        $offer = $this->photoAllowance->offer;
         $this->redirect($offer === null ? route('checkout.subscription') : route('checkout.start', ['product' => $offer->productId]));
     }
 
@@ -76,7 +85,7 @@ class extends Component
     public function analyze(AnalyzeFoodPhotoAction $action): void
     {
         $this->error = null;
-        if ($this->photoAllowance()->exhausted()) {
+        if ($this->photoAllowance->exhausted) {
             $this->error = 'Your photo allowance is used up. Choose a plan below to continue.';
 
             return;
@@ -133,6 +142,7 @@ class extends Component
             ));
 
             $this->result = $analysis->toArray();
+            unset($this->photoAllowance);
         } catch (\App\Exceptions\Billing\PhotoLimitExceeded $e) {
             $this->error = $e->getMessage();
         } catch (ValidationException $e) {
@@ -150,7 +160,7 @@ class extends Component
 
     public function clearPhoto(): void
     {
-        if ($this->photoAllowance()->exhausted()) {
+        if ($this->photoAllowance->exhausted) {
             return;
         }
         $this->deleteTemporaryPhoto(resetUploadChallenge: true);
@@ -161,7 +171,7 @@ class extends Component
 
     public function limitReachedGate(): ?string
     {
-        if ($this->photoAllowance()->exhausted()) {
+        if ($this->photoAllowance->exhausted) {
             return 'daily';
         }
 
@@ -194,11 +204,7 @@ class extends Component
             return;
         }
 
-        $this->draftToken ??= $action->handle(
-            FoodAnalysisData::from($this->result),
-            AnalysisDraftSource::PublicSnapToTrack,
-            auth()->id(),
-        );
+        $this->ensureDraftToken($action);
 
         $reviewUrl = route('snap-to-track.review', ['draft' => $this->draftToken], absolute: false);
 
@@ -297,8 +303,6 @@ class extends Component
 
 <x-slot:jsonLd>
     <x-json-ld.snap-to-track />
-
-
 </x-slot:jsonLd>
 
 @push('turnstile')
@@ -312,7 +316,7 @@ class extends Component
 
     <div class="px-4 py-8 md:py-12">
     @php
-        $photoAllowance = $this->photoAllowance();
+        $photoAllowance = $this->photoAllowance;
     @endphp
     @if ($photoAllowance->enabled)
         <section class="mx-auto max-w-2xl border border-[#D9CFBC] px-6 py-4" aria-label="Photo allowance"

@@ -25,6 +25,9 @@ abstract class SpecialistAgent implements Agent, CanActAsTool, HasTools
 
     abstract public function description(): string;
 
+    /**
+     * @return view-string
+     */
     abstract protected function promptView(): string;
 
     /**

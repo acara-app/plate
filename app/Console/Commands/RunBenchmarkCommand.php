@@ -67,7 +67,7 @@ final class RunBenchmarkCommand extends Command
             $meals->count(),
             $repeats,
             $analyses,
-            $model->model.'/p3',
+            FoodPhotoAnalyzerAgent::version($model->model),
             $estimatedCost,
         ));
 

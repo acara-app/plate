@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Checkout;
 
-use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
-use App\Data\Billing\PhotoAnalysisContext;
+use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Services\StripeServiceContract;
+use App\Data\Billing\PhotoAnalysisContext;
 use App\Models\SubscriptionProduct;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -71,15 +71,19 @@ final readonly class CashierShowSubscriptionController
         $availableProducts = $products->filter($offers->available(...))->map($offers->present(...))->values();
 
         $allowance = resolve(ManagesPhotoAnalyses::class)->entitlement($user, PhotoAnalysisContext::guestId($request));
+        $returningFromCheckout = $request->routeIs('checkout.success');
 
-        if ($request->routeIs('checkout.success') && $allowance->mode === 'premium' && $request->session()->pull('checkout.started')) {
+        if ($returningFromCheckout && $allowance->mode === 'premium' && $request->session()->pull('checkout.started')) {
             Inertia::flash('analytics', ['name' => 'snap_to_track_payment_verified', 'properties' => ['source' => 'checkout']]);
         }
+
+        $premiumNotYetActive = $allowance->enabled ? $allowance->mode !== 'premium' : $currentSubscription === null;
+        $paymentPending = $returningFromCheckout && $request->session()->has('checkout.started') && $premiumNotYetActive;
 
         return Inertia::render('checkout/show-subscription-product', [
             'products' => $availableProducts,
             'isGuest' => $user === null,
-            'paymentPending' => $request->routeIs('checkout.success') && $request->session()->has('checkout.started') && ($allowance->enabled ? $allowance->mode !== 'premium' : $currentSubscription === null),
+            'paymentPending' => $paymentPending,
             'selectedProductId' => $request->session()->get('checkout.selected_product'),
             'photoAllowance' => $allowance->toArray(),
             'upgradeDraft' => session('snap_to_track.upgrade_draft'),

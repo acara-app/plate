@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Data\Billing\PhotoModel;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Data\Billing\PhotoModel;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Spatie\LaravelData\Exceptions\CannotCreateData;

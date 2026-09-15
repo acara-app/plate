@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use Inertia\Testing\AssertableInertia;
 use App\Contracts\Services\StripeServiceContract;
 use App\Http\Controllers\Checkout\CashierShowSubscriptionController;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Inertia\Testing\AssertableInertia;
 use Laravel\Cashier\Subscription;
 
 covers(CashierShowSubscriptionController::class);

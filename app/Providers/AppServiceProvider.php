@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Contracts\Billing\OffersSubscriptions;
-use App\Services\Billing\DefaultSubscriptionOffers;
-use App\Contracts\Billing\ProvidesAiBudget;
-use App\Services\Billing\NullAiBudget;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
-use App\Services\Billing\NullPhotoAnalyses;
+use App\Contracts\Billing\OffersSubscriptions;
+use App\Contracts\Billing\ProvidesAiBudget;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Contracts\Memory\DispatchesMemoryExtraction;
 use App\Contracts\Memory\ManagesMemoryContext;
@@ -20,6 +17,9 @@ use App\Contracts\Skills\LoadsSkills;
 use App\Listeners\TrackAiUsage;
 use App\Models\User;
 use App\Services\Ai\PlateConversationStore;
+use App\Services\Billing\DefaultSubscriptionOffers;
+use App\Services\Billing\NullAiBudget;
+use App\Services\Billing\NullPhotoAnalyses;
 use App\Services\Billing\SubscriptionTierResolver;
 use App\Services\IndexNowService;
 use App\Services\Memory\NullConversationHistoryPuller;

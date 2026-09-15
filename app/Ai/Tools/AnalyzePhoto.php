@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use Illuminate\Support\Str;
-use App\Data\Billing\PhotoAnalysisContext;
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Ai\Attributes\AiToolSensitivity;
+use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\DataSensitivity;
 use App\Models\User;
 use App\Utilities\LanguageUtil;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Tools\Request;

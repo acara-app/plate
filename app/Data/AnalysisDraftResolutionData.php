@@ -16,7 +16,7 @@ final readonly class AnalysisDraftResolutionData
 
     public function analysis(): ?FoodAnalysisData
     {
-        if (!$this->draft instanceof AnalysisDraft) {
+        if ($this->draft === null) {
             return null;
         }
 

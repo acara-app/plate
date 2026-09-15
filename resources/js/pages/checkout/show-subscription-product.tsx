@@ -496,9 +496,7 @@ export default function CashierSubscription({
                                                   photoAllowance?.enabled ? (
                                                     photoAllowance.mode ===
                                                         'trial' &&
-                                                    photoAllowance.used <
-                                                        (photoAllowance.limit ??
-                                                            0) ? (
+                                                    !photoAllowance.exhausted ? (
                                                         <Button
                                                             asChild
                                                             variant="outline"
@@ -585,11 +583,9 @@ export default function CashierSubscription({
                                                                 'yearly' &&
                                                                 !product.yearly_stripe_price_id)) && (
                                                             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                                Subscriptions
-                                                                are temporarily
-                                                                unavailable.
-                                                                Please try again
-                                                                later.
+                                                                {t(
+                                                                    'checkout_subscription.stripe_price_required',
+                                                                )}
                                                             </p>
                                                         )}
                                                     </>

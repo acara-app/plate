@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Models\User;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\Billing\PhotoAnalysisContext;
@@ -12,6 +11,7 @@ use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
 use App\Data\FoodItemData;
 use App\Enums\FoodValueProvenance;
+use App\Models\User;
 use App\Services\Nutrition\ReferenceFoodMatcher;
 use App\Services\Nutrition\ReferenceMatch;
 use Illuminate\Support\Facades\Log;

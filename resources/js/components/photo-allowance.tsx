@@ -8,6 +8,8 @@ export interface PhotoAllowance {
     enabled: boolean;
     limit: number | null;
     used: number;
+    remaining: number | null;
+    exhausted: boolean;
     resetsAt: string | null;
     mode: string;
     canUpgrade: boolean;
@@ -30,20 +32,17 @@ export function PhotoAllowanceCard({
         if (allowance?.enabled && allowance.canUpgrade)
             window.umami?.track('snap_to_track_offer_viewed', {
                 mode: allowance.mode,
-                exhausted:
-                    allowance.limit !== null &&
-                    allowance.used >= allowance.limit,
+                exhausted: allowance.exhausted,
             });
     }, [
         allowance?.enabled,
         allowance?.canUpgrade,
         allowance?.mode,
-        allowance?.used,
-        allowance?.limit,
+        allowance?.exhausted,
     ]);
     if (!allowance?.enabled || allowance.limit === null) return null;
 
-    const remaining = Math.max(0, allowance.limit - allowance.used);
+    const remaining = allowance.remaining ?? 0;
     const trial = allowance.mode === 'trial';
     const offer = allowance.offer;
 

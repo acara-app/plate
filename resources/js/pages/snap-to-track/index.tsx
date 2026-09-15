@@ -114,11 +114,7 @@ export default function SnapToTrackIndex({
                     </Card>
                 )}
 
-                {!(
-                    photoAllowance?.enabled &&
-                    photoAllowance.limit !== null &&
-                    photoAllowance.used >= photoAllowance.limit
-                ) && (
+                {!(photoAllowance?.enabled && photoAllowance.exhausted) && (
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
