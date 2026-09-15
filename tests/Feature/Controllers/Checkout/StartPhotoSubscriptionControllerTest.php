@@ -2,11 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Contracts\Billing\ManagesPhotoAnalyses;
-use App\Data\Billing\PhotoAnalysisContext;
-use App\Data\Billing\PhotoEntitlement;
-use App\Data\Billing\PhotoModel;
-use App\Data\FoodAnalysisData;
+use App\Contracts\Billing\OffersSubscriptions;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 
@@ -24,31 +20,22 @@ it('preserves the chosen offer through account creation without starting payment
         ->assertSessionHas('snap_to_track.upgrade_draft', 'saved-result');
 })->with([false, true]);
 
-it('opens the photo plan for purchase once the scan quota is live', function (): void {
+it('refuses to start checkout for a plan that is not on offer', function (): void {
     $snapPro = SubscriptionProduct::query()->where('name', 'Snap Pro')->sole();
     $snapPro->update(['stripe_price_id' => 'price_snap_pro_monthly']);
 
-    $this->get(route('checkout.start', $snapPro))->assertNotFound();
-
-    $this->app->instance(ManagesPhotoAnalyses::class, new readonly class implements ManagesPhotoAnalyses
+    $this->app->instance(OffersSubscriptions::class, new readonly class implements OffersSubscriptions
     {
-        public function enabled(): bool
+        public function present(SubscriptionProduct $product): SubscriptionProduct
         {
-            return true;
+            return $product;
         }
 
-        public function entitlement(?User $user, ?string $guestId): PhotoEntitlement
+        public function available(SubscriptionProduct $product): bool
         {
-            return new PhotoEntitlement(enabled: true, limit: 100);
-        }
-
-        public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
-        {
-            return $analyze(PhotoModel::standard());
+            return false;
         }
     });
 
-    $this->get(route('checkout.start', $snapPro))
-        ->assertRedirect(route('register'))
-        ->assertSessionHas('checkout.selected_product', $snapPro->id);
+    $this->get(route('checkout.start', $snapPro))->assertNotFound();
 });
