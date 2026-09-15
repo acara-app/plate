@@ -156,7 +156,7 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
 
         // @codeCoverageIgnoreEnd
 
-        return $this->agentBuilder->buildTools($this->currentRequest);
+        return $this->agentBuilder->buildTools($this->currentRequest, $this->user);
     }
 
     /**

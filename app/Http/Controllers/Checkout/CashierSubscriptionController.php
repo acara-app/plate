@@ -24,6 +24,9 @@ final readonly class CashierSubscriptionController
         /** @var SubscriptionProduct $product */
         $product = SubscriptionProduct::query()->findOrFail($data['product_id']);
 
+        abort_unless(resolve(\App\Contracts\Billing\OffersSubscriptions::class)->available($product), 422, 'This plan is no longer offered.');
+        abort_if($data['billing_interval'] === 'yearly' && ! $product->yearly_stripe_lookup_key, 422, 'This plan is monthly only.');
+
         try {
             $user = $request->user();
 

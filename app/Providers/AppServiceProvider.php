@@ -43,6 +43,9 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->bindIf(\App\Contracts\Billing\OffersSubscriptions::class, \App\Services\Billing\DefaultSubscriptionOffers::class);
+        $this->app->bindIf(\App\Contracts\Billing\ProvidesAiBudget::class, \App\Services\Billing\NullAiBudget::class);
+        $this->app->bindIf(\App\Contracts\Billing\ManagesPhotoAnalyses::class, \App\Services\Billing\NullPhotoAnalyses::class);
         $this->app->bind(StripeServiceContract::class, StripeService::class);
         $this->app->bind(IndexNowServiceContract::class, IndexNowService::class);
         $this->app->bind(ResolvesUserTier::class, SubscriptionTierResolver::class);

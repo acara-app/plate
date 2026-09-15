@@ -70,8 +70,13 @@ final readonly class CashierShowSubscriptionController
             $incompletePaymentUrl = $this->stripeService->getIncompletePaymentUrl($currentSubscription);
         }
 
+        $offers = resolve(\App\Contracts\Billing\OffersSubscriptions::class);
+        $availableProducts = $products->filter($offers->available(...))->map($offers->present(...))->values();
+
         return Inertia::render('checkout/show-subscription-product', [
-            'products' => $products,
+            'products' => $availableProducts,
+            'photoAllowance' => resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement($user, \App\Data\Billing\PhotoAnalysisContext::guestId($request))->toArray(),
+            'upgradeDraft' => session('snap_to_track.upgrade_draft'),
             'currentSubscription' => $currentSubscription ? [
                 'id' => $currentSubscription->id,
                 'type' => $currentSubscription->type,

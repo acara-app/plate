@@ -38,9 +38,32 @@ class extends Component
 
     public ?string $draftToken = null;
 
+    #[\Livewire\Attributes\Locked]
+    public ?string $analysisRequestId = null;
+
+    public function photoAllowance(): \App\Data\Billing\PhotoEntitlement
+    {
+        return resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement(auth()->user(), \App\Data\Billing\PhotoAnalysisContext::guestId(request()));
+    }
+
+    public function upgrade(): void
+    {
+        if ($this->result !== null && $this->draftToken === null) {
+            $this->draftToken = resolve(CreateAnalysisDraftAction::class)->handle(
+                FoodAnalysisData::from($this->result), AnalysisDraftSource::PublicSnapToTrack, auth()->id(),
+            );
+        }
+        if ($this->draftToken !== null) {
+            session()->put('snap_to_track.upgrade_draft', $this->draftToken);
+        }
+        session()->put('url.intended', route('checkout.subscription', absolute: false));
+        $this->redirect(route(auth()->check() ? 'checkout.subscription' : 'register'));
+    }
+
     public function _startUpload($name, $fileInfo, $isMultiple): void
     {
         if ($name === 'photo') {
+            $this->analysisRequestId = (string) \Illuminate\Support\Str::uuid();
             $this->validateUploadChallenge();
             $this->hitUploadRateLimit();
             $this->rememberVerifiedUploadChallenge();
@@ -96,9 +119,15 @@ class extends Component
                 $mimeType = 'image/jpeg'; // @codeCoverageIgnore
             }
 
-            $analysis = $action->handle($base64, $mimeType);
+            $this->analysisRequestId ??= (string) \Illuminate\Support\Str::uuid();
+            $analysis = $action->handle($base64, $mimeType, context: new \App\Data\Billing\PhotoAnalysisContext(
+                auth()->user(), \App\Data\Billing\PhotoAnalysisContext::guestId(request()), $this->analysisRequestId,
+                'public_snap_to_track', hash('sha256', $base64),
+            ));
 
             $this->result = $analysis->toArray();
+        } catch (\App\Exceptions\Billing\PhotoLimitExceeded $e) {
+            $this->error = $e->getMessage();
         } catch (ValidationException $e) {
             $this->deleteTemporaryPhoto(resetUploadChallenge: true);
 
@@ -122,6 +151,10 @@ class extends Component
 
     public function limitReachedGate(): ?string
     {
+        if ($this->photoAllowance()->exhausted()) {
+            return 'daily';
+        }
+
         if (RateLimiter::tooManyAttempts($this->uploadRateLimitKey(), 5)) {
             return 'upload';
         }
@@ -254,6 +287,8 @@ class extends Component
 
 <x-slot:jsonLd>
     <x-json-ld.snap-to-track />
+
+
 </x-slot:jsonLd>
 
 @push('turnstile')
@@ -266,6 +301,18 @@ class extends Component
     <x-tools-header theme="cream" />
 
     <div class="px-4 py-8 md:py-12">
+    @php
+        $photoAllowance = $this->photoAllowance();
+    @endphp
+    @if ($photoAllowance->enabled)
+        <section class="mx-auto max-w-2xl px-6 py-4" aria-label="Photo allowance">
+            <p>{{ $photoAllowance->remaining() }} of {{ $photoAllowance->limit }} {{ $photoAllowance->mode === 'premium' ? 'premium scans this billing month' : 'free scans today' }} remaining.</p>
+            <p>Resets {{ $photoAllowance->resetsAt }}.</p>
+            @if ($photoAllowance->canUpgrade)
+                <button type="button" wire:click="upgrade" data-umami-event="snap_to_track_upgrade_click" class="mt-2 underline">100 premium scans per month — $9</button>
+            @endif
+        </section>
+    @endif
         {{-- Editorial breadcrumbs --}}
         <nav aria-label="Breadcrumb" class="mx-auto flex max-w-7xl items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[#6E665C] lg:px-8">
             <a href="/" aria-label="Home" class="inline-flex items-center transition hover:text-[#1A1814]">
@@ -300,7 +347,7 @@ class extends Component
                 @php
                     $limitGate = $this->limitReachedGate();
                 @endphp
-                @if ($limitGate !== null)
+                @if ($limitGate !== null && ! $photoAllowance->enabled)
                     {{-- Limit recovery (dark inverse) --}}
                     <article
                         x-data

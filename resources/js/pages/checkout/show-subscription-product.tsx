@@ -1,3 +1,8 @@
+import {
+    PhotoAllowanceCard,
+    type PhotoAllowance,
+} from '@/components/photo-allowance';
+import ShowSnapToTrackReviewController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackReviewController';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { support } from '@/routes';
@@ -46,6 +51,8 @@ interface CashierSubscription {
 }
 
 interface Props {
+    photoAllowance?: PhotoAllowance;
+    upgradeDraft?: string | null;
     products: BillingProduct[];
     currentSubscription: CashierSubscription | null;
     billingPortalUrl: string;
@@ -62,6 +69,8 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
 
 export default function CashierSubscription({
     products,
+    photoAllowance,
+    upgradeDraft,
     currentSubscription,
     billingPortalUrl,
     hasIncompletePayment,
@@ -246,6 +255,19 @@ export default function CashierSubscription({
                         </div>
                     )}
 
+                    <PhotoAllowanceCard allowance={photoAllowance} />
+                    {upgradeDraft && (
+                        <Link
+                            className="underline"
+                            href={
+                                ShowSnapToTrackReviewController({
+                                    draft: upgradeDraft,
+                                }).url
+                            }
+                        >
+                            Return to your saved analysis
+                        </Link>
+                    )}
                     {/* Available Plans */}
                     <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
                         <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-800 dark:bg-gray-950">
@@ -259,41 +281,47 @@ export default function CashierSubscription({
                                 </h2>
 
                                 {/* Billing Interval Toggle */}
-                                <div className="flex items-center space-x-1 rounded-lg bg-gray-200 p-1 dark:bg-gray-800">
-                                    <button
-                                        onClick={() =>
-                                            setBillingInterval('monthly')
-                                        }
-                                        className={clsx(
-                                            'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                                            billingInterval === 'monthly'
-                                                ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
-                                                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
-                                        )}
-                                    >
-                                        {t('checkout_subscription.monthly')}
-                                    </button>
-                                    <button
-                                        onClick={() =>
-                                            setBillingInterval('yearly')
-                                        }
-                                        className={clsx(
-                                            'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                                            billingInterval === 'yearly'
-                                                ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
-                                                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
-                                        )}
-                                    >
-                                        {t('checkout_subscription.yearly')}
-                                        <span className="ml-1 text-xs font-semibold text-green-600 dark:text-green-400">
-                                            {t('checkout_subscription.save')}{' '}
-                                            {products[0]
-                                                ?.yearly_savings_percentage ||
-                                                17}
-                                            %
-                                        </span>
-                                    </button>
-                                </div>
+                                {products.some(
+                                    (product) => product.yearly_price,
+                                ) && (
+                                    <div className="flex items-center space-x-1 rounded-lg bg-gray-200 p-1 dark:bg-gray-800">
+                                        <button
+                                            onClick={() =>
+                                                setBillingInterval('monthly')
+                                            }
+                                            className={clsx(
+                                                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                                                billingInterval === 'monthly'
+                                                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
+                                                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
+                                            )}
+                                        >
+                                            {t('checkout_subscription.monthly')}
+                                        </button>
+                                        <button
+                                            onClick={() =>
+                                                setBillingInterval('yearly')
+                                            }
+                                            className={clsx(
+                                                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                                                billingInterval === 'yearly'
+                                                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
+                                                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
+                                            )}
+                                        >
+                                            {t('checkout_subscription.yearly')}
+                                            <span className="ml-1 text-xs font-semibold text-green-600 dark:text-green-400">
+                                                {t(
+                                                    'checkout_subscription.save',
+                                                )}{' '}
+                                                {products[0]
+                                                    ?.yearly_savings_percentage ||
+                                                    17}
+                                                %
+                                            </span>
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="px-6 py-6">

@@ -11,8 +11,6 @@ final class SubscriptionProductSeeder extends Seeder
 {
     public function run(): void
     {
-        SubscriptionProduct::query()->whereIn('name', ['Personal', 'Basic', 'Plus'])->delete();
-
         $products = [
             [
                 'name' => 'Free',
@@ -80,7 +78,7 @@ final class SubscriptionProductSeeder extends Seeder
         ];
 
         foreach ($products as $product) {
-            SubscriptionProduct::query()->updateOrCreate(
+            SubscriptionProduct::query()->firstOrCreate(
                 ['name' => $product['name']],
                 $product,
             );

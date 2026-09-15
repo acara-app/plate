@@ -9,6 +9,7 @@ use App\Data\Benchmark\CalibrationBin;
 use App\Data\Benchmark\HarnessReport;
 use App\Data\Benchmark\PathDelta;
 use App\Data\Benchmark\PathMetrics;
+use App\Data\Billing\PhotoModel;
 use App\Models\BenchmarkMeal;
 use App\Models\BenchmarkRun;
 use App\Services\Benchmark\BenchmarkHarness;
@@ -21,7 +22,7 @@ use Illuminate\Console\Command;
 use function Laravel\Prompts\confirm;
 
 #[Description('Run the golden-plate validation benchmark through the production analyzer — raw model and reference-enriched paths side by side.')]
-#[Signature('benchmark:run {--smoke : Analyze only the smoke subset (first 12 meals by code)} {--repeats=5 : Analyses per meal per path} {--force : Skip the cost confirmation}')]
+#[Signature('benchmark:run {--smoke : Analyze only the smoke subset (first 12 meals by code)} {--repeats=5 : Analyses per meal per path} {--force : Skip the cost confirmation} {--provider=gemini : AI provider} {--model= : Pinned vision model} {--max-tokens=35000 : Output token ceiling}')]
 final class RunBenchmarkCommand extends Command
 {
     private const int SMOKE_LIMIT = 12;
@@ -35,6 +36,12 @@ final class RunBenchmarkCommand extends Command
 
     public function handle(): int
     {
+        $model = new PhotoModel((string) $this->option('provider'), $this->option('model') ?: FoodPhotoAnalyzerAgent::pinnedModel(), max(1, (int) $this->option('max-tokens')));
+        if (! array_key_exists($model->model, config()->array('plate.model_pricing.models'))) {
+            $this->error('Add verified pricing for this exact model before benchmarking.');
+
+            return self::FAILURE;
+        }
         $repeats = max(1, (int) $this->option('repeats'));
 
         $query = BenchmarkMeal::query()->with('items')->orderBy('code');
@@ -52,14 +59,14 @@ final class RunBenchmarkCommand extends Command
         }
 
         $analyses = $meals->count() * $repeats * 2;
-        $estimatedCost = $this->estimateCost($analyses);
+        $estimatedCost = $this->estimateCost($analyses, $model);
 
         $this->info(sprintf(
             'Benchmarking %d meals × %d repeats × 2 paths = %d analyses on %s (~$%.2f estimated).',
             $meals->count(),
             $repeats,
             $analyses,
-            FoodPhotoAnalyzerAgent::version(),
+            $model->model.'/p3',
             $estimatedCost,
         ));
 
@@ -72,7 +79,7 @@ final class RunBenchmarkCommand extends Command
         $bar = $this->output->createProgressBar($analyses);
         $report = $this->harness->run($meals, $repeats, function () use ($bar): void {
             $bar->advance();
-        });
+        }, $model);
         $bar->finish();
         $this->newLine(2);
 
@@ -162,6 +169,10 @@ final class RunBenchmarkCommand extends Command
 
         $this->table(['Metric', 'Value'], [
             ['Meals / runs / failed runs', sprintf('%d / %d / %d', $metrics->mealCount, $metrics->runCount, $pathMetrics->failedRuns)],
+            ['Success rate (%)', $this->formatValue($pathMetrics->successRate() * 100)],
+            ['Cost per 100 successful scans ($)', $this->formatValue($pathMetrics->costPerHundred(), 4)],
+            ['Unmetered attempts (must be 0 for approval)', $pathMetrics->unmeteredRuns],
+            ['p95 latency (ms)', $this->formatValue($pathMetrics->p95LatencyMs)],
             ['Carb MAE (g)', $this->formatValue($metrics->carbs->mae)],
             ['Carb MAPE (%)', $this->formatValue($metrics->carbs->mape)],
             ['Energy MAPE (%)', $this->formatValue($metrics->calories->mape)],
@@ -195,9 +206,9 @@ final class RunBenchmarkCommand extends Command
         );
     }
 
-    private function estimateCost(int $analyses): float
+    private function estimateCost(int $analyses, PhotoModel $model): float
     {
-        $pricing = ModelPricing::forModel(FoodPhotoAnalyzerAgent::pinnedModel());
+        $pricing = ModelPricing::forModel($model->model);
 
         /** @var array{input: int, output: int} $budget */
         $budget = config()->array('plate.ai_usage_preflight.token_budget', ['input' => 2_000, 'output' => 1_000]);

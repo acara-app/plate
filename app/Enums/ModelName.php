@@ -122,7 +122,7 @@ enum ModelName: string
     }
 
     /**
-     * @return array{input: float, output: float, reasoning: float, cache_read: float}
+     * @return array{input: float, output: float, reasoning: float, cache_read: float, cache_write?: float}
      */
     public function getPricing(): array
     {

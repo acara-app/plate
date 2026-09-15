@@ -1,3 +1,7 @@
+import {
+    PhotoAllowanceCard,
+    type PhotoAllowance,
+} from '@/components/photo-allowance';
 import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackController';
 import StoreSnapToTrackMealController from '@/actions/App/Http/Controllers/SnapToTrack/StoreSnapToTrackMealController';
 import InputError from '@/components/input-error';
@@ -52,6 +56,7 @@ type ReviewItem = {
 type MacroField = 'calories' | 'protein' | 'carbs' | 'fat';
 
 interface SnapToTrackReviewProps {
+    photoAllowance?: PhotoAllowance;
     state: 'restored' | 'unavailable';
     reason: string | null;
     analysis: Analysis | null;
@@ -79,6 +84,7 @@ export default function SnapToTrackReview({
     reason,
     analysis,
     draftToken,
+    photoAllowance,
 }: SnapToTrackReviewProps) {
     const { t } = useTranslation('common');
 
@@ -176,6 +182,7 @@ export default function SnapToTrackReview({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('snap_to_track.review.heading')} />
             <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4">
+                <PhotoAllowanceCard allowance={photoAllowance} />
                 <div>
                     <h1 className="text-2xl font-semibold">
                         {t('snap_to_track.review.heading')}

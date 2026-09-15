@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string $name
  * @property-read float $price
  * @property-read string|null $description
+ * @property-read bool $purchasable
  * @property-read bool $popular
  * @property-read string|null $stripe_price_id
  * @property-read string|null $stripe_lookup_key
@@ -42,6 +43,8 @@ final class SubscriptionProduct extends Model
 
     protected $guarded = [];
 
+    protected $attributes = ['purchasable' => true];
+
     public function getStripePriceId(string $interval = 'month'): ?string
     {
         return $interval === 'year' ? $this->yearly_stripe_price_id : $this->stripe_price_id;
@@ -63,6 +66,7 @@ final class SubscriptionProduct extends Model
             'price' => 'float',
             'description' => 'string',
             'popular' => 'boolean',
+            'purchasable' => 'boolean',
             'stripe_price_id' => 'string',
             'stripe_lookup_key' => 'string',
             'billing_interval' => 'string',

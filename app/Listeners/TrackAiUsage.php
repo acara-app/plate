@@ -8,7 +8,7 @@ use App\Models\AiUsage;
 use App\Models\User;
 use App\Services\AiUsageService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Events\AgentPrompted;
 use ReflectionClass;
 use Throwable;
@@ -23,13 +23,6 @@ final readonly class TrackAiUsage
     {
         $invocationId = $event->invocationId;
 
-        $cached = Cache::get('ai_usage_'.$invocationId);
-        if ($cached) {
-            return;
-        }
-
-        Cache::put('ai_usage_'.$invocationId, true, now()->addMinutes(5));
-
         $response = $event->response;
 
         $usage = $response->usage;
@@ -38,7 +31,7 @@ final readonly class TrackAiUsage
         $model = $meta->model ?? 'unknown';
         $provider = $meta->provider ?? 'unknown';
 
-        $user = $this->request->user() ?? $this->getUserFromAgent($event->prompt->agent);
+        $user = $this->getUserFromAgent($event->prompt->agent) ?? $this->request->user();
 
         $agentClass = $event->prompt->agent::class;
 
@@ -46,12 +39,14 @@ final readonly class TrackAiUsage
             'prompt_tokens' => $usage->promptTokens,
             'completion_tokens' => $usage->completionTokens,
             'cache_read_input_tokens' => $usage->cacheReadInputTokens,
+            'cache_write_input_tokens' => $usage->cacheWriteInputTokens,
             'reasoning_tokens' => $usage->reasoningTokens,
         ];
 
         $cost = new AiUsageService()->calculateCost($model, $usageArray);
 
-        AiUsage::query()->create([
+        AiUsage::query()->firstOrCreate(['invocation_id' => $invocationId], [
+            'usage_group' => Context::get('photo_usage_group'),
             'user_id' => $user?->id,
             'agent' => $agentClass,
             'model' => $model,
@@ -59,6 +54,7 @@ final readonly class TrackAiUsage
             'prompt_tokens' => $usage->promptTokens,
             'completion_tokens' => $usage->completionTokens,
             'cache_read_input_tokens' => $usage->cacheReadInputTokens,
+            'cache_write_input_tokens' => $usage->cacheWriteInputTokens,
             'reasoning_tokens' => $usage->reasoningTokens,
             'cost' => $cost,
         ]);

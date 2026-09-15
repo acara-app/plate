@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Data\Billing\PhotoAnalysisContext;
+use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
 use App\Data\FoodItemData;
 use App\Enums\FoodValueProvenance;
@@ -21,13 +24,25 @@ final readonly class AnalyzeFoodPhotoAction
         private ReferenceFoodMatcher $matcher,
     ) {}
 
-    public function handle(string $imageBase64, string $mimeType, ?string $language = null, ?string $languageCode = null): FoodAnalysisData
+    public function handle(string $imageBase64, string $mimeType, ?string $language = null, ?string $languageCode = null, ?PhotoAnalysisContext $context = null): FoodAnalysisData
     {
+        $context ??= PhotoAnalysisContext::fromRequest(request(), 'photo_tool', $imageBase64);
+
+        return resolve(ManagesPhotoAnalyses::class)->analyze(
+            $context,
+            fn (PhotoModel $model): FoodAnalysisData => $this->analyzeUsingModel($imageBase64, $mimeType, $model, $language, $languageCode, $context->user),
+        );
+    }
+
+    public function analyzeUsingModel(string $imageBase64, string $mimeType, PhotoModel $model, ?string $language = null, ?string $languageCode = null, ?\App\Models\User $user = null): FoodAnalysisData
+    {
+        $agent = $this->agent->usingModel($model, $user);
+
         if ($language !== null && $languageCode !== null) {
-            $this->agent->withLanguage($language, $languageCode);
+            $agent->withLanguage($language, $languageCode);
         }
 
-        $analysis = $this->agent->analyze($imageBase64, $mimeType);
+        $analysis = $agent->analyze($imageBase64, $mimeType);
 
         if (! $this->lookupEnabled()) {
             return $analysis;

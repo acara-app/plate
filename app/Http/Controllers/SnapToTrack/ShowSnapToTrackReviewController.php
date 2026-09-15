@@ -28,8 +28,10 @@ final readonly class ShowSnapToTrackReviewController
         }
 
         $this->flashRestoredAnalytics($resolution);
+        session()->put('snap_to_track.upgrade_draft', $draft);
 
         return Inertia::render('snap-to-track/review', [
+            'photoAllowance' => resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement($this->currentUser, \App\Data\Billing\PhotoAnalysisContext::guestId(request()))->toArray(),
             'state' => 'restored',
             'reason' => null,
             'analysis' => $resolution->analysis(),

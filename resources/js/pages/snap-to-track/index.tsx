@@ -1,3 +1,7 @@
+import {
+    PhotoAllowanceCard,
+    type PhotoAllowance,
+} from '@/components/photo-allowance';
 import ListHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/ListHealthEntryController';
 import AnalyzeSnapToTrackPhotoController from '@/actions/App/Http/Controllers/SnapToTrack/AnalyzeSnapToTrackPhotoController';
 import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackController';
@@ -30,6 +34,8 @@ type CreditLimit = {
 };
 
 interface SnapToTrackIndexProps {
+    photoAllowance?: PhotoAllowance;
+    analysisRequestId: string;
     savedGroupId: string | null;
     creditLimit: CreditLimit | null;
 }
@@ -37,6 +43,8 @@ interface SnapToTrackIndexProps {
 export default function SnapToTrackIndex({
     savedGroupId,
     creditLimit,
+    photoAllowance,
+    analysisRequestId,
 }: SnapToTrackIndexProps) {
     const { t } = useTranslation('common');
 
@@ -51,6 +59,7 @@ export default function SnapToTrackIndex({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('snap_to_track.title')} />
             <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4">
+                <PhotoAllowanceCard allowance={photoAllowance} />
                 {savedGroupId !== null && (
                     <Card>
                         <CardHeader>
@@ -129,6 +138,11 @@ export default function SnapToTrackIndex({
                                                 'snap_to_track.index.upload_label',
                                             )}
                                         </Label>
+                                        <input
+                                            type="hidden"
+                                            name="analysis_request_id"
+                                            value={analysisRequestId}
+                                        />
                                         <Input
                                             id="snap-photo"
                                             name="photo"
