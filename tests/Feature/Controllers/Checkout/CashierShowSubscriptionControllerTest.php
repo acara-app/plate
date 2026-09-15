@@ -2,12 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Services\StripeServiceContract;
-use App\Data\Billing\PhotoAnalysisContext;
-use App\Data\Billing\PhotoEntitlement;
-use App\Data\Billing\PhotoModel;
-use App\Data\FoodAnalysisData;
 use App\Http\Controllers\Checkout\CashierShowSubscriptionController;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
@@ -798,27 +794,21 @@ it('keeps the photo plan out of the pricing grid until the scan quota is enforce
                 ->doesntContain('Snap Pro')));
 });
 
-it('offers the photo plan beside the credit plans once the scan quota is live', function (): void {
-    $this->app->instance(ManagesPhotoAnalyses::class, new readonly class implements ManagesPhotoAnalyses
+it('offers the photo plan beside the credit plans once it is purchasable', function (): void {
+    $this->app->instance(OffersSubscriptions::class, new readonly class implements OffersSubscriptions
     {
-        public function enabled(): bool
+        public function present(SubscriptionProduct $product): SubscriptionProduct
+        {
+            return $product;
+        }
+
+        public function available(SubscriptionProduct $product): bool
         {
             return true;
-        }
-
-        public function entitlement(?User $user, ?string $guestId): PhotoEntitlement
-        {
-            return new PhotoEntitlement(enabled: true, limit: 100);
-        }
-
-        public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
-        {
-            return $analyze(PhotoModel::standard());
         }
     });
 
     SubscriptionProduct::factory()->create(['name' => 'Supporter', 'price' => 9]);
-    SubscriptionProduct::factory()->create(['name' => 'Pro', 'price' => 19]);
 
     $user = User::factory()->create(['stripe_id' => null]);
 
