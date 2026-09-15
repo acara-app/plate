@@ -47,6 +47,25 @@ class extends Component
         return resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement(auth()->user(), \App\Data\Billing\PhotoAnalysisContext::guestId(request()));
     }
 
+    public function perScanPrice(): ?string
+    {
+        $offer = $this->photoAllowance->offer;
+
+        if ($offer === null || $offer->scans < 1) {
+            return null;
+        }
+
+        $amount = (float) preg_replace('/[^0-9.]/', '', $offer->formattedPrice);
+
+        if ($amount <= 0.0) {
+            return null;
+        }
+
+        $perScan = $amount / $offer->scans;
+
+        return $perScan < 1 ? round($perScan * 100).'¢' : '$'.number_format($perScan, 2);
+    }
+
     private function ensureDraftToken(CreateAnalysisDraftAction $action): ?string
     {
         if ($this->result === null) {
@@ -318,25 +337,6 @@ class extends Component
     @php
         $photoAllowance = $this->photoAllowance;
     @endphp
-    @if ($photoAllowance->enabled)
-        <section class="mx-auto max-w-2xl border border-[#D9CFBC] px-6 py-4" aria-label="Photo allowance"
-            x-data x-init="window.acaraTrack?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', exhausted: @js($photoAllowance->exhausted()) })">
-            @if ($photoAllowance->mode === 'trial')
-                <p>{{ $photoAllowance->exhausted() ? 'Your free trial scan is complete.' : 'Try one photo free. No signup or credit card required.' }}</p>
-                <p class="mt-2 text-sm">One successful trial scan, with no daily reset.</p>
-            @else
-                <p>{{ $photoAllowance->remaining() }} of {{ $photoAllowance->limit }} premium scans remaining this billing month.</p>
-            @endif
-            @if ($photoAllowance->resetsAt)
-                <p>Resets {{ $photoAllowance->resetsAt }}.</p>
-            @endif
-            @if ($photoAllowance->canUpgrade && $photoAllowance->offer)
-                <p class="mt-2">{{ $photoAllowance->offer->scans }} premium scans per billing month. No rollover or overage charges.</p>
-                <button type="button" wire:click="upgrade" data-umami-event="snap_to_track_upgrade_click" class="mt-4 inline-flex min-h-12 items-center bg-[#1A1814] px-6 text-[#F2EBDD]">Continue with {{ $photoAllowance->offer->name }} — {{ $photoAllowance->offer->formattedPrice }}/month</button>
-                <p class="mt-2 text-sm">Renews monthly. Cancel anytime from billing settings.</p>
-            @endif
-        </section>
-    @endif
         {{-- Editorial breadcrumbs --}}
         <nav aria-label="Breadcrumb" class="mx-auto flex max-w-7xl items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[#6E665C] lg:px-8">
             <a href="/" aria-label="Home" class="inline-flex items-center transition hover:text-[#1A1814]">
@@ -408,7 +408,7 @@ class extends Component
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>
                             </button>
-                            <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[#F2EBDD]/70">
+                            <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-[#F2EBDD]/70">
                                 Already a member?
                                 <button
                                     type="button"
@@ -418,6 +418,40 @@ class extends Component
                                 >Log in</button>
                             </p>
                         @endauth
+                    </article>
+                @endif
+                @if ($photoAllowance->exhausted())
+                    {{-- Scan wall: the allowance is spent, so the offer leads here --}}
+                    <article
+                        x-data
+                        x-init="window.acaraTrack?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: 'wall', exhausted: true })"
+                        class="border border-[#1A1814] bg-[#1A1814] p-6 sm:p-8 text-[#F2EBDD]"
+                    >
+                        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Scan limit reached</p>
+                        <h2 class="mt-4 font-bold text-2xl leading-tight tracking-[-0.02em]">
+                            {{ $photoAllowance->mode === 'trial' ? 'That was your free scan.' : 'Your scans are used up for this month.' }}
+                        </h2>
+                        @if ($photoAllowance->canUpgrade && $photoAllowance->offer)
+                            @php
+                                $perScan = $this->perScanPrice();
+                                $offerLine = $photoAllowance->offer->scans.' scans a month · '.$photoAllowance->offer->formattedPrice
+                                    .($perScan === null ? '' : ' · about '.$perScan.' a scan').'.';
+                            @endphp
+                            <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">{{ $offerLine }}</p>
+                            <button
+                                type="button"
+                                wire:click="upgrade"
+                                x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'wall', exhausted: true })"
+                                class="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28] focus:outline-none focus:ring-2 focus:ring-[#C4623A] focus:ring-offset-2 focus:ring-offset-[#1A1814] motion-reduce:transition-none"
+                            >Continue with {{ $photoAllowance->offer->name }} — {{ $photoAllowance->offer->formattedPrice }}/month</button>
+                            <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[#F2EBDD]/60">Renews monthly · Cancel anytime · No overage charges</p>
+                        @endif
+                        @guest
+                            <p class="mt-6 border-t border-[#F2EBDD]/20 pt-5 text-sm text-[#F2EBDD]/85">
+                                Already have an account?
+                                <button type="button" wire:click="continueInApp('login')" class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]">Log in</button>
+                            </p>
+                        @endguest
                     </article>
                 @endif
                 @unless ($photoAllowance->exhausted())
@@ -442,7 +476,7 @@ class extends Component
                                 @endif
                             </p>
                             <span class="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
-                                <span class="size-1.5 rounded-full bg-emerald-600" aria-hidden="true"></span>
+                                <span class="size-1.5 rounded-full bg-[#C4623A]" aria-hidden="true"></span>
                                 Live
                             </span>
                         </div>
@@ -566,7 +600,7 @@ class extends Component
                                     <button
                                         type="button"
                                         wire:click="clearPhoto"
-                                        class="font-mono text-[10px] uppercase tracking-[0.16em] text-[#6E665C] transition hover:text-[#B5482E]"
+                                        class="font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C] transition hover:text-[#B5482E]"
                                         title="Remove photo"
                                         @disabled($loading)
                                     >
@@ -620,6 +654,12 @@ class extends Component
                                     This usually takes 5–15 seconds. Hang tight.
                                 </p>
                             </div>
+                        @endif
+
+                        @if ($photoAllowance->enabled && $photoAllowance->mode === 'trial' && ! $photoAllowance->exhausted())
+                            <p wire:loading.remove wire:target="analyze" class="mt-6 border-t border-[#D9CFBC] pt-5 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
+                                One free scan · No signup · No card
+                            </p>
                         @endif
 
                         @if ($error)
@@ -712,7 +752,7 @@ class extends Component
                                                     <span class="shrink-0 font-bold text-sm tracking-[-0.01em] text-[#1A1814]">{{ number_format($item['calories'], 0) }} kcal</span>
                                                 </div>
                                                 <p class="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">{{ $item['portion'] }}</p>
-                                                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.16em] text-[#6E665C]">
+                                                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
                                                     <span>P {{ number_format($item['protein'], 1) }}g</span>
                                                     <span aria-hidden="true">·</span>
                                                     <span>C {{ number_format($item['carbs'], 1) }}g</span>
@@ -720,7 +760,7 @@ class extends Component
                                                     <span>F {{ number_format($item['fat'], 1) }}g</span>
                                                 </div>
                                                 @if (($item['provenance'] ?? 'model') === 'reference')
-                                                    <p class="mt-2 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.16em] text-[#6E665C]">
+                                                    <p class="mt-2 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
                                                         <span class="text-[#C4623A]" aria-hidden="true">◆</span> USDA reference
                                                     </p>
                                                 @endif
@@ -749,7 +789,7 @@ class extends Component
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>
                             </button>
-                            <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[#F2EBDD]/70">
+                            <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-[#F2EBDD]/70">
                                 Already a member?
                                 <button
                                     type="button"
@@ -758,6 +798,21 @@ class extends Component
                                     class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]"
                                 >Log in</button>
                             </p>
+                            @if ($photoAllowance->canUpgrade && $photoAllowance->offer)
+                                <p
+                                    x-data
+                                    x-init="window.acaraTrack?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: 'result', exhausted: @js($photoAllowance->exhausted()) })"
+                                    class="mt-6 border-t border-[#F2EBDD]/20 pt-5 text-sm leading-relaxed text-[#F2EBDD]/85"
+                                >
+                                    Scanning often?
+                                    <button
+                                        type="button"
+                                        wire:click="upgrade"
+                                        x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result', exhausted: @js($photoAllowance->exhausted()) })"
+                                        class="font-semibold underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]"
+                                    >{{ $photoAllowance->offer->name }} — {{ $photoAllowance->offer->scans }} scans a month, {{ $photoAllowance->offer->formattedPrice }}</button>
+                                </p>
+                            @endif
                         </article>
 
                         {{-- Analyze another --}}
@@ -933,7 +988,7 @@ class extends Component
                         View All Tools →
                     </h2>
                 </div>
-                <span class="font-mono text-[11px] uppercase tracking-[0.16em] text-[#6E665C]">
+                <span class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
                     Calculators · Trackers · Planners
                 </span>
             </a>
