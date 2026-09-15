@@ -3,6 +3,12 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Data\Billing\PhotoAnalysisContext;
+use App\Data\Billing\PhotoEntitlement;
+use App\Data\Billing\PhotoModel;
+use App\Data\Billing\PhotoOffer;
+use App\Data\FoodAnalysisData;
 use App\Models\AnalysisDraft;
 use App\Models\ReferenceFood;
 use App\Models\User;
@@ -485,4 +491,53 @@ it('does not create a draft without an analysis result', function (): void {
         ->call('saveMeal', 'register');
 
     expect(AnalysisDraft::query()->count())->toBe(0);
+});
+
+function stubSnapPhotoAllowance(int $used): void
+{
+    app()->instance(ManagesPhotoAnalyses::class, new readonly class($used) implements ManagesPhotoAnalyses
+    {
+        public function __construct(private int $used) {}
+
+        public function enabled(): bool
+        {
+            return true;
+        }
+
+        public function entitlement(?User $user, ?string $guestId): PhotoEntitlement
+        {
+            return new PhotoEntitlement(
+                enabled: true, limit: 1, used: $this->used, mode: 'trial', canUpgrade: true,
+                offer: new PhotoOffer(productId: 7, name: 'Snap Pro', formattedPrice: '$9.00', scans: 100),
+            );
+        }
+
+        public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
+        {
+            return $analyze(PhotoModel::standard());
+        }
+    });
+}
+
+it('withholds the Snap Pro offer until a scan has proven the value', function (): void {
+    stubSnapPhotoAllowance(used: 0);
+
+    Livewire::test('pages::snap-to-track')
+        ->assertDontSee('Snap Pro')
+        ->assertSee('One free scan');
+
+    analyzePhotoForSnapToTrack([
+        'items' => [['name' => 'Toast', 'calories' => 200, 'protein' => 6, 'carbs' => 30, 'fat' => 5, 'portion' => '1 slice']],
+        'total_calories' => 200, 'total_protein' => 6, 'total_carbs' => 30, 'total_fat' => 5, 'confidence' => 85,
+    ])
+        ->assertSee('Save this meal free')
+        ->assertSee('Snap Pro — 100 scans a month, $9.00');
+
+    stubSnapPhotoAllowance(used: 1);
+
+    Livewire::test('pages::snap-to-track')
+        ->assertSee('Scan limit reached')
+        ->assertSee('That was your free scan.')
+        ->assertSee('100 scans a month · $9.00 · about 9¢ a scan.')
+        ->assertDontSee('Tap to take photo or upload');
 });
