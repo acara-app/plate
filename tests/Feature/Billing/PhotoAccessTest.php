@@ -7,13 +7,10 @@ use App\Contracts\Billing\OffersSubscriptions;
 use App\Data\Billing\PhotoEntitlement;
 use App\Data\Billing\PhotoOffer;
 use App\Models\SubscriptionProduct;
-use App\Services\Billing\NullPhotoAnalyses;
 
-it('keeps community photo analysis available without Cloud quota tables', function (): void {
-    config()->set('snap.enabled', true);
+it('leaves photo analysis ungated while the scan quota is unconfigured', function (): void {
     $access = resolve(ManagesPhotoAnalyses::class);
-    expect($access)->toBeInstanceOf(NullPhotoAnalyses::class)
-        ->and($access->enabled())->toBeFalse()
+    expect($access->enabled())->toBeFalse()
         ->and($access->entitlement(null, null)->limit)->toBeNull();
 });
 
