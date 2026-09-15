@@ -30,7 +30,7 @@ final readonly class AnalyzeSnapToTrackPhotoController
 
     public function __invoke(AnalyzeSnapToTrackPhotoRequest $request, #[CurrentUser] User $user): JsonResponse
     {
-        if (! resolve(ManagesPhotoAnalyses::class)->enabled()) {
+        if (! resolve(ManagesPhotoAnalyses::class)->entitlement($user, null)->enabled) {
             $this->enforceAiUsageLimit->handle(
                 $user,
                 ModelName::tryFrom(config()->string('plate.food_photo_analyzer.model')),
