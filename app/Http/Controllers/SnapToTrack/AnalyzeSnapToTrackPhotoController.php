@@ -41,7 +41,7 @@ final readonly class AnalyzeSnapToTrackPhotoController
         }
 
         try {
-            if (! resolve(ManagesPhotoAnalyses::class)->enabled()) {
+            if (! resolve(ManagesPhotoAnalyses::class)->entitlement($this->currentUser, null)->enabled) {
                 $this->enforceAiUsageLimit->handle(
                     $this->currentUser,
                     ModelName::tryFrom(config()->string('plate.food_photo_analyzer.model')),
