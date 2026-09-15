@@ -10,6 +10,7 @@ it('preserves the chosen offer through account creation without starting payment
     if ($authenticated) {
         $this->actingAs(User::factory()->create());
     }
+
     $this->withSession(['snap_to_track.upgrade_draft' => 'saved-result'])
         ->get(route('checkout.start', $product))
         ->assertRedirect(route($authenticated ? 'checkout.subscription' : 'register'))

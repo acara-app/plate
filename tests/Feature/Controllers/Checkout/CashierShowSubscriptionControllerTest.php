@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Inertia\Testing\AssertableInertia;
 use App\Contracts\Services\StripeServiceContract;
 use App\Http\Controllers\Checkout\CashierShowSubscriptionController;
 use App\Models\SubscriptionProduct;
@@ -329,7 +330,7 @@ it('renders page when user has no active subscription', function (): void {
 it('lets guests view prices without contacting Stripe', function (): void {
     $this->mock(StripeServiceContract::class)->shouldNotReceive('ensureStripeCustomer', 'getBillingPortalUrl');
     $this->get(route('checkout.subscription'))->assertOk()
-        ->assertInertia(fn (Inertia\Testing\AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('currentSubscription', null)->where('isGuest', true));
 });
 

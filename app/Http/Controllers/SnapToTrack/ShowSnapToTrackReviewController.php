@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\SnapToTrack;
 
+use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Data\Billing\PhotoAnalysisContext;
+use App\Models\AnalysisDraft;
 use App\Actions\RestoreAnalysisDraftAction;
 use App\Data\AnalysisDraftResolutionData;
 use App\Enums\AnalysisDraftStatus;
@@ -31,7 +34,7 @@ final readonly class ShowSnapToTrackReviewController
         session()->put('snap_to_track.upgrade_draft', $draft);
 
         return Inertia::render('snap-to-track/review', [
-            'photoAllowance' => resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement($this->currentUser, \App\Data\Billing\PhotoAnalysisContext::guestId(request()))->toArray(),
+            'photoAllowance' => resolve(ManagesPhotoAnalyses::class)->entitlement($this->currentUser, PhotoAnalysisContext::guestId(request()))->toArray(),
             'state' => 'restored',
             'reason' => null,
             'analysis' => $resolution->analysis(),
@@ -44,7 +47,7 @@ final readonly class ShowSnapToTrackReviewController
     {
         session()->forget('snap_to_track.auth_path');
 
-        if ($resolution->status === AnalysisDraftStatus::Expired && $resolution->draft !== null) {
+        if ($resolution->status === AnalysisDraftStatus::Expired && $resolution->draft instanceof AnalysisDraft) {
             Inertia::flash('analytics', [
                 'name' => 'snap_to_track_draft_expired',
                 'properties' => ['draft_age_band' => $resolution->draft->ageBand()],

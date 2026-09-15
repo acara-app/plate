@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V2\SnapToTrack;
 
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Illuminate\Validation\ValidationException;
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\CreateAnalysisDraftAction;
@@ -53,9 +55,9 @@ final readonly class AnalyzeSnapToTrackPhotoController
             );
         } catch (PhotoLimitExceeded $exception) {
             return $exception->render();
-        } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $exception) {
+        } catch (HttpExceptionInterface $exception) {
             return response()->json(['error' => $exception->getMessage()], $exception->getStatusCode());
-        } catch (\Illuminate\Validation\ValidationException $exception) {
+        } catch (ValidationException $exception) {
             throw $exception;
         } catch (Throwable $throwable) {
             report($throwable);

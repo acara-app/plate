@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Billing;
 
+use App\Contracts\Billing\ProvidesAiBudget;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Data\Billing\CreditWarning;
 use App\Enums\SubscriptionTier;
@@ -20,7 +21,7 @@ final readonly class BuildCreditWarning
     {
         $entitlement = resolve(ResolvesUserTier::class)->resolve($user);
 
-        $budget = resolve(\App\Contracts\Billing\ProvidesAiBudget::class)->forUser($user);
+        $budget = resolve(ProvidesAiBudget::class)->forUser($user);
         if ($budget !== null) {
             $ratio = $budget->limit > 0 ? $budget->used / $budget->limit : 1.0;
             if ($ratio < self::WARNING_THRESHOLD) {

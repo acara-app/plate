@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Checkout;
 
+use App\Contracts\Billing\OffersSubscriptions;
+use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Data\Billing\PhotoAnalysisContext;
 use App\Contracts\Services\StripeServiceContract;
 use App\Models\SubscriptionProduct;
 use Illuminate\Http\Request;
@@ -64,10 +67,10 @@ final readonly class CashierShowSubscriptionController
             $incompletePaymentUrl = $this->stripeService->getIncompletePaymentUrl($currentSubscription);
         }
 
-        $offers = resolve(\App\Contracts\Billing\OffersSubscriptions::class);
+        $offers = resolve(OffersSubscriptions::class);
         $availableProducts = $products->filter($offers->available(...))->map($offers->present(...))->values();
 
-        $allowance = resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement($user, \App\Data\Billing\PhotoAnalysisContext::guestId($request));
+        $allowance = resolve(ManagesPhotoAnalyses::class)->entitlement($user, PhotoAnalysisContext::guestId($request));
 
         if ($request->routeIs('checkout.success') && $allowance->mode === 'premium' && $request->session()->pull('checkout.started')) {
             Inertia::flash('analytics', ['name' => 'snap_to_track_payment_verified', 'properties' => ['source' => 'checkout']]);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Models\User;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\Billing\PhotoAnalysisContext;
@@ -34,7 +35,7 @@ final readonly class AnalyzeFoodPhotoAction
         );
     }
 
-    public function analyzeUsingModel(string $imageBase64, string $mimeType, PhotoModel $model, ?string $language = null, ?string $languageCode = null, ?\App\Models\User $user = null): FoodAnalysisData
+    public function analyzeUsingModel(string $imageBase64, string $mimeType, PhotoModel $model, ?string $language = null, ?string $languageCode = null, ?User $user = null): FoodAnalysisData
     {
         $agent = $this->agent->usingModel($model, $user);
 

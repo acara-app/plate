@@ -59,9 +59,7 @@ final readonly class RecordApprovalDecisions
             ->get()
             ->first(fn (History $message): bool => $message->hasPendingApprovals());
 
-        if (! $paused instanceof History) {
-            throw new ApprovalMismatchException('This conversation has no tool call awaiting approval.', new Collection);
-        }
+        throw_unless($paused instanceof History, ApprovalMismatchException::class, 'This conversation has no tool call awaiting approval.', new Collection);
 
         return $paused;
     }
@@ -95,7 +93,7 @@ final readonly class RecordApprovalDecisions
             $arguments[$toolCall['id']] = $toolCall['arguments'] ?? [];
         }
 
-        return (new Collection($paused->pendingApprovals()))
+        return new Collection($paused->pendingApprovals())
             ->map(fn (?string $reason, string $toolCallId): PendingApproval => new PendingApproval(
                 id: $toolCallId,
                 tool: $tools[$toolCallId] ?? '',

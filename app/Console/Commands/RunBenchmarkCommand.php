@@ -42,6 +42,7 @@ final class RunBenchmarkCommand extends Command
 
             return self::FAILURE;
         }
+
         $repeats = max(1, (int) $this->option('repeats'));
 
         $query = BenchmarkMeal::query()->with('items')->orderBy('code');

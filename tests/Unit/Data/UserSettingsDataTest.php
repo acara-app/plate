@@ -66,7 +66,6 @@ it('can be converted to array', function (): void {
 it('uses config default for low threshold when null', function (): void {
     $settings = new UserSettingsData(
         glucoseNotificationsEnabled: true,
-        glucoseNotificationLowThreshold: null,
         glucoseNotificationHighThreshold: 180
     );
 

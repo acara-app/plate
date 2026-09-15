@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use Illuminate\Support\Str;
+use App\Data\Billing\PhotoAnalysisContext;
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Enums\DataSensitivity;
@@ -25,7 +27,7 @@ final readonly class AnalyzePhoto implements Tool
      */
     public function __construct(private array $images, private ?User $user = null, ?string $requestId = null)
     {
-        $this->requestId = $requestId ?? (string) \Illuminate\Support\Str::uuid();
+        $this->requestId = $requestId ?? (string) Str::uuid();
     }
 
     public function name(): string
@@ -62,7 +64,7 @@ final readonly class AnalyzePhoto implements Tool
             $image->mime ?? 'image/jpeg',
             $language,
             $languageCode,
-            new \App\Data\Billing\PhotoAnalysisContext($user, null, $this->requestId, 'chat', hash('sha256', $image->base64)),
+            new PhotoAnalysisContext($user, null, $this->requestId, 'chat', hash('sha256', $image->base64)),
         );
 
         return (string) json_encode($analysis->toArray());

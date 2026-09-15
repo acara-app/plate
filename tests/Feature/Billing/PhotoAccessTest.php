@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Models\SubscriptionProduct;
+use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Services\Billing\NullPhotoAnalyses;
 
@@ -14,6 +16,6 @@ it('keeps community photo analysis available without Cloud quota tables', functi
 });
 
 it('does not offer a photo-specific subscription without the photo access integration', function (): void {
-    $product = App\Models\SubscriptionProduct::factory()->create(['name' => 'Snap Pro', 'price' => 9, 'stripe_price_id' => 'price_test', 'purchasable' => true]);
-    expect(resolve(App\Contracts\Billing\OffersSubscriptions::class)->available($product))->toBeFalse();
+    $product = SubscriptionProduct::factory()->create(['name' => 'Snap Pro', 'price' => 9, 'stripe_price_id' => 'price_test', 'purchasable' => true]);
+    expect(resolve(OffersSubscriptions::class)->available($product))->toBeFalse();
 });

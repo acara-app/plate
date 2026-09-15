@@ -44,9 +44,9 @@ function fakeApiSnapAnalysis(): void
 
 function stubApiSnapTier(SubscriptionTier $tier): void
 {
-    app()->instance(ResolvesUserTier::class, new class($tier) implements ResolvesUserTier
+    app()->instance(ResolvesUserTier::class, new readonly class($tier) implements ResolvesUserTier
     {
-        public function __construct(private readonly SubscriptionTier $tier) {}
+        public function __construct(private SubscriptionTier $tier) {}
 
         public function resolve(User $user): TierEntitlement
         {

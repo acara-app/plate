@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\SnapToTrack;
 
+use Illuminate\Support\Str;
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\Billing\PhotoAnalysisContext;
@@ -39,7 +40,7 @@ final readonly class ShowSnapToTrackController
 
         return Inertia::render('snap-to-track/index', [
             'photoAllowance' => $allowance->toArray(),
-            'analysisRequestId' => (string) \Illuminate\Support\Str::uuid(),
+            'analysisRequestId' => (string) Str::uuid(),
             'savedGroupId' => session('snap_to_track_saved_group'),
             'creditLimit' => $creditLimit,
         ]);

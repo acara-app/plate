@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\Billing\OffersSubscriptions;
+use App\Services\Billing\DefaultSubscriptionOffers;
+use App\Contracts\Billing\ProvidesAiBudget;
+use App\Services\Billing\NullAiBudget;
+use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Services\Billing\NullPhotoAnalyses;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Contracts\Memory\DispatchesMemoryExtraction;
 use App\Contracts\Memory\ManagesMemoryContext;
@@ -43,9 +49,9 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bindIf(\App\Contracts\Billing\OffersSubscriptions::class, \App\Services\Billing\DefaultSubscriptionOffers::class);
-        $this->app->bindIf(\App\Contracts\Billing\ProvidesAiBudget::class, \App\Services\Billing\NullAiBudget::class);
-        $this->app->bindIf(\App\Contracts\Billing\ManagesPhotoAnalyses::class, \App\Services\Billing\NullPhotoAnalyses::class);
+        $this->app->bindIf(OffersSubscriptions::class, DefaultSubscriptionOffers::class);
+        $this->app->bindIf(ProvidesAiBudget::class, NullAiBudget::class);
+        $this->app->bindIf(ManagesPhotoAnalyses::class, NullPhotoAnalyses::class);
         $this->app->bind(StripeServiceContract::class, StripeService::class);
         $this->app->bind(IndexNowServiceContract::class, IndexNowService::class);
         $this->app->bind(ResolvesUserTier::class, SubscriptionTierResolver::class);
