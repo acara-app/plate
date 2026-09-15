@@ -79,9 +79,8 @@ it('redirects with error if user already has subscription', function (): void {
         ]);
 
     $response->assertRedirect(route('checkout.subscription'))
-        ->assertSessionHas('error');
-
-    expect(session('error'))->toContain('subscription');
+        ->assertInertiaFlash('toast.type', 'error')
+        ->assertInertiaFlash('toast.message', 'You already have an active subscription. Use the billing portal to manage it.');
 });
 
 it('handles exceptions gracefully', function (): void {
@@ -97,5 +96,6 @@ it('handles exceptions gracefully', function (): void {
         ]);
 
     $response->assertRedirect(route('checkout.subscription'))
-        ->assertSessionHas('error');
+        ->assertInertiaFlash('toast.type', 'error')
+        ->assertInertiaFlash('toast.message', 'Failed to initiate subscription. Please try again.');
 });

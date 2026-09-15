@@ -3,6 +3,7 @@ import {
     type PhotoAllowance,
 } from '@/components/photo-allowance';
 import ShowSnapToTrackReviewController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackReviewController';
+import { PaymentConfirmation } from '@/components/billing/payment-confirmation';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { support, login, snapToTrack } from '@/routes';
@@ -12,7 +13,7 @@ import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import clsx from 'clsx';
 import { CreditCardIcon, ReceiptIcon, TriangleIcon } from 'lucide-react';
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface BillingProduct {
@@ -89,32 +90,10 @@ export default function CashierSubscription({
     const { t } = useTranslation('common');
 
     const Layout = isGuest ? GuestPricingLayout : AppLayout;
-    useEffect(() => {
-        if (!paymentPending) return;
-        const timer = window.setInterval(
-            () =>
-                router.reload({
-                    only: [
-                        'paymentPending',
-                        'photoAllowance',
-                        'currentSubscription',
-                    ],
-                }),
-            3000,
-        );
-        const stop = window.setTimeout(
-            () => window.clearInterval(timer),
-            60000,
-        );
-        return () => {
-            window.clearInterval(timer);
-            window.clearTimeout(stop);
-        };
-    }, [paymentPending]);
 
     const formatSavings = (value: number) => `$${parseFloat(value.toFixed(2))}`;
 
-    const handleSubscribe = (productId: number) => {
+    function handleSubscribe(productId: number) {
         if (isSubscribing) {
             return;
         }
@@ -135,10 +114,12 @@ export default function CashierSubscription({
                 billing_interval: billingInterval,
             },
             {
-                onFinish: () => setIsSubscribing(false),
+                onFinish() {
+                    setIsSubscribing(false);
+                },
             },
         );
-    };
+    }
 
     return (
         <Layout breadcrumbs={getBreadcrumbs(t)}>
@@ -146,22 +127,13 @@ export default function CashierSubscription({
 
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <div className="space-y-8">
-                    {paymentPending && (
-                        <div role="status" className="rounded-lg border p-4">
-                            We’re confirming your payment. Your scans will
-                            unlock when payment is verified. If this takes
-                            longer, refresh this page or check billing settings.
-                        </div>
-                    )}
+                    {paymentPending && <PaymentConfirmation />}
                     {!paymentPending && photoAllowance?.mode === 'premium' && (
                         <div role="status" className="rounded-lg border p-4">
                             Your premium scans are ready.{' '}
-                            <Link
-                                href={snapToTrack().url}
-                                className="underline"
-                            >
+                            <a href={snapToTrack().url} className="underline">
                                 Continue scanning
-                            </Link>
+                            </a>
                         </div>
                     )}
                     {hasIncompletePayment && incompletePaymentUrl && (
