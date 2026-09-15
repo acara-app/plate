@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data\Billing;
 
+use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use Spatie\LaravelData\Data;
 
 final class PhotoModel extends Data
@@ -18,6 +19,6 @@ final class PhotoModel extends Data
 
     public static function standard(): self
     {
-        return new self('gemini', config()->string('plate.food_photo_analyzer.model'));
+        return new self('gemini', FoodPhotoAnalyzerAgent::pinnedModel());
     }
 }

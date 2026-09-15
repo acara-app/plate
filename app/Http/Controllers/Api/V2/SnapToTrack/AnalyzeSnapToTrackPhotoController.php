@@ -18,6 +18,8 @@ use App\Models\User;
 use App\Utilities\LanguageUtil;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
 final readonly class AnalyzeSnapToTrackPhotoController
@@ -44,18 +46,20 @@ final readonly class AnalyzeSnapToTrackPhotoController
         );
 
         try {
+            $imageBase64 = $image->base64();
+
             $analysis = $this->analyzeFoodPhoto->handle(
-                $image->base64(),
+                $imageBase64,
                 $image->mimeType,
                 $language,
                 $languageCode,
-                PhotoAnalysisContext::fromRequest($request, 'mobile_snap_to_track', $image->base64(), $user),
+                PhotoAnalysisContext::fromRequest($request, 'mobile_snap_to_track', $imageBase64, $user),
             );
         } catch (PhotoLimitExceeded $exception) {
             return $exception->render();
-        } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $exception) {
+        } catch (HttpExceptionInterface $exception) {
             return response()->json(['error' => $exception->getMessage()], $exception->getStatusCode());
-        } catch (\Illuminate\Validation\ValidationException $exception) {
+        } catch (ValidationException $exception) {
             throw $exception;
         } catch (Throwable $throwable) {
             report($throwable);

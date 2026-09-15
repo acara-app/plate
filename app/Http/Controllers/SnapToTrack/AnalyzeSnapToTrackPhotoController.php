@@ -66,12 +66,14 @@ final readonly class AnalyzeSnapToTrackPhotoController
         try {
             ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($this->currentUser->locale);
 
+            $imageBase64 = base64_encode((string) $photo->get());
+
             $analysis = $this->analyzeFoodPhoto->handle(
-                base64_encode((string) $photo->get()),
+                $imageBase64,
                 $photo->getMimeType() ?? 'image/jpeg',
                 $language,
                 $languageCode,
-                PhotoAnalysisContext::fromRequest($request, 'authenticated_snap_to_track', base64_encode((string) $photo->get()), $this->currentUser),
+                PhotoAnalysisContext::fromRequest($request, 'authenticated_snap_to_track', $imageBase64, $this->currentUser),
             );
         } catch (PhotoLimitExceeded $exception) {
             return to_route('snap-to-track.index')->withErrors(['photo' => $exception->getMessage()]);

@@ -89,7 +89,7 @@ it('carries a guest draft through email registration and verification to the rev
 
     $this->get($reviewUrl)
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('snap-to-track/review')
             ->where('state', 'restored'));
 
@@ -110,7 +110,7 @@ it('carries a guest draft through a plain login to the review page', function ()
 
     $this->get($reviewUrl)
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page->where('state', 'restored'));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('state', 'restored'));
 
     expect($draft->refresh()->user_id)->toBe($user->id);
 });
@@ -133,7 +133,7 @@ it('carries a guest draft through Google signup and the disclaimer gate to the r
 
     $this->get($reviewUrl)
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page->where('state', 'restored'));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('state', 'restored'));
 
     $user = User::query()->where('email', 'snap-google@example.com')->sole();
 
@@ -153,7 +153,7 @@ it('carries a guest draft through a Google login for an existing user to the rev
 
     $this->get($reviewUrl)
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page->where('state', 'restored'));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('state', 'restored'));
 
     expect($draft->refresh()->user_id)->toBe($user->id);
 });

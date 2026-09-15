@@ -7,6 +7,7 @@ namespace App\Data\Billing;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 final readonly class PhotoAnalysisContext
 {
@@ -27,16 +28,16 @@ final readonly class PhotoAnalysisContext
 
     public static function fromRequest(Request $request, string $source, string $image, ?User $user = null): self
     {
-        $key = $request->header('Idempotency-Key') ?? $request->input('analysis_request_id');
+        $key = $request->header('Idempotency-Key') ?? $request->input('analysis_request_id') ?? (string) Str::uuid();
 
-        if ($key !== null && (! is_string($key) || ! Str::isUuid($key))) {
-            throw \Illuminate\Validation\ValidationException::withMessages(['analysis_request_id' => 'Use a UUID for the analysis request ID.']);
+        if (! is_string($key) || ! Str::isUuid($key)) {
+            throw ValidationException::withMessages(['analysis_request_id' => 'Use a UUID for the analysis request ID.']);
         }
 
         return new self(
             $user ?? $request->user(),
             self::guestId($request),
-            is_string($key) && Str::isUuid($key) ? $key : (string) Str::uuid(),
+            $key,
             $source,
             hash('sha256', $image),
         );

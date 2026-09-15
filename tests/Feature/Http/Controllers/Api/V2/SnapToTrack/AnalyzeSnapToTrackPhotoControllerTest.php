@@ -44,9 +44,9 @@ function fakeApiSnapAnalysis(): void
 
 function stubApiSnapTier(SubscriptionTier $tier): void
 {
-    app()->instance(ResolvesUserTier::class, new class($tier) implements ResolvesUserTier
+    app()->instance(ResolvesUserTier::class, new readonly class($tier) implements ResolvesUserTier
     {
-        public function __construct(private readonly SubscriptionTier $tier) {}
+        public function __construct(private SubscriptionTier $tier) {}
 
         public function resolve(User $user): TierEntitlement
         {
@@ -170,7 +170,11 @@ it('returns a real 429 with Retry-After instead of the web redirect when the bur
     $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
         ->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => apiSnapPhotoDataUrl()]);
 
-    $response->assertStatus(429);
+    $response->assertStatus(429)
+        ->assertJsonPath('error', 'burst_limit_exceeded')
+        ->assertJsonPath('burstLimit.cap', 1)
+        ->assertJsonPath('burstLimit.tier', 'free')
+        ->assertJsonStructure(['burstLimit' => ['tier_label', 'retry_after_seconds', 'retry_after_minutes', 'resets_at']]);
 
     expect($response->headers->get('Retry-After'))->not->toBeNull()
         ->and(AnalysisDraft::query()->count())->toBe(1);

@@ -40,9 +40,7 @@ final class AnalyzeSnapToTrackPhotoRequest extends FormRequest
 
         $decoded = Base64Image::decode($this->string('photo')->toString());
 
-        if (! $decoded instanceof Base64Image) {
-            throw new RuntimeException('Photo failed to decode after validation.');
-        }
+        throw_unless($decoded instanceof Base64Image, RuntimeException::class, 'Photo failed to decode after validation.');
 
         return $this->decoded = $decoded;
     }

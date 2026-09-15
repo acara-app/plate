@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Billing;
 
+use App\Contracts\Billing\ProvidesAiBudget;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Data\Billing\CreditWarning;
 use App\Enums\SubscriptionTier;
@@ -18,19 +19,25 @@ final readonly class BuildCreditWarning
 
     public function currentState(User $user): ?CreditWarning
     {
-        $entitlement = resolve(ResolvesUserTier::class)->resolve($user);
-
-        $budget = resolve(\App\Contracts\Billing\ProvidesAiBudget::class)->forUser($user);
+        $budget = resolve(ProvidesAiBudget::class)->forUser($user);
         if ($budget !== null) {
             $ratio = $budget->limit > 0 ? $budget->used / $budget->limit : 1.0;
             if ($ratio < self::WARNING_THRESHOLD) {
                 return null;
             }
 
-            return new CreditWarning('monthly', $entitlement->tier,
-                (int) round($budget->used * $this->multiplier()), (int) round($budget->limit * $this->multiplier()),
-                min(100, (int) floor($ratio * 100)), $budget->resetsAt, $this->formatResetsIn($budget->resetsAt));
+            return new CreditWarning(
+                limitType: 'monthly',
+                tier: resolve(ResolvesUserTier::class)->resolve($user)->tier,
+                currentCredits: (int) round($budget->used * $this->multiplier()),
+                limitCredits: (int) round($budget->limit * $this->multiplier()),
+                percentage: min(100, (int) floor($ratio * 100)),
+                resetsAt: $budget->resetsAt,
+                resetsIn: $this->formatResetsIn($budget->resetsAt),
+            );
         }
+
+        $entitlement = resolve(ResolvesUserTier::class)->resolve($user);
 
         if (! $entitlement->premiumEnforcementActive) {
             return null;

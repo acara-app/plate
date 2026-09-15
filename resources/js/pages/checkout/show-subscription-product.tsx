@@ -3,6 +3,7 @@ import {
     type PhotoAllowance,
 } from '@/components/photo-allowance';
 import ShowSnapToTrackReviewController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackReviewController';
+import { PaymentConfirmation } from '@/components/billing/payment-confirmation';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { support, login, snapToTrack } from '@/routes';
@@ -10,9 +11,10 @@ import billing from '@/routes/billing';
 import checkout from '@/routes/checkout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
+import { PhotoPlanBand } from '@/components/billing/photo-plan-band';
 import clsx from 'clsx';
 import { CreditCardIcon, ReceiptIcon, TriangleIcon } from 'lucide-react';
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface BillingProduct {
@@ -57,6 +59,7 @@ interface Props {
     photoAllowance?: PhotoAllowance;
     upgradeDraft?: string | null;
     products: BillingProduct[];
+    photoPlan: BillingProduct | null;
     currentSubscription: CashierSubscription | null;
     billingPortalUrl: string | null;
     hasIncompletePayment: boolean;
@@ -72,6 +75,7 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
 
 export default function CashierSubscription({
     products,
+    photoPlan,
     isGuest,
     paymentPending,
     selectedProductId,
@@ -89,32 +93,13 @@ export default function CashierSubscription({
     const { t } = useTranslation('common');
 
     const Layout = isGuest ? GuestPricingLayout : AppLayout;
-    useEffect(() => {
-        if (!paymentPending) return;
-        const timer = window.setInterval(
-            () =>
-                router.reload({
-                    only: [
-                        'paymentPending',
-                        'photoAllowance',
-                        'currentSubscription',
-                    ],
-                }),
-            3000,
-        );
-        const stop = window.setTimeout(
-            () => window.clearInterval(timer),
-            60000,
-        );
-        return () => {
-            window.clearInterval(timer);
-            window.clearTimeout(stop);
-        };
-    }, [paymentPending]);
 
     const formatSavings = (value: number) => `$${parseFloat(value.toFixed(2))}`;
 
-    const handleSubscribe = (productId: number) => {
+    function handleSubscribe(
+        productId: number,
+        interval: 'monthly' | 'yearly' = billingInterval,
+    ) {
         if (isSubscribing) {
             return;
         }
@@ -125,20 +110,22 @@ export default function CashierSubscription({
         }
         window.umami?.track('snap_to_track_checkout_click', {
             source: 'checkout',
-            interval: billingInterval,
+            interval,
         });
         setIsSubscribing(true);
         router.post(
             checkout.subscription.store(),
             {
                 product_id: productId,
-                billing_interval: billingInterval,
+                billing_interval: interval,
             },
             {
-                onFinish: () => setIsSubscribing(false),
+                onFinish() {
+                    setIsSubscribing(false);
+                },
             },
         );
-    };
+    }
 
     return (
         <Layout breadcrumbs={getBreadcrumbs(t)}>
@@ -146,22 +133,13 @@ export default function CashierSubscription({
 
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <div className="space-y-8">
-                    {paymentPending && (
-                        <div role="status" className="rounded-lg border p-4">
-                            We’re confirming your payment. Your scans will
-                            unlock when payment is verified. If this takes
-                            longer, refresh this page or check billing settings.
-                        </div>
-                    )}
+                    {paymentPending && <PaymentConfirmation />}
                     {!paymentPending && photoAllowance?.mode === 'premium' && (
                         <div role="status" className="rounded-lg border p-4">
                             Your premium scans are ready.{' '}
-                            <Link
-                                href={snapToTrack().url}
-                                className="underline"
-                            >
+                            <a href={snapToTrack().url} className="underline">
                                 Continue scanning
-                            </Link>
+                            </a>
                         </div>
                     )}
                     {hasIncompletePayment && incompletePaymentUrl && (
@@ -318,7 +296,7 @@ export default function CashierSubscription({
                     {photoAllowance?.offer && (
                         <p className="text-sm text-muted-foreground">
                             {photoAllowance.offer.name} renews at{' '}
-                            {photoAllowance.offer.formattedPrice} every month
+                            {photoAllowance.offer.formatted_price} every month
                             and includes {photoAllowance.offer.scans} premium
                             scans per billing month. Unused scans do not roll
                             over. When scans run out, wait for renewal. No
@@ -338,6 +316,21 @@ export default function CashierSubscription({
                             Return to your saved analysis
                         </Link>
                     )}
+                    {photoPlan && (
+                        <PhotoPlanBand
+                            plan={photoPlan}
+                            isGuest={isGuest}
+                            isSubscribing={isSubscribing}
+                            isCurrent={
+                                currentSubscription?.product_name ===
+                                photoPlan.name
+                            }
+                            onSubscribe={() =>
+                                handleSubscribe(photoPlan.id, 'monthly')
+                            }
+                        />
+                    )}
+
                     {/* Available Plans */}
                     <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
                         <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-800 dark:bg-gray-950">
@@ -524,9 +517,7 @@ export default function CashierSubscription({
                                                   photoAllowance?.enabled ? (
                                                     photoAllowance.mode ===
                                                         'trial' &&
-                                                    photoAllowance.used <
-                                                        (photoAllowance.limit ??
-                                                            0) ? (
+                                                    !photoAllowance.exhausted ? (
                                                         <Button
                                                             asChild
                                                             variant="outline"
@@ -596,11 +587,11 @@ export default function CashierSubscription({
                                                                   )
                                                                 : photoAllowance
                                                                         ?.offer
-                                                                        ?.productId ===
+                                                                        ?.product_id ===
                                                                     product.id
                                                                   ? isGuest
                                                                       ? 'Create an account to subscribe'
-                                                                      : `Subscribe — ${photoAllowance.offer.formattedPrice}/month`
+                                                                      : `Subscribe — ${photoAllowance.offer.formatted_price}/month`
                                                                   : t(
                                                                         'checkout_subscription.choose_plan_button',
                                                                     )}
@@ -613,11 +604,9 @@ export default function CashierSubscription({
                                                                 'yearly' &&
                                                                 !product.yearly_stripe_price_id)) && (
                                                             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                                Subscriptions
-                                                                are temporarily
-                                                                unavailable.
-                                                                Please try again
-                                                                later.
+                                                                {t(
+                                                                    'checkout_subscription.stripe_price_required',
+                                                                )}
                                                             </p>
                                                         )}
                                                     </>

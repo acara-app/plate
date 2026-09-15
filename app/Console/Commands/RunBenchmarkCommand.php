@@ -42,6 +42,7 @@ final class RunBenchmarkCommand extends Command
 
             return self::FAILURE;
         }
+
         $repeats = max(1, (int) $this->option('repeats'));
 
         $query = BenchmarkMeal::query()->with('items')->orderBy('code');
@@ -66,7 +67,7 @@ final class RunBenchmarkCommand extends Command
             $meals->count(),
             $repeats,
             $analyses,
-            $model->model.'/p3',
+            FoodPhotoAnalyzerAgent::version($model->model),
             $estimatedCost,
         ));
 

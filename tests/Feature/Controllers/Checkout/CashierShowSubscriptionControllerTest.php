@@ -2,12 +2,21 @@
 
 declare(strict_types=1);
 
+use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Services\StripeServiceContract;
+use App\Data\Billing\PhotoAnalysisContext;
+use App\Data\Billing\PhotoEntitlement;
+use App\Data\Billing\PhotoModel;
+use App\Data\FoodAnalysisData;
 use App\Http\Controllers\Checkout\CashierShowSubscriptionController;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Inertia\Testing\AssertableInertia;
 use Laravel\Cashier\Subscription;
+
+use function Pest\Laravel\actingAs;
 
 covers(CashierShowSubscriptionController::class);
 
@@ -329,7 +338,7 @@ it('renders page when user has no active subscription', function (): void {
 it('lets guests view prices without contacting Stripe', function (): void {
     $this->mock(StripeServiceContract::class)->shouldNotReceive('ensureStripeCustomer', 'getBillingPortalUrl');
     $this->get(route('checkout.subscription'))->assertOk()
-        ->assertInertia(fn (Inertia\Testing\AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('currentSubscription', null)->where('isGuest', true));
 });
 
@@ -774,4 +783,49 @@ it('renders subscription page with trialing subscription', function (): void {
     expect($stripeMock->ensureStripeCustomerCalled)->toBeFalse()
         ->and($stripeMock->hasIncompletePaymentCalled)->toBeTrue()
         ->and($stripeMock->getBillingPortalUrlCalled)->toBeFalse();
+});
+
+it('keeps the photo plan out of the pricing grid until the scan quota is enforced', function (): void {
+    $user = User::factory()->create(['stripe_id' => null]);
+
+    actingAs($user)
+        ->get(route('checkout.subscription'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('photoPlan', null)
+            ->where('products', fn (Collection $products): bool => $products
+                ->pluck('name')
+                ->doesntContain('Snap Pro')));
+});
+
+it('offers the photo plan beside the credit plans once the scan quota is live', function (): void {
+    $this->app->instance(ManagesPhotoAnalyses::class, new readonly class implements ManagesPhotoAnalyses
+    {
+        public function enabled(): bool
+        {
+            return true;
+        }
+
+        public function entitlement(?User $user, ?string $guestId): PhotoEntitlement
+        {
+            return new PhotoEntitlement(enabled: true, limit: 100);
+        }
+
+        public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
+        {
+            return $analyze(PhotoModel::standard());
+        }
+    });
+
+    $user = User::factory()->create(['stripe_id' => null]);
+
+    actingAs($user)
+        ->get(route('checkout.subscription'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('photoPlan.name', 'Snap Pro')
+            ->where('photoPlan.formatted_price', '$9.00')
+            ->where('products', fn (Collection $products): bool => $products
+                ->pluck('name')
+                ->doesntContain('Snap Pro')));
 });

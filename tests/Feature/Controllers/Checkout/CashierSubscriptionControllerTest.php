@@ -191,7 +191,8 @@ it('redirects when user already has active subscription', function (): void {
     ]);
 
     $response->assertRedirect(route('checkout.subscription'));
-    $response->assertSessionHas('error', 'You already have an active subscription. Use the billing portal to manage it.');
+    $response->assertInertiaFlash('toast.type', 'error')
+        ->assertInertiaFlash('toast.message', 'You already have an active subscription. Use the billing portal to manage it.');
 });
 
 it('redirects when price lookup key not found', function (): void {
@@ -250,7 +251,8 @@ it('redirects when price lookup key not found', function (): void {
     ]);
 
     $response->assertRedirect(route('checkout.subscription'));
-    $response->assertSessionHas('error', 'Failed to initiate subscription. Please try again.');
+    $response->assertInertiaFlash('toast.type', 'error')
+        ->assertInertiaFlash('toast.message', 'Failed to initiate subscription. Please try again.');
 });
 
 it('validates required fields', function (): void {

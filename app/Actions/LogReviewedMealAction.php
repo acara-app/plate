@@ -64,9 +64,7 @@ final readonly class LogReviewedMealAction
             ->where('user_id', $user->id)
             ->value('health_group_id');
 
-        if (! is_string($groupId) || $groupId === '') {
-            throw new InvalidArgumentException('Analysis draft cannot be consumed by this user.');
-        }
+        throw_if(! is_string($groupId) || $groupId === '', InvalidArgumentException::class, 'Analysis draft cannot be consumed by this user.');
 
         return $groupId;
     }

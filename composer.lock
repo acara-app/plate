@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e2f87d5b0ac95b69c947a27bd49c867b",
+    "content-hash": "f34083ce1389ff167dcd846550291aaf",
     "packages": [
         {
             "name": "acara-app/acara-core",
@@ -17713,6 +17713,66 @@
                 "source": "https://github.com/spatie/boost-spatie-guidelines/tree/1.1.0"
             },
             "time": "2026-03-06T08:25:49+00:00"
+        },
+        {
+            "name": "spatie/guidelines-skills",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/guidelines-skills.git",
+                "reference": "c31006972d0b8c8db71e7b75c1b1d505b479023d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/guidelines-skills/zipball/c31006972d0b8c8db71e7b75c1b1d505b479023d",
+                "reference": "c31006972d0b8c8db71e7b75c1b1d505b479023d",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Spatie\\Guidelines\\GuidelinesServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\Guidelines\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Spatie's coding guidelines as AI skills for Laravel Boost and skills.sh",
+            "homepage": "https://github.com/spatie/guidelines-skills",
+            "keywords": [
+                "ai",
+                "boost",
+                "coding-standards",
+                "guidelines",
+                "laravel",
+                "skills",
+                "spatie"
+            ],
+            "support": {
+                "issues": "https://github.com/spatie/guidelines-skills/issues",
+                "source": "https://github.com/spatie/guidelines-skills/tree/1.1.0"
+            },
+            "time": "2026-08-17T09:06:36+00:00"
         },
         {
             "name": "staabm/side-effects-detector",

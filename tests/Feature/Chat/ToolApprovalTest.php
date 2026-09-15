@@ -200,7 +200,7 @@ it('marks persistence app-managed for streamed turns and hands it back for sync 
 it('subscribes the browser to the pause event the server broadcasts', function (): void {
     $payload = resolve(StreamAggregator::class)->normalizeEvent(new ToolApprovalRequest(
         id: 'evt-1',
-        pendingApprovals: new Collection([new PendingApproval('call_abc', 'log_health_entry', [], null)]),
+        pendingApprovals: new Collection([new PendingApproval('call_abc', 'log_health_entry', [])]),
         timestamp: 1,
     ));
 

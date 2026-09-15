@@ -94,7 +94,7 @@ it('passes user preferred language to the agent when authenticated', function ()
     $tool = new AnalyzePhoto([$image]);
     $tool->handle(new Request(['query' => 'analyze']));
 
-    FoodPhotoAnalyzerAgent::assertPrompted(fn ($prompt) => str_contains($prompt->agent->instructions(), 'language code: `en`')
+    FoodPhotoAnalyzerAgent::assertPrompted(fn ($prompt): bool => str_contains($prompt->agent->instructions(), 'language code: `en`')
         && str_contains($prompt->agent->instructions(), 'Return all `name` and `portion` values in English'));
 });
 

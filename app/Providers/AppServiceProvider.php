@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Actions\Billing\ResolveSnapBurstCap;
+use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Contracts\Billing\OffersSubscriptions;
+use App\Contracts\Billing\ProvidesAiBudget;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Contracts\Memory\DispatchesMemoryExtraction;
 use App\Contracts\Memory\ManagesMemoryContext;
@@ -14,6 +18,9 @@ use App\Contracts\Skills\LoadsSkills;
 use App\Listeners\TrackAiUsage;
 use App\Models\User;
 use App\Services\Ai\PlateConversationStore;
+use App\Services\Billing\DefaultSubscriptionOffers;
+use App\Services\Billing\NullAiBudget;
+use App\Services\Billing\NullPhotoAnalyses;
 use App\Services\Billing\SubscriptionTierResolver;
 use App\Services\IndexNowService;
 use App\Services\Memory\NullConversationHistoryPuller;
@@ -43,9 +50,9 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bindIf(\App\Contracts\Billing\OffersSubscriptions::class, \App\Services\Billing\DefaultSubscriptionOffers::class);
-        $this->app->bindIf(\App\Contracts\Billing\ProvidesAiBudget::class, \App\Services\Billing\NullAiBudget::class);
-        $this->app->bindIf(\App\Contracts\Billing\ManagesPhotoAnalyses::class, \App\Services\Billing\NullPhotoAnalyses::class);
+        $this->app->bindIf(OffersSubscriptions::class, DefaultSubscriptionOffers::class);
+        $this->app->bindIf(ProvidesAiBudget::class, NullAiBudget::class);
+        $this->app->bindIf(ManagesPhotoAnalyses::class, NullPhotoAnalyses::class);
         $this->app->bind(StripeServiceContract::class, StripeService::class);
         $this->app->bind(IndexNowServiceContract::class, IndexNowService::class);
         $this->app->bind(ResolvesUserTier::class, SubscriptionTierResolver::class);
@@ -74,37 +81,13 @@ final class AppServiceProvider extends ServiceProvider
 
     private function bootRateLimiters(): void
     {
-        RateLimiter::for('snap-to-track-analyze', function (Request $request): Limit {
+        RateLimiter::for(ResolveSnapBurstCap::LIMITER, function (Request $request): Limit {
             $user = $request->user();
+            $burstCap = resolve(ResolveSnapBurstCap::class);
 
-            if (! $user instanceof User) {
-                return Limit::perHour($this->snapToTrackBurstCap(null))
-                    ->by('snap-to-track-analyze:'.$request->ip());
-            }
-
-            return Limit::perHour($this->snapToTrackBurstCap($user))
-                ->by('snap-to-track-analyze:'.$user->id);
+            return Limit::perHour($burstCap->handle($user))
+                ->by(ResolveSnapBurstCap::keyFor($user, $request->ip()));
         });
-    }
-
-    private function snapToTrackBurstCap(?User $user): int
-    {
-        $default = config()->integer('plate.snap_to_track.burst_caps.default', 5);
-
-        if (! $user instanceof User) {
-            return $default;
-        }
-
-        $entitlement = resolve(ResolvesUserTier::class)->resolve($user);
-
-        if ($entitlement->isUnrestricted()) {
-            return $default;
-        }
-
-        return config()->integer(
-            'plate.snap_to_track.burst_caps.'.$entitlement->tier->value,
-            $default,
-        );
     }
 
     private function bootModelsDefaults(): void

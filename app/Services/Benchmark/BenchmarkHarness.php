@@ -42,7 +42,9 @@ final readonly class BenchmarkHarness
     public function run(Collection $meals, int $repeats, ?Closure $onAnalysis = null, ?PhotoModel $model = null): HarnessReport
     {
         $model ??= PhotoModel::standard();
-        $costs = $timings = $unmetered = [];
+        $costs = [];
+        $timings = [];
+        $unmetered = [];
         $evaluations = array_fill_keys(array_column(AnalysisPath::cases(), 'value'), []);
         $failures = array_fill_keys(array_column(AnalysisPath::cases(), 'value'), 0);
         $skippedMeals = 0;
@@ -72,14 +74,12 @@ final readonly class BenchmarkHarness
 
                 for ($attempt = 0; $attempt < $repeats; $attempt++) {
                     $group = (string) Str::uuid();
-                    $previousGroup = Context::get('photo_usage_group');
                     Context::add('photo_usage_group', $group);
                     $started = hrtime(true);
                     try {
                         $analysis = $this->analyze($path, $imageBase64, $mimeType, $model);
-                        if ($analysis->items->count() === 0) {
-                            throw new RuntimeException('No food was detected.');
-                        }
+                        throw_if($analysis->items->count() === 0, RuntimeException::class, 'No food was detected.');
+
                         $runs[] = $this->toPredictedRun($analysis, $truthNames);
                         // @codeCoverageIgnoreStart
                     } catch (Throwable) {
@@ -88,11 +88,10 @@ final readonly class BenchmarkHarness
                     } finally {
                         $timings[$path->value][] = (hrtime(true) - $started) / 1_000_000;
                         $usage = AiUsage::query()->where('usage_group', $group)->get();
-                        foreach ($usage as $record) {
-                            $costs[$path->value] = ($costs[$path->value] ?? 0.0) + $record->cost;
-                        }
+                        $costs[$path->value] = ($costs[$path->value] ?? 0.0) + $usage->sum(fn (AiUsage $record): float => $record->cost);
+
                         $unmetered[$path->value] = ($unmetered[$path->value] ?? 0) + ($usage->isEmpty() || $usage->sum('prompt_tokens') === 0 ? 1 : 0);
-                        $previousGroup === null ? Context::forget('photo_usage_group') : Context::add('photo_usage_group', $previousGroup);
+                        Context::forget('photo_usage_group');
                     }
 
                     if ($onAnalysis instanceof Closure) {
@@ -122,14 +121,14 @@ final readonly class BenchmarkHarness
         );
 
         return new HarnessReport(
-            analyzerVersion: $model->model.'/p3',
-            provider: $model->provider,
-            maxTokens: $model->maxTokens,
-            datasetHash: hash('sha256', json_encode($dataset, JSON_THROW_ON_ERROR)),
+            analyzerVersion: FoodPhotoAnalyzerAgent::version($model->model),
             referenceLookupEnabled: config()->boolean('plate.food_photo_analyzer.reference_lookup.enabled', false),
             repeats: $repeats,
             skippedMeals: $skippedMeals,
             paths: new DataCollection(PathMetrics::class, $paths),
+            provider: $model->provider,
+            maxTokens: $model->maxTokens,
+            datasetHash: hash('sha256', json_encode($dataset, JSON_THROW_ON_ERROR)),
         );
     }
 
@@ -146,6 +145,7 @@ final readonly class BenchmarkHarness
         if ($values === []) {
             return null;
         }
+
         sort($values);
 
         return $values[(int) ceil(count($values) * 0.95) - 1];

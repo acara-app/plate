@@ -36,7 +36,7 @@ it('restores a valid draft into the review page and claims it', function (): voi
     actingAs($this->user)
         ->get(route('snap-to-track.review', ['draft' => $token]))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('snap-to-track/review')
             ->where('state', 'restored')
             ->where('draftToken', $token)
@@ -92,7 +92,7 @@ it('shows the recovery state and flashes expiry analytics for an expired draft',
     $response = actingAs($this->user)
         ->get(route('snap-to-track.review', ['draft' => $token]))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('snap-to-track/review')
             ->where('state', 'unavailable')
             ->where('reason', 'expired')
@@ -108,7 +108,7 @@ it('shows the recovery state without analytics for an unknown token', function (
     $response = actingAs($this->user)
         ->get(route('snap-to-track.review', ['draft' => Str::random(64)]))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('state', 'unavailable')
             ->where('reason', 'invalid'));
 
@@ -122,7 +122,7 @@ it('refuses a draft claimed by another user without leaking the analysis', funct
     $response = actingAs($this->user)
         ->get(route('snap-to-track.review', ['draft' => $token]))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('state', 'unavailable')
             ->where('reason', 'claimed_by_other')
             ->where('analysis', null));
@@ -140,7 +140,7 @@ it('shows the recovery state for a consumed draft', function (): void {
 
     actingAs($this->user)
         ->get(route('snap-to-track.review', ['draft' => $token]))
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('state', 'unavailable')
             ->where('reason', 'consumed'));
 });

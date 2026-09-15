@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Billing;
 
+use App\Contracts\Billing\ProvidesAiBudget;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Enums\ModelName;
 use App\Enums\SubscriptionTier;
@@ -23,7 +24,7 @@ final readonly class EnforceAiUsageLimit
      */
     public function handle(User $user, ?ModelName $model = null): void
     {
-        $budget = resolve(\App\Contracts\Billing\ProvidesAiBudget::class)->forUser($user);
+        $budget = resolve(ProvidesAiBudget::class)->forUser($user);
         if ($budget !== null) {
             if ($budget->used + $this->estimateCallCost($model) > $budget->limit) {
                 throw new UsageLimitExceededException('monthly', $this->resolveUserTier->resolve($user)->tier,

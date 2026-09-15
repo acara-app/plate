@@ -24,6 +24,7 @@ final readonly class IdentifyPhotoGuest
                 $id = (string) Str::uuid();
                 Cookie::queue(cookie('photo_guest', $id, 525600, secure: $request->isSecure(), httpOnly: true, sameSite: 'lax'));
             }
+
             $request->attributes->set('photo_guest_id', $id);
         }
 

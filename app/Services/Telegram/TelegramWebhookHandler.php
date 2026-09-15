@@ -191,7 +191,7 @@ final class TelegramWebhookHandler extends WebhookHandler
         }
     }
 
-    private static function approvalToken(string $toolCallId): string
+    private function approvalToken(string $toolCallId): string
     {
         return mb_substr(sha1($toolCallId), 0, 12);
     }
@@ -215,8 +215,8 @@ final class TelegramWebhookHandler extends WebhookHandler
         $this->chat
             ->html($this->approvalCardHtml($approval->reason, (string) __('tools.approval_awaiting')))
             ->keyboard(Keyboard::make()->row([
-                Button::make('✅ Approve')->action('approve')->param('c', self::approvalToken($approval->id)),
-                Button::make('❌ Reject')->action('reject')->param('c', self::approvalToken($approval->id)),
+                Button::make('✅ Approve')->action('approve')->param('c', $this->approvalToken($approval->id)),
+                Button::make('❌ Reject')->action('reject')->param('c', $this->approvalToken($approval->id)),
             ]))
             ->dispatch();
     }
@@ -238,7 +238,7 @@ final class TelegramWebhookHandler extends WebhookHandler
         $token = $this->data->get('c');
 
         $toolCallId = collect(array_keys($pending))
-            ->first(fn (string $id): bool => is_string($token) && self::approvalToken($id) === $token);
+            ->first(fn (string $id): bool => is_string($token) && $this->approvalToken($id) === $token);
 
         if ($toolCallId === null) {
             $this->reply('This request is no longer available.');
@@ -273,8 +273,8 @@ final class TelegramWebhookHandler extends WebhookHandler
 
         try {
             $result = $this->dispatchChatTurn->resume($linkedChat, $recorded->toDecisions());
-        } catch (Throwable $e) {
-            report($e);
+        } catch (Throwable $throwable) {
+            report($throwable);
 
             $failed = (string) __('tools.approval_failed');
             $this->reply($failed);

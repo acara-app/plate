@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\GetAiUsageForBillingAction;
+use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Contracts\Billing\ProvidesAiBudget;
+use App\Data\Billing\PhotoAnalysisContext;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -23,36 +26,31 @@ final readonly class BillingHistoryController
 
         $billingHistory = [];
         $aiUsage = null;
+        $monthlyBudget = null;
 
-        if ($user === null) {
-            return Inertia::render('billing/index', [
-                'photoAllowance' => resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement($user, \App\Data\Billing\PhotoAnalysisContext::guestId($request))->toArray(),
-                'monthlyBudget' => null,
-                'billingHistory' => $billingHistory,
-                'aiUsage' => $aiUsage,
-            ]);
+        if ($user !== null) {
+            try {
+                $invoices = $user->invoices()->take(10); // @codeCoverageIgnore
+                $billingHistory = collect($invoices)->map(function (Invoice $invoice): array { // @codeCoverageIgnore
+                    return [ // @codeCoverageIgnore
+                        'id' => $invoice->id ?? '', // @codeCoverageIgnore
+                        'date' => $invoice->date()->toDateString(), // @codeCoverageIgnore
+                        'total' => $invoice->total(), // @codeCoverageIgnore
+                        'status' => $invoice->status ?? 'unknown', // @codeCoverageIgnore
+                        'download_url' => $invoice->hosted_invoice_url ?? '', // @codeCoverageIgnore
+                    ]; // @codeCoverageIgnore
+                })->all(); // @codeCoverageIgnore
+            } catch (Exception) {
+                $billingHistory = [];
+            }
+
+            $aiUsage = $this->getAiUsageForBilling->handle($user);
+            $monthlyBudget = resolve(ProvidesAiBudget::class)->forUser($user)?->toArray();
         }
-
-        try {
-            $invoices = $user->invoices()->take(10); // @codeCoverageIgnore
-            $billingHistory = collect($invoices)->map(function (Invoice $invoice): array { // @codeCoverageIgnore
-                return [ // @codeCoverageIgnore
-                    'id' => $invoice->id ?? '', // @codeCoverageIgnore
-                    'date' => $invoice->date()->toDateString(), // @codeCoverageIgnore
-                    'total' => $invoice->total(), // @codeCoverageIgnore
-                    'status' => $invoice->status ?? 'unknown', // @codeCoverageIgnore
-                    'download_url' => $invoice->hosted_invoice_url ?? '', // @codeCoverageIgnore
-                ]; // @codeCoverageIgnore
-            })->all(); // @codeCoverageIgnore
-        } catch (Exception) {
-            $billingHistory = [];
-        }
-
-        $aiUsage = $this->getAiUsageForBilling->handle($user);
 
         return Inertia::render('billing/index', [
-            'photoAllowance' => resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement($user, \App\Data\Billing\PhotoAnalysisContext::guestId($request))->toArray(),
-            'monthlyBudget' => resolve(\App\Contracts\Billing\ProvidesAiBudget::class)->forUser($user)?->toArray(),
+            'photoAllowance' => resolve(ManagesPhotoAnalyses::class)->entitlement($user, PhotoAnalysisContext::guestId($request))->toArray(),
+            'monthlyBudget' => $monthlyBudget,
             'billingHistory' => $billingHistory,
             'aiUsage' => $aiUsage,
         ]);

@@ -49,9 +49,9 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasProviderOptions, HasStru
         return $model;
     }
 
-    public static function version(): string
+    public static function version(?string $model = null): string
     {
-        return sprintf('%s/p%s', self::pinnedModel(), self::PROMPT_VERSION);
+        return sprintf('%s/p%s', $model ?? self::pinnedModel(), self::PROMPT_VERSION);
     }
 
     public function usingModel(PhotoModel $model, ?User $user = null): self
@@ -152,6 +152,8 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasProviderOptions, HasStru
 
     public function analyze(string $imageBase64, string $mimeType): FoodAnalysisData
     {
+        $model = $this->photoModel->model ?? self::pinnedModel();
+
         /** @var StructuredAgentResponse $response */
         $response = $this->prompt(
             'Analyze this food photo and provide nutritional breakdown for all food items visible.',
@@ -159,12 +161,12 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasProviderOptions, HasStru
                 new Base64Image($imageBase64, $mimeType),
             ],
             provider: $this->photoModel->provider ?? 'gemini',
-            model: $this->photoModel->model ?? self::pinnedModel(),
+            model: $model,
         );
 
         /** @var array<string, mixed> $data */
         $data = $response->toArray();
-        $data['analyzer_version'] = ($this->photoModel->model ?? self::pinnedModel()).'/p'.self::PROMPT_VERSION;
+        $data['analyzer_version'] = self::version($model);
 
         return FoodAnalysisData::from($data);
     }

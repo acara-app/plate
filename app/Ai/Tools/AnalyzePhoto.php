@@ -6,11 +6,13 @@ namespace App\Ai\Tools;
 
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Ai\Attributes\AiToolSensitivity;
+use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\DataSensitivity;
 use App\Models\User;
 use App\Utilities\LanguageUtil;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Tools\Request;
@@ -25,7 +27,7 @@ final readonly class AnalyzePhoto implements Tool
      */
     public function __construct(private array $images, private ?User $user = null, ?string $requestId = null)
     {
-        $this->requestId = $requestId ?? (string) \Illuminate\Support\Str::uuid();
+        $this->requestId = $requestId ?? (string) Str::uuid();
     }
 
     public function name(): string
@@ -62,7 +64,7 @@ final readonly class AnalyzePhoto implements Tool
             $image->mime ?? 'image/jpeg',
             $language,
             $languageCode,
-            new \App\Data\Billing\PhotoAnalysisContext($user, null, $this->requestId, 'chat', hash('sha256', $image->base64)),
+            new PhotoAnalysisContext($user, null, $this->requestId, 'chat', hash('sha256', $image->base64)),
         );
 
         return (string) json_encode($analysis->toArray());
