@@ -817,6 +817,9 @@ it('offers the photo plan beside the credit plans once the scan quota is live', 
         }
     });
 
+    SubscriptionProduct::factory()->create(['name' => 'Supporter', 'price' => 9]);
+    SubscriptionProduct::factory()->create(['name' => 'Pro', 'price' => 19]);
+
     $user = User::factory()->create(['stripe_id' => null]);
 
     actingAs($user)
