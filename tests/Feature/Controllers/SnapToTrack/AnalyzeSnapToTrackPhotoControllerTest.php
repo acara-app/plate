@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Billing\ResolveSnapBurstCap;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Data\Billing\TierEntitlement;
@@ -12,6 +13,7 @@ use App\Models\AnalysisDraft;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\RateLimiter;
+use Inertia\Testing\AssertableInertia;
 
 use function Pest\Laravel\actingAs;
 
@@ -19,9 +21,9 @@ covers(AnalyzeSnapToTrackPhotoController::class);
 
 function stubTierForSnapToTrack(SubscriptionTier $tier): void
 {
-    app()->instance(ResolvesUserTier::class, new class($tier) implements ResolvesUserTier
+    app()->instance(ResolvesUserTier::class, new readonly class($tier) implements ResolvesUserTier
     {
-        public function __construct(private readonly SubscriptionTier $tier) {}
+        public function __construct(private SubscriptionTier $tier) {}
 
         public function resolve(User $user): TierEntitlement
         {
@@ -109,7 +111,7 @@ it('validates the uploaded photo', function (array $payload, string $errorKey): 
     'oversized image' => [fn (): array => ['photo' => UploadedFile::fake()->image('meal.jpg')->size(11000)], 'photo'],
 ]);
 
-it('throttles repeated analyses per user with a friendly retry message', function (): void {
+it('offers an upgrade instead of a dead end when the burst cap is hit', function (): void {
     fakeAuthenticatedAnalysis();
 
     foreach (range(1, 5) as $attempt) {
@@ -124,9 +126,19 @@ it('throttles repeated analyses per user with a friendly retry message', functio
             'photo' => UploadedFile::fake()->image('meal-6.jpg'),
         ])
         ->assertRedirect(route('snap-to-track.index'))
-        ->assertSessionHasErrors([
-            'photo' => "You've hit this hour's scan limit. You can scan again in about 60 minutes.",
+        ->assertSessionDoesntHaveErrors('photo')
+        ->assertInertiaFlash('analytics', [
+            'name' => 'snap_to_track_limit_reached',
+            'properties' => ['gate' => 'burst', 'tier' => 'free'],
         ]);
+
+    actingAs($this->user)
+        ->withoutVite()
+        ->get(route('snap-to-track.index'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('burstLimit.tier', 'free')
+            ->where('burstLimit.cap', 5)
+            ->where('burstLimit.retry_after_minutes', 60));
 });
 
 it('leaves other throttled routes returning a plain 429', function (): void {
@@ -201,8 +213,7 @@ it('applies tier-aware burst caps to scanning', function (): void {
         ->post(route('snap-to-track.analyze'), [
             'photo' => UploadedFile::fake()->image('meal-2.jpg'),
         ])
-        ->assertRedirect(route('snap-to-track.index'))
-        ->assertSessionHasErrors('photo');
+        ->assertRedirect(route('snap-to-track.index'));
 
     $supporter = User::factory()->create();
     stubTierForSnapToTrack(SubscriptionTier::Basic);
@@ -218,7 +229,16 @@ it('applies tier-aware burst caps to scanning', function (): void {
         ->post(route('snap-to-track.analyze'), [
             'photo' => UploadedFile::fake()->image('supporter-3.jpg'),
         ])
-        ->assertSessionHasErrors('photo');
+        ->assertRedirect(route('snap-to-track.index'));
+});
+
+it('gives Snap Pro subscribers more hourly scans than the free tier', function (): void {
+    fakeAuthenticatedAnalysis();
+    stubTierForSnapToTrack(SubscriptionTier::Snap);
+
+    expect(resolve(ResolveSnapBurstCap::class)->handle($this->user))
+        ->toBe(30)
+        ->toBeGreaterThan(config()->integer('plate.snap_to_track.burst_caps.free'));
 });
 
 it('keeps the default burst cap for unrestricted entitlements', function (): void {
@@ -236,5 +256,5 @@ it('keeps the default burst cap for unrestricted entitlements', function (): voi
         ->post(route('snap-to-track.analyze'), [
             'photo' => UploadedFile::fake()->image('meal-2.jpg'),
         ])
-        ->assertSessionHasErrors('photo');
+        ->assertRedirect(route('snap-to-track.index'));
 });

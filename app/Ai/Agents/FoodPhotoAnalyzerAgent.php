@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Ai\SystemPrompt;
+use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
+use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\JsonSchema\Types\Type;
@@ -13,7 +15,9 @@ use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
+use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
@@ -22,11 +26,15 @@ use RuntimeException;
 #[Provider('gemini')]
 #[MaxTokens(35000)]
 #[Timeout(120)]
-final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
+final class FoodPhotoAnalyzerAgent implements Agent, HasProviderOptions, HasStructuredOutput
 {
     use Promptable;
 
     public const string PROMPT_VERSION = '3';
+
+    public ?User $user = null;
+
+    private ?PhotoModel $photoModel = null;
 
     private ?string $language = null;
 
@@ -41,9 +49,29 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
         return $model;
     }
 
-    public static function version(): string
+    public static function version(?string $model = null): string
     {
-        return sprintf('%s/p%s', self::pinnedModel(), self::PROMPT_VERSION);
+        return sprintf('%s/p%s', $model ?? self::pinnedModel(), self::PROMPT_VERSION);
+    }
+
+    public function usingModel(PhotoModel $model, ?User $user = null): self
+    {
+        $agent = clone $this;
+        $agent->photoModel = $model;
+        $agent->user = $user;
+
+        return $agent;
+    }
+
+    public function maxTokens(): int
+    {
+        return $this->photoModel->maxTokens ?? 35000;
+    }
+
+    /** @return array<string, mixed> */
+    public function providerOptions(Lab|string $provider): array
+    {
+        return $this->photoModel->options ?? [];
     }
 
     public function withLanguage(string $language, string $languageCode): self
@@ -124,18 +152,21 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasStructuredOutput
 
     public function analyze(string $imageBase64, string $mimeType): FoodAnalysisData
     {
+        $model = $this->photoModel->model ?? self::pinnedModel();
+
         /** @var StructuredAgentResponse $response */
         $response = $this->prompt(
             'Analyze this food photo and provide nutritional breakdown for all food items visible.',
             attachments: [
                 new Base64Image($imageBase64, $mimeType),
             ],
-            model: self::pinnedModel(),
+            provider: $this->photoModel->provider ?? 'gemini',
+            model: $model,
         );
 
         /** @var array<string, mixed> $data */
         $data = $response->toArray();
-        $data['analyzer_version'] = self::version();
+        $data['analyzer_version'] = self::version($model);
 
         return FoodAnalysisData::from($data);
     }

@@ -56,6 +56,7 @@ return [
         'burst_caps' => [
             'default' => (int) env('SNAP_TO_TRACK_BURST_CAP_DEFAULT', 5),
             'free' => (int) env('SNAP_TO_TRACK_BURST_CAP_FREE', 5),
+            'snap' => (int) env('SNAP_TO_TRACK_BURST_CAP_SNAP', 30),
             'basic' => (int) env('SNAP_TO_TRACK_BURST_CAP_BASIC', 15),
             'plus' => (int) env('SNAP_TO_TRACK_BURST_CAP_PLUS', 30),
         ],
@@ -95,12 +96,16 @@ return [
     'model_pricing' => [
         'default' => ['input' => 0.50, 'output' => 2.00, 'reasoning' => 0.0, 'cache_read' => 0.25],
         'models' => [
+            'gpt-5.6-terra' => ['input' => 2.00, 'output' => 12.00, 'reasoning' => 0.0, 'cache_read' => 0.20],
+            'gpt-6-astra' => ['input' => 10.00, 'output' => 50.00, 'reasoning' => 0.0, 'cache_read' => 1.00],
+            'claude-sonnet-5' => ['input' => 2.00, 'output' => 10.00, 'reasoning' => 0.0, 'cache_read' => 0.20, 'cache_write' => 2.50],
+            'claude-fable-5-1' => ['input' => 10.00, 'output' => 50.00, 'reasoning' => 0.0, 'cache_read' => 1.00, 'cache_write' => 12.50],
             'gpt-5-mini' => ['input' => 0.15, 'output' => 0.60, 'reasoning' => 0.0, 'cache_read' => 0.075],
             'gpt-5-nano' => ['input' => 0.10, 'output' => 0.40, 'reasoning' => 0.0, 'cache_read' => 0.05],
             'gpt-5.4-mini' => ['input' => 0.75, 'output' => 4.50, 'reasoning' => 0.0, 'cache_read' => 0.075],
             'gemini-3-flash-preview' => ['input' => 0.50, 'output' => 3.00, 'reasoning' => 0.0, 'cache_read' => 0.05],
-            'gemini-3.5-flash' => ['input' => 0.50, 'output' => 3.00, 'reasoning' => 0.0, 'cache_read' => 0.05],
-            'gemini-3.1-pro-preview' => ['input' => 2.00, 'output' => 12.00, 'reasoning' => 0.0, 'cache_read' => 0.20],
+            'gemini-3.5-flash' => ['input' => 1.50, 'output' => 9.00, 'reasoning' => 9.00, 'cache_read' => 0.15],
+            'gemini-3.1-pro-preview' => ['input' => 2.00, 'output' => 12.00, 'reasoning' => 12.00, 'cache_read' => 0.20],
         ],
     ],
 

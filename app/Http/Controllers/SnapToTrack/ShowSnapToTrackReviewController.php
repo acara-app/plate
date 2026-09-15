@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\SnapToTrack;
 
 use App\Actions\RestoreAnalysisDraftAction;
+use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\AnalysisDraftResolutionData;
+use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\AnalysisDraftStatus;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -28,8 +30,10 @@ final readonly class ShowSnapToTrackReviewController
         }
 
         $this->flashRestoredAnalytics($resolution);
+        session()->put('snap_to_track.upgrade_draft', $draft);
 
         return Inertia::render('snap-to-track/review', [
+            'photoAllowance' => resolve(ManagesPhotoAnalyses::class)->entitlement($this->currentUser, PhotoAnalysisContext::guestId(request()))->toArray(),
             'state' => 'restored',
             'reason' => null,
             'analysis' => $resolution->analysis(),

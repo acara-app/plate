@@ -13,5 +13,20 @@ final class PathMetrics extends Data
         public AnalysisPath $path,
         public int $failedRuns,
         public BenchmarkMetrics $metrics,
+        public float $costUsd = 0.0,
+        public ?float $p95LatencyMs = null,
+        public int $unmeteredRuns = 0,
     ) {}
+
+    public function costPerHundred(): ?float
+    {
+        return $this->metrics->runCount > 0 && $this->unmeteredRuns === 0 ? $this->costUsd / $this->metrics->runCount * 100 : null;
+    }
+
+    public function successRate(): float
+    {
+        $attempts = $this->metrics->runCount + $this->failedRuns;
+
+        return $attempts > 0 ? $this->metrics->runCount / $attempts : 0.0;
+    }
 }

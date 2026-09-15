@@ -309,7 +309,7 @@ it('blocks the analyze call once the per-IP rate limit is exhausted', function (
         ->set('photo', $file)
         ->set('turnstileToken', Turnstile::dummy())
         ->call('analyze')
-        ->assertSet('error', null)
+        ->assertSet('error', 'Too many attempts in a short time. Please try again later; this is separate from your scan allowance.')
         ->assertSet('result', null)
         ->assertSee('on a roll')
         ->assertDontSee('Too many requests. Please try again later.');

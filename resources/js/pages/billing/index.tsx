@@ -1,3 +1,7 @@
+import {
+    PhotoAllowanceCard,
+    type PhotoAllowance,
+} from '@/components/photo-allowance';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import clsx from 'clsx';
@@ -27,7 +31,7 @@ interface AiUsageData {
 }
 
 interface AiUsage {
-    tier: 'free' | 'basic' | 'plus';
+    tier: 'free' | 'basic' | 'plus' | 'snap';
     tier_label: string;
     payment_pending: boolean;
     premium_enforcement_active: boolean;
@@ -36,6 +40,8 @@ interface AiUsage {
 }
 
 interface Props {
+    photoAllowance?: PhotoAllowance;
+    monthlyBudget?: { used: number; limit: number; resets_at: string } | null;
     billingHistory: Invoice[];
     aiUsage?: AiUsage;
 }
@@ -47,7 +53,12 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     },
 ];
 
-export default function Index({ billingHistory, aiUsage }: Props) {
+export default function Index({
+    billingHistory,
+    aiUsage,
+    photoAllowance,
+    monthlyBudget,
+}: Props) {
     const { t } = useTranslation('common');
 
     const showTierBadge = aiUsage?.premium_enforcement_active === true;
@@ -58,12 +69,29 @@ export default function Index({ billingHistory, aiUsage }: Props) {
 
             <SettingsLayout>
                 <div className="space-y-6">
+                    <PhotoAllowanceCard allowance={photoAllowance} />
+                    {monthlyBudget && (
+                        <p className="text-sm text-muted-foreground">
+                            Other AI:{' '}
+                            {Math.max(
+                                0,
+                                Math.round(
+                                    (1 -
+                                        monthlyBudget.used /
+                                            monthlyBudget.limit) *
+                                        100,
+                                ),
+                            )}
+                            % of your monthly allowance remains. Photo scans
+                            have a separate allowance.
+                        </p>
+                    )}
                     <HeadingSmall
                         title={t('billing.title')}
                         description={t('billing.description')}
                     />
 
-                    {aiUsage && (
+                    {aiUsage && !monthlyBudget && (
                         <div className="space-y-4">
                             {showTierBadge && (
                                 <div className="flex flex-wrap items-center gap-2">

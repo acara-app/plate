@@ -1,6 +1,14 @@
+import {
+    PhotoAllowanceCard,
+    type PhotoAllowance,
+} from '@/components/photo-allowance';
 import ListHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/ListHealthEntryController';
 import AnalyzeSnapToTrackPhotoController from '@/actions/App/Http/Controllers/SnapToTrack/AnalyzeSnapToTrackPhotoController';
 import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackController';
+import {
+    BurstLimitNotice,
+    type BurstLimit,
+} from '@/components/billing/burst-limit-notice';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,13 +38,19 @@ type CreditLimit = {
 };
 
 interface SnapToTrackIndexProps {
+    photoAllowance?: PhotoAllowance;
+    analysisRequestId: string;
     savedGroupId: string | null;
     creditLimit: CreditLimit | null;
+    burstLimit: BurstLimit | null;
 }
 
 export default function SnapToTrackIndex({
     savedGroupId,
     creditLimit,
+    burstLimit,
+    photoAllowance,
+    analysisRequestId,
 }: SnapToTrackIndexProps) {
     const { t } = useTranslation('common');
 
@@ -51,6 +65,8 @@ export default function SnapToTrackIndex({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('snap_to_track.title')} />
             <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4">
+                <PhotoAllowanceCard allowance={photoAllowance} />
+                {burstLimit !== null && <BurstLimitNotice limit={burstLimit} />}
                 {savedGroupId !== null && (
                     <Card>
                         <CardHeader>
@@ -105,53 +121,72 @@ export default function SnapToTrackIndex({
                     </Card>
                 )}
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <ScanLine className="size-5" />
-                            {t('snap_to_track.index.heading')}
-                        </CardTitle>
-                        <CardDescription>
-                            {t('snap_to_track.index.description')}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Form
-                            {...AnalyzeSnapToTrackPhotoController.form()}
-                            disableWhileProcessing
-                            className="flex flex-col gap-4"
-                        >
-                            {({ processing, errors }) => (
-                                <>
-                                    <div>
-                                        <Label htmlFor="snap-photo">
-                                            {t(
-                                                'snap_to_track.index.upload_label',
-                                            )}
-                                        </Label>
-                                        <Input
-                                            id="snap-photo"
-                                            name="photo"
-                                            type="file"
-                                            accept="image/*"
-                                            required
-                                            className="mt-1"
-                                        />
-                                        <InputError message={errors.photo} />
-                                    </div>
-                                    <Button type="submit" disabled={processing}>
-                                        {processing
-                                            ? t('snap_to_track.index.analyzing')
-                                            : t('snap_to_track.index.analyze')}
-                                    </Button>
-                                    <p className="text-xs text-muted-foreground">
-                                        {t('snap_to_track.review.disclaimer')}
-                                    </p>
-                                </>
-                            )}
-                        </Form>
-                    </CardContent>
-                </Card>
+                {burstLimit === null &&
+                    !(photoAllowance?.enabled && photoAllowance.exhausted) && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <ScanLine className="size-5" />
+                                    {t('snap_to_track.index.heading')}
+                                </CardTitle>
+                                <CardDescription>
+                                    {t('snap_to_track.index.description')}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Form
+                                    {...AnalyzeSnapToTrackPhotoController.form()}
+                                    disableWhileProcessing
+                                    className="flex flex-col gap-4"
+                                >
+                                    {({ processing, errors }) => (
+                                        <>
+                                            <div>
+                                                <Label htmlFor="snap-photo">
+                                                    {t(
+                                                        'snap_to_track.index.upload_label',
+                                                    )}
+                                                </Label>
+                                                <input
+                                                    type="hidden"
+                                                    name="analysis_request_id"
+                                                    value={analysisRequestId}
+                                                />
+                                                <Input
+                                                    id="snap-photo"
+                                                    name="photo"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    required
+                                                    className="mt-1"
+                                                />
+                                                <InputError
+                                                    message={errors.photo}
+                                                />
+                                            </div>
+                                            <Button
+                                                type="submit"
+                                                disabled={processing}
+                                            >
+                                                {processing
+                                                    ? t(
+                                                          'snap_to_track.index.analyzing',
+                                                      )
+                                                    : t(
+                                                          'snap_to_track.index.analyze',
+                                                      )}
+                                            </Button>
+                                            <p className="text-xs text-muted-foreground">
+                                                {t(
+                                                    'snap_to_track.review.disclaimer',
+                                                )}
+                                            </p>
+                                        </>
+                                    )}
+                                </Form>
+                            </CardContent>
+                        </Card>
+                    )}
             </div>
         </AppLayout>
     );

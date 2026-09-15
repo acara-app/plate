@@ -1,13 +1,20 @@
+import {
+    PhotoAllowanceCard,
+    type PhotoAllowance,
+} from '@/components/photo-allowance';
+import ShowSnapToTrackReviewController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackReviewController';
+import { PaymentConfirmation } from '@/components/billing/payment-confirmation';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import { support } from '@/routes';
+import { support, login, snapToTrack } from '@/routes';
 import billing from '@/routes/billing';
 import checkout from '@/routes/checkout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
+import { PhotoPlanBand } from '@/components/billing/photo-plan-band';
 import clsx from 'clsx';
 import { CreditCardIcon, ReceiptIcon, TriangleIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface BillingProduct {
@@ -46,9 +53,15 @@ interface CashierSubscription {
 }
 
 interface Props {
+    isGuest: boolean;
+    paymentPending: boolean;
+    selectedProductId: number | null;
+    photoAllowance?: PhotoAllowance;
+    upgradeDraft?: string | null;
     products: BillingProduct[];
+    photoPlan: BillingProduct | null;
     currentSubscription: CashierSubscription | null;
-    billingPortalUrl: string;
+    billingPortalUrl: string | null;
     hasIncompletePayment: boolean;
     incompletePaymentUrl: string | null;
 }
@@ -62,6 +75,12 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
 
 export default function CashierSubscription({
     products,
+    photoPlan,
+    isGuest,
+    paymentPending,
+    selectedProductId,
+    photoAllowance,
+    upgradeDraft,
     currentSubscription,
     billingPortalUrl,
     hasIncompletePayment,
@@ -73,32 +92,56 @@ export default function CashierSubscription({
     >('monthly');
     const { t } = useTranslation('common');
 
+    const Layout = isGuest ? GuestPricingLayout : AppLayout;
+
     const formatSavings = (value: number) => `$${parseFloat(value.toFixed(2))}`;
 
-    const handleSubscribe = (productId: number) => {
+    function handleSubscribe(
+        productId: number,
+        interval: 'monthly' | 'yearly' = billingInterval,
+    ) {
         if (isSubscribing) {
             return;
         }
 
+        if (isGuest) {
+            router.visit(checkout.start(productId).url);
+            return;
+        }
+        window.umami?.track('snap_to_track_checkout_click', {
+            source: 'checkout',
+            interval,
+        });
         setIsSubscribing(true);
         router.post(
             checkout.subscription.store(),
             {
                 product_id: productId,
-                billing_interval: billingInterval,
+                billing_interval: interval,
             },
             {
-                onFinish: () => setIsSubscribing(false),
+                onFinish() {
+                    setIsSubscribing(false);
+                },
             },
         );
-    };
+    }
 
     return (
-        <AppLayout breadcrumbs={getBreadcrumbs(t)}>
+        <Layout breadcrumbs={getBreadcrumbs(t)}>
             <Head title={t('checkout_subscription.title')} />
 
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <div className="space-y-8">
+                    {paymentPending && <PaymentConfirmation />}
+                    {!paymentPending && photoAllowance?.mode === 'premium' && (
+                        <div role="status" className="rounded-lg border p-4">
+                            Your premium scans are ready.{' '}
+                            <a href={snapToTrack().url} className="underline">
+                                Continue scanning
+                            </a>
+                        </div>
+                    )}
                     {hasIncompletePayment && incompletePaymentUrl && (
                         <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/50 dark:bg-yellow-900/20">
                             <div className="flex">
@@ -246,6 +289,48 @@ export default function CashierSubscription({
                         </div>
                     )}
 
+                    <PhotoAllowanceCard
+                        allowance={photoAllowance}
+                        showUpgrade={false}
+                    />
+                    {photoAllowance?.offer && (
+                        <p className="text-sm text-muted-foreground">
+                            {photoAllowance.offer.name} renews at{' '}
+                            {photoAllowance.offer.formatted_price} every month
+                            and includes {photoAllowance.offer.scans} premium
+                            scans per billing month. Unused scans do not roll
+                            over. When scans run out, wait for renewal. No
+                            automatic overage charges. Cancel anytime from
+                            billing settings.
+                        </p>
+                    )}
+                    {upgradeDraft && (
+                        <Link
+                            className="underline"
+                            href={
+                                ShowSnapToTrackReviewController({
+                                    draft: upgradeDraft,
+                                }).url
+                            }
+                        >
+                            Return to your saved analysis
+                        </Link>
+                    )}
+                    {photoPlan && (
+                        <PhotoPlanBand
+                            plan={photoPlan}
+                            isGuest={isGuest}
+                            isSubscribing={isSubscribing}
+                            isCurrent={
+                                currentSubscription?.product_name ===
+                                photoPlan.name
+                            }
+                            onSubscribe={() =>
+                                handleSubscribe(photoPlan.id, 'monthly')
+                            }
+                        />
+                    )}
+
                     {/* Available Plans */}
                     <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
                         <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-800 dark:bg-gray-950">
@@ -259,45 +344,58 @@ export default function CashierSubscription({
                                 </h2>
 
                                 {/* Billing Interval Toggle */}
-                                <div className="flex items-center space-x-1 rounded-lg bg-gray-200 p-1 dark:bg-gray-800">
-                                    <button
-                                        onClick={() =>
-                                            setBillingInterval('monthly')
-                                        }
-                                        className={clsx(
-                                            'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                                            billingInterval === 'monthly'
-                                                ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
-                                                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
-                                        )}
-                                    >
-                                        {t('checkout_subscription.monthly')}
-                                    </button>
-                                    <button
-                                        onClick={() =>
-                                            setBillingInterval('yearly')
-                                        }
-                                        className={clsx(
-                                            'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                                            billingInterval === 'yearly'
-                                                ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
-                                                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
-                                        )}
-                                    >
-                                        {t('checkout_subscription.yearly')}
-                                        <span className="ml-1 text-xs font-semibold text-green-600 dark:text-green-400">
-                                            {t('checkout_subscription.save')}{' '}
-                                            {products[0]
-                                                ?.yearly_savings_percentage ||
-                                                17}
-                                            %
-                                        </span>
-                                    </button>
-                                </div>
+                                {products.some(
+                                    (product) => product.yearly_price,
+                                ) && (
+                                    <div className="flex items-center space-x-1 rounded-lg bg-gray-200 p-1 dark:bg-gray-800">
+                                        <button
+                                            onClick={() =>
+                                                setBillingInterval('monthly')
+                                            }
+                                            className={clsx(
+                                                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                                                billingInterval === 'monthly'
+                                                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
+                                                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
+                                            )}
+                                        >
+                                            {t('checkout_subscription.monthly')}
+                                        </button>
+                                        <button
+                                            onClick={() =>
+                                                setBillingInterval('yearly')
+                                            }
+                                            className={clsx(
+                                                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                                                billingInterval === 'yearly'
+                                                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
+                                                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
+                                            )}
+                                        >
+                                            {t('checkout_subscription.yearly')}
+                                            <span className="ml-1 text-xs font-semibold text-green-600 dark:text-green-400">
+                                                {t(
+                                                    'checkout_subscription.save',
+                                                )}{' '}
+                                                {products[0]
+                                                    ?.yearly_savings_percentage ||
+                                                    17}
+                                                %
+                                            </span>
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="px-6 py-6">
-                            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                            <div
+                                className={clsx(
+                                    'grid grid-cols-1 gap-6',
+                                    products.length === 2
+                                        ? 'md:grid-cols-2'
+                                        : 'md:grid-cols-3',
+                                )}
+                            >
                                 {products.map((product) => (
                                     <div
                                         key={product.id}
@@ -321,6 +419,12 @@ export default function CashierSubscription({
                                         <div className="flex flex-1 flex-col text-center">
                                             <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-gray-100">
                                                 {product.name}
+                                                {selectedProductId ===
+                                                    product.id && (
+                                                    <span className="block text-sm text-muted-foreground">
+                                                        Your selected plan
+                                                    </span>
+                                                )}
                                             </h3>
                                             <div className="mb-4">
                                                 {product.coming_soon ? (
@@ -409,6 +513,38 @@ export default function CashierSubscription({
                                                             )}
                                                         </a>
                                                     </Button>
+                                                ) : product.price === 0 &&
+                                                  photoAllowance?.enabled ? (
+                                                    photoAllowance.mode ===
+                                                        'trial' &&
+                                                    !photoAllowance.exhausted ? (
+                                                        <Button
+                                                            asChild
+                                                            variant="outline"
+                                                            className="w-full"
+                                                        >
+                                                            <a
+                                                                href={
+                                                                    snapToTrack()
+                                                                        .url
+                                                                }
+                                                            >
+                                                                Try your free
+                                                                scan
+                                                            </a>
+                                                        </Button>
+                                                    ) : (
+                                                        <Button
+                                                            disabled
+                                                            variant="outline"
+                                                            className="w-full"
+                                                        >
+                                                            {photoAllowance.mode ===
+                                                            'premium'
+                                                                ? 'Premium active'
+                                                                : 'Trial scan used'}
+                                                        </Button>
+                                                    )
                                                 ) : product.price === 0 ? (
                                                     <Button
                                                         disabled
@@ -449,9 +585,16 @@ export default function CashierSubscription({
                                                                 ? t(
                                                                       'checkout_subscription.processing',
                                                                   )
-                                                                : t(
-                                                                      'checkout_subscription.choose_plan_button',
-                                                                  )}
+                                                                : photoAllowance
+                                                                        ?.offer
+                                                                        ?.product_id ===
+                                                                    product.id
+                                                                  ? isGuest
+                                                                      ? 'Create an account to subscribe'
+                                                                      : `Subscribe — ${photoAllowance.offer.formatted_price}/month`
+                                                                  : t(
+                                                                        'checkout_subscription.choose_plan_button',
+                                                                    )}
                                                         </Button>
 
                                                         {((billingInterval ===
@@ -481,7 +624,9 @@ export default function CashierSubscription({
                         <div className="flex flex-col gap-3">
                             <Button asChild variant="default">
                                 <a
-                                    href={billingPortalUrl}
+                                    href={
+                                        billingPortalUrl ?? billing.index().url
+                                    }
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
@@ -503,6 +648,23 @@ export default function CashierSubscription({
                     )}
                 </div>
             </div>
-        </AppLayout>
+        </Layout>
+    );
+}
+
+function GuestPricingLayout({
+    children,
+}: {
+    children: ReactNode;
+    breadcrumbs?: BreadcrumbItem[];
+}) {
+    return (
+        <main className="min-h-screen bg-background text-foreground">
+            <nav className="mx-auto flex max-w-7xl justify-between px-6 py-4">
+                <a href={snapToTrack().url}>Snap to Track</a>
+                <Link href={login().url}>Log in</Link>
+            </nav>
+            {children}
+        </main>
     );
 }

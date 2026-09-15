@@ -94,9 +94,8 @@ it('passes user preferred language to the agent when authenticated', function ()
     $tool = new AnalyzePhoto([$image]);
     $tool->handle(new Request(['query' => 'analyze']));
 
-    expect($agent->instructions())
-        ->toContain('language code: `en`')
-        ->toContain('Return all `name` and `portion` values in English');
+    FoodPhotoAnalyzerAgent::assertPrompted(fn ($prompt): bool => str_contains($prompt->agent->instructions(), 'language code: `en`')
+        && str_contains($prompt->agent->instructions(), 'Return all `name` and `portion` values in English'));
 });
 
 it('does not pass language when no user is authenticated', function (): void {

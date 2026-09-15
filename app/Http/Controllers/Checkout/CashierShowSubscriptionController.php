@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Checkout;
 
+use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Services\StripeServiceContract;
+use App\Data\Billing\PhotoAnalysisContext;
+use App\Enums\SubscriptionTier;
 use App\Models\SubscriptionProduct;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -23,17 +27,11 @@ final readonly class CashierShowSubscriptionController
     {
         $user = $request->user();
 
-        if ($user === null) {
-            abort(401); // @codeCoverageIgnore
-        }
-
-        $this->stripeService->ensureStripeCustomer($user);
-
         $products = SubscriptionProduct::all();
 
         /** @var Subscription|null $currentSubscription */
         /** @phpstan-ignore-next-line argument.type */
-        $currentSubscription = $user->subscriptions()->get()->first(fn (Subscription $subscription): bool => $subscription->valid());
+        $currentSubscription = $user?->subscriptions()->get()->first(fn (Subscription $subscription): bool => $subscription->valid());
 
         $currentProduct = null;
         $isYearly = false;
@@ -63,19 +61,42 @@ final readonly class CashierShowSubscriptionController
             }
         }
 
-        $hasIncompletePayment = $currentSubscription !== null && $this->stripeService->hasIncompletePayment($user, $currentSubscription->type);
+        $hasIncompletePayment = $user !== null && $currentSubscription !== null && $this->stripeService->hasIncompletePayment($user, $currentSubscription->type);
 
         $incompletePaymentUrl = null;
         if ($currentSubscription !== null && $hasIncompletePayment) {
             $incompletePaymentUrl = $this->stripeService->getIncompletePaymentUrl($currentSubscription);
         }
 
+        $offers = resolve(OffersSubscriptions::class);
+        $availableProducts = $products->filter($offers->available(...))->map($offers->present(...))->values();
+
+        $isPhotoPlan = fn (SubscriptionProduct $product): bool => SubscriptionTier::fromProductName($product->name) === SubscriptionTier::Snap;
+        $photoPlan = $availableProducts->first($isPhotoPlan);
+        $availableProducts = $availableProducts->reject($isPhotoPlan)->values();
+
+        $allowance = resolve(ManagesPhotoAnalyses::class)->entitlement($user, PhotoAnalysisContext::guestId($request));
+        $returningFromCheckout = $request->routeIs('checkout.success');
+
+        if ($returningFromCheckout && $allowance->mode === 'premium' && $request->session()->pull('checkout.started')) {
+            Inertia::flash('analytics', ['name' => 'snap_to_track_payment_verified', 'properties' => ['source' => 'checkout']]);
+        }
+
+        $premiumNotYetActive = $allowance->enabled ? $allowance->mode !== 'premium' : $currentSubscription === null;
+        $paymentPending = $returningFromCheckout && $request->session()->has('checkout.started') && $premiumNotYetActive;
+
         return Inertia::render('checkout/show-subscription-product', [
-            'products' => $products,
+            'products' => $availableProducts,
+            'photoPlan' => $photoPlan,
+            'isGuest' => $user === null,
+            'paymentPending' => $paymentPending,
+            'selectedProductId' => $request->session()->get('checkout.selected_product'),
+            'photoAllowance' => $allowance->toArray(),
+            'upgradeDraft' => session('snap_to_track.upgrade_draft'),
             'currentSubscription' => $currentSubscription ? [
                 'id' => $currentSubscription->id,
                 'type' => $currentSubscription->type,
-                'type_display' => $user->subscriptionDisplayName(),
+                'type_display' => $user?->subscriptionDisplayName(),
                 'stripe_status' => $currentSubscription->stripe_status,
                 'stripe_price' => $currentSubscription->stripe_price,
                 'quantity' => $currentSubscription->quantity,
@@ -89,7 +110,7 @@ final readonly class CashierShowSubscriptionController
                 'product_name' => $currentProduct?->name,
                 'is_yearly' => $isYearly,
             ] : null,
-            'billingPortalUrl' => $this->stripeService->getBillingPortalUrl($user, route('checkout.subscription')),
+            'billingPortalUrl' => $user?->stripe_id ? route('billing.portal') : null,
             'hasIncompletePayment' => $hasIncompletePayment,
             'incompletePaymentUrl' => $incompletePaymentUrl,
         ]);

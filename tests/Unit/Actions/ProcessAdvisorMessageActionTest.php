@@ -40,7 +40,7 @@ function fakeConversationStore(?string $latestId = null, string $newId = 'conv-1
             return 'msg-1';
         }
 
-        public function storeAssistantMessage(string $conversationId, ?string $participantType, string|int|null $participantId, AgentPrompt $prompt, AgentResponse $response): ?string
+        public function storeAssistantMessage(string $conversationId, ?string $participantType, string|int|null $participantId, AgentPrompt $prompt, AgentResponse $response): string
         {
             return 'msg-2';
         }

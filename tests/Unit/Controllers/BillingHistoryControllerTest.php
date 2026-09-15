@@ -30,7 +30,10 @@ it('returns billing history for authenticated user', function (): void {
 
     $request = new class($user) extends Request
     {
-        public function __construct(private readonly User $user) {}
+        public function __construct(private readonly User $user)
+        {
+            parent::__construct();
+        }
 
         public function user($guard = null): User
         {
@@ -50,7 +53,10 @@ it('returns empty billing history when exception occurs fetching invoices', func
 
     $request = new class($user) extends Request
     {
-        public function __construct(private readonly User $user) {}
+        public function __construct(private readonly User $user)
+        {
+            parent::__construct();
+        }
 
         public function user($guard = null): User
         {

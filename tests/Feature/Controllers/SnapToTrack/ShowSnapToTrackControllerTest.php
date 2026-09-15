@@ -20,7 +20,7 @@ it('renders the snap to track module', function (): void {
     actingAs($this->user)
         ->get(route('snap-to-track.index'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('snap-to-track/index')
             ->where('savedGroupId', null));
 });
@@ -29,18 +29,16 @@ it('exposes the saved entry group after a meal was logged', function (): void {
     actingAs($this->user)
         ->withSession(['snap_to_track_saved_group' => 'group-uuid'])
         ->get(route('snap-to-track.index'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('savedGroupId', 'group-uuid'));
 });
 
-it('exposes the credit limit panel data after a blocked scan', function (): void {
+it('discards a stale credit warning when another scan is allowed', function (): void {
     actingAs($this->user)
         ->withSession(['snap_to_track_credit_limit' => ['tier' => 'free', 'limit_credits' => 400, 'current_credits' => 401, 'resets_in' => '3 hours 10 minutes']])
         ->get(route('snap-to-track.index'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('creditLimit.tier', 'free')
-            ->where('creditLimit.limit_credits', 400)
-            ->where('creditLimit.current_credits', 401));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('creditLimit', null));
 });
 
 it('completes the auth funnel when a limit-recovery signup lands on the module', function (): void {

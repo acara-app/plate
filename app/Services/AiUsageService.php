@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 final class AiUsageService
 {
     /**
-     * @param  array{prompt_tokens?: int, completion_tokens?: int, cache_read_input_tokens?: int, reasoning_tokens?: int}  $usage
+     * @param  array{prompt_tokens?: int, completion_tokens?: int, cache_read_input_tokens?: int, cache_write_input_tokens?: int, reasoning_tokens?: int}  $usage
      */
     public function calculateCost(string $model, array $usage): float
     {
@@ -23,7 +23,8 @@ final class AiUsageService
         $reasoningCost = ($usage['reasoning_tokens'] ?? 0) / 1_000_000 * $pricing['reasoning'];
         $cacheCost = ($usage['cache_read_input_tokens'] ?? 0) / 1_000_000 * $pricing['cache_read'];
 
-        return $inputCost + $outputCost + $reasoningCost + $cacheCost;
+        return $inputCost + $outputCost + $reasoningCost + $cacheCost
+            + ($usage['cache_write_input_tokens'] ?? 0) / 1_000_000 * ($pricing['cache_write'] ?? $pricing['input'] * 1.25);
     }
 
     /**
@@ -79,6 +80,6 @@ final class AiUsageService
         return (int) AiUsage::query()
             ->forUser($user)
             ->dateRange($startDate, $endDate)
-            ->sum(DB::raw('prompt_tokens + completion_tokens + cache_read_input_tokens + reasoning_tokens'));
+            ->sum(DB::raw('prompt_tokens + completion_tokens + cache_read_input_tokens + cache_write_input_tokens + reasoning_tokens'));
     }
 }

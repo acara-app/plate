@@ -10,15 +10,20 @@ use App\Data\Benchmark\HarnessReport;
 use App\Data\Benchmark\MealEvaluation;
 use App\Data\Benchmark\PathMetrics;
 use App\Data\Benchmark\PredictedRun;
+use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
 use App\Data\FoodItemData;
 use App\Data\NutrientValues;
 use App\Enums\Benchmark\AnalysisPath;
+use App\Models\AiUsage;
 use App\Models\BenchmarkMeal;
 use App\Models\BenchmarkMealItem;
 use Closure;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use RuntimeException;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
@@ -34,11 +39,16 @@ final readonly class BenchmarkHarness
     /**
      * @param  Collection<int, BenchmarkMeal>  $meals
      */
-    public function run(Collection $meals, int $repeats, ?Closure $onAnalysis = null): HarnessReport
+    public function run(Collection $meals, int $repeats, ?Closure $onAnalysis = null, ?PhotoModel $model = null): HarnessReport
     {
+        $model ??= PhotoModel::standard();
+        $costs = [];
+        $timings = [];
+        $unmetered = [];
         $evaluations = array_fill_keys(array_column(AnalysisPath::cases(), 'value'), []);
         $failures = array_fill_keys(array_column(AnalysisPath::cases(), 'value'), 0);
         $skippedMeals = 0;
+        $dataset = [];
 
         foreach ($meals as $meal) {
             $photo = $this->loadPhoto($meal);
@@ -53,6 +63,7 @@ final readonly class BenchmarkHarness
 
             [$imageBase64, $mimeType] = $photo;
             $truth = $meal->truthTotals();
+            $dataset[] = [$meal->code, hash('sha256', $imageBase64), $truth->toArray(), $meal->items->toArray()];
             $truthNames = array_values($meal->items
                 ->filter(fn (BenchmarkMealItem $item): bool => $item->visible)
                 ->map(fn (BenchmarkMealItem $item): string => $item->name)
@@ -62,12 +73,25 @@ final readonly class BenchmarkHarness
                 $runs = [];
 
                 for ($attempt = 0; $attempt < $repeats; $attempt++) {
+                    $group = (string) Str::uuid();
+                    Context::add('photo_usage_group', $group);
+                    $started = hrtime(true);
                     try {
-                        $runs[] = $this->toPredictedRun($this->analyze($path, $imageBase64, $mimeType), $truthNames);
+                        $analysis = $this->analyze($path, $imageBase64, $mimeType, $model);
+                        throw_if($analysis->items->count() === 0, RuntimeException::class, 'No food was detected.');
+
+                        $runs[] = $this->toPredictedRun($analysis, $truthNames);
                         // @codeCoverageIgnoreStart
                     } catch (Throwable) {
                         $failures[$path->value]++;
                         // @codeCoverageIgnoreEnd
+                    } finally {
+                        $timings[$path->value][] = (hrtime(true) - $started) / 1_000_000;
+                        $usage = AiUsage::query()->where('usage_group', $group)->get();
+                        $costs[$path->value] = ($costs[$path->value] ?? 0.0) + $usage->sum(fn (AiUsage $record): float => $record->cost);
+
+                        $unmetered[$path->value] = ($unmetered[$path->value] ?? 0) + ($usage->isEmpty() || $usage->sum('prompt_tokens') === 0 ? 1 : 0);
+                        Context::forget('photo_usage_group');
                     }
 
                     if ($onAnalysis instanceof Closure) {
@@ -89,24 +113,42 @@ final readonly class BenchmarkHarness
                 path: $path,
                 failedRuns: $failures[$path->value],
                 metrics: $this->calculator->calculate($evaluations[$path->value]),
+                costUsd: $costs[$path->value] ?? 0.0,
+                p95LatencyMs: $this->p95($timings[$path->value] ?? []),
+                unmeteredRuns: $unmetered[$path->value] ?? 0,
             ),
             AnalysisPath::cases(),
         );
 
         return new HarnessReport(
-            analyzerVersion: FoodPhotoAnalyzerAgent::version(),
+            analyzerVersion: FoodPhotoAnalyzerAgent::version($model->model),
             referenceLookupEnabled: config()->boolean('plate.food_photo_analyzer.reference_lookup.enabled', false),
             repeats: $repeats,
             skippedMeals: $skippedMeals,
             paths: new DataCollection(PathMetrics::class, $paths),
+            provider: $model->provider,
+            maxTokens: $model->maxTokens,
+            datasetHash: hash('sha256', json_encode($dataset, JSON_THROW_ON_ERROR)),
         );
     }
 
-    private function analyze(AnalysisPath $path, string $imageBase64, string $mimeType): FoodAnalysisData
+    private function analyze(AnalysisPath $path, string $imageBase64, string $mimeType, PhotoModel $model): FoodAnalysisData
     {
         return $path === AnalysisPath::Raw
-            ? $this->agent->analyze($imageBase64, $mimeType)
-            : $this->action->handle($imageBase64, $mimeType);
+            ? $this->agent->usingModel($model)->analyze($imageBase64, $mimeType)
+            : $this->action->analyzeUsingModel($imageBase64, $mimeType, $model);
+    }
+
+    /** @param list<float> $values */
+    private function p95(array $values): ?float
+    {
+        if ($values === []) {
+            return null;
+        }
+
+        sort($values);
+
+        return $values[(int) ceil(count($values) * 0.95) - 1];
     }
 
     /**

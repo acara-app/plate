@@ -38,9 +38,42 @@ class extends Component
 
     public ?string $draftToken = null;
 
+    #[\Livewire\Attributes\Locked]
+    public ?string $analysisRequestId = null;
+
+    #[\Livewire\Attributes\Computed]
+    public function photoAllowance(): \App\Data\Billing\PhotoEntitlement
+    {
+        return resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement(auth()->user(), \App\Data\Billing\PhotoAnalysisContext::guestId(request()));
+    }
+
+    private function ensureDraftToken(CreateAnalysisDraftAction $action): ?string
+    {
+        if ($this->result === null) {
+            return null;
+        }
+
+        return $this->draftToken ??= $action->handle(
+            FoodAnalysisData::from($this->result),
+            AnalysisDraftSource::PublicSnapToTrack,
+            auth()->id(),
+        );
+    }
+
+    public function upgrade(CreateAnalysisDraftAction $action): void
+    {
+        if ($this->ensureDraftToken($action) !== null) {
+            session()->put('snap_to_track.upgrade_draft', $this->draftToken);
+        }
+        session()->put('url.intended', route('checkout.subscription', absolute: false));
+        $offer = $this->photoAllowance->offer;
+        $this->redirect($offer === null ? route('checkout.subscription') : route('checkout.start', ['product' => $offer->productId]));
+    }
+
     public function _startUpload($name, $fileInfo, $isMultiple): void
     {
         if ($name === 'photo') {
+            $this->analysisRequestId = (string) \Illuminate\Support\Str::uuid();
             $this->validateUploadChallenge();
             $this->hitUploadRateLimit();
             $this->rememberVerifiedUploadChallenge();
@@ -52,10 +85,16 @@ class extends Component
     public function analyze(AnalyzeFoodPhotoAction $action): void
     {
         $this->error = null;
+        if ($this->photoAllowance->exhausted) {
+            $this->error = 'Your photo allowance is used up. Choose a plan below to continue.';
+
+            return;
+        }
         $this->result = null;
         $this->draftToken = null;
 
         if (RateLimiter::tooManyAttempts($this->analysisRateLimitKey(), 5)) {
+            $this->error = 'Too many attempts in a short time. Please try again later; this is separate from your scan allowance.';
             $this->deleteTemporaryPhoto(resetUploadChallenge: true);
 
             return;
@@ -96,9 +135,16 @@ class extends Component
                 $mimeType = 'image/jpeg'; // @codeCoverageIgnore
             }
 
-            $analysis = $action->handle($base64, $mimeType);
+            $this->analysisRequestId ??= (string) \Illuminate\Support\Str::uuid();
+            $analysis = $action->handle($base64, $mimeType, context: new \App\Data\Billing\PhotoAnalysisContext(
+                auth()->user(), \App\Data\Billing\PhotoAnalysisContext::guestId(request()), $this->analysisRequestId,
+                'public_snap_to_track', hash('sha256', $base64),
+            ));
 
             $this->result = $analysis->toArray();
+            unset($this->photoAllowance);
+        } catch (\App\Exceptions\Billing\PhotoLimitExceeded $e) {
+            $this->error = $e->getMessage();
         } catch (ValidationException $e) {
             $this->deleteTemporaryPhoto(resetUploadChallenge: true);
 
@@ -114,6 +160,9 @@ class extends Component
 
     public function clearPhoto(): void
     {
+        if ($this->photoAllowance->exhausted) {
+            return;
+        }
         $this->deleteTemporaryPhoto(resetUploadChallenge: true);
         $this->result = null;
         $this->error = null;
@@ -122,6 +171,10 @@ class extends Component
 
     public function limitReachedGate(): ?string
     {
+        if ($this->photoAllowance->exhausted) {
+            return 'daily';
+        }
+
         if (RateLimiter::tooManyAttempts($this->uploadRateLimitKey(), 5)) {
             return 'upload';
         }
@@ -151,11 +204,7 @@ class extends Component
             return;
         }
 
-        $this->draftToken ??= $action->handle(
-            FoodAnalysisData::from($this->result),
-            AnalysisDraftSource::PublicSnapToTrack,
-            auth()->id(),
-        );
+        $this->ensureDraftToken($action);
 
         $reviewUrl = route('snap-to-track.review', ['draft' => $this->draftToken], absolute: false);
 
@@ -266,6 +315,28 @@ class extends Component
     <x-tools-header theme="cream" />
 
     <div class="px-4 py-8 md:py-12">
+    @php
+        $photoAllowance = $this->photoAllowance;
+    @endphp
+    @if ($photoAllowance->enabled)
+        <section class="mx-auto max-w-2xl border border-[#D9CFBC] px-6 py-4" aria-label="Photo allowance"
+            x-data x-init="window.acaraTrack?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', exhausted: @js($photoAllowance->exhausted()) })">
+            @if ($photoAllowance->mode === 'trial')
+                <p>{{ $photoAllowance->exhausted() ? 'Your free trial scan is complete.' : 'Try one photo free. No signup or credit card required.' }}</p>
+                <p class="mt-2 text-sm">One successful trial scan, with no daily reset.</p>
+            @else
+                <p>{{ $photoAllowance->remaining() }} of {{ $photoAllowance->limit }} premium scans remaining this billing month.</p>
+            @endif
+            @if ($photoAllowance->resetsAt)
+                <p>Resets {{ $photoAllowance->resetsAt }}.</p>
+            @endif
+            @if ($photoAllowance->canUpgrade && $photoAllowance->offer)
+                <p class="mt-2">{{ $photoAllowance->offer->scans }} premium scans per billing month. No rollover or overage charges.</p>
+                <button type="button" wire:click="upgrade" data-umami-event="snap_to_track_upgrade_click" class="mt-4 inline-flex min-h-12 items-center bg-[#1A1814] px-6 text-[#F2EBDD]">Continue with {{ $photoAllowance->offer->name }} — {{ $photoAllowance->offer->formattedPrice }}/month</button>
+                <p class="mt-2 text-sm">Renews monthly. Cancel anytime from billing settings.</p>
+            @endif
+        </section>
+    @endif
         {{-- Editorial breadcrumbs --}}
         <nav aria-label="Breadcrumb" class="mx-auto flex max-w-7xl items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[#6E665C] lg:px-8">
             <a href="/" aria-label="Home" class="inline-flex items-center transition hover:text-[#1A1814]">
@@ -300,7 +371,7 @@ class extends Component
                 @php
                     $limitGate = $this->limitReachedGate();
                 @endphp
-                @if ($limitGate !== null)
+                @if ($limitGate !== null && ! $photoAllowance->enabled)
                     {{-- Limit recovery (dark inverse) --}}
                     <article
                         x-data
@@ -349,6 +420,7 @@ class extends Component
                         @endauth
                     </article>
                 @endif
+                @unless ($photoAllowance->exhausted())
                 <form wire:submit="analyze" class="space-y-6">
                     <div
                         x-data="{ uploading: false, uploadFailed: false, progress: 0, fileName: '' }"
@@ -565,6 +637,7 @@ class extends Component
                         <p><time datetime="{{ now()->toDateString() }}">Last updated: {{ now()->format('F Y') }}</time></p>
                     </div>
                 </form>
+                @endunless
             @else
                 {{-- Result --}}
                 @php
@@ -688,6 +761,7 @@ class extends Component
                         </article>
 
                         {{-- Analyze another --}}
+                        @unless ($photoAllowance->exhausted())
                         <button
                             type="button"
                             wire:click="clearPhoto"
@@ -698,6 +772,8 @@ class extends Component
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </button>
+
+                        @endunless
 
                         {{-- Disclaimer --}}
                         <div class="flex flex-col gap-1 px-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">

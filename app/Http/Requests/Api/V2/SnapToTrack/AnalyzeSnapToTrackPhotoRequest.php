@@ -27,6 +27,7 @@ final class AnalyzeSnapToTrackPhotoRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'analysis_request_id' => ['sometimes', 'uuid'],
             'photo' => ['required', 'string', new ValidBase64Image(self::MAX_KILOBYTES)],
         ];
     }
@@ -39,9 +40,7 @@ final class AnalyzeSnapToTrackPhotoRequest extends FormRequest
 
         $decoded = Base64Image::decode($this->string('photo')->toString());
 
-        if (! $decoded instanceof Base64Image) {
-            throw new RuntimeException('Photo failed to decode after validation.');
-        }
+        throw_unless($decoded instanceof Base64Image, RuntimeException::class, 'Photo failed to decode after validation.');
 
         return $this->decoded = $decoded;
     }

@@ -165,7 +165,7 @@ it('aborts without spending when the cost confirmation is declined', function ()
     FoodPhotoAnalyzerAgent::fake(fn (): array => perfectAnalysisPayload());
 
     $this->artisan('benchmark:run', ['--repeats' => 2])
-        ->expectsConfirmation('Run 4 analyses (~$0.02)?', 'no')
+        ->expectsConfirmation('Run 4 analyses (~$0.05)?', 'no')
         ->assertSuccessful();
 
     FoodPhotoAnalyzerAgent::assertNeverPrompted();
@@ -177,4 +177,20 @@ it('fails fast when no benchmark meals exist', function (): void {
     $this->artisan('benchmark:run', ['--force' => true])
         ->expectsOutputToContain('No benchmark meals collected yet')
         ->assertFailed();
+});
+
+it('benchmarks an explicit premium model and refuses to treat unmetered calls as free', function (): void {
+    seedGoldenPlate();
+    FoodPhotoAnalyzerAgent::fake(fn (): array => perfectAnalysisPayload());
+
+    $this->artisan('benchmark:run', ['--repeats' => 3, '--force' => true, '--provider' => 'openai', '--model' => 'gpt-5.6-terra', '--max-tokens' => 4096])->assertSuccessful();
+
+    $report = BenchmarkRun::query()->sole()->toHarnessReport();
+    expect($report->provider)->toBe('openai')
+        ->and($report->analyzerVersion)->toBe('gpt-5.6-terra/p3')
+        ->and($report->maxTokens)->toBe(4096)
+        ->and($report->datasetHash)->not->toBeNull()
+        ->and($report->paths[0]->unmeteredRuns)->toBe(3)
+        ->and($report->paths[0]->costPerHundred())->toBeNull();
+    FoodPhotoAnalyzerAgent::assertPrompted(fn ($prompt): bool => $prompt->model === 'gpt-5.6-terra');
 });

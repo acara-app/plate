@@ -48,7 +48,8 @@
         "pestphp/pest-plugin-type-coverage": "^5.0",
         "rector/rector": "^2.6.1",
         "roave/security-advisories": "dev-latest",
-        "spatie/boost-spatie-guidelines": "^1.1"
+        "spatie/boost-spatie-guidelines": "^1.1",
+        "spatie/guidelines-skills": "^1.1"
     },
     "autoload": {
         "psr-4": {

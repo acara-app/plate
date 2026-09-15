@@ -7,14 +7,19 @@ namespace App\Http\Controllers\Api\V2\SnapToTrack;
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\CreateAnalysisDraftAction;
+use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\AnalysisDraftSource;
 use App\Enums\ModelName;
+use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Http\Requests\Api\V2\SnapToTrack\AnalyzeSnapToTrackPhotoRequest;
 use App\Models\AnalysisDraft;
 use App\Models\User;
 use App\Utilities\LanguageUtil;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
 final readonly class AnalyzeSnapToTrackPhotoController
@@ -27,10 +32,12 @@ final readonly class AnalyzeSnapToTrackPhotoController
 
     public function __invoke(AnalyzeSnapToTrackPhotoRequest $request, #[CurrentUser] User $user): JsonResponse
     {
-        $this->enforceAiUsageLimit->handle(
-            $user,
-            ModelName::tryFrom(config()->string('plate.food_photo_analyzer.model')),
-        );
+        if (! resolve(ManagesPhotoAnalyses::class)->entitlement($user, null)->enabled) {
+            $this->enforceAiUsageLimit->handle(
+                $user,
+                ModelName::tryFrom(config()->string('plate.food_photo_analyzer.model')),
+            );
+        }
 
         $image = $request->decodedImage();
 
@@ -39,12 +46,21 @@ final readonly class AnalyzeSnapToTrackPhotoController
         );
 
         try {
+            $imageBase64 = $image->base64();
+
             $analysis = $this->analyzeFoodPhoto->handle(
-                $image->base64(),
+                $imageBase64,
                 $image->mimeType,
                 $language,
                 $languageCode,
+                PhotoAnalysisContext::fromRequest($request, 'mobile_snap_to_track', $imageBase64, $user),
             );
+        } catch (PhotoLimitExceeded $exception) {
+            return $exception->render();
+        } catch (HttpExceptionInterface $exception) {
+            return response()->json(['error' => $exception->getMessage()], $exception->getStatusCode());
+        } catch (ValidationException $exception) {
+            throw $exception;
         } catch (Throwable $throwable) {
             report($throwable);
 
@@ -65,6 +81,7 @@ final readonly class AnalyzeSnapToTrackPhotoController
             'draft_token' => $token,
             'expires_at' => $draft?->expires_at->toIso8601String(),
             'analysis' => $analysis->toArray(),
+            'photoAllowance' => resolve(ManagesPhotoAnalyses::class)->entitlement($user, null)->toArray(),
         ]);
     }
 

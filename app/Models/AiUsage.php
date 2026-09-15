@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read string $provider
  * @property-read int $prompt_tokens
  * @property-read int $completion_tokens
+ * @property-read int $cache_write_input_tokens
  * @property-read int $cache_read_input_tokens
  * @property-read int $reasoning_tokens
  * @property-read float $cost
@@ -39,6 +40,7 @@ final class AiUsage extends Model
         'prompt_tokens' => 'integer',
         'completion_tokens' => 'integer',
         'cache_read_input_tokens' => 'integer',
+        'cache_write_input_tokens' => 'integer',
         'reasoning_tokens' => 'integer',
         'cost' => 'float',
         'created_at' => 'datetime',
@@ -55,7 +57,7 @@ final class AiUsage extends Model
 
     public function totalTokens(): int
     {
-        return $this->prompt_tokens + $this->completion_tokens + $this->cache_read_input_tokens + $this->reasoning_tokens;
+        return $this->prompt_tokens + $this->completion_tokens + $this->cache_read_input_tokens + $this->cache_write_input_tokens + $this->reasoning_tokens;
     }
 
     /**

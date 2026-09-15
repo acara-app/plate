@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Data\Billing\PhotoModel;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Spatie\LaravelData\Exceptions\CannotCreateData;
@@ -172,3 +173,16 @@ it('fails loudly when no model is pinned', function (): void {
 
     FoodPhotoAnalyzerAgent::pinnedModel();
 })->throws(RuntimeException::class, 'No model is pinned for the food photo analyzer.');
+
+it('uses the selected photo model without changing the shared default', function (): void {
+    FoodPhotoAnalyzerAgent::fake([[
+        'items' => [], 'total_calories' => 0, 'total_protein' => 0,
+        'total_carbs' => 0, 'total_fat' => 0, 'confidence' => 0,
+    ]]);
+    $agent = new FoodPhotoAnalyzerAgent;
+    $profile = new PhotoModel('openai', 'test-premium-model', 2048);
+    $result = $agent->usingModel($profile)->analyze('aW1hZ2U=', 'image/jpeg');
+    expect($result->analyzerVersion)->toContain('test-premium-model')
+        ->and($agent->maxTokens())->toBe(35000);
+    FoodPhotoAnalyzerAgent::assertPrompted(fn ($prompt): bool => $prompt->model === 'test-premium-model');
+});

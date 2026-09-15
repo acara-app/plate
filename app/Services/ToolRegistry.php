@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\User;
 use Illuminate\Contracts\Container\Container;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Tool;
@@ -32,12 +33,12 @@ final readonly class ToolRegistry
      * @param  array<int, Base64Image>  $images
      * @return array<int, Tool|ProviderTool>
      */
-    public function getImageTools(array $images): array
+    public function getImageTools(array $images, ?User $user = null, ?string $requestId = null): array
     {
         /** @var array<int, class-string> $classes */
         $classes = config()->array('plate.image_tools', []);
 
-        return $this->resolve($classes, ['images' => $images]);
+        return $this->resolve($classes, ['images' => $images, 'user' => $user, 'requestId' => $requestId]);
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Checkout;
 
+use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Services\StripeServiceContract;
 use App\Http\Requests\CreateSubscriptionRequest;
 use App\Models\SubscriptionProduct;
@@ -24,6 +25,9 @@ final readonly class CashierSubscriptionController
         /** @var SubscriptionProduct $product */
         $product = SubscriptionProduct::query()->findOrFail($data['product_id']);
 
+        abort_unless(resolve(OffersSubscriptions::class)->available($product), 422, 'This plan is no longer offered.');
+        abort_if($data['billing_interval'] === 'yearly' && ! $product->yearly_stripe_lookup_key, 422, 'This plan is monthly only.');
+
         try {
             $user = $request->user();
 
@@ -32,8 +36,12 @@ final readonly class CashierSubscriptionController
             }
 
             if ($this->stripeService->hasActiveSubscription($user)) {
-                return to_route('checkout.subscription')
-                    ->with('error', 'You already have an active subscription. Use the billing portal to manage it.');
+                Inertia::flash('toast', [
+                    'type' => 'error',
+                    'message' => 'You already have an active subscription. Use the billing portal to manage it.',
+                ]);
+
+                return to_route('checkout.subscription');
             }
 
             $billingInterval = $data['billing_interval'];
@@ -45,7 +53,7 @@ final readonly class CashierSubscriptionController
 
             $actualPriceId = $this->stripeService->getPriceIdFromLookupKey($lookupKey);
 
-            throw_unless($actualPriceId, Exception::class, 'No Stripe price found with lookup_key: '.$lookupKey);
+            throw_unless($actualPriceId, Exception::class, "No Stripe price found with lookup_key: {$lookupKey}");
 
             $subscriptionType = str($product->name)->slug()->toString();
 
@@ -66,12 +74,16 @@ final readonly class CashierSubscriptionController
                 $trialDays
             );
 
+            $request->session()->put('checkout.started', true);
+
             return Inertia::location($checkoutUrl);
-
         } catch (Exception) {
+            Inertia::flash('toast', [
+                'type' => 'error',
+                'message' => 'Failed to initiate subscription. Please try again.',
+            ]);
 
-            return to_route('checkout.subscription')
-                ->with('error', 'Failed to initiate subscription. Please try again.');
+            return to_route('checkout.subscription');
         }
     }
 }
