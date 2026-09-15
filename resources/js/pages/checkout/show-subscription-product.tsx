@@ -5,14 +5,14 @@ import {
 import ShowSnapToTrackReviewController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackReviewController';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import { support } from '@/routes';
+import { support, login, snapToTrack } from '@/routes';
 import billing from '@/routes/billing';
 import checkout from '@/routes/checkout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import clsx from 'clsx';
 import { CreditCardIcon, ReceiptIcon, TriangleIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface BillingProduct {
@@ -51,11 +51,14 @@ interface CashierSubscription {
 }
 
 interface Props {
+    isGuest: boolean;
+    paymentPending: boolean;
+    selectedProductId: number | null;
     photoAllowance?: PhotoAllowance;
     upgradeDraft?: string | null;
     products: BillingProduct[];
     currentSubscription: CashierSubscription | null;
-    billingPortalUrl: string;
+    billingPortalUrl: string | null;
     hasIncompletePayment: boolean;
     incompletePaymentUrl: string | null;
 }
@@ -69,6 +72,9 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
 
 export default function CashierSubscription({
     products,
+    isGuest,
+    paymentPending,
+    selectedProductId,
     photoAllowance,
     upgradeDraft,
     currentSubscription,
@@ -82,6 +88,30 @@ export default function CashierSubscription({
     >('monthly');
     const { t } = useTranslation('common');
 
+    const Layout = isGuest ? GuestPricingLayout : AppLayout;
+    useEffect(() => {
+        if (!paymentPending) return;
+        const timer = window.setInterval(
+            () =>
+                router.reload({
+                    only: [
+                        'paymentPending',
+                        'photoAllowance',
+                        'currentSubscription',
+                    ],
+                }),
+            3000,
+        );
+        const stop = window.setTimeout(
+            () => window.clearInterval(timer),
+            60000,
+        );
+        return () => {
+            window.clearInterval(timer);
+            window.clearTimeout(stop);
+        };
+    }, [paymentPending]);
+
     const formatSavings = (value: number) => `$${parseFloat(value.toFixed(2))}`;
 
     const handleSubscribe = (productId: number) => {
@@ -89,6 +119,14 @@ export default function CashierSubscription({
             return;
         }
 
+        if (isGuest) {
+            router.visit(checkout.start(productId).url);
+            return;
+        }
+        window.umami?.track('snap_to_track_checkout_click', {
+            source: 'checkout',
+            interval: billingInterval,
+        });
         setIsSubscribing(true);
         router.post(
             checkout.subscription.store(),
@@ -103,11 +141,29 @@ export default function CashierSubscription({
     };
 
     return (
-        <AppLayout breadcrumbs={getBreadcrumbs(t)}>
+        <Layout breadcrumbs={getBreadcrumbs(t)}>
             <Head title={t('checkout_subscription.title')} />
 
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <div className="space-y-8">
+                    {paymentPending && (
+                        <div role="status" className="rounded-lg border p-4">
+                            We’re confirming your payment. Your scans will
+                            unlock when payment is verified. If this takes
+                            longer, refresh this page or check billing settings.
+                        </div>
+                    )}
+                    {!paymentPending && photoAllowance?.mode === 'premium' && (
+                        <div role="status" className="rounded-lg border p-4">
+                            Your premium scans are ready.{' '}
+                            <Link
+                                href={snapToTrack().url}
+                                className="underline"
+                            >
+                                Continue scanning
+                            </Link>
+                        </div>
+                    )}
                     {hasIncompletePayment && incompletePaymentUrl && (
                         <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/50 dark:bg-yellow-900/20">
                             <div className="flex">
@@ -255,7 +311,21 @@ export default function CashierSubscription({
                         </div>
                     )}
 
-                    <PhotoAllowanceCard allowance={photoAllowance} />
+                    <PhotoAllowanceCard
+                        allowance={photoAllowance}
+                        showUpgrade={false}
+                    />
+                    {photoAllowance?.offer && (
+                        <p className="text-sm text-muted-foreground">
+                            {photoAllowance.offer.name} renews at{' '}
+                            {photoAllowance.offer.formattedPrice} every month
+                            and includes {photoAllowance.offer.scans} premium
+                            scans per billing month. Unused scans do not roll
+                            over. When scans run out, wait for renewal. No
+                            automatic overage charges. Cancel anytime from
+                            billing settings.
+                        </p>
+                    )}
                     {upgradeDraft && (
                         <Link
                             className="underline"
@@ -325,7 +395,14 @@ export default function CashierSubscription({
                             </div>
                         </div>
                         <div className="px-6 py-6">
-                            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                            <div
+                                className={clsx(
+                                    'grid grid-cols-1 gap-6',
+                                    products.length === 2
+                                        ? 'md:grid-cols-2'
+                                        : 'md:grid-cols-3',
+                                )}
+                            >
                                 {products.map((product) => (
                                     <div
                                         key={product.id}
@@ -349,6 +426,12 @@ export default function CashierSubscription({
                                         <div className="flex flex-1 flex-col text-center">
                                             <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-gray-100">
                                                 {product.name}
+                                                {selectedProductId ===
+                                                    product.id && (
+                                                    <span className="block text-sm text-muted-foreground">
+                                                        Your selected plan
+                                                    </span>
+                                                )}
                                             </h3>
                                             <div className="mb-4">
                                                 {product.coming_soon ? (
@@ -437,6 +520,40 @@ export default function CashierSubscription({
                                                             )}
                                                         </a>
                                                     </Button>
+                                                ) : product.price === 0 &&
+                                                  photoAllowance?.enabled ? (
+                                                    photoAllowance.mode ===
+                                                        'trial' &&
+                                                    photoAllowance.used <
+                                                        (photoAllowance.limit ??
+                                                            0) ? (
+                                                        <Button
+                                                            asChild
+                                                            variant="outline"
+                                                            className="w-full"
+                                                        >
+                                                            <a
+                                                                href={
+                                                                    snapToTrack()
+                                                                        .url
+                                                                }
+                                                            >
+                                                                Try your free
+                                                                scan
+                                                            </a>
+                                                        </Button>
+                                                    ) : (
+                                                        <Button
+                                                            disabled
+                                                            variant="outline"
+                                                            className="w-full"
+                                                        >
+                                                            {photoAllowance.mode ===
+                                                            'premium'
+                                                                ? 'Premium active'
+                                                                : 'Trial scan used'}
+                                                        </Button>
+                                                    )
                                                 ) : product.price === 0 ? (
                                                     <Button
                                                         disabled
@@ -477,9 +594,16 @@ export default function CashierSubscription({
                                                                 ? t(
                                                                       'checkout_subscription.processing',
                                                                   )
-                                                                : t(
-                                                                      'checkout_subscription.choose_plan_button',
-                                                                  )}
+                                                                : photoAllowance
+                                                                        ?.offer
+                                                                        ?.productId ===
+                                                                    product.id
+                                                                  ? isGuest
+                                                                      ? 'Create an account to subscribe'
+                                                                      : `Subscribe — ${photoAllowance.offer.formattedPrice}/month`
+                                                                  : t(
+                                                                        'checkout_subscription.choose_plan_button',
+                                                                    )}
                                                         </Button>
 
                                                         {((billingInterval ===
@@ -489,9 +613,11 @@ export default function CashierSubscription({
                                                                 'yearly' &&
                                                                 !product.yearly_stripe_price_id)) && (
                                                             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                                {t(
-                                                                    'checkout_subscription.stripe_price_required',
-                                                                )}
+                                                                Subscriptions
+                                                                are temporarily
+                                                                unavailable.
+                                                                Please try again
+                                                                later.
                                                             </p>
                                                         )}
                                                     </>
@@ -509,7 +635,9 @@ export default function CashierSubscription({
                         <div className="flex flex-col gap-3">
                             <Button asChild variant="default">
                                 <a
-                                    href={billingPortalUrl}
+                                    href={
+                                        billingPortalUrl ?? billing.index().url
+                                    }
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
@@ -531,6 +659,23 @@ export default function CashierSubscription({
                     )}
                 </div>
             </div>
-        </AppLayout>
+        </Layout>
+    );
+}
+
+function GuestPricingLayout({
+    children,
+}: {
+    children: ReactNode;
+    breadcrumbs?: BreadcrumbItem[];
+}) {
+    return (
+        <main className="min-h-screen bg-background text-foreground">
+            <nav className="mx-auto flex max-w-7xl justify-between px-6 py-4">
+                <a href={snapToTrack().url}>Snap to Track</a>
+                <Link href={login().url}>Log in</Link>
+            </nav>
+            {children}
+        </main>
     );
 }

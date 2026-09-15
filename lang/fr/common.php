@@ -824,7 +824,7 @@ return [
         ],
     ],
     'checkout_subscription' => [
-        'title' => 'Gestion de l\'abonnement (Cashier)',
+        'title' => 'Gestion de l\'abonnement',
         'breadcrumb' => 'Abonnement',
         'payment_required' => 'Paiement requis',
         'payment_required_description' => 'Votre abonnement nécessite une confirmation de paiement supplémentaire.',

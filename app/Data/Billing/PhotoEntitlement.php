@@ -15,6 +15,7 @@ final class PhotoEntitlement extends Data
         public ?string $resetsAt = null,
         public string $mode = 'standard',
         public bool $canUpgrade = false,
+        public ?PhotoOffer $offer = null,
     ) {}
 
     public function remaining(): ?int

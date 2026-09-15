@@ -69,6 +69,8 @@ final readonly class CashierSubscriptionController
                 $trialDays
             );
 
+            $request->session()->put('checkout.started', true);
+
             return Inertia::location($checkoutUrl);
 
         } catch (Exception) {

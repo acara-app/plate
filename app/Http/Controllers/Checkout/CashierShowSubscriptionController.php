@@ -23,17 +23,11 @@ final readonly class CashierShowSubscriptionController
     {
         $user = $request->user();
 
-        if ($user === null) {
-            abort(401); // @codeCoverageIgnore
-        }
-
-        $this->stripeService->ensureStripeCustomer($user);
-
         $products = SubscriptionProduct::all();
 
         /** @var Subscription|null $currentSubscription */
         /** @phpstan-ignore-next-line argument.type */
-        $currentSubscription = $user->subscriptions()->get()->first(fn (Subscription $subscription): bool => $subscription->valid());
+        $currentSubscription = $user?->subscriptions()->get()->first(fn (Subscription $subscription): bool => $subscription->valid());
 
         $currentProduct = null;
         $isYearly = false;
@@ -63,7 +57,7 @@ final readonly class CashierShowSubscriptionController
             }
         }
 
-        $hasIncompletePayment = $currentSubscription !== null && $this->stripeService->hasIncompletePayment($user, $currentSubscription->type);
+        $hasIncompletePayment = $user !== null && $currentSubscription !== null && $this->stripeService->hasIncompletePayment($user, $currentSubscription->type);
 
         $incompletePaymentUrl = null;
         if ($currentSubscription !== null && $hasIncompletePayment) {
@@ -73,14 +67,23 @@ final readonly class CashierShowSubscriptionController
         $offers = resolve(\App\Contracts\Billing\OffersSubscriptions::class);
         $availableProducts = $products->filter($offers->available(...))->map($offers->present(...))->values();
 
+        $allowance = resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement($user, \App\Data\Billing\PhotoAnalysisContext::guestId($request));
+
+        if ($request->routeIs('checkout.success') && $allowance->mode === 'premium' && $request->session()->pull('checkout.started')) {
+            Inertia::flash('analytics', ['name' => 'snap_to_track_payment_verified', 'properties' => ['source' => 'checkout']]);
+        }
+
         return Inertia::render('checkout/show-subscription-product', [
             'products' => $availableProducts,
-            'photoAllowance' => resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement($user, \App\Data\Billing\PhotoAnalysisContext::guestId($request))->toArray(),
+            'isGuest' => $user === null,
+            'paymentPending' => $request->routeIs('checkout.success') && $request->session()->has('checkout.started') && ($allowance->enabled ? $allowance->mode !== 'premium' : $currentSubscription === null),
+            'selectedProductId' => $request->session()->get('checkout.selected_product'),
+            'photoAllowance' => $allowance->toArray(),
             'upgradeDraft' => session('snap_to_track.upgrade_draft'),
             'currentSubscription' => $currentSubscription ? [
                 'id' => $currentSubscription->id,
                 'type' => $currentSubscription->type,
-                'type_display' => $user->subscriptionDisplayName(),
+                'type_display' => $user?->subscriptionDisplayName(),
                 'stripe_status' => $currentSubscription->stripe_status,
                 'stripe_price' => $currentSubscription->stripe_price,
                 'quantity' => $currentSubscription->quantity,
@@ -94,7 +97,7 @@ final readonly class CashierShowSubscriptionController
                 'product_name' => $currentProduct?->name,
                 'is_yearly' => $isYearly,
             ] : null,
-            'billingPortalUrl' => $this->stripeService->getBillingPortalUrl($user, route('checkout.subscription')),
+            'billingPortalUrl' => $user?->stripe_id ? route('billing.portal') : null,
             'hasIncompletePayment' => $hasIncompletePayment,
             'incompletePaymentUrl' => $incompletePaymentUrl,
         ]);

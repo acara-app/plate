@@ -28,10 +28,12 @@ export function CreditWarningBanner({
             <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400" />
             <div className="flex-1 space-y-2">
                 <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
-                    {t('billing.warning.heading', {
-                        percentage: warning.percentage,
-                        limit: limitLabel,
-                    })}
+                    {warning.limit_type === 'monthly'
+                        ? 'Other AI tools: monthly allowance nearly used'
+                        : t('billing.warning.heading', {
+                              percentage: warning.percentage,
+                              limit: limitLabel,
+                          })}
                 </p>
                 <p className="text-xs text-amber-800 dark:text-amber-200">
                     {t('billing.warning.body', {
@@ -40,17 +42,25 @@ export function CreditWarningBanner({
                         time: warning.resets_in,
                     })}
                 </p>
-                {onUpgradeClick && warning.tier !== 'plus' && (
-                    <Button
-                        type="button"
-                        variant="link"
-                        size="sm"
-                        onClick={onUpgradeClick}
-                        className="h-auto p-0 text-amber-900 underline dark:text-amber-100"
-                    >
-                        {t('billing.warning.see_upgrade_options')}
-                    </Button>
+                {warning.limit_type === 'monthly' && (
+                    <p className="text-xs">
+                        Photo scans have their own allowance. Upgrading the
+                        photo plan does not increase this budget.
+                    </p>
                 )}
+                {onUpgradeClick &&
+                    warning.tier !== 'plus' &&
+                    warning.limit_type !== 'monthly' && (
+                        <Button
+                            type="button"
+                            variant="link"
+                            size="sm"
+                            onClick={onUpgradeClick}
+                            className="h-auto p-0 text-amber-900 underline dark:text-amber-100"
+                        >
+                            {t('billing.warning.see_upgrade_options')}
+                        </Button>
+                    )}
             </div>
             {onDismiss && (
                 <button

@@ -38,7 +38,7 @@ final readonly class StripeService implements StripeServiceContract
 
     public function hasActiveSubscription(User $user): bool
     {
-        return $user->subscribed();
+        return $user->hasActiveSubscription();
     }
 
     public function getPriceIdFromLookupKey(string $lookupKey): ?string

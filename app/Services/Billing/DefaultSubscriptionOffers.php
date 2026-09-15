@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Billing;
 
 use App\Contracts\Billing\OffersSubscriptions;
+use App\Enums\SubscriptionTier;
 use App\Models\SubscriptionProduct;
 
 final readonly class DefaultSubscriptionOffers implements OffersSubscriptions
@@ -16,6 +17,6 @@ final readonly class DefaultSubscriptionOffers implements OffersSubscriptions
 
     public function available(SubscriptionProduct $product): bool
     {
-        return $product->purchasable;
+        return $product->purchasable && SubscriptionTier::fromProductName($product->name) !== SubscriptionTier::Snap;
     }
 }
