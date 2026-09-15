@@ -7,8 +7,11 @@ namespace App\Http\Controllers\Api\V2\SnapToTrack;
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\CreateAnalysisDraftAction;
+use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\AnalysisDraftSource;
 use App\Enums\ModelName;
+use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Http\Requests\Api\V2\SnapToTrack\AnalyzeSnapToTrackPhotoRequest;
 use App\Models\AnalysisDraft;
 use App\Models\User;
@@ -27,10 +30,12 @@ final readonly class AnalyzeSnapToTrackPhotoController
 
     public function __invoke(AnalyzeSnapToTrackPhotoRequest $request, #[CurrentUser] User $user): JsonResponse
     {
-        $this->enforceAiUsageLimit->handle(
-            $user,
-            ModelName::tryFrom(config()->string('plate.food_photo_analyzer.model')),
-        );
+        if (! resolve(ManagesPhotoAnalyses::class)->enabled()) {
+            $this->enforceAiUsageLimit->handle(
+                $user,
+                ModelName::tryFrom(config()->string('plate.food_photo_analyzer.model')),
+            );
+        }
 
         $image = $request->decodedImage();
 
@@ -44,7 +49,14 @@ final readonly class AnalyzeSnapToTrackPhotoController
                 $image->mimeType,
                 $language,
                 $languageCode,
+                PhotoAnalysisContext::fromRequest($request, 'mobile_snap_to_track', $image->base64(), $user),
             );
+        } catch (PhotoLimitExceeded $exception) {
+            return $exception->render();
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $exception) {
+            return response()->json(['error' => $exception->getMessage()], $exception->getStatusCode());
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            throw $exception;
         } catch (Throwable $throwable) {
             report($throwable);
 
@@ -65,6 +77,7 @@ final readonly class AnalyzeSnapToTrackPhotoController
             'draft_token' => $token,
             'expires_at' => $draft?->expires_at->toIso8601String(),
             'analysis' => $analysis->toArray(),
+            'photoAllowance' => resolve(ManagesPhotoAnalyses::class)->entitlement($user, null)->toArray(),
         ]);
     }
 

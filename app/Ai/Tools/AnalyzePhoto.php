@@ -18,10 +18,15 @@ use Laravel\Ai\Tools\Request;
 #[AiToolSensitivity(DataSensitivity::Sensitive)]
 final readonly class AnalyzePhoto implements Tool
 {
+    private string $requestId;
+
     /**
      * @param  array<int, Base64Image>  $images
      */
-    public function __construct(private array $images) {}
+    public function __construct(private array $images, private ?User $user = null, ?string $requestId = null)
+    {
+        $this->requestId = $requestId ?? (string) \Illuminate\Support\Str::uuid();
+    }
 
     public function name(): string
     {
@@ -41,7 +46,7 @@ final readonly class AnalyzePhoto implements Tool
             ]);
         }
 
-        $user = Auth::user();
+        $user = $this->user ?? Auth::user();
 
         $image = $this->images[0];
 
@@ -57,6 +62,7 @@ final readonly class AnalyzePhoto implements Tool
             $image->mime ?? 'image/jpeg',
             $language,
             $languageCode,
+            new \App\Data\Billing\PhotoAnalysisContext($user, null, $this->requestId, 'chat', hash('sha256', $image->base64)),
         );
 
         return (string) json_encode($analysis->toArray());

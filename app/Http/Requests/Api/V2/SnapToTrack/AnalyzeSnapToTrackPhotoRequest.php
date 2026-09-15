@@ -27,6 +27,7 @@ final class AnalyzeSnapToTrackPhotoRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'analysis_request_id' => ['sometimes', 'uuid'],
             'photo' => ['required', 'string', new ValidBase64Image(self::MAX_KILOBYTES)],
         ];
     }

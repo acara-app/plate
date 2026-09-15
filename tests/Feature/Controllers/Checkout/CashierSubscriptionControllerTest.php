@@ -352,6 +352,5 @@ it('handles missing yearly lookup key gracefully', function (): void {
         'billing_interval' => 'yearly',
     ]);
 
-    $response->assertRedirect(route('checkout.subscription'));
-    $response->assertSessionHas('error', 'Failed to initiate subscription. Please try again.');
+    $response->assertUnprocessable();
 });

@@ -21,7 +21,7 @@ it('shares appearance cookie value with views', function (): void {
         ->and($response->getContent())->toBe('OK');
 });
 
-it('defaults to system when appearance cookie not present', function (): void {
+it('defaults to light when appearance cookie not present', function (): void {
     $middleware = new HandleAppearance();
 
     $request = Request::create('/', 'GET');

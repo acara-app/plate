@@ -20,5 +20,8 @@ final class HarnessReport extends Data
         public int $skippedMeals,
         #[DataCollectionOf(PathMetrics::class)]
         public DataCollection $paths,
+        public ?string $provider = null,
+        public ?int $maxTokens = null,
+        public ?string $datasetHash = null,
     ) {}
 }

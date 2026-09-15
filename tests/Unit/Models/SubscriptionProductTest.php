@@ -27,6 +27,7 @@ it('to array', function (): void {
             'updated_at',
             'stripe_lookup_key',
             'yearly_stripe_lookup_key',
+            'purchasable',
             'formatted_price',
             'formatted_yearly_price',
             'yearly_savings',

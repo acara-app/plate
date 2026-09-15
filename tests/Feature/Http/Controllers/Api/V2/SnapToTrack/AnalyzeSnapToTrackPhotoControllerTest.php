@@ -211,7 +211,7 @@ it('localizes the analysis using the Accept-Language header over the account loc
         ->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => apiSnapPhotoDataUrl()])
         ->assertOk();
 
-    expect($agent->instructions())->toContain('Монгол');
+    FoodPhotoAnalyzerAgent::assertPrompted(fn ($prompt): bool => str_contains($prompt->agent->instructions(), 'Монгол'));
 });
 
 it('falls back to the account locale when the requested language is unsupported', function (): void {
@@ -227,7 +227,7 @@ it('falls back to the account locale when the requested language is unsupported'
         ->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => apiSnapPhotoDataUrl()])
         ->assertOk();
 
-    expect($agent->instructions())->toContain('Монгол');
+    FoodPhotoAnalyzerAgent::assertPrompted(fn ($prompt): bool => str_contains($prompt->agent->instructions(), 'Монгол'));
 });
 
 it('matches a regional Accept-Language tag to its base language', function (): void {
@@ -243,5 +243,5 @@ it('matches a regional Accept-Language tag to its base language', function (): v
         ->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => apiSnapPhotoDataUrl()])
         ->assertOk();
 
-    expect($agent->instructions())->toContain('Français');
+    FoodPhotoAnalyzerAgent::assertPrompted(fn ($prompt): bool => str_contains($prompt->agent->instructions(), 'Français'));
 });

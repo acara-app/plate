@@ -7,6 +7,7 @@ namespace App\Enums;
 enum SubscriptionTier: string
 {
     case Free = 'free';
+    case Snap = 'snap';
     case Basic = 'basic';
     case Plus = 'plus';
 
@@ -14,6 +15,7 @@ enum SubscriptionTier: string
     {
         return match (mb_strtolower((string) $name)) {
             'free' => self::Free,
+            'snap pro' => self::Snap,
             'basic', 'supporter' => self::Basic,
             'plus', 'pro' => self::Plus,
             default => null, // @codeCoverageIgnore
@@ -24,6 +26,7 @@ enum SubscriptionTier: string
     {
         return match ($this) {
             self::Free => 'Free',
+            self::Snap => 'Snap Pro',
             self::Basic => 'Supporter',
             self::Plus => 'Pro',
         };

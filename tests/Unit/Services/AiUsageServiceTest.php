@@ -137,3 +137,11 @@ it('calculates cost with partial tokens', function (): void {
 
     expect($cost)->toBe($expectedCost);
 });
+
+it('includes Gemini thinking and current rates in actual photo costs', function (): void {
+    expect((new AiUsageService)->calculateCost('gemini-3.5-flash', [
+        'prompt_tokens' => 2000,
+        'completion_tokens' => 1000,
+        'reasoning_tokens' => 1000,
+    ]))->toBe(0.021);
+});

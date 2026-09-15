@@ -26,6 +26,8 @@ final readonly class BillingHistoryController
 
         if ($user === null) {
             return Inertia::render('billing/index', [
+                'photoAllowance' => resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement($user, \App\Data\Billing\PhotoAnalysisContext::guestId($request))->toArray(),
+                'monthlyBudget' => null,
                 'billingHistory' => $billingHistory,
                 'aiUsage' => $aiUsage,
             ]);
@@ -49,6 +51,8 @@ final readonly class BillingHistoryController
         $aiUsage = $this->getAiUsageForBilling->handle($user);
 
         return Inertia::render('billing/index', [
+            'photoAllowance' => resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement($user, \App\Data\Billing\PhotoAnalysisContext::guestId($request))->toArray(),
+            'monthlyBudget' => resolve(\App\Contracts\Billing\ProvidesAiBudget::class)->forUser($user)?->toArray(),
             'billingHistory' => $billingHistory,
             'aiUsage' => $aiUsage,
         ]);

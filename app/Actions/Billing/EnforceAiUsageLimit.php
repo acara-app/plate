@@ -23,6 +23,17 @@ final readonly class EnforceAiUsageLimit
      */
     public function handle(User $user, ?ModelName $model = null): void
     {
+        $budget = resolve(\App\Contracts\Billing\ProvidesAiBudget::class)->forUser($user);
+        if ($budget !== null) {
+            if ($budget->used + $this->estimateCallCost($model) > $budget->limit) {
+                throw new UsageLimitExceededException('monthly', $this->resolveUserTier->resolve($user)->tier,
+                    (int) round($budget->used * $this->multiplier()),
+                    (int) round($budget->limit * $this->multiplier()), $budget->resetsAt);
+            }
+
+            return;
+        }
+
         $entitlement = $this->resolveUserTier->resolve($user);
 
         if (! $entitlement->premiumEnforcementActive) {

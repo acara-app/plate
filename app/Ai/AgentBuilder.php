@@ -37,7 +37,7 @@ final readonly class AgentBuilder
     {
         return [
             'instructions' => $this->buildInstructions($request, $user),
-            'tools' => $this->buildTools($request),
+            'tools' => $this->buildTools($request, $user),
         ];
     }
 
@@ -68,12 +68,12 @@ final readonly class AgentBuilder
     /**
      * @return array<int, Tool|ProviderTool|Agent>
      */
-    public function buildTools(AgentRequest $request): array
+    public function buildTools(AgentRequest $request, ?User $user = null): array
     {
         $tools = $this->toolRegistry->getTools();
 
         if ($request->hasImages()) {
-            $imageTools = $this->toolRegistry->getImageTools($request->images);
+            $imageTools = $this->toolRegistry->getImageTools($request->images, $user, $request->streamId);
             $tools = [...$tools, ...$imageTools];
         }
 

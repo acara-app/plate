@@ -7,9 +7,12 @@ namespace App\Http\Controllers\SnapToTrack;
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\CreateAnalysisDraftAction;
+use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\AnalysisDraftSource;
 use App\Enums\ConfidenceBand;
 use App\Enums\ModelName;
+use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Http\Requests\SnapToTrack\AnalyzeSnapToTrackPhotoRequest;
 use App\Models\User;
@@ -38,10 +41,12 @@ final readonly class AnalyzeSnapToTrackPhotoController
         }
 
         try {
-            $this->enforceAiUsageLimit->handle(
-                $this->currentUser,
-                ModelName::tryFrom(config()->string('plate.food_photo_analyzer.model')),
-            );
+            if (! resolve(ManagesPhotoAnalyses::class)->enabled()) {
+                $this->enforceAiUsageLimit->handle(
+                    $this->currentUser,
+                    ModelName::tryFrom(config()->string('plate.food_photo_analyzer.model')),
+                );
+            }
         } catch (UsageLimitExceededException $usageLimitExceededException) {
             $this->deleteUploadedPhoto($photo);
 
@@ -66,7 +71,10 @@ final readonly class AnalyzeSnapToTrackPhotoController
                 $photo->getMimeType() ?? 'image/jpeg',
                 $language,
                 $languageCode,
+                PhotoAnalysisContext::fromRequest($request, 'authenticated_snap_to_track', base64_encode((string) $photo->get()), $this->currentUser),
             );
+        } catch (PhotoLimitExceeded $exception) {
+            return to_route('snap-to-track.index')->withErrors(['photo' => $exception->getMessage()]);
         } catch (Throwable $throwable) {
             report($throwable);
 

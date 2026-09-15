@@ -21,6 +21,8 @@ final readonly class ShowSnapToTrackController
         }
 
         return Inertia::render('snap-to-track/index', [
+            'photoAllowance' => resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement(request()->user(), \App\Data\Billing\PhotoAnalysisContext::guestId(request()))->toArray(),
+            'analysisRequestId' => (string) \Illuminate\Support\Str::uuid(),
             'savedGroupId' => session('snap_to_track_saved_group'),
             'creditLimit' => session('snap_to_track_credit_limit'),
         ]);

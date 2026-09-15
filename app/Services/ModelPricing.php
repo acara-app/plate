@@ -7,11 +7,11 @@ namespace App\Services;
 final class ModelPricing
 {
     /**
-     * @return array{input: float, output: float, reasoning: float, cache_read: float}
+     * @return array{input: float, output: float, reasoning: float, cache_read: float, cache_write?: float}
      */
     public static function forModel(string $model): array
     {
-        /** @var array<string, array{input: float, output: float, reasoning: float, cache_read: float}> $models */
+        /** @var array<string, array{input: float, output: float, reasoning: float, cache_read: float, cache_write?: float}> $models */
         $models = config()->array('plate.model_pricing.models', []);
 
         $match = $models[$model] ?? self::matchByBase($model, $models);
@@ -20,7 +20,7 @@ final class ModelPricing
             return $match;
         }
 
-        /** @var array{input: float, output: float, reasoning: float, cache_read: float} $default */
+        /** @var array{input: float, output: float, reasoning: float, cache_read: float, cache_write?: float} $default */
         $default = config()->array('plate.model_pricing.default', [
             'input' => 0.50,
             'output' => 2.00,
@@ -32,8 +32,8 @@ final class ModelPricing
     }
 
     /**
-     * @param  array<string, array{input: float, output: float, reasoning: float, cache_read: float}>  $models
-     * @return array{input: float, output: float, reasoning: float, cache_read: float}|null
+     * @param  array<string, array{input: float, output: float, reasoning: float, cache_read: float, cache_write?: float}>  $models
+     * @return array{input: float, output: float, reasoning: float, cache_read: float, cache_write?: float}|null
      */
     private static function matchByBase(string $model, array $models): ?array
     {
