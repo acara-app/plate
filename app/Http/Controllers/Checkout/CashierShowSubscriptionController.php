@@ -72,8 +72,13 @@ final readonly class CashierShowSubscriptionController
         $availableProducts = $products->filter($offers->available(...))->map($offers->present(...))->values();
 
         $isPhotoPlan = fn (SubscriptionProduct $product): bool => SubscriptionTier::fromProductName($product->name) === SubscriptionTier::Snap;
-        $photoPlan = $availableProducts->first($isPhotoPlan);
-        $availableProducts = $availableProducts->reject($isPhotoPlan)->values();
+        $otherProducts = $availableProducts->reject($isPhotoPlan)->values();
+        $photoPlan = null;
+
+        if ($otherProducts->contains(fn (SubscriptionProduct $product): bool => $product->price > 0)) {
+            $photoPlan = $availableProducts->first($isPhotoPlan);
+            $availableProducts = $otherProducts;
+        }
 
         $allowance = resolve(ManagesPhotoAnalyses::class)->entitlement($user, PhotoAnalysisContext::guestId($request));
         $returningFromCheckout = $request->routeIs('checkout.success');
