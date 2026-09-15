@@ -229,3 +229,9 @@ it('returns null from getIncompletePaymentUrlForUser when the user has no incomp
 
     expect($service->getIncompletePaymentUrlForUser($user))->toBeNull();
 });
+
+it('recognizes named subscriptions so checkout cannot sell a second active plan', function (): void {
+    $user = User::factory()->create();
+    $user->subscriptions()->create(['type' => 'snap-pro', 'stripe_id' => 'sub_named', 'stripe_status' => 'active', 'stripe_price' => 'price_named', 'quantity' => 1]);
+    expect((new StripeService)->hasActiveSubscription($user))->toBeTrue();
+});

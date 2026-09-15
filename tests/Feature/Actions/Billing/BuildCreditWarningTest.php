@@ -161,3 +161,12 @@ it('produces a human-readable resets_in string', function (): void {
 
     expect($warning?->resetsIn)->toBeString()->not->toBeEmpty();
 });
+
+it('uses the separate monthly AI allowance for warnings instead of photo spending', function (): void {
+    $user = User::factory()->create();
+    AiUsage::factory()->create(['user_id' => $user->id, 'cost' => 3.0]);
+    $this->mock(App\Contracts\Billing\ProvidesAiBudget::class)->shouldReceive('forUser')->with($user)
+        ->andReturn(new App\Data\Billing\AiBudget(0.45, 0.50, Carbon\CarbonImmutable::now()->addMonth()));
+    $warning = buildWarning()->currentState($user);
+    expect($warning->limitType)->toBe('monthly')->and($warning->percentage)->toBe(90);
+});

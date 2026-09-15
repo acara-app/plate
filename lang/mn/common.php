@@ -767,7 +767,7 @@ return [
         ],
     ],
     'checkout_subscription' => [
-        'title' => 'Захиалгын удирдлага (Cashier)',
+        'title' => 'Захиалгын удирдлага',
         'breadcrumb' => 'Захиалга',
         'payment_required' => 'Төлбөр шаардлагатай',
         'payment_required_description' => 'Таны захиалга нэмэлт төлбөрийн баталгаажуулалт шаардаж байна.',

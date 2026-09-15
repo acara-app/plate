@@ -114,58 +114,75 @@ export default function SnapToTrackIndex({
                     </Card>
                 )}
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <ScanLine className="size-5" />
-                            {t('snap_to_track.index.heading')}
-                        </CardTitle>
-                        <CardDescription>
-                            {t('snap_to_track.index.description')}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Form
-                            {...AnalyzeSnapToTrackPhotoController.form()}
-                            disableWhileProcessing
-                            className="flex flex-col gap-4"
-                        >
-                            {({ processing, errors }) => (
-                                <>
-                                    <div>
-                                        <Label htmlFor="snap-photo">
+                {!(
+                    photoAllowance?.enabled &&
+                    photoAllowance.limit !== null &&
+                    photoAllowance.used >= photoAllowance.limit
+                ) && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <ScanLine className="size-5" />
+                                {t('snap_to_track.index.heading')}
+                            </CardTitle>
+                            <CardDescription>
+                                {t('snap_to_track.index.description')}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Form
+                                {...AnalyzeSnapToTrackPhotoController.form()}
+                                disableWhileProcessing
+                                className="flex flex-col gap-4"
+                            >
+                                {({ processing, errors }) => (
+                                    <>
+                                        <div>
+                                            <Label htmlFor="snap-photo">
+                                                {t(
+                                                    'snap_to_track.index.upload_label',
+                                                )}
+                                            </Label>
+                                            <input
+                                                type="hidden"
+                                                name="analysis_request_id"
+                                                value={analysisRequestId}
+                                            />
+                                            <Input
+                                                id="snap-photo"
+                                                name="photo"
+                                                type="file"
+                                                accept="image/*"
+                                                required
+                                                className="mt-1"
+                                            />
+                                            <InputError
+                                                message={errors.photo}
+                                            />
+                                        </div>
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                        >
+                                            {processing
+                                                ? t(
+                                                      'snap_to_track.index.analyzing',
+                                                  )
+                                                : t(
+                                                      'snap_to_track.index.analyze',
+                                                  )}
+                                        </Button>
+                                        <p className="text-xs text-muted-foreground">
                                             {t(
-                                                'snap_to_track.index.upload_label',
+                                                'snap_to_track.review.disclaimer',
                                             )}
-                                        </Label>
-                                        <input
-                                            type="hidden"
-                                            name="analysis_request_id"
-                                            value={analysisRequestId}
-                                        />
-                                        <Input
-                                            id="snap-photo"
-                                            name="photo"
-                                            type="file"
-                                            accept="image/*"
-                                            required
-                                            className="mt-1"
-                                        />
-                                        <InputError message={errors.photo} />
-                                    </div>
-                                    <Button type="submit" disabled={processing}>
-                                        {processing
-                                            ? t('snap_to_track.index.analyzing')
-                                            : t('snap_to_track.index.analyze')}
-                                    </Button>
-                                    <p className="text-xs text-muted-foreground">
-                                        {t('snap_to_track.review.disclaimer')}
-                                    </p>
-                                </>
-                            )}
-                        </Form>
-                    </CardContent>
-                </Card>
+                                        </p>
+                                    </>
+                                )}
+                            </Form>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
         </AppLayout>
     );

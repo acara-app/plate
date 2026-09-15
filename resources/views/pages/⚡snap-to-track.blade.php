@@ -57,7 +57,8 @@ class extends Component
             session()->put('snap_to_track.upgrade_draft', $this->draftToken);
         }
         session()->put('url.intended', route('checkout.subscription', absolute: false));
-        $this->redirect(route(auth()->check() ? 'checkout.subscription' : 'register'));
+        $offer = $this->photoAllowance()->offer;
+        $this->redirect($offer === null ? route('checkout.subscription') : route('checkout.start', ['product' => $offer->productId]));
     }
 
     public function _startUpload($name, $fileInfo, $isMultiple): void
@@ -75,10 +76,16 @@ class extends Component
     public function analyze(AnalyzeFoodPhotoAction $action): void
     {
         $this->error = null;
+        if ($this->photoAllowance()->exhausted()) {
+            $this->error = 'Your photo allowance is used up. Choose a plan below to continue.';
+
+            return;
+        }
         $this->result = null;
         $this->draftToken = null;
 
         if (RateLimiter::tooManyAttempts($this->analysisRateLimitKey(), 5)) {
+            $this->error = 'Too many attempts in a short time. Please try again later; this is separate from your scan allowance.';
             $this->deleteTemporaryPhoto(resetUploadChallenge: true);
 
             return;
@@ -143,6 +150,9 @@ class extends Component
 
     public function clearPhoto(): void
     {
+        if ($this->photoAllowance()->exhausted()) {
+            return;
+        }
         $this->deleteTemporaryPhoto(resetUploadChallenge: true);
         $this->result = null;
         $this->error = null;
@@ -305,11 +315,21 @@ class extends Component
         $photoAllowance = $this->photoAllowance();
     @endphp
     @if ($photoAllowance->enabled)
-        <section class="mx-auto max-w-2xl px-6 py-4" aria-label="Photo allowance">
-            <p>{{ $photoAllowance->remaining() }} of {{ $photoAllowance->limit }} {{ $photoAllowance->mode === 'premium' ? 'premium scans this billing month' : 'free scans today' }} remaining.</p>
-            <p>Resets {{ $photoAllowance->resetsAt }}.</p>
-            @if ($photoAllowance->canUpgrade)
-                <button type="button" wire:click="upgrade" data-umami-event="snap_to_track_upgrade_click" class="mt-2 underline">100 premium scans per month — $9</button>
+        <section class="mx-auto max-w-2xl border border-[#D9CFBC] px-6 py-4" aria-label="Photo allowance"
+            x-data x-init="window.acaraTrack?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', exhausted: @js($photoAllowance->exhausted()) })">
+            @if ($photoAllowance->mode === 'trial')
+                <p>{{ $photoAllowance->exhausted() ? 'Your free trial scan is complete.' : 'Try one photo free. No signup or credit card required.' }}</p>
+                <p class="mt-2 text-sm">One successful trial scan, with no daily reset.</p>
+            @else
+                <p>{{ $photoAllowance->remaining() }} of {{ $photoAllowance->limit }} premium scans remaining this billing month.</p>
+            @endif
+            @if ($photoAllowance->resetsAt)
+                <p>Resets {{ $photoAllowance->resetsAt }}.</p>
+            @endif
+            @if ($photoAllowance->canUpgrade && $photoAllowance->offer)
+                <p class="mt-2">{{ $photoAllowance->offer->scans }} premium scans per billing month. No rollover or overage charges.</p>
+                <button type="button" wire:click="upgrade" data-umami-event="snap_to_track_upgrade_click" class="mt-4 inline-flex min-h-12 items-center bg-[#1A1814] px-6 text-[#F2EBDD]">Continue with {{ $photoAllowance->offer->name }} — {{ $photoAllowance->offer->formattedPrice }}/month</button>
+                <p class="mt-2 text-sm">Renews monthly. Cancel anytime from billing settings.</p>
             @endif
         </section>
     @endif
@@ -396,6 +416,7 @@ class extends Component
                         @endauth
                     </article>
                 @endif
+                @unless ($photoAllowance->exhausted())
                 <form wire:submit="analyze" class="space-y-6">
                     <div
                         x-data="{ uploading: false, uploadFailed: false, progress: 0, fileName: '' }"
@@ -612,6 +633,7 @@ class extends Component
                         <p><time datetime="{{ now()->toDateString() }}">Last updated: {{ now()->format('F Y') }}</time></p>
                     </div>
                 </form>
+                @endunless
             @else
                 {{-- Result --}}
                 @php
@@ -735,6 +757,7 @@ class extends Component
                         </article>
 
                         {{-- Analyze another --}}
+                        @unless ($photoAllowance->exhausted())
                         <button
                             type="button"
                             wire:click="clearPhoto"
@@ -745,6 +768,8 @@ class extends Component
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </button>
+
+                        @endunless
 
                         {{-- Disclaimer --}}
                         <div class="flex flex-col gap-1 px-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">

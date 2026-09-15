@@ -20,6 +20,18 @@ final readonly class BuildCreditWarning
     {
         $entitlement = resolve(ResolvesUserTier::class)->resolve($user);
 
+        $budget = resolve(\App\Contracts\Billing\ProvidesAiBudget::class)->forUser($user);
+        if ($budget !== null) {
+            $ratio = $budget->limit > 0 ? $budget->used / $budget->limit : 1.0;
+            if ($ratio < self::WARNING_THRESHOLD) {
+                return null;
+            }
+
+            return new CreditWarning('monthly', $entitlement->tier,
+                (int) round($budget->used * $this->multiplier()), (int) round($budget->limit * $this->multiplier()),
+                min(100, (int) floor($ratio * 100)), $budget->resetsAt, $this->formatResetsIn($budget->resetsAt));
+        }
+
         if (! $entitlement->premiumEnforcementActive) {
             return null;
         }

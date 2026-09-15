@@ -12,7 +12,9 @@ final class PhotoLimitExceeded extends RuntimeException
 {
     public function __construct(public readonly PhotoEntitlement $entitlement)
     {
-        parent::__construct('Your photo allowance is used up. It resets at '.$entitlement->resetsAt.'.');
+        parent::__construct($entitlement->mode === 'trial'
+            ? 'Your free trial scan has been used. Choose a plan to analyze another photo.'
+            : 'Your photo allowance is used up. It resets at '.$entitlement->resetsAt.'.');
     }
 
     public function render(): JsonResponse

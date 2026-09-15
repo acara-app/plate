@@ -11,7 +11,7 @@ use Laravel\Cashier\Subscription;
 
 covers(CashierShowSubscriptionController::class);
 
-it('calls stripe service for user without stripe id', function (): void {
+it('does not create a Stripe customer when viewing prices', function (): void {
     $user = User::factory()->create(['stripe_id' => null]);
     SubscriptionProduct::factory()->count(3)->create();
 
@@ -71,8 +71,8 @@ it('calls stripe service for user without stripe id', function (): void {
 
     $response->assertOk();
 
-    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue()
-        ->and($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeFalse()
+        ->and($stripeMock->getBillingPortalUrlCalled)->toBeFalse();
 });
 
 it('renders subscription with active subscription', function (): void {
@@ -164,9 +164,9 @@ it('renders subscription with active subscription', function (): void {
 
     $response->assertOk();
 
-    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue()
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeFalse()
         ->and($stripeMock->hasIncompletePaymentCalled)->toBeTrue()
-        ->and($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
+        ->and($stripeMock->getBillingPortalUrlCalled)->toBeFalse();
 });
 
 it('detects yearly subscription correctly', function (): void {
@@ -258,9 +258,9 @@ it('detects yearly subscription correctly', function (): void {
 
     $response->assertOk();
 
-    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue()
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeFalse()
         ->and($stripeMock->hasIncompletePaymentCalled)->toBeTrue()
-        ->and($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
+        ->and($stripeMock->getBillingPortalUrlCalled)->toBeFalse();
 });
 
 it('renders page when user has no active subscription', function (): void {
@@ -322,14 +322,15 @@ it('renders page when user has no active subscription', function (): void {
 
     $response->assertOk();
 
-    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue()
-        ->and($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeFalse()
+        ->and($stripeMock->getBillingPortalUrlCalled)->toBeFalse();
 });
 
-it('requires authentication', function (): void {
-    $response = $this->get(route('checkout.subscription'));
-
-    $response->assertRedirect(route('login'));
+it('lets guests view prices without contacting Stripe', function (): void {
+    $this->mock(StripeServiceContract::class)->shouldNotReceive('ensureStripeCustomer', 'getBillingPortalUrl');
+    $this->get(route('checkout.subscription'))->assertOk()
+        ->assertInertia(fn (Inertia\Testing\AssertableInertia $page) => $page
+            ->where('currentSubscription', null)->where('isGuest', true));
 });
 
 it('renders subscription when no subscription items exist', function (): void {
@@ -406,9 +407,9 @@ it('renders subscription when no subscription items exist', function (): void {
 
     $response->assertOk();
 
-    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue()
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeFalse()
         ->and($stripeMock->hasIncompletePaymentCalled)->toBeTrue()
-        ->and($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
+        ->and($stripeMock->getBillingPortalUrlCalled)->toBeFalse();
 });
 
 it('renders subscription when product does not match price id', function (): void {
@@ -501,9 +502,9 @@ it('renders subscription when product does not match price id', function (): voi
 
     $response->assertOk();
 
-    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue()
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeFalse()
         ->and($stripeMock->hasIncompletePaymentCalled)->toBeTrue()
-        ->and($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
+        ->and($stripeMock->getBillingPortalUrlCalled)->toBeFalse();
 });
 
 it('returns null for incomplete payment url when has incomplete payment is false', function (): void {
@@ -580,9 +581,9 @@ it('returns null for incomplete payment url when has incomplete payment is false
 
     $response->assertOk();
 
-    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue()
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeFalse()
         ->and($stripeMock->hasIncompletePaymentCalled)->toBeTrue()
-        ->and($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
+        ->and($stripeMock->getBillingPortalUrlCalled)->toBeFalse();
 });
 
 it('returns incomplete payment url when payment is incomplete', function (): void {
@@ -673,9 +674,9 @@ it('returns incomplete payment url when payment is incomplete', function (): voi
 
     $response->assertOk();
 
-    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue()
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeFalse()
         ->and($stripeMock->hasIncompletePaymentCalled)->toBeTrue()
-        ->and($stripeMock->getBillingPortalUrlCalled)->toBeTrue()
+        ->and($stripeMock->getBillingPortalUrlCalled)->toBeFalse()
         ->and($stripeMock->getIncompletePaymentUrlCalled)->toBeTrue()
         ->and($stripeMock->capturedSubscriptionId)->toBe($subscription->id);
 });
@@ -770,7 +771,7 @@ it('renders subscription page with trialing subscription', function (): void {
 
     $response->assertOk();
 
-    expect($stripeMock->ensureStripeCustomerCalled)->toBeTrue()
+    expect($stripeMock->ensureStripeCustomerCalled)->toBeFalse()
         ->and($stripeMock->hasIncompletePaymentCalled)->toBeTrue()
-        ->and($stripeMock->getBillingPortalUrlCalled)->toBeTrue();
+        ->and($stripeMock->getBillingPortalUrlCalled)->toBeFalse();
 });

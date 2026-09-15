@@ -151,6 +151,11 @@ Route::middleware(['auth', 'verified'])->prefix('onboarding')->name('onboarding.
     Route::get('/completion', [Web\OnboardingController::class, 'showCompletion'])->name('completion.show');
 });
 
+Route::get('/checkout/start/{product}', Web\Checkout\StartPhotoSubscriptionController::class)->name('checkout.start');
+
+Route::get('/checkout/subscription', Web\Checkout\CashierShowSubscriptionController::class)
+    ->name('checkout.subscription');
+
 Route::middleware('auth')->group(function (): void {
     Route::delete('user', [Web\UserController::class, 'destroy'])->name('user.destroy');
 
@@ -180,8 +185,6 @@ Route::middleware('auth')->group(function (): void {
     Route::get('settings/two-factor', [Web\UserTwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
 
-    Route::get('/checkout/subscription', Web\Checkout\CashierShowSubscriptionController::class)
-        ->name('checkout.subscription');
     Route::post('/checkout/subscription', Web\Checkout\CashierSubscriptionController::class)
         ->name('checkout.subscription.store');
 

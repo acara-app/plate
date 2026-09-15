@@ -823,7 +823,7 @@ return [
         ],
     ],
     'checkout_subscription' => [
-        'title' => 'Subscription Management (Cashier)',
+        'title' => 'Subscription Management',
         'breadcrumb' => 'Subscription',
         'payment_required' => 'Payment Required',
         'payment_required_description' => 'Your subscription requires additional payment confirmation.',

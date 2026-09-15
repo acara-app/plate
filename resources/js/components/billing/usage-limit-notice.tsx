@@ -15,7 +15,7 @@ interface UsageLimitNoticeProps {
 function defaultTargetTier(
     currentTier: PaywallCapTrigger['currentTier'],
 ): PaidSubscriptionTier | null {
-    if (currentTier === 'plus') {
+    if (currentTier === 'plus' || currentTier === 'snap') {
         return null;
     }
 
@@ -28,14 +28,20 @@ export function UsageLimitNotice({
     onUpgradeClick,
 }: UsageLimitNoticeProps) {
     const { t } = useTranslation('common');
-    const targetTier = defaultTargetTier(trigger.currentTier);
+    const targetTier =
+        trigger.limitType === 'monthly'
+            ? null
+            : defaultTargetTier(trigger.currentTier);
 
-    const heading = t('billing.paywall.cap_title', {
-        tier: t(`billing.tier.labels.${trigger.currentTier}`, {
-            defaultValue: trigger.currentTier,
-        }),
-        limit: t(`billing.usage.${trigger.limitType}`),
-    });
+    const heading =
+        trigger.limitType === 'monthly'
+            ? 'Your monthly allowance for other AI tools is used up'
+            : t('billing.paywall.cap_title', {
+                  tier: t(`billing.tier.labels.${trigger.currentTier}`, {
+                      defaultValue: trigger.currentTier,
+                  }),
+                  limit: t(`billing.usage.${trigger.limitType}`),
+              });
 
     const body = t('billing.paywall.cap_description', {
         current: trigger.currentCredits.toLocaleString(),
@@ -60,6 +66,13 @@ export function UsageLimitNotice({
             <div className="flex-1 space-y-2">
                 <p className="text-sm font-medium text-foreground">{heading}</p>
                 <p className="text-xs text-muted-foreground">{body}</p>
+                {trigger.limitType === 'monthly' && (
+                    <p className="text-xs text-muted-foreground">
+                        Photo scans use a separate allowance. Your other AI
+                        allowance renews automatically; upgrading the photo plan
+                        does not increase it.
+                    </p>
+                )}
                 {targetTier && (
                     <Button
                         type="button"
