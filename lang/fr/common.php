@@ -451,7 +451,13 @@ return [
     ],
     'snap_to_track' => [
         'title' => 'Snap to Track',
-        'burst_limit' => 'Vous avez atteint la limite de scans pour cette heure. Réessayez dans environ :minutes minutes.',
+        'burst' => [
+            'heading' => 'Vous avez atteint la limite de scans pour cette heure.',
+            'body' => '{{cap}} scans par heure avec le forfait {{tier}} · vous pourrez scanner à nouveau dans environ {{minutes}} minutes.',
+            'upgrade' => 'Continuer avec {{name}} — {{price}}/mois',
+            'upgrade_hint' => '{{scans}} scans premium par mois. Renouvellement mensuel, annulable à tout moment.',
+            'see_plans' => 'Voir les forfaits',
+        ],
         'credit' => [
             'heading' => 'Vos crédits IA sont épuisés pour le moment.',
             'pro_heading' => "Vous avez atteint le plafond d'utilisation du jour.",
@@ -703,6 +709,7 @@ return [
             'payment_pending' => 'Paiement en attente — votre accès s\'activera dans quelques instants.',
             'labels' => [
                 'free' => 'Gratuit',
+                'snap' => 'Snap Pro',
                 'basic' => 'Supporter',
                 'plus' => 'Pro',
             ],
@@ -825,6 +832,14 @@ return [
     ],
     'checkout_subscription' => [
         'title' => 'Gestion de l\'abonnement',
+        'photo_plan' => [
+            'price' => '{{price}} par mois',
+            'cta' => 'Obtenir Snap Pro',
+            'guest_cta' => 'Créer un compte pour s\'abonner',
+            'current' => 'Votre forfait actuel',
+            'renewal' => 'Renouvellement mensuel. Annulable à tout moment.',
+            'separate' => 'Uniquement pour les scans photo — vos crédits IA dépendent des forfaits ci-dessous.',
+        ],
         'breadcrumb' => 'Abonnement',
         'payment_required' => 'Paiement requis',
         'payment_required_description' => 'Votre abonnement nécessite une confirmation de paiement supplémentaire.',

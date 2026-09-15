@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Billing\RenderSnapBurstLimit;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\IdentifyPhotoGuest;
@@ -60,20 +61,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return $request->expectsJson();
         });
 
-        $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
-            if (! $request->routeIs('snap-to-track.analyze')) {
-                return null;
-            }
-
-            $retryAfter = $e->getHeaders()['Retry-After'] ?? null;
-            $seconds = is_numeric($retryAfter) ? (int) $retryAfter : 3600;
-
-            return back()->withErrors([
-                'photo' => __('common.snap_to_track.burst_limit', [
-                    'minutes' => max(1, (int) ceil($seconds / 60)),
-                ]),
-            ]);
-        });
+        $exceptions->render(fn (ThrottleRequestsException $e, Request $request) => resolve(RenderSnapBurstLimit::class)->handle($e, $request));
 
         $exceptions->report(function (RequestException $e): void {
             Log::error($e->getMessage(), [

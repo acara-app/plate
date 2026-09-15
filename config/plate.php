@@ -56,6 +56,7 @@ return [
         'burst_caps' => [
             'default' => (int) env('SNAP_TO_TRACK_BURST_CAP_DEFAULT', 5),
             'free' => (int) env('SNAP_TO_TRACK_BURST_CAP_FREE', 5),
+            'snap' => (int) env('SNAP_TO_TRACK_BURST_CAP_SNAP', 30),
             'basic' => (int) env('SNAP_TO_TRACK_BURST_CAP_BASIC', 15),
             'plus' => (int) env('SNAP_TO_TRACK_BURST_CAP_PLUS', 30),
         ],

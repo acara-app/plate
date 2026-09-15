@@ -41,7 +41,7 @@ interface AiUsage {
 
 interface Props {
     photoAllowance?: PhotoAllowance;
-    monthlyBudget?: { used: number; limit: number; resetsAt: string } | null;
+    monthlyBudget?: { used: number; limit: number; resets_at: string } | null;
     billingHistory: Invoice[];
     aiUsage?: AiUsage;
 }

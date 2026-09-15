@@ -10,13 +10,13 @@ export interface PhotoAllowance {
     used: number;
     remaining: number | null;
     exhausted: boolean;
-    resetsAt: string | null;
+    resets_at: string | null;
     mode: string;
-    canUpgrade: boolean;
+    can_upgrade: boolean;
     offer?: {
-        productId: number;
+        product_id: number;
         name: string;
-        formattedPrice: string;
+        formatted_price: string;
         scans: number;
     } | null;
 }
@@ -29,14 +29,14 @@ export function PhotoAllowanceCard({
     showUpgrade?: boolean;
 }) {
     useEffect(() => {
-        if (allowance?.enabled && allowance.canUpgrade)
+        if (allowance?.enabled && allowance.can_upgrade)
             window.umami?.track('snap_to_track_offer_viewed', {
                 mode: allowance.mode,
                 exhausted: allowance.exhausted,
             });
     }, [
         allowance?.enabled,
-        allowance?.canUpgrade,
+        allowance?.can_upgrade,
         allowance?.mode,
         allowance?.exhausted,
     ]);
@@ -64,12 +64,12 @@ export function PhotoAllowanceCard({
                         stays available after the trial.
                     </p>
                 )}
-                {allowance.resetsAt && (
+                {allowance.resets_at && (
                     <p className="text-sm text-muted-foreground">
-                        Resets {new Date(allowance.resetsAt).toLocaleString()}.
+                        Resets {new Date(allowance.resets_at).toLocaleString()}.
                     </p>
                 )}
-                {showUpgrade && allowance.canUpgrade && offer && (
+                {showUpgrade && allowance.can_upgrade && offer && (
                     <>
                         <p>
                             {offer.scans} premium scans per billing month. No
@@ -77,11 +77,11 @@ export function PhotoAllowanceCard({
                         </p>
                         <Button asChild>
                             <Link
-                                href={checkout.start(offer.productId).url}
+                                href={checkout.start(offer.product_id).url}
                                 data-umami-event="snap_to_track_upgrade_click"
                             >
                                 Continue with {offer.name} —{' '}
-                                {offer.formattedPrice}/month
+                                {offer.formatted_price}/month
                             </Link>
                         </Button>
                         <p className="text-xs text-muted-foreground">

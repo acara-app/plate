@@ -11,6 +11,7 @@ import billing from '@/routes/billing';
 import checkout from '@/routes/checkout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
+import { PhotoPlanBand } from '@/components/billing/photo-plan-band';
 import clsx from 'clsx';
 import { CreditCardIcon, ReceiptIcon, TriangleIcon } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
@@ -58,6 +59,7 @@ interface Props {
     photoAllowance?: PhotoAllowance;
     upgradeDraft?: string | null;
     products: BillingProduct[];
+    photoPlan: BillingProduct | null;
     currentSubscription: CashierSubscription | null;
     billingPortalUrl: string | null;
     hasIncompletePayment: boolean;
@@ -73,6 +75,7 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
 
 export default function CashierSubscription({
     products,
+    photoPlan,
     isGuest,
     paymentPending,
     selectedProductId,
@@ -93,7 +96,10 @@ export default function CashierSubscription({
 
     const formatSavings = (value: number) => `$${parseFloat(value.toFixed(2))}`;
 
-    function handleSubscribe(productId: number) {
+    function handleSubscribe(
+        productId: number,
+        interval: 'monthly' | 'yearly' = billingInterval,
+    ) {
         if (isSubscribing) {
             return;
         }
@@ -104,14 +110,14 @@ export default function CashierSubscription({
         }
         window.umami?.track('snap_to_track_checkout_click', {
             source: 'checkout',
-            interval: billingInterval,
+            interval,
         });
         setIsSubscribing(true);
         router.post(
             checkout.subscription.store(),
             {
                 product_id: productId,
-                billing_interval: billingInterval,
+                billing_interval: interval,
             },
             {
                 onFinish() {
@@ -290,7 +296,7 @@ export default function CashierSubscription({
                     {photoAllowance?.offer && (
                         <p className="text-sm text-muted-foreground">
                             {photoAllowance.offer.name} renews at{' '}
-                            {photoAllowance.offer.formattedPrice} every month
+                            {photoAllowance.offer.formatted_price} every month
                             and includes {photoAllowance.offer.scans} premium
                             scans per billing month. Unused scans do not roll
                             over. When scans run out, wait for renewal. No
@@ -310,6 +316,21 @@ export default function CashierSubscription({
                             Return to your saved analysis
                         </Link>
                     )}
+                    {photoPlan && (
+                        <PhotoPlanBand
+                            plan={photoPlan}
+                            isGuest={isGuest}
+                            isSubscribing={isSubscribing}
+                            isCurrent={
+                                currentSubscription?.product_name ===
+                                photoPlan.name
+                            }
+                            onSubscribe={() =>
+                                handleSubscribe(photoPlan.id, 'monthly')
+                            }
+                        />
+                    )}
+
                     {/* Available Plans */}
                     <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
                         <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-800 dark:bg-gray-950">
@@ -566,11 +587,11 @@ export default function CashierSubscription({
                                                                   )
                                                                 : photoAllowance
                                                                         ?.offer
-                                                                        ?.productId ===
+                                                                        ?.product_id ===
                                                                     product.id
                                                                   ? isGuest
                                                                       ? 'Create an account to subscribe'
-                                                                      : `Subscribe — ${photoAllowance.offer.formattedPrice}/month`
+                                                                      : `Subscribe — ${photoAllowance.offer.formatted_price}/month`
                                                                   : t(
                                                                         'checkout_subscription.choose_plan_button',
                                                                     )}

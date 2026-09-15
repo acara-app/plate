@@ -8,6 +8,7 @@ use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Services\StripeServiceContract;
 use App\Data\Billing\PhotoAnalysisContext;
+use App\Enums\SubscriptionTier;
 use App\Models\SubscriptionProduct;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -70,6 +71,10 @@ final readonly class CashierShowSubscriptionController
         $offers = resolve(OffersSubscriptions::class);
         $availableProducts = $products->filter($offers->available(...))->map($offers->present(...))->values();
 
+        $isPhotoPlan = fn (SubscriptionProduct $product): bool => SubscriptionTier::fromProductName($product->name) === SubscriptionTier::Snap;
+        $photoPlan = $availableProducts->first($isPhotoPlan);
+        $availableProducts = $availableProducts->reject($isPhotoPlan)->values();
+
         $allowance = resolve(ManagesPhotoAnalyses::class)->entitlement($user, PhotoAnalysisContext::guestId($request));
         $returningFromCheckout = $request->routeIs('checkout.success');
 
@@ -82,6 +87,7 @@ final readonly class CashierShowSubscriptionController
 
         return Inertia::render('checkout/show-subscription-product', [
             'products' => $availableProducts,
+            'photoPlan' => $photoPlan,
             'isGuest' => $user === null,
             'paymentPending' => $paymentPending,
             'selectedProductId' => $request->session()->get('checkout.selected_product'),

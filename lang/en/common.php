@@ -450,7 +450,13 @@ return [
     ],
     'snap_to_track' => [
         'title' => 'Snap to Track',
-        'burst_limit' => "You've hit this hour's scan limit. You can scan again in about :minutes minutes.",
+        'burst' => [
+            'heading' => "You've hit this hour's scan limit.",
+            'body' => '{{cap}} scans an hour on the {{tier}} plan · you can scan again in about {{minutes}} minutes.',
+            'upgrade' => 'Continue with {{name}} — {{price}}/month',
+            'upgrade_hint' => '{{scans}} premium scans a month. Renews monthly, cancel anytime.',
+            'see_plans' => 'See plans',
+        ],
         'credit' => [
             'heading' => "You've used your AI credits for now.",
             'pro_heading' => "You've hit today's fair-use ceiling.",
@@ -702,6 +708,7 @@ return [
             'payment_pending' => 'Payment pending — your access will activate momentarily.',
             'labels' => [
                 'free' => 'Free',
+                'snap' => 'Snap Pro',
                 'basic' => 'Supporter',
                 'plus' => 'Pro',
             ],
@@ -824,6 +831,14 @@ return [
     ],
     'checkout_subscription' => [
         'title' => 'Subscription Management',
+        'photo_plan' => [
+            'price' => '{{price}} a month',
+            'cta' => 'Get Snap Pro',
+            'guest_cta' => 'Create an account to subscribe',
+            'current' => 'Your current plan',
+            'renewal' => 'Renews monthly. Cancel anytime.',
+            'separate' => 'Just for photo scans — your AI credits are handled by the plans below.',
+        ],
         'breadcrumb' => 'Subscription',
         'payment_required' => 'Payment Required',
         'payment_required_description' => 'Your subscription requires additional payment confirmation.',
