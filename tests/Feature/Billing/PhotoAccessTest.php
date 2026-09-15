@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
+use Acara\AcaraCore\Services\Billing\CloudPhotoAnalyses;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
-use App\Services\Billing\NullPhotoAnalyses;
 
-it('keeps community photo analysis available without Cloud quota tables', function (): void {
+it('binds the Cloud extension and enforces its daily photo allowance', function (): void {
     config()->set('snap.enabled', true);
     $access = resolve(ManagesPhotoAnalyses::class);
-    expect($access)->toBeInstanceOf(NullPhotoAnalyses::class)
-        ->and($access->enabled())->toBeFalse()
-        ->and($access->entitlement(null, null)->limit)->toBeNull();
+    expect($access)->toBeInstanceOf(CloudPhotoAnalyses::class)
+        ->and($access->enabled())->toBeTrue()
+        ->and($access->entitlement(null, 'browser')->limit)->toBe(1);
 });
