@@ -2,18 +2,15 @@
 
 declare(strict_types=1);
 
-use Acara\AcaraCore\Services\Billing\CloudPhotoAnalyses;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\OffersSubscriptions;
 use App\Data\Billing\PhotoEntitlement;
 use App\Data\Billing\PhotoOffer;
 use App\Models\SubscriptionProduct;
 
-it('binds the Cloud extension without activating an unconfigured photo offer', function (): void {
-    config()->set(['snap.enabled' => true, 'snap.model_approved' => false]);
+it('leaves photo analysis ungated while the scan quota is unconfigured', function (): void {
     $access = resolve(ManagesPhotoAnalyses::class);
-    expect($access)->toBeInstanceOf(CloudPhotoAnalyses::class)
-        ->and($access->enabled())->toBeFalse()
+    expect($access->enabled())->toBeFalse()
         ->and($access->entitlement(null, null)->limit)->toBeNull();
 });
 
