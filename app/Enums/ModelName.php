@@ -20,47 +20,6 @@ enum ModelName: string
         return self::GPT_5_4_MINI;
     }
 
-    /**
-     * @return array{id: string, name: string, description: string, provider: string}[]
-     */
-    public static function getAvailableModels(): array
-    {
-        return array_map(
-            fn (ModelName $model): array => $model->toArray(),
-            self::cases()
-        );
-    }
-
-    public function getName(): string
-    {
-        return match ($this) {
-            self::GPT_5_MINI => 'GPT-5 mini',
-            self::GPT_5_4_MINI => 'GPT-5.4 mini',
-            self::GPT_5_NANO => 'GPT-5 Nano',
-            self::GEMINI_3_5_FLASH => 'Gemini 3.5 Flash',
-            self::GEMINI_3_1_PRO => 'Gemini 3.1 Pro',
-        };
-    }
-
-    public function getDescription(): string
-    {
-        return match ($this) {
-            self::GPT_5_MINI => 'Cheapest model, best for smarter tasks',
-            self::GPT_5_4_MINI => 'Strongest mini model for coding, agents, and high-volume workloads',
-            self::GPT_5_NANO => 'Cheapest model, best for simpler tasks',
-            self::GEMINI_3_5_FLASH => 'Google\'s latest model with frontier intelligence built for speed that helps everyone learn, build, and plan anything — faster',
-            self::GEMINI_3_1_PRO => "Google's latest Pro model with advanced reasoning and frontier capabilities",
-        };
-    }
-
-    public function getProvider(): string
-    {
-        return match ($this) {
-            self::GPT_5_MINI, self::GPT_5_4_MINI, self::GPT_5_NANO => 'openai',
-            self::GEMINI_3_5_FLASH, self::GEMINI_3_1_PRO => 'google',
-        };
-    }
-
     public function labProvider(): string
     {
         // @codeCoverageIgnoreStart
@@ -97,48 +56,11 @@ enum ModelName: string
         };
     }
 
-    public function supportsTemperature(): bool
-    {
-        return match ($this) {
-            self::GPT_5_MINI, self::GPT_5_4_MINI, self::GPT_5_NANO => false,
-            default => true,
-        };
-    }
-
-    public function getRecommendedTemperature(): float
-    {
-        return match ($this) {
-            self::GEMINI_3_5_FLASH, self::GEMINI_3_1_PRO => 1.0,
-            default => 0.7,
-        };
-    }
-
-    public function getMinMaxTokens(): int
-    {
-        return match ($this) {
-            self::GEMINI_3_5_FLASH, self::GEMINI_3_1_PRO => 16384,
-            default => 8000,
-        };
-    }
-
     /**
      * @return array{input: float, output: float, reasoning: float, cache_read: float, cache_write?: float}
      */
     public function getPricing(): array
     {
         return ModelPricing::forModel($this->value);
-    }
-
-    /**
-     * @return array{id: string, name: string, description: string, provider: string}
-     */
-    public function toArray(): array
-    {
-        return [
-            'id' => $this->value,
-            'name' => $this->getName(),
-            'description' => $this->getDescription(),
-            'provider' => $this->getProvider(),
-        ];
     }
 }
