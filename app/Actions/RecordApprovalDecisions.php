@@ -10,7 +10,6 @@ use App\Models\History;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Laravel\Ai\Approvals\PendingApproval;
-use Laravel\Ai\Enums\MessageStatus;
 use Laravel\Ai\Exceptions\ApprovalMismatchException;
 
 final readonly class RecordApprovalDecisions
@@ -54,7 +53,7 @@ final readonly class RecordApprovalDecisions
     private function lockPausedTurn(Conversation $conversation): History
     {
         $paused = $conversation->messages()
-            ->where('status', MessageStatus::Paused)
+            ->paused()
             ->reorder('id', 'desc')
             ->lockForUpdate()
             ->get()

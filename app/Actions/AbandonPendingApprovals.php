@@ -15,7 +15,7 @@ final readonly class AbandonPendingApprovals
         History::query()
             ->where('conversation_id', $conversationId)
             ->where('role', MessageRole::Assistant->value)
-            ->where('status', MessageStatus::Paused)
+            ->paused()
             ->get()
             ->each(fn (History $message) => $message->forceFill([
                 'status' => MessageStatus::Completed,

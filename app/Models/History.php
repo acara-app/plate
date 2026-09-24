@@ -6,7 +6,9 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\HistoryFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -238,5 +240,14 @@ final class History extends Model
     public function summary(): BelongsTo
     {
         return $this->belongsTo(ConversationSummary::class, 'summary_id');
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function paused(Builder $query): void
+    {
+        $query->where('status', MessageStatus::Paused);
     }
 }
