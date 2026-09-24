@@ -2,91 +2,38 @@
 
 declare(strict_types=1);
 
-use App\Enums\ModelName;
 use App\Services\AiUsageService;
 
 covers(AiUsageService::class);
 
-it('calculates cost for gemini-3.5-flash model', function (): void {
-    $service = new AiUsageService;
-    $pricing = ModelName::GEMINI_3_5_FLASH->getPricing();
-
-    $usage = [
-        'prompt_tokens' => 1000000,
-        'completion_tokens' => 500000,
-        'cache_read_input_tokens' => 0,
-        'reasoning_tokens' => 0,
-    ];
-
-    $cost = $service->calculateCost('gemini-3.5-flash', $usage);
-
-    expect($cost)->toBe($pricing['input'] + ($pricing['output'] * 0.5));
+beforeEach(function (): void {
+    config()->set('plate.model_pricing.models.priced-model', [
+        'input' => 1.00,
+        'output' => 4.00,
+        'reasoning' => 2.00,
+        'cache_read' => 0.10,
+        'cache_write' => 1.50,
+    ]);
 });
 
-it('calculates cost for gemini-3-1-pro model', function (): void {
-    $service = new AiUsageService;
-    $pricing = ModelName::GEMINI_3_1_PRO->getPricing();
+it('charges each token category at its own per-million rate', function (): void {
+    $cost = new AiUsageService()->calculateCost('priced-model', [
+        'prompt_tokens' => 1_000_000,
+        'completion_tokens' => 500_000,
+        'reasoning_tokens' => 250_000,
+        'cache_read_input_tokens' => 2_000_000,
+        'cache_write_input_tokens' => 100_000,
+    ]);
 
-    $usage = [
-        'prompt_tokens' => 1000000,
-        'completion_tokens' => 1000000,
-        'cache_read_input_tokens' => 0,
-        'reasoning_tokens' => 0,
-    ];
-
-    $cost = $service->calculateCost('gemini-3.1-pro-preview', $usage);
-
-    expect($cost)->toBe($pricing['input'] + $pricing['output']);
+    expect($cost)->toEqualWithDelta(3.85, 0.000001);
 });
 
-it('calculates cost for gpt-5-mini model', function (): void {
-    $service = new AiUsageService;
-    $pricing = ModelName::GPT_5_MINI->getPricing();
+it('prices a dated model snapshot at its base model rate', function (): void {
+    $cost = new AiUsageService()->calculateCost('priced-model-2026-03-17', [
+        'prompt_tokens' => 1_000_000,
+    ]);
 
-    $usage = [
-        'prompt_tokens' => 1000000,
-        'completion_tokens' => 500000,
-        'cache_read_input_tokens' => 0,
-        'reasoning_tokens' => 0,
-    ];
-
-    $cost = $service->calculateCost('gpt-5-mini', $usage);
-
-    expect($cost)->toBe($pricing['input'] + ($pricing['output'] * 0.5));
-});
-
-it('calculates cost with cache reads', function (): void {
-    $service = new AiUsageService;
-    $pricing = ModelName::GEMINI_3_5_FLASH->getPricing();
-
-    $usage = [
-        'prompt_tokens' => 500000,
-        'completion_tokens' => 100000,
-        'cache_read_input_tokens' => 500000,
-        'reasoning_tokens' => 0,
-    ];
-
-    $cost = $service->calculateCost('gemini-3.5-flash', $usage);
-
-    expect($cost)->toBe(
-        ($pricing['input'] * 0.5) +
-        ($pricing['output'] * 0.1) +
-        ($pricing['cache_read'] * 0.5)
-    );
-});
-
-it('prices dated model snapshots using the base model pricing', function (): void {
-    $service = new AiUsageService;
-    $pricing = ModelName::GPT_5_4_MINI->getPricing();
-
-    $usage = [
-        'prompt_tokens' => 1000000,
-        'completion_tokens' => 0,
-        'cache_read_input_tokens' => 0,
-        'reasoning_tokens' => 0,
-    ];
-
-    expect($service->calculateCost('gpt-5.4-mini-2026-03-17', $usage))->toBe($pricing['input']);
+    expect($cost)->toBe(1.0);
 });
 
 it('uses default pricing for unknown model', function (): void {
@@ -117,25 +64,6 @@ it('calculates cost with zero tokens', function (): void {
     $cost = $service->calculateCost('gemini-3.5-flash', $usage);
 
     expect($cost)->toBe(0.0);
-});
-
-it('calculates cost with partial tokens', function (): void {
-    $service = new AiUsageService;
-    $pricing = ModelName::GEMINI_3_5_FLASH->getPricing();
-
-    $usage = [
-        'prompt_tokens' => 1000,
-        'completion_tokens' => 500,
-        'cache_read_input_tokens' => 0,
-        'reasoning_tokens' => 0,
-    ];
-
-    $cost = $service->calculateCost('gemini-3.5-flash', $usage);
-
-    $expectedCost = (1000 / 1000000 * $pricing['input']) +
-                    (500 / 1000000 * $pricing['output']);
-
-    expect($cost)->toBe($expectedCost);
 });
 
 it('includes Gemini thinking and current rates in actual photo costs', function (): void {

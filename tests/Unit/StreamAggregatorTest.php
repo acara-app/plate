@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Services\StreamAggregator;
+use Laravel\Ai\Responses\Data\TextUsage;
 use Laravel\Ai\Responses\Data\ToolCall;
 use Laravel\Ai\Responses\Data\ToolResult;
-use Laravel\Ai\Responses\Data\Usage;
 use Laravel\Ai\Streaming\Events\ProviderToolEvent;
 use Laravel\Ai\Streaming\Events\ReasoningDelta;
 use Laravel\Ai\Streaming\Events\StreamEnd;
@@ -26,6 +26,7 @@ it('normalizes and aggregates rich Laravel AI stream events', function (): void 
         data: ['query' => 'glucose'],
         status: 'completed',
         timestamp: $timestamp,
+        provider: 'openai',
     );
 
     $normalized = $aggregator->normalizeEvent($providerTool);
@@ -34,10 +35,10 @@ it('normalizes and aggregates rich Laravel AI stream events', function (): void 
         new TextDelta('text-1', 'message-1', 'Hello ', $timestamp),
         new TextDelta('text-2', 'message-1', 'there', $timestamp),
         new ReasoningDelta('thinking-1', 'reasoning-1', 'checking', $timestamp),
-        new ToolCallEvent('tool-event-1', new ToolCall('tool-1', 'lookup_health_metric', ['metric' => 'glucose']), $timestamp),
+        new ToolCallEvent('tool-event-1', new ToolCall('tool-1', 'lookup_health_metric', ['metric' => 'glucose'], thoughtSignature: 'sig-1'), $timestamp),
         new ToolResultEvent('tool-result-event-1', new ToolResult('tool-1', 'lookup_health_metric', [], ['value' => 104]), true, null, $timestamp),
         $providerTool,
-        new StreamEnd('end-1', 'stop', new Usage(promptTokens: 10, completionTokens: 5), $timestamp),
+        new StreamEnd('end-1', 'stop', new TextUsage(inputTokens: 10, outputTokens: 5), $timestamp),
     ];
 
     $result = $aggregator->aggregateNormalized(array_map(
@@ -49,8 +50,9 @@ it('normalizes and aggregates rich Laravel AI stream events', function (): void 
         ->and($normalized['tool_type'])->toBe('web_search_call')
         ->and($result->text)->toBe('Hello there')
         ->and($result->toolCalls[0]['name'])->toBe('lookup_health_metric')
+        ->and($result->toolCalls[0]['thought_signature'])->toBe('sig-1')
         ->and($result->toolResults[0]['result'])->toBe(['value' => 104])
         ->and($result->providerTools[0]['item_id'])->toBe('search-1')
-        ->and($result->usage['prompt_tokens'])->toBe(10)
-        ->and($result->usage['completion_tokens'])->toBe(5);
+        ->and($result->usage['input_tokens'])->toBe(10)
+        ->and($result->usage['output_tokens'])->toBe(5);
 });

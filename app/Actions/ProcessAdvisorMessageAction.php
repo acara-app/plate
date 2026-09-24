@@ -34,7 +34,7 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
     {
         Auth::login($user);
 
-        $conversationId ??= $this->conversationStore->latestConversationId($user->getMorphClass(), $user->id)
+        $conversationId ??= $this->conversationStore->latestConversationId($user->getMorphClass(), $user->id, AgentRunner::class)
             ?? $this->newConversationFor($user);
 
         Context::add('chat.conversation_id', $conversationId);

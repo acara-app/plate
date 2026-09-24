@@ -6,10 +6,13 @@ namespace App\Services;
 
 use App\Data\ChatStreamDelivery;
 use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Broadcast;
+use Laravel\Ai\Streaming\Events\StreamEnd;
 use Laravel\Ai\Streaming\Events\StreamEvent;
 use Laravel\Ai\Streaming\Events\StreamStart;
 use Laravel\Ai\Streaming\Events\ToolApprovalRequest;
+use Laravel\Ai\Streaming\Events\ToolResult;
 
 /**
  * @phpstan-import-type TNormalizedEvent from StreamAggregator
@@ -33,7 +36,7 @@ final readonly class BroadcastConnector
         $cancelled = false;
         $lastCancellationCheck = 0.0;
         $payloads = [];
-        $providerContentBlocks = [];
+        $steps = new Collection;
         $provider = null;
 
         foreach ($stream as $event) {
@@ -41,8 +44,8 @@ final readonly class BroadcastConnector
                 $provider = $event->provider;
             }
 
-            if ($event instanceof ToolApprovalRequest) {
-                $providerContentBlocks = array_values($event->providerContentBlocks);
+            if ($event instanceof StreamEnd || $event instanceof ToolApprovalRequest) {
+                $steps = $event->steps;
             }
 
             if (microtime(true) - $lastCancellationCheck >= self::CANCELLATION_CHECK_SECONDS) {
@@ -55,6 +58,10 @@ final readonly class BroadcastConnector
                 }
             }
 
+            if ($event instanceof ToolResult && $event->preliminary) {
+                continue;
+            }
+
             $payload = $this->aggregator->normalizeEvent($event);
             $payloads[] = $payload;
             $this->events->append($conversationId, $payload, $sequence++);
@@ -64,7 +71,7 @@ final readonly class BroadcastConnector
         return new ChatStreamDelivery(
             result: $this->aggregator->aggregateNormalized($payloads),
             cancelled: $cancelled,
-            providerContentBlocks: $providerContentBlocks,
+            steps: $steps,
             provider: $provider,
         );
     }

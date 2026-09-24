@@ -11,10 +11,8 @@ covers(ThinkingOptions::class);
 it('enables Gemini thinking config for a thinking-capable model', function (): void {
     expect(ThinkingOptions::forModel(ModelName::GEMINI_3_5_FLASH, Lab::Gemini))
         ->toBe([
-            'thinkingConfig' => [
-                'thinkingBudget' => 8192,
-                'includeThoughts' => true,
-            ],
+            'thinking_level' => 'high',
+            'thinking_summaries' => 'auto',
         ]);
 });
 

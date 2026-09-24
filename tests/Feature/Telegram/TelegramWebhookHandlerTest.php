@@ -118,13 +118,8 @@ function pausedTurnFor(User $user, string $conversationId, ?array $pending = nul
 
     History::factory()
         ->forConversation($conversation)
-        ->awaitingApproval($pending)
-        ->create([
-            'tool_calls' => collect($pending)
-                ->map(fn (string $reason, string $id): array => ['id' => $id, 'name' => 'log_health_entry', 'arguments' => ['log_type' => 'glucose']])
-                ->values()
-                ->all(),
-        ]);
+        ->awaitingApproval($pending, arguments: ['log_type' => 'glucose'])
+        ->create();
 
     return $conversation;
 }

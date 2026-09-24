@@ -7,6 +7,7 @@ use App\Models\Conversation;
 use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;
+use Laravel\Ai\Enums\MessageStatus;
 use Laravel\Ai\Messages\MessageRole;
 
 covers(History::class);
@@ -26,8 +27,8 @@ it('has correct casts', function (): void {
         ->toHaveKey('updated_at', 'datetime')
         ->toHaveKey('role', MessageRole::class)
         ->toHaveKey('attachments', 'array')
-        ->toHaveKey('tool_calls', 'array')
-        ->toHaveKey('tool_results', 'array')
+        ->toHaveKey('steps', 'array')
+        ->toHaveKey('status', MessageStatus::class)
         ->toHaveKey('usage', 'array')
         ->toHaveKey('meta', 'array');
 });
@@ -63,15 +64,13 @@ it('casts role to MessageRole enum', function (): void {
 it('casts array fields to arrays', function (): void {
     $history = History::factory()->create([
         'attachments' => ['file1.pdf', 'file2.jpg'],
-        'tool_calls' => ['tool1', 'tool2'],
-        'tool_results' => ['result1'],
+        'steps' => [['content' => 'Hi', 'tool_calls' => [], 'reasoning' => '', 'replay_blocks' => [], 'provider_tool_calls' => []]],
         'usage' => ['tokens' => 100],
         'meta' => ['key' => 'value'],
     ]);
 
     expect($history->attachments)->toBeArray()->toHaveCount(2)
-        ->and($history->tool_calls)->toBeArray()->toHaveCount(2)
-        ->and($history->tool_results)->toBeArray()->toHaveCount(1)
+        ->and($history->steps)->toBeArray()->toHaveCount(1)
         ->and($history->usage)->toBeArray()->toHaveKey('tokens')
         ->and($history->meta)->toBeArray()->toHaveKey('key');
 });
@@ -93,8 +92,7 @@ it('factory creates user message correctly', function (): void {
     $history = History::factory()->userMessage()->create();
 
     expect($history->role)->toBe(MessageRole::User)
-        ->and($history->tool_calls)->toBeEmpty()
-        ->and($history->tool_results)->toBeEmpty()
+        ->and($history->steps)->toBeEmpty()
         ->and($history->usage)->toBeEmpty();
 });
 

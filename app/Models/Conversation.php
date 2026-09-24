@@ -109,7 +109,7 @@ final class Conversation extends Model
     public function pausedApprovalTurn(): ?History
     {
         return $this->messages()
-            ->whereNotNull('approval_state')
+            ->paused()
             ->reorder('id', 'desc')
             ->get()
             ->first(fn (History $message): bool => $message->hasPendingApprovals());

@@ -8,16 +8,27 @@ use App\Data\ChatStreamResult;
 use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
+use App\Services\Ai\PlateConversationStore;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Laravel\Ai\Enums\MessageStatus;
 use Laravel\Ai\Messages\MessageRole;
+use Laravel\Ai\Responses\Data\Step;
 
-/** @codeCoverageIgnore */
+/**
+ * @codeCoverageIgnore
+ *
+ * @phpstan-import-type TStoredStep from PlateConversationStore
+ */
 final readonly class CompletePendingChatStreamTurn
 {
+    public function __construct(
+        private PlateConversationStore $conversationStore,
+    ) {}
+
     /**
-     * @param  list<array<string, mixed>>  $providerContentBlocks
+     * @param  Collection<int, Step>  $steps
      */
     public function handle(
         string $conversationId,
@@ -26,14 +37,14 @@ final readonly class CompletePendingChatStreamTurn
         string $assistantMessageId,
         ChatStreamResult $result,
         string $status,
-        array $providerContentBlocks = [],
+        Collection $steps = new Collection,
         ?string $provider = null,
     ): void {
         if ($status !== History::STREAM_STATUS_COMPLETED) {
             $result = $result->withoutPendingApprovals();
         }
 
-        DB::transaction(function () use ($conversationId, $user, $userMessageId, $assistantMessageId, $result, $status, $providerContentBlocks, $provider): void {
+        DB::transaction(function () use ($conversationId, $user, $userMessageId, $assistantMessageId, $result, $status, $steps, $provider): void {
             $now = now();
 
             $conversation = Conversation::query()
@@ -61,13 +72,10 @@ final readonly class CompletePendingChatStreamTurn
 
             $assistantMessage->forceFill([
                 'content' => $result->text,
-                'tool_calls' => $result->toolCalls,
-                'tool_results' => $this->toolResults($conversationId, $assistantMessageId, $result),
+                'steps' => $this->steps($result, $steps),
                 'usage' => $result->usage,
-                'meta' => $this->assistantMeta($assistantMessage, $result, $status, $providerContentBlocks, $provider),
-                'approval_state' => $result->hasPendingApprovals()
-                    ? ['pending' => $result->pendingApprovals]
-                    : null,
+                'meta' => $this->assistantMeta($assistantMessage, $result, $status, $provider),
+                'status' => $this->messageStatus($result, $status),
                 'updated_at' => $now,
             ])->save();
 
@@ -76,32 +84,25 @@ final readonly class CompletePendingChatStreamTurn
     }
 
     /**
-     * @return list<array<string, mixed>>
+     * @param  Collection<int, Step>  $steps
+     * @return list<TStoredStep>
      */
-    private function toolResults(string $conversationId, string $assistantMessageId, ChatStreamResult $result): array
+    private function steps(ChatStreamResult $result, Collection $steps): array
     {
-        if ($result->toolResults === []) {
-            return [];
+        if ($steps->isEmpty()) {
+            return [$this->conversationStore->storableStep($result->text, $result->toolCalls, $result->toolResults, $result->pendingApprovals)];
         }
 
-        $recorded = History::query()
-            ->where('conversation_id', $conversationId)
-            ->whereKeyNot($assistantMessageId)
-            ->where('role', MessageRole::Assistant->value)
-            ->whereNotNull('approval_state')
-            ->get(['id', 'tool_results'])
-            ->flatMap(fn (History $message): Collection => collect($message->tool_results ?? [])->pluck('id'))
-            ->filter()
-            ->all();
+        return $this->conversationStore->storableSteps($steps, $result->pendingApprovals);
+    }
 
-        if ($recorded === []) {
-            return $result->toolResults;
-        }
-
-        return array_values(array_filter(
-            $result->toolResults,
-            fn (array $toolResult): bool => ! in_array($toolResult['id'] ?? null, $recorded, true),
-        ));
+    private function messageStatus(ChatStreamResult $result, string $status): MessageStatus
+    {
+        return match (true) {
+            $status === History::STREAM_STATUS_FAILED => MessageStatus::Failed,
+            $result->hasPendingApprovals() => MessageStatus::Paused,
+            default => MessageStatus::Completed,
+        };
     }
 
     private function lockMessage(string $messageId, string $conversationId, User $user, MessageRole $role): History
@@ -126,14 +127,12 @@ final readonly class CompletePendingChatStreamTurn
     }
 
     /**
-     * @param  list<array<string, mixed>>  $providerContentBlocks
      * @return array<string, mixed>
      */
     private function assistantMeta(
         History $message,
         ChatStreamResult $result,
         string $status,
-        array $providerContentBlocks,
         ?string $provider,
     ): array {
         $meta = $this->mergeStreamMeta($message, [
@@ -146,10 +145,6 @@ final readonly class CompletePendingChatStreamTurn
 
         if ($provider !== null) {
             $meta['provider'] = $provider;
-        }
-
-        if ($providerContentBlocks !== []) {
-            $meta['provider_content_blocks'] = $providerContentBlocks;
         }
 
         return $meta;
