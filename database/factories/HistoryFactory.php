@@ -10,6 +10,7 @@ use App\Models\History;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use Laravel\Ai\Enums\MessageStatus;
 use Laravel\Ai\Messages\MessageRole;
 
 /**
@@ -33,8 +34,7 @@ final class HistoryFactory extends Factory
             'role' => fake()->randomElement([MessageRole::User, MessageRole::Assistant]),
             'content' => fake()->paragraph(),
             'attachments' => [],
-            'tool_calls' => [],
-            'tool_results' => [],
+            'steps' => [],
             'usage' => [],
             'meta' => [],
         ];
@@ -44,8 +44,7 @@ final class HistoryFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'role' => MessageRole::User,
-            'tool_calls' => [],
-            'tool_results' => [],
+            'steps' => [],
             'usage' => [],
         ]);
     }
@@ -82,12 +81,25 @@ final class HistoryFactory extends Factory
 
     /**
      * @param  array<string, string|null>  $pending
+     * @param  array<string, mixed>  $arguments
+     * @param  list<array<string, mixed>>  $replayBlocks
      */
-    public function awaitingApproval(array $pending): static
+    public function awaitingApproval(array $pending, array $arguments = [], array $replayBlocks = []): static
     {
         return $this->state(fn (array $attributes): array => [
             'role' => MessageRole::Assistant,
-            'approval_state' => ['pending' => $pending],
+            'status' => MessageStatus::Paused,
+            'steps' => [[
+                'content' => '',
+                'tool_calls' => array_map(
+                    fn (string $id, ?string $reason): array => ['id' => $id, 'name' => 'log_health_entry', 'arguments' => $arguments, 'approval_reason' => $reason],
+                    array_keys($pending),
+                    $pending,
+                ),
+                'reasoning' => '',
+                'replay_blocks' => $replayBlocks,
+                'provider_tool_calls' => [],
+            ]],
         ]);
     }
 

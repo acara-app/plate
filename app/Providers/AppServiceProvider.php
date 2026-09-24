@@ -62,9 +62,10 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->bindIf(LoadsSkills::class, NullSkillLoader::class);
 
         $this->app->singleton(
-            ConversationStore::class,
+            PlateConversationStore::class,
             fn (): PlateConversationStore => new PlateConversationStore(config()->string('ai.conversations.connection', config()->string('database.default'))),
         );
+        $this->app->alias(PlateConversationStore::class, ConversationStore::class);
     }
 
     public function boot(): void

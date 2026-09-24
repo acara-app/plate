@@ -53,7 +53,7 @@ final readonly class RecordApprovalDecisions
     private function lockPausedTurn(Conversation $conversation): History
     {
         $paused = $conversation->messages()
-            ->whereNotNull('approval_state')
+            ->paused()
             ->reorder('id', 'desc')
             ->lockForUpdate()
             ->get()
@@ -88,7 +88,7 @@ final readonly class RecordApprovalDecisions
         $tools = [];
         $arguments = [];
 
-        foreach ($paused->tool_calls ?? [] as $toolCall) {
+        foreach ($paused->toolCalls() as $toolCall) {
             $tools[$toolCall['id']] = $toolCall['name'];
             $arguments[$toolCall['id']] = $toolCall['arguments'] ?? [];
         }

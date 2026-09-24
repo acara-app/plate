@@ -23,15 +23,11 @@ use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Enums\Lab;
-use Laravel\Ai\Messages\AssistantMessage;
 use Laravel\Ai\Messages\Message;
 use Laravel\Ai\Messages\MessageRole;
-use Laravel\Ai\Messages\ToolResultMessage;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Providers\Tools\ProviderTool;
 use Laravel\Ai\Responses\AgentResponse;
-use Laravel\Ai\Responses\Data\ToolCall;
-use Laravel\Ai\Responses\Data\ToolResult;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
 #[Timeout(120)]
@@ -46,6 +42,7 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
     public function __construct(
         private readonly AgentBuilder $agentBuilder,
         private readonly EnforceAiUsageLimit $enforceAiUsageLimit,
+        private readonly PlateConversationStore $conversationStore,
     ) {}
 
     public function run(AgentRequest $request, User $user): StreamableAgentResponse
@@ -117,7 +114,7 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
         $streamId = $this->currentRequest->streamId;
 
         $messages = History::query()
-            ->select(['id', 'conversation_id', 'agent', 'role', 'content', 'tool_calls', 'tool_results', 'meta', 'approval_state'])
+            ->select(['id', 'conversation_id', 'agent', 'role', 'content', 'steps', 'status', 'meta'])
             ->where('conversation_id', $this->currentRequest->conversationId)
             ->where('agent', self::class)
             ->orderByDesc('id')
@@ -189,50 +186,11 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
      */
     private function toAiMessages(History $message): array
     {
-        $toolCalls = collect($message->tool_calls ?? [])->values();
-        $toolResults = collect($message->tool_results ?? [])->values();
-
         if ($message->role === MessageRole::User) {
             return [new Message(MessageRole::User, $message->content)];
         }
 
-        if ($toolCalls->isNotEmpty()) {
-            // @codeCoverageIgnoreStart
-            $pending = $message->pendingApprovals();
-
-            $messages = [
-                new AssistantMessage(
-                    $message->content ?: '',
-                    $toolCalls->map(fn (array $toolCall): ToolCall => new ToolCall(
-                        id: $toolCall['id'],
-                        name: $toolCall['name'],
-                        arguments: $toolCall['arguments'] ?? [],
-                        resultId: $toolCall['result_id'] ?? null,
-                        reasoningId: $toolCall['reasoning_id'] ?? null,
-                        reasoningSummary: $toolCall['reasoning_summary'] ?? null,
-                    )),
-                    $pending === [] ? [] : $message->providerContentBlocks(),
-                    $pending === [] ? null : $message->provider(),
-                ),
-            ];
-
-            if ($toolResults->isNotEmpty()) {
-                $messages[] = new ToolResultMessage(
-                    $toolResults->map(fn (array $toolResult): ToolResult => new ToolResult(
-                        id: $toolResult['id'],
-                        name: $toolResult['name'],
-                        arguments: $toolResult['arguments'] ?? [],
-                        result: $toolResult['result'] ?? null,
-                        resultId: $toolResult['result_id'] ?? null,
-                    ))
-                );
-            }
-
-            return $messages;
-            // @codeCoverageIgnoreEnd
-        }
-
-        return [new AssistantMessage($message->content)];
+        return array_values($this->conversationStore->assistantTurn($message));
     }
 
     private function prepare(AgentRequest $request, User $user, bool $appManagedPersistence): ModelName

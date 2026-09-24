@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Ai\Contracts\ConversationStore;
+use Laravel\Ai\Messages\UserMessage;
 use Laravel\Ai\Prompts\AgentPrompt;
 use Laravel\Ai\Responses\AgentResponse;
 
@@ -25,27 +26,27 @@ function fakeConversationStore(?string $latestId = null, string $newId = 'conv-1
             private string $newId,
         ) {}
 
-        public function latestConversationId(string $participantType, string|int $participantId): ?string
+        public function latestConversationId(string $participantType, string|int $participantId, string $agent): ?string
         {
             return $this->latestId;
         }
 
-        public function storeConversation(?string $participantType, string|int|null $participantId, string $title): string
+        public function storeConversation(?string $participantType, string|int|null $participantId, string $title, ?string $id = null): string
         {
             return $this->newId;
         }
 
-        public function storeUserMessage(string $conversationId, ?string $participantType, string|int|null $participantId, AgentPrompt $prompt): string
+        public function storeUserMessage(string $conversationId, ?string $participantType, string|int|null $participantId, string $agent, UserMessage $message): string
         {
             return 'msg-1';
         }
 
-        public function storeAssistantMessage(string $conversationId, ?string $participantType, string|int|null $participantId, AgentPrompt $prompt, AgentResponse $response): string
+        public function storeAssistantMessage(string $conversationId, ?string $participantType, string|int|null $participantId, AgentPrompt $prompt, AgentResponse $response, ?Throwable $exception = null): string
         {
             return 'msg-2';
         }
 
-        public function storeApprovalResults(string $conversationId, ?string $participantType, string|int|null $participantId, array $toolResults): void
+        public function storeApprovalResults(string $conversationId, array $toolResults): void
         {
             //
         }

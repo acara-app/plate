@@ -36,11 +36,11 @@ final readonly class TrackAiUsage
         $agentClass = $event->prompt->agent::class;
 
         $usageArray = [
-            'prompt_tokens' => $usage->promptTokens,
-            'completion_tokens' => $usage->completionTokens,
-            'cache_read_input_tokens' => $usage->cacheReadInputTokens,
-            'cache_write_input_tokens' => $usage->cacheWriteInputTokens,
-            'reasoning_tokens' => $usage->reasoningTokens,
+            'prompt_tokens' => $usage->uncachedInputTokens(),
+            'completion_tokens' => $usage->outputTokens - ($usage->reasoningTokens ?? 0),
+            'cache_read_input_tokens' => $usage->cacheReadInputTokens ?? 0,
+            'cache_write_input_tokens' => $usage->cacheWriteInputTokens ?? 0,
+            'reasoning_tokens' => $usage->reasoningTokens ?? 0,
         ];
 
         $cost = new AiUsageService()->calculateCost($model, $usageArray);
@@ -51,11 +51,7 @@ final readonly class TrackAiUsage
             'agent' => $agentClass,
             'model' => $model,
             'provider' => $provider,
-            'prompt_tokens' => $usage->promptTokens,
-            'completion_tokens' => $usage->completionTokens,
-            'cache_read_input_tokens' => $usage->cacheReadInputTokens,
-            'cache_write_input_tokens' => $usage->cacheWriteInputTokens,
-            'reasoning_tokens' => $usage->reasoningTokens,
+            ...$usageArray,
             'cost' => $cost,
         ]);
     }

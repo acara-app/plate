@@ -21,10 +21,32 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Ai\Approvals\PendingApproval;
+use Laravel\Ai\Enums\MessageStatus;
 use Laravel\Ai\Exceptions\ApprovalMismatchException;
 use Laravel\Ai\Messages\AssistantMessage;
 use Laravel\Ai\Messages\MessageRole;
+use Laravel\Ai\Messages\ToolResultMessage;
+use Laravel\Ai\Responses\Data\FinishReason;
+use Laravel\Ai\Responses\Data\Meta;
+use Laravel\Ai\Responses\Data\Step;
+use Laravel\Ai\Responses\Data\TextUsage;
+use Laravel\Ai\Responses\Data\ToolCall;
+use Laravel\Ai\Responses\Data\ToolResult;
 use Laravel\Ai\Streaming\Events\ToolApprovalRequest;
+
+function pausedStep(): Step
+{
+    return new Step(
+        text: 'Confirm below.',
+        toolCalls: [new ToolCall('call_abc', 'log_health_entry', [])],
+        toolResults: [],
+        finishReason: FinishReason::ToolCalls,
+        usage: new TextUsage,
+        meta: new Meta('gemini', 'gemini-3.5-flash'),
+        reasoning: '',
+        replayBlocks: [['type' => 'function_call']],
+    );
+}
 
 function pausedConversation(User $user, string $reason = 'Glucose 140 mg/dL, fasting'): Conversation
 {
@@ -32,14 +54,17 @@ function pausedConversation(User $user, string $reason = 'Glucose 140 mg/dL, fas
 
     History::factory()
         ->forConversation($conversation)
-        ->awaitingApproval(['call_abc' => $reason])
+        ->awaitingApproval(
+            ['call_abc' => $reason],
+            arguments: ['log_type' => 'glucose', 'summary' => $reason],
+            replayBlocks: [['type' => 'function_call']],
+        )
         ->create([
             'content' => 'Let me log that.',
-            'tool_calls' => [['id' => 'call_abc', 'name' => 'log_health_entry', 'arguments' => ['log_type' => 'glucose', 'summary' => $reason]]],
             'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_COMPLETED, [
                 'model' => 'gemini-3.5-flash',
                 'approvals' => ['call_abc' => $reason],
-            ]) + ['provider' => 'gemini', 'provider_content_blocks' => [['type' => 'function_call']]],
+            ]) + ['provider' => 'gemini'],
         ]);
 
     return $conversation->fresh();
@@ -65,15 +90,17 @@ it('records the paused tool call on the assistant turn instead of executing it',
             pendingApprovals: ['call_abc' => 'Glucose 140 mg/dL, fasting'],
         ),
         status: History::STREAM_STATUS_COMPLETED,
-        providerContentBlocks: [['type' => 'function_call']],
+        steps: new Collection([pausedStep()]),
         provider: 'gemini',
     );
 
     $assistant = $assistant->fresh();
 
-    expect($assistant->pendingApprovals())->toBe(['call_abc' => 'Glucose 140 mg/dL, fasting'])
+    expect($assistant->status)->toBe(MessageStatus::Paused)
+        ->and($assistant->pendingApprovals())->toBe(['call_abc' => 'Glucose 140 mg/dL, fasting'])
         ->and($assistant->requestedApprovals())->toBe(['call_abc' => 'Glucose 140 mg/dL, fasting'])
-        ->and($assistant->providerContentBlocks())->toBe([['type' => 'function_call']])
+        ->and($assistant->steps[0]['content'])->toBe('Confirm below.')
+        ->and($assistant->steps[0]['replay_blocks'])->toBe([['type' => 'function_call']])
         ->and($assistant->provider())->toBe('gemini');
 });
 
@@ -82,13 +109,13 @@ it('surfaces pending approvals from the stream so the browser can render a card'
         id: 'evt-1',
         pendingApprovals: new Collection([new PendingApproval('call_abc', 'log_health_entry', ['log_type' => 'glucose'], 'Glucose 140 mg/dL')]),
         timestamp: 1,
-        providerContentBlocks: [['type' => 'function_call']],
+        steps: new Collection([pausedStep()]),
     ));
 
     expect($payload['type'])->toBe('tool_approval_request')
         ->and($payload['approvals'][0]['id'])->toBe('call_abc')
         ->and($payload['approvals'][0]['reason'])->toBe('Glucose 140 mg/dL')
-        ->and($payload)->not->toHaveKey('provider_content_blocks');
+        ->and($payload)->not->toHaveKey('steps');
 });
 
 it('queues a resumed stream carrying the approval decision', function (): void {
@@ -151,8 +178,8 @@ it('replays a paused turn with its provider state so the call can be resumed', f
 
     expect($messages)->toHaveCount(1)
         ->and($assistant->toolCalls->first()->id)->toBe('call_abc')
-        ->and($assistant->providerContentBlocks)->toBe([['type' => 'function_call']])
-        ->and($assistant->providerContentBlocksProvider)->toBe('gemini');
+        ->and($assistant->replayBlocks)->toBe([['type' => 'function_call']])
+        ->and($assistant->replayBlocksProvider)->toBe('gemini');
 });
 
 it('rebuilds the approval card on reload and marks it resolved once decided', function (): void {
@@ -168,17 +195,39 @@ it('rebuilds the approval card on reload and marks it resolved once decided', fu
         ->and($parts['data']['reason'])->toBe('Glucose 140 mg/dL, fasting')
         ->and($parts['data']['status'])->toBe('pending');
 
-    $paused = $conversation->messages()->first();
-    $paused->forceFill([
-        'approval_state' => ['pending' => []],
-        'tool_results' => [['id' => 'call_abc', 'name' => 'log_health_entry', 'result' => 'Saved.']],
-    ])->save();
+    resolve(PlateConversationStore::class)->storeApprovalResults($conversation->id, [
+        new ToolResult('call_abc', 'log_health_entry', ['log_type' => 'glucose'], 'Saved.'),
+    ]);
 
     $resolved = collect(resolve(BuildConversationMessagesAction::class)->handle($conversation->fresh()))
         ->flatMap(fn (array $message): array => $message['parts'])
         ->firstWhere('type', 'data-approval');
 
-    expect($resolved['data']['status'])->toBe('approved');
+    expect($resolved['data']['status'])->toBe('approved')
+        ->and($conversation->fresh()->pausedApprovalTurn())->toBeNull();
+});
+
+it('replays a resolved approval as an answered call rather than a pending one', function (): void {
+    $user = User::factory()->create();
+    $conversation = pausedConversation($user);
+
+    resolve(PlateConversationStore::class)->storeApprovalResults($conversation->id, [
+        new ToolResult('call_abc', 'log_health_entry', ['log_type' => 'glucose'], 'Rejected by the user.', denied: true),
+    ]);
+
+    $replay = new ReflectionMethod(AgentRunner::class, 'toAiMessages');
+    $messages = collect($replay->invoke(resolve(AgentRunner::class), $conversation->messages()->first()));
+
+    $answer = $messages->first(fn (object $message): bool => $message instanceof ToolResultMessage);
+
+    expect($answer->toolResults->first()->id)->toBe('call_abc')
+        ->and($answer->toolResults->first()->denied)->toBeTrue();
+
+    $card = collect(resolve(BuildConversationMessagesAction::class)->handle($conversation->fresh()))
+        ->flatMap(fn (array $message): array => $message['parts'])
+        ->firstWhere('type', 'data-approval');
+
+    expect($card['data']['status'])->toBe('rejected');
 });
 
 it('marks persistence app-managed for streamed turns and hands it back for sync turns', function (): void {
@@ -233,7 +282,8 @@ it('drops a pause from a turn that never finished, since it cannot be resumed', 
 
     $assistant = $assistant->fresh();
 
-    expect($assistant->approval_state)->toBeNull()
+    expect($assistant->status)->toBe(MessageStatus::Failed)
+        ->and($assistant->toolCalls()[0])->not->toHaveKey('approval_reason')
         ->and($assistant->requestedApprovals())->toBe([])
         ->and($assistant->hasPendingApprovals())->toBeFalse();
 });
@@ -282,10 +332,6 @@ it('waits for every pending call before resuming, rather than dismissing the res
         ->forConversation($conversation)
         ->awaitingApproval(['call_abc' => 'Eggs', 'call_def' => 'Coffee'])
         ->create([
-            'tool_calls' => [
-                ['id' => 'call_abc', 'name' => 'log_health_entry', 'arguments' => []],
-                ['id' => 'call_def', 'name' => 'log_health_entry', 'arguments' => []],
-            ],
             'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_COMPLETED, [
                 'approvals' => ['call_abc' => 'Eggs', 'call_def' => 'Coffee'],
             ]),

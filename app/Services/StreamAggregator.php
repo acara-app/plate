@@ -71,10 +71,10 @@ final readonly class StreamAggregator
                 'type' => 'stream_end',
                 'reason' => $event->reason,
                 'usage' => [
-                    'prompt_tokens' => $event->usage->promptTokens,
-                    'completion_tokens' => $event->usage->completionTokens,
-                    'cache_write_input_tokens' => $event->usage->cacheWriteInputTokens,
+                    'input_tokens' => $event->usage->inputTokens,
+                    'output_tokens' => $event->usage->outputTokens,
                     'cache_read_input_tokens' => $event->usage->cacheReadInputTokens,
+                    'cache_write_input_tokens' => $event->usage->cacheWriteInputTokens,
                     'reasoning_tokens' => $event->usage->reasoningTokens,
                 ],
                 'timestamp' => $event->timestamp,
@@ -142,6 +142,7 @@ final readonly class StreamAggregator
                     'result_id' => $event->toolCall->resultId,
                     'reasoning_id' => $event->toolCall->reasoningId,
                     'reasoning_summary' => $event->toolCall->reasoningSummary,
+                    'thought_signature' => $event->toolCall->thoughtSignature,
                 ],
             ],
             $event instanceof ToolResult => [
@@ -162,6 +163,8 @@ final readonly class StreamAggregator
                     'arguments' => $event->toolResult->arguments,
                     'result' => $event->toolResult->result,
                     'result_id' => $event->toolResult->resultId,
+                    'denied' => $event->toolResult->denied,
+                    'failed' => $event->toolResult->failed,
                 ],
             ],
             $event instanceof ToolApprovalRequest => [
