@@ -62,11 +62,11 @@ it('identifies models that support temperature', function (): void {
         ->and(ModelName::GEMINI_3_1_PRO->supportsTemperature())->toBeTrue();
 });
 
-it('returns correct thinking budget for thinking models', function (): void {
-    expect(ModelName::GEMINI_3_5_FLASH->getThinkingBudget())->toBe(8192)
-        ->and(ModelName::GEMINI_3_1_PRO->getThinkingBudget())->toBe(8192)
-        ->and(ModelName::GPT_5_4_MINI->getThinkingBudget())->toBeNull()
-        ->and(ModelName::GPT_5_MINI->getThinkingBudget())->toBeNull();
+it('returns correct thinking level for thinking models', function (): void {
+    expect(ModelName::GEMINI_3_5_FLASH->getThinkingLevel())->toBe('high')
+        ->and(ModelName::GEMINI_3_1_PRO->getThinkingLevel())->toBe('high')
+        ->and(ModelName::GPT_5_4_MINI->getThinkingLevel())->toBeNull()
+        ->and(ModelName::GPT_5_MINI->getThinkingLevel())->toBeNull();
 });
 
 it('returns correct recommended temperature', function (): void {

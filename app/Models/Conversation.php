@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Config;
+use Laravel\Ai\Enums\MessageStatus;
 
 /**
  * @property string $id UUID primary key
@@ -109,7 +110,7 @@ final class Conversation extends Model
     public function pausedApprovalTurn(): ?History
     {
         return $this->messages()
-            ->whereNotNull('approval_state')
+            ->where('status', MessageStatus::Paused)
             ->reorder('id', 'desc')
             ->get()
             ->first(fn (History $message): bool => $message->hasPendingApprovals());

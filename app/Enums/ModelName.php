@@ -89,10 +89,10 @@ enum ModelName: string
         };
     }
 
-    public function getThinkingBudget(): ?int
+    public function getThinkingLevel(): ?string
     {
         return match ($this) {
-            self::GEMINI_3_5_FLASH, self::GEMINI_3_1_PRO => 8192,
+            self::GEMINI_3_5_FLASH, self::GEMINI_3_1_PRO => 'high',
             default => null,
         };
     }

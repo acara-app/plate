@@ -7,8 +7,18 @@ use App\Services\StreamAggregator;
 use App\Services\StreamEventStore;
 use Illuminate\Broadcasting\AnonymousEvent;
 use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
+use Laravel\Ai\Responses\Data\FinishReason;
+use Laravel\Ai\Responses\Data\Meta;
+use Laravel\Ai\Responses\Data\Step;
+use Laravel\Ai\Responses\Data\TextUsage;
+use Laravel\Ai\Responses\Data\ToolCall;
+use Laravel\Ai\Responses\Data\ToolResult;
+use Laravel\Ai\Streaming\Events\StreamEnd;
 use Laravel\Ai\Streaming\Events\TextDelta;
+use Laravel\Ai\Streaming\Events\ToolCall as ToolCallEvent;
+use Laravel\Ai\Streaming\Events\ToolResult as ToolResultEvent;
 
 covers(BroadcastConnector::class);
 
@@ -76,4 +86,34 @@ it('stops delivery before storing or broadcasting when cancellation is requested
         ->and($delivery->result->hasAssistantContent())->toBeFalse();
 
     Event::assertNotDispatched(AnonymousEvent::class);
+});
+
+it('holds back sub-agent progress so a specialist tool only reports its final result', function (): void {
+    Event::fake([AnonymousEvent::class]);
+
+    $toolCall = new ToolCall('call-1', 'nutrition_specialist', ['task' => 'Plan lunch']);
+    $step = new Step('Here is lunch.', [$toolCall], [], FinishReason::Stop, new TextUsage, new Meta('openai', 'gpt-5-mini'), '', []);
+
+    $stream = [
+        new ToolCallEvent('event-1', $toolCall, 1),
+        new ToolResultEvent('event-2', new ToolResult('call-1', 'nutrition_specialist', [], 'Grilled'), true, null, 1, preliminary: true),
+        new ToolResultEvent('event-3', new ToolResult('call-1', 'nutrition_specialist', [], 'Grilled salmon'), true, null, 1),
+        new StreamEnd('event-4', 'stop', new TextUsage, 1, new Collection([$step])),
+    ];
+
+    $events = Mockery::mock(StreamEventStore::class);
+    $events->shouldReceive('wasCancellationRequested')->andReturnFalse();
+    $events->shouldReceive('append')->times(3);
+
+    $delivery = new BroadcastConnector($events, resolve(StreamAggregator::class))->deliver(
+        stream: $stream,
+        userId: 1,
+        conversationId: 'conversation-1',
+    );
+
+    expect($delivery->result->toolResults)->toHaveCount(1)
+        ->and($delivery->result->toolResults[0]['result'])->toBe('Grilled salmon')
+        ->and($delivery->steps->all())->toBe([$step]);
+
+    Event::assertDispatchedTimes(AnonymousEvent::class, 3);
 });

@@ -47,8 +47,7 @@ final readonly class CreatePendingChatStreamTurn
                 'role' => MessageRole::User,
                 'content' => $prompt,
                 'attachments' => $attachments,
-                'tool_calls' => [],
-                'tool_results' => [],
+                'steps' => [],
                 'usage' => [],
                 'meta' => History::streamMeta($streamId, History::STREAM_STATUS_SUBMITTED, [
                     'channel' => $channel,
@@ -120,8 +119,7 @@ final readonly class CreatePendingChatStreamTurn
             'role' => MessageRole::Assistant,
             'content' => '',
             'attachments' => [],
-            'tool_calls' => [],
-            'tool_results' => [],
+            'steps' => [],
             'usage' => [],
             'meta' => History::streamMeta($streamId, History::STREAM_STATUS_PENDING, array_filter([
                 'channel' => $channel,

@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Laravel\Ai\Approvals\PendingApproval;
+use Laravel\Ai\Enums\MessageStatus;
 use Laravel\Ai\Messages\MessageRole;
 
 /**
@@ -23,17 +25,18 @@ use Laravel\Ai\Messages\MessageRole;
  * @property MessageRole $role
  * @property string $content
  * @property list<array{type?: string, name?: ?string, base64?: string, mime?: ?string}>|null $attachments
- * @property list<array{id: string, name: string, arguments?: array<string, mixed>|null, result_id?: string|null, reasoning_id?: string|null, reasoning_summary?: array<int|string, mixed>|null}>|null $tool_calls
- * @property list<array{id: string, name: string, arguments?: array<string, mixed>|null, result?: mixed, result_id?: string|null, denied?: bool}>|null $tool_results
+ * @property list<array{content: string, tool_calls: list<TStoredToolCall>, reasoning: string, replay_blocks: array<array-key, mixed>, provider_tool_calls: list<array<string, mixed>>}>|null $steps
+ * @property MessageStatus|null $status
  * @property array<string, mixed> $usage
- * @property array{chat_stream?: array<string, mixed>, provider?: string|null, provider_content_blocks?: list<array<string, mixed>>, ...<string, mixed>}|null $meta
- * @property array{pending?: array<string, string|null>}|null $approval_state
+ * @property array{chat_stream?: array<string, mixed>, provider?: string|null, ...<string, mixed>}|null $meta
  * @property string|null $summary_id
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
  * @property-read Conversation $conversation
  * @property-read ConversationSummary|null $summary
  * @property-read Model|null $participant
+ *
+ * @phpstan-type TStoredToolCall array{id: string, name: string, arguments?: array<string, mixed>, result_id?: string|null, thought_signature?: string, approval_reason?: string|null, result?: mixed, denied?: bool, failed?: bool}
  */
 #[Table(name: 'agent_conversation_messages')]
 final class History extends Model
@@ -77,13 +80,23 @@ final class History extends Model
             'updated_at' => 'datetime',
             'role' => MessageRole::class,
             'attachments' => 'array',
-            'tool_calls' => 'array',
-            'tool_results' => 'array',
+            'steps' => 'array',
+            'status' => MessageStatus::class,
             'usage' => 'array',
             'meta' => 'array',
-            'approval_state' => 'array',
             'summary_id' => 'string',
         ];
+    }
+
+    /**
+     * @return list<TStoredToolCall>
+     */
+    public function toolCalls(): array
+    {
+        return array_merge(...array_map(
+            fn (array $step): array => $step['tool_calls'],
+            $this->steps ?? [],
+        ));
     }
 
     /**
@@ -91,7 +104,14 @@ final class History extends Model
      */
     public function pendingApprovals(): array
     {
-        return $this->approval_state['pending'] ?? [];
+        if ($this->status !== MessageStatus::Paused) {
+            return [];
+        }
+
+        return collect($this->toolCalls())
+            ->filter(PendingApproval::isPending(...))
+            ->mapWithKeys(fn (array $toolCall): array => [$toolCall['id'] => $toolCall['approval_reason'] ?? null])
+            ->all();
     }
 
     public function hasPendingApprovals(): bool
@@ -152,14 +172,6 @@ final class History extends Model
         }
 
         return $approvals;
-    }
-
-    /**
-     * @return list<array<string, mixed>>
-     */
-    public function providerContentBlocks(): array
-    {
-        return $this->meta['provider_content_blocks'] ?? [];
     }
 
     public function provider(): ?string

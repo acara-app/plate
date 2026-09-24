@@ -199,7 +199,7 @@ final class ProcessChatStream implements ShouldQueue
             assistantMessageId: $this->assistantMessageId,
             result: $delivery->result,
             status: $status,
-            providerContentBlocks: $delivery->providerContentBlocks,
+            steps: $delivery->steps,
             provider: $delivery->provider,
         );
         // @codeCoverageIgnoreEnd

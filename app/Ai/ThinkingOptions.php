@@ -22,17 +22,15 @@ final class ThinkingOptions
             return []; // @codeCoverageIgnore
         }
 
-        $budget = $model->getThinkingBudget();
+        $level = $model->getThinkingLevel();
 
-        if ($budget === null) {
+        if ($level === null) {
             return []; // @codeCoverageIgnore
         }
 
         return [
-            'thinkingConfig' => [
-                'thinkingBudget' => $budget,
-                'includeThoughts' => true,
-            ],
+            'thinking_level' => $level,
+            'thinking_summaries' => 'auto',
         ];
     }
 }

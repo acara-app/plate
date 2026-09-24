@@ -119,6 +119,7 @@ describe('messages', function (): void {
         ]);
         History::factory()->forConversation($conversation)->assistantMessage()->create([
             'content' => 'Previous answer',
+            'steps' => [['content' => 'Previous answer', 'tool_calls' => [], 'reasoning' => '', 'replay_blocks' => [], 'provider_tool_calls' => []]],
         ]);
         History::factory()->forConversation($conversation)->userMessage()->create([
             'content' => 'Current question',
@@ -154,10 +155,8 @@ describe('providerOptions', function (): void {
         $this->agent->run($request, $this->user);
 
         expect($this->agent->providerOptions(Lab::Gemini))->toBe([
-            'thinkingConfig' => [
-                'thinkingBudget' => 8192,
-                'includeThoughts' => true,
-            ],
+            'thinking_level' => 'high',
+            'thinking_summaries' => 'auto',
         ]);
     });
 });
