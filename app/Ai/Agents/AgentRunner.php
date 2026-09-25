@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Actions\Billing\EnforceAiUsageLimit;
+use App\Actions\CompactStaleToolResults;
 use App\Ai\AgentBuilder;
 use App\Ai\AgentRequest;
 use App\Ai\ThinkingOptions;
@@ -23,6 +24,7 @@ use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Enums\Lab;
+use Laravel\Ai\Enums\MessageStatus;
 use Laravel\Ai\Messages\Message;
 use Laravel\Ai\Messages\MessageRole;
 use Laravel\Ai\Promptable;
@@ -43,6 +45,7 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
         private readonly AgentBuilder $agentBuilder,
         private readonly EnforceAiUsageLimit $enforceAiUsageLimit,
         private readonly PlateConversationStore $conversationStore,
+        private readonly CompactStaleToolResults $compactStaleToolResults,
     ) {}
 
     public function run(AgentRequest $request, User $user): StreamableAgentResponse
@@ -190,7 +193,13 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
             return [new Message(MessageRole::User, $message->content)];
         }
 
-        return array_values($this->conversationStore->assistantTurn($message));
+        $turn = array_values($this->conversationStore->assistantTurn($message));
+
+        if ($message->status === MessageStatus::Paused) {
+            return $turn;
+        }
+
+        return $this->compactStaleToolResults->handle($turn);
     }
 
     private function prepare(AgentRequest $request, User $user, bool $appManagedPersistence): ModelName
