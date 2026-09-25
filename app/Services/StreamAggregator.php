@@ -36,18 +36,36 @@ final readonly class StreamAggregator
     private const array AGGREGATION_ONLY_KEYS = ['tool_call', 'tool_result', 'summary', 'metadata'];
 
     /**
+     * @var list<string>
+     */
+    private const array TRUNCATABLE_BROADCAST_KEYS = ['result', 'arguments', 'data'];
+
+    private const int MAX_BROADCAST_BYTES = 8_000;
+
+    private const int TRUNCATED_PREVIEW_BYTES = 1_500;
+
+    /**
      * @param  TNormalizedEvent  $payload
      * @return array{type: string, ...<string, mixed>}
      */
     public function broadcastPayload(array $payload): array
     {
-        // @codeCoverageIgnoreStart
         foreach (self::AGGREGATION_ONLY_KEYS as $key) {
             unset($payload[$key]);
         }
 
+        if ($this->broadcastBytes($payload) <= self::MAX_BROADCAST_BYTES) {
+            return $payload;
+        }
+
+        foreach (self::TRUNCATABLE_BROADCAST_KEYS as $key) {
+            if (array_key_exists($key, $payload)) {
+                $payload[$key] = $this->truncatedPreview($payload[$key]);
+                $payload['truncated'] = true;
+            }
+        }
+
         return $payload;
-        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -270,6 +288,23 @@ final readonly class StreamAggregator
         }
 
         return $pending;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    private function broadcastBytes(array $payload): int
+    {
+        return mb_strlen((string) json_encode((string) json_encode($payload)));
+    }
+
+    private function truncatedPreview(mixed $value): string
+    {
+        $text = is_string($value)
+            ? $value
+            : (string) json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        return mb_strcut($text, 0, self::TRUNCATED_PREVIEW_BYTES).'…';
     }
 
     private function toolTitle(string $name): string
