@@ -6,9 +6,13 @@ use App\Services\BroadcastConnector;
 use App\Services\StreamAggregator;
 use App\Services\StreamEventStore;
 use Illuminate\Broadcasting\AnonymousEvent;
+use Illuminate\Broadcasting\Broadcasters\PusherBroadcaster;
+use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Exceptions;
 use Laravel\Ai\Responses\Data\FinishReason;
 use Laravel\Ai\Responses\Data\Meta;
 use Laravel\Ai\Responses\Data\Step;
@@ -19,6 +23,8 @@ use Laravel\Ai\Streaming\Events\StreamEnd;
 use Laravel\Ai\Streaming\Events\TextDelta;
 use Laravel\Ai\Streaming\Events\ToolCall as ToolCallEvent;
 use Laravel\Ai\Streaming\Events\ToolResult as ToolResultEvent;
+use Pusher\ApiErrorException;
+use Pusher\Pusher;
 
 covers(BroadcastConnector::class);
 
@@ -116,4 +122,39 @@ it('holds back sub-agent progress so a specialist tool only reports its final re
         ->and($delivery->steps->all())->toBe([$step]);
 
     Event::assertDispatchedTimes(AnonymousEvent::class, 3);
+});
+
+it('keeps streaming and reports the error when the websocket server rejects a broadcast', function (): void {
+    Exceptions::fake();
+
+    $pusher = Mockery::mock(Pusher::class);
+    $pusher->shouldReceive('trigger')
+        ->twice()
+        ->andThrow(new ApiErrorException('Payload too large.', 413));
+
+    Broadcast::extend('rejecting', fn (): PusherBroadcaster => new PusherBroadcaster($pusher));
+    config([
+        'broadcasting.default' => 'rejecting',
+        'broadcasting.connections.rejecting' => ['driver' => 'rejecting'],
+    ]);
+
+    $events = Mockery::mock(StreamEventStore::class);
+    $events->shouldReceive('wasCancellationRequested')->andReturnFalse();
+    $events->shouldReceive('append')->twice();
+
+    $delivery = new BroadcastConnector($events, resolve(StreamAggregator::class))->deliver(
+        stream: [
+            new TextDelta('event-1', 'message-1', 'Hello ', now()->timestamp),
+            new TextDelta('event-2', 'message-1', 'there', now()->timestamp),
+        ],
+        userId: 1,
+        conversationId: 'conversation-1',
+    );
+
+    expect($delivery->cancelled)->toBeFalse()
+        ->and($delivery->result->text)->toBe('Hello there');
+
+    Exceptions::assertReported(
+        fn (BroadcastException $exception): bool => $exception->getMessage() === 'Pusher error: Payload too large..',
+    );
 });

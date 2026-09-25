@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Data\ChatStreamDelivery;
+use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Broadcast;
@@ -81,9 +82,13 @@ final readonly class BroadcastConnector
      */
     private function broadcastEvent(array $payload, PrivateChannel $channel): void
     {
-        Broadcast::on($channel)
-            ->as($payload['type'])
-            ->with($this->aggregator->broadcastPayload($payload))
-            ->sendNow();
+        try {
+            Broadcast::on($channel)
+                ->as($payload['type'])
+                ->with($this->aggregator->broadcastPayload($payload))
+                ->sendNow();
+        } catch (BroadcastException $broadcastException) {
+            report($broadcastException);
+        }
     }
 }
