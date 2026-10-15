@@ -53,6 +53,7 @@ final readonly class BillingHistoryController
             'monthlyBudget' => $monthlyBudget,
             'billingHistory' => $billingHistory,
             'aiUsage' => $aiUsage,
+            'hasStripeCustomer' => ($user?->stripe_id) !== null,
         ]);
     }
 }

@@ -695,6 +695,11 @@ return [
         'title' => 'Billing history',
         'description' => 'View and download your past invoices',
         'no_history' => 'No billing history available yet.',
+        'manage' => [
+            'heading' => 'Your subscription',
+            'description' => 'Update your payment method, change plan, or cancel your subscription.',
+            'button' => 'Manage subscription',
+        ],
         'usage' => [
             'rolling' => 'Rolling Usage',
             'weekly' => 'Weekly Usage',

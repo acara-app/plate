@@ -196,17 +196,17 @@ return [
     'cyclingDistance' => $cumulative('km', 'Cycling Distance', conversions: $kmConversions, sourcePref: $cumulativeSourcePref),
     'swimmingDistance' => $cumulative('km', 'Swimming Distance', conversions: $kmConversions, sourcePref: $cumulativeSourcePref),
     'wheelchairDistance' => $cumulative('km', 'Wheelchair Distance', conversions: $kmConversions, sourcePref: $cumulativeSourcePref),
-    'wheelchairPushCount' => $cumulative('count', 'Wheelchair Pushes', sourcePref: $cumulativeSourcePref),
+    'wheelchairPushCount' => $cumulative('count', 'Wheelchair Pushes', conversions: ['pushes' => ['multiplier' => 1.0]], sourcePref: $cumulativeSourcePref),
     'flightsClimbed' => $cumulative('flights', 'Flights Climbed', sourcePref: $cumulativeSourcePref),
     'workouts' => $event('min', 'Workouts'),
-    'stepCount' => $cumulative('steps', 'Steps', canonical: 'count', sourcePref: $cumulativeSourcePref),
+    'stepCount' => $cumulative('steps', 'Steps', canonical: 'count', conversions: ['steps' => ['multiplier' => 1.0]], sourcePref: $cumulativeSourcePref),
     'standHours' => $cumulative('hours', 'Stand Hours', sourcePref: $cumulativeSourcePref),
     'standMinutes' => $cumulative('min', 'Stand Minutes', sourcePref: $cumulativeSourcePref),
 
     // ----------------------------------------------------------------
     // Mobility
     // ----------------------------------------------------------------
-    'cardioFitness' => $slow('mL/kg·min', 'Cardio Fitness (VO₂ max)'),
+    'cardioFitness' => $slow('mL/kg·min', 'Cardio Fitness (VO₂ max)', conversions: ['mL/kg/min' => ['multiplier' => 1.0]]),
     'walkingSpeed' => $instantaneous('m/s', 'Walking Speed'),
     'walkingHeartRateAverage' => $slow('bpm', 'Walking Heart Rate Average'),
     'walkingAsymmetry' => $instantaneous('%', 'Walking Asymmetry'),
@@ -214,7 +214,7 @@ return [
     'walkingStepLength' => $instantaneous('cm', 'Walking Step Length', conversions: $cmConversions),
     'stairSpeedUp' => $instantaneous('m/s', 'Stair Speed (Up)'),
     'stairSpeedDown' => $instantaneous('m/s', 'Stair Speed (Down)'),
-    'sixMinuteWalkTestDistance' => $slow('m', '6-Minute Walk Test Distance'),
+    'sixMinuteWalkTestDistance' => $slow('m', '6-Minute Walk Test Distance', conversions: ['km' => ['multiplier' => 1000.0]]),
 
     // ----------------------------------------------------------------
     // Sleep (legacy iOS 1.1.1 — daily pre-aggregated; iOS 1.2+ uses

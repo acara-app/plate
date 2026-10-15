@@ -40,7 +40,8 @@ final readonly class DecryptSyncPayloadAction
         abort_unless(is_array($data), 422, 'Decrypted payload has an invalid structure.');
 
         $validated = Validator::make($data, [
-            'entries' => ['present', 'array', 'max:1000'],
+            'batch_id' => ['sometimes', 'nullable', 'uuid'],
+            'entries' => ['present', 'array', 'list', 'max:1000'],
             'entries.*.type' => ['required', 'string', 'max:100'],
             'entries.*.value' => ['required', 'numeric'],
             'entries.*.unit' => ['required', 'string', 'max:20'],
@@ -50,7 +51,7 @@ final readonly class DecryptSyncPayloadAction
             'entries.*.metadata.*' => ['nullable', 'string', 'max:500'],
             'entries.*.sample_uuid' => ['nullable', 'string', 'max:36'],
             'entries.*.ended_at' => ['nullable', 'date'],
-            'sleep_events' => ['sometimes', 'array', 'max:500'],
+            'sleep_events' => ['sometimes', 'array', 'list', 'max:500'],
             'sleep_events.*.type' => ['required_with:sleep_events', 'string', 'max:50'],
             'sleep_events.*.stage' => ['required_with:sleep_events', 'string', 'max:24'],
             'sleep_events.*.started_at' => ['required_with:sleep_events', 'date'],
