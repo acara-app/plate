@@ -8,6 +8,8 @@ use App\Contracts\SummarizesConversation;
 use App\Models\Conversation;
 use App\Models\ConversationSummary;
 use App\Models\History;
+use App\Models\User;
+use App\Services\Ai\AgentModelContext;
 use App\Utilities\ConfigHelper;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +34,11 @@ final readonly class SummarizeConversationAction
 
             $previousSummary = ConversationSummary::getLatestForConversation($conversation->id);
             $conversationText = $this->formatMessages($messages);
-            $summaryData = $this->agent->summarize($conversationText, $previousSummary);
+            $participant = $conversation->participant;
+            $summaryData = resolve(AgentModelContext::class)->run(
+                $participant instanceof User ? $participant : null, [],
+                fn () => $this->agent->summarize($conversationText, $previousSummary),
+            );
 
             if (! $this->hasRequiredSummary($summaryData)) {
                 return null;

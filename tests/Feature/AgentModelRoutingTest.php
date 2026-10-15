@@ -129,3 +129,22 @@ it('restores a dated provider snapshot from a legacy paused turn', function (): 
         'model' => 'gpt-5.4-mini-2026-03-17', 'provider' => 'openai',
     ]);
 });
+
+it('attributes background conversation work to its owner rather than the current session', function (string $task): void {
+    $owner = App\Models\User::factory()->create();
+    $this->actingAs(App\Models\User::factory()->create());
+    $conversation = App\Models\Conversation::factory()->forUser($owner)->create(['title' => App\Models\Conversation::DEFAULT_TITLE]);
+    App\Models\History::factory()->forConversation($conversation)->create(['role' => 'user', 'content' => 'Plan lunches']);
+    config()->set('altani.summarization.buffer', 0);
+    config()->set('altani.summarization.threshold', 1);
+    $agent = $task === 'title' ? ConversationTitleGeneratorAgent::class : App\Ai\Agents\ConversationSummarizerAgent::class;
+    $agent::fake([[
+        'title' => 'Lunch plans', 'summary' => 'Lunch plans', 'topics' => [],
+        'key_facts' => [], 'unresolved_threads' => [], 'resolved_threads' => [],
+    ]]);
+
+    resolve($task === 'title' ? App\Actions\GenerateConversationTitleAction::class : App\Actions\SummarizeConversationAction::class)->handle($conversation);
+
+    expect(App\Models\AiUsage::query()->where('agent', $agent)->sole())->user_id->toBe($owner->id);
+    expect(resolve(App\Services\Ai\AgentModelContext::class)->user())->toBeNull();
+})->with(['title', 'summary']);
