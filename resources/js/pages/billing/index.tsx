@@ -9,10 +9,12 @@ import { useTranslation } from 'react-i18next';
 
 import HeadingSmall from '@/components/heading-small';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { UsageWidget } from '@/components/usage-widget';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import billing from '@/routes/billing';
+import { CreditCardIcon } from 'lucide-react';
 
 interface Invoice {
     id: string;
@@ -44,6 +46,7 @@ interface Props {
     monthlyBudget?: { used: number; limit: number; resets_at: string } | null;
     billingHistory: Invoice[];
     aiUsage?: AiUsage;
+    hasStripeCustomer?: boolean;
 }
 
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
@@ -58,6 +61,7 @@ export default function Index({
     aiUsage,
     photoAllowance,
     monthlyBudget,
+    hasStripeCustomer,
 }: Props) {
     const { t } = useTranslation('common');
 
@@ -69,6 +73,24 @@ export default function Index({
 
             <SettingsLayout>
                 <div className="space-y-6">
+                    {hasStripeCustomer && (
+                        <div className="space-y-4">
+                            <HeadingSmall
+                                title={t('billing.manage.heading')}
+                                description={t('billing.manage.description')}
+                            />
+                            <Button asChild variant="default">
+                                <a
+                                    href={billing.portal().url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <CreditCardIcon className="h-4 w-4" />
+                                    {t('billing.manage.button')}
+                                </a>
+                            </Button>
+                        </div>
+                    )}
                     <PhotoAllowanceCard allowance={photoAllowance} />
                     {monthlyBudget && (
                         <p className="text-sm text-muted-foreground">

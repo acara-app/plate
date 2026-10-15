@@ -28,7 +28,7 @@ beforeEach(function (): void {
 });
 
 it('renders billing history page', function (): void {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['stripe_id' => null]);
 
     $this->withoutVite();
 
@@ -43,6 +43,30 @@ it('renders billing history page', function (): void {
             ->where('aiUsage.payment_pending', false));
 });
 
+it('shows subscription management for users with a stripe customer', function (): void {
+    $user = User::factory()->create(['stripe_id' => 'cus_test_latest']);
+
+    $this->withoutVite();
+
+    $this->actingAs($user)
+        ->get(route('billing.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('hasStripeCustomer', true));
+});
+
+it('hides subscription management for users without a stripe customer', function (): void {
+    $user = User::factory()->create(['stripe_id' => null]);
+
+    $this->withoutVite();
+
+    $this->actingAs($user)
+        ->get(route('billing.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('hasStripeCustomer', false));
+});
+
 it('handles exception when fetching invoices', function (): void {
     $user = User::factory()->create(['stripe_id' => null]);
 
@@ -55,7 +79,7 @@ it('handles exception when fetching invoices', function (): void {
 });
 
 it('shows the resolved tier limits for a Basic subscriber', function (): void {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['stripe_id' => null]);
 
     Subscription::factory()
         ->for($user)
@@ -76,14 +100,14 @@ it('shows the resolved tier limits for a Basic subscriber', function (): void {
 });
 
 it("does not leak another user's subscription tier into the response", function (): void {
-    $basicUser = User::factory()->create();
+    $basicUser = User::factory()->create(['stripe_id' => null]);
     Subscription::factory()
         ->for($basicUser)
         ->active()
         ->withPrice('price_basic_monthly')
         ->create();
 
-    $freeUser = User::factory()->create();
+    $freeUser = User::factory()->create(['stripe_id' => null]);
 
     $this->withoutVite();
 
@@ -98,7 +122,7 @@ it("does not leak another user's subscription tier into the response", function 
 it('flags self-host mode by setting premium_enforcement_active to false', function (): void {
     Config::set('plate.enable_premium_upgrades', false);
 
-    $user = User::factory()->create();
+    $user = User::factory()->create(['stripe_id' => null]);
 
     $this->withoutVite();
 
