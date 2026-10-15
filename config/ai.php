@@ -15,8 +15,6 @@ return [
     |
     */
 
-    'paid_models_enabled' => (bool) env('AI_PAID_MODELS_ENABLED', false),
-
     'default' => 'gemini',
     'default_for_images' => 'gemini',
     'default_for_audio' => 'openai',
@@ -161,7 +159,7 @@ return [
         ],
         App\Ai\Agents\FoodPhotoAnalyzerAgent::class => [
             'standard' => env('AI_STANDARD_PHOTO_MODEL', env('FOOD_PHOTO_ANALYZER_MODEL', 'gemini-3.6-flash')),
-            'paid' => env('AI_PAID_PHOTO_MODEL', env('SNAP_PREMIUM_MODEL', 'gemini-3.8-flash')),
+            'paid' => env('AI_PAID_PHOTO_MODEL', 'gemini-3.8-flash'),
         ],
         App\Ai\Agents\ConversationTitleGeneratorAgent::class => [
             'standard' => env('AI_BACKGROUND_TEXT_MODEL', 'gpt-5-nano'),
