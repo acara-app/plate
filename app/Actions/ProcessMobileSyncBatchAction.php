@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Data\MobileSync\DecryptedSyncPayloadData;
+use App\Data\MobileSync\HealthEntryData;
+use App\Data\MobileSync\SleepEventData;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -34,8 +36,8 @@ final readonly class ProcessMobileSyncBatchAction
 
             $batchId = $payload->batch_id !== null ? mb_strtolower($payload->batch_id) : null;
             $hash = hash('sha256', json_encode($this->canonicalize([
-                'entries' => array_map(fn ($entry): array => $entry->toArray(), $payload->entries),
-                'sleep_events' => array_map(fn ($event): array => $event->toArray(), $payload->sleep_events),
+                'entries' => array_map(fn (HealthEntryData $entry): array => $entry->toArray(), $payload->entries),
+                'sleep_events' => array_map(fn (SleepEventData $event): array => $event->toArray(), $payload->sleep_events),
                 'timezone' => $timezone,
             ]), JSON_THROW_ON_ERROR));
 
