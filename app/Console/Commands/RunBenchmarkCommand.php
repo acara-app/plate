@@ -37,7 +37,7 @@ final class RunBenchmarkCommand extends Command
     public function handle(): int
     {
         $model = new PhotoModel((string) $this->option('provider'), $this->option('model') ?: FoodPhotoAnalyzerAgent::pinnedModel(), max(1, (int) $this->option('max-tokens')));
-        if (! array_key_exists($model->model, config()->array('plate.model_pricing.models'))) {
+        if (! array_key_exists($model->model, config()->array('ai.model_catalog'))) {
             $this->error('Add verified pricing for this exact model before benchmarking.');
 
             return self::FAILURE;

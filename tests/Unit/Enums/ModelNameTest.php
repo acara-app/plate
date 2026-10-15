@@ -15,5 +15,5 @@ it('turns on high thinking for Gemini models only', function (ModelName $model, 
 ]);
 
 it('prices every selectable model from its own rate card rather than the fallback', function (ModelName $model): void {
-    expect(array_keys(config()->array('plate.model_pricing.models')))->toContain($model->value);
+    expect(array_keys(config()->array('ai.model_catalog')))->toContain($model->value);
 })->with(ModelName::cases());

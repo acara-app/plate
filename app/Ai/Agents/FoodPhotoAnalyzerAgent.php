@@ -4,31 +4,31 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Ai\SystemPrompt;
+use App\Data\Ai\AgentModelData;
 use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
 use App\Models\User;
+use App\Services\Ai\ConfiguredAgentModels;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
-use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
-use RuntimeException;
 
-#[Provider('gemini')]
 #[MaxTokens(35000)]
 #[Timeout(120)]
 final class FoodPhotoAnalyzerAgent implements Agent, HasProviderOptions, HasStructuredOutput
 {
     use Promptable;
+    use UsesConfiguredAgentModel;
 
     public const string PROMPT_VERSION = '3';
 
@@ -42,11 +42,7 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasProviderOptions, HasStru
 
     public static function pinnedModel(): string
     {
-        $model = config('plate.food_photo_analyzer.model');
-
-        throw_if(! is_string($model) || $model === '', RuntimeException::class, 'No model is pinned for the food photo analyzer. Set plate.food_photo_analyzer.model.');
-
-        return $model;
+        return resolve(ConfiguredAgentModels::class)->forAgent(self::class)->model;
     }
 
     public static function version(?string $model = null): string
@@ -56,7 +52,13 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasProviderOptions, HasStru
 
     public function usingModel(PhotoModel $model, ?User $user = null): self
     {
-        $agent = clone $this;
+        $registered = array_key_exists($model->model, config()->array('ai.model_catalog'))
+            ? resolve(ConfiguredAgentModels::class)->forModel($model->model, $model->provider)
+            : new AgentModelData($model->provider, $model->model, $model->maxTokens);
+        $agent = $this->usingAgentModel(new AgentModelData(
+            $model->provider, $model->model, $registered->maxOutputTokens,
+            $registered->capabilities, $model->options, $registered->pricing,
+        ), $user);
         $agent->photoModel = $model;
         $agent->user = $user;
 
@@ -65,13 +67,7 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasProviderOptions, HasStru
 
     public function maxTokens(): int
     {
-        return $this->photoModel->maxTokens ?? 35000;
-    }
-
-    /** @return array<string, mixed> */
-    public function providerOptions(Lab|string $provider): array
-    {
-        return $this->photoModel->options ?? [];
+        return min($this->photoModel->maxTokens ?? 35000, $this->agentModel()->maxOutputTokens);
     }
 
     public function withLanguage(string $language, string $languageCode): self
@@ -152,7 +148,7 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasProviderOptions, HasStru
 
     public function analyze(string $imageBase64, string $mimeType): FoodAnalysisData
     {
-        $model = $this->photoModel->model ?? self::pinnedModel();
+        $model = $this->model();
 
         /** @var StructuredAgentResponse $response */
         $response = $this->prompt(
@@ -160,7 +156,7 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasProviderOptions, HasStru
             attachments: [
                 new Base64Image($imageBase64, $mimeType),
             ],
-            provider: $this->photoModel->provider ?? 'gemini',
+            provider: $this->provider(),
             model: $model,
         );
 

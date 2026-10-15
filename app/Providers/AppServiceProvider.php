@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Actions\Billing\ResolveSnapBurstCap;
+use App\Contracts\Ai\ResolvesAgentModel;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Billing\ProvidesAiBudget;
@@ -17,6 +18,8 @@ use App\Contracts\Services\StripeServiceContract;
 use App\Contracts\Skills\LoadsSkills;
 use App\Listeners\TrackAiUsage;
 use App\Models\User;
+use App\Services\Ai\AgentModelContext;
+use App\Services\Ai\ConfiguredAgentModels;
 use App\Services\Ai\PlateConversationStore;
 use App\Services\Billing\DefaultSubscriptionOffers;
 use App\Services\Billing\NullAiBudget;
@@ -50,6 +53,8 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->bindIf(ResolvesAgentModel::class, ConfiguredAgentModels::class);
+        $this->app->scoped(AgentModelContext::class);
         $this->app->bindIf(OffersSubscriptions::class, DefaultSubscriptionOffers::class);
         $this->app->bindIf(ProvidesAiBudget::class, NullAiBudget::class);
         $this->app->bindIf(ManagesPhotoAnalyses::class, NullPhotoAnalyses::class);

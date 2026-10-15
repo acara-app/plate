@@ -7,10 +7,11 @@ namespace App\Actions;
 use App\Ai\AgentRequest;
 use App\Ai\Agents\AgentRunner;
 use App\Contracts\ProcessesAdvisorMessage;
-use App\Enums\ModelName;
+use App\Data\Ai\AgentModelData;
 use App\Jobs\GenerateConversationTitleJob;
 use App\Models\Conversation;
 use App\Models\User;
+use App\Services\Ai\ConfiguredAgentModels;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Approvals\Decisions;
@@ -43,7 +44,7 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
         $isFirstTurn = $conversation?->messages()->doesntExist() ?? false;
 
         $response = $this->agentRunner->runSync(
-            $this->request($message, $conversationId, $attachments),
+            $this->request($message, $conversationId, $user, $attachments),
             $user,
         );
 
@@ -64,7 +65,7 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
         Context::add('chat.conversation_id', $conversationId);
 
         $response = $this->agentRunner->resumeSync(
-            $this->request('', $conversationId),
+            $this->request('', $conversationId, $user, resume: true),
             $user,
             $decisions,
         );
@@ -80,12 +81,21 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
     /**
      * @param  array<int, Base64Image>  $attachments
      */
-    private function request(string $message, string $conversationId, array $attachments = []): AgentRequest
+    private function request(string $message, string $conversationId, User $user, array $attachments = [], bool $resume = false): AgentRequest
     {
+        $models = resolve(ConfiguredAgentModels::class)->snapshot($user);
+        $model = AgentModelData::from($models[AgentRunner::class]);
+        if ($resume) {
+            $paused = Conversation::query()->findOrFail($conversationId)->messages()->where('status', 'paused')->latest('id')->first();
+            $models = resolve(ConfiguredAgentModels::class)->forTurn($paused, $user);
+            $model = AgentModelData::from($models[AgentRunner::class]);
+        }
+
         return new AgentRequest(
             message: $message,
             images: $attachments,
-            modelName: ModelName::GPT_5_4_MINI,
+            model: $model,
+            agentModels: $models,
             conversationId: $conversationId,
         );
     }

@@ -6,6 +6,7 @@ namespace App\Actions\Billing;
 
 use App\Contracts\Billing\ProvidesAiBudget;
 use App\Contracts\Billing\ResolvesUserTier;
+use App\Data\Ai\AgentModelData;
 use App\Enums\ModelName;
 use App\Enums\SubscriptionTier;
 use App\Exceptions\Billing\UsageLimitExceededException;
@@ -22,7 +23,7 @@ final readonly class EnforceAiUsageLimit
     /**
      * @throws UsageLimitExceededException when the projected total cost would exceed any window.
      */
-    public function handle(User $user, ?ModelName $model = null): void
+    public function handle(User $user, AgentModelData|ModelName|null $model = null): void
     {
         $budget = resolve(ProvidesAiBudget::class)->forUser($user);
         if ($budget !== null) {
@@ -76,7 +77,7 @@ final readonly class EnforceAiUsageLimit
         return $tierLimits[$tier->value] ?? $tierLimits[SubscriptionTier::Free->value];
     }
 
-    private function estimateCallCost(?ModelName $model): float
+    private function estimateCallCost(AgentModelData|ModelName|null $model): float
     {
         /** @var array{token_budget: array{input: int, output: int}, fallback_estimate: float} $config */
         $config = config()->array('plate.ai_usage_preflight', [
@@ -84,11 +85,11 @@ final readonly class EnforceAiUsageLimit
             'fallback_estimate' => 0.01,
         ]);
 
-        if (! $model instanceof ModelName) {
+        if ($model === null) {
             return (float) $config['fallback_estimate'];
         }
 
-        $pricing = $model->getPricing();
+        $pricing = $model instanceof AgentModelData ? $model->pricing : $model->getPricing();
         $tokens = $config['token_budget'];
 
         return ((int) $tokens['input']) / 1_000_000 * $pricing['input']

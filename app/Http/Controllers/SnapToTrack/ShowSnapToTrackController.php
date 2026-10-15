@@ -7,9 +7,10 @@ namespace App\Http\Controllers\SnapToTrack;
 use App\Actions\Billing\BuildSnapBurstLimit;
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\Billing\ResolveSnapBurstCap;
+use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Contracts\Ai\ResolvesAgentModel;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\Billing\PhotoAnalysisContext;
-use App\Enums\ModelName;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -39,7 +40,7 @@ final readonly class ShowSnapToTrackController
         $creditLimit = null;
         if (! $allowance->enabled && $request->user() !== null) {
             try {
-                $enforceAiUsageLimit->handle($request->user(), ModelName::tryFrom(config()->string('plate.food_photo_analyzer.model')));
+                $enforceAiUsageLimit->handle($request->user(), resolve(ResolvesAgentModel::class)->resolve(FoodPhotoAnalyzerAgent::class, $request->user()));
             } catch (UsageLimitExceededException $exception) {
                 $creditLimit = $exception->toPayload();
             }

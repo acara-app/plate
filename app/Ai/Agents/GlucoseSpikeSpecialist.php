@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Ai\SystemPrompt;
 use App\Data\SpikePredictionData;
 use App\Models\User;
@@ -12,19 +13,19 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\CanActAsTool;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 
-#[Provider('openai')]
 #[MaxTokens(2000)]
 #[Timeout(120)]
-final class GlucoseSpikeSpecialist implements Agent, CanActAsTool, HasStructuredOutput
+final class GlucoseSpikeSpecialist implements Agent, CanActAsTool, HasProviderOptions, HasStructuredOutput
 {
     use Promptable;
+    use UsesConfiguredAgentModel;
 
     public function name(): string
     {

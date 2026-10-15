@@ -4,20 +4,23 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Models\User;
 use App\Services\ToolRegistry;
 use App\Utilities\LanguageUtil;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\CanActAsTool;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Providers\Tools\ProviderTool;
 
-abstract class SpecialistAgent implements Agent, CanActAsTool, HasTools
+abstract class SpecialistAgent implements Agent, CanActAsTool, HasProviderOptions, HasTools
 {
     use Promptable;
+    use UsesConfiguredAgentModel;
 
     public function __construct(protected readonly ToolRegistry $toolRegistry) {}
 

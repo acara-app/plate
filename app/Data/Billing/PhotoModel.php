@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Data\Billing;
 
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Data\Ai\AgentModelData;
+use App\Services\Ai\ConfiguredAgentModels;
 use Spatie\LaravelData\Data;
 
 final class PhotoModel extends Data
@@ -17,8 +19,13 @@ final class PhotoModel extends Data
         public array $options = [],
     ) {}
 
+    public static function fromAgentModel(AgentModelData $model, int $maxTokens = 35000): self
+    {
+        return new self($model->provider, $model->model, min($maxTokens, $model->maxOutputTokens), $model->options);
+    }
+
     public static function standard(): self
     {
-        return new self('gemini', FoodPhotoAnalyzerAgent::pinnedModel());
+        return self::fromAgentModel(resolve(ConfiguredAgentModels::class)->forAgent(FoodPhotoAnalyzerAgent::class));
     }
 }
