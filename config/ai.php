@@ -113,7 +113,7 @@ return [
 
     'agent_profiles' => [
         App\Ai\Agents\AgentRunner::class => [
-            'standard' => env('AI_STANDARD_CHAT_MODEL', 'gpt-5.4-mini'),
+            'standard' => env('AI_STANDARD_CHAT_MODEL', 'gpt-6-luna'),
             'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
         App\Ai\Agents\FitnessSpecialist::class => [
