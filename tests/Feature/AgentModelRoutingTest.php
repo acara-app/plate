@@ -219,7 +219,7 @@ it('resumes a legacy paused turn on the current chat model when its recorded mod
 
     $profiles = resolve(ConfiguredAgentModels::class)->forTurn($history, $user);
 
-    expect($profiles[AgentRunner::class])->toMatchArray(['model' => 'gpt-5.4-mini', 'provider' => 'openai']);
+    expect($profiles[AgentRunner::class])->toMatchArray(['model' => config('ai.agent_profiles.'.AgentRunner::class.'.standard'), 'provider' => 'openai']);
 });
 
 it('resumes a turn created without a frozen snapshot on the configured chat model', function (): void {
@@ -229,7 +229,7 @@ it('resumes a turn created without a frozen snapshot on the configured chat mode
 
     $profiles = resolve(ConfiguredAgentModels::class)->forTurn(History::query()->findOrFail($turn->assistantMessageId), $user);
 
-    expect($profiles[AgentRunner::class])->toMatchArray(['model' => 'gpt-5.4-mini']);
+    expect($profiles[AgentRunner::class])->toMatchArray(['model' => config('ai.agent_profiles.'.AgentRunner::class.'.standard')]);
 });
 
 it('resumes a telegram approval on the models frozen for the turn awaiting it', function (): void {
