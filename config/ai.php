@@ -90,9 +90,10 @@ return [
             'pricing' => ['input' => 2.0, 'output' => 10.0, 'reasoning' => 10.0, 'cache_read' => 0.1],
         ],
         'gemini-3.5-flash' => [
+            'pricing_changes' => ['2027-01-01' => ['input' => 1.50, 'output' => 7.50, 'reasoning' => 7.50, 'cache_read' => 0.15]],
             'provider' => 'gemini', 'max_output_tokens' => 65536,
             'capabilities' => ['tools', 'structured_output', 'vision'], 'options' => ['thinking_level' => 'high', 'thinking_summaries' => 'auto'],
-            'pricing' => ['input' => 1.5, 'output' => 9.0, 'reasoning' => 9.0, 'cache_read' => 0.15],
+            'pricing' => ['input' => 0.75, 'output' => 3.75, 'reasoning' => 3.75, 'cache_read' => 0.075],
         ],
         'gemini-3.6-flash' => [
             'pricing_changes' => ['2027-01-01' => ['input' => 1.50, 'output' => 7.50, 'reasoning' => 7.50, 'cache_read' => 0.15]],
