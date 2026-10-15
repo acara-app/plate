@@ -8,6 +8,7 @@ use App\Data\ChatStreamResult;
 use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
+use App\Services\Ai\AgentModelContext;
 use App\Services\Ai\PlateConversationStore;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
@@ -140,7 +141,10 @@ final readonly class CompletePendingChatStreamTurn
             'provider_tools' => $result->providerTools,
             'citations' => $result->citations,
             'errors' => $result->errors,
-            ...$result->hasPendingApprovals() ? ['approvals' => $result->pendingApprovals] : [],
+            ...$result->hasPendingApprovals() ? [
+                'approvals' => $result->pendingApprovals,
+                'agent_models' => resolve(AgentModelContext::class)->selections(),
+            ] : [],
         ]);
 
         if ($provider !== null) {

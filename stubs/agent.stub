@@ -2,15 +2,18 @@
 
 namespace {{ namespace }};
 
+use App\Ai\Concerns\UsesConfiguredAgentModel;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\Conversational;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-class {{ class }} implements Agent, Conversational, HasTools
+class {{ class }} implements Agent, Conversational, HasProviderOptions, HasTools
 {
     use Promptable;
+    use UsesConfiguredAgentModel;
 
     /**
      * Get the instructions that the agent should follow.

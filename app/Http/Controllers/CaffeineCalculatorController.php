@@ -49,7 +49,7 @@ final readonly class CaffeineCalculatorController
             context: $context,
             conditions: $request->conditions(),
         );
-        $guidance = resolve(CaffeineGuidanceAgent::class)->assess(
+        $guidance = resolve(CaffeineGuidanceAgent::class)->forModelUser($request->user())->assess(
             limit: $limit,
             context: $context,
             locale: $locale,

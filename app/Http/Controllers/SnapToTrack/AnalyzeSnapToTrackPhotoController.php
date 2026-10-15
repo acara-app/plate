@@ -7,11 +7,12 @@ namespace App\Http\Controllers\SnapToTrack;
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\CreateAnalysisDraftAction;
+use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Contracts\Ai\ResolvesAgentModel;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\AnalysisDraftSource;
 use App\Enums\ConfidenceBand;
-use App\Enums\ModelName;
 use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Http\Requests\SnapToTrack\AnalyzeSnapToTrackPhotoRequest;
@@ -44,7 +45,7 @@ final readonly class AnalyzeSnapToTrackPhotoController
             if (! resolve(ManagesPhotoAnalyses::class)->entitlement($this->currentUser, null)->enabled) {
                 $this->enforceAiUsageLimit->handle(
                     $this->currentUser,
-                    ModelName::tryFrom(config()->string('plate.food_photo_analyzer.model')),
+                    resolve(ResolvesAgentModel::class)->resolve(FoodPhotoAnalyzerAgent::class, $request->user()),
                 );
             }
         } catch (UsageLimitExceededException $usageLimitExceededException) {

@@ -4,25 +4,27 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Contracts\SummarizesConversation;
 use App\Models\ConversationSummary;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ArrayType;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
-#[Provider('openai')]
 #[MaxTokens(4000)]
 #[Timeout(90)]
-final class ConversationSummarizerAgent implements Agent, HasStructuredOutput, SummarizesConversation
+final class ConversationSummarizerAgent implements Agent, HasProviderOptions, HasStructuredOutput, SummarizesConversation, UsesAgentModelProfiles
 {
     use Promptable;
+    use UsesConfiguredAgentModel;
 
     private ?ConversationSummary $previousSummary = null;
 
@@ -57,7 +59,6 @@ final class ConversationSummarizerAgent implements Agent, HasStructuredOutput, S
         /** @var StructuredAgentResponse $response */
         $response = $this->prompt(
             prompt: $conversationText,
-            model: 'gpt-5-nano',
         );
 
         /** @var array{summary: string, topics: array<int, string>, key_facts: array<int, string>, unresolved_threads: array<int, string>, resolved_threads: array<int, string>} */

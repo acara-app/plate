@@ -44,3 +44,23 @@ it('records cached and reasoning tokens apart from the base token counts so they
         ->reasoning_tokens->toBe(100)
         ->totalTokens()->toBe(1500);
 });
+
+it('prices a response by its model when the provider is not reported', function (): void {
+    $this->actingAs(User::factory()->create());
+
+    $prompt = new AgentPrompt(
+        resolve(ConversationTitleGeneratorAgent::class),
+        'Hi',
+        [],
+        resolve(AiManager::class)->textProvider('openai'),
+        'gpt-6.1-sol',
+    );
+
+    $response = new AgentResponse('invocation-2', 'Hello', new TextUsage(inputTokens: 1_000_000), new Meta(null, 'gpt-6.1-sol'));
+
+    event(new AgentPrompted('invocation-2', $prompt, $response));
+
+    expect(AiUsage::query()->sole())
+        ->provider->toBe('unknown')
+        ->cost->toEqualWithDelta(2.00, 0.000001);
+});

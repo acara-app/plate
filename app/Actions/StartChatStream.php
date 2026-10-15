@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Actions\Billing\EnforceAiUsageLimit;
+use App\Ai\Agents\AgentRunner;
 use App\Contracts\Memory\DispatchesMemoryExtraction;
+use App\Data\Ai\AgentModelData;
 use App\Data\ChatStreamTurn;
 use App\Http\Requests\StreamChatRequest;
 use App\Jobs\GenerateConversationTitleJob;
@@ -13,6 +15,7 @@ use App\Jobs\ProcessChatStream;
 use App\Jobs\SummarizeConversationJob;
 use App\Models\Conversation;
 use App\Models\User;
+use App\Services\Ai\ConfiguredAgentModels;
 use App\Services\StreamEventStore;
 use App\Utilities\ConfigHelper;
 use Laravel\Ai\Files\Base64Image;
@@ -28,7 +31,8 @@ final readonly class StartChatStream
 
     public function handle(StreamChatRequest $request, User $user, Conversation $conversation, string $channel = 'web', ?string $locale = null): ChatStreamTurn
     {
-        $modelName = $request->modelName();
+        $agentModels = resolve(ConfiguredAgentModels::class)->snapshot($user);
+        $modelName = AgentModelData::from($agentModels[AgentRunner::class]);
         $this->enforceAiUsageLimit->handle($user, $modelName);
 
         $messageCount = $conversation->messages()->count();
@@ -38,7 +42,7 @@ final readonly class StartChatStream
         $this->events->clear($conversation->id);
 
         $attachments = $this->serializeAttachments($request->userAttachments());
-        $turn = $this->pendingTurn->handle($conversation, $user, $request->userMessage(), $attachments, $channel, $modelName->value);
+        $turn = $this->pendingTurn->handle($conversation, $user, $request->userMessage(), $attachments, $channel, $modelName->model);
 
         if ($messageCount === 0) {
             dispatch(new GenerateConversationTitleJob($conversation->withoutRelations()));
@@ -47,12 +51,13 @@ final readonly class StartChatStream
         dispatch(new ProcessChatStream(
             userId: $user->id,
             conversationId: $conversation->id,
-            modelName: $modelName->value,
+            modelName: $modelName->model,
             channel: $channel,
             streamId: $turn->streamId,
             userMessageId: $turn->userMessageId,
             assistantMessageId: $turn->assistantMessageId,
             locale: $locale,
+            agentModels: resolve(ConfiguredAgentModels::class)->selections($agentModels),
         ));
 
         return $turn;

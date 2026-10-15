@@ -4,25 +4,27 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Ai\SystemPrompt;
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Data\AttributeMetadataData;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ArrayType;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
-#[Provider('gemini')]
 #[MaxTokens(8192)]
 #[Timeout(60)]
-final class EnrichAttributeMetadataAgent implements Agent, HasStructuredOutput
+final class EnrichAttributeMetadataAgent implements Agent, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
 {
     use Promptable;
+    use UsesConfiguredAgentModel;
 
     private ?string $language = null;
 

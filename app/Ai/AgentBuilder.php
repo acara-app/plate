@@ -77,7 +77,7 @@ final readonly class AgentBuilder
             $tools = [...$tools, ...$imageTools];
         }
 
-        $subAgents = $this->toolRegistry->getSubAgents();
+        $subAgents = $this->toolRegistry->getSubAgents($user);
 
         if (
             $request->shouldEnableWebSearch()

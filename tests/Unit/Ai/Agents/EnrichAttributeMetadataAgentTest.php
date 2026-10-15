@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Ai\Agents\EnrichAttributeMetadataAgent;
 use App\Data\AttributeMetadataData;
 use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Tests\Helpers\TestJsonSchema;
 
@@ -49,12 +48,10 @@ it('appends language directive to instructions when language is set', function (
 it('has correct attributes configured', function (): void {
     $reflection = new ReflectionClass($this->agent);
 
-    $provider = $reflection->getAttributes(Provider::class);
     $maxTokens = $reflection->getAttributes(MaxTokens::class);
     $timeout = $reflection->getAttributes(Timeout::class);
 
-    expect($provider)->toHaveCount(1)
-        ->and($provider[0]->getArguments())->toBe(['gemini'])
+    expect(resolve(EnrichAttributeMetadataAgent::class)->provider())->toBe('gemini')
         ->and($maxTokens)->toHaveCount(1)
         ->and($maxTokens[0]->newInstance()->value)->toBe(8192)
         ->and($timeout)->toHaveCount(1)

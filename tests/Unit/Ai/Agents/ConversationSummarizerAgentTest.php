@@ -6,7 +6,6 @@ use App\Ai\Agents\ConversationSummarizerAgent;
 use App\Contracts\SummarizesConversation;
 use Illuminate\JsonSchema\JsonSchemaTypeFactory;
 use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 
 covers(ConversationSummarizerAgent::class);
@@ -31,12 +30,10 @@ it('returns instructions from view', function (): void {
 it('has correct attributes configured', function (): void {
     $reflection = new ReflectionClass(ConversationSummarizerAgent::class);
 
-    $provider = $reflection->getAttributes(Provider::class);
     $maxTokens = $reflection->getAttributes(MaxTokens::class);
     $timeout = $reflection->getAttributes(Timeout::class);
 
-    expect($provider)->toHaveCount(1)
-        ->and($provider[0]->getArguments())->toBe(['openai'])
+    expect(resolve(ConversationSummarizerAgent::class)->provider())->toBe('openai')
         ->and($maxTokens)->toHaveCount(1)
         ->and($maxTokens[0]->newInstance()->value)->toBe(4000)
         ->and($timeout)->toHaveCount(1)

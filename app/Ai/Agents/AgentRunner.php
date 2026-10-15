@@ -8,10 +8,14 @@ use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\CompactStaleToolResults;
 use App\Ai\AgentBuilder;
 use App\Ai\AgentRequest;
-use App\Ai\ThinkingOptions;
-use App\Enums\ModelName;
+use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Contracts\Ai\AcceptsImages;
+use App\Contracts\Ai\UsesAgentModelProfiles;
+use App\Data\Ai\AgentModelData;
 use App\Models\History;
 use App\Models\User;
+use App\Services\Ai\AgentModelContext;
+use App\Services\Ai\ConfiguredAgentModels;
 use App\Services\Ai\PlateConversationStore;
 use App\Utilities\ConfigHelper;
 use Illuminate\Support\Facades\Context;
@@ -23,7 +27,6 @@ use Laravel\Ai\Contracts\Conversational;
 use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
-use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Enums\MessageStatus;
 use Laravel\Ai\Messages\Message;
 use Laravel\Ai\Messages\MessageRole;
@@ -33,9 +36,10 @@ use Laravel\Ai\Responses\AgentResponse;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
 #[Timeout(120)]
-final class AgentRunner implements Agent, Conversational, HasProviderOptions, HasTools
+final class AgentRunner implements AcceptsImages, Agent, Conversational, HasProviderOptions, HasTools, UsesAgentModelProfiles
 {
     use Promptable, RemembersConversations;
+    use UsesConfiguredAgentModel;
 
     private ?User $user = null;
 
@@ -57,8 +61,8 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
             ->stream(
                 prompt: $request->message,
                 attachments: $request->images,
-                provider: $modelName->labProvider(),
-                model: $modelName->value,
+                provider: $modelName->provider,
+                model: $modelName->model,
             );
     }
 
@@ -70,8 +74,8 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
             ->continue($request->conversationId ?? '', as: $user)
             ->stream(
                 prompt: $decisions,
-                provider: $modelName->labProvider(),
-                model: $modelName->value,
+                provider: $modelName->provider,
+                model: $modelName->model,
             );
     }
 
@@ -80,27 +84,33 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
     {
         $modelName = $this->prepare($request, $user, appManagedPersistence: false);
 
-        return $this
-            ->continue($request->conversationId ?? '', as: $user)
-            ->prompt(
-                prompt: $request->message,
-                attachments: $request->images,
-                provider: $modelName->labProvider(),
-                model: $modelName->value,
-            );
+        return resolve(AgentModelContext::class)->run(
+            $user, $this->modelsForRequest($request, $user, $modelName),
+            fn (): AgentResponse => $this
+                ->continue($request->conversationId ?? '', as: $user)
+                ->prompt(
+                    prompt: $request->message,
+                    attachments: $request->images,
+                    provider: $modelName->provider,
+                    model: $modelName->model,
+                ),
+        );
     }
 
     public function resumeSync(AgentRequest $request, User $user, Decisions $decisions): AgentResponse
     {
         $modelName = $this->prepare($request, $user, appManagedPersistence: false);
 
-        return $this
-            ->continue($request->conversationId ?? '', as: $user)
-            ->prompt(
-                prompt: $decisions,
-                provider: $modelName->labProvider(),
-                model: $modelName->value,
-            );
+        return resolve(AgentModelContext::class)->run(
+            $user, $this->modelsForRequest($request, $user, $modelName),
+            fn (): AgentResponse => $this
+                ->continue($request->conversationId ?? '', as: $user)
+                ->prompt(
+                    prompt: $decisions,
+                    provider: $modelName->provider,
+                    model: $modelName->model,
+                ),
+        );
     }
 
     // @codeCoverageIgnoreEnd
@@ -159,23 +169,6 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
         return $this->agentBuilder->buildTools($this->currentRequest, $this->user);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function providerOptions(Lab|string $provider): array
-    {
-        // @codeCoverageIgnoreStart
-        if (! $this->currentRequest instanceof AgentRequest) {
-            return [];
-        }
-
-        // @codeCoverageIgnoreEnd
-
-        $modelName = $this->currentRequest->modelName ?? ModelName::default();
-
-        return ThinkingOptions::forModel($modelName, $provider);
-    }
-
     // @codeCoverageIgnoreStart
     protected function maxConversationMessages(): int
     {
@@ -202,12 +195,26 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
         return $this->compactStaleToolResults->handle($turn);
     }
 
-    private function prepare(AgentRequest $request, User $user, bool $appManagedPersistence): ModelName
+    /** @return array<string, array<string, mixed>> */
+    private function modelsForRequest(AgentRequest $request, User $user, AgentModelData $model): array
     {
-        $modelName = $request->modelName ?? ModelName::default();
+        $models = $request->agentModels ?: resolve(ConfiguredAgentModels::class)->snapshot($user);
+        $models[self::class] = $model->toSnapshot();
+
+        return $models;
+    }
+
+    private function prepare(AgentRequest $request, User $user, bool $appManagedPersistence): AgentModelData
+    {
+        $this->setModelUser($user);
+        $modelName = $request->model ?? resolve(AgentModelContext::class)->resolve(self::class, $user);
+        $this->selectedAgentModel = $modelName;
         $this->enforceAiUsageLimit->handle($user, $modelName);
 
-        $this->currentRequest = $request;
+        $this->currentRequest = new AgentRequest(
+            message: $request->message, images: $request->images, conversationId: $request->conversationId,
+            streamId: $request->streamId, model: $modelName, agentModels: $request->agentModels,
+        );
         $this->user = $user;
 
         if ($appManagedPersistence) {

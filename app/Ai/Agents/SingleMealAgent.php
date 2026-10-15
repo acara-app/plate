@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Ai\SingleMealPromptBuilder;
 use App\Contracts\Ai\GeneratesSingleMeals;
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Data\GeneratedMealData;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -14,15 +16,17 @@ use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(8000)]
 #[Timeout(60)]
-final class SingleMealAgent implements Agent, GeneratesSingleMeals, HasStructuredOutput
+final class SingleMealAgent implements Agent, GeneratesSingleMeals, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
 {
     use Promptable;
+    use UsesConfiguredAgentModel;
 
     public function __construct(
         private SingleMealPromptBuilder $promptBuilder,
@@ -66,6 +70,8 @@ final class SingleMealAgent implements Agent, GeneratesSingleMeals, HasStructure
         ?int $maxCalories = null,
         ?string $specificRequest = null,
     ): GeneratedMealData {
+        $this->setModelUser($user);
+
         $prompt = $this->promptBuilder->handle(
             $user,
             $mealType,
