@@ -158,7 +158,7 @@ it('resolves an unrestricted entitlement even with an incomplete subscription wh
 });
 
 it('exposes premium_enforcement_active=false on the shared entitlement prop everywhere', function (): void {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['stripe_id' => null]);
 
     $surfaces = [
         route('meal-plans.index'),

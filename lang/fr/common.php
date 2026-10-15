@@ -696,6 +696,11 @@ return [
         'title' => 'Historique de facturation',
         'description' => 'Consultez et téléchargez vos factures passées',
         'no_history' => 'Aucun historique de facturation disponible pour le moment.',
+        'manage' => [
+            'heading' => 'Votre abonnement',
+            'description' => 'Modifiez votre moyen de paiement, changez de forfait ou annulez votre abonnement à tout moment.',
+            'button' => 'Gérer l\'abonnement',
+        ],
         'usage' => [
             'rolling' => 'Utilisation glissante',
             'weekly' => 'Utilisation hebdomadaire',
