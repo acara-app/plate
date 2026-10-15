@@ -6,9 +6,7 @@ namespace App\Http\Controllers\Api\V2;
 
 use App\Actions\DecryptSyncPayloadAction;
 use App\Actions\DispatchAggregateUserUtcDatesAction;
-use App\Actions\SyncMobileHealthEntriesAction;
-use App\Actions\SyncSleepEventsAction;
-use App\Actions\UpdateUserTimezoneAction;
+use App\Actions\ProcessMobileSyncBatchAction;
 use App\Http\Requests\Api\V2\StoreMobileSyncHealthEntriesRequest;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
@@ -20,9 +18,7 @@ final readonly class MobileSyncHealthEntriesController
 {
     public function __construct(
         private DecryptSyncPayloadAction $decryptPayloadAction,
-        private SyncMobileHealthEntriesAction $syncHealthEntriesAction,
-        private SyncSleepEventsAction $syncSleepEventsAction,
-        private UpdateUserTimezoneAction $updateTimezoneAction,
+        private ProcessMobileSyncBatchAction $processBatchAction,
         private DispatchAggregateUserUtcDatesAction $dispatchAggregateDatesAction,
     ) {}
 
@@ -54,48 +50,10 @@ final readonly class MobileSyncHealthEntriesController
 
         $payload = $this->decryptPayloadAction->handle($encryptedPayload, $device->encryption_key);
 
-        $sampleResult = $this->syncHealthEntriesAction->handle(
-            user: $user,
-            device: $device,
-            entries: $payload->entries,
-            timezone: $timezone,
-        );
+        $result = $this->processBatchAction->handle($user, $device, $payload, $timezone);
 
-        $sleepResult = ['created' => 0, 'updated' => 0, 'affected_utc_dates' => []];
+        $this->dispatchAggregateDatesAction->handle($user, $result['affected_utc_dates']);
 
-        if ($payload->sleep_events !== []) {
-            $sleepResult = $this->syncSleepEventsAction->handle(
-                user: $user,
-                events: $payload->sleep_events,
-                timezone: $timezone,
-            );
-        }
-
-        if (is_string($timezone)) {
-            $this->updateTimezoneAction->handle($user, $timezone);
-        }
-
-        /** @var list<string> $affectedUtcDates */
-        $affectedUtcDates = collect($sampleResult['affected_utc_dates'])
-            ->concat($sleepResult['affected_utc_dates'])
-            ->unique()
-            ->values()
-            ->all();
-
-        $dispatchedAggregateJobs = $this->dispatchAggregateDatesAction->handle(
-            $user,
-            $affectedUtcDates,
-        );
-
-        return response()->json([
-            'message' => 'Synced successfully.',
-            'samples_created' => $sampleResult['samples_created'],
-            'samples_updated' => $sampleResult['samples_updated'],
-            'samples_dropped' => $sampleResult['samples_dropped'],
-            'sleep_events_created' => $sleepResult['created'],
-            'sleep_events_updated' => $sleepResult['updated'],
-            'aggregate_jobs_dispatched' => $dispatchedAggregateJobs,
-            'profile_updated' => $sampleResult['profile_updated'],
-        ]);
+        return response()->json($result['response']);
     }
 }

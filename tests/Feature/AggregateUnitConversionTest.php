@@ -96,3 +96,22 @@ it('converts sub-gram milligrams to the gram canonical unit for macronutrients',
         ->and($result['value'])->toBe(2.0)
         ->and($result['original_unit'])->toBe('mg');
 });
+
+it('accepts every iOS wire unit in the metric contract', function (): void {
+    $fixture = json_decode(file_get_contents(base_path('tests/Fixtures/ios_health_metrics.json')), true);
+
+    foreach ($fixture['wire_units'] as $identifier => $unit) {
+        expect($this->converter->toCanonical($identifier, 1.0, $unit))->toHaveKey('canonical_unit');
+    }
+});
+
+it('converts the four rejected iOS activity units without changing their meaning', function (string $identifier, string $unit, float $value, string $canonical, float $expected): void {
+    $result = $this->converter->toCanonical($identifier, $value, $unit);
+
+    expect($result)->toBe(['value' => $expected, 'canonical_unit' => $canonical, 'original_unit' => $unit]);
+})->with([
+    'steps' => ['stepCount', 'steps', 1234.0, 'count', 1234.0],
+    'pushes' => ['wheelchairPushCount', 'pushes', 42.0, 'count', 42.0],
+    'fitness' => ['cardioFitness', 'mL/kg/min', 45.0, 'mL/kg·min', 45.0],
+    'walk test' => ['sixMinuteWalkTestDistance', 'km', 0.45, 'm', 450.0],
+]);

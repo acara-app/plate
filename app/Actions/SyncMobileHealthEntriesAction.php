@@ -29,7 +29,7 @@ final readonly class SyncMobileHealthEntriesAction
 
     /**
      * @param  list<HealthEntryData>  $entries
-     * @return array{samples_created: int, samples_updated: int, samples_dropped: int, profile_updated: bool, affected_utc_dates: list<string>}
+     * @return array{samples_created: int, samples_updated: int, samples_dropped: int, rejected_entries: list<array{index: int, code: string}>, profile_updated: bool, affected_utc_dates: list<string>}
      */
     public function handle(User $user, MobileSyncDevice $device, array $entries, ?string $timezone = null): array
     {
@@ -43,6 +43,7 @@ final readonly class SyncMobileHealthEntriesAction
                 'samples_created' => $sampleCounts['created'],
                 'samples_updated' => $sampleCounts['updated'],
                 'samples_dropped' => $sampleCounts['dropped'],
+                'rejected_entries' => $sampleCounts['rejected_entries'],
                 'profile_updated' => $profileUpdated,
                 'affected_utc_dates' => $sampleCounts['affected_utc_dates'],
             ];
@@ -51,14 +52,14 @@ final readonly class SyncMobileHealthEntriesAction
 
     /**
      * @param  list<HealthEntryData>  $entries
-     * @return array{created: int, updated: int, dropped: int, affected_utc_dates: list<string>}
+     * @return array{created: int, updated: int, dropped: int, rejected_entries: list<array{index: int, code: string}>, affected_utc_dates: list<string>}
      */
     private function syncSamples(User $user, MobileSyncDevice $device, array $entries, ?string $timezone): array
     {
         $syncableEntries = [];
         $bpGroupIds = [];
 
-        foreach ($entries as $entry) {
+        foreach ($entries as $index => $entry) {
             $syncType = HealthSyncType::tryFrom($entry->type);
 
             if ($syncType !== null && $syncType->isUserCharacteristic()) {
@@ -70,11 +71,11 @@ final readonly class SyncMobileHealthEntriesAction
                 $bpGroupIds[$dateKey] ??= (string) Str::uuid();
             }
 
-            $syncableEntries[] = $entry;
+            $syncableEntries[$index] = $entry;
         }
 
         if ($syncableEntries === []) {
-            return ['created' => 0, 'updated' => 0, 'dropped' => 0, 'affected_utc_dates' => []];
+            return ['created' => 0, 'updated' => 0, 'dropped' => 0, 'rejected_entries' => [], 'affected_utc_dates' => []];
         }
 
         $cache = $this->preloadSamples($user, $syncableEntries);
@@ -83,9 +84,10 @@ final readonly class SyncMobileHealthEntriesAction
         $created = 0;
         $updated = 0;
         $dropped = 0;
+        $rejectedEntries = [];
         $affectedUtcDates = [];
 
-        foreach ($syncableEntries as $entry) {
+        foreach ($syncableEntries as $index => $entry) {
             $measuredAt = CarbonImmutable::instance(Date::parse($entry->date)->utc());
             $endedAt = $entry->ended_at !== null
                 ? CarbonImmutable::instance(Date::parse($entry->ended_at)->utc())
@@ -107,6 +109,7 @@ final readonly class SyncMobileHealthEntriesAction
                 );
             } catch (HealthUnitConversionException) {
                 $dropped++;
+                $rejectedEntries[] = ['index' => $index, 'code' => 'unsupported_unit'];
 
                 continue;
             }
@@ -170,6 +173,7 @@ final readonly class SyncMobileHealthEntriesAction
             'created' => $created,
             'updated' => $updated,
             'dropped' => $dropped,
+            'rejected_entries' => $rejectedEntries,
             'affected_utc_dates' => array_keys($affectedUtcDates),
         ];
     }
@@ -223,7 +227,7 @@ final readonly class SyncMobileHealthEntriesAction
     }
 
     /**
-     * @param  list<HealthEntryData>  $entries
+     * @param  array<int, HealthEntryData>  $entries
      * @return array<string, HealthSyncSample>
      */
     private function preloadSamples(User $user, array $entries): array
@@ -245,7 +249,7 @@ final readonly class SyncMobileHealthEntriesAction
     }
 
     /**
-     * @param  list<HealthEntryData>  $entries
+     * @param  array<int, HealthEntryData>  $entries
      * @return array<string, HealthSyncSample>
      */
     private function preloadSamplesByUuid(User $user, array $entries): array
