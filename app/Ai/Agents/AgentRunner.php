@@ -9,6 +9,8 @@ use App\Actions\CompactStaleToolResults;
 use App\Ai\AgentBuilder;
 use App\Ai\AgentRequest;
 use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Contracts\Ai\AcceptsImages;
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Data\Ai\AgentModelData;
 use App\Models\History;
 use App\Models\User;
@@ -34,7 +36,7 @@ use Laravel\Ai\Responses\AgentResponse;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
 #[Timeout(120)]
-final class AgentRunner implements Agent, Conversational, HasProviderOptions, HasTools
+final class AgentRunner implements AcceptsImages, Agent, Conversational, HasProviderOptions, HasTools, UsesAgentModelProfiles
 {
     use Promptable, RemembersConversations;
     use UsesConfiguredAgentModel;
@@ -84,7 +86,7 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
 
         return resolve(AgentModelContext::class)->run(
             $user, $this->modelsForRequest($request, $user, $modelName),
-            fn () => $this
+            fn (): AgentResponse => $this
                 ->continue($request->conversationId ?? '', as: $user)
                 ->prompt(
                     prompt: $request->message,
@@ -101,7 +103,7 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
 
         return resolve(AgentModelContext::class)->run(
             $user, $this->modelsForRequest($request, $user, $modelName),
-            fn () => $this
+            fn (): AgentResponse => $this
                 ->continue($request->conversationId ?? '', as: $user)
                 ->prompt(
                     prompt: $decisions,
@@ -205,8 +207,7 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
     private function prepare(AgentRequest $request, User $user, bool $appManagedPersistence): AgentModelData
     {
         $this->setModelUser($user);
-        $modelName = $request->model
-            ?? ($request->modelName !== null ? resolve(ConfiguredAgentModels::class)->forModel($request->modelName->value) : $this->agentModel());
+        $modelName = $request->model ?? resolve(AgentModelContext::class)->resolve(self::class, $user);
         $this->selectedAgentModel = $modelName;
         $this->enforceAiUsageLimit->handle($user, $modelName);
 

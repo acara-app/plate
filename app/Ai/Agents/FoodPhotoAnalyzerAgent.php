@@ -6,7 +6,8 @@ namespace App\Ai\Agents;
 
 use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Ai\SystemPrompt;
-use App\Data\Ai\AgentModelData;
+use App\Contracts\Ai\AcceptsImages;
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
 use App\Models\User;
@@ -25,7 +26,7 @@ use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(35000)]
 #[Timeout(120)]
-final class FoodPhotoAnalyzerAgent implements Agent, HasProviderOptions, HasStructuredOutput
+final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
 {
     use Promptable;
     use UsesConfiguredAgentModel;
@@ -52,13 +53,7 @@ final class FoodPhotoAnalyzerAgent implements Agent, HasProviderOptions, HasStru
 
     public function usingModel(PhotoModel $model, ?User $user = null): self
     {
-        $registered = array_key_exists($model->model, config()->array('ai.model_catalog'))
-            ? resolve(ConfiguredAgentModels::class)->forModel($model->model, $model->provider)
-            : new AgentModelData($model->provider, $model->model, $model->maxTokens);
-        $agent = $this->usingAgentModel(new AgentModelData(
-            $model->provider, $model->model, $registered->maxOutputTokens,
-            $registered->capabilities, $model->options, $registered->pricing,
-        ), $user);
+        $agent = $this->usingAgentModel(resolve(ConfiguredAgentModels::class)->forModel($model->model, $model->provider), $user);
         $agent->photoModel = $model;
         $agent->user = $user;
 

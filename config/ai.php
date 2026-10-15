@@ -88,10 +88,9 @@ return [
             'pricing' => ['input' => 2.0, 'output' => 10.0, 'reasoning' => 10.0, 'cache_read' => 0.1],
         ],
         'gemini-3.5-flash' => [
-            'pricing_changes' => ['2027-01-01' => ['input' => 1.50, 'output' => 7.50, 'reasoning' => 7.50, 'cache_read' => 0.15]],
             'provider' => 'gemini', 'max_output_tokens' => 65536,
             'capabilities' => ['tools', 'structured_output', 'vision'], 'options' => ['thinking_level' => 'high', 'thinking_summaries' => 'auto'],
-            'pricing' => ['input' => 0.75, 'output' => 3.75, 'reasoning' => 3.75, 'cache_read' => 0.075],
+            'pricing' => ['input' => 1.50, 'output' => 9.00, 'reasoning' => 9.00, 'cache_read' => 0.15],
         ],
         'gemini-3.6-flash' => [
             'pricing_changes' => ['2027-01-01' => ['input' => 1.50, 'output' => 7.50, 'reasoning' => 7.50, 'cache_read' => 0.15]],
@@ -155,7 +154,7 @@ return [
         ],
         App\Ai\Agents\SpikePredictorAgent::class => [
             'standard' => env('AI_STANDARD_GLUCOSE_MODEL', 'gpt-6-sol'),
-            'paid' => env('AI_PAID_TASK_MODEL', 'gemini-3.8-flash'),
+            'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
         App\Ai\Agents\FoodPhotoAnalyzerAgent::class => [
             'standard' => env('AI_STANDARD_PHOTO_MODEL', env('FOOD_PHOTO_ANALYZER_MODEL', 'gemini-3.6-flash')),

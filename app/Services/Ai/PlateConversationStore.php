@@ -49,21 +49,7 @@ final class PlateConversationStore extends DatabaseConversationStore
             return null;
         }
 
-        $id = parent::storeAssistantMessage($conversationId, $participantType, $participantId, $prompt, $response, $exception);
-        $models = resolve(AgentModelContext::class)->snapshot();
-        if ($id !== null && $models !== []) {
-            $message = History::query()->findOrFail($id);
-            $message->forceFill(['meta' => [
-                ...($message->meta ?? []),
-                History::STREAM_META_KEY => [
-                    ...$message->chatStreamMeta(),
-                    'model' => $prompt->model,
-                    'agent_models' => $models,
-                ],
-            ]])->save();
-        }
-
-        return $id;
+        return parent::storeAssistantMessage($conversationId, $participantType, $participantId, $prompt, $response, $exception);
     }
 
     /**
@@ -113,5 +99,20 @@ final class PlateConversationStore extends DatabaseConversationStore
             'replay_blocks' => [],
             'provider_tool_calls' => [],
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function metaFor(AgentResponse $response, ?Throwable $exception): array
+    {
+        $meta = parent::metaFor($response, $exception);
+        $selections = resolve(AgentModelContext::class)->selections();
+
+        if ($exception instanceof Throwable || ! $response->hasPendingApprovals() || $selections === []) {
+            return $meta;
+        }
+
+        return [...$meta, History::STREAM_META_KEY => ['agent_models' => $selections]];
     }
 }

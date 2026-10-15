@@ -7,6 +7,7 @@ namespace App\Ai\Agents;
 use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Ai\SingleMealPromptBuilder;
 use App\Contracts\Ai\GeneratesSingleMeals;
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Data\GeneratedMealData;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -22,7 +23,7 @@ use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(8000)]
 #[Timeout(60)]
-final class SingleMealAgent implements Agent, GeneratesSingleMeals, HasProviderOptions, HasStructuredOutput
+final class SingleMealAgent implements Agent, GeneratesSingleMeals, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
 {
     use Promptable;
     use UsesConfiguredAgentModel;

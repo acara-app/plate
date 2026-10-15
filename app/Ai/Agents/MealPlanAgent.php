@@ -10,6 +10,7 @@ use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Ai\MealPlanPromptBuilder;
 use App\Ai\Tools\StartMealPlanGeneration;
 use App\Contracts\Ai\GeneratesMealPlans;
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Data\DayMealsData;
 use App\Data\GlucoseAnalysis\GlucoseAnalysisData;
 use App\Data\PreviousDayContext;
@@ -37,7 +38,7 @@ use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(64000)]
 #[Timeout(180)]
-final class MealPlanAgent implements Agent, GeneratesMealPlans, HasProviderOptions, HasStructuredOutput, HasTools
+final class MealPlanAgent implements Agent, GeneratesMealPlans, HasProviderOptions, HasStructuredOutput, HasTools, UsesAgentModelProfiles
 {
     use Promptable;
     use UsesConfiguredAgentModel;

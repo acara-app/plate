@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Ai;
 
 use App\Data\Ai\AgentModelData;
-use App\Enums\ModelName;
 use Laravel\Ai\Files\Base64Image;
 
 final readonly class AgentRequest
@@ -17,7 +16,6 @@ final readonly class AgentRequest
     public function __construct(
         public string $message,
         public array $images = [],
-        public ?ModelName $modelName = null,
         public ?string $conversationId = null,
         public ?string $streamId = null,
         public ?AgentModelData $model = null,
@@ -39,6 +37,6 @@ final readonly class AgentRequest
 
     public function shouldEnableWebSearch(): bool
     {
-        return $this->model?->supports('web_search') ?? ($this->modelName instanceof ModelName && $this->modelName->supportsWebSearch());
+        return $this->model?->supports('web_search') ?? false;
     }
 }

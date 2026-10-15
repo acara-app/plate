@@ -6,6 +6,7 @@ namespace App\Ai\Agents;
 
 use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Ai\SystemPrompt;
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Data\ExtractedIngredientData;
 use App\Data\GroceryItemData;
 use App\Data\GroceryListData;
@@ -27,7 +28,7 @@ use Spatie\LaravelData\DataCollection;
 
 #[MaxTokens(67000)]
 #[Timeout(120)]
-final class GroceryListAgent implements Agent, HasProviderOptions, HasStructuredOutput
+final class GroceryListAgent implements Agent, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
 {
     use Promptable;
     use UsesConfiguredAgentModel;

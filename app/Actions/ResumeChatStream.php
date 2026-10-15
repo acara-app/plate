@@ -44,7 +44,7 @@ final readonly class ResumeChatStream
 
         $this->events->clear($conversation->id);
 
-        $turn = $this->pendingTurn->forResume($conversation, $user, $channel, $modelName->model, $agentModels);
+        $turn = $this->pendingTurn->forResume($conversation, $user, $channel, $modelName->model);
 
         dispatch(new ProcessChatStream(
             userId: $user->id,
@@ -56,7 +56,7 @@ final readonly class ResumeChatStream
             assistantMessageId: $turn->assistantMessageId,
             locale: $locale,
             decisions: $recorded->toQueuePayload(),
-            agentModels: $agentModels,
+            agentModels: resolve(ConfiguredAgentModels::class)->selections($agentModels),
         ));
 
         return new ApprovalDecisionResult(turn: $turn, awaiting: []);

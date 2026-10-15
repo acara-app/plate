@@ -83,20 +83,16 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
      */
     private function request(string $message, string $conversationId, User $user, array $attachments = [], bool $resume = false): AgentRequest
     {
-        $models = resolve(ConfiguredAgentModels::class)->snapshot($user);
-        $model = AgentModelData::from($models[AgentRunner::class]);
-        if ($resume) {
-            $paused = Conversation::query()->findOrFail($conversationId)->messages()->where('status', 'paused')->latest('id')->first();
-            $models = resolve(ConfiguredAgentModels::class)->forTurn($paused, $user);
-            $model = AgentModelData::from($models[AgentRunner::class]);
-        }
+        $models = $resume
+            ? resolve(ConfiguredAgentModels::class)->forTurn(Conversation::query()->findOrFail($conversationId)->pausedApprovalTurn(), $user)
+            : resolve(ConfiguredAgentModels::class)->snapshot($user);
 
         return new AgentRequest(
             message: $message,
             images: $attachments,
-            model: $model,
-            agentModels: $models,
             conversationId: $conversationId,
+            model: AgentModelData::from($models[AgentRunner::class]),
+            agentModels: $models,
         );
     }
 

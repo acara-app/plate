@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Actions\StartChatStream;
-use App\Enums\ModelName;
 use App\Http\Requests\StreamChatRequest;
 use App\Jobs\SummarizeConversationJob;
 use App\Models\Conversation;
@@ -19,7 +18,7 @@ function makeSummarizationStreamRequest(string $conversationId): StreamChatReque
         route('chat.stream', $conversationId),
         'POST',
         [
-            'model' => ModelName::GPT_5_MINI->value,
+            'model' => 'gpt-5-mini',
             'messages' => [['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Hello']]]],
         ],
     );

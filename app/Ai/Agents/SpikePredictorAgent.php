@@ -7,6 +7,7 @@ namespace App\Ai\Agents;
 use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Ai\SystemPrompt;
 use App\Contracts\Ai\PredictsGlucoseSpikes;
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Data\SpikePredictionData;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -21,7 +22,7 @@ use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(2000)]
 #[Timeout(120)]
-final class SpikePredictorAgent implements Agent, HasProviderOptions, HasStructuredOutput, PredictsGlucoseSpikes
+final class SpikePredictorAgent implements Agent, HasProviderOptions, HasStructuredOutput, PredictsGlucoseSpikes, UsesAgentModelProfiles
 {
     use Promptable;
     use UsesConfiguredAgentModel;

@@ -179,6 +179,11 @@ it('uses the selected photo model without changing the shared default', function
         'items' => [], 'total_calories' => 0, 'total_protein' => 0,
         'total_carbs' => 0, 'total_fat' => 0, 'confidence' => 0,
     ]]);
+    config()->set('ai.model_catalog.test-premium-model', [
+        'provider' => 'openai', 'max_output_tokens' => 128000,
+        'capabilities' => ['structured_output', 'vision'], 'options' => [],
+        'pricing' => ['input' => 1.0, 'output' => 4.0, 'reasoning' => 4.0, 'cache_read' => 0.1],
+    ]);
     $agent = new FoodPhotoAnalyzerAgent;
     $profile = new PhotoModel('openai', 'test-premium-model', 2048);
     $result = $agent->usingModel($profile)->analyze('aW1hZ2U=', 'image/jpeg');
