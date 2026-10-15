@@ -77,6 +77,11 @@ return [
             'capabilities' => ['tools', 'structured_output', 'vision', 'web_search'], 'options' => [],
             'pricing' => ['input' => 0.1, 'output' => 0.4, 'reasoning' => 0.4, 'cache_read' => 0.05],
         ],
+        'gpt-6-luna' => [
+            'provider' => 'openai', 'max_output_tokens' => 128000,
+            'capabilities' => ['tools', 'structured_output', 'vision', 'web_search'], 'options' => [],
+            'pricing' => ['input' => 0.10, 'output' => 0.50, 'reasoning' => 0.50, 'cache_read' => 0.01],
+        ],
         'gpt-6-sol' => [
             'provider' => 'openai', 'max_output_tokens' => 128000,
             'capabilities' => ['tools', 'structured_output', 'vision', 'web_search'], 'options' => [],
