@@ -7,6 +7,7 @@ namespace App\Actions;
 use App\Contracts\GeneratesConversationTitle;
 use App\Models\Conversation;
 use App\Models\User;
+use App\Services\Ai\AgentModelContext;
 use App\Utilities\LanguageUtil;
 use Illuminate\Support\Str;
 use Laravel\Ai\Messages\MessageRole;
@@ -38,7 +39,10 @@ final readonly class GenerateConversationTitleAction
         );
 
         try {
-            $title = mb_trim($this->agent->generate($firstMessage, $language, $languageCode));
+            $title = mb_trim(resolve(AgentModelContext::class)->run(
+                $participant instanceof User ? $participant : null, [],
+                fn () => $this->agent->generate($firstMessage, $language, $languageCode),
+            ));
         } catch (Throwable) {
             return;
         }
