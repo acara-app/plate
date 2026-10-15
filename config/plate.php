@@ -38,8 +38,6 @@ return [
     ],
 
     'food_photo_analyzer' => [
-        'model' => (string) env('FOOD_PHOTO_ANALYZER_MODEL', 'gemini-3.5-flash'),
-
         'reference_lookup' => [
             'enabled' => (bool) env('FOOD_REFERENCE_LOOKUP_ENABLED', true),
             'match_threshold' => (float) env('FOOD_REFERENCE_MATCH_THRESHOLD', 0.5),

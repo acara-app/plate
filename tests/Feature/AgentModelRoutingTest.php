@@ -116,3 +116,16 @@ it('keeps the original provider and model when an approval resumes after a promo
 
     expect($restored[App\Ai\Agents\AgentRunner::class])->toMatchArray(['provider' => 'gemini', 'model' => 'gemini-3.8-flash']);
 });
+
+it('restores a dated provider snapshot from a legacy paused turn', function (): void {
+    $user = App\Models\User::factory()->create();
+    $history = new App\Models\History(['meta' => [
+        'model' => 'gpt-5.4-mini-2026-03-17', 'provider' => 'openai',
+    ]]);
+
+    $profiles = resolve(App\Services\Ai\ConfiguredAgentModels::class)->forTurn($history, $user);
+
+    expect($profiles[App\Ai\Agents\AgentRunner::class])->toMatchArray([
+        'model' => 'gpt-5.4-mini-2026-03-17', 'provider' => 'openai',
+    ]);
+});

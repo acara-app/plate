@@ -51,6 +51,14 @@ final readonly class ConfiguredAgentModels implements ResolvesAgentModel
     {
         $catalog = config()->array('ai.model_catalog');
         $definition = $catalog[$model] ?? null;
+        if ($definition === null) {
+            foreach ($catalog as $base => $candidate) {
+                if (is_string($base) && preg_match('/^'.preg_quote($base, '/').'-\d{4}-\d{2}-\d{2}$/', $model) === 1) {
+                    $definition = $candidate;
+                    break;
+                }
+            }
+        }
         throw_unless(is_array($definition), InvalidArgumentException::class, "Register model {$model} in ai.model_catalog before using it.");
         throw_unless(is_string($definition['provider'] ?? null), InvalidArgumentException::class, "Missing provider for model {$model}.");
         throw_if($provider !== null && $definition['provider'] !== $provider, InvalidArgumentException::class, "Model {$model} is not registered for {$provider}.");
