@@ -6,6 +6,7 @@ namespace App\Ai\Agents;
 
 use App\Actions\AnalyzeGlucoseForNotificationAction;
 use App\Actions\CreateMealPlan;
+use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Ai\MealPlanPromptBuilder;
 use App\Ai\Tools\StartMealPlanGeneration;
 use App\Contracts\Ai\GeneratesMealPlans;
@@ -26,6 +27,7 @@ use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
@@ -35,9 +37,10 @@ use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(64000)]
 #[Timeout(180)]
-final class MealPlanAgent implements Agent, GeneratesMealPlans, HasStructuredOutput, HasTools
+final class MealPlanAgent implements Agent, GeneratesMealPlans, HasProviderOptions, HasStructuredOutput, HasTools
 {
     use Promptable;
+    use UsesConfiguredAgentModel;
 
     private ?DietType $dietType = null;
 
@@ -135,6 +138,8 @@ final class MealPlanAgent implements Agent, GeneratesMealPlans, HasStructuredOut
         ?GlucoseAnalysisData $glucoseAnalysis = null,
         ?MealPlan $mealPlan = null,
     ): DayMealsData {
+        $this->setModelUser($user);
+
         /** @var string|null $customPrompt */
         $customPrompt = $mealPlan?->metadata['custom_prompt'] ?? null;
 

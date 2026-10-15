@@ -49,7 +49,21 @@ final class PlateConversationStore extends DatabaseConversationStore
             return null;
         }
 
-        return parent::storeAssistantMessage($conversationId, $participantType, $participantId, $prompt, $response, $exception);
+        $id = parent::storeAssistantMessage($conversationId, $participantType, $participantId, $prompt, $response, $exception);
+        $models = resolve(AgentModelContext::class)->snapshot();
+        if ($id !== null && $models !== []) {
+            $message = History::query()->findOrFail($id);
+            $message->forceFill(['meta' => [
+                ...($message->meta ?? []),
+                History::STREAM_META_KEY => [
+                    ...$message->chatStreamMeta(),
+                    'model' => $prompt->model,
+                    'agent_models' => $models,
+                ],
+            ]])->save();
+        }
+
+        return $id;
     }
 
     /**

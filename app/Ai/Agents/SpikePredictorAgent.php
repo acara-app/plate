@@ -4,25 +4,27 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Ai\SystemPrompt;
 use App\Contracts\Ai\PredictsGlucoseSpikes;
 use App\Data\SpikePredictionData;
+use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
-#[Provider('openai')]
 #[MaxTokens(2000)]
 #[Timeout(120)]
-final class SpikePredictorAgent implements Agent, HasStructuredOutput, PredictsGlucoseSpikes
+final class SpikePredictorAgent implements Agent, HasProviderOptions, HasStructuredOutput, PredictsGlucoseSpikes
 {
     use Promptable;
+    use UsesConfiguredAgentModel;
 
     private ?string $language = null;
 
@@ -88,8 +90,10 @@ final class SpikePredictorAgent implements Agent, HasStructuredOutput, PredictsG
         return SpikePredictionData::jsonSchema($schema);
     }
 
-    public function predict(string $food): SpikePredictionData
+    public function predict(string $food, ?User $user = null): SpikePredictionData
     {
+        $this->setModelUser($user);
+
         $prompt = sprintf('Analyze this food for glucose spike risk: "%s"', $food);
 
         /** @var StructuredAgentResponse $response */

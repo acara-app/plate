@@ -112,7 +112,7 @@ it('benchmarks both production paths, reports per-path metrics, and persists the
     FoodPhotoAnalyzerAgent::fake(fn (): array => perfectAnalysisPayload());
 
     $this->artisan('benchmark:run', ['--repeats' => 2, '--force' => true])
-        ->expectsOutputToContain('gemini-3.5-flash/p3')
+        ->expectsOutputToContain('gemini-3.6-flash/p3')
         ->expectsOutputToContain('Raw model')
         ->expectsOutputToContain('With reference lookup')
         ->expectsOutputToContain('1 / 2 / 0')
@@ -122,7 +122,7 @@ it('benchmarks both production paths, reports per-path metrics, and persists the
 
     $run = BenchmarkRun::query()->sole();
 
-    expect($run->analyzer_version)->toBe('gemini-3.5-flash/p3')
+    expect($run->analyzer_version)->toBe('gemini-3.6-flash/p3')
         ->and($run->smoke)->toBeFalse()
         ->and($run->repeats)->toBe(2)
         ->and($run->meal_count)->toBe(1)
@@ -165,7 +165,7 @@ it('aborts without spending when the cost confirmation is declined', function ()
     FoodPhotoAnalyzerAgent::fake(fn (): array => perfectAnalysisPayload());
 
     $this->artisan('benchmark:run', ['--repeats' => 2])
-        ->expectsConfirmation('Run 4 analyses (~$0.05)?', 'no')
+        ->expectsConfirmation('Run 4 analyses (~$0.02)?', 'no')
         ->assertSuccessful();
 
     FoodPhotoAnalyzerAgent::assertNeverPrompted();

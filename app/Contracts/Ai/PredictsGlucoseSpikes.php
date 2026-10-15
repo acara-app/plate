@@ -6,10 +6,11 @@ namespace App\Contracts\Ai;
 
 use App\Ai\Agents\SpikePredictorAgent;
 use App\Data\SpikePredictionData;
+use App\Models\User;
 use Illuminate\Container\Attributes\Bind;
 
 #[Bind(SpikePredictorAgent::class)]
 interface PredictsGlucoseSpikes
 {
-    public function predict(string $food): SpikePredictionData;
+    public function predict(string $food, ?User $user = null): SpikePredictionData;
 }

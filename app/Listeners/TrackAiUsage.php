@@ -43,7 +43,7 @@ final readonly class TrackAiUsage
             'reasoning_tokens' => $usage->reasoningTokens ?? 0,
         ];
 
-        $cost = new AiUsageService()->calculateCost($model, $usageArray);
+        $cost = new AiUsageService()->calculateCost($model, $usageArray, $provider);
 
         AiUsage::query()->firstOrCreate(['invocation_id' => $invocationId], [
             'usage_group' => Context::get('photo_usage_group'),
@@ -58,6 +58,10 @@ final readonly class TrackAiUsage
 
     private function getUserFromAgent(object $agent): ?User
     {
+        if (method_exists($agent, 'modelUser') && $agent->modelUser() instanceof User) {
+            return $agent->modelUser();
+        }
+
         try {
             $reflection = new ReflectionClass($agent);
 

@@ -7,11 +7,13 @@ namespace App\Jobs;
 use App\Actions\CompletePendingChatStreamTurn;
 use App\Ai\AgentRequest;
 use App\Ai\Agents\AgentRunner;
+use App\Data\Ai\AgentModelData;
 use App\Data\ChatStreamDelivery;
 use App\Data\ChatStreamResult;
-use App\Enums\ModelName;
 use App\Models\History;
 use App\Models\User;
+use App\Services\Ai\AgentModelContext;
+use App\Services\Ai\ConfiguredAgentModels;
 use App\Services\BroadcastConnector;
 use App\Services\ChatChannel;
 use App\Services\StreamAggregator;
@@ -41,6 +43,7 @@ final class ProcessChatStream implements ShouldQueue
     public const int TRIES = 3;
 
     /**
+     * @param  array<string, array<string, mixed>>|null  $agentModels
      * @param  list<array{id: string, action: string, result?: string|null}>|null  $decisions  tool approval decisions that resume a paused turn
      */
     public function __construct(
@@ -53,6 +56,7 @@ final class ProcessChatStream implements ShouldQueue
         public string $assistantMessageId,
         public ?string $locale = null,
         public ?array $decisions = null,
+        public ?array $agentModels = null,
     ) {}
 
     /**
@@ -70,11 +74,47 @@ final class ProcessChatStream implements ShouldQueue
         BroadcastConnector $connector,
         CompletePendingChatStreamTurn $complete,
     ): void {
+        $user = User::query()->findOrFail($this->userId);
+        $models = $this->agentModels ?? resolve(ConfiguredAgentModels::class)->snapshot($user);
+        if ($this->agentModels === null) {
+            $models[AgentRunner::class] = resolve(ConfiguredAgentModels::class)->forModel($this->modelName)->toSnapshot();
+        }
+
+        resolve(AgentModelContext::class)->run($user, $models, fn () => $this->process($user, $models, $agentRunner, $events, $connector, $complete));
+    }
+
+    public function failed(Throwable $e): void
+    {
+        report($e);
+
+        $events = resolve(StreamEventStore::class);
+        $aggregator = resolve(StreamAggregator::class);
+        $user = User::query()->find($this->userId);
+
+        if ($user instanceof User) {
+            resolve(CompletePendingChatStreamTurn::class)->handle(
+                conversationId: $this->conversationId,
+                user: $user,
+                userMessageId: $this->userMessageId,
+                assistantMessageId: $this->assistantMessageId,
+                result: $aggregator->aggregateStoredEvents($events->eventsAfter($this->conversationId, -1)),
+                status: History::STREAM_STATUS_FAILED,
+            );
+        }
+
+        $events->markComplete($this->conversationId);
+
+        $this->broadcastLifecycle('error', [
+            'message' => 'Failed to process your message after multiple attempts.',
+        ]);
+    }
+
+    /** @param array<string, array<string, mixed>> $models */
+    private function process(User $user, array $models, AgentRunner $agentRunner, StreamEventStore $events, BroadcastConnector $connector, CompletePendingChatStreamTurn $complete): void
+    {
         $previousLocale = App::getLocale();
 
         try {
-            $user = User::query()->findOrFail($this->userId);
-
             if ($this->resetStateForRetry($events)) {
                 $this->completePendingTurn(
                     complete: $complete,
@@ -101,7 +141,8 @@ final class ProcessChatStream implements ShouldQueue
             $request = new AgentRequest(
                 message: $userMessage->content ?? '',
                 images: $this->base64Images($userMessage->attachments ?? []),
-                modelName: ModelName::tryFrom($this->modelName) ?? ModelName::default(),
+                model: AgentModelData::from($models[AgentRunner::class]),
+                agentModels: $models,
                 conversationId: $this->conversationId,
                 streamId: $this->streamId,
             );
@@ -129,32 +170,6 @@ final class ProcessChatStream implements ShouldQueue
         } finally {
             App::setLocale($previousLocale);
         }
-    }
-
-    public function failed(Throwable $e): void
-    {
-        report($e);
-
-        $events = resolve(StreamEventStore::class);
-        $aggregator = resolve(StreamAggregator::class);
-        $user = User::query()->find($this->userId);
-
-        if ($user instanceof User) {
-            resolve(CompletePendingChatStreamTurn::class)->handle(
-                conversationId: $this->conversationId,
-                user: $user,
-                userMessageId: $this->userMessageId,
-                assistantMessageId: $this->assistantMessageId,
-                result: $aggregator->aggregateStoredEvents($events->eventsAfter($this->conversationId, -1)),
-                status: History::STREAM_STATUS_FAILED,
-            );
-        }
-
-        $events->markComplete($this->conversationId);
-
-        $this->broadcastLifecycle('error', [
-            'message' => 'Failed to process your message after multiple attempts.',
-        ]);
     }
 
     /**

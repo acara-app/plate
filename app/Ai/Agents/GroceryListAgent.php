@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Ai\SystemPrompt;
 use App\Data\ExtractedIngredientData;
 use App\Data\GroceryItemData;
@@ -16,20 +17,20 @@ use Illuminate\JsonSchema\Types\ArrayType;
 use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 use Spatie\LaravelData\DataCollection;
 
-#[Provider('gemini')]
 #[MaxTokens(67000)]
 #[Timeout(120)]
-final class GroceryListAgent implements Agent, HasStructuredOutput
+final class GroceryListAgent implements Agent, HasProviderOptions, HasStructuredOutput
 {
     use Promptable;
+    use UsesConfiguredAgentModel;
 
     public function instructions(): string
     {
@@ -88,6 +89,8 @@ final class GroceryListAgent implements Agent, HasStructuredOutput
 
     public function generate(MealPlan $mealPlan): GroceryListData
     {
+        $this->setModelUser($mealPlan->user);
+
         $ingredients = $this->extractIngredients($mealPlan);
 
         if ($ingredients === []) {

@@ -7,7 +7,8 @@ use App\Services\AiUsageService;
 covers(AiUsageService::class);
 
 beforeEach(function (): void {
-    config()->set('plate.model_pricing.models.priced-model', [
+    config()->set('ai.model_catalog.priced-model.provider', 'openai');
+    config()->set('ai.model_catalog.priced-model.pricing', [
         'input' => 1.00,
         'output' => 4.00,
         'reasoning' => 2.00,

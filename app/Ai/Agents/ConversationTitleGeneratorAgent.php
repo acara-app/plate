@@ -4,23 +4,24 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Contracts\GeneratesConversationTitle;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
-#[Provider('openai')]
 #[MaxTokens(1000)]
 #[Timeout(30)]
-final class ConversationTitleGeneratorAgent implements Agent, GeneratesConversationTitle, HasStructuredOutput
+final class ConversationTitleGeneratorAgent implements Agent, GeneratesConversationTitle, HasProviderOptions, HasStructuredOutput
 {
     use Promptable;
+    use UsesConfiguredAgentModel;
 
     private string $language = 'English';
 
@@ -56,7 +57,6 @@ final class ConversationTitleGeneratorAgent implements Agent, GeneratesConversat
         /** @var StructuredAgentResponse $response */
         $response = $this->prompt(
             prompt: $message,
-            model: 'gpt-5-nano',
         );
 
         /** @var array{title?: string} $data */
