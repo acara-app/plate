@@ -157,7 +157,7 @@ return [
             'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
         App\Ai\Agents\FoodPhotoAnalyzerAgent::class => [
-            'standard' => env('AI_STANDARD_PHOTO_MODEL', env('FOOD_PHOTO_ANALYZER_MODEL', 'gemini-3.6-flash')),
+            'standard' => env('AI_STANDARD_PHOTO_MODEL', 'gemini-3.6-flash'),
             'paid' => env('AI_PAID_PHOTO_MODEL', 'gemini-3.8-flash'),
         ],
         App\Ai\Agents\ConversationTitleGeneratorAgent::class => [
