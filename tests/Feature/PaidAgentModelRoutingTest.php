@@ -19,8 +19,6 @@ use Laravel\Cashier\Subscription;
 
 beforeEach(function (): void {
     config()->set('plate.enable_premium_upgrades', true);
-    config()->set('ai.paid_models_enabled', true);
-    config()->set('snap.model_approved', true);
     config()->set('ai.agent_profiles.'.FoodPhotoAnalyzerAgent::class.'.paid', 'gemini-3.8-flash');
 });
 
@@ -103,7 +101,7 @@ it('freezes paid profiles in queued chat turns before an upgrade or cancellation
     $this->actingAs($user)->postJson(route('chat.stream', $conversation->id), [
         'messages' => [['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Hello']]]],
     ])->assertAccepted();
-    config()->set('ai.paid_models_enabled', false);
+    config()->set('ai.agent_profiles.'.AgentRunner::class.'.paid', 'gpt-6-sol');
 
     Illuminate\Support\Facades\Queue::assertPushed(App\Jobs\ProcessChatStream::class, function ($job): bool {
         $restored = unserialize(serialize($job));
@@ -143,9 +141,26 @@ it('keeps Snap Pro scans idempotent while using the paid photo profile', functio
     expect($photos->entitlement($user, null))->used->toBe(1);
 });
 
-it('keeps standard models available while the paid rollout is disabled', function (): void {
+it('uses paid profiles for active subscriptions without a rollout switch', function (): void {
     $user = subscribedModelUser('Pro');
-    config()->set('ai.paid_models_enabled', false);
 
-    expect(resolve(ResolvesAgentModel::class)->resolve(AgentRunner::class, $user))->model->toBe('gpt-5.4-mini');
+    expect(resolve(ResolvesAgentModel::class)->resolve(AgentRunner::class, $user))->model->toBe('gpt-6.1-sol');
 });
+
+it('offers Snap only when its model and billing dependencies are ready', function (string $model, bool $stripeReady, bool $purchasable, bool $expected): void {
+    config()->set('ai.agent_profiles.'.FoodPhotoAnalyzerAgent::class.'.paid', $model);
+    config()->set('cashier.key', $stripeReady ? 'pk_test_snap' : null);
+    config()->set('cashier.secret', 'sk_test_snap');
+    config()->set('cashier.webhook.secret', 'whsec_test_snap');
+    SubscriptionProduct::factory()->create([
+        'name' => 'Snap Pro', 'price' => 9, 'purchasable' => $purchasable,
+        'stripe_lookup_key' => 'acara-plate-snap-pro-monthly-v1', 'stripe_price_id' => 'price_snap',
+    ]);
+
+    expect(resolve(CloudPhotoAnalyses::class)->enabled())->toBe($expected);
+})->with([
+    'ready' => ['gemini-3.8-flash', true, true, true],
+    'unknown photo model' => ['missing-model', true, true, false],
+    'Stripe unavailable' => ['gemini-3.8-flash', false, true, false],
+    'product unavailable' => ['gemini-3.8-flash', true, false, false],
+]);
