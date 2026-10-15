@@ -17,5 +17,6 @@ final class DecryptedSyncPayloadData extends Data
         /** @var list<SleepEventData> */
         #[DataCollectionOf(SleepEventData::class)]
         public array $sleep_events = [],
+        public ?string $batch_id = null,
     ) {}
 }

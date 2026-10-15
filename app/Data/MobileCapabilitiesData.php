@@ -16,6 +16,7 @@ final class MobileCapabilitiesData extends Data
         public array $methods,
         public bool $chatFirst,
         public string $minAppVersion,
+        public int $health_sync_protocol = 2,
     ) {}
 
     public static function fromConfig(): self
