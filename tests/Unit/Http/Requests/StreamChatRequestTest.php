@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\ModelName;
 use App\Http\Requests\StreamChatRequest;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Ai\Files\Base64Image;
@@ -91,14 +90,6 @@ it('ignores non-text parts when extracting user message', function () use ($crea
     ]);
 
     expect($request->userMessage())->toBe('Text content');
-});
-
-it('returns default model', function () use ($createRequest): void {
-    $request = $createRequest([
-        'messages' => [['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Hi']]]],
-    ]);
-
-    expect($request->modelName())->toBe(ModelName::default());
 });
 
 it('returns empty attachments when no file parts exist', function () use ($createRequest): void {

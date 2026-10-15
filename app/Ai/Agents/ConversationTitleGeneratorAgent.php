@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Contracts\GeneratesConversationTitle;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
@@ -18,7 +19,7 @@ use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(1000)]
 #[Timeout(30)]
-final class ConversationTitleGeneratorAgent implements Agent, GeneratesConversationTitle, HasProviderOptions, HasStructuredOutput
+final class ConversationTitleGeneratorAgent implements Agent, GeneratesConversationTitle, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
 {
     use Promptable;
     use UsesConfiguredAgentModel;

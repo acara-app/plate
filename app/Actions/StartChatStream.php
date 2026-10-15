@@ -42,7 +42,7 @@ final readonly class StartChatStream
         $this->events->clear($conversation->id);
 
         $attachments = $this->serializeAttachments($request->userAttachments());
-        $turn = $this->pendingTurn->handle($conversation, $user, $request->userMessage(), $attachments, $channel, $modelName->model, $agentModels);
+        $turn = $this->pendingTurn->handle($conversation, $user, $request->userMessage(), $attachments, $channel, $modelName->model);
 
         if ($messageCount === 0) {
             dispatch(new GenerateConversationTitleJob($conversation->withoutRelations()));
@@ -57,7 +57,7 @@ final readonly class StartChatStream
             userMessageId: $turn->userMessageId,
             assistantMessageId: $turn->assistantMessageId,
             locale: $locale,
-            agentModels: $agentModels,
+            agentModels: resolve(ConfiguredAgentModels::class)->selections($agentModels),
         ));
 
         return $turn;

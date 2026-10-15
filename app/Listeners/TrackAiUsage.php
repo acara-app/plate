@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Models\AiUsage;
 use App\Models\User;
 use App\Services\AiUsageService;
@@ -58,7 +59,7 @@ final readonly class TrackAiUsage
 
     private function getUserFromAgent(object $agent): ?User
     {
-        if (method_exists($agent, 'modelUser') && $agent->modelUser() instanceof User) {
+        if ($agent instanceof UsesAgentModelProfiles && $agent->modelUser() instanceof User) {
             return $agent->modelUser();
         }
 

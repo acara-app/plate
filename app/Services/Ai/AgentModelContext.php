@@ -16,6 +16,9 @@ final class AgentModelContext
     /** @var array<string, array<string, mixed>> */
     private array $models = [];
 
+    /** @var array<string, AgentModelData> */
+    private array $resolved = [];
+
     /**
      * @template TResult
      *
@@ -25,23 +28,22 @@ final class AgentModelContext
      */
     public function run(?User $user, array $models, Closure $callback): mixed
     {
-        $previousUser = $this->user;
-        $previousModels = $this->models;
+        $previous = [$this->user, $this->models, $this->resolved];
         $this->user = $user;
         $this->models = $models;
+        $this->resolved = [];
 
         try {
             return $callback();
         } finally {
-            $this->user = $previousUser;
-            $this->models = $previousModels;
+            [$this->user, $this->models, $this->resolved] = $previous;
         }
     }
 
-    /** @return array<string, array<string, mixed>> */
-    public function snapshot(): array
+    /** @return array<string, array{provider: string, model: string}> */
+    public function selections(): array
     {
-        return $this->models;
+        return resolve(ConfiguredAgentModels::class)->selections($this->models);
     }
 
     public function user(): ?User
@@ -51,10 +53,10 @@ final class AgentModelContext
 
     public function resolve(string $agentClass, ?User $user = null): AgentModelData
     {
-        if (($user === null || $user->is($this->user)) && isset($this->models[$agentClass])) {
-            return AgentModelData::from($this->models[$agentClass]);
-        }
+        $user ??= $this->user;
 
-        return resolve(ResolvesAgentModel::class)->resolve($agentClass, $user ?? $this->user);
+        return $this->resolved[$agentClass.':'.($user->id ?? '')] ??= (! $user instanceof User || $user->is($this->user)) && isset($this->models[$agentClass])
+            ? AgentModelData::from($this->models[$agentClass])
+            : resolve(ResolvesAgentModel::class)->resolve($agentClass, $user);
     }
 }

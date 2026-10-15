@@ -9,12 +9,12 @@ use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\StartMealPlanGeneration;
 use App\Contracts\Ai\GeneratesMealPlans;
 use App\Contracts\Billing\ResolvesUserTier;
-use App\Enums\ModelName;
 use App\Enums\SubscriptionTier;
 use App\Models\AiUsage;
 use App\Models\Conversation;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
+use App\Services\Ai\ConfiguredAgentModels;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
@@ -34,7 +34,7 @@ it('does not block AI invocations when the flag is off, even for users far over 
         'cost' => 50.0,
     ]);
 
-    resolve(EnforceAiUsageLimit::class)->handle($user, ModelName::GPT_5_4_MINI);
+    resolve(EnforceAiUsageLimit::class)->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
 
     expect(true)->toBeTrue();
 });

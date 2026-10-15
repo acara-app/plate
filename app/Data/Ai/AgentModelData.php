@@ -32,6 +32,12 @@ final class AgentModelData extends Data
         ];
     }
 
+    /** @return array{provider: string, model: string} */
+    public function toSelection(): array
+    {
+        return ['provider' => $this->provider, 'model' => $this->model];
+    }
+
     public function supports(string $capability): bool
     {
         return in_array($capability, $this->capabilities, true);

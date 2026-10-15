@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Contracts\SummarizesConversation;
 use App\Models\ConversationSummary;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -20,7 +21,7 @@ use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(4000)]
 #[Timeout(90)]
-final class ConversationSummarizerAgent implements Agent, HasProviderOptions, HasStructuredOutput, SummarizesConversation
+final class ConversationSummarizerAgent implements Agent, HasProviderOptions, HasStructuredOutput, SummarizesConversation, UsesAgentModelProfiles
 {
     use Promptable;
     use UsesConfiguredAgentModel;

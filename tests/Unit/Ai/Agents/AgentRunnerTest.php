@@ -13,10 +13,11 @@ use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
-use App\Enums\ModelName;
 use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
+use App\Services\Ai\ConfiguredAgentModels;
+use Illuminate\Support\Collection;
 use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Enums\MessageStatus;
 use Laravel\Ai\Files\Base64Image;
@@ -36,7 +37,7 @@ beforeEach(function (): void {
 
 describe('instructions', function (): void {
     it('returns instructions with default mode', function (): void {
-        $request = new AgentRequest(message: 'Hello', modelName: ModelName::GPT_5_4_MINI);
+        $request = new AgentRequest(message: 'Hello', model: resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
 
         $this->agent->run($request, $this->user);
         $instructions = $this->agent->instructions();
@@ -47,7 +48,7 @@ describe('instructions', function (): void {
     });
 
     it('returns instructions that delegate meal planning to a specialist', function (): void {
-        $request = new AgentRequest(message: 'Create a meal plan', modelName: ModelName::GPT_5_4_MINI);
+        $request = new AgentRequest(message: 'Create a meal plan', model: resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
 
         $this->agent->run($request, $this->user);
         $instructions = $this->agent->instructions();
@@ -60,7 +61,7 @@ describe('instructions', function (): void {
 
 describe('tools', function (): void {
     it('returns top-level tools plus specialist sub-agents', function (): void {
-        $request = new AgentRequest(message: 'Hello', modelName: ModelName::GPT_5_4_MINI);
+        $request = new AgentRequest(message: 'Hello', model: resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
 
         $this->agent->run($request, $this->user);
         $tools = $this->agent->tools();
@@ -81,7 +82,7 @@ describe('tools', function (): void {
 
     it('includes AnalyzePhoto tool when attachments are set', function (): void {
         $image = new Base64Image(base64_encode('fake-image'), 'image/jpeg');
-        $request = new AgentRequest(message: 'Analyze this', images: [$image], modelName: ModelName::GPT_5_4_MINI);
+        $request = new AgentRequest(message: 'Analyze this', images: [$image], model: resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
 
         $this->agent->run($request, $this->user);
         $tools = $this->agent->tools();
@@ -94,7 +95,7 @@ describe('tools', function (): void {
     });
 
     it('includes provider tools when web search enabled', function (): void {
-        $request = new AgentRequest(message: 'Search for something', modelName: ModelName::GPT_5_MINI);
+        $request = new AgentRequest(message: 'Search for something', model: resolve(ConfiguredAgentModels::class)->forModel('gpt-5-mini'));
 
         $this->agent->run($request, $this->user);
         $tools = $this->agent->tools();
@@ -105,7 +106,7 @@ describe('tools', function (): void {
 
 describe('messages', function (): void {
     it('returns empty messages when no conversation', function (): void {
-        $request = new AgentRequest(message: 'Hello', modelName: ModelName::GPT_5_4_MINI);
+        $request = new AgentRequest(message: 'Hello', model: resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
 
         $this->agent->run($request, $this->user);
         $messages = $this->agent->messages();
@@ -135,9 +136,9 @@ describe('messages', function (): void {
 
         $request = new AgentRequest(
             message: 'Current question',
-            modelName: ModelName::GPT_5_4_MINI,
             conversationId: $conversation->id,
             streamId: 'stream-1',
+            model: resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'),
         );
 
         $this->agent->run($request, $this->user);
@@ -178,13 +179,13 @@ describe('messages', function (): void {
 
         $this->agent->run(new AgentRequest(
             message: 'Approve',
-            modelName: ModelName::GPT_5_4_MINI,
             conversationId: $conversation->id,
+            model: resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'),
         ), $this->user);
 
         $skillResults = collect($this->agent->messages())
             ->whereInstanceOf(ToolResultMessage::class)
-            ->flatMap(fn (ToolResultMessage $message) => $message->toolResults)
+            ->flatMap(fn (ToolResultMessage $message): Collection => $message->toolResults)
             ->mapWithKeys(fn (ToolResult $result): array => [$result->id => $result->result]);
 
         expect($skillResults->all())->toBe([
@@ -196,7 +197,7 @@ describe('messages', function (): void {
 
 describe('providerOptions', function (): void {
     it('requests Gemini thinking config for a thinking-capable model', function (): void {
-        $request = new AgentRequest(message: 'Hello', modelName: ModelName::GEMINI_3_5_FLASH);
+        $request = new AgentRequest(message: 'Hello', model: resolve(ConfiguredAgentModels::class)->forModel('gemini-3.5-flash'));
 
         $this->agent->run($request, $this->user);
 

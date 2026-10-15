@@ -6,6 +6,7 @@ namespace App\Ai\Agents;
 
 use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Ai\SystemPrompt;
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Data\AttributeMetadataData;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ArrayType;
@@ -20,7 +21,7 @@ use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(8192)]
 #[Timeout(60)]
-final class EnrichAttributeMetadataAgent implements Agent, HasProviderOptions, HasStructuredOutput
+final class EnrichAttributeMetadataAgent implements Agent, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
 {
     use Promptable;
     use UsesConfiguredAgentModel;

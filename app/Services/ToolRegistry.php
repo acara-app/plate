@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Models\User;
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
@@ -58,21 +59,15 @@ final readonly class ToolRegistry
      */
     public function getSubAgents(?User $user = null): array
     {
-        /** @var array<int, class-string<Agent>> $classes */
+        /** @var array<int, string> $classes */
         $classes = config()->array('plate.sub_agents', []);
 
         return collect($classes)
             ->map(function (string $class) use ($user): Agent {
-                /** @var Agent */
                 $agent = $this->container->make($class);
-                if (method_exists($agent, 'forModelUser')) {
-                    $agent = $agent->forModelUser($user);
-                }
-                if (! $agent instanceof Agent) {
-                    throw new InvalidArgumentException("{$class} must implement the AI agent contract.");
-                }
+                throw_unless($agent instanceof Agent, InvalidArgumentException::class, "{$class} must implement the AI agent contract.");
 
-                return $agent;
+                return $agent instanceof UsesAgentModelProfiles ? $agent->forModelUser($user) : $agent;
             })
             ->all();
     }

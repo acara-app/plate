@@ -9,8 +9,9 @@ use App\Actions\CompactStaleToolResults;
 use App\Ai\AgentBuilder;
 use App\Ai\AgentRequest;
 use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Contracts\Ai\AcceptsImages;
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Data\Ai\AgentModelData;
-use App\Enums\ModelName;
 use App\Models\History;
 use App\Models\User;
 use App\Services\Ai\AgentModelContext;
@@ -35,7 +36,7 @@ use Laravel\Ai\Responses\AgentResponse;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
 #[Timeout(120)]
-final class AgentRunner implements Agent, Conversational, HasProviderOptions, HasTools
+final class AgentRunner implements AcceptsImages, Agent, Conversational, HasProviderOptions, HasTools, UsesAgentModelProfiles
 {
     use Promptable, RemembersConversations;
     use UsesConfiguredAgentModel;
@@ -206,8 +207,7 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
     private function prepare(AgentRequest $request, User $user, bool $appManagedPersistence): AgentModelData
     {
         $this->setModelUser($user);
-        $modelName = $request->model
-            ?? ($request->modelName instanceof ModelName ? resolve(ConfiguredAgentModels::class)->forModel($request->modelName->value) : resolve(AgentModelContext::class)->resolve(self::class, $user));
+        $modelName = $request->model ?? resolve(AgentModelContext::class)->resolve(self::class, $user);
         $this->selectedAgentModel = $modelName;
         $this->enforceAiUsageLimit->handle($user, $modelName);
 

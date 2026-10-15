@@ -194,3 +194,30 @@ it('benchmarks an explicit premium model and refuses to treat unmetered calls as
         ->and($report->paths[0]->costPerHundred())->toBeNull();
     FoodPhotoAnalyzerAgent::assertPrompted(fn ($prompt): bool => $prompt->model === 'gpt-5.6-terra');
 });
+
+it('benchmarks a model on its catalog provider when none is given', function (): void {
+    seedGoldenPlate();
+    FoodPhotoAnalyzerAgent::fake(fn (): array => perfectAnalysisPayload());
+
+    $this->artisan('benchmark:run', ['--repeats' => 1, '--force' => true, '--model' => 'gpt-6.1-sol'])->assertSuccessful();
+
+    expect(BenchmarkRun::query()->sole()->toHarnessReport()->provider)->toBe('openai');
+    FoodPhotoAnalyzerAgent::assertPrompted(fn ($prompt): bool => $prompt->model === 'gpt-6.1-sol' && $prompt->provider->name() === 'openai');
+});
+
+it('benchmarks a model with the provider options production sends', function (): void {
+    seedGoldenPlate();
+    FoodPhotoAnalyzerAgent::fake(fn (): array => perfectAnalysisPayload());
+
+    $this->artisan('benchmark:run', ['--repeats' => 1, '--force' => true, '--model' => 'gemini-3.5-flash'])->assertSuccessful();
+
+    FoodPhotoAnalyzerAgent::assertPrompted(fn ($prompt): bool => $prompt->agent->providerOptions('gemini') === ['thinking_level' => 'high', 'thinking_summaries' => 'auto']);
+});
+
+it('refuses to benchmark a model without verified catalog pricing', function (): void {
+    seedGoldenPlate();
+
+    $this->artisan('benchmark:run', ['--force' => true, '--model' => 'unpriced-vision-model'])
+        ->expectsOutputToContain('Register model unpriced-vision-model in ai.model_catalog')
+        ->assertFailed();
+});

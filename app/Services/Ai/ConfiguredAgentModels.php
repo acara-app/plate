@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Ai;
 
 use App\Ai\Agents\AgentRunner;
-use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Contracts\Ai\AcceptsImages;
 use App\Contracts\Ai\ResolvesAgentModel;
 use App\Data\Ai\AgentModelData;
 use App\Models\History;
@@ -39,7 +39,7 @@ final readonly class ConfiguredAgentModels implements ResolvesAgentModel
             $required[] = 'structured_output';
         }
 
-        if (in_array($agentClass, [AgentRunner::class, FoodPhotoAnalyzerAgent::class], true)) {
+        if (is_a($agentClass, AcceptsImages::class, true)) {
             $required[] = 'vision';
         }
 
@@ -83,49 +83,29 @@ final readonly class ConfiguredAgentModels implements ResolvesAgentModel
     {
         $recorded = $paused?->chatStreamMeta()['agent_models'] ?? null;
         if (is_array($recorded) && $recorded !== []) {
-            $models = [];
-            foreach ($recorded as $agent => $definition) {
-                throw_unless(is_string($agent) && is_array($definition), InvalidArgumentException::class, 'Invalid recorded agent profile.');
-                $models[$agent] = AgentModelData::from($definition)->toSnapshot();
-            }
-
-            throw_unless(isset($models[AgentRunner::class]), InvalidArgumentException::class, 'Missing recorded chat profile.');
-
-            return $models;
+            return $this->snapshot($user, $recorded);
         }
 
         $model = $paused?->chatStreamMeta()['model'] ?? $paused?->meta['model'] ?? null;
         $provider = $paused?->meta['provider'] ?? $paused?->chatStreamMeta()['provider'] ?? null;
 
-        return $this->forChatModel($user, is_string($model) ? $model : null, is_string($provider) ? $provider : null);
+        return $this->snapshot($user, is_string($model) ? [AgentRunner::class => ['model' => $model, 'provider' => $provider]] : []);
     }
 
-    /** @return array<string, array<string, mixed>> */
-    public function forChatModel(User $user, ?string $model, ?string $provider = null): array
+    /**
+     * @param  array<array-key, mixed>  $selections
+     * @return array<string, array<string, mixed>>
+     */
+    public function snapshot(?User $user, array $selections = []): array
     {
-        $models = $this->snapshot($user);
-        if ($model === null) {
-            return $models;
-        }
-
-        try {
-            $models[AgentRunner::class] = $this->forModel($model, $provider)->toSnapshot();
-        } catch (InvalidArgumentException $invalidArgumentException) {
-            report($invalidArgumentException);
-        }
-
-        return $models;
-    }
-
-    /** @return array<string, array<string, mixed>> */
-    public function snapshot(?User $user): array
-    {
+        $resolver = resolve(ResolvesAgentModel::class);
         $models = [];
         foreach (array_keys(config()->array('ai.agent_profiles')) as $agentClass) {
             throw_unless(is_string($agentClass), InvalidArgumentException::class, 'Agent profile keys must be class names.');
 
             try {
-                $models[$agentClass] = resolve(ResolvesAgentModel::class)->resolve($agentClass, $user)->toSnapshot();
+                $models[$agentClass] = $this->selected($selections[$agentClass] ?? null)?->toSnapshot()
+                    ?? $resolver->resolve($agentClass, $user)->toSnapshot();
             } catch (InvalidArgumentException $exception) {
                 throw_if($agentClass === AgentRunner::class, $exception);
                 report($exception);
@@ -133,5 +113,29 @@ final readonly class ConfiguredAgentModels implements ResolvesAgentModel
         }
 
         return $models;
+    }
+
+    /**
+     * @param  array<string, array<string, mixed>>  $models
+     * @return array<string, array{provider: string, model: string}>
+     */
+    public function selections(array $models): array
+    {
+        return array_map(fn (array $model): array => AgentModelData::from($model)->toSelection(), $models);
+    }
+
+    private function selected(mixed $selection): ?AgentModelData
+    {
+        if (! is_array($selection) || ! is_string($selection['model'] ?? null)) {
+            return null;
+        }
+
+        try {
+            return $this->forModel($selection['model'], is_string($selection['provider'] ?? null) ? $selection['provider'] : null);
+        } catch (InvalidArgumentException $invalidArgumentException) {
+            report($invalidArgumentException);
+
+            return null;
+        }
     }
 }

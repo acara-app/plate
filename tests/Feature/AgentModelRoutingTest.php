@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\CompletePendingChatStreamTurn;
 use App\Actions\CreatePendingChatStreamTurn;
 use App\Actions\GenerateConversationTitleAction;
 use App\Actions\ProcessAdvisorMessageAction;
@@ -21,6 +22,8 @@ use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Agents\SingleMealAgent;
 use App\Ai\Agents\SpikePredictorAgent;
+use App\Contracts\Ai\UsesAgentModelProfiles;
+use App\Data\ChatStreamResult;
 use App\Jobs\ProcessChatStream;
 use App\Models\AiUsage;
 use App\Models\Conversation;
@@ -28,10 +31,17 @@ use App\Models\History;
 use App\Models\User;
 use App\Services\Ai\AgentModelContext;
 use App\Services\Ai\ConfiguredAgentModels;
+use App\Services\Ai\PlateConversationStore;
 use App\Services\StreamEventStore;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Queue;
+use Laravel\Ai\AiManager;
 use Laravel\Ai\Approvals\Decisions;
+use Laravel\Ai\Approvals\PendingApproval;
+use Laravel\Ai\Prompts\AgentPrompt;
+use Laravel\Ai\Responses\AgentResponse;
+use Laravel\Ai\Responses\Data\Meta;
+use Laravel\Ai\Responses\Data\TextUsage;
 
 it('promotes a configured model without changing the agent or an enum', function (): void {
     config()->set('ai.model_catalog.test-model', [
@@ -93,7 +103,7 @@ it('freezes the resolved models when a chat turn is queued', function (): void {
 
     Queue::assertPushed(ProcessChatStream::class, fn ($job): bool => $job->modelName === 'gpt-6.1-sol'
         && $job->agentModels[AgentRunner::class]['model'] === 'gpt-6.1-sol');
-    expect($conversation->messages()->where('role', 'assistant')->sole()->chatStreamMeta()['agent_models'][AgentRunner::class]['model'])->toBe('gpt-6.1-sol');
+    expect($conversation->messages()->where('role', 'assistant')->sole()->chatStreamMeta())->not->toHaveKey('agent_models');
 });
 
 it('restores model ownership and profiles after a failed delegated run', function (): void {
@@ -252,4 +262,58 @@ it('keeps an explicitly selected model when a task agent is run for a user', fun
     resolve(SpikePredictorAgent::class)->usingAgentModel($profile)->predict('Lentil soup', User::factory()->create());
 
     SpikePredictorAgent::assertPrompted(fn ($prompt): bool => $prompt->model === 'gemini-3.8-flash');
+});
+
+it('records only the provider and model of each agent when a streamed turn pauses for approval', function (array $pendingApprovals, ?array $recorded): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    $assistant = History::factory()->forConversation($conversation)->create([
+        'role' => 'assistant', 'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_PENDING),
+    ]);
+    $snapshot = resolve(ConfiguredAgentModels::class)->snapshot($user, [AgentRunner::class => ['model' => 'gpt-6.1-sol']]);
+
+    resolve(AgentModelContext::class)->run($user, $snapshot, fn () => resolve(CompletePendingChatStreamTurn::class)->handle(
+        conversationId: $conversation->id,
+        user: $user,
+        userMessageId: null,
+        assistantMessageId: $assistant->id,
+        result: new ChatStreamResult(
+            text: 'Confirm below.',
+            toolCalls: [['id' => 'call_abc', 'name' => 'log_health_entry', 'arguments' => []]],
+            pendingApprovals: $pendingApprovals,
+        ),
+        status: History::STREAM_STATUS_COMPLETED,
+    ));
+
+    expect($assistant->fresh()->chatStreamMeta()['agent_models'][AgentRunner::class] ?? null)->toBe($recorded);
+})->with([
+    'paused' => [['call_abc' => 'Glucose 140 mg/dL'], ['provider' => 'openai', 'model' => 'gpt-6.1-sol']],
+    'completed' => [[], null],
+]);
+
+it('records the turn models on a telegram reply that pauses for approval', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    $prompt = new AgentPrompt(resolve(AgentRunner::class), 'Log 140', [], resolve(AiManager::class)->textProvider('openai'), 'gpt-6.1-sol');
+    $response = new AgentResponse('invocation-1', 'Confirm below.', new TextUsage, new Meta('openai', 'gpt-6.1-sol-2026-09-01'));
+    $response->withPendingApprovals(collect([new PendingApproval('call_abc', 'log_health_entry', [], 'Glucose 140 mg/dL')]));
+
+    $snapshot = resolve(ConfiguredAgentModels::class)->snapshot($user, [AgentRunner::class => ['model' => 'gpt-6.1-sol']]);
+
+    $id = resolve(AgentModelContext::class)->run($user, $snapshot, fn (): ?string => resolve(PlateConversationStore::class)
+        ->storeAssistantMessage($conversation->id, $user->getMorphClass(), $user->id, $prompt, $response));
+
+    expect(History::query()->findOrFail($id)->chatStreamMeta()['agent_models'][AgentRunner::class])->toBe(['provider' => 'openai', 'model' => 'gpt-6.1-sol']);
+});
+
+it('ships a registered, capable and priced model for every agent profile', function (): void {
+    $models = resolve(ConfiguredAgentModels::class);
+
+    foreach (config()->array('ai.agent_profiles') as $agentClass => $profiles) {
+        expect(is_a($agentClass, UsesAgentModelProfiles::class, true))->toBeTrue();
+
+        foreach (array_keys($profiles) as $profile) {
+            expect($models->forAgent($agentClass, $profile)->pricing['input'])->toBeGreaterThan(0);
+        }
+    }
 });

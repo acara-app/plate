@@ -6,6 +6,7 @@ namespace App\Ai\Agents;
 
 use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Ai\SystemPrompt;
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Data\CaffeineGuidanceData;
 use App\Data\CaffeineLimitData;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -22,7 +23,7 @@ use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(2500)]
 #[Timeout(60)]
-final class CaffeineGuidanceAgent implements Agent, HasProviderOptions, HasStructuredOutput
+final class CaffeineGuidanceAgent implements Agent, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
 {
     use Promptable;
     use UsesConfiguredAgentModel;

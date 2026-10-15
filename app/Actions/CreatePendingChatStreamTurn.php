@@ -22,7 +22,6 @@ final readonly class CreatePendingChatStreamTurn
 
     /**
      * @param  list<array{type: string, name: ?string, base64: string, mime: ?string}>  $attachments
-     * @param  array<string, array<string, mixed>>  $agentModels
      */
     public function handle(
         Conversation $conversation,
@@ -31,9 +30,8 @@ final readonly class CreatePendingChatStreamTurn
         array $attachments,
         string $channel,
         ?string $model = null,
-        array $agentModels = [],
     ): ChatStreamTurn {
-        return DB::transaction(function () use ($conversation, $user, $prompt, $attachments, $channel, $model, $agentModels): ChatStreamTurn {
+        return DB::transaction(function () use ($conversation, $user, $prompt, $attachments, $channel, $model): ChatStreamTurn {
             $streamId = (string) Str::uuid7();
             $userMessageId = (string) Str::uuid7();
             $now = now();
@@ -58,7 +56,7 @@ final readonly class CreatePendingChatStreamTurn
                 'updated_at' => $now,
             ]);
 
-            $assistantMessageId = $this->createAssistantPlaceholder($conversation, $user, $streamId, $channel, $model, $userMessageId, $now, $agentModels);
+            $assistantMessageId = $this->createAssistantPlaceholder($conversation, $user, $streamId, $channel, $model, $userMessageId, $now);
 
             $conversation->forceFill(['updated_at' => $now])->save();
 
@@ -70,21 +68,19 @@ final readonly class CreatePendingChatStreamTurn
         });
     }
 
-    /** @param array<string, array<string, mixed>> $agentModels */
     public function forResume(
         Conversation $conversation,
         User $user,
         string $channel,
         ?string $model = null,
-        array $agentModels = [],
     ): ChatStreamTurn {
-        return DB::transaction(function () use ($conversation, $user, $channel, $model, $agentModels): ChatStreamTurn {
+        return DB::transaction(function () use ($conversation, $user, $channel, $model): ChatStreamTurn {
             $streamId = (string) Str::uuid7();
             $now = now();
 
             $conversation = $this->lockConversation($conversation, $user);
 
-            $assistantMessageId = $this->createAssistantPlaceholder($conversation, $user, $streamId, $channel, $model, null, $now, $agentModels);
+            $assistantMessageId = $this->createAssistantPlaceholder($conversation, $user, $streamId, $channel, $model, null, $now);
 
             $conversation->forceFill(['updated_at' => $now])->save();
 
@@ -105,7 +101,6 @@ final readonly class CreatePendingChatStreamTurn
             ->firstOrFail();
     }
 
-    /** @param array<string, array<string, mixed>> $agentModels */
     private function createAssistantPlaceholder(
         Conversation $conversation,
         User $user,
@@ -114,7 +109,6 @@ final readonly class CreatePendingChatStreamTurn
         ?string $model,
         ?string $userMessageId,
         CarbonInterface $now,
-        array $agentModels,
     ): string {
         $assistantMessageId = (string) Str::uuid7();
 
@@ -130,9 +124,8 @@ final readonly class CreatePendingChatStreamTurn
             'meta' => History::streamMeta($streamId, History::STREAM_STATUS_PENDING, array_filter([
                 'channel' => $channel,
                 'model' => $model,
-                'agent_models' => $agentModels,
                 'user_message_id' => $userMessageId,
-            ], fn (mixed $value): bool => $value !== null && $value !== [])),
+            ], fn (mixed $value): bool => $value !== null)),
             'created_at' => $now,
             'updated_at' => $now,
         ]);

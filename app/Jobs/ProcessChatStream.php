@@ -43,7 +43,7 @@ final class ProcessChatStream implements ShouldQueue
     public const int TRIES = 3;
 
     /**
-     * @param  array<string, array<string, mixed>>|null  $agentModels
+     * @param  array<string, array{provider: string, model: string}>|null  $agentModels
      * @param  list<array{id: string, action: string, result?: string|null}>|null  $decisions  tool approval decisions that resume a paused turn
      */
     public function __construct(
@@ -75,7 +75,7 @@ final class ProcessChatStream implements ShouldQueue
         CompletePendingChatStreamTurn $complete,
     ): void {
         $user = User::query()->findOrFail($this->userId);
-        $models = $this->agentModels ?? resolve(ConfiguredAgentModels::class)->forChatModel($user, $this->modelName);
+        $models = resolve(ConfiguredAgentModels::class)->snapshot($user, $this->agentModels ?? [AgentRunner::class => ['model' => $this->modelName]]);
 
         resolve(AgentModelContext::class)->run($user, $models, fn () => $this->process($user, $models, $agentRunner, $events, $connector, $complete));
     }
