@@ -3,16 +3,19 @@
 namespace {{ namespace }};
 
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use App\Ai\Concerns\UsesConfiguredAgentModel;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\Conversational;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-class {{ class }} implements Agent, Conversational, HasTools, HasStructuredOutput
+class {{ class }} implements Agent, Conversational, HasProviderOptions, HasTools, HasStructuredOutput
 {
     use Promptable;
+    use UsesConfiguredAgentModel;
 
     /**
      * Get the instructions that the agent should follow.

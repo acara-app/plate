@@ -100,4 +100,19 @@ final class PlateConversationStore extends DatabaseConversationStore
             'provider_tool_calls' => [],
         ];
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function metaFor(AgentResponse $response, ?Throwable $exception): array
+    {
+        $meta = parent::metaFor($response, $exception);
+        $selections = resolve(AgentModelContext::class)->selections();
+
+        if ($exception instanceof Throwable || ! $response->hasPendingApprovals() || $selections === []) {
+            return $meta;
+        }
+
+        return [...$meta, History::STREAM_META_KEY => ['agent_models' => $selections]];
+    }
 }

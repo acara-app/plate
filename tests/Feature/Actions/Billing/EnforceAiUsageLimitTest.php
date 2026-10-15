@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use App\Actions\Billing\EnforceAiUsageLimit;
-use App\Enums\ModelName;
 use App\Enums\SubscriptionTier;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Models\AiUsage;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
+use App\Services\Ai\ConfiguredAgentModels;
 use Illuminate\Support\Facades\Config;
 use Laravel\Cashier\Subscription;
 
@@ -47,7 +47,7 @@ it('allows users who are well under their tier limits', function (): void {
         'cost' => 0.005,
     ]);
 
-    enforceUsage()->handle($user, ModelName::GPT_5_4_MINI);
+    enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
 
     expect(true)->toBeTrue();
 });
@@ -60,7 +60,7 @@ it('throws when the rolling window cost plus estimate would exceed the cap', fun
         'cost' => 0.396,
     ]);
 
-    enforceUsage()->handle($user, ModelName::GPT_5_4_MINI);
+    enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
 })
     ->throws(UsageLimitExceededException::class)
     ->expectExceptionMessageMatches('/rolling/');
@@ -74,7 +74,7 @@ it('throws when the weekly window cost plus estimate would exceed the cap', func
         'created_at' => now()->subDays(2),
     ]);
 
-    expect(fn (): mixed => enforceUsage()->handle($user, ModelName::GPT_5_4_MINI))
+    expect(fn (): mixed => enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini')))
         ->toThrow(UsageLimitExceededException::class);
 });
 
@@ -87,7 +87,7 @@ it('throws at the 99% mark when the next call would push the user past 100', fun
     ]);
 
     try {
-        enforceUsage()->handle($user, ModelName::GPT_5_4_MINI);
+        enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
         expect(false)->toBeTrue('expected UsageLimitExceededException to be thrown');
     } catch (UsageLimitExceededException $usageLimitExceededException) {
         expect($usageLimitExceededException->limitType)->toBe('rolling')
@@ -107,7 +107,7 @@ it('does not throw when the flag is off, even for users far over their cap', fun
         'cost' => 5.0,
     ]);
 
-    enforceUsage()->handle($user, ModelName::GPT_5_4_MINI);
+    enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
 
     expect(true)->toBeTrue();
 });
@@ -123,7 +123,7 @@ it('does not write an AiUsage row when it rejects a request', function (): void 
     $countBefore = AiUsage::query()->count();
 
     try {
-        enforceUsage()->handle($user, ModelName::GPT_5_4_MINI);
+        enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
     } catch (UsageLimitExceededException) {
         //
     }
@@ -145,7 +145,7 @@ it('uses Plus-tier limits for an active Plus subscriber', function (): void {
         'cost' => 0.5,
     ]);
 
-    enforceUsage()->handle($user, ModelName::GPT_5_4_MINI);
+    enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
 
     expect(true)->toBeTrue();
 });
@@ -171,7 +171,7 @@ it('exposes the resets_at timestamp on the exception for the breached window', f
     ]);
 
     try {
-        enforceUsage()->handle($user, ModelName::GPT_5_4_MINI);
+        enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
         expect(false)->toBeTrue();
     } catch (UsageLimitExceededException $usageLimitExceededException) {
         expect(now()->diffInHours($usageLimitExceededException->resetsAt, true))->toBeGreaterThanOrEqual(23);
@@ -190,7 +190,7 @@ it('reports the rolling resets_at as the oldest in-window usage plus period_hour
     ]);
 
     try {
-        enforceUsage()->handle($user, ModelName::GPT_5_4_MINI);
+        enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
         expect(false)->toBeTrue('expected UsageLimitExceededException to be thrown');
     } catch (UsageLimitExceededException $usageLimitExceededException) {
         expect($usageLimitExceededException->limitType)->toBe('rolling');
@@ -209,7 +209,7 @@ it('falls back to now+period_hours for the rolling reset when no in-window usage
     Config::set('plate.tier_limits.free.rolling.limit', 0.001);
 
     try {
-        enforceUsage()->handle($user, ModelName::GPT_5_4_MINI);
+        enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
         expect(false)->toBeTrue('expected UsageLimitExceededException to be thrown');
     } catch (UsageLimitExceededException $usageLimitExceededException) {
         expect($usageLimitExceededException->limitType)->toBe('rolling')

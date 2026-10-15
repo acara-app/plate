@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Models\User;
 use Illuminate\Contracts\Container\Container;
+use InvalidArgumentException;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Files\Base64Image;
@@ -55,15 +57,17 @@ final readonly class ToolRegistry
     /**
      * @return array<int, Agent>
      */
-    public function getSubAgents(): array
+    public function getSubAgents(?User $user = null): array
     {
-        /** @var array<int, class-string<Agent>> $classes */
+        /** @var array<int, string> $classes */
         $classes = config()->array('plate.sub_agents', []);
 
         return collect($classes)
-            ->map(function (string $class): Agent {
-                /** @var Agent */
-                return $this->container->make($class);
+            ->map(function (string $class) use ($user): Agent {
+                $agent = $this->container->make($class);
+                throw_unless($agent instanceof Agent, InvalidArgumentException::class, "{$class} must implement the AI agent contract.");
+
+                return $agent instanceof UsesAgentModelProfiles ? $agent->forModelUser($user) : $agent;
             })
             ->all();
     }

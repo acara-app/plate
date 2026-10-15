@@ -7,11 +7,13 @@ namespace App\Jobs;
 use App\Actions\CompletePendingChatStreamTurn;
 use App\Ai\AgentRequest;
 use App\Ai\Agents\AgentRunner;
+use App\Data\Ai\AgentModelData;
 use App\Data\ChatStreamDelivery;
 use App\Data\ChatStreamResult;
-use App\Enums\ModelName;
 use App\Models\History;
 use App\Models\User;
+use App\Services\Ai\AgentModelContext;
+use App\Services\Ai\ConfiguredAgentModels;
 use App\Services\BroadcastConnector;
 use App\Services\ChatChannel;
 use App\Services\StreamAggregator;
@@ -41,6 +43,7 @@ final class ProcessChatStream implements ShouldQueue
     public const int TRIES = 3;
 
     /**
+     * @param  array<string, array{provider: string, model: string}>|null  $agentModels
      * @param  list<array{id: string, action: string, result?: string|null}>|null  $decisions  tool approval decisions that resume a paused turn
      */
     public function __construct(
@@ -53,6 +56,7 @@ final class ProcessChatStream implements ShouldQueue
         public string $assistantMessageId,
         public ?string $locale = null,
         public ?array $decisions = null,
+        public ?array $agentModels = null,
     ) {}
 
     /**
@@ -70,65 +74,10 @@ final class ProcessChatStream implements ShouldQueue
         BroadcastConnector $connector,
         CompletePendingChatStreamTurn $complete,
     ): void {
-        $previousLocale = App::getLocale();
+        $user = User::query()->findOrFail($this->userId);
+        $models = resolve(ConfiguredAgentModels::class)->snapshot($user, $this->agentModels ?? [AgentRunner::class => ['model' => $this->modelName]]);
 
-        try {
-            $user = User::query()->findOrFail($this->userId);
-
-            if ($this->resetStateForRetry($events)) {
-                $this->completePendingTurn(
-                    complete: $complete,
-                    user: $user,
-                    delivery: new ChatStreamDelivery(new ChatStreamResult, cancelled: true),
-                    status: History::STREAM_STATUS_CANCELLED,
-                );
-
-                return;
-            }
-
-            Auth::login($user);
-            App::setLocale(LanguageUtil::resolve($this->locale ?? $user->locale)['code']);
-
-            Context::add('chat.channel', $this->channel);
-            Context::add('chat.conversation_id', $this->conversationId);
-
-            $this->broadcastLifecycle('processing');
-
-            $userMessage = $this->userMessageId === null
-                ? null
-                : History::query()->findOrFail($this->userMessageId);
-
-            $request = new AgentRequest(
-                message: $userMessage->content ?? '',
-                images: $this->base64Images($userMessage->attachments ?? []),
-                modelName: ModelName::tryFrom($this->modelName) ?? ModelName::default(),
-                conversationId: $this->conversationId,
-                streamId: $this->streamId,
-            );
-
-            $decisions = $this->approvalDecisions();
-
-            $stream = $decisions instanceof Decisions
-                ? $agentRunner->resume($request, $user, $decisions)
-                : $agentRunner->run($request, $user);
-
-            $delivery = $connector->deliver($stream, $this->userId, $this->conversationId);
-
-            $this->completePendingTurn(
-                complete: $complete,
-                user: $user,
-                delivery: $delivery,
-                status: $delivery->cancelled ? History::STREAM_STATUS_CANCELLED : History::STREAM_STATUS_COMPLETED,
-            );
-
-            if ($delivery->cancelled) {
-                $this->broadcastLifecycle('stream_end');
-            }
-
-            $events->markComplete($this->conversationId);
-        } finally {
-            App::setLocale($previousLocale);
-        }
+        resolve(AgentModelContext::class)->run($user, $models, fn () => $this->process($user, $models, $agentRunner, $events, $connector, $complete));
     }
 
     public function failed(Throwable $e): void
@@ -155,6 +104,69 @@ final class ProcessChatStream implements ShouldQueue
         $this->broadcastLifecycle('error', [
             'message' => 'Failed to process your message after multiple attempts.',
         ]);
+    }
+
+    /** @param array<string, array<string, mixed>> $models */
+    private function process(User $user, array $models, AgentRunner $agentRunner, StreamEventStore $events, BroadcastConnector $connector, CompletePendingChatStreamTurn $complete): void
+    {
+        $previousLocale = App::getLocale();
+
+        try {
+            if ($this->resetStateForRetry($events)) {
+                $this->completePendingTurn(
+                    complete: $complete,
+                    user: $user,
+                    delivery: new ChatStreamDelivery(new ChatStreamResult, cancelled: true),
+                    status: History::STREAM_STATUS_CANCELLED,
+                );
+
+                return;
+            }
+
+            Auth::login($user);
+            App::setLocale(LanguageUtil::resolve($this->locale ?? $user->locale)['code']);
+
+            Context::add('chat.channel', $this->channel);
+            Context::add('chat.conversation_id', $this->conversationId);
+
+            $this->broadcastLifecycle('processing');
+
+            $userMessage = $this->userMessageId === null
+                ? null
+                : History::query()->findOrFail($this->userMessageId);
+
+            $request = new AgentRequest(
+                message: $userMessage->content ?? '',
+                images: $this->base64Images($userMessage->attachments ?? []),
+                conversationId: $this->conversationId,
+                streamId: $this->streamId,
+                model: AgentModelData::from($models[AgentRunner::class]),
+                agentModels: $models,
+            );
+
+            $decisions = $this->approvalDecisions();
+
+            $stream = $decisions instanceof Decisions
+                ? $agentRunner->resume($request, $user, $decisions)
+                : $agentRunner->run($request, $user);
+
+            $delivery = $connector->deliver($stream, $this->userId, $this->conversationId);
+
+            $this->completePendingTurn(
+                complete: $complete,
+                user: $user,
+                delivery: $delivery,
+                status: $delivery->cancelled ? History::STREAM_STATUS_CANCELLED : History::STREAM_STATUS_COMPLETED,
+            );
+
+            if ($delivery->cancelled) {
+                $this->broadcastLifecycle('stream_end');
+            }
+
+            $events->markComplete($this->conversationId);
+        } finally {
+            App::setLocale($previousLocale);
+        }
     }
 
     /**

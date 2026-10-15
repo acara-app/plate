@@ -7,7 +7,8 @@ use App\Services\AiUsageService;
 covers(AiUsageService::class);
 
 beforeEach(function (): void {
-    config()->set('plate.model_pricing.models.priced-model', [
+    config()->set('ai.model_catalog.priced-model.provider', 'openai');
+    config()->set('ai.model_catalog.priced-model.pricing', [
         'input' => 1.00,
         'output' => 4.00,
         'reasoning' => 2.00,
@@ -72,4 +73,10 @@ it('includes Gemini thinking and current rates in actual photo costs', function 
         'completion_tokens' => 1000,
         'reasoning_tokens' => 1000,
     ]))->toBe(0.021);
+});
+
+it('prices a model even when another catalog entry has incomplete pricing', function (): void {
+    config()->set('ai.model_catalog.partially-priced', ['provider' => 'openai', 'pricing' => ['input' => 1.00, 'output' => 4.00]]);
+
+    expect(new AiUsageService()->calculateCost('priced-model', ['prompt_tokens' => 1_000_000]))->toEqualWithDelta(1.00, 0.000001);
 });

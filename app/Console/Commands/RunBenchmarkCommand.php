@@ -12,17 +12,19 @@ use App\Data\Benchmark\PathMetrics;
 use App\Data\Billing\PhotoModel;
 use App\Models\BenchmarkMeal;
 use App\Models\BenchmarkRun;
+use App\Services\Ai\ConfiguredAgentModels;
 use App\Services\Benchmark\BenchmarkHarness;
 use App\Services\Benchmark\RunComparator;
 use App\Services\ModelPricing;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use InvalidArgumentException;
 
 use function Laravel\Prompts\confirm;
 
 #[Description('Run the golden-plate validation benchmark through the production analyzer — raw model and reference-enriched paths side by side.')]
-#[Signature('benchmark:run {--smoke : Analyze only the smoke subset (first 12 meals by code)} {--repeats=5 : Analyses per meal per path} {--force : Skip the cost confirmation} {--provider=gemini : AI provider} {--model= : Pinned vision model} {--max-tokens=35000 : Output token ceiling}')]
+#[Signature('benchmark:run {--smoke : Analyze only the smoke subset (first 12 meals by code)} {--repeats=5 : Analyses per meal per path} {--force : Skip the cost confirmation} {--provider= : AI provider (defaults to the catalog provider for the model)} {--model= : Pinned vision model} {--max-tokens=35000 : Output token ceiling}')]
 final class RunBenchmarkCommand extends Command
 {
     private const int SMOKE_LIMIT = 12;
@@ -36,9 +38,13 @@ final class RunBenchmarkCommand extends Command
 
     public function handle(): int
     {
-        $model = new PhotoModel((string) $this->option('provider'), $this->option('model') ?: FoodPhotoAnalyzerAgent::pinnedModel(), max(1, (int) $this->option('max-tokens')));
-        if (! array_key_exists($model->model, config()->array('plate.model_pricing.models'))) {
-            $this->error('Add verified pricing for this exact model before benchmarking.');
+        try {
+            $model = PhotoModel::fromAgentModel(
+                resolve(ConfiguredAgentModels::class)->forModel($this->option('model') ?: FoodPhotoAnalyzerAgent::pinnedModel(), $this->option('provider') ?: null),
+                max(1, (int) $this->option('max-tokens')),
+            );
+        } catch (InvalidArgumentException $invalidArgumentException) {
+            $this->error($invalidArgumentException->getMessage());
 
             return self::FAILURE;
         }
@@ -209,7 +215,7 @@ final class RunBenchmarkCommand extends Command
 
     private function estimateCost(int $analyses, PhotoModel $model): float
     {
-        $pricing = ModelPricing::forModel($model->model);
+        $pricing = ModelPricing::forModel($model->model, $model->provider);
 
         /** @var array{input: int, output: int} $budget */
         $budget = config()->array('plate.ai_usage_preflight.token_budget', ['input' => 2_000, 'output' => 1_000]);
