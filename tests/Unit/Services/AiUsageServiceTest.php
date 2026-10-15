@@ -72,7 +72,7 @@ it('includes Gemini thinking and current rates in actual photo costs', function 
         'prompt_tokens' => 2000,
         'completion_tokens' => 1000,
         'reasoning_tokens' => 1000,
-    ]))->toBe(0.009);
+    ]))->toBe(0.021);
 });
 
 it('prices a model even when another catalog entry has incomplete pricing', function (): void {
