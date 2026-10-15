@@ -15,32 +15,52 @@ final class ModelPricing
     {
         $models = [];
         foreach (config()->array('ai.model_catalog') as $name => $definition) {
-            if (! is_string($name) || ! is_array($definition) || ! is_array($definition['pricing'] ?? null)) {
+            if (! is_string($name)) {
                 continue;
             }
+
+            if (! is_array($definition)) {
+                continue;
+            }
+
+            if (! is_array($definition['pricing'] ?? null)) {
+                continue;
+            }
+
             if ($provider !== null && ($definition['provider'] ?? null) !== $provider) {
                 continue;
             }
-            $pricing = self::rates($definition['pricing']);
-            $changes = $definition['pricing_changes'] ?? [];
-            if (is_array($changes)) {
-                ksort($changes);
-                foreach ($changes as $date => $changedPricing) {
-                    if (is_string($date) && now()->toDateString() >= $date && is_array($changedPricing)) {
-                        $pricing = self::rates($changedPricing);
-                    }
-                }
-            }
-            $models[$name] = $pricing;
+
+            $models[$name] = $definition;
         }
 
         $match = $models[$model] ?? self::matchByBase($model, $models);
 
         if ($match !== null) {
-            return $match;
+            return self::currentRates($match);
         }
 
         return self::rates(config()->array('ai.default_model_pricing'));
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $definition
+     * @return array{input: float, output: float, reasoning: float, cache_read: float, cache_write: float}
+     */
+    private static function currentRates(array $definition): array
+    {
+        $pricing = is_array($definition['pricing'] ?? null) ? $definition['pricing'] : [];
+        $changes = $definition['pricing_changes'] ?? [];
+        if (is_array($changes)) {
+            ksort($changes);
+            foreach ($changes as $date => $changedPricing) {
+                if (is_string($date) && now()->toDateString() >= $date && is_array($changedPricing)) {
+                    $pricing = $changedPricing;
+                }
+            }
+        }
+
+        return self::rates($pricing);
     }
 
     /**
@@ -62,16 +82,14 @@ final class ModelPricing
 
     private static function rate(mixed $rate): float
     {
-        if ((! is_int($rate) && ! is_float($rate)) || $rate < 0) {
-            throw new InvalidArgumentException('Model prices must be non-negative numbers.');
-        }
+        throw_if((! is_int($rate) && ! is_float($rate)) || $rate < 0, InvalidArgumentException::class, 'Model prices must be non-negative numbers.');
 
         return (float) $rate;
     }
 
     /**
-     * @param  array<string, array{input: float, output: float, reasoning: float, cache_read: float, cache_write?: float}>  $models
-     * @return array{input: float, output: float, reasoning: float, cache_read: float, cache_write?: float}|null
+     * @param  array<string, array<array-key, mixed>>  $models
+     * @return array<array-key, mixed>|null
      */
     private static function matchByBase(string $model, array $models): ?array
     {

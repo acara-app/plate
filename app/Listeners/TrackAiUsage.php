@@ -43,7 +43,7 @@ final readonly class TrackAiUsage
             'reasoning_tokens' => $usage->reasoningTokens ?? 0,
         ];
 
-        $cost = new AiUsageService()->calculateCost($model, $usageArray, $provider);
+        $cost = new AiUsageService()->calculateCost($model, $usageArray, $meta->provider);
 
         AiUsage::query()->firstOrCreate(['invocation_id' => $invocationId], [
             'usage_group' => Context::get('photo_usage_group'),

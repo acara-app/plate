@@ -34,12 +34,15 @@ final readonly class ConfiguredAgentModels implements ResolvesAgentModel
         if (is_a($agentClass, HasTools::class, true)) {
             $required[] = 'tools';
         }
+
         if (is_a($agentClass, HasStructuredOutput::class, true)) {
             $required[] = 'structured_output';
         }
+
         if (in_array($agentClass, [AgentRunner::class, FoodPhotoAnalyzerAgent::class], true)) {
             $required[] = 'vision';
         }
+
         foreach ($required as $capability) {
             throw_unless($selected->supports($capability), InvalidArgumentException::class, "Model {$model} does not support {$capability} required by {$agentClass}.");
         }
@@ -59,6 +62,7 @@ final readonly class ConfiguredAgentModels implements ResolvesAgentModel
                 }
             }
         }
+
         throw_unless(is_array($definition), InvalidArgumentException::class, "Register model {$model} in ai.model_catalog before using it.");
         throw_unless(is_string($definition['provider'] ?? null), InvalidArgumentException::class, "Missing provider for model {$model}.");
         throw_if($provider !== null && $definition['provider'] !== $provider, InvalidArgumentException::class, "Model {$model} is not registered for {$provider}.");
@@ -78,22 +82,36 @@ final readonly class ConfiguredAgentModels implements ResolvesAgentModel
     public function forTurn(?History $paused, User $user): array
     {
         $recorded = $paused?->chatStreamMeta()['agent_models'] ?? null;
-        if (is_array($recorded)) {
+        if (is_array($recorded) && $recorded !== []) {
             $models = [];
             foreach ($recorded as $agent => $definition) {
                 throw_unless(is_string($agent) && is_array($definition), InvalidArgumentException::class, 'Invalid recorded agent profile.');
                 $models[$agent] = AgentModelData::from($definition)->toSnapshot();
             }
+
             throw_unless(isset($models[AgentRunner::class]), InvalidArgumentException::class, 'Missing recorded chat profile.');
 
             return $models;
         }
 
-        $models = $this->snapshot($user);
         $model = $paused?->chatStreamMeta()['model'] ?? $paused?->meta['model'] ?? null;
         $provider = $paused?->meta['provider'] ?? $paused?->chatStreamMeta()['provider'] ?? null;
-        if (is_string($model)) {
-            $models[AgentRunner::class] = $this->forModel($model, is_string($provider) ? $provider : null)->toSnapshot();
+
+        return $this->forChatModel($user, is_string($model) ? $model : null, is_string($provider) ? $provider : null);
+    }
+
+    /** @return array<string, array<string, mixed>> */
+    public function forChatModel(User $user, ?string $model, ?string $provider = null): array
+    {
+        $models = $this->snapshot($user);
+        if ($model === null) {
+            return $models;
+        }
+
+        try {
+            $models[AgentRunner::class] = $this->forModel($model, $provider)->toSnapshot();
+        } catch (InvalidArgumentException $invalidArgumentException) {
+            report($invalidArgumentException);
         }
 
         return $models;
@@ -105,7 +123,13 @@ final readonly class ConfiguredAgentModels implements ResolvesAgentModel
         $models = [];
         foreach (array_keys(config()->array('ai.agent_profiles')) as $agentClass) {
             throw_unless(is_string($agentClass), InvalidArgumentException::class, 'Agent profile keys must be class names.');
-            $models[$agentClass] = resolve(ResolvesAgentModel::class)->resolve($agentClass, $user)->toSnapshot();
+
+            try {
+                $models[$agentClass] = resolve(ResolvesAgentModel::class)->resolve($agentClass, $user)->toSnapshot();
+            } catch (InvalidArgumentException $exception) {
+                throw_if($agentClass === AgentRunner::class, $exception);
+                report($exception);
+            }
         }
 
         return $models;

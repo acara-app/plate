@@ -132,7 +132,7 @@ final readonly class CreatePendingChatStreamTurn
                 'model' => $model,
                 'agent_models' => $agentModels,
                 'user_message_id' => $userMessageId,
-            ], fn (mixed $value): bool => $value !== null)),
+            ], fn (mixed $value): bool => $value !== null && $value !== [])),
             'created_at' => $now,
             'updated_at' => $now,
         ]);

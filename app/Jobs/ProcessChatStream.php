@@ -75,10 +75,7 @@ final class ProcessChatStream implements ShouldQueue
         CompletePendingChatStreamTurn $complete,
     ): void {
         $user = User::query()->findOrFail($this->userId);
-        $models = $this->agentModels ?? resolve(ConfiguredAgentModels::class)->snapshot($user);
-        if ($this->agentModels === null) {
-            $models[AgentRunner::class] = resolve(ConfiguredAgentModels::class)->forModel($this->modelName)->toSnapshot();
-        }
+        $models = $this->agentModels ?? resolve(ConfiguredAgentModels::class)->forChatModel($user, $this->modelName);
 
         resolve(AgentModelContext::class)->run($user, $models, fn () => $this->process($user, $models, $agentRunner, $events, $connector, $complete));
     }
@@ -141,10 +138,10 @@ final class ProcessChatStream implements ShouldQueue
             $request = new AgentRequest(
                 message: $userMessage->content ?? '',
                 images: $this->base64Images($userMessage->attachments ?? []),
-                model: AgentModelData::from($models[AgentRunner::class]),
-                agentModels: $models,
                 conversationId: $this->conversationId,
                 streamId: $this->streamId,
+                model: AgentModelData::from($models[AgentRunner::class]),
+                agentModels: $models,
             );
 
             $decisions = $this->approvalDecisions();

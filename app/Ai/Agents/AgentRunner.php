@@ -10,6 +10,7 @@ use App\Ai\AgentBuilder;
 use App\Ai\AgentRequest;
 use App\Ai\Concerns\UsesConfiguredAgentModel;
 use App\Data\Ai\AgentModelData;
+use App\Enums\ModelName;
 use App\Models\History;
 use App\Models\User;
 use App\Services\Ai\AgentModelContext;
@@ -84,7 +85,7 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
 
         return resolve(AgentModelContext::class)->run(
             $user, $this->modelsForRequest($request, $user, $modelName),
-            fn () => $this
+            fn (): AgentResponse => $this
                 ->continue($request->conversationId ?? '', as: $user)
                 ->prompt(
                     prompt: $request->message,
@@ -101,7 +102,7 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
 
         return resolve(AgentModelContext::class)->run(
             $user, $this->modelsForRequest($request, $user, $modelName),
-            fn () => $this
+            fn (): AgentResponse => $this
                 ->continue($request->conversationId ?? '', as: $user)
                 ->prompt(
                     prompt: $decisions,
@@ -206,7 +207,7 @@ final class AgentRunner implements Agent, Conversational, HasProviderOptions, Ha
     {
         $this->setModelUser($user);
         $modelName = $request->model
-            ?? ($request->modelName !== null ? resolve(ConfiguredAgentModels::class)->forModel($request->modelName->value) : $this->agentModel());
+            ?? ($request->modelName instanceof ModelName ? resolve(ConfiguredAgentModels::class)->forModel($request->modelName->value) : resolve(AgentModelContext::class)->resolve(self::class, $user));
         $this->selectedAgentModel = $modelName;
         $this->enforceAiUsageLimit->handle($user, $modelName);
 

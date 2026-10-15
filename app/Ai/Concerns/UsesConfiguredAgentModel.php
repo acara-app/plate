@@ -55,7 +55,7 @@ trait UsesConfiguredAgentModel
 
     public function maxTokens(): ?int
     {
-        $attributes = (new ReflectionClass($this))->getAttributes(MaxTokens::class);
+        $attributes = new ReflectionClass($this)->getAttributes(MaxTokens::class);
         $requested = $attributes === [] ? null : $attributes[0]->newInstance()->value;
 
         return $requested === null ? null : min($requested, $this->agentModel()->maxOutputTokens);
@@ -72,6 +72,5 @@ trait UsesConfiguredAgentModel
     protected function setModelUser(?User $user): void
     {
         $this->agentModelUser = $user;
-        $this->selectedAgentModel = null;
     }
 }
