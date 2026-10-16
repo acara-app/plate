@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'get_user_profile' => 'Looking up your profile',
+    'get_subscription_status' => 'Checking your plan',
     'log_health_entry' => 'Logging your health entry',
     'enrich_attribute_metadata' => 'Organizing your details',
     'update_user_profile_attributes' => 'Updating your profile',

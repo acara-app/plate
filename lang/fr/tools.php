@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'get_user_profile' => 'Consultation de votre profil',
+    'get_subscription_status' => 'Vérification de votre forfait',
     'log_health_entry' => 'Enregistrement de votre donnée santé',
     'enrich_attribute_metadata' => 'Organisation de vos informations',
     'update_user_profile_attributes' => 'Mise à jour de votre profil',
