@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\DB;
 
 covers(CashierSubscriptionController::class);
 
+beforeEach(function (): void {
+    offerAllSubscriptions();
+});
+
 it('validates product_id is required', function (): void {
     $user = User::factory()->create();
 
