@@ -4,6 +4,9 @@ import {
 } from '@/components/photo-allowance';
 import ShowSnapToTrackReviewController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackReviewController';
 import { PaymentConfirmation } from '@/components/billing/payment-confirmation';
+import PhotoPlanLimitsDetails, {
+    type PhotoPlanLimits,
+} from '@/components/billing/photo-plan-limits';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { support, login, snapToTrack } from '@/routes';
@@ -32,6 +35,7 @@ interface BillingProduct {
     yearly_savings: number;
     yearly_savings_percentage: number;
     coming_soon?: boolean;
+    photo_limits?: PhotoPlanLimits | null;
 }
 
 interface CashierSubscription {
@@ -495,6 +499,11 @@ export default function CashierSubscription({
                                                         ),
                                                     )}
                                                 </ul>
+                                                <PhotoPlanLimitsDetails
+                                                    limits={
+                                                        product.photo_limits
+                                                    }
+                                                />
                                             </div>
 
                                             <div className="mt-auto">

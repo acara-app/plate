@@ -108,6 +108,7 @@ function reportWithCarbError(float $absoluteError): array
 }
 
 it('benchmarks both production paths, reports per-path metrics, and persists the run', function (): void {
+    config()->set('ai.agent_profiles.'.FoodPhotoAnalyzerAgent::class.'.standard', 'gemini-3.6-flash');
     seedGoldenPlate();
     FoodPhotoAnalyzerAgent::fake(fn (): array => perfectAnalysisPayload());
 

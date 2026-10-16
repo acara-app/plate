@@ -471,6 +471,7 @@ return [
             'heading' => 'Review your meal',
             'description' => 'Check what the AI detected, fix anything that looks off, then log it to your health history.',
             'ai_confidence' => 'AI confidence: {{confidence}}%. Every value below is editable.',
+            'saved_confidence' => 'AI confidence: {{confidence}}%. Nutrition values are estimates.',
             'items_heading' => 'Detected items',
             'item_name' => 'Food item',
             'portion' => 'Portion',
@@ -841,6 +842,14 @@ return [
         ],
     ],
     'checkout_subscription' => [
+        'limits' => [
+            'heading' => 'Photo scan limits',
+            'scans' => 'Up to {{count}} scan attempts per hour',
+            'rolling' => '{{credits}} AI credits per rolling {{hours}} hours',
+            'weekly' => '{{credits}} AI credits per rolling {{days}} days',
+            'shared' => 'Credits are shared across photo scans and other AI tools. Scan costs vary, so there is no fixed daily scan count.',
+            'reset' => 'Both credit limits apply. Credits become available as older usage leaves each rolling window. No overage charges.',
+        ],
         'title' => 'Subscription Management',
         'photo_plan' => [
             'price' => '{{price}} a month',

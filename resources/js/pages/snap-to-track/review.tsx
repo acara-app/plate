@@ -17,7 +17,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
-import { formatLocalDatetime } from '@/lib/format-local-datetime';
+import {
+    formatLocalDatetime,
+    localDatetimeToIso,
+} from '@/lib/format-local-datetime';
 import { type BreadcrumbItem } from '@/types';
 import { Form, Head, Link } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
@@ -199,6 +202,12 @@ export default function SnapToTrackReview({
 
                 <Form
                     {...StoreSnapToTrackMealController.form(draftToken)}
+                    transform={(data) => ({
+                        ...data,
+                        measured_at: localDatetimeToIso(
+                            String(data.measured_at ?? ''),
+                        ),
+                    })}
                     disableWhileProcessing
                     className="flex flex-col gap-6"
                 >

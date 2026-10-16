@@ -5,7 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { formatLocalDatetime } from '@/lib/format-local-datetime';
+import {
+    formatLocalDatetime,
+    localDatetimeToIso,
+} from '@/lib/format-local-datetime';
 import { getPrimaryType, getTypeConfig } from '@/lib/health-entry-registry';
 import { cn } from '@/lib/utils';
 import {
@@ -22,6 +25,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import EntryFields from './components/entry-fields';
 import EntryTypePicker from './components/entry-type-picker';
+import { FoodBreakdownFields } from './components/food-breakdown';
 
 interface HealthEntryFormProps {
     mode: 'create' | 'edit';
@@ -69,6 +73,10 @@ export default function HealthEntryForm({
     return (
         <Form
             {...formAction}
+            transform={(data) => ({
+                ...data,
+                measured_at: localDatetimeToIso(String(data.measured_at ?? '')),
+            })}
             disableWhileProcessing
             onSuccess={onCancel}
             className="space-y-4"
@@ -103,17 +111,24 @@ export default function HealthEntryForm({
                         )}
                     </div>
 
-                    <EntryFields
-                        type={activeType}
-                        entry={entry}
-                        errors={errors}
-                        glucoseReadingTypes={glucoseReadingTypes}
-                        insulinTypes={insulinTypes}
-                        glucoseUnit={glucoseUnit}
-                        recentMedications={recentMedications}
-                        recentInsulins={recentInsulins}
-                        todaysMeals={todaysMeals}
-                    />
+                    {activeType === 'food' && entry?.food_analysis ? (
+                        <FoodBreakdownFields
+                            analysis={entry.food_analysis}
+                            errors={errors}
+                        />
+                    ) : (
+                        <EntryFields
+                            type={activeType}
+                            entry={entry}
+                            errors={errors}
+                            glucoseReadingTypes={glucoseReadingTypes}
+                            insulinTypes={insulinTypes}
+                            glucoseUnit={glucoseUnit}
+                            recentMedications={recentMedications}
+                            recentInsulins={recentInsulins}
+                            todaysMeals={todaysMeals}
+                        />
+                    )}
 
                     <div className="space-y-2">
                         <Label htmlFor="notes">
