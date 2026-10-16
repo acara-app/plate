@@ -20,6 +20,7 @@ final readonly class SessionController
         return Inertia::render('session/create', [
             'canResetPassword' => Route::has('password.request'),
             'status' => $request->session()->get('status'),
+            'error' => $request->session()->get('error'),
         ]);
     }
 

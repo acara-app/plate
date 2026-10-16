@@ -26,6 +26,7 @@ function intendedDraftToken(): array
 function fakeGoogleUserForIntended(string $googleId, string $email): void
 {
     $googleUser = new SocialiteUser();
+    $googleUser->setRaw(['email_verified' => true]);
     $googleUser->id = $googleId;
     $googleUser->email = $email;
     $googleUser->name = 'Snap Tester';

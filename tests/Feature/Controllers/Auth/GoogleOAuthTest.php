@@ -63,6 +63,7 @@ it('redirects to Google OAuth page', function (): void {
 
 it('creates new user from Google OAuth callback with mocked provider', function (): void {
     $googleUser = new SocialiteUser();
+    $googleUser->setRaw(['email_verified' => true]);
     $googleUser->id = 'google123';
     $googleUser->email = 'newuser@example.com';
     $googleUser->name = 'New User';
@@ -91,6 +92,7 @@ it('creates new user from Google OAuth callback with mocked provider', function 
 
 it('marks email as verified when creating user from Google OAuth', function (): void {
     $googleUser = new SocialiteUser();
+    $googleUser->setRaw(['email_verified' => true]);
     $googleUser->id = 'google123';
     $googleUser->email = 'verified@example.com';
     $googleUser->name = 'Verified User';
@@ -103,9 +105,10 @@ it('marks email as verified when creating user from Google OAuth', function (): 
     expect($user->email_verified_at)->not->toBeNull();
 })->group('oauth');
 
-it('links Google account to existing user by email and redirects to chat', function (): void {
+it('links Google to an existing verified account by email and redirects to chat', function (): void {
     $existingUser = User::factory()->create([
         'email' => 'existing@example.com',
+        'name' => 'Original Name',
         'google_id' => null,
     ]);
     $existingUser->profile()->create([
@@ -114,6 +117,7 @@ it('links Google account to existing user by email and redirects to chat', funct
     ]);
 
     $googleUser = new SocialiteUser();
+    $googleUser->setRaw(['email_verified' => true]);
     $googleUser->id = 'google456';
     $googleUser->email = 'existing@example.com';
     $googleUser->name = 'Updated Name';
@@ -127,11 +131,11 @@ it('links Google account to existing user by email and redirects to chat', funct
 
     $existingUser->refresh();
     expect($existingUser->google_id)->toBe('google456')
-        ->and($existingUser->name)->toBe('Updated Name')
+        ->and($existingUser->name)->toBe('Original Name')
         ->and(Auth::id())->toBe($existingUser->id);
 })->group('oauth');
 
-it('updates existing Google user information on login and redirects to chat', function (): void {
+it('keeps a returning Google user\'s email and name unchanged and redirects to chat', function (): void {
     $existingUser = User::factory()->create([
         'google_id' => 'google789',
         'email' => 'oldmail@example.com',
@@ -143,6 +147,7 @@ it('updates existing Google user information on login and redirects to chat', fu
     ]);
 
     $googleUser = new SocialiteUser();
+    $googleUser->setRaw(['email_verified' => true]);
     $googleUser->id = 'google789';
     $googleUser->email = 'newmail@example.com';
     $googleUser->name = 'New Name';
@@ -155,13 +160,14 @@ it('updates existing Google user information on login and redirects to chat', fu
     $response->assertInertiaFlashMissing('analytics');
 
     $existingUser->refresh();
-    expect($existingUser->email)->toBe('newmail@example.com')
-        ->and($existingUser->name)->toBe('New Name')
+    expect($existingUser->email)->toBe('oldmail@example.com')
+        ->and($existingUser->name)->toBe('Old Name')
         ->and(Auth::id())->toBe($existingUser->id);
 })->group('oauth');
 
 it('handles missing name from Google gracefully for new users', function (): void {
     $googleUser = new SocialiteUser();
+    $googleUser->setRaw(['email_verified' => true]);
     $googleUser->id = 'google999';
     $googleUser->email = 'noname@example.com';
     $googleUser->name = null;
@@ -187,6 +193,7 @@ it('handles missing name from Google gracefully for existing users', function ()
     ]);
 
     $googleUser = new SocialiteUser();
+    $googleUser->setRaw(['email_verified' => true]);
     $googleUser->id = 'google111';
     $googleUser->email = 'existing@example.com';
     $googleUser->name = null;
@@ -221,6 +228,7 @@ it('handles duplicate Google ID gracefully', function (): void {
     ]);
 
     $googleUser = new SocialiteUser();
+    $googleUser->setRaw(['email_verified' => true]);
     $googleUser->id = 'google_duplicate';
     $googleUser->email = 'second@example.com';
     $googleUser->name = 'Second User';
@@ -232,5 +240,57 @@ it('handles duplicate Google ID gracefully', function (): void {
     $response->assertRedirectToRoute('dashboard');
 
     $user = User::query()->where('google_id', 'google_duplicate')->first();
-    expect($user->email)->toBe('second@example.com');
+    expect($user->email)->toBe('first@example.com');
+})->group('oauth');
+
+it('refuses to link Google to an existing account whose email was never verified', function (): void {
+    Exceptions::fake();
+    $existingUser = User::factory()->unverified()->create(['email' => 'claimed@example.com', 'google_id' => null]);
+
+    $googleUser = new SocialiteUser();
+    $googleUser->setRaw(['email_verified' => true]);
+    $googleUser->id = 'google_owner';
+    $googleUser->email = 'claimed@example.com';
+    $googleUser->name = 'Real Owner';
+
+    $this->provider->user = $googleUser;
+
+    get(route('auth.google.callback'))
+        ->assertRedirect(route('login'))
+        ->assertSessionHas('error', 'This email is already registered. Please sign in with your password.');
+
+    expect(Auth::check())->toBeFalse()
+        ->and($existingUser->refresh()->google_id)->toBeNull();
+    Exceptions::assertNothingReported();
+})->group('oauth');
+
+it('refuses to link Google to an existing account when Google has not verified the email', function (): void {
+    $existingUser = User::factory()->create(['email' => 'existing@example.com', 'google_id' => null]);
+
+    $googleUser = new SocialiteUser();
+    $googleUser->setRaw(['email_verified' => false]);
+    $googleUser->id = 'google_unverified';
+    $googleUser->email = 'existing@example.com';
+    $googleUser->name = 'Someone';
+
+    $this->provider->user = $googleUser;
+
+    get(route('auth.google.callback'))->assertRedirect(route('login'));
+
+    expect(Auth::check())->toBeFalse()
+        ->and($existingUser->refresh()->google_id)->toBeNull();
+})->group('oauth');
+
+it('does not mark a new user verified when Google has not verified the email', function (): void {
+    $googleUser = new SocialiteUser();
+    $googleUser->setRaw(['email_verified' => false]);
+    $googleUser->id = 'google_new_unverified';
+    $googleUser->email = 'unconfirmed@example.com';
+    $googleUser->name = 'New Person';
+
+    $this->provider->user = $googleUser;
+
+    get(route('auth.google.callback'))->assertRedirectToRoute('dashboard');
+
+    expect(User::query()->where('email', 'unconfirmed@example.com')->sole()->email_verified_at)->toBeNull();
 })->group('oauth');

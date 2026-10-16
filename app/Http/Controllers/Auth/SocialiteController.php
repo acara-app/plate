@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Auth;
 
 use App\Actions\FindOrCreateUserFromGoogleOAuth;
+use App\Exceptions\AccountLinkException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -44,6 +45,8 @@ final readonly class SocialiteController
 
             return redirect()->intended(route('dashboard', absolute: false));
 
+        } catch (AccountLinkException) {
+            return to_route('login')->with('error', __('This email is already registered. Please sign in with your password.'));
         } catch (Throwable $throwable) {
             report($throwable);
 
