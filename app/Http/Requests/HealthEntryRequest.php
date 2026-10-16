@@ -8,6 +8,7 @@ use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
 use App\Enums\InsulinType;
+use App\Http\Requests\Concerns\ValidatesReviewedMeal;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -16,6 +17,11 @@ use Illuminate\Validation\Validator;
 /** @codeCoverageIgnore */
 final class HealthEntryRequest extends FormRequest
 {
+    use ValidatesReviewedMeal {
+        rules as private reviewedMealRules;
+        withValidator as private validateReviewedMealTotals;
+    }
+
     /**
      * @return array<string, array<int, mixed>>
      */
@@ -72,7 +78,7 @@ final class HealthEntryRequest extends FormRequest
             'a1c_value' => ['nullable', 'numeric', 'min:3', 'max:20'],
 
             'carbs_grams' => [
-                $logType === HealthEntryType::Food->value ? 'required' : 'nullable',
+                $logType === HealthEntryType::Food->value && ! $this->has('items') ? 'required' : 'nullable',
                 'numeric',
                 'min:0',
                 'max:1000',
@@ -87,11 +93,16 @@ final class HealthEntryRequest extends FormRequest
                 'max:100',
             ],
             'exercise_duration_minutes' => ['nullable', 'integer', 'min:0', 'max:1440'],
+            ...($logType === HealthEntryType::Food->value && $this->has('items') ? $this->reviewedMealRules() : []),
         ];
     }
 
     public function withValidator(Validator $validator): void
     {
+        if ($this->input('log_type') === HealthEntryType::Food->value && $this->has('items')) {
+            $this->validateReviewedMealTotals($validator);
+        }
+
         $validator->after(function (Validator $validator): void {
             $logType = $this->input('log_type');
 

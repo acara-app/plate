@@ -27,9 +27,19 @@ final class ReviewedMealData extends Data
      */
     public static function fromValidated(array $data): self
     {
+        return new self(
+            items: self::normalizeItems($data['items'] ?? null),
+            measuredAt: Date::parse(is_string($data['measured_at'] ?? null) ? $data['measured_at'] : 'now')->toImmutable(),
+            notes: is_string($data['notes'] ?? null) && mb_trim($data['notes']) !== '' ? $data['notes'] : null,
+        );
+    }
+
+    /** @return list<array<string, mixed>> */
+    public static function normalizeItems(mixed $values): array
+    {
         $items = [];
 
-        foreach (is_array($data['items'] ?? null) ? $data['items'] : [] as $item) {
+        foreach (is_array($values) ? $values : [] as $item) {
             if (! is_array($item)) {
                 continue;
             }
@@ -43,14 +53,21 @@ final class ReviewedMealData extends Data
             $items[] = $normalized;
         }
 
-        return new self(
-            items: $items,
-            measuredAt: Date::parse(is_string($data['measured_at'] ?? null) ? $data['measured_at'] : 'now')->toImmutable(),
-            notes: is_string($data['notes'] ?? null) && mb_trim($data['notes']) !== '' ? $data['notes'] : null,
-        );
+        return $items;
     }
 
     public function toHealthLogData(AnalysisDraft $draft): HealthLogData
+    {
+        return $this->toHealthLogDataWithMetadata([
+            'confidence' => $draft->payload['confidence'] ?? null,
+            'analyzer_version' => $draft->payload['analyzer_version'] ?? null,
+            'source' => $draft->source->value,
+            'draft_reference' => mb_substr($draft->token_hash, 0, 12),
+        ]);
+    }
+
+    /** @param array<array-key, mixed> $metadata */
+    public function toHealthLogDataWithMetadata(array $metadata): HealthLogData
     {
         return new HealthLogData(
             isHealthData: true,
@@ -62,10 +79,10 @@ final class ReviewedMealData extends Data
             measuredAt: $this->measuredAt,
             notes: $this->mealLabel(),
             foodItems: $this->normalizedItems(),
-            confidence: is_int($draft->payload['confidence'] ?? null) ? $draft->payload['confidence'] : null,
-            analyzerVersion: is_string($draft->payload['analyzer_version'] ?? null) ? $draft->payload['analyzer_version'] : null,
-            foodSource: $draft->source->value,
-            draftReference: mb_substr($draft->token_hash, 0, 12),
+            confidence: is_int($metadata['confidence'] ?? null) ? $metadata['confidence'] : null,
+            analyzerVersion: is_string($metadata['analyzer_version'] ?? null) ? $metadata['analyzer_version'] : null,
+            foodSource: is_string($metadata['source'] ?? null) ? $metadata['source'] : null,
+            draftReference: is_string($metadata['draft_reference'] ?? null) ? $metadata['draft_reference'] : null,
         );
     }
 

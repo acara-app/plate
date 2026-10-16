@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Concerns;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Validator;
 
 trait ValidatesReviewedMeal
@@ -17,7 +16,7 @@ trait ValidatesReviewedMeal
     ];
 
     /**
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, array<int, mixed>>
      */
     public function rules(): array
     {

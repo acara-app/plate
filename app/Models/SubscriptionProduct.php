@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Data\Billing\PhotoPlanLimits;
 use Carbon\CarbonInterface;
 use Database\Factories\SubscriptionProductFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string|null $yearly_stripe_lookup_key
  * @property-read array<int, string>|null $features
  * @property-read bool $coming_soon
+ * @property-read PhotoPlanLimits|null $photo_limits
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  */
@@ -35,6 +37,7 @@ use Illuminate\Database\Eloquent\Model;
     'yearly_savings',
     'yearly_savings_percentage',
     'coming_soon',
+    'photo_limits',
 ])]
 final class SubscriptionProduct extends Model
 {
@@ -84,6 +87,11 @@ final class SubscriptionProduct extends Model
     protected function getFormattedPriceAttribute(): string
     {
         return '$'.number_format($this->price, 2);
+    }
+
+    protected function getPhotoLimitsAttribute(): ?PhotoPlanLimits
+    {
+        return PhotoPlanLimits::forProductName($this->name);
     }
 
     protected function getFormattedYearlyPriceAttribute(): string

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Data\HealthLogData;
+use App\Data\ReviewedMealData;
+use App\Enums\HealthEntryType;
 use App\Models\HealthSyncSample;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -15,8 +17,18 @@ final readonly class UpdateHealthSampleAction
     {
         return DB::transaction(function () use ($sample, $data): HealthSyncSample {
             $newSamples = $data->toSampleArrays();
-            $measuredAt = $data->measuredAt ?? $sample->measured_at;
+            $measuredAt = ($data->measuredAt ?? $sample->measured_at)->toImmutable()->utc();
             $groupId = $sample->group_id;
+
+            $metadata = $sample->metadata['snap_to_track'] ?? null;
+
+            if ($data->logType === HealthEntryType::Food && $data->foodItems === null && is_array($metadata) && is_array($metadata['items'] ?? null)) {
+                $previous = (new ReviewedMealData(ReviewedMealData::normalizeItems($metadata['items']), $measuredAt))->toHealthLogDataWithMetadata($metadata);
+
+                if ($data->carbsGrams === $previous->carbsGrams && $data->proteinGrams === $previous->proteinGrams && $data->fatGrams === $previous->fatGrams && $data->calories === $previous->calories) {
+                    $newSamples = $previous->toSampleArrays();
+                }
+            }
 
             if ($groupId !== null) {
                 HealthSyncSample::query()

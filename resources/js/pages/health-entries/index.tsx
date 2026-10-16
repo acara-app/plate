@@ -23,6 +23,7 @@ import { Head, InfiniteScroll, router } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import EntryValueBadges from './components/entry-value-badges';
+import FoodBreakdownDetails from './components/food-breakdown';
 import SourceBadge from './components/source-badge';
 import HealthEntriesDialog from './health-entries-dialog';
 
@@ -169,10 +170,21 @@ export default function HealthEntriesIndex({
                                                                 log.measured_at,
                                                             ).toLocaleString()}
                                                         </time>
-                                                        <SourceBadge
-                                                            source={log.source}
-                                                        />
+                                                        {!log.food_analysis && (
+                                                            <SourceBadge
+                                                                source={
+                                                                    log.source
+                                                                }
+                                                            />
+                                                        )}
                                                     </div>
+                                                    {log.food_analysis && (
+                                                        <FoodBreakdownDetails
+                                                            analysis={
+                                                                log.food_analysis
+                                                            }
+                                                        />
+                                                    )}
                                                     {log.notes && (
                                                         <p className="text-sm">
                                                             {log.notes}
