@@ -301,6 +301,20 @@ it('requires authentication', function (): void {
     $response->assertRedirect(route('login'));
 });
 
+it('sends unverified users to verify their email before Stripe checkout', function (): void {
+    $this->mock(StripeServiceContract::class)->shouldNotReceive('createSubscriptionCheckout');
+    $product = SubscriptionProduct::factory()->create(['stripe_price_id' => 'price_monthly_test']);
+
+    $this->actingAs(User::factory()->unverified()->create())
+        ->from(route('checkout.subscription'))
+        ->post(route('checkout.subscription.store'), [
+            'product_id' => $product->id,
+            'billing_interval' => 'monthly',
+        ])
+        ->assertRedirect(route('verification.notice'))
+        ->assertSessionHas('url.intended', route('checkout.subscription'));
+});
+
 it('handles missing yearly lookup key gracefully', function (): void {
     $user = User::factory()->create();
     $product = SubscriptionProduct::factory()->create([

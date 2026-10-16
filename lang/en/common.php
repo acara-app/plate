@@ -842,6 +842,12 @@ return [
         ],
     ],
     'checkout_subscription' => [
+        'verify_email' => [
+            'title' => 'Verify your email to subscribe',
+            'body' => 'We sent a link to your inbox. Click it, then come back here to finish choosing your plan.',
+            'resend' => 'Resend verification email',
+            'sent' => 'A new link is on its way. Check your inbox and spam folder.',
+        ],
         'limits' => [
             'heading' => 'Photo scan limits',
             'scans' => 'Up to {{count}} scan attempts per hour',

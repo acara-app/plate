@@ -842,6 +842,12 @@ return [
         ],
     ],
     'checkout_subscription' => [
+        'verify_email' => [
+            'title' => 'Vérifiez votre adresse e-mail pour vous abonner',
+            'body' => 'Nous vous avons envoyé un lien. Cliquez dessus, puis revenez ici pour choisir votre forfait.',
+            'resend' => 'Renvoyer l’e-mail de vérification',
+            'sent' => 'Un nouveau lien est en route. Vérifiez votre boîte de réception et vos courriers indésirables.',
+        ],
         'title' => 'Gestion de l\'abonnement',
         'photo_plan' => [
             'price' => '{{price}} par mois',

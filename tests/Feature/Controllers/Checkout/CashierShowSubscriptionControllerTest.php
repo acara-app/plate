@@ -331,6 +331,21 @@ it('renders page when user has no active subscription', function (): void {
         ->and($stripeMock->getBillingPortalUrlCalled)->toBeFalse();
 });
 
+it('asks signed-in visitors to verify their email before subscribing', function (?string $visitor, bool $required): void {
+    if ($visitor !== null) {
+        $factory = $visitor === 'unverified' ? User::factory()->unverified() : User::factory();
+        actingAs($factory->create(['stripe_id' => null]));
+    }
+
+    $this->get(route('checkout.subscription'))->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('requiresEmailVerification', $required));
+})->with([
+    'guest' => [null, false],
+    'verified user' => ['verified', false],
+    'unverified user' => ['unverified', true],
+]);
+
 it('lets guests view prices without contacting Stripe', function (): void {
     $this->mock(StripeServiceContract::class)->shouldNotReceive('ensureStripeCustomer', 'getBillingPortalUrl');
     $this->get(route('checkout.subscription'))->assertOk()
