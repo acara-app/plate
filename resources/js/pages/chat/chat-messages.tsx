@@ -133,7 +133,7 @@ function MessagePart({
     switch (part.type) {
         case 'text':
             return (
-                <div className="prose prose-sm max-w-none dark:prose-invert">
+                <div className="chat-markdown prose prose-sm max-w-none dark:prose-invert">
                     <Streamdown
                         animated
                         isAnimating={isStreaming}

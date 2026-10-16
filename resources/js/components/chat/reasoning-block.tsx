@@ -88,7 +88,7 @@ export function ReasoningBlock({
             }
         >
             <div className="max-h-72 overflow-y-auto px-3 pb-2">
-                <div className="prose prose-sm max-w-none text-muted-foreground italic dark:prose-invert">
+                <div className="chat-markdown prose prose-sm max-w-none text-muted-foreground italic dark:prose-invert">
                     <Streamdown animated isAnimating={live} plugins={{ code }}>
                         {data.text}
                     </Streamdown>
