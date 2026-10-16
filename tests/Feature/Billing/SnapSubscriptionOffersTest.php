@@ -18,7 +18,7 @@ use Inertia\Testing\AssertableInertia;
 
 covers(CloudPhotoAnalyses::class, SnapSubscriptionOffers::class);
 
-it('offers only the photo plans without rollout flags or a separate premium model', function (array $stripeConfig, array $productAttributes, array $expectedPlans): void {
+it('offers only the photo plans without rollout flags or a separate premium model', function (array $configOverrides, array $productAttributes, array $expectedPlans): void {
     $this->withoutVite();
     config()->set([
         'snap.enabled' => false,
@@ -28,7 +28,7 @@ it('offers only the photo plans without rollout flags or a separate premium mode
         'cashier.key' => 'pk_test_configured',
         'cashier.secret' => 'sk_test_configured',
         'cashier.webhook.secret' => 'whsec_configured',
-        ...$stripeConfig,
+        ...$configOverrides,
     ]);
     $this->seed(SubscriptionProductSeeder::class);
     SubscriptionProduct::query()->where('name', 'Snap Pro')->firstOrFail()->update([
@@ -52,16 +52,23 @@ it('offers only the photo plans without rollout flags or a separate premium mode
     'missing webhook secret' => [['cashier.webhook.secret' => null], [], ['Free trial']],
     'missing price' => [[], ['stripe_price_id' => null], ['Free trial']],
     'unavailable product' => [[], ['purchasable' => false], ['Free trial']],
+    'invalid paid model' => [['ai.agent_profiles.'.FoodPhotoAnalyzerAgent::class.'.paid' => 'unregistered-model'], [], ['Free trial']],
+    'paid model without vision' => [[
+        'ai.agent_profiles.'.FoodPhotoAnalyzerAgent::class.'.paid' => 'claude-sonnet-5',
+        'ai.model_catalog.claude-sonnet-5.capabilities' => ['structured_output'],
+    ], [], ['Free trial']],
 ]);
 
-it('completes a paid scan with the normal photo model unless a full override is configured', function (?string $provider, ?string $model, string $expectedModel, int $expectedMaxTokens): void {
+it('completes a paid scan using the shared paid photo model profile', function (string $paidModel, string $expectedProvider): void {
     config()->set([
         'snap.enabled' => false,
         'snap.model_approved' => false,
-        'snap.premium.provider' => $provider,
-        'snap.premium.model' => $model,
+        'snap.premium.provider' => 'obsolete-provider',
+        'snap.premium.model' => 'obsolete-model',
         'snap.premium.max_tokens' => 4096,
+        'plate.enable_premium_upgrades' => true,
         'ai.agent_profiles.'.FoodPhotoAnalyzerAgent::class.'.standard' => 'gemini-3.6-flash',
+        'ai.agent_profiles.'.FoodPhotoAnalyzerAgent::class.'.paid' => $paidModel,
         'cashier.key' => 'pk_test_configured',
         'cashier.secret' => 'sk_test_configured',
         'cashier.webhook.secret' => 'whsec_configured',
@@ -98,10 +105,10 @@ it('completes a paid scan with the normal photo model unless a full override is 
 
     $result = $photos->analyze(
         new PhotoAnalysisContext($user, null, (string) Str::uuid(), 'web', hash('sha256', 'meal')),
-        function (PhotoModel $selectedModel) use ($analysis, $expectedModel, $expectedMaxTokens): FoodAnalysisData {
-            expect($selectedModel->provider)->toBe('gemini');
-            expect($selectedModel->model)->toBe($expectedModel);
-            expect($selectedModel->maxTokens)->toBe($expectedMaxTokens);
+        function (PhotoModel $selectedModel) use ($analysis, $paidModel, $expectedProvider): FoodAnalysisData {
+            expect($selectedModel->provider)->toBe($expectedProvider);
+            expect($selectedModel->model)->toBe($paidModel);
+            expect($selectedModel->maxTokens)->toBe(4096);
 
             return $analysis;
         },
@@ -113,8 +120,8 @@ it('completes a paid scan with the normal photo model unless a full override is 
     expect($allowance->limit)->toBe(100);
     expect($allowance->used)->toBe(1);
 })->with([
-    'no override' => [null, null, 'gemini-3.6-flash', 35000],
-    'provider only' => ['gemini', null, 'gemini-3.6-flash', 35000],
-    'model only' => [null, 'gemini-3.8-flash', 'gemini-3.6-flash', 35000],
-    'complete override' => ['gemini', 'gemini-3.8-flash', 'gemini-3.8-flash', 4096],
+    'Gemini paid profile' => ['gemini-3.8-flash', 'gemini'],
+    'alternate Gemini profile' => ['gemini-3.6-flash', 'gemini'],
+    'OpenAI paid profile' => ['gpt-6-sol', 'openai'],
+    'Anthropic paid profile' => ['claude-sonnet-5', 'anthropic'],
 ]);
