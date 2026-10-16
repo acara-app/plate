@@ -220,6 +220,28 @@
     }
 }
 
+.chat-markdown [data-streamdown='code-block-body'] pre {
+    margin: 0;
+    padding: 0;
+    color: var(--foreground);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.chat-markdown [data-streamdown='code-block-body'] pre code {
+    font-size: inherit;
+    font-style: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+}
+
+.chat-markdown [data-streamdown='code-block-body'] code > span::before {
+    color: var(--muted-foreground);
+}
+
 /* Hide scrollbar while preserving scroll functionality */
 .no-scrollbar {
     -ms-overflow-style: none;
