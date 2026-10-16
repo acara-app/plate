@@ -73,24 +73,6 @@ export default function Index({
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    {hasStripeCustomer && (
-                        <div className="space-y-4">
-                            <HeadingSmall
-                                title={t('billing.manage.heading')}
-                                description={t('billing.manage.description')}
-                            />
-                            <Button asChild variant="default">
-                                <a
-                                    href={billing.portal().url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <CreditCardIcon className="h-4 w-4" />
-                                    {t('billing.manage.button')}
-                                </a>
-                            </Button>
-                        </div>
-                    )}
                     <PhotoAllowanceCard allowance={photoAllowance} />
                     {monthlyBudget && (
                         <p className="text-sm text-muted-foreground">
@@ -218,6 +200,25 @@ export default function Index({
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                    )}
+
+                    {hasStripeCustomer && (
+                        <div className="space-y-4">
+                            <HeadingSmall
+                                title={t('billing.manage.heading')}
+                                description={t('billing.manage.description')}
+                            />
+                            <Button asChild variant="default">
+                                <a
+                                    href={billing.portal().url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <CreditCardIcon className="h-4 w-4" />
+                                    {t('billing.manage.button')}
+                                </a>
+                            </Button>
                         </div>
                     )}
                 </div>
