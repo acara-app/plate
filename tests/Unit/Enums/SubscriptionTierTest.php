@@ -15,10 +15,14 @@ it('maps product names case-insensitively to tier cases', function (string $name
     'public Supporter name' => ['Supporter', SubscriptionTier::Basic],
     'lowercase plus' => ['plus', SubscriptionTier::Plus],
     'public Pro name' => ['Pro', SubscriptionTier::Plus],
+    'Starter plan' => ['Starter', SubscriptionTier::Starter],
+    'Snap Pro plan' => ['Snap Pro', SubscriptionTier::Snap],
 ]);
 
 it('uses customer-facing tier labels for the Cloud pricing catalog', function (): void {
     expect(SubscriptionTier::Free->label())->toBe('Free')
         ->and(SubscriptionTier::Basic->label())->toBe('Supporter')
-        ->and(SubscriptionTier::Plus->label())->toBe('Pro');
+        ->and(SubscriptionTier::Plus->label())->toBe('Pro')
+        ->and(SubscriptionTier::Starter->label())->toBe('Starter')
+        ->and(SubscriptionTier::Snap->label())->toBe('Snap Pro');
 });
