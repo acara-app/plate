@@ -60,6 +60,7 @@ final class SubscriptionProductSeeder extends Seeder
                     '100 premium photo scans per billing month',
                     'Tested premium nutrition model',
                     'Save scans to your food log',
+                    'Cancel anytime',
                     'Scans reset monthly; no rollover or overage charges',
                 ],
                 'price' => 9.00,
