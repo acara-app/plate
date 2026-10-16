@@ -11,6 +11,7 @@ use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\GetCalorieLevelGuideline;
+use App\Ai\Tools\GetSubscriptionStatus;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
 use App\Models\User;
@@ -25,6 +26,20 @@ beforeEach(function (): void {
 });
 
 describe('build', function (): void {
+    it('gives the agent Acara billing facts and the plan tool when plans are sold', function (): void {
+        config(['plate.enable_premium_upgrades' => true]);
+
+        $result = $this->builder->build(new AgentRequest(message: 'Cancel my subscription'), User::factory()->create());
+
+        expect($result['instructions'])
+            ->toContain('## Account & Billing')
+            ->toContain('There is no Android or Google Play app')
+            ->toContain('call `get_subscription_status` first')
+            ->toContain('Never suggest upgrades')
+            ->not->toContain('iPhone/Android apps')
+            ->and(collect($result['tools'])->map(fn (mixed $tool): string => $tool::class)->all())->toContain(GetSubscriptionStatus::class);
+    });
+
     it('returns instructions and tools array', function (): void {
         $user = User::factory()->create();
         $request = new AgentRequest(message: 'Hello');

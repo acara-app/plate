@@ -19,4 +19,16 @@ final class StaticUrl
         return (string) Uri::of(config()->string('app.url'))
             ->withPath(route('checkout.subscription', [], false));
     }
+
+    public static function billingUrl(): string
+    {
+        return (string) Uri::of(config()->string('app.url'))
+            ->withPath(route('billing.index', [], false));
+    }
+
+    public static function supportUrl(): string
+    {
+        return (string) Uri::of(config()->string('app.url'))
+            ->withPath(route('support', [], false));
+    }
 }

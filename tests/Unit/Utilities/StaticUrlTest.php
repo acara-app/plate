@@ -18,3 +18,10 @@ it('returns the absolute checkout url from the configured app url, not the reque
 
     expect(StaticUrl::checkoutUrl())->toBe('https://acara.example/checkout/subscription');
 });
+
+it('returns absolute billing and support urls from the configured app url', function (): void {
+    config(['app.url' => 'https://acara.example']);
+
+    expect(StaticUrl::billingUrl())->toBe('https://acara.example/settings/billing')
+        ->and(StaticUrl::supportUrl())->toBe('https://acara.example/support');
+});

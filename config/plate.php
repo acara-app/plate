@@ -10,6 +10,7 @@ use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\EnrichAttributeMetadata;
 use App\Ai\Tools\GetDietReference;
+use App\Ai\Tools\GetSubscriptionStatus;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
 use App\Ai\Tools\UpdateHouseholdContext;
@@ -63,6 +64,7 @@ return [
 
     'tools' => [
         GetUserProfile::class,
+        GetSubscriptionStatus::class,
         LogHealthEntry::class,
         EnrichAttributeMetadata::class,
         UpdateUserProfileAttributes::class,

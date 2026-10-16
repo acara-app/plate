@@ -58,6 +58,7 @@ final readonly class AgentBuilder
             'summaries' => $summaries,
             'emergencyNumber' => EmergencyNumberUtil::emergencyNumber($timezone),
             'availableSkills' => $this->skillLoader->loadAll(),
+            'billingEnabled' => enable_premium_upgrades_for($user),
         ])->render();
 
         $memories = $this->renderMemories($request, $user);

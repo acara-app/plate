@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Billing\BuildCreditWarning;
 use App\Actions\Billing\EnforceAiUsageLimit;
+use App\Ai\AgentBuilder;
+use App\Ai\AgentRequest;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\StartMealPlanGeneration;
@@ -182,4 +184,11 @@ it('does not require subscription middleware to gate verified=null users when th
     $response = $this->actingAs($user)->get(route('meal-plans.index'));
 
     $response->assertSuccessful();
+});
+
+it('leaves Acara billing guidance out of the chat instructions when the flag is off', function (): void {
+    $instructions = resolve(AgentBuilder::class)->buildInstructions(new AgentRequest(message: 'Cancel my subscription'), User::factory()->create());
+
+    expect($instructions)->not->toContain('## Account & Billing')
+        ->not->toContain('get_subscription_status');
 });
