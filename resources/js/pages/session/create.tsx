@@ -16,10 +16,11 @@ import { useTranslation } from 'react-i18next';
 
 interface LoginProps {
     status?: string;
+    error?: string;
     canResetPassword: boolean;
 }
 
-export default function Login({ status, canResetPassword }: LoginProps) {
+export default function Login({ status, error, canResetPassword }: LoginProps) {
     const { t } = useTranslation('auth');
 
     return (
@@ -129,6 +130,12 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     </>
                 )}
             </Form>
+
+            {error && (
+                <div className="mb-4 text-center text-sm font-medium text-red-600">
+                    {error}
+                </div>
+            )}
 
             {status && (
                 <div className="mb-4 text-center text-sm font-medium text-green-600">
