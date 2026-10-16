@@ -12,6 +12,5 @@ final class PhotoOffer extends Data
         public int $productId,
         public string $name,
         public string $formattedPrice,
-        public int $scans,
     ) {}
 }

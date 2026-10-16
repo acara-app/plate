@@ -27,11 +27,12 @@ it('serializes the photo offer with the keys the upgrade call to action reads', 
         resetsAt: '2026-10-01T00:00:00+00:00',
         mode: 'premium',
         canUpgrade: true,
-        offer: new PhotoOffer(productId: 7, name: 'Snap Pro', formattedPrice: '$9', scans: 300),
+        offer: new PhotoOffer(productId: 7, name: 'Starter', formattedPrice: '$2.99'),
     );
 
     expect($entitlement->toArray())
         ->toHaveKeys(['can_upgrade', 'resets_at', 'exhausted', 'remaining'])
         ->and($entitlement->toArray()['offer'])
-        ->toHaveKeys(['product_id', 'formatted_price', 'name', 'scans']);
+        ->toHaveKeys(['product_id', 'formatted_price', 'name'])
+        ->not->toHaveKey('scans');
 });

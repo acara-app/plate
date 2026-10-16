@@ -508,7 +508,7 @@ function stubSnapPhotoAllowance(int $used): void
         {
             return new PhotoEntitlement(
                 enabled: true, limit: 1, used: $this->used, mode: 'trial', canUpgrade: true,
-                offer: new PhotoOffer(productId: 7, name: 'Snap Pro', formattedPrice: '$9.00', scans: 100),
+                offer: new PhotoOffer(productId: 7, name: 'Starter', formattedPrice: '$2.99'),
             );
         }
 
@@ -519,11 +519,11 @@ function stubSnapPhotoAllowance(int $used): void
     });
 }
 
-it('withholds the Snap Pro offer until a scan has proven the value', function (): void {
+it('withholds the paid offer until a scan has proven the value', function (): void {
     stubSnapPhotoAllowance(used: 0);
 
     Livewire::test('pages::snap-to-track')
-        ->assertDontSee('Snap Pro')
+        ->assertDontSee('Starter — $2.99/month')
         ->assertSee('One free scan');
 
     analyzePhotoForSnapToTrack([
@@ -531,13 +531,13 @@ it('withholds the Snap Pro offer until a scan has proven the value', function ()
         'total_calories' => 200, 'total_protein' => 6, 'total_carbs' => 30, 'total_fat' => 5, 'confidence' => 85,
     ])
         ->assertSee('Save this meal free')
-        ->assertSee('Snap Pro — 100 scans a month, $9.00');
+        ->assertSee('Starter — $2.99/month');
 
     stubSnapPhotoAllowance(used: 1);
 
     Livewire::test('pages::snap-to-track')
         ->assertSee('Scan limit reached')
         ->assertSee('That was your free scan.')
-        ->assertSee('100 scans a month · $9.00 · about 9¢ a scan.')
+        ->assertSee('Every Acara feature with daily and weekly limits · $2.99/month.')
         ->assertDontSee('Tap to take photo or upload');
 });

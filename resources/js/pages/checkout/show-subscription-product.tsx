@@ -136,7 +136,7 @@ export default function CashierSubscription({
                     {paymentPending && <PaymentConfirmation />}
                     {!paymentPending && photoAllowance?.mode === 'premium' && (
                         <div role="status" className="rounded-lg border p-4">
-                            Your premium scans are ready.{' '}
+                            Your plan is active.{' '}
                             <a href={snapToTrack().url} className="underline">
                                 Continue scanning
                             </a>
@@ -297,11 +297,8 @@ export default function CashierSubscription({
                         <p className="text-sm text-muted-foreground">
                             {photoAllowance.offer.name} renews at{' '}
                             {photoAllowance.offer.formatted_price} every month
-                            and includes {photoAllowance.offer.scans} premium
-                            scans per billing month. Unused scans do not roll
-                            over. When scans run out, wait for renewal. No
-                            automatic overage charges. Cancel anytime from
-                            billing settings.
+                            and unlocks every Acara feature with daily and
+                            weekly limits. Cancel anytime from billing settings.
                         </p>
                     )}
                     {upgradeDraft && (

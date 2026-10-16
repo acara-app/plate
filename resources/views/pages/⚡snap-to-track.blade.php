@@ -47,25 +47,6 @@ class extends Component
         return resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement(auth()->user(), \App\Data\Billing\PhotoAnalysisContext::guestId(request()));
     }
 
-    public function perScanPrice(): ?string
-    {
-        $offer = $this->photoAllowance->offer;
-
-        if ($offer === null || $offer->scans < 1) {
-            return null;
-        }
-
-        $amount = (float) preg_replace('/[^0-9.]/', '', $offer->formattedPrice);
-
-        if ($amount <= 0.0) {
-            return null;
-        }
-
-        $perScan = $amount / $offer->scans;
-
-        return $perScan < 1 ? round($perScan * 100).'¢' : '$'.number_format($perScan, 2);
-    }
-
     private function ensureDraftToken(CreateAnalysisDraftAction $action): ?string
     {
         if ($this->result === null) {
@@ -429,15 +410,10 @@ class extends Component
                     >
                         <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Scan limit reached</p>
                         <h2 class="mt-4 font-bold text-2xl leading-tight tracking-[-0.02em]">
-                            {{ $photoAllowance->mode === 'trial' ? 'That was your free scan.' : 'Your scans are used up for this month.' }}
+                            That was your free scan.
                         </h2>
                         @if ($photoAllowance->canUpgrade && $photoAllowance->offer)
-                            @php
-                                $perScan = $this->perScanPrice();
-                                $offerLine = $photoAllowance->offer->scans.' scans a month · '.$photoAllowance->offer->formattedPrice
-                                    .($perScan === null ? '' : ' · about '.$perScan.' a scan').'.';
-                            @endphp
-                            <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">{{ $offerLine }}</p>
+                            <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">Every Acara feature with daily and weekly limits · {{ $photoAllowance->offer->formattedPrice }}/month.</p>
                             <button
                                 type="button"
                                 wire:click="upgrade"
@@ -810,7 +786,7 @@ class extends Component
                                         wire:click="upgrade"
                                         x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result', exhausted: @js($photoAllowance->exhausted()) })"
                                         class="font-semibold underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]"
-                                    >{{ $photoAllowance->offer->name }} — {{ $photoAllowance->offer->scans }} scans a month, {{ $photoAllowance->offer->formattedPrice }}</button>
+                                    >{{ $photoAllowance->offer->name }} — {{ $photoAllowance->offer->formattedPrice }}/month</button>
                                 </p>
                             @endif
                         </article>

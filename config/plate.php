@@ -54,6 +54,7 @@ return [
         'burst_caps' => [
             'default' => (int) env('SNAP_TO_TRACK_BURST_CAP_DEFAULT', 5),
             'free' => (int) env('SNAP_TO_TRACK_BURST_CAP_FREE', 5),
+            'starter' => (int) env('SNAP_TO_TRACK_BURST_CAP_STARTER', 30),
             'snap' => (int) env('SNAP_TO_TRACK_BURST_CAP_SNAP', 30),
             'basic' => (int) env('SNAP_TO_TRACK_BURST_CAP_BASIC', 15),
             'plus' => (int) env('SNAP_TO_TRACK_BURST_CAP_PLUS', 30),
@@ -103,6 +104,14 @@ return [
         'free' => [
             'rolling' => ['limit' => 0.40, 'period_hours' => 24],
             'weekly' => ['limit' => 1.40, 'period_days' => 7],
+        ],
+        'starter' => [
+            'rolling' => ['limit' => 0.50, 'period_hours' => 24],
+            'weekly' => ['limit' => 1.50, 'period_days' => 7],
+        ],
+        'snap' => [
+            'rolling' => ['limit' => 1.50, 'period_hours' => 24],
+            'weekly' => ['limit' => 6.00, 'period_days' => 7],
         ],
         'basic' => [
             'rolling' => ['limit' => 1.50, 'period_hours' => 24],

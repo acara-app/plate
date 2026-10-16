@@ -455,7 +455,7 @@ return [
             'heading' => 'Vous avez atteint la limite de scans pour cette heure.',
             'body' => '{{cap}} scans par heure avec le forfait {{tier}} · vous pourrez scanner à nouveau dans environ {{minutes}} minutes.',
             'upgrade' => 'Continuer avec {{name}} — {{price}}/mois',
-            'upgrade_hint' => '{{scans}} scans premium par mois. Renouvellement mensuel, annulable à tout moment.',
+            'upgrade_hint' => 'Des limites quotidiennes et hebdomadaires plus élevées. Renouvellement mensuel, annulable à tout moment.',
             'see_plans' => 'Voir les forfaits',
         ],
         'credit' => [
@@ -714,6 +714,7 @@ return [
             'payment_pending' => 'Paiement en attente — votre accès s\'activera dans quelques instants.',
             'labels' => [
                 'free' => 'Gratuit',
+                'starter' => 'Starter',
                 'snap' => 'Snap Pro',
                 'basic' => 'Supporter',
                 'plus' => 'Pro',
@@ -737,6 +738,11 @@ return [
             'cap_description' => '{{current}} crédits utilisés sur {{total}}. Réinitialisation dans {{time}}.',
             'upgrade_to' => 'Passer à {{tier}}',
             'plans' => [
+                'snap' => [
+                    'name' => 'Snap Pro',
+                    'price' => '9 $/mois',
+                    'pitch' => 'Des limites quotidiennes et hebdomadaires plus élevées pour suivre chaque repas.',
+                ],
                 'basic' => [
                     'name' => 'Supporter',
                     'price' => '9 $/mois',

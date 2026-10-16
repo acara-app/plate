@@ -8,7 +8,7 @@ export interface Entitlement {
     grace_period_ends_at: string | null;
 }
 
-export type SubscriptionTier = 'free' | 'snap' | 'basic' | 'plus';
+export type SubscriptionTier = 'free' | 'starter' | 'snap' | 'basic' | 'plus';
 export type PaidSubscriptionTier = Exclude<SubscriptionTier, 'free'>;
 export type LimitType = 'rolling' | 'weekly' | 'monthly';
 

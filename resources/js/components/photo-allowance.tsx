@@ -17,7 +17,6 @@ export interface PhotoAllowance {
         product_id: number;
         name: string;
         formatted_price: string;
-        scans: number;
     } | null;
 }
 
@@ -54,7 +53,7 @@ export function PhotoAllowanceCard({
                         ? remaining > 0
                             ? 'Try one photo free'
                             : 'Your free trial scan is complete'
-                        : `${remaining} of ${allowance.limit} premium scans remaining`}
+                        : `${remaining} of ${allowance.limit} scans remaining`}
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -72,8 +71,8 @@ export function PhotoAllowanceCard({
                 {showUpgrade && allowance.can_upgrade && offer && (
                     <>
                         <p>
-                            {offer.scans} premium scans per billing month. No
-                            rollover or overage charges.
+                            Track meals from photos and save them to your food
+                            log.
                         </p>
                         <Button asChild>
                             <Link

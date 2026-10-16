@@ -24,7 +24,7 @@ final readonly class DefaultSubscriptionOffers implements OffersSubscriptions
             return false;
         }
 
-        if (SubscriptionTier::fromProductName($product->name) === SubscriptionTier::Snap) {
+        if (in_array(SubscriptionTier::fromProductName($product->name), [SubscriptionTier::Starter, SubscriptionTier::Snap], true)) {
             return $this->photoAnalyses->enabled();
         }
 

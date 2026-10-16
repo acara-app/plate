@@ -71,7 +71,7 @@ final class UsageLimitExceededException extends RuntimeException
 
         $window = $this->limitType === 'weekly' ? 'weekly' : 'daily';
 
-        if ($this->tier === SubscriptionTier::Plus) {
+        if (in_array($this->tier, [SubscriptionTier::Snap, SubscriptionTier::Plus], true)) {
             return sprintf(
                 "⏳ You've reached your %s AI credit limit on the %s plan.\n\nThey'll refill in %s.",
                 $window,
