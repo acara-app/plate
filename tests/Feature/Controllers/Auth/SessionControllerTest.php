@@ -21,6 +21,14 @@ it('renders login page', function (): void {
             ->has('status'));
 });
 
+it('shows a sign-in error passed back to the login page', function (): void {
+    $this->withSession(['error' => 'This email is already registered. Please sign in with your password.'])
+        ->get(route('login'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('error', 'This email is already registered. Please sign in with your password.'));
+});
+
 it('may create a session', function (): void {
     $user = User::factory()->withoutTwoFactor()->create([
         'email' => 'test@example.com',
