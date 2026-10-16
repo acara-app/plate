@@ -13,12 +13,14 @@ final readonly class UserEmailVerification
 {
     public function update(EmailVerificationRequest $request, #[CurrentUser] User $user): RedirectResponse
     {
-        if ($user->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+        if (! $user->hasVerifiedEmail()) {
+            $request->fulfill();
         }
 
-        $request->fulfill();
+        $fallback = $request->session()->has('checkout.selected_product')
+            ? route('checkout.subscription', absolute: false)
+            : route('dashboard', absolute: false).'?verified=1';
 
-        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+        return redirect()->intended($fallback);
     }
 }

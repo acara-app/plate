@@ -186,6 +186,7 @@ Route::middleware('auth')->group(function (): void {
         ->name('two-factor.show');
 
     Route::post('/checkout/subscription', Web\Checkout\CashierSubscriptionController::class)
+        ->middleware('verified')
         ->name('checkout.subscription.store');
 
     Route::get('/checkout/success', Web\Checkout\CashierShowSubscriptionController::class)

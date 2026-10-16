@@ -3,6 +3,7 @@ import {
     type PhotoAllowance,
 } from '@/components/photo-allowance';
 import ShowSnapToTrackReviewController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackReviewController';
+import UserEmailVerificationNotificationController from '@/actions/App/Http/Controllers/UserEmailVerificationNotificationController';
 import { PaymentConfirmation } from '@/components/billing/payment-confirmation';
 import PhotoPlanLimitsDetails, {
     type PhotoPlanLimits,
@@ -13,10 +14,15 @@ import { support, login, snapToTrack } from '@/routes';
 import billing from '@/routes/billing';
 import checkout from '@/routes/checkout';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Form, Head, Link, router } from '@inertiajs/react';
 import { PhotoPlanBand } from '@/components/billing/photo-plan-band';
 import clsx from 'clsx';
-import { CreditCardIcon, ReceiptIcon, TriangleIcon } from 'lucide-react';
+import {
+    CreditCardIcon,
+    MailIcon,
+    ReceiptIcon,
+    TriangleIcon,
+} from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -58,6 +64,7 @@ interface CashierSubscription {
 
 interface Props {
     isGuest: boolean;
+    requiresEmailVerification: boolean;
     paymentPending: boolean;
     selectedProductId: number | null;
     photoAllowance?: PhotoAllowance;
@@ -81,6 +88,7 @@ export default function CashierSubscription({
     products,
     photoPlan,
     isGuest,
+    requiresEmailVerification,
     paymentPending,
     selectedProductId,
     photoAllowance,
@@ -138,6 +146,56 @@ export default function CashierSubscription({
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <div className="space-y-8">
                     {paymentPending && <PaymentConfirmation />}
+                    {requiresEmailVerification && (
+                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/50 dark:bg-yellow-900/20">
+                            <div className="flex">
+                                <div className="shrink-0">
+                                    <MailIcon className="h-5 w-5 text-yellow-400 dark:text-yellow-500" />
+                                </div>
+                                <div className="ml-3 flex-1">
+                                    <h3 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
+                                        {t(
+                                            'checkout_subscription.verify_email.title',
+                                        )}
+                                    </h3>
+                                    <p className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
+                                        {t(
+                                            'checkout_subscription.verify_email.body',
+                                        )}
+                                    </p>
+                                    <Form
+                                        {...UserEmailVerificationNotificationController.store.form()}
+                                        options={{ preserveScroll: true }}
+                                        className="mt-4 flex flex-wrap items-center gap-3"
+                                    >
+                                        {({
+                                            processing,
+                                            recentlySuccessful,
+                                        }) => (
+                                            <>
+                                                <Button
+                                                    type="submit"
+                                                    variant="secondary"
+                                                    disabled={processing}
+                                                >
+                                                    {t(
+                                                        'checkout_subscription.verify_email.resend',
+                                                    )}
+                                                </Button>
+                                                {recentlySuccessful && (
+                                                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                                                        {t(
+                                                            'checkout_subscription.verify_email.sent',
+                                                        )}
+                                                    </p>
+                                                )}
+                                            </>
+                                        )}
+                                    </Form>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     {!paymentPending && photoAllowance?.mode === 'premium' && (
                         <div role="status" className="rounded-lg border p-4">
                             Your plan is active.{' '}
