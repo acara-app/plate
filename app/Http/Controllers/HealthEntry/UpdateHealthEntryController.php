@@ -7,7 +7,9 @@ namespace App\Http\Controllers\HealthEntry;
 use App\Actions\DispatchAggregateUserUtcDatesAction;
 use App\Actions\UpdateHealthSampleAction;
 use App\Data\HealthLogData;
+use App\Data\ReviewedMealData;
 use App\Enums\GlucoseUnit;
+use App\Enums\HealthEntryType;
 use App\Http\Requests\HealthEntryRequest;
 use App\Models\HealthSyncSample;
 use App\Models\User;
@@ -37,10 +39,10 @@ final readonly class UpdateHealthEntryController
             $data['glucose_value'] = GlucoseUnit::mmolLToMgDl($glucoseValue);
         }
 
-        $healthData = HealthLogData::fromParsedArray(array_merge(
-            $data,
-            ['is_health_data' => true],
-        ));
+        $metadata = $healthSyncSample->metadata['snap_to_track'] ?? null;
+        $healthData = $data['log_type'] === HealthEntryType::Food->value && isset($data['items'])
+            ? ReviewedMealData::fromValidated($data)->toHealthLogDataWithMetadata(is_array($metadata) ? $metadata : [])
+            : HealthLogData::fromParsedArray(array_merge($data, ['is_health_data' => true]));
 
         $updatedSample = $this->updateHealthSample->handle($healthSyncSample, $healthData);
 

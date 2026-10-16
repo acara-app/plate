@@ -59,7 +59,24 @@ export interface HealthEntry {
     exercise_type: string | null;
     exercise_duration_minutes: number | null;
     source: string | null;
+    food_analysis?: FoodBreakdown | null;
     created_at: string;
+}
+
+export interface FoodBreakdownItem {
+    name: string;
+    portion: string | null;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    provenance: string;
+}
+
+export interface FoodBreakdown {
+    items: FoodBreakdownItem[];
+    confidence: number | null;
+    source: string | null;
 }
 
 export interface ReadingType {

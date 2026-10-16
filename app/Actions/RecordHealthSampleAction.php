@@ -22,7 +22,7 @@ final readonly class RecordHealthSampleAction
             throw_if($samples === [], InvalidArgumentException::class, 'No health samples to record.');
 
             $groupId = count($samples) > 1 ? (string) Str::uuid() : null;
-            $measuredAt = $data->measuredAt ?? now();
+            $measuredAt = ($data->measuredAt ?? now())->toImmutable()->utc();
             $primary = null;
 
             foreach ($samples as $sample) {

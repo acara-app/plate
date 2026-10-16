@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Data\MealBreakdownData;
 use App\Enums\HealthSyncType;
 use App\Models\HealthSyncSample;
 use Illuminate\Support\Collection;
@@ -44,6 +45,7 @@ final readonly class HealthEntryAssembler
                 'exercise_type' => null,
                 'exercise_duration_minutes' => null,
                 'source' => $primary->entry_source?->value,
+                'food_analysis' => null,
                 'created_at' => $primary->created_at->toIso8601String(),
             ];
 
@@ -51,6 +53,10 @@ final readonly class HealthEntryAssembler
                 /** @var HealthSyncSample $sample */
                 if ($sample->notes !== null) {
                     $entry['notes'] = $sample->notes;
+                }
+
+                if (is_array($sample->metadata['snap_to_track'] ?? null)) {
+                    $entry['food_analysis'] = MealBreakdownData::fromMetadata($sample->metadata['snap_to_track'])->toArray();
                 }
 
                 $this->mapSampleToEntry($sample, $entry);

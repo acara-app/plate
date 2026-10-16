@@ -11,3 +11,9 @@ export function formatLocalDatetime(date: Date): string {
 
     return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
+
+export function localDatetimeToIso(value: string): string {
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime()) ? value : date.toISOString();
+}

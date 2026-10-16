@@ -2,6 +2,9 @@ import { Camera, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import PhotoPlanLimitsDetails, {
+    type PhotoPlanLimits,
+} from './photo-plan-limits';
 
 export interface PhotoPlan {
     id: number;
@@ -9,6 +12,7 @@ export interface PhotoPlan {
     description: string;
     features: string[];
     formatted_price: string;
+    photo_limits?: PhotoPlanLimits | null;
 }
 
 interface PhotoPlanBandProps {
@@ -60,6 +64,7 @@ export function PhotoPlanBand({
                                 </li>
                             ))}
                         </ul>
+                        <PhotoPlanLimitsDetails limits={plan.photo_limits} />
                         <p className="text-xs text-muted-foreground">
                             {t('checkout_subscription.photo_plan.separate')}
                         </p>
