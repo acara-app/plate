@@ -454,7 +454,7 @@ return [
             'heading' => "You've hit this hour's scan limit.",
             'body' => '{{cap}} scans an hour on the {{tier}} plan · you can scan again in about {{minutes}} minutes.',
             'upgrade' => 'Continue with {{name}} — {{price}}/month',
-            'upgrade_hint' => '{{scans}} premium scans a month. Renews monthly, cancel anytime.',
+            'upgrade_hint' => 'Higher daily and weekly limits. Renews monthly, cancel anytime.',
             'see_plans' => 'See plans',
         ],
         'credit' => [
@@ -713,6 +713,7 @@ return [
             'payment_pending' => 'Payment pending — your access will activate momentarily.',
             'labels' => [
                 'free' => 'Free',
+                'starter' => 'Starter',
                 'snap' => 'Snap Pro',
                 'basic' => 'Supporter',
                 'plus' => 'Pro',
@@ -736,6 +737,11 @@ return [
             'cap_description' => '{{current}} of {{total}} credits used. Resets in {{time}}.',
             'upgrade_to' => 'Upgrade to {{tier}}',
             'plans' => [
+                'snap' => [
+                    'name' => 'Snap Pro',
+                    'price' => '$9/mo',
+                    'pitch' => 'Higher daily and weekly limits for people who track every meal.',
+                ],
                 'basic' => [
                     'name' => 'Supporter',
                     'price' => '$9/mo',

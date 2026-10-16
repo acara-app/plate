@@ -70,9 +70,7 @@ export function BurstLimitNotice({ limit }: BurstLimitNoticeProps) {
                             </Link>
                         </Button>
                         <p className="text-xs text-muted-foreground">
-                            {t('snap_to_track.burst.upgrade_hint', {
-                                scans: offer.scans,
-                            })}
+                            {t('snap_to_track.burst.upgrade_hint')}
                         </p>
                     </>
                 ) : (

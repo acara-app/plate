@@ -19,6 +19,10 @@ function defaultTargetTier(
         return null;
     }
 
+    if (currentTier === 'starter') {
+        return 'snap';
+    }
+
     return currentTier === 'basic' ? 'plus' : 'basic';
 }
 
@@ -68,9 +72,8 @@ export function UsageLimitNotice({
                 <p className="text-xs text-muted-foreground">{body}</p>
                 {trigger.limitType === 'monthly' && (
                     <p className="text-xs text-muted-foreground">
-                        Photo scans use a separate allowance. Your other AI
-                        allowance renews automatically; upgrading the photo plan
-                        does not increase it.
+                        Upgrade for higher daily and weekly limits across every
+                        feature.
                     </p>
                 )}
                 {targetTier && (

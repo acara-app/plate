@@ -13,7 +13,7 @@ it('exposes paywall plan copy for both paid tiers', function (string $tier): voi
     expect(Lang::has(sprintf('common.billing.paywall.plans.%s.name', $tier)))->toBeTrue()
         ->and(Lang::has(sprintf('common.billing.paywall.plans.%s.price', $tier)))->toBeTrue()
         ->and(Lang::has(sprintf('common.billing.paywall.plans.%s.pitch', $tier)))->toBeTrue();
-})->with(['basic', 'plus']);
+})->with(['snap', 'basic', 'plus']);
 
 it('exposes cap-trigger paywall headings and the upgrade-to copy', function (): void {
     expect(Lang::has('common.billing.paywall.cap_title'))->toBeTrue()
@@ -30,7 +30,7 @@ it('exposes pro-model upsell copy for the meal planner banner', function (): voi
 it('exposes a label for every subscription tier', function (string $tier): void {
     expect(Lang::has('common.billing.tier.labels.'.$tier))->toBeTrue()
         ->and(__('common.billing.tier.labels.'.$tier))->not->toBeEmpty();
-})->with(['free', 'basic', 'plus']);
+})->with(['free', 'starter', 'snap', 'basic', 'plus']);
 
 it('exposes a usage-window label for every limit type', function (string $window): void {
     expect(Lang::has('common.billing.usage.'.$window))->toBeTrue()
@@ -39,15 +39,12 @@ it('exposes a usage-window label for every limit type', function (string $window
 
 it('aligns billing.tier.labels with the canonical SubscriptionTier label', function (SubscriptionTier $tier): void {
     expect(__('common.billing.tier.labels.'.$tier->value))->toBe($tier->label());
-})->with([
-    SubscriptionTier::Free,
-    SubscriptionTier::Basic,
-    SubscriptionTier::Plus,
-]);
+})->with(SubscriptionTier::cases());
 
 it('aligns billing.paywall.plans.X.name with the canonical SubscriptionTier label', function (SubscriptionTier $tier): void {
     expect(__('common.billing.paywall.plans.'.$tier->value.'.name'))->toBe($tier->label());
 })->with([
+    SubscriptionTier::Snap,
     SubscriptionTier::Basic,
     SubscriptionTier::Plus,
 ]);

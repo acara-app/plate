@@ -44,8 +44,8 @@ export function CreditWarningBanner({
                 </p>
                 {warning.limit_type === 'monthly' && (
                     <p className="text-xs">
-                        Photo scans have their own allowance. Upgrading the
-                        photo plan does not increase this budget.
+                        Upgrade for higher daily and weekly limits across every
+                        feature.
                     </p>
                 )}
                 {onUpgradeClick &&

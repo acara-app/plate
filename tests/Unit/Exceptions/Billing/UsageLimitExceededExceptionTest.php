@@ -87,10 +87,10 @@ it('describes the weekly window when the weekly limit is exceeded', function ():
         ->toContain(StaticUrl::checkoutUrl());
 });
 
-it('omits the upgrade link for the top tier', function (): void {
+it('omits the upgrade link for the top tier', function (SubscriptionTier $tier): void {
     $exception = new UsageLimitExceededException(
         limitType: 'rolling',
-        tier: SubscriptionTier::Plus,
+        tier: $tier,
         currentCredits: 1_100,
         limitCredits: 1_000,
         resetsAt: now()->addHours(3),
@@ -98,6 +98,6 @@ it('omits the upgrade link for the top tier', function (): void {
 
     expect($exception->userMessage())
         ->toContain('reached your daily AI credit limit')
-        ->toContain('Pro plan')
+        ->toContain($tier->label().' plan')
         ->not->toContain(StaticUrl::checkoutUrl());
-});
+})->with([SubscriptionTier::Snap, SubscriptionTier::Plus]);
