@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'get_user_profile' => 'Таны профайлыг харж байна',
+    'get_subscription_status' => 'Таны төлөвлөгөөг шалгаж байна',
     'log_health_entry' => 'Эрүүл мэндийн бүртгэл хийж байна',
     'enrich_attribute_metadata' => 'Мэдээллийг цэгцэлж байна',
     'update_user_profile_attributes' => 'Профайлыг шинэчилж байна',
