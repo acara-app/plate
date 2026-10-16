@@ -10,6 +10,10 @@ use Laravel\Cashier\Subscription;
 
 covers(CashierSubscriptionController::class);
 
+beforeEach(function (): void {
+    offerAllSubscriptions();
+});
+
 it('creates monthly subscription checkout successfully', function (): void {
     $user = User::factory()->create();
     $product = SubscriptionProduct::factory()->create([

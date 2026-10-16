@@ -7,6 +7,7 @@ use App\Models\SubscriptionProduct;
 use App\Models\User;
 
 it('preserves the chosen offer through account creation without starting payment', function (bool $authenticated): void {
+    offerAllSubscriptions();
     $product = SubscriptionProduct::factory()->create(['price' => 9, 'stripe_price_id' => 'price_test']);
     if ($authenticated) {
         $this->actingAs(User::factory()->create());
