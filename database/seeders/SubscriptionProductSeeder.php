@@ -59,6 +59,7 @@ final class SubscriptionProductSeeder extends Seeder
                 'features' => [
                     '100 premium photo scans per billing month',
                     'Tested premium nutrition model',
+                    'Advanced AI analysis for mixed dishes and complex meals',
                     'Save scans to your food log',
                     'Cancel anytime',
                     'Scans reset monthly; no rollover or overage charges',
