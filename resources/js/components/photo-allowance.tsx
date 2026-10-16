@@ -72,8 +72,8 @@ export function PhotoAllowanceCard({
                 {showUpgrade && allowance.can_upgrade && offer && (
                     <>
                         <p>
-                            {offer.scans} premium scans per billing month. No
-                            rollover or overage charges.
+                            Track meals from photos and save them to your food
+                            log.
                         </p>
                         <Button asChild>
                             <Link

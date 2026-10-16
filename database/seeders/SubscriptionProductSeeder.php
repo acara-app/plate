@@ -33,6 +33,27 @@ final class SubscriptionProductSeeder extends Seeder
                 'coming_soon' => false,
             ],
             [
+                'name' => 'Starter',
+                'description' => 'Make food tracking a simple daily habit.',
+                'features' => [
+                    'Food photo scans for everyday tracking',
+                    'Estimate calories, protein, carbs, and fat',
+                    'Save scanned meals to your food log',
+                    'Track your meals in one place',
+                    'Cancel anytime',
+                ],
+                'price' => 2.99,
+                'yearly_price' => null,
+                'stripe_price_id' => null,
+                'stripe_lookup_key' => 'acara-plate-starter-monthly-v1',
+                'yearly_stripe_price_id' => null,
+                'yearly_stripe_lookup_key' => null,
+                'billing_interval' => 'monthly',
+                'product_group' => 'subscription',
+                'popular' => true,
+                'coming_soon' => false,
+            ],
+            [
                 'name' => 'Snap Pro',
                 'description' => 'More photo scans with our tested premium nutrition model.',
                 'features' => [

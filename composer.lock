@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:acara-app/acara-core.git",
-                "reference": "ed919697996b9d11de01813163ea1ce0239b7005"
+                "reference": "243db55d5899abac59e9e55e0afe905dcadd37cc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/acara-app/acara-core/zipball/ed919697996b9d11de01813163ea1ce0239b7005",
-                "reference": "ed919697996b9d11de01813163ea1ce0239b7005",
+                "url": "https://api.github.com/repos/acara-app/acara-core/zipball/243db55d5899abac59e9e55e0afe905dcadd37cc",
+                "reference": "243db55d5899abac59e9e55e0afe905dcadd37cc",
                 "shasum": ""
             },
             "require": {

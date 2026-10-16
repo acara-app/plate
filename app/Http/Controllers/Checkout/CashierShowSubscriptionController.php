@@ -27,7 +27,7 @@ final readonly class CashierShowSubscriptionController
     {
         $user = $request->user();
 
-        $products = SubscriptionProduct::all();
+        $products = SubscriptionProduct::query()->orderBy('price')->get();
 
         /** @var Subscription|null $currentSubscription */
         /** @phpstan-ignore-next-line argument.type */
@@ -71,7 +71,7 @@ final readonly class CashierShowSubscriptionController
         $offers = resolve(OffersSubscriptions::class);
         $availableProducts = $products->filter($offers->available(...))->map($offers->present(...))->values();
 
-        $isPhotoPlan = fn (SubscriptionProduct $product): bool => SubscriptionTier::fromProductName($product->name) === SubscriptionTier::Snap;
+        $isPhotoPlan = fn (SubscriptionProduct $product): bool => in_array(SubscriptionTier::fromProductName($product->name), [SubscriptionTier::Starter, SubscriptionTier::Snap], true);
         $otherProducts = $availableProducts->reject($isPhotoPlan)->values();
         $photoPlan = null;
 
