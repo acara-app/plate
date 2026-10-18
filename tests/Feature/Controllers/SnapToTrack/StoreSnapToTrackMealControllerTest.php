@@ -27,7 +27,7 @@ function reviewedMealPayload(array $overrides = []): array
 {
     return [
         'items' => [
-            ['name' => 'Grilled chicken', 'portion' => '100g', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'provenance' => 'model'],
+            ['name' => 'Grilled chicken', 'portion' => '100g', 'grams' => 100, 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'provenance' => 'model'],
             ['name' => 'Steamed rice', 'calories' => 210, 'protein' => 4, 'carbs' => 45, 'fat' => 0.5, 'provenance' => 'reference'],
         ],
         'measured_at' => now()->subHour()->toDateTimeString(),
@@ -61,6 +61,8 @@ it('saves the reviewed meal and redirects to the module confirmation', function 
     expect($samples)->toHaveCount(4)
         ->and($samples->firstWhere('type_identifier', 'dietaryEnergy')->value)->toBe(375.0)
         ->and($samples->first()->metadata['snap_to_track']['items'])->toHaveCount(2)
+        ->and($samples->first()->metadata['snap_to_track']['items'][0]['grams'])->toEqual(100)
+        ->and($samples->first()->metadata['snap_to_track']['items'][1]['grams'])->toBeNull()
         ->and($draft->refresh()->isConsumed())->toBeTrue();
 });
 
@@ -117,6 +119,8 @@ it('rejects adversarial payloads', function (array $overrides, string $errorKey)
     'too many items' => [['items' => array_fill(0, 31, ['name' => 'Bite', 'calories' => 10])], 'items'],
     'missing item name' => [['items' => [['calories' => 100]]], 'items.0.name'],
     'unknown provenance' => [['items' => [['name' => 'Soup', 'provenance' => 'hacked']]], 'items.0.provenance'],
+    'negative weight' => [['items' => [['name' => 'Soup', 'grams' => -1]]], 'items.0.grams'],
+    'excessive weight' => [['items' => [['name' => 'Soup', 'grams' => 2001]]], 'items.0.grams'],
     'missing timestamp' => [['measured_at' => null], 'measured_at'],
     'overlong notes' => [['notes' => str_repeat('a', 501)], 'notes'],
 ]);

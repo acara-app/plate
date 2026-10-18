@@ -2,10 +2,10 @@ import {
     PhotoAllowanceCard,
     type PhotoAllowance,
 } from '@/components/photo-allowance';
-import EstimateSnapToTrackItemController from '@/actions/App/Http/Controllers/SnapToTrack/EstimateSnapToTrackItemController';
 import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackController';
 import StoreSnapToTrackMealController from '@/actions/App/Http/Controllers/SnapToTrack/StoreSnapToTrackMealController';
 import InputError from '@/components/input-error';
+import { RenamedItemPrompt } from '@/components/snap-to-track/renamed-item-prompt';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -23,12 +23,15 @@ import {
     formatLocalDatetime,
     localDatetimeToIso,
 } from '@/lib/format-local-datetime';
+import {
+    needsNutritionUpdate,
+    useFoodItemEstimate,
+} from '@/hooks/use-food-item-estimate';
 import { type BreadcrumbItem } from '@/types';
-import { Form, Head, Link, useHttp } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 type AnalysisItem = {
     name: string;
@@ -76,20 +79,6 @@ type ReviewItem = {
     estimateFailed?: boolean;
 };
 
-type EstimateRequest = {
-    name: string;
-    grams: number | null;
-};
-
-type EstimateResponse = {
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-    grams: number;
-    portion: string;
-};
-
 type MacroField = 'calories' | 'protein' | 'carbs' | 'fat';
 
 interface SnapToTrackReviewProps {
@@ -106,14 +95,6 @@ const numericValue = (value: string): number => {
 
     return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
 };
-
-const normalizedName = (value: string): string => value.trim().toLowerCase();
-
-const needsNutritionUpdate = (item: ReviewItem): boolean =>
-    item.originalName !== undefined &&
-    item.name.trim() !== '' &&
-    normalizedName(item.name) !== normalizedName(item.originalName) &&
-    normalizedName(item.name) !== normalizedName(item.estimatedFor ?? '');
 
 const emptyItem = (): ReviewItem => ({
     name: '',
@@ -155,11 +136,7 @@ export default function SnapToTrackReview({
         })),
     );
 
-    const estimate = useHttp<EstimateRequest, EstimateResponse>(
-        EstimateSnapToTrackItemController(),
-        { name: '', grams: null },
-    );
-    const [estimatingIndex, setEstimatingIndex] = useState<number | null>(null);
+    const { estimatingIndex, estimate } = useFoodItemEstimate();
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -235,48 +212,31 @@ export default function SnapToTrackReview({
 
         const name = item.name.trim();
 
-        setEstimatingIndex(index);
-        estimate.transform(() => ({
-            name,
-            grams: item.grams ?? null,
-        }));
-        estimate
-            .submit({
-                onSuccess: (response) => {
-                    setItems((current) =>
-                        current.map((row, rowIndex) =>
-                            rowIndex === index && row.name.trim() === name
-                                ? {
-                                      ...row,
-                                      portion: response.portion,
-                                      calories: String(response.calories),
-                                      protein: String(response.protein),
-                                      carbs: String(response.carbs),
-                                      fat: String(response.fat),
-                                      grams: response.grams,
-                                      provenance: 'user',
-                                      estimatedFor: name,
-                                      estimateFailed: false,
-                                      fatOptions: undefined,
-                                      fatChoice: undefined,
-                                  }
-                                : row,
-                        ),
-                    );
-                },
-                onHttpException: (response) => {
-                    if (response.status === 402) {
-                        toast.error(t('snap_to_track.review.rename.limit'));
-                    } else {
-                        markEstimateFailed(index);
-                    }
-
-                    return false;
-                },
-                onNetworkError: () => markEstimateFailed(index),
-                onFinish: () => setEstimatingIndex(null),
-            })
-            .catch(() => undefined);
+        estimate(index, name, item.grams ?? null, {
+            onSuccess: (response) => {
+                setItems((current) =>
+                    current.map((row, rowIndex) =>
+                        rowIndex === index && row.name.trim() === name
+                            ? {
+                                  ...row,
+                                  portion: response.portion,
+                                  calories: String(response.calories),
+                                  protein: String(response.protein),
+                                  carbs: String(response.carbs),
+                                  fat: String(response.fat),
+                                  grams: response.grams,
+                                  provenance: 'user',
+                                  estimatedFor: name,
+                                  estimateFailed: false,
+                                  fatOptions: undefined,
+                                  fatChoice: undefined,
+                              }
+                            : row,
+                    ),
+                );
+            },
+            onFailed: () => markEstimateFailed(index),
+        });
     };
 
     const removeItem = (index: number) => {
@@ -381,6 +341,11 @@ export default function SnapToTrackReview({
                                                 name={`items[${index}][provenance]`}
                                                 value={item.provenance}
                                             />
+                                            <input
+                                                type="hidden"
+                                                name={`items[${index}][grams]`}
+                                                value={item.grams ?? ''}
+                                            />
                                             <div className="flex items-end gap-2">
                                                 <div className="flex-1">
                                                     <Label
@@ -421,52 +386,31 @@ export default function SnapToTrackReview({
                                                     <Trash2 className="size-4" />
                                                 </Button>
                                             </div>
-                                            {needsNutritionUpdate(item) && (
-                                                <div className="flex flex-col gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm dark:border-amber-900/50 dark:bg-amber-900/20">
-                                                    <p className="text-amber-800 dark:text-amber-200">
-                                                        {t(
-                                                            'snap_to_track.review.rename.still_for',
-                                                            {
-                                                                name: item.originalName,
-                                                            },
-                                                        )}
-                                                    </p>
-                                                    <div>
-                                                        <Button
-                                                            type="button"
-                                                            variant="outline"
-                                                            size="sm"
-                                                            disabled={
-                                                                estimatingIndex !==
-                                                                null
-                                                            }
-                                                            onClick={() =>
-                                                                updateNutrition(
-                                                                    index,
-                                                                )
-                                                            }
-                                                        >
-                                                            {estimatingIndex ===
-                                                            index
-                                                                ? t(
-                                                                      'snap_to_track.review.rename.updating',
-                                                                  )
-                                                                : t(
-                                                                      'snap_to_track.review.rename.update',
-                                                                      {
-                                                                          name: item.name.trim(),
-                                                                      },
-                                                                  )}
-                                                        </Button>
-                                                    </div>
-                                                    {item.estimateFailed && (
-                                                        <p className="text-xs text-amber-800 dark:text-amber-200">
-                                                            {t(
-                                                                'snap_to_track.review.rename.failed',
-                                                            )}
-                                                        </p>
-                                                    )}
-                                                </div>
+                                            {needsNutritionUpdate(
+                                                item.name,
+                                                item.originalName,
+                                                item.estimatedFor,
+                                            ) && (
+                                                <RenamedItemPrompt
+                                                    originalName={
+                                                        item.originalName ?? ''
+                                                    }
+                                                    name={item.name}
+                                                    estimating={
+                                                        estimatingIndex ===
+                                                        index
+                                                    }
+                                                    disabled={
+                                                        estimatingIndex !== null
+                                                    }
+                                                    failed={
+                                                        item.estimateFailed ===
+                                                        true
+                                                    }
+                                                    onUpdate={() =>
+                                                        updateNutrition(index)
+                                                    }
+                                                />
                                             )}
                                             {item.provenance ===
                                                 'reference' && (

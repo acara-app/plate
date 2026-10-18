@@ -487,6 +487,7 @@ return [
                 'updating' => 'Updating…',
                 'failed' => 'Couldn\'t update the nutrition. Please adjust the numbers.',
                 'limit' => 'You\'ve reached your AI credit limit. Please adjust the numbers by hand for now.',
+                'typical_portion' => 'Estimated for a typical portion. Adjust the numbers if your amount was different.',
             ],
             'added_fat' => [
                 'label' => 'How much was used?',
