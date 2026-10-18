@@ -133,6 +133,9 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
                 ->name('analyze');
             Route::get('review/{draft}', Web\SnapToTrack\ShowSnapToTrackReviewController::class)->name('review');
             Route::post('review/{draft}', Web\SnapToTrack\StoreSnapToTrackMealController::class)->name('review.store');
+            Route::post('estimate-item', Web\SnapToTrack\EstimateSnapToTrackItemController::class)
+                ->middleware('throttle:20,1')
+                ->name('estimate-item');
         });
 });
 

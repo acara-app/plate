@@ -161,6 +161,10 @@ return [
             'standard' => env('AI_STANDARD_GLUCOSE_MODEL', 'gpt-6-sol'),
             'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
+        App\Ai\Agents\FoodItemEstimatorAgent::class => [
+            'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
+            'paid' => env('AI_PAID_TASK_MODEL', 'gemini-3.8-flash'),
+        ],
         App\Ai\Agents\FoodPhotoAnalyzerAgent::class => [
             'standard' => env('AI_STANDARD_PHOTO_MODEL', 'gemini-3.6-flash'),
             'paid' => env('AI_PAID_PHOTO_MODEL', 'gemini-3.8-flash'),

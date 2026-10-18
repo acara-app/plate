@@ -13,6 +13,7 @@ use App\Ai\Agents\ConversationSummarizerAgent;
 use App\Ai\Agents\ConversationTitleGeneratorAgent;
 use App\Ai\Agents\EnrichAttributeMetadataAgent;
 use App\Ai\Agents\FitnessSpecialist;
+use App\Ai\Agents\FoodItemEstimatorAgent;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Ai\Agents\GlucoseSpikeSpecialist;
 use App\Ai\Agents\GroceryListAgent;
@@ -83,6 +84,7 @@ it('uses the catalog for every concrete agent including SDK delegated calls', fu
     MealPlanAgent::class,
     SingleMealAgent::class,
     SpikePredictorAgent::class,
+    FoodItemEstimatorAgent::class,
     FoodPhotoAnalyzerAgent::class,
     ConversationTitleGeneratorAgent::class,
     ConversationSummarizerAgent::class,
