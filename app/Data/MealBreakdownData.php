@@ -19,7 +19,15 @@ final class MealBreakdownData extends Data
     public static function fromMetadata(array $metadata): self
     {
         return new self(
-            items: ReviewedMealData::normalizeItems($metadata['items'] ?? null),
+            items: array_map(
+                fn (array $item): array => [
+                    ...$item,
+                    'grams' => is_numeric($item['grams'] ?? null)
+                        ? (float) $item['grams']
+                        : ReviewedMealData::gramsFromPortion(is_string($item['portion'] ?? null) ? $item['portion'] : null),
+                ],
+                ReviewedMealData::normalizeItems($metadata['items'] ?? null),
+            ),
             confidence: is_int($metadata['confidence'] ?? null) ? $metadata['confidence'] : null,
             source: is_string($metadata['source'] ?? null) ? $metadata['source'] : null,
         );

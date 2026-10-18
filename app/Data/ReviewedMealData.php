@@ -34,6 +34,15 @@ final class ReviewedMealData extends Data
         );
     }
 
+    public static function gramsFromPortion(?string $portion): ?float
+    {
+        if ($portion === null || preg_match('/^\s*(\d+(?:[.,]\d+)?)\s*(?:g|grams?)(?![a-z])/i', $portion, $matches) !== 1) {
+            return null;
+        }
+
+        return round((float) str_replace(',', '.', $matches[1]), 1);
+    }
+
     /** @return list<array<string, mixed>> */
     public static function normalizeItems(mixed $values): array
     {
@@ -105,6 +114,7 @@ final class ReviewedMealData extends Data
         return array_map(fn (array $item): array => [
             'name' => is_string($item['name'] ?? null) ? $item['name'] : '',
             'portion' => is_string($item['portion'] ?? null) ? $item['portion'] : null,
+            'grams' => is_numeric($item['grams'] ?? null) ? round((float) $item['grams'], 1) : null,
             'calories' => is_numeric($item['calories'] ?? null) ? round((float) $item['calories'], 1) : 0.0,
             'protein' => is_numeric($item['protein'] ?? null) ? round((float) $item['protein'], 1) : 0.0,
             'carbs' => is_numeric($item['carbs'] ?? null) ? round((float) $item['carbs'], 1) : 0.0,

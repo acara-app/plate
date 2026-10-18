@@ -1,11 +1,23 @@
 import InputError from '@/components/input-error';
+import { RenamedItemPrompt } from '@/components/snap-to-track/renamed-item-prompt';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    needsNutritionUpdate,
+    useFoodItemEstimate,
+} from '@/hooks/use-food-item-estimate';
 import type { FoodBreakdown, FoodBreakdownItem } from '@/types/diabetes';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const macroFields = ['calories', 'protein', 'carbs', 'fat'] as const;
+
+type EditableFoodItem = FoodBreakdownItem & {
+    originalName: string;
+    estimatedFor?: string;
+    estimateFailed?: boolean;
+    estimatedTypical?: boolean;
+};
 
 export default function FoodBreakdownDetails({
     analysis,
@@ -56,7 +68,14 @@ export function FoodBreakdownFields({
     errors: Record<string, string>;
 }) {
     const { t } = useTranslation('common');
-    const [items, setItems] = useState(analysis.items);
+    const [items, setItems] = useState<EditableFoodItem[]>(() =>
+        analysis.items.map((item) => ({
+            ...item,
+            grams: item.grams ?? null,
+            originalName: item.name,
+        })),
+    );
+    const { estimatingIndex, estimate } = useFoodItemEstimate();
 
     const updateItem = (
         index: number,
@@ -66,10 +85,58 @@ export function FoodBreakdownFields({
         setItems((current) =>
             current.map((item, itemIndex) =>
                 itemIndex === index
-                    ? { ...item, [field]: value, provenance: 'user' }
+                    ? {
+                          ...item,
+                          [field]: value,
+                          provenance: 'user',
+                          estimateFailed: false,
+                      }
                     : item,
             ),
         );
+    };
+
+    const updateNutrition = (index: number) => {
+        const item = items[index];
+
+        if (item === undefined) {
+            return;
+        }
+
+        const name = item.name.trim();
+        const grams = item.grams ?? null;
+
+        estimate(index, name, grams, {
+            onSuccess: (response) => {
+                setItems((current) =>
+                    current.map((row, rowIndex) =>
+                        rowIndex === index && row.name.trim() === name
+                            ? {
+                                  ...row,
+                                  portion: response.portion,
+                                  calories: response.calories,
+                                  protein: response.protein,
+                                  carbs: response.carbs,
+                                  fat: response.fat,
+                                  grams: response.grams,
+                                  provenance: 'user',
+                                  estimatedFor: name,
+                                  estimateFailed: false,
+                                  estimatedTypical: grams === null,
+                              }
+                            : row,
+                    ),
+                );
+            },
+            onFailed: () =>
+                setItems((current) =>
+                    current.map((row, rowIndex) =>
+                        rowIndex === index
+                            ? { ...row, estimateFailed: true }
+                            : row,
+                    ),
+                ),
+        });
     };
 
     return (
@@ -83,6 +150,11 @@ export function FoodBreakdownFields({
                         type="hidden"
                         name={`items[${index}][provenance]`}
                         value={item.provenance}
+                    />
+                    <input
+                        type="hidden"
+                        name={`items[${index}][grams]`}
+                        value={item.grams ?? ''}
                     />
                     {(['name', 'portion', ...macroFields] as const).map(
                         (field) => {
@@ -122,6 +194,37 @@ export function FoodBreakdownFields({
                                         }
                                     />
                                     <InputError message={error} />
+                                    {field === 'name' &&
+                                        needsNutritionUpdate(
+                                            item.name,
+                                            item.originalName,
+                                            item.estimatedFor,
+                                        ) && (
+                                            <RenamedItemPrompt
+                                                originalName={item.originalName}
+                                                name={item.name}
+                                                estimating={
+                                                    estimatingIndex === index
+                                                }
+                                                disabled={
+                                                    estimatingIndex !== null
+                                                }
+                                                failed={
+                                                    item.estimateFailed === true
+                                                }
+                                                onUpdate={() =>
+                                                    updateNutrition(index)
+                                                }
+                                            />
+                                        )}
+                                    {field === 'portion' &&
+                                        item.estimatedTypical && (
+                                            <p className="text-xs text-muted-foreground">
+                                                {t(
+                                                    'snap_to_track.review.rename.typical_portion',
+                                                )}
+                                            </p>
+                                        )}
                                 </div>
                             );
                         },

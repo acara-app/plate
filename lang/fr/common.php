@@ -487,6 +487,7 @@ return [
                 'updating' => 'Mise à jour…',
                 'failed' => 'Impossible de mettre à jour. Veuillez ajuster les valeurs.',
                 'limit' => 'Vous avez atteint votre limite de crédits IA. Ajustez les valeurs manuellement pour l’instant.',
+                'typical_portion' => 'Estimation pour une portion type. Ajustez les valeurs si votre quantité était différente.',
             ],
             'added_fat' => [
                 'label' => 'Quelle quantité ?',
