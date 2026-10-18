@@ -67,6 +67,7 @@ export interface HealthEntry {
 export interface FoodBreakdownItem {
     name: string;
     portion: string | null;
+    grams?: number | null;
     calories: number;
     protein: number;
     carbs: number;

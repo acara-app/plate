@@ -24,6 +24,7 @@ trait ValidatesReviewedMeal
             'items' => ['required', 'array', 'min:1', 'max:30'],
             'items.*.name' => ['required', 'string', 'max:100'],
             'items.*.portion' => ['nullable', 'string', 'max:100'],
+            'items.*.grams' => ['nullable', 'numeric', 'min:0', 'max:2000'],
             'items.*.calories' => ['nullable', 'numeric', 'min:0', 'max:5000'],
             'items.*.protein' => ['nullable', 'numeric', 'min:0', 'max:500'],
             'items.*.carbs' => ['nullable', 'numeric', 'min:0', 'max:1000'],

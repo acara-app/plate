@@ -100,6 +100,45 @@ it('keeps the full reviewed meal available in the logbook after editing it', fun
         ->where('logs.data.0.notes', 'Only the notes changed'));
 });
 
+it('saves a renamed item with its updated nutrition, portion and weight from the logbook', function (): void {
+    $user = User::factory()->create();
+    $token = Str::random(64);
+    AnalysisDraft::factory()->claimed($user)->create([
+        'token_hash' => AnalysisDraft::hashToken($token),
+    ]);
+    $items = [
+        ['name' => 'Black olives', 'portion' => '35 g (about 10 olives)', 'grams' => 35, 'calories' => 40, 'protein' => 0.3, 'carbs' => 2.2, 'fat' => 3.8, 'provenance' => 'model'],
+        ['name' => 'Lettuce', 'portion' => '50g', 'calories' => 8, 'protein' => 0.6, 'carbs' => 1.5, 'fat' => 0.1, 'provenance' => 'model'],
+    ];
+
+    $this->actingAs($user)->post(route('snap-to-track.review.store', ['draft' => $token]), [
+        'items' => $items,
+        'measured_at' => '2026-10-16T03:57:00Z',
+    ])->assertRedirectToRoute('snap-to-track.index');
+
+    $this->get(route('health-entries.index'))->assertInertia(fn (AssertableInertia $page) => $page
+        ->where('logs.data.0.food_analysis.items.0.grams', 35)
+        ->where('logs.data.0.food_analysis.items.1.grams', 50));
+
+    $sample = HealthSyncSample::query()->whereBelongsTo($user)->firstOrFail();
+    $items[0] = ['name' => 'Blueberries', 'portion' => '35 g (about ¼ cup)', 'grams' => 35, 'calories' => 20, 'protein' => 0.3, 'carbs' => 5.1, 'fat' => 0.1, 'provenance' => 'user'];
+
+    $this->put(route('health-entries.update', $sample), [
+        'log_type' => 'food',
+        'items' => $items,
+        'measured_at' => '2026-10-16T03:57:00Z',
+    ])->assertSessionHasNoErrors()->assertRedirect();
+
+    $this->get(route('health-entries.index'))->assertInertia(fn (AssertableInertia $page) => $page
+        ->where('logs.data.0.food_analysis.items.0.name', 'Blueberries')
+        ->where('logs.data.0.food_analysis.items.0.portion', '35 g (about ¼ cup)')
+        ->where('logs.data.0.food_analysis.items.0.grams', 35)
+        ->where('logs.data.0.food_analysis.items.0.calories', 20)
+        ->where('logs.data.0.food_analysis.items.0.fat', 0.1)
+        ->where('logs.data.0.food_analysis.items.1.grams', 50)
+        ->where('logs.data.0.calories', 28));
+});
+
 it('leaves a saved meal unchanged when an ingredient edit is invalid', function (array $items, string $error): void {
     $user = User::factory()->create();
     $sample = HealthSyncSample::factory()->carbohydrates()->fromWeb()->for($user)->create([
@@ -123,5 +162,6 @@ it('leaves a saved meal unchanged when an ingredient edit is invalid', function 
 })->with([
     'empty ingredients' => [[], 'items'],
     'negative calories' => [[['name' => 'Banana', 'calories' => -1]], 'items.0.calories'],
+    'excessive weight' => [[['name' => 'Banana', 'grams' => 2001]], 'items.0.grams'],
     'combined calorie cap' => [[['name' => 'A', 'calories' => 3000], ['name' => 'B', 'calories' => 3000]], 'items'],
 ]);
