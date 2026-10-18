@@ -480,6 +480,13 @@ return [
             'carbs' => 'Carbs (g)',
             'fat' => 'Fat (g)',
             'reference_badge' => 'Matched against USDA reference data',
+            'rename' => [
+                'still_for' => 'Nutrition is still for “{{name}}”.',
+                'update' => 'Update nutrition for “{{name}}”',
+                'updating' => 'Updating…',
+                'failed' => 'Couldn\'t update the nutrition. Please adjust the numbers.',
+                'limit' => 'You\'ve reached your AI credit limit. Please adjust the numbers by hand for now.',
+            ],
             'added_fat' => [
                 'label' => 'How much was used?',
                 'none' => 'None',

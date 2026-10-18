@@ -480,6 +480,13 @@ return [
             'carbs' => 'Glucides (g)',
             'fat' => 'Lipides (g)',
             'reference_badge' => 'Comparé aux données de référence USDA',
+            'rename' => [
+                'still_for' => 'Les valeurs nutritionnelles correspondent encore à « {{name}} ».',
+                'update' => 'Mettre à jour pour « {{name}} »',
+                'updating' => 'Mise à jour…',
+                'failed' => 'Impossible de mettre à jour. Veuillez ajuster les valeurs.',
+                'limit' => 'Vous avez atteint votre limite de crédits IA. Ajustez les valeurs manuellement pour l’instant.',
+            ],
             'added_fat' => [
                 'label' => 'Quelle quantité ?',
                 'none' => 'Aucune',

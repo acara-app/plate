@@ -2,6 +2,7 @@ import {
     PhotoAllowanceCard,
     type PhotoAllowance,
 } from '@/components/photo-allowance';
+import EstimateSnapToTrackItemController from '@/actions/App/Http/Controllers/SnapToTrack/EstimateSnapToTrackItemController';
 import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackController';
 import StoreSnapToTrackMealController from '@/actions/App/Http/Controllers/SnapToTrack/StoreSnapToTrackMealController';
 import InputError from '@/components/input-error';
@@ -23,10 +24,11 @@ import {
     localDatetimeToIso,
 } from '@/lib/format-local-datetime';
 import { type BreadcrumbItem } from '@/types';
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head, Link, useHttp } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 type AnalysisItem = {
     name: string;
@@ -35,6 +37,7 @@ type AnalysisItem = {
     carbs: number;
     fat: number;
     portion: string;
+    grams?: number | null;
     provenance: string;
 };
 
@@ -67,6 +70,24 @@ type ReviewItem = {
     provenance: string;
     fatOptions?: AddedFatOption[];
     fatChoice?: string;
+    grams?: number | null;
+    originalName?: string;
+    estimatedFor?: string;
+    estimateFailed?: boolean;
+};
+
+type EstimateRequest = {
+    name: string;
+    grams: number | null;
+    portion: string;
+};
+
+type EstimateResponse = {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    grams: number;
 };
 
 type MacroField = 'calories' | 'protein' | 'carbs' | 'fat';
@@ -85,6 +106,14 @@ const numericValue = (value: string): number => {
 
     return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
 };
+
+const normalizedName = (value: string): string => value.trim().toLowerCase();
+
+const needsNutritionUpdate = (item: ReviewItem): boolean =>
+    item.originalName !== undefined &&
+    item.name.trim() !== '' &&
+    normalizedName(item.name) !== normalizedName(item.originalName) &&
+    normalizedName(item.name) !== normalizedName(item.estimatedFor ?? '');
 
 const emptyItem = (): ReviewItem => ({
     name: '',
@@ -121,8 +150,16 @@ export default function SnapToTrackReview({
             fatChoice: addedFatOptions?.[index]?.find(
                 (option) => option.selected,
             )?.key,
+            grams: item.grams ?? null,
+            originalName: item.name,
         })),
     );
+
+    const estimate = useHttp<EstimateRequest, EstimateResponse>(
+        EstimateSnapToTrackItemController(),
+        { name: '', grams: null, portion: '' },
+    );
+    const [estimatingIndex, setEstimatingIndex] = useState<number | null>(null);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -149,6 +186,7 @@ export default function SnapToTrackReview({
                           provenance: 'user',
                           fatChoice:
                               field === 'name' ? item.fatChoice : undefined,
+                          estimateFailed: false,
                       }
                     : item,
             ),
@@ -178,6 +216,67 @@ export default function SnapToTrackReview({
                 };
             }),
         );
+    };
+
+    const markEstimateFailed = (index: number) => {
+        setItems((current) =>
+            current.map((item, itemIndex) =>
+                itemIndex === index ? { ...item, estimateFailed: true } : item,
+            ),
+        );
+    };
+
+    const updateNutrition = (index: number) => {
+        const item = items[index];
+
+        if (item === undefined) {
+            return;
+        }
+
+        const name = item.name.trim();
+
+        setEstimatingIndex(index);
+        estimate.transform(() => ({
+            name,
+            grams: item.grams ?? null,
+            portion: item.portion,
+        }));
+        estimate
+            .submit({
+                onSuccess: (response) => {
+                    setItems((current) =>
+                        current.map((row, rowIndex) =>
+                            rowIndex === index && row.name.trim() === name
+                                ? {
+                                      ...row,
+                                      calories: String(response.calories),
+                                      protein: String(response.protein),
+                                      carbs: String(response.carbs),
+                                      fat: String(response.fat),
+                                      grams: response.grams,
+                                      provenance: 'user',
+                                      estimatedFor: name,
+                                      estimateFailed: false,
+                                      fatOptions: undefined,
+                                      fatChoice: undefined,
+                                  }
+                                : row,
+                        ),
+                    );
+                },
+                onHttpException: (response) => {
+                    if (response.status === 402) {
+                        toast.error(t('snap_to_track.review.rename.limit'));
+                    } else {
+                        markEstimateFailed(index);
+                    }
+
+                    return false;
+                },
+                onNetworkError: () => markEstimateFailed(index),
+                onFinish: () => setEstimatingIndex(null),
+            })
+            .catch(() => undefined);
     };
 
     const removeItem = (index: number) => {
@@ -322,6 +421,53 @@ export default function SnapToTrackReview({
                                                     <Trash2 className="size-4" />
                                                 </Button>
                                             </div>
+                                            {needsNutritionUpdate(item) && (
+                                                <div className="flex flex-col gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm dark:border-amber-900/50 dark:bg-amber-900/20">
+                                                    <p className="text-amber-800 dark:text-amber-200">
+                                                        {t(
+                                                            'snap_to_track.review.rename.still_for',
+                                                            {
+                                                                name: item.originalName,
+                                                            },
+                                                        )}
+                                                    </p>
+                                                    <div>
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            disabled={
+                                                                estimatingIndex !==
+                                                                null
+                                                            }
+                                                            onClick={() =>
+                                                                updateNutrition(
+                                                                    index,
+                                                                )
+                                                            }
+                                                        >
+                                                            {estimatingIndex ===
+                                                            index
+                                                                ? t(
+                                                                      'snap_to_track.review.rename.updating',
+                                                                  )
+                                                                : t(
+                                                                      'snap_to_track.review.rename.update',
+                                                                      {
+                                                                          name: item.name.trim(),
+                                                                      },
+                                                                  )}
+                                                        </Button>
+                                                    </div>
+                                                    {item.estimateFailed && (
+                                                        <p className="text-xs text-amber-800 dark:text-amber-200">
+                                                            {t(
+                                                                'snap_to_track.review.rename.failed',
+                                                            )}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
                                             {item.provenance ===
                                                 'reference' && (
                                                 <p className="text-xs text-muted-foreground">
