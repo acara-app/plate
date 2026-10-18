@@ -70,7 +70,7 @@ it('keeps usage-limit preflight synchronous for web chat streams', function (): 
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.396,
+        'cost' => 0.4,
     ]);
 
     $this->actingAs($user)
