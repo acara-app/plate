@@ -14,19 +14,15 @@ use Throwable;
 
 final readonly class EstimateSnapToTrackItemController
 {
-    public function __construct(
-        private EstimateFoodItemNutritionAction $estimateFoodItemNutrition,
-        #[CurrentUser()] private User $currentUser,
-    ) {}
+    public function __construct(private EstimateFoodItemNutritionAction $estimateFoodItemNutrition) {}
 
-    public function __invoke(EstimateSnapToTrackItemRequest $request): JsonResponse
+    public function __invoke(EstimateSnapToTrackItemRequest $request, #[CurrentUser()] User $user): JsonResponse
     {
         try {
             $estimate = $this->estimateFoodItemNutrition->handle(
-                $this->currentUser,
+                $user,
                 $request->foodName(),
                 $request->grams(),
-                $request->portion(),
             );
         } catch (UsageLimitExceededException $usageLimitExceededException) {
             throw $usageLimitExceededException;

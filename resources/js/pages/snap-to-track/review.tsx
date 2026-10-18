@@ -79,7 +79,6 @@ type ReviewItem = {
 type EstimateRequest = {
     name: string;
     grams: number | null;
-    portion: string;
 };
 
 type EstimateResponse = {
@@ -88,6 +87,7 @@ type EstimateResponse = {
     carbs: number;
     fat: number;
     grams: number;
+    portion: string;
 };
 
 type MacroField = 'calories' | 'protein' | 'carbs' | 'fat';
@@ -157,7 +157,7 @@ export default function SnapToTrackReview({
 
     const estimate = useHttp<EstimateRequest, EstimateResponse>(
         EstimateSnapToTrackItemController(),
-        { name: '', grams: null, portion: '' },
+        { name: '', grams: null },
     );
     const [estimatingIndex, setEstimatingIndex] = useState<number | null>(null);
 
@@ -239,7 +239,6 @@ export default function SnapToTrackReview({
         estimate.transform(() => ({
             name,
             grams: item.grams ?? null,
-            portion: item.portion,
         }));
         estimate
             .submit({
@@ -249,6 +248,7 @@ export default function SnapToTrackReview({
                             rowIndex === index && row.name.trim() === name
                                 ? {
                                       ...row,
+                                      portion: response.portion,
                                       calories: String(response.calories),
                                       protein: String(response.protein),
                                       carbs: String(response.carbs),
