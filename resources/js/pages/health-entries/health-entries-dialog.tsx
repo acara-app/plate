@@ -48,8 +48,11 @@ export default function HealthEntriesDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-                <DialogHeader>
+            <DialogContent
+                closeLabel={t('health_entries.timeline.close')}
+                className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden border-0 p-0 sm:max-w-2xl [&>button]:flex [&>button]:size-11 [&>button]:items-center [&>button]:justify-center"
+            >
+                <DialogHeader className="shrink-0 px-5 pt-6 pr-16 text-left sm:px-6 sm:pr-16">
                     <DialogTitle>
                         {mode === 'create'
                             ? t('health_entries.dialog.add_title')
@@ -62,6 +65,7 @@ export default function HealthEntriesDialog({
                     </DialogDescription>
                 </DialogHeader>
                 <HealthEntryForm
+                    key={`${mode}-${logEntry?.id ?? 'new'}`}
                     mode={mode}
                     glucoseReadingTypes={glucoseReadingTypes}
                     insulinTypes={insulinTypes}

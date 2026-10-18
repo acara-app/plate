@@ -70,8 +70,8 @@ function GlucoseFields({
             : '';
 
     return (
-        <div className="space-y-4">
-            <div className="space-y-2">
+        <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
                 <Label htmlFor="glucose_value">
                     {t('health_entries.glucose.label', { unit: glucoseUnit })}
                 </Label>
@@ -86,7 +86,7 @@ function GlucoseFields({
                 <InputError message={errors.glucose_value} />
             </div>
 
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
                 <Label>{t('health_entries.glucose.reading_context')}</Label>
                 <input
                     type="hidden"
@@ -127,9 +127,9 @@ function FoodFields({
     );
 
     return (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
             {todaysMeals.length > 0 && (
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <Label className="text-xs text-muted-foreground">
                         {t('health_entries.food.import_from_plan')}
                     </Label>
@@ -151,7 +151,7 @@ function FoodFields({
                 </div>
             )}
 
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
                 <Label htmlFor="carbs_grams">
                     {t('health_entries.food.carbs_label')}
                 </Label>
@@ -167,7 +167,7 @@ function FoodFields({
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <Label htmlFor="protein_grams">
                         {t('health_entries.food.protein_label', 'Protein (g)')}
                     </Label>
@@ -183,7 +183,7 @@ function FoodFields({
                     />
                     <InputError message={errors.protein_grams} />
                 </div>
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <Label htmlFor="fat_grams">
                         {t('health_entries.food.fat_label', 'Fat (g)')}
                     </Label>
@@ -199,7 +199,7 @@ function FoodFields({
                     />
                     <InputError message={errors.fat_grams} />
                 </div>
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <Label htmlFor="calories">
                         {t('health_entries.food.calories_label', 'Calories')}
                     </Label>
@@ -237,9 +237,9 @@ function InsulinFields({
     const [insulinType, setInsulinType] = useState(entry?.insulin_type ?? '');
 
     return (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
             {recentInsulins.length > 0 && (
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <Label className="text-xs text-muted-foreground">
                         {t('health_entries.insulin.quick_add')}
                     </Label>
@@ -263,7 +263,7 @@ function InsulinFields({
             )}
 
             <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <Label htmlFor="insulin_units">
                         {t('health_entries.insulin.units_label')}
                     </Label>
@@ -280,7 +280,7 @@ function InsulinFields({
                     />
                     <InputError message={errors.insulin_units} />
                 </div>
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <Label htmlFor="insulin_type">
                         {t('health_entries.insulin.type_label')}
                     </Label>
@@ -331,9 +331,9 @@ function MedicationFields({
     );
 
     return (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
             {recentMedications.length > 0 && (
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <Label className="text-xs text-muted-foreground">
                         {t('health_entries.medication.quick_add')}
                     </Label>
@@ -357,7 +357,7 @@ function MedicationFields({
             )}
 
             <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <Label htmlFor="medication_name">
                         {t('health_entries.medication.name_label')}
                     </Label>
@@ -373,7 +373,7 @@ function MedicationFields({
                     />
                     <InputError message={errors.medication_name} />
                 </div>
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <Label htmlFor="medication_dosage">
                         {t('health_entries.medication.dosage_label')}
                     </Label>
@@ -401,9 +401,9 @@ function VitalsFields({
     const { t } = useTranslation('common');
 
     return (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
             <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <Label htmlFor="weight">
                         {t('health_entries.vitals.weight_label')}
                     </Label>
@@ -419,7 +419,7 @@ function VitalsFields({
                     />
                     <InputError message={errors.weight} />
                 </div>
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <Label htmlFor="a1c_value">
                         {t('health_entries.vitals.a1c_label')}
                     </Label>
@@ -435,7 +435,7 @@ function VitalsFields({
                 </div>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <Label htmlFor="blood_pressure_systolic">
                         {t('health_entries.vitals.systolic_label')}
                     </Label>
@@ -450,7 +450,7 @@ function VitalsFields({
                     />
                     <InputError message={errors.blood_pressure_systolic} />
                 </div>
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <Label htmlFor="blood_pressure_diastolic">
                         {t('health_entries.vitals.diastolic_label')}
                     </Label>
@@ -478,7 +478,7 @@ function ExerciseFields({
 
     return (
         <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
                 <Label htmlFor="exercise_type">
                     {t('health_entries.exercise.type_label')}
                 </Label>
@@ -491,7 +491,7 @@ function ExerciseFields({
                 />
                 <InputError message={errors.exercise_type} />
             </div>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
                 <Label htmlFor="exercise_duration_minutes">
                     {t('health_entries.exercise.duration_label')}
                 </Label>

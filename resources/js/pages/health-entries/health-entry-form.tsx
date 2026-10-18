@@ -55,8 +55,17 @@ export default function HealthEntryForm({
         mode === 'edit' && entry ? getPrimaryType(entry) : null,
     );
 
+    const [isEstimating, setIsEstimating] = useState(false);
+    const [defaultMeasuredAt] = useState(() =>
+        formatLocalDatetime(entry ? new Date(entry.measured_at) : new Date()),
+    );
+
     if (activeType === null) {
-        return <EntryTypePicker onSelect={setActiveType} />;
+        return (
+            <div className="overflow-y-auto px-5 py-6 sm:px-6">
+                <EntryTypePicker onSelect={setActiveType} />
+            </div>
+        );
     }
 
     const formAction =
@@ -66,9 +75,6 @@ export default function HealthEntryForm({
 
     const typeConfig = getTypeConfig(activeType);
     const TypeIcon = typeConfig.icon;
-    const defaultMeasuredAt = formatLocalDatetime(
-        entry ? new Date(entry.measured_at) : new Date(),
-    );
 
     return (
         <Form
@@ -79,75 +85,77 @@ export default function HealthEntryForm({
             })}
             disableWhileProcessing
             onSuccess={onCancel}
-            className="space-y-4"
+            onBefore={() => !isEstimating}
+            className="flex min-h-0 flex-col"
         >
             {({ processing, errors }) => (
                 <>
                     <input type="hidden" name="log_type" value={activeType} />
 
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <TypeIcon
-                                className={cn('size-5', typeConfig.accent)}
-                                aria-hidden="true"
-                            />
-                            <span className="font-medium">
-                                {t(typeConfig.labelKey)}
-                            </span>
-                        </div>
-                        {mode === 'create' && (
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setActiveType(null)}
-                            >
-                                <ChevronLeft
-                                    className="mr-1 size-4"
+                    <div className="flex min-h-0 flex-col gap-6 overflow-y-auto overscroll-contain px-5 py-6 sm:px-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <TypeIcon
+                                    className={cn('size-5', typeConfig.accent)}
                                     aria-hidden="true"
                                 />
-                                {t('health_entries.picker.back')}
-                            </Button>
-                        )}
-                    </div>
-
-                    {activeType === 'food' && entry?.food_analysis ? (
-                        <FoodBreakdownFields
-                            analysis={entry.food_analysis}
-                            errors={errors}
-                        />
-                    ) : (
-                        <EntryFields
-                            type={activeType}
-                            entry={entry}
-                            errors={errors}
-                            glucoseReadingTypes={glucoseReadingTypes}
-                            insulinTypes={insulinTypes}
-                            glucoseUnit={glucoseUnit}
-                            recentMedications={recentMedications}
-                            recentInsulins={recentInsulins}
-                            todaysMeals={todaysMeals}
-                        />
-                    )}
-
-                    <div className="space-y-2">
-                        <Label htmlFor="notes">
-                            {t('health_entries.common.notes_label')}
-                        </Label>
-                        <Textarea
-                            id="notes"
-                            name="notes"
-                            placeholder={t(
-                                'health_entries.common.notes_placeholder',
+                                <span className="font-medium">
+                                    {t(typeConfig.labelKey)}
+                                </span>
+                            </div>
+                            {mode === 'create' && (
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setActiveType(null)}
+                                >
+                                    <ChevronLeft
+                                        className="mr-1 size-4"
+                                        aria-hidden="true"
+                                    />
+                                    {t('health_entries.picker.back')}
+                                </Button>
                             )}
-                            defaultValue={entry?.notes ?? ''}
-                            maxLength={500}
-                        />
-                        <InputError message={errors.notes} />
-                    </div>
+                        </div>
 
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                        <div className="space-y-2 sm:flex-1">
+                        {activeType === 'food' && entry?.food_analysis ? (
+                            <FoodBreakdownFields
+                                analysis={entry.food_analysis}
+                                errors={errors}
+                                onEstimatingChange={setIsEstimating}
+                            />
+                        ) : (
+                            <EntryFields
+                                type={activeType}
+                                entry={entry}
+                                errors={errors}
+                                glucoseReadingTypes={glucoseReadingTypes}
+                                insulinTypes={insulinTypes}
+                                glucoseUnit={glucoseUnit}
+                                recentMedications={recentMedications}
+                                recentInsulins={recentInsulins}
+                                todaysMeals={todaysMeals}
+                            />
+                        )}
+
+                        <div className="flex flex-col gap-2">
+                            <Label htmlFor="notes">
+                                {t('health_entries.common.notes_label')}
+                            </Label>
+                            <Textarea
+                                id="notes"
+                                name="notes"
+                                placeholder={t(
+                                    'health_entries.common.notes_placeholder',
+                                )}
+                                defaultValue={entry?.notes ?? ''}
+                                maxLength={500}
+                            />
+                            <InputError message={errors.notes} />
+                        </div>
+
+                        <div className="flex flex-col gap-2">
                             <Label htmlFor="measured_at">
                                 {t('health_entries.common.date_time_label')}
                             </Label>
@@ -160,20 +168,25 @@ export default function HealthEntryForm({
                             />
                             <InputError message={errors.measured_at} />
                         </div>
-                        <div className="flex justify-end gap-2">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={onCancel}
-                            >
-                                {t('health_entries.common.cancel')}
-                            </Button>
-                            <Button type="submit" disabled={processing}>
-                                {mode === 'edit'
-                                    ? t('health_entries.common.update')
-                                    : t('health_entries.common.create')}
-                            </Button>
-                        </div>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap justify-end gap-2 bg-muted/30 px-5 py-4 sm:px-6">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={onCancel}
+                        >
+                            {t('health_entries.common.cancel')}
+                        </Button>
+                        <Button
+                            type="submit"
+                            variant="secondary"
+                            className="h-11 min-w-24"
+                            disabled={processing || isEstimating}
+                        >
+                            {mode === 'edit'
+                                ? t('health_entries.common.update')
+                                : t('health_entries.common.save')}
+                        </Button>
                     </div>
                 </>
             )}
