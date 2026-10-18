@@ -24,18 +24,20 @@ it('keeps local meal times and the ingredient breakdown through saving and editi
         ->assertSee('Meal logged!')
         ->click('Open your logbook')
         ->assertSee('Grilled chicken breast')
+        ->click('Meal details')
         ->assertSee('1 breast (170g)')
         ->assertSee('Steamed rice')
-        ->assertSee('11:57:00 AM')
+        ->assertSee('11:57 AM')
         ->click('button[aria-label="Edit log entry"]')
         ->assertValue('measured_at', '2026-10-16T11:57')
         ->fill('input[name="items[0][name]"]', 'Chicken with sauce')
+        ->click('fieldset:first-of-type summary')
         ->fill('input[name="items[0][calories]"]', '400')
         ->fill('measured_at', '2026-10-16T12:15')
-        ->press('Update')
+        ->press('Save changes')
         ->assertSee('Chicken with sauce')
         ->assertSee('610 kcal')
-        ->assertSee('12:15:00 PM')
+        ->assertSee('12:15 PM')
         ->assertNoJavaScriptErrors();
 
     $this->assertDatabaseHas('health_sync_samples', [
