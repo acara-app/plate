@@ -8,6 +8,7 @@ use App\Data\HealthLogData;
 use App\Enums\HealthEntrySource;
 use App\Models\AnalysisDraft;
 use App\Models\HealthSyncSample;
+use App\Models\MealPhoto;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -40,6 +41,11 @@ final readonly class LogReviewedMealAction
 
             AnalysisDraft::query()
                 ->whereKey($draft->id)
+                ->update(['health_group_id' => (string) $recorded->group_id]);
+
+            MealPhoto::query()
+                ->where('analysis_draft_id', $draft->id)
+                ->where('user_id', $user->id)
                 ->update(['health_group_id' => (string) $recorded->group_id]);
 
             return $recorded;

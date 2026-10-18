@@ -123,6 +123,7 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
     Route::post('health-entries', Web\HealthEntry\StoreHealthEntryController::class)->name('health-entries.store');
     Route::put('health-entries/{healthSyncSample}', Web\HealthEntry\UpdateHealthEntryController::class)->name('health-entries.update');
     Route::delete('health-entries/{healthSyncSample}', Web\HealthEntry\DestroyHealthEntryController::class)->name('health-entries.destroy');
+    Route::get('health-entries/{group}/photo', Web\HealthEntry\ShowMealPhotoController::class)->whereUuid('group')->name('health-entries.photo');
 
     Route::prefix('app/snap-to-track')
         ->name('snap-to-track.')

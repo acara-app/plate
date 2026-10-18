@@ -352,6 +352,7 @@ return [
     ],
 
     'health_entries' => [
+        'meal_photo_alt' => 'Photo du repas',
         'tabs' => [
             'glucose' => 'Glucose',
             'food' => 'Alimentation',
@@ -517,6 +518,7 @@ return [
             'description' => "Prenez ou téléversez une photo — l'IA estime les calories, protéines, glucides et lipides de chaque aliment. Vous vérifiez avant tout enregistrement.",
             'upload_label' => 'Photo du repas',
             'analyze' => 'Analyser la photo',
+            'photo_saved' => 'Votre photo est enregistrée en privé avec ce repas. Supprimez le repas pour supprimer la photo.',
             'analyzing' => 'Analyse en cours…',
             'saved_heading' => 'Repas enregistré !',
             'saved_description' => 'Votre repas vérifié fait maintenant partie de votre historique de santé.',

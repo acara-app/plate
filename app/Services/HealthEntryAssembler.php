@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Data\MealBreakdownData;
 use App\Enums\HealthSyncType;
 use App\Models\HealthSyncSample;
+use App\Models\MealPhoto;
 use Illuminate\Support\Collection;
 
 final readonly class HealthEntryAssembler
@@ -19,7 +20,12 @@ final readonly class HealthEntryAssembler
     {
         $grouped = $samples->groupBy(fn (HealthSyncSample $sample): string => $sample->group_id ?? 'standalone_'.$sample->id);
 
-        return $grouped->map(function (Collection $group): array {
+        $photoGroupIds = MealPhoto::query()
+            ->whereIn('health_group_id', $samples->pluck('group_id')->filter()->unique()->values())
+            ->pluck('health_group_id')
+            ->flip();
+
+        return $grouped->map(function (Collection $group) use ($photoGroupIds): array {
             /** @var HealthSyncSample $primary */
             $primary = $group->sortBy('id')->first();
 
@@ -46,6 +52,9 @@ final readonly class HealthEntryAssembler
                 'exercise_duration_minutes' => null,
                 'source' => $primary->entry_source?->value,
                 'food_analysis' => null,
+                'photo_url' => $primary->group_id !== null && $photoGroupIds->has($primary->group_id)
+                    ? route('health-entries.photo', ['group' => $primary->group_id], absolute: false)
+                    : null,
                 'created_at' => $primary->created_at->toIso8601String(),
             ];
 
