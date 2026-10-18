@@ -178,6 +178,11 @@ export default function SnapToTrackIndex({
                                             </Button>
                                             <p className="text-xs text-muted-foreground">
                                                 {t(
+                                                    'snap_to_track.index.photo_saved',
+                                                )}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {t(
                                                     'snap_to_track.review.disclaimer',
                                                 )}
                                             </p>

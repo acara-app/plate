@@ -14,7 +14,7 @@
         <div class="mt-6">
             <div class="prose prose-slate dark:prose-invert mx-auto max-w-4xl">
                 <h1>Privacy Policy</h1>
-                <p><strong>Effective Date: April 23, 2026</strong></p>
+                <p><strong>Effective Date: October 18, 2026</strong></p>
                 <p>
                     At Acara Plate, we value your privacy and are committed to protecting your personal data. This
                     Privacy Policy explains how we collect, use, store, and protect the information you provide through
@@ -119,6 +119,7 @@
                     <li>Your free-text "Additional Goals" field, <strong>only when the AI explicitly requests your goals</strong> via a dedicated tool call (for example, to answer a workout or wellness question).</li>
                     <li>Your specific medical conditions, medications, or detailed Apple Health readings, <strong>only when the AI explicitly requests them</strong> via a dedicated tool call to answer a health-related question.</li>
                     <li>Image attachments you choose to share with the AI for food or label analysis.</li>
+                    <li>Meal photos you scan with Snap to Track while signed in. These photos are also stored privately with your food log, as described in Section 7.</li>
                 </ul>
                 </p>
                 <p>
@@ -164,6 +165,13 @@
                     We retain your personal data only as long as necessary to provide the Services or comply with legal
                     obligations. You can request deletion of your data at any time (see Section 8). Anonymized data may
                     be retained indefinitely for analytics purposes.
+                </p>
+                <p>
+                    <strong>Meal photos:</strong>
+                    Photos you scan with Snap to Track while signed in are stored privately with your food log so you
+                    can see them later. Before storing, we resize each photo and remove its location and other photo
+                    metadata. Only you can view your meal photos. A photo is deleted when you delete that meal or your
+                    account, or after one day if you don't save the meal.
                 </p>
 
                 <h2>8. Your Rights (GDPR and Applicable Laws)</h2>

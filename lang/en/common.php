@@ -351,6 +351,7 @@ return [
     ],
 
     'health_entries' => [
+        'meal_photo_alt' => 'Meal photo',
         'tabs' => [
             'glucose' => 'Glucose',
             'food' => 'Food',
@@ -517,6 +518,7 @@ return [
             'description' => 'Snap or upload one photo — the AI estimates calories, protein, carbs, and fat for every item. You review before anything is saved.',
             'upload_label' => 'Meal photo',
             'analyze' => 'Analyze photo',
+            'photo_saved' => 'Your photo is saved privately with this meal. Delete the meal to delete the photo.',
             'analyzing' => 'Analyzing…',
             'saved_heading' => 'Meal logged!',
             'saved_description' => 'Your reviewed meal is now part of your health history.',

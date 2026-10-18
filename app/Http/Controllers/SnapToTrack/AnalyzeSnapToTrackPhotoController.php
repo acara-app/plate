@@ -7,6 +7,7 @@ namespace App\Http\Controllers\SnapToTrack;
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\CreateAnalysisDraftAction;
+use App\Actions\StoreMealPhotoAction;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Contracts\Ai\ResolvesAgentModel;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
@@ -30,6 +31,7 @@ final readonly class AnalyzeSnapToTrackPhotoController
         private AnalyzeFoodPhotoAction $analyzeFoodPhoto,
         private CreateAnalysisDraftAction $createAnalysisDraft,
         private EnforceAiUsageLimit $enforceAiUsageLimit,
+        private StoreMealPhotoAction $storeMealPhoto,
         #[CurrentUser()] private User $currentUser,
     ) {}
 
@@ -67,7 +69,8 @@ final readonly class AnalyzeSnapToTrackPhotoController
         try {
             ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($this->currentUser->locale);
 
-            $imageBase64 = base64_encode((string) $photo->get());
+            $imageBytes = (string) $photo->get();
+            $imageBase64 = base64_encode($imageBytes);
 
             $analysis = $this->analyzeFoodPhoto->handle(
                 $imageBase64,
@@ -91,6 +94,12 @@ final readonly class AnalyzeSnapToTrackPhotoController
             AnalysisDraftSource::AuthenticatedSnapToTrack,
             $this->currentUser->id,
         );
+
+        try {
+            $this->storeMealPhoto->handle($this->currentUser, $imageBytes, $token);
+        } catch (Throwable $throwable) {
+            report($throwable);
+        }
 
         Inertia::flash('analytics', [
             'name' => 'snap_to_track_result_viewed',

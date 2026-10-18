@@ -60,6 +60,7 @@ export interface HealthEntry {
     exercise_duration_minutes: number | null;
     source: string | null;
     food_analysis?: FoodBreakdown | null;
+    photo_url?: string | null;
     created_at: string;
 }
 
