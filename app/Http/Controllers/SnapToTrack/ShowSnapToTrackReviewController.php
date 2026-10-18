@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\SnapToTrack;
 
+use App\Actions\BuildAddedFatOptionsAction;
 use App\Actions\RestoreAnalysisDraftAction;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\AnalysisDraftResolutionData;
@@ -18,6 +19,7 @@ final readonly class ShowSnapToTrackReviewController
 {
     public function __construct(
         private RestoreAnalysisDraftAction $restoreAnalysisDraft,
+        private BuildAddedFatOptionsAction $buildAddedFatOptions,
         #[CurrentUser()] private User $currentUser,
     ) {}
 
@@ -31,12 +33,14 @@ final readonly class ShowSnapToTrackReviewController
 
         $this->flashRestoredAnalytics($resolution);
         session()->put('snap_to_track.upgrade_draft', $draft);
+        $analysis = $resolution->analysis();
 
         return Inertia::render('snap-to-track/review', [
             'photoAllowance' => resolve(ManagesPhotoAnalyses::class)->entitlement($this->currentUser, PhotoAnalysisContext::guestId(request()))->toArray(),
             'state' => 'restored',
             'reason' => null,
-            'analysis' => $resolution->analysis(),
+            'analysis' => $analysis,
+            'addedFatOptions' => $this->buildAddedFatOptions->handle($analysis),
             'draftToken' => $draft,
             'source' => $resolution->draft?->source->value,
         ]);
@@ -57,6 +61,7 @@ final readonly class ShowSnapToTrackReviewController
             'state' => 'unavailable',
             'reason' => $resolution->status->value,
             'analysis' => null,
+            'addedFatOptions' => [],
             'draftToken' => null,
             'source' => null,
         ]);
