@@ -26,8 +26,37 @@ final class FoodItemEstimatorAgent implements Agent, HasProviderOptions, HasStru
     use Promptable;
     use UsesConfiguredAgentModel;
 
+    private ?string $language = null;
+
+    private ?string $languageCode = null;
+
+    public function withLanguage(string $language, string $languageCode): self
+    {
+        $this->language = $language;
+        $this->languageCode = $languageCode;
+
+        return $this;
+    }
+
     public function instructions(): string
     {
+        $output = [
+            'Return the structured response requested by the schema.',
+            'Every value is for the full stated weight, not per 100 g.',
+            'Calories are in kcal; protein, carbs, fat, and grams are in grams.',
+            'Round every number to 1 decimal place.',
+            '`portion` describes only this food: the weight in grams, followed by a short household measure for that amount in parentheses. Keep it under 60 characters and never mention any other food.',
+        ];
+
+        if ($this->language !== null && $this->languageCode !== null) {
+            $output[] = sprintf(
+                'Write `portion` in %s (language code: `%s`). Keep numbers as numerals and the gram unit as "g". Use natural, idiomatic terms in %s.',
+                $this->language,
+                $this->languageCode,
+                $this->language,
+            );
+        }
+
         return (string) new SystemPrompt(
             background: [
                 'You are an expert nutritionist.',
@@ -38,13 +67,9 @@ final class FoodItemEstimatorAgent implements Agent, HasProviderOptions, HasStru
                 '1. Identify the food the name most likely refers to, including any preparation the name implies.',
                 '2. Use the given weight in grams. If no weight is given, assume one typical single portion and report the grams you assumed.',
                 '3. Estimate calories, protein, carbs, and fat for exactly that weight from standard nutrition reference values.',
+                '4. Describe that amount of this food as `portion`.',
             ],
-            output: [
-                'Return the structured response requested by the schema.',
-                'Every value is for the full stated weight, not per 100 g.',
-                'Calories are in kcal; protein, carbs, fat, and grams are in grams.',
-                'Round every number to 1 decimal place.',
-            ],
+            output: $output,
         );
     }
 
@@ -59,18 +84,18 @@ final class FoodItemEstimatorAgent implements Agent, HasProviderOptions, HasStru
             'carbs' => $schema->number()->required(),
             'fat' => $schema->number()->required(),
             'grams' => $schema->number()->required(),
+            'portion' => $schema->string()->required(),
         ];
     }
 
-    public function estimate(string $name, ?float $grams, ?string $portion, ?User $user = null): FoodItemEstimateData
+    public function estimate(string $name, ?float $grams, ?User $user = null): FoodItemEstimateData
     {
         $this->setModelUser($user);
 
         $prompt = sprintf(
-            'Food: "%s". Weight: %s. Portion description: %s.',
+            'Food: "%s". Weight: %s.',
             $name,
             $grams === null ? 'unknown' : $grams.' g',
-            $portion === null || $portion === '' ? 'none' : '"'.$portion.'"',
         );
 
         /** @var StructuredAgentResponse $response */

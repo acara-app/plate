@@ -21,7 +21,6 @@ final class EstimateSnapToTrackItemRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:100'],
             'grams' => ['nullable', 'numeric', 'min:1', 'max:2000'],
-            'portion' => ['nullable', 'string', 'max:100'],
         ];
     }
 
@@ -33,10 +32,5 @@ final class EstimateSnapToTrackItemRequest extends FormRequest
     public function grams(): ?float
     {
         return $this->filled('grams') ? $this->float('grams') : null;
-    }
-
-    public function portion(): ?string
-    {
-        return $this->filled('portion') ? $this->string('portion')->trim()->toString() : null;
     }
 }

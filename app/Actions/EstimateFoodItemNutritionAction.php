@@ -9,6 +9,7 @@ use App\Ai\Agents\FoodItemEstimatorAgent;
 use App\Contracts\Ai\ResolvesAgentModel;
 use App\Data\FoodItemEstimateData;
 use App\Models\User;
+use App\Utilities\LanguageUtil;
 
 final readonly class EstimateFoodItemNutritionAction
 {
@@ -18,10 +19,15 @@ final readonly class EstimateFoodItemNutritionAction
         private FoodItemEstimatorAgent $agent,
     ) {}
 
-    public function handle(User $user, string $name, ?float $grams, ?string $portion): FoodItemEstimateData
+    public function handle(User $user, string $name, ?float $grams): FoodItemEstimateData
     {
         $this->enforceAiUsageLimit->handle($user, $this->agentModels->resolve(FoodItemEstimatorAgent::class, $user));
 
-        return $this->agent->estimate($name, $grams, $portion, $user)->rounded();
+        ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($user->locale);
+
+        return $this->agent
+            ->withLanguage($language, $languageCode)
+            ->estimate($name, $grams, $user)
+            ->normalized();
     }
 }
