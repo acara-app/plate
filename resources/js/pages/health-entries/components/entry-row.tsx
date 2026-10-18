@@ -41,9 +41,7 @@ export default function EntryRow({
     const Icon = config.icon;
     const source = entry.source ? SOURCE_META[entry.source] : undefined;
     const isFood =
-        type === 'food' ||
-        entry.food_analysis !== null ||
-        entry.photo_url !== null;
+        type === 'food' || Boolean(entry.food_analysis || entry.photo_url);
     const readings = getEntryBadges(entry, glucoseUnit, t).filter(
         (value) =>
             !isFood ||

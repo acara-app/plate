@@ -51,7 +51,7 @@ final readonly class GetUserHealthEntriesAction
             [
                 'path' => LengthAwarePaginator::resolveCurrentPath(),
                 'pageName' => 'page',
-                'query' => $type === null ? [] : ['type' => $type->value],
+                'query' => $type instanceof HealthEntryType ? ['type' => $type->value] : [],
             ],
         );
     }

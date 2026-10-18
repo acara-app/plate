@@ -25,6 +25,7 @@ function createLogbookMeal(User $user, bool $large = false): HealthSyncSample
             'calories' => 20, 'protein' => 1, 'carbs' => 3, 'fat' => 1, 'provenance' => 'model',
         ], ['Mixed salad greens with cucumber, baby spinach and fresh herbs', 'Cherry tomatoes', 'Red onion', 'Shredded carrot', 'Green olives', 'Blueberries', 'Olive oil']);
     }
+
     $group = Str::uuid()->toString();
     $samples = [];
 
