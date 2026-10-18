@@ -81,7 +81,7 @@ it('redirects back with an error and persists nothing when the usage limit is ex
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.396,
+        'cost' => 0.4,
     ]);
 
     $this->from(route('dashboard'))

@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\UserController;
+use App\Models\MealPhoto;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 covers(UserController::class);
 
@@ -110,6 +112,7 @@ it('requires password', function (): void {
 });
 
 it('may delete user account', function (): void {
+    Storage::fake(MealPhoto::DISK);
     $user = User::factory()->create([
         'password' => Hash::make('password'),
     ]);

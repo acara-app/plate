@@ -95,6 +95,7 @@ export function getPrimaryType(entry: HealthEntry): LogTypeValue {
     if (
         entry.weight !== null ||
         entry.blood_pressure_systolic !== null ||
+        entry.blood_pressure_diastolic !== null ||
         entry.a1c_value !== null
     ) {
         return LogType.Vitals;

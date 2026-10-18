@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Enums\HealthEntryType;
 use App\Enums\HealthSyncType;
 use App\Models\HealthSyncSample;
 use App\Models\User;
@@ -23,7 +24,7 @@ final readonly class GetUserHealthEntriesAction
     /**
      * @return LengthAwarePaginatorContract<int, array<string, mixed>>
      */
-    public function handle(User $user, int $perPage = 15): LengthAwarePaginatorContract
+    public function handle(User $user, int $perPage = 15, ?HealthEntryType $type = null): LengthAwarePaginatorContract
     {
         $entryTypes = HealthSyncType::entryTypeValues();
         $entryKey = "COALESCE(CAST(group_id AS TEXT), '".self::STANDALONE_PREFIX."' || id)";
@@ -32,6 +33,12 @@ final readonly class GetUserHealthEntriesAction
             ->whereIn('type_identifier', $entryTypes)
             ->selectRaw($entryKey.' as entry_key, MAX(measured_at) as sort_at')
             ->groupByRaw($entryKey)
+            ->when($type, function (Builder $query, HealthEntryType $type): void {
+                $matchingTypes = $type->sampleTypeValues();
+                $placeholders = implode(', ', array_fill(0, count($matchingTypes), '?'));
+
+                $query->havingRaw("COUNT(CASE WHEN type_identifier IN ({$placeholders}) THEN 1 END) > 0", $matchingTypes);
+            })
             ->latest('sort_at')
             ->orderByDesc('entry_key')
             ->paginate($perPage);
@@ -44,6 +51,7 @@ final readonly class GetUserHealthEntriesAction
             [
                 'path' => LengthAwarePaginator::resolveCurrentPath(),
                 'pageName' => 'page',
+                'query' => $type instanceof HealthEntryType ? ['type' => $type->value] : [],
             ],
         );
     }
