@@ -48,6 +48,26 @@ it('restores a valid draft into the review page and claims it', function (): voi
     expect($draft->refresh()->user_id)->toBe($this->user->id);
 });
 
+it('offers a one-tap amount for added fats on the review page', function (): void {
+    [$token] = reviewDraftToken(['payload' => [
+        'items' => [
+            ['name' => 'Mixed Salad Greens', 'calories' => 17, 'protein' => 1.2, 'carbs' => 3.3, 'fat' => 0.3, 'portion' => '2 cups', 'grams' => 100, 'match_name' => 'lettuce, mixed greens, raw', 'provenance' => 'model'],
+            ['name' => 'Olive Oil Dressing', 'calories' => 119, 'protein' => 0, 'carbs' => 0, 'fat' => 13.5, 'portion' => '1 tablespoon', 'grams' => 14, 'match_name' => 'olive oil', 'provenance' => 'model'],
+        ],
+        'total_calories' => 136, 'total_protein' => 1.2, 'total_carbs' => 3.3, 'total_fat' => 13.8, 'confidence' => 88,
+    ]]);
+
+    actingAs($this->user)
+        ->get(route('snap-to-track.review', ['draft' => $token]))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->missing('addedFatOptions.0')
+            ->count('addedFatOptions.1', 4)
+            ->where('addedFatOptions.1.1.key', 'half_tbsp')
+            ->where('addedFatOptions.1.1.calories', 59.5)
+            ->where('addedFatOptions.1.2.selected', true));
+});
+
 it('flashes the draft restored event with an age band', function (): void {
     [$token, $draft] = reviewDraftToken();
     $draft->forceFill(['created_at' => now()->subMinutes(20)])->save();
