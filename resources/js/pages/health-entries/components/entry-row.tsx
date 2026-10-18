@@ -40,7 +40,15 @@ export default function EntryRow({
     const config = getTypeConfig(type);
     const Icon = config.icon;
     const source = entry.source ? SOURCE_META[entry.source] : undefined;
-    const isFood = type === 'food';
+    const isFood =
+        type === 'food' ||
+        entry.food_analysis !== null ||
+        entry.photo_url !== null;
+    const readings = getEntryBadges(entry, glucoseUnit, t).filter(
+        (value) =>
+            !isFood ||
+            !['calories', 'protein', 'carbs', 'fat'].includes(value.key),
+    );
     const items = entry.food_analysis?.items ?? [];
 
     return (
@@ -148,13 +156,11 @@ export default function EntryRow({
                             )}
                         </div>
                     )}
-                    {!isFood && (
+                    {readings.length > 0 && (
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm font-medium break-words tabular-nums">
-                            {getEntryBadges(entry, glucoseUnit, t).map(
-                                (value) => (
-                                    <span key={value.key}>{value.label}</span>
-                                ),
-                            )}
+                            {readings.map((value) => (
+                                <span key={value.key}>{value.label}</span>
+                            ))}
                         </div>
                     )}
                     {isFood && (

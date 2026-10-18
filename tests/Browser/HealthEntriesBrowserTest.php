@@ -233,3 +233,28 @@ it('explains when a saved meal photo is unavailable', function (): void {
         ->assertSeeIn('[role="dialog"]', '490')
         ->assertNoJavaScriptErrors();
 });
+
+it('keeps photos and all readings visible for meals with other grouped samples', function (bool $withGlucose): void {
+    Storage::fake(MealPhoto::DISK);
+    $user = User::factory()->create();
+    $sample = createLogbookMeal($user);
+    $photo = MealPhoto::factory()->create(['user_id' => $user->id, 'health_group_id' => $sample->group_id]);
+    Storage::disk(MealPhoto::DISK)->put($photo->path, (string) UploadedFile::fake()->image('meal.jpg')->get());
+    HealthSyncSample::factory()->create([
+        'user_id' => $user->id,
+        'group_id' => $sample->group_id,
+        'type_identifier' => $withGlucose ? 'bloodGlucose' : 'weight',
+        'value' => $withGlucose ? 120 : 75,
+        'measured_at' => $sample->measured_at,
+    ]);
+    $this->actingAs($user);
+
+    visit(route('health-entries.index', ['type' => 'food'], absolute: false))
+        ->assertSee($withGlucose ? '6.7 mmol/L' : '75 kg')
+        ->assertSee('490')
+        ->assertVisible('button[aria-label="View meal photo"]')
+        ->click('button[aria-label="View meal photo"]')
+        ->assertVisible('[role="dialog"] img')
+        ->assertSeeIn('[role="dialog"]', '490')
+        ->assertNoJavaScriptErrors();
+})->with(['food and glucose' => [true], 'food and vitals' => [false]]);
