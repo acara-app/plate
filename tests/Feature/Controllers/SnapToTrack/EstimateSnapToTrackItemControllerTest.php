@@ -9,6 +9,7 @@ use App\Enums\SubscriptionTier;
 use App\Http\Controllers\SnapToTrack\EstimateSnapToTrackItemController;
 use App\Models\User;
 use Illuminate\Support\Facades\Exceptions;
+use Laravel\Ai\Prompts\AgentPrompt;
 
 covers(EstimateSnapToTrackItemController::class);
 
@@ -24,13 +25,49 @@ beforeEach(function (): void {
     $this->user = User::factory()->create();
 });
 
-it('estimates nutrition for a renamed item at the same weight', function (): void {
-    FoodItemEstimatorAgent::fake([['calories' => 19.96, 'protein' => 0.25, 'carbs' => 5.07, 'fat' => 0.1, 'grams' => 35]]);
+it('estimates nutrition and a new portion for a renamed item at the same weight', function (): void {
+    FoodItemEstimatorAgent::fake([['calories' => 19.96, 'protein' => 0.25, 'carbs' => 5.07, 'fat' => 0.1, 'grams' => 35, 'portion' => ' 35 g (about ¼ cup) ']]);
 
     $this->actingAs($this->user)
-        ->postJson(route('snap-to-track.estimate-item'), ['name' => ' Blueberries ', 'grams' => 35, 'portion' => '8-9 pieces'])
+        ->postJson(route('snap-to-track.estimate-item'), ['name' => ' Blueberries ', 'grams' => 35])
         ->assertOk()
-        ->assertExactJson(['calories' => 20, 'protein' => 0.3, 'carbs' => 5.1, 'fat' => 0.1, 'grams' => 35]);
+        ->assertExactJson(['calories' => 20, 'protein' => 0.3, 'carbs' => 5.1, 'fat' => 0.1, 'grams' => 35, 'portion' => '35 g (about ¼ cup)']);
+});
+
+it('replaces a portion that named the old food and never sends that wording to the AI', function (): void {
+    FoodItemEstimatorAgent::fake([['calories' => 14.3, 'protein' => 0.2, 'carbs' => 3.6, 'fat' => 0.1, 'grams' => 25, 'portion' => '25 g (about ⅙ cup)']]);
+
+    $this->actingAs($this->user)
+        ->postJson(route('snap-to-track.estimate-item'), ['name' => 'Blueberries', 'grams' => 25, 'portion' => '25g (approx. 6 olives)'])
+        ->assertOk()
+        ->assertJsonPath('grams', 25)
+        ->assertJsonPath('portion', '25 g (about ⅙ cup)');
+
+    FoodItemEstimatorAgent::assertPrompted(fn (AgentPrompt $prompt): bool => $prompt->contains('Food: "Blueberries". Weight: 25 g.'));
+    FoodItemEstimatorAgent::assertNotPrompted(fn (AgentPrompt $prompt): bool => $prompt->contains('olive'));
+});
+
+it('falls back to the weight when the AI gives no portion and keeps it within the saved length', function (string $aiPortion, string $expected): void {
+    FoodItemEstimatorAgent::fake([['calories' => 14.3, 'protein' => 0.2, 'carbs' => 3.6, 'fat' => 0.1, 'grams' => 25, 'portion' => $aiPortion]]);
+
+    $this->actingAs($this->user)
+        ->postJson(route('snap-to-track.estimate-item'), ['name' => 'Blueberries', 'grams' => 25])
+        ->assertOk()
+        ->assertJsonPath('portion', $expected);
+})->with([
+    'no portion' => ['', '25 g'],
+    'blank portion' => ['   ', '25 g'],
+    'too long' => [str_repeat('a', 150), str_repeat('a', 100)],
+]);
+
+it('asks for the portion in the user language', function (): void {
+    FoodItemEstimatorAgent::fake([['calories' => 14.3, 'protein' => 0.2, 'carbs' => 3.6, 'fat' => 0.1, 'grams' => 25, 'portion' => '25 g (environ ⅙ tasse)']]);
+
+    $this->actingAs(User::factory()->create(['locale' => 'fr']))
+        ->postJson(route('snap-to-track.estimate-item'), ['name' => 'Myrtilles', 'grams' => 25])
+        ->assertOk();
+
+    FoodItemEstimatorAgent::assertPrompted(fn (AgentPrompt $prompt): bool => str_contains($prompt->agent->instructions(), 'Write `portion` in Français'));
 });
 
 it('requires a food name', function (): void {
