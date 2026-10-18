@@ -8,6 +8,7 @@ use App\Data\HealthLogData;
 use App\Data\ReviewedMealData;
 use App\Enums\HealthEntryType;
 use App\Models\HealthSyncSample;
+use App\Models\MealPhoto;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -38,6 +39,10 @@ final readonly class UpdateHealthSampleAction
             }
 
             $newGroupId = count($newSamples) > 1 ? ($groupId ?? (string) Str::uuid()) : null;
+
+            if ($groupId !== null && $newGroupId === null) {
+                MealPhoto::deleteForGroup($sample->user_id, $groupId);
+            }
 
             /** @var array{type_identifier: string, value: float|int, unit: string, metadata?: array<string, mixed>} $first */
             $first = array_shift($newSamples);

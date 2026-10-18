@@ -178,6 +178,25 @@ export default function HealthEntriesIndex({
                                                             />
                                                         )}
                                                     </div>
+                                                    {log.photo_url && (
+                                                        <a
+                                                            href={log.photo_url}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="block w-fit"
+                                                        >
+                                                            <img
+                                                                src={
+                                                                    log.photo_url
+                                                                }
+                                                                alt={t(
+                                                                    'health_entries.meal_photo_alt',
+                                                                )}
+                                                                loading="lazy"
+                                                                className="size-24 rounded-md border object-cover"
+                                                            />
+                                                        </a>
+                                                    )}
                                                     {log.food_analysis && (
                                                         <FoodBreakdownDetails
                                                             analysis={
