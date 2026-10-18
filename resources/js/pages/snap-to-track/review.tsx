@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import AppLayout from '@/layouts/app-layout';
 import {
     formatLocalDatetime,
@@ -46,6 +47,16 @@ type Analysis = {
     confidence: number;
 };
 
+type AddedFatOption = {
+    key: string;
+    grams: number;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    selected: boolean;
+};
+
 type ReviewItem = {
     name: string;
     portion: string;
@@ -54,6 +65,8 @@ type ReviewItem = {
     carbs: string;
     fat: string;
     provenance: string;
+    fatOptions?: AddedFatOption[];
+    fatChoice?: string;
 };
 
 type MacroField = 'calories' | 'protein' | 'carbs' | 'fat';
@@ -63,6 +76,7 @@ interface SnapToTrackReviewProps {
     state: 'restored' | 'unavailable';
     reason: string | null;
     analysis: Analysis | null;
+    addedFatOptions?: Record<number, AddedFatOption[]>;
     draftToken: string | null;
 }
 
@@ -86,13 +100,14 @@ export default function SnapToTrackReview({
     state,
     reason,
     analysis,
+    addedFatOptions,
     draftToken,
     photoAllowance,
 }: SnapToTrackReviewProps) {
     const { t } = useTranslation('common');
 
     const [items, setItems] = useState<ReviewItem[]>(() =>
-        (analysis?.items ?? []).map((item) => ({
+        (analysis?.items ?? []).map((item, index) => ({
             name: item.name,
             portion: item.portion ?? '',
             calories: String(item.calories),
@@ -102,6 +117,10 @@ export default function SnapToTrackReview({
             provenance: ['model', 'reference'].includes(item.provenance)
                 ? item.provenance
                 : 'user',
+            fatOptions: addedFatOptions?.[index],
+            fatChoice: addedFatOptions?.[index]?.find(
+                (option) => option.selected,
+            )?.key,
         })),
     );
 
@@ -124,9 +143,40 @@ export default function SnapToTrackReview({
         setItems((current) =>
             current.map((item, itemIndex) =>
                 itemIndex === index
-                    ? { ...item, [field]: value, provenance: 'user' }
+                    ? {
+                          ...item,
+                          [field]: value,
+                          provenance: 'user',
+                          fatChoice:
+                              field === 'name' ? item.fatChoice : undefined,
+                      }
                     : item,
             ),
+        );
+    };
+
+    const chooseFatAmount = (index: number, key: string) => {
+        setItems((current) =>
+            current.map((item, itemIndex) => {
+                const option = item.fatOptions?.find(
+                    (candidate) => candidate.key === key,
+                );
+
+                if (itemIndex !== index || option === undefined) {
+                    return item;
+                }
+
+                return {
+                    ...item,
+                    portion: t(`snap_to_track.review.added_fat.${key}`),
+                    calories: String(option.calories),
+                    protein: String(option.protein),
+                    carbs: String(option.carbs),
+                    fat: String(option.fat),
+                    provenance: 'user',
+                    fatChoice: key,
+                };
+            }),
         );
     };
 
@@ -280,6 +330,55 @@ export default function SnapToTrackReview({
                                                     )}
                                                 </p>
                                             )}
+                                            {item.fatOptions &&
+                                                item.fatOptions.length > 0 && (
+                                                    <div className="space-y-2">
+                                                        <ToggleGroup
+                                                            type="single"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            joined
+                                                            value={
+                                                                item.fatChoice ??
+                                                                ''
+                                                            }
+                                                            onValueChange={(
+                                                                value,
+                                                            ) =>
+                                                                value &&
+                                                                chooseFatAmount(
+                                                                    index,
+                                                                    value,
+                                                                )
+                                                            }
+                                                            aria-label={t(
+                                                                'snap_to_track.review.added_fat.label',
+                                                            )}
+                                                        >
+                                                            {item.fatOptions.map(
+                                                                (option) => (
+                                                                    <ToggleGroupItem
+                                                                        key={
+                                                                            option.key
+                                                                        }
+                                                                        value={
+                                                                            option.key
+                                                                        }
+                                                                    >
+                                                                        {t(
+                                                                            `snap_to_track.review.added_fat.${option.key}`,
+                                                                        )}
+                                                                    </ToggleGroupItem>
+                                                                ),
+                                                            )}
+                                                        </ToggleGroup>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {t(
+                                                                'snap_to_track.review.added_fat.hint',
+                                                            )}
+                                                        </p>
+                                                    </div>
+                                                )}
                                             <div>
                                                 <Label
                                                     htmlFor={`item-portion-${index}`}
