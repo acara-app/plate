@@ -13,6 +13,7 @@ use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Services\DietMapper;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
@@ -199,7 +200,14 @@ final readonly class UpdateUserBiometrics implements Tool
             return (string) json_encode(['error' => 'No valid fields provided to update.']);
         }
 
-        $profile->update($updateData);
+        $profile->fill($updateData);
+
+        if ($profile->goal_choice instanceof GoalChoice && $profile->isDirty(['goal_choice', 'animal_product_choice', 'intensity_choice'])) {
+            $profile->setAttribute('calculated_diet_type', $profile->dietType());
+            $profile->setAttribute('derived_activity_multiplier', DietMapper::getActivityMultiplier($profile->goal_choice, $profile->intensity_choice ?? IntensityChoice::Balanced));
+        }
+
+        $profile->save();
         $profile->refresh();
 
         $fields = $this->formatProfile($profile);

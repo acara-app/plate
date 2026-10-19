@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Enums\AnimalProductChoice;
+use App\Enums\DietType;
+use App\Enums\GoalChoice;
+use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use App\Enums\UserProfileAttributeCategory;
 use App\Models\User;
@@ -218,3 +222,22 @@ it('calculate tdee returns correct value', function (): void {
 
     expect($profile->tdee)->toBe($expectedTDEE);
 });
+
+it('calculates bmr from the date of birth when it is known', function (): void {
+    $profile = UserProfile::factory()->create([
+        'weight' => 70,
+        'height' => 175,
+        'age' => 30,
+        'date_of_birth' => now()->subYears(40)->subDay(),
+        'sex' => Sex::Male,
+    ]);
+
+    expect($profile->bmr)->toBe(round((10 * 70) + (6.25 * 175) - (5 * 40) + 5, 2));
+});
+
+it('maps the onboarding choices to a diet type with defaults for missing ones', function (array $choices, DietType $dietType): void {
+    expect(UserProfile::factory()->create($choices)->dietType())->toBe($dietType);
+})->with([
+    'nothing chosen' => [['goal_choice' => null, 'animal_product_choice' => null, 'intensity_choice' => null], DietType::Balanced],
+    'steady glucose, aggressive' => [['goal_choice' => GoalChoice::Spikes, 'animal_product_choice' => AnimalProductChoice::Omnivore, 'intensity_choice' => IntensityChoice::Aggressive], DietType::LowCarb],
+]);

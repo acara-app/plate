@@ -1,3 +1,5 @@
+import type { MealType } from '@/types/meal-plan';
+
 // =============================================================================
 // Glucose Unit Types & Constants
 // =============================================================================
@@ -40,6 +42,7 @@ export type LogTypeValue = (typeof LogType)[keyof typeof LogType];
 
 export interface HealthEntry {
     id: number;
+    group_id: string | null;
     glucose_value: number | null;
     glucose_reading_type: string | null;
     measured_at: string;
@@ -56,9 +59,11 @@ export interface HealthEntry {
     protein_grams: number | null;
     fat_grams: number | null;
     calories: number | null;
+    fiber_grams: number | null;
     exercise_type: string | null;
     exercise_duration_minutes: number | null;
     source: string | null;
+    meal_type: MealType | null;
     food_analysis?: FoodBreakdown | null;
     photo_url?: string | null;
     created_at: string;
@@ -72,6 +77,7 @@ export interface FoodBreakdownItem {
     protein: number;
     carbs: number;
     fat: number;
+    fiber?: number | null;
     provenance: string;
 }
 
@@ -107,4 +113,12 @@ export interface TodaysMeal {
     fat?: number;
     calories?: number;
     label: string;
+}
+
+export interface DailyNutritionGoals {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    fiber: number;
 }

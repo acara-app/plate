@@ -83,6 +83,7 @@ final readonly class AnalyzeFoodPhotoAction
             confidence: $analysis->confidence,
             analyzerVersion: $analysis->analyzerVersion,
             referenceRelease: $referenceRelease,
+            totalFiber: $analysis->totalFiber,
         );
     }
 
@@ -107,6 +108,7 @@ final readonly class AnalyzeFoodPhotoAction
                     grams: $item->grams,
                     matchName: $item->matchName,
                     provenance: FoodValueProvenance::Reference,
+                    fiber: $item->fiber,
                 ), $match->food->release];
             }
 

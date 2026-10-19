@@ -41,12 +41,14 @@ interface SnapToTrackIndexProps {
     photoAllowance?: PhotoAllowance;
     analysisRequestId: string;
     savedGroupId: string | null;
+    savedDate: string | null;
     creditLimit: CreditLimit | null;
     burstLimit: BurstLimit | null;
 }
 
 export default function SnapToTrackIndex({
     savedGroupId,
+    savedDate,
     creditLimit,
     burstLimit,
     photoAllowance,
@@ -80,7 +82,15 @@ export default function SnapToTrackIndex({
                         </CardHeader>
                         <CardContent className="flex flex-col gap-3 sm:flex-row">
                             <Button asChild>
-                                <Link href={ListHealthEntryController().url}>
+                                <Link
+                                    href={
+                                        ListHealthEntryController(
+                                            savedDate
+                                                ? { query: { date: savedDate } }
+                                                : undefined,
+                                        ).url
+                                    }
+                                >
                                     {t('snap_to_track.index.open_entry')}
                                 </Link>
                             </Button>

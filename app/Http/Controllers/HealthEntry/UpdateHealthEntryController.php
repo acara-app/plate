@@ -39,7 +39,7 @@ final readonly class UpdateHealthEntryController
             $data['glucose_value'] = GlucoseUnit::mmolLToMgDl($glucoseValue);
         }
 
-        $metadata = $healthSyncSample->metadata['snap_to_track'] ?? null;
+        $metadata = HealthSyncSample::firstMetadataIn($healthSyncSample->groupMembers(), 'snap_to_track');
         $healthData = $data['log_type'] === HealthEntryType::Food->value && isset($data['items'])
             ? ReviewedMealData::fromValidated($data)->toHealthLogDataWithMetadata(is_array($metadata) ? $metadata : [])
             : HealthLogData::fromParsedArray(array_merge($data, ['is_health_data' => true]));

@@ -12,6 +12,7 @@ use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use App\Enums\UserProfileAttributeCategory;
+use App\Services\DietMapper;
 use Carbon\CarbonInterface;
 use Database\Factories\UserProfileFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
@@ -94,6 +95,15 @@ final class UserProfile extends Model
         ];
     }
 
+    public function dietType(): DietType
+    {
+        return DietMapper::map(
+            $this->goal_choice ?? GoalChoice::HealthyEating,
+            $this->animal_product_choice ?? AnimalProductChoice::Omnivore,
+            $this->intensity_choice ?? IntensityChoice::Balanced,
+        );
+    }
+
     /**
      * @return BelongsTo<User, $this>
      */
@@ -157,11 +167,13 @@ final class UserProfile extends Model
     protected function bmr(): Attribute
     {
         return Attribute::get(function (): ?float {
-            if (! $this->weight || ! $this->height || ! $this->age || ! $this->sex) {
+            $age = $this->date_of_birth instanceof CarbonInterface ? (int) $this->date_of_birth->age : $this->age;
+
+            if (! $this->weight || ! $this->height || ! $age || ! $this->sex) {
                 return null;
             }
 
-            $bmr = (10 * $this->weight) + (6.25 * $this->height) - (5 * $this->age);
+            $bmr = (10 * $this->weight) + (6.25 * $this->height) - (5 * $age);
 
             if ($this->sex === Sex::Male) {
                 $bmr += 5;

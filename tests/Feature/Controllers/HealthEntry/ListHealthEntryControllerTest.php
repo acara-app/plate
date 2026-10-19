@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
-use App\Enums\HealthSyncType;
+use App\Enums\GoalChoice;
+use App\Enums\Sex;
 use App\Http\Controllers\HealthEntry\ListHealthEntryController;
+use App\Http\Requests\ListHealthEntriesRequest;
 use App\Models\HealthSyncSample;
 use App\Models\User;
+use App\Models\UserProfile;
+use Carbon\CarbonImmutable;
 
-covers(ListHealthEntryController::class);
+covers(ListHealthEntryController::class, ListHealthEntriesRequest::class);
 
 it('requires authentication to view diabetes log index', function (): void {
     $response = $this->get(route('health-entries.index'));
@@ -24,33 +28,57 @@ it('requires email verification to view diabetes log index', function (): void {
     $response->assertRedirectToRoute('verification.notice');
 });
 
-it('renders diabetes log index page for authenticated and verified user', function (): void {
-    $user = User::factory()->create();
+it('renders the logbook for today in the user’s timezone', function (): void {
+    $this->travelTo(CarbonImmutable::parse('2026-10-18 17:00:00', 'UTC'));
+    $user = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
 
-    $response = $this->actingAs($user)
-        ->get(route('health-entries.index'));
-
-    $response->assertOk()
+    $this->actingAs($user)
+        ->get(route('health-entries.index'))
+        ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->has('logs')
+            ->component('health-entries/index')
+            ->where('date', '2026-10-19')
+            ->where('today', '2026-10-19')
+            ->where('newEntryAt', null)
+            ->has('entries')
+            ->has('loggedDates')
             ->has('glucoseReadingTypes')
             ->has('insulinTypes'));
 });
 
-it('displays user diabetes logs', function (): void {
-    $user = User::factory()->create();
-    $otherUser = User::factory()->create();
+it('lists only the chosen local day’s entries for the signed-in user', function (string $date, array $values): void {
+    $user = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
+    $otherUser = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
 
-    HealthSyncSample::factory()->bloodGlucose()->fromWeb()->count(3)->create(['user_id' => $user->id]);
-    HealthSyncSample::factory()->bloodGlucose()->fromWeb()->count(2)->create(['user_id' => $otherUser->id]);
+    foreach (['2026-10-17 15:30:00' => 101, '2026-10-17 23:30:00' => 102, '2026-10-18 15:59:00' => 103, '2026-10-18 16:00:00' => 104] as $measuredAt => $value) {
+        HealthSyncSample::factory()->bloodGlucose()->fromWeb()->create(['user_id' => $user->id, 'value' => $value, 'measured_at' => $measuredAt]);
+    }
 
-    $response = $this->actingAs($user)
-        ->get(route('health-entries.index'));
+    HealthSyncSample::factory()->bloodGlucose()->fromWeb()->create(['user_id' => $otherUser->id, 'measured_at' => '2026-10-18 01:00:00']);
 
-    $response->assertOk()
+    $this->actingAs($user)
+        ->get(route('health-entries.index', ['date' => $date]))
+        ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('health-entries/index')
-            ->has('logs.data', 3));
+            ->where('date', $date)
+            ->where('entries', fn ($entries): bool => collect($entries)->pluck('glucose_value')->map(fn ($value): int => (int) $value)->all() === $values));
+})->with([
+    'late local evening' => ['2026-10-17', [101]],
+    'local morning after a UTC late evening' => ['2026-10-18', [103, 102]],
+    'next local day starts at 16:00 UTC' => ['2026-10-19', [104]],
+]);
+
+it('marks the days of the selected Monday-to-Sunday week that have entries', function (): void {
+    $user = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
+
+    foreach (['2026-10-11 15:00:00', '2026-10-12 23:00:00', '2026-10-13 02:00:00', '2026-10-18 15:00:00', '2026-10-18 16:30:00'] as $measuredAt) {
+        HealthSyncSample::factory()->weight()->fromWeb()->create(['user_id' => $user->id, 'measured_at' => $measuredAt]);
+    }
+
+    $this->actingAs($user)
+        ->get(route('health-entries.index', ['date' => '2026-10-15']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->where('loggedDates', ['2026-10-13', '2026-10-18']));
 });
 
 it('defers dialog helper props so they are skipped on partial reloads', function (): void {
@@ -66,42 +94,33 @@ it('defers dialog helper props so they are skipped on partial reloads', function
             ->missing('todaysMeals'));
 });
 
-it('filters health entries by type without exposing another user’s readings', function (string $type, array $identifiers): void {
-    $user = User::factory()->create();
-    $otherUser = User::factory()->create();
+it('rejects malformed logbook dates', function (mixed $date): void {
+    $this->actingAs(User::factory()->create())
+        ->getJson(route('health-entries.index', ['date' => $date]))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('date');
+})->with(['impossible month' => ['2026-13-01'], 'day first' => ['18-10-2026'], 'array' => [['2026-10-18']]]);
 
-    foreach (HealthSyncType::entryTypeValues() as $identifier) {
-        HealthSyncSample::factory()->create([
-            'user_id' => $user->id,
-            'type_identifier' => $identifier,
-            'group_id' => null,
-        ]);
-        HealthSyncSample::factory()->create([
-            'user_id' => $otherUser->id,
-            'type_identifier' => $identifier,
-            'group_id' => null,
-        ]);
-    }
+it('shares daily nutrition goals once the profile allows them', function (bool $complete): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create($complete
+        ? ['age' => 30, 'date_of_birth' => null, 'height' => 180, 'weight' => 80, 'sex' => Sex::Male, 'goal_choice' => GoalChoice::HealthyEating, 'derived_activity_multiplier' => 1.5]
+        : ['weight' => null, 'goal_choice' => null]);
 
     $this->actingAs($user)
-        ->get(route('health-entries.index', ['type' => $type]))
-        ->assertSuccessful()
-        ->assertInertia(fn ($page) => $page
-            ->where('filters.type', $type)
-            ->where('logs.total', count($identifiers))
-            ->has('logs.data', count($identifiers)));
-})->with([
-    'food' => ['food', ['carbohydrates', 'protein', 'totalFat', 'dietaryEnergy']],
-    'glucose' => ['glucose', ['bloodGlucose']],
-    'insulin' => ['insulin', ['insulin']],
-    'medication' => ['meds', ['medication', 'medicationDoseEvent']],
-    'vitals' => ['vitals', ['weight', 'bloodPressureSystolic', 'bloodPressureDiastolic', 'a1c']],
-    'exercise' => ['exercise', ['exerciseMinutes', 'workouts']],
-]);
+        ->get(route('health-entries.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $complete
+            ? $page->where('goals.calories', 2370)->where('goals.fiber', 33)
+            : $page->where('goals', null));
+})->with(['complete profile' => [true], 'skipped onboarding' => [false]]);
 
-it('rejects invalid entry filters', function (mixed $type): void {
-    $this->actingAs(User::factory()->create())
-        ->getJson(route('health-entries.index', ['type' => $type]))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('type');
-})->with(['unknown' => ['unknown'], 'array' => [['food']]]);
+it('suggests the current account-local time on a past day for new entries', function (): void {
+    $this->travelTo(CarbonImmutable::parse('2026-10-18 17:00:00', 'UTC'));
+    $user = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
+
+    $this->actingAs($user)
+        ->get(route('health-entries.index', ['date' => '2026-10-17']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->where('newEntryAt', '2026-10-17T01:00:00+08:00'));
+});

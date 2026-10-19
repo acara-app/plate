@@ -10,6 +10,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { MEAL_TYPES, mealTypeForTime } from '@/lib/meal-types';
 import { convertGlucoseValue } from '@/lib/utils';
 import {
     GlucoseUnit,
@@ -22,6 +23,8 @@ import {
     RecentMedication,
     TodaysMeal,
 } from '@/types/diabetes';
+import type { MealType } from '@/types/meal-plan';
+import { Utensils } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -87,7 +90,9 @@ function GlucoseFields({
             </div>
 
             <div className="flex flex-col gap-2">
-                <Label>{t('health_entries.glucose.reading_context')}</Label>
+                <Label id="glucose-reading-type-label">
+                    {t('health_entries.glucose.reading_context')}
+                </Label>
                 <input
                     type="hidden"
                     name="glucose_reading_type"
@@ -97,6 +102,7 @@ function GlucoseFields({
                     type="single"
                     value={readingType}
                     onValueChange={(value) => value && setReadingType(value)}
+                    aria-labelledby="glucose-reading-type-label"
                     className="flex flex-wrap justify-start gap-2"
                 >
                     {glucoseReadingTypes.map((readingTypeOption) => (
@@ -106,7 +112,7 @@ function GlucoseFields({
                             variant="outline"
                             className="capitalize"
                         >
-                            {readingTypeOption.label.replace('-', ' ')}
+                            {readingTypeOption.label.replaceAll('-', ' ')}
                         </ToggleGroupItem>
                     ))}
                 </ToggleGroup>
@@ -125,9 +131,42 @@ function FoodFields({
     const [carbsGrams, setCarbsGrams] = useState(
         entry?.carbs_grams != null ? String(entry.carbs_grams) : '',
     );
+    const [mealType, setMealType] = useState<MealType>(
+        () =>
+            entry?.meal_type ??
+            mealTypeForTime(entry ? new Date(entry.measured_at) : new Date()),
+    );
 
     return (
         <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+                <Label id="meal-type-label">
+                    {t('health_entries.detail.meal_type')}
+                </Label>
+                <input type="hidden" name="meal_type" value={mealType} />
+                <ToggleGroup
+                    type="single"
+                    value={mealType}
+                    onValueChange={(value) =>
+                        value && setMealType(value as MealType)
+                    }
+                    aria-labelledby="meal-type-label"
+                    className="flex flex-wrap justify-start gap-2"
+                >
+                    {MEAL_TYPES.map((option) => (
+                        <ToggleGroupItem
+                            key={option.key}
+                            value={option.key}
+                            variant="outline"
+                            className="h-10 rounded-full px-4"
+                        >
+                            {t(option.labelKey)}
+                        </ToggleGroupItem>
+                    ))}
+                </ToggleGroup>
+                <InputError message={errors.meal_type} />
+            </div>
+
             {todaysMeals.length > 0 && (
                 <div className="flex flex-col gap-2">
                     <Label className="text-xs text-muted-foreground">
@@ -144,7 +183,8 @@ function FoodFields({
                                     setCarbsGrams(String(meal.carbs))
                                 }
                             >
-                                🍽️ {meal.label}
+                                <Utensils aria-hidden="true" />
+                                {meal.label}
                             </Button>
                         ))}
                     </div>
@@ -166,10 +206,10 @@ function FoodFields({
                 <InputError message={errors.carbs_grams} />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 <div className="flex flex-col gap-2">
                     <Label htmlFor="protein_grams">
-                        {t('health_entries.food.protein_label', 'Protein (g)')}
+                        {t('health_entries.food.protein_label')}
                     </Label>
                     <Input
                         id="protein_grams"
@@ -177,7 +217,6 @@ function FoodFields({
                         name="protein_grams"
                         placeholder={t(
                             'health_entries.food.protein_placeholder',
-                            'e.g., 25',
                         )}
                         defaultValue={entry?.protein_grams ?? ''}
                     />
@@ -185,23 +224,35 @@ function FoodFields({
                 </div>
                 <div className="flex flex-col gap-2">
                     <Label htmlFor="fat_grams">
-                        {t('health_entries.food.fat_label', 'Fat (g)')}
+                        {t('health_entries.food.fat_label')}
                     </Label>
                     <Input
                         id="fat_grams"
                         type="number"
                         name="fat_grams"
-                        placeholder={t(
-                            'health_entries.food.fat_placeholder',
-                            'e.g., 15',
-                        )}
+                        placeholder={t('health_entries.food.fat_placeholder')}
                         defaultValue={entry?.fat_grams ?? ''}
                     />
                     <InputError message={errors.fat_grams} />
                 </div>
                 <div className="flex flex-col gap-2">
+                    <Label htmlFor="fiber_grams">
+                        {t('health_entries.food.fiber_label')}
+                    </Label>
+                    <Input
+                        id="fiber_grams"
+                        type="number"
+                        step="0.1"
+                        min={0}
+                        name="fiber_grams"
+                        placeholder={t('health_entries.food.fiber_placeholder')}
+                        defaultValue={entry?.fiber_grams ?? ''}
+                    />
+                    <InputError message={errors.fiber_grams} />
+                </div>
+                <div className="flex flex-col gap-2">
                     <Label htmlFor="calories">
-                        {t('health_entries.food.calories_label', 'Calories')}
+                        {t('health_entries.food.calories_label')}
                     </Label>
                     <Input
                         id="calories"
@@ -209,7 +260,6 @@ function FoodFields({
                         name="calories"
                         placeholder={t(
                             'health_entries.food.calories_placeholder',
-                            'e.g., 400',
                         )}
                         defaultValue={entry?.calories ?? ''}
                     />

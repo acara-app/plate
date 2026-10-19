@@ -10,6 +10,7 @@ use Carbon\CarbonInterface;
 use Database\Factories\HealthSyncSampleFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -61,7 +62,7 @@ final class HealthSyncSample extends Model
             'standMinutes', 'standHours' => 'stand_time',
             'walkingSpeed', 'walkingStepLength', 'walkingDoubleSupportPercentage', 'walkingAsymmetry' => 'mobility',
             'environmentalAudioExposure' => 'environment',
-            'fiber', 'sugar', 'saturatedFat', 'monounsaturatedFat', 'polyunsaturatedFat',
+            'sugar', 'saturatedFat', 'monounsaturatedFat', 'polyunsaturatedFat',
             'dietaryCholesterol', 'sodium', 'potassium', 'calcium', 'iron', 'zinc', 'magnesium',
             'phosphorus', 'copper', 'manganese', 'chloride', 'vitaminA', 'vitaminC', 'vitaminD',
             'vitaminE', 'vitaminK', 'vitaminB6', 'vitaminB12', 'folate', 'biotin', 'niacin',
@@ -91,6 +92,22 @@ final class HealthSyncSample extends Model
             ->all();
 
         return $matched !== [] ? $matched : [$type];
+    }
+
+    /**
+     * @param  iterable<int, self>  $samples
+     */
+    public static function firstMetadataIn(iterable $samples, string $key): mixed
+    {
+        foreach ($samples as $sample) {
+            $value = ($sample->metadata ?? [])[$key] ?? null;
+
+            if ($value !== null) {
+                return $value;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -132,6 +149,22 @@ final class HealthSyncSample extends Model
     }
 
     /**
+     * @return Collection<int, self>
+     */
+    public function groupMembers(): Collection
+    {
+        return self::query()
+            ->where('user_id', $this->user_id)
+            ->when(
+                $this->group_id === null,
+                fn (Builder $query): Builder => $query->whereKey($this->id),
+                fn (Builder $query): Builder => $query->where('group_id', $this->group_id),
+            )
+            ->oldest('id')
+            ->get();
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
@@ -156,6 +189,19 @@ final class HealthSyncSample extends Model
         // @codeCoverageIgnoreStart
         $query->where('type_identifier', $type->value);
         // @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function logbookEntries(Builder $query): void
+    {
+        $query->where(fn (Builder $entries): Builder => $entries
+            ->whereIn('type_identifier', HealthSyncType::entryTypeValues())
+            ->orWhere(fn (Builder $grouped): Builder => $grouped
+                ->whereIn('type_identifier', HealthSyncType::groupOnlyValues())
+                ->whereNotNull('group_id')));
     }
 
     /**

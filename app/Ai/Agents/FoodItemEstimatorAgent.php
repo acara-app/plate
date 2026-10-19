@@ -43,7 +43,8 @@ final class FoodItemEstimatorAgent implements Agent, HasProviderOptions, HasStru
         $output = [
             'Return the structured response requested by the schema.',
             'Every value is for the full stated weight, not per 100 g.',
-            'Calories are in kcal; protein, carbs, fat, and grams are in grams.',
+            'Calories are in kcal; protein, carbs, fat, fiber, and grams are in grams.',
+            'carbs is total carbohydrate including dietary fiber; fiber is the total dietary fiber.',
             'Round every number to 1 decimal place.',
             '`portion` describes only this food: the weight in grams, followed by a short household measure for that amount in parentheses. Keep it under 60 characters and never mention any other food.',
         ];
@@ -66,7 +67,7 @@ final class FoodItemEstimatorAgent implements Agent, HasProviderOptions, HasStru
             steps: [
                 '1. Identify the food the name most likely refers to, including any preparation the name implies.',
                 '2. Use the given weight in grams. If no weight is given, assume one typical single portion and report the grams you assumed.',
-                '3. Estimate calories, protein, carbs, and fat for exactly that weight from standard nutrition reference values.',
+                '3. Estimate calories, protein, carbs, fat, and dietary fiber for exactly that weight from standard nutrition reference values.',
                 '4. Describe that amount of this food as `portion`.',
             ],
             output: $output,
@@ -83,6 +84,7 @@ final class FoodItemEstimatorAgent implements Agent, HasProviderOptions, HasStru
             'protein' => $schema->number()->required(),
             'carbs' => $schema->number()->required(),
             'fat' => $schema->number()->required(),
+            'fiber' => $schema->number()->required(),
             'grams' => $schema->number()->required(),
             'portion' => $schema->string()->required(),
         ];

@@ -25,14 +25,17 @@ it('dispatches daily aggregate refresh after deleting a health entry', function 
     Queue::assertPushed(AggregateUserDayJob::class, fn (AggregateUserDayJob $job): bool => str_contains($job->uniqueId(), $user->id.':'.$utcDate));
 });
 
-it('can delete own diabetes log', function (): void {
-    $user = User::factory()->create();
-    $sample = HealthSyncSample::factory()->bloodGlucose()->fromWeb()->create(['user_id' => $user->id]);
+it('deletes an own entry and returns to its day in the logbook', function (): void {
+    $user = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
+    $sample = HealthSyncSample::factory()->bloodGlucose()->fromWeb()->create([
+        'user_id' => $user->id,
+        'measured_at' => '2026-10-17 23:30:00',
+    ]);
 
     $response = $this->actingAs($user)
         ->delete(route('health-entries.destroy', $sample));
 
-    $response->assertRedirect();
+    $response->assertRedirectToRoute('health-entries.index', ['date' => '2026-10-18']);
 
     $this->assertDatabaseMissing('health_sync_samples', [
         'id' => $sample->id,

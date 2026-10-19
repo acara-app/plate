@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/dialog';
 import {
     HealthEntry,
+    LogTypeValue,
     ReadingType,
     RecentInsulin,
     RecentMedication,
@@ -26,6 +27,8 @@ interface DialogProps {
     recentInsulins?: RecentInsulin[];
     todaysMeals?: TodaysMeal[];
     logEntry?: HealthEntry;
+    type?: LogTypeValue;
+    defaultMeasuredAt?: string;
 }
 
 export default function HealthEntriesDialog({
@@ -39,9 +42,10 @@ export default function HealthEntriesDialog({
     recentInsulins = [],
     todaysMeals = [],
     logEntry,
+    type,
+    defaultMeasuredAt,
 }: DialogProps) {
     const { t } = useTranslation('common');
-
     if (mode === 'edit' && !logEntry) {
         return null;
     }
@@ -65,8 +69,10 @@ export default function HealthEntriesDialog({
                     </DialogDescription>
                 </DialogHeader>
                 <HealthEntryForm
-                    key={`${mode}-${logEntry?.id ?? 'new'}`}
+                    key={`${mode}-${logEntry?.id ?? 'new'}-${type ?? ''}-${defaultMeasuredAt ?? ''}`}
                     mode={mode}
+                    type={type}
+                    defaultMeasuredAt={defaultMeasuredAt}
                     glucoseReadingTypes={glucoseReadingTypes}
                     insulinTypes={insulinTypes}
                     glucoseUnit={glucoseUnit}

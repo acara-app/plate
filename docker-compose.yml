@@ -13,6 +13,42 @@ services:
       timeout: 5s
       retries: 5
 
+  storage:
+    image: rustfs/rustfs:latest
+    container_name: plate-storage
+    restart: unless-stopped
+    environment:
+      RUSTFS_ACCESS_KEY: '${R2_ACCESS_KEY_ID:-plate}'
+      RUSTFS_SECRET_KEY: '${R2_SECRET_ACCESS_KEY:-plate-secret}'
+    ports:
+      - '${DKR_STORAGE_PORT:-9000}:9000'
+      - '${DKR_STORAGE_CONSOLE_PORT:-9001}:9001'
+    volumes:
+      - storage_data:/data
+
+  storage-buckets:
+    image: amazon/aws-cli:latest
+    container_name: plate-storage-buckets
+    depends_on:
+      - storage
+    environment:
+      AWS_ACCESS_KEY_ID: '${R2_ACCESS_KEY_ID:-plate}'
+      AWS_SECRET_ACCESS_KEY: '${R2_SECRET_ACCESS_KEY:-plate-secret}'
+      AWS_DEFAULT_REGION: us-east-1
+      PRIVATE_BUCKET: '${R2_BUCKET_PRIVATE:-local-private}'
+      PUBLIC_BUCKET: '${R2_BUCKET_PUBLIC:-local-public}'
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - |
+        s3="aws --endpoint-url http://storage:9000"
+        until $$s3 s3 ls > /dev/null 2>&1; do sleep 1; done
+        for bucket in "$$PRIVATE_BUCKET" "$$PUBLIC_BUCKET"; do
+          $$s3 s3api head-bucket --bucket "$$bucket" > /dev/null 2>&1 || $$s3 s3 mb "s3://$$bucket"
+        done
+        $$s3 s3api put-bucket-policy --bucket "$$PUBLIC_BUCKET" --policy "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":\"*\",\"Action\":[\"s3:GetObject\"],\"Resource\":[\"arn:aws:s3:::$$PUBLIC_BUCKET/*\"]}]}"
+
 volumes:
   redis_data:
+    driver: local
+  storage_data:
     driver: local

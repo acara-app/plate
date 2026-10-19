@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Enums\HealthEntryType;
+use App\Enums\MealType;
 use App\Models\AnalysisDraft;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -20,6 +21,7 @@ final class ReviewedMealData extends Data
         public array $items,
         public CarbonImmutable $measuredAt,
         public ?string $notes = null,
+        public ?MealType $mealType = null,
     ) {}
 
     /**
@@ -31,6 +33,7 @@ final class ReviewedMealData extends Data
             items: self::normalizeItems($data['items'] ?? null),
             measuredAt: Date::parse(is_string($data['measured_at'] ?? null) ? $data['measured_at'] : 'now')->toImmutable(),
             notes: is_string($data['notes'] ?? null) && mb_trim($data['notes']) !== '' ? $data['notes'] : null,
+            mealType: MealType::tryFrom(is_string($data['meal_type'] ?? null) ? $data['meal_type'] : ''),
         );
     }
 
@@ -92,6 +95,8 @@ final class ReviewedMealData extends Data
             analyzerVersion: is_string($metadata['analyzer_version'] ?? null) ? $metadata['analyzer_version'] : null,
             foodSource: is_string($metadata['source'] ?? null) ? $metadata['source'] : null,
             draftReference: is_string($metadata['draft_reference'] ?? null) ? $metadata['draft_reference'] : null,
+            mealType: $this->mealType,
+            fiberGrams: $this->hasAny('fiber') ? $this->totalOf('fiber') : null,
         );
     }
 
@@ -104,6 +109,17 @@ final class ReviewedMealData extends Data
         }
 
         return round($total, 1);
+    }
+
+    private function hasAny(string $field): bool
+    {
+        foreach ($this->items as $item) {
+            if (is_numeric($item[$field] ?? null)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -119,6 +135,7 @@ final class ReviewedMealData extends Data
             'protein' => is_numeric($item['protein'] ?? null) ? round((float) $item['protein'], 1) : 0.0,
             'carbs' => is_numeric($item['carbs'] ?? null) ? round((float) $item['carbs'], 1) : 0.0,
             'fat' => is_numeric($item['fat'] ?? null) ? round((float) $item['fat'], 1) : 0.0,
+            'fiber' => is_numeric($item['fiber'] ?? null) ? round((float) $item['fiber'], 1) : null,
             'provenance' => in_array($item['provenance'] ?? null, ['model', 'reference', 'user'], true) ? $item['provenance'] : 'user',
         ], $this->items);
     }

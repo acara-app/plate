@@ -25,7 +25,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import EntryFields from './components/entry-fields';
 import EntryTypePicker from './components/entry-type-picker';
-import { FoodBreakdownFields } from './components/food-breakdown';
 
 interface HealthEntryFormProps {
     mode: 'create' | 'edit';
@@ -36,6 +35,8 @@ interface HealthEntryFormProps {
     recentInsulins?: RecentInsulin[];
     todaysMeals?: TodaysMeal[];
     entry?: HealthEntry;
+    type?: LogTypeValue;
+    defaultMeasuredAt?: string;
     onCancel: () => void;
 }
 
@@ -48,16 +49,21 @@ export default function HealthEntryForm({
     recentInsulins = [],
     todaysMeals = [],
     entry,
+    type,
+    defaultMeasuredAt: initialMeasuredAt,
     onCancel,
 }: HealthEntryFormProps) {
     const { t } = useTranslation('common');
     const [activeType, setActiveType] = useState<LogTypeValue | null>(
-        mode === 'edit' && entry ? getPrimaryType(entry) : null,
+        type ?? (mode === 'edit' && entry ? getPrimaryType(entry) : null),
     );
 
-    const [isEstimating, setIsEstimating] = useState(false);
-    const [defaultMeasuredAt] = useState(() =>
-        formatLocalDatetime(entry ? new Date(entry.measured_at) : new Date()),
+    const [defaultMeasuredAt] = useState(
+        () =>
+            initialMeasuredAt ??
+            formatLocalDatetime(
+                entry ? new Date(entry.measured_at) : new Date(),
+            ),
     );
 
     if (activeType === null) {
@@ -85,7 +91,6 @@ export default function HealthEntryForm({
             })}
             disableWhileProcessing
             onSuccess={onCancel}
-            onBefore={() => !isEstimating}
             className="flex min-h-0 flex-col"
         >
             {({ processing, errors }) => (
@@ -119,25 +124,17 @@ export default function HealthEntryForm({
                             )}
                         </div>
 
-                        {activeType === 'food' && entry?.food_analysis ? (
-                            <FoodBreakdownFields
-                                analysis={entry.food_analysis}
-                                errors={errors}
-                                onEstimatingChange={setIsEstimating}
-                            />
-                        ) : (
-                            <EntryFields
-                                type={activeType}
-                                entry={entry}
-                                errors={errors}
-                                glucoseReadingTypes={glucoseReadingTypes}
-                                insulinTypes={insulinTypes}
-                                glucoseUnit={glucoseUnit}
-                                recentMedications={recentMedications}
-                                recentInsulins={recentInsulins}
-                                todaysMeals={todaysMeals}
-                            />
-                        )}
+                        <EntryFields
+                            type={activeType}
+                            entry={entry}
+                            errors={errors}
+                            glucoseReadingTypes={glucoseReadingTypes}
+                            insulinTypes={insulinTypes}
+                            glucoseUnit={glucoseUnit}
+                            recentMedications={recentMedications}
+                            recentInsulins={recentInsulins}
+                            todaysMeals={todaysMeals}
+                        />
 
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="notes">
@@ -181,7 +178,7 @@ export default function HealthEntryForm({
                             type="submit"
                             variant="secondary"
                             className="h-11 min-w-24"
-                            disabled={processing || isEstimating}
+                            disabled={processing}
                         >
                             {mode === 'edit'
                                 ? t('health_entries.common.update')

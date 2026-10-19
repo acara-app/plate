@@ -17,3 +17,26 @@ export function localDatetimeToIso(value: string): string {
 
     return Number.isNaN(date.getTime()) ? value : date.toISOString();
 }
+
+function toDateKey(date: Date): string {
+    return formatLocalDatetime(date).slice(0, 10);
+}
+
+export function parseDateKey(key: string): Date {
+    const [year, month, day] = key.split('-').map(Number);
+
+    return new Date(year, month - 1, day);
+}
+
+export function addDaysToKey(key: string, days: number): string {
+    const date = parseDateKey(key);
+    date.setDate(date.getDate() + days);
+
+    return toDateKey(date);
+}
+
+export function startOfWeekKey(key: string): string {
+    const weekday = (parseDateKey(key).getDay() + 6) % 7;
+
+    return addDaysToKey(key, -weekday);
+}

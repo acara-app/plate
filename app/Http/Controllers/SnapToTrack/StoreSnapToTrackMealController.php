@@ -49,6 +49,7 @@ final readonly class StoreSnapToTrackMealController
         ]);
 
         return to_route('snap-to-track.index')
-            ->with('snap_to_track_saved_group', $groupId);
+            ->with('snap_to_track_saved_group', $groupId)
+            ->with('snap_to_track_saved_date', $meal->measuredAt->setTimezone($this->currentUser->resolveTimezone())->toDateString());
     }
 }

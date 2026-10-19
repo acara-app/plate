@@ -9,7 +9,9 @@ it('describes no database lookup when the reference lookup is disabled', functio
 
     expect(AiTransparency::usesReferenceLookup())->toBeFalse()
         ->and(implode(' ', AiTransparency::pipeline()))->toContain('not retrieved from a database')
-        ->and(AiTransparency::snapToTrackFaqs()[0]['a'])->toContain('not looked up in a live database');
+        ->and(implode(' ', AiTransparency::pipeline()))->toContain('fat, and fiber for every item')
+        ->and(AiTransparency::snapToTrackFaqs()[0]['a'])->toContain('not looked up in a live database')
+        ->and(AiTransparency::snapToTrackFaqs()[0]['a'])->toContain('fat, and fiber');
 });
 
 it('describes USDA-derived values when the reference lookup is enabled', function (): void {
