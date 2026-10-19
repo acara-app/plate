@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Str;
 
 it('keeps local meal times and the ingredient breakdown through saving and editing', function (): void {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
     $token = Str::random(64);
     AnalysisDraft::factory()->claimed($user)->create([
         'token_hash' => AnalysisDraft::hashToken($token),
@@ -22,8 +22,8 @@ it('keeps local meal times and the ingredient breakdown through saving and editi
     $page->fill('measured_at', '2026-10-16T11:57')
         ->fill('input[name="items[1][fiber]"]', '0.6')
         ->press('Log this meal')
-        ->assertSee('Meal logged!')
-        ->click('Open your logbook')
+        ->assertPathIs('/health-entries')
+        ->assertQueryStringHas('date', '2026-10-16')
         ->assertSee('Grilled chicken breast, Steamed rice')
         ->assertSee('11:57 AM')
         ->click('a:has-text("Grilled chicken breast")')
