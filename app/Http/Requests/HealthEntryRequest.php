@@ -88,6 +88,7 @@ final class HealthEntryRequest extends FormRequest
             'protein_grams' => ['nullable', 'numeric', 'min:0', 'max:500'],
             'fat_grams' => ['nullable', 'numeric', 'min:0', 'max:500'],
             'calories' => ['nullable', 'integer', 'min:0', 'max:5000'],
+            'fiber_grams' => ['nullable', 'numeric', 'min:0', 'max:300'],
             'meal_type' => ['nullable', Rule::enum(MealType::class)],
 
             'exercise_type' => [

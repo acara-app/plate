@@ -103,6 +103,22 @@ it('stores the meal type when the app sends one', function (): void {
         ->toBe(['lunch']);
 });
 
+it('stores fiber with the meal when the reviewed items carry it', function (): void {
+    [$token] = apiMobileDraftFor($this->user);
+
+    $response = $this->postJson(route('api.v2.snap-to-track.meal', ['draft' => $token]), apiReviewedMealPayload(['items' => [
+        ['name' => 'Lentil soup', 'calories' => 230, 'protein' => 18, 'carbs' => 40, 'fat' => 1, 'fiber' => 15.6, 'provenance' => 'model'],
+        ['name' => 'Bread', 'calories' => 80, 'protein' => 3, 'carbs' => 15, 'fat' => 1, 'fiber' => 1.9, 'provenance' => 'model'],
+    ]]))->assertCreated();
+
+    $samples = HealthSyncSample::query()->where('user_id', $this->user->id)->get();
+
+    expect((float) $response->json('totals.fiber'))->toBe(17.5)
+        ->and($samples)->toHaveCount(5)
+        ->and($samples->firstWhere('type_identifier', 'fiber')->value)->toBe(17.5)
+        ->and($samples->pluck('group_id')->unique())->toHaveCount(1);
+});
+
 it('refreshes the daily aggregate for the measured day', function (): void {
     Queue::fake();
 
@@ -186,6 +202,7 @@ it('validates the reviewed items', function (array $overrides, string $errorKey)
     'missing measured_at' => [['measured_at' => null], 'measured_at'],
     'notes too long' => [['notes' => str_repeat('a', 501)], 'notes'],
     'unknown meal type' => [['meal_type' => 'brunch'], 'meal_type'],
+    'negative fiber' => [['items' => [['name' => 'Toast', 'fiber' => -1]]], 'items.0.fiber'],
 ]);
 
 it('rejects a meal whose combined macros exceed the caps', function (): void {

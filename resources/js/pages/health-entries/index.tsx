@@ -7,6 +7,7 @@ import { formatLocalDatetime, parseDateKey } from '@/lib/format-local-datetime';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
 import {
+    DailyNutritionGoals,
     HealthEntry,
     ReadingType,
     RecentInsulin,
@@ -17,8 +18,10 @@ import { Head, Link } from '@inertiajs/react';
 import { BookOpen, Camera, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import DaySummary from './components/day-summary';
+import CalorieGoalCard from './components/calorie-goal-card';
 import EntryCard from './components/entry-card';
+import MacroGoals from './components/macro-goals';
+import { sumNutrition } from './components/macros';
 import WeekStrip from './components/week-strip';
 import HealthEntriesDialog from './health-entries-dialog';
 
@@ -28,6 +31,7 @@ interface Props {
     newEntryAt: string | null;
     entries: HealthEntry[];
     loggedDates: string[];
+    goals: DailyNutritionGoals | null;
     glucoseReadingTypes: ReadingType[];
     insulinTypes: ReadingType[];
     glucoseUnit: string;
@@ -42,6 +46,7 @@ export default function HealthEntriesIndex({
     newEntryAt,
     entries,
     loggedDates,
+    goals,
     glucoseReadingTypes,
     insulinTypes,
     glucoseUnit,
@@ -53,6 +58,7 @@ export default function HealthEntriesIndex({
     const createModal = useModalToggle();
     const [loading, setLoading] = useState(false);
     const isToday = date === today;
+    const totals = sumNutrition(entries);
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: t('health_entries.index_page.title'),
@@ -99,7 +105,11 @@ export default function HealthEntriesIndex({
                         loading && 'opacity-60',
                     )}
                 >
-                    <DaySummary entries={entries} />
+                    <CalorieGoalCard
+                        calories={totals.calories ?? 0}
+                        goals={goals}
+                    />
+                    <MacroGoals totals={totals} goals={goals} />
                     <section
                         aria-labelledby="day-entries-heading"
                         className="flex flex-col gap-4"

@@ -5,13 +5,14 @@ declare(strict_types=1);
 use App\Ai\Agents\FoodItemEstimatorAgent;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Data\Billing\TierEntitlement;
+use App\Data\FoodItemEstimateData;
 use App\Enums\SubscriptionTier;
 use App\Http\Controllers\SnapToTrack\EstimateSnapToTrackItemController;
 use App\Models\User;
 use Illuminate\Support\Facades\Exceptions;
 use Laravel\Ai\Prompts\AgentPrompt;
 
-covers(EstimateSnapToTrackItemController::class);
+covers(EstimateSnapToTrackItemController::class, FoodItemEstimateData::class);
 
 beforeEach(function (): void {
     app()->instance(ResolvesUserTier::class, new readonly class implements ResolvesUserTier
@@ -26,12 +27,12 @@ beforeEach(function (): void {
 });
 
 it('estimates nutrition and a new portion for a renamed item at the same weight', function (): void {
-    FoodItemEstimatorAgent::fake([['calories' => 19.96, 'protein' => 0.25, 'carbs' => 5.07, 'fat' => 0.1, 'grams' => 35, 'portion' => ' 35 g (about ¼ cup) ']]);
+    FoodItemEstimatorAgent::fake([['calories' => 19.96, 'protein' => 0.25, 'carbs' => 5.07, 'fat' => 0.1, 'fiber' => 0.84, 'grams' => 35, 'portion' => ' 35 g (about ¼ cup) ']]);
 
     $this->actingAs($this->user)
         ->postJson(route('snap-to-track.estimate-item'), ['name' => ' Blueberries ', 'grams' => 35])
         ->assertOk()
-        ->assertExactJson(['calories' => 20, 'protein' => 0.3, 'carbs' => 5.1, 'fat' => 0.1, 'grams' => 35, 'portion' => '35 g (about ¼ cup)']);
+        ->assertExactJson(['calories' => 20, 'protein' => 0.3, 'carbs' => 5.1, 'fat' => 0.1, 'fiber' => 0.8, 'grams' => 35, 'portion' => '35 g (about ¼ cup)']);
 });
 
 it('replaces a portion that named the old food and never sends that wording to the AI', function (): void {

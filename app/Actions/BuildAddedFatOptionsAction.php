@@ -83,6 +83,7 @@ final readonly class BuildAddedFatOptionsAction
                 carbs: round($item->carbs * $factor, 1),
                 fat: round($item->fat * $factor, 1),
                 selected: abs($grams - $itemGrams) <= self::SELECTED_TOLERANCE_GRAMS,
+                fiber: $item->fiber === null ? null : round($item->fiber * $factor, 1),
             );
         }
 

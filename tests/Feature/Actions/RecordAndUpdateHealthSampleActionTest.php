@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\DeleteHealthSampleAction;
 use App\Actions\UpdateHealthSampleAction;
 use App\Data\HealthLogData;
+use App\Data\ReviewedMealData;
 use App\Enums\HealthEntrySource;
 use App\Enums\HealthEntryType;
 use App\Enums\HealthSyncType;
@@ -78,6 +79,37 @@ it('keeps a meal when only the reading logged with it is edited', function (): v
         HealthSyncType::Carbohydrates->value => 50,
         HealthSyncType::BloodGlucose->value => 140,
     ]);
+});
+
+it("replaces or removes a meal's fiber when its ingredients are edited", function (?float $fiber, ?float $stored): void {
+    $user = User::factory()->create();
+    $groupId = (string) Str::uuid();
+    $sample = HealthSyncSample::factory()->for($user)->create(['type_identifier' => HealthSyncType::Carbohydrates->value, 'value' => 40, 'group_id' => $groupId]);
+    HealthSyncSample::factory()->for($user)->create(['type_identifier' => HealthSyncType::Fiber->value, 'value' => 6, 'group_id' => $groupId]);
+
+    resolve(UpdateHealthSampleAction::class)->handle($sample, new ReviewedMealData(
+        [['name' => 'Oats', 'calories' => 300, 'carbs' => 54, 'fiber' => $fiber]],
+        now()->toImmutable(),
+    )->toHealthLogDataWithMetadata([]));
+
+    expect(HealthSyncSample::query()->where('group_id', $groupId)->where('type_identifier', 'fiber')->value('value'))->toBe($stored);
+})->with([
+    'new fiber value' => [8.0, 8.0],
+    'fiber removed' => [null, null],
+]);
+
+it('clears fiber when a totals-only update explicitly sends none', function (): void {
+    $user = User::factory()->create();
+    $groupId = (string) Str::uuid();
+    $items = [['name' => 'Oats', 'calories' => 300, 'protein' => 10, 'carbs' => 54, 'fat' => 5, 'fiber' => 8, 'provenance' => 'model']];
+    $sample = HealthSyncSample::factory()->for($user)->create(['type_identifier' => HealthSyncType::Carbohydrates->value, 'value' => 54, 'group_id' => $groupId, 'metadata' => ['snap_to_track' => ['items' => $items]]]);
+    HealthSyncSample::factory()->for($user)->create(['type_identifier' => HealthSyncType::Fiber->value, 'value' => 8, 'group_id' => $groupId, 'metadata' => ['snap_to_track' => ['items' => $items]]]);
+
+    resolve(UpdateHealthSampleAction::class)->handle($sample, HealthLogData::fromParsedArray([
+        'log_type' => 'food', 'carbs_grams' => 54, 'protein_grams' => 10, 'fat_grams' => 5, 'calories' => 300, 'fiber_grams' => null,
+    ]));
+
+    expect(HealthSyncSample::query()->whereBelongsTo($user)->where('type_identifier', 'fiber')->exists())->toBeFalse();
 });
 
 it('creates additional group members when updating to a multi-sample entry', function (): void {

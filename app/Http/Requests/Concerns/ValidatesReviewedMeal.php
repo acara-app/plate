@@ -15,6 +15,7 @@ trait ValidatesReviewedMeal
         'carbs' => 1000,
         'protein' => 500,
         'fat' => 500,
+        'fiber' => 300,
     ];
 
     /**
@@ -31,6 +32,7 @@ trait ValidatesReviewedMeal
             'items.*.protein' => ['nullable', 'numeric', 'min:0', 'max:500'],
             'items.*.carbs' => ['nullable', 'numeric', 'min:0', 'max:1000'],
             'items.*.fat' => ['nullable', 'numeric', 'min:0', 'max:500'],
+            'items.*.fiber' => ['nullable', 'numeric', 'min:0', 'max:200'],
             'items.*.provenance' => ['nullable', 'string', 'in:model,reference,user'],
             'measured_at' => ['required', 'date'],
             'notes' => ['nullable', 'string', 'max:500'],

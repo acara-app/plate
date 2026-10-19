@@ -206,7 +206,7 @@ function FoodFields({
                 <InputError message={errors.carbs_grams} />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 <div className="flex flex-col gap-2">
                     <Label htmlFor="protein_grams">
                         {t('health_entries.food.protein_label')}
@@ -234,6 +234,21 @@ function FoodFields({
                         defaultValue={entry?.fat_grams ?? ''}
                     />
                     <InputError message={errors.fat_grams} />
+                </div>
+                <div className="flex flex-col gap-2">
+                    <Label htmlFor="fiber_grams">
+                        {t('health_entries.food.fiber_label')}
+                    </Label>
+                    <Input
+                        id="fiber_grams"
+                        type="number"
+                        step="0.1"
+                        min={0}
+                        name="fiber_grams"
+                        placeholder={t('health_entries.food.fiber_placeholder')}
+                        defaultValue={entry?.fiber_grams ?? ''}
+                    />
+                    <InputError message={errors.fiber_grams} />
                 </div>
                 <div className="flex flex-col gap-2">
                     <Label htmlFor="calories">

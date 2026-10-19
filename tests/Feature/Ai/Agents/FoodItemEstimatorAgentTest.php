@@ -23,12 +23,12 @@ it('writes the portion in the user language', function (): void {
 });
 
 it('returns the estimate and portion for the renamed food from its name and weight only', function (): void {
-    FoodItemEstimatorAgent::fake([['calories' => 20, 'protein' => 0.3, 'carbs' => 5.1, 'fat' => 0.1, 'grams' => 35, 'portion' => '35 g (about ¼ cup)']]);
+    FoodItemEstimatorAgent::fake([['calories' => 20, 'protein' => 0.3, 'carbs' => 5.1, 'fat' => 0.1, 'fiber' => 0.8, 'grams' => 35, 'portion' => '35 g (about ¼ cup)']]);
 
     $estimate = (new FoodItemEstimatorAgent)->estimate('Blueberries', 35.0);
 
     expect($estimate)->toBeInstanceOf(FoodItemEstimateData::class)
-        ->and($estimate->toArray())->toBe(['calories' => 20.0, 'protein' => 0.3, 'carbs' => 5.1, 'fat' => 0.1, 'grams' => 35.0, 'portion' => '35 g (about ¼ cup)']);
+        ->and($estimate->toArray())->toBe(['calories' => 20.0, 'protein' => 0.3, 'carbs' => 5.1, 'fat' => 0.1, 'grams' => 35.0, 'portion' => '35 g (about ¼ cup)', 'fiber' => 0.8]);
 
     FoodItemEstimatorAgent::assertPrompted(fn (AgentPrompt $prompt): bool => $prompt->contains('Food: "Blueberries". Weight: 35 g.'));
 });

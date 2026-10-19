@@ -49,6 +49,8 @@ final class HealthLogData extends Data
         public ?string $foodSource = null,
         public ?string $draftReference = null,
         public ?MealType $mealType = null,
+        public ?float $fiberGrams = null,
+        public bool $fiberGramsProvided = false,
     ) {}
 
     /**
@@ -80,6 +82,8 @@ final class HealthLogData extends Data
             measuredAt: self::toDateTime($data['measured_at'] ?? null),
             notes: self::toNullableString($data['notes'] ?? null),
             mealType: MealType::tryFrom(self::toNullableString($data['meal_type'] ?? null) ?? ''),
+            fiberGrams: self::toFloat($data['fiber_grams'] ?? null),
+            fiberGramsProvided: array_key_exists('fiber_grams', $data),
         );
     }
 
@@ -339,6 +343,10 @@ final class HealthLogData extends Data
 
         if ($samples === []) {
             $samples[] = $this->foodSample(HealthSyncType::DietaryEnergy, 0, $metadata);
+        }
+
+        if ($this->fiberGrams !== null) {
+            $samples[] = $this->foodSample(HealthSyncType::Fiber, $this->fiberGrams, $metadata);
         }
 
         return $samples;

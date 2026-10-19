@@ -3,8 +3,11 @@
 declare(strict_types=1);
 
 use App\Ai\Tools\UpdateUserBiometrics;
+use App\Enums\AnimalProductChoice;
 use App\Enums\BloodType;
+use App\Enums\DietType;
 use App\Enums\GoalChoice;
+use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use App\Models\User;
 use App\Models\UserProfile;
@@ -251,4 +254,22 @@ it('returns date_of_birth and blood_type in get response', function (): void {
         ->success->toBeTrue()
         ->biometrics->date_of_birth->toBe('1996-04-04')
         ->biometrics->blood_type->toBe('O+');
+});
+
+it('recomputes the diet type and activity level when the goal changes in chat', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create([
+        'goal_choice' => GoalChoice::HealthyEating,
+        'animal_product_choice' => AnimalProductChoice::Omnivore,
+        'intensity_choice' => IntensityChoice::Balanced,
+        'calculated_diet_type' => DietType::Balanced,
+        'derived_activity_multiplier' => 1.3,
+    ]);
+    $this->actingAs($user);
+
+    $this->tool->handle(new Request(['action' => 'update', 'goal_choice' => 'weight_loss', 'intensity_choice' => 'aggressive']));
+
+    expect($user->profile()->firstOrFail())
+        ->calculated_diet_type->toBe(DietType::Keto)
+        ->derived_activity_multiplier->toBe(1.55);
 });

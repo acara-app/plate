@@ -364,7 +364,10 @@ return [
             'empty_today' => 'Nothing logged yet today',
             'empty_day' => 'Nothing logged on this day',
             'empty_description' => 'Snap your meal or add a reading, and it will show up here.',
-            'day_total' => 'Eaten this day',
+            'calorie_goal' => 'Daily calorie goal',
+            'macros_heading' => 'Macronutrients',
+            'goal_of' => '/{{value}} {{unit}}',
+            'setup_goals' => 'Complete your profile to see your daily goals',
         ],
         'detail' => [
             'back' => 'Back to Logbook',
@@ -402,6 +405,7 @@ return [
             'protein' => 'Protein',
             'carbs' => 'Carbs',
             'fat' => 'Fat',
+            'fiber' => 'Fiber',
             'kcal' => 'kcal',
             'grams' => '{{value}}g',
             'grams_unit' => 'g',
@@ -458,6 +462,8 @@ return [
             'fat_placeholder' => 'e.g., 15',
             'calories_label' => 'Calories',
             'calories_placeholder' => 'e.g., 400',
+            'fiber_label' => 'Fiber (grams)',
+            'fiber_placeholder' => 'e.g., 8',
         ],
         'insulin' => [
             'quick_add' => 'Quick Add',
@@ -542,6 +548,7 @@ return [
             'protein' => 'Protein (g)',
             'carbs' => 'Carbs (g)',
             'fat' => 'Fat (g)',
+            'fiber' => 'Fiber (g)',
             'reference_badge' => 'Matched against USDA reference data',
             'rename' => [
                 'still_for' => 'Nutrition is still for “{{name}}”.',

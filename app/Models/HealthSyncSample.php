@@ -62,7 +62,7 @@ final class HealthSyncSample extends Model
             'standMinutes', 'standHours' => 'stand_time',
             'walkingSpeed', 'walkingStepLength', 'walkingDoubleSupportPercentage', 'walkingAsymmetry' => 'mobility',
             'environmentalAudioExposure' => 'environment',
-            'fiber', 'sugar', 'saturatedFat', 'monounsaturatedFat', 'polyunsaturatedFat',
+            'sugar', 'saturatedFat', 'monounsaturatedFat', 'polyunsaturatedFat',
             'dietaryCholesterol', 'sodium', 'potassium', 'calcium', 'iron', 'zinc', 'magnesium',
             'phosphorus', 'copper', 'manganese', 'chloride', 'vitaminA', 'vitaminC', 'vitaminD',
             'vitaminE', 'vitaminK', 'vitaminB6', 'vitaminB12', 'folate', 'biotin', 'niacin',
@@ -189,6 +189,19 @@ final class HealthSyncSample extends Model
         // @codeCoverageIgnoreStart
         $query->where('type_identifier', $type->value);
         // @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function logbookEntries(Builder $query): void
+    {
+        $query->where(fn (Builder $entries): Builder => $entries
+            ->whereIn('type_identifier', HealthSyncType::entryTypeValues())
+            ->orWhere(fn (Builder $grouped): Builder => $grouped
+                ->whereIn('type_identifier', HealthSyncType::groupOnlyValues())
+                ->whereNotNull('group_id')));
     }
 
     /**

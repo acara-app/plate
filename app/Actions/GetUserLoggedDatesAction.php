@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Enums\HealthSyncType;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 
@@ -18,7 +17,7 @@ final readonly class GetUserLoggedDatesAction
         $timezone = $from->getTimezone()->getName();
 
         $dates = $user->healthSyncSamples()
-            ->whereIn('type_identifier', HealthSyncType::entryTypeValues())
+            ->logbookEntries()
             ->where('measured_at', '>=', $from->startOfDay()->utc())
             ->where('measured_at', '<', $to->startOfDay()->addDay()->utc())
             ->toBase()

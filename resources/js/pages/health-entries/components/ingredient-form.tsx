@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
+    estimatedFields,
     needsNutritionUpdate,
     useFoodItemEstimate,
 } from '@/hooks/use-food-item-estimate';
+import { cn } from '@/lib/utils';
 import type { FoodBreakdownItem } from '@/types/diabetes';
 import { Sparkles, Trash2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
@@ -18,7 +20,7 @@ export type EditableItem = FoodBreakdownItem & {
     estimatedFor?: string;
 };
 
-type NutrientField = 'calories' | 'protein' | 'carbs' | 'fat';
+type NutrientField = 'calories' | 'protein' | 'carbs' | 'fat' | 'fiber';
 
 type Draft = {
     name: string;
@@ -35,6 +37,7 @@ const NUTRIENTS: { field: NutrientField; labelKey: string }[] = [
     { field: 'protein', labelKey: 'snap_to_track.review.protein' },
     { field: 'carbs', labelKey: 'snap_to_track.review.carbs' },
     { field: 'fat', labelKey: 'snap_to_track.review.fat' },
+    { field: 'fiber', labelKey: 'snap_to_track.review.fiber' },
 ];
 
 function toDraft(item: EditableItem | null): Draft {
@@ -48,6 +51,7 @@ function toDraft(item: EditableItem | null): Draft {
         protein: item ? String(item.protein) : '',
         carbs: item ? String(item.carbs) : '',
         fat: item ? String(item.fat) : '',
+        fiber: item?.fiber != null ? String(item.fiber) : '',
     };
 }
 
@@ -101,13 +105,7 @@ export default function IngredientForm({
                     current.name.trim() === name
                         ? {
                               ...current,
-                              portion: response.portion,
-                              grams: response.grams,
-                              calories: String(response.calories),
-                              protein: String(response.protein),
-                              carbs: String(response.carbs),
-                              fat: String(response.fat),
-                              provenance: 'user',
+                              ...estimatedFields(response, current.fiber),
                               estimatedFor: name,
                               estimateFailed: false,
                               estimatedTypical: isNew || draft.grams === null,
@@ -136,6 +134,7 @@ export default function IngredientForm({
             protein: toNumber(draft.protein),
             carbs: toNumber(draft.carbs),
             fat: toNumber(draft.fat),
+            fiber: draft.fiber.trim() === '' ? null : toNumber(draft.fiber),
         });
     };
 
@@ -218,7 +217,10 @@ export default function IngredientForm({
                     {NUTRIENTS.map(({ field, labelKey }) => (
                         <div
                             key={field}
-                            className="flex min-w-0 flex-col gap-2"
+                            className={cn(
+                                'flex min-w-0 flex-col gap-2',
+                                field === 'calories' && 'col-span-2',
+                            )}
                         >
                             <Label htmlFor={`ingredient-${field}`}>
                                 {t(labelKey)}

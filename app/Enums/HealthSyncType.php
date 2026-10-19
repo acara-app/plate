@@ -18,6 +18,7 @@ enum HealthSyncType: string
     case Protein = 'protein';
     case TotalFat = 'totalFat';
     case DietaryEnergy = 'dietaryEnergy';
+    case Fiber = 'fiber';
     case ExerciseMinutes = 'exerciseMinutes';
     case Workouts = 'workouts';
     case A1c = 'a1c';
@@ -38,7 +39,18 @@ enum HealthSyncType: string
     {
         return array_values(array_map(
             fn (self $case): string => $case->value,
-            array_filter(self::cases(), fn (self $case): bool => $case->isSyncable()),
+            array_filter(self::cases(), fn (self $case): bool => $case->isSyncable() && ! $case->isGroupOnly()),
+        ));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function groupOnlyValues(): array
+    {
+        return array_values(array_map(
+            fn (self $case): string => $case->value,
+            array_filter(self::cases(), fn (self $case): bool => $case->isGroupOnly()),
         ));
     }
 
@@ -58,6 +70,11 @@ enum HealthSyncType: string
         return ! $this->isUserCharacteristic() && $this !== self::BloodPressure;
     }
 
+    public function isGroupOnly(): bool
+    {
+        return $this === self::Fiber;
+    }
+
     public function isUserCharacteristic(): bool
     {
         return in_array($this, [
@@ -70,7 +87,7 @@ enum HealthSyncType: string
     public function category(): string
     {
         return match ($this) {
-            self::Carbohydrates, self::Protein, self::TotalFat, self::DietaryEnergy => 'food',
+            self::Carbohydrates, self::Protein, self::TotalFat, self::DietaryEnergy, self::Fiber => 'food',
             self::BloodGlucose => 'glucose',
             self::Weight, self::BloodPressureSystolic, self::BloodPressureDiastolic, self::BloodPressure, self::A1c => 'vitals',
             self::Insulin, self::Medication, self::MedicationDoseEvent => 'medication',
@@ -85,7 +102,7 @@ enum HealthSyncType: string
             self::BloodGlucose => 'mg/dL',
             self::BloodPressureSystolic, self::BloodPressureDiastolic, self::BloodPressure => 'mmHg',
             self::Weight => 'kg',
-            self::Carbohydrates, self::Protein, self::TotalFat => 'g',
+            self::Carbohydrates, self::Protein, self::TotalFat, self::Fiber => 'g',
             self::DietaryEnergy => 'kcal',
             self::ExerciseMinutes, self::Workouts => 'min',
             self::A1c => '%',
@@ -121,6 +138,7 @@ enum HealthSyncType: string
             self::Protein => 'Protein',
             self::TotalFat => 'Total Fat',
             self::DietaryEnergy => 'Calories',
+            self::Fiber => 'Fiber',
             self::ExerciseMinutes => 'Exercise',
             self::Workouts => 'Workouts',
             self::A1c => 'A1C',

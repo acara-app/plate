@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Enums\GoalChoice;
+use App\Enums\Sex;
 use App\Http\Controllers\HealthEntry\ListHealthEntryController;
 use App\Http\Requests\ListHealthEntriesRequest;
 use App\Models\HealthSyncSample;
 use App\Models\User;
+use App\Models\UserProfile;
 use Carbon\CarbonImmutable;
 
 covers(ListHealthEntryController::class, ListHealthEntriesRequest::class);
@@ -97,6 +100,20 @@ it('rejects malformed logbook dates', function (mixed $date): void {
         ->assertUnprocessable()
         ->assertJsonValidationErrors('date');
 })->with(['impossible month' => ['2026-13-01'], 'day first' => ['18-10-2026'], 'array' => [['2026-10-18']]]);
+
+it('shares daily nutrition goals once the profile allows them', function (bool $complete): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create($complete
+        ? ['age' => 30, 'date_of_birth' => null, 'height' => 180, 'weight' => 80, 'sex' => Sex::Male, 'goal_choice' => GoalChoice::HealthyEating, 'derived_activity_multiplier' => 1.5]
+        : ['weight' => null, 'goal_choice' => null]);
+
+    $this->actingAs($user)
+        ->get(route('health-entries.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $complete
+            ? $page->where('goals.calories', 2370)->where('goals.fiber', 33)
+            : $page->where('goals', null));
+})->with(['complete profile' => [true], 'skipped onboarding' => [false]]);
 
 it('suggests the current account-local time on a past day for new entries', function (): void {
     $this->travelTo(CarbonImmutable::parse('2026-10-18 17:00:00', 'UTC'));

@@ -16,5 +16,6 @@ final class AddedFatOptionData extends Data
         public float $carbs,
         public float $fat,
         public bool $selected,
+        public ?float $fiber = null,
     ) {}
 }

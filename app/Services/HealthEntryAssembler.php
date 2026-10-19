@@ -29,8 +29,10 @@ final readonly class HealthEntryAssembler
             ->flip();
 
         return $grouped->map(function (Collection $group) use ($photoGroupIds, $timezone): array {
+            $ordered = $group->sortBy('id');
+
             /** @var HealthSyncSample $primary */
-            $primary = $group->sortBy('id')->first();
+            $primary = $ordered->first(fn (HealthSyncSample $sample): bool => ! HealthSyncType::tryFrom($sample->type_identifier)?->isGroupOnly()) ?? $ordered->first();
 
             $entry = [
                 'id' => $primary->id,
@@ -51,6 +53,7 @@ final readonly class HealthEntryAssembler
                 'protein_grams' => null,
                 'fat_grams' => null,
                 'calories' => null,
+                'fiber_grams' => null,
                 'exercise_type' => null,
                 'exercise_duration_minutes' => null,
                 'source' => $primary->entry_source?->value,
@@ -109,6 +112,7 @@ final readonly class HealthEntryAssembler
             HealthSyncType::Protein->value => $entry['protein_grams'] = $sample->value,
             HealthSyncType::TotalFat->value => $entry['fat_grams'] = $sample->value,
             HealthSyncType::DietaryEnergy->value => $entry['calories'] = (int) $sample->value,
+            HealthSyncType::Fiber->value => $entry['fiber_grams'] = $sample->value,
             HealthSyncType::Weight->value => $entry['weight'] = $sample->value,
             HealthSyncType::BloodPressureSystolic->value => $entry['blood_pressure_systolic'] = (int) $sample->value,
             HealthSyncType::BloodPressureDiastolic->value => $entry['blood_pressure_diastolic'] = (int) $sample->value,

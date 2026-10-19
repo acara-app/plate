@@ -9,6 +9,7 @@ export type FoodItemEstimate = {
     protein: number;
     carbs: number;
     fat: number;
+    fiber?: number | null;
     grams: number;
     portion: string;
 };
@@ -24,6 +25,20 @@ type FoodItemEstimateCallbacks = {
 };
 
 const normalizedName = (value: string): string => value.trim().toLowerCase();
+
+export const estimatedFields = (
+    estimate: FoodItemEstimate,
+    currentFiber: string,
+) => ({
+    portion: estimate.portion,
+    grams: estimate.grams,
+    calories: String(estimate.calories),
+    protein: String(estimate.protein),
+    carbs: String(estimate.carbs),
+    fat: String(estimate.fat),
+    fiber: estimate.fiber != null ? String(estimate.fiber) : currentFiber,
+    provenance: 'user',
+});
 
 export const needsNutritionUpdate = (
     name: string,

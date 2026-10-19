@@ -20,6 +20,7 @@ it('keeps local meal times and the ingredient breakdown through saving and editi
         ->withLocale('en-US');
 
     $page->fill('measured_at', '2026-10-16T11:57')
+        ->fill('input[name="items[1][fiber]"]', '0.6')
         ->press('Log this meal')
         ->assertSee('Meal logged!')
         ->click('Open your logbook')
@@ -45,6 +46,11 @@ it('keeps local meal times and the ingredient breakdown through saving and editi
         ->assertSee('12:15 PM')
         ->assertNoJavaScriptErrors();
 
+    $this->assertDatabaseHas('health_sync_samples', [
+        'user_id' => $user->id,
+        'type_identifier' => 'fiber',
+        'value' => 0.6,
+    ]);
     $this->assertDatabaseHas('health_sync_samples', [
         'user_id' => $user->id,
         'type_identifier' => 'dietaryEnergy',
