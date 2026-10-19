@@ -96,6 +96,7 @@ final class ReviewedMealData extends Data
             foodSource: is_string($metadata['source'] ?? null) ? $metadata['source'] : null,
             draftReference: is_string($metadata['draft_reference'] ?? null) ? $metadata['draft_reference'] : null,
             mealType: $this->mealType,
+            fiberGrams: $this->hasAny('fiber') ? $this->totalOf('fiber') : null,
         );
     }
 
@@ -108,6 +109,17 @@ final class ReviewedMealData extends Data
         }
 
         return round($total, 1);
+    }
+
+    private function hasAny(string $field): bool
+    {
+        foreach ($this->items as $item) {
+            if (is_numeric($item[$field] ?? null)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -123,6 +135,7 @@ final class ReviewedMealData extends Data
             'protein' => is_numeric($item['protein'] ?? null) ? round((float) $item['protein'], 1) : 0.0,
             'carbs' => is_numeric($item['carbs'] ?? null) ? round((float) $item['carbs'], 1) : 0.0,
             'fat' => is_numeric($item['fat'] ?? null) ? round((float) $item['fat'], 1) : 0.0,
+            'fiber' => is_numeric($item['fiber'] ?? null) ? round((float) $item['fiber'], 1) : null,
             'provenance' => in_array($item['provenance'] ?? null, ['model', 'reference', 'user'], true) ? $item['provenance'] : 'user',
         ], $this->items);
     }

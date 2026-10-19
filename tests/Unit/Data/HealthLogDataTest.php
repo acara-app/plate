@@ -561,3 +561,13 @@ test('a manually logged meal keeps the chosen meal type on every nutrition sampl
     expect($samples)->toHaveCount(2)
         ->and(array_column(array_column($samples, 'metadata'), 'meal_type'))->toBe([MealType::Lunch->value, MealType::Lunch->value]);
 });
+
+test('a meal records fiber as its own sample only when fiber is known', function (?float $fiber, int $samples): void {
+    $data = HealthLogData::fromParsedArray(['log_type' => 'food', 'carbs_grams' => 45, 'fiber_grams' => $fiber]);
+
+    expect($data->toSampleArrays())->toHaveCount($samples)
+        ->and(array_column($data->toSampleArrays(), 'type_identifier'))->toContain('carbohydrates');
+})->with([
+    'with fiber' => [6.5, 2],
+    'without fiber' => [null, 1],
+]);

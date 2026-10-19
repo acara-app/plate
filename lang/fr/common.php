@@ -365,7 +365,10 @@ return [
             'empty_today' => 'Rien de noté pour l’instant aujourd’hui',
             'empty_day' => 'Rien de noté ce jour-là',
             'empty_description' => 'Photographiez votre repas ou ajoutez une mesure : il apparaîtra ici.',
-            'day_total' => 'Mangé ce jour-là',
+            'calorie_goal' => 'Objectif calorique du jour',
+            'macros_heading' => 'Macronutriments',
+            'goal_of' => '/{{value}} {{unit}}',
+            'setup_goals' => 'Complétez votre profil pour voir vos objectifs du jour',
         ],
         'detail' => [
             'back' => 'Retour au carnet',
@@ -403,6 +406,7 @@ return [
             'protein' => 'Protéines',
             'carbs' => 'Glucides',
             'fat' => 'Lipides',
+            'fiber' => 'Fibres',
             'kcal' => 'kcal',
             'grams' => '{{value}} g',
             'grams_unit' => 'g',
@@ -463,6 +467,8 @@ return [
             'fat_placeholder' => 'ex. 15',
             'calories_label' => 'Calories',
             'calories_placeholder' => 'ex. 400',
+            'fiber_label' => 'Fibres (grammes)',
+            'fiber_placeholder' => 'ex. 8',
         ],
         'insulin' => [
             'quick_add' => 'Ajout rapide',
@@ -547,6 +553,7 @@ return [
             'protein' => 'Protéines (g)',
             'carbs' => 'Glucides (g)',
             'fat' => 'Lipides (g)',
+            'fiber' => 'Fibres (g)',
             'reference_badge' => 'Comparé aux données de référence USDA',
             'rename' => [
                 'still_for' => 'Les valeurs nutritionnelles correspondent encore à « {{name}} ».',

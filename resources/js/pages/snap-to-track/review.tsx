@@ -39,6 +39,7 @@ type AnalysisItem = {
     protein: number;
     carbs: number;
     fat: number;
+    fiber?: number | null;
     portion: string;
     grams?: number | null;
     provenance: string;
@@ -60,6 +61,7 @@ type AddedFatOption = {
     protein: number;
     carbs: number;
     fat: number;
+    fiber?: number | null;
     selected: boolean;
 };
 
@@ -70,6 +72,7 @@ type ReviewItem = {
     protein: string;
     carbs: string;
     fat: string;
+    fiber: string;
     provenance: string;
     fatOptions?: AddedFatOption[];
     fatChoice?: string;
@@ -79,7 +82,7 @@ type ReviewItem = {
     estimateFailed?: boolean;
 };
 
-type MacroField = 'calories' | 'protein' | 'carbs' | 'fat';
+type MacroField = 'calories' | 'protein' | 'carbs' | 'fat' | 'fiber';
 
 interface SnapToTrackReviewProps {
     photoAllowance?: PhotoAllowance;
@@ -103,6 +106,7 @@ const emptyItem = (): ReviewItem => ({
     protein: '',
     carbs: '',
     fat: '',
+    fiber: '',
     provenance: 'user',
 });
 
@@ -124,6 +128,7 @@ export default function SnapToTrackReview({
             protein: String(item.protein),
             carbs: String(item.carbs),
             fat: String(item.fat),
+            fiber: item.fiber != null ? String(item.fiber) : '',
             provenance: ['model', 'reference'].includes(item.provenance)
                 ? item.provenance
                 : 'user',
@@ -188,6 +193,10 @@ export default function SnapToTrackReview({
                     protein: String(option.protein),
                     carbs: String(option.carbs),
                     fat: String(option.fat),
+                    fiber:
+                        option.fiber != null
+                            ? String(option.fiber)
+                            : item.fiber,
                     provenance: 'user',
                     fatChoice: key,
                 };
@@ -224,6 +233,10 @@ export default function SnapToTrackReview({
                                   protein: String(response.protein),
                                   carbs: String(response.carbs),
                                   fat: String(response.fat),
+                                  fiber:
+                                      response.fiber != null
+                                          ? String(response.fiber)
+                                          : row.fiber,
                                   grams: response.grams,
                                   provenance: 'user',
                                   estimatedFor: name,
@@ -251,8 +264,9 @@ export default function SnapToTrackReview({
             protein: accumulator.protein + numericValue(item.protein),
             carbs: accumulator.carbs + numericValue(item.carbs),
             fat: accumulator.fat + numericValue(item.fat),
+            fiber: accumulator.fiber + numericValue(item.fiber),
         }),
-        { calories: 0, protein: 0, carbs: 0, fat: 0 },
+        { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
     );
 
     if (state !== 'restored' || analysis === null || draftToken === null) {
@@ -288,7 +302,13 @@ export default function SnapToTrackReview({
         );
     }
 
-    const macroFields: MacroField[] = ['calories', 'protein', 'carbs', 'fat'];
+    const macroFields: MacroField[] = [
+        'calories',
+        'protein',
+        'carbs',
+        'fat',
+        'fiber',
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -492,9 +512,16 @@ export default function SnapToTrackReview({
                                                     className="mt-1"
                                                 />
                                             </div>
-                                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
                                                 {macroFields.map((field) => (
-                                                    <div key={field}>
+                                                    <div
+                                                        key={field}
+                                                        className={
+                                                            field === 'calories'
+                                                                ? 'col-span-2 sm:col-span-1'
+                                                                : undefined
+                                                        }
+                                                    >
                                                         <Label
                                                             htmlFor={`item-${field}-${index}`}
                                                         >
@@ -565,7 +592,7 @@ export default function SnapToTrackReview({
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                                    <dl className="grid grid-cols-3 gap-4 sm:grid-cols-5">
                                         {macroFields.map((field) => (
                                             <div key={field}>
                                                 <dt className="text-xs text-muted-foreground uppercase">

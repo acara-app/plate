@@ -18,6 +18,7 @@ it('returns correct units for all types', function (HealthSyncType $type, string
     [HealthSyncType::Protein, 'g'],
     [HealthSyncType::TotalFat, 'g'],
     [HealthSyncType::DietaryEnergy, 'kcal'],
+    [HealthSyncType::Fiber, 'g'],
     [HealthSyncType::ExerciseMinutes, 'min'],
     [HealthSyncType::Workouts, 'min'],
     [HealthSyncType::A1c, '%'],
@@ -40,6 +41,7 @@ it('returns correct labels for all types', function (HealthSyncType $type, strin
     [HealthSyncType::Protein, 'Protein'],
     [HealthSyncType::TotalFat, 'Total Fat'],
     [HealthSyncType::DietaryEnergy, 'Calories'],
+    [HealthSyncType::Fiber, 'Fiber'],
     [HealthSyncType::ExerciseMinutes, 'Exercise'],
     [HealthSyncType::Workouts, 'Workouts'],
     [HealthSyncType::A1c, 'A1C'],
@@ -59,10 +61,11 @@ it('returns entry type values with all syncable types', function (): void {
         ->not->toContain(HealthSyncType::BiologicalSex->value)
         ->not->toContain(HealthSyncType::DateOfBirth->value)
         ->not->toContain(HealthSyncType::BloodType->value)
-        ->not->toContain(HealthSyncType::BloodPressure->value);
+        ->not->toContain(HealthSyncType::BloodPressure->value)
+        ->not->toContain(HealthSyncType::Fiber->value);
 
     foreach (HealthSyncType::cases() as $case) {
-        if ($case->isSyncable()) {
+        if ($case->isSyncable() && $case !== HealthSyncType::Fiber) {
             expect($values)->toContain($case->value);
         }
     }

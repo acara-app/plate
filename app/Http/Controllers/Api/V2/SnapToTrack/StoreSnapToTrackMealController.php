@@ -55,6 +55,7 @@ final readonly class StoreSnapToTrackMealController
                 'protein' => $meal->totalOf('protein'),
                 'carbs' => $meal->totalOf('carbs'),
                 'fat' => $meal->totalOf('fat'),
+                'fiber' => $meal->totalOf('fiber'),
             ],
         ], $replay ? 200 : 201);
     }

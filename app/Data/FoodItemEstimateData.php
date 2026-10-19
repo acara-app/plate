@@ -17,6 +17,7 @@ final class FoodItemEstimateData extends Data
         public float $fat,
         public float $grams,
         public string $portion = '',
+        public ?float $fiber = null,
     ) {}
 
     public function normalized(): self
@@ -31,6 +32,7 @@ final class FoodItemEstimateData extends Data
             fat: round(max(0.0, $this->fat), 1),
             grams: $grams,
             portion: $portion !== '' ? $portion : mb_rtrim(mb_rtrim(number_format($grams, 1, '.', ''), '0'), '.').' g',
+            fiber: $this->fiber === null ? null : round(max(0.0, $this->fiber), 1),
         );
     }
 }

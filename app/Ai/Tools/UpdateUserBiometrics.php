@@ -13,6 +13,7 @@ use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Services\DietMapper;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
@@ -197,6 +198,18 @@ final readonly class UpdateUserBiometrics implements Tool
 
         if ($updateData === []) {
             return (string) json_encode(['error' => 'No valid fields provided to update.']);
+        }
+
+        $goal = $updateData['goal_choice'] ?? $profile->goal_choice;
+
+        if ($goal instanceof GoalChoice && array_intersect_key($updateData, array_flip(['goal_choice', 'animal_product_choice', 'intensity_choice'])) !== []) {
+            $animal = $updateData['animal_product_choice'] ?? $profile->animal_product_choice ?? AnimalProductChoice::Omnivore;
+            $intensity = $updateData['intensity_choice'] ?? $profile->intensity_choice ?? IntensityChoice::Balanced;
+
+            if ($animal instanceof AnimalProductChoice && $intensity instanceof IntensityChoice) {
+                $updateData['calculated_diet_type'] = DietMapper::map($goal, $animal, $intensity);
+                $updateData['derived_activity_multiplier'] = DietMapper::getActivityMultiplier($goal, $intensity);
+            }
         }
 
         $profile->update($updateData);

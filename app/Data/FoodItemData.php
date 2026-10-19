@@ -22,5 +22,6 @@ final class FoodItemData extends Data
         public ?float $grams = null,
         public ?string $matchName = null,
         public FoodValueProvenance $provenance = FoodValueProvenance::Model,
+        public ?float $fiber = null,
     ) {}
 }

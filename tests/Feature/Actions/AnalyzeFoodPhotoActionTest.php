@@ -15,6 +15,7 @@ function fakePhotoAnalysis(array $items, array $totals): void
         'total_protein' => $totals['protein'] ?? 0,
         'total_carbs' => $totals['carbs'] ?? 0,
         'total_fat' => $totals['fat'] ?? 0,
+        'total_fiber' => $totals['fiber'] ?? null,
         'confidence' => 80,
     ]]);
 }
@@ -44,9 +45,9 @@ it('replaces matched item macros with computed reference values when enabled', f
     ]);
 
     fakePhotoAnalysis([
-        ['name' => 'Hummus', 'calories' => 200.0, 'protein' => 5.0, 'carbs' => 10.0, 'fat' => 15.0, 'portion' => '100g', 'grams' => 100.0, 'match_name' => 'hummus commercial'],
-        ['name' => 'Pita', 'calories' => 250.0, 'protein' => 8.0, 'carbs' => 50.0, 'fat' => 2.0, 'portion' => '80g', 'grams' => 80.0, 'match_name' => 'pita bread'],
-    ], ['calories' => 450, 'protein' => 13, 'carbs' => 60, 'fat' => 17]);
+        ['name' => 'Hummus', 'calories' => 200.0, 'protein' => 5.0, 'carbs' => 10.0, 'fat' => 15.0, 'fiber' => 6.0, 'portion' => '100g', 'grams' => 100.0, 'match_name' => 'hummus commercial'],
+        ['name' => 'Pita', 'calories' => 250.0, 'protein' => 8.0, 'carbs' => 50.0, 'fat' => 2.0, 'fiber' => 2.2, 'portion' => '80g', 'grams' => 80.0, 'match_name' => 'pita bread'],
+    ], ['calories' => 450, 'protein' => 13, 'carbs' => 60, 'fat' => 17, 'fiber' => 8.2]);
 
     $result = $this->action->handle(base64_encode('img'), 'image/jpeg');
 
@@ -60,7 +61,9 @@ it('replaces matched item macros with computed reference values when enabled', f
         ->and($pita->calories)->toBe(250.0)
         ->and($result->totalCalories)->toBe(416.0)
         ->and($result->totalCarbs)->toBe(64.3)
-        ->and($result->referenceRelease)->toBe('USDA Foundation 2026-04-30');
+        ->and($result->referenceRelease)->toBe('USDA Foundation 2026-04-30')
+        ->and($hummus->fiber)->toBe(6.0)
+        ->and($result->totalFiber)->toBe(8.2);
 });
 
 it('leaves model values untouched when the lookup is disabled', function (): void {

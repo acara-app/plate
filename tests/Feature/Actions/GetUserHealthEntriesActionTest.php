@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\GetUserHealthEntriesAction;
+use App\Actions\GetUserLoggedDatesAction;
 use App\Enums\HealthSyncType;
 use App\Models\HealthSyncSample;
 use App\Models\User;
@@ -61,4 +62,20 @@ it('orders the day newest first and scopes it to the requesting user and local d
 
     expect($entries->pluck('group_id')->all())->toBe(['late-snack', 'breakfast'])
         ->and($entries->pluck('meal_type')->all())->toBe(['snack', 'breakfast']);
+});
+
+it('shows fiber logged with a meal but keeps standalone synced fiber off the logbook', function (): void {
+    $user = User::factory()->create();
+    $day = CarbonImmutable::parse('2026-10-18', 'UTC');
+    seedMeal($user, 'lunch', $day->setTime(12, 0));
+    HealthSyncSample::factory()->create(['user_id' => $user->id, 'type_identifier' => 'fiber', 'value' => 9.5, 'group_id' => 'lunch', 'measured_at' => $day->setTime(12, 0)]);
+    HealthSyncSample::factory()->create(['user_id' => $user->id, 'type_identifier' => 'fiber', 'value' => 4, 'group_id' => null, 'measured_at' => $day->setTime(18, 0)]);
+    HealthSyncSample::factory()->create(['user_id' => $user->id, 'type_identifier' => 'fiber', 'value' => 3, 'group_id' => null, 'measured_at' => $day->addDay()->setTime(9, 0)]);
+
+    $entries = resolve(GetUserHealthEntriesAction::class)->handle($user, $day);
+    $loggedDates = resolve(GetUserLoggedDatesAction::class)->handle($user, $day, $day->addDay());
+
+    expect($entries)->toHaveCount(1)
+        ->and($entries[0]['fiber_grams'])->toBe(9.5)
+        ->and($loggedDates)->toBe(['2026-10-18']);
 });

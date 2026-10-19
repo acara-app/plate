@@ -29,8 +29,9 @@ final readonly class ShowHealthEntryController
         abort_unless(in_array($healthSyncSample->type_identifier, $entryTypes, true), 404);
 
         $timezone = $this->currentUser->resolveTimezone();
+        $memberTypes = [...$entryTypes, HealthSyncType::Fiber->value];
         $members = $healthSyncSample->groupMembers()
-            ->filter(fn (HealthSyncSample $member): bool => in_array($member->type_identifier, $entryTypes, true));
+            ->filter(fn (HealthSyncSample $member): bool => in_array($member->type_identifier, $memberTypes, true));
 
         return Inertia::render('health-entries/show', [
             'entry' => $this->assembler->assemble($members, $timezone)->sole(),

@@ -5,12 +5,15 @@ declare(strict_types=1);
 use App\Ai\Agents\FoodItemEstimatorAgent;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Data\Billing\TierEntitlement;
+use App\Enums\GoalChoice;
+use App\Enums\Sex;
 use App\Enums\SubscriptionTier;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Models\AnalysisDraft;
 use App\Models\HealthSyncSample;
 use App\Models\MealPhoto;
 use App\Models\User;
+use App\Models\UserProfile;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Storage;
@@ -308,3 +311,51 @@ it('edits a reading logged with a meal without losing the meal or its photo', fu
     expect(HealthSyncSample::query()->where('group_id', $sample->group_id)->count())->toBe(5)
         ->and(MealPhoto::query()->where('health_group_id', $sample->group_id)->exists())->toBeTrue();
 })->with(['food and glucose' => [true], 'food and vitals' => [false]]);
+
+it('shows the daily calorie goal and macro progress for a completed profile', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['age' => 30, 'date_of_birth' => null, 'height' => 180, 'weight' => 80, 'sex' => Sex::Male, 'goal_choice' => GoalChoice::HealthyEating, 'derived_activity_multiplier' => 1.5]);
+    createLogbookMeal($user);
+    $this->actingAs($user);
+
+    visit(route('health-entries.index', ['date' => '2026-10-16'], absolute: false))->on()->mobile()
+        ->assertSee('Daily calorie goal')
+        ->assertSeeIn('#calorie-goal-heading + p', '490')
+        ->assertSeeIn('#calorie-goal-heading + p', '/2370 kcal')
+        ->assertSee('Macronutrients')
+        ->assertSee('/119 g')
+        ->assertSee('33%')
+        ->assertSee('/33 g')
+        ->assertDontSee('Complete your profile to see your daily goals')
+        ->assertNoJavaScriptErrors();
+});
+
+it('invites people who skipped onboarding to set up their daily goals', function (): void {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    visit(route('health-entries.index', absolute: false))->on()->mobile()
+        ->assertSee('Daily calorie goal')
+        ->click('Complete your profile to see your daily goals')
+        ->assertPathIs('/onboarding/biometrics')
+        ->assertNoJavaScriptErrors();
+});
+
+it('adds fiber to an ingredient and saves it with the meal', function (): void {
+    $user = User::factory()->create();
+    $sample = createLogbookMeal($user);
+    $this->actingAs($user);
+
+    visit(route('health-entries.show', $sample, absolute: false))
+        ->click('button:has-text("Steamed rice")')
+        ->assertSee('Edit ingredient')
+        ->fill('#ingredient-fiber', '1.8')
+        ->press('Apply')
+        ->assertMissing('[role="dialog"]')
+        ->assertSee('1.8g')
+        ->press('Done')
+        ->assertSee('490 kcal')
+        ->assertNoJavaScriptErrors();
+
+    expect(HealthSyncSample::query()->whereBelongsTo($user)->where('type_identifier', 'fiber')->value('value'))->toBe(1.8);
+});

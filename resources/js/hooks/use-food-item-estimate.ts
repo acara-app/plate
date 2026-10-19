@@ -9,6 +9,7 @@ export type FoodItemEstimate = {
     protein: number;
     carbs: number;
     fat: number;
+    fiber?: number | null;
     grams: number;
     portion: string;
 };

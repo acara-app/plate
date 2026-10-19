@@ -45,7 +45,7 @@ it('leaves foods that are not added fats alone', function (array $item): void {
 it('rescales the item for each amount and preselects the model guess', function (): void {
     $options = resolve(BuildAddedFatOptionsAction::class)->handle(analysisWith(
         ['name' => 'Mixed Salad Greens', 'calories' => 17, 'fat' => 0.3, 'grams' => 100],
-        ['name' => 'Olive Oil Dressing', 'match_name' => 'olive oil', 'calories' => 119, 'fat' => 13.5, 'grams' => 14],
+        ['name' => 'Olive Oil Dressing', 'match_name' => 'olive oil', 'calories' => 119, 'fat' => 13.5, 'fiber' => 0.4, 'grams' => 14],
     ));
 
     expect($options)->toHaveKeys([1])->not->toHaveKey(0);
@@ -55,7 +55,7 @@ it('rescales the item for each amount and preselects the model guess', function 
     expect($byKey['none']->toArray())->toMatchArray(['grams' => 0.0, 'calories' => 0.0, 'fat' => 0.0, 'selected' => false])
         ->and($byKey['half_tbsp']->toArray())->toMatchArray(['grams' => 7.0, 'calories' => 59.5, 'fat' => 6.8, 'selected' => false])
         ->and($byKey['one_tbsp']->toArray())->toMatchArray(['grams' => 14.0, 'calories' => 119.0, 'fat' => 13.5, 'selected' => true])
-        ->and($byKey['two_tbsp']->toArray())->toMatchArray(['grams' => 28.0, 'calories' => 238.0, 'fat' => 27.0, 'selected' => false]);
+        ->and($byKey['two_tbsp']->toArray())->toMatchArray(['grams' => 28.0, 'calories' => 238.0, 'fat' => 27.0, 'fiber' => 0.8, 'selected' => false]);
 });
 
 it('returns nothing when there is no analysis', function (): void {

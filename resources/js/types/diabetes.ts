@@ -59,6 +59,7 @@ export interface HealthEntry {
     protein_grams: number | null;
     fat_grams: number | null;
     calories: number | null;
+    fiber_grams: number | null;
     exercise_type: string | null;
     exercise_duration_minutes: number | null;
     source: string | null;
@@ -76,6 +77,7 @@ export interface FoodBreakdownItem {
     protein: number;
     carbs: number;
     fat: number;
+    fiber?: number | null;
     provenance: string;
 }
 
@@ -111,4 +113,12 @@ export interface TodaysMeal {
     fat?: number;
     calories?: number;
     label: string;
+}
+
+export interface DailyNutritionGoals {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    fiber: number;
 }

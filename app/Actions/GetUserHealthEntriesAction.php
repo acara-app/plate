@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Enums\HealthSyncType;
 use App\Models\User;
 use App\Services\HealthEntryAssembler;
 use Carbon\CarbonImmutable;
@@ -23,7 +22,7 @@ final readonly class GetUserHealthEntriesAction
         $start = $day->startOfDay();
 
         $samples = $user->healthSyncSamples()
-            ->whereIn('type_identifier', HealthSyncType::entryTypeValues())
+            ->logbookEntries()
             ->where('measured_at', '>=', $start->utc())
             ->where('measured_at', '<', $start->addDay()->utc())
             ->get();

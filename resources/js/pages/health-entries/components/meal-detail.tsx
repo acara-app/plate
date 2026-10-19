@@ -80,6 +80,7 @@ export default function MealDetail({
         protein_grams: entry.protein_grams,
         carbs_grams: entry.carbs_grams,
         fat_grams: entry.fat_grams,
+        fiber_grams: entry.fiber_grams,
     });
     const [sheetKey, setSheetKey] = useState(0);
     const [ingredientOpen, setIngredientOpen] = useState(false);
@@ -97,6 +98,9 @@ export default function MealDetail({
               protein_grams: items.reduce((sum, item) => sum + item.protein, 0),
               carbs_grams: items.reduce((sum, item) => sum + item.carbs, 0),
               fat_grams: items.reduce((sum, item) => sum + item.fat, 0),
+              fiber_grams: items.some((item) => item.fiber != null)
+                  ? items.reduce((sum, item) => sum + (item.fiber ?? 0), 0)
+                  : null,
           }
         : data;
     const measuredAt = new Date(data.measured_at);
@@ -194,6 +198,7 @@ export default function MealDetail({
                           protein: item.protein,
                           carbs: item.carbs,
                           fat: item.fat,
+                          fiber: item.fiber ?? null,
                           provenance: item.provenance,
                       })),
                   }
@@ -203,6 +208,7 @@ export default function MealDetail({
                       protein_grams: current.protein_grams,
                       carbs_grams: current.carbs_grams,
                       fat_grams: current.fat_grams,
+                      fiber_grams: current.fiber_grams,
                   };
         });
 
@@ -308,7 +314,12 @@ export default function MealDetail({
                     </Button>
                 )}
             </div>
-            <dl className="grid grid-cols-3 gap-3">
+            <dl
+                className={cn(
+                    'grid gap-2 sm:gap-3',
+                    isItemized ? 'grid-cols-4' : 'grid-cols-2 sm:grid-cols-4',
+                )}
+            >
                 {MACROS.map((macro) => {
                     const value = totals[macro.field];
 
@@ -316,7 +327,7 @@ export default function MealDetail({
                         <div
                             key={macro.key}
                             className={cn(
-                                'relative flex min-w-0 flex-col gap-3 rounded-3xl p-4',
+                                'relative flex min-w-0 flex-col gap-2 rounded-3xl p-3 sm:p-4',
                                 macro.card,
                                 errors[macro.field] &&
                                     'ring-2 ring-destructive',
@@ -325,19 +336,19 @@ export default function MealDetail({
                             <span
                                 aria-hidden="true"
                                 className={cn(
-                                    'flex size-10 items-center justify-center rounded-full',
+                                    'flex size-9 items-center justify-center rounded-full',
                                     macro.tile,
                                 )}
                             >
                                 <macro.Icon
-                                    className={cn('size-5', macro.icon)}
+                                    className={cn('size-[18px]', macro.icon)}
                                 />
                             </span>
                             <div className="flex min-w-0 flex-col-reverse">
-                                <dt className="truncate text-sm text-muted-foreground">
+                                <dt className="truncate text-xs text-muted-foreground sm:text-sm">
                                     {t(macro.labelKey)}
                                 </dt>
-                                <dd className="text-xl font-semibold tabular-nums">
+                                <dd className="text-lg font-semibold tabular-nums sm:text-xl">
                                     {value === null
                                         ? '—'
                                         : t('health_entries.nutrition.grams', {
