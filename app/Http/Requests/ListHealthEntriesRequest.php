@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class ListHealthEntriesRequest extends FormRequest
@@ -24,5 +25,10 @@ final class ListHealthEntriesRequest extends FormRequest
         return is_string($date)
             ? CarbonImmutable::parse($date, $timezone)->startOfDay()
             : CarbonImmutable::now($timezone)->startOfDay();
+    }
+
+    public function selectedWeekStart(string $timezone): CarbonImmutable
+    {
+        return $this->selectedDay($timezone)->startOfWeek(CarbonInterface::MONDAY);
     }
 }

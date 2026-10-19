@@ -12,7 +12,6 @@ use App\Http\Layouts\DiabetesLayout;
 use App\Http\Requests\ListHealthEntriesRequest;
 use App\Models\User;
 use Carbon\CarbonImmutable;
-use Carbon\CarbonInterface;
 use Illuminate\Container\Attributes\CurrentUser;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -30,7 +29,7 @@ final readonly class ListHealthEntryController
     {
         $timezone = $this->currentUser->resolveTimezone();
         $day = $request->selectedDay($timezone);
-        $weekStart = $day->startOfWeek(CarbonInterface::MONDAY);
+        $weekStart = $request->selectedWeekStart($timezone);
         $now = CarbonImmutable::now($timezone);
 
         return Inertia::render('health-entries/index', [

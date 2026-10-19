@@ -14,10 +14,12 @@ use App\Models\HealthSyncSample;
 use App\Models\MealPhoto;
 use App\Models\User;
 use App\Models\UserProfile;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Pest\Browser\Api\AwaitableWebpage;
 
 function createLogbookMeal(User $user, bool $large = false): HealthSyncSample
 {
@@ -53,6 +55,11 @@ function storeLogbookPhoto(User $user, HealthSyncSample $sample): void
     Storage::disk(MealPhoto::DISK)->put($photo->path, (string) UploadedFile::fake()->image('meal.jpg', 960, 640)->get());
 }
 
+function scrollToPreviousWeek(AwaitableWebpage $page): void
+{
+    $page->script('const strip = document.querySelector("#health-entry-weeks"); strip.scrollBy({ left: -strip.clientWidth, behavior: "instant" });');
+}
+
 it('shows a day’s meal as a card and opens its nutrition page with the photo on mobile', function (): void {
     Storage::fake(MealPhoto::DISK);
     $user = User::factory()->create();
@@ -78,19 +85,32 @@ it('shows a day’s meal as a card and opens its nutrition page with the photo o
         ->assertNoJavaScriptErrors();
 });
 
-it('moves between days and weeks with the week strip', function (): void {
-    $user = User::factory()->create();
+it('browses whole weeks without changing entries until a day is selected', function (bool $mobile): void {
+    $this->travelTo(CarbonImmutable::parse('2026-10-19 12:00:00', 'UTC'));
+    $user = User::factory()->create(['timezone' => 'UTC']);
     createLogbookMeal($user);
-    HealthSyncSample::factory()->create([
+    HealthSyncSample::factory()->weight()->fromWeb()->create([
         'user_id' => $user->id,
-        'type_identifier' => 'exerciseMinutes',
+        'value' => 75,
+        'measured_at' => '2026-10-09T12:00:00Z',
+    ]);
+    HealthSyncSample::factory()->exercise()->create([
+        'user_id' => $user->id,
         'value' => 30,
-        'group_id' => null,
         'measured_at' => '2026-10-17T03:57:00Z',
     ]);
     $this->actingAs($user);
 
-    visit(route('health-entries.index', ['date' => '2026-10-17'], absolute: false))->withLocale('en-US')
+    $page = visit(route('health-entries.index', ['date' => '2026-10-17'], absolute: false))->withLocale('en-US');
+
+    if ($mobile) {
+        $page = $page->on()->mobile();
+    }
+
+    $page = $page->assertMissing('button[aria-label="Pick a date"]')
+        ->assertMissing('a[aria-label="Previous week"]')
+        ->assertMissing('button[aria-label="Next week"]')
+        ->assertAttribute('#health-entry-weeks', 'data-week-start', '2026-10-12')
         ->assertSee('30 min')
         ->assertDontSee('Grilled chicken breast')
         ->click('a[aria-label^="Friday, October 16"]')
@@ -98,9 +118,84 @@ it('moves between days and weeks with the week strip', function (): void {
         ->assertQueryStringHas('date', '2026-10-16')
         ->assertDontSee('30 min')
         ->assertAttribute('a[aria-label^="Friday, October 16"]', 'aria-current', 'date')
-        ->click('a[aria-label="Previous week"]')
-        ->assertSee('Nothing logged on this day')
+        ->assertScript('(() => { const strip = document.querySelector("#health-entry-weeks"); return Math.abs(strip.scrollLeft - strip.clientWidth) < 2; })()');
+
+    scrollToPreviousWeek($page);
+
+    $page->assertAttribute('#health-entry-weeks', 'data-week-start', '2026-10-05')
+        ->assertQueryStringHas('date', '2026-10-16')
+        ->assertSee('Grilled chicken breast, Steamed rice')
+        ->assertAttribute('a[aria-label^="Friday, October 9"]', 'aria-label', 'Friday, October 9, 2026, has entries')
+        ->back()
+        ->assertQueryStringHas('date', '2026-10-17')
+        ->assertAttribute('#health-entry-weeks', 'data-week-start', '2026-10-12')
+        ->assertSee('30 min')
+        ->forward()
+        ->assertQueryStringHas('date', '2026-10-16')
+        ->assertSee('Grilled chicken breast, Steamed rice');
+
+    scrollToPreviousWeek($page);
+
+    $page->assertAttribute('#health-entry-weeks', 'data-week-start', '2026-10-05')
+        ->click('a[aria-label^="Friday, October 9"]')
         ->assertQueryStringHas('date', '2026-10-09')
+        ->assertSee('75 kg')
+        ->assertDontSee('Grilled chicken breast, Steamed rice')
+        ->keys('#health-entry-weeks', 'ArrowRight')
+        ->assertAttribute('#health-entry-weeks', 'data-week-start', '2026-10-12')
+        ->assertQueryStringHas('date', '2026-10-09')
+        ->assertSee('75 kg')
+        ->keys('#health-entry-weeks', 'ArrowRight')
+        ->assertAttribute('#health-entry-weeks', 'data-week-start', '2026-10-19')
+        ->keys('#health-entry-weeks', 'ArrowRight')
+        ->assertAttribute('#health-entry-weeks', 'data-week-start', '2026-10-19')
+        ->assertAttribute('span[aria-label="Tuesday, October 20, 2026"]', 'aria-disabled', 'true')
+        ->click('a:has-text("Today")')
+        ->assertQueryStringHas('date', '2026-10-19')
+        ->assertSee('Nothing logged yet today')
+        ->back()
+        ->assertQueryStringHas('date', '2026-10-09')
+        ->assertAttribute('#health-entry-weeks', 'data-week-start', '2026-10-05')
+        ->assertSee('75 kg')
+        ->assertNoJavaScriptErrors();
+})->with(['desktop' => [false], 'mobile' => [true]]);
+
+it('drags across the year boundary without selecting a day and returns to today', function (): void {
+    $this->travelTo(CarbonImmutable::parse('2026-01-07 12:00:00', 'UTC'));
+    $user = User::factory()->create(['timezone' => 'UTC']);
+    HealthSyncSample::factory()->weight()->fromWeb()->create([
+        'user_id' => $user->id,
+        'value' => 80,
+        'measured_at' => '2025-12-31T12:00:00Z',
+    ]);
+    HealthSyncSample::factory()->exercise()->create([
+        'user_id' => $user->id,
+        'value' => 30,
+        'measured_at' => '2026-01-07T03:57:00Z',
+    ]);
+    $this->actingAs($user);
+
+    visit(route('health-entries.index', absolute: false))->withLocale('en-US')
+        ->assertSee('30 min')
+        ->drag('a[aria-label^="Monday, January 5"]', 'a[aria-label^="Wednesday, January 7"]')
+        ->assertAttribute('#health-entry-weeks', 'data-week-start', '2025-12-29')
+        ->assertQueryStringMissing('date')
+        ->assertSee('30 min')
+        ->assertAttribute('a[aria-label^="Wednesday, December 31"]', 'aria-label', 'Wednesday, December 31, 2025, has entries')
+        ->click('a:has-text("Today")')
+        ->assertAttribute('#health-entry-weeks', 'data-week-start', '2026-01-05')
+        ->assertSee('30 min')
+        ->keys('#health-entry-weeks', 'ArrowLeft')
+        ->assertAttribute('#health-entry-weeks', 'data-week-start', '2025-12-29')
+        ->click('a[aria-label^="Wednesday, December 31"]')
+        ->assertQueryStringHas('date', '2025-12-31')
+        ->assertSee('80 kg')
+        ->keys('#health-entry-weeks', 'ArrowLeft')
+        ->assertAttribute('#health-entry-weeks', 'data-week-start', '2025-12-22')
+        ->assertSee('80 kg')
+        ->refresh()
+        ->assertAttribute('#health-entry-weeks', 'data-week-start', '2025-12-29')
+        ->assertSee('80 kg')
         ->assertNoJavaScriptErrors();
 });
 
