@@ -196,7 +196,7 @@ it('adds and removes ingredients and changes the meal type before saving', funct
         ->assertDontSeeIn('section[aria-labelledby="ingredients-heading"]', 'Steamed rice')
         ->assertSee('330')
         ->click('[role="radio"]:has-text("Dinner")')
-        ->click('button[aria-label="Back to Logbook"]')
+        ->click('a[aria-label="Back to Logbook"]')
         ->assertSee('Discard your changes?')
         ->press('Keep editing')
         ->press('Done')
@@ -308,3 +308,46 @@ it('edits a reading logged with a meal without losing the meal or its photo', fu
     expect(HealthSyncSample::query()->where('group_id', $sample->group_id)->count())->toBe(5)
         ->and(MealPhoto::query()->where('health_group_id', $sample->group_id)->exists())->toBeTrue();
 })->with(['food and glucose' => [true], 'food and vitals' => [false]]);
+
+it('asks before leaving an edited meal through any link and keeps the draft when staying', function (): void {
+    $user = User::factory()->create();
+    $sample = createLogbookMeal($user);
+    $this->actingAs($user);
+
+    visit(route('health-entries.show', $sample, absolute: false))
+        ->click('[role="radio"]:has-text("Dinner")')
+        ->click('nav[aria-label="breadcrumb"] a:has-text("Logbook")')
+        ->assertSee('Discard your changes?')
+        ->press('Keep editing')
+        ->assertPathIs('/health-entries/'.$sample->id)
+        ->assertAttribute('[role="radio"]:has-text("Dinner")', 'data-state', 'on')
+        ->click('nav[aria-label="breadcrumb"] a:has-text("Logbook")')
+        ->press('Discard')
+        ->assertPathIs('/health-entries')
+        ->assertNoJavaScriptErrors();
+
+    expect(HealthSyncSample::query()->whereBelongsTo($user)->where('type_identifier', 'dietaryEnergy')->value('metadata'))
+        ->not->toHaveKey('meal_type');
+});
+
+it('keeps a time changed through a logged reading when the meal is saved afterwards', function (): void {
+    $user = User::factory()->create();
+    $sample = createLogbookMeal($user);
+    HealthSyncSample::factory()->bloodGlucose()->create(['user_id' => $user->id, 'group_id' => $sample->group_id, 'value' => 120, 'measured_at' => $sample->measured_at]);
+    $this->actingAs($user);
+
+    visit(route('health-entries.show', $sample, absolute: false))->withTimezone('UTC')
+        ->click('button[aria-label="Edit Glucose"]')
+        ->fill('measured_at', '2026-10-16T05:00')
+        ->press('Save changes')
+        ->assertMissing('[role="dialog"]')
+        ->click('[role="radio"]:has-text("Dinner")')
+        ->press('Done')
+        ->assertSee('490 kcal')
+        ->assertNoJavaScriptErrors();
+
+    $calories = HealthSyncSample::query()->whereBelongsTo($user)->where('type_identifier', 'dietaryEnergy')->sole();
+
+    expect($calories->measured_at->toDateTimeString())->toBe('2026-10-16 05:00:00')
+        ->and($calories->metadata['meal_type'])->toBe('dinner');
+});

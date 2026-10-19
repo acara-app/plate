@@ -79,7 +79,8 @@ final class HealthEntryRequest extends FormRequest
             'a1c_value' => ['nullable', 'numeric', 'min:3', 'max:20'],
 
             'carbs_grams' => [
-                $logType === HealthEntryType::Food->value && ! $this->has('items') ? 'required' : 'nullable',
+                'nullable',
+                ...($logType === HealthEntryType::Food->value && ! $this->has('items') ? ['required_without_all:protein_grams,fat_grams,calories'] : []),
                 'numeric',
                 'min:0',
                 'max:1000',
@@ -146,6 +147,7 @@ final class HealthEntryRequest extends FormRequest
             'insulin_type.required_with' => 'Please select the insulin type.',
             'medication_name.required' => 'Please enter the medication name.',
             'carbs_grams.required' => 'Please enter the carbohydrate amount.',
+            'carbs_grams.required_without_all' => 'Please enter at least one nutrition value.',
             'exercise_type.required' => 'Please enter the exercise type.',
             'blood_pressure_systolic.min' => 'Systolic blood pressure seems too low.',
             'blood_pressure_systolic.max' => 'Systolic blood pressure seems too high.',

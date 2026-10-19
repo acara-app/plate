@@ -31,7 +31,7 @@ export default function ReadingDetail({
 
     return (
         <div className="mx-auto flex w-full max-w-xl min-w-0 flex-col gap-6 px-4 pt-3 pb-36 sm:px-6 md:pb-10">
-            <DetailTopBar entry={entry} backUrl={backUrl} isDirty={false} />
+            <DetailTopBar entry={entry} backUrl={backUrl} />
             <h1 className="-mt-3 text-4xl font-bold tracking-tight">
                 {t(config.labelKey)}
             </h1>

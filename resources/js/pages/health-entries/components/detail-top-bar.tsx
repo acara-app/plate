@@ -1,7 +1,6 @@
 import DestroyHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/DestroyHealthEntryController';
 import {
     AlertDialog,
-    AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
@@ -25,15 +24,12 @@ import { useTranslation } from 'react-i18next';
 export default function DetailTopBar({
     entry,
     backUrl,
-    isDirty,
 }: {
     entry: HealthEntry;
     backUrl: string;
-    isDirty: boolean;
 }) {
     const { t } = useTranslation('common');
     const [confirmingDelete, setConfirmingDelete] = useState(false);
-    const [confirmingDiscard, setConfirmingDiscard] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
     const removeEntry = () => {
@@ -45,31 +41,19 @@ export default function DetailTopBar({
 
     return (
         <div className="flex items-center justify-between">
-            {isDirty ? (
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="-ml-2 size-11 rounded-full"
+            <Button
+                asChild
+                variant="ghost"
+                size="icon"
+                className="-ml-2 size-11 rounded-full"
+            >
+                <Link
+                    href={backUrl}
                     aria-label={t('health_entries.detail.back')}
-                    onClick={() => setConfirmingDiscard(true)}
                 >
                     <ChevronLeft className="size-6" aria-hidden="true" />
-                </Button>
-            ) : (
-                <Button
-                    asChild
-                    variant="ghost"
-                    size="icon"
-                    className="-ml-2 size-11 rounded-full"
-                >
-                    <Link
-                        href={backUrl}
-                        aria-label={t('health_entries.detail.back')}
-                    >
-                        <ChevronLeft className="size-6" aria-hidden="true" />
-                    </Link>
-                </Button>
-            )}
+                </Link>
+            </Button>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button
@@ -123,31 +107,6 @@ export default function DetailTopBar({
                                     : 'health_entries.timeline.delete',
                             )}
                         </Button>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-            <AlertDialog
-                open={confirmingDiscard}
-                onOpenChange={setConfirmingDiscard}
-            >
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>
-                            {t('health_entries.detail.discard_title')}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {t('health_entries.detail.discard_description')}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>
-                            {t('health_entries.detail.keep_editing')}
-                        </AlertDialogCancel>
-                        <AlertDialogAction asChild>
-                            <Link href={backUrl}>
-                                {t('health_entries.detail.discard')}
-                            </Link>
-                        </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

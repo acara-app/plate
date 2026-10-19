@@ -1,5 +1,14 @@
 import UpdateHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/UpdateHealthEntryController';
 import ListHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/ListHealthEntryController';
+import {
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import {
@@ -18,12 +27,13 @@ import {
     MEAL_TYPES,
     mealTypeForTime,
 } from '@/lib/meal-types';
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
 import { cn } from '@/lib/utils';
 import type { HealthEntry, LogTypeValue } from '@/types/diabetes';
 import type { MealType } from '@/types/meal-plan';
 import { router, useForm } from '@inertiajs/react';
 import { ChevronRight, Pencil, Plus, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DetailActions from './detail-actions';
 import DetailTopBar from './detail-top-bar';
@@ -87,6 +97,18 @@ export default function MealDetail({
     const [valueOpen, setValueOpen] = useState(false);
     const [valueField, setValueField] = useState<NutritionField>('calories');
     const [detailsOpen, setDetailsOpen] = useState(false);
+    const leaveGuard = useUnsavedChanges(form.isDirty);
+    const savedMeasuredAt = formatLocalDatetime(new Date(entry.measured_at));
+    const savedNotes = userNotes(entry) ?? '';
+
+    useEffect(() => {
+        form.setDefaults({ measured_at: savedMeasuredAt, notes: savedNotes });
+        form.setData((current) => ({
+            ...current,
+            measured_at: savedMeasuredAt,
+            notes: savedNotes,
+        }));
+    }, [savedMeasuredAt, savedNotes]);
 
     const { data } = form;
     const errors = form.errors as Record<string, string>;
@@ -172,8 +194,6 @@ export default function MealDetail({
     };
 
     const save = () => {
-        const day = data.measured_at.slice(0, 10);
-
         form.transform((current) => {
             const notes = current.notes.trim();
             const base = {
@@ -208,10 +228,14 @@ export default function MealDetail({
 
         form.put(UpdateHealthEntryController.url(entry.id), {
             preserveScroll: true,
-            onSuccess: () =>
+            onSuccess: (page) => {
+                leaveGuard.allowLeaving();
                 router.visit(
-                    ListHealthEntryController({ query: { date: day } }),
-                ),
+                    ListHealthEntryController({
+                        query: { date: String(page.props.date) },
+                    }),
+                );
+            },
         });
     };
 
@@ -220,11 +244,7 @@ export default function MealDetail({
 
     return (
         <div className="mx-auto flex w-full max-w-xl min-w-0 flex-col gap-6 px-4 pt-3 pb-36 sm:px-6 md:pb-10">
-            <DetailTopBar
-                entry={entry}
-                backUrl={backUrl}
-                isDirty={form.isDirty}
-            />
+            <DetailTopBar entry={entry} backUrl={backUrl} />
             <h1 className="-mt-3 text-4xl font-bold tracking-tight">
                 {t('health_entries.detail.nutrition')}
             </h1>
@@ -663,6 +683,32 @@ export default function MealDetail({
                     setDetailsOpen(false);
                 }}
             />
+            <AlertDialog
+                open={leaveGuard.pendingUrl !== null}
+                onOpenChange={(open) => !open && leaveGuard.keepEditing()}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {t('health_entries.detail.discard_title')}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t('health_entries.detail.discard_description')}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>
+                            {t('health_entries.detail.keep_editing')}
+                        </AlertDialogCancel>
+                        <Button
+                            variant="destructive"
+                            onClick={leaveGuard.discard}
+                        >
+                            {t('health_entries.detail.discard')}
+                        </Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

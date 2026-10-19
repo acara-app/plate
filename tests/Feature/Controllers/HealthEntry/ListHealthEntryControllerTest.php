@@ -36,6 +36,7 @@ it('renders the logbook for today in the user’s timezone', function (): void {
             ->component('health-entries/index')
             ->where('date', '2026-10-19')
             ->where('today', '2026-10-19')
+            ->where('newEntryAt', null)
             ->has('entries')
             ->has('loggedDates')
             ->has('glucoseReadingTypes')
@@ -96,3 +97,13 @@ it('rejects malformed logbook dates', function (mixed $date): void {
         ->assertUnprocessable()
         ->assertJsonValidationErrors('date');
 })->with(['impossible month' => ['2026-13-01'], 'day first' => ['18-10-2026'], 'array' => [['2026-10-18']]]);
+
+it('suggests the current account-local time on a past day for new entries', function (): void {
+    $this->travelTo(CarbonImmutable::parse('2026-10-18 17:00:00', 'UTC'));
+    $user = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
+
+    $this->actingAs($user)
+        ->get(route('health-entries.index', ['date' => '2026-10-17']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->where('newEntryAt', '2026-10-17T01:00:00+08:00'));
+});
