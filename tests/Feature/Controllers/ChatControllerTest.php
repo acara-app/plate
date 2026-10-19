@@ -72,6 +72,42 @@ it('passes an optional initial prompt to the chat page', function (): void {
         );
 });
 
+it('rejects invalid initial prompt send options', function (mixed $autoSend): void {
+    $user = User::factory()->create();
+
+    actingAs($user)
+        ->getJson(route('chat.create', [
+            'conversationId' => (string) fake()->uuid(),
+            'auto_send' => $autoSend,
+        ]))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('auto_send');
+})->with([
+    'invalid string' => 'draft',
+    'invalid number' => 2,
+    'array' => [['0']],
+]);
+
+it('passes the initial prompt send behavior to the chat page', function (array $query, bool $autoSend): void {
+    $user = User::factory()->create();
+
+    actingAs($user)
+        ->get(route('chat.create', [
+            'conversationId' => (string) fake()->uuid(),
+            'prompt' => 'Review my health entries.',
+            ...$query,
+        ]))
+        ->assertInertia(fn ($page) => $page
+            ->where('initialPrompt', 'Review my health entries.')
+            ->where('autoSendInitialPrompt', $autoSend)
+            ->has('messages', 0)
+        );
+})->with([
+    'existing shortcuts send automatically' => [[], true],
+    'draft prompts wait for editing' => [['auto_send' => '0'], false],
+    'explicit automatic sending' => [['auto_send' => '1'], true],
+]);
+
 it('returns 400 for invalid UUID format', function (): void {
     $user = User::factory()->create();
 

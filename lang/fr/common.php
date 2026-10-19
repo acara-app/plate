@@ -535,6 +535,8 @@ return [
         ],
         'index_page' => [
             'title' => 'Carnet de suivi',
+            'ask_ai' => 'Demander à l’IA',
+            'review_prompt' => 'Analyse mes données de santé du {{startDate}} au {{endDate}}, ces deux dates incluses. Quelles tendances observes-tu et que pourrais-je améliorer ?',
             'add_entry' => 'Ajouter une entrée',
             'bp_label' => 'TA',
             'kg_label' => 'kg',

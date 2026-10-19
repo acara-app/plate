@@ -10,6 +10,7 @@ export interface ChatPageProps {
     isKept?: boolean;
     temporaryRetentionHours?: number;
     initialPrompt?: string | null;
+    autoSendInitialPrompt?: boolean;
     initialStreaming?: boolean;
     messages: UIMessage[];
     [key: string]: unknown;

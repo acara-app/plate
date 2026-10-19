@@ -9,8 +9,11 @@ use App\Enums\GoalChoice;
 use App\Enums\Sex;
 use App\Enums\SubscriptionTier;
 use App\Exceptions\Billing\UsageLimitExceededException;
+use App\Jobs\ProcessChatStream;
 use App\Models\AnalysisDraft;
+use App\Models\Conversation;
 use App\Models\HealthSyncSample;
+use App\Models\History;
 use App\Models\MealPhoto;
 use App\Models\SleepSession;
 use App\Models\User;
@@ -18,6 +21,7 @@ use App\Models\UserProfile;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Exceptions;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Pest\Browser\Api\AwaitableWebpage;
@@ -60,6 +64,61 @@ function scrollToPreviousWeek(AwaitableWebpage $page): void
 {
     $page->script('const strip = document.querySelector("#health-entry-weeks"); strip.scrollBy({ left: -strip.clientWidth, behavior: "instant" });');
 }
+
+it('opens an editable seven-day review in a fresh chat and waits for the user to send', function (string $date, string $startDate, bool $mobile): void {
+    Queue::fake();
+    $user = User::factory()->create(['timezone' => 'UTC']);
+    $this->actingAs($user);
+    $prompt = "Review my health entries from {$startDate} through {$date}, inclusive. What trends do you notice, and what could I improve?";
+    $logbook = route('health-entries.index', ['date' => $date], absolute: false);
+    $page = visit($logbook)->withLocale('en-US');
+
+    if ($mobile) {
+        $page = $page->on()->mobile();
+    }
+
+    $page = $page->assertVisible('h1 button:has-text("Ask AI")')
+        ->assertVisible('header a:has-text("Scan meal")')
+        ->assertTitleContains('Logbook')
+        ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
+        ->keys('h1 button[type="button"]', 'Enter')
+        ->assertValue('textarea[aria-label="Message input"]', $prompt)
+        ->assertQueryStringHas('auto_send', '0')
+        ->assertNoJavaScriptErrors();
+
+    Queue::assertNothingPushed();
+    expect(History::query()->count())->toBe(0);
+    $firstConversation = Conversation::query()->sole();
+
+    $page->back()
+        ->assertVisible('h1 button:has-text("Ask AI")')
+        ->click('Ask AI')
+        ->assertValue('textarea[aria-label="Message input"]', $prompt);
+
+    $conversation = Conversation::query()->where('id', '!=', $firstConversation->id)->sole();
+
+    $editedPrompt = 'Focus on my meal timing during those seven days.';
+    $page->fill('textarea[aria-label="Message input"]', $editedPrompt)
+        ->click('button[aria-label="Send message"]')
+        ->assertSee($editedPrompt)
+        ->assertQueryStringMissing('prompt')
+        ->assertQueryStringMissing('auto_send')
+        ->assertVisible('button[aria-label="Stop generating"]')
+        ->refresh()
+        ->assertValue('textarea[aria-label="Message input"]', '')
+        ->assertSee($editedPrompt)
+        ->assertNoJavaScriptErrors();
+
+    Queue::assertPushed(ProcessChatStream::class, 1);
+    $this->assertDatabaseHas('agent_conversation_messages', [
+        'conversation_id' => $conversation->id,
+        'role' => 'user',
+        'content' => $editedPrompt,
+    ]);
+})->with([
+    'desktop selected day' => ['2026-10-19', '2026-10-13', false],
+    'mobile across the new year' => ['2026-01-03', '2025-12-28', true],
+]);
 
 it('shows a day’s meal as a card and opens its nutrition page with the photo on mobile', function (): void {
     Storage::fake(MealPhoto::DISK);

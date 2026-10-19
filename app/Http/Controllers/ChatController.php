@@ -66,6 +66,7 @@ final readonly class ChatController
             'temporaryRetentionHours' => Config::integer('plate.chat.temporary_retention_hours'),
             'messages' => fn (): array => $this->messagesAction->handle($conversation),
             'initialPrompt' => $request->initialPrompt(),
+            'autoSendInitialPrompt' => $request->shouldAutoSendPrompt(),
             'initialStreaming' => $conversation->hasPendingChatStream(),
             'creditWarning' => $this->buildCreditWarning
                 ->currentState($this->user)
