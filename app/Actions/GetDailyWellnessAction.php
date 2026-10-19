@@ -76,7 +76,8 @@ final readonly class GetDailyWellnessAction
             ->where('entry_source', HealthEntrySource::Web)
             ->whereIn('type_identifier', array_column(DailyCheckInMetric::cases(), 'value'))
             ->measuredWithinDay($start)
-            ->oldest('measured_at')
+            ->oldest('updated_at')
+            ->oldest('id')
             ->pluck('value', 'type_identifier');
     }
 

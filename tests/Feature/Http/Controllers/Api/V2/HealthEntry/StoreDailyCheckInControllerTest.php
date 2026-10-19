@@ -66,6 +66,27 @@ it('prefers sleep synced from Apple Health over logged hours', function (): void
         ->assertJsonPath('wellness.sleep_quality', 2);
 });
 
+it('keeps one answer per question after the app moves the account to the device timezone', function (): void {
+    $this->travelTo(CarbonImmutable::parse('2026-10-19 12:00:00', 'UTC'));
+    $user = User::factory()->create(['timezone' => 'UTC']);
+    Sanctum::actingAs($user, ['chat:converse']);
+
+    $this->postJson(route('api.v2.health-entries.check-in.store'), ['date' => '2026-10-19', 'sleep_quality' => 1, 'stress_level' => 3])->assertOk();
+    $this->putJson(route('api.v2.account.timezone'), ['timezone' => 'Asia/Ulaanbaatar'])->assertNoContent();
+
+    $this->postJson(route('api.v2.health-entries.check-in.store'), ['date' => '2026-10-19', 'sleep_quality' => 3])
+        ->assertOk()
+        ->assertJsonPath('wellness.sleep_quality', 3)
+        ->assertJsonPath('wellness.stress_level', 3);
+
+    expect(HealthSyncSample::query()->where('user_id', $user->id)->orderBy('type_identifier')->get()
+        ->map(fn (HealthSyncSample $sample): array => [$sample->type_identifier, $sample->value, $sample->measured_at->utc()->toDateTimeString()])
+        ->all())->toBe([
+            ['sleepQuality', 3.0, '2026-10-18 16:00:00'],
+            ['stressLevel', 3.0, '2026-10-18 16:00:00'],
+        ]);
+});
+
 it('rejects check-ins it cannot save', function (array $payload, string $field): void {
     Sanctum::actingAs($this->user, ['chat:converse']);
 

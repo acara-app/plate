@@ -23,7 +23,7 @@ final readonly class StoreDailyCheckInController
 
     public function __invoke(StoreDailyCheckInRequest $request): RedirectResponse
     {
-        $measuredAt = $this->recordDailyCheckIn->handle(
+        $affectedUtcDates = $this->recordDailyCheckIn->handle(
             $this->currentUser,
             $request->selectedDay(),
             $request->sleepHours(),
@@ -31,7 +31,7 @@ final readonly class StoreDailyCheckInController
             $request->enum('stress_level', StressLevel::class),
         );
 
-        $this->dispatchAggregateUserUtcDates->handle($this->currentUser, [$measuredAt->toDateString()]);
+        $this->dispatchAggregateUserUtcDates->handle($this->currentUser, $affectedUtcDates);
 
         return back()->with('success', 'Daily check-in saved.');
     }
