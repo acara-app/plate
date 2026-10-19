@@ -2,21 +2,13 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-} from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { bottomSheetClassName } from './ingredient-sheet';
 
 type Details = { measured_at: string; notes: string };
 
-function DetailsForm({
+export default function DetailsForm({
     details,
     errors,
     onApply,
@@ -71,48 +63,5 @@ function DetailsForm({
                 {t('health_entries.detail.apply')}
             </Button>
         </form>
-    );
-}
-
-export default function MealDetailsSheet({
-    open,
-    onOpenChange,
-    formKey,
-    details,
-    errors,
-    onApply,
-}: {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    formKey: number;
-    details: Details;
-    errors: Record<string, string>;
-    onApply: (details: Details) => void;
-}) {
-    const { t } = useTranslation('common');
-
-    return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent
-                side="bottom"
-                closeLabel={t('health_entries.timeline.close')}
-                className={bottomSheetClassName}
-            >
-                <SheetHeader className="px-5 pt-6 pr-16 pb-4">
-                    <SheetTitle className="text-xl">
-                        {t('health_entries.detail.details_title')}
-                    </SheetTitle>
-                    <SheetDescription>
-                        {t('health_entries.detail.details_description')}
-                    </SheetDescription>
-                </SheetHeader>
-                <DetailsForm
-                    key={formKey}
-                    details={details}
-                    errors={errors}
-                    onApply={onApply}
-                />
-            </SheetContent>
-        </Sheet>
     );
 }

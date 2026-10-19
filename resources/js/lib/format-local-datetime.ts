@@ -18,7 +18,7 @@ export function localDatetimeToIso(value: string): string {
     return Number.isNaN(date.getTime()) ? value : date.toISOString();
 }
 
-export function toDateKey(date: Date): string {
+function toDateKey(date: Date): string {
     return formatLocalDatetime(date).slice(0, 10);
 }
 

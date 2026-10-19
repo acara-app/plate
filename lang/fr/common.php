@@ -444,10 +444,6 @@ return [
             'mobile' => 'Application mobile',
         ],
         'badges' => [
-            'carbs' => '{{value}} g de glucides',
-            'protein' => '{{value}} g de protéines',
-            'fat' => '{{value}} g de lipides',
-            'calories' => '{{value}} kcal',
             'a1c' => '{{value}} % HbA1c',
             'exercise_minutes' => '{{value}} min',
         ],

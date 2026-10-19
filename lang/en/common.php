@@ -443,10 +443,6 @@ return [
             'mobile' => 'Mobile app',
         ],
         'badges' => [
-            'carbs' => '{{value}}g carbs',
-            'protein' => '{{value}}g protein',
-            'fat' => '{{value}}g fat',
-            'calories' => '{{value}} kcal',
             'a1c' => '{{value}}% A1C',
             'exercise_minutes' => '{{value}} min',
         ],

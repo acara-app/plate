@@ -18,7 +18,7 @@ import {
 import {
     getReadingGroups,
     getTypeConfig,
-    mealLabel,
+    mealTitle,
     SOURCE_META,
     userNotes,
 } from '@/lib/health-entry-registry';
@@ -37,7 +37,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DetailActions from './detail-actions';
 import DetailTopBar from './detail-top-bar';
-import IngredientSheet, { type EditableItem } from './ingredient-sheet';
+import BottomSheet from './bottom-sheet';
+import IngredientForm, { type EditableItem } from './ingredient-form';
 import {
     CALORIES,
     formatAmount,
@@ -45,9 +46,9 @@ import {
     type Nutrition,
     type NutritionField,
 } from './macros';
-import MealDetailsSheet from './meal-details-sheet';
+import DetailsForm from './meal-details-form';
 import PhotoHero from './photo-hero';
-import ValueSheet from './value-sheet';
+import ValueForm from './value-form';
 
 type MealForm = {
     log_type: 'food';
@@ -74,10 +75,12 @@ export default function MealDetail({
     const locale = i18n.resolvedLanguage;
     const analysis = entry.food_analysis ?? null;
     const isItemized = (analysis?.items.length ?? 0) > 0;
+    const savedMeasuredAt = formatLocalDatetime(new Date(entry.measured_at));
+    const savedNotes = userNotes(entry) ?? '';
     const form = useForm<MealForm>({
         log_type: 'food',
-        measured_at: formatLocalDatetime(new Date(entry.measured_at)),
-        notes: userNotes(entry) ?? '',
+        measured_at: savedMeasuredAt,
+        notes: savedNotes,
         meal_type:
             entry.meal_type ?? mealTypeForTime(new Date(entry.measured_at)),
         items: (analysis?.items ?? []).map((item, index) => ({
@@ -92,15 +95,13 @@ export default function MealDetail({
         fat_grams: entry.fat_grams,
         fiber_grams: entry.fiber_grams,
     });
+    const [sheet, setSheet] = useState<
+        'ingredient' | 'value' | 'details' | null
+    >(null);
     const [sheetKey, setSheetKey] = useState(0);
-    const [ingredientOpen, setIngredientOpen] = useState(false);
     const [ingredientIndex, setIngredientIndex] = useState<number | null>(null);
-    const [valueOpen, setValueOpen] = useState(false);
     const [valueField, setValueField] = useState<NutritionField>('calories');
-    const [detailsOpen, setDetailsOpen] = useState(false);
     const leaveGuard = useUnsavedChanges(form.isDirty);
-    const savedMeasuredAt = formatLocalDatetime(new Date(entry.measured_at));
-    const savedNotes = userNotes(entry) ?? '';
 
     useEffect(() => {
         form.setDefaults({ measured_at: savedMeasuredAt, notes: savedNotes });
@@ -129,9 +130,7 @@ export default function MealDetail({
     const mealType = getMealTypeConfig(data.meal_type);
     const readingGroups = getReadingGroups(entry, glucoseUnit, t);
     const source = entry.source ? SOURCE_META[entry.source] : undefined;
-    const title = isItemized
-        ? mealLabel(items)
-        : data.notes.split('\n')[0].trim() || t('health_entries.timeline.meal');
+    const title = mealTitle(items, data.notes, t);
     const itemErrors = (index: number): Record<string, string> => {
         const prefix = `items.${index}.`;
 
@@ -152,10 +151,16 @@ export default function MealDetail({
         key.startsWith('items.'),
     );
 
-    const openIngredient = (index: number | null) => {
+    const openSheet = (kind: 'ingredient' | 'value' | 'details') => {
         setSheetKey((key) => key + 1);
+        setSheet(kind);
+    };
+
+    const closeSheet = () => setSheet(null);
+
+    const openIngredient = (index: number | null) => {
         setIngredientIndex(index);
-        setIngredientOpen(true);
+        openSheet('ingredient');
     };
 
     const applyIngredient = (
@@ -179,7 +184,7 @@ export default function MealDetail({
                   ),
         );
         form.clearErrors();
-        setIngredientOpen(false);
+        closeSheet();
     };
 
     const removeIngredient = () => {
@@ -188,13 +193,12 @@ export default function MealDetail({
             items.filter((_, index) => index !== ingredientIndex),
         );
         form.clearErrors();
-        setIngredientOpen(false);
+        closeSheet();
     };
 
     const openValue = (field: NutritionField) => {
-        setSheetKey((key) => key + 1);
         setValueField(field);
-        setValueOpen(true);
+        openSheet('value');
     };
 
     const save = () => {
@@ -247,6 +251,7 @@ export default function MealDetail({
 
     const caloriesLabel = t('health_entries.nutrition.calories');
     const valueConfig = MACROS.find((macro) => macro.field === valueField);
+    const valueLabel = valueConfig ? t(valueConfig.labelKey) : caloriesLabel;
 
     return (
         <div className="mx-auto flex w-full max-w-xl min-w-0 flex-col gap-6 px-4 pt-3 pb-36 sm:px-6 md:pb-10">
@@ -620,10 +625,7 @@ export default function MealDetail({
                 </p>
             )}
             <DetailActions
-                onEdit={() => {
-                    setSheetKey((key) => key + 1);
-                    setDetailsOpen(true);
-                }}
+                onEdit={() => openSheet('details')}
                 doneUrl={backUrl}
                 onDone={form.isDirty ? save : undefined}
                 saving={form.processing}
@@ -647,53 +649,79 @@ export default function MealDetail({
                     ) : null
                 }
             />
-            <IngredientSheet
-                open={ingredientOpen}
-                onOpenChange={setIngredientOpen}
-                formKey={sheetKey}
-                item={
+            <BottomSheet
+                open={sheet === 'ingredient'}
+                onClose={closeSheet}
+                title={t(
                     ingredientIndex === null
-                        ? null
-                        : (items[ingredientIndex] ?? null)
-                }
-                canRemove={ingredientIndex !== null && items.length > 1}
-                errors={
-                    ingredientIndex === null ? {} : itemErrors(ingredientIndex)
-                }
-                onApply={applyIngredient}
-                onRemove={removeIngredient}
-            />
-            <ValueSheet
-                open={valueOpen}
-                onOpenChange={setValueOpen}
-                formKey={sheetKey}
-                label={valueConfig ? t(valueConfig.labelKey) : caloriesLabel}
-                unit={
-                    valueConfig
-                        ? t('health_entries.nutrition.grams_unit')
-                        : t('health_entries.nutrition.kcal')
-                }
-                value={data[valueField]}
-                integer={valueField === 'calories'}
-                error={errors[valueField]}
-                onApply={(value) => {
-                    form.setData(valueField, value);
-                    form.clearErrors(valueField);
-                    setValueOpen(false);
-                }}
-            />
-            <MealDetailsSheet
-                open={detailsOpen}
-                onOpenChange={setDetailsOpen}
-                formKey={sheetKey}
-                details={{ measured_at: data.measured_at, notes: data.notes }}
-                errors={errors}
-                onApply={(details) => {
-                    form.setData((current) => ({ ...current, ...details }));
-                    form.clearErrors('measured_at', 'notes');
-                    setDetailsOpen(false);
-                }}
-            />
+                        ? 'health_entries.detail.new_ingredient'
+                        : 'health_entries.detail.edit_ingredient',
+                )}
+                description={t('health_entries.detail.ingredient_description')}
+            >
+                <IngredientForm
+                    key={sheetKey}
+                    item={
+                        ingredientIndex === null
+                            ? null
+                            : (items[ingredientIndex] ?? null)
+                    }
+                    canRemove={ingredientIndex !== null && items.length > 1}
+                    errors={
+                        ingredientIndex === null
+                            ? {}
+                            : itemErrors(ingredientIndex)
+                    }
+                    onApply={applyIngredient}
+                    onRemove={removeIngredient}
+                />
+            </BottomSheet>
+            <BottomSheet
+                open={sheet === 'value'}
+                onClose={closeSheet}
+                title={t('health_entries.detail.edit_value', {
+                    label: valueLabel,
+                })}
+                description={t('health_entries.detail.value_description')}
+            >
+                <ValueForm
+                    key={sheetKey}
+                    label={valueLabel}
+                    unit={
+                        valueConfig
+                            ? t('health_entries.nutrition.grams_unit')
+                            : t('health_entries.nutrition.kcal')
+                    }
+                    value={data[valueField]}
+                    integer={valueField === 'calories'}
+                    error={errors[valueField]}
+                    onApply={(value) => {
+                        form.setData(valueField, value);
+                        form.clearErrors(valueField);
+                        closeSheet();
+                    }}
+                />
+            </BottomSheet>
+            <BottomSheet
+                open={sheet === 'details'}
+                onClose={closeSheet}
+                title={t('health_entries.detail.details_title')}
+                description={t('health_entries.detail.details_description')}
+            >
+                <DetailsForm
+                    key={sheetKey}
+                    details={{
+                        measured_at: data.measured_at,
+                        notes: data.notes,
+                    }}
+                    errors={errors}
+                    onApply={(details) => {
+                        form.setData((current) => ({ ...current, ...details }));
+                        form.clearErrors('measured_at', 'notes');
+                        closeSheet();
+                    }}
+                />
+            </BottomSheet>
             <AlertDialog
                 open={leaveGuard.pendingUrl !== null}
                 onOpenChange={(open) => !open && leaveGuard.keepEditing()}

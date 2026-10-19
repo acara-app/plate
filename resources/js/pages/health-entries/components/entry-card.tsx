@@ -14,8 +14,6 @@ import { useTranslation } from 'react-i18next';
 import { formatAmount, MACROS } from './macros';
 import MealPhotoImage from './meal-photo-image';
 
-const MEAL_BADGES = ['calories', 'protein', 'carbs', 'fat'];
-
 export default function EntryCard({
     entry,
     glucoseUnit,
@@ -30,9 +28,7 @@ export default function EntryCard({
     const mealType =
         isMeal && entry.meal_type ? getMealTypeConfig(entry.meal_type) : null;
     const PlaceholderIcon = mealType?.Icon ?? typeConfig.icon;
-    const readings = getEntryBadges(entry, glucoseUnit, t).filter(
-        (badge) => !MEAL_BADGES.includes(badge.key),
-    );
+    const readings = getEntryBadges(entry, glucoseUnit, t);
 
     return (
         <Link

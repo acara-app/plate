@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Models\HealthSyncSample;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 
@@ -21,8 +20,9 @@ final readonly class GetUserLoggedDatesAction
             ->logbookEntries()
             ->where('measured_at', '>=', $from->startOfDay()->utc())
             ->where('measured_at', '<', $to->startOfDay()->addDay()->utc())
-            ->get(['id', 'measured_at'])
-            ->map(fn (HealthSyncSample $sample): string => $sample->measured_at->toImmutable()->setTimezone($timezone)->toDateString())
+            ->toBase()
+            ->pluck('measured_at')
+            ->map(fn (mixed $measuredAt): string => CarbonImmutable::parse(is_string($measuredAt) ? $measuredAt : '', 'UTC')->setTimezone($timezone)->toDateString())
             ->unique()
             ->sort()
             ->all();

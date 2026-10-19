@@ -42,13 +42,11 @@ final readonly class UpdateHealthSampleAction
                 MealPhoto::deleteForGroup($sample->user_id, $groupId);
             }
 
-            foreach ($kept as $member) {
-                $member->update([
-                    'measured_at' => $measuredAt,
-                    'notes' => $data->notes,
-                    'group_id' => $newGroupId,
-                ]);
-            }
+            HealthSyncSample::query()->whereKey($kept->modelKeys())->update([
+                'measured_at' => $measuredAt,
+                'notes' => $data->notes,
+                'group_id' => $newGroupId,
+            ]);
 
             if ($replaced->contains('id', $sample->id)) {
                 /** @var array{type_identifier: string, value: float|int, unit: string, metadata?: array<string, mixed>} $first */

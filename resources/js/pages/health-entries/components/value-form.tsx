@@ -2,18 +2,10 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-} from '@/components/ui/sheet';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { bottomSheetClassName } from './ingredient-sheet';
 
-function ValueForm({
+export default function ValueForm({
     label,
     unit,
     value,
@@ -66,57 +58,5 @@ function ValueForm({
                 {t('health_entries.detail.apply')}
             </Button>
         </form>
-    );
-}
-
-export default function ValueSheet({
-    open,
-    onOpenChange,
-    formKey,
-    label,
-    unit,
-    value,
-    integer = false,
-    error,
-    onApply,
-}: {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    formKey: number;
-    label: string;
-    unit: string;
-    value: number | null;
-    integer?: boolean;
-    error?: string;
-    onApply: (value: number | null) => void;
-}) {
-    const { t } = useTranslation('common');
-
-    return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent
-                side="bottom"
-                closeLabel={t('health_entries.timeline.close')}
-                className={bottomSheetClassName}
-            >
-                <SheetHeader className="px-5 pt-6 pr-16 pb-4">
-                    <SheetTitle className="text-xl">
-                        {t('health_entries.detail.edit_value', { label })}
-                    </SheetTitle>
-                    <SheetDescription>
-                        {t('health_entries.detail.value_description')}
-                    </SheetDescription>
-                </SheetHeader>
-                <ValueForm
-                    key={formKey}
-                    label={label}
-                    unit={unit}
-                    value={value}
-                    integer={integer}
-                    error={error}
-                    onApply={onApply}
-                />
-            </SheetContent>
-        </Sheet>
     );
 }

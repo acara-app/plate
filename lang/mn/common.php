@@ -443,10 +443,6 @@ return [
             'mobile' => 'Гар утасны апп',
         ],
         'badges' => [
-            'carbs' => '{{value}}г нүүрс ус',
-            'protein' => '{{value}}г уураг',
-            'fat' => '{{value}}г өөх тос',
-            'calories' => '{{value}} ккал',
             'a1c' => '{{value}}% A1C',
             'exercise_minutes' => '{{value}} мин',
         ],

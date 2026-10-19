@@ -10,11 +10,7 @@ import {
     Activity,
     Droplet,
     HeartPulse,
-    MessageCircle,
     Pill,
-    Send,
-    Smartphone,
-    SquarePen,
     Syringe,
     Utensils,
     type LucideIcon,
@@ -79,12 +75,7 @@ export function getPrimaryType(entry: HealthEntry): LogTypeValue {
     if (entry.glucose_value !== null) {
         return LogType.Glucose;
     }
-    if (
-        entry.carbs_grams !== null ||
-        entry.protein_grams !== null ||
-        entry.fat_grams !== null ||
-        entry.calories !== null
-    ) {
+    if (hasFood(entry)) {
         return LogType.Food;
     }
     if (entry.insulin_units !== null) {
@@ -130,7 +121,7 @@ export function mealLabel(items: Pick<FoodBreakdownItem, 'name'>[]): string {
         .slice(0, 500);
 }
 
-export function isAutoMealLabel(
+function isAutoMealLabel(
     notes: string | null,
     items: Pick<FoodBreakdownItem, 'name'>[],
 ): boolean {
@@ -143,53 +134,27 @@ export function userNotes(entry: HealthEntry): string | null {
     return isAutoMealLabel(entry.notes, items) ? null : entry.notes;
 }
 
-export function entryTitle(entry: HealthEntry, t: TranslateFn): string {
-    if (!hasFood(entry)) {
-        return t(getTypeConfig(getPrimaryType(entry)).labelKey);
-    }
-
-    const items = entry.food_analysis?.items ?? [];
-
+export function mealTitle(
+    items: Pick<FoodBreakdownItem, 'name'>[],
+    notes: string | null,
+    t: TranslateFn,
+): string {
     if (items.length > 0) {
         return mealLabel(items);
     }
 
-    return (
-        entry.notes?.split('\n')[0].trim() || t('health_entries.timeline.meal')
-    );
+    return notes?.split('\n')[0].trim() || t('health_entries.timeline.meal');
 }
 
-const BADGE_ACCENT = {
-    glucose: 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300',
-    carbs: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
-    protein:
-        'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300',
-    fat: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300',
-    calories: 'bg-lime-100 text-lime-700 dark:bg-lime-950 dark:text-lime-300',
-    insulin: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
-    medication:
-        'bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300',
-    weight: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',
-    bp: 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
-    a1c: 'bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300',
-    exercise: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300',
-} as const;
-
-const MACRO_BADGES = [
-    { key: 'carbs', field: 'carbs_grams', accent: BADGE_ACCENT.carbs },
-    { key: 'protein', field: 'protein_grams', accent: BADGE_ACCENT.protein },
-    { key: 'fat', field: 'fat_grams', accent: BADGE_ACCENT.fat },
-    { key: 'calories', field: 'calories', accent: BADGE_ACCENT.calories },
-] as const satisfies ReadonlyArray<{
-    key: string;
-    field: keyof HealthEntry;
-    accent: string;
-}>;
+export function entryTitle(entry: HealthEntry, t: TranslateFn): string {
+    return hasFood(entry)
+        ? mealTitle(entry.food_analysis?.items ?? [], entry.notes, t)
+        : t(getTypeConfig(getPrimaryType(entry)).labelKey);
+}
 
 export interface EntryBadge {
     key: string;
     label: string;
-    className?: string;
     subtle?: boolean;
 }
 
@@ -204,7 +169,6 @@ export function getEntryBadges(
         badges.push({
             key: 'glucose',
             label: `${convertGlucoseValue(entry.glucose_value, glucoseUnit as GlucoseUnitType)} ${glucoseUnit}`,
-            className: BADGE_ACCENT.glucose,
         });
         if (entry.glucose_reading_type) {
             badges.push({
@@ -215,23 +179,11 @@ export function getEntryBadges(
         }
     }
 
-    for (const macro of MACRO_BADGES) {
-        const value = entry[macro.field];
-        if (value !== null) {
-            badges.push({
-                key: macro.key,
-                label: t(`health_entries.badges.${macro.key}`, { value }),
-                className: macro.accent,
-            });
-        }
-    }
-
     if (entry.insulin_units !== null) {
         const type = entry.insulin_type ? ` ${entry.insulin_type}` : '';
         badges.push({
             key: 'insulin',
             label: `${entry.insulin_units}${t('health_entries.index_page.units_label')}${type}`,
-            className: BADGE_ACCENT.insulin,
         });
     }
 
@@ -242,7 +194,6 @@ export function getEntryBadges(
         badges.push({
             key: 'medication',
             label: `${entry.medication_name}${dosage}`,
-            className: BADGE_ACCENT.medication,
         });
     }
 
@@ -250,7 +201,6 @@ export function getEntryBadges(
         badges.push({
             key: 'weight',
             label: `${entry.weight} ${t('health_entries.index_page.kg_label')}`,
-            className: BADGE_ACCENT.weight,
         });
     }
 
@@ -263,7 +213,6 @@ export function getEntryBadges(
         badges.push({
             key: 'bp',
             label: `${systolic}/${diastolic} ${t('health_entries.index_page.bp_label')}`,
-            className: BADGE_ACCENT.bp,
         });
     }
 
@@ -271,7 +220,6 @@ export function getEntryBadges(
         badges.push({
             key: 'a1c',
             label: t('health_entries.badges.a1c', { value: entry.a1c_value }),
-            className: BADGE_ACCENT.a1c,
         });
     }
 
@@ -290,27 +238,18 @@ export function getEntryBadges(
         badges.push({
             key: 'exercise',
             label: parts.join(' · '),
-            className: BADGE_ACCENT.exercise,
         });
     }
 
     return badges;
 }
 
-export interface SourceMeta {
-    labelKey: string;
-    icon: LucideIcon;
-}
-
-export const SOURCE_META: Record<string, SourceMeta> = {
-    mobile_sync: {
-        labelKey: 'health_entries.source.apple_health',
-        icon: Smartphone,
-    },
-    chat: { labelKey: 'health_entries.source.chat', icon: MessageCircle },
-    telegram: { labelKey: 'health_entries.source.telegram', icon: Send },
-    web: { labelKey: 'health_entries.source.manual', icon: SquarePen },
-    mobile: { labelKey: 'health_entries.source.mobile', icon: Smartphone },
+export const SOURCE_META: Record<string, { labelKey: string }> = {
+    mobile_sync: { labelKey: 'health_entries.source.apple_health' },
+    chat: { labelKey: 'health_entries.source.chat' },
+    telegram: { labelKey: 'health_entries.source.telegram' },
+    web: { labelKey: 'health_entries.source.manual' },
+    mobile: { labelKey: 'health_entries.source.mobile' },
 };
 
 const READING_BADGE_KEYS: Record<Exclude<LogTypeValue, 'food'>, string[]> = {
@@ -321,7 +260,7 @@ const READING_BADGE_KEYS: Record<Exclude<LogTypeValue, 'food'>, string[]> = {
     exercise: ['exercise'],
 };
 
-export interface ReadingGroup {
+interface ReadingGroup {
     type: LogTypeValue;
     badges: EntryBadge[];
 }
