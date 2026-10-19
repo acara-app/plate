@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\BloodType;
+use App\Enums\HealthEntrySource;
 use App\Enums\HealthSyncType;
 use App\Enums\Sex;
 use App\Http\Controllers\Api\V2\MobileSyncHealthEntriesController;
@@ -1213,4 +1214,48 @@ it('syncs multiple medications with the same timestamp without collision', funct
         ->all();
 
     expect($displayTexts)->toBe(['Atorvastatin 20 mg', 'Lisinopril 10 mg', 'Metformin 500 mg']);
+});
+
+it('adds synced water next to water logged on the web at the same moment instead of replacing it', function (): void {
+    $user = User::factory()->create();
+    $device = MobileSyncDevice::factory()->for($user)->paired()->create([
+        'device_identifier' => 'test-uuid',
+    ]);
+    $token = $user->createToken('test', ['sync:push'])->plainTextToken;
+    HealthSyncSample::factory()->fromWeb()->create([
+        'user_id' => $user->id,
+        'type_identifier' => 'water',
+        'value' => 750,
+        'unit' => 'mL',
+        'measured_at' => '2026-10-18 16:00:00',
+    ]);
+
+    /** @var string $encryptionKey */
+    $encryptionKey = $device->encryption_key;
+
+    $this->withHeader('Authorization', 'Bearer '.$token)
+        ->postJson(route('api.v2.sync.health-entries'), [
+            'device_identifier' => 'test-uuid',
+            'encrypted_payload' => encryptSyncPayload([
+                [
+                    'type' => 'water',
+                    'value' => 300,
+                    'unit' => 'mL',
+                    'date' => '2026-10-18T16:00:00Z',
+                ],
+            ], $encryptionKey),
+        ])
+        ->assertOk()
+        ->assertJson(['samples_created' => 1, 'samples_updated' => 0]);
+
+    expect(HealthSyncSample::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', 'water')
+        ->orderBy('value')
+        ->get()
+        ->map(fn (HealthSyncSample $sample): array => [$sample->value, $sample->entry_source])
+        ->all())->toBe([
+            [300.0, HealthEntrySource::MobileSync],
+            [750.0, HealthEntrySource::Web],
+        ]);
 });

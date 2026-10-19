@@ -21,13 +21,13 @@ final readonly class StoreWaterIntakeController
 
     public function __invoke(StoreWaterIntakeRequest $request): RedirectResponse
     {
-        $measuredAt = $this->recordWaterIntake->handle(
+        $affectedUtcDates = $this->recordWaterIntake->handle(
             $this->currentUser,
             $request->selectedDay(),
             $request->amountMl(),
         );
 
-        $this->dispatchAggregateUserUtcDates->handle($this->currentUser, [$measuredAt->toDateString()]);
+        $this->dispatchAggregateUserUtcDates->handle($this->currentUser, $affectedUtcDates);
 
         return back();
     }

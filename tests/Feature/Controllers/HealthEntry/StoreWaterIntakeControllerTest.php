@@ -38,6 +38,20 @@ function storedWater(User $user): array
         ->all();
 }
 
+/**
+ * @return array<string, float|null>
+ */
+function waterTotals(User $user): array
+{
+    return HealthDailyAggregate::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', 'water')
+        ->oldest(HealthDailyAggregate::UTC_DAY_COLUMN)
+        ->get()
+        ->mapWithKeys(fn (HealthDailyAggregate $aggregate): array => [(string) $aggregate->local_date?->toDateString() => $aggregate->value_sum])
+        ->all();
+}
+
 it('requires authentication to log water', function (): void {
     $this->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 250])
         ->assertRedirectToRoute('login');
@@ -94,6 +108,56 @@ it('counts logged water in the day’s totals next to water synced from Apple He
         ->where(HealthDailyAggregate::UTC_DAY_COLUMN, '2026-10-18')
         ->where('type_identifier', 'water')
         ->value('value_sum'))->toEqual(800.0);
+});
+
+it('forgets the day’s logged water total once every cup is emptied', function (?float $syncedMl, array $totals): void {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    if ($syncedMl !== null) {
+        HealthSyncSample::factory()->fromMobileSync()->create([
+            'user_id' => $user->id,
+            'type_identifier' => 'water',
+            'value' => $syncedMl,
+            'unit' => 'mL',
+            'measured_at' => '2026-10-18 09:00:00',
+        ]);
+    }
+
+    $this->actingAs($user)
+        ->post(route('health-entries.water.store'), ['date' => '2026-10-18', 'amount_ml' => 250]);
+
+    $this->actingAs($user)
+        ->post(route('health-entries.water.store'), ['date' => '2026-10-18', 'amount_ml' => 0])
+        ->assertSessionHasNoErrors();
+
+    expect(waterTotals($user))->toBe($totals);
+})->with([
+    'nothing synced' => [null, []],
+    'water synced from Apple Health' => [300.0, ['2026-10-18' => 300.0]],
+]);
+
+it('keeps a single logged amount for the day after the timezone changes', function (): void {
+    $this->travelTo(CarbonImmutable::parse('2026-10-19 12:00:00', 'UTC'));
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    $this->actingAs($user)
+        ->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 500]);
+
+    $user->update(['timezone' => 'Asia/Ulaanbaatar']);
+
+    $this->actingAs($user)
+        ->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 750])
+        ->assertSessionHasNoErrors();
+
+    expect(storedWater($user))->toBe([[750.0, 'mL', '2026-10-18 16:00:00', HealthEntrySource::Web]])
+        ->and(waterTotals($user))->toBe(['2026-10-18' => 750.0]);
+
+    $this->actingAs($user)
+        ->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 0])
+        ->assertSessionHasNoErrors();
+
+    expect(storedWater($user))->toBe([])
+        ->and(waterTotals($user))->toBe([]);
 });
 
 it('rejects water it cannot save', function (array $payload, string $field): void {
