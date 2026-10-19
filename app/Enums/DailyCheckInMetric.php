@@ -6,7 +6,7 @@ namespace App\Enums;
 
 enum DailyCheckInMetric: string
 {
-    case SleepHours = 'timeAsleep';
+    case SleepHours = 'selfReportedSleep';
     case SleepQuality = 'sleepQuality';
     case StressLevel = 'stressLevel';
 

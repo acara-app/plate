@@ -144,7 +144,7 @@ export default function WellnessCards({
                 emptyLabel={stressLabel}
             />
             <CheckInSheet
-                key={checkIn.key}
+                key={`${date}:${wellness.sleep_synced}:${checkIn.key}`}
                 open={checkIn.open}
                 onClose={() =>
                     setCheckIn((current) => ({ ...current, open: false }))

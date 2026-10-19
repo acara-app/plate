@@ -8,7 +8,9 @@ use App\Enums\HealthEntrySource;
 use App\Http\Controllers\HealthEntry\StoreDailyCheckInController;
 use App\Http\Requests\StoreDailyCheckInRequest;
 use App\Jobs\AggregateUserDayJob;
+use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
+use App\Models\SleepSession;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Queue;
@@ -58,9 +60,9 @@ it('saves sleep, sleep quality and stress for the chosen local day', function ()
         ->assertRedirect($logbook);
 
     expect(storedCheckIns($this->user))->toBe([
+        'selfReportedSleep' => [7.5, 'hours', '2026-10-18 16:00:00', HealthEntrySource::Web],
         'sleepQuality' => [3.0, 'score', '2026-10-18 16:00:00', HealthEntrySource::Web],
         'stressLevel' => [1.0, 'score', '2026-10-18 16:00:00', HealthEntrySource::Web],
-        'timeAsleep' => [7.5, 'hours', '2026-10-18 16:00:00', HealthEntrySource::Web],
     ]);
 
     Queue::assertPushed(AggregateUserDayJob::class, fn (AggregateUserDayJob $job): bool => $job->uniqueId() === $this->user->id.':2026-10-18');
@@ -75,10 +77,32 @@ it('updates the day’s answers and keeps the ones skipped this time', function 
         ->assertSessionHasNoErrors();
 
     expect(storedCheckIns($this->user))->toBe([
+        'selfReportedSleep' => [6.0, 'hours', '2026-10-18 16:00:00', HealthEntrySource::Web],
         'sleepQuality' => [3.0, 'score', '2026-10-18 16:00:00', HealthEntrySource::Web],
         'stressLevel' => [3.0, 'score', '2026-10-18 16:00:00', HealthEntrySource::Web],
-        'timeAsleep' => [6.0, 'hours', '2026-10-18 16:00:00', HealthEntrySource::Web],
     ]);
+});
+
+it('keeps logged sleep in the daily totals when a synced nap lands on the same day', function (): void {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+    SleepSession::factory()->create([
+        'user_id' => $user->id,
+        'stage' => SleepSession::STAGE_ASLEEP_CORE,
+        'started_at' => '2026-10-18 14:00:00',
+        'ended_at' => '2026-10-18 15:00:00',
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('health-entries.check-in.store'), ['date' => '2026-10-18', 'sleep_hours' => 7.5])
+        ->assertSessionHasNoErrors();
+
+    expect(HealthDailyAggregate::query()
+        ->where('user_id', $user->id)
+        ->where(HealthDailyAggregate::UTC_DAY_COLUMN, '2026-10-18')
+        ->whereIn('type_identifier', ['selfReportedSleep', 'timeAsleep'])
+        ->orderBy('type_identifier')
+        ->pluck('value_last', 'type_identifier')
+        ->all())->toBe(['selfReportedSleep' => 7.5, 'timeAsleep' => 1.0]);
 });
 
 it('rejects check-ins it cannot save', function (array $payload, string $field): void {

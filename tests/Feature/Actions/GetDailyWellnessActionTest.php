@@ -36,7 +36,7 @@ function logCheckIn(User $user, string $type, float $value, string $measuredAt =
         'user_id' => $user->id,
         'type_identifier' => $type,
         'value' => $value,
-        'unit' => $type === 'timeAsleep' ? 'hours' : 'score',
+        'unit' => $type === 'selfReportedSleep' ? 'hours' : 'score',
         'measured_at' => $measuredAt,
     ]);
 }
@@ -80,7 +80,7 @@ it('measures last night’s synced sleep once even when stages overlap, ahead of
     syncSleep($this->user, SleepSession::STAGE_AWAKE, '2026-10-18 19:30:00', '2026-10-18 19:45:00');
     syncSleep($this->user, SleepSession::STAGE_IN_BED, '2026-10-18 14:30:00', '2026-10-18 22:00:00');
     syncSleep($this->user, SleepSession::STAGE_ASLEEP_CORE, '2026-10-17 15:00:00', '2026-10-17 23:00:00');
-    logCheckIn($this->user, 'timeAsleep', 8);
+    logCheckIn($this->user, 'selfReportedSleep', 8);
 
     $wellness = resolve(GetDailyWellnessAction::class)->handle($this->user, $this->day);
 
@@ -97,8 +97,30 @@ it('falls back to time in bed when only the phone tracked the night', function (
         ->and($wellness->sleepSynced)->toBeTrue();
 });
 
+it('reads sleep totals sent by older versions of the iOS app', function (array $samples, float $hours): void {
+    foreach ($samples as [$type, $value]) {
+        HealthSyncSample::factory()->fromMobileSync()->create([
+            'user_id' => $this->user->id,
+            'type_identifier' => $type,
+            'value' => $value,
+            'unit' => 'hours',
+            'measured_at' => '2026-10-18 23:00:00',
+        ]);
+    }
+
+    logCheckIn($this->user, 'selfReportedSleep', 5);
+
+    $wellness = resolve(GetDailyWellnessAction::class)->handle($this->user, $this->day);
+
+    expect($wellness->sleepHours)->toBe($hours)
+        ->and($wellness->sleepSynced)->toBeTrue();
+})->with([
+    'time asleep wins over time in bed' => [[['timeInBed', 8.0], ['timeAsleep', 7.0]], 7.0],
+    'time in bed when that is all the phone sent' => [[['timeInBed', 8.0]], 8.0],
+]);
+
 it('shows the day’s logged check-in when nothing was synced', function (): void {
-    logCheckIn($this->user, 'timeAsleep', 6.5);
+    logCheckIn($this->user, 'selfReportedSleep', 6.5);
     logCheckIn($this->user, 'sleepQuality', 2);
     logCheckIn($this->user, 'stressLevel', 3);
     logCheckIn($this->user, 'stressLevel', 1, '2026-10-17 16:00:00');

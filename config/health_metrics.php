@@ -227,6 +227,7 @@ return [
     'coreSleep' => $sleep('Core Sleep'),
     'deepSleep' => $sleep('Deep Sleep'),
     'awakeTime' => $sleep('Awake Time'),
+    'selfReportedSleep' => $sleep('Sleep (self-reported)'),
 
     // ----------------------------------------------------------------
     // Nutrition — every entry accumulates across the day (Sum).

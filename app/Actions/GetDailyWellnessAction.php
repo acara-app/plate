@@ -23,6 +23,10 @@ final readonly class GetDailyWellnessAction
 
     private const string STEP_COUNT_TYPE = 'stepCount';
 
+    private const string LEGACY_TIME_ASLEEP_TYPE = 'timeAsleep';
+
+    private const string LEGACY_TIME_IN_BED_TYPE = 'timeInBed';
+
     private const array ASLEEP_STAGES = [
         SleepSession::STAGE_ASLEEP_CORE,
         SleepSession::STAGE_ASLEEP_DEEP,
@@ -94,9 +98,29 @@ final readonly class GetDailyWellnessAction
 
         $asleepHours = $this->coveredHours($sessions->whereIn('stage', self::ASLEEP_STAGES));
 
-        return $asleepHours > 0
-            ? $asleepHours
-            : $this->coveredHours($sessions->where('stage', SleepSession::STAGE_IN_BED));
+        if ($asleepHours > 0) {
+            return $asleepHours;
+        }
+
+        $inBedHours = $this->coveredHours($sessions->where('stage', SleepSession::STAGE_IN_BED));
+
+        return $inBedHours > 0 ? $inBedHours : $this->legacySyncedSleepHours($user, $start);
+    }
+
+    private function legacySyncedSleepHours(User $user, CarbonImmutable $start): float
+    {
+        $samples = $user->healthSyncSamples()
+            ->where('entry_source', HealthEntrySource::MobileSync)
+            ->whereIn('type_identifier', [self::LEGACY_TIME_ASLEEP_TYPE, self::LEGACY_TIME_IN_BED_TYPE])
+            ->where('measured_at', '>=', $start->utc())
+            ->where('measured_at', '<', $start->addDay()->utc())
+            ->latest('measured_at')
+            ->get();
+
+        $sample = $samples->firstWhere('type_identifier', self::LEGACY_TIME_ASLEEP_TYPE)
+            ?? $samples->firstWhere('type_identifier', self::LEGACY_TIME_IN_BED_TYPE);
+
+        return $sample instanceof HealthSyncSample ? $sample->value : 0.0;
     }
 
     /**

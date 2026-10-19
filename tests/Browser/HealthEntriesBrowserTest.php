@@ -12,6 +12,7 @@ use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Models\AnalysisDraft;
 use App\Models\HealthSyncSample;
 use App\Models\MealPhoto;
+use App\Models\SleepSession;
 use App\Models\User;
 use App\Models\UserProfile;
 use Carbon\CarbonImmutable;
@@ -527,5 +528,28 @@ it('shows synced steps and logs last night’s sleep and today’s stress from t
         ->assertMissing('[role="dialog"]')
         ->assertVisible('button[aria-label="Sleep: 7.5h"]')
         ->assertVisible('button[aria-label="Stress: Calm"]')
+        ->assertNoJavaScriptErrors();
+});
+
+it('keeps the Logbook working when moving from an unfinished check-in to a day with synced sleep', function (): void {
+    $this->travelTo(CarbonImmutable::parse('2026-10-21 12:00:00', 'UTC'));
+    $user = User::factory()->create(['timezone' => 'UTC']);
+    SleepSession::factory()->create([
+        'user_id' => $user->id,
+        'stage' => SleepSession::STAGE_ASLEEP_CORE,
+        'started_at' => '2026-10-19 23:00:00',
+        'ended_at' => '2026-10-20 06:30:00',
+    ]);
+    $this->actingAs($user);
+
+    visit(route('health-entries.index', absolute: false))->on()->mobile()
+        ->click('button[aria-label="Log stress"]')
+        ->assertSee('Rate your stress level today')
+        ->keys('[role="dialog"]', 'Escape')
+        ->assertMissing('[role="dialog"]')
+        ->click('a[aria-label^="Tuesday, October 20"]')
+        ->assertVisible('button[aria-label="Sleep: 7.5h"]')
+        ->click('button[aria-label="Sleep: 7.5h"]')
+        ->assertSee('Rate how well you slept')
         ->assertNoJavaScriptErrors();
 });

@@ -30,6 +30,8 @@ final readonly class RecordDailyCheckInAction
         ];
 
         DB::transaction(function () use ($user, $measuredAt, $answers): void {
+            User::query()->whereKey($user->id)->lockForUpdate()->first();
+
             foreach ($answers as [$metric, $value]) {
                 if ($value === null) {
                     continue;
