@@ -210,6 +210,45 @@
     --sidebar-ring: oklch(0.439 0 0);
 }
 
+.camera-capture {
+    --tw-enter-scale: 1;
+    --tw-exit-scale: 1;
+    color-scheme: dark;
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+}
+
+@media (max-height: 32rem) {
+    .camera-capture [data-camera-header] {
+        padding-top: max(0.75rem, env(safe-area-inset-top));
+        padding-bottom: 0.75rem;
+    }
+
+    .camera-capture [data-camera-controls] {
+        gap: 0;
+        padding-top: 1rem;
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+
+    .camera-capture [data-camera-hint] {
+        display: none;
+    }
+
+    .camera-capture [data-camera-guide],
+    .camera-capture [data-camera-status] {
+        top: 5.5rem;
+        bottom: 9rem;
+    }
+}
+
 @layer base {
     * {
         @apply border-border;
