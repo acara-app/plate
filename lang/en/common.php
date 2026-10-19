@@ -534,6 +534,8 @@ return [
         ],
         'index_page' => [
             'title' => 'Logbook',
+            'ask_ai' => 'Ask AI',
+            'review_prompt' => 'Review my health entries from {{startDate}} through {{endDate}}, inclusive. What trends do you notice, and what could I improve?',
             'add_entry' => 'Add entry',
             'bp_label' => 'BP',
             'kg_label' => 'kg',
