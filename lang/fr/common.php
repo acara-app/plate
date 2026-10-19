@@ -433,7 +433,6 @@ return [
             'exercise' => 'Exercice',
         ],
         'picker' => [
-            'heading' => 'Que voulez-vous enregistrer ?',
             'back' => 'Changer de type',
         ],
         'source' => [
@@ -506,7 +505,6 @@ return [
         ],
         'dialog' => [
             'add_title' => 'Ajouter une entrée au carnet de suivi',
-            'add_description' => 'Enregistrez une nouvelle entrée — choisissez quoi enregistrer.',
             'edit_title' => 'Modifier l\'entrée du carnet de suivi',
             'edit_description' => 'Corrigez cette entrée et enregistrez vos modifications.',
         ],
