@@ -96,7 +96,7 @@ it('keeps a signed-in scan photo privately with the saved meal and only its owne
     $this->post(route('snap-to-track.review.store', ['draft' => $token]), [
         'items' => [['name' => 'Salad', 'portion' => '1 bowl', 'calories' => 180, 'protein' => 3, 'carbs' => 14, 'fat' => 13, 'provenance' => 'model']],
         'measured_at' => now()->toIso8601String(),
-    ])->assertRedirectToRoute('snap-to-track.index');
+    ])->assertRedirectToRoute('health-entries.index', ['date' => now()->toDateString()]);
 
     $groupId = (string) $draft->refresh()->health_group_id;
     expect($photo->refresh()->health_group_id)->toBe($groupId);

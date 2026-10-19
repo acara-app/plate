@@ -25,7 +25,7 @@ it('stores a reviewed meal at the same instant regardless of its timezone offset
             'items' => [['name' => 'Banana', 'calories' => 105, 'carbs' => 27]],
             'measured_at' => $measuredAt,
         ])
-        ->assertRedirectToRoute('snap-to-track.index');
+        ->assertRedirectToRoute('health-entries.index', ['date' => '2026-10-16']);
 
     $this->assertDatabaseHas('health_sync_samples', [
         'user_id' => $user->id,
@@ -54,7 +54,7 @@ it('keeps the full reviewed meal available in the logbook after editing it', fun
         'items' => $items,
         'measured_at' => '2026-10-16T03:57:00Z',
         'notes' => 'Breakfast',
-    ])->assertRedirectToRoute('snap-to-track.index');
+    ])->assertRedirectToRoute('health-entries.index', ['date' => '2026-10-16']);
 
     $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page) => $page
         ->has('entry.food_analysis.items', 2)
@@ -117,7 +117,7 @@ it('saves a renamed item with its updated nutrition, portion and weight from the
     $this->actingAs($user)->post(route('snap-to-track.review.store', ['draft' => $token]), [
         'items' => $items,
         'measured_at' => '2026-10-16T03:57:00Z',
-    ])->assertRedirectToRoute('snap-to-track.index');
+    ])->assertRedirectToRoute('health-entries.index', ['date' => '2026-10-16']);
 
     $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page) => $page
         ->where('entry.food_analysis.items.0.grams', 35)
