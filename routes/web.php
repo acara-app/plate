@@ -120,6 +120,7 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
     Route::patch('grocery-items/{groceryItem}/toggle', [Web\GroceryListController::class, 'toggleItem'])->name('grocery-items.toggle');
 
     Route::get('health-entries', Web\HealthEntry\ListHealthEntryController::class)->name('health-entries.index');
+    Route::get('health-entries/logged-dates', Web\HealthEntry\ListLoggedDatesController::class)->name('health-entries.logged-dates');
     Route::post('health-entries', Web\HealthEntry\StoreHealthEntryController::class)->name('health-entries.store');
     Route::get('health-entries/{healthSyncSample}', Web\HealthEntry\ShowHealthEntryController::class)->whereNumber('healthSyncSample')->name('health-entries.show');
     Route::put('health-entries/{healthSyncSample}', Web\HealthEntry\UpdateHealthEntryController::class)->name('health-entries.update');
