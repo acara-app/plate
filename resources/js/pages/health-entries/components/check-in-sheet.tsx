@@ -17,6 +17,7 @@ import { useForm } from '@inertiajs/react';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { BOTTOM_SHEET_CONTENT_CLASS } from './bottom-sheet';
 import { formatAmount } from './macros';
 import {
     CHECK_IN_STEPS,
@@ -122,7 +123,7 @@ export default function CheckInSheet({
             <SheetContent
                 side="bottom"
                 closeLabel={t('health_entries.timeline.close')}
-                className="mx-auto max-h-[90dvh] w-full max-w-xl gap-0 overflow-y-auto overscroll-contain rounded-t-3xl border-x p-0 [&>button:last-child]:top-3 [&>button:last-child]:right-3 [&>button:last-child]:flex [&>button:last-child]:size-11 [&>button:last-child]:items-center [&>button:last-child]:justify-center [&>button:last-child]:rounded-full"
+                className={BOTTOM_SHEET_CONTENT_CLASS}
             >
                 <div className="flex items-center gap-2 px-3 pt-3 pr-16">
                     <Button

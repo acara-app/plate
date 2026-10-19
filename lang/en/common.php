@@ -394,6 +394,17 @@ return [
             'stress_moderate' => 'Moderate',
             'stress_calm' => 'Calm',
         ],
+        'trackers' => [
+            'water_heading' => 'Water',
+            'water_today' => 'Today’s water',
+            'water_logged' => 'Water intake',
+            'water_label' => '{{value}} of {{goal}} ml of water',
+            'water_synced' => 'Includes {{value}} ml from Apple Health',
+            'water_hint' => 'Tap a cup to fill or empty it. Each cup = {{value}} ml',
+            'cup_label' => '{{value}} ml',
+            'ml_unit' => 'ml',
+            'coming_soon' => 'Coming soon',
+        ],
         'detail' => [
             'back' => 'Back to Logbook',
             'nutrition' => 'Nutrition',
