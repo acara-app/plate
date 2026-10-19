@@ -77,11 +77,11 @@ it('opens an editable seven-day review in a fresh chat and waits for the user to
         $page = $page->on()->mobile();
     }
 
-    $page = $page->assertVisible('h1 button:has-text("Ask AI")')
+    $page = $page->assertVisible('header button:has-text("Ask AI")')
         ->assertVisible('header a:has-text("Scan meal")')
         ->assertTitleContains('Logbook')
         ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
-        ->keys('h1 button[type="button"]', 'Enter')
+        ->keys('header button:has-text("Ask AI")', 'Enter')
         ->assertValue('textarea[aria-label="Message input"]', $prompt)
         ->assertQueryStringHas('auto_send', '0')
         ->assertNoJavaScriptErrors();
@@ -91,7 +91,7 @@ it('opens an editable seven-day review in a fresh chat and waits for the user to
     $firstConversation = Conversation::query()->sole();
 
     $page->back()
-        ->assertVisible('h1 button:has-text("Ask AI")')
+        ->assertVisible('header button:has-text("Ask AI")')
         ->click('Ask AI')
         ->assertValue('textarea[aria-label="Message input"]', $prompt);
 

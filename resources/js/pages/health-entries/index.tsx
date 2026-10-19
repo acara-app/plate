@@ -21,7 +21,7 @@ import {
     TodaysMeal,
 } from '@/types/diabetes';
 import { Head, Link, router } from '@inertiajs/react';
-import { BookOpen, Camera, Plus } from 'lucide-react';
+import { BookOpen, Camera, Plus, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import CalorieGoalCard from './components/calorie-goal-card';
@@ -101,15 +101,17 @@ export default function HealthEntriesIndex({
             <Head title={t('health_entries.index_page.title')} />
             <div className="mx-auto flex w-full max-w-2xl min-w-0 flex-col gap-6 px-4 pt-4 pb-16 sm:px-6 sm:pt-6">
                 <header className="flex items-center justify-between gap-3">
-                    <h1 className="text-3xl font-semibold tracking-tight">
-                        <button
-                            type="button"
-                            onClick={askAi}
-                            className="cursor-pointer rounded-md text-left transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:outline-none"
-                        >
-                            {t('health_entries.index_page.ask_ai')}
-                        </button>
+                    <h1 className="sr-only">
+                        {t('health_entries.index_page.title')}
                     </h1>
+                    <Button
+                        type="button"
+                        onClick={askAi}
+                        className="h-11 rounded-full px-4"
+                    >
+                        <Sparkles data-icon="inline-start" aria-hidden="true" />
+                        {t('health_entries.index_page.ask_ai')}
+                    </Button>
                     <Button
                         asChild
                         variant="secondary"
