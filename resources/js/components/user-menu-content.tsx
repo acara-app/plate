@@ -17,9 +17,10 @@ import { useTranslation } from 'react-i18next';
 
 interface UserMenuContentProps {
     user: User;
+    onNavigate?: () => void;
 }
 
-export function UserMenuContent({ user }: UserMenuContentProps) {
+export function UserMenuContent({ user, onNavigate }: UserMenuContentProps) {
     const cleanup = useMobileNavigation();
     const { t } = useTranslation('common');
 
@@ -44,6 +45,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                         as="button"
                         prefetch
                         onClick={cleanup}
+                        onStart={onNavigate}
                     >
                         <Settings className="mr-2" />
                         {t('user_menu.settings')}
@@ -56,6 +58,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                         as="button"
                         prefetch
                         onClick={cleanup}
+                        onStart={onNavigate}
                     >
                         <ReceiptTextIcon className="mr-2" />
                         {t('user_menu.billing')}
@@ -68,6 +71,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                         as="button"
                         prefetch
                         onClick={cleanup}
+                        onStart={onNavigate}
                     >
                         <FolderDotIcon className="mr-2" />
                         {t('user_menu.pricing')}
@@ -81,6 +85,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                     href={logout()}
                     as="button"
                     onClick={handleLogout}
+                    onStart={onNavigate}
                     data-test="logout-button"
                 >
                     <LogOut className="mr-2" />

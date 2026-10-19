@@ -96,12 +96,13 @@ const getFooterNavItems = (t: (key: string) => string): NavItem[] => [
 export function AppSidebar() {
     const { currentUser, enablePremiumUpgrades } = useSharedProps();
     const { t } = useTranslation('common');
-    const { state, isMobile, toggleSidebar } = useSidebar();
+    const { state, isMobile, toggleSidebar, setOpenMobile } = useSidebar();
     const mainNavItems = getMainNavItems(t);
     const profileNavItems = getProfileNavItems(t);
     const footerNavItems = getFooterNavItems(t);
 
     const isCollapsed = !isMobile && state === 'collapsed';
+    const closeMobileSidebar = () => setOpenMobile(false);
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -127,7 +128,11 @@ export function AppSidebar() {
                                     asChild
                                     className="justify-start"
                                 >
-                                    <Link href={dashboard()} prefetch>
+                                    <Link
+                                        href={dashboard()}
+                                        prefetch
+                                        onStart={closeMobileSidebar}
+                                    >
                                         <AppLogo showText={false} />
                                     </Link>
                                 </SidebarMenuButton>
@@ -136,9 +141,9 @@ export function AppSidebar() {
                                     size="icon"
                                     onClick={toggleSidebar}
                                     aria-label={t('sidebar.close')}
-                                    className="size-7 shrink-0"
+                                    className="size-12 shrink-0 touch-manipulation md:size-7"
                                 >
-                                    <PanelLeftClose className="size-4" />
+                                    <PanelLeftClose className="size-5 md:size-4" />
                                 </Button>
                             </div>
                         )}
@@ -164,7 +169,7 @@ export function AppSidebar() {
                                 className="rounded-lg border border-purple-300 bg-purple-50 p-3 hover:bg-purple-100 hover:text-purple-900 dark:border-purple-700 dark:bg-purple-950/50 dark:hover:bg-purple-900/50 dark:hover:text-purple-100"
                                 tooltip={{ children: 'Upgrade' }}
                             >
-                                <UpgradeButton />
+                                <UpgradeButton onStart={closeMobileSidebar} />
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     )}
