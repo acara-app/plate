@@ -64,6 +64,23 @@ export const ACTIVITY_TONE = {
     indicator: 'bg-green-500 dark:bg-green-400',
 };
 
+export const WATER_CUP_ML = 250;
+
+export const MAX_WATER_ML = 5000;
+
+export const WATER_TONE = {
+    icon: 'text-blue-500 dark:text-blue-400',
+    indicator: 'bg-blue-500 dark:bg-blue-400',
+    track: 'bg-blue-100 dark:bg-blue-500/15',
+    text: 'text-blue-500 dark:text-blue-400',
+    cup: 'bg-blue-500 text-white ring-blue-500 dark:bg-blue-500',
+};
+
+export const FASTING_TONE = {
+    icon: 'text-green-500/70 dark:text-green-400/70',
+    track: 'bg-green-100 dark:bg-green-500/15',
+};
+
 export const CHECK_IN_STEPS: Record<CheckInStep, CheckInStepConfig> = {
     hours: {
         Icon: Moon,

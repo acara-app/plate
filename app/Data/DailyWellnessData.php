@@ -17,5 +17,8 @@ final class DailyWellnessData extends Data
         public bool $sleepSynced,
         public ?SleepQuality $sleepQuality,
         public ?StressLevel $stressLevel,
+        public int $waterMl,
+        public int $waterSyncedMl,
+        public int $waterGoalMl,
     ) {}
 }

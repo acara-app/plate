@@ -49,6 +49,9 @@ it('renders the logbook for today in the user’s timezone', function (): void {
                 'sleep_synced' => false,
                 'sleep_quality' => null,
                 'stress_level' => null,
+                'water_ml' => 0,
+                'water_synced_ml' => 0,
+                'water_goal_ml' => 2000,
             ])
             ->has('glucoseReadingTypes')
             ->has('insulinTypes'));

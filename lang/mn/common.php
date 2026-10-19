@@ -394,6 +394,18 @@ return [
             'stress_moderate' => 'Дунд',
             'stress_calm' => 'Тайван',
         ],
+        'trackers' => [
+            'water_heading' => 'Ус',
+            'water_today' => 'Өнөөдрийн ус',
+            'water_logged' => 'Уусан ус',
+            'water_label' => 'Ус: {{goal}} мл-ээс {{value}} мл',
+            'water_synced' => 'Үүнээс {{value}} мл нь Apple Health-ээс',
+            'water_hint' => 'Аяга дарж дүүргэх эсвэл хоослоно. Аяга бүр = {{value}}мл',
+            'cup_label' => '{{value}} мл',
+            'ml_unit' => 'мл',
+            'fasting_heading' => 'Мацаг',
+            'coming_soon' => 'Тун удахгүй',
+        ],
         'detail' => [
             'back' => 'Тэмдэглэл рүү буцах',
             'nutrition' => 'Шим тэжээл',

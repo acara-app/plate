@@ -395,6 +395,18 @@ return [
             'stress_moderate' => 'Moyen',
             'stress_calm' => 'Calme',
         ],
+        'trackers' => [
+            'water_heading' => 'Eau',
+            'water_today' => 'Eau aujourd’hui',
+            'water_logged' => 'Eau bue',
+            'water_label' => '{{value}} ml d’eau sur {{goal}} ml',
+            'water_synced' => 'Dont {{value}} ml d’Apple Health',
+            'water_hint' => 'Touchez un verre pour le remplir ou le vider. Un verre = {{value}} ml',
+            'cup_label' => '{{value}} ml',
+            'ml_unit' => 'ml',
+            'fasting_heading' => 'Jeûne',
+            'coming_soon' => 'Bientôt disponible',
+        ],
         'detail' => [
             'back' => 'Retour au carnet',
             'nutrition' => 'Nutrition',
