@@ -8,7 +8,7 @@ import {
     BurstLimitNotice,
     type BurstLimit,
 } from '@/components/billing/burst-limit-notice';
-import InputError from '@/components/input-error';
+import { MealPhotoPicker } from '@/components/snap-to-track/meal-photo-picker';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -17,13 +17,12 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import checkout from '@/routes/checkout';
 import { type BreadcrumbItem } from '@/types';
 import { Form, Head, Link } from '@inertiajs/react';
 import { Gauge, ScanLine } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 type CreditLimit = {
@@ -50,6 +49,7 @@ export default function SnapToTrackIndex({
     analysisRequestId,
 }: SnapToTrackIndexProps) {
     const { t } = useTranslation('common');
+    const [photo, setPhoto] = useState<File | null>(null);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -112,37 +112,31 @@ export default function SnapToTrackIndex({
                             <CardContent>
                                 <Form
                                     {...AnalyzeSnapToTrackPhotoController.form()}
+                                    transform={(data) => ({ ...data, photo })}
                                     disableWhileProcessing
                                     className="flex flex-col gap-4"
                                 >
-                                    {({ processing, errors }) => (
+                                    {({ processing, errors, clearErrors }) => (
                                         <>
-                                            <div>
-                                                <Label htmlFor="snap-photo">
-                                                    {t(
-                                                        'snap_to_track.index.upload_label',
-                                                    )}
-                                                </Label>
-                                                <input
-                                                    type="hidden"
-                                                    name="analysis_request_id"
-                                                    value={analysisRequestId}
-                                                />
-                                                <Input
-                                                    id="snap-photo"
-                                                    name="photo"
-                                                    type="file"
-                                                    accept="image/*"
-                                                    required
-                                                    className="mt-1"
-                                                />
-                                                <InputError
-                                                    message={errors.photo}
-                                                />
-                                            </div>
+                                            <input
+                                                type="hidden"
+                                                name="analysis_request_id"
+                                                value={analysisRequestId}
+                                            />
+                                            <MealPhotoPicker
+                                                photo={photo}
+                                                onChange={(file) => {
+                                                    setPhoto(file);
+                                                    clearErrors('photo');
+                                                }}
+                                                disabled={processing}
+                                                error={errors.photo}
+                                            />
                                             <Button
                                                 type="submit"
-                                                disabled={processing}
+                                                size="touch"
+                                                className="w-full"
+                                                disabled={processing || !photo}
                                             >
                                                 {processing
                                                     ? t(
@@ -152,11 +146,6 @@ export default function SnapToTrackIndex({
                                                           'snap_to_track.index.analyze',
                                                       )}
                                             </Button>
-                                            <p className="text-xs text-muted-foreground">
-                                                {t(
-                                                    'snap_to_track.index.photo_saved',
-                                                )}
-                                            </p>
                                             <p className="text-xs text-muted-foreground">
                                                 {t(
                                                     'snap_to_track.review.disclaimer',

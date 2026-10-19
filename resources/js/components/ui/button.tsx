@@ -24,7 +24,9 @@ const buttonVariants = cva(
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
         sm: "h-8 rounded-md px-3 has-[>svg]:px-2.5",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+        touch: "h-14 min-h-14 touch-manipulation rounded-xl px-6 text-base has-[>svg]:px-5 [&_svg:not([class*='size-'])]:size-5",
         icon: "size-9",
+        "icon-touch": "size-14 shrink-0 touch-manipulation [&_svg:not([class*='size-'])]:size-6",
       },
     },
     defaultVariants: {
