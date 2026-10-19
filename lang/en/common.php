@@ -432,7 +432,6 @@ return [
             'exercise' => 'Exercise',
         ],
         'picker' => [
-            'heading' => 'What are you logging?',
             'back' => 'Change type',
         ],
         'source' => [
@@ -505,7 +504,6 @@ return [
         ],
         'dialog' => [
             'add_title' => 'Add an entry',
-            'add_description' => 'Record a new entry — pick what you want to log.',
             'edit_title' => 'Edit entry',
             'edit_description' => 'Make a correction and save your changes.',
         ],
