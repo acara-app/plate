@@ -289,7 +289,7 @@ export default function CreateChat() {
                                 : 'pointer-events-none -translate-y-2 opacity-0',
                         )}
                     >
-                        <SidebarTrigger className="size-10 rounded-full border border-border/40 bg-background/80 shadow-md backdrop-blur-md supports-[backdrop-filter]:bg-background/60" />
+                        <SidebarTrigger className="rounded-full border border-border/40 bg-background/80 shadow-md backdrop-blur-md supports-[backdrop-filter]:bg-background/60" />
                     </div>
                     <div
                         className={cn(
