@@ -3,12 +3,12 @@
     <div class="mx-auto max-w-6xl py-12 px-6 lg:px-0">
         <div class="xl:grid xl:grid-cols-5 xl:gap-8">
             <div class="space-y-8">
-                <a href="{{ route('home') }}" class="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white" title="Acara Plate - AI Nutritionist & Diabetes Management Home">
+                <a href="{{ route('home') }}" class="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white" title="Acara Plate - AI Food & Health Tracker">
                     <span class="text-2xl" role="img" aria-label="strawberry">🍓</span>
                     Acara Plate
                 </a>
                 <p class="text-sm leading-6 text-slate-600 dark:text-slate-400">
-                    AI-powered nutrition and meal planning for Type 2 diabetes management.
+                    Photo food logging and everyday health tracking, together in one personal logbook.
                 </p>
                 <div class="flex space-x-6">
                     <a href="https://github.com/acara-app/plate" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-slate-500 dark:hover:text-slate-300">
