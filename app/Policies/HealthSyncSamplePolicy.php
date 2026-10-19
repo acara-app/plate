@@ -10,6 +10,11 @@ use App\Models\User;
 /** @codeCoverageIgnore */
 final class HealthSyncSamplePolicy
 {
+    public function view(User $user, HealthSyncSample $healthSyncSample): bool
+    {
+        return $user->id === $healthSyncSample->user_id;
+    }
+
     public function update(User $user, HealthSyncSample $healthSyncSample): bool
     {
         return $user->id === $healthSyncSample->user_id;

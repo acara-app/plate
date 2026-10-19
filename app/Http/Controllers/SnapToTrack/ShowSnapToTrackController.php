@@ -55,6 +55,7 @@ final readonly class ShowSnapToTrackController
             'photoAllowance' => $allowance->toArray(),
             'analysisRequestId' => (string) Str::uuid(),
             'savedGroupId' => session('snap_to_track_saved_group'),
+            'savedDate' => session('snap_to_track_saved_date'),
             'creditLimit' => $creditLimit,
             'burstLimit' => $burstLimit?->toArray(),
         ]);

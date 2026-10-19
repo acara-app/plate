@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\HealthEntry;
 
 use App\Actions\GetUserHealthEntriesAction;
-use App\Enums\HealthEntryType;
+use App\Actions\GetUserLoggedDatesAction;
 use App\Http\Layouts\DiabetesLayout;
 use App\Http\Requests\ListHealthEntriesRequest;
 use App\Models\User;
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Container\Attributes\CurrentUser;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,16 +19,23 @@ final readonly class ListHealthEntryController
 {
     public function __construct(
         private GetUserHealthEntriesAction $getUserHealthEntries,
+        private GetUserLoggedDatesAction $getUserLoggedDates,
         #[CurrentUser()] private User $currentUser,
     ) {}
 
     public function __invoke(ListHealthEntriesRequest $request): Response
     {
-        $type = $request->enum('type', HealthEntryType::class);
+        $timezone = $this->currentUser->resolveTimezone();
+        $day = $request->selectedDay($timezone);
+        $weekStart = $day->startOfWeek(CarbonInterface::MONDAY);
+        $now = CarbonImmutable::now($timezone);
 
         return Inertia::render('health-entries/index', [
-            'logs' => Inertia::scroll(fn (): LengthAwarePaginator => $this->getUserHealthEntries->handle($this->currentUser, type: $type)),
-            'filters' => ['type' => $type?->value],
+            'date' => $day->toDateString(),
+            'today' => $now->toDateString(),
+            'newEntryAt' => $day->isSameDay($now) ? null : $day->setTimeFrom($now)->toIso8601String(),
+            'entries' => fn (): array => $this->getUserHealthEntries->handle($this->currentUser, $day)->all(),
+            'loggedDates' => fn (): array => $this->getUserLoggedDates->handle($this->currentUser, $weekStart, $weekStart->addDays(6)),
             ...DiabetesLayout::props($this->currentUser),
         ]);
     }

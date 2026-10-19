@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use App\Actions\GetUserHealthEntriesAction;
-use App\Enums\HealthEntryType;
 use App\Enums\HealthSyncType;
 use App\Models\HealthSyncSample;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 
 function seedMeal(User $user, string $groupId, CarbonInterface $at): void
@@ -21,78 +21,44 @@ function seedMeal(User $user, string $groupId, CarbonInterface $at): void
     }
 }
 
-it('counts a multi-sample meal as one entry, not one row per sample', function (): void {
+it('returns each meal once with its other grouped readings', function (): void {
     $user = User::factory()->create();
-    seedMeal($user, 'meal-1', now()->subHour());
+    $day = CarbonImmutable::parse('2026-10-18', 'UTC');
+    seedMeal($user, 'meal-1', $day->setTime(12, 30));
+    HealthSyncSample::factory()->bloodGlucose()->create([
+        'user_id' => $user->id,
+        'group_id' => 'meal-1',
+        'value' => 120,
+        'measured_at' => $day->setTime(12, 30),
+    ]);
     HealthSyncSample::factory()->weight()->create([
         'user_id' => $user->id,
         'group_id' => null,
-        'measured_at' => now()->subHours(2),
+        'measured_at' => $day->setTime(8, 0),
     ]);
 
-    $paginator = resolve(GetUserHealthEntriesAction::class)->handle($user);
+    $entries = resolve(GetUserHealthEntriesAction::class)->handle($user, $day);
 
-    expect($paginator->total())->toBe(2)
-        ->and($paginator->items())->toHaveCount(2);
+    expect($entries)->toHaveCount(2)
+        ->and($entries[0]['group_id'])->toBe('meal-1')
+        ->and($entries[0]['glucose_value'])->toBe(120.0)
+        ->and($entries[0]['protein_grams'])->not->toBeNull()
+        ->and($entries[0]['meal_type'])->toBe('lunch')
+        ->and($entries[1]['weight'])->not->toBeNull();
 });
 
-it('keeps every sample of a meal on the same page', function (): void {
-    $user = User::factory()->create();
-    seedMeal($user, 'meal-a', now()->subHour());
-    seedMeal($user, 'meal-b', now()->subHours(3));
-
-    $page = resolve(GetUserHealthEntriesAction::class)->handle($user, perPage: 1);
-
-    expect($page->total())->toBe(2)
-        ->and($page->lastPage())->toBe(2)
-        ->and($page->items())->toHaveCount(1);
-
-    $entry = $page->items()[0];
-
-    expect($entry['group_id'])->toBe('meal-a')
-        ->and($entry['carbs_grams'])->not->toBeNull()
-        ->and($entry['protein_grams'])->not->toBeNull()
-        ->and($entry['fat_grams'])->not->toBeNull();
-});
-
-it('orders entries by most recent first and scopes to the requesting user', function (): void {
+it('orders the day newest first and scopes it to the requesting user and local day', function (): void {
     $user = User::factory()->create();
     $other = User::factory()->create();
+    $day = CarbonImmutable::parse('2026-10-18', 'America/Los_Angeles');
 
-    seedMeal($user, 'older', now()->subHours(5));
-    seedMeal($user, 'newer', now()->subHour());
-    seedMeal($other, 'theirs', now());
+    seedMeal($user, 'breakfast', $day->setTime(7, 0)->utc());
+    seedMeal($user, 'late-snack', $day->setTime(23, 45)->utc());
+    seedMeal($user, 'next-day', $day->addDay()->setTime(0, 15)->utc());
+    seedMeal($other, 'theirs', $day->setTime(9, 0)->utc());
 
-    $paginator = resolve(GetUserHealthEntriesAction::class)->handle($user);
+    $entries = resolve(GetUserHealthEntriesAction::class)->handle($user, $day);
 
-    expect($paginator->total())->toBe(2)
-        ->and($paginator->items()[0]['group_id'])->toBe('newer')
-        ->and($paginator->items()[1]['group_id'])->toBe('older');
-});
-
-it('paginates matching groups and keeps their other readings intact', function (): void {
-    $user = User::factory()->create();
-    seedMeal($user, 'meal-newer', now()->subHour());
-    seedMeal($user, 'meal-older', now()->subHours(3));
-    HealthSyncSample::factory()->bloodGlucose()->create([
-        'user_id' => $user->id,
-        'group_id' => 'meal-newer',
-        'value' => 120,
-        'measured_at' => now()->subHour(),
-    ]);
-    HealthSyncSample::factory()->weight()->count(20)->create(['user_id' => $user->id]);
-
-    $paginator = resolve(GetUserHealthEntriesAction::class)->handle($user, perPage: 1, type: HealthEntryType::Food);
-
-    expect($paginator->total())->toBe(2)
-        ->and($paginator->items())->toHaveCount(1)
-        ->and($paginator->items()[0]['group_id'])->toBe('meal-newer')
-        ->and($paginator->items()[0]['glucose_value'])->toBe(120.0)
-        ->and($paginator->items()[0]['protein_grams'])->not->toBeNull()
-        ->and($paginator->nextPageUrl())->toContain('type=food', 'page=2');
-
-    $this->app['request']->query->set('page', 2);
-    $nextPage = resolve(GetUserHealthEntriesAction::class)->handle($user, perPage: 1, type: HealthEntryType::Food);
-
-    expect($nextPage->items()[0]['group_id'])->toBe('meal-older');
+    expect($entries->pluck('group_id')->all())->toBe(['late-snack', 'breakfast'])
+        ->and($entries->pluck('meal_type')->all())->toBe(['snack', 'breakfast']);
 });

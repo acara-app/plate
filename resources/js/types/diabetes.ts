@@ -1,3 +1,5 @@
+import type { MealType } from '@/types/meal-plan';
+
 // =============================================================================
 // Glucose Unit Types & Constants
 // =============================================================================
@@ -40,6 +42,7 @@ export type LogTypeValue = (typeof LogType)[keyof typeof LogType];
 
 export interface HealthEntry {
     id: number;
+    group_id: string | null;
     glucose_value: number | null;
     glucose_reading_type: string | null;
     measured_at: string;
@@ -59,6 +62,7 @@ export interface HealthEntry {
     exercise_type: string | null;
     exercise_duration_minutes: number | null;
     source: string | null;
+    meal_type: MealType | null;
     food_analysis?: FoodBreakdown | null;
     photo_url?: string | null;
     created_at: string;

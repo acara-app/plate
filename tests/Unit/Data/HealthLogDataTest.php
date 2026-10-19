@@ -7,6 +7,7 @@ use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
 use App\Enums\InsulinType;
+use App\Enums\MealType;
 use App\Enums\WeightUnit;
 
 covers(HealthLogData::class);
@@ -547,4 +548,16 @@ test('toSampleArrays converts pounds to kilograms', function (): void {
         ->and($samples[0]['type_identifier'])->toBe('weight')
         ->and($samples[0]['unit'])->toBe('kg')
         ->and(round((float) $samples[0]['value'], 1))->toBe(80.0);
+});
+
+test('a manually logged meal keeps the chosen meal type on every nutrition sample', function (): void {
+    $samples = HealthLogData::fromParsedArray([
+        'log_type' => 'food',
+        'carbs_grams' => 45,
+        'calories' => 400,
+        'meal_type' => 'lunch',
+    ])->toSampleArrays();
+
+    expect($samples)->toHaveCount(2)
+        ->and(array_column(array_column($samples, 'metadata'), 'meal_type'))->toBe([MealType::Lunch->value, MealType::Lunch->value]);
 });

@@ -182,3 +182,31 @@ it('assembles grouped food samples into a single entry', function (): void {
         ->and($result->first()['calories'])->toBe(400)
         ->and($result->first()['notes'])->toBe('Rice bowl');
 });
+
+it('labels an unlabelled meal by the local time it was eaten', function (string $utcTime, string $mealType): void {
+    $sample = HealthSyncSample::factory()->carbohydrates()->for(User::factory())->create([
+        'measured_at' => '2026-10-18 '.$utcTime,
+    ]);
+
+    expect((new HealthEntryAssembler)->assemble(collect([$sample]), 'Asia/Ulaanbaatar')->first()['meal_type'])->toBe($mealType);
+})->with([
+    'breakfast from 04:00' => ['20:00:00', 'breakfast'],
+    'breakfast until 10:59' => ['02:59:00', 'breakfast'],
+    'lunch from 11:00' => ['03:00:00', 'lunch'],
+    'dinner until 21:59' => ['13:59:00', 'dinner'],
+    'snack from 22:00' => ['14:00:00', 'snack'],
+    'snack until 03:59' => ['19:59:00', 'snack'],
+]);
+
+it('keeps a chosen meal type and gives readings none', function (): void {
+    $user = User::factory()->create();
+    $meal = HealthSyncSample::factory()->carbohydrates()->for($user)->create([
+        'measured_at' => '2026-10-18 01:00:00',
+        'metadata' => ['meal_type' => 'snack'],
+    ]);
+    $reading = HealthSyncSample::factory()->bloodGlucose()->for($user)->create(['measured_at' => '2026-10-18 01:00:00']);
+
+    $entries = (new HealthEntryAssembler)->assemble(collect([$meal, $reading]));
+
+    expect($entries->pluck('meal_type', 'id')->all())->toBe([$meal->id => 'snack', $reading->id => null]);
+});
