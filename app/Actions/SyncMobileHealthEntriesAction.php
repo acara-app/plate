@@ -248,7 +248,7 @@ final readonly class SyncMobileHealthEntriesAction
             ->whereIn('measured_at', $dates)
             ->where(static fn (Builder $query): Builder => $query
                 ->whereNull('entry_source')
-                ->orWhere('entry_source', '!=', HealthEntrySource::Web))
+                ->orWhere('entry_source', HealthEntrySource::MobileSync))
             ->get();
 
         foreach ($samples as $sample) {

@@ -217,6 +217,16 @@ final class HealthSyncSample extends Model
      * @param  Builder<self>  $query
      */
     #[Scope]
+    protected function measuredWithinDay(Builder $query, CarbonInterface $dayStart): void
+    {
+        $query->where('measured_at', '>=', $dayStart->copy()->utc())
+            ->where('measured_at', '<', $dayStart->copy()->addDay()->utc());
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
     protected function excludingGroup(Builder $query, ?string $groupId): void
     {
         if ($groupId === null) {

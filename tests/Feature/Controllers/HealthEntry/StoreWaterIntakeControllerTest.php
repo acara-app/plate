@@ -52,6 +52,17 @@ function waterTotals(User $user): array
         ->all();
 }
 
+function syncWater(User $user, float $millilitres): void
+{
+    HealthSyncSample::factory()->fromMobileSync()->create([
+        'user_id' => $user->id,
+        'type_identifier' => 'water',
+        'value' => $millilitres,
+        'unit' => 'mL',
+        'measured_at' => '2026-10-18 09:00:00',
+    ]);
+}
+
 it('requires authentication to log water', function (): void {
     $this->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 250])
         ->assertRedirectToRoute('login');
@@ -76,14 +87,12 @@ it('replaces the day’s amount when another cup is tapped and clears it when ev
     $this->actingAs($this->user)
         ->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 1000]);
 
-    $this->actingAs($this->user)
-        ->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 1250])
+    $this->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 1250])
         ->assertSessionHasNoErrors();
 
     expect(storedWater($this->user))->toBe([[1250.0, 'mL', '2026-10-18 16:00:00', HealthEntrySource::Web]]);
 
-    $this->actingAs($this->user)
-        ->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 0])
+    $this->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 0])
         ->assertSessionHasNoErrors();
 
     expect(storedWater($this->user))->toBe([]);
@@ -91,43 +100,26 @@ it('replaces the day’s amount when another cup is tapped and clears it when ev
 
 it('counts logged water in the day’s totals next to water synced from Apple Health', function (): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
-    HealthSyncSample::factory()->fromMobileSync()->create([
-        'user_id' => $user->id,
-        'type_identifier' => 'water',
-        'value' => 300,
-        'unit' => 'mL',
-        'measured_at' => '2026-10-18 09:00:00',
-    ]);
+    syncWater($user, 300);
 
     $this->actingAs($user)
         ->post(route('health-entries.water.store'), ['date' => '2026-10-18', 'amount_ml' => 500])
         ->assertSessionHasNoErrors();
 
-    expect(HealthDailyAggregate::query()
-        ->where('user_id', $user->id)
-        ->where(HealthDailyAggregate::UTC_DAY_COLUMN, '2026-10-18')
-        ->where('type_identifier', 'water')
-        ->value('value_sum'))->toEqual(800.0);
+    expect(waterTotals($user))->toBe(['2026-10-18' => 800.0]);
 });
 
 it('forgets the day’s logged water total once every cup is emptied', function (?float $syncedMl, array $totals): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
     if ($syncedMl !== null) {
-        HealthSyncSample::factory()->fromMobileSync()->create([
-            'user_id' => $user->id,
-            'type_identifier' => 'water',
-            'value' => $syncedMl,
-            'unit' => 'mL',
-            'measured_at' => '2026-10-18 09:00:00',
-        ]);
+        syncWater($user, $syncedMl);
     }
 
     $this->actingAs($user)
         ->post(route('health-entries.water.store'), ['date' => '2026-10-18', 'amount_ml' => 250]);
 
-    $this->actingAs($user)
-        ->post(route('health-entries.water.store'), ['date' => '2026-10-18', 'amount_ml' => 0])
+    $this->post(route('health-entries.water.store'), ['date' => '2026-10-18', 'amount_ml' => 0])
         ->assertSessionHasNoErrors();
 
     expect(waterTotals($user))->toBe($totals);
@@ -145,15 +137,13 @@ it('keeps a single logged amount for the day after the timezone changes', functi
 
     $user->update(['timezone' => 'Asia/Ulaanbaatar']);
 
-    $this->actingAs($user)
-        ->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 750])
+    $this->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 750])
         ->assertSessionHasNoErrors();
 
     expect(storedWater($user))->toBe([[750.0, 'mL', '2026-10-18 16:00:00', HealthEntrySource::Web]])
         ->and(waterTotals($user))->toBe(['2026-10-18' => 750.0]);
 
-    $this->actingAs($user)
-        ->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 0])
+    $this->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 0])
         ->assertSessionHasNoErrors();
 
     expect(storedWater($user))->toBe([])

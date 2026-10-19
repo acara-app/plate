@@ -72,7 +72,6 @@ export const WATER_TONE = {
     icon: 'text-blue-500 dark:text-blue-400',
     indicator: 'bg-blue-500 dark:bg-blue-400',
     track: 'bg-blue-100 dark:bg-blue-500/15',
-    text: 'text-blue-500 dark:text-blue-400',
     cup: 'bg-blue-500 text-white ring-blue-500 dark:bg-blue-500',
 };
 

@@ -1216,17 +1216,18 @@ it('syncs multiple medications with the same timestamp without collision', funct
     expect($displayTexts)->toBe(['Atorvastatin 20 mg', 'Lisinopril 10 mg', 'Metformin 500 mg']);
 });
 
-it('adds synced water next to water logged on the web at the same moment instead of replacing it', function (): void {
+it('adds a synced sample next to an entry logged in Plate at the same moment instead of replacing it', function (HealthEntrySource $loggedFrom): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->paired()->create([
         'device_identifier' => 'test-uuid',
     ]);
     $token = $user->createToken('test', ['sync:push'])->plainTextToken;
-    HealthSyncSample::factory()->fromWeb()->create([
+    HealthSyncSample::factory()->create([
         'user_id' => $user->id,
         'type_identifier' => 'water',
         'value' => 750,
         'unit' => 'mL',
+        'entry_source' => $loggedFrom,
         'measured_at' => '2026-10-18 16:00:00',
     ]);
 
@@ -1256,6 +1257,10 @@ it('adds synced water next to water logged on the web at the same moment instead
         ->map(fn (HealthSyncSample $sample): array => [$sample->value, $sample->entry_source])
         ->all())->toBe([
             [300.0, HealthEntrySource::MobileSync],
-            [750.0, HealthEntrySource::Web],
+            [750.0, $loggedFrom],
         ]);
-});
+})->with([
+    'web' => [HealthEntrySource::Web],
+    'chat' => [HealthEntrySource::Chat],
+    'the iOS app' => [HealthEntrySource::Mobile],
+]);

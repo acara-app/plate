@@ -75,8 +75,7 @@ final readonly class GetDailyWellnessAction
         return $user->healthSyncSamples()
             ->where('entry_source', HealthEntrySource::Web)
             ->whereIn('type_identifier', array_column(DailyCheckInMetric::cases(), 'value'))
-            ->where('measured_at', '>=', $start->utc())
-            ->where('measured_at', '<', $start->addDay()->utc())
+            ->measuredWithinDay($start)
             ->oldest('measured_at')
             ->pluck('value', 'type_identifier');
     }
@@ -93,8 +92,7 @@ final readonly class GetDailyWellnessAction
     {
         return $user->healthSyncSamples()
             ->where('type_identifier', $type)
-            ->where('measured_at', '>=', $start->utc())
-            ->where('measured_at', '<', $start->addDay()->utc())
+            ->measuredWithinDay($start)
             ->get();
     }
 
@@ -132,8 +130,7 @@ final readonly class GetDailyWellnessAction
         $samples = $user->healthSyncSamples()
             ->where('entry_source', HealthEntrySource::MobileSync)
             ->whereIn('type_identifier', [self::LEGACY_TIME_ASLEEP_TYPE, self::LEGACY_TIME_IN_BED_TYPE])
-            ->where('measured_at', '>=', $start->utc())
-            ->where('measured_at', '<', $start->addDay()->utc())
+            ->measuredWithinDay($start)
             ->latest('measured_at')
             ->get();
 

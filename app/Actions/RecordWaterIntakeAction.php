@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Enums\HealthEntrySource;
-use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -15,7 +14,7 @@ final readonly class RecordWaterIntakeAction
 {
     public const string WATER_TYPE = 'water';
 
-    public const string WATER_UNIT = 'mL';
+    private const string WATER_UNIT = 'mL';
 
     /**
      * @return list<string>
@@ -29,9 +28,8 @@ final readonly class RecordWaterIntakeAction
 
             $logged = $user->healthSyncSamples()
                 ->where('type_identifier', self::WATER_TYPE)
-                ->where('entry_source', HealthEntrySource::Web)
-                ->where('measured_at', '>=', $start->utc())
-                ->where('measured_at', '<', $start->addDay()->utc())
+                ->forEntrySource(HealthEntrySource::Web)
+                ->measuredWithinDay($start)
                 ->get();
 
             $affectedUtcDates = array_values(array_unique([
@@ -67,14 +65,13 @@ final readonly class RecordWaterIntakeAction
 
             $hasWater = $user->healthSyncSamples()
                 ->where('type_identifier', self::WATER_TYPE)
-                ->where('measured_at', '>=', $utcDay)
-                ->where('measured_at', '<', $utcDay->addDay())
+                ->measuredWithinDay($utcDay)
                 ->exists();
 
             if (! $hasWater) {
                 $user->healthDailyAggregates()
-                    ->where(HealthDailyAggregate::UTC_DAY_COLUMN, $utcDate)
-                    ->where('type_identifier', self::WATER_TYPE)
+                    ->forDate($utcDay)
+                    ->ofType(self::WATER_TYPE)
                     ->delete();
             }
         }
