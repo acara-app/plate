@@ -42,6 +42,14 @@ it('renders the logbook for today in the user’s timezone', function (): void {
             ->where('newEntryAt', null)
             ->has('entries')
             ->has('loggedDates')
+            ->where('wellness', [
+                'steps' => 0,
+                'step_goal' => 10000,
+                'sleep_hours' => null,
+                'sleep_synced' => false,
+                'sleep_quality' => null,
+                'stress_level' => null,
+            ])
             ->has('glucoseReadingTypes')
             ->has('insulinTypes'));
 });

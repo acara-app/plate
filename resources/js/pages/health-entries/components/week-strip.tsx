@@ -9,7 +9,14 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import useWeekScroll from './use-week-scroll';
 
-const DAY_PROPS = ['date', 'today', 'newEntryAt', 'entries', 'loggedDates'];
+const DAY_PROPS = [
+    'date',
+    'today',
+    'newEntryAt',
+    'entries',
+    'loggedDates',
+    'wellness',
+];
 const LONG_DATE: Intl.DateTimeFormatOptions = {
     month: 'long',
     day: 'numeric',

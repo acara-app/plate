@@ -7,9 +7,10 @@ use App\Enums\HealthEntrySource;
 use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
 use App\Models\User;
+use App\Services\CumulativeSampleDeduplicator;
 use Carbon\CarbonImmutable;
 
-covers(AggregateHealthDailySamplesAction::class);
+covers(AggregateHealthDailySamplesAction::class, CumulativeSampleDeduplicator::class);
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();

@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\HealthEntry;
 
 use App\Actions\CalculateDailyNutritionGoals;
+use App\Actions\GetDailyWellnessAction;
 use App\Actions\GetUserHealthEntriesAction;
 use App\Actions\GetUserLoggedDatesAction;
 use App\Data\DailyNutritionGoalsData;
+use App\Data\DailyWellnessData;
 use App\Http\Layouts\DiabetesLayout;
 use App\Http\Requests\ListHealthEntriesRequest;
 use App\Models\User;
@@ -22,6 +24,7 @@ final readonly class ListHealthEntryController
         private GetUserHealthEntriesAction $getUserHealthEntries,
         private GetUserLoggedDatesAction $getUserLoggedDates,
         private CalculateDailyNutritionGoals $calculateDailyNutritionGoals,
+        private GetDailyWellnessAction $getDailyWellness,
         #[CurrentUser()] private User $currentUser,
     ) {}
 
@@ -39,6 +42,7 @@ final readonly class ListHealthEntryController
             'entries' => fn (): array => $this->getUserHealthEntries->handle($this->currentUser, $day)->all(),
             'loggedDates' => fn (): array => $this->getUserLoggedDates->handle($this->currentUser, $weekStart, $weekStart->addDays(6)),
             'goals' => fn (): ?DailyNutritionGoalsData => $this->calculateDailyNutritionGoals->handle($this->currentUser->profile),
+            'wellness' => fn (): DailyWellnessData => $this->getDailyWellness->handle($this->currentUser, $day),
             ...DiabetesLayout::props($this->currentUser),
         ]);
     }
