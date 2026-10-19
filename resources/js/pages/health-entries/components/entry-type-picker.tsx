@@ -1,3 +1,4 @@
+import { SnapToTrackLauncher } from '@/components/snap-to-track/snap-to-track-launcher';
 import { HEALTH_ENTRY_TYPES } from '@/lib/health-entry-registry';
 import { cn } from '@/lib/utils';
 import { LogTypeValue } from '@/types/diabetes';
@@ -12,9 +13,7 @@ export default function EntryTypePicker({ onSelect }: EntryTypePickerProps) {
 
     return (
         <div className="flex flex-col gap-4">
-            <p className="text-sm text-muted-foreground">
-                {t('health_entries.picker.heading')}
-            </p>
+            <SnapToTrackLauncher />
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {HEALTH_ENTRY_TYPES.map(
                     ({ key, icon: Icon, labelKey, accent }) => (

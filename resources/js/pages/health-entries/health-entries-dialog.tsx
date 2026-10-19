@@ -54,6 +54,7 @@ export default function HealthEntriesDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 closeLabel={t('health_entries.timeline.close')}
+                {...(mode === 'create' && { 'aria-describedby': undefined })}
                 className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden border-0 p-0 sm:max-w-2xl [&>button]:flex [&>button]:size-11 [&>button]:items-center [&>button]:justify-center"
             >
                 <DialogHeader className="shrink-0 px-5 pt-6 pr-16 text-left sm:px-6 sm:pr-16">
@@ -62,11 +63,11 @@ export default function HealthEntriesDialog({
                             ? t('health_entries.dialog.add_title')
                             : t('health_entries.dialog.edit_title')}
                     </DialogTitle>
-                    <DialogDescription>
-                        {mode === 'create'
-                            ? t('health_entries.dialog.add_description')
-                            : t('health_entries.dialog.edit_description')}
-                    </DialogDescription>
+                    {mode === 'edit' && (
+                        <DialogDescription>
+                            {t('health_entries.dialog.edit_description')}
+                        </DialogDescription>
+                    )}
                 </DialogHeader>
                 <HealthEntryForm
                     key={`${mode}-${logEntry?.id ?? 'new'}-${type ?? ''}-${defaultMeasuredAt ?? ''}`}
