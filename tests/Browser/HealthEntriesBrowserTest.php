@@ -44,94 +44,99 @@ function createLogbookMeal(User $user, bool $large = false): HealthSyncSample
     return $samples[0];
 }
 
-it('opens a meal photo with its nutrition and returns to the timeline on mobile', function (): void {
+function storeLogbookPhoto(User $user, HealthSyncSample $sample): void
+{
+    $photo = MealPhoto::factory()->create(['user_id' => $user->id, 'health_group_id' => $sample->group_id]);
+    Storage::disk(MealPhoto::DISK)->put($photo->path, (string) UploadedFile::fake()->image('meal.jpg', 960, 640)->get());
+}
+
+it('shows a day’s meal as a card and opens its nutrition page with the photo on mobile', function (): void {
     Storage::fake(MealPhoto::DISK);
     $user = User::factory()->create();
     $sample = createLogbookMeal($user);
-    $photo = MealPhoto::factory()->create(['user_id' => $user->id, 'health_group_id' => $sample->group_id]);
-    Storage::disk(MealPhoto::DISK)->put($photo->path, (string) UploadedFile::fake()->image('meal.jpg', 960, 640)->get());
+    storeLogbookPhoto($user, $sample);
     $this->actingAs($user);
 
-    $page = visit(route('health-entries.index', absolute: false))->on()->mobile()
-        ->assertSee('Logbook')
+    visit(route('health-entries.index', ['date' => '2026-10-16'], absolute: false))->on()->mobile()
+        ->assertSee('Grilled chicken breast, Steamed rice')
+        ->assertSee('490 kcal')
+        ->click('a[href="/health-entries/'.$sample->id.'"]')
+        ->assertSee('Nutrition')
+        ->assertSee('Ingredients')
+        ->assertSee('1 breast (170g)')
         ->click('button[aria-label="View meal photo"]')
-        ->assertVisible('[role="dialog"]')
-        ->assertSeeIn('[role="dialog"]', '490')
         ->assertVisible('[role="dialog"] img')
         ->keys('[role="dialog"]', 'Escape')
         ->assertMissing('[role="dialog"]')
-        ->assertVisible('button[aria-label="View meal photo"]')
+        ->click('Done')
+        ->assertSee('Today')
+        ->assertQueryStringHas('date', '2026-10-16')
+        ->assertSee('Grilled chicken breast, Steamed rice')
         ->assertNoJavaScriptErrors();
-
-    expect($page->script('document.activeElement.getAttribute("aria-label")'))->toBe('View meal photo');
 });
 
-it('finds older meals and resets the loaded timeline when switching filters', function (): void {
+it('moves between days and weeks with the week strip', function (): void {
     $user = User::factory()->create();
     createLogbookMeal($user);
-    HealthSyncSample::factory()->count(20)->create([
+    HealthSyncSample::factory()->create([
         'user_id' => $user->id,
         'type_identifier' => 'exerciseMinutes',
+        'value' => 30,
         'group_id' => null,
         'measured_at' => '2026-10-17T03:57:00Z',
     ]);
     $this->actingAs($user);
 
-    $page = visit(route('health-entries.index', absolute: false))
-        ->assertVisible('#health-entry-list > li:first-child article[aria-label="Exercise"]')
-        ->click('Food')
-        ->assertSee('Grilled chicken breast')
-        ->assertMissing('article[aria-label="Exercise"]')
-        ->assertCount('#health-entry-list > li', 1)
-        ->click('All')
-        ->assertVisible('#health-entry-list > li:first-child article[aria-label="Exercise"]')
+    visit(route('health-entries.index', ['date' => '2026-10-17'], absolute: false))->withLocale('en-US')
+        ->assertSee('30 min')
         ->assertDontSee('Grilled chicken breast')
-        ->assertCount('#health-entry-list h2', 1);
-
-    $page->script('document.querySelector("#health-entry-list > li:last-child").scrollIntoView()');
-    $page->assertSee('Grilled chicken breast')
-        ->assertCount('#health-entry-list > li', 21)
-        ->assertCount('#health-entry-list h2', 2)
+        ->click('a[aria-label^="Friday, October 16"]')
+        ->assertSee('Grilled chicken breast, Steamed rice')
+        ->assertQueryStringHas('date', '2026-10-16')
+        ->assertDontSee('30 min')
+        ->assertAttribute('a[aria-label^="Friday, October 16"]', 'aria-current', 'date')
+        ->click('a[aria-label="Previous week"]')
+        ->assertSee('Nothing logged on this day')
+        ->assertQueryStringHas('date', '2026-10-09')
         ->assertNoJavaScriptErrors();
 });
 
-it('updates a renamed food and saves every ingredient while nutrition details stay collapsed', function (): void {
+it('renames an ingredient, updates its nutrition and saves the meal with Done', function (): void {
     $user = User::factory()->create();
-    createLogbookMeal($user);
+    $sample = createLogbookMeal($user);
     FoodItemEstimatorAgent::fake([[
         'calories' => 240, 'protein' => 26, 'carbs' => 8, 'fat' => 13,
         'grams' => 170, 'portion' => '170 g (1 block)',
     ]]);
     $this->actingAs($user);
 
-    visit(route('health-entries.index', absolute: false))
-
-        ->click('button[aria-label="Edit log entry"]')
-        ->assertMissing('input[name="items[0][calories]"]:visible')
-        ->fill('input[name="items[0][name]"]', 'Baked tofu')
+    visit(route('health-entries.show', $sample, absolute: false))->on()->mobile()
+        ->click('button:has-text("Grilled chicken breast")')
+        ->fill('#ingredient-name', 'Baked tofu')
         ->click('Update nutrition for “Baked tofu”')
-        ->assertValue('input[name="items[0][portion]"]', '170 g (1 block)')
-        ->assertSeeIn('[aria-label="Meal totals"]', '450')
-
-        ->press('Save changes')
-        ->assertMissing('[role="dialog"]')
-        ->assertSee('Baked tofu')
-        ->click('Meal details')
-        ->assertSee('170 g (1 block)')
-        ->assertSee('Steamed rice')
+        ->assertValue('#ingredient-portion', '170 g (1 block)')
+        ->assertValue('#ingredient-calories', '240')
+        ->press('Apply')
+        ->assertSee('Baked tofu, Steamed rice')
+        ->assertSee('450')
+        ->press('Done')
+        ->assertSee('450 kcal')
+        ->assertQueryStringHas('date', '2026-10-16')
+        ->assertSee('Baked tofu, Steamed rice')
         ->assertNoJavaScriptErrors();
 
     $this->assertDatabaseHas('health_sync_samples', [
         'user_id' => $user->id,
         'type_identifier' => 'dietaryEnergy',
         'value' => 450,
+        'notes' => 'Baked tofu, Steamed rice',
     ]);
     FoodItemEstimatorAgent::assertPromptedTimes(1);
 });
 
-it('retains meal edits when nutrition estimation fails', function (bool $creditLimit): void {
+it('keeps ingredient edits when nutrition estimation fails', function (bool $creditLimit): void {
     $user = User::factory()->create();
-    createLogbookMeal($user);
+    $sample = createLogbookMeal($user);
     app()->instance(ResolvesUserTier::class, new readonly class implements ResolvesUserTier
     {
         public function resolve(User $user): TierEntitlement
@@ -152,15 +157,15 @@ it('retains meal edits when nutrition estimation fails', function (bool $creditL
     }
 
     $this->actingAs($user);
-    visit(route('health-entries.index', absolute: false))
-        ->click('button[aria-label="Edit log entry"]')
-        ->fill('input[name="items[0][name]"]', 'Baked tofu')
+    visit(route('health-entries.show', $sample, absolute: false))
+        ->click('button:has-text("Grilled chicken breast")')
+        ->fill('#ingredient-name', 'Baked tofu')
         ->click('Update nutrition for “Baked tofu”')
         ->assertSee($creditLimit
             ? "You've reached your AI credit limit. Please adjust the numbers by hand for now."
             : "Couldn't update the nutrition. Please adjust the numbers.")
-        ->assertValue('input[name="items[0][name]"]', 'Baked tofu')
-        ->assertValue('input[name="items[0][calories]"]', '280')
+        ->assertValue('#ingredient-name', 'Baked tofu')
+        ->assertValue('#ingredient-calories', '280')
         ->assertVisible('[role="dialog"]')
         ->assertNoJavaScriptErrors();
 
@@ -172,49 +177,85 @@ it('retains meal edits when nutrition estimation fails', function (bool $creditL
     }
 })->with(['provider failure' => [false], 'credit limit' => [true]]);
 
-it('keeps save within reach for seven foods and reveals invalid hidden nutrition fields', function (): void {
+it('adds and removes ingredients and changes the meal type before saving', function (): void {
     $user = User::factory()->create();
-    createLogbookMeal($user, large: true);
+    $sample = createLogbookMeal($user);
     $this->actingAs($user);
 
-    $page = visit(route('health-entries.index', absolute: false))->on()->mobile()
-        ->click('button[aria-label="Edit log entry"]')
-        ->assertSee('Food 7');
-
-    expect($page->script('(() => { const r = document.querySelector("button[type=submit]").getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; })()'))->toBeTrue();
-
-    $page->click('fieldset:nth-of-type(7) summary')
-        ->fill('input[name="items[6][calories]"]', '-1')
-        ->click('fieldset:nth-of-type(7) summary')
-        ->press('Save changes')
-        ->assertVisible('input[name="items[6][calories]"]')
-        ->assertVisible('[role="dialog"]')
-        ->press('Cancel')
-        ->click('button[aria-label="Edit log entry"]')
-        ->assertValue('input[name="items[6][calories]"]', '20')
+    visit(route('health-entries.show', $sample, absolute: false))
+        ->click('section[aria-labelledby="ingredients-heading"] button:has-text("Add")')
+        ->fill('#ingredient-name', 'Green salad')
+        ->fill('#ingredient-calories', '50')
+        ->fill('#ingredient-carbs', '6')
+        ->press('Apply')
+        ->assertSee('3 items')
+        ->assertMissing('[role="dialog"]')
+        ->click('button:has-text("Steamed rice")')
+        ->assertSee('Edit ingredient')
+        ->press('Remove ingredient')
+        ->assertDontSeeIn('section[aria-labelledby="ingredients-heading"]', 'Steamed rice')
+        ->assertSee('330')
+        ->click('[role="radio"]:has-text("Dinner")')
+        ->click('button[aria-label="Back to Logbook"]')
+        ->assertSee('Discard your changes?')
+        ->press('Keep editing')
+        ->press('Done')
+        ->assertSee('330 kcal')
+        ->assertQueryStringHas('date', '2026-10-16')
         ->assertNoJavaScriptErrors();
+
+    $calories = HealthSyncSample::query()->whereBelongsTo($user)->where('type_identifier', 'dietaryEnergy')->sole();
+
+    expect($calories->value)->toBe(330.0)
+        ->and($calories->metadata['meal_type'])->toBe('dinner')
+        ->and(array_column($calories->metadata['snap_to_track']['items'], 'name'))->toBe(['Grilled chicken breast', 'Green salad']);
 });
 
-it('adds a manual vital sign and confirms before deleting it', function (): void {
+it('keeps Done within reach and shows why a meal could not be saved', function (): void {
+    $user = User::factory()->create();
+    $sample = createLogbookMeal($user, large: true);
+    $this->actingAs($user);
+
+    $page = visit(route('health-entries.show', $sample, absolute: false))->on()->mobile()
+        ->assertSee('7 items');
+    $page->script('document.querySelector("section[aria-labelledby=ingredients-heading] li:nth-child(7) button").scrollIntoView({ block: "center" })');
+    $page->click('button:has-text("Olive oil")')
+        ->fill('#ingredient-calories', '5000')
+        ->press('Apply');
+
+    expect($page->script('(() => { const r = [...document.querySelectorAll("button")].find((b) => b.textContent.trim() === "Done").getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; })()'))->toBeTrue();
+
+    $page->press('Done')
+        ->assertSee('We couldn’t save your changes. Check the highlighted items.')
+        ->assertSee('The combined calories of all items may not exceed 5000.')
+        ->assertSee('Olive oil')
+        ->assertNoJavaScriptErrors();
+
+    $this->assertDatabaseHas('health_sync_samples', ['user_id' => $user->id, 'type_identifier' => 'dietaryEnergy', 'value' => 140]);
+});
+
+it('adds a manual vital sign and confirms before deleting it from its page', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
     visit(route('health-entries.index', absolute: false))
+        ->assertSee('Nothing logged yet today')
         ->press('Add entry')
         ->click('[role="dialog"] button:has-text("Vitals")')
         ->fill('blood_pressure_diastolic', '80')
         ->press('Save')
         ->assertMissing('[role="dialog"]')
-        ->assertVisible('article[aria-label="Vitals"]')
+        ->click('a:has-text("Vitals")')
+        ->assertSee('–/80 BP')
         ->click('button[aria-label="More entry actions"]')
         ->click('Delete entry')
         ->assertVisible('[role="alertdialog"]')
         ->press('Cancel')
-        ->assertVisible('article[aria-label="Vitals"]')
+        ->assertSee('–/80 BP')
         ->click('button[aria-label="More entry actions"]')
         ->click('Delete entry')
         ->press('Delete entry')
-        ->assertSee('Your logbook starts here')
+        ->assertSee('Nothing logged yet today')
         ->assertNoJavaScriptErrors();
 
     $this->assertDatabaseMissing('health_sync_samples', ['user_id' => $user->id]);
@@ -227,35 +268,43 @@ it('explains when a saved meal photo is unavailable', function (): void {
     MealPhoto::factory()->create(['user_id' => $user->id, 'health_group_id' => $sample->group_id]);
     $this->actingAs($user);
 
-    visit(route('health-entries.index', absolute: false))
+    visit(route('health-entries.index', ['date' => '2026-10-16'], absolute: false))
         ->assertSee('Photo unavailable')
-        ->click('button[aria-label="View meal photo"]')
-        ->assertSeeIn('[role="dialog"]', 'Photo unavailable')
-        ->assertSeeIn('[role="dialog"]', '490')
+        ->click('a[href="/health-entries/'.$sample->id.'"]')
+        ->assertSee('Photo unavailable')
+        ->assertSee('490')
         ->assertNoJavaScriptErrors();
 });
 
-it('keeps photos and all readings visible for meals with other grouped samples', function (bool $withGlucose): void {
+it('edits a reading logged with a meal without losing the meal or its photo', function (bool $withGlucose): void {
     Storage::fake(MealPhoto::DISK);
     $user = User::factory()->create();
     $sample = createLogbookMeal($user);
-    $photo = MealPhoto::factory()->create(['user_id' => $user->id, 'health_group_id' => $sample->group_id]);
-    Storage::disk(MealPhoto::DISK)->put($photo->path, (string) UploadedFile::fake()->image('meal.jpg')->get());
+    storeLogbookPhoto($user, $sample);
     HealthSyncSample::factory()->create([
         'user_id' => $user->id,
         'group_id' => $sample->group_id,
         'type_identifier' => $withGlucose ? 'bloodGlucose' : 'weight',
         'value' => $withGlucose ? 120 : 75,
         'measured_at' => $sample->measured_at,
+        'metadata' => $withGlucose ? ['glucose_reading_type' => 'post-meal'] : null,
     ]);
     $this->actingAs($user);
 
-    visit(route('health-entries.index', ['type' => 'food'], absolute: false))
+    visit(route('health-entries.index', ['date' => '2026-10-16'], absolute: false))
         ->assertSee($withGlucose ? '6.7 mmol/L' : '75 kg')
+        ->assertSee('490 kcal')
+        ->click('a[href="/health-entries/'.$sample->id.'"]')
+        ->assertSee('Also logged')
+        ->click($withGlucose ? 'button[aria-label="Edit Glucose"]' : 'button[aria-label="Edit Vitals"]')
+        ->fill($withGlucose ? 'glucose_value' : 'weight', $withGlucose ? '7.5' : '76')
+        ->press('Save changes')
+        ->assertMissing('[role="dialog"]')
+        ->assertSee($withGlucose ? '7.5 mmol/L' : '76 kg')
         ->assertSee('490')
         ->assertVisible('button[aria-label="View meal photo"]')
-        ->click('button[aria-label="View meal photo"]')
-        ->assertVisible('[role="dialog"] img')
-        ->assertSeeIn('[role="dialog"]', '490')
         ->assertNoJavaScriptErrors();
+
+    expect(HealthSyncSample::query()->where('group_id', $sample->group_id)->count())->toBe(5)
+        ->and(MealPhoto::query()->where('health_group_id', $sample->group_id)->exists())->toBeTrue();
 })->with(['food and glucose' => [true], 'food and vitals' => [false]]);

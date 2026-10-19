@@ -25,12 +25,13 @@ it('renders the snap to track module', function (): void {
             ->where('savedGroupId', null));
 });
 
-it('exposes the saved entry group after a meal was logged', function (): void {
+it('exposes the saved entry group and its logbook day after a meal was logged', function (): void {
     actingAs($this->user)
-        ->withSession(['snap_to_track_saved_group' => 'group-uuid'])
+        ->withSession(['snap_to_track_saved_group' => 'group-uuid', 'snap_to_track_saved_date' => '2026-10-16'])
         ->get(route('snap-to-track.index'))
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-            ->where('savedGroupId', 'group-uuid'));
+            ->where('savedGroupId', 'group-uuid')
+            ->where('savedDate', '2026-10-16'));
 });
 
 it('discards a stale credit warning when another scan is allowed', function (): void {

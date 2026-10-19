@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Concerns;
 
+use App\Enums\MealType;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 trait ValidatesReviewedMeal
@@ -32,6 +34,7 @@ trait ValidatesReviewedMeal
             'items.*.provenance' => ['nullable', 'string', 'in:model,reference,user'],
             'measured_at' => ['required', 'date'],
             'notes' => ['nullable', 'string', 'max:500'],
+            'meal_type' => ['nullable', Rule::enum(MealType::class)],
         ];
     }
 

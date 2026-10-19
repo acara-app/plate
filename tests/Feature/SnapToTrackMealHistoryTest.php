@@ -8,6 +8,11 @@ use App\Models\User;
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia;
 
+function snapHistoryMealSample(User $user): HealthSyncSample
+{
+    return HealthSyncSample::query()->whereBelongsTo($user)->oldest('id')->firstOrFail();
+}
+
 it('stores a reviewed meal at the same instant regardless of its timezone offset', function (string $measuredAt): void {
     $user = User::factory()->create();
     $token = Str::random(64);
@@ -51,12 +56,11 @@ it('keeps the full reviewed meal available in the logbook after editing it', fun
         'notes' => 'Breakfast',
     ])->assertRedirectToRoute('snap-to-track.index');
 
-    $this->get(route('health-entries.index'))->assertInertia(fn (AssertableInertia $page) => $page
-        ->has('logs.data', 1)
-        ->has('logs.data.0.food_analysis.items', 2)
-        ->where('logs.data.0.food_analysis.items.0.name', 'Banana')
-        ->where('logs.data.0.food_analysis.items.0.portion', '1 medium')
-        ->where('logs.data.0.food_analysis.confidence', 82));
+    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page) => $page
+        ->has('entry.food_analysis.items', 2)
+        ->where('entry.food_analysis.items.0.name', 'Banana')
+        ->where('entry.food_analysis.items.0.portion', '1 medium')
+        ->where('entry.food_analysis.confidence', 82));
 
     $sample = HealthSyncSample::query()->whereBelongsTo($user)->firstOrFail();
     $items[0] = ['name' => 'Large banana', 'portion' => '1 large', 'calories' => 120, 'protein' => 1.5, 'carbs' => 30, 'fat' => 0.4, 'provenance' => 'user'];
@@ -75,14 +79,13 @@ it('keeps the full reviewed meal available in the logbook after editing it', fun
         'notes' => 'Updated breakfast',
         'measured_at' => '2026-10-16 04:15:00',
     ]);
-    $this->get(route('health-entries.index'))->assertInertia(fn (AssertableInertia $page) => $page
-        ->has('logs.data', 1)
-        ->has('logs.data.0.food_analysis.items', 2)
-        ->where('logs.data.0.food_analysis.items.0.name', 'Large banana')
-        ->where('logs.data.0.food_analysis.items.0.calories', 120)
-        ->where('logs.data.0.food_analysis.items.1.name', 'Yogurt')
-        ->where('logs.data.0.food_analysis.confidence', 82)
-        ->where('logs.data.0.calories', 180));
+    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page) => $page
+        ->has('entry.food_analysis.items', 2)
+        ->where('entry.food_analysis.items.0.name', 'Large banana')
+        ->where('entry.food_analysis.items.0.calories', 120)
+        ->where('entry.food_analysis.items.1.name', 'Yogurt')
+        ->where('entry.food_analysis.confidence', 82)
+        ->where('entry.calories', 180));
 
     $this->put(route('health-entries.update', $sample), [
         'log_type' => 'food',
@@ -94,10 +97,10 @@ it('keeps the full reviewed meal available in the logbook after editing it', fun
         'notes' => 'Only the notes changed',
     ])->assertSessionHasNoErrors()->assertRedirect();
 
-    $this->get(route('health-entries.index'))->assertInertia(fn (AssertableInertia $page) => $page
-        ->has('logs.data.0.food_analysis.items', 2)
-        ->where('logs.data.0.food_analysis.items.0.name', 'Large banana')
-        ->where('logs.data.0.notes', 'Only the notes changed'));
+    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page) => $page
+        ->has('entry.food_analysis.items', 2)
+        ->where('entry.food_analysis.items.0.name', 'Large banana')
+        ->where('entry.notes', 'Only the notes changed'));
 });
 
 it('saves a renamed item with its updated nutrition, portion and weight from the logbook', function (): void {
@@ -116,9 +119,9 @@ it('saves a renamed item with its updated nutrition, portion and weight from the
         'measured_at' => '2026-10-16T03:57:00Z',
     ])->assertRedirectToRoute('snap-to-track.index');
 
-    $this->get(route('health-entries.index'))->assertInertia(fn (AssertableInertia $page) => $page
-        ->where('logs.data.0.food_analysis.items.0.grams', 35)
-        ->where('logs.data.0.food_analysis.items.1.grams', 50));
+    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page) => $page
+        ->where('entry.food_analysis.items.0.grams', 35)
+        ->where('entry.food_analysis.items.1.grams', 50));
 
     $sample = HealthSyncSample::query()->whereBelongsTo($user)->firstOrFail();
     $items[0] = ['name' => 'Blueberries', 'portion' => '35 g (about ¼ cup)', 'grams' => 35, 'calories' => 20, 'protein' => 0.3, 'carbs' => 5.1, 'fat' => 0.1, 'provenance' => 'user'];
@@ -129,14 +132,14 @@ it('saves a renamed item with its updated nutrition, portion and weight from the
         'measured_at' => '2026-10-16T03:57:00Z',
     ])->assertSessionHasNoErrors()->assertRedirect();
 
-    $this->get(route('health-entries.index'))->assertInertia(fn (AssertableInertia $page) => $page
-        ->where('logs.data.0.food_analysis.items.0.name', 'Blueberries')
-        ->where('logs.data.0.food_analysis.items.0.portion', '35 g (about ¼ cup)')
-        ->where('logs.data.0.food_analysis.items.0.grams', 35)
-        ->where('logs.data.0.food_analysis.items.0.calories', 20)
-        ->where('logs.data.0.food_analysis.items.0.fat', 0.1)
-        ->where('logs.data.0.food_analysis.items.1.grams', 50)
-        ->where('logs.data.0.calories', 28));
+    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page) => $page
+        ->where('entry.food_analysis.items.0.name', 'Blueberries')
+        ->where('entry.food_analysis.items.0.portion', '35 g (about ¼ cup)')
+        ->where('entry.food_analysis.items.0.grams', 35)
+        ->where('entry.food_analysis.items.0.calories', 20)
+        ->where('entry.food_analysis.items.0.fat', 0.1)
+        ->where('entry.food_analysis.items.1.grams', 50)
+        ->where('entry.calories', 28));
 });
 
 it('leaves a saved meal unchanged when an ingredient edit is invalid', function (array $items, string $error): void {

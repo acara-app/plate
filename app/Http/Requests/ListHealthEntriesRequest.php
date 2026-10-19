@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
-use App\Enums\HealthEntryType;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 final class ListHealthEntriesRequest extends FormRequest
 {
@@ -14,7 +13,16 @@ final class ListHealthEntriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => ['nullable', Rule::enum(HealthEntryType::class)],
+            'date' => ['nullable', 'date_format:Y-m-d'],
         ];
+    }
+
+    public function selectedDay(string $timezone): CarbonImmutable
+    {
+        $date = $this->validated('date');
+
+        return is_string($date)
+            ? CarbonImmutable::parse($date, $timezone)->startOfDay()
+            : CarbonImmutable::now($timezone)->startOfDay();
     }
 }

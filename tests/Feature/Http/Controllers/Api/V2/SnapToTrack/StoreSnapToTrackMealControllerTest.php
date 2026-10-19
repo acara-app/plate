@@ -87,8 +87,20 @@ it('logs the reviewed meal as grouped mobile health samples', function (): void 
         ->and($samples->first()->group_id)->toBe($response->json('group_id'))
         ->and($samples->first()->metadata['snap_to_track']['source'])->toBe('mobile_snap_to_track')
         ->and($samples->first()->metadata['snap_to_track']['items'])->toHaveCount(2)
+        ->and($samples->first()->metadata)->not->toHaveKey('meal_type')
         ->and($draft->refresh()->isConsumed())->toBeTrue()
         ->and($draft->health_group_id)->toBe($response->json('group_id'));
+});
+
+it('stores the meal type when the app sends one', function (): void {
+    [$token] = apiMobileDraftFor($this->user);
+
+    $this->postJson(route('api.v2.snap-to-track.meal', ['draft' => $token]), apiReviewedMealPayload(['meal_type' => 'lunch']))
+        ->assertCreated()
+        ->assertJsonStructure(['group_id', 'measured_at', 'totals']);
+
+    expect(HealthSyncSample::query()->where('user_id', $this->user->id)->pluck('metadata')->pluck('meal_type')->unique()->all())
+        ->toBe(['lunch']);
 });
 
 it('refreshes the daily aggregate for the measured day', function (): void {
@@ -173,6 +185,7 @@ it('validates the reviewed items', function (array $overrides, string $errorKey)
     'bad provenance' => [['items' => [['name' => 'Toast', 'provenance' => 'guess']]], 'items.0.provenance'],
     'missing measured_at' => [['measured_at' => null], 'measured_at'],
     'notes too long' => [['notes' => str_repeat('a', 501)], 'notes'],
+    'unknown meal type' => [['meal_type' => 'brunch'], 'meal_type'],
 ]);
 
 it('rejects a meal whose combined macros exceed the caps', function (): void {

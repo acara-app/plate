@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Enums\HealthEntryType;
+use App\Enums\MealType;
 use App\Models\AnalysisDraft;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -20,6 +21,7 @@ final class ReviewedMealData extends Data
         public array $items,
         public CarbonImmutable $measuredAt,
         public ?string $notes = null,
+        public ?MealType $mealType = null,
     ) {}
 
     /**
@@ -31,6 +33,7 @@ final class ReviewedMealData extends Data
             items: self::normalizeItems($data['items'] ?? null),
             measuredAt: Date::parse(is_string($data['measured_at'] ?? null) ? $data['measured_at'] : 'now')->toImmutable(),
             notes: is_string($data['notes'] ?? null) && mb_trim($data['notes']) !== '' ? $data['notes'] : null,
+            mealType: MealType::tryFrom(is_string($data['meal_type'] ?? null) ? $data['meal_type'] : ''),
         );
     }
 
@@ -92,6 +95,7 @@ final class ReviewedMealData extends Data
             analyzerVersion: is_string($metadata['analyzer_version'] ?? null) ? $metadata['analyzer_version'] : null,
             foodSource: is_string($metadata['source'] ?? null) ? $metadata['source'] : null,
             draftReference: is_string($metadata['draft_reference'] ?? null) ? $metadata['draft_reference'] : null,
+            mealType: $this->mealType,
         );
     }
 

@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Data\MealBreakdownData;
 use App\Enums\HealthSyncType;
+use App\Enums\MealType;
 use App\Models\HealthSyncSample;
 use App\Models\MealPhoto;
 use Illuminate\Support\Collection;
@@ -16,7 +17,7 @@ final readonly class HealthEntryAssembler
      * @param  Collection<int, HealthSyncSample>  $samples
      * @return Collection<int, array<string, mixed>>
      */
-    public function assemble(Collection $samples): Collection
+    public function assemble(Collection $samples, string $timezone = 'UTC'): Collection
     {
         $grouped = $samples->groupBy(fn (HealthSyncSample $sample): string => $sample->group_id ?? 'standalone_'.$sample->id);
 
@@ -25,7 +26,7 @@ final readonly class HealthEntryAssembler
             ->pluck('health_group_id')
             ->flip();
 
-        return $grouped->map(function (Collection $group) use ($photoGroupIds): array {
+        return $grouped->map(function (Collection $group) use ($photoGroupIds, $timezone): array {
             /** @var HealthSyncSample $primary */
             $primary = $group->sortBy('id')->first();
 
@@ -51,6 +52,7 @@ final readonly class HealthEntryAssembler
                 'exercise_type' => null,
                 'exercise_duration_minutes' => null,
                 'source' => $primary->entry_source?->value,
+                'meal_type' => null,
                 'food_analysis' => null,
                 'photo_url' => $primary->group_id !== null && $photoGroupIds->has($primary->group_id)
                     ? route('health-entries.photo', ['group' => $primary->group_id], absolute: false)
@@ -68,11 +70,27 @@ final readonly class HealthEntryAssembler
                     $entry['food_analysis'] = MealBreakdownData::fromMetadata($sample->metadata['snap_to_track'])->toArray();
                 }
 
+                if (is_string($sample->metadata['meal_type'] ?? null)) {
+                    $entry['meal_type'] = MealType::tryFrom($sample->metadata['meal_type'])?->value;
+                }
+
                 $this->mapSampleToEntry($sample, $entry);
+            }
+
+            if ($entry['meal_type'] === null && $this->hasFood($entry)) {
+                $entry['meal_type'] = MealType::forLocalTime($primary->measured_at->toImmutable()->setTimezone($timezone))->value;
             }
 
             return $entry;
         })->sortByDesc('measured_at')->values();
+    }
+
+    /**
+     * @param  array<string, mixed>  $entry
+     */
+    private function hasFood(array $entry): bool
+    {
+        return $entry['calories'] !== null || $entry['carbs_grams'] !== null || $entry['protein_grams'] !== null || $entry['fat_grams'] !== null;
     }
 
     /**

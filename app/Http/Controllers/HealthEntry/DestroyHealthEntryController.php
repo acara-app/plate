@@ -24,10 +24,12 @@ final readonly class DestroyHealthEntryController
         $user = $healthSyncSample->user;
         $affectedUtcDates = $this->affectedUtcDatesForDeletion($healthSyncSample);
 
+        $localDate = $healthSyncSample->measured_at->toImmutable()->setTimezone($user->resolveTimezone())->toDateString();
+
         $this->deleteHealthSample->handle($healthSyncSample);
         $this->dispatchAggregateUserUtcDates->handle($user, $affectedUtcDates);
 
-        return back()->with('success', 'Health entry deleted successfully.');
+        return to_route('health-entries.index', ['date' => $localDate])->with('success', 'Health entry deleted successfully.');
     }
 
     /**

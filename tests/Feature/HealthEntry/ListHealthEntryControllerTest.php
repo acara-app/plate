@@ -9,6 +9,7 @@ use Inertia\Testing\AssertableInertia;
 use function Pest\Laravel\actingAs;
 
 it('renders assembled health entries, not raw samples, on the index', function (): void {
+    $this->travelTo(now()->setTime(12, 0));
     $user = User::factory()->create();
 
     HealthSyncSample::factory()->bloodGlucose()->create([
@@ -29,13 +30,14 @@ it('renders assembled health entries, not raw samples, on the index', function (
         ->assertSuccessful()
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('health-entries/index')
-            ->has('logs.data', 2)
-            ->where('logs.data.0.glucose_value', 120)
-            ->where('logs.data.1.carbs_grams', 45)
+            ->has('entries', 2)
+            ->where('entries.0.glucose_value', 120)
+            ->where('entries.1.carbs_grams', 45)
         );
 });
 
 it("merges a food meal's macro samples into a single assembled entry", function (): void {
+    $this->travelTo(now()->setTime(12, 0));
     $user = User::factory()->create();
 
     HealthSyncSample::factory()->carbohydrates()->create(['user_id' => $user->id, 'value' => 45, 'group_id' => 'meal-1', 'measured_at' => now()]);
@@ -45,8 +47,9 @@ it("merges a food meal's macro samples into a single assembled entry", function 
         ->get(route('health-entries.index'))
         ->assertSuccessful()
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-            ->has('logs.data', 1)
-            ->where('logs.data.0.carbs_grams', 45)
-            ->where('logs.data.0.calories', 600)
+            ->has('entries', 1)
+            ->where('entries.0.carbs_grams', 45)
+            ->where('entries.0.calories', 600)
+            ->where('entries.0.meal_type', 'lunch')
         );
 });

@@ -103,7 +103,7 @@ it('keeps a signed-in scan photo privately with the saved meal and only its owne
 
     $photoUrl = route('health-entries.photo', ['group' => $groupId], absolute: false);
     $this->get(route('health-entries.index'))->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-        ->where('logs.data.0.photo_url', $photoUrl));
+        ->where('entries.0.photo_url', $photoUrl));
 
     $this->get($photoUrl)->assertOk()->assertHeader('Content-Type', 'image/jpeg');
     $this->actingAs(User::factory()->create())->get($photoUrl)->assertNotFound();
@@ -155,9 +155,8 @@ it('removes the photo when an edit turns the meal into a single entry', function
     $photo = storedMealPhoto($this->user, $groupId);
 
     $this->actingAs($this->user)->put(route('health-entries.update', $sample), [
-        'log_type' => 'glucose',
-        'glucose_value' => 6.5,
-        'glucose_reading_type' => 'random',
+        'log_type' => 'food',
+        'carbs_grams' => 30,
         'measured_at' => now()->toIso8601String(),
     ])->assertSessionHasNoErrors();
 

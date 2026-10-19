@@ -7,11 +7,13 @@ import {
 } from '@/components/ui/dialog';
 import {
     HealthEntry,
+    LogTypeValue,
     ReadingType,
     RecentInsulin,
     RecentMedication,
     TodaysMeal,
 } from '@/types/diabetes';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import HealthEntryForm from './health-entry-form';
 
@@ -26,6 +28,8 @@ interface DialogProps {
     recentInsulins?: RecentInsulin[];
     todaysMeals?: TodaysMeal[];
     logEntry?: HealthEntry;
+    type?: LogTypeValue;
+    defaultMeasuredAt?: string;
 }
 
 export default function HealthEntriesDialog({
@@ -39,10 +43,19 @@ export default function HealthEntriesDialog({
     recentInsulins = [],
     todaysMeals = [],
     logEntry,
+    type,
+    defaultMeasuredAt,
 }: DialogProps) {
     const { t } = useTranslation('common');
+    const [shownEntry, setShownEntry] = useState(logEntry);
 
-    if (mode === 'edit' && !logEntry) {
+    if (logEntry && logEntry !== shownEntry) {
+        setShownEntry(logEntry);
+    }
+
+    const entry = logEntry ?? shownEntry;
+
+    if (mode === 'edit' && !entry) {
         return null;
     }
 
@@ -65,15 +78,17 @@ export default function HealthEntriesDialog({
                     </DialogDescription>
                 </DialogHeader>
                 <HealthEntryForm
-                    key={`${mode}-${logEntry?.id ?? 'new'}`}
+                    key={`${mode}-${entry?.id ?? 'new'}-${type ?? ''}-${defaultMeasuredAt ?? ''}`}
                     mode={mode}
+                    type={type}
+                    defaultMeasuredAt={defaultMeasuredAt}
                     glucoseReadingTypes={glucoseReadingTypes}
                     insulinTypes={insulinTypes}
                     glucoseUnit={glucoseUnit}
                     recentMedications={recentMedications}
                     recentInsulins={recentInsulins}
                     todaysMeals={todaysMeals}
-                    entry={logEntry}
+                    entry={entry}
                     onCancel={() => onOpenChange(false)}
                 />
             </DialogContent>

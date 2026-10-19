@@ -1,5 +1,6 @@
 import { convertGlucoseValue } from '@/lib/utils';
 import {
+    FoodBreakdownItem,
     HealthEntry,
     LogType,
     LogTypeValue,
@@ -107,6 +108,57 @@ export function getPrimaryType(entry: HealthEntry): LogTypeValue {
     return LogType.Glucose;
 }
 
+export function hasFood(
+    entry: Pick<
+        HealthEntry,
+        'calories' | 'carbs_grams' | 'protein_grams' | 'fat_grams'
+    >,
+): boolean {
+    return (
+        entry.calories !== null ||
+        entry.carbs_grams !== null ||
+        entry.protein_grams !== null ||
+        entry.fat_grams !== null
+    );
+}
+
+export function mealLabel(items: Pick<FoodBreakdownItem, 'name'>[]): string {
+    return items
+        .map((item) => item.name.trim())
+        .filter((name) => name !== '')
+        .join(', ')
+        .slice(0, 500);
+}
+
+export function isAutoMealLabel(
+    notes: string | null,
+    items: Pick<FoodBreakdownItem, 'name'>[],
+): boolean {
+    return notes !== null && items.length > 0 && notes === mealLabel(items);
+}
+
+export function userNotes(entry: HealthEntry): string | null {
+    const items = entry.food_analysis?.items ?? [];
+
+    return isAutoMealLabel(entry.notes, items) ? null : entry.notes;
+}
+
+export function entryTitle(entry: HealthEntry, t: TranslateFn): string {
+    if (!hasFood(entry)) {
+        return t(getTypeConfig(getPrimaryType(entry)).labelKey);
+    }
+
+    const items = entry.food_analysis?.items ?? [];
+
+    if (items.length > 0) {
+        return mealLabel(items);
+    }
+
+    return (
+        entry.notes?.split('\n')[0].trim() || t('health_entries.timeline.meal')
+    );
+}
+
 const BADGE_ACCENT = {
     glucose: 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300',
     carbs: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
@@ -157,7 +209,7 @@ export function getEntryBadges(
         if (entry.glucose_reading_type) {
             badges.push({
                 key: 'glucose_reading_type',
-                label: entry.glucose_reading_type.replace('-', ' '),
+                label: entry.glucose_reading_type.replaceAll('-', ' '),
                 subtle: true,
             });
         }
@@ -258,4 +310,33 @@ export const SOURCE_META: Record<string, SourceMeta> = {
     chat: { labelKey: 'health_entries.source.chat', icon: MessageCircle },
     telegram: { labelKey: 'health_entries.source.telegram', icon: Send },
     web: { labelKey: 'health_entries.source.manual', icon: SquarePen },
+    mobile: { labelKey: 'health_entries.source.mobile', icon: Smartphone },
 };
+
+const READING_BADGE_KEYS: Record<Exclude<LogTypeValue, 'food'>, string[]> = {
+    glucose: ['glucose', 'glucose_reading_type'],
+    insulin: ['insulin'],
+    meds: ['medication'],
+    vitals: ['weight', 'bp', 'a1c'],
+    exercise: ['exercise'],
+};
+
+export interface ReadingGroup {
+    type: LogTypeValue;
+    badges: EntryBadge[];
+}
+
+export function getReadingGroups(
+    entry: HealthEntry,
+    glucoseUnit: string,
+    t: TranslateFn,
+): ReadingGroup[] {
+    const badges = getEntryBadges(entry, glucoseUnit, t);
+
+    return Object.entries(READING_BADGE_KEYS)
+        .map(([type, keys]) => ({
+            type: type as LogTypeValue,
+            badges: badges.filter((badge) => keys.includes(badge.key)),
+        }))
+        .filter((group) => group.badges.some((badge) => !badge.subtle));
+}

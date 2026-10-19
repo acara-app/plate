@@ -8,6 +8,7 @@ use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
 use App\Enums\InsulinType;
+use App\Enums\MealType;
 use App\Http\Requests\Concerns\ValidatesReviewedMeal;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
@@ -86,6 +87,7 @@ final class HealthEntryRequest extends FormRequest
             'protein_grams' => ['nullable', 'numeric', 'min:0', 'max:500'],
             'fat_grams' => ['nullable', 'numeric', 'min:0', 'max:500'],
             'calories' => ['nullable', 'integer', 'min:0', 'max:5000'],
+            'meal_type' => ['nullable', Rule::enum(MealType::class)],
 
             'exercise_type' => [
                 $logType === HealthEntryType::Exercise->value ? 'required' : 'nullable',

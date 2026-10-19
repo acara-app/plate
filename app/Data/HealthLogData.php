@@ -9,6 +9,7 @@ use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
 use App\Enums\HealthSyncType;
 use App\Enums\InsulinType;
+use App\Enums\MealType;
 use App\Enums\WeightUnit;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -47,6 +48,7 @@ final class HealthLogData extends Data
         public ?string $analyzerVersion = null,
         public ?string $foodSource = null,
         public ?string $draftReference = null,
+        public ?MealType $mealType = null,
     ) {}
 
     /**
@@ -77,6 +79,7 @@ final class HealthLogData extends Data
             exerciseDurationMinutes: self::toInt($data['exercise_duration_minutes'] ?? null),
             measuredAt: self::toDateTime($data['measured_at'] ?? null),
             notes: self::toNullableString($data['notes'] ?? null),
+            mealType: MealType::tryFrom(self::toNullableString($data['meal_type'] ?? null) ?? ''),
         );
     }
 
@@ -342,7 +345,7 @@ final class HealthLogData extends Data
     }
 
     /**
-     * @param  array{snap_to_track: array<string, mixed>}|null  $metadata
+     * @param  array<string, mixed>|null  $metadata
      * @return array{type_identifier: string, value: float|int, unit: string, metadata?: array<string, mixed>}
      */
     private function foodSample(HealthSyncType $type, float|int $value, ?array $metadata): array
@@ -361,23 +364,27 @@ final class HealthLogData extends Data
     }
 
     /**
-     * @return array{snap_to_track: array<string, mixed>}|null
+     * @return array<string, mixed>|null
      */
     private function foodItemsMetadata(): ?array
     {
-        if ($this->foodItems === null) {
-            return null;
+        $metadata = [];
+
+        if ($this->mealType instanceof MealType) {
+            $metadata['meal_type'] = $this->mealType->value;
         }
 
-        return [
-            'snap_to_track' => [
+        if ($this->foodItems !== null) {
+            $metadata['snap_to_track'] = [
                 'source' => $this->foodSource,
                 'confidence' => $this->confidence,
                 'analyzer_version' => $this->analyzerVersion,
                 'draft_reference' => $this->draftReference,
                 'items' => $this->foodItems,
-            ],
-        ];
+            ];
+        }
+
+        return $metadata === [] ? null : $metadata;
     }
 
     /**

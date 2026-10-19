@@ -16,19 +16,10 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import { getMealTypeConfig } from '@/lib/meal-types';
 import { cn } from '@/lib/utils';
-import { Meal, MealType } from '@/types/meal-plan';
-import {
-    Apple,
-    BookOpen,
-    ChefHat,
-    ChevronRight,
-    Clock,
-    Coffee,
-    Moon,
-    SunMedium,
-    type LucideIcon,
-} from 'lucide-react';
+import { Meal } from '@/types/meal-plan';
+import { BookOpen, ChefHat, ChevronRight, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { MacroBar } from './macro-bar';
 import { NutritionStats } from './nutrition-stats';
@@ -38,41 +29,9 @@ interface MealCardProps {
     className?: string;
 }
 
-const getMealTypeConfig = (
-    t: (key: string) => string,
-): Record<
-    MealType,
-    { Icon: LucideIcon; color: string; iconColor: string; label: string }
-> => ({
-    breakfast: {
-        Icon: Coffee,
-        color: 'bg-orange-100 text-orange-800 dark:bg-orange-500/15 dark:text-orange-200',
-        iconColor: 'text-orange-700 dark:text-orange-300',
-        label: t('meal_plans.meal_types.breakfast'),
-    },
-    lunch: {
-        Icon: SunMedium,
-        color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-500/15 dark:text-cyan-200',
-        iconColor: 'text-cyan-700 dark:text-cyan-300',
-        label: t('meal_plans.meal_types.lunch'),
-    },
-    dinner: {
-        Icon: Moon,
-        color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-200',
-        iconColor: 'text-indigo-700 dark:text-indigo-300',
-        label: t('meal_plans.meal_types.dinner'),
-    },
-    snack: {
-        Icon: Apple,
-        color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200',
-        iconColor: 'text-emerald-700 dark:text-emerald-300',
-        label: t('meal_plans.meal_types.snack'),
-    },
-});
-
 export function MealCard({ meal, className }: MealCardProps) {
     const { t } = useTranslation('common');
-    const config = getMealTypeConfig(t)[meal.type];
+    const config = getMealTypeConfig(meal.type);
     const MealTypeIcon = config.Icon;
     const hasDetails =
         meal.description ||
@@ -99,7 +58,7 @@ export function MealCard({ meal, className }: MealCardProps) {
                             <MealTypeIcon
                                 className={cn('h-3.5 w-3.5', config.iconColor)}
                             />
-                            {config.label}
+                            {t(config.labelKey)}
                         </Badge>
                         {meal.preparation_time_minutes && (
                             <div className="flex min-h-7 items-center gap-1.5 rounded-md border px-2 text-xs text-muted-foreground">
@@ -171,7 +130,7 @@ export function MealCard({ meal, className }: MealCardProps) {
                                     {meal.name}
                                 </DialogTitle>
                                 <DialogDescription>
-                                    {config.label}
+                                    {t(config.labelKey)}
                                     {meal.preparation_time_minutes &&
                                         ` • ${meal.preparation_time_minutes} ${t('meal_plans.meal_card.min')}`}
                                 </DialogDescription>

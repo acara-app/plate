@@ -10,6 +10,7 @@ use Carbon\CarbonInterface;
 use Database\Factories\HealthSyncSampleFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -94,6 +95,22 @@ final class HealthSyncSample extends Model
     }
 
     /**
+     * @param  iterable<int, self>  $samples
+     */
+    public static function firstMetadataIn(iterable $samples, string $key): mixed
+    {
+        foreach ($samples as $sample) {
+            $value = ($sample->metadata ?? [])[$key] ?? null;
+
+            if ($value !== null) {
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -129,6 +146,22 @@ final class HealthSyncSample extends Model
 
         return $this->composeMedicationDosage();
         // @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+    public function groupMembers(): Collection
+    {
+        return self::query()
+            ->where('user_id', $this->user_id)
+            ->when(
+                $this->group_id === null,
+                fn (Builder $query): Builder => $query->whereKey($this->id),
+                fn (Builder $query): Builder => $query->where('group_id', $this->group_id),
+            )
+            ->oldest('id')
+            ->get();
     }
 
     /**

@@ -42,12 +42,14 @@ beforeEach(function (): void {
 
 it('saves the reviewed meal and redirects to the module confirmation', function (): void {
     [$token, $draft] = storableDraftFor($this->user);
+    $this->user->update(['timezone' => 'Asia/Ulaanbaatar']);
 
     $response = actingAs($this->user)
-        ->post(route('snap-to-track.review.store', ['draft' => $token]), reviewedMealPayload());
+        ->post(route('snap-to-track.review.store', ['draft' => $token]), reviewedMealPayload(['measured_at' => '2026-10-17T23:30:00Z']));
 
     $response->assertRedirect(route('snap-to-track.index'))
         ->assertSessionHas('snap_to_track_saved_group')
+        ->assertSessionHas('snap_to_track_saved_date', '2026-10-18')
         ->assertInertiaFlash('analytics', [
             'name' => 'snap_to_track_meal_logged',
             'properties' => [
