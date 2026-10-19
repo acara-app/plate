@@ -5,7 +5,6 @@ export function ProgressRing({
     value,
     size = 64,
     strokeWidth = 6,
-    trackClassName,
     indicatorClassName,
     className,
     children,
@@ -13,7 +12,6 @@ export function ProgressRing({
     value: number;
     size?: number;
     strokeWidth?: number;
-    trackClassName?: string;
     indicatorClassName?: string;
     className?: string;
     children?: ReactNode;
@@ -43,7 +41,7 @@ export function ProgressRing({
                     r={radius}
                     fill="none"
                     strokeWidth={strokeWidth}
-                    className={cn('stroke-muted', trackClassName)}
+                    className="stroke-muted"
                 />
                 <circle
                     cx={size / 2}

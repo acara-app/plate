@@ -200,19 +200,14 @@ final readonly class UpdateUserBiometrics implements Tool
             return (string) json_encode(['error' => 'No valid fields provided to update.']);
         }
 
-        $goal = $updateData['goal_choice'] ?? $profile->goal_choice;
+        $profile->fill($updateData);
 
-        if ($goal instanceof GoalChoice && array_intersect_key($updateData, array_flip(['goal_choice', 'animal_product_choice', 'intensity_choice'])) !== []) {
-            $animal = $updateData['animal_product_choice'] ?? $profile->animal_product_choice ?? AnimalProductChoice::Omnivore;
-            $intensity = $updateData['intensity_choice'] ?? $profile->intensity_choice ?? IntensityChoice::Balanced;
-
-            if ($animal instanceof AnimalProductChoice && $intensity instanceof IntensityChoice) {
-                $updateData['calculated_diet_type'] = DietMapper::map($goal, $animal, $intensity);
-                $updateData['derived_activity_multiplier'] = DietMapper::getActivityMultiplier($goal, $intensity);
-            }
+        if ($profile->goal_choice instanceof GoalChoice && $profile->isDirty(['goal_choice', 'animal_product_choice', 'intensity_choice'])) {
+            $profile->setAttribute('calculated_diet_type', $profile->dietType());
+            $profile->setAttribute('derived_activity_multiplier', DietMapper::getActivityMultiplier($profile->goal_choice, $profile->intensity_choice ?? IntensityChoice::Balanced));
         }
 
-        $profile->update($updateData);
+        $profile->save();
         $profile->refresh();
 
         $fields = $this->formatProfile($profile);

@@ -32,7 +32,7 @@ final readonly class HealthEntryAssembler
             $ordered = $group->sortBy('id');
 
             /** @var HealthSyncSample $primary */
-            $primary = $ordered->first(fn (HealthSyncSample $sample): bool => $sample->type_identifier !== HealthSyncType::Fiber->value) ?? $ordered->first();
+            $primary = $ordered->first(fn (HealthSyncSample $sample): bool => ! HealthSyncType::tryFrom($sample->type_identifier)?->isGroupOnly()) ?? $ordered->first();
 
             $entry = [
                 'id' => $primary->id,

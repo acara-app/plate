@@ -39,7 +39,18 @@ enum HealthSyncType: string
     {
         return array_values(array_map(
             fn (self $case): string => $case->value,
-            array_filter(self::cases(), fn (self $case): bool => $case->isSyncable() && $case !== self::Fiber),
+            array_filter(self::cases(), fn (self $case): bool => $case->isSyncable() && ! $case->isGroupOnly()),
+        ));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function groupOnlyValues(): array
+    {
+        return array_values(array_map(
+            fn (self $case): string => $case->value,
+            array_filter(self::cases(), fn (self $case): bool => $case->isGroupOnly()),
         ));
     }
 
@@ -57,6 +68,11 @@ enum HealthSyncType: string
     public function isSyncable(): bool
     {
         return ! $this->isUserCharacteristic() && $this !== self::BloodPressure;
+    }
+
+    public function isGroupOnly(): bool
+    {
+        return $this === self::Fiber;
     }
 
     public function isUserCharacteristic(): bool

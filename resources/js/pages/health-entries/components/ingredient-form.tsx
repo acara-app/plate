@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
+    estimatedFields,
     needsNutritionUpdate,
     useFoodItemEstimate,
 } from '@/hooks/use-food-item-estimate';
@@ -104,17 +105,7 @@ export default function IngredientForm({
                     current.name.trim() === name
                         ? {
                               ...current,
-                              portion: response.portion,
-                              grams: response.grams,
-                              calories: String(response.calories),
-                              protein: String(response.protein),
-                              carbs: String(response.carbs),
-                              fat: String(response.fat),
-                              fiber:
-                                  response.fiber != null
-                                      ? String(response.fiber)
-                                      : current.fiber,
-                              provenance: 'user',
+                              ...estimatedFields(response, current.fiber),
                               estimatedFor: name,
                               estimateFailed: false,
                               estimatedTypical: isNew || draft.grams === null,

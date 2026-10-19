@@ -24,6 +24,7 @@ import {
     localDatetimeToIso,
 } from '@/lib/format-local-datetime';
 import {
+    estimatedFields,
     needsNutritionUpdate,
     useFoodItemEstimate,
 } from '@/hooks/use-food-item-estimate';
@@ -228,17 +229,7 @@ export default function SnapToTrackReview({
                         rowIndex === index && row.name.trim() === name
                             ? {
                                   ...row,
-                                  portion: response.portion,
-                                  calories: String(response.calories),
-                                  protein: String(response.protein),
-                                  carbs: String(response.carbs),
-                                  fat: String(response.fat),
-                                  fiber:
-                                      response.fiber != null
-                                          ? String(response.fiber)
-                                          : row.fiber,
-                                  grams: response.grams,
-                                  provenance: 'user',
+                                  ...estimatedFields(response, row.fiber),
                                   estimatedFor: name,
                                   estimateFailed: false,
                                   fatOptions: undefined,

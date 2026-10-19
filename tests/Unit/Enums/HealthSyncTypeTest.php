@@ -65,7 +65,7 @@ it('returns entry type values with all syncable types', function (): void {
         ->not->toContain(HealthSyncType::Fiber->value);
 
     foreach (HealthSyncType::cases() as $case) {
-        if ($case->isSyncable() && $case !== HealthSyncType::Fiber) {
+        if ($case->isSyncable() && ! $case->isGroupOnly()) {
             expect($values)->toContain($case->value);
         }
     }

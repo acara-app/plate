@@ -29,7 +29,7 @@ final readonly class ShowHealthEntryController
         abort_unless(in_array($healthSyncSample->type_identifier, $entryTypes, true), 404);
 
         $timezone = $this->currentUser->resolveTimezone();
-        $memberTypes = [...$entryTypes, HealthSyncType::Fiber->value];
+        $memberTypes = [...$entryTypes, ...HealthSyncType::groupOnlyValues()];
         $members = $healthSyncSample->groupMembers()
             ->filter(fn (HealthSyncSample $member): bool => in_array($member->type_identifier, $memberTypes, true));
 

@@ -200,7 +200,7 @@ final class HealthSyncSample extends Model
         $query->where(fn (Builder $entries): Builder => $entries
             ->whereIn('type_identifier', HealthSyncType::entryTypeValues())
             ->orWhere(fn (Builder $grouped): Builder => $grouped
-                ->where('type_identifier', HealthSyncType::Fiber->value)
+                ->whereIn('type_identifier', HealthSyncType::groupOnlyValues())
                 ->whereNotNull('group_id')));
     }
 

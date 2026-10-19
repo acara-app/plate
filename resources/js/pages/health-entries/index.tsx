@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import useModalToggle from '@/hooks/use-modal-toggle';
 import AppLayout from '@/layouts/app-layout';
 import { formatLocalDatetime, parseDateKey } from '@/lib/format-local-datetime';
-import { hasFood } from '@/lib/health-entry-registry';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
 import {
@@ -59,7 +58,7 @@ export default function HealthEntriesIndex({
     const createModal = useModalToggle();
     const [loading, setLoading] = useState(false);
     const isToday = date === today;
-    const totals = sumNutrition(entries.filter(hasFood));
+    const totals = sumNutrition(entries);
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: t('health_entries.index_page.title'),

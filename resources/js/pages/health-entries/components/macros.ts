@@ -30,7 +30,7 @@ export interface MacroConfig {
 export const CALORIES = {
     Icon: Flame,
     icon: 'text-orange-500 dark:text-orange-400',
-    ring: 'stroke-primary',
+    tile: 'bg-orange-100 dark:bg-orange-500/15',
 };
 
 export const MACROS: MacroConfig[] = [

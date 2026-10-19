@@ -52,12 +52,14 @@ export default function CalorieGoalCard({
                         value={calories / goals.calories}
                         size={88}
                         strokeWidth={10}
-                        indicatorClassName={CALORIES.ring}
                     />
                 ) : (
                     <span
                         aria-hidden="true"
-                        className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-orange-100 dark:bg-orange-500/15"
+                        className={cn(
+                            'flex size-14 shrink-0 items-center justify-center rounded-2xl',
+                            CALORIES.tile,
+                        )}
                     >
                         <CALORIES.Icon
                             className={cn('size-7', CALORIES.icon)}
