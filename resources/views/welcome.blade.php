@@ -122,7 +122,6 @@
                             <a href="{{ route('snap-to-track') }}"
                                data-umami-event="snap_to_track_cta_click"
                                data-umami-event-location="home_hero"
-                               aria-describedby="hero-scan-note"
                                class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#C94F35] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#FF6B4A]/15 transition hover:bg-[#AF402A] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C94F35] sm:text-base">
                                 <svg class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
@@ -130,7 +129,6 @@
                                 </svg>
                                 Try Snap to Track
                             </a>
-                            <p id="hero-scan-note" class="text-center text-xs leading-5 text-slate-500">Try one free scan. No signup required.</p>
                         </div>
                         <a href="{{ route('register') }}"
                            data-umami-event="signup_cta_click"
