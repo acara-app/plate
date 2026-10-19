@@ -21,6 +21,8 @@ final readonly class GetDailyWellnessAction
 {
     public const int STEP_GOAL = 10_000;
 
+    public const int WATER_GOAL_ML = 2000;
+
     private const string STEP_COUNT_TYPE = 'stepCount';
 
     private const string LEGACY_TIME_ASLEEP_TYPE = 'timeAsleep';
@@ -46,6 +48,10 @@ final readonly class GetDailyWellnessAction
         $syncedSleepHours = $this->syncedSleepHours($user, $start);
         $sleepQuality = $checkIns->get(DailyCheckInMetric::SleepQuality->value);
         $stressLevel = $checkIns->get(DailyCheckInMetric::StressLevel->value);
+        $water = $this->samplesOn($user, $start, RecordWaterIntakeAction::WATER_TYPE);
+        $isLoggedOnWeb = static fn (HealthSyncSample $sample): bool => $sample->entry_source === HealthEntrySource::Web;
+        $waterSyncedMl = (int) round($this->deduplicatedTotal($water->reject($isLoggedOnWeb), RecordWaterIntakeAction::WATER_TYPE));
+        $waterLoggedMl = (int) round($water->filter($isLoggedOnWeb)->sum(static fn (HealthSyncSample $sample): float => $sample->value));
 
         return new DailyWellnessData(
             steps: $this->steps($user, $start),
@@ -54,6 +60,9 @@ final readonly class GetDailyWellnessAction
             sleepSynced: $syncedSleepHours > 0,
             sleepQuality: $sleepQuality === null ? null : SleepQuality::tryFrom((int) $sleepQuality),
             stressLevel: $stressLevel === null ? null : StressLevel::tryFrom((int) $stressLevel),
+            waterMl: $waterSyncedMl + $waterLoggedMl,
+            waterSyncedMl: $waterSyncedMl,
+            waterGoalMl: self::WATER_GOAL_ML,
         );
     }
 
@@ -66,27 +75,36 @@ final readonly class GetDailyWellnessAction
         return $user->healthSyncSamples()
             ->where('entry_source', HealthEntrySource::Web)
             ->whereIn('type_identifier', array_column(DailyCheckInMetric::cases(), 'value'))
-            ->where('measured_at', '>=', $start->utc())
-            ->where('measured_at', '<', $start->addDay()->utc())
+            ->measuredWithinDay($start)
             ->oldest('measured_at')
             ->pluck('value', 'type_identifier');
     }
 
     private function steps(User $user, CarbonImmutable $start): int
     {
-        $samples = $user->healthSyncSamples()
-            ->where('type_identifier', self::STEP_COUNT_TYPE)
-            ->where('measured_at', '>=', $start->utc())
-            ->where('measured_at', '<', $start->addDay()->utc())
+        return (int) round($this->deduplicatedTotal($this->samplesOn($user, $start, self::STEP_COUNT_TYPE), self::STEP_COUNT_TYPE));
+    }
+
+    /**
+     * @return Collection<int, HealthSyncSample>
+     */
+    private function samplesOn(User $user, CarbonImmutable $start, string $type): Collection
+    {
+        return $user->healthSyncSamples()
+            ->where('type_identifier', $type)
+            ->measuredWithinDay($start)
             ->get();
+    }
 
-        $sourcePreference = $this->registry->descriptorOrUnknown(self::STEP_COUNT_TYPE)->sourcePreference;
+    /**
+     * @param  Collection<int, HealthSyncSample>  $samples
+     */
+    private function deduplicatedTotal(Collection $samples, string $type): float
+    {
+        $sourcePreference = $this->registry->descriptorOrUnknown($type)->sourcePreference;
 
-        $stepCounts = $this->deduplicator->handle($samples, $sourcePreference)
-            ->map(static fn (HealthSyncSample $sample): float => $sample->value)
-            ->all();
-
-        return (int) round(array_sum($stepCounts));
+        return $this->deduplicator->handle($samples, $sourcePreference)
+            ->sum(static fn (HealthSyncSample $sample): float => $sample->value);
     }
 
     private function syncedSleepHours(User $user, CarbonImmutable $start): float
@@ -112,8 +130,7 @@ final readonly class GetDailyWellnessAction
         $samples = $user->healthSyncSamples()
             ->where('entry_source', HealthEntrySource::MobileSync)
             ->whereIn('type_identifier', [self::LEGACY_TIME_ASLEEP_TYPE, self::LEGACY_TIME_IN_BED_TYPE])
-            ->where('measured_at', '>=', $start->utc())
-            ->where('measured_at', '<', $start->addDay()->utc())
+            ->measuredWithinDay($start)
             ->latest('measured_at')
             ->get();
 

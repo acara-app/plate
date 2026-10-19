@@ -134,4 +134,7 @@ export interface DailyWellness {
     sleep_synced: boolean;
     sleep_quality: SleepQuality | null;
     stress_level: StressLevel | null;
+    water_ml: number;
+    water_synced_ml: number;
+    water_goal_ml: number;
 }

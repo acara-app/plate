@@ -612,3 +612,26 @@ it('keeps the Logbook working when moving from an unfinished check-in to a day w
         ->assertSee('Rate how well you slept')
         ->assertNoJavaScriptErrors();
 });
+
+it('fills and empties water cups from the water card and shows what is coming soon next to it', function (): void {
+    $this->travelTo(CarbonImmutable::parse('2026-10-19 12:00:00', 'UTC'));
+    $user = User::factory()->create(['timezone' => 'UTC']);
+    $this->actingAs($user);
+
+    visit(route('health-entries.index', absolute: false))->on()->mobile()
+        ->assertSee('Coming soon')
+        ->click('button[aria-label="0 of 2000 ml of water"]')
+        ->assertSee('Tap a cup to fill or empty it.')
+        ->click('[role="dialog"] button[aria-label="500 ml"]')
+        ->assertSee('500 / 2000')
+        ->assertVisible('[role="dialog"] button[aria-label="500 ml"][aria-pressed="true"]')
+        ->click('[role="dialog"] button[aria-label="500 ml"]')
+        ->assertSee('250 / 2000')
+        ->assertVisible('[role="dialog"] button[aria-label="500 ml"][aria-pressed="false"]')
+        ->keys('[role="dialog"]', 'Escape')
+        ->assertMissing('[role="dialog"]')
+        ->assertVisible('button[aria-label="250 of 2000 ml of water"]')
+        ->assertNoJavaScriptErrors();
+
+    expect(HealthSyncSample::query()->where('user_id', $user->id)->where('type_identifier', 'water')->sole()->value)->toBe(250.0);
+});

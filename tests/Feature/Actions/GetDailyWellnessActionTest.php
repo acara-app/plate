@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\GetDailyWellnessAction;
 use App\Data\DailyWellnessData;
+use App\Enums\HealthEntrySource;
 use App\Enums\SleepQuality;
 use App\Enums\StressLevel;
 use App\Models\HealthSyncSample;
@@ -49,7 +50,33 @@ it('shows an empty day before anything is synced or logged', function (): void {
         'sleep_synced' => false,
         'sleep_quality' => null,
         'stress_level' => null,
+        'water_ml' => 0,
+        'water_synced_ml' => 0,
+        'water_goal_ml' => 2000,
     ]);
+});
+
+it('adds the water logged on the web to the local day’s water synced from Apple Health', function (): void {
+    foreach ([
+        [HealthEntrySource::MobileSync, 300, '2026-10-19 02:00:00'],
+        [HealthEntrySource::MobileSync, 200.4, '2026-10-19 09:00:00'],
+        [HealthEntrySource::MobileSync, 900, '2026-10-18 15:00:00'],
+        [HealthEntrySource::Web, 750, '2026-10-18 16:00:00'],
+        [HealthEntrySource::Web, 1000, '2026-10-19 16:00:00'],
+    ] as [$source, $millilitres, $measuredAt]) {
+        HealthSyncSample::factory()->create([
+            'user_id' => $this->user->id,
+            'type_identifier' => 'water',
+            'value' => $millilitres,
+            'unit' => 'mL',
+            'entry_source' => $source,
+            'measured_at' => $measuredAt,
+        ]);
+    }
+
+    $wellness = resolve(GetDailyWellnessAction::class)->handle($this->user, $this->day);
+
+    expect([$wellness->waterMl, $wellness->waterSyncedMl, $wellness->waterGoalMl])->toBe([1250, 500, 2000]);
 });
 
 it('totals the local day’s steps without counting Apple Watch and iPhone twice', function (): void {

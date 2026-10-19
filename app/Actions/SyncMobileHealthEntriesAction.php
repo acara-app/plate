@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\HealthKitCharacteristicMapper;
 use App\Services\HealthMetricUnitConverter;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -241,7 +242,16 @@ final readonly class SyncMobileHealthEntriesAction
 
         $keyed = [];
 
-        foreach (HealthSyncSample::query()->where('user_id', $user->id)->whereIn('type_identifier', $types)->whereIn('measured_at', $dates)->get() as $sample) {
+        $samples = HealthSyncSample::query()
+            ->where('user_id', $user->id)
+            ->whereIn('type_identifier', $types)
+            ->whereIn('measured_at', $dates)
+            ->where(static fn (Builder $query): Builder => $query
+                ->whereNull('entry_source')
+                ->orWhere('entry_source', HealthEntrySource::MobileSync))
+            ->get();
+
+        foreach ($samples as $sample) {
             $keyed[$sample->type_identifier.'|'.$sample->measured_at->toDateTimeString()] = $sample;
         }
 

@@ -25,6 +25,7 @@ import { BookOpen, Camera, Plus, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import CalorieGoalCard from './components/calorie-goal-card';
+import DailyTrackers from './components/daily-trackers';
 import EntryCard from './components/entry-card';
 import MacroGoals from './components/macro-goals';
 import { sumNutrition } from './components/macros';
@@ -139,6 +140,11 @@ export default function HealthEntriesIndex({
                     />
                     <WellnessCards date={date} wellness={wellness} />
                     <MacroGoals totals={totals} goals={goals} />
+                    <DailyTrackers
+                        date={date}
+                        isToday={isToday}
+                        wellness={wellness}
+                    />
                     <section
                         aria-labelledby="day-entries-heading"
                         className="flex flex-col gap-4"
