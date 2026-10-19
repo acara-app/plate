@@ -54,8 +54,6 @@ final readonly class ShowSnapToTrackController
         return Inertia::render('snap-to-track/index', [
             'photoAllowance' => $allowance->toArray(),
             'analysisRequestId' => (string) Str::uuid(),
-            'savedGroupId' => session('snap_to_track_saved_group'),
-            'savedDate' => session('snap_to_track_saved_date'),
             'creditLimit' => $creditLimit,
             'burstLimit' => $burstLimit?->toArray(),
         ]);

@@ -34,7 +34,7 @@ final readonly class StoreSnapToTrackMealController
 
         $meal = ReviewedMealData::fromValidated($request->validated());
 
-        $groupId = $this->logReviewedMeal->handle(
+        $this->logReviewedMeal->handle(
             $draftModel,
             $meal->toHealthLogData($draftModel),
             $this->currentUser,
@@ -48,8 +48,8 @@ final readonly class StoreSnapToTrackMealController
             ],
         ]);
 
-        return to_route('snap-to-track.index')
-            ->with('snap_to_track_saved_group', $groupId)
-            ->with('snap_to_track_saved_date', $meal->measuredAt->setTimezone($this->currentUser->resolveTimezone())->toDateString());
+        return to_route('health-entries.index', [
+            'date' => $meal->measuredAt->setTimezone($this->currentUser->resolveTimezone())->toDateString(),
+        ]);
     }
 }

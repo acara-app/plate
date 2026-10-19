@@ -2,7 +2,6 @@ import {
     PhotoAllowanceCard,
     type PhotoAllowance,
 } from '@/components/photo-allowance';
-import ListHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/ListHealthEntryController';
 import AnalyzeSnapToTrackPhotoController from '@/actions/App/Http/Controllers/SnapToTrack/AnalyzeSnapToTrackPhotoController';
 import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackController';
 import {
@@ -24,7 +23,7 @@ import AppLayout from '@/layouts/app-layout';
 import checkout from '@/routes/checkout';
 import { type BreadcrumbItem } from '@/types';
 import { Form, Head, Link } from '@inertiajs/react';
-import { CheckCircle2, Gauge, ScanLine } from 'lucide-react';
+import { Gauge, ScanLine } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 type CreditLimit = {
@@ -40,15 +39,11 @@ type CreditLimit = {
 interface SnapToTrackIndexProps {
     photoAllowance?: PhotoAllowance;
     analysisRequestId: string;
-    savedGroupId: string | null;
-    savedDate: string | null;
     creditLimit: CreditLimit | null;
     burstLimit: BurstLimit | null;
 }
 
 export default function SnapToTrackIndex({
-    savedGroupId,
-    savedDate,
     creditLimit,
     burstLimit,
     photoAllowance,
@@ -69,35 +64,6 @@ export default function SnapToTrackIndex({
             <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4">
                 <PhotoAllowanceCard allowance={photoAllowance} />
                 {burstLimit !== null && <BurstLimitNotice limit={burstLimit} />}
-                {savedGroupId !== null && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <CheckCircle2 className="size-5 text-green-600" />
-                                {t('snap_to_track.index.saved_heading')}
-                            </CardTitle>
-                            <CardDescription>
-                                {t('snap_to_track.index.saved_description')}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex flex-col gap-3 sm:flex-row">
-                            <Button asChild>
-                                <Link
-                                    href={
-                                        ListHealthEntryController(
-                                            savedDate
-                                                ? { query: { date: savedDate } }
-                                                : undefined,
-                                        ).url
-                                    }
-                                >
-                                    {t('snap_to_track.index.open_entry')}
-                                </Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
-                )}
-
                 {creditLimit !== null && (
                     <Card>
                         <CardHeader>
