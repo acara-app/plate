@@ -164,11 +164,6 @@ final class HealthSyncSample extends Model
             ->get();
     }
 
-    public function isLogbookEntry(): bool
-    {
-        return in_array($this->type_identifier, HealthSyncType::entryTypeValues(), true);
-    }
-
     /**
      * @return list<string>
      */

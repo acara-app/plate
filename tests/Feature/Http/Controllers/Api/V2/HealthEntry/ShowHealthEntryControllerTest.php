@@ -45,7 +45,7 @@ it('shows a whole meal with its ingredients, photo, meal type and local day', fu
         ->assertJsonPath('entry.group_id', $groupId)
         ->assertJsonPath('entry.calories', 330)
         ->assertJsonPath('entry.fiber_grams', 9)
-        ->assertJsonPath('entry.glucose_value', 120)
+        ->assertJsonPath('entry.glucose_value', 6.7)
         ->assertJsonPath('entry.meal_type', 'dinner')
         ->assertJsonPath('entry.source', 'mobile')
         ->assertJsonPath('entry.measured_at', '2026-10-17T23:39:00+00:00')

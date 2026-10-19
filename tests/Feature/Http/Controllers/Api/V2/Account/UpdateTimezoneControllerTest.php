@@ -27,14 +27,14 @@ it('saves the device timezone so logbook days follow it', function (): void {
         ->assertJsonPath('today', '2026-10-19');
 });
 
-it('accepts current IANA names the picker list does not include', function (string $timezone): void {
+it('accepts every zone name a device can report, including aliases', function (string $timezone): void {
     $user = User::factory()->create();
     Sanctum::actingAs($user, ['chat:converse']);
 
     $this->putJson(route('api.v2.account.timezone'), ['timezone' => $timezone])->assertNoContent();
 
     expect($user->fresh()->timezone)->toBe($timezone);
-})->with(['Europe/Kyiv', 'America/Nuuk', 'Asia/Yangon']);
+})->with(['Europe/Kyiv', 'America/Nuuk', 'Asia/Yangon', 'GMT', 'Asia/Katmandu', 'Asia/Saigon', 'Atlantic/Faeroe']);
 
 it('rejects names that are not timezones', function (mixed $timezone): void {
     Sanctum::actingAs(User::factory()->create(), ['chat:converse']);

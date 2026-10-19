@@ -27,8 +27,6 @@ final readonly class UpdateHealthEntryController
     {
         Gate::authorize('update', $healthSyncSample);
 
-        abort_unless($healthSyncSample->isLogbookEntry(), 404);
-
         $previousUtcDate = $healthSyncSample->measured_at->copy()->utc()->toDateString();
         $metadata = HealthSyncSample::firstMetadataIn($healthSyncSample->groupMembers(), 'snap_to_track');
 
@@ -45,7 +43,7 @@ final readonly class UpdateHealthEntryController
         $timezone = $user->resolveTimezone();
 
         return response()->json([
-            'entry' => $this->getHealthEntry->handle($updatedSample, $timezone, MealPhotoRoute::Api),
+            'entry' => $this->getHealthEntry->handle($updatedSample, $timezone, MealPhotoRoute::Api, $user->glucoseUnit()),
             'date' => $updatedSample->measured_at->toImmutable()->setTimezone($timezone)->toDateString(),
             'glucose_unit' => $user->glucoseUnit()->value,
         ]);

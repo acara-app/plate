@@ -20,12 +20,10 @@ final readonly class ShowHealthEntryController
     {
         Gate::authorize('view', $healthSyncSample);
 
-        abort_unless($healthSyncSample->isLogbookEntry(), 404);
-
         $timezone = $user->resolveTimezone();
 
         return response()->json([
-            'entry' => $this->getHealthEntry->handle($healthSyncSample, $timezone, MealPhotoRoute::Api),
+            'entry' => $this->getHealthEntry->handle($healthSyncSample, $timezone, MealPhotoRoute::Api, $user->glucoseUnit()),
             'date' => $healthSyncSample->measured_at->toImmutable()->setTimezone($timezone)->toDateString(),
             'glucose_unit' => $user->glucoseUnit()->value,
         ]);

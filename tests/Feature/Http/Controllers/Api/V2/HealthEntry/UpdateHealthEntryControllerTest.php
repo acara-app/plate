@@ -61,7 +61,7 @@ it('saves an edited reading and returns it with its new local day', function ():
         ->assertJsonPath('date', '2026-10-13')
         ->assertJsonPath('glucose_unit', 'mmol/L')
         ->assertJsonPath('entry.id', $sample->id)
-        ->assertJsonPath('entry.glucose_value', 130)
+        ->assertJsonPath('entry.glucose_value', 7.2)
         ->assertJsonPath('entry.notes', 'Updated notes')
         ->assertJsonPath('entry.source', 'web');
 
@@ -83,7 +83,7 @@ it('saves edited ingredients and meal type without losing the reading, photo or 
         ->assertOk()
         ->assertJsonPath('entry.calories', 170)
         ->assertJsonPath('entry.fiber_grams', null)
-        ->assertJsonPath('entry.glucose_value', 120)
+        ->assertJsonPath('entry.glucose_value', 6.7)
         ->assertJsonPath('entry.meal_type', 'breakfast')
         ->assertJsonPath('entry.food_analysis.confidence', 82)
         ->assertJsonPath('entry.food_analysis.items.0.name', 'Rye bread')
@@ -105,7 +105,7 @@ it('saves an edited reading without losing the meal it was logged with', functio
         'measured_at' => now()->toIso8601String(),
     ])
         ->assertOk()
-        ->assertJsonPath('entry.glucose_value', 135)
+        ->assertJsonPath('entry.glucose_value', 7.5)
         ->assertJsonPath('entry.food_analysis.items.0.name', 'Bread')
         ->assertJsonPath('entry.fiber_grams', 3);
 

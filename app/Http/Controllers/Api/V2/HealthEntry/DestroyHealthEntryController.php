@@ -23,8 +23,6 @@ final readonly class DestroyHealthEntryController
     {
         Gate::authorize('delete', $healthSyncSample);
 
-        abort_unless($healthSyncSample->isLogbookEntry(), 404);
-
         $affectedUtcDates = $healthSyncSample->groupUtcDates();
         $localDate = $healthSyncSample->measured_at->toImmutable()->setTimezone($user->resolveTimezone())->toDateString();
 

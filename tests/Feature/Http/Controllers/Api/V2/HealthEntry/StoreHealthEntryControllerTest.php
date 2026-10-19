@@ -41,7 +41,7 @@ it('logs every kind of entry from the app', function (array $payload, string $ty
         ->and($response->json('entry.id'))->toBeInt()
         ->and(HealthSyncSample::query()->where('user_id', $this->user->id)->pluck('entry_source')->map->value->unique()->all())->toBe(['mobile']);
 })->with([
-    'glucose in mmol/L' => [['log_type' => 'glucose', 'glucose_value' => 6.7, 'glucose_reading_type' => 'fasting'], 'bloodGlucose', 121.0, 'glucose_reading_type', 'fasting'],
+    'glucose in mmol/L' => [['log_type' => 'glucose', 'glucose_value' => 6.7, 'glucose_reading_type' => 'fasting'], 'bloodGlucose', 121.0, 'glucose_value', 6.7],
     'food' => [['log_type' => 'food', 'carbs_grams' => 45, 'protein_grams' => 20, 'fat_grams' => 10, 'calories' => 420, 'fiber_grams' => 6, 'meal_type' => 'lunch'], 'dietaryEnergy', 420.0, 'meal_type', 'lunch'],
     'insulin' => [['log_type' => 'insulin', 'insulin_units' => 10, 'insulin_type' => 'bolus'], 'insulin', 10.0, 'insulin_type', 'bolus'],
     'medication' => [['log_type' => 'meds', 'medication_name' => 'Metformin', 'medication_dosage' => '500mg'], 'medication', 1.0, 'medication_name', 'Metformin'],

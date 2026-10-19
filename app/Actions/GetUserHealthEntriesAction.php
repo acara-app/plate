@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Enums\GlucoseUnit;
 use App\Enums\MealPhotoRoute;
 use App\Models\User;
 use App\Services\HealthEntryAssembler;
@@ -17,7 +18,7 @@ final readonly class GetUserHealthEntriesAction
     /**
      * @return Collection<int, array<string, mixed>>
      */
-    public function handle(User $user, CarbonImmutable $day, MealPhotoRoute $photoRoute = MealPhotoRoute::Web): Collection
+    public function handle(User $user, CarbonImmutable $day, MealPhotoRoute $photoRoute = MealPhotoRoute::Web, GlucoseUnit $glucoseUnit = GlucoseUnit::MgDl): Collection
     {
         $timezone = $day->getTimezone()->getName();
         $start = $day->startOfDay();
@@ -28,6 +29,6 @@ final readonly class GetUserHealthEntriesAction
             ->where('measured_at', '<', $start->addDay()->utc())
             ->get();
 
-        return $this->assembler->assemble($samples, $timezone, $photoRoute);
+        return $this->assembler->assemble($samples, $timezone, $photoRoute, $glucoseUnit);
     }
 }

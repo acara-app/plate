@@ -24,8 +24,6 @@ final readonly class ShowHealthEntryController
     {
         Gate::authorize('view', $healthSyncSample);
 
-        abort_unless($healthSyncSample->isLogbookEntry(), 404);
-
         $timezone = $this->currentUser->resolveTimezone();
 
         return Inertia::render('health-entries/show', [

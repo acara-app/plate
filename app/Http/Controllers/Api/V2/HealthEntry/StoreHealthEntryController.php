@@ -31,7 +31,7 @@ final readonly class StoreHealthEntryController
         $timezone = $user->resolveTimezone();
 
         return response()->json([
-            'entry' => $this->getHealthEntry->handle($sample, $timezone, MealPhotoRoute::Api),
+            'entry' => $this->getHealthEntry->handle($sample, $timezone, MealPhotoRoute::Api, $user->glucoseUnit()),
             'date' => $sample->measured_at->toImmutable()->setTimezone($timezone)->toDateString(),
             'glucose_unit' => $user->glucoseUnit()->value,
         ], 201);
