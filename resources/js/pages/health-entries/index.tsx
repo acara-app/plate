@@ -3,8 +3,13 @@ import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrac
 import { Button } from '@/components/ui/button';
 import useModalToggle from '@/hooks/use-modal-toggle';
 import AppLayout from '@/layouts/app-layout';
-import { formatLocalDatetime, parseDateKey } from '@/lib/format-local-datetime';
-import { cn } from '@/lib/utils';
+import {
+    addDaysToKey,
+    formatLocalDatetime,
+    parseDateKey,
+} from '@/lib/format-local-datetime';
+import { cn, generateUUID } from '@/lib/utils';
+import chat from '@/routes/chat';
 import { type BreadcrumbItem } from '@/types';
 import {
     DailyNutritionGoals,
@@ -15,8 +20,8 @@ import {
     RecentMedication,
     TodaysMeal,
 } from '@/types/diabetes';
-import { Head, Link } from '@inertiajs/react';
-import { BookOpen, Camera, Plus } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { BookOpen, Camera, Plus, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import CalorieGoalCard from './components/calorie-goal-card';
@@ -77,19 +82,38 @@ export default function HealthEntriesIndex({
               day: 'numeric',
           });
 
+    function askAi() {
+        router.visit(
+            chat.create(generateUUID(), {
+                query: {
+                    prompt: t('health_entries.index_page.review_prompt', {
+                        startDate: addDaysToKey(date, -6),
+                        endDate: date,
+                    }),
+                    auto_send: false,
+                },
+            }),
+        );
+    }
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('health_entries.index_page.title')} />
             <div className="mx-auto flex w-full max-w-2xl min-w-0 flex-col gap-6 px-4 pt-4 pb-16 sm:px-6 sm:pt-6">
                 <header className="flex items-center justify-between gap-3">
-                    <h1 className="text-3xl font-semibold tracking-tight">
+                    <h1 className="sr-only">
                         {t('health_entries.index_page.title')}
                     </h1>
                     <Button
-                        asChild
+                        type="button"
                         variant="secondary"
+                        onClick={askAi}
                         className="h-11 rounded-full px-4"
                     >
+                        <Sparkles data-icon="inline-start" aria-hidden="true" />
+                        {t('health_entries.index_page.ask_ai')}
+                    </Button>
+                    <Button asChild className="h-11 rounded-full px-4">
                         <Link href={ShowSnapToTrackController()}>
                             <Camera aria-hidden="true" />
                             {t('health_entries.timeline.scan_meal')}

@@ -23,6 +23,7 @@ final class StoreChatConversationRequest extends FormRequest
     {
         return [
             'prompt' => ['nullable', 'string', 'max:500'],
+            'auto_send' => ['sometimes', 'boolean'],
         ];
     }
 
@@ -32,6 +33,11 @@ final class StoreChatConversationRequest extends FormRequest
         $prompt = $this->validated('prompt');
 
         return $prompt === '' ? null : $prompt;
+    }
+
+    public function shouldAutoSendPrompt(): bool
+    {
+        return $this->boolean('auto_send', true);
     }
 
     public function withValidator(Validator $validator): void

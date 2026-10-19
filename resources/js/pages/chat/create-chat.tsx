@@ -49,6 +49,23 @@ import ChatInput from './chat-input';
 
 import ChatMessages, { ChatErrorBanner } from './chat-messages';
 
+function clearInitialPromptQuery() {
+    const url = new URL(window.location.href);
+
+    if (!url.searchParams.has('prompt') && !url.searchParams.has('auto_send')) {
+        return;
+    }
+
+    url.searchParams.delete('prompt');
+    url.searchParams.delete('auto_send');
+    router.replace({
+        url: `${url.pathname}${url.search}${url.hash}`,
+        props: (props) => ({ ...props, initialPrompt: null }),
+        preserveScroll: true,
+        preserveState: true,
+    });
+}
+
 export default function CreateChat() {
     const page = usePage<
         ChatPageProps & { creditWarning?: CreditWarning | null }
@@ -57,6 +74,7 @@ export default function CreateChat() {
         conversationId: initialConversationId,
         messages: messageHistories,
         initialPrompt,
+        autoSendInitialPrompt = true,
         initialStreaming,
         isPinned,
         isKept,
@@ -92,7 +110,9 @@ export default function CreateChat() {
     );
     const normalizedInitialPrompt = initialPrompt?.trim() ?? '';
     const shouldAutoStartInitialPrompt =
-        normalizedInitialPrompt.length > 0 && initialMessages.length === 0;
+        autoSendInitialPrompt &&
+        normalizedInitialPrompt.length > 0 &&
+        initialMessages.length === 0;
 
     const handleStreamFinish = useCallback(() => {
         router.reload({ only: ['creditWarning'] });
@@ -189,19 +209,7 @@ export default function CreateChat() {
         autoStartedPromptRef.current = promptKey;
         lastMessageRef.current = { text: normalizedInitialPrompt };
         sendMessage({ text: normalizedInitialPrompt });
-
-        const url = new URL(window.location.href);
-
-        if (!url.searchParams.has('prompt')) {
-            return;
-        }
-
-        url.searchParams.delete('prompt');
-        window.history.replaceState(
-            window.history.state,
-            '',
-            `${url.pathname}${url.search}${url.hash}`,
-        );
+        clearInitialPromptQuery();
     }, [
         conversationId,
         normalizedInitialPrompt,
@@ -226,6 +234,7 @@ export default function CreateChat() {
         }
 
         sendMessage({ text: message, files });
+        clearInitialPromptQuery();
     }
 
     const handleRetry = useCallback(() => {
