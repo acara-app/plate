@@ -158,3 +158,18 @@ it('saves an edited reading without losing the meal and photo it was logged with
         ->and($members->firstWhere('type_identifier', 'dietaryEnergy')->metadata['snap_to_track']['items'][0]['name'])->toBe('Bread')
         ->and($photo->fresh())->not->toBeNull();
 });
+
+it('saves a synced meal that has calories but no carbohydrates', function (): void {
+    $user = User::factory()->create();
+    $sample = HealthSyncSample::factory()->fromWeb()->create(['user_id' => $user->id, 'type_identifier' => 'dietaryEnergy', 'value' => 250, 'unit' => 'kcal']);
+
+    $this->actingAs($user)->put(route('health-entries.update', $sample), [
+        'log_type' => 'food',
+        'calories' => 260,
+        'meal_type' => 'snack',
+        'measured_at' => now()->toIso8601String(),
+    ])->assertSessionHasNoErrors()->assertRedirect();
+
+    expect($sample->refresh()->value)->toBe(260.0)
+        ->and($sample->metadata['meal_type'])->toBe('snack');
+});

@@ -31,10 +31,12 @@ final readonly class ListHealthEntryController
         $timezone = $this->currentUser->resolveTimezone();
         $day = $request->selectedDay($timezone);
         $weekStart = $day->startOfWeek(CarbonInterface::MONDAY);
+        $now = CarbonImmutable::now($timezone);
 
         return Inertia::render('health-entries/index', [
             'date' => $day->toDateString(),
-            'today' => CarbonImmutable::now($timezone)->toDateString(),
+            'today' => $now->toDateString(),
+            'newEntryAt' => $day->isSameDay($now) ? null : $day->setTimeFrom($now)->toIso8601String(),
             'entries' => fn (): array => $this->getUserHealthEntries->handle($this->currentUser, $day)->all(),
             'loggedDates' => fn (): array => $this->getUserLoggedDates->handle($this->currentUser, $weekStart, $weekStart->addDays(6)),
             'goals' => fn (): ?DailyNutritionGoalsData => $this->calculateDailyNutritionGoals->handle($this->currentUser->profile),

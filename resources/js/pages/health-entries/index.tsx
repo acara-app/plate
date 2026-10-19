@@ -29,6 +29,7 @@ import HealthEntriesDialog from './health-entries-dialog';
 interface Props {
     date: string;
     today: string;
+    newEntryAt: string | null;
     entries: HealthEntry[];
     loggedDates: string[];
     goals: DailyNutritionGoals | null;
@@ -43,6 +44,7 @@ interface Props {
 export default function HealthEntriesIndex({
     date,
     today,
+    newEntryAt,
     entries,
     loggedDates,
     goals,
@@ -199,9 +201,9 @@ export default function HealthEntriesIndex({
                     open ? createModal.open() : createModal.close()
                 }
                 defaultMeasuredAt={
-                    isToday
+                    newEntryAt === null
                         ? undefined
-                        : `${date}${formatLocalDatetime(new Date()).slice(10)}`
+                        : formatLocalDatetime(new Date(newEntryAt))
                 }
                 glucoseReadingTypes={glucoseReadingTypes}
                 insulinTypes={insulinTypes}

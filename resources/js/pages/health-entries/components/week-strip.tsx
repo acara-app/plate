@@ -11,7 +11,13 @@ import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-export const DAY_PROPS = ['date', 'today', 'entries', 'loggedDates'];
+export const DAY_PROPS = [
+    'date',
+    'today',
+    'newEntryAt',
+    'entries',
+    'loggedDates',
+];
 
 export default function WeekStrip({
     date,
