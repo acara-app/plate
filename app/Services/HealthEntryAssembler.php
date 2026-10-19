@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Data\MealBreakdownData;
 use App\Enums\HealthSyncType;
+use App\Enums\MealPhotoRoute;
 use App\Enums\MealType;
 use App\Models\HealthSyncSample;
 use App\Models\MealPhoto;
@@ -17,7 +18,7 @@ final readonly class HealthEntryAssembler
      * @param  Collection<int, HealthSyncSample>  $samples
      * @return Collection<int, array<string, mixed>>
      */
-    public function assemble(Collection $samples, string $timezone = 'UTC'): Collection
+    public function assemble(Collection $samples, string $timezone = 'UTC', MealPhotoRoute $photoRoute = MealPhotoRoute::Web): Collection
     {
         $grouped = $samples->groupBy(fn (HealthSyncSample $sample): string => $sample->group_id ?? 'standalone_'.$sample->id);
 
@@ -28,7 +29,7 @@ final readonly class HealthEntryAssembler
             ->pluck('health_group_id')
             ->flip();
 
-        return $grouped->map(function (Collection $group) use ($photoGroupIds, $timezone): array {
+        return $grouped->map(function (Collection $group) use ($photoGroupIds, $timezone, $photoRoute): array {
             $ordered = $group->sortBy('id');
 
             /** @var HealthSyncSample $primary */
@@ -60,7 +61,7 @@ final readonly class HealthEntryAssembler
                 'meal_type' => null,
                 'food_analysis' => null,
                 'photo_url' => $primary->group_id !== null && $photoGroupIds->has($primary->group_id)
-                    ? route('health-entries.photo', ['group' => $primary->group_id], absolute: false)
+                    ? $photoRoute->urlFor($primary->group_id)
                     : null,
                 'created_at' => $primary->created_at->toIso8601String(),
             ];

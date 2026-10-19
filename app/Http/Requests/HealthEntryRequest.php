@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Data\HealthLogData;
+use App\Data\ReviewedMealData;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
@@ -32,9 +34,7 @@ final class HealthEntryRequest extends FormRequest
 
         /** @var User $user */
         $user = $this->user();
-        // @phpstan-ignore nullsafe.neverNull
-        $glucoseUnit = $user->profile?->units_preference ?? GlucoseUnit::MmolL;
-        $range = $glucoseUnit->validationRange();
+        $range = $user->glucoseUnit()->validationRange();
 
         return [
             'log_type' => ['required', Rule::enum(HealthEntryType::class)],
@@ -99,6 +99,25 @@ final class HealthEntryRequest extends FormRequest
             'exercise_duration_minutes' => ['nullable', 'integer', 'min:0', 'max:1440'],
             ...($logType === HealthEntryType::Food->value && $this->has('items') ? $this->reviewedMealRules() : []),
         ];
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $snapToTrackMetadata
+     */
+    public function healthLogData(array $snapToTrackMetadata = []): HealthLogData
+    {
+        $data = $this->validated();
+
+        /** @var User $user */
+        $user = $this->user();
+        if ($user->glucoseUnit() === GlucoseUnit::MmolL && isset($data['glucose_value'])) {
+            $glucoseValue = is_numeric($data['glucose_value']) ? (float) $data['glucose_value'] : 0;
+            $data['glucose_value'] = GlucoseUnit::mmolLToMgDl($glucoseValue);
+        }
+
+        return $data['log_type'] === HealthEntryType::Food->value && isset($data['items'])
+            ? ReviewedMealData::fromValidated($data)->toHealthLogDataWithMetadata($snapToTrackMetadata)
+            : HealthLogData::fromParsedArray(array_merge($data, ['is_health_data' => true]));
     }
 
     public function withValidator(Validator $validator): void

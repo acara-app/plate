@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\V2\SnapToTrack;
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\CreateAnalysisDraftAction;
+use App\Actions\StoreMealPhotoAction;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Contracts\Ai\ResolvesAgentModel;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
@@ -29,6 +30,7 @@ final readonly class AnalyzeSnapToTrackPhotoController
         private AnalyzeFoodPhotoAction $analyzeFoodPhoto,
         private CreateAnalysisDraftAction $createAnalysisDraft,
         private EnforceAiUsageLimit $enforceAiUsageLimit,
+        private StoreMealPhotoAction $storeMealPhoto,
     ) {}
 
     public function __invoke(AnalyzeSnapToTrackPhotoRequest $request, #[CurrentUser] User $user): JsonResponse
@@ -73,6 +75,12 @@ final readonly class AnalyzeSnapToTrackPhotoController
             AnalysisDraftSource::MobileSnapToTrack,
             $user->id,
         );
+
+        try {
+            $this->storeMealPhoto->handle($user, $image->bytes, $token);
+        } catch (Throwable $throwable) {
+            report($throwable);
+        }
 
         $draft = AnalysisDraft::query()
             ->where('token_hash', AnalysisDraft::hashToken($token))

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Rules;
 
 use Closure;
+use DateTimeZone;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
 
@@ -18,7 +19,7 @@ final readonly class ValidTimezone implements ValidationRule
     {
         $value = is_scalar($value) ? (string) $value : '';
 
-        if (! array_key_exists($value, $this->getTimezones())) {
+        if (! array_key_exists($value, $this->getTimezones()) && ! in_array($value, DateTimeZone::listIdentifiers(), true)) {
             $fail(__('The :attribute must be a valid timezone.'));
         }
     }
@@ -29,7 +30,7 @@ final readonly class ValidTimezone implements ValidationRule
     private function getTimezones(): array
     {
         return [
-            null => 'Select a timezone',
+            '' => 'Select a timezone',
             'Pacific/Midway' => 'Midway (UTC-11:00)',
             'Pacific/Niue' => 'Niue (UTC-11:00)',
             'Pacific/Pago_Pago' => 'Pago Pago (UTC-11:00)',

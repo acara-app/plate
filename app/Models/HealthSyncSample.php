@@ -164,6 +164,24 @@ final class HealthSyncSample extends Model
             ->get();
     }
 
+    public function isLogbookEntry(): bool
+    {
+        return in_array($this->type_identifier, HealthSyncType::entryTypeValues(), true);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function groupUtcDates(): array
+    {
+        /** @var list<string> */
+        return $this->groupMembers()
+            ->map(static fn (self $sample): string => $sample->measured_at->copy()->utc()->toDateString())
+            ->unique()
+            ->values()
+            ->all();
+    }
+
     /**
      * @return BelongsTo<User, $this>
      */
