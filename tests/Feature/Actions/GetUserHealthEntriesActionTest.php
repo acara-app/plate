@@ -79,3 +79,18 @@ it('shows fiber logged with a meal but keeps standalone synced fiber off the log
         ->and($entries[0]['fiber_grams'])->toBe(9.5)
         ->and($loggedDates)->toBe(['2026-10-18']);
 });
+
+it('opens a synced blood pressure reading even when fiber at the same time was stored first', function (): void {
+    $user = User::factory()->create();
+    $day = CarbonImmutable::parse('2026-10-18', 'UTC');
+    HealthSyncSample::factory()->create(['user_id' => $user->id, 'type_identifier' => 'fiber', 'value' => 4, 'group_id' => 'bp', 'measured_at' => $day->setTime(8, 0)]);
+    $systolic = HealthSyncSample::factory()->create(['user_id' => $user->id, 'type_identifier' => 'bloodPressureSystolic', 'value' => 120, 'group_id' => 'bp', 'measured_at' => $day->setTime(8, 0)]);
+    HealthSyncSample::factory()->create(['user_id' => $user->id, 'type_identifier' => 'bloodPressureDiastolic', 'value' => 80, 'group_id' => 'bp', 'measured_at' => $day->setTime(8, 0)]);
+
+    $entries = resolve(GetUserHealthEntriesAction::class)->handle($user, $day);
+
+    expect($entries)->toHaveCount(1)
+        ->and($entries[0]['id'])->toBe($systolic->id);
+
+    $this->actingAs($user)->get(route('health-entries.show', $entries[0]['id']))->assertOk();
+});

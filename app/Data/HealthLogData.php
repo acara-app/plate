@@ -50,6 +50,7 @@ final class HealthLogData extends Data
         public ?string $draftReference = null,
         public ?MealType $mealType = null,
         public ?float $fiberGrams = null,
+        public bool $fiberGramsProvided = false,
     ) {}
 
     /**
@@ -82,6 +83,7 @@ final class HealthLogData extends Data
             notes: self::toNullableString($data['notes'] ?? null),
             mealType: MealType::tryFrom(self::toNullableString($data['meal_type'] ?? null) ?? ''),
             fiberGrams: self::toFloat($data['fiber_grams'] ?? null),
+            fiberGramsProvided: array_key_exists('fiber_grams', $data),
         );
     }
 

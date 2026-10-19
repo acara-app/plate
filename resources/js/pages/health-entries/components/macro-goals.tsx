@@ -98,7 +98,7 @@ export default function MacroGoals({
                                     <span
                                         className={cn(
                                             'shrink-0 text-sm font-semibold tabular-nums',
-                                            macro.icon,
+                                            macro.text,
                                         )}
                                     >
                                         {percent}%

@@ -23,6 +23,7 @@ export interface MacroConfig {
     tile: string;
     card: string;
     icon: string;
+    text: string;
     ring: string;
 }
 
@@ -41,6 +42,7 @@ export const MACROS: MacroConfig[] = [
         tile: 'bg-rose-100 dark:bg-rose-500/15',
         card: 'bg-rose-50 dark:bg-rose-500/10',
         icon: 'text-rose-500 dark:text-rose-300',
+        text: 'text-rose-600 dark:text-rose-300',
         ring: 'stroke-rose-500 dark:stroke-rose-400',
     },
     {
@@ -51,6 +53,7 @@ export const MACROS: MacroConfig[] = [
         tile: 'bg-amber-100 dark:bg-amber-500/15',
         card: 'bg-amber-50 dark:bg-amber-500/10',
         icon: 'text-amber-500 dark:text-amber-300',
+        text: 'text-amber-700 dark:text-amber-300',
         ring: 'stroke-amber-400 dark:stroke-amber-300',
     },
     {
@@ -61,6 +64,7 @@ export const MACROS: MacroConfig[] = [
         tile: 'bg-orange-100 dark:bg-orange-500/15',
         card: 'bg-orange-50 dark:bg-orange-500/10',
         icon: 'text-orange-500 dark:text-orange-300',
+        text: 'text-orange-700 dark:text-orange-300',
         ring: 'stroke-orange-400 dark:stroke-orange-300',
     },
     {
@@ -71,6 +75,7 @@ export const MACROS: MacroConfig[] = [
         tile: 'bg-green-100 dark:bg-green-500/15',
         card: 'bg-green-50 dark:bg-green-500/10',
         icon: 'text-green-600 dark:text-green-300',
+        text: 'text-green-700 dark:text-green-300',
         ring: 'stroke-green-500 dark:stroke-green-400',
     },
 ];

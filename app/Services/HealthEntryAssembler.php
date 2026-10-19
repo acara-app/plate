@@ -27,8 +27,10 @@ final readonly class HealthEntryAssembler
             ->flip();
 
         return $grouped->map(function (Collection $group) use ($photoGroupIds, $timezone): array {
+            $ordered = $group->sortBy('id');
+
             /** @var HealthSyncSample $primary */
-            $primary = $group->sortBy('id')->first();
+            $primary = $ordered->first(fn (HealthSyncSample $sample): bool => $sample->type_identifier !== HealthSyncType::Fiber->value) ?? $ordered->first();
 
             $entry = [
                 'id' => $primary->id,

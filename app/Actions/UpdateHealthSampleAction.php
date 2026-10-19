@@ -102,7 +102,7 @@ final readonly class UpdateHealthSampleAction
             $previous = (new ReviewedMealData(ReviewedMealData::normalizeItems($metadata['items']), $measuredAt, mealType: $data->mealType))
                 ->toHealthLogDataWithMetadata($metadata);
 
-            $sameFiber = $data->fiberGrams === null || $data->fiberGrams === $previous->fiberGrams;
+            $sameFiber = ! $data->fiberGramsProvided || $data->fiberGrams === $previous->fiberGrams;
 
             if ($sameFiber && $data->carbsGrams === $previous->carbsGrams && $data->proteinGrams === $previous->proteinGrams && $data->fatGrams === $previous->fatGrams && $data->calories === $previous->calories) {
                 return $previous->toSampleArrays();
