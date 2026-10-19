@@ -1,22 +1,56 @@
-@section('title', 'AI Diabetes Meal Planner & Glucose Tracker | Personalized Nutrition')
-@section('meta_description', 'Manage Type 2 diabetes with Acara Plate\'s AI nutritionist. Get meal plans that match your glucose levels. Start your free plan today!')
+@section('title', 'AI Food & Health Tracker | Acara Plate')
+@section('meta_description', 'Estimate calories and macros from a meal photo, then track meals, sleep, water, activity, and daily check-ins with Acara Plate.')
+@section('meta_keywords', 'AI food tracker, health tracker, photo food log, calorie and macro tracker, daily health log, meal photo nutrition, sleep and water tracking')
+@section('og_image_alt', 'Acara Plate - AI Food & Health Tracker')
+
+@php
+    $frequentlyAskedQuestions = [
+        [
+            'question' => 'How does Snap to Track work?',
+            'answer' => 'Take or upload a meal photo to get AI estimates of calories, protein, carbs, fat, and fiber. Review the ingredients and portions, make any corrections, and save the meal to your Logbook with an account.',
+        ],
+        [
+            'question' => 'Can I try it without signing up?',
+            'answer' => 'Yes. Try one free scan with Snap to Track without creating an account or entering a card. Create an account to save meals to your Logbook. Further photo scans depend on your plan allowance.',
+        ],
+        [
+            'question' => 'What can I track in Logbook?',
+            'answer' => 'Keep meals, calories, protein, carbs, fat, fiber, water, sleep, activity, and daily check-ins together. You can also log readings such as weight, blood pressure, and glucose. Browse past days to revisit your entries.',
+        ],
+        [
+            'question' => 'How accurate are photo nutrition estimates?',
+            'answer' => 'Photo nutrition values are AI estimates, not measurements. Lighting, portion sizes, and hidden ingredients such as oils and sauces can affect the result. Review and correct the analysis before saving it, and verify important nutritional information independently.',
+        ],
+        [
+            'question' => 'Who is Acara Plate for?',
+            'answer' => 'Acara Plate is for adults who want a simpler way to record meals and keep everyday health habits in view. Use it to follow nutrition goals, log daily check-ins, and keep a personal history of your food and health entries.',
+        ],
+        [
+            'question' => 'Is this a medical app or diagnostic tool?',
+            'answer' => 'No. Acara Plate is an informational and educational wellness tool, not a medical device. It does not diagnose, treat, or manage medical conditions. Discuss health decisions and significant dietary changes with a qualified healthcare professional.',
+        ],
+        [
+            'question' => 'Is there a mobile app?',
+            'answer' => 'Use Plate in your mobile browser or install it on your home screen as a Progressive Web App. The separate Acara Health Sync iPhone app can bring Apple Health data, including steps and sleep, into Plate.',
+        ],
+        [
+            'question' => 'Why is Acara Plate open source?',
+            'answer' => 'Transparency matters when you record food and health information. You can inspect the code on GitHub, contribute improvements, or self-host Plate for control over your own instance.',
+        ],
+    ];
+@endphp
 
 <x-default-layout>
-@section('head')
-<script type="application/ld+json">
+    @section('head')
+    <script type="application/ld+json">
     {
         "@@context": "https://schema.org",
         "@@type": "WebSite",
         "name": "Acara Plate",
-        "url": "{{ url('/') }}",
-        "potentialAction": {
-            "@@type": "SearchAction",
-            "target": "{{ url('/') }}/?s={search_term_string}",
-            "query-input": "required name=search_term_string"
-        }
+        "url": "{{ url('/') }}"
     }
     </script>
-        <script type="application/ld+json">
+    <script type="application/ld+json">
     {
         "@@context": "https://schema.org",
         "@@type": "Organization",
@@ -33,62 +67,16 @@
         "@@context": "https://schema.org",
         "@@type": "FAQPage",
         "mainEntity": [
-        {
-            "@@type": "Question",
-            "name": "How accurate are the nutritional values in meal plans?",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "Acara Plate uses AI-generated meal plans with carefully selected ingredients from the USDA FoodData Central database. We strive for accuracy by leveraging established nutritional data sources. However, since meal plans are AI-generated, we recommend verifying key nutritional information and consulting with your healthcare provider for personalized dietary guidance."
-            }
-        },
-        {
-            "@@type": "Question",
-            "name": "Can AI hallucinate incorrect food information?",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "Yes, AI can occasionally hallucinate or generate incorrect information about food, ingredients, or nutritional values. This is a known limitation of language models. We recommend always verifying key ingredients for allergens and consulting your healthcare provider before making significant dietary changes based on meal plan suggestions."
-            }
-        },
-        {
-            "@@type": "Question",
-            "name": "Is this a medical app or diagnostic tool?",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "No. Acara Plate is an informational and educational tool, not a medical device. It does not diagnose, treat, or manage any medical condition. The glucose tracking feature helps you monitor trends, but all meal plans and health decisions should be discussed with your healthcare provider."
-            }
-        },
-        {
-            "@@type": "Question",
-            "name": "Why is Acara Plate open source?",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "Transparency is crucial for health-related tools. Being open source allows healthcare professionals, developers, and users to inspect how meal plans are generated, how nutritional data is verified, and how AI is used. You can review the code on GitHub, contribute improvements, and verify that the platform operates as described."
-            }
-        },
-        {
-            "@@type": "Question",
-            "name": "How do you ensure nutritional accuracy?",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "We reference the USDA FoodData Central database—the scientific gold standard for nutrition of whole foods like bananas, chicken breast, and rice. However, as meal plans are AI-generated, we recommend verifying nutritional information independently and consulting with your healthcare provider for personalized guidance."
-            }
-        },
-        {
-            "@@type": "Question",
-            "name": "Who should use Acara Plate?",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "Acara Plate is designed for adults seeking personalized meal planning guidance, particularly those managing Type 2 diabetes or prediabetes. It's useful for anyone wanting structured nutrition plans based on their goals, dietary preferences, and health conditions. However, it should complement—not replace—professional medical advice."
-            }
-        },
-        {
-            "@@type": "Question",
-            "name": "Is there a mobile app?",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "Yes — two of them, and they do different jobs. If you use an iPhone and want Apple Health data (glucose, weight, sleep, activity) to flow into Plate automatically, install Acara Health Sync on the App Store at {{ config('plate.health_sync.app_store_url') }}. If you just want the Plate dashboard on your home screen, our Progressive Web App installs directly from your browser in Safari or Chrome — no store required. Most iPhone users end up using both."
-            }
-        }
+            @foreach ($frequentlyAskedQuestions as $faq)
+                {
+                    "@@type": "Question",
+                    "name": @json($faq['question']),
+                    "acceptedAnswer": {
+                        "@@type": "Answer",
+                        "text": @json($faq['answer'])
+                    }
+                }@if (! $loop->last),@endif
+            @endforeach
         ]
     }
     </script>
@@ -96,8 +84,8 @@
     {
         "@@context": "https://schema.org",
         "@@type": "WebPage",
-        "name": "Acara Plate — Your Digital Meal Planner for Diabetes",
-        "description": "A personalized nutrition platform that creates meal plans around your glucose patterns. Built for people managing Type 2 diabetes.",
+        "name": "AI Food & Health Tracker | Acara Plate",
+        "description": "Estimate calories and macros from a meal photo, then track meals, sleep, water, activity, and daily check-ins with Acara Plate.",
         "url": "{{ url('/') }}",
         "speakable": {
             "@@type": "SpeakableSpecification",
@@ -111,133 +99,93 @@
     }
     </script>
     @endsection
-    {{-- Hero Section with Fizzy-style design --}}
     <div class="relative min-h-screen bg-white">
-        {{-- Gradient overlay at top --}}
-        <div aria-hidden="true"
-            class="pointer-events-none absolute inset-x-0 top-0 h-150 bg-linear-to-b from-fuchsia-100/60 via-orange-100/40 to-transparent">
-        </div>
-        <div aria-hidden="true"
-            class="pointer-events-none absolute inset-x-0 top-0 h-100 bg-linear-to-br from-pink-100/40 via-transparent to-transparent">
-        </div>
-
         <x-tools-header />
 
-        {{-- Hero Section — F-pattern layout with fruit decorations --}}
-        <section aria-label="Hero" class="relative w-full overflow-hidden bg-[#FFFBF5] pt-16 pb-20 sm:pt-24 sm:pb-32">
-            {{-- Ambient gradient blobs --}}
-            <div aria-hidden="true" class="pointer-events-none absolute -left-32 top-0 h-[500px] w-[500px] rounded-full bg-[#FF6B4A]/5 blur-3xl"></div>
-            <div aria-hidden="true" class="pointer-events-none absolute -right-32 bottom-0 h-[400px] w-[400px] rounded-full bg-orange-200/20 blur-3xl"></div>
-
-            {{-- Edge fruit decorations (visible on all sizes) --}}
-            <img src="https://pub-plate-assets.acara.app/images/fruits/cherries.svg"
-                 alt="" aria-hidden="true"
-                 class="absolute -bottom-6 -left-6 w-28 sm:w-36 opacity-25 select-none pointer-events-none z-0 animate-float animation-delay-4000 rotate-12">
-            <img src="https://pub-plate-assets.acara.app/images/fruits/pear-green.svg"
-                 alt="" aria-hidden="true"
-                 class="absolute bottom-12 left-16 w-16 sm:w-20 opacity-30 select-none pointer-events-none z-0 animate-float animation-delay-2000 -rotate-6">
-
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-                <div class="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
-                    {{-- LEFT COLUMN — Text content (F-pattern reading zone) --}}
-                    <div class="text-center lg:text-left speakable-intro">
-                        {{-- Badge with pulse --}}
-                        <div class="mb-6 flex justify-center lg:justify-start">
-                            <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200/60">
-                                <span class="relative flex h-2 w-2" aria-hidden="true">
-                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                                    <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-                                </span>
-                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
-                                </svg>
-                                Open Source Beta
-                            </span>
-                        </div>
-
-                        {{-- Headline (F-pattern primary scan line) --}}
-                        <h1 class="font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl mb-6">
-                            Your Digital Meal Planner<br>
-                            <span class="text-transparent bg-clip-text bg-linear-to-r from-[#FF6B4A] to-[#FF8F6B]">for Diabetes</span>
-                        </h1>
-
-                        {{-- Subheadline (secondary scan path) --}}
-                        <p class="mt-4 text-lg leading-8 text-slate-600 max-w-xl mx-auto lg:mx-0">
-                            A personalized nutrition platform that creates meal plans around your glucose patterns. Built for people managing Type 2 diabetes.
-                        </p>
-
-                        {{-- CTA (natural eye-flow endpoint) --}}
-                        <div class="mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                            <a href="{{ route('register') }}"
-                               data-umami-event="signup_cta_click"
+        <section aria-labelledby="hero-heading" class="relative isolate overflow-hidden bg-[#FFFBF5] py-12 sm:py-16 lg:py-14">
+            <div aria-hidden="true" class="pointer-events-none absolute -right-32 top-20 -z-10 size-[500px] rounded-full bg-[#FFDCCB]/40 blur-3xl"></div>
+            <div class="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:gap-10 lg:px-8">
+                <div class="speakable-intro min-w-0 text-center lg:text-left">
+                    <p class="mb-6 inline-flex items-center gap-2 rounded-full border border-[#FF6B4A]/20 bg-white/80 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.12em] text-[#9A3E29] sm:text-[11px]">
+                        <span aria-hidden="true" class="size-1.5 rounded-full bg-[#FF6B4A]"></span>
+                        AI food &amp; health tracking
+                    </p>
+                    <h1 id="hero-heading" class="font-display text-[2.625rem] font-bold leading-[1.12] tracking-tight text-slate-900 sm:text-6xl lg:text-5xl xl:text-[4rem]">
+                        <span class="block">Snap your meals.</span>
+                        <span class="mt-1 block text-[#C94F35]">Track your everyday health.</span>
+                    </h1>
+                    <p class="mx-auto mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8 lg:mx-0">
+                        Estimate calories and macros from a photo. Keep meals, sleep, water, activity, and daily check-ins together in your personal health log.
+                    </p>
+                    <div class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap lg:justify-start">
+                        <div class="flex flex-col items-stretch gap-3">
+                            <a href="{{ route('snap-to-track') }}"
+                               data-umami-event="snap_to_track_cta_click"
                                data-umami-event-location="home_hero"
-                               class="w-full sm:w-auto rounded-full bg-[#FF6B4A] px-8 py-3.5 text-center text-base font-semibold text-white shadow-lg shadow-[#FF6B4A]/20 hover:bg-[#E85A3A] hover:shadow-[#FF6B4A]/30 hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF6B4A]">
-                                Start Your Free Plan
-                            </a>
-                            <a href="https://github.com/acara-app/plate"
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               data-umami-event="github_cta_click"
-                               data-umami-event-location="home_hero"
-                               aria-label="Star on GitHub (opens in a new tab)"
-                               class="group w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-base font-medium text-slate-600 shadow-sm ring-1 ring-slate-200 transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 hover:-translate-y-0.5">
-                                <svg class="h-5 w-5 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                               aria-describedby="hero-scan-note"
+                               class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#C94F35] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#FF6B4A]/15 transition hover:bg-[#AF402A] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C94F35] sm:text-base">
+                                <svg class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
+                                    <circle cx="12" cy="12" r="4" />
                                 </svg>
-                                Star on GitHub
+                                Try Snap to Track
                             </a>
+                            <p id="hero-scan-note" class="text-center text-xs leading-5 text-slate-500">Try one free scan. No signup required.</p>
                         </div>
-
-                        {{-- Trust strip — AI tools mention with internal links --}}
-                        <div class="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-sm text-slate-500">
-                            <span class="inline-flex items-center gap-1.5">
-                                <span class="h-1.5 w-1.5 rounded-full bg-[#FF6B4A]" aria-hidden="true"></span>
-                                <a href="{{ route('ai-nutritionist') }}" class="hover:text-slate-700 transition-colors">AI Nutritionist</a>
-                            </span>
-                            <span class="inline-flex items-center gap-1.5">
-                                <span class="h-1.5 w-1.5 rounded-full bg-indigo-400" aria-hidden="true"></span>
-                                <a href="{{ route('ai-health-coach') }}" class="hover:text-slate-700 transition-colors">Personal Health Coach</a>
-                            </span>
-                            <span class="inline-flex items-center gap-1.5">
-                                <span class="h-1.5 w-1.5 rounded-full bg-orange-400" aria-hidden="true"></span>
-                                <a href="{{ route('ai-personal-trainer') }}" class="hover:text-slate-700 transition-colors">AI Personal Trainer</a>
-                            </span>
-                        </div>
+                        <a href="{{ route('register') }}"
+                           data-umami-event="signup_cta_click"
+                           data-umami-event-location="home_hero"
+                           class="inline-flex min-h-12 items-center justify-center self-stretch rounded-full border border-[#D9CFC3] bg-white px-7 py-3.5 text-sm font-semibold text-slate-800 transition hover:border-[#C94F35] hover:bg-orange-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C94F35] sm:self-start sm:text-base">
+                            Create My Health Log
+                        </a>
                     </div>
-
-                    {{-- RIGHT COLUMN — Fruit decoration cluster --}}
-                    <div class="hidden lg:block relative h-[420px]" aria-hidden="true">
-                        {{-- Main hero fruit — Avocado --}}
-                        <img src="https://pub-plate-assets.acara.app/images/fruits/avocado.svg"
-                             alt=""
-                             class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 opacity-90 select-none pointer-events-none animate-float drop-shadow-lg">
-
-                        {{-- Strawberry — top right --}}
-                        <img src="https://pub-plate-assets.acara.app/images/fruits/strawberry.svg"
-                             alt=""
-                             class="absolute top-2 right-4 w-32 opacity-80 select-none pointer-events-none animate-float animation-delay-1000 -rotate-12 drop-shadow-md">
-
-                        {{-- Lemon — bottom left --}}
-                        <img src="https://pub-plate-assets.acara.app/images/fruits/lemon.svg"
-                             alt=""
-                             class="absolute bottom-4 left-8 w-28 opacity-75 select-none pointer-events-none animate-float animation-delay-2000 rotate-6 drop-shadow-md">
-
-                        {{-- Mango — top left --}}
-                        <img src="https://pub-plate-assets.acara.app/images/fruits/mango.svg"
-                             alt=""
-                             class="absolute top-8 left-4 w-24 opacity-70 select-none pointer-events-none animate-float animation-delay-4000 rotate-12 drop-shadow-sm">
-
-                        {{-- Orange — bottom right --}}
-                        <img src="https://pub-plate-assets.acara.app/images/fruits/orange.svg"
-                             alt=""
-                             class="absolute bottom-8 right-12 w-24 opacity-65 select-none pointer-events-none animate-float animation-delay-1000 -rotate-6 drop-shadow-sm">
-
-                        {{-- Beet (vegetable) — middle right --}}
-                        <img src="https://pub-plate-assets.acara.app/images/fruits/beet.svg"
-                             alt=""
-                             class="absolute top-1/3 right-0 w-20 opacity-60 select-none pointer-events-none animate-float animation-delay-2000 rotate-3 drop-shadow-sm">
+                    <div class="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-slate-500 sm:text-sm lg:justify-start">
+                        <span class="inline-flex items-center gap-1.5"><span aria-hidden="true" class="size-1.5 rounded-full bg-emerald-500"></span>Calories &amp; macros</span>
+                        <span class="inline-flex items-center gap-1.5"><span aria-hidden="true" class="size-1.5 rounded-full bg-violet-400"></span>Daily check-ins</span>
+                        <span class="inline-flex items-center gap-1.5"><span aria-hidden="true" class="size-1.5 rounded-full bg-blue-400"></span>Your personal logbook</span>
                     </div>
                 </div>
+
+                <figure class="mx-auto w-full min-w-0 max-w-[600px]" aria-labelledby="logbook-preview-caption">
+                    <div class="relative isolate aspect-[1/1.5] sm:aspect-[1/1.06]">
+                        <div aria-hidden="true" class="absolute inset-[12%] -z-10 rounded-full bg-[#F4DDC9]/40 blur-3xl"></div>
+
+                        <img src="{{ asset('health-log-hero-wellness.webp') }}"
+                             alt="Sample daily check-ins: 7.5 hours of sleep, 7,240 steps, and low stress."
+                             width="1200" height="400"
+                             loading="eager" decoding="async"
+                             class="absolute right-[2%] top-0 z-20 w-[90%] rotate-3 drop-shadow-[0_12px_20px_rgba(72,45,27,0.09)] sm:w-[76%]">
+
+                        <img src="{{ asset('health-log-hero-nutrition.webp') }}"
+                             alt="Logbook nutrition overview with a sample 1,436 calorie total and protein, carbs, fat, and fiber goals."
+                             width="1000" height="1310"
+                             loading="eager" fetchpriority="high" decoding="async"
+                             class="absolute left-0 top-[25%] z-10 w-[59%] -rotate-3 drop-shadow-[0_22px_28px_rgba(72,45,27,0.12)] sm:w-[55%]">
+
+                        <div class="absolute right-[1%] top-[30%] w-[34%] -rotate-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_12px_24px_-10px_rgba(72,45,27,0.16)] sm:rounded-3xl sm:p-5">
+                            <div class="flex items-center gap-1.5 text-[9px] text-slate-500 sm:gap-2 sm:text-xs">
+                                <svg class="size-4 shrink-0 text-blue-500 sm:size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 3h14l-2 18H7L5 3Zm1 7c2-2 4 2 6 0s4 2 6 0" />
+                                </svg>
+                                Today's water
+                            </div>
+                            <p class="mt-3 flex flex-wrap items-baseline gap-x-0.5 sm:mt-4">
+                                <span class="text-xl font-bold tracking-tight text-slate-900 tabular-nums sm:text-3xl">1,500</span>
+                                <span class="text-[9px] text-slate-400 tabular-nums sm:text-xs">/2,000 ml</span>
+                            </p>
+                            <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-blue-100 sm:mt-4 sm:h-2" aria-hidden="true">
+                                <div class="h-full w-3/4 rounded-full bg-blue-500"></div>
+                            </div>
+                        </div>
+
+                        <img src="{{ asset('health-log-hero-meal.webp') }}"
+                             alt="Sample meal photo saved to Logbook: chicken quinoa salad with 606 calories and a macro breakdown."
+                             width="1000" height="417"
+                             loading="eager" decoding="async"
+                             class="absolute right-[2%] top-[75%] z-20 w-[85%] rotate-3 drop-shadow-[0_16px_24px_rgba(72,45,27,0.12)] sm:-right-[2%] sm:top-[62%] sm:w-[50%]">
+                    </div>
+                    <figcaption id="logbook-preview-caption" class="mt-5 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">Sample day in Logbook</figcaption>
+                </figure>
             </div>
         </section>
 
@@ -245,7 +193,7 @@
             <section class="w-full max-w-6xl">
                 <x-cta-block
                     title="Meet Altani — Your Personal AI Health Coach"
-                    description="Altani helps you plan meals, predict glucose responses, and stay on track with your health goals. She's available 24/7 and learns what works best for your body."
+                    description="Bring your food and health questions to Altani. Get help reviewing your logged meals, planning what to eat, and building everyday routines around your goals."
                     buttonText="Ask your questions"
                     buttonUrl="{{ route('meet-altani') }}"
                 />
@@ -362,7 +310,7 @@
                             </div>
                             <h3 class="text-lg font-bold text-slate-900">AI Nutritionist</h3>
                             <p class="mt-2 text-sm text-slate-600">
-                                Stuck at a restaurant? Ask the AI what to order and get advice that keeps your glucose steady.
+                                Need meal ideas or help with a menu? Ask the AI for suggestions around your food preferences and nutrition goals.
                             </p>
                             <a href="{{ route('ai-nutritionist') }}"
                                class="mt-4 inline-flex items-center text-sm font-semibold text-rose-600 hover:text-rose-700"
@@ -405,7 +353,7 @@
                             </div>
                             <h3 class="text-lg font-bold text-slate-900">Snap to Track</h3>
                             <p class="mt-2 text-sm text-slate-600">
-                                Take a photo of your meal and get instant nutrition facts.
+                                Estimate calories and macros from a photo, review the result, and save your meal to Logbook.
                             </p>
                             <a href="{{ route('snap-to-track') }}"
                                class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700"
@@ -425,9 +373,8 @@
             <section class="w-full max-w-6xl">
                 <div class="space-y-4 lg:space-y-6">
                     <div class="text-center">
-                        <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl">Data-Driven Glucose Control</h2>
-                        <p class="mt-2 text-sm text-slate-600 lg:text-base">AI-powered precision for effortless
-                            diabetes diet management</p>
+                        <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl">Your Food and Daily Health, Together</h2>
+                        <p class="mt-2 text-sm text-slate-600 lg:text-base">A personal logbook for meals, nutrition goals, and everyday habits</p>
                     </div>
 
                     <div class="grid grid-cols-1 gap-3 lg:grid-cols-4 lg:gap-4">
@@ -442,9 +389,8 @@
                                             d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base">Build For You</h3>
-                                <p class="mt-2 text-xs text-slate-600 lg:text-sm">Meal plans tailored to your glucose
-                                    responses, not generic advice</p>
+                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base">Photo Food Logging</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm">Scan a meal, review the ingredients, and save it to your day</p>
                             </div>
                         </div>
 
@@ -459,10 +405,8 @@
                                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base">Simple
-                                    Choices</h3>
-                                <p class="mt-2 text-xs text-slate-600 lg:text-sm">Clear food suggestions help you
-                                    decide what to eat daily</p>
+                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base">Calories &amp; Macros</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm">See daily calorie totals and track protein, carbs, fat, and fiber against your goals</p>
                             </div>
                         </div>
 
@@ -478,9 +422,8 @@
                                     </svg>
                                 </div>
                                 <h3 class="text-sm font-semibold text-slate-900 lg:text-base">
-                                    Stay Ahead</h3>
-                                <p class="mt-2 text-xs text-slate-600 lg:text-sm">Pick foods that help keep your blood
-                                    sugar stable</p>
+                                    Daily Check-ins</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm">Log sleep, stress, and water, with activity from your connected health data</p>
                             </div>
                         </div>
 
@@ -495,10 +438,8 @@
                                             d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base">Know
-                                    More</h3>
-                                <p class="mt-2 text-xs text-slate-600 lg:text-sm">Learn how food affects you so you can
-                                    eat with confidence</p>
+                                <h3 class="text-sm font-semibold text-slate-900 lg:text-base">Your Daily History</h3>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm">Browse previous days and keep meals and health entries in one place</p>
                             </div>
                         </div>
 
@@ -589,8 +530,7 @@
                 <div class="space-y-4 lg:space-y-6">
                     <div class="text-center">
                         <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl">How It Works</h2>
-                        <p class="mt-2 text-sm text-slate-600 lg:text-base">Your AI-powered glucose navigator in three
-                            simple steps</p>
+                        <p class="mt-2 text-sm text-slate-600 lg:text-base">From your first meal photo to a daily tracking habit</p>
                     </div>
 
                     <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
@@ -600,10 +540,9 @@
                                 class="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-[#FF6B4A] text-sm font-bold text-white">
                                 1</div>
                             <div class="pt-2">
-                                <h3 class="text-base font-semibold text-slate-900 lg:text-lg">Set Up Your Profile</h3>
+                                <h3 class="text-base font-semibold text-slate-900 lg:text-lg">Scan</h3>
                                 <p class="mt-2 text-xs leading-relaxed text-slate-600 lg:text-sm">
-                                    Tell us about your glucose readings, goals, and foods you like. We keep your data
-                                    private and use it to build your plan.
+                                    Take or upload a meal photo in Snap to Track. Try one free scan without signing up.
                                 </p>
                             </div>
                         </div>
@@ -614,11 +553,9 @@
                                 class="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-[#FF6B4A] text-sm font-bold text-white">
                                 2</div>
                             <div class="pt-2">
-                                <h3 class="text-base font-semibold text-slate-900 lg:text-lg">AI Analyzes Patterns</h3>
+                                <h3 class="text-base font-semibold text-slate-900 lg:text-lg">Review and save</h3>
                                 <p class="mt-2 text-xs leading-relaxed text-slate-600 lg:text-sm">
-                                    Identifies how your body responds to different foods and creates a nutrition
-                                    strategy optimized for <strong class="text-slate-800">your</strong> glucose
-                                    stability.
+                                    Check the estimated ingredients, portions, and macros. Make corrections and save the meal with your account.
                                 </p>
                             </div>
                         </div>
@@ -629,10 +566,9 @@
                                 class="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-[#FF6B4A] text-sm font-bold text-white">
                                 3</div>
                             <div class="pt-2">
-                                <h3 class="text-base font-semibold text-slate-900 lg:text-lg">Eat, Track, Improve</h3>
+                                <h3 class="text-base font-semibold text-slate-900 lg:text-lg">Track your day</h3>
                                 <p class="mt-2 text-xs leading-relaxed text-slate-600 lg:text-sm">
-                                    Follow your personalized meal plan, log your glucose, and watch your plan adapt
-                                    based on your logged data. <strong class="text-[#FF6B4A]">See measurable results</strong>.
+                                    See your meals and nutrition totals in Logbook. Add water and daily check-ins, and revisit earlier days whenever you need.
                                 </p>
                             </div>
                         </div>
@@ -643,7 +579,7 @@
             <section class="w-full max-w-6xl">
                 <x-cta-block
                     title="Meet Altani — Your Health Helper"
-                    description="Altani is always here to help you eat right and stay healthy. She learns what your body needs, makes meal plans just for you, and spots blood sugar spikes before they happen."
+                    description="Turn your food and health questions into practical next steps. Ask Altani about meal ideas, your logged history, and everyday habits that fit your goals."
                     buttonText="Start Chatting"
                     buttonUrl="{{ route('meet-altani') }}"
                 />
@@ -704,163 +640,32 @@
                 </div>
             </section>
 
-            <section class="w-full max-w-6xl">
-                <div class="space-y-4 lg:space-y-6">
+            <section class="w-full max-w-6xl" aria-labelledby="faq-heading">
+                <div class="space-y-6">
                     <div class="text-center">
-                        <h2 class="text-2xl font-bold text-slate-900 lg:text-3xl">Common Questions</h2>
-                        <p class="mt-2 text-sm text-slate-600 lg:text-base">Learn more about Acara Plate</p>
+                        <h2 id="faq-heading" class="text-2xl font-bold text-slate-900 lg:text-3xl">Common Questions</h2>
+                        <p class="mt-2 text-sm text-slate-600 lg:text-base">From your first scan to your daily Logbook</p>
                     </div>
-
                     <div class="space-y-3">
-                        <details
-                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50">
-                            <summary
-                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
-                                <h3 class="inline">How accurate are the nutritional values in meal plans?</h3>
-                                <svg aria-hidden="true"
-                                    class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </summary>
-                            <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm">
-                                Acara Plate uses AI-generated meal plans with carefully selected ingredients from the
-                                USDA FoodData Central database. We strive for accuracy by leveraging established
-                                nutritional data sources. However, since meal plans are AI-generated, we recommend
-                                verifying key nutritional information and consulting with your healthcare provider for
-                                personalized dietary guidance.
-                            </p>
-                        </details>
-
-                        <details
-                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50">
-                            <summary
-                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
-                                <h3 class="inline">Can AI hallucinate incorrect food information?</h3>
-                                <svg aria-hidden="true"
-                                    class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </summary>
-                            <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm">
-                                Yes, AI can occasionally hallucinate or generate incorrect information about food,
-                                ingredients, or nutritional values. This is a known limitation of language models. We
-                                recommend always verifying key ingredients for allergens and consulting your healthcare
-                                provider before making significant dietary changes based on meal plan suggestions.
-                            </p>
-                        </details>
-
-                        <details
-                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50">
-                            <summary
-                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
-                                <h3 class="inline">Is this a medical app or diagnostic tool?</h3>
-                                <svg aria-hidden="true"
-                                    class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </summary>
-                            <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm">
-                                No. Acara Plate is an informational and educational tool, not a medical device. It does
-                                not diagnose, treat, or manage any medical condition. The glucose tracking feature helps
-                                you monitor trends, but all meal plans and health decisions should be discussed with
-                                your healthcare provider. This platform is intended for adults as a supplementary
-                                nutrition planning tool.
-                            </p>
-                        </details>
-
-                        <details
-                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50">
-                            <summary
-                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
-                                <h3 class="inline">Why is Acara Plate open source?</h3>
-                                <svg aria-hidden="true"
-                                    class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </summary>
-                            <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm">
-                                Transparency is crucial for health-related tools. Being open source allows healthcare
-                                professionals, developers, and users to inspect how meal plans are generated, how
-                                nutritional data is verified, and how AI is used. You can review the code on <a
-                                    href="https://github.com/acara-app/plate" target="_blank"
-                                    class="font-semibold text-[#FF6B4A] hover:underline">GitHub</a>,
-                                contribute improvements, and verify that the platform operates as described.
-                            </p>
-                        </details>
-
-                        <details
-                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50">
-                            <summary
-                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
-                                <h3 class="inline">How do you ensure nutritional accuracy?</h3>
-                                <svg aria-hidden="true"
-                                    class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </summary>
-                            <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm">
-                                We reference the <a href="https://fdc.nal.usda.gov/" target="_blank"
-                                    class="font-semibold text-[#FF6B4A] hover:underline">USDA
-                                    FoodData Central</a> database—the scientific gold standard for nutrition of whole
-                                foods like bananas, chicken breast, and rice. However, as meal plans are AI-generated,
-                                we recommend verifying nutritional information independently and consulting with your
-                                healthcare provider for personalized guidance.
-                            </p>
-                        </details>
-
-                        <details
-                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50">
-                            <summary
-                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
-                                <h3 class="inline">Who should use Acara Plate?</h3>
-                                <svg aria-hidden="true"
-                                    class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </summary>
-                            <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm">
-                                Acara Plate is designed for adults seeking personalized meal planning guidance,
-                                particularly those managing Type 2 diabetes or prediabetes. It's useful for anyone
-                                wanting structured nutrition plans based on their goals, dietary preferences, and health
-                                conditions. However, it should complement—not replace—professional medical advice and
-                                supervision from your healthcare team.
-                            </p>
-                        </details>
-
-                        <details
-                            class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-orange-400 hover:bg-slate-50">
-                            <summary
-                                class="flex cursor-pointer items-start justify-between gap-3 text-sm font-semibold text-slate-900 lg:text-base">
-                                <h3 class="inline">Is there a mobile app?</h3>
-                                <svg aria-hidden="true"
-                                    class="mt-1 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </summary>
-                            <p class="mt-3 text-xs leading-relaxed text-slate-600 lg:text-sm">
-                                Yes! Acara Plate is a Progressive Web App (PWA), which means you can install it directly
-                                on your device without visiting an app store. Visit our <a
-                                    href="{{ route('install-app') }}"
-                                    class="font-semibold text-[#FF6B4A] hover:underline">installation
-                                    guide</a> to learn how to add it to your home screen for a native app-like
-                                experience.
-                            </p>
-                        </details>
+                        @foreach ($frequentlyAskedQuestions as $faq)
+                            <details class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-orange-300">
+                                <summary class="flex min-h-11 cursor-pointer items-center justify-between gap-3 text-sm font-semibold text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C94F35] lg:text-base">
+                                    {{ $faq['question'] }}
+                                    <svg aria-hidden="true" class="size-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </summary>
+                                <p class="mt-3 text-sm leading-relaxed text-slate-600">{{ $faq['answer'] }}</p>
+                            </details>
+                        @endforeach
                     </div>
+                    <p class="text-center text-sm leading-6 text-slate-500">
+                        <a href="{{ route('ai-accuracy') }}" class="font-medium text-[#C94F35] underline underline-offset-4 hover:text-[#AF402A]">AI accuracy &amp; limitations</a>
+                        <span aria-hidden="true" class="mx-2">&middot;</span>
+                        <a href="{{ route('install-app') }}" class="font-medium text-[#C94F35] underline underline-offset-4 hover:text-[#AF402A]">Install Plate</a>
+                        <span aria-hidden="true" class="mx-2">&middot;</span>
+                        <a href="{{ route('health-sync') }}" class="font-medium text-[#C94F35] underline underline-offset-4 hover:text-[#AF402A]">Apple Health sync</a>
+                    </p>
                 </div>
             </section>
 
@@ -881,7 +686,7 @@
                             <p class="mt-1 text-xs leading-relaxed text-amber-700 lg:text-sm">
                                 Acara Plate is an AI-powered tool designed for informational and educational purposes
                                 only.
-                                The meal plans, nutritional insights, and glucose tracking features are
+                                The meal plans, nutritional estimates, and health tracking features are
                                 <strong>not</strong> a substitute for professional medical advice, diagnosis, or
                                 treatment. Always seek the advice of your physician or other qualified health provider
                                 with any questions you may have regarding a medical condition.
@@ -894,55 +699,4 @@
     </div>
     <x-footer />
 
-    <style>
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        @keyframes scan {
-
-            0%,
-            100% {
-                top: 0%;
-                opacity: 0;
-            }
-
-            10% {
-                opacity: 1;
-            }
-
-            90% {
-                opacity: 1;
-            }
-
-            100% {
-                top: 100%;
-                opacity: 0;
-            }
-        }
-
-        .animate-float {
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .animation-delay-1000 {
-            animation-delay: 1s;
-        }
-
-        .animation-delay-2000 {
-            animation-delay: 2s;
-        }
-
-        .animation-delay-4000 {
-            animation-delay: 4s;
-        }
-    </style>
 </x-default-layout>
