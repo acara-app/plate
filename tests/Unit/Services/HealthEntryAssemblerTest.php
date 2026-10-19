@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Enums\GlucoseUnit;
 use App\Enums\HealthSyncType;
+use App\Enums\MealPhotoRoute;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Services\HealthEntryAssembler;
@@ -210,3 +212,15 @@ it('keeps a chosen meal type and gives readings none', function (): void {
 
     expect($entries->pluck('meal_type', 'id')->all())->toBe([$meal->id => 'snack', $reading->id => null]);
 });
+
+it('reports glucose in the unit the reader asked for', function (GlucoseUnit $unit, float $expected): void {
+    $user = User::factory()->create();
+    $sample = HealthSyncSample::factory()->bloodGlucose()->for($user)->create(['value' => 120]);
+
+    $result = (new HealthEntryAssembler)->assemble(collect([$sample]), 'UTC', MealPhotoRoute::Api, $unit);
+
+    expect($result->first()['glucose_value'])->toBe($expected);
+})->with([
+    'mg/dL stays as stored' => [GlucoseUnit::MgDl, 120.0],
+    'mmol/L is converted' => [GlucoseUnit::MmolL, 6.7],
+]);

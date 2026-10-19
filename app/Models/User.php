@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Data\UserSettingsData;
 use App\Enums\ChatPlatform;
+use App\Enums\GlucoseUnit;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -217,6 +218,12 @@ final class User extends Authenticatable implements MustVerifyEmail
 
         return is_string($tz) && $tz !== '' ? $tz : 'UTC';
         // @codeCoverageIgnoreEnd
+    }
+
+    public function glucoseUnit(): GlucoseUnit
+    {
+        // @phpstan-ignore nullsafe.neverNull
+        return $this->profile?->units_preference ?? GlucoseUnit::MmolL;
     }
 
     public function hasActiveSubscription(): bool

@@ -173,3 +173,18 @@ it('saves a synced meal that has calories but no carbohydrates', function (): vo
     expect($sample->refresh()->value)->toBe(260.0)
         ->and($sample->metadata['meal_type'])->toBe('snack');
 });
+
+it('does not turn samples that are not logbook entries into one', function (): void {
+    $user = User::factory()->create();
+    $water = HealthSyncSample::factory()->create(['user_id' => $user->id, 'type_identifier' => 'water', 'value' => 250, 'unit' => 'mL']);
+
+    $this->actingAs($user)->put(route('health-entries.update', $water), [
+        'log_type' => 'vitals',
+        'weight' => 70,
+        'measured_at' => now()->toIso8601String(),
+    ])->assertNotFound();
+
+    expect($water->refresh()->type_identifier)->toBe('water')
+        ->and($water->value)->toBe(250.0)
+        ->and(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(1);
+});

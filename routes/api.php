@@ -100,6 +100,10 @@ Route::prefix('v2/account')
         Route::post('consent', ApiV2\Account\AcceptConsentController::class)
             ->middleware('throttle:30,1')
             ->name('api.v2.account.consent');
+
+        Route::put('timezone', ApiV2\Account\UpdateTimezoneController::class)
+            ->middleware('throttle:10,1,api-timezone')
+            ->name('api.v2.account.timezone');
     });
 
 Route::prefix('v2/snap-to-track')
@@ -112,4 +116,46 @@ Route::prefix('v2/snap-to-track')
         Route::post('drafts/{draft}/meal', ApiV2\SnapToTrack\StoreSnapToTrackMealController::class)
             ->middleware('throttle:60,1')
             ->name('api.v2.snap-to-track.meal');
+
+        Route::post('estimate-item', ApiV2\SnapToTrack\EstimateSnapToTrackItemController::class)
+            ->middleware('throttle:20,1,api-snap-estimate')
+            ->name('api.v2.snap-to-track.estimate-item');
+    });
+
+Route::prefix('v2/health-entries')
+    ->middleware(['auth:sanctum', 'throttle:120,1,api-logbook'])
+    ->group(function (): void {
+        Route::get('/', ApiV2\HealthEntry\ListHealthEntryController::class)
+            ->name('api.v2.health-entries.index');
+
+        Route::get('logged-dates', ApiV2\HealthEntry\ListLoggedDatesController::class)
+            ->name('api.v2.health-entries.logged-dates');
+
+        Route::get('suggestions', ApiV2\HealthEntry\ListHealthEntrySuggestionsController::class)
+            ->name('api.v2.health-entries.suggestions');
+
+        Route::post('/', ApiV2\HealthEntry\StoreHealthEntryController::class)
+            ->name('api.v2.health-entries.store');
+
+        Route::post('water', ApiV2\HealthEntry\StoreWaterIntakeController::class)
+            ->name('api.v2.health-entries.water.store');
+
+        Route::post('check-in', ApiV2\HealthEntry\StoreDailyCheckInController::class)
+            ->name('api.v2.health-entries.check-in.store');
+
+        Route::get('{group}/photo', ApiV2\HealthEntry\ShowMealPhotoController::class)
+            ->whereUuid('group')
+            ->name('api.v2.health-entries.photo');
+
+        Route::get('{healthSyncSample}', ApiV2\HealthEntry\ShowHealthEntryController::class)
+            ->whereNumber('healthSyncSample')
+            ->name('api.v2.health-entries.show');
+
+        Route::put('{healthSyncSample}', ApiV2\HealthEntry\UpdateHealthEntryController::class)
+            ->whereNumber('healthSyncSample')
+            ->name('api.v2.health-entries.update');
+
+        Route::delete('{healthSyncSample}', ApiV2\HealthEntry\DestroyHealthEntryController::class)
+            ->whereNumber('healthSyncSample')
+            ->name('api.v2.health-entries.destroy');
     });

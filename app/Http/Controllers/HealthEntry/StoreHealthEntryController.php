@@ -6,11 +6,7 @@ namespace App\Http\Controllers\HealthEntry;
 
 use App\Actions\DispatchAggregateUserUtcDatesAction;
 use App\Actions\RecordHealthSampleAction;
-use App\Data\HealthLogData;
-use App\Data\ReviewedMealData;
-use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntrySource;
-use App\Enums\HealthEntryType;
 use App\Http\Requests\HealthEntryRequest;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -26,20 +22,7 @@ final readonly class StoreHealthEntryController
 
     public function __invoke(HealthEntryRequest $request): RedirectResponse
     {
-        $data = $request->validated();
-
-        // @phpstan-ignore nullsafe.neverNull
-        $glucoseUnit = $this->currentUser->profile?->units_preference ?? GlucoseUnit::MmolL;
-        if ($glucoseUnit === GlucoseUnit::MmolL && isset($data['glucose_value'])) {
-            $glucoseValue = is_numeric($data['glucose_value']) ? (float) $data['glucose_value'] : 0;
-            $data['glucose_value'] = GlucoseUnit::mmolLToMgDl($glucoseValue);
-        }
-
-        $healthData = $data['log_type'] === HealthEntryType::Food->value && isset($data['items'])
-            ? ReviewedMealData::fromValidated($data)->toHealthLogDataWithMetadata([])
-            : HealthLogData::fromParsedArray(array_merge($data, ['is_health_data' => true]));
-
-        $sample = $this->recordHealthSample->handle($healthData, $this->currentUser, HealthEntrySource::Web);
+        $sample = $this->recordHealthSample->handle($request->healthLogData(), $this->currentUser, HealthEntrySource::Web);
 
         $this->dispatchAggregateUserUtcDates->handle(
             $this->currentUser,

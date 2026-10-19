@@ -16,7 +16,9 @@ use App\Contracts\Memory\PullsConversationHistory;
 use App\Contracts\Services\IndexNowServiceContract;
 use App\Contracts\Services\StripeServiceContract;
 use App\Contracts\Skills\LoadsSkills;
+use App\Enums\HealthSyncType;
 use App\Listeners\TrackAiUsage;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Services\Ai\AgentModelContext;
 use App\Services\Ai\ConfiguredAgentModels;
@@ -41,6 +43,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -81,6 +84,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->bootCashierDefaults();
         $this->bootUrlDefaults();
         $this->bootRateLimiters();
+        $this->bootRouteBindings();
         $this->configureDates();
         $this->registerEventListeners();
     }
@@ -94,6 +98,13 @@ final class AppServiceProvider extends ServiceProvider
             return Limit::perHour($burstCap->handle($user))
                 ->by(ResolveSnapBurstCap::keyFor($user, $request->ip()));
         });
+    }
+
+    private function bootRouteBindings(): void
+    {
+        Route::bind('healthSyncSample', fn (string $value): HealthSyncSample => HealthSyncSample::query()
+            ->whereIn('type_identifier', HealthSyncType::entryTypeValues())
+            ->findOrFail($value));
     }
 
     private function bootModelsDefaults(): void
