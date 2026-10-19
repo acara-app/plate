@@ -9,11 +9,14 @@ import {
     useState,
 } from 'react';
 
+const clampWeek = (week: string, currentWeek: string) =>
+    week > currentWeek ? currentWeek : week;
+
 export default function useWeekScroll(date: string, today: string) {
     const currentWeek = startOfWeekKey(today);
     const selectedWeek = startOfWeekKey(date);
     const [visibleWeek, setVisibleWeek] = useState(
-        selectedWeek > currentWeek ? currentWeek : selectedWeek,
+        clampWeek(selectedWeek, currentWeek),
     );
     const stripRef = useRef<HTMLDivElement>(null);
     const settleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -33,7 +36,7 @@ export default function useWeekScroll(date: string, today: string) {
     }
 
     useLayoutEffect(() => {
-        setVisibleWeek(selectedWeek > currentWeek ? currentWeek : selectedWeek);
+        setVisibleWeek(clampWeek(selectedWeek, currentWeek));
     }, [date, selectedWeek, currentWeek]);
 
     useLayoutEffect(() => {
@@ -43,7 +46,6 @@ export default function useWeekScroll(date: string, today: string) {
             return;
         }
 
-        clearTimeout(settleTimer.current);
         strip.scrollTo({ left: strip.clientWidth, behavior: 'instant' });
 
         if (strip.contains(document.activeElement)) {
@@ -85,8 +87,9 @@ export default function useWeekScroll(date: string, today: string) {
         const offset = Math.round(strip.scrollLeft / strip.clientWidth) - 1;
 
         if (offset !== 0) {
-            const nextWeek = addDaysToKey(visibleWeek, offset * 7);
-            setVisibleWeek(nextWeek > currentWeek ? currentWeek : nextWeek);
+            setVisibleWeek(
+                clampWeek(addDaysToKey(visibleWeek, offset * 7), currentWeek),
+            );
         }
     }
 
@@ -182,12 +185,12 @@ export default function useWeekScroll(date: string, today: string) {
     }
 
     return {
+        currentWeek,
+        selectedWeek,
         visibleWeek,
         weeks,
-        showWeek: (day: string) => {
-            const week = startOfWeekKey(day);
-            setVisibleWeek(week > currentWeek ? currentWeek : week);
-        },
+        showWeek: (day: string) =>
+            setVisibleWeek(clampWeek(startOfWeekKey(day), currentWeek)),
         stripProps: {
             ref: stripRef,
             onKeyDown,

@@ -19,6 +19,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Pest\Browser\Api\AwaitableWebpage;
 
 function createLogbookMeal(User $user, bool $large = false): HealthSyncSample
 {
@@ -52,6 +53,11 @@ function storeLogbookPhoto(User $user, HealthSyncSample $sample): void
 {
     $photo = MealPhoto::factory()->create(['user_id' => $user->id, 'health_group_id' => $sample->group_id]);
     Storage::disk(MealPhoto::DISK)->put($photo->path, (string) UploadedFile::fake()->image('meal.jpg', 960, 640)->get());
+}
+
+function scrollToPreviousWeek(AwaitableWebpage $page): void
+{
+    $page->script('const strip = document.querySelector("#health-entry-weeks"); strip.scrollBy({ left: -strip.clientWidth, behavior: "instant" });');
 }
 
 it('shows a day’s meal as a card and opens its nutrition page with the photo on mobile', function (): void {
@@ -88,11 +94,9 @@ it('browses whole weeks without changing entries until a day is selected', funct
         'value' => 75,
         'measured_at' => '2026-10-09T12:00:00Z',
     ]);
-    HealthSyncSample::factory()->create([
+    HealthSyncSample::factory()->exercise()->create([
         'user_id' => $user->id,
-        'type_identifier' => 'exerciseMinutes',
         'value' => 30,
-        'group_id' => null,
         'measured_at' => '2026-10-17T03:57:00Z',
     ]);
     $this->actingAs($user);
@@ -116,7 +120,7 @@ it('browses whole weeks without changing entries until a day is selected', funct
         ->assertAttribute('a[aria-label^="Friday, October 16"]', 'aria-current', 'date')
         ->assertScript('(() => { const strip = document.querySelector("#health-entry-weeks"); return Math.abs(strip.scrollLeft - strip.clientWidth) < 2; })()');
 
-    $page->script('const strip = document.querySelector("#health-entry-weeks"); strip.scrollBy({ left: -strip.clientWidth, behavior: "instant" });');
+    scrollToPreviousWeek($page);
 
     $page->assertAttribute('#health-entry-weeks', 'data-week-start', '2026-10-05')
         ->assertQueryStringHas('date', '2026-10-16')
@@ -130,7 +134,7 @@ it('browses whole weeks without changing entries until a day is selected', funct
         ->assertQueryStringHas('date', '2026-10-16')
         ->assertSee('Grilled chicken breast, Steamed rice');
 
-    $page->script('const strip = document.querySelector("#health-entry-weeks"); strip.scrollBy({ left: -strip.clientWidth, behavior: "instant" });');
+    scrollToPreviousWeek($page);
 
     $page->assertAttribute('#health-entry-weeks', 'data-week-start', '2026-10-05')
         ->click('a[aria-label^="Friday, October 9"]')
@@ -164,11 +168,9 @@ it('drags across the year boundary without selecting a day and returns to today'
         'value' => 80,
         'measured_at' => '2025-12-31T12:00:00Z',
     ]);
-    HealthSyncSample::factory()->create([
+    HealthSyncSample::factory()->exercise()->create([
         'user_id' => $user->id,
-        'type_identifier' => 'exerciseMinutes',
         'value' => 30,
-        'group_id' => null,
         'measured_at' => '2026-01-07T03:57:00Z',
     ]);
     $this->actingAs($user);

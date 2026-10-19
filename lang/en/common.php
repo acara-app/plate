@@ -354,10 +354,7 @@ return [
         'meal_photo_alt' => 'Meal photo',
         'logbook' => [
             'week_label' => 'Choose a day',
-            'pick_date' => 'Pick a date',
             'today' => 'Today',
-            'previous_week' => 'Previous week',
-            'next_week' => 'Next week',
             'has_entries' => 'has entries',
             'today_entries' => 'Today’s entries',
             'add' => 'Add',

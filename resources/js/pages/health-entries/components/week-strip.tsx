@@ -1,18 +1,20 @@
 import ListHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/ListHealthEntryController';
+import ListLoggedDatesController from '@/actions/App/Http/Controllers/HealthEntry/ListLoggedDatesController';
 import { Button } from '@/components/ui/button';
-import {
-    addDaysToKey,
-    parseDateKey,
-    startOfWeekKey,
-} from '@/lib/format-local-datetime';
+import { addDaysToKey, parseDateKey } from '@/lib/format-local-datetime';
 import { cn } from '@/lib/utils';
 import { type Page } from '@inertiajs/core';
-import { Link, router } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import { Link } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import useWeekScroll from './use-week-scroll';
 
 const DAY_PROPS = ['date', 'today', 'newEntryAt', 'entries', 'loggedDates'];
+const LONG_DATE: Intl.DateTimeFormatOptions = {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+};
 const dayUrl = (day: string) =>
     ListHealthEntryController({ query: { date: day } });
 
@@ -29,73 +31,44 @@ export default function WeekStrip({
 }) {
     const { t, i18n } = useTranslation('common');
     const locale = i18n.resolvedLanguage;
-    const { visibleWeek, weeks, showWeek, stripProps } = useWeekScroll(
-        date,
-        today,
-    );
-    const [weekLogs, setWeekLogs] = useState<Record<string, string[]>>({
-        [startOfWeekKey(date)]: loggedDates,
-    });
-    const markerRequest = useRef<(() => void) | null>(null);
-    const backgroundDates = useRef<string[] | null>(null);
+    const {
+        currentWeek,
+        selectedWeek,
+        visibleWeek,
+        weeks,
+        showWeek,
+        stripProps,
+    } = useWeekScroll(date, today);
+    const [weekLogs, setWeekLogs] = useState<Record<string, string[]>>({});
+    const logsFor = (week: string) =>
+        week === selectedWeek ? loggedDates : weekLogs[week];
+    const visibleLogs = logsFor(visibleWeek);
 
     useEffect(() => {
-        if (loggedDates !== backgroundDates.current) {
-            setWeekLogs((cache) => ({
-                ...cache,
-                [startOfWeekKey(date)]: loggedDates,
-            }));
-        }
-    }, [date, loggedDates]);
-
-    useEffect(
-        () =>
-            router.on('before', (event) => {
-                if (
-                    event.detail.visit.only.length !== 1 ||
-                    event.detail.visit.only[0] !== 'loggedDates'
-                ) {
-                    markerRequest.current?.();
-                }
-            }),
-        [],
-    );
+        setWeekLogs((cache) => ({ ...cache, [selectedWeek]: loggedDates }));
+    }, [selectedWeek, loggedDates]);
 
     useEffect(() => {
-        if (weekLogs[visibleWeek]) {
+        if (visibleLogs) {
             return;
         }
 
-        let active = true;
-        router.visit(dayUrl(visibleWeek), {
-            only: ['loggedDates'],
-            async: true,
-            showProgress: false,
-            preserveUrl: true,
-            preserveState: true,
-            preserveScroll: true,
-            onCancelToken: ({ cancel }) => {
-                markerRequest.current = cancel;
-            },
-            onBeforeUpdate: (page) => {
-                backgroundDates.current = page.props.loggedDates as string[];
-            },
-            onSuccess: (page) => {
-                if (active) {
-                    setWeekLogs((cache) => ({
-                        ...cache,
-                        [visibleWeek]: page.props.loggedDates as string[],
-                    }));
-                }
-            },
-        });
+        const request = new AbortController();
 
-        return () => {
-            active = false;
-            markerRequest.current?.();
-            markerRequest.current = null;
-        };
-    }, [visibleWeek, weekLogs]);
+        fetch(ListLoggedDatesController.url({ query: { date: visibleWeek } }), {
+            headers: { Accept: 'application/json' },
+            signal: request.signal,
+        })
+            .then((response) =>
+                response.ok ? response.json() : Promise.reject(response),
+            )
+            .then((dates: string[]) =>
+                setWeekLogs((cache) => ({ ...cache, [visibleWeek]: dates })),
+            )
+            .catch(() => undefined);
+
+        return () => request.abort();
+    }, [visibleWeek, visibleLogs]);
 
     const visit = {
         only: DAY_PROPS,
@@ -103,14 +76,7 @@ export default function WeekStrip({
         preserveState: true,
         onStart: () => onLoadingChange(true),
         onFinish: () => onLoadingChange(false),
-        onSuccess: (page: Page) => {
-            showWeek(page.props.date as string);
-            setWeekLogs((cache) => ({
-                ...cache,
-                [startOfWeekKey(page.props.date as string)]: page.props
-                    .loggedDates as string[],
-            }));
-        },
+        onSuccess: (page: Page) => showWeek(page.props.date as string),
     };
 
     return (
@@ -119,15 +85,14 @@ export default function WeekStrip({
             className="flex min-w-0 flex-col gap-1"
         >
             <p className="sr-only" aria-live="polite" aria-atomic="true">
-                {parseDateKey(visibleWeek).toLocaleDateString(locale, {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
-                })}
+                {parseDateKey(visibleWeek).toLocaleDateString(
+                    locale,
+                    LONG_DATE,
+                )}
                 {' – '}
                 {parseDateKey(addDaysToKey(visibleWeek, 6)).toLocaleDateString(
                     locale,
-                    { month: 'long', day: 'numeric', year: 'numeric' },
+                    LONG_DATE,
                 )}
             </p>
             <div
@@ -137,7 +102,7 @@ export default function WeekStrip({
                 aria-label={t('health_entries.logbook.week_label')}
                 data-week-start={visibleWeek}
                 tabIndex={0}
-                className="flex cursor-grab snap-x snap-mandatory [scrollbar-width:none] overflow-x-auto overscroll-x-contain rounded-2xl py-2 outline-none select-none focus-visible:ring-[3px] focus-visible:ring-ring/50 active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
+                className="no-scrollbar flex cursor-grab snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-2xl py-2 outline-none select-none focus-visible:ring-[3px] focus-visible:ring-ring/50 active:cursor-grabbing"
             >
                 {weeks.map((week) => (
                     <ol
@@ -153,7 +118,7 @@ export default function WeekStrip({
                             const isToday = day === today;
                             const isFuture = day > today;
                             const isLogged =
-                                weekLogs[week]?.includes(day) ?? false;
+                                logsFor(week)?.includes(day) ?? false;
                             const content = (
                                 <>
                                     <span
@@ -194,9 +159,7 @@ export default function WeekStrip({
                             const label = [
                                 value.toLocaleDateString(locale, {
                                     weekday: 'long',
-                                    month: 'long',
-                                    day: 'numeric',
-                                    year: 'numeric',
+                                    ...LONG_DATE,
                                 }),
                                 isLogged
                                     ? t('health_entries.logbook.has_entries')
@@ -239,7 +202,7 @@ export default function WeekStrip({
                     </ol>
                 ))}
             </div>
-            {(date !== today || visibleWeek !== startOfWeekKey(today)) && (
+            {(date !== today || visibleWeek !== currentWeek) && (
                 <div className="flex justify-end">
                     <Button
                         asChild

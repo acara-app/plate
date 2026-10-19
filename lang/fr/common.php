@@ -355,10 +355,7 @@ return [
         'meal_photo_alt' => 'Photo du repas',
         'logbook' => [
             'week_label' => 'Choisir un jour',
-            'pick_date' => 'Choisir une date',
             'today' => 'Aujourd’hui',
-            'previous_week' => 'Semaine précédente',
-            'next_week' => 'Semaine suivante',
             'has_entries' => 'avec des entrées',
             'today_entries' => 'Entrées du jour',
             'add' => 'Ajouter',

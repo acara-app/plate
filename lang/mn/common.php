@@ -354,10 +354,7 @@ return [
         'meal_photo_alt' => 'Хоолны зураг',
         'logbook' => [
             'week_label' => 'Өдөр сонгох',
-            'pick_date' => 'Огноо сонгох',
             'today' => 'Өнөөдөр',
-            'previous_week' => 'Өмнөх долоо хоног',
-            'next_week' => 'Дараагийн долоо хоног',
             'has_entries' => 'тэмдэглэлтэй',
             'today_entries' => 'Өнөөдөр оруулсан зүйлс',
             'add' => 'Нэмэх',
