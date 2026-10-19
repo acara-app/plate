@@ -76,11 +76,6 @@ export const WATER_TONE = {
     cup: 'bg-blue-500 text-white ring-blue-500 dark:bg-blue-500',
 };
 
-export const FASTING_TONE = {
-    icon: 'text-green-500/70 dark:text-green-400/70',
-    track: 'bg-green-100 dark:bg-green-500/15',
-};
-
 export const CHECK_IN_STEPS: Record<CheckInStep, CheckInStepConfig> = {
     hours: {
         Icon: Moon,

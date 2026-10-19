@@ -613,7 +613,7 @@ it('keeps the Logbook working when moving from an unfinished check-in to a day w
         ->assertNoJavaScriptErrors();
 });
 
-it('fills and empties water cups from the water card and shows fasting as coming soon', function (): void {
+it('fills and empties water cups from the water card and shows what is coming soon next to it', function (): void {
     $this->travelTo(CarbonImmutable::parse('2026-10-19 12:00:00', 'UTC'));
     $user = User::factory()->create(['timezone' => 'UTC']);
     $this->actingAs($user);

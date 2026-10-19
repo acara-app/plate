@@ -1,12 +1,12 @@
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import type { DailyWellness } from '@/types/diabetes';
-import { GlassWater, Timer } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { GlassWater, Sparkles } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatAmount } from './macros';
 import WaterSheet from './water-sheet';
-import { FASTING_TONE, WATER_TONE } from './wellness';
+import { WATER_TONE } from './wellness';
 
 const CARD =
     'flex min-w-0 flex-col gap-4 rounded-3xl bg-card p-4 text-left shadow-xs ring-1 ring-border/60';
@@ -28,10 +28,16 @@ export default function DailyTrackers({
 
     return (
         <div className="grid grid-cols-2 gap-3">
-            <Tracker
-                id="water-heading"
-                heading={t('health_entries.trackers.water_heading')}
+            <section
+                aria-labelledby="water-heading"
+                className="flex min-w-0 flex-col gap-3"
             >
+                <h2
+                    id="water-heading"
+                    className="text-xl font-semibold tracking-tight"
+                >
+                    {t('health_entries.trackers.water_heading')}
+                </h2>
                 <button
                     type="button"
                     onClick={() =>
@@ -88,35 +94,25 @@ export default function DailyTrackers({
                         />
                     </span>
                 </button>
-            </Tracker>
-            <Tracker
-                id="fasting-heading"
-                heading={t('health_entries.trackers.fasting_heading')}
-            >
+            </section>
+            <div className="flex min-w-0 flex-col gap-3">
+                <div aria-hidden="true" className="h-7" />
                 <div aria-disabled="true" className={CARD}>
-                    <span className="flex min-w-0 items-center gap-2">
-                        <Timer
-                            className={cn('size-6 shrink-0', FASTING_TONE.icon)}
-                            aria-hidden="true"
-                        />
-                        <span className="truncate text-sm text-muted-foreground">
-                            {t('health_entries.trackers.fasting_heading')}
-                        </span>
-                    </span>
+                    <Sparkles
+                        className="size-6 shrink-0 text-muted-foreground"
+                        aria-hidden="true"
+                    />
                     <span className="flex flex-col gap-3">
                         <span className="flex min-h-9 items-end text-lg font-semibold text-muted-foreground">
                             {t('health_entries.trackers.coming_soon')}
                         </span>
                         <span
                             aria-hidden="true"
-                            className={cn(
-                                'h-2 w-full rounded-full',
-                                FASTING_TONE.track,
-                            )}
+                            className="h-2 w-full rounded-full bg-muted"
                         />
                     </span>
                 </div>
-            </Tracker>
+            </div>
             <WaterSheet
                 key={`${date}:${sheet.key}`}
                 open={sheet.open}
@@ -127,24 +123,5 @@ export default function DailyTrackers({
                 wellness={wellness}
             />
         </div>
-    );
-}
-
-function Tracker({
-    id,
-    heading,
-    children,
-}: {
-    id: string;
-    heading: string;
-    children: ReactNode;
-}) {
-    return (
-        <section aria-labelledby={id} className="flex min-w-0 flex-col gap-3">
-            <h2 id={id} className="text-xl font-semibold tracking-tight">
-                {heading}
-            </h2>
-            {children}
-        </section>
     );
 }

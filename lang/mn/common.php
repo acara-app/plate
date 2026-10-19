@@ -403,7 +403,6 @@ return [
             'water_hint' => 'Аяга дарж дүүргэх эсвэл хоослоно. Аяга бүр = {{value}}мл',
             'cup_label' => '{{value}} мл',
             'ml_unit' => 'мл',
-            'fasting_heading' => 'Мацаг',
             'coming_soon' => 'Тун удахгүй',
         ],
         'detail' => [

@@ -404,7 +404,6 @@ return [
             'water_hint' => 'Touchez un verre pour le remplir ou le vider. Un verre = {{value}} ml',
             'cup_label' => '{{value}} ml',
             'ml_unit' => 'ml',
-            'fasting_heading' => 'Jeûne',
             'coming_soon' => 'Bientôt disponible',
         ],
         'detail' => [

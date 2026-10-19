@@ -403,7 +403,6 @@ return [
             'water_hint' => 'Tap a cup to fill or empty it. Each cup = {{value}} ml',
             'cup_label' => '{{value}} ml',
             'ml_unit' => 'ml',
-            'fasting_heading' => 'Fasting',
             'coming_soon' => 'Coming soon',
         ],
         'detail' => [
