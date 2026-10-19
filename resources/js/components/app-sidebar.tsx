@@ -51,9 +51,9 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
         icon: MessageCircle,
     },
     {
-        title: t('sidebar.nav.meal_plans'),
-        href: mealPlans.index(),
-        icon: CalendarHeartIcon,
+        title: t('sidebar.nav.snap_to_track'),
+        href: ShowSnapToTrackController().url,
+        icon: ScanLine,
     },
     {
         title: t('sidebar.nav.health_entries'),
@@ -61,9 +61,9 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
         icon: ActivityIcon,
     },
     {
-        title: t('sidebar.nav.snap_to_track'),
-        href: ShowSnapToTrackController().url,
-        icon: ScanLine,
+        title: t('sidebar.nav.meal_plans'),
+        href: mealPlans.index(),
+        icon: CalendarHeartIcon,
     },
 ];
 
