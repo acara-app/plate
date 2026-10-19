@@ -299,6 +299,8 @@ return [
     'mindfulMinutes' => $cumulative('min', 'Mindful Minutes'),
     'stateOfMind' => $event('event', 'State of Mind'),
     'timeInDaylight' => $cumulative('min', 'Time in Daylight'),
+    'stressLevel' => $slow('score', 'Stress Level'),
+    'sleepQuality' => $slow('score', 'Sleep Quality'),
 
     // ----------------------------------------------------------------
     // Medications (iOS payload — 'medication' as a raw event)

@@ -122,3 +122,16 @@ export interface DailyNutritionGoals {
     fat: number;
     fiber: number;
 }
+
+export type SleepQuality = 1 | 2 | 3;
+
+export type StressLevel = 1 | 2 | 3;
+
+export interface DailyWellness {
+    steps: number;
+    step_goal: number;
+    sleep_hours: number | null;
+    sleep_synced: boolean;
+    sleep_quality: SleepQuality | null;
+    stress_level: StressLevel | null;
+}

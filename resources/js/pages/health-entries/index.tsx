@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
 import {
     DailyNutritionGoals,
+    DailyWellness,
     HealthEntry,
     ReadingType,
     RecentInsulin,
@@ -23,6 +24,7 @@ import EntryCard from './components/entry-card';
 import MacroGoals from './components/macro-goals';
 import { sumNutrition } from './components/macros';
 import WeekStrip from './components/week-strip';
+import WellnessCards from './components/wellness-cards';
 import HealthEntriesDialog from './health-entries-dialog';
 
 interface Props {
@@ -32,6 +34,7 @@ interface Props {
     entries: HealthEntry[];
     loggedDates: string[];
     goals: DailyNutritionGoals | null;
+    wellness: DailyWellness;
     glucoseReadingTypes: ReadingType[];
     insulinTypes: ReadingType[];
     glucoseUnit: string;
@@ -47,6 +50,7 @@ export default function HealthEntriesIndex({
     entries,
     loggedDates,
     goals,
+    wellness,
     glucoseReadingTypes,
     insulinTypes,
     glucoseUnit,
@@ -109,6 +113,7 @@ export default function HealthEntriesIndex({
                         calories={totals.calories ?? 0}
                         goals={goals}
                     />
+                    <WellnessCards date={date} wellness={wellness} />
                     <MacroGoals totals={totals} goals={goals} />
                     <section
                         aria-labelledby="day-entries-heading"

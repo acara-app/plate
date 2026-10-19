@@ -8,6 +8,7 @@ use App\Enums\HealthAggregationFunction;
 use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
 use App\Models\User;
+use App\Services\CumulativeSampleDeduplicator;
 use App\Services\HealthMetricRegistry;
 use App\ValueObjects\HealthMetricDescriptorData;
 use Carbon\CarbonImmutable;
@@ -16,10 +17,9 @@ use Illuminate\Support\Facades\DB;
 
 final readonly class AggregateHealthDailySamplesAction
 {
-    private const int CUMULATIVE_BUCKET_SECONDS = 300;
-
     public function __construct(
         private HealthMetricRegistry $registry,
+        private CumulativeSampleDeduplicator $deduplicator,
     ) {}
 
     public function handle(User $user, CarbonImmutable $utcDate): int
@@ -182,7 +182,7 @@ final readonly class AggregateHealthDailySamplesAction
         }
 
         if ($descriptor->isCumulative() && $descriptor->sourcePreference !== []) {
-            $samples = $this->intervalDedupBySource($samples, $descriptor->sourcePreference);
+            $samples = $this->deduplicator->handle($samples, $descriptor->sourcePreference);
         }
 
         if ($samples->isEmpty()) {
@@ -231,88 +231,6 @@ final readonly class AggregateHealthDailySamplesAction
             metadata: $metadata,
             aggregationFunction: $descriptor->function,
         );
-    }
-
-    /**
-     * @param  Collection<int, HealthSyncSample>  $samples
-     * @param  list<string>  $priority
-     * @return Collection<int, HealthSyncSample>
-     */
-    private function intervalDedupBySource(Collection $samples, array $priority): Collection
-    {
-        if ($samples->isEmpty()) {
-            // @codeCoverageIgnoreStart
-            return $samples;
-            // @codeCoverageIgnoreEnd
-        }
-
-        $buckets = [];
-
-        foreach ($samples as $sample) {
-            $startEpoch = $sample->measured_at->getTimestamp();
-            $startBucket = (int) floor($startEpoch / self::CUMULATIVE_BUCKET_SECONDS);
-
-            $endBucket = $startBucket;
-            if ($sample->ended_at !== null) {
-                // @codeCoverageIgnoreStart
-                $endEpoch = $sample->ended_at->getTimestamp();
-                $endBucket = (int) floor($endEpoch / self::CUMULATIVE_BUCKET_SECONDS);
-                // @codeCoverageIgnoreEnd
-            }
-
-            for ($b = $startBucket; $b <= $endBucket; $b++) {
-                $buckets[$b] ??= [];
-                $buckets[$b][] = $sample;
-            }
-        }
-
-        $keptIds = [];
-
-        foreach ($buckets as $group) {
-            $bestRank = PHP_INT_MAX;
-            $bestSamples = [];
-
-            foreach ($group as $sample) {
-                $rank = $this->sourceRank($sample->source, $priority);
-
-                if ($rank < $bestRank) {
-                    $bestRank = $rank;
-                    $bestSamples = [$sample];
-                } elseif ($rank === $bestRank) {
-                    $bestSamples[] = $sample;
-                }
-            }
-
-            foreach ($bestSamples as $sample) {
-                $id = spl_object_id($sample);
-                $keptIds[$id] ??= $sample;
-            }
-        }
-
-        return new Collection(array_values($keptIds));
-    }
-
-    /**
-     * @param  list<string>  $priority
-     */
-    private function sourceRank(?string $source, array $priority): int
-    {
-        // @codeCoverageIgnoreStart
-        if ($source === null || $source === '') {
-            return PHP_INT_MAX;
-        }
-
-        // @codeCoverageIgnoreEnd
-
-        foreach ($priority as $i => $preferredSubstring) {
-            if (str_contains($source, $preferredSubstring)) {
-                return $i + 1;
-            }
-        }
-
-        // @codeCoverageIgnoreStart
-        return PHP_INT_MAX;
-        // @codeCoverageIgnoreEnd
     }
 
     /**

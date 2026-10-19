@@ -500,3 +500,32 @@ it('keeps a time changed through a logged reading when the meal is saved afterwa
     expect($calories->measured_at->toDateTimeString())->toBe('2026-10-16 05:00:00')
         ->and($calories->metadata['meal_type'])->toBe('dinner');
 });
+
+it('shows synced steps and logs last night’s sleep and today’s stress from the cards', function (): void {
+    $this->travelTo(CarbonImmutable::parse('2026-10-19 12:00:00', 'UTC'));
+    $user = User::factory()->create(['timezone' => 'UTC']);
+    HealthSyncSample::factory()->stepCount()->fromMobileSync()->create([
+        'user_id' => $user->id,
+        'source' => 'Apple Watch',
+        'value' => 4200,
+        'measured_at' => '2026-10-19 08:00:00',
+    ]);
+    $this->actingAs($user);
+
+    visit(route('health-entries.index', absolute: false))->on()->mobile()
+        ->assertVisible('[aria-label="4200 of 10,000 steps"]')
+        ->click('button[aria-label="Log sleep"]')
+        ->assertSee('How long did you sleep?')
+        ->assertSee('7.5')
+        ->press('Continue')
+        ->assertSee('Rate how well you slept')
+        ->click('[role="dialog"] button:has-text("Good")')
+        ->press('Continue')
+        ->assertSee('Rate your stress level today')
+        ->click('[role="dialog"] button:has-text("Calm")')
+        ->press('Save')
+        ->assertMissing('[role="dialog"]')
+        ->assertVisible('button[aria-label="Sleep: 7.5h"]')
+        ->assertVisible('button[aria-label="Stress: Calm"]')
+        ->assertNoJavaScriptErrors();
+});
