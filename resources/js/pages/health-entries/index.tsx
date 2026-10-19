@@ -106,17 +106,14 @@ export default function HealthEntriesIndex({
                     </h1>
                     <Button
                         type="button"
+                        variant="secondary"
                         onClick={askAi}
                         className="h-11 rounded-full px-4"
                     >
                         <Sparkles data-icon="inline-start" aria-hidden="true" />
                         {t('health_entries.index_page.ask_ai')}
                     </Button>
-                    <Button
-                        asChild
-                        variant="secondary"
-                        className="h-11 rounded-full px-4"
-                    >
+                    <Button asChild className="h-11 rounded-full px-4">
                         <Link href={ShowSnapToTrackController()}>
                             <Camera aria-hidden="true" />
                             {t('health_entries.timeline.scan_meal')}
