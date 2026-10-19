@@ -184,12 +184,10 @@ function CheckInCard({
         >
             <span className="flex w-full items-center justify-between gap-2">
                 {icon}
-                {value === null && (
-                    <Plus
-                        className="size-5 text-muted-foreground"
-                        aria-hidden="true"
-                    />
-                )}
+                <Plus
+                    className="size-4 shrink-0 text-muted-foreground"
+                    aria-hidden="true"
+                />
             </span>
             {value === null ? (
                 <span className="truncate text-sm text-muted-foreground">
