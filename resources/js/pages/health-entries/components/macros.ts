@@ -59,15 +59,25 @@ export const MACROS: MacroConfig[] = [
     },
 ];
 
+const formatters = new Map<string, Intl.NumberFormat>();
+
 export function formatAmount(
     value: number,
     locale: string | undefined,
     fractionDigits = 0,
 ): string {
-    return new Intl.NumberFormat(locale, {
-        minimumFractionDigits: fractionDigits,
-        maximumFractionDigits: Math.max(fractionDigits, 1),
-    }).format(value);
+    const key = `${locale ?? ''}|${fractionDigits}`;
+    let formatter = formatters.get(key);
+
+    if (formatter === undefined) {
+        formatter = new Intl.NumberFormat(locale, {
+            minimumFractionDigits: fractionDigits,
+            maximumFractionDigits: Math.max(fractionDigits, 1),
+        });
+        formatters.set(key, formatter);
+    }
+
+    return formatter.format(value);
 }
 
 export function sumNutrition(entries: Nutrition[]): Nutrition {

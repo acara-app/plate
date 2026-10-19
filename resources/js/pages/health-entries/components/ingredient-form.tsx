@@ -4,13 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-} from '@/components/ui/sheet';
-import {
     needsNutritionUpdate,
     useFoodItemEstimate,
 } from '@/hooks/use-food-item-estimate';
@@ -44,11 +37,6 @@ const NUTRIENTS: { field: NutrientField; labelKey: string }[] = [
     { field: 'fat', labelKey: 'snap_to_track.review.fat' },
 ];
 
-export const sheetCloseClassName =
-    '[&>button:last-child]:top-3 [&>button:last-child]:right-3 [&>button:last-child]:flex [&>button:last-child]:size-11 [&>button:last-child]:items-center [&>button:last-child]:justify-center [&>button:last-child]:rounded-full';
-
-export const bottomSheetClassName = `mx-auto max-h-[90dvh] w-full max-w-xl gap-0 overflow-y-auto overscroll-contain rounded-t-3xl border-x p-0 ${sheetCloseClassName}`;
-
 function toDraft(item: EditableItem | null): Draft {
     return {
         name: item?.name ?? '',
@@ -69,7 +57,7 @@ const toNumber = (value: string): number => {
     return Number.isFinite(number) && number >= 0 ? number : 0;
 };
 
-function IngredientForm({
+export default function IngredientForm({
     item,
     canRemove,
     errors,
@@ -277,58 +265,5 @@ function IngredientForm({
                 </Button>
             </div>
         </form>
-    );
-}
-
-export default function IngredientSheet({
-    open,
-    onOpenChange,
-    formKey,
-    item,
-    canRemove,
-    errors,
-    onApply,
-    onRemove,
-}: {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    formKey: number;
-    item: EditableItem | null;
-    canRemove: boolean;
-    errors: Record<string, string>;
-    onApply: (item: Omit<EditableItem, 'key' | 'originalName'>) => void;
-    onRemove: () => void;
-}) {
-    const { t } = useTranslation('common');
-
-    return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent
-                side="bottom"
-                closeLabel={t('health_entries.timeline.close')}
-                className={bottomSheetClassName}
-            >
-                <SheetHeader className="px-5 pt-6 pr-16 pb-4">
-                    <SheetTitle className="text-xl">
-                        {t(
-                            item
-                                ? 'health_entries.detail.edit_ingredient'
-                                : 'health_entries.detail.new_ingredient',
-                        )}
-                    </SheetTitle>
-                    <SheetDescription>
-                        {t('health_entries.detail.ingredient_description')}
-                    </SheetDescription>
-                </SheetHeader>
-                <IngredientForm
-                    key={formKey}
-                    item={item}
-                    canRemove={canRemove}
-                    errors={errors}
-                    onApply={onApply}
-                    onRemove={onRemove}
-                />
-            </SheetContent>
-        </Sheet>
     );
 }

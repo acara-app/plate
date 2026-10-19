@@ -13,7 +13,6 @@ import {
     RecentMedication,
     TodaysMeal,
 } from '@/types/diabetes';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import HealthEntryForm from './health-entry-form';
 
@@ -47,15 +46,7 @@ export default function HealthEntriesDialog({
     defaultMeasuredAt,
 }: DialogProps) {
     const { t } = useTranslation('common');
-    const [shownEntry, setShownEntry] = useState(logEntry);
-
-    if (logEntry && logEntry !== shownEntry) {
-        setShownEntry(logEntry);
-    }
-
-    const entry = logEntry ?? shownEntry;
-
-    if (mode === 'edit' && !entry) {
+    if (mode === 'edit' && !logEntry) {
         return null;
     }
 
@@ -78,7 +69,7 @@ export default function HealthEntriesDialog({
                     </DialogDescription>
                 </DialogHeader>
                 <HealthEntryForm
-                    key={`${mode}-${entry?.id ?? 'new'}-${type ?? ''}-${defaultMeasuredAt ?? ''}`}
+                    key={`${mode}-${logEntry?.id ?? 'new'}-${type ?? ''}-${defaultMeasuredAt ?? ''}`}
                     mode={mode}
                     type={type}
                     defaultMeasuredAt={defaultMeasuredAt}
@@ -88,7 +79,7 @@ export default function HealthEntriesDialog({
                     recentMedications={recentMedications}
                     recentInsulins={recentInsulins}
                     todaysMeals={todaysMeals}
-                    entry={entry}
+                    entry={logEntry}
                     onCancel={() => onOpenChange(false)}
                 />
             </DialogContent>

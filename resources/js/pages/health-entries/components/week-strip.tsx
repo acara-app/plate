@@ -11,13 +11,7 @@ import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-export const DAY_PROPS = [
-    'date',
-    'today',
-    'newEntryAt',
-    'entries',
-    'loggedDates',
-];
+const DAY_PROPS = ['date', 'today', 'newEntryAt', 'entries'];
 
 export default function WeekStrip({
     date,
@@ -39,12 +33,13 @@ export default function WeekStrip({
     );
     const canGoForward = weekStart < startOfWeekKey(today);
     const nextWeekDay = addDaysToKey(date, 7);
-    const visit = {
+    const dayVisit = {
         only: DAY_PROPS,
         preserveScroll: true,
         onStart: () => onLoadingChange(true),
         onFinish: () => onLoadingChange(false),
     };
+    const visit = { ...dayVisit, only: [...DAY_PROPS, 'loggedDates'] };
     const dayUrl = (day: string) =>
         ListHealthEntryController({ query: { date: day } });
 
@@ -231,7 +226,7 @@ export default function WeekStrip({
                                         isSelected ? 'date' : undefined
                                     }
                                     className="group flex flex-col items-center gap-1 rounded-2xl px-1 py-1 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                                    {...visit}
+                                    {...dayVisit}
                                 >
                                     {content}
                                 </Link>

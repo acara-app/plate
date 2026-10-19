@@ -21,8 +21,10 @@ final readonly class HealthEntryAssembler
     {
         $grouped = $samples->groupBy(fn (HealthSyncSample $sample): string => $sample->group_id ?? 'standalone_'.$sample->id);
 
-        $photoGroupIds = MealPhoto::query()
-            ->whereIn('health_group_id', $samples->pluck('group_id')->filter()->unique()->values())
+        $groupIds = $samples->pluck('group_id')->filter()->unique()->values();
+        $photoGroupIds = $groupIds->isEmpty() ? collect() : MealPhoto::query()
+            ->where('user_id', $samples->first()?->user_id)
+            ->whereIn('health_group_id', $groupIds)
             ->pluck('health_group_id')
             ->flip();
 
@@ -62,19 +64,21 @@ final readonly class HealthEntryAssembler
 
             foreach ($group as $sample) {
                 /** @var HealthSyncSample $sample */
+                $metadata = $sample->metadata ?? [];
+
                 if ($sample->notes !== null) {
                     $entry['notes'] = $sample->notes;
                 }
 
-                if (is_array($sample->metadata['snap_to_track'] ?? null)) {
-                    $entry['food_analysis'] = MealBreakdownData::fromMetadata($sample->metadata['snap_to_track'])->toArray();
+                if ($entry['food_analysis'] === null && is_array($metadata['snap_to_track'] ?? null)) {
+                    $entry['food_analysis'] = MealBreakdownData::fromMetadata($metadata['snap_to_track'])->toArray();
                 }
 
-                if (is_string($sample->metadata['meal_type'] ?? null)) {
-                    $entry['meal_type'] = MealType::tryFrom($sample->metadata['meal_type'])?->value;
+                if (is_string($metadata['meal_type'] ?? null)) {
+                    $entry['meal_type'] = MealType::tryFrom($metadata['meal_type'])?->value;
                 }
 
-                $this->mapSampleToEntry($sample, $entry);
+                $this->mapSampleToEntry($sample, $metadata, $entry);
             }
 
             if ($entry['meal_type'] === null && $this->hasFood($entry)) {
@@ -94,12 +98,11 @@ final readonly class HealthEntryAssembler
     }
 
     /**
+     * @param  array<string, mixed>  $metadata
      * @param  array<string, mixed>  $entry
      */
-    private function mapSampleToEntry(HealthSyncSample $sample, array &$entry): void
+    private function mapSampleToEntry(HealthSyncSample $sample, array $metadata, array &$entry): void
     {
-        $metadata = $sample->metadata ?? [];
-
         match ($sample->type_identifier) {
             HealthSyncType::BloodGlucose->value => $this->mapGlucose($sample, $metadata, $entry),
             HealthSyncType::Carbohydrates->value => $entry['carbs_grams'] = $sample->value,

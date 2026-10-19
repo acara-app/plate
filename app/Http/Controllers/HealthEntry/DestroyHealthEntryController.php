@@ -8,7 +8,6 @@ use App\Actions\DeleteHealthSampleAction;
 use App\Actions\DispatchAggregateUserUtcDatesAction;
 use App\Models\HealthSyncSample;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 
 final readonly class DestroyHealthEntryController
@@ -37,12 +36,8 @@ final readonly class DestroyHealthEntryController
      */
     private function affectedUtcDatesForDeletion(HealthSyncSample $healthSyncSample): array
     {
-        $samples = $healthSyncSample->group_id !== null
-            ? HealthSyncSample::query()->where('group_id', $healthSyncSample->group_id)->get()
-            : new Collection([$healthSyncSample]);
-
         /** @var list<string> */
-        return $samples
+        return $healthSyncSample->groupMembers()
             ->map(static fn (HealthSyncSample $sample): string => $sample->measured_at->copy()->utc()->toDateString())
             ->unique()
             ->values()
