@@ -66,7 +66,7 @@ it('lists only the chosen local day’s entries for the signed-in user', functio
         ->assertOk()
         ->assertJsonPath('date', $date);
 
-    expect(collect($response->json('entries'))->pluck('glucose_value')->all())->toBe(array_map(fn (int $value): float => GlucoseUnit::mgDlToMmolL($value), $values));
+    expect(collect($response->json('entries'))->pluck('glucose_value')->all())->toBe(array_map(GlucoseUnit::mgDlToMmolL(...), $values));
 })->with([
     'late local evening' => ['2026-10-17', [101]],
     'local morning after a UTC late evening' => ['2026-10-18', [103, 102]],
