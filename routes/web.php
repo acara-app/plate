@@ -122,6 +122,7 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
     Route::get('health-entries', Web\HealthEntry\ListHealthEntryController::class)->name('health-entries.index');
     Route::get('health-entries/logged-dates', Web\HealthEntry\ListLoggedDatesController::class)->name('health-entries.logged-dates');
     Route::post('health-entries', Web\HealthEntry\StoreHealthEntryController::class)->name('health-entries.store');
+    Route::post('health-entries/check-in', Web\HealthEntry\StoreDailyCheckInController::class)->name('health-entries.check-in.store');
     Route::get('health-entries/{healthSyncSample}', Web\HealthEntry\ShowHealthEntryController::class)->whereNumber('healthSyncSample')->name('health-entries.show');
     Route::put('health-entries/{healthSyncSample}', Web\HealthEntry\UpdateHealthEntryController::class)->name('health-entries.update');
     Route::delete('health-entries/{healthSyncSample}', Web\HealthEntry\DestroyHealthEntryController::class)->name('health-entries.destroy');
