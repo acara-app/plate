@@ -26,7 +26,7 @@ final readonly class StoreDailyCheckInController
     {
         $day = $request->selectedDay();
 
-        $measuredAt = $this->recordDailyCheckIn->handle(
+        $affectedUtcDates = $this->recordDailyCheckIn->handle(
             $user,
             $day,
             $request->sleepHours(),
@@ -34,7 +34,7 @@ final readonly class StoreDailyCheckInController
             $request->enum('stress_level', StressLevel::class),
         );
 
-        $this->dispatchAggregateUserUtcDates->handle($user, [$measuredAt->toDateString()]);
+        $this->dispatchAggregateUserUtcDates->handle($user, $affectedUtcDates);
 
         return response()->json(['wellness' => $this->getDailyWellness->handle($user, $day)->toArray()]);
     }

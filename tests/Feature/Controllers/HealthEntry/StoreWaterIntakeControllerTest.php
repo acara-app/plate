@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\ForgetEmptyDailyTotalsAction;
 use App\Actions\RecordWaterIntakeAction;
 use App\Enums\HealthEntrySource;
 use App\Http\Controllers\HealthEntry\StoreWaterIntakeController;
@@ -13,7 +14,7 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Queue;
 
-covers(StoreWaterIntakeController::class, StoreWaterIntakeRequest::class, RecordWaterIntakeAction::class);
+covers(StoreWaterIntakeController::class, StoreWaterIntakeRequest::class, RecordWaterIntakeAction::class, ForgetEmptyDailyTotalsAction::class);
 
 beforeEach(function (): void {
     $this->travelTo(CarbonImmutable::parse('2026-10-18 17:00:00', 'UTC'));
