@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\DB;
 
 final readonly class RecordDailyCheckInAction
 {
+    public function __construct(private ForgetEmptyDailyTotalsAction $forgetEmptyDailyTotals) {}
+
     /**
      * @return list<string>
      */
@@ -37,7 +39,7 @@ final readonly class RecordDailyCheckInAction
             User::query()->whereKey($user->id)->lockForUpdate()->first();
 
             $saved = $user->healthSyncSamples()
-                ->whereIn('type_identifier', array_column(DailyCheckInMetric::cases(), 'value'))
+                ->whereIn('type_identifier', DailyCheckInMetric::values())
                 ->forEntrySource(HealthEntrySource::Web)
                 ->measuredWithinDay($start)
                 ->oldest('updated_at')
@@ -51,7 +53,9 @@ final readonly class RecordDailyCheckInAction
                 ...$saved->toBase()->map(static fn (HealthSyncSample $sample): string => $sample->measured_at->copy()->utc()->toDateString())->all(),
             ]));
 
-            $user->healthSyncSamples()->whereKey($saved->modelKeys())->delete();
+            if ($saved->isNotEmpty()) {
+                $user->healthSyncSamples()->whereKey($saved->modelKeys())->delete();
+            }
 
             foreach (DailyCheckInMetric::cases() as $metric) {
                 $value = $answers[$metric->value] ?? $latestSaved->get($metric->value)?->value;
@@ -69,33 +73,9 @@ final readonly class RecordDailyCheckInAction
                 ]);
             }
 
-            $this->forgetEmptyCheckInTotals($user, $affectedUtcDates);
+            $this->forgetEmptyDailyTotals->handle($user, $affectedUtcDates, DailyCheckInMetric::values());
 
             return $affectedUtcDates;
         });
-    }
-
-    /**
-     * @param  list<string>  $utcDates
-     */
-    private function forgetEmptyCheckInTotals(User $user, array $utcDates): void
-    {
-        foreach ($utcDates as $utcDate) {
-            $utcDay = CarbonImmutable::parse($utcDate, 'UTC');
-
-            foreach (DailyCheckInMetric::cases() as $metric) {
-                $hasAnswer = $user->healthSyncSamples()
-                    ->where('type_identifier', $metric->value)
-                    ->measuredWithinDay($utcDay)
-                    ->exists();
-
-                if (! $hasAnswer) {
-                    $user->healthDailyAggregates()
-                        ->forDate($utcDay)
-                        ->ofType($metric->value)
-                        ->delete();
-                }
-            }
-        }
     }
 }

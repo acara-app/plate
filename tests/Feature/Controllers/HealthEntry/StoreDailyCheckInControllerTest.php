@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\ForgetEmptyDailyTotalsAction;
 use App\Actions\RecordDailyCheckInAction;
 use App\Enums\DailyCheckInMetric;
 use App\Enums\HealthEntrySource;
@@ -15,7 +16,7 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Queue;
 
-covers(StoreDailyCheckInController::class, StoreDailyCheckInRequest::class, RecordDailyCheckInAction::class, DailyCheckInMetric::class);
+covers(StoreDailyCheckInController::class, StoreDailyCheckInRequest::class, RecordDailyCheckInAction::class, ForgetEmptyDailyTotalsAction::class, DailyCheckInMetric::class);
 
 beforeEach(function (): void {
     $this->travelTo(CarbonImmutable::parse('2026-10-18 17:00:00', 'UTC'));

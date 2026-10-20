@@ -73,8 +73,8 @@ final readonly class GetDailyWellnessAction
     {
         /** @var Collection<string, float> */
         return $user->healthSyncSamples()
-            ->where('entry_source', HealthEntrySource::Web)
-            ->whereIn('type_identifier', array_column(DailyCheckInMetric::cases(), 'value'))
+            ->forEntrySource(HealthEntrySource::Web)
+            ->whereIn('type_identifier', DailyCheckInMetric::values())
             ->measuredWithinDay($start)
             ->oldest('updated_at')
             ->oldest('id')

@@ -74,6 +74,8 @@ it('keeps one answer per question after the app moves the account to the device 
     $this->postJson(route('api.v2.health-entries.check-in.store'), ['date' => '2026-10-19', 'sleep_quality' => 1, 'stress_level' => 3])->assertOk();
     $this->putJson(route('api.v2.account.timezone'), ['timezone' => 'Asia/Ulaanbaatar'])->assertNoContent();
 
+    Queue::fake();
+
     $this->postJson(route('api.v2.health-entries.check-in.store'), ['date' => '2026-10-19', 'sleep_quality' => 3])
         ->assertOk()
         ->assertJsonPath('wellness.sleep_quality', 3)
@@ -85,6 +87,9 @@ it('keeps one answer per question after the app moves the account to the device 
             ['sleepQuality', 3.0, '2026-10-18 16:00:00'],
             ['stressLevel', 3.0, '2026-10-18 16:00:00'],
         ]);
+
+    Queue::assertPushed(AggregateUserDayJob::class, fn (AggregateUserDayJob $job): bool => $job->uniqueId() === $user->id.':2026-10-18');
+    Queue::assertPushed(AggregateUserDayJob::class, fn (AggregateUserDayJob $job): bool => $job->uniqueId() === $user->id.':2026-10-19');
 });
 
 it('rejects check-ins it cannot save', function (array $payload, string $field): void {
