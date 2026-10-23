@@ -21,7 +21,7 @@ it('requires a bearer token', function (): void {
     $this->getJson(route('api.v2.health-entries.index'))->assertUnauthorized();
 });
 
-it('continues returning individual synced exercise entries to mobile clients', function (): void {
+it('sends the synced exercise total alongside the per-minute entries the iOS logbook still lists', function (): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
     $sample = HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
         'user_id' => $user->id, 'value' => 1, 'measured_at' => '2026-10-21 09:00:00',
@@ -29,6 +29,7 @@ it('continues returning individual synced exercise entries to mobile clients', f
     Sanctum::actingAs($user, ['chat:converse']);
 
     $this->getJson(route('api.v2.health-entries.index', ['date' => '2026-10-21']))
+        ->assertJsonPath('wellness.synced_exercise_minutes', 1)
         ->assertJsonCount(1, 'entries')
         ->assertJsonPath('entries.0.id', $sample->id)
         ->assertJsonPath('entries.0.exercise_duration_minutes', 1);
@@ -60,6 +61,7 @@ it('returns today’s logbook in the user’s timezone', function (): void {
                 'water_ml' => 0,
                 'water_synced_ml' => 0,
                 'water_goal_ml' => 2000,
+                'synced_exercise_minutes' => null,
             ],
         ]);
 });

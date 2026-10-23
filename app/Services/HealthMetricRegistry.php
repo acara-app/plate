@@ -11,7 +11,7 @@ use Illuminate\Contracts\Config\Repository as ConfigRepository;
 
 final class HealthMetricRegistry
 {
-    public const int CURRENT_AGGREGATION_VERSION = 1;
+    public const int CURRENT_AGGREGATION_VERSION = 2;
 
     /**
      * @var array<string, HealthMetricDescriptorData>|null

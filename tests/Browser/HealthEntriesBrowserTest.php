@@ -81,19 +81,19 @@ it('refreshes the synced exercise summary when selecting another day', function 
         $page = $page->on()->mobile();
     }
 
-    $page->assertSeeIn('[aria-label="Synced exercise"]', '12.3 min')
+    $page->assertSeeIn('[aria-label="Daily total from Apple Health"]', '12.3 min')
         ->assertDontSee('Nothing logged on this day')
         ->assertMissing('a[href="/health-entries/'.$sample->id.'"]')
-        ->assertMissing('[aria-label="Synced exercise"] a, [aria-label="Synced exercise"] button, [aria-label="Synced exercise"] time')
+        ->assertMissing('[aria-label="Daily total from Apple Health"] a, [aria-label="Daily total from Apple Health"] button, [aria-label="Daily total from Apple Health"] time')
         ->click('a[aria-label^="Thursday, October 22"]')
         ->assertQueryStringHas('date', '2026-10-22')
         ->assertSee('Nothing logged on this day')
-        ->assertMissing('[aria-label="Synced exercise"]')
+        ->assertMissing('[aria-label="Daily total from Apple Health"]')
         ->click('a[aria-label^="Friday, October 23"]')
-        ->assertSeeIn('[aria-label="Synced exercise"]', '7 min')
+        ->assertSeeIn('[aria-label="Daily total from Apple Health"]', '7 min')
         ->assertDontSee('Nothing logged yet today')
         ->click('a[aria-label^="Wednesday, October 21"]')
-        ->assertSeeIn('[aria-label="Synced exercise"]', '12.3 min')
+        ->assertSeeIn('[aria-label="Daily total from Apple Health"]', '12.3 min')
         ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
         ->assertNoJavaScriptErrors();
 })->with(['desktop' => [false], 'mobile' => [true]]);

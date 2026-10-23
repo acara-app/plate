@@ -134,7 +134,7 @@ final class HealthSyncSamplesFixture
                     continue;
                 }
 
-                $source = self::nullable($row[$idx['source']]) ?? '';
+                $source = (string) preg_replace('/\s+/u', ' ', self::nullable($row[$idx['source']]) ?? '');
                 $rank = 99;
                 foreach ($priority as $i => $prefSubstring) {
                     if (str_contains($source, $prefSubstring)) {

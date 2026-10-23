@@ -1,41 +1,36 @@
-import type { DailyExerciseSummary } from '@/types/diabetes';
-import { Dumbbell } from 'lucide-react';
+import { getTypeConfig } from '@/lib/health-entry-registry';
+import { cn } from '@/lib/utils';
+import { LogType } from '@/types/diabetes';
 import { useTranslation } from 'react-i18next';
+import { ENTRY_CARD } from './entry-card-layout';
 import { formatAmount } from './macros';
 
-export default function ExerciseSummaryCard({
-    summary,
-}: {
-    summary: DailyExerciseSummary;
-}) {
+export default function ExerciseSummaryCard({ minutes }: { minutes: number }) {
     const { t, i18n } = useTranslation('common');
-    const title = t('health_entries.logbook.synced_exercise');
+    const typeConfig = getTypeConfig(LogType.Exercise);
+    const caption = t('health_entries.logbook.synced_exercise_total');
 
     return (
-        <div
-            role="group"
-            aria-label={title}
-            className="flex min-h-28 overflow-hidden rounded-3xl bg-card shadow-xs ring-1 ring-border/60"
-        >
+        <div role="group" aria-label={caption} className={ENTRY_CARD.shell}>
             <span
                 aria-hidden="true"
-                className="flex w-28 shrink-0 items-center justify-center bg-muted sm:w-32"
+                className={cn(
+                    ENTRY_CARD.media,
+                    'flex items-center justify-center bg-muted',
+                )}
             >
-                <Dumbbell className="size-8 text-primary" />
+                <typeConfig.icon className={cn('size-8', typeConfig.accent)} />
             </span>
-            <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4">
-                <h3 className="leading-snug font-semibold">{title}</h3>
-                <p className="text-sm font-semibold text-primary tabular-nums">
+            <div className={ENTRY_CARD.body}>
+                <h3 className="leading-snug font-semibold">
+                    {t(typeConfig.labelKey)}
+                </h3>
+                <p className={ENTRY_CARD.value}>
                     {t('health_entries.badges.exercise_minutes', {
-                        value: formatAmount(
-                            summary.total_minutes,
-                            i18n.resolvedLanguage,
-                        ),
+                        value: formatAmount(minutes, i18n.resolvedLanguage),
                     })}
                 </p>
-                <p className="text-sm text-muted-foreground">
-                    {t('health_entries.logbook.synced_daily_total')}
-                </p>
+                <p className="text-sm text-muted-foreground">{caption}</p>
             </div>
         </div>
     );

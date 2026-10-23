@@ -7,6 +7,7 @@ use App\Jobs\AggregateUserDayJob;
 use App\Models\HealthSyncSample;
 use App\Models\MealPhoto;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 
@@ -187,4 +188,38 @@ it('does not turn samples that are not logbook entries into one', function (): v
     expect($water->refresh()->type_identifier)->toBe('water')
         ->and($water->value)->toBe(250.0)
         ->and(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(1);
+});
+
+it('keeps an edited synced workout in the logbook and out of the synced exercise total', function (): void {
+    Queue::fake();
+    $user = User::factory()->create(['timezone' => 'UTC']);
+    $day = CarbonImmutable::parse('2026-10-21', 'UTC');
+    foreach (range(1, 10) as $minute) {
+        HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+            'user_id' => $user->id, 'source' => 'Apple Watch', 'value' => 1,
+            'measured_at' => $day->setTime(9, $minute), 'ended_at' => $day->setTime(9, $minute + 1),
+        ]);
+    }
+
+    $workout = HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+        'user_id' => $user->id, 'type_identifier' => 'workouts', 'source' => 'Apple Watch', 'value' => 10,
+        'measured_at' => $day->setTime(9, 0, 20), 'ended_at' => $day->setTime(9, 10, 20),
+    ]);
+
+    $this->actingAs($user)->put(route('health-entries.update', $workout), [
+        'log_type' => 'exercise',
+        'exercise_type' => 'walking',
+        'exercise_duration_minutes' => 10,
+        'measured_at' => $workout->measured_at->toIso8601String(),
+        'notes' => 'Evening walk',
+    ])->assertSessionHasNoErrors()->assertRedirect();
+
+    $this->get(route('health-entries.index', ['date' => '2026-10-21']))
+        ->assertInertia(fn ($page) => $page
+            ->where('wellness.synced_exercise_minutes', 10)
+            ->where('entries', fn ($entries): bool => collect($entries)->pluck('id')->all() === [$workout->id])
+            ->where('entries.0.notes', 'Evening walk')
+            ->where('entries.0.source', 'web'));
+
+    expect($workout->refresh()->type_identifier)->toBe('workouts');
 });

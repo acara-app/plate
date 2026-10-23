@@ -53,6 +53,7 @@ it('shows an empty day before anything is synced or logged', function (): void {
         'water_ml' => 0,
         'water_synced_ml' => 0,
         'water_goal_ml' => 2000,
+        'synced_exercise_minutes' => null,
     ]);
 });
 
@@ -99,6 +100,91 @@ it('totals the local day’s steps without counting Apple Watch and iPhone twice
 
     expect(resolve(GetDailyWellnessAction::class)->handle($this->user, $this->day)->steps)->toBe(2000);
 });
+
+it('totals the local day’s standalone exercise minutes synced from Apple Health and rounds only the final sum', function (): void {
+    foreach ([
+        ['2026-10-18 16:00:00', 1.04],
+        ['2026-10-19 00:00:00', 1.04],
+        ['2026-10-19 15:59:59', 2.04],
+        ['2026-10-18 15:59:59', 50],
+        ['2026-10-19 16:00:00', 50],
+    ] as [$measuredAt, $minutes]) {
+        HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+            'user_id' => $this->user->id, 'source' => "Tuvshinjargal’s Apple\u{00A0}Watch", 'value' => $minutes, 'measured_at' => $measuredAt,
+        ]);
+    }
+
+    HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+        'user_id' => $this->user->id, 'type_identifier' => 'workouts', 'value' => 45, 'measured_at' => '2026-10-19 01:00:00',
+    ]);
+    HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+        'user_id' => $this->user->id, 'group_id' => 'blood-pressure', 'value' => 1, 'measured_at' => '2026-10-19 02:00:00',
+    ]);
+    HealthSyncSample::factory()->exercise()->fromWeb()->create([
+        'user_id' => $this->user->id, 'value' => 30, 'measured_at' => '2026-10-19 03:00:00',
+    ]);
+    HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+        'value' => 50, 'measured_at' => '2026-10-19 01:00:00',
+    ]);
+
+    expect(resolve(GetDailyWellnessAction::class)->handle($this->user, $this->day)->syncedExerciseMinutes)->toBe(4.1);
+});
+
+it('counts each synced exercise minute once across the watch and the phone', function (array $samples, float $minutes): void {
+    foreach ($samples as [$source, $startedAt, $endedAt, $value]) {
+        HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+            'user_id' => $this->user->id,
+            'source' => $source === 'watch' ? "Tuvshinjargal’s Apple\u{00A0}Watch" : 'Tuvshinjargal’s iPhone',
+            'value' => $value,
+            'measured_at' => "2026-10-19 {$startedAt}",
+            'ended_at' => "2026-10-19 {$endedAt}",
+        ]);
+    }
+
+    expect(resolve(GetDailyWellnessAction::class)->handle($this->user, $this->day)->syncedExerciseMinutes)->toBe($minutes);
+})->with([
+    'the watch wins the minutes both recorded' => [[['phone', '02:00:10', '02:02:00', 1.5], ['watch', '02:00:00', '02:02:00', 2]], 2.0],
+    'separate minutes in the same five minutes' => [[['watch', '02:00:00', '02:01:00', 1], ['phone', '02:03:00', '02:04:00', 1]], 2.0],
+    'a watch minute ending as the phone’s begins' => [[['watch', '02:04:00', '02:05:00', 1], ['phone', '02:05:00', '02:06:00', 1]], 2.0],
+    'only the phone time the watch missed' => [[['watch', '02:00:00', '02:01:00', 1], ['phone', '02:00:30', '02:02:30', 2]], 2.5],
+    'a minute moved after its recorded end' => [[['watch', '09:00:00', '02:30:00', 30]], 30.0],
+]);
+
+it('has no synced exercise total without standalone exercise minutes from Apple Health', function (int $count, ?HealthEntrySource $source, string $type, ?string $groupId): void {
+    HealthSyncSample::factory()->exercise()->count($count)->create([
+        'user_id' => $this->user->id,
+        'entry_source' => $source,
+        'type_identifier' => $type,
+        'group_id' => $groupId,
+        'measured_at' => '2026-10-19 02:00:00',
+    ]);
+
+    expect(resolve(GetDailyWellnessAction::class)->handle($this->user, $this->day)->syncedExerciseMinutes)->toBeNull();
+})->with([
+    'empty day' => [0, null, 'exerciseMinutes', null],
+    'web exercise' => [1, HealthEntrySource::Web, 'exerciseMinutes', null],
+    'chat exercise' => [1, HealthEntrySource::Chat, 'exerciseMinutes', null],
+    'telegram exercise' => [1, HealthEntrySource::Telegram, 'exerciseMinutes', null],
+    'mobile exercise' => [1, HealthEntrySource::Mobile, 'exerciseMinutes', null],
+    'unspecified source' => [1, null, 'exerciseMinutes', null],
+    'synced minute grouped with a reading' => [1, HealthEntrySource::MobileSync, 'exerciseMinutes', 'blood-pressure'],
+    'synced workout' => [1, HealthEntrySource::MobileSync, 'workouts', null],
+    'synced steps' => [1, HealthEntrySource::MobileSync, 'stepCount', null],
+]);
+
+it('keeps a synced minute on its own local day when daylight saving time starts at midnight', function (string $date, ?float $minutes): void {
+    $user = User::factory()->create(['timezone' => 'America/Santiago']);
+    HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+        'user_id' => $user->id, 'value' => 1, 'measured_at' => '2026-09-07 03:30:00',
+    ]);
+
+    $wellness = resolve(GetDailyWellnessAction::class)->handle($user, CarbonImmutable::parse($date, 'America/Santiago'));
+
+    expect($wellness->syncedExerciseMinutes)->toBe($minutes);
+})->with([
+    'the day the clocks moved forward' => ['2026-09-06', null],
+    'the next day' => ['2026-09-07', 1.0],
+]);
 
 it('measures last night’s synced sleep once even when stages overlap, ahead of a logged value', function (): void {
     syncSleep($this->user, SleepSession::STAGE_ASLEEP_CORE, '2026-10-18 15:00:00', '2026-10-18 18:00:00');

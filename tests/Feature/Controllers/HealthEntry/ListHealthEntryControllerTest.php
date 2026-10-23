@@ -52,6 +52,7 @@ it('renders the logbook for today in the user’s timezone', function (): void {
                 'water_ml' => 0,
                 'water_synced_ml' => 0,
                 'water_goal_ml' => 2000,
+                'synced_exercise_minutes' => null,
             ])
             ->has('glucoseReadingTypes')
             ->has('insulinTypes'));
@@ -155,7 +156,8 @@ it('summarizes synced exercise minutes while keeping manual exercise and workout
     $this->actingAs($user)
         ->get(route('health-entries.index', ['date' => '2026-10-21']))
         ->assertInertia(fn ($page) => $page
-            ->where('exerciseSummary', ['date' => '2026-10-21', 'total_minutes' => 12])
+            ->where('wellness.synced_exercise_minutes', 12)
+            ->missing('exerciseSummary')
             ->where('entries', fn ($entries): bool => collect($entries)->pluck('id')->all() === [$glucose->id, $workout->id, $manual->id])
             ->where('loggedDates', ['2026-10-21']));
 
