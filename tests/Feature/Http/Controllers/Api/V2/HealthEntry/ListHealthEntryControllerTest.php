@@ -48,6 +48,7 @@ it('returns today’s logbook in the user’s timezone', function (): void {
             'week_start' => '2026-10-19',
             'new_entry_at' => null,
             'glucose_unit' => 'mmol/L',
+            'exercise_summary' => false,
             'entries' => [],
             'logged_dates' => [],
             'goals' => null,
@@ -64,6 +65,66 @@ it('returns today’s logbook in the user’s timezone', function (): void {
                 'synced_exercise_minutes' => null,
             ],
         ]);
+});
+
+it('only replaces synced minute rows when the client opts into the exercise summary', function (int $summary): void {
+    $user = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
+    $day = CarbonImmutable::parse('2026-10-21', 'Asia/Ulaanbaatar');
+    $minutes = HealthSyncSample::factory()->exercise()->fromMobileSync()->count(3)
+        ->sequence(fn ($sequence): array => ['measured_at' => $day->setTime(9, $sequence->index)->utc()])
+        ->create(['user_id' => $user->id, 'source' => 'Apple Watch', 'value' => 1]);
+    $manual = HealthSyncSample::factory()->exercise()->fromWeb()->create([
+        'user_id' => $user->id, 'value' => 30, 'measured_at' => $day->setTime(16, 0)->utc(),
+    ]);
+    $edited = HealthSyncSample::factory()->exercise()->create([
+        'user_id' => $user->id, 'entry_source' => 'mobile', 'value' => 1, 'measured_at' => $day->setTime(17, 0)->utc(),
+    ]);
+    $workout = HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+        'user_id' => $user->id, 'type_identifier' => 'workouts', 'metadata' => ['exercise_type' => 'Exercise'],
+        'value' => 45, 'measured_at' => $day->setTime(18, 0)->utc(),
+    ]);
+    Sanctum::actingAs($user, ['chat:converse']);
+
+    $expected = [$workout->id, $edited->id, $manual->id];
+    if ($summary === 0) {
+        $expected = [...$expected, ...$minutes->reverse()->modelKeys()];
+    }
+
+    $this->getJson(route('api.v2.health-entries.index', ['date' => '2026-10-21', 'exercise_summary' => $summary]))
+        ->assertOk()
+        ->assertJsonPath('exercise_summary', (bool) $summary)
+        ->assertJsonPath('wellness.synced_exercise_minutes', 3)
+        ->assertJsonPath('entries', fn (array $entries): bool => array_column($entries, 'id') === $expected);
+
+    $this->assertDatabaseCount('health_sync_samples', 6);
+})->with(['legacy list' => [0], 'summary capable client' => [1]]);
+
+it('acknowledges the exercise summary only when that day has a total including zero', function (?float $minutes): void {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+    $manual = HealthSyncSample::factory()->exercise()->fromWeb()->create([
+        'user_id' => $user->id, 'measured_at' => '2026-10-21 10:00:00',
+    ]);
+    if ($minutes !== null) {
+        HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+            'user_id' => $user->id, 'value' => $minutes, 'measured_at' => '2026-10-21 09:00:00',
+        ]);
+    }
+    Sanctum::actingAs($user, ['chat:converse']);
+
+    $this->getJson(route('api.v2.health-entries.index', ['date' => '2026-10-21', 'exercise_summary' => 1]))
+        ->assertOk()
+        ->assertJsonPath('exercise_summary', $minutes !== null)
+        ->assertJsonPath('wellness.synced_exercise_minutes', $minutes === null ? null : 0)
+        ->assertJsonCount(1, 'entries')
+        ->assertJsonPath('entries.0.id', $manual->id);
+})->with(['no synced minutes' => [null], 'zero total' => [0.0]]);
+
+it('returns 422 for an invalid exercise summary preference', function (): void {
+    Sanctum::actingAs(User::factory()->create(), ['chat:converse']);
+
+    $this->getJson(route('api.v2.health-entries.index', ['exercise_summary' => 'invalid']))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('exercise_summary');
 });
 
 it('lists only the chosen local day’s entries for the signed-in user', function (string $date, array $values): void {
