@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\HealthSyncSample;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 final readonly class CumulativeSampleDeduplicator
 {
@@ -125,7 +126,7 @@ final readonly class CumulativeSampleDeduplicator
 
         // @codeCoverageIgnoreEnd
 
-        $source = (string) preg_replace('/\s+/u', ' ', $source);
+        $source = Str::squish($source);
 
         foreach ($priority as $i => $preferredSubstring) {
             if (str_contains($source, $preferredSubstring)) {

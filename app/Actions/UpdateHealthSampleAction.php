@@ -98,7 +98,7 @@ final readonly class UpdateHealthSampleAction
         return [
             'entry_source' => $this->editedEntrySource($member, $editedFrom),
             'measured_at' => $measuredAt,
-            'ended_at' => $member->ended_at === null ? null : $measuredAt->addSeconds(max(0, $member->ended_at->getTimestamp() - $member->measured_at->getTimestamp())),
+            'ended_at' => $member->ended_at === null ? null : $measuredAt->addSeconds(max(0, $member->measured_at->diffInSeconds($member->ended_at))),
         ];
     }
 
