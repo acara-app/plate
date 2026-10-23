@@ -77,3 +77,14 @@ it('cannot delete another user diabetes log', function (): void {
         'id' => $sample->id,
     ]);
 });
+
+it('does not delete samples that are not logbook entries', function (string $type): void {
+    $user = User::factory()->create();
+    $sample = HealthSyncSample::factory()->create(['user_id' => $user->id, 'type_identifier' => $type]);
+
+    $this->actingAs($user)
+        ->delete(route('health-entries.destroy', $sample))
+        ->assertNotFound();
+
+    $this->assertDatabaseHas('health_sync_samples', ['id' => $sample->id]);
+})->with(['synced steps' => ['stepCount'], 'logged water' => ['water']]);

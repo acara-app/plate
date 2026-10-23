@@ -6,10 +6,6 @@ namespace App\Http\Controllers\HealthEntry;
 
 use App\Actions\DispatchAggregateUserUtcDatesAction;
 use App\Actions\UpdateHealthSampleAction;
-use App\Data\HealthLogData;
-use App\Data\ReviewedMealData;
-use App\Enums\GlucoseUnit;
-use App\Enums\HealthEntryType;
 use App\Http\Requests\HealthEntryRequest;
 use App\Models\HealthSyncSample;
 use App\Models\User;
@@ -30,19 +26,8 @@ final readonly class UpdateHealthEntryController
         Gate::authorize('update', $healthSyncSample);
         $previousUtcDate = $healthSyncSample->measured_at->copy()->utc()->toDateString();
 
-        $data = $request->validated();
-
-        // @phpstan-ignore nullsafe.neverNull
-        $glucoseUnit = $this->currentUser->profile?->units_preference ?? GlucoseUnit::MmolL;
-        if ($glucoseUnit === GlucoseUnit::MmolL && isset($data['glucose_value'])) {
-            $glucoseValue = is_numeric($data['glucose_value']) ? (float) $data['glucose_value'] : 0;
-            $data['glucose_value'] = GlucoseUnit::mmolLToMgDl($glucoseValue);
-        }
-
         $metadata = HealthSyncSample::firstMetadataIn($healthSyncSample->groupMembers(), 'snap_to_track');
-        $healthData = $data['log_type'] === HealthEntryType::Food->value && isset($data['items'])
-            ? ReviewedMealData::fromValidated($data)->toHealthLogDataWithMetadata(is_array($metadata) ? $metadata : [])
-            : HealthLogData::fromParsedArray(array_merge($data, ['is_health_data' => true]));
+        $healthData = $request->healthLogData(is_array($metadata) ? $metadata : []);
 
         $updatedSample = $this->updateHealthSample->handle($healthSyncSample, $healthData);
 

@@ -16,6 +16,8 @@ final readonly class RecordWaterIntakeAction
 
     private const string WATER_UNIT = 'mL';
 
+    public function __construct(private ForgetEmptyDailyTotalsAction $forgetEmptyDailyTotals) {}
+
     /**
      * @return list<string>
      */
@@ -37,7 +39,9 @@ final readonly class RecordWaterIntakeAction
                 ...$logged->toBase()->map(static fn (HealthSyncSample $sample): string => $sample->measured_at->copy()->utc()->toDateString())->all(),
             ]));
 
-            $user->healthSyncSamples()->whereKey($logged->modelKeys())->delete();
+            if ($logged->isNotEmpty()) {
+                $user->healthSyncSamples()->whereKey($logged->modelKeys())->delete();
+            }
 
             if ($amountMl > 0) {
                 $user->healthSyncSamples()->create([
@@ -49,31 +53,9 @@ final readonly class RecordWaterIntakeAction
                 ]);
             }
 
-            $this->forgetEmptyWaterTotals($user, $affectedUtcDates);
+            $this->forgetEmptyDailyTotals->handle($user, $affectedUtcDates, [self::WATER_TYPE]);
 
             return $affectedUtcDates;
         });
-    }
-
-    /**
-     * @param  list<string>  $utcDates
-     */
-    private function forgetEmptyWaterTotals(User $user, array $utcDates): void
-    {
-        foreach ($utcDates as $utcDate) {
-            $utcDay = CarbonImmutable::parse($utcDate, 'UTC');
-
-            $hasWater = $user->healthSyncSamples()
-                ->where('type_identifier', self::WATER_TYPE)
-                ->measuredWithinDay($utcDay)
-                ->exists();
-
-            if (! $hasWater) {
-                $user->healthDailyAggregates()
-                    ->forDate($utcDay)
-                    ->ofType(self::WATER_TYPE)
-                    ->delete();
-            }
-        }
     }
 }

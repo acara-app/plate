@@ -9,9 +9,12 @@ use App\Enums\SubscriptionTier;
 use App\Http\Controllers\Api\V2\SnapToTrack\AnalyzeSnapToTrackPhotoController;
 use App\Models\AiUsage;
 use App\Models\AnalysisDraft;
+use App\Models\MealPhoto;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 
 covers(AnalyzeSnapToTrackPhotoController::class);
@@ -64,6 +67,7 @@ function zeroApiSnapCreditBudget(): void
 }
 
 beforeEach(function (): void {
+    Storage::fake(MealPhoto::DISK);
     $this->user = User::factory()->create();
     $this->token = $this->user->createToken('mobile:test', ['chat:converse'])->plainTextToken;
 
@@ -248,4 +252,51 @@ it('matches a regional Accept-Language tag to its base language', function (): v
         ->assertOk();
 
     FoodPhotoAnalyzerAgent::assertPrompted(fn ($prompt): bool => str_contains($prompt->agent->instructions(), 'Français'));
+});
+
+it('keeps the photo privately so the logged meal shows it', function (): void {
+    fakeApiSnapAnalysis();
+    $photo = base64_encode((string) UploadedFile::fake()->image('meal.jpg', 2000, 1500)->get());
+
+    $token = $this->withHeader('Authorization', 'Bearer '.$this->token)
+        ->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => 'data:image/jpeg;base64,'.$photo])
+        ->assertOk()
+        ->json('draft_token');
+
+    $stored = MealPhoto::query()->sole();
+    $size = getimagesizefromstring((string) Storage::disk(MealPhoto::DISK)->get($stored->path));
+
+    expect($stored->user_id)->toBe($this->user->id)
+        ->and($stored->analysis_draft_id)->toBe(AnalysisDraft::query()->sole()->id)
+        ->and($stored->health_group_id)->toBeNull()
+        ->and([$size[0], $size[1], $size['mime']])->toBe([1280, 960, 'image/jpeg']);
+
+    $groupId = $this->postJson(route('api.v2.snap-to-track.meal', ['draft' => $token]), [
+        'items' => [['name' => 'Avocado toast', 'portion' => '1 slice', 'calories' => 320, 'protein' => 9, 'carbs' => 30, 'fat' => 19, 'provenance' => 'model']],
+        'measured_at' => now()->toIso8601String(),
+    ])->assertCreated()->json('group_id');
+
+    expect($stored->refresh()->health_group_id)->toBe($groupId);
+
+    $this->getJson(route('api.v2.health-entries.index'))
+        ->assertOk()
+        ->assertJsonPath('entries.0.photo_url', '/api/v2/health-entries/'.$groupId.'/photo');
+
+    $this->get(route('api.v2.health-entries.photo', ['group' => $groupId]))
+        ->assertOk()
+        ->assertHeader('Content-Type', 'image/jpeg');
+});
+
+it('still returns the analysis when the photo cannot be kept', function (): void {
+    Exceptions::fake();
+    fakeApiSnapAnalysis();
+    $unreadableGif = 'GIF89a'.pack('vv', 10, 10)."\0\0\0";
+
+    $this->withHeader('Authorization', 'Bearer '.$this->token)
+        ->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => base64_encode($unreadableGif)])
+        ->assertOk()
+        ->assertJsonPath('analysis.total_calories', 320);
+
+    expect(MealPhoto::query()->count())->toBe(0);
+    Exceptions::assertReported(RuntimeException::class);
 });

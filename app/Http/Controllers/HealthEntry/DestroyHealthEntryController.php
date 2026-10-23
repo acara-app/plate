@@ -21,7 +21,7 @@ final readonly class DestroyHealthEntryController
     {
         Gate::authorize('delete', $healthSyncSample);
         $user = $healthSyncSample->user;
-        $affectedUtcDates = $this->affectedUtcDatesForDeletion($healthSyncSample);
+        $affectedUtcDates = $healthSyncSample->groupUtcDates();
 
         $localDate = $healthSyncSample->measured_at->toImmutable()->setTimezone($user->resolveTimezone())->toDateString();
 
@@ -29,18 +29,5 @@ final readonly class DestroyHealthEntryController
         $this->dispatchAggregateUserUtcDates->handle($user, $affectedUtcDates);
 
         return to_route('health-entries.index', ['date' => $localDate])->with('success', 'Health entry deleted successfully.');
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function affectedUtcDatesForDeletion(HealthSyncSample $healthSyncSample): array
-    {
-        /** @var list<string> */
-        return $healthSyncSample->groupMembers()
-            ->map(static fn (HealthSyncSample $sample): string => $sample->measured_at->copy()->utc()->toDateString())
-            ->unique()
-            ->values()
-            ->all();
     }
 }
