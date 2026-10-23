@@ -20,5 +20,6 @@ final class DailyWellnessData extends Data
         public int $waterMl,
         public int $waterSyncedMl,
         public int $waterGoalMl,
+        public ?float $syncedExerciseMinutes,
     ) {}
 }

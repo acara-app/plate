@@ -75,6 +75,11 @@ enum HealthSyncType: string
         return $this === self::Fiber;
     }
 
+    public function isBloodPressureReading(): bool
+    {
+        return $this === self::BloodPressureSystolic || $this === self::BloodPressureDiastolic;
+    }
+
     public function isUserCharacteristic(): bool
     {
         return in_array($this, [

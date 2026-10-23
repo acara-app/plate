@@ -358,6 +358,7 @@ return [
             'today' => 'Aujourd’hui',
             'has_entries' => 'avec des entrées',
             'today_entries' => 'Entrées du jour',
+            'synced_exercise_total' => 'Total du jour d’Apple Santé',
             'add' => 'Ajouter',
             'empty_today' => 'Rien de noté pour l’instant aujourd’hui',
             'empty_day' => 'Rien de noté ce jour-là',

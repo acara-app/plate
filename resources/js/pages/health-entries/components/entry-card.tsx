@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import type { HealthEntry } from '@/types/diabetes';
 import { Link } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
+import { ENTRY_CARD } from './entry-card-layout';
 import { formatAmount, MACROS } from './macros';
 import MealPhotoImage from './meal-photo-image';
 
@@ -33,9 +34,12 @@ export default function EntryCard({
     return (
         <Link
             href={ShowHealthEntryController(entry.id)}
-            className="group flex min-h-28 overflow-hidden rounded-3xl bg-card shadow-xs ring-1 ring-border/60 transition outline-none hover:ring-primary/40 focus-visible:ring-[3px] focus-visible:ring-primary/50"
+            className={cn(
+                ENTRY_CARD.shell,
+                'group transition outline-none hover:ring-primary/40 focus-visible:ring-[3px] focus-visible:ring-primary/50',
+            )}
         >
-            <div className="relative w-28 shrink-0 overflow-hidden sm:w-32">
+            <div className={cn(ENTRY_CARD.media, 'relative overflow-hidden')}>
                 {entry.photo_url ? (
                     <MealPhotoImage
                         src={entry.photo_url}
@@ -60,7 +64,7 @@ export default function EntryCard({
                     </span>
                 )}
             </div>
-            <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4">
+            <div className={ENTRY_CARD.body}>
                 <div className="flex min-w-0 items-baseline gap-2">
                     <h3 className="line-clamp-2 min-w-0 flex-1 leading-snug font-semibold break-words">
                         {entryTitle(entry, t)}
@@ -76,7 +80,7 @@ export default function EntryCard({
                     </time>
                 </div>
                 {isMeal && entry.calories !== null && (
-                    <p className="text-sm font-semibold text-primary tabular-nums">
+                    <p className={ENTRY_CARD.value}>
                         {formatAmount(entry.calories, locale)}{' '}
                         {t('health_entries.nutrition.kcal')}
                     </p>

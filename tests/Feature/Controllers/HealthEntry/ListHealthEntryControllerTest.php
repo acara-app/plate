@@ -52,6 +52,7 @@ it('renders the logbook for today in the user’s timezone', function (): void {
                 'water_ml' => 0,
                 'water_synced_ml' => 0,
                 'water_goal_ml' => 2000,
+                'synced_exercise_minutes' => null,
             ])
             ->has('glucoseReadingTypes')
             ->has('insulinTypes'));
@@ -134,4 +135,31 @@ it('suggests the current account-local time on a past day for new entries', func
         ->get(route('health-entries.index', ['date' => '2026-10-17']))
         ->assertOk()
         ->assertInertia(fn ($page) => $page->where('newEntryAt', '2026-10-17T01:00:00+08:00'));
+});
+
+it('summarizes synced exercise minutes while keeping manual exercise and workouts in the logbook', function (): void {
+    $user = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
+    $day = CarbonImmutable::parse('2026-10-21', 'Asia/Ulaanbaatar');
+    HealthSyncSample::factory()->exercise()->fromMobileSync()->count(12)
+        ->sequence(fn ($sequence): array => ['measured_at' => $day->setTime(9, $sequence->index)->utc()])
+        ->create(['user_id' => $user->id, 'source' => 'Apple Watch', 'value' => 1]);
+    $manual = HealthSyncSample::factory()->exercise()->fromWeb()->create([
+        'user_id' => $user->id, 'value' => 30, 'measured_at' => $day->setTime(16, 0)->utc(),
+    ]);
+    $workout = HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+        'user_id' => $user->id, 'type_identifier' => 'workouts', 'value' => 45, 'measured_at' => $day->setTime(17, 0)->utc(),
+    ]);
+    $glucose = HealthSyncSample::factory()->bloodGlucose()->fromMobileSync()->create([
+        'user_id' => $user->id, 'measured_at' => $day->setTime(18, 0)->utc(),
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('health-entries.index', ['date' => '2026-10-21']))
+        ->assertInertia(fn ($page) => $page
+            ->where('wellness.synced_exercise_minutes', 12)
+            ->missing('exerciseSummary')
+            ->where('entries', fn ($entries): bool => collect($entries)->pluck('id')->all() === [$glucose->id, $workout->id, $manual->id])
+            ->where('loggedDates', ['2026-10-21']));
+
+    $this->assertDatabaseCount('health_sync_samples', 15);
 });

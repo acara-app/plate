@@ -6,6 +6,7 @@ namespace App\Http\Controllers\HealthEntry;
 
 use App\Actions\DispatchAggregateUserUtcDatesAction;
 use App\Actions\UpdateHealthSampleAction;
+use App\Enums\HealthEntrySource;
 use App\Http\Requests\HealthEntryRequest;
 use App\Models\HealthSyncSample;
 use App\Models\User;
@@ -29,7 +30,7 @@ final readonly class UpdateHealthEntryController
         $metadata = HealthSyncSample::firstMetadataIn($healthSyncSample->groupMembers(), 'snap_to_track');
         $healthData = $request->healthLogData(is_array($metadata) ? $metadata : []);
 
-        $updatedSample = $this->updateHealthSample->handle($healthSyncSample, $healthData);
+        $updatedSample = $this->updateHealthSample->handle($healthSyncSample, $healthData, HealthEntrySource::Web);
 
         $this->dispatchAggregateUserUtcDates->handle(
             $this->currentUser,
