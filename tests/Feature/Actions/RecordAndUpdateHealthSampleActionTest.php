@@ -12,6 +12,7 @@ use App\Enums\HealthSyncType;
 use App\Enums\MealType;
 use App\Models\HealthSyncSample;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 
 covers(UpdateHealthSampleAction::class, DeleteHealthSampleAction::class);
@@ -42,6 +43,7 @@ it('replaces only the edited kind of reading and keeps the rest of the group', f
     $result = resolve(UpdateHealthSampleAction::class)->handle(
         $boundToEditedKind ? $carbs : $glucose,
         new HealthLogData(isHealthData: true, logType: HealthEntryType::Food, carbsGrams: 60.0, measuredAt: now()->subHour()->toImmutable(), notes: 'Pasta'),
+        HealthEntrySource::Web,
     );
 
     $members = HealthSyncSample::query()->where('group_id', $groupId)->get();
@@ -73,7 +75,7 @@ it('keeps a meal when only the reading logged with it is edited', function (): v
         isHealthData: true,
         logType: HealthEntryType::Glucose,
         glucoseValue: 140.0,
-    ));
+    ), HealthEntrySource::Web);
 
     expect(HealthSyncSample::query()->where('group_id', $groupId)->pluck('value', 'type_identifier')->all())->toEqual([
         HealthSyncType::Carbohydrates->value => 50,
@@ -90,7 +92,7 @@ it("replaces or removes a meal's fiber when its ingredients are edited", functio
     resolve(UpdateHealthSampleAction::class)->handle($sample, new ReviewedMealData(
         [['name' => 'Oats', 'calories' => 300, 'carbs' => 54, 'fiber' => $fiber]],
         now()->toImmutable(),
-    )->toHealthLogDataWithMetadata([]));
+    )->toHealthLogDataWithMetadata([]), HealthEntrySource::Web);
 
     expect(HealthSyncSample::query()->where('group_id', $groupId)->where('type_identifier', 'fiber')->value('value'))->toBe($stored);
 })->with([
@@ -107,7 +109,7 @@ it('clears fiber when a totals-only update explicitly sends none', function (): 
 
     resolve(UpdateHealthSampleAction::class)->handle($sample, HealthLogData::fromParsedArray([
         'log_type' => 'food', 'carbs_grams' => 54, 'protein_grams' => 10, 'fat_grams' => 5, 'calories' => 300, 'fiber_grams' => null,
-    ]));
+    ]), HealthEntrySource::Web);
 
     expect(HealthSyncSample::query()->whereBelongsTo($user)->where('type_identifier', 'fiber')->exists())->toBeFalse();
 });
@@ -129,7 +131,7 @@ it('creates additional group members when updating to a multi-sample entry', fun
         proteinGrams: 20.0,
     );
 
-    $result = resolve(UpdateHealthSampleAction::class)->handle($sample, $data);
+    $result = resolve(UpdateHealthSampleAction::class)->handle($sample, $data, HealthEntrySource::Web);
 
     expect($result->id)->toBe($sample->id)
         ->and($result->group_id)->not->toBeNull();
@@ -164,7 +166,7 @@ it('keeps the stored meal type when an edit does not choose one', function (?Mea
         carbsGrams: 45.0,
         calories: 320,
         mealType: $chosen,
-    ));
+    ), HealthEntrySource::Web);
 
     expect(HealthSyncSample::query()->where('group_id', $groupId)->pluck('metadata')->pluck('meal_type')->unique()->all())
         ->toBe([$expected]);
@@ -196,3 +198,49 @@ it('deletes all group members when sample has a group_id', function (): void {
         ->and(HealthSyncSample::query()->find($sibling->id))->toBeNull()
         ->and(HealthSyncSample::query()->find($unrelated->id))->not->toBeNull();
 });
+
+it('keeps an edited synced exercise reading’s kind and moves its recorded span with it', function (string $type): void {
+    $sample = HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+        'type_identifier' => $type,
+        'value' => 10,
+        'measured_at' => '2026-10-21 09:00:20',
+        'ended_at' => '2026-10-21 09:10:20',
+    ]);
+
+    $updated = resolve(UpdateHealthSampleAction::class)->handle($sample, new HealthLogData(
+        isHealthData: true,
+        logType: HealthEntryType::Exercise,
+        exerciseType: 'yoga',
+        exerciseDurationMinutes: 30,
+        measuredAt: CarbonImmutable::parse('2026-10-21 18:00:00'),
+        notes: 'Class',
+    ), HealthEntrySource::Web);
+
+    expect($updated->type_identifier)->toBe($type)
+        ->and($updated->value)->toBe(30.0)
+        ->and($updated->measured_at->toDateTimeString())->toBe('2026-10-21 18:00:00')
+        ->and($updated->ended_at?->toDateTimeString())->toBe('2026-10-21 18:10:00');
+})->with([
+    'exercise minutes' => [HealthSyncType::ExerciseMinutes->value],
+    'workout' => [HealthSyncType::Workouts->value],
+]);
+
+it('makes an edited synced reading the user’s own and keeps where other readings were logged', function (?HealthEntrySource $loggedFrom, HealthEntrySource $editedFrom, ?HealthEntrySource $expected): void {
+    $user = User::factory()->create();
+    $groupId = (string) Str::uuid();
+    $glucose = HealthSyncSample::factory()->for($user)->bloodGlucose()->create(['entry_source' => $loggedFrom, 'group_id' => $groupId]);
+    HealthSyncSample::factory()->for($user)->exercise()->create(['entry_source' => $loggedFrom, 'group_id' => $groupId]);
+
+    resolve(UpdateHealthSampleAction::class)->handle($glucose, new HealthLogData(
+        isHealthData: true,
+        logType: HealthEntryType::Glucose,
+        glucoseValue: 140.0,
+    ), $editedFrom);
+
+    expect(HealthSyncSample::query()->where('group_id', $groupId)->get()->pluck('entry_source')->unique()->all())->toBe([$expected]);
+})->with([
+    'synced, edited on the web' => [HealthEntrySource::MobileSync, HealthEntrySource::Web, HealthEntrySource::Web],
+    'synced, edited in the app' => [HealthEntrySource::MobileSync, HealthEntrySource::Mobile, HealthEntrySource::Mobile],
+    'logged in chat' => [HealthEntrySource::Chat, HealthEntrySource::Web, HealthEntrySource::Chat],
+    'no recorded source' => [null, HealthEntrySource::Mobile, null],
+]);

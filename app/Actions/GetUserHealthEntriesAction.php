@@ -9,6 +9,7 @@ use App\Enums\MealPhotoRoute;
 use App\Models\User;
 use App\Services\HealthEntryAssembler;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 final readonly class GetUserHealthEntriesAction
@@ -18,15 +19,14 @@ final readonly class GetUserHealthEntriesAction
     /**
      * @return Collection<int, array<string, mixed>>
      */
-    public function handle(User $user, CarbonImmutable $day, MealPhotoRoute $photoRoute = MealPhotoRoute::Web, GlucoseUnit $glucoseUnit = GlucoseUnit::MgDl): Collection
+    public function handle(User $user, CarbonImmutable $day, MealPhotoRoute $photoRoute = MealPhotoRoute::Web, GlucoseUnit $glucoseUnit = GlucoseUnit::MgDl, bool $includeSyncedExerciseMinutes = false): Collection
     {
         $timezone = $day->getTimezone()->getName();
-        $start = $day->startOfDay();
 
         $samples = $user->healthSyncSamples()
             ->logbookEntries()
-            ->where('measured_at', '>=', $start->utc())
-            ->where('measured_at', '<', $start->addDay()->utc())
+            ->measuredWithinDay($day->startOfDay())
+            ->unless($includeSyncedExerciseMinutes, fn (Builder $query): Builder => $query->excludingSyncedExerciseMinutes())
             ->get();
 
         return $this->assembler->assemble($samples, $timezone, $photoRoute, $glucoseUnit);

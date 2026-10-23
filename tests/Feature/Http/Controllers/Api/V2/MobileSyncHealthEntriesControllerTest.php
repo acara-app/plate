@@ -14,7 +14,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Queue;
 
-covers(MobileSyncHealthEntriesController::class);
+covers(MobileSyncHealthEntriesController::class, HealthSyncType::class);
 
 /**
  * @param  array<int, array<string, mixed>>  $entries
@@ -146,7 +146,7 @@ it('syncs blood glucose to health sync samples with random reading type', functi
         ->metadata->toBe(['glucose_reading_type' => 'random']);
 });
 
-it('syncs blood pressure to two health sync sample rows with shared group_id', function (): void {
+it('syncs blood pressure to two health sync sample rows with shared group_id and leaves other readings at that second ungrouped', function (): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->paired()->create([
         'device_identifier' => 'test-uuid',
@@ -172,15 +172,21 @@ it('syncs blood pressure to two health sync sample rows with shared group_id', f
                     'unit' => 'mmHg',
                     'date' => '2026-03-25T10:30:00Z',
                 ],
+                [
+                    'type' => HealthSyncType::ExerciseMinutes->value,
+                    'value' => 1,
+                    'unit' => 'min',
+                    'date' => '2026-03-25T10:30:00Z',
+                ],
             ], $encryptionKey),
         ])
         ->assertOk()
         ->assertJson([
-            'samples_created' => 2,
+            'samples_created' => 3,
             'samples_updated' => 0,
         ]);
 
-    expect(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(2);
+    expect(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(3);
 
     $systolic = HealthSyncSample::query()->where('user_id', $user->id)
         ->where('type_identifier', HealthSyncType::BloodPressureSystolic->value)
@@ -194,7 +200,8 @@ it('syncs blood pressure to two health sync sample rows with shared group_id', f
         ->and($diastolic->value)->toBe(80.0)
         ->and($systolic->entry_source->value)->toBe('mobile_sync')
         ->and($systolic->group_id)->not->toBeNull()
-        ->and($systolic->group_id)->toBe($diastolic->group_id);
+        ->and($systolic->group_id)->toBe($diastolic->group_id)
+        ->and(HealthSyncSample::query()->where('user_id', $user->id)->where('type_identifier', HealthSyncType::ExerciseMinutes->value)->sole()->group_id)->toBeNull();
 });
 
 it('syncs weight to health sync samples', function (): void {

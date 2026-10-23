@@ -10,6 +10,7 @@ use App\Models\User;
 use DateTimeImmutable;
 use DateTimeZone;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 final class HealthSyncSamplesFixture
@@ -134,7 +135,7 @@ final class HealthSyncSamplesFixture
                     continue;
                 }
 
-                $source = self::nullable($row[$idx['source']]) ?? '';
+                $source = Str::squish(self::nullable($row[$idx['source']]) ?? '');
                 $rank = 99;
                 foreach ($priority as $i => $prefSubstring) {
                     if (str_contains($source, $prefSubstring)) {

@@ -7,6 +7,7 @@ namespace App\Actions;
 use App\Data\DailyWellnessData;
 use App\Enums\DailyCheckInMetric;
 use App\Enums\HealthEntrySource;
+use App\Enums\HealthSyncType;
 use App\Enums\SleepQuality;
 use App\Enums\StressLevel;
 use App\Models\HealthSyncSample;
@@ -63,6 +64,7 @@ final readonly class GetDailyWellnessAction
             waterMl: $waterSyncedMl + $waterLoggedMl,
             waterSyncedMl: $waterSyncedMl,
             waterGoalMl: self::WATER_GOAL_ML,
+            syncedExerciseMinutes: $this->syncedExerciseMinutes($user, $start),
         );
     }
 
@@ -84,6 +86,16 @@ final readonly class GetDailyWellnessAction
     private function steps(User $user, CarbonImmutable $start): int
     {
         return (int) round($this->deduplicatedTotal($this->samplesOn($user, $start, self::STEP_COUNT_TYPE), self::STEP_COUNT_TYPE));
+    }
+
+    private function syncedExerciseMinutes(User $user, CarbonImmutable $start): ?float
+    {
+        $samples = $user->healthSyncSamples()
+            ->syncedExerciseMinutes()
+            ->measuredWithinDay($start)
+            ->get(['source', 'value', 'measured_at', 'ended_at']);
+
+        return $samples->isEmpty() ? null : round($this->deduplicatedTotal($samples, HealthSyncType::ExerciseMinutes->value), 1);
     }
 
     /**

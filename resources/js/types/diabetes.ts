@@ -137,4 +137,5 @@ export interface DailyWellness {
     water_ml: number;
     water_synced_ml: number;
     water_goal_ml: number;
+    synced_exercise_minutes: number | null;
 }

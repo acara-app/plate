@@ -19,7 +19,7 @@ final readonly class GetUserLoggedDatesAction
         $dates = $user->healthSyncSamples()
             ->logbookEntries()
             ->where('measured_at', '>=', $from->startOfDay()->utc())
-            ->where('measured_at', '<', $to->startOfDay()->addDay()->utc())
+            ->where('measured_at', '<', $to->addDay()->startOfDay()->utc())
             ->toBase()
             ->pluck('measured_at')
             ->map(fn (mixed $measuredAt): string => CarbonImmutable::parse(is_string($measuredAt) ? $measuredAt : '', 'UTC')->setTimezone($timezone)->toDateString())

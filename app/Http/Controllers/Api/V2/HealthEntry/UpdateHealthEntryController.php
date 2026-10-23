@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\V2\HealthEntry;
 use App\Actions\DispatchAggregateUserUtcDatesAction;
 use App\Actions\GetHealthEntryAction;
 use App\Actions\UpdateHealthSampleAction;
+use App\Enums\HealthEntrySource;
 use App\Enums\MealPhotoRoute;
 use App\Http\Requests\HealthEntryRequest;
 use App\Models\HealthSyncSample;
@@ -33,6 +34,7 @@ final readonly class UpdateHealthEntryController
         $updatedSample = $this->updateHealthSample->handle(
             $healthSyncSample,
             $request->healthLogData(is_array($metadata) ? $metadata : []),
+            HealthEntrySource::Mobile,
         );
 
         $this->dispatchAggregateUserUtcDates->handle($user, [

@@ -6,7 +6,9 @@ namespace App\Actions;
 
 use App\Data\HealthLogData;
 use App\Data\ReviewedMealData;
+use App\Enums\HealthEntrySource;
 use App\Enums\HealthEntryType;
+use App\Enums\HealthSyncType;
 use App\Enums\MealType;
 use App\Models\HealthSyncSample;
 use App\Models\MealPhoto;
@@ -17,9 +19,9 @@ use Illuminate\Support\Str;
 
 final readonly class UpdateHealthSampleAction
 {
-    public function handle(HealthSyncSample $sample, HealthLogData $data): HealthSyncSample
+    public function handle(HealthSyncSample $sample, HealthLogData $data, HealthEntrySource $editedFrom): HealthSyncSample
     {
-        return DB::transaction(function () use ($sample, $data): HealthSyncSample {
+        return DB::transaction(function () use ($sample, $data, $editedFrom): HealthSyncSample {
             $measuredAt = ($data->measuredAt ?? $sample->measured_at)->toImmutable()->utc();
             $groupId = $sample->group_id;
             $editedTypes = $data->logType->sampleTypeValues();
@@ -42,21 +44,23 @@ final readonly class UpdateHealthSampleAction
                 MealPhoto::deleteForGroup($sample->user_id, $groupId);
             }
 
-            HealthSyncSample::query()->whereKey($kept->modelKeys())->update([
-                'measured_at' => $measuredAt,
-                'notes' => $data->notes,
-                'group_id' => $newGroupId,
-            ]);
+            foreach ($kept as $member) {
+                $member->update([
+                    ...$this->editedPlacement($member, $editedFrom, $measuredAt),
+                    'notes' => $data->notes,
+                    'group_id' => $newGroupId,
+                ]);
+            }
 
             if ($replaced->contains('id', $sample->id)) {
                 /** @var array{type_identifier: string, value: float|int, unit: string, metadata?: array<string, mixed>} $first */
                 $first = array_shift($newSamples);
 
                 $sample->update([
+                    ...$this->editedPlacement($sample, $editedFrom, $measuredAt),
                     'type_identifier' => $first['type_identifier'],
                     'value' => $first['value'],
                     'unit' => $first['unit'],
-                    'measured_at' => $measuredAt,
                     'metadata' => empty($first['metadata']) ? null : $first['metadata'],
                     'notes' => $data->notes,
                     'group_id' => $newGroupId,
@@ -70,7 +74,7 @@ final readonly class UpdateHealthSampleAction
                     'value' => $sampleData['value'],
                     'unit' => $sampleData['unit'],
                     'measured_at' => $measuredAt,
-                    'entry_source' => $sample->entry_source,
+                    'entry_source' => $this->editedEntrySource($sample, $editedFrom),
                     'metadata' => empty($sampleData['metadata']) ? null : $sampleData['metadata'],
                     'notes' => $data->notes,
                     'group_id' => $newGroupId,
@@ -81,12 +85,36 @@ final readonly class UpdateHealthSampleAction
         });
     }
 
+    private function editedEntrySource(HealthSyncSample $member, HealthEntrySource $editedFrom): ?HealthEntrySource
+    {
+        return $member->entry_source === HealthEntrySource::MobileSync ? $editedFrom : $member->entry_source;
+    }
+
+    /**
+     * @return array{entry_source: HealthEntrySource|null, measured_at: CarbonImmutable, ended_at: CarbonImmutable|null}
+     */
+    private function editedPlacement(HealthSyncSample $member, HealthEntrySource $editedFrom, CarbonImmutable $measuredAt): array
+    {
+        return [
+            'entry_source' => $this->editedEntrySource($member, $editedFrom),
+            'measured_at' => $measuredAt,
+            'ended_at' => $member->ended_at === null ? null : $measuredAt->addSeconds(max(0, $member->measured_at->diffInSeconds($member->ended_at))),
+        ];
+    }
+
     /**
      * @param  Collection<int, HealthSyncSample>  $replaced
      * @return array<int, array{type_identifier: string, value: float|int, unit: string, metadata?: array<string, mixed>}>
      */
     private function newSamples(HealthLogData $data, Collection $replaced, CarbonImmutable $measuredAt): array
     {
+        if ($data->logType === HealthEntryType::Exercise && $replaced->contains('type_identifier', HealthSyncType::Workouts->value)) {
+            return array_map(
+                static fn (array $sample): array => [...$sample, 'type_identifier' => HealthSyncType::Workouts->value],
+                $data->toSampleArrays(),
+            );
+        }
+
         if ($data->logType !== HealthEntryType::Food) {
             return $data->toSampleArrays();
         }

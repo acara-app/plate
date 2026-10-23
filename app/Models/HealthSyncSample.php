@@ -221,6 +221,27 @@ final class HealthSyncSample extends Model
      * @param  Builder<self>  $query
      */
     #[Scope]
+    protected function syncedExerciseMinutes(Builder $query): void
+    {
+        $query->where('type_identifier', HealthSyncType::ExerciseMinutes->value)
+            ->whereNotNull('entry_source')
+            ->where('entry_source', HealthEntrySource::MobileSync->value)
+            ->whereNull('group_id');
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function excludingSyncedExerciseMinutes(Builder $query): void
+    {
+        $query->whereNot(fn (Builder $synced): Builder => $synced->syncedExerciseMinutes());
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
     protected function forEntrySource(Builder $query, HealthEntrySource $source): void
     {
         $query->where('entry_source', $source->value);
@@ -233,7 +254,7 @@ final class HealthSyncSample extends Model
     protected function measuredWithinDay(Builder $query, CarbonInterface $dayStart): void
     {
         $query->where('measured_at', '>=', $dayStart->copy()->utc())
-            ->where('measured_at', '<', $dayStart->copy()->addDay()->utc());
+            ->where('measured_at', '<', $dayStart->copy()->addDay()->startOfDay()->utc());
     }
 
     /**

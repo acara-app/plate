@@ -67,7 +67,7 @@ final readonly class SyncMobileHealthEntriesAction
                 continue;
             }
 
-            if ($syncType === HealthSyncType::BloodPressureSystolic || $syncType === HealthSyncType::BloodPressureDiastolic) {
+            if ($syncType?->isBloodPressureReading() === true) {
                 $dateKey = Date::parse($entry->date)->utc()->toDateTimeString();
                 $bpGroupIds[$dateKey] ??= (string) Str::uuid();
             }
@@ -158,7 +158,7 @@ final readonly class SyncMobileHealthEntriesAction
                 'user_id' => $user->id,
                 'mobile_sync_device_id' => $device->id,
                 'type_identifier' => $entry->type,
-                'group_id' => $bpGroupIds[$dateKey] ?? null,
+                'group_id' => $syncType?->isBloodPressureReading() === true ? ($bpGroupIds[$dateKey] ?? null) : null,
             ]);
             $cache[$key] = $sample;
 
