@@ -15,6 +15,7 @@ final class ListHealthEntriesRequest extends FormRequest
     {
         return [
             'date' => ['nullable', 'date_format:Y-m-d'],
+            'exercise_summary' => ['sometimes', 'boolean'],
         ];
     }
 

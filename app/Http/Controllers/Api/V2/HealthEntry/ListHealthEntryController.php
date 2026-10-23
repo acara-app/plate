@@ -30,6 +30,8 @@ final readonly class ListHealthEntryController
         $day = $request->selectedDay($timezone);
         $weekStart = $request->selectedWeekStart($timezone);
         $now = CarbonImmutable::now($timezone);
+        $wellness = $this->getDailyWellness->handle($user, $day);
+        $exerciseSummary = $request->boolean('exercise_summary') && $wellness->syncedExerciseMinutes !== null;
 
         return response()->json([
             'date' => $day->toDateString(),
@@ -38,10 +40,11 @@ final readonly class ListHealthEntryController
             'week_start' => $weekStart->toDateString(),
             'new_entry_at' => $day->isSameDay($now) ? null : $day->setTimeFrom($now)->toIso8601String(),
             'glucose_unit' => $user->glucoseUnit()->value,
-            'entries' => $this->getUserHealthEntries->handle($user, $day, MealPhotoRoute::Api, $user->glucoseUnit(), includeSyncedExerciseMinutes: true)->all(),
+            'exercise_summary' => $exerciseSummary,
+            'entries' => $this->getUserHealthEntries->handle($user, $day, MealPhotoRoute::Api, $user->glucoseUnit(), includeSyncedExerciseMinutes: ! $exerciseSummary)->all(),
             'logged_dates' => $this->getUserLoggedDates->handle($user, $weekStart, $weekStart->addDays(6)),
             'goals' => $this->calculateDailyNutritionGoals->handle($user->profile)?->toArray(),
-            'wellness' => $this->getDailyWellness->handle($user, $day)->toArray(),
+            'wellness' => $wellness->toArray(),
         ]);
     }
 }
