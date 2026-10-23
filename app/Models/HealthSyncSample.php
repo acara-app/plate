@@ -165,6 +165,19 @@ final class HealthSyncSample extends Model
     }
 
     /**
+     * @return list<string>
+     */
+    public function groupUtcDates(): array
+    {
+        /** @var list<string> */
+        return $this->groupMembers()
+            ->map(static fn (self $sample): string => $sample->measured_at->copy()->utc()->toDateString())
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
