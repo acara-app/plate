@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\GetUserHealthEntriesAction;
 use App\Actions\GetUserLoggedDatesAction;
+use App\Enums\HealthEntrySource;
 use App\Enums\HealthSyncType;
 use App\Models\HealthSyncSample;
 use App\Models\User;
@@ -94,3 +95,30 @@ it('opens a synced blood pressure reading even when fiber at the same time was s
 
     $this->actingAs($user)->get(route('health-entries.show', $entries[0]['id']))->assertOk();
 });
+
+it('preserves exercise from non-sync sources when synced minute rows are excluded', function (?HealthEntrySource $source): void {
+    $user = User::factory()->create();
+    $day = CarbonImmutable::parse('2026-10-21', 'UTC');
+    $exercise = HealthSyncSample::factory()->exercise()->create([
+        'user_id' => $user->id, 'entry_source' => $source, 'measured_at' => $day->setTime(9, 0),
+    ]);
+    HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+        'user_id' => $user->id, 'measured_at' => $day->setTime(10, 0),
+    ]);
+    HealthSyncSample::factory()->exercise()->create([
+        'entry_source' => $source, 'measured_at' => $day->setTime(9, 0),
+    ]);
+    HealthSyncSample::factory()->exercise()->create([
+        'user_id' => $user->id, 'entry_source' => $source, 'measured_at' => $day->addDay(),
+    ]);
+
+    $entries = resolve(GetUserHealthEntriesAction::class)->handle($user, $day, includeSyncedExerciseMinutes: false);
+
+    expect($entries->pluck('id')->all())->toBe([$exercise->id]);
+})->with([
+    'web' => [HealthEntrySource::Web],
+    'chat' => [HealthEntrySource::Chat],
+    'telegram' => [HealthEntrySource::Telegram],
+    'mobile' => [HealthEntrySource::Mobile],
+    'unspecified source' => [null],
+]);

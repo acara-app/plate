@@ -12,6 +12,7 @@ import { cn, generateUUID } from '@/lib/utils';
 import chat from '@/routes/chat';
 import { type BreadcrumbItem } from '@/types';
 import {
+    DailyExerciseSummary,
     DailyNutritionGoals,
     DailyWellness,
     HealthEntry,
@@ -27,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import CalorieGoalCard from './components/calorie-goal-card';
 import DailyTrackers from './components/daily-trackers';
 import EntryCard from './components/entry-card';
+import ExerciseSummaryCard from './components/exercise-summary-card';
 import MacroGoals from './components/macro-goals';
 import { sumNutrition } from './components/macros';
 import WeekStrip from './components/week-strip';
@@ -38,6 +40,7 @@ interface Props {
     today: string;
     newEntryAt: string | null;
     entries: HealthEntry[];
+    exerciseSummary: DailyExerciseSummary | null;
     loggedDates: string[];
     goals: DailyNutritionGoals | null;
     wellness: DailyWellness;
@@ -54,6 +57,7 @@ export default function HealthEntriesIndex({
     today,
     newEntryAt,
     entries,
+    exerciseSummary,
     loggedDates,
     goals,
     wellness,
@@ -165,7 +169,7 @@ export default function HealthEntriesIndex({
                                 {t('health_entries.logbook.add')}
                             </Button>
                         </div>
-                        {entries.length === 0 ? (
+                        {entries.length === 0 && exerciseSummary === null ? (
                             <div className="flex flex-col items-center gap-4 rounded-3xl bg-card px-6 py-12 text-center ring-1 ring-border/60">
                                 <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10">
                                     <BookOpen
@@ -215,6 +219,13 @@ export default function HealthEntriesIndex({
                             </div>
                         ) : (
                             <ul className="flex flex-col gap-3">
+                                {exerciseSummary !== null && (
+                                    <li>
+                                        <ExerciseSummaryCard
+                                            summary={exerciseSummary}
+                                        />
+                                    </li>
+                                )}
                                 {entries.map((entry) => (
                                     <li key={entry.id}>
                                         <EntryCard

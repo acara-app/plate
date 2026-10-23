@@ -358,6 +358,8 @@ return [
             'today' => 'Aujourd’hui',
             'has_entries' => 'avec des entrées',
             'today_entries' => 'Entrées du jour',
+            'synced_exercise' => 'Exercice synchronisé',
+            'synced_daily_total' => 'Total quotidien de l’activité synchronisée',
             'add' => 'Ajouter',
             'empty_today' => 'Rien de noté pour l’instant aujourd’hui',
             'empty_day' => 'Rien de noté ce jour-là',

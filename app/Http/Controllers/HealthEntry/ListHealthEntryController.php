@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\HealthEntry;
 
 use App\Actions\CalculateDailyNutritionGoals;
+use App\Actions\GetDailyExerciseSummary;
 use App\Actions\GetDailyWellnessAction;
 use App\Actions\GetUserHealthEntriesAction;
 use App\Actions\GetUserLoggedDatesAction;
+use App\Data\DailyExerciseSummaryData;
 use App\Data\DailyNutritionGoalsData;
 use App\Data\DailyWellnessData;
 use App\Http\Layouts\DiabetesLayout;
@@ -25,6 +27,7 @@ final readonly class ListHealthEntryController
         private GetUserLoggedDatesAction $getUserLoggedDates,
         private CalculateDailyNutritionGoals $calculateDailyNutritionGoals,
         private GetDailyWellnessAction $getDailyWellness,
+        private GetDailyExerciseSummary $getDailyExerciseSummary,
         #[CurrentUser()] private User $currentUser,
     ) {}
 
@@ -39,7 +42,8 @@ final readonly class ListHealthEntryController
             'date' => $day->toDateString(),
             'today' => $now->toDateString(),
             'newEntryAt' => $day->isSameDay($now) ? null : $day->setTimeFrom($now)->toIso8601String(),
-            'entries' => fn (): array => $this->getUserHealthEntries->handle($this->currentUser, $day)->all(),
+            'entries' => fn (): array => $this->getUserHealthEntries->handle($this->currentUser, $day, includeSyncedExerciseMinutes: false)->all(),
+            'exerciseSummary' => fn (): ?DailyExerciseSummaryData => $this->getDailyExerciseSummary->handle($this->currentUser, $day),
             'loggedDates' => fn (): array => $this->getUserLoggedDates->handle($this->currentUser, $weekStart, $weekStart->addDays(6)),
             'goals' => fn (): ?DailyNutritionGoalsData => $this->calculateDailyNutritionGoals->handle($this->currentUser->profile),
             'wellness' => fn (): DailyWellnessData => $this->getDailyWellness->handle($this->currentUser, $day),

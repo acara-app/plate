@@ -14,6 +14,7 @@ const DAY_PROPS = [
     'today',
     'newEntryAt',
     'entries',
+    'exerciseSummary',
     'loggedDates',
     'wellness',
 ];

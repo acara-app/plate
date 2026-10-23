@@ -65,6 +65,39 @@ function scrollToPreviousWeek(AwaitableWebpage $page): void
     $page->script('const strip = document.querySelector("#health-entry-weeks"); strip.scrollBy({ left: -strip.clientWidth, behavior: "instant" });');
 }
 
+it('refreshes the synced exercise summary when selecting another day', function (bool $mobile): void {
+    $this->travelTo(CarbonImmutable::parse('2026-10-23 12:00:00', 'UTC'));
+    $user = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
+    $sample = HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+        'user_id' => $user->id, 'value' => 12.3, 'measured_at' => '2026-10-21 01:00:00',
+    ]);
+    HealthSyncSample::factory()->exercise()->fromMobileSync()->create([
+        'user_id' => $user->id, 'value' => 7, 'measured_at' => '2026-10-23 01:00:00',
+    ]);
+    $this->actingAs($user);
+
+    $page = visit(route('health-entries.index', ['date' => '2026-10-21'], absolute: false))->withLocale('en-US');
+    if ($mobile) {
+        $page = $page->on()->mobile();
+    }
+
+    $page->assertSeeIn('[aria-label="Synced exercise"]', '12.3 min')
+        ->assertDontSee('Nothing logged on this day')
+        ->assertMissing('a[href="/health-entries/'.$sample->id.'"]')
+        ->assertMissing('[aria-label="Synced exercise"] a, [aria-label="Synced exercise"] button, [aria-label="Synced exercise"] time')
+        ->click('a[aria-label^="Thursday, October 22"]')
+        ->assertQueryStringHas('date', '2026-10-22')
+        ->assertSee('Nothing logged on this day')
+        ->assertMissing('[aria-label="Synced exercise"]')
+        ->click('a[aria-label^="Friday, October 23"]')
+        ->assertSeeIn('[aria-label="Synced exercise"]', '7 min')
+        ->assertDontSee('Nothing logged yet today')
+        ->click('a[aria-label^="Wednesday, October 21"]')
+        ->assertSeeIn('[aria-label="Synced exercise"]', '12.3 min')
+        ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
+        ->assertNoJavaScriptErrors();
+})->with(['desktop' => [false], 'mobile' => [true]]);
+
 it('opens an editable seven-day review in a fresh chat and waits for the user to send', function (string $date, string $startDate, bool $mobile): void {
     Queue::fake();
     $user = User::factory()->create(['timezone' => 'UTC']);

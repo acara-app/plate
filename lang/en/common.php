@@ -357,6 +357,8 @@ return [
             'today' => 'Today',
             'has_entries' => 'has entries',
             'today_entries' => 'Today’s entries',
+            'synced_exercise' => 'Synced exercise',
+            'synced_daily_total' => 'Daily total from synced activity',
             'add' => 'Add',
             'empty_today' => 'Nothing logged yet today',
             'empty_day' => 'Nothing logged on this day',

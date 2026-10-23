@@ -40,6 +40,11 @@ export type LogTypeValue = (typeof LogType)[keyof typeof LogType];
 // Diabetes Log Entry Types
 // =============================================================================
 
+export interface DailyExerciseSummary {
+    date: string;
+    total_minutes: number;
+}
+
 export interface HealthEntry {
     id: number;
     group_id: string | null;
