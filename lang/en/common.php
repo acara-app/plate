@@ -938,6 +938,7 @@ return [
         'title' => 'Settings',
         'description' => 'Manage your profile and account settings',
         'nav' => [
+            'passkeys' => 'Passkeys',
             'profile' => 'Profile',
             'password' => 'Password',
             'two_factor' => 'Two-Factor Auth',

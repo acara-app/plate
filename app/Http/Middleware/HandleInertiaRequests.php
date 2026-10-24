@@ -12,6 +12,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Middleware;
+use Laravel\Fortify\Features;
 
 final class HandleInertiaRequests extends Middleware
 {
@@ -52,6 +53,7 @@ final class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config()->string('app.name'),
+            'canManagePasskeys' => Features::canManagePasskeys(),
             'auth' => [
                 'user' => $user,
                 'subscribed' => $user?->hasActiveSubscription() ?? false,

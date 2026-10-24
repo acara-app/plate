@@ -939,6 +939,7 @@ return [
         'title' => 'Paramètres',
         'description' => 'Gérez votre profil et les paramètres de votre compte',
         'nav' => [
+            'passkeys' => 'Clés d’accès',
             'profile' => 'Profil',
             'password' => 'Mot de passe',
             'two_factor' => 'Auth. deux facteurs',

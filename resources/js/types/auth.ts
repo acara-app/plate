@@ -22,6 +22,14 @@ export type TwoFactorSetupData = {
     url: string;
 };
 
+export type Passkey = {
+    id: number;
+    name: string;
+    authenticator: string | null;
+    created_at: string | null;
+    last_used_at: string | null;
+};
+
 export type TwoFactorSecretKey = {
     secretKey: string;
 };
