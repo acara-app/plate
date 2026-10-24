@@ -6,15 +6,19 @@ interface AuthLayoutProps {
     name?: string;
     title?: string;
     description?: string;
+    snap?: boolean;
 }
 
 export default function AuthSimpleLayout({
     children,
     title,
     description,
+    snap = false,
 }: PropsWithChildren<AuthLayoutProps>) {
     return (
-        <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
+        <div
+            className={`flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10 ${snap ? 'bg-[#F2EBDD] text-[#1A1814] [--color-background:#F2EBDD] [--color-border:#847668] [--color-foreground:#1A1814] [--color-input:#847668] [--color-muted-foreground:#5C544A] [--color-primary-foreground:#FFFFFF] [--color-primary:#A04A28] [--color-ring:#A04A28]' : 'bg-background'}`}
+        >
             <div className="w-full max-w-sm">
                 <div className="flex flex-col gap-8">
                     <div className="flex flex-col items-center gap-4">

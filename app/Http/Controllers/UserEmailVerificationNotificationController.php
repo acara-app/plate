@@ -18,7 +18,10 @@ final readonly class UserEmailVerificationNotificationController
     {
         return $user->hasVerifiedEmail()
             ? redirect()->intended(route('dashboard', absolute: false))
-            : Inertia::render('user-email-verification-notification/create', ['status' => $request->session()->get('status')]);
+            : Inertia::render('user-email-verification-notification/create', [
+                'status' => $request->session()->get('status'),
+                'snapIntent' => $request->session()->get('snap_to_track.intent'),
+            ]);
     }
 
     public function store(#[CurrentUser] User $user, CreateUserEmailVerificationNotification $action): RedirectResponse

@@ -75,6 +75,7 @@ final readonly class StripeService implements StripeServiceContract
             'success_url' => $successUrl,
             'cancel_url' => $cancelUrl,
             'metadata' => $metadata,
+            'subscription_data' => ['metadata' => $metadata],
         ]);
 
         $url = $checkout->url ?? null; // @codeCoverageIgnore

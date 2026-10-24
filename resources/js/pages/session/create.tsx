@@ -21,6 +21,7 @@ interface LoginProps {
     error?: string;
     canResetPassword: boolean;
     canManagePasskeys: boolean;
+    snapIntent?: string | null;
 }
 
 export default function Login({
@@ -28,6 +29,7 @@ export default function Login({
     error,
     canResetPassword,
     canManagePasskeys,
+    snapIntent,
 }: LoginProps) {
     const { t } = useTranslation('auth');
     const [remember, setRemember] = useState(false);
@@ -35,8 +37,15 @@ export default function Login({
 
     return (
         <AuthLayout
-            title={t('login.title')}
-            description={t('login.description')}
+            title={
+                snapIntent ? 'Continue with Snap to Track' : t('login.title')
+            }
+            description={
+                snapIntent
+                    ? 'Sign in to continue with your meal, scan allowance, and selected next step.'
+                    : t('login.description')
+            }
+            snap={!!snapIntent}
         >
             <Head title={t('login.page_title')} />
 

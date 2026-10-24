@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Checkout;
 
 use App\Contracts\Billing\OffersSubscriptions;
+use App\Contracts\Billing\TracksPhotoConversion;
 use App\Contracts\Services\StripeServiceContract;
+use App\Data\Billing\PhotoAnalysisContext;
 use App\Http\Requests\CreateSubscriptionRequest;
 use App\Models\SubscriptionProduct;
 use Exception;
@@ -70,11 +72,13 @@ final readonly class CashierSubscriptionController
                     'product_name' => $product->name,
                     'user_id' => (string) $user->id,
                     'billing_interval' => $data['billing_interval'],
+                    ...resolve(TracksPhotoConversion::class)->metadata($user, PhotoAnalysisContext::guestId($request)),
                 ],
                 $trialDays
             );
 
             $request->session()->put('checkout.started', true);
+            resolve(TracksPhotoConversion::class)->track($user, PhotoAnalysisContext::guestId($request), 'checkout_created', hash('sha256', $checkoutUrl));
 
             return Inertia::location($checkoutUrl);
         } catch (Exception) {
