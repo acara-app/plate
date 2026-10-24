@@ -21,6 +21,7 @@ final readonly class SessionController
             'canResetPassword' => Route::has('password.request'),
             'status' => $request->session()->get('status'),
             'error' => $request->session()->get('error'),
+            'snapIntent' => $request->session()->get('snap_to_track.intent'),
         ]);
     }
 

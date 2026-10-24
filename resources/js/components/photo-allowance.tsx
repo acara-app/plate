@@ -1,8 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import checkout from '@/routes/checkout';
+import { snapToTrack } from '@/routes';
 import { Link } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+
+const seenOffers = new Set<string>();
 
 export interface PhotoAllowance {
     enabled: boolean;
@@ -13,6 +16,13 @@ export interface PhotoAllowance {
     resets_at: string | null;
     mode: string;
     can_upgrade: boolean;
+    variant?: string | null;
+    preview?: {
+        status: 'available' | 'active' | 'expired';
+        starts_at: string | null;
+        expires_at: string | null;
+        next_scan_at: string | null;
+    } | null;
     offer?: {
         product_id: number;
         name: string;
@@ -27,19 +37,43 @@ export function PhotoAllowanceCard({
     allowance?: PhotoAllowance;
     showUpgrade?: boolean;
 }) {
+    const offerRef = useRef<HTMLDivElement>(null);
+    const showOffer = !!(
+        showUpgrade &&
+        allowance?.can_upgrade &&
+        allowance.offer &&
+        (allowance.exhausted || allowance.preview)
+    );
     useEffect(() => {
-        if (allowance?.enabled && allowance.can_upgrade)
-            window.umami?.track('snap_to_track_offer_viewed', {
-                mode: allowance.mode,
-                exhausted: allowance.exhausted,
-            });
-    }, [
-        allowance?.enabled,
-        allowance?.can_upgrade,
-        allowance?.mode,
-        allowance?.exhausted,
-    ]);
-    if (!allowance?.enabled || allowance.limit === null) return null;
+        if (!showOffer || !offerRef.current || !allowance) {
+            return;
+        }
+        const key = JSON.stringify([
+            allowance.variant,
+            allowance.mode,
+            allowance.used,
+            allowance.resets_at,
+        ]);
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting && !seenOffers.has(key)) {
+                    seenOffers.add(key);
+                    window.umami?.track('snap_to_track_offer_viewed', {
+                        source: 'app',
+                        mode: allowance.mode,
+                        variant: allowance.variant ?? 'baseline',
+                    });
+                    observer.disconnect();
+                }
+            },
+            { threshold: 0.5 },
+        );
+        observer.observe(offerRef.current);
+        return () => observer.disconnect();
+    }, [showOffer, allowance]);
+    if (!allowance?.enabled || allowance.limit === null) {
+        return null;
+    }
 
     const remaining = allowance.remaining ?? 0;
     const trial = allowance.mode === 'trial';
@@ -51,16 +85,16 @@ export function PhotoAllowanceCard({
                 <CardTitle>
                     {trial
                         ? remaining > 0
-                            ? 'Try one photo free'
-                            : 'Your free trial scan is complete'
+                            ? `${remaining} free ${remaining === 1 ? 'scan' : 'scans'} remaining`
+                            : 'Your free scans are complete'
                         : `${remaining} of ${allowance.limit} scans remaining`}
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
                 {trial && (
                     <p className="text-sm text-muted-foreground">
-                        One successful scan, with no daily reset. Your result
-                        stays available after the trial.
+                        {allowance.limit} successful scans, with no daily reset.
+                        Saved meals stay in your food log.
                     </p>
                 )}
                 {allowance.resets_at && (
@@ -68,8 +102,24 @@ export function PhotoAllowanceCard({
                         Resets {new Date(allowance.resets_at).toLocaleString()}.
                     </p>
                 )}
-                {showUpgrade && allowance.can_upgrade && offer && (
-                    <>
+                {allowance.preview?.status === 'available' && (
+                    <Button asChild className="min-h-11">
+                        <a href={snapToTrack().url}>
+                            Try one scan a day for three days
+                        </a>
+                    </Button>
+                )}
+                {allowance.preview?.expires_at && (
+                    <p className="text-sm text-muted-foreground">
+                        Preview ends{' '}
+                        {new Date(
+                            allowance.preview.expires_at,
+                        ).toLocaleString()}
+                        . No automatic subscription.
+                    </p>
+                )}
+                {showOffer && offer && (
+                    <div ref={offerRef} className="space-y-3">
                         <p>
                             Track meals from photos and save them to your food
                             log.
@@ -79,15 +129,15 @@ export function PhotoAllowanceCard({
                                 href={checkout.start(offer.product_id).url}
                                 data-umami-event="snap_to_track_upgrade_click"
                             >
-                                Continue with {offer.name} —{' '}
+                                Continue scanning with {offer.name} —{' '}
                                 {offer.formatted_price}/month
                             </Link>
                         </Button>
                         <p className="text-xs text-muted-foreground">
-                            Renews monthly. Cancel anytime from billing
-                            settings.
+                            Daily and weekly AI limits apply. Renews monthly.
+                            Cancel anytime from billing settings.
                         </p>
-                    </>
+                    </div>
                 )}
             </CardContent>
         </Card>

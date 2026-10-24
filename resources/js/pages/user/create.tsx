@@ -17,11 +17,29 @@ import { useTranslation } from 'react-i18next';
 const trackSignupEmailBlur = () =>
     window.umami?.track('signup_field_blur_email');
 
-export default function Register() {
+export default function Register({
+    snapIntent,
+}: {
+    snapIntent?: 'save' | 'upgrade' | 'preview' | 'scan' | null;
+}) {
     const { t } = useTranslation('auth');
+    const descriptions = {
+        save: 'Create your free account to save this meal and correct its breakdown.',
+        upgrade:
+            'Create your account, verify your email, then review your selected plan before paying. Any meal you just scanned stays with you.',
+        preview:
+            'Create and verify your free account, then activate one photo scan per day for three days. No card or automatic subscription.',
+        scan: 'Keep your meals together in your food log. Your remaining free scans follow your account.',
+    };
 
     return (
-        <AuthLayout title={t('register.title')}>
+        <AuthLayout
+            title={
+                snapIntent ? 'Continue with Snap to Track' : t('register.title')
+            }
+            description={snapIntent ? descriptions[snapIntent] : undefined}
+            snap={!!snapIntent}
+        >
             <Head title={t('register.page_title')} />
             <Form
                 {...UserController.store.form()}
@@ -51,6 +69,7 @@ export default function Register() {
                                 </Label>
                                 <Input
                                     id="name"
+                                    className="min-h-11 text-base"
                                     type="text"
                                     required
                                     autoComplete="name"
@@ -70,6 +89,7 @@ export default function Register() {
                                 </Label>
                                 <Input
                                     id="email"
+                                    className="min-h-11 text-base"
                                     type="email"
                                     required
                                     autoComplete="email"
@@ -90,6 +110,7 @@ export default function Register() {
                                 </Label>
                                 <PasswordInput
                                     id="password"
+                                    className="min-h-11 text-base"
                                     required
                                     autoComplete="new-password"
                                     name="password"
@@ -153,8 +174,8 @@ export default function Register() {
 
                             <Button
                                 type="submit"
-                                variant="outline"
-                                className="mt-2 w-full"
+                                variant={snapIntent ? 'default' : 'outline'}
+                                className={`mt-2 min-h-11 w-full ${snapIntent ? 'shadow-none before:hidden after:hidden hover:shadow-none' : ''}`}
                                 data-test="register-user-button"
                                 data-umami-event="signup_form_submit"
                                 data-umami-event-method="email"

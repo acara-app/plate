@@ -84,7 +84,7 @@ final readonly class CashierShowSubscriptionController
         $returningFromCheckout = $request->routeIs('checkout.success');
 
         if ($returningFromCheckout && $allowance->mode === 'premium' && $request->session()->pull('checkout.started')) {
-            Inertia::flash('analytics', ['name' => 'snap_to_track_payment_verified', 'properties' => ['source' => 'checkout']]);
+            Inertia::flash('analytics', ['name' => 'snap_to_track_checkout_returned', 'properties' => ['source' => 'checkout']]);
         }
 
         $premiumNotYetActive = $allowance->enabled ? $allowance->mode !== 'premium' : $currentSubscription === null;

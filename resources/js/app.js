@@ -15,4 +15,14 @@ window.acaraTrack = (eventName, properties = {}) => {
     window.umami.track(eventName, properties);
 };
 
+const snapImpressions = new Set();
+window.acaraTrackOnce = (eventName, properties, key) => {
+    const identity = `${eventName}:${key}`;
+    if (snapImpressions.has(identity)) {
+        return;
+    }
+    snapImpressions.add(identity);
+    window.acaraTrack(eventName, properties);
+};
+
 Livewire.start();
