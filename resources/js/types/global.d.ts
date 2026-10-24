@@ -9,6 +9,7 @@ declare module '@inertiajs/core' {
             locale: string;
             translations: Record<string, unknown>;
             enablePremiumUpgrades: boolean;
+            canManagePasskeys: boolean;
 
             [key: string]: unknown;
         };

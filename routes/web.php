@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', Web\HomeController::class)->name('home');
+Route::get('.well-known/passkey-endpoints', Web\PasskeyEndpointsController::class)->name('well-known.passkeys');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy');
 Route::view('/terms-of-service', 'terms-of-service')->name('terms');
 Route::view('/about', 'about')->name('about');
@@ -177,6 +178,9 @@ Route::middleware('auth')->group(function (): void {
     Route::get('settings/billing', [Web\BillingHistoryController::class, 'index'])->name('billing.index');
 
     Route::get('settings/password', [Web\UserPasswordController::class, 'edit'])->name('password.edit');
+    Route::get('settings/passkeys', [Web\UserPasskeyController::class, 'edit'])
+        ->middleware('password.confirm')
+        ->name('passkeys.edit');
     Route::put('settings/password', [Web\UserPasswordController::class, 'update'])
         ->middleware('throttle:6,1')
         ->name('password.update');

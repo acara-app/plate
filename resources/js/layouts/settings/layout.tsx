@@ -6,14 +6,16 @@ import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editHousehold } from '@/routes/household';
 import { edit as editIntegrations } from '@/routes/integrations';
 import { edit as editPassword } from '@/routes/password';
+import { edit as editPasskeys } from '@/routes/passkeys';
 import { show } from '@/routes/two-factor';
 import { edit as editNotifications } from '@/routes/user-notifications';
 import { edit } from '@/routes/user-profile';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     Bell,
     Home,
+    KeyRound,
     Lock,
     Palette,
     Puzzle,
@@ -23,7 +25,10 @@ import {
 import { type PropsWithChildren, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const getSidebarNavItems = (t: (key: string) => string): NavItem[] => [
+const getSidebarNavItems = (
+    t: (key: string) => string,
+    canManagePasskeys: boolean,
+): NavItem[] => [
     {
         title: t('settings_layout.nav.profile'),
         href: edit(),
@@ -49,6 +54,15 @@ const getSidebarNavItems = (t: (key: string) => string): NavItem[] => [
         href: show(),
         icon: ShieldCheck,
     },
+    ...(canManagePasskeys
+        ? [
+              {
+                  title: t('settings_layout.nav.passkeys'),
+                  href: editPasskeys(),
+                  icon: KeyRound,
+              },
+          ]
+        : []),
     {
         title: t('settings_layout.nav.notifications'),
         href: editNotifications(),
@@ -63,6 +77,7 @@ const getSidebarNavItems = (t: (key: string) => string): NavItem[] => [
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const { t } = useTranslation('common');
+    const { canManagePasskeys } = usePage().props;
     const scrollRef = useRef<HTMLDivElement>(null);
 
     // When server-side rendering, we only render the layout on the client...
@@ -71,7 +86,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
     }
 
     const currentPath = window.location.pathname;
-    const sidebarNavItems = getSidebarNavItems(t);
+    const sidebarNavItems = getSidebarNavItems(t, canManagePasskeys);
 
     const isActive = (item: NavItem) =>
         currentPath ===
