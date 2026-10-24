@@ -218,6 +218,8 @@ class extends Component
         $this->result = null;
         $this->error = null;
         $this->draftToken = null;
+
+        $this->redirect(route('snap-to-track'));
     }
 
     public function limitReachedGate(): ?string
