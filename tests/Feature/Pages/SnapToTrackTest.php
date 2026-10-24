@@ -100,7 +100,7 @@ it('shows analyze button after photo is uploaded', function (): void {
         ->assertDontSee('Tap to take photo or upload');
 });
 
-it('can clear photo and reset state', function (): void {
+it('clears the photo and reloads verification for the next upload', function (): void {
     $file = UploadedFile::fake()->image('food.jpg');
 
     $component = Livewire::test('pages::snap-to-track')
@@ -114,6 +114,7 @@ it('can clear photo and reset state', function (): void {
 
     $component
         ->call('clearPhoto')
+        ->assertRedirect(route('snap-to-track'))
         ->assertSet('photo', null)
         ->assertSet('result', null)
         ->assertSet('error', null);
