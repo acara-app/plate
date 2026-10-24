@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\CreateAnalysisDraftAction;
+use App\Actions\RestoreAnalysisDraftAction;
+use App\Contracts\Billing\ManagesPhotoPreview;
+use App\Contracts\Billing\TracksPhotoConversion;
+use App\Data\Billing\PhotoAnalysisContext;
+use App\Enums\AnalysisDraftStatus;
 use App\Data\FoodAnalysisData;
 use App\Enums\AnalysisDraftSource;
 use Illuminate\Support\Facades\Cache;
@@ -41,6 +46,51 @@ class extends Component
     #[\Livewire\Attributes\Locked]
     public ?string $analysisRequestId = null;
 
+    public function mount(TracksPhotoConversion $tracking, RestoreAnalysisDraftAction $restore): void
+    {
+        $tracking->track(auth()->user(), PhotoAnalysisContext::guestId(request()), 'visit', 'visit');
+        if (auth()->guest() && ! session()->has('snap_to_track.intent')) {
+            session()->put('snap_to_track.intent', 'scan');
+            if (! session()->has('url.intended')) {
+                session()->put('url.intended', route('snap-to-track.index', absolute: false));
+            }
+        }
+        $token = auth()->check() ? (session()->pull('snap_to_track.preview_draft') ?? session('snap_to_track.upgrade_draft')) : null;
+        if (auth()->check() && is_string($token)) {
+            $resolution = $restore->handle($token, auth()->user());
+            if ($resolution->status === AnalysisDraftStatus::Restored) {
+                $this->result = $resolution->analysis()?->toArray();
+                $this->draftToken = $token;
+            } else {
+                $this->error = 'Your meal preview has expired. Your scan allowance is unchanged; you can still save meals already in your log.';
+            }
+        }
+    }
+
+    public function startPreview(CreateAnalysisDraftAction $drafts, ManagesPhotoPreview $preview): void
+    {
+        abort_unless($this->photoAllowance->preview?->status === 'available', 403);
+        session()->put('snap_to_track.intent', 'preview');
+        session()->put('url.intended', route('snap-to-track', absolute: false));
+        $token = $this->ensureDraftToken($drafts);
+        if ($token !== null) {
+            session()->put('snap_to_track.preview_draft', $token);
+        }
+        if (! auth()->check()) {
+            $this->redirect(route('register'));
+
+            return;
+        }
+        if (! auth()->user()->hasVerifiedEmail()) {
+            $this->redirect(route('verification.notice'));
+
+            return;
+        }
+        $preview->activate(auth()->user(), PhotoAnalysisContext::guestId(request()));
+        session()->forget(['snap_to_track.preview_draft', 'snap_to_track.intent']);
+        unset($this->photoAllowance);
+    }
+
     #[\Livewire\Attributes\Computed]
     public function photoAllowance(): \App\Data\Billing\PhotoEntitlement
     {
@@ -62,6 +112,7 @@ class extends Component
 
     public function upgrade(CreateAnalysisDraftAction $action): void
     {
+        session()->put('snap_to_track.intent', 'upgrade');
         if ($this->ensureDraftToken($action) !== null) {
             session()->put('snap_to_track.upgrade_draft', $this->draftToken);
         }
@@ -192,8 +243,10 @@ class extends Component
             return;
         }
 
-        session()->put('url.intended', route('snap-to-track.index', absolute: false));
+        $previewAvailable = $this->photoAllowance->preview?->status === 'available';
+        session()->put('url.intended', route($previewAvailable ? 'snap-to-track' : 'snap-to-track.index', absolute: false));
         session()->put('snap_to_track.auth_path', $intent);
+        session()->put('snap_to_track.intent', $previewAvailable ? 'preview' : 'scan');
 
         $this->redirect(route($intent));
     }
@@ -216,6 +269,7 @@ class extends Component
 
         session()->put('url.intended', $reviewUrl);
         session()->put('snap_to_track.auth_path', $intent);
+        session()->put('snap_to_track.intent', 'save');
 
         $this->redirect(route($intent));
     }
@@ -250,7 +304,7 @@ class extends Component
     {
         if (RateLimiter::tooManyAttempts($this->uploadRateLimitKey(), 5)) {
             throw ValidationException::withMessages([
-                'photo' => "That's this hour's free scans.",
+                'photo' => 'Too many uploads in a short time. Please try again later; your unused scan allowance is preserved.',
             ]);
         }
 
@@ -314,7 +368,7 @@ class extends Component
 <div class="min-h-screen bg-[#F2EBDD] text-[#1A1814]">
     <x-tools-header theme="cream" />
 
-    <div class="px-4 py-8 md:py-12">
+    <div class="px-4 py-5 md:py-12">
     @php
         $photoAllowance = $this->photoAllowance;
     @endphp
@@ -347,7 +401,10 @@ class extends Component
         </header>
 
         {{-- Tool --}}
-        <section class="mx-auto mt-8 max-w-3xl lg:px-8">
+        <section class="mx-auto mt-6 max-w-3xl lg:px-8">
+            @if ($error)
+                <p role="alert" class="mb-4 border border-[#B5482E] p-4 text-sm text-[#893E20]">{{ $error }}</p>
+            @endif
             @if ($result === null)
                 @php
                     $limitGate = $this->limitReachedGate();
@@ -402,33 +459,7 @@ class extends Component
                     </article>
                 @endif
                 @if ($photoAllowance->exhausted())
-                    {{-- Scan wall: the allowance is spent, so the offer leads here --}}
-                    <article
-                        x-data
-                        x-init="window.acaraTrack?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: 'wall', exhausted: true })"
-                        class="border border-[#1A1814] bg-[#1A1814] p-6 sm:p-8 text-[#F2EBDD]"
-                    >
-                        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Scan limit reached</p>
-                        <h2 class="mt-4 font-bold text-2xl leading-tight tracking-[-0.02em]">
-                            That was your free scan.
-                        </h2>
-                        @if ($photoAllowance->canUpgrade && $photoAllowance->offer)
-                            <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">Every Acara feature with daily and weekly limits · {{ $photoAllowance->offer->formattedPrice }}/month.</p>
-                            <button
-                                type="button"
-                                wire:click="upgrade"
-                                x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'wall', exhausted: true })"
-                                class="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28] focus:outline-none focus:ring-2 focus:ring-[#C4623A] focus:ring-offset-2 focus:ring-offset-[#1A1814] motion-reduce:transition-none"
-                            >Continue with {{ $photoAllowance->offer->name }} — {{ $photoAllowance->offer->formattedPrice }}/month</button>
-                            <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[#F2EBDD]/60">Renews monthly · Cancel anytime · No overage charges</p>
-                        @endif
-                        @guest
-                            <p class="mt-6 border-t border-[#F2EBDD]/20 pt-5 text-sm text-[#F2EBDD]/85">
-                                Already have an account?
-                                <button type="button" wire:click="continueInApp('login')" class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]">Log in</button>
-                            </p>
-                        @endguest
-                    </article>
+                    <x-snap-conversion-offer :allowance="$photoAllowance" placement="wall" />
                 @endif
                 @unless ($photoAllowance->exhausted())
                 <form wire:submit="analyze" class="space-y-6">
@@ -457,6 +488,14 @@ class extends Component
                             </span>
                         </div>
 
+                        @if ($photoAllowance->enabled && $photoAllowance->mode === 'trial')
+                            <p id="scan-terms" class="mb-4 text-center text-sm font-semibold text-[#3D3833]">{{ $photoAllowance->limit }} free scans · No signup · No card</p>
+                            @if ($photoAllowance->used > 0)
+                                <p class="mb-4 text-center text-sm">{{ $photoAllowance->remaining }} free scan remaining</p>
+                            @endif
+                        @elseif ($photoAllowance->preview?->status === 'active')
+                            <p class="mb-4 text-sm">Your daily preview scan is ready. Preview ends <time x-data x-text="new Date(@js($photoAllowance->preview->expiresAt)).toLocaleString()">{{ $photoAllowance->preview->expiresAt }}</time>.</p>
+                        @endif
                         @if (! $photo)
                             @if (App::environment(['production', 'testing']))
                                 <div class="border-t border-[#D9CFBC] pt-6">
@@ -477,16 +516,21 @@ class extends Component
                                     accept="image/*"
                                     class="hidden"
                                     id="photo-upload"
-                                    x-on:change="fileName = $event.target.files[0]?.name ?? ''"
+                                    x-ref="photoUpload"
+                                    x-on:change="
+                                        fileName = $event.target.files[0]?.name ?? '';
+                                        if ($event.target.files.length) {
+                                            window.acaraTrack?.('snap_to_track_upload_selected', { source: 'public_snap_to_track' });
+                                        }
+                                    "
                                     @disabled($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))
                                 >
-                                <label
-                                    for="photo-upload"
-                                    data-umami-event="snap_to_track_upload_click"
-                                    data-umami-event-location="main_form"
-                                    x-on:click="if (uploading) $event.preventDefault()"
-                                    x-bind:aria-disabled="uploading"
-                                    class="group flex min-h-60 cursor-pointer flex-col items-center justify-center border-2 border-dashed border-[#D9CFBC] bg-[#F2EBDD] p-8 text-center transition hover:border-[#1A1814] hover:bg-[#F2EBDD]/70"
+                                <button
+                                    type="button"
+                                    aria-label="Take a food photo or upload an image"
+                                    x-on:click="$refs.photoUpload.click()"
+                                    x-bind:disabled="uploading || @js($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))"
+                                    class="group flex min-h-44 w-full cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1A1814] disabled:cursor-not-allowed flex-col items-center justify-center border-2 border-dashed border-[#D9CFBC] bg-[#F2EBDD] p-8 text-center transition hover:border-[#1A1814] hover:bg-[#F2EBDD]/70"
                                 >
                                     <div x-show="! uploading && ! uploadFailed" class="flex flex-col items-center">
                                         <div class="mb-5 flex size-14 items-center justify-center border border-[#1A1814] bg-[#F2EBDD] text-[#1A1814] transition group-hover:bg-[#1A1814] group-hover:text-[#F2EBDD]">
@@ -545,7 +589,7 @@ class extends Component
                                         <span class="font-bold text-lg tracking-[-0.01em] text-[#1A1814]">Upload didn’t finish</span>
                                         <span class="mt-2 text-sm leading-relaxed text-[#3D3833]">Tap here and choose the photo again to retry.</span>
                                     </div>
-                                </label>
+                                </button>
                                 @error('photo')
                                     <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#B5482E]">{{ $message }}</p>
                                 @enderror
@@ -632,18 +676,6 @@ class extends Component
                             </div>
                         @endif
 
-                        @if ($photoAllowance->enabled && $photoAllowance->mode === 'trial' && ! $photoAllowance->exhausted())
-                            <p wire:loading.remove wire:target="analyze" class="mt-6 border-t border-[#D9CFBC] pt-5 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
-                                One free scan · No signup · No card
-                            </p>
-                        @endif
-
-                        @if ($error)
-                            <div class="mt-6 border border-[#B5482E]/40 bg-[#B5482E]/5 p-4">
-                                <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#B5482E]">Hit a snag</p>
-                                <p class="mt-2 text-sm leading-relaxed text-[#3D3833]">{{ $error }}</p>
-                            </div>
-                        @endif
                     </div>
 
                     {{-- Authority footer --}}
@@ -653,6 +685,9 @@ class extends Component
                         <p><time datetime="{{ now()->toDateString() }}">Last updated: {{ now()->format('F Y') }}</time></p>
                     </div>
                 </form>
+                @if ($photoAllowance->preview?->status === 'active')
+                    <x-snap-conversion-offer :allowance="$photoAllowance" placement="preview_upload" />
+                @endif
                 @endunless
             @else
                 {{-- Result --}}
@@ -662,7 +697,8 @@ class extends Component
                 @endphp
                 <div
                     x-data
-                    x-init="window.acaraTrack?.('snap_to_track_result_viewed', { source: 'public_snap_to_track', confidence_band: @js($confidenceBand), items_count: @js(count($result['items'])) }); $el.classList.remove('opacity-0', 'translate-y-2')"
+                    x-init="$el.classList.remove('opacity-0', 'translate-y-2')"
+                    x-intersect.once="window.acaraTrackOnce?.('snap_to_track_result_viewed', { source: 'public_snap_to_track' }, @js($analysisRequestId ?? 'restored'))"
                     class="opacity-0 translate-y-2 transition-all duration-500 motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0"
                 >
                     <div class="flex flex-col gap-4">
@@ -710,6 +746,8 @@ class extends Component
                             </p>
                         </article>
 
+                        <x-snap-conversion-offer :allowance="$photoAllowance" placement="result" :has-result="count($result['items']) > 0" />
+
                         {{-- Items list --}}
                         <article class="border border-[#D9CFBC] bg-[#F2EBDD] p-6 sm:p-8">
                             <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Food Items Detected</p>
@@ -744,50 +782,6 @@ class extends Component
                                         </li>
                                     @endforeach
                                 </ul>
-                            @endif
-                        </article>
-
-                        {{-- Save this meal (dark inverse) --}}
-                        <article class="border border-[#1A1814] bg-[#1A1814] p-6 sm:p-8 text-[#F2EBDD]">
-                            <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Keep this result</p>
-                            <h3 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.02em]">Don't let this meal disappear.</h3>
-                            <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
-                                Save the full breakdown, fix anything the AI got wrong, and start building your real food history — free.
-                            </p>
-                            <button
-                                type="button"
-                                wire:click="saveMeal('register')"
-                                x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', authenticated: @js(auth()->check()) })@guest; window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'register' })@endguest"
-                                class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
-                            >
-                                Save this meal free
-                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                </svg>
-                            </button>
-                            <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-[#F2EBDD]/70">
-                                Already a member?
-                                <button
-                                    type="button"
-                                    wire:click="saveMeal('login')"
-                                    x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', authenticated: @js(auth()->check()) })@guest; window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'login' })@endguest"
-                                    class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]"
-                                >Log in</button>
-                            </p>
-                            @if ($photoAllowance->canUpgrade && $photoAllowance->offer)
-                                <p
-                                    x-data
-                                    x-init="window.acaraTrack?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: 'result', exhausted: @js($photoAllowance->exhausted()) })"
-                                    class="mt-6 border-t border-[#F2EBDD]/20 pt-5 text-sm leading-relaxed text-[#F2EBDD]/85"
-                                >
-                                    Scanning often?
-                                    <button
-                                        type="button"
-                                        wire:click="upgrade"
-                                        x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result', exhausted: @js($photoAllowance->exhausted()) })"
-                                        class="font-semibold underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]"
-                                    >{{ $photoAllowance->offer->name }} — {{ $photoAllowance->offer->formattedPrice }}/month</button>
-                                </p>
                             @endif
                         </article>
 
