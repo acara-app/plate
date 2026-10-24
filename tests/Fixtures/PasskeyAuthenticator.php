@@ -73,10 +73,11 @@ final class PasskeyAuthenticator
     }
 
     /** @return array<string, mixed> */
-    public function assertion(string $challenge, User $user, ?string $origin = null): array
+    public function assertion(string $challenge, User $user, ?string $origin = null, bool $userVerified = true): array
     {
         $clientData = $this->clientData('webauthn.get', $challenge, $origin);
-        $authData = hash('sha256', config('passkeys.relying_party_id'), binary: true)."\x05".pack('N', 1);
+        $authData = hash('sha256', config('passkeys.relying_party_id'), binary: true)
+            .($userVerified ? "\x05" : "\x01").pack('N', 1);
         openssl_sign($authData.hash('sha256', Base64UrlSafe::decodeNoPadding($clientData), binary: true), $signature, $this->key, OPENSSL_ALGO_SHA256);
 
         return $this->credential([

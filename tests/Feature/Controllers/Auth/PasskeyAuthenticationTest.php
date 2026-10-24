@@ -29,6 +29,27 @@ it('logs in directly with a verified passkey and respects remember me', function
     }
 })->with([true, false]);
 
+it('skips the two-factor challenge because a user-verified passkey is already multi-factor', function (): void {
+    $user = User::factory()->create([
+        'two_factor_secret' => encrypt('secret'),
+        'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
+        'two_factor_confirmed_at' => now(),
+    ]);
+    $authenticator = new PasskeyAuthenticator;
+    $authenticator->store($user);
+    $challenge = $this->getJson(route('passkey.login-options'))
+        ->assertOk()
+        ->assertJsonPath('options.userVerification', 'required')
+        ->json('options.challenge');
+
+    $this->postJson(route('passkey.login'), ['credential' => $authenticator->assertion($challenge, $user)])
+        ->assertOk()
+        ->assertSessionMissing('login.id');
+
+    expect($user->hasEnabledTwoFactorAuthentication())->toBeTrue();
+    $this->assertAuthenticatedAs($user);
+});
+
 it('rejects login without an active challenge', function (): void {
     $user = User::factory()->create();
     $authenticator = new PasskeyAuthenticator;
@@ -45,7 +66,12 @@ it('rejects invalid passkey assertions', function (string $failure): void {
     $authenticator = new PasskeyAuthenticator;
     $passkey = $authenticator->store($user);
     $challenge = $this->getJson(route('passkey.login-options'))->json('options.challenge');
-    $credential = $authenticator->assertion($failure === 'challenge' ? 'wrong-challenge' : $challenge, $user, $failure === 'origin' ? 'https://untrusted.example' : null);
+    $credential = $authenticator->assertion(
+        $failure === 'challenge' ? 'wrong-challenge' : $challenge,
+        $user,
+        $failure === 'origin' ? 'https://untrusted.example' : null,
+        userVerified: $failure !== 'user verification',
+    );
     if ($failure === 'signature') {
         $credential['response']['signature'] = ParagonIE\ConstantTime\Base64UrlSafe::encodeUnpadded(random_bytes(64));
     }
@@ -60,7 +86,7 @@ it('rejects invalid passkey assertions', function (string $failure): void {
     if ($failure !== 'removed') {
         expect($passkey->fresh()->last_used_at)->toBeNull();
     }
-})->with(['challenge', 'origin', 'signature', 'removed']);
+})->with(['challenge', 'origin', 'signature', 'user verification', 'removed']);
 
 it('confirms identity with an owned passkey and rejects replay', function (): void {
     $user = User::factory()->create();

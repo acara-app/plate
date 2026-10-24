@@ -80,7 +80,11 @@ export default function Login({
                                     required
                                     autoFocus
                                     tabIndex={1}
-                                    autoComplete="email"
+                                    autoComplete={
+                                        canManagePasskeys
+                                            ? 'email webauthn'
+                                            : 'email'
+                                    }
                                     placeholder={t('login.email_placeholder')}
                                 />
                                 <InputError message={errors.email} />
