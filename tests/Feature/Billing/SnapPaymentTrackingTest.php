@@ -2,17 +2,16 @@
 
 declare(strict_types=1);
 
-use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\TracksPhotoConversion;
 use App\Models\User;
-use App\Services\Billing\NullPhotoAnalyses;
+use App\Services\Billing\NullPhotoConversion;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Events\WebhookReceived;
 
 beforeEach(function (): void {
-    if (resolve(ManagesPhotoAnalyses::class) instanceof NullPhotoAnalyses) {
-        $this->markTestSkipped('Requires the Cloud billing integration.');
+    if (resolve(TracksPhotoConversion::class) instanceof NullPhotoConversion) {
+        $this->markTestSkipped('Requires the optional photo conversion integration.');
     }
     config(['cashier.webhook.secret' => 'whsec_snap_test']);
 });

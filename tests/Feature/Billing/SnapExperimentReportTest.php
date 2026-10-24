@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Contracts\Billing\TracksPhotoConversion;
 use App\Models\User;
-use App\Services\Billing\NullPhotoAnalyses;
+use App\Services\Billing\NullPhotoConversion;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 it('reports deduplicated paid conversion and net contribution without declaring an early winner', function (): void {
-    if (resolve(ManagesPhotoAnalyses::class) instanceof NullPhotoAnalyses) {
-        $this->markTestSkipped('Requires the Cloud billing integration.');
+    if (resolve(TracksPhotoConversion::class) instanceof NullPhotoConversion) {
+        $this->markTestSkipped('Requires the optional photo conversion integration.');
     }
     config(['snap.experiment.starts_at' => now()->subDays(15)->toIso8601String()]);
     $user = User::factory()->create();
@@ -40,8 +40,8 @@ it('reports deduplicated paid conversion and net contribution without declaring 
 });
 
 it('does not approve a variant while a refund still needs payment reconciliation', function (): void {
-    if (resolve(ManagesPhotoAnalyses::class) instanceof NullPhotoAnalyses) {
-        $this->markTestSkipped('Requires the Cloud billing integration.');
+    if (resolve(TracksPhotoConversion::class) instanceof NullPhotoConversion) {
+        $this->markTestSkipped('Requires the optional photo conversion integration.');
     }
     config(['snap.experiment.starts_at' => now()->subDays(90)->toIso8601String()]);
     $user = User::factory()->create();
@@ -62,8 +62,8 @@ it('does not approve a variant while a refund still needs payment reconciliation
 });
 
 it('adopts the habit offer only after maturation with positive conversion evidence and complete fees', function (bool $completeFees): void {
-    if (resolve(ManagesPhotoAnalyses::class) instanceof NullPhotoAnalyses) {
-        $this->markTestSkipped('Requires the Cloud billing integration.');
+    if (resolve(TracksPhotoConversion::class) instanceof NullPhotoConversion) {
+        $this->markTestSkipped('Requires the optional photo conversion integration.');
     }
     config(['snap.experiment.starts_at' => now()->subDays(90)->toIso8601String()]);
     foreach (['A', 'B'] as $variant) {
@@ -93,8 +93,8 @@ it('adopts the habit offer only after maturation with positive conversion eviden
 })->with([true, false]);
 
 it('counts first payments rather than renewals or returning customers as conversions', function (string $history, int $expected): void {
-    if (resolve(ManagesPhotoAnalyses::class) instanceof NullPhotoAnalyses) {
-        $this->markTestSkipped('Requires the Cloud billing integration.');
+    if (resolve(TracksPhotoConversion::class) instanceof NullPhotoConversion) {
+        $this->markTestSkipped('Requires the optional photo conversion integration.');
     }
     config(['snap.experiment.starts_at' => now()->subDays(15)->toIso8601String()]);
     $subject = 'user:'.User::factory()->create()->id;
