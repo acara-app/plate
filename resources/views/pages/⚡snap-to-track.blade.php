@@ -489,7 +489,7 @@ class extends Component
                         </div>
 
                         @if ($photoAllowance->enabled && $photoAllowance->mode === 'trial')
-                            <p id="scan-terms" class="mb-4 text-center text-sm font-semibold text-[#3D3833]">{{ $photoAllowance->limit }} free scans · No signup · No card</p>
+                            <p id="scan-terms" class="mb-4 text-center text-sm font-semibold text-[#3D3833]">{{ $photoAllowance->limit }} {{ $photoAllowance->limit === 1 ? 'free scan' : 'free scans' }} · No signup · No card</p>
                             @if ($photoAllowance->used > 0)
                                 <p class="mb-4 text-center text-sm">{{ $photoAllowance->remaining }} free scan remaining</p>
                             @endif

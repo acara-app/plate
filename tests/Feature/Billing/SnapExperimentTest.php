@@ -9,13 +9,13 @@ use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\FoodAnalysisData;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
-use App\Services\Billing\NullPhotoAnalyses;
+use App\Services\Billing\NullPhotoConversion;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 beforeEach(function (): void {
-    if (resolve(ManagesPhotoAnalyses::class) instanceof NullPhotoAnalyses) {
-        $this->markTestSkipped('Requires the Cloud billing integration.');
+    if (resolve(TracksPhotoConversion::class) instanceof NullPhotoConversion) {
+        $this->markTestSkipped('Requires the optional photo conversion integration.');
     }
     config([
         'plate.enable_premium_upgrades' => true,
