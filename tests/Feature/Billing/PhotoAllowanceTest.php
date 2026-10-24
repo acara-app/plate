@@ -13,15 +13,14 @@ use Illuminate\Support\Str;
 
 it('preserves two lifetime scans through retries, pending requests, and account registration', function (): void {
     $access = resolve(ManagesPhotoAnalyses::class);
-    if ($access instanceof NullPhotoAnalyses || config('snap.two_free_scans_enabled') === null) {
-        $this->markTestSkipped('Requires the configurable photo allowance integration.');
+    if ($access instanceof NullPhotoAnalyses || (int) config('snap.free_trial_scans', 0) < 2) {
+        $this->markTestSkipped('Requires the two-scan photo allowance integration.');
     }
     config([
         'plate.enable_premium_upgrades' => true,
         'cashier.key' => 'pk_test_fake',
         'cashier.secret' => 'sk_test_fake',
         'cashier.webhook.secret' => 'whsec_test',
-        'snap.two_free_scans_enabled' => true,
     ]);
     SubscriptionProduct::factory()->create([
         'name' => 'Starter', 'price' => 2.99, 'stripe_price_id' => 'price_starter',
@@ -42,10 +41,6 @@ it('preserves two lifetime scans through retries, pending requests, and account 
     $access->analyze($context, fn () => $result);
     $access->analyze($context, fn () => throw new RuntimeException('A retry must reuse the result'));
     expect($access->entitlement(null, $guest)->remaining)->toBe(1);
-
-    config(['snap.two_free_scans_enabled' => false]);
-    expect($access->entitlement(null, $guest)->remaining)->toBe(0);
-    config(['snap.two_free_scans_enabled' => true]);
 
     $user = User::factory()->create();
     expect($access->entitlement($user, $guest)->remaining)->toBe(1);
