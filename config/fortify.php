@@ -119,6 +119,7 @@ return [
     'limiters' => [
         'login' => 'login',
         'two-factor' => 'two-factor',
+        'passkeys' => 'passkeys',
     ],
 
     /*
@@ -134,6 +135,13 @@ return [
 
     'views' => true,
 
+    'passkeys' => [
+        'relying_party_id' => parse_url(config()->string('app.url'), PHP_URL_HOST),
+        'allowed_origins' => [mb_rtrim(config()->string('app.url'), '/')],
+        'user_handle_secret' => env('PASSKEYS_USER_HANDLE_SECRET') ?: config('app.key'),
+        'timeout' => 60000,
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Features
@@ -146,6 +154,9 @@ return [
     */
 
     'features' => [
+        Features::passkeys([
+            'confirmPassword' => true,
+        ]),
         // Features::registration(),
         // Features::resetPasswords(),
         // Features::emailVerification(),

@@ -15,7 +15,9 @@ use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
+use Webauthn\Exception\AuthenticatorResponseVerificationException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -44,6 +46,10 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->dontReportDuplicates();
+
+        $exceptions->map(fn (AuthenticatorResponseVerificationException $exception): ValidationException => ValidationException::withMessages([
+            'credential' => __('auth.passkeys.failed'),
+        ]));
 
         $exceptions->throttle(function (Throwable $e): ?Limit {
             if ($e instanceof RequestException) {

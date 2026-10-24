@@ -2,6 +2,7 @@ import SessionController from '@/actions/App/Http/Controllers/Auth/SessionContro
 import GoogleOAuthButton from '@/components/google-oauth-button';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
+import PasskeyVerify from '@/components/passkey-verify';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -12,16 +13,25 @@ import { register } from '@/routes';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface LoginProps {
     status?: string;
     error?: string;
     canResetPassword: boolean;
+    canManagePasskeys: boolean;
 }
 
-export default function Login({ status, error, canResetPassword }: LoginProps) {
+export default function Login({
+    status,
+    error,
+    canResetPassword,
+    canManagePasskeys,
+}: LoginProps) {
     const { t } = useTranslation('auth');
+    const [remember, setRemember] = useState(false);
+    const [verifyingPasskey, setVerifyingPasskey] = useState(false);
 
     return (
         <AuthLayout
@@ -38,6 +48,14 @@ export default function Login({ status, error, canResetPassword }: LoginProps) {
                 {({ processing, errors }) => (
                     <>
                         <GoogleOAuthButton />
+
+                        {canManagePasskeys && (
+                            <PasskeyVerify
+                                remember={remember}
+                                disabled={processing}
+                                onProcessingChange={setVerifyingPasskey}
+                            />
+                        )}
 
                         <div className="relative">
                             <div className="absolute inset-0 flex items-center">
@@ -62,7 +80,11 @@ export default function Login({ status, error, canResetPassword }: LoginProps) {
                                     required
                                     autoFocus
                                     tabIndex={1}
-                                    autoComplete="email"
+                                    autoComplete={
+                                        canManagePasskeys
+                                            ? 'email webauthn'
+                                            : 'email'
+                                    }
                                     placeholder={t('login.email_placeholder')}
                                 />
                                 <InputError message={errors.email} />
@@ -100,6 +122,10 @@ export default function Login({ status, error, canResetPassword }: LoginProps) {
                                 <Checkbox
                                     id="remember"
                                     name="remember"
+                                    checked={remember}
+                                    onCheckedChange={(checked) =>
+                                        setRemember(checked === true)
+                                    }
                                     tabIndex={3}
                                 />
                                 <Label htmlFor="remember">
@@ -111,7 +137,7 @@ export default function Login({ status, error, canResetPassword }: LoginProps) {
                                 type="submit"
                                 className="mt-4 w-full"
                                 tabIndex={4}
-                                disabled={processing}
+                                disabled={processing || verifyingPasskey}
                                 data-test="login-button"
                             >
                                 {processing && (
