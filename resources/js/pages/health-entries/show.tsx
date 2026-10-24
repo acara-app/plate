@@ -1,5 +1,4 @@
 import ListHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/ListHealthEntryController';
-import ShowHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/ShowHealthEntryController';
 import AppLayout from '@/layouts/app-layout';
 import {
     entryTitle,
@@ -54,10 +53,6 @@ export default function HealthEntryShow({
         {
             title: t('health_entries.index_page.title'),
             href: backUrl,
-        },
-        {
-            title,
-            href: ShowHealthEntryController(entry.id).url,
         },
     ];
 
