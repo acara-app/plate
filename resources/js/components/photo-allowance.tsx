@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import checkout from '@/routes/checkout';
 import { snapToTrack } from '@/routes';
+import { cn } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 import { useEffect, useRef } from 'react';
 
@@ -33,9 +34,11 @@ export interface PhotoAllowance {
 export function PhotoAllowanceCard({
     allowance,
     showUpgrade = true,
+    variant = 'card',
 }: {
     allowance?: PhotoAllowance;
     showUpgrade?: boolean;
+    variant?: 'card' | 'plain';
 }) {
     const offerRef = useRef<HTMLDivElement>(null);
     const showOffer = !!(
@@ -80,9 +83,16 @@ export function PhotoAllowanceCard({
     const offer = allowance.offer;
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>
+        <Card
+            className={cn(
+                variant === 'plain' &&
+                    'gap-2 rounded-none border-0 border-b bg-transparent py-0 pb-5 shadow-none',
+            )}
+        >
+            <CardHeader className={cn(variant === 'plain' && 'px-0')}>
+                <CardTitle
+                    className={cn(variant === 'plain' && 'text-sm leading-6')}
+                >
                     {trial
                         ? remaining > 0
                             ? `${remaining} free ${remaining === 1 ? 'scan' : 'scans'} remaining`
@@ -90,7 +100,9 @@ export function PhotoAllowanceCard({
                         : `${remaining} of ${allowance.limit} scans remaining`}
                 </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent
+                className={cn('space-y-3', variant === 'plain' && 'px-0')}
+            >
                 {trial && (
                     <p className="text-sm text-muted-foreground">
                         {allowance.limit} successful scans, with no daily reset.
