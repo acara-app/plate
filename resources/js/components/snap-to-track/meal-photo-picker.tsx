@@ -49,7 +49,7 @@ export function MealPhotoPicker({
         <div
             role="group"
             aria-label={t('snap_to_track.index.upload_label')}
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-5"
         >
             <input
                 ref={inputRef}
@@ -72,25 +72,34 @@ export function MealPhotoPicker({
             />
 
             {photo && previewUrl ? (
-                <figure className="flex flex-col gap-2 overflow-hidden rounded-2xl border bg-muted/40 p-2">
+                <figure className="flex flex-col gap-3">
                     {!previewFailed && (
                         <img
                             src={previewUrl}
                             alt={t('snap_to_track.index.preview_alt')}
-                            className="max-h-80 w-full rounded-xl object-contain"
+                            className="aspect-4/3 max-h-96 w-full rounded-3xl bg-muted/50 object-contain"
                             onError={() => setPreviewFailed(true)}
                         />
                     )}
-                    <figcaption className="px-2 py-1 text-sm text-muted-foreground">
+                    <figcaption className="text-center text-sm text-muted-foreground">
                         {previewFailed
                             ? t('snap_to_track.index.preview_unavailable')
                             : t('snap_to_track.index.preview_hint')}
                     </figcaption>
                 </figure>
             ) : (
-                <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed bg-muted/40 px-6 py-8 text-center">
+                <div className="relative flex min-h-64 flex-col items-center justify-center gap-4 rounded-3xl bg-muted/50 px-8 py-12 text-center sm:min-h-80">
+                    <div
+                        className="pointer-events-none absolute inset-5 text-primary/30"
+                        aria-hidden="true"
+                    >
+                        <span className="absolute top-0 left-0 size-6 rounded-tl-xl border-t-2 border-l-2" />
+                        <span className="absolute top-0 right-0 size-6 rounded-tr-xl border-t-2 border-r-2" />
+                        <span className="absolute bottom-0 left-0 size-6 rounded-bl-xl border-b-2 border-l-2" />
+                        <span className="absolute right-0 bottom-0 size-6 rounded-br-xl border-r-2 border-b-2" />
+                    </div>
                     <Camera
-                        className="size-8 text-muted-foreground"
+                        className="size-10 text-primary/70"
                         aria-hidden="true"
                     />
                     <p className="text-sm text-muted-foreground">
@@ -103,8 +112,9 @@ export function MealPhotoPicker({
                 <Button
                     ref={takePhotoRef}
                     type="button"
+                    variant="secondary"
                     size="touch"
-                    className="w-full sm:flex-1"
+                    className="w-full shadow-none sm:flex-1"
                     disabled={disabled}
                     onClick={() => setCameraOpen(true)}
                 >
@@ -121,7 +131,7 @@ export function MealPhotoPicker({
                     type="button"
                     variant="outline"
                     size="touch"
-                    className="w-full sm:flex-1"
+                    className="w-full shadow-none sm:flex-1"
                     disabled={disabled}
                     onClick={choosePhoto}
                 >
