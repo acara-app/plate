@@ -39,7 +39,7 @@ it('previews a captured meal and waits for confirmation before submitting it', f
     $this->actingAs(User::factory()->create());
 
     $page = visit(route('snap-to-track.index', absolute: false))->on()->mobile()
-        ->assertSee('Analyze a meal photo');
+        ->assertSee('Take photo');
     fakeMealCamera($page);
     $page->script(<<<'JS'
         () => {
@@ -100,7 +100,7 @@ it('previews a captured meal and waits for confirmation before submitting it', f
 it('previews a gallery photo and preserves it when replacement is cancelled', function (bool $fromCamera): void {
     $this->actingAs(User::factory()->create());
     $photo = UploadedFile::fake()->image('meal.jpg', 640, 480);
-    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Analyze a meal photo');
+    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Take photo');
     fakeMealCamera($page);
     $page->script(<<<'JS'
         () => {
@@ -148,7 +148,7 @@ it('previews a gallery photo and preserves it when replacement is cancelled', fu
 it('keeps the photo picker available when camera access fails', function (string $failure, string $message): void {
     $this->actingAs(User::factory()->create());
     $photo = UploadedFile::fake()->image('meal.jpg');
-    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Analyze a meal photo');
+    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Take photo');
     fakeMealCamera($page);
 
     if ($failure === 'unsupported') {
@@ -175,7 +175,7 @@ it('keeps the photo picker available when camera access fails', function (string
 
 it('releases camera access granted after the camera has been closed', function (): void {
     $this->actingAs(User::factory()->create());
-    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Analyze a meal photo');
+    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Take photo');
     fakeMealCamera($page);
     $page->script(<<<'JS'
         () => {
@@ -201,7 +201,7 @@ it('releases camera access granted after the camera has been closed', function (
 it('pauses the camera in the background and releases camera and preview resources on navigation', function (): void {
     $this->actingAs(User::factory()->create());
     $photo = UploadedFile::fake()->image('meal.jpg');
-    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Analyze a meal photo');
+    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Take photo');
     fakeMealCamera($page);
     $page->script(<<<'JS'
         () => {
@@ -245,7 +245,7 @@ it('pauses the camera in the background and releases camera and preview resource
 it('preserves the photo after a server validation error and clears the error when it is replaced', function (): void {
     $this->actingAs(User::factory()->create());
     $photo = UploadedFile::fake()->image('meal.jpg');
-    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Analyze a meal photo');
+    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Take photo');
     $page->script(<<<'JS'
         () => {
             const send = XMLHttpRequest.prototype.send;
@@ -276,7 +276,7 @@ it('preserves the photo after a server validation error and clears the error whe
 
 it('allows another camera attempt when a photo cannot be captured', function (): void {
     $this->actingAs(User::factory()->create());
-    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Analyze a meal photo');
+    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Take photo');
     fakeMealCamera($page);
     $page->script(<<<'JS'
         () => {
