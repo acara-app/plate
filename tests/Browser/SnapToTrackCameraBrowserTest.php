@@ -63,7 +63,7 @@ it('previews a captured meal and waits for confirmation before submitting it', f
     $requestId = $page->value('input[name="analysis_request_id"]');
     $page->assertDisabled('Analyze photo')
         ->assertScript('window.mealCameraRequests.length', 0)
-        ->press('Take photo')
+        ->press('Keep the whole meal in frame.')
         ->assertVisible('[role="dialog"]')
         ->assertEnabled('button[aria-label="Capture photo"]')
         ->assertScript('window.mealCameraRequests[0].audio', false)
@@ -71,6 +71,7 @@ it('previews a captured meal and waits for confirmation before submitting it', f
         ->press('button[aria-label="Capture photo"]')
         ->assertMissing('[role="dialog"]')
         ->assertVisible('img[alt="Meal photo preview"]')
+        ->assertScript('document.activeElement.textContent.includes("Retake")')
         ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalHeight > document.querySelector("img[alt=\"Meal photo preview\"]").naturalWidth')
         ->assertEnabled('Analyze photo')
         ->assertScript('window.mealPhotoSubmissions.length', 0)
@@ -96,6 +97,28 @@ it('previews a captured meal and waits for confirmation before submitting it', f
     $page->script('document.querySelector("button[type=\"submit\"]").click()');
     $page->assertScript('window.mealPhotoSubmissions.length', 1);
 });
+
+it('opens the camera from the photo area with the keyboard and restores focus when dismissed', function (string $key): void {
+    $this->actingAs(User::factory()->create());
+    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Take photo');
+    fakeMealCamera($page);
+
+    $page->assertVisible('button[aria-label="Take a meal photo"]')
+        ->assertScript('window.mealCameraRequests.length', 0)
+        ->keys('button[aria-label="Take a meal photo"]', $key)
+        ->assertVisible('[role="dialog"]')
+        ->assertEnabled('button[aria-label="Capture photo"]')
+        ->assertScript('window.mealCameraRequests.length', 1)
+        ->keys('[role="dialog"]', 'Escape')
+        ->assertMissing('[role="dialog"]')
+        ->assertScript('document.activeElement.getAttribute("aria-label")', 'Take a meal photo')
+        ->assertScript('window.mealCameraStreams[0].getTracks()[0].readyState', 'ended')
+        ->assertDisabled('Analyze photo')
+        ->assertNoJavaScriptErrors();
+})->with([
+    'Enter' => 'Enter',
+    'Space' => 'Space',
+]);
 
 it('previews a gallery photo and preserves it when replacement is cancelled', function (bool $fromCamera): void {
     $this->actingAs(User::factory()->create());
