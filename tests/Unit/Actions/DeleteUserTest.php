@@ -7,6 +7,9 @@ use App\Models\Conversation;
 use App\Models\History;
 use App\Models\MealPhoto;
 use App\Models\User;
+use App\Notifications\AccountDeletedNotification;
+use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 covers(DeleteUser::class);
@@ -26,6 +29,19 @@ it('deletes a user and creates a deleted user record', function (): void {
         'user_id' => $user->id,
         'email' => $user->email,
     ]);
+});
+
+it('emails the person a confirmation that their account was deleted', function (): void {
+    Notification::fake();
+    $user = User::factory()->create();
+
+    resolve(DeleteUser::class)->handle($user);
+
+    Notification::assertSentOnDemand(
+        AccountDeletedNotification::class,
+        fn (AccountDeletedNotification $notification, array $channels, AnonymousNotifiable $notifiable): bool => $notifiable->routes['mail'] === [$user->email => $user->name]
+            && $notification->name === $user->name,
+    );
 });
 
 it('preserves orphaned conversations after user deletion', function (): void {
