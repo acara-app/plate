@@ -39,6 +39,18 @@ export default defineConfig({
                 enabled: true,
                 type: 'module',
             },
+            integration: {
+                beforeBuildServiceWorker(options) {
+                    options.workbox.additionalManifestEntries =
+                        options.workbox.additionalManifestEntries?.map(
+                            (entry) =>
+                                typeof entry !== 'string' &&
+                                entry.url === options.manifestFilename
+                                    ? { ...entry, url: `build/${entry.url}` }
+                                    : entry,
+                        );
+                },
+            },
             manifest: {
                 name: 'Acara Plate',
                 short_name: 'Acara Plate',
