@@ -7,7 +7,9 @@ namespace App\Actions;
 use App\Models\DeletedUser;
 use App\Models\MealPhoto;
 use App\Models\User;
+use App\Notifications\AccountDeletedNotification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 final readonly class DeleteUser
@@ -25,5 +27,8 @@ final readonly class DeleteUser
 
             $user->delete();
         });
+
+        Notification::route('mail', [$user->email => $user->name])
+            ->notify(new AccountDeletedNotification($user->name));
     }
 }
