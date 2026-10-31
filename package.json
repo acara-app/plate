@@ -80,12 +80,8 @@
         "lightningcss-linux-x64-gnu": "^1.33.0"
     },
     "overrides": {
-        "@tailwindcss/typography": {
-            "postcss-selector-parser": "^6.1.5"
-        },
-        "workbox-build": {
-            "glob": "^14.0.2",
-            "@trickfilm400/rollup-plugin-off-main-thread": "^4.0.0"
-        }
+        "@trickfilm400/rollup-plugin-off-main-thread": "^4.0.0",
+        "glob": "^14.0.2",
+        "postcss-selector-parser": "^6.1.5"
     }
 }
