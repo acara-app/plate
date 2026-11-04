@@ -105,3 +105,20 @@ it('does not claim expired or consumed drafts', function (): void {
 
     expect($expired->refresh()->user_id)->toBeNull();
 });
+
+it('lets a guest read their own unclaimed draft without claiming it', function (): void {
+    [$token, $draft] = draftWithToken();
+
+    $resolution = $this->action->handle($token, null);
+
+    expect($resolution->status)->toBe(AnalysisDraftStatus::Restored)
+        ->and($resolution->analysis()->totalCalories)->toBe(490.0)
+        ->and($draft->refresh()->user_id)->toBeNull()
+        ->and($draft->claimed_at)->toBeNull();
+});
+
+it('keeps a claimed draft away from guests', function (): void {
+    [$token] = draftWithToken(['user_id' => $this->user->id, 'claimed_at' => now()]);
+
+    expect($this->action->handle($token, null)->status)->toBe(AnalysisDraftStatus::ClaimedByOther);
+});

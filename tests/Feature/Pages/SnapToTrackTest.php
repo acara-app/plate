@@ -9,12 +9,14 @@ use App\Data\Billing\PhotoEntitlement;
 use App\Data\Billing\PhotoModel;
 use App\Data\Billing\PhotoOffer;
 use App\Data\FoodAnalysisData;
+use App\Enums\AnalysisDraftSource;
 use App\Models\AnalysisDraft;
 use App\Models\ReferenceFood;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -116,14 +118,13 @@ it('clears the photo and reloads verification for the next upload', function ():
         ->call('clearPhoto')
         ->assertRedirect(route('snap-to-track'))
         ->assertSet('photo', null)
-        ->assertSet('result', null)
         ->assertSet('error', null);
 
     expect(file_exists($photo->getRealPath()))->toBeFalse();
 });
 
-it('displays result after successful analysis', function (): void {
-    analyzePhotoForSnapToTrack([
+it('sends a guest to the result page with their analysis kept in a guest draft', function (): void {
+    $component = analyzePhotoForSnapToTrack([
         'items' => [
             ['name' => 'Grilled Chicken', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'portion' => '100g'],
         ],
@@ -133,18 +134,20 @@ it('displays result after successful analysis', function (): void {
         'total_fat' => 3.6,
         'confidence' => 85,
     ])
-        ->assertSet('result.total_calories', 165.0)
-        ->assertSet('result.total_protein', 31.0)
-        ->assertSet('result.total_carbs', 0.0)
-        ->assertSet('result.total_fat', 3.6)
-        ->assertSet('result.confidence', 85)
-        ->assertSet('photo', null)
-        ->assertSee('165')
-        ->assertSee('Grilled Chicken')
-        ->assertSee('85% confident');
+        ->assertRedirect(route('snap-to-track.result'))
+        ->assertSet('photo', null);
+
+    $draft = AnalysisDraft::query()->sole();
+
+    expect($draft->user_id)->toBeNull()
+        ->and($draft->source)->toBe(AnalysisDraftSource::PublicSnapToTrack)
+        ->and($draft->payload['total_calories'])->toEqual(165)
+        ->and($draft->payload['confidence'])->toBe(85)
+        ->and(AnalysisDraft::hashToken(session('snap_to_track.result.draft')))->toBe($draft->token_hash)
+        ->and(session('snap_to_track.result.request_id'))->toBe($component->instance()->analysisRequestId);
 });
 
-it('displays multiple food items in result', function (): void {
+it('keeps every detected item in the guest draft', function (): void {
     analyzePhotoForSnapToTrack([
         'items' => [
             ['name' => 'Rice', 'calories' => 130, 'protein' => 2.7, 'carbs' => 28, 'fat' => 0.3, 'portion' => '100g'],
@@ -155,11 +158,25 @@ it('displays multiple food items in result', function (): void {
         'total_carbs' => 28,
         'total_fat' => 3.9,
         'confidence' => 90,
-    ])
-        ->assertSee('Rice')
-        ->assertSee('Chicken')
-        ->assertSee('295')
-        ->assertSee('Food Items Detected');
+    ])->assertRedirect(route('snap-to-track.result'));
+
+    expect(array_column(AnalysisDraft::query()->sole()->payload['items'], 'name'))->toBe(['Rice', 'Chicken']);
+});
+
+it('sends a signed-in member straight to the claimed draft review', function (): void {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $component = analyzePhotoForSnapToTrack(saveMealAnalysisFixture())->assertRedirect();
+
+    $draft = AnalysisDraft::query()->sole();
+    $token = Str::afterLast($component->effects['redirect'], '/review/');
+
+    expect($component->effects['redirect'])->toBe(route('snap-to-track.review', ['draft' => $token]))
+        ->and(AnalysisDraft::hashToken($token))->toBe($draft->token_hash)
+        ->and($draft->user_id)->toBe($user->id)
+        ->and($draft->claimed_at)->not->toBeNull()
+        ->and(session('snap_to_track.result'))->toBeNull();
 });
 
 it('displays error when analysis fails', function (): void {
@@ -185,7 +202,9 @@ it('displays error when analysis fails', function (): void {
         ->call('analyze')
         ->assertSet('error', 'Something went wrong. Please try again.')
         ->assertSet('photo', null)
-        ->assertSet('result', null);
+        ->assertNoRedirect();
+
+    expect(AnalysisDraft::query()->count())->toBe(0);
 
     expect(file_exists($photo->getRealPath()))->toBeFalse();
 });
@@ -224,24 +243,7 @@ it('renders authority and freshness signals', function (): void {
         ->assertSee('Last updated:');
 });
 
-it('shows the save meal CTA after a result', function (): void {
-    analyzePhotoForSnapToTrack([
-        'items' => [
-            ['name' => 'Apple', 'calories' => 52, 'protein' => 0.3, 'carbs' => 14, 'fat' => 0.2, 'portion' => '1 medium'],
-        ],
-        'total_calories' => 52,
-        'total_protein' => 0.3,
-        'total_carbs' => 14,
-        'total_fat' => 0.2,
-        'confidence' => 95,
-    ])
-        ->assertSee('Save this meal free')
-        ->assertSee('Log in')
-        ->assertSee('Analyze another photo')
-        ->assertDontSee('Altani');
-});
-
-it('handles empty food detection gracefully', function (): void {
+it('keeps the visitor on the tool when no food is detected', function (): void {
     analyzePhotoForSnapToTrack([
         'items' => [],
         'total_calories' => 0,
@@ -250,9 +252,12 @@ it('handles empty food detection gracefully', function (): void {
         'total_fat' => 0,
         'confidence' => 0,
     ], 'empty.jpg')
-        ->assertSet('result.total_calories', 0.0)
-        ->assertSet('result.confidence', 0)
+        ->assertNoRedirect()
+        ->assertSet('error', 'No food items were detected. Try a clearer photo with better lighting.')
         ->assertSee('No food items were detected');
+
+    expect(AnalysisDraft::query()->count())->toBe(0)
+        ->and(session('snap_to_track.result'))->toBeNull();
 });
 
 it('validates turnstile token is required in testing environment', function (): void {
@@ -317,7 +322,7 @@ it('blocks the analyze call once the per-IP rate limit is exhausted', function (
         ->set('turnstileToken', Turnstile::dummy())
         ->call('analyze')
         ->assertSet('error', 'Too many attempts in a short time. Please try again later; this is separate from your scan allowance.')
-        ->assertSet('result', null)
+        ->assertNoRedirect()
         ->assertSee('on a roll')
         ->assertDontSee('Too many requests. Please try again later.');
 });
@@ -360,21 +365,7 @@ it('shows the app shortcut instead of signup actions to a limited member', funct
         ->assertDontSee('Keep analyzing — free');
 });
 
-it('shows the carb boundary notice with analysis results', function (): void {
-    analyzePhotoForSnapToTrack([
-        'items' => [
-            ['name' => 'Rice', 'calories' => 130, 'protein' => 2.7, 'carbs' => 28, 'fat' => 0.3, 'portion' => '100g'],
-        ],
-        'total_calories' => 130,
-        'total_protein' => 2.7,
-        'total_carbs' => 28,
-        'total_fat' => 0.3,
-        'confidence' => 90,
-    ])
-        ->assertSee('never dose insulin');
-});
-
-it('flags reference-derived items in the result when the lookup is enabled', function (): void {
+it('flags reference-derived items in the guest draft when the lookup is enabled', function (): void {
     config()->set('plate.food_photo_analyzer.reference_lookup.enabled', true);
 
     ReferenceFood::factory()->create([
@@ -395,8 +386,9 @@ it('flags reference-derived items in the result when the lookup is enabled', fun
         'total_carbs' => 10,
         'total_fat' => 15,
         'confidence' => 80,
-    ])
-        ->assertSee('USDA reference');
+    ])->assertRedirect(route('snap-to-track.result'));
+
+    expect(AnalysisDraft::query()->sole()->payload['items'][0]['provenance'])->toBe('reference');
 });
 
 it('shows how it works section', function (): void {
@@ -433,65 +425,10 @@ function saveMealAnalysisFixture(): array
     ];
 }
 
-it('keeps the sharper-analysis upsell retired', function (): void {
-    analyzePhotoForSnapToTrack(saveMealAnalysisFixture())
-        ->assertSee('Save this meal free')
-        ->assertDontSee('Sign up for sharper analysis');
-});
-
-it('creates a draft and seeds the intended destination for a guest saving a meal', function (): void {
-    $component = analyzePhotoForSnapToTrack(saveMealAnalysisFixture())
-        ->call('saveMeal', 'register')
-        ->assertRedirect(route('register'));
-
-    $token = $component->instance()->draftToken;
-    $draft = AnalysisDraft::query()->sole();
-
-    expect($draft->token_hash)->toBe(AnalysisDraft::hashToken($token))
-        ->and($draft->user_id)->toBeNull()
-        ->and(session('url.intended'))->toBe(route('snap-to-track.review', ['draft' => $token], absolute: false))
-        ->and(session('snap_to_track.auth_path'))->toBe('register');
-});
-
-it('sends a guest choosing the login path to the login page', function (): void {
-    analyzePhotoForSnapToTrack(saveMealAnalysisFixture())
-        ->call('saveMeal', 'login')
-        ->assertRedirect(route('login'));
-
-    expect(session('snap_to_track.auth_path'))->toBe('login');
-});
-
-it('sends an authenticated user straight to the claimed draft review', function (): void {
-    $user = User::factory()->create();
-    $this->actingAs($user);
-
-    $component = analyzePhotoForSnapToTrack(saveMealAnalysisFixture())
-        ->call('saveMeal', 'register');
-
-    $token = $component->instance()->draftToken;
-
-    $component->assertRedirect(route('snap-to-track.review', ['draft' => $token], absolute: false));
-
-    $draft = AnalysisDraft::query()->sole();
-
-    expect($draft->user_id)->toBe($user->id)
-        ->and($draft->claimed_at)->not->toBeNull()
-        ->and(session('snap_to_track.auth_path'))->toBeNull();
-});
-
-it('reuses the minted draft token on repeated save clicks', function (): void {
-    analyzePhotoForSnapToTrack(saveMealAnalysisFixture())
-        ->call('saveMeal', 'register')
-        ->call('saveMeal', 'login');
-
-    expect(AnalysisDraft::query()->count())->toBe(1);
-});
-
-it('does not create a draft without an analysis result', function (): void {
+it('keeps retired upsells off the tool page', function (): void {
     Livewire::test('pages::snap-to-track')
-        ->call('saveMeal', 'register');
-
-    expect(AnalysisDraft::query()->count())->toBe(0);
+        ->assertDontSee('Sign up for sharper analysis')
+        ->assertDontSee('Altani');
 });
 
 function stubSnapPhotoAllowance(int $used): void
@@ -530,9 +467,14 @@ it('withholds the paid offer until a scan has proven the value', function (): vo
     analyzePhotoForSnapToTrack([
         'items' => [['name' => 'Toast', 'calories' => 200, 'protein' => 6, 'carbs' => 30, 'fat' => 5, 'portion' => '1 slice']],
         'total_calories' => 200, 'total_protein' => 6, 'total_carbs' => 30, 'total_fat' => 5, 'confidence' => 85,
-    ])
-        ->assertSee('Save this meal free')
-        ->assertSee('free scans remaining');
+    ])->assertRedirect(route('snap-to-track.result'));
+
+    stubSnapPhotoAllowance(used: 1);
+
+    Livewire::test('pages::snap-to-track-result')
+        ->assertSee('1 free scan left')
+        ->assertSee('Keep tracking with Starter — $2.99/month')
+        ->assertSee('Not now — save this meal free');
 
     stubSnapPhotoAllowance(used: 2);
 

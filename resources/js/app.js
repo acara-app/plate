@@ -2,17 +2,30 @@ import {
     Alpine,
     Livewire,
 } from '../../vendor/livewire/livewire/dist/livewire.esm';
+import {
+    keepSnapPhoto,
+    recallSnapPhoto,
+    tagSnapPhoto,
+} from './lib/snap-to-track-photo';
 
 Alpine.magic('clipboard', () => {
     return (subject) => navigator.clipboard?.writeText(subject);
 });
 
 window.acaraTrack = (eventName, properties = {}) => {
-    if (typeof window.umami?.track !== 'function') {
+    if (typeof window.umami?.track === 'function') {
+        window.umami.track(eventName, properties);
+
         return;
     }
 
-    window.umami.track(eventName, properties);
+    if (document.readyState !== 'complete') {
+        window.addEventListener(
+            'load',
+            () => window.umami?.track?.(eventName, properties),
+            { once: true },
+        );
+    }
 };
 
 const snapImpressions = new Set();
@@ -24,5 +37,9 @@ window.acaraTrackOnce = (eventName, properties, key) => {
     snapImpressions.add(identity);
     window.acaraTrack(eventName, properties);
 };
+
+window.acaraKeepSnapPhoto = keepSnapPhoto;
+window.acaraTagSnapPhoto = tagSnapPhoto;
+window.acaraRecallSnapPhoto = recallSnapPhoto;
 
 Livewire.start();

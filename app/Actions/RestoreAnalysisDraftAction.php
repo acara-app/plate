@@ -12,7 +12,7 @@ use Illuminate\Contracts\Database\Query\Builder;
 
 final readonly class RestoreAnalysisDraftAction
 {
-    public function handle(string $token, User $user): AnalysisDraftResolutionData
+    public function handle(string $token, ?User $user): AnalysisDraftResolutionData
     {
         $draft = AnalysisDraft::query()
             ->where('token_hash', AnalysisDraft::hashToken($token))
@@ -22,7 +22,7 @@ final readonly class RestoreAnalysisDraftAction
             return new AnalysisDraftResolutionData(AnalysisDraftStatus::Invalid);
         }
 
-        if ($draft->user_id !== null && $draft->user_id !== $user->id) {
+        if ($draft->user_id !== null && $draft->user_id !== $user?->id) {
             return new AnalysisDraftResolutionData(AnalysisDraftStatus::ClaimedByOther);
         }
 
@@ -32,6 +32,10 @@ final readonly class RestoreAnalysisDraftAction
 
         if ($draft->isExpired()) {
             return new AnalysisDraftResolutionData(AnalysisDraftStatus::Expired, $draft);
+        }
+
+        if (! $user instanceof User) {
+            return new AnalysisDraftResolutionData(AnalysisDraftStatus::Restored, $draft);
         }
 
         $claimed = AnalysisDraft::query()
