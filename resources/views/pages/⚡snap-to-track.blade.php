@@ -414,7 +414,17 @@ class extends Component
             @unless ($photoAllowance->exhausted())
             <form wire:submit="analyze" class="space-y-6">
                 <div
-                    x-data="{ uploading: false, uploadFailed: false, progress: 0, fileName: '' }"
+                    x-data="{
+                        uploading: false,
+                        uploadFailed: false,
+                        progress: 0,
+                        fileName: '',
+                        pickPhoto(fromCamera) {
+                            const input = this.$refs.photoUpload;
+                            fromCamera ? input.setAttribute('capture', 'environment') : input.removeAttribute('capture');
+                            input.click();
+                        },
+                    }"
                     x-on:livewire-upload-start="uploading = true; uploadFailed = false; progress = 0"
                     x-on:livewire-upload-progress="progress = $event.detail.progress"
                     x-on:livewire-upload-finish="progress = 100"
@@ -479,7 +489,7 @@ class extends Component
                             <button
                                 type="button"
                                 aria-label="Take a food photo or upload an image"
-                                x-on:click="$refs.photoUpload.click()"
+                                x-on:click="pickPhoto(false)"
                                 x-bind:disabled="uploading || @js($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))"
                                 class="group flex min-h-44 w-full cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1A1814] disabled:cursor-not-allowed flex-col items-center justify-center border-2 border-dashed border-[#D9CFBC] bg-[#F2EBDD] p-8 text-center transition hover:border-[#1A1814] hover:bg-[#F2EBDD]/70"
                             >
@@ -541,6 +551,35 @@ class extends Component
                                     <span class="mt-2 text-sm leading-relaxed text-[#3D3833]">Tap here and choose the photo again to retry.</span>
                                 </div>
                             </button>
+                            <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                                <button
+                                    type="button"
+                                    x-on:click="pickPhoto(true)"
+                                    x-bind:disabled="uploading || @js($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))"
+                                    class="inline-flex h-12 w-full items-center justify-center gap-2 border border-[#1A1814] bg-[#1A1814] px-4 text-sm font-semibold text-[#F2EBDD] transition hover:bg-[#3D3833] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1A1814] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-1"
+                                >
+                                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+                                        <circle cx="12" cy="13" r="3" />
+                                    </svg>
+                                    Take photo
+                                </button>
+                                <button
+                                    type="button"
+                                    x-on:click="pickPhoto(false)"
+                                    x-bind:disabled="uploading || @js($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))"
+                                    class="inline-flex h-12 w-full items-center justify-center gap-2 border border-[#1A1814] bg-transparent px-4 text-sm font-semibold text-[#1A1814] transition hover:bg-[#1A1814] hover:text-[#F2EBDD] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1A1814] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-1"
+                                >
+                                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M16 5h6" />
+                                        <path d="M19 2v6" />
+                                        <path d="M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5" />
+                                        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                                        <circle cx="9" cy="9" r="2" />
+                                    </svg>
+                                    Choose photo
+                                </button>
+                            </div>
                             @error('photo')
                                 <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#B5482E]">{{ $message }}</p>
                             @enderror
