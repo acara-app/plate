@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\CreateAnalysisDraftAction;
-use App\Actions\RestoreAnalysisDraftAction;
+use App\Actions\PrepareSnapToTrackUpgrade;
 use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Contracts\Billing\TracksPhotoConversion;
 use App\Data\Billing\PhotoAnalysisContext;
-use App\Enums\AnalysisDraftStatus;
-use App\Data\FoodAnalysisData;
 use App\Enums\AnalysisDraftSource;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
@@ -36,17 +34,12 @@ class extends Component
 
     public bool $loading = false;
 
-    /** @var array{items: array<int, array<string, mixed>>, total_calories: float, total_protein: float, total_carbs: float, total_fat: float, confidence: int, analyzer_version: string|null, reference_release: string|null}|null */
-    public ?array $result = null;
-
     public ?string $error = null;
-
-    public ?string $draftToken = null;
 
     #[\Livewire\Attributes\Locked]
     public ?string $analysisRequestId = null;
 
-    public function mount(TracksPhotoConversion $tracking, RestoreAnalysisDraftAction $restore): void
+    public function mount(TracksPhotoConversion $tracking): void
     {
         $tracking->track(auth()->user(), PhotoAnalysisContext::guestId(request()), 'visit', 'visit');
         if (auth()->guest() && ! session()->has('snap_to_track.intent')) {
@@ -55,27 +48,13 @@ class extends Component
                 session()->put('url.intended', route('snap-to-track.index', absolute: false));
             }
         }
-        $token = auth()->check() ? (session()->pull('snap_to_track.preview_draft') ?? session('snap_to_track.upgrade_draft')) : null;
-        if (auth()->check() && is_string($token)) {
-            $resolution = $restore->handle($token, auth()->user());
-            if ($resolution->status === AnalysisDraftStatus::Restored) {
-                $this->result = $resolution->analysis()?->toArray();
-                $this->draftToken = $token;
-            } else {
-                $this->error = 'Your meal preview has expired. Your scan allowance is unchanged; you can still save meals already in your log.';
-            }
-        }
     }
 
-    public function startPreview(CreateAnalysisDraftAction $drafts, ManagesPhotoPreview $preview): void
+    public function startPreview(ManagesPhotoPreview $preview): void
     {
         abort_unless($this->photoAllowance->preview?->status === 'available', 403);
         session()->put('snap_to_track.intent', 'preview');
         session()->put('url.intended', route('snap-to-track', absolute: false));
-        $token = $this->ensureDraftToken($drafts);
-        if ($token !== null) {
-            session()->put('snap_to_track.preview_draft', $token);
-        }
         if (! auth()->check()) {
             $this->redirect(route('register'));
 
@@ -97,28 +76,9 @@ class extends Component
         return resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement(auth()->user(), \App\Data\Billing\PhotoAnalysisContext::guestId(request()));
     }
 
-    private function ensureDraftToken(CreateAnalysisDraftAction $action): ?string
+    public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade): void
     {
-        if ($this->result === null) {
-            return null;
-        }
-
-        return $this->draftToken ??= $action->handle(
-            FoodAnalysisData::from($this->result),
-            AnalysisDraftSource::PublicSnapToTrack,
-            auth()->id(),
-        );
-    }
-
-    public function upgrade(CreateAnalysisDraftAction $action): void
-    {
-        session()->put('snap_to_track.intent', 'upgrade');
-        if ($this->ensureDraftToken($action) !== null) {
-            session()->put('snap_to_track.upgrade_draft', $this->draftToken);
-        }
-        session()->put('url.intended', route('checkout.subscription', absolute: false));
-        $offer = $this->photoAllowance->offer;
-        $this->redirect($offer === null ? route('checkout.subscription') : route('checkout.start', ['product' => $offer->productId]));
+        $this->redirect($prepareUpgrade->handle($this->photoAllowance->offer));
     }
 
     public function _startUpload($name, $fileInfo, $isMultiple): void
@@ -133,7 +93,7 @@ class extends Component
         $this->startLivewireUpload($name, $fileInfo, $isMultiple);
     }
 
-    public function analyze(AnalyzeFoodPhotoAction $action): void
+    public function analyze(AnalyzeFoodPhotoAction $action, CreateAnalysisDraftAction $drafts): void
     {
         $this->error = null;
         if ($this->photoAllowance->exhausted) {
@@ -141,8 +101,6 @@ class extends Component
 
             return;
         }
-        $this->result = null;
-        $this->draftToken = null;
 
         if (RateLimiter::tooManyAttempts($this->analysisRateLimitKey(), 5)) {
             $this->error = 'Too many attempts in a short time. Please try again later; this is separate from your scan allowance.';
@@ -192,8 +150,24 @@ class extends Component
                 'public_snap_to_track', hash('sha256', $base64),
             ));
 
-            $this->result = $analysis->toArray();
             unset($this->photoAllowance);
+
+            if ($analysis->items->count() === 0) {
+                $this->error = 'No food items were detected. Try a clearer photo with better lighting.';
+
+                return;
+            }
+
+            $token = $drafts->handle($analysis, AnalysisDraftSource::PublicSnapToTrack, auth()->id());
+
+            if (auth()->check()) {
+                $this->redirect(route('snap-to-track.review', ['draft' => $token]));
+
+                return;
+            }
+
+            session()->put('snap_to_track.result', ['draft' => $token, 'request_id' => $this->analysisRequestId]);
+            $this->redirect(route('snap-to-track.result'));
         } catch (\App\Exceptions\Billing\PhotoLimitExceeded $e) {
             $this->error = $e->getMessage();
         } catch (ValidationException $e) {
@@ -215,9 +189,7 @@ class extends Component
             return;
         }
         $this->deleteTemporaryPhoto(resetUploadChallenge: true);
-        $this->result = null;
         $this->error = null;
-        $this->draftToken = null;
 
         $this->redirect(route('snap-to-track'));
     }
@@ -249,29 +221,6 @@ class extends Component
         session()->put('url.intended', route($previewAvailable ? 'snap-to-track' : 'snap-to-track.index', absolute: false));
         session()->put('snap_to_track.auth_path', $intent);
         session()->put('snap_to_track.intent', $previewAvailable ? 'preview' : 'scan');
-
-        $this->redirect(route($intent));
-    }
-
-    public function saveMeal(string $intent, CreateAnalysisDraftAction $action): void
-    {
-        if ($this->result === null || ! in_array($intent, ['register', 'login'], true)) {
-            return;
-        }
-
-        $this->ensureDraftToken($action);
-
-        $reviewUrl = route('snap-to-track.review', ['draft' => $this->draftToken], absolute: false);
-
-        if (auth()->check()) {
-            $this->redirect($reviewUrl);
-
-            return;
-        }
-
-        session()->put('url.intended', $reviewUrl);
-        session()->put('snap_to_track.auth_path', $intent);
-        session()->put('snap_to_track.intent', 'save');
 
         $this->redirect(route($intent));
     }
@@ -407,410 +356,291 @@ class extends Component
             @if ($error)
                 <p role="alert" class="mb-4 border border-[#B5482E] p-4 text-sm text-[#893E20]">{{ $error }}</p>
             @endif
-            @if ($result === null)
-                @php
-                    $limitGate = $this->limitReachedGate();
-                @endphp
-                @if ($limitGate !== null && ! $photoAllowance->enabled)
-                    {{-- Limit recovery (dark inverse) --}}
-                    <article
-                        x-data
-                        x-init="window.acaraTrack?.('snap_to_track_limit_reached', { source: 'public_snap_to_track', gate: @js($limitGate), authenticated: @js(auth()->check()) })"
-                        class="mb-6 border border-[#1A1814] bg-[#1A1814] p-6 sm:p-8 text-[#F2EBDD]"
-                    >
-                        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Free scans used</p>
-                        <h3 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.02em]">You're on a roll.</h3>
-                        @auth
-                            <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
-                                You've maxed the public scanner. Your account has its own — pick up right where you left off.
-                            </p>
-                            <a
-                                href="{{ route('snap-to-track.index') }}"
-                                class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
-                            >
-                                Open Snap to Track
-                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                </svg>
-                            </a>
-                        @else
-                            <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
-                                That's this hour's free scans from this network. Create a free account and keep analyzing in the app — your results become meals you can save.
-                            </p>
-                            <button
-                                type="button"
-                                wire:click="continueInApp('register')"
-                                x-on:click="window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'register' })"
-                                class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
-                            >
-                                Keep analyzing — free
-                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                </svg>
-                            </button>
-                            <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-[#F2EBDD]/70">
-                                Already a member?
-                                <button
-                                    type="button"
-                                    wire:click="continueInApp('login')"
-                                    x-on:click="window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'login' })"
-                                    class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]"
-                                >Log in</button>
-                            </p>
-                        @endauth
-                    </article>
-                @endif
-                @if ($photoAllowance->exhausted())
-                    <x-snap-conversion-offer :allowance="$photoAllowance" placement="wall" />
-                @endif
-                @unless ($photoAllowance->exhausted())
-                <form wire:submit="analyze" class="space-y-6">
-                    <div
-                        x-data="{ uploading: false, uploadFailed: false, progress: 0, fileName: '' }"
-                        x-on:livewire-upload-start="uploading = true; uploadFailed = false; progress = 0"
-                        x-on:livewire-upload-progress="progress = $event.detail.progress"
-                        x-on:livewire-upload-finish="progress = 100"
-                        x-on:livewire-upload-cancel="uploading = false; progress = 0"
-                        x-on:livewire-upload-error="uploading = false; uploadFailed = true; progress = 0; $event.target.value = null"
-                        x-bind:aria-busy="uploading"
-                        class="border border-[#D9CFBC] bg-[#EBE2D0] p-6 sm:p-8"
-                    >
-                        <div class="flex items-center justify-between gap-4 pb-5">
-                            <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
-                                @if ($photo)
-                                    Step 2 · Analyze
-                                @else
-                                    <span x-show="! uploading">Step 1 · Upload</span>
-                                    <span x-show="uploading" style="display: none;">Step 1 · Uploading</span>
-                                @endif
-                            </p>
-                            <span class="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
-                                <span class="size-1.5 rounded-full bg-[#C4623A]" aria-hidden="true"></span>
-                                Live
-                            </span>
-                        </div>
-
-                        @if ($photoAllowance->enabled && $photoAllowance->mode === 'trial')
-                            <p id="scan-terms" class="mb-4 text-center text-sm font-semibold text-[#3D3833]">{{ $photoAllowance->limit }} {{ $photoAllowance->limit === 1 ? 'free scan' : 'free scans' }} · No signup · No card</p>
-                            @if ($photoAllowance->used > 0)
-                                <p class="mb-4 text-center text-sm">{{ $photoAllowance->remaining }} free scan remaining</p>
-                            @endif
-                        @elseif ($photoAllowance->preview?->status === 'active')
-                            <p class="mb-4 text-sm">Your daily preview scan is ready. Preview ends <time x-data x-text="new Date(@js($photoAllowance->preview->expiresAt)).toLocaleString()">{{ $photoAllowance->preview->expiresAt }}</time>.</p>
-                        @endif
-                        @if (! $photo)
-                            @if (App::environment(['production', 'testing']))
-                                <div class="border-t border-[#D9CFBC] pt-6">
-                                    <div class="flex justify-center">
-                                        <x-turnstile wire:model="turnstileToken" data-theme="auto" />
-                                    </div>
-                                    @error('turnstileToken')
-                                        <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#B5482E]">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            @endif
-
-                            {{-- Upload Area --}}
-                            <div class="relative border-t border-[#D9CFBC] pt-6 {{ App::environment(['production', 'testing']) && blank($turnstileToken) ? 'opacity-50' : '' }}">
-                                <input
-                                    type="file"
-                                    wire:model="photo"
-                                    accept="image/*"
-                                    class="hidden"
-                                    id="photo-upload"
-                                    x-ref="photoUpload"
-                                    x-on:change="
-                                        fileName = $event.target.files[0]?.name ?? '';
-                                        if ($event.target.files.length) {
-                                            window.acaraTrack?.('snap_to_track_upload_selected', { source: 'public_snap_to_track' });
-                                        }
-                                    "
-                                    @disabled($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))
-                                >
-                                <button
-                                    type="button"
-                                    aria-label="Take a food photo or upload an image"
-                                    x-on:click="$refs.photoUpload.click()"
-                                    x-bind:disabled="uploading || @js($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))"
-                                    class="group flex min-h-44 w-full cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1A1814] disabled:cursor-not-allowed flex-col items-center justify-center border-2 border-dashed border-[#D9CFBC] bg-[#F2EBDD] p-8 text-center transition hover:border-[#1A1814] hover:bg-[#F2EBDD]/70"
-                                >
-                                    <div x-show="! uploading && ! uploadFailed" class="flex flex-col items-center">
-                                        <div class="mb-5 flex size-14 items-center justify-center border border-[#1A1814] bg-[#F2EBDD] text-[#1A1814] transition group-hover:bg-[#1A1814] group-hover:text-[#F2EBDD]">
-                                            <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                        </div>
-                                        <span class="font-bold text-lg tracking-[-0.01em] text-[#1A1814]">Tap to take photo or upload</span>
-                                        <span class="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">JPG, PNG up to 10MB</span>
-                                    </div>
-
-                                    <div
-                                        x-show="uploading"
-                                        style="display: none;"
-                                        class="flex w-full max-w-sm flex-col items-center"
-                                    >
-                                        <div class="mb-5 flex size-14 items-center justify-center border border-[#C4623A] bg-[#C4623A] text-[#F2EBDD]">
-                                            <svg class="size-6 motion-safe:animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 15v3a2 2 0 002 2h10a2 2 0 002-2v-3" />
-                                            </svg>
-                                        </div>
-                                        <span
-                                            x-text="progress < 100 ? 'Uploading photo · ' + progress + '%' : 'Preparing preview…'"
-                                            class="font-bold text-lg tracking-[-0.01em] text-[#1A1814]"
-                                        >Uploading photo…</span>
-                                        <span
-                                            x-text="progress < 100 ? 'Uploading photo. Please wait.' : 'Upload complete. Preparing preview.'"
-                                            class="sr-only"
-                                            role="status"
-                                            aria-live="polite"
-                                        ></span>
-                                        <span x-show="fileName" x-text="fileName" class="mt-2 max-w-full truncate font-mono text-[10px] uppercase tracking-[0.14em] text-[#6E665C]"></span>
-                                        <div
-                                            role="progressbar"
-                                            aria-label="Photo upload progress"
-                                            aria-valuemin="0"
-                                            aria-valuemax="100"
-                                            x-bind:aria-valuenow="progress"
-                                            class="mt-5 h-1.5 w-full overflow-hidden bg-[#D9CFBC]"
-                                        >
-                                            <div
-                                                x-bind:style="'width: ' + progress + '%'"
-                                                class="h-full bg-[#C4623A] transition-[width] duration-200 motion-reduce:transition-none"
-                                            ></div>
-                                        </div>
-                                        <span class="mt-3 text-sm leading-relaxed text-[#3D3833]">Keep this tab open. Your preview is next.</span>
-                                    </div>
-
-                                    <div x-show="uploadFailed" style="display: none;" class="flex flex-col items-center" role="alert">
-                                        <div class="mb-5 flex size-14 items-center justify-center border border-[#B5482E] bg-[#B5482E]/5 text-[#B5482E]">
-                                            <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 3.84L2.82 17a2 2 0 001.74 3h14.88a2 2 0 001.74-3L13.7 3.84a2 2 0 00-3.4 0z" />
-                                            </svg>
-                                        </div>
-                                        <span class="font-bold text-lg tracking-[-0.01em] text-[#1A1814]">Upload didn’t finish</span>
-                                        <span class="mt-2 text-sm leading-relaxed text-[#3D3833]">Tap here and choose the photo again to retry.</span>
-                                    </div>
-                                </button>
-                                @error('photo')
-                                    <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#B5482E]">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            {{-- Tips --}}
-                            <div class="mt-6 border-t border-[#D9CFBC] pt-6">
-                                <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Tips for best results</p>
-                                <ul class="mt-3 grid gap-2 sm:grid-cols-2">
-                                    @foreach ([
-                                        'Take photo in good lighting',
-                                        'Make sure all food is visible',
-                                        'Capture from directly above',
-                                        'Include a reference for scale (optional)',
-                                    ] as $tip)
-                                        <li class="flex items-start gap-3 text-sm leading-relaxed text-[#3D3833]">
-                                            <span class="mt-2 size-1 shrink-0 bg-[#C4623A]" aria-hidden="true"></span>
-                                            <span>{{ $tip }}</span>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @else
-                            {{-- Photo preview --}}
-                            <div class="border-t border-[#D9CFBC] pt-6">
-                                <div class="flex items-baseline justify-between gap-3">
-                                    <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Photo loaded</p>
-                                    <button
-                                        type="button"
-                                        wire:click="clearPhoto"
-                                        class="font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C] transition hover:text-[#B5482E]"
-                                        title="Remove photo"
-                                        @disabled($loading)
-                                    >
-                                        Remove ×
-                                    </button>
-                                </div>
-                                <div class="mt-3 border border-[#D9CFBC] bg-[#F2EBDD] p-2">
-                                    <img
-                                        src="{{ $photo->temporaryUrl() }}"
-                                        alt="Food photo preview"
-                                        class="h-72 w-full object-cover"
-                                    >
-                                </div>
-                            </div>
-
-                            @if (App::environment(['production', 'testing']))
-                                <div class="mt-6 border-t border-[#D9CFBC] pt-6">
-                                    <div class="flex justify-center">
-                                        <x-turnstile wire:model="turnstileToken" data-theme="auto" />
-                                    </div>
-                                    @error('turnstileToken')
-                                        <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#B5482E]">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            @endif
-
-                            <div class="mt-6 border-t border-[#D9CFBC] pt-6">
-                                <button
-                                    type="submit"
-                                    data-umami-event="snap_to_track_analyze_click"
-                                    data-umami-event-location="main_form"
-                                    class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#1A1814] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#3D3833] focus:outline-none focus:ring-2 focus:ring-[#1A1814] focus:ring-offset-2 focus:ring-offset-[#EBE2D0] disabled:cursor-wait disabled:bg-[#1A1814] disabled:text-[#F2EBDD]"
-                                    @disabled($loading)
-                                >
-                                    <span wire:loading.remove wire:target="analyze" class="inline-flex items-center gap-2">
-                                        Analyze Food
-                                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                        </svg>
-                                    </span>
-                                    <span wire:loading.inline-flex wire:target="analyze" class="items-center gap-2">
-                                        <svg class="size-4 motion-safe:animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Analyzing your meal...
-                                    </span>
-                                </button>
-
-                                <p wire:loading wire:target="analyze" class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
-                                    This usually takes 5–15 seconds. Hang tight.
-                                </p>
-                            </div>
-                        @endif
-
-                    </div>
-
-                    {{-- Authority footer --}}
-                    <div class="flex flex-col gap-1 px-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
-                        <p><strong class="font-bold text-[#3D3833]">Disclaimer:</strong> These are AI estimates. Actual nutrition depends on how the food was made.</p>
-                        <p>AI vision analysis · USDA-aligned nutrition references</p>
-                        <p><time datetime="{{ now()->toDateString() }}">Last updated: {{ now()->format('F Y') }}</time></p>
-                    </div>
-                </form>
-                @if ($photoAllowance->preview?->status === 'active')
-                    <x-snap-conversion-offer :allowance="$photoAllowance" placement="preview_upload" />
-                @endif
-                @endunless
-            @else
-                {{-- Result --}}
-                @php
-                    $totalMacroWeight = max(1, $result['total_protein'] + $result['total_carbs'] + $result['total_fat']);
-                    $confidenceBand = App\Enums\ConfidenceBand::fromScore($result['confidence'])->value;
-                @endphp
-                <div
+            @php
+                $limitGate = $this->limitReachedGate();
+            @endphp
+            @if ($limitGate !== null && ! $photoAllowance->enabled)
+                {{-- Limit recovery (dark inverse) --}}
+                <article
                     x-data
-                    x-init="$el.classList.remove('opacity-0', 'translate-y-2')"
-                    x-intersect.once="window.acaraTrackOnce?.('snap_to_track_result_viewed', { source: 'public_snap_to_track' }, @js($analysisRequestId ?? 'restored'))"
-                    class="opacity-0 translate-y-2 transition-all duration-500 motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0"
+                    x-init="window.acaraTrack?.('snap_to_track_limit_reached', { source: 'public_snap_to_track', gate: @js($limitGate), authenticated: @js(auth()->check()) })"
+                    class="mb-6 border border-[#1A1814] bg-[#1A1814] p-6 sm:p-8 text-[#F2EBDD]"
                 >
-                    <div class="flex flex-col gap-4">
-                        {{-- Total nutrition --}}
-                        <article class="border border-[#D9CFBC] bg-[#F2EBDD] p-6 sm:p-8">
-                            <div class="flex items-baseline justify-between gap-4">
-                                <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Total Nutrition</p>
-                                <span class="border border-[#C4623A] px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[#C4623A]">
-                                    {{ $result['confidence'] }}% confident
-                                </span>
-                            </div>
-
-                            <div class="mt-5 flex items-end gap-3">
-                                <span class="font-bold text-[clamp(56px,7vw,96px)] leading-[1] tracking-[-0.03em] text-[#1A1814]">{{ number_format($result['total_calories'], 0) }}</span>
-                                <span class="mb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">kcal</span>
-                            </div>
-                            <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
-                                ~{{ round($result['total_calories'] / 2000 * 100) }}% of a 2,000 kcal daily goal
-                            </p>
-                            <div class="mt-2 h-1.5 w-full overflow-hidden bg-[#D9CFBC]">
-                                <div class="h-full bg-[#C4623A] transition-[width] duration-700" style="width: {{ min(100, round($result['total_calories'] / 2000 * 100)) }}%"></div>
-                            </div>
-
-                            {{-- Macro grid --}}
-                            <div class="mt-7 grid grid-cols-3 gap-6 border-t border-[#D9CFBC] pt-6">
-                                @foreach ([
-                                    ['label' => 'Protein', 'value' => $result['total_protein']],
-                                    ['label' => 'Carbs', 'value' => $result['total_carbs']],
-                                    ['label' => 'Fat', 'value' => $result['total_fat']],
-                                ] as $macro)
-                                    <div>
-                                        <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">{{ $macro['label'] }}</p>
-                                        <p class="mt-1 font-bold text-2xl leading-tight tracking-[-0.02em] text-[#1A1814]">
-                                            {{ number_format($macro['value'], 1) }}<span class="ml-1 font-mono text-xs uppercase tracking-[0.18em] text-[#6E665C]">g</span>
-                                        </p>
-                                        <div class="mt-2 h-1 w-full overflow-hidden bg-[#D9CFBC]">
-                                            <div class="h-full bg-[#1A1814] transition-[width] duration-700" style="width: {{ min(100, ($macro['value'] / $totalMacroWeight) * 100) }}%"></div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-
-                            <p class="mt-5 border-t border-[#D9CFBC] pt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
-                                {{ App\Services\AiTransparency::carbBoundaryNotice() }}
-                            </p>
-                        </article>
-
-                        <x-snap-conversion-offer :allowance="$photoAllowance" placement="result" :has-result="count($result['items']) > 0" />
-
-                        {{-- Items list --}}
-                        <article class="border border-[#D9CFBC] bg-[#F2EBDD] p-6 sm:p-8">
-                            <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Food Items Detected</p>
-                            @if (count($result['items']) === 0)
-                                <p class="mt-4 text-sm leading-relaxed text-[#3D3833]">No food items were detected. Try a clearer photo with better lighting.</p>
-                            @else
-                                <ul class="mt-4 divide-y divide-[#D9CFBC]">
-                                    @foreach ($result['items'] as $i => $item)
-                                        <li class="flex items-start gap-4 py-4 first:pt-0 last:pb-0">
-                                            <span class="pt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#C4623A]" aria-hidden="true">
-                                                {{ str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) }}
-                                            </span>
-                                            <div class="flex-1 min-w-0">
-                                                <div class="flex items-baseline justify-between gap-3">
-                                                    <h4 class="font-bold text-base leading-tight tracking-[-0.01em] text-[#1A1814]">{{ $item['name'] }}</h4>
-                                                    <span class="shrink-0 font-bold text-sm tracking-[-0.01em] text-[#1A1814]">{{ number_format($item['calories'], 0) }} kcal</span>
-                                                </div>
-                                                <p class="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">{{ $item['portion'] }}</p>
-                                                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
-                                                    <span>P {{ number_format($item['protein'], 1) }}g</span>
-                                                    <span aria-hidden="true">·</span>
-                                                    <span>C {{ number_format($item['carbs'], 1) }}g</span>
-                                                    <span aria-hidden="true">·</span>
-                                                    <span>F {{ number_format($item['fat'], 1) }}g</span>
-                                                </div>
-                                                @if (($item['provenance'] ?? 'model') === 'reference')
-                                                    <p class="mt-2 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
-                                                        <span class="text-[#C4623A]" aria-hidden="true">◆</span> USDA reference
-                                                    </p>
-                                                @endif
-                                            </div>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @endif
-                        </article>
-
-                        {{-- Analyze another --}}
-                        @unless ($photoAllowance->exhausted())
+                    <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#C4623A]">Free scans used</p>
+                    <h3 class="mt-3 font-bold text-2xl leading-tight tracking-[-0.02em]">You're on a roll.</h3>
+                    @auth
+                        <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
+                            You've maxed the public scanner. Your account has its own — pick up right where you left off.
+                        </p>
+                        <a
+                            href="{{ route('snap-to-track.index') }}"
+                            class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
+                        >
+                            Open Snap to Track
+                            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                        </a>
+                    @else
+                        <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">
+                            That's this hour's free scans from this network. Create a free account and keep analyzing in the app — your results become meals you can save.
+                        </p>
                         <button
                             type="button"
-                            wire:click="clearPhoto"
-                            class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-none border border-[#1A1814] bg-[#F2EBDD] px-6 text-sm font-semibold text-[#1A1814] transition hover:bg-[#1A1814] hover:text-[#F2EBDD]"
+                            wire:click="continueInApp('register')"
+                            x-on:click="window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'register' })"
+                            class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
                         >
-                            Analyze another photo
+                            Keep analyzing — free
                             <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </button>
-
-                        @endunless
-
-                        {{-- Disclaimer --}}
-                        <div class="flex flex-col gap-1 px-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
-                            <p><strong class="font-bold text-[#3D3833]">Disclaimer:</strong> These are AI estimates. Actual nutrition depends on how the food was made.</p>
-                            <p>AI vision analysis · USDA-aligned nutrition references</p>
-                            <p><time datetime="{{ now()->toDateString() }}">Last updated: {{ now()->format('F Y') }}</time></p>
-                        </div>
-                    </div>
-                </div>
+                        <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-[#F2EBDD]/70">
+                            Already a member?
+                            <button
+                                type="button"
+                                wire:click="continueInApp('login')"
+                                x-on:click="window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'login' })"
+                                class="underline decoration-[#C4623A] underline-offset-4 transition hover:text-[#F2EBDD]"
+                            >Log in</button>
+                        </p>
+                    @endauth
+                </article>
             @endif
+            @if ($photoAllowance->exhausted())
+                <x-snap-conversion-offer :allowance="$photoAllowance" placement="wall" />
+            @endif
+            @unless ($photoAllowance->exhausted())
+            <form wire:submit="analyze" class="space-y-6">
+                <div
+                    x-data="{ uploading: false, uploadFailed: false, progress: 0, fileName: '' }"
+                    x-on:livewire-upload-start="uploading = true; uploadFailed = false; progress = 0"
+                    x-on:livewire-upload-progress="progress = $event.detail.progress"
+                    x-on:livewire-upload-finish="progress = 100"
+                    x-on:livewire-upload-cancel="uploading = false; progress = 0"
+                    x-on:livewire-upload-error="uploading = false; uploadFailed = true; progress = 0; $event.target.value = null"
+                    x-bind:aria-busy="uploading"
+                    class="border border-[#D9CFBC] bg-[#EBE2D0] p-6 sm:p-8"
+                >
+                    <div class="flex items-center justify-between gap-4 pb-5">
+                        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
+                            @if ($photo)
+                                Step 2 · Analyze
+                            @else
+                                <span x-show="! uploading">Step 1 · Upload</span>
+                                <span x-show="uploading" style="display: none;">Step 1 · Uploading</span>
+                            @endif
+                        </p>
+                        <span class="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
+                            <span class="size-1.5 rounded-full bg-[#C4623A]" aria-hidden="true"></span>
+                            Live
+                        </span>
+                    </div>
+
+                    @if ($photoAllowance->enabled && $photoAllowance->mode === 'trial')
+                        <p id="scan-terms" class="mb-4 text-center text-sm font-semibold text-[#3D3833]">{{ $photoAllowance->limit }} {{ $photoAllowance->limit === 1 ? 'free scan' : 'free scans' }} · No signup · No card</p>
+                        @if ($photoAllowance->used > 0)
+                            <p class="mb-4 text-center text-sm">{{ $photoAllowance->remaining }} free scan remaining</p>
+                        @endif
+                    @elseif ($photoAllowance->preview?->status === 'active')
+                        <p class="mb-4 text-sm">Your daily preview scan is ready. Preview ends <time x-data x-text="new Date(@js($photoAllowance->preview->expiresAt)).toLocaleString()">{{ $photoAllowance->preview->expiresAt }}</time>.</p>
+                    @endif
+                    @if (! $photo)
+                        @if (App::environment(['production', 'testing']))
+                            <div class="border-t border-[#D9CFBC] pt-6">
+                                <div class="flex justify-center">
+                                    <x-turnstile wire:model="turnstileToken" data-theme="auto" />
+                                </div>
+                                @error('turnstileToken')
+                                    <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#B5482E]">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        @endif
+
+                        {{-- Upload Area --}}
+                        <div class="relative border-t border-[#D9CFBC] pt-6 {{ App::environment(['production', 'testing']) && blank($turnstileToken) ? 'opacity-50' : '' }}">
+                            <input
+                                type="file"
+                                wire:model="photo"
+                                accept="image/*"
+                                class="hidden"
+                                id="photo-upload"
+                                x-ref="photoUpload"
+                                x-on:change="
+                                    fileName = $event.target.files[0]?.name ?? '';
+                                    if ($event.target.files.length) {
+                                        window.acaraTrack?.('snap_to_track_upload_selected', { source: 'public_snap_to_track' });
+                                        window.acaraKeepSnapPhoto?.($event.target.files[0]);
+                                    }
+                                "
+                                @disabled($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))
+                            >
+                            <button
+                                type="button"
+                                aria-label="Take a food photo or upload an image"
+                                x-on:click="$refs.photoUpload.click()"
+                                x-bind:disabled="uploading || @js($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))"
+                                class="group flex min-h-44 w-full cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1A1814] disabled:cursor-not-allowed flex-col items-center justify-center border-2 border-dashed border-[#D9CFBC] bg-[#F2EBDD] p-8 text-center transition hover:border-[#1A1814] hover:bg-[#F2EBDD]/70"
+                            >
+                                <div x-show="! uploading && ! uploadFailed" class="flex flex-col items-center">
+                                    <div class="mb-5 flex size-14 items-center justify-center border border-[#1A1814] bg-[#F2EBDD] text-[#1A1814] transition group-hover:bg-[#1A1814] group-hover:text-[#F2EBDD]">
+                                        <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </div>
+                                    <span class="font-bold text-lg tracking-[-0.01em] text-[#1A1814]">Tap to take photo or upload</span>
+                                    <span class="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">JPG, PNG up to 10MB</span>
+                                </div>
+
+                                <div
+                                    x-show="uploading"
+                                    style="display: none;"
+                                    class="flex w-full max-w-sm flex-col items-center"
+                                >
+                                    <div class="mb-5 flex size-14 items-center justify-center border border-[#C4623A] bg-[#C4623A] text-[#F2EBDD]">
+                                        <svg class="size-6 motion-safe:animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 15v3a2 2 0 002 2h10a2 2 0 002-2v-3" />
+                                        </svg>
+                                    </div>
+                                    <span
+                                        x-text="progress < 100 ? 'Uploading photo · ' + progress + '%' : 'Preparing preview…'"
+                                        class="font-bold text-lg tracking-[-0.01em] text-[#1A1814]"
+                                    >Uploading photo…</span>
+                                    <span
+                                        x-text="progress < 100 ? 'Uploading photo. Please wait.' : 'Upload complete. Preparing preview.'"
+                                        class="sr-only"
+                                        role="status"
+                                        aria-live="polite"
+                                    ></span>
+                                    <span x-show="fileName" x-text="fileName" class="mt-2 max-w-full truncate font-mono text-[10px] uppercase tracking-[0.14em] text-[#6E665C]"></span>
+                                    <div
+                                        role="progressbar"
+                                        aria-label="Photo upload progress"
+                                        aria-valuemin="0"
+                                        aria-valuemax="100"
+                                        x-bind:aria-valuenow="progress"
+                                        class="mt-5 h-1.5 w-full overflow-hidden bg-[#D9CFBC]"
+                                    >
+                                        <div
+                                            x-bind:style="'width: ' + progress + '%'"
+                                            class="h-full bg-[#C4623A] transition-[width] duration-200 motion-reduce:transition-none"
+                                        ></div>
+                                    </div>
+                                    <span class="mt-3 text-sm leading-relaxed text-[#3D3833]">Keep this tab open. Your preview is next.</span>
+                                </div>
+
+                                <div x-show="uploadFailed" style="display: none;" class="flex flex-col items-center" role="alert">
+                                    <div class="mb-5 flex size-14 items-center justify-center border border-[#B5482E] bg-[#B5482E]/5 text-[#B5482E]">
+                                        <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 3.84L2.82 17a2 2 0 001.74 3h14.88a2 2 0 001.74-3L13.7 3.84a2 2 0 00-3.4 0z" />
+                                        </svg>
+                                    </div>
+                                    <span class="font-bold text-lg tracking-[-0.01em] text-[#1A1814]">Upload didn’t finish</span>
+                                    <span class="mt-2 text-sm leading-relaxed text-[#3D3833]">Tap here and choose the photo again to retry.</span>
+                                </div>
+                            </button>
+                            @error('photo')
+                                <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#B5482E]">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Tips --}}
+                        <div class="mt-6 border-t border-[#D9CFBC] pt-6">
+                            <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Tips for best results</p>
+                            <ul class="mt-3 grid gap-2 sm:grid-cols-2">
+                                @foreach ([
+                                    'Take photo in good lighting',
+                                    'Make sure all food is visible',
+                                    'Capture from directly above',
+                                    'Include a reference for scale (optional)',
+                                ] as $tip)
+                                    <li class="flex items-start gap-3 text-sm leading-relaxed text-[#3D3833]">
+                                        <span class="mt-2 size-1 shrink-0 bg-[#C4623A]" aria-hidden="true"></span>
+                                        <span>{{ $tip }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @else
+                        {{-- Photo preview --}}
+                        <div class="border-t border-[#D9CFBC] pt-6">
+                            <div class="flex items-baseline justify-between gap-3">
+                                <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Photo loaded</p>
+                                <button
+                                    type="button"
+                                    wire:click="clearPhoto"
+                                    class="font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C] transition hover:text-[#B5482E]"
+                                    title="Remove photo"
+                                    @disabled($loading)
+                                >
+                                    Remove ×
+                                </button>
+                            </div>
+                            <div class="mt-3 border border-[#D9CFBC] bg-[#F2EBDD] p-2">
+                                <img
+                                    src="{{ $photo->temporaryUrl() }}"
+                                    alt="Food photo preview"
+                                    class="h-72 w-full object-cover"
+                                >
+                            </div>
+                        </div>
+
+                        @if (App::environment(['production', 'testing']))
+                            <div class="mt-6 border-t border-[#D9CFBC] pt-6">
+                                <div class="flex justify-center">
+                                    <x-turnstile wire:model="turnstileToken" data-theme="auto" />
+                                </div>
+                                @error('turnstileToken')
+                                    <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#B5482E]">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        @endif
+
+                        <div class="mt-6 border-t border-[#D9CFBC] pt-6">
+                            <button
+                                type="submit"
+                                x-on:click="window.acaraTagSnapPhoto?.($wire.analysisRequestId)"
+                                data-umami-event="snap_to_track_analyze_click"
+                                data-umami-event-location="main_form"
+                                class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#1A1814] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#3D3833] focus:outline-none focus:ring-2 focus:ring-[#1A1814] focus:ring-offset-2 focus:ring-offset-[#EBE2D0] disabled:cursor-wait disabled:bg-[#1A1814] disabled:text-[#F2EBDD]"
+                                @disabled($loading)
+                            >
+                                <span wire:loading.remove wire:target="analyze" class="inline-flex items-center gap-2">
+                                    Analyze Food
+                                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                    </svg>
+                                </span>
+                                <span wire:loading.inline-flex wire:target="analyze" class="items-center gap-2">
+                                    <svg class="size-4 motion-safe:animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Analyzing your meal...
+                                </span>
+                            </button>
+
+                            <p wire:loading wire:target="analyze" class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
+                                This usually takes 5–15 seconds. Hang tight.
+                            </p>
+                        </div>
+                    @endif
+
+                </div>
+
+                {{-- Authority footer --}}
+                <div class="flex flex-col gap-1 px-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
+                    <p><strong class="font-bold text-[#3D3833]">Disclaimer:</strong> These are AI estimates. Actual nutrition depends on how the food was made.</p>
+                    <p>AI vision analysis · USDA-aligned nutrition references</p>
+                    <p><time datetime="{{ now()->toDateString() }}">Last updated: {{ now()->format('F Y') }}</time></p>
+                </div>
+            </form>
+            @if ($photoAllowance->preview?->status === 'active')
+                <x-snap-conversion-offer :allowance="$photoAllowance" placement="preview_upload" />
+            @endif
+            @endunless
         </section>
 
         {{-- Field manual / definition (placed below the tool so the action stays above the fold) --}}

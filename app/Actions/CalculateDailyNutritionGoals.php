@@ -12,8 +12,6 @@ final readonly class CalculateDailyNutritionGoals
 {
     private const int MINIMUM_CALORIES = 1200;
 
-    private const int FIBER_GRAMS_PER_1000_KCAL = 14;
-
     public function handle(?UserProfile $profile): ?DailyNutritionGoalsData
     {
         $tdee = $profile?->tdee;
@@ -27,14 +25,7 @@ final readonly class CalculateDailyNutritionGoals
             GoalChoice::BuildMuscle => $tdee + 300,
             GoalChoice::Spikes, GoalChoice::HeartHealth, GoalChoice::HealthyEating => $tdee - 300,
         }));
-        $split = $profile->dietType()->macroTargets();
 
-        return new DailyNutritionGoalsData(
-            calories: $calories,
-            protein: (int) round($calories * $split['protein'] / 100 / 4),
-            carbs: (int) round($calories * $split['carbs'] / 100 / 4),
-            fat: (int) round($calories * $split['fat'] / 100 / 9),
-            fiber: (int) round($calories * self::FIBER_GRAMS_PER_1000_KCAL / 1000),
-        );
+        return DailyNutritionGoalsData::forCalories($calories, $profile->dietType());
     }
 }
