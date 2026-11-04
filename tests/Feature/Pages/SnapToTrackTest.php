@@ -68,8 +68,7 @@ it('renders the snap to track page', function (): void {
 
 it('shows upload area when no photo is selected', function (): void {
     Livewire::test('pages::snap-to-track')
-        ->assertSee('Tap to take photo or upload')
-        ->assertSee('JPG, PNG up to 10MB');
+        ->assertSeeInOrder(['Tap to take photo or upload', 'JPG, PNG up to 10MB', 'Take photo', 'Choose photo']);
 });
 
 it('validates photo is required', function (): void {
