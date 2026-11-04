@@ -11,14 +11,9 @@ final readonly class PrepareSnapToTrackUpgrade
 {
     public function __construct(private Session $session) {}
 
-    public function handle(?PhotoOffer $offer, ?string $draftToken = null): string
+    public function handle(?PhotoOffer $offer): string
     {
         $this->session->put('snap_to_track.intent', 'upgrade');
-
-        if ($draftToken !== null) {
-            $this->session->put('snap_to_track.upgrade_draft', $draftToken);
-        }
-
         $this->session->put('url.intended', route('checkout.subscription', absolute: false));
 
         return $offer instanceof PhotoOffer

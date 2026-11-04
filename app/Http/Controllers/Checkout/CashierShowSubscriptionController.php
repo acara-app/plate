@@ -98,7 +98,6 @@ final readonly class CashierShowSubscriptionController
             'paymentPending' => $paymentPending,
             'selectedProductId' => $request->session()->get('checkout.selected_product'),
             'photoAllowance' => $allowance->toArray(),
-            'upgradeDraft' => session('snap_to_track.upgrade_draft'),
             'currentSubscription' => $currentSubscription ? [
                 'id' => $currentSubscription->id,
                 'type' => $currentSubscription->type,
