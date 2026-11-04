@@ -2,7 +2,7 @@ import {
     PhotoAllowanceCard,
     type PhotoAllowance,
 } from '@/components/photo-allowance';
-import ShowSnapToTrackReviewController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackReviewController';
+import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackController';
 import UserEmailVerificationNotificationController from '@/actions/App/Http/Controllers/UserEmailVerificationNotificationController';
 import { PaymentConfirmation } from '@/components/billing/payment-confirmation';
 import PhotoPlanLimitsDetails, {
@@ -68,7 +68,6 @@ interface Props {
     paymentPending: boolean;
     selectedProductId: number | null;
     photoAllowance?: PhotoAllowance;
-    upgradeDraft?: string | null;
     products: BillingProduct[];
     photoPlan: BillingProduct | null;
     currentSubscription: CashierSubscription | null;
@@ -92,7 +91,6 @@ export default function CashierSubscription({
     paymentPending,
     selectedProductId,
     photoAllowance,
-    upgradeDraft,
     currentSubscription,
     billingPortalUrl,
     hasIncompletePayment,
@@ -199,9 +197,12 @@ export default function CashierSubscription({
                     {!paymentPending && photoAllowance?.mode === 'premium' && (
                         <div role="status" className="rounded-lg border p-4">
                             Your plan is active.{' '}
-                            <a href={snapToTrack().url} className="underline">
+                            <Link
+                                href={ShowSnapToTrackController()}
+                                className="underline"
+                            >
                                 Continue scanning
-                            </a>
+                            </Link>
                         </div>
                     )}
                     {hasIncompletePayment && incompletePaymentUrl && (
@@ -362,18 +363,6 @@ export default function CashierSubscription({
                             and unlocks every Acara feature with daily and
                             weekly limits. Cancel anytime from billing settings.
                         </p>
-                    )}
-                    {upgradeDraft && (
-                        <Link
-                            className="underline"
-                            href={
-                                ShowSnapToTrackReviewController({
-                                    draft: upgradeDraft,
-                                }).url
-                            }
-                        >
-                            Return to your saved analysis
-                        </Link>
                     )}
                     {photoPlan && (
                         <PhotoPlanBand

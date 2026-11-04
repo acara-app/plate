@@ -114,7 +114,7 @@ class extends Component
 
     public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade): void
     {
-        $this->redirect($prepareUpgrade->handle($this->photoAllowance->offer, $this->draftToken));
+        $this->redirect($prepareUpgrade->handle($this->photoAllowance->offer));
     }
 
     private function resultDraftToken(): ?string

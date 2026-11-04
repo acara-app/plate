@@ -32,7 +32,6 @@ final readonly class ShowSnapToTrackReviewController
         }
 
         $this->flashRestoredAnalytics($resolution);
-        session()->put('snap_to_track.upgrade_draft', $draft);
         $analysis = $resolution->analysis();
 
         return Inertia::render('snap-to-track/review', [
