@@ -1,4 +1,4 @@
-@props(['allowance', 'placement', 'hasResult' => false])
+@props(['allowance', 'placement'])
 
 <article
     @if ($allowance->canUpgrade && ($allowance->exhausted || $allowance->preview !== null))
@@ -27,9 +27,6 @@
     @elseif ($allowance->enabled && $allowance->mode === 'trial')
         <h2 class="text-xl font-bold">{{ $allowance->remaining }} {{ $allowance->remaining === 1 ? 'free scan remaining' : 'free scans remaining' }}</h2>
         <p class="mt-2 text-sm text-[#F2EBDD]/85">Try another meal and see how photo tracking fits your day.</p>
-        @if ($hasResult)
-            <button type="button" wire:click="clearPhoto" class="mt-5 inline-flex min-h-12 w-full items-center justify-center bg-[#F2EBDD] px-4 py-3 font-semibold text-[#1A1814] focus-visible:outline-2 focus-visible:outline-offset-4">Use my remaining free scan</button>
-        @endif
     @else
         <h2 class="text-xl font-bold">Keep this meal in your food log</h2>
     @endif
@@ -43,11 +40,7 @@
         </div>
     @endif
 
-    @if ($hasResult)
-        <button type="button" wire:click="saveMeal('register')" wire:loading.attr="disabled" wire:target="saveMeal" x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track' })" class="mt-5 inline-flex min-h-12 w-full items-center justify-center border border-[#F2EBDD] px-4 py-3 font-semibold focus-visible:outline-2 focus-visible:outline-offset-4">Save this meal free</button>
-        <p class="mt-2 text-sm text-[#F2EBDD]/85">Save the breakdown and correct anything the AI got wrong.</p>
-    @endif
     @guest
-        <button type="button" wire:click="{{ $hasResult ? "saveMeal('login')" : "continueInApp('login')" }}" class="mt-3 min-h-11 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4">Already have an account? Log in</button>
+        <button type="button" wire:click="continueInApp('login')" class="mt-3 min-h-11 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4">Already have an account? Log in</button>
     @endguest
 </article>
