@@ -13,12 +13,10 @@ it('preserves the chosen offer through account creation without starting payment
         $this->actingAs(User::factory()->create());
     }
 
-    $this->withSession(['snap_to_track.upgrade_draft' => 'saved-result'])
-        ->get(route('checkout.start', $product))
+    $this->get(route('checkout.start', $product))
         ->assertRedirect(route($authenticated ? 'checkout.subscription' : 'register'))
         ->assertSessionHas('url.intended', route('checkout.subscription', absolute: false))
-        ->assertSessionHas('checkout.selected_product', $product->id)
-        ->assertSessionHas('snap_to_track.upgrade_draft', 'saved-result');
+        ->assertSessionHas('checkout.selected_product', $product->id);
 })->with([false, true]);
 
 it('refuses to start checkout for a plan that is not on offer', function (): void {

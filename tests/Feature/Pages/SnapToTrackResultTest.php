@@ -195,16 +195,15 @@ it('keeps offering the plan once the free scans are used up', function (): void 
         ->assertDontSee('Analyze another photo');
 });
 
-it('carries the meal into checkout when the visitor upgrades', function (?PhotoOffer $offer, string $destination, array $parameters): void {
+it('sends the visitor to checkout when they upgrade', function (?PhotoOffer $offer, string $destination, array $parameters): void {
     stubResultPhotoAllowance(exhaustedResultAllowance($offer));
-    $token = guestResultDraft();
+    guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')
         ->call('upgrade')
         ->assertRedirect(route($destination, $parameters));
 
-    expect(session('snap_to_track.upgrade_draft'))->toBe($token)
-        ->and(session('snap_to_track.intent'))->toBe('upgrade')
+    expect(session('snap_to_track.intent'))->toBe('upgrade')
         ->and(session('url.intended'))->toBe(route('checkout.subscription', absolute: false));
 })->with([
     'offered plan' => [new PhotoOffer(productId: 7, name: 'Starter', formattedPrice: '$2.99'), 'checkout.start', ['product' => 7]],
