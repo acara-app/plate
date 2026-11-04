@@ -21,9 +21,9 @@ function openGuestSnapResult(): PendingAwaitablePage
     return visit('/testing/guest-snap-result');
 }
 
-function keepMealPhotoInThisTab(PendingAwaitablePage $page, string $requestId): void
+function keepMealPhotoInThisTab(PendingAwaitablePage $page, string $requestId, int $minutesAgo = 0): void
 {
-    $page->script("(() => { const canvas = document.createElement('canvas'); canvas.width = 320; canvas.height = 240; canvas.getContext('2d').fillRect(0, 0, 320, 240); sessionStorage.setItem('snap_to_track.photo', JSON.stringify({ requestId: '{$requestId}', dataUrl: canvas.toDataURL('image/jpeg', 0.8) })); return true; })()");
+    $page->script("(() => { const canvas = document.createElement('canvas'); canvas.width = 320; canvas.height = 240; canvas.getContext('2d').fillRect(0, 0, 320, 240); sessionStorage.setItem('snap_to_track.photo', JSON.stringify({ requestId: '{$requestId}', dataUrl: canvas.toDataURL('image/jpeg', 0.8), storedAt: Date.now() - {$minutesAgo} * 60000 })); return true; })()");
     $page->script('setTimeout(() => location.reload(), 0)');
     $page->wait(2);
 }
@@ -47,4 +47,15 @@ it('never shows a photo kept for a different analysis', function (): void {
 
     $page->assertSee('Preview · not saved yet')
         ->assertMissing('img[alt="Your meal photo"]');
+});
+
+it('drops a photo kept longer than the preview lasts', function (): void {
+    $page = openGuestSnapResult();
+
+    keepMealPhotoInThisTab($page, 'analysis-request-1', minutesAgo: 61);
+
+    $page->assertSee('Preview · not saved yet')
+        ->assertMissing('img[alt="Your meal photo"]');
+
+    expect($page->script("sessionStorage.getItem('snap_to_track.photo')"))->toBeNull();
 });

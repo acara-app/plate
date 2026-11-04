@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\PrepareSnapToTrackUpgradeAction;
+use App\Actions\PrepareSnapToTrackUpgrade;
 use App\Actions\RestoreAnalysisDraftAction;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\Billing\PhotoAnalysisContext;
@@ -36,6 +36,9 @@ class extends Component
     #[Locked]
     public ?string $analysisRequestId = null;
 
+    #[Locked]
+    public ?string $draftToken = null;
+
     public function mount(RestoreAnalysisDraftAction $restore): void
     {
         $token = $this->resultDraftToken();
@@ -54,7 +57,15 @@ class extends Component
 
         $resolution = $restore->handle($token, null);
 
-        if (in_array($resolution->status, [AnalysisDraftStatus::Invalid, AnalysisDraftStatus::ClaimedByOther], true)) {
+        if (in_array($resolution->status, [AnalysisDraftStatus::Expired, AnalysisDraftStatus::Consumed], true)) {
+            $this->unavailableReason = $resolution->status->value;
+
+            return;
+        }
+
+        $analysis = $resolution->status === AnalysisDraftStatus::Restored ? $resolution->analysis() : null;
+
+        if ($analysis === null) {
             session()->forget('snap_to_track.result');
             $this->redirect(route('snap-to-track'));
 
@@ -62,16 +73,10 @@ class extends Component
         }
 
         $requestId = session('snap_to_track.result.request_id');
+        $this->draftToken = $token;
+        $this->analysis = $analysis->toArray();
         $this->analysisRequestId = is_string($requestId) ? $requestId : null;
         $this->analyzedAt = $resolution->draft?->created_at->toIso8601String();
-
-        if ($resolution->status !== AnalysisDraftStatus::Restored) {
-            $this->unavailableReason = $resolution->status->value;
-
-            return;
-        }
-
-        $this->analysis = $resolution->analysis()?->toArray();
     }
 
     #[Computed]
@@ -88,19 +93,11 @@ class extends Component
 
     public function save(string $intent): void
     {
-        if (! in_array($intent, ['register', 'login'], true)) {
+        if ($this->draftToken === null || ! in_array($intent, ['register', 'login'], true)) {
             return;
         }
 
-        $token = $this->resultDraftToken();
-
-        if ($token === null) {
-            $this->redirect(route('snap-to-track'));
-
-            return;
-        }
-
-        $reviewUrl = route('snap-to-track.review', ['draft' => $token], absolute: false);
+        $reviewUrl = route('snap-to-track.review', ['draft' => $this->draftToken], absolute: false);
 
         if (auth()->check()) {
             $this->redirect($reviewUrl);
@@ -115,9 +112,9 @@ class extends Component
         $this->redirect(route($intent));
     }
 
-    public function upgrade(PrepareSnapToTrackUpgradeAction $prepareUpgrade): void
+    public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade): void
     {
-        $this->redirect($prepareUpgrade->handle($this->photoAllowance->offer, $this->resultDraftToken()));
+        $this->redirect($prepareUpgrade->handle($this->photoAllowance->offer, $this->draftToken));
     }
 
     private function resultDraftToken(): ?string
@@ -157,7 +154,7 @@ class extends Component
     </header>
 
     @if ($analysis === null)
-        <div class="mx-auto w-full max-w-2xl px-4 pt-6 pb-16 sm:px-6">
+        <div x-data x-init="window.acaraForgetSnapPhoto?.()" class="mx-auto w-full max-w-2xl px-4 pt-6 pb-16 sm:px-6">
             <section class="flex flex-col gap-4 rounded-3xl bg-card p-6 shadow-xs ring-1 ring-border/60">
                 <h1 class="text-xl font-semibold tracking-tight">This meal preview is no longer available</h1>
                 <p class="text-sm text-muted-foreground">
@@ -273,21 +270,23 @@ class extends Component
                 <ul class="grid grid-cols-2 gap-3">
                     @foreach ($macros as $macro)
                         @php
-                            $eaten = (float) ($macro['value'] ?? 0);
+                            $eaten = $macro['value'] === null ? null : (float) $macro['value'];
                         @endphp
                         <li class="flex min-w-0 flex-col gap-4 rounded-3xl bg-card p-4 shadow-xs ring-1 ring-border/60">
                             <div class="flex items-start justify-between gap-2">
                                 <span class="truncate pt-1 text-sm text-muted-foreground">{{ $macro['label'] }}</span>
-                                <x-snap-result.progress-ring :value="$eaten / $macro['goal']" :indicator="$macro['ring']">
+                                <x-snap-result.progress-ring :value="($eaten ?? 0) / $macro['goal']" :indicator="$macro['ring']">
                                     <x-snap-result.icon :name="$macro['icon']" class="size-5 {{ $macro['iconColor'] }}" />
                                 </x-snap-result.progress-ring>
                             </div>
                             <div class="flex items-end justify-between gap-2">
                                 <p class="flex min-w-0 flex-wrap items-baseline gap-x-0.5">
-                                    <span class="text-3xl font-bold tracking-tight tabular-nums">{{ $amount($eaten) }}</span>
+                                    <span class="text-3xl font-bold tracking-tight tabular-nums">{{ $eaten === null ? '—' : $amount($eaten) }}</span>
                                     <span class="text-sm text-muted-foreground tabular-nums">/{{ $macro['goal'] }} g</span>
                                 </p>
-                                <span class="shrink-0 text-sm font-semibold tabular-nums {{ $macro['text'] }}">{{ round($eaten / $macro['goal'] * 100) }}%</span>
+                                @if ($eaten !== null)
+                                    <span class="shrink-0 text-sm font-semibold tabular-nums {{ $macro['text'] }}">{{ round($eaten / $macro['goal'] * 100) }}%</span>
+                                @endif
                             </div>
                         </li>
                     @endforeach

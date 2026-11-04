@@ -143,15 +143,24 @@ it('keeps the meal waiting in review while the visitor signs up or logs in', fun
         ->and(AnalysisDraft::query()->count())->toBe(1);
 })->with(['register', 'login']);
 
-it('sends the visitor back to the tool when the meal is gone before saving', function (): void {
-    guestResultDraft();
+it('saves the meal shown on the page even after another analysis replaces it', function (): void {
+    $shownToken = guestResultDraft();
 
     $component = Livewire::test('pages::snap-to-track-result');
 
-    session()->forget('snap_to_track.result');
+    guestResultDraft();
 
     $component->call('save', 'register')
-        ->assertRedirect(route('snap-to-track'));
+        ->assertRedirect(route('register'));
+
+    expect(session('url.intended'))->toBe(route('snap-to-track.review', ['draft' => $shownToken], absolute: false));
+});
+
+it('shows an unknown fiber estimate as missing rather than zero', function (): void {
+    guestResultDraft();
+
+    Livewire::test('pages::snap-to-track-result')
+        ->assertSeeInOrder(['Fiber', '—', '/28 g', 'Today’s entries']);
 });
 
 it('offers the plan right after the first scan while keeping the free save as the way out', function (): void {

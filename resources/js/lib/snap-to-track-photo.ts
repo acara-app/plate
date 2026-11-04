@@ -1,13 +1,16 @@
 const STORAGE_KEY = 'snap_to_track.photo';
 const MAX_EDGE = 960;
 const JPEG_QUALITY = 0.8;
+const KEEP_FOR_MS = 60 * 60 * 1000;
 
 interface StoredPhoto {
     requestId: string | null;
     dataUrl: string;
+    storedAt: number;
 }
 
 let pending: Promise<void> = Promise.resolve();
+let generation = 0;
 
 function readPhoto(): StoredPhoto | null {
     try {
@@ -47,19 +50,30 @@ async function downscale(file: File): Promise<string> {
     return canvas.toDataURL('image/jpeg', JPEG_QUALITY);
 }
 
-export function keepSnapPhoto(file: File | undefined): void {
+export function forgetSnapPhoto(): void {
+    generation++;
     writePhoto(null);
+}
+
+export function keepSnapPhoto(file: File | undefined): void {
+    forgetSnapPhoto();
 
     if (!file) {
         return;
     }
 
+    const current = generation;
+
     pending = downscale(file)
         .then((dataUrl) => {
-            writePhoto({ requestId: null, dataUrl });
+            if (current === generation) {
+                writePhoto({ requestId: null, dataUrl, storedAt: Date.now() });
+            }
         })
         .catch(() => {
-            writePhoto(null);
+            if (current === generation) {
+                writePhoto(null);
+            }
         });
 }
 
@@ -74,11 +88,20 @@ export function tagSnapPhoto(requestId: string | null | undefined): void {
 }
 
 export function recallSnapPhoto(requestId: string | null): string | null {
-    if (!requestId) {
+    const photo = readPhoto();
+
+    if (photo === null) {
         return null;
     }
 
-    const photo = readPhoto();
+    if (
+        typeof photo.storedAt !== 'number' ||
+        Date.now() - photo.storedAt > KEEP_FOR_MS
+    ) {
+        writePhoto(null);
 
-    return photo?.requestId === requestId ? photo.dataUrl : null;
+        return null;
+    }
+
+    return requestId && photo.requestId === requestId ? photo.dataUrl : null;
 }

@@ -3,6 +3,7 @@ import {
     Livewire,
 } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import {
+    forgetSnapPhoto,
     keepSnapPhoto,
     recallSnapPhoto,
     tagSnapPhoto,
@@ -41,5 +42,6 @@ window.acaraTrackOnce = (eventName, properties, key) => {
 window.acaraKeepSnapPhoto = keepSnapPhoto;
 window.acaraTagSnapPhoto = tagSnapPhoto;
 window.acaraRecallSnapPhoto = recallSnapPhoto;
+window.acaraForgetSnapPhoto = forgetSnapPhoto;
 
 Livewire.start();

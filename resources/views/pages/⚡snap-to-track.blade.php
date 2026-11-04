@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\CreateAnalysisDraftAction;
-use App\Actions\PrepareSnapToTrackUpgradeAction;
+use App\Actions\PrepareSnapToTrackUpgrade;
 use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Contracts\Billing\TracksPhotoConversion;
 use App\Data\Billing\PhotoAnalysisContext;
@@ -76,7 +76,7 @@ class extends Component
         return resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement(auth()->user(), \App\Data\Billing\PhotoAnalysisContext::guestId(request()));
     }
 
-    public function upgrade(PrepareSnapToTrackUpgradeAction $prepareUpgrade): void
+    public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade): void
     {
         $this->redirect($prepareUpgrade->handle($this->photoAllowance->offer));
     }
