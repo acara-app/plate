@@ -103,7 +103,6 @@ final readonly class CashierShowSubscriptionController
             'products' => $availableProducts,
             'photoPlan' => $photoPlan,
             'isGuest' => $user === null,
-            'requiresEmailVerification' => $user !== null && ! $user->hasVerifiedEmail(),
             'paymentPending' => $paymentPending,
             'selectedProductId' => $request->session()->get('checkout.selected_product'),
             'photoAllowance' => $allowance->toArray(),

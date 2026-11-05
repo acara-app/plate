@@ -7,6 +7,7 @@ use App\Http\Controllers\Checkout\CashierSubscriptionController;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use Laravel\Cashier\Subscription;
+use Mockery\MockInterface;
 
 covers(CashierSubscriptionController::class);
 
@@ -301,18 +302,29 @@ it('requires authentication', function (): void {
     $response->assertRedirect(route('login'));
 });
 
-it('sends unverified users to verify their email before Stripe checkout', function (): void {
-    $this->mock(StripeServiceContract::class)->shouldNotReceive('createSubscriptionCheckout');
-    $product = SubscriptionProduct::factory()->create(['stripe_price_id' => 'price_monthly_test']);
+it('lets unverified users go straight to Stripe checkout', function (): void {
+    $user = User::factory()->unverified()->create();
+    $product = SubscriptionProduct::factory()->create([
+        'name' => 'Starter',
+        'stripe_price_id' => 'price_monthly_test',
+        'stripe_lookup_key' => 'lookup_starter_monthly',
+    ]);
 
-    $this->actingAs(User::factory()->unverified()->create())
-        ->from(route('checkout.subscription'))
+    $this->mock(StripeServiceContract::class, function (MockInterface $mock) use ($user): void {
+        $mock->shouldReceive('hasActiveSubscription')->andReturnFalse();
+        $mock->shouldReceive('getPriceIdFromLookupKey')->with('lookup_starter_monthly')->andReturn('price_actual_id_123');
+        $mock->shouldReceive('createSubscriptionCheckout')
+            ->once()
+            ->withArgs(fn (User $checkoutUser): bool => $checkoutUser->is($user))
+            ->andReturn('https://checkout.stripe.com/session_unverified');
+    });
+
+    $this->actingAs($user)
         ->post(route('checkout.subscription.store'), [
             'product_id' => $product->id,
             'billing_interval' => 'monthly',
         ])
-        ->assertRedirect(route('verification.notice'))
-        ->assertSessionHas('url.intended', route('checkout.subscription'));
+        ->assertRedirect('https://checkout.stripe.com/session_unverified');
 });
 
 it('handles missing yearly lookup key gracefully', function (): void {
