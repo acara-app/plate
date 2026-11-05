@@ -109,6 +109,7 @@ it('acknowledges the exercise summary only when that day has a total including z
             'user_id' => $user->id, 'value' => $minutes, 'measured_at' => '2026-10-21 09:00:00',
         ]);
     }
+
     Sanctum::actingAs($user, ['chat:converse']);
 
     $this->getJson(route('api.v2.health-entries.index', ['date' => '2026-10-21', 'exercise_summary' => 1]))

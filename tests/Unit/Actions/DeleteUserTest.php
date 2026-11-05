@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Actions\DeleteUser;
 use App\Models\Conversation;
 use App\Models\History;
-use App\Models\MealPhoto;
 use App\Models\User;
 use App\Notifications\AccountDeletedNotification;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -15,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 covers(DeleteUser::class);
 
 beforeEach(function (): void {
-    Storage::fake(MealPhoto::DISK);
+    Storage::fake('s3');
 });
 
 it('deletes a user and creates a deleted user record', function (): void {

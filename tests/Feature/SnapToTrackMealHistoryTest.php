@@ -56,7 +56,7 @@ it('keeps the full reviewed meal available in the logbook after editing it', fun
         'notes' => 'Breakfast',
     ])->assertRedirectToRoute('health-entries.index', ['date' => '2026-10-16']);
 
-    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page) => $page
+    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
         ->has('entry.food_analysis.items', 2)
         ->where('entry.food_analysis.items.0.name', 'Banana')
         ->where('entry.food_analysis.items.0.portion', '1 medium')
@@ -79,7 +79,7 @@ it('keeps the full reviewed meal available in the logbook after editing it', fun
         'notes' => 'Updated breakfast',
         'measured_at' => '2026-10-16 04:15:00',
     ]);
-    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page) => $page
+    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
         ->has('entry.food_analysis.items', 2)
         ->where('entry.food_analysis.items.0.name', 'Large banana')
         ->where('entry.food_analysis.items.0.calories', 120)
@@ -97,7 +97,7 @@ it('keeps the full reviewed meal available in the logbook after editing it', fun
         'notes' => 'Only the notes changed',
     ])->assertSessionHasNoErrors()->assertRedirect();
 
-    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page) => $page
+    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
         ->has('entry.food_analysis.items', 2)
         ->where('entry.food_analysis.items.0.name', 'Large banana')
         ->where('entry.notes', 'Only the notes changed'));
@@ -119,7 +119,7 @@ it('saves a renamed item with its updated nutrition, portion and weight from the
         'measured_at' => '2026-10-16T03:57:00Z',
     ])->assertRedirectToRoute('health-entries.index', ['date' => '2026-10-16']);
 
-    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page) => $page
+    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
         ->where('entry.food_analysis.items.0.grams', 35)
         ->where('entry.food_analysis.items.1.grams', 50));
 
@@ -132,7 +132,7 @@ it('saves a renamed item with its updated nutrition, portion and weight from the
         'measured_at' => '2026-10-16T03:57:00Z',
     ])->assertSessionHasNoErrors()->assertRedirect();
 
-    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page) => $page
+    $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
         ->where('entry.food_analysis.items.0.name', 'Blueberries')
         ->where('entry.food_analysis.items.0.portion', '35 g (about ¼ cup)')
         ->where('entry.food_analysis.items.0.grams', 35)

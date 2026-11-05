@@ -67,7 +67,7 @@ function zeroApiSnapCreditBudget(): void
 }
 
 beforeEach(function (): void {
-    Storage::fake(MealPhoto::DISK);
+    Storage::fake('s3');
     $this->user = User::factory()->create();
     $this->token = $this->user->createToken('mobile:test', ['chat:converse'])->plainTextToken;
 
@@ -264,7 +264,7 @@ it('keeps the photo privately so the logged meal shows it', function (): void {
         ->json('draft_token');
 
     $stored = MealPhoto::query()->sole();
-    $size = getimagesizefromstring((string) Storage::disk(MealPhoto::DISK)->get($stored->path));
+    $size = getimagesizefromstring((string) Storage::disk('s3')->get($stored->path));
 
     expect($stored->user_id)->toBe($this->user->id)
         ->and($stored->analysis_draft_id)->toBe(AnalysisDraft::query()->sole()->id)

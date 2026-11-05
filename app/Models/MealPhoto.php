@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Storage;
  * @property int $user_id
  * @property int|null $analysis_draft_id
  * @property string|null $health_group_id
- * @property string $disk
  * @property string $path
  * @property-read User $user
  * @property-read CarbonInterface $created_at
@@ -30,8 +29,6 @@ final class MealPhoto extends Model
     use HasFactory;
 
     use Prunable;
-
-    public const string DISK = 's3';
 
     public const string DIRECTORY = 'meal-photos';
 
@@ -61,7 +58,7 @@ final class MealPhoto extends Model
 
     public function deleteWithFile(): ?bool
     {
-        Storage::disk($this->disk)->delete($this->path);
+        Storage::disk('s3')->delete($this->path);
 
         return $this->delete();
     }
@@ -78,6 +75,6 @@ final class MealPhoto extends Model
 
     protected function pruning(): void
     {
-        Storage::disk($this->disk)->delete($this->path);
+        Storage::disk('s3')->delete($this->path);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Contracts\Billing\TracksPhotoConversion;
 use App\Models\User;
 use App\Services\Billing\NullPhotoConversion;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Events\WebhookReceived;
@@ -13,6 +14,7 @@ beforeEach(function (): void {
     if (resolve(TracksPhotoConversion::class) instanceof NullPhotoConversion) {
         $this->markTestSkipped('Requires the optional photo conversion integration.');
     }
+
     config(['cashier.webhook.secret' => 'whsec_snap_test']);
 });
 
@@ -46,7 +48,7 @@ it('keeps each partial refund at its original time when Stripe retries older eve
 
     $this->assertDatabaseHas('snap_billing_events', ['event_key' => 'refund:re_first', 'kind' => 'refund', 'amount' => 100, 'occurred_at' => now()->subDays(20)->toDateTimeString()]);
     $this->assertDatabaseHas('snap_billing_events', ['event_key' => 'refund:re_second', 'kind' => 'refund', 'amount' => 199]);
-    expect(Illuminate\Support\Facades\DB::table('snap_billing_events')->where('kind', 'refund')->sum('amount'))->toBe(299);
+    expect(DB::table('snap_billing_events')->where('kind', 'refund')->sum('amount'))->toBe(299);
 });
 
 it('rejects forged Stripe callbacks before recording payment', function (): void {
@@ -76,6 +78,7 @@ it('records a signed delayed payment without a checkout return and ignores retri
         $this->call('POST', route('cashier.webhook'), server: ['HTTP_STRIPE_SIGNATURE' => 't='.$time.',v1='.$signature, 'CONTENT_TYPE' => 'application/json'], content: $payload)
             ->assertSuccessful();
     }
+
     $this->assertDatabaseCount('snap_billing_events', 1);
     $this->assertDatabaseHas('snap_billing_events', ['invoice_id' => 'in_delayed', 'kind' => 'initial_payment']);
 });

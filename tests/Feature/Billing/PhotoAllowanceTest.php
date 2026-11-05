@@ -16,6 +16,7 @@ it('preserves two lifetime scans through retries, pending requests, and account 
     if ($access instanceof NullPhotoAnalyses || (int) config('snap.free_trial_scans', 0) < 2) {
         $this->markTestSkipped('Requires the two-scan photo allowance integration.');
     }
+
     config([
         'plate.enable_premium_upgrades' => true,
         'cashier.key' => 'pk_test_fake',
@@ -38,8 +39,9 @@ it('preserves two lifetime scans through retries, pending requests, and account 
         ->toThrow(RuntimeException::class, 'Analysis unavailable');
     expect($access->entitlement(null, $guest)->remaining)->toBe(2);
 
-    $access->analyze($context, fn () => $result);
+    $access->analyze($context, fn (): FoodAnalysisData => $result);
     $access->analyze($context, fn () => throw new RuntimeException('A retry must reuse the result'));
+
     expect($access->entitlement(null, $guest)->remaining)->toBe(1);
 
     $user = User::factory()->create();
@@ -47,12 +49,12 @@ it('preserves two lifetime scans through retries, pending requests, and account 
     $second = new PhotoAnalysisContext($user, $guest, (string) Str::uuid(), 'public_snap_to_track', 'fixture');
     $third = new PhotoAnalysisContext($user, $guest, (string) Str::uuid(), 'public_snap_to_track', 'fixture');
     $access->analyze($second, function () use ($access, $third, $result): FoodAnalysisData {
-        expect(fn () => $access->analyze($third, fn () => $result))->toThrow(PhotoLimitExceeded::class);
+        expect(fn () => $access->analyze($third, fn (): FoodAnalysisData => $result))->toThrow(PhotoLimitExceeded::class);
 
         return $result;
     });
 
     expect($access->entitlement($user, null)->remaining)->toBe(0);
     expect($access->entitlement(null, $guest)->remaining)->toBe(0);
-    expect(fn () => $access->analyze($third, fn () => $result))->toThrow(PhotoLimitExceeded::class);
+    expect(fn () => $access->analyze($third, fn (): FoodAnalysisData => $result))->toThrow(PhotoLimitExceeded::class);
 });

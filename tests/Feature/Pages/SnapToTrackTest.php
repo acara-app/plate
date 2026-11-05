@@ -11,6 +11,7 @@ use App\Data\Billing\PhotoOffer;
 use App\Data\FoodAnalysisData;
 use App\Enums\AnalysisDraftSource;
 use App\Models\AnalysisDraft;
+use App\Models\MealPhoto;
 use App\Models\ReferenceFood;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Inertia\Testing\AssertableInertia;
 use Laravel\Ai\Prompts\AgentPrompt;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -219,6 +221,8 @@ it('clears the photo and reloads verification for the next upload', function ():
 });
 
 it('sends a guest to the result page with their analysis kept in a guest draft', function (): void {
+    Storage::fake('s3');
+
     $component = analyzePhotoForSnapToTrack([
         'items' => [
             ['name' => 'Grilled Chicken', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'portion' => '100g'],
@@ -239,7 +243,9 @@ it('sends a guest to the result page with their analysis kept in a guest draft',
         ->and($draft->payload['total_calories'])->toEqual(165)
         ->and($draft->payload['confidence'])->toBe(85)
         ->and(AnalysisDraft::hashToken(session('snap_to_track.result.draft')))->toBe($draft->token_hash)
-        ->and(session('snap_to_track.result.request_id'))->toBe($component->instance()->analysisRequestId);
+        ->and(session('snap_to_track.result.request_id'))->toBe($component->instance()->analysisRequestId)
+        ->and(MealPhoto::query()->count())->toBe(0)
+        ->and(Storage::disk('s3')->allFiles())->toBe([]);
 });
 
 it('keeps every detected item in the guest draft', function (): void {
@@ -272,6 +278,33 @@ it('sends a signed-in member straight to the claimed draft review', function ():
         ->and($draft->user_id)->toBe($user->id)
         ->and($draft->claimed_at)->not->toBeNull()
         ->and(session('snap_to_track.result'))->toBeNull();
+});
+
+it('keeps a signed-in member photo with the meal they log from the public tool', function (): void {
+    Storage::fake('s3');
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $component = analyzePhotoForSnapToTrack(saveMealAnalysisFixture())->assertRedirect();
+
+    $draft = AnalysisDraft::query()->sole();
+    $photo = MealPhoto::query()->sole();
+
+    expect($photo->user_id)->toBe($user->id)
+        ->and($photo->analysis_draft_id)->toBe($draft->id);
+    Storage::disk('s3')->assertExists($photo->path);
+
+    $token = Str::afterLast($component->effects['redirect'], '/review/');
+    $this->post(route('snap-to-track.review.store', ['draft' => $token]), [
+        'items' => [['name' => 'Grilled Chicken', 'portion' => '100g', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'provenance' => 'model']],
+        'measured_at' => now()->toIso8601String(),
+    ])->assertRedirect();
+
+    $groupId = (string) $draft->refresh()->health_group_id;
+
+    expect($photo->refresh()->health_group_id)->toBe($groupId);
+    $this->get(route('health-entries.index'))->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+        ->where('entries.0.photo_url', route('health-entries.photo', ['group' => $groupId], absolute: false)));
 });
 
 it('displays error when analysis fails', function (): void {

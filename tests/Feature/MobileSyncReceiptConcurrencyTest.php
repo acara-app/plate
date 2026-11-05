@@ -39,14 +39,12 @@ final class MobileSyncReceiptConcurrencyTest extends TestCase
                 ['type' => 'sleepAnalysis', 'stage' => 'asleepCore', 'started_at' => '2026-10-15T00:00:00Z', 'ended_at' => '2026-10-15T01:00:00Z'],
             ],
         ];
-        $submit = static function () use ($userId, $deviceId, $data): array {
-            return app(ProcessMobileSyncBatchAction::class)->handle(
-                User::query()->findOrFail($userId),
-                MobileSyncDevice::query()->findOrFail($deviceId),
-                DecryptedSyncPayloadData::from($data),
-                'UTC',
-            );
-        };
+        $submit = (static fn (): array => resolve(ProcessMobileSyncBatchAction::class)->handle(
+            User::query()->findOrFail($userId),
+            MobileSyncDevice::query()->findOrFail($deviceId),
+            DecryptedSyncPayloadData::from($data),
+            'UTC',
+        ));
 
         [$first, $second] = Concurrency::driver('process')->run([$submit, $submit]);
 

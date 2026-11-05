@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Ai\Agents\ConversationTitleGeneratorAgent;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Data\Billing\PhotoModel;
 use App\Services\Ai\ConfiguredAgentModels;
@@ -9,6 +10,7 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Laravel\Ai\Contracts\Tool;
+use Laravel\Ai\Streaming\Events\ToolResult;
 use Laravel\Ai\Tools\Request;
 
 use function Laravel\Ai\agent;
@@ -63,7 +65,7 @@ it('streams a tool call and its completed response', function (string $model): v
     $stream = $probe->stream('Run the compatibility probe.', provider: $profile->provider, model: $profile->model, timeout: 60);
     $toolResults = 0;
     foreach ($stream as $event) {
-        if ($event instanceof Laravel\Ai\Streaming\Events\ToolResult && ! $event->preliminary) {
+        if ($event instanceof ToolResult && ! $event->preliminary) {
             $toolResults++;
         }
     }
@@ -77,7 +79,7 @@ it('streams a tool call and its completed response', function (string $model): v
 it('returns a localized structured title', function (string $model, string $language, string $locale): void {
     $profile = resolve(ConfiguredAgentModels::class)->forModel($model);
 
-    $title = resolve(App\Ai\Agents\ConversationTitleGeneratorAgent::class)->usingAgentModel($profile)->generate(
+    $title = resolve(ConversationTitleGeneratorAgent::class)->usingAgentModel($profile)->generate(
         'Help me plan meals for the coming week.', $language, $locale,
     );
 
