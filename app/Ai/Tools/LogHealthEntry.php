@@ -16,6 +16,7 @@ use App\Enums\HealthEntryType;
 use App\Enums\InsulinType;
 use App\Enums\WeightUnit;
 use App\Models\User;
+use App\Services\BodyMassIndex;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
@@ -72,6 +73,16 @@ final class LogHealthEntry implements Approvable, Tool
                 'field' => 'glucose_unit',
                 'message' => 'Your glucose value looks like mmol/L. Please confirm whether it is mg/dL or mmol/L.',
                 'allowed_values' => ['mg/dL', 'mmol/L'],
+            ]);
+        }
+
+        if ($this->requiresWeightUnitClarification($healthData, $user)) {
+            return (string) json_encode([
+                'error' => 'I need the weight unit to log this accurately.',
+                'requires_clarification' => true,
+                'field' => 'weight_unit',
+                'message' => sprintf('Just checking the units: is that %s kg or %s lb?', $healthData->weight, $healthData->weight),
+                'allowed_values' => ['kg', 'lb'],
             ]);
         }
 
@@ -143,10 +154,10 @@ final class LogHealthEntry implements Approvable, Tool
             'medication_dosage' => $schema->string()->required()->nullable()
                 ->description('Dosage of the medication (e.g., "500mg").'),
             'weight' => $schema->number()->required()->nullable()
-                ->description('Body weight in kg. Convert lbs to kg (/ 2.205).'),
+                ->description('Body weight exactly as the user stated it. Do not convert it yourself; set weight_unit instead.'),
             'weight_unit' => $schema->string()->required()->nullable()
                 ->enum(WeightUnit::class)
-                ->description('Unit for weight. Use "lb" for pounds or "kg" for kilograms.'),
+                ->description('Unit of the weight value: "lb" for pounds or "kg" for kilograms. Leave empty if the user did not say; the tool asks when it is unclear.'),
             'bp_systolic' => $schema->integer()->required()->nullable()
                 ->description('Systolic blood pressure reading.'),
             'bp_diastolic' => $schema->integer()->required()->nullable()
@@ -169,7 +180,11 @@ final class LogHealthEntry implements Approvable, Tool
         try {
             $healthData = $this->healthData($request);
 
-            if ($this->requiresGlucoseUnitClarification($healthData) || $this->requiresFoodEstimate($healthData)) {
+            $user = Auth::user();
+
+            if ($this->requiresGlucoseUnitClarification($healthData)
+                || ($user instanceof User && $this->requiresWeightUnitClarification($healthData, $user))
+                || $this->requiresFoodEstimate($healthData)) {
                 return false;
             }
 
@@ -199,6 +214,16 @@ final class LogHealthEntry implements Approvable, Tool
         return is_string($summary) && mb_trim($summary) !== ''
             ? $summary
             : $healthData->formatForDisplay();
+    }
+
+    private function requiresWeightUnitClarification(HealthLogData $healthData, User $user): bool
+    {
+        $heightCm = $user->profile?->height;
+
+        return $healthData->weight !== null
+            && ! $healthData->weightUnit instanceof WeightUnit
+            && $heightCm !== null
+            && BodyMassIndex::looksLikePounds($healthData->weight, $heightCm);
     }
 
     private function requiresGlucoseUnitClarification(HealthLogData $healthData): bool

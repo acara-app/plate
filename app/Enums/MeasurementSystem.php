@@ -11,7 +11,7 @@ enum MeasurementSystem: string
 
     public static function feetAndInchesToCentimeters(int $feet, float $inches): float
     {
-        return round((($feet * 12) + $inches) * 2.54, 2);
+        return round(HeightUnit::In->toCentimeters(($feet * 12) + $inches), 2);
     }
 
     public function weightInKilograms(float $weight): float

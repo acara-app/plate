@@ -172,7 +172,7 @@ export default function Biometrics({
             : isValidMeasurement(
                     measurements.weight,
                     isImperial ? 45 : 20,
-                    isImperial ? 1100 : 500,
+                    isImperial ? 1102 : 500,
                 )
               ? `${isImperial ? poundsToKilograms(measurements.weight) : kilogramsToPounds(measurements.weight)} ${t(isImperial ? 'onboarding.biometrics.unit_kg' : 'onboarding.biometrics.unit_lb')}`
               : null;
@@ -180,7 +180,7 @@ export default function Biometrics({
         measurements.heightCm,
     );
     const hasValidImperialHeight =
-        isValidMeasurement(measurements.heightFeet, 2, 8) &&
+        isValidMeasurement(measurements.heightFeet, 1, 9) &&
         Number.isInteger(Number(measurements.heightFeet)) &&
         (measurements.heightInches.trim() === '' ||
             isValidMeasurement(measurements.heightInches, 0, 11.9));
@@ -655,8 +655,8 @@ export default function Biometrics({
                                                                 )
                                                             }
                                                             step="1"
-                                                            min="2"
-                                                            max="8"
+                                                            min="1"
+                                                            max="9"
                                                             required
                                                             aria-label={t(
                                                                 'onboarding.biometrics.feet_label',
@@ -788,7 +788,7 @@ export default function Biometrics({
                                                 step="0.01"
                                                 min={isImperial ? '45' : '20'}
                                                 max={
-                                                    isImperial ? '1100' : '500'
+                                                    isImperial ? '1102' : '500'
                                                 }
                                                 required
                                                 placeholder={t(

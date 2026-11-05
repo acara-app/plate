@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Actions\AssessBodyMeasurements;
 use App\Enums\BloodType;
+use App\Enums\MeasurementAssessment;
 use App\Enums\MeasurementSystem;
 use App\Enums\Sex;
 use App\Models\User;
@@ -62,17 +64,39 @@ final class StoreBiometricsRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
-            if ($validator->errors()->isNotEmpty() || $this->boolean('confirm_measurements')) {
+            if ($validator->errors()->isNotEmpty()) {
                 return;
             }
 
             ['height' => $height, 'weight' => $weight] = $this->metricMeasurements();
+            $isImperial = $this->measurementSystem() === MeasurementSystem::Imperial;
 
-            if (BodyMassIndex::isPlausible($weight, $height) || $this->repeatsSavedMeasurements($height, $weight)) {
+            if (! BodyMassIndex::isHeightInRange($height)) {
+                $validator->errors()->add(
+                    $isImperial ? 'height_feet' : 'height',
+                    $isImperial ? 'Please enter a valid height in feet and inches.' : 'Please enter a valid height in centimeters.',
+                );
+
                 return;
             }
 
-            if ($this->measurementSystem() === MeasurementSystem::Metric && BodyMassIndex::looksLikePounds($weight, $height)) {
+            if (! BodyMassIndex::isWeightInRange($weight)) {
+                $validator->errors()->add('weight', $isImperial ? 'Please enter a valid weight in pounds.' : 'Please enter a valid weight in kilograms.');
+
+                return;
+            }
+
+            if ($this->boolean('confirm_measurements')) {
+                return;
+            }
+
+            $assessment = resolve(AssessBodyMeasurements::class)->handle($weight, $height, $this->savedProfile());
+
+            if ($assessment === MeasurementAssessment::Plausible) {
+                return;
+            }
+
+            if (! $isImperial && $assessment === MeasurementAssessment::LooksLikePounds) {
                 $validator->errors()->add(
                     'weight_in_pounds',
                     __('Did you mean :weight lb?', ['weight' => (string) $this->float('weight')]),
@@ -128,16 +152,11 @@ final class StoreBiometricsRequest extends FormRequest
         return $attributes;
     }
 
-    private function repeatsSavedMeasurements(float $height, float $weight): bool
+    private function savedProfile(): ?UserProfile
     {
         $user = $this->user();
-        $profile = $user instanceof User ? $user->profile : null;
 
-        if (! $profile instanceof UserProfile || $profile->needs_re_onboarding || $profile->height === null || $profile->weight === null) {
-            return false;
-        }
-
-        return abs($profile->height - $height) < 0.005 && abs($profile->weight - $weight) < 0.005;
+        return $user instanceof User ? $user->profile : null;
     }
 
     /**
@@ -146,16 +165,19 @@ final class StoreBiometricsRequest extends FormRequest
     private function measurementRules(): array
     {
         if ($this->measurementSystem() === MeasurementSystem::Imperial) {
+            $inches = BodyMassIndex::heightRangeInInches();
+            $pounds = BodyMassIndex::weightRangeInPounds();
+
             return [
-                'height_feet' => ['required', 'integer', 'min:2', 'max:8'],
+                'height_feet' => ['required', 'integer', 'min:'.intdiv($inches['min'], 12), 'max:'.intdiv($inches['max'], 12)],
                 'height_inches' => ['nullable', 'numeric', 'min:0', 'lt:12'],
-                'weight' => ['required', 'numeric', 'min:45', 'max:1100'],
+                'weight' => ['required', 'numeric', 'min:'.$pounds['min'], 'max:'.$pounds['max']],
             ];
         }
 
         return [
-            'height' => ['required', 'numeric', 'min:50', 'max:300'],
-            'weight' => ['required', 'numeric', 'min:20', 'max:500'],
+            'height' => ['required', 'numeric', 'min:'.BodyMassIndex::MINIMUM_HEIGHT_CM, 'max:'.BodyMassIndex::MAXIMUM_HEIGHT_CM],
+            'weight' => ['required', 'numeric', 'min:'.BodyMassIndex::MINIMUM_WEIGHT_KG, 'max:'.BodyMassIndex::MAXIMUM_WEIGHT_KG],
         ];
     }
 }

@@ -73,7 +73,7 @@ final class HealthLogData extends Data
             medicationName: self::toNullableString($data['medication_name'] ?? null),
             medicationDosage: self::toNullableString($data['medication_dosage'] ?? null),
             weight: self::toFloat($data['weight'] ?? null),
-            weightUnit: WeightUnit::tryFrom(self::toNullableString($data['weight_unit'] ?? null) ?? ''),
+            weightUnit: WeightUnit::fromInput($data['weight_unit'] ?? null),
             bpSystolic: self::toInt($data['blood_pressure_systolic'] ?? $data['bp_systolic'] ?? null),
             bpDiastolic: self::toInt($data['blood_pressure_diastolic'] ?? $data['bp_diastolic'] ?? null),
             a1cValue: self::toFloat($data['a1c_value'] ?? null),

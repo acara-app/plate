@@ -657,12 +657,13 @@ it('validates imperial measurements', function (array $overrides, string $errorK
     expect($user->profile()->exists())->toBeFalse();
 })->with([
     'missing feet' => [['height_feet' => null], 'height_feet'],
-    'feet below the range' => [['height_feet' => 1], 'height_feet'],
-    'feet above the range' => [['height_feet' => 9], 'height_feet'],
+    'feet above the range' => [['height_feet' => 10], 'height_feet'],
+    'height below the range' => [['height_feet' => 1, 'height_inches' => 0], 'height_feet'],
+    'height above the range' => [['height_feet' => 9, 'height_inches' => 11.9], 'height_feet'],
     'twelve inches' => [['height_inches' => 12], 'height_inches'],
     'negative inches' => [['height_inches' => -1], 'height_inches'],
     'weight below the range' => [['weight' => 44], 'weight'],
-    'weight above the range' => [['weight' => 1101], 'weight'],
+    'weight above the range' => [['weight' => 1103], 'weight'],
 ]);
 
 it('rejects an unknown measurement system', function (mixed $measurementSystem): void {
@@ -865,6 +866,27 @@ it('does not ask again when already saved measurements are submitted unchanged',
         ->blood_type->toBe(BloodType::OPositive);
 });
 
+it('does not ask again for a small change to confirmed measurements', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'age' => 30,
+        'height' => 175,
+        'weight' => 140,
+        'sex' => Sex::Male->value,
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'age' => 30,
+            'height' => 175,
+            'weight' => 138,
+            'sex' => Sex::Male->value,
+        ])
+        ->assertSessionHasNoErrors();
+
+    expect($user->profile()->first()->weight)->toBe(138.0);
+});
+
 it('asks again when saved measurements change or are waiting for review', function (array $profile, float $weight): void {
     $user = User::factory()->create();
     $user->profile()->create([
@@ -883,6 +905,6 @@ it('asks again when saved measurements change or are waiting for review', functi
         ])
         ->assertSessionHasErrors('weight_in_pounds');
 })->with([
-    'changed weight' => [['weight' => 140], 141.0],
+    'changed a lot' => [['weight' => 140], 193.0],
     'flagged for review' => [['weight' => 193, 'needs_re_onboarding' => true], 193.0],
 ]);
