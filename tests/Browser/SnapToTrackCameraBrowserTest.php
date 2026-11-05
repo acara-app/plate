@@ -9,8 +9,9 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\RateLimiter;
 use Pest\Browser\Api\AwaitableWebpage;
 
-function fakeMealCamera(AwaitableWebpage $page): void
+function fakeMealCamera(AwaitableWebpage $page, int $width = 640, int $height = 480): void
 {
+    $page->script("window.mealCameraDimensions = { width: {$width}, height: {$height} }");
     $page->script(<<<'JS'
         window.mealCameraRequests = [];
         window.mealCameraStreams = [];
@@ -21,11 +22,26 @@ function fakeMealCamera(AwaitableWebpage $page): void
                 throw new DOMException('Camera unavailable', window.mealCameraFailure);
             }
             const canvas = document.createElement('canvas');
-            canvas.width = 640;
-            canvas.height = 480;
+            canvas.width = window.mealCameraDimensions.width;
+            canvas.height = window.mealCameraDimensions.height;
             const context = canvas.getContext('2d');
             context.fillStyle = '#f0b67f';
             context.fillRect(0, 0, canvas.width, canvas.height);
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            context.fillStyle = '#ffffff';
+            context.beginPath();
+            context.arc(centerX, centerY, 48, 0, Math.PI * 2);
+            context.fill();
+            for (const [color, x, y] of [
+                ['#0000ff', centerX - 140, centerY - 16],
+                ['#ff0000', centerX + 108, centerY - 16],
+                ['#00ff00', centerX - 16, centerY - 140],
+                ['#ff00ff', centerX - 16, centerY + 108],
+            ]) {
+                context.fillStyle = color;
+                context.fillRect(x, y, 32, 32);
+            }
             const stream = canvas.captureStream(10);
             window.mealCameraCanvases.push(canvas);
             window.mealCameraStreams.push(stream);
@@ -34,6 +50,148 @@ function fakeMealCamera(AwaitableWebpage $page): void
         void 0;
         JS);
 }
+
+it('captures the displayed standard frame without stretching the meal photo', function (int $sourceWidth, int $sourceHeight, int $viewportWidth, int $viewportHeight, int $photoWidth, int $photoHeight): void {
+    $this->actingAs(User::factory()->create());
+    $page = visit(route('snap-to-track.index', absolute: false))
+        ->resize($viewportWidth, $viewportHeight)
+        ->assertSee('Take photo');
+    fakeMealCamera($page, $sourceWidth, $sourceHeight);
+
+    $page->press('Take photo')
+        ->assertEnabled('button[aria-label="Capture photo"]')
+        ->assertScript(<<<JS
+            () => {
+                const frame = document.querySelector('[data-camera-frame]').getBoundingClientRect();
+                const video = document.querySelector('video').getBoundingClientRect();
+                return Math.abs(frame.width - frame.height * {$photoWidth} / {$photoHeight}) < 1
+                    && Math.abs(video.width - frame.width) < 1
+                    && Math.abs(video.height - frame.height) < 1;
+            }
+            JS)
+        ->assertScript(<<<'JS'
+            () => {
+                const frame = document.querySelector('[data-camera-frame]').getBoundingClientRect();
+                const header = document.querySelector('[data-camera-header]').getBoundingClientRect();
+                const controls = document.querySelector('[data-camera-controls]').getBoundingClientRect();
+                const dialog = document.querySelector('[role="dialog"]');
+                const dialogBounds = dialog.getBoundingClientRect();
+                const capture = document.querySelector('button[aria-label="Capture photo"]').getBoundingClientRect();
+                const controlsClear = frame.right <= controls.left + 1
+                    || frame.bottom <= controls.top + 1;
+                return controlsClear && header.bottom <= frame.top + 1
+                    && frame.width > 0 && frame.height > 0
+                    && capture.left >= 0 && capture.right <= innerWidth + 1
+                    && capture.top >= 0 && capture.bottom <= innerHeight + 1
+                    && dialogBounds.left >= -1 && dialogBounds.right <= innerWidth + 1
+                    && dialogBounds.top >= -1 && dialogBounds.bottom <= innerHeight + 1
+                    && dialog.scrollWidth <= dialog.clientWidth + 1
+                    && dialog.scrollHeight <= dialog.clientHeight + 1
+                    && document.documentElement.scrollWidth <= innerWidth + 1;
+            }
+            JS)
+        ->press('button[aria-label="Capture photo"]')
+        ->assertVisible('img[alt="Meal photo preview"]')
+        ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalWidth', $photoWidth)
+        ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalHeight', $photoHeight)
+        ->assertScript(<<<'JS'
+            () => {
+                const image = document.querySelector('img[alt="Meal photo preview"]');
+                const bounds = image.getBoundingClientRect();
+                return Math.abs(bounds.width - bounds.height * image.naturalWidth / image.naturalHeight) < 1;
+            }
+            JS);
+    $pixels = $page->script(<<<'JS'
+        () => {
+            const image = document.querySelector('img[alt="Meal photo preview"]');
+            const canvas = document.createElement('canvas');
+            canvas.width = image.naturalWidth;
+            canvas.height = image.naturalHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(image, 0, 0);
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const colorAt = (x, y) => Array.from(context.getImageData(x, y, 1, 1).data).slice(0, 3);
+            const isWhite = (x, y) => colorAt(x, y).every((channel) => channel > 235);
+            let circleWidth = 0;
+            let circleHeight = 0;
+            for (let offset = -60; offset <= 60; offset++) {
+                circleWidth += Number(isWhite(centerX + offset, centerY));
+                circleHeight += Number(isWhite(centerX, centerY + offset));
+            }
+            return {
+                left: colorAt(centerX - 124, centerY),
+                right: colorAt(centerX + 124, centerY),
+                top: colorAt(centerX, centerY - 124),
+                bottom: colorAt(centerX, centerY + 124),
+                circleWidth,
+                circleHeight,
+            };
+        }
+        JS);
+
+    expect($pixels['left'])->toEqualWithDelta([0, 0, 255], 25);
+    expect($pixels['right'])->toEqualWithDelta([255, 0, 0], 25);
+    expect($pixels['top'])->toEqualWithDelta([0, 255, 0], 25);
+    expect($pixels['bottom'])->toEqualWithDelta([255, 0, 255], 25);
+    expect($pixels['circleWidth'])->toBeBetween(94, 98);
+    expect($pixels['circleHeight'])->toBeBetween(94, 98);
+    $page->assertNoJavaScriptErrors();
+})->with([
+    'landscape camera on a portrait phone' => [640, 480, 390, 844, 360, 480],
+    'odd camera dimensions on a portrait phone' => [641, 481, 390, 844, 360, 480],
+    'landscape camera on a small portrait phone' => [640, 480, 320, 568, 360, 480],
+    'landscape camera on a square viewport' => [640, 480, 600, 600, 360, 480],
+    'portrait camera on a portrait phone' => [480, 640, 390, 844, 480, 640],
+    'landscape camera on a landscape phone' => [640, 480, 844, 390, 640, 480],
+    'portrait camera on a landscape phone' => [480, 640, 844, 390, 480, 360],
+    'landscape camera on a desktop' => [640, 480, 1440, 900, 640, 480],
+]);
+
+it('updates the camera frame when the phone rotates and keeps the captured photo unchanged', function (): void {
+    $this->actingAs(User::factory()->create());
+    $page = visit(route('snap-to-track.index', absolute: false))
+        ->resize(390, 844)
+        ->assertSee('Take photo');
+    fakeMealCamera($page);
+
+    $page->press('Take photo')
+        ->assertEnabled('button[aria-label="Capture photo"]')
+        ->resize(844, 390)
+        ->assertScript(<<<'JS'
+            () => {
+                const frame = document.querySelector('[data-camera-frame]').getBoundingClientRect();
+                return Math.abs(frame.width - frame.height * 4 / 3) < 1;
+            }
+            JS)
+        ->assertScript('window.mealCameraRequests.length', 1)
+        ->press('button[aria-label="Capture photo"]')
+        ->assertVisible('img[alt="Meal photo preview"]')
+        ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalWidth', 640)
+        ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalHeight', 480)
+        ->resize(390, 844)
+        ->assertScript(<<<'JS'
+            () => {
+                const image = document.querySelector('img[alt="Meal photo preview"]');
+                const bounds = image.getBoundingClientRect();
+                return image.naturalWidth === 640 && image.naturalHeight === 480
+                    && Math.abs(bounds.width - bounds.height * 4 / 3) < 1;
+            }
+            JS)
+        ->press('Retake')
+        ->assertEnabled('button[aria-label="Capture photo"]')
+        ->assertScript(<<<'JS'
+            () => {
+                const frame = document.querySelector('[data-camera-frame]').getBoundingClientRect();
+                return Math.abs(frame.width - frame.height * 3 / 4) < 1;
+            }
+            JS)
+        ->press('button[aria-label="Capture photo"]')
+        ->assertVisible('img[alt="Meal photo preview"]')
+        ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalWidth', 360)
+        ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalHeight', 480)
+        ->assertNoJavaScriptErrors();
+});
 
 it('previews a captured meal and waits for confirmation before submitting it', function (): void {
     $this->actingAs(User::factory()->create());
@@ -72,7 +230,8 @@ it('previews a captured meal and waits for confirmation before submitting it', f
         ->assertMissing('[role="dialog"]')
         ->assertVisible('img[alt="Meal photo preview"]')
         ->assertScript('document.activeElement.textContent.includes("Retake")')
-        ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalHeight > document.querySelector("img[alt=\"Meal photo preview\"]").naturalWidth')
+        ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalWidth', 360)
+        ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalHeight', 480)
         ->assertEnabled('Analyze photo')
         ->assertScript('window.mealPhotoSubmissions.length', 0)
         ->assertScript('window.mealCameraStreams[0].getTracks()[0].readyState', 'ended');
@@ -120,10 +279,13 @@ it('opens the camera from the photo area with the keyboard and restores focus wh
     'Space' => 'Space',
 ]);
 
-it('previews a gallery photo and preserves it when replacement is cancelled', function (bool $fromCamera): void {
+it('previews a gallery photo and preserves it when replacement is cancelled', function (bool $fromCamera, int $width, int $height): void {
     $this->actingAs(User::factory()->create());
-    $photo = UploadedFile::fake()->image('meal.jpg', 640, 480);
-    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Take photo');
+    $photo = UploadedFile::fake()->image('meal.jpg', $width, $height);
+    $replacement = UploadedFile::fake()->image('replacement.jpg', $height, $width);
+    $page = visit(route('snap-to-track.index', absolute: false))
+        ->resize(390, 844)
+        ->assertSee('Take photo');
     fakeMealCamera($page);
     $page->script(<<<'JS'
         () => {
@@ -147,7 +309,17 @@ it('previews a gallery photo and preserves it when replacement is cancelled', fu
     $page->attach('#snap-photo', $photo->getPathname())
         ->assertMissing('[role="dialog"]')
         ->assertVisible('img[alt="Meal photo preview"]')
-        ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalWidth', 640)
+        ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalWidth', $width)
+        ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalHeight', $height)
+        ->assertScript(<<<'JS'
+            () => {
+                const image = document.querySelector('img[alt="Meal photo preview"]');
+                const bounds = image.getBoundingClientRect();
+                const figure = image.closest('figure').getBoundingClientRect();
+                return Math.abs(bounds.width - bounds.height * image.naturalWidth / image.naturalHeight) < 1
+                    && Math.abs(bounds.left + bounds.width / 2 - figure.left - figure.width / 2) < 1;
+            }
+            JS)
         ->assertEnabled('Analyze photo')
         ->assertScript('window.mealCameraRequests.length', $fromCamera ? 1 : 0);
 
@@ -160,18 +332,31 @@ it('previews a gallery photo and preserves it when replacement is cancelled', fu
     $page->press('Replace photo');
     $page->script('document.querySelector("#snap-photo").dispatchEvent(new Event("cancel", { bubbles: true }))');
     $page->assertAttribute('img[alt="Meal photo preview"]', 'src', $preview)
-        ->attach('#snap-photo', $photo->getPathname())
+        ->attach('#snap-photo', $replacement->getPathname())
+        ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalWidth', $height)
+        ->assertScript('document.querySelector("img[alt=\"Meal photo preview\"]").naturalHeight', $width)
+        ->assertScript(<<<'JS'
+            () => {
+                const image = document.querySelector('img[alt="Meal photo preview"]');
+                const bounds = image.getBoundingClientRect();
+                return Math.abs(bounds.width - bounds.height * image.naturalWidth / image.naturalHeight) < 1;
+            }
+            JS)
         ->assertScript('window.revokedMealPhotoUrls[0]', $preview)
         ->assertNoJavaScriptErrors();
 })->with([
-    'from the page' => false,
-    'from the camera' => true,
+    'landscape photo from the page' => [false, 640, 480],
+    'portrait photo from the camera' => [true, 480, 640],
+    'square photo from the page' => [false, 640, 640],
+    'panoramic photo from the page' => [false, 1200, 400],
 ]);
 
-it('keeps the photo picker available when camera access fails', function (string $failure, string $message): void {
+it('keeps the photo picker available when camera access fails', function (string $failure, string $message, int $viewportWidth, int $viewportHeight): void {
     $this->actingAs(User::factory()->create());
     $photo = UploadedFile::fake()->image('meal.jpg');
-    $page = visit(route('snap-to-track.index', absolute: false))->assertSee('Take photo');
+    $page = visit(route('snap-to-track.index', absolute: false))
+        ->resize($viewportWidth, $viewportHeight)
+        ->assertSee('Take photo');
     fakeMealCamera($page);
 
     if ($failure === 'unsupported') {
@@ -184,6 +369,17 @@ it('keeps the photo picker available when camera access fails', function (string
         ->assertSee($message)
         ->assertDisabled('button[aria-label="Capture photo"]')
         ->assertVisible('button:has-text("Try camera again")')
+        ->assertScript(<<<'JS'
+            () => {
+                const retry = Array.from(document.querySelectorAll('button'))
+                    .find((button) => button.textContent.includes('Try camera again'))
+                    .getBoundingClientRect();
+                return retry.left >= 0 && retry.right <= innerWidth + 1
+                    && retry.top >= 0 && retry.bottom <= innerHeight + 1;
+            }
+            JS)
+        ->press('Try camera again')
+        ->assertSee($message)
         ->press('button[aria-label="Choose photo"]')
         ->attach('#snap-photo', $photo->getPathname())
         ->assertMissing('[role="dialog"]')
@@ -194,6 +390,9 @@ it('keeps the photo picker available when camera access fails', function (string
     'permission denied' => ['NotAllowedError', 'Camera access is blocked.'],
     'camera missing' => ['NotFoundError', 'The camera is unavailable.'],
     'unsupported browser' => ['unsupported', 'Your browser cannot open the camera here.'],
+])->with([
+    'portrait phone' => [390, 844],
+    'short landscape phone' => [844, 390],
 ]);
 
 it('releases camera access granted after the camera has been closed', function (): void {
