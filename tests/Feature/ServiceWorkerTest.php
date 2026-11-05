@@ -2,9 +2,27 @@
 
 declare(strict_types=1);
 
+/**
+ * @return array<string, array{file: string, isDynamicEntry?: bool, css?: list<string>}>
+ */
+function viteManifest(): array
+{
+    /** @var array<string, array{file: string, isDynamicEntry?: bool, css?: list<string>}> */
+    return json_decode((string) file_get_contents(public_path('build/manifest.json')), true, flags: JSON_THROW_ON_ERROR);
+}
+
+function registeredServiceWorker(): string
+{
+    $entry = viteManifest()['resources/js/app.tsx']['file'];
+
+    preg_match('~[`"\']/(sw[\w-]*\.js)[`"\']~', (string) file_get_contents(public_path("build/{$entry}")), $matches);
+
+    return $matches[1] ?? '';
+}
+
 function serviceWorker(): string
 {
-    return (string) file_get_contents(public_path('sw.js'));
+    return (string) file_get_contents(public_path(registeredServiceWorker()));
 }
 
 /**
@@ -15,15 +33,6 @@ function precachedUrls(): array
     preg_match_all('/\{url:"([^"]+)"/', serviceWorker(), $matches);
 
     return $matches[1];
-}
-
-/**
- * @return array<string, array{file: string, isDynamicEntry?: bool, css?: list<string>}>
- */
-function viteManifest(): array
-{
-    /** @var array<string, array{file: string, isDynamicEntry?: bool, css?: list<string>}> */
-    return json_decode((string) file_get_contents(public_path('build/manifest.json')), true, flags: JSON_THROW_ON_ERROR);
 }
 
 it('precaches the app shell and the web manifest', function (): void {

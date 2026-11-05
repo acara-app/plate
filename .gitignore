@@ -6,6 +6,7 @@
 /public/test_temp
 /public/storage
 /public/sw.js
+/public/sw-*.js
 /public/workbox-*.js
 /public/manifest.webmanifest
 /public/food_sitemap.xml

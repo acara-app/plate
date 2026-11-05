@@ -176,15 +176,23 @@ function CameraView({
         }
 
         setCapturing(true);
-        const scale = Math.max(
-            video.clientWidth / video.videoWidth,
-            video.clientHeight / video.videoHeight,
+        const landscape = video.clientWidth > video.clientHeight;
+        const ratioWidth = landscape ? 4 : 3;
+        const ratioHeight = landscape ? 3 : 4;
+        const sourceWidth = Math.min(
+            video.videoWidth,
+            (video.videoHeight * ratioWidth) / ratioHeight,
         );
-        const sourceWidth = video.clientWidth / scale;
-        const sourceHeight = video.clientHeight / scale;
+        const sourceHeight = (sourceWidth * ratioHeight) / ratioWidth;
+        const outputUnit = Math.floor(
+            Math.min(
+                video.videoWidth / ratioWidth,
+                video.videoHeight / ratioHeight,
+            ),
+        );
         const canvas = document.createElement('canvas');
-        canvas.width = Math.round(sourceWidth);
-        canvas.height = Math.round(sourceHeight);
+        canvas.width = outputUnit * ratioWidth;
+        canvas.height = outputUnit * ratioHeight;
 
         function captureFailed(): void {
             if (streamRef.current !== stream) {
@@ -238,48 +246,20 @@ function CameraView({
     }
 
     return (
-        <div className="relative min-h-0 flex-1 bg-background text-foreground">
-            <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                aria-label={t('snap_to_track.camera.live_view')}
-                className="absolute inset-0 size-full object-cover"
-                onPlaying={() => {
-                    if (
-                        streamRef.current &&
-                        videoRef.current?.videoWidth &&
-                        videoRef.current?.videoHeight
-                    ) {
-                        setStatus('ready');
-                    }
-                }}
-            />
-
-            {status === 'ready' && (
-                <div
-                    aria-hidden="true"
-                    data-camera-guide
-                    className="pointer-events-none absolute inset-x-8 top-1/4 bottom-[36%] sm:inset-x-12"
-                >
-                    <span className="absolute top-0 left-0 size-10 rounded-tl-lg border-t-2 border-l-2 border-foreground" />
-                    <span className="absolute top-0 right-0 size-10 rounded-tr-lg border-t-2 border-r-2 border-foreground" />
-                    <span className="absolute bottom-0 left-0 size-10 rounded-bl-lg border-b-2 border-l-2 border-foreground" />
-                    <span className="absolute right-0 bottom-0 size-10 rounded-br-lg border-r-2 border-b-2 border-foreground" />
-                </div>
-            )}
-
+        <div
+            data-camera-view
+            className="grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)_auto] bg-background text-foreground"
+        >
             <div
                 data-camera-header
-                className="absolute inset-x-0 top-0 z-10 flex items-center gap-4 bg-linear-to-b from-background/90 to-transparent pt-[max(1.25rem,env(safe-area-inset-top))] pr-[max(1.25rem,env(safe-area-inset-right))] pb-12 pl-[max(1.25rem,env(safe-area-inset-left))]"
+                className="flex items-center gap-4 pt-[max(1.25rem,env(safe-area-inset-top))] pr-[max(1.25rem,env(safe-area-inset-right))] pb-4 pl-[max(1.25rem,env(safe-area-inset-left))]"
             >
                 <DialogClose asChild>
                     <Button
                         type="button"
                         variant="secondary"
                         size="icon-touch"
-                        className="rounded-full"
+                        className="shrink-0 rounded-full"
                         aria-label={t('snap_to_track.camera.close')}
                     >
                         <X />
@@ -288,55 +268,95 @@ function CameraView({
                 <DialogTitle>{t('snap_to_track.camera.title')}</DialogTitle>
             </div>
 
-            {status !== 'ready' && (
+            <div
+                data-camera-stage
+                className="relative mr-[max(1rem,env(safe-area-inset-right))] ml-[max(1rem,env(safe-area-inset-left))] flex min-h-0 min-w-0 items-center justify-center"
+            >
                 <div
-                    data-camera-status
-                    className="pointer-events-none absolute inset-x-6 top-24 bottom-56 flex items-center justify-center overflow-y-auto"
+                    data-camera-frame
+                    className="relative shrink-0 overflow-hidden rounded-lg bg-black"
                 >
-                    {error ? (
-                        <Alert className="pointer-events-auto max-h-full overflow-y-auto">
-                            <CameraOff />
-                            <AlertTitle>
-                                {t('snap_to_track.camera.error_heading')}
-                            </AlertTitle>
-                            <AlertDescription>
-                                <p>{t(`snap_to_track.camera.${error}`)}</p>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="touch"
-                                    className="mt-3 h-auto w-full whitespace-normal"
-                                    onClick={() =>
-                                        setAttempt((value) => value + 1)
-                                    }
-                                >
-                                    <RotateCcw data-icon="inline-start" />
-                                    {t('snap_to_track.camera.retry')}
-                                </Button>
-                            </AlertDescription>
-                        </Alert>
-                    ) : (
+                    <video
+                        ref={videoRef}
+                        autoPlay
+                        playsInline
+                        muted
+                        aria-label={t('snap_to_track.camera.live_view')}
+                        className="absolute inset-0 size-full object-cover object-center"
+                        onPlaying={() => {
+                            if (
+                                streamRef.current &&
+                                videoRef.current?.videoWidth &&
+                                videoRef.current?.videoHeight
+                            ) {
+                                setStatus('ready');
+                            }
+                        }}
+                    />
+                    {status === 'ready' && (
                         <div
-                            role="status"
-                            className="flex flex-col items-center gap-4 text-center"
+                            aria-hidden="true"
+                            data-camera-guide
+                            className="pointer-events-none absolute inset-0"
                         >
-                            <LoaderCircle
-                                className="size-7 animate-spin"
-                                aria-hidden="true"
-                            />
-                            <p>
-                                {t(
-                                    `snap_to_track.camera.${status === 'paused' ? 'paused' : 'loading'}`,
-                                )}
-                            </p>
+                            <span className="absolute top-0 left-0 size-10 rounded-tl-lg border-t-2 border-l-2 border-foreground" />
+                            <span className="absolute top-0 right-0 size-10 rounded-tr-lg border-t-2 border-r-2 border-foreground" />
+                            <span className="absolute bottom-0 left-0 size-10 rounded-bl-lg border-b-2 border-l-2 border-foreground" />
+                            <span className="absolute right-0 bottom-0 size-10 rounded-br-lg border-r-2 border-b-2 border-foreground" />
                         </div>
                     )}
                 </div>
-            )}
+
+                {status !== 'ready' && (
+                    <div
+                        data-camera-status
+                        className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-y-auto p-4"
+                    >
+                        {error ? (
+                            <Alert className="pointer-events-auto max-h-full max-w-sm overflow-y-auto">
+                                <CameraOff />
+                                <AlertTitle>
+                                    {t('snap_to_track.camera.error_heading')}
+                                </AlertTitle>
+                                <AlertDescription>
+                                    <p>{t(`snap_to_track.camera.${error}`)}</p>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="touch"
+                                        className="mt-3 h-auto w-full whitespace-normal"
+                                        onClick={() =>
+                                            setAttempt((value) => value + 1)
+                                        }
+                                    >
+                                        <RotateCcw data-icon="inline-start" />
+                                        {t('snap_to_track.camera.retry')}
+                                    </Button>
+                                </AlertDescription>
+                            </Alert>
+                        ) : (
+                            <div
+                                role="status"
+                                className="flex flex-col items-center gap-4 text-center"
+                            >
+                                <LoaderCircle
+                                    className="size-7 animate-spin"
+                                    aria-hidden="true"
+                                />
+                                <p>
+                                    {t(
+                                        `snap_to_track.camera.${status === 'paused' ? 'paused' : 'loading'}`,
+                                    )}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
 
             <div
                 data-camera-controls
-                className="absolute inset-x-0 bottom-0 z-10 flex flex-col gap-6 bg-linear-to-t from-background via-background/80 to-transparent pt-12 pr-[max(1.5rem,env(safe-area-inset-right))] pb-[max(2rem,env(safe-area-inset-bottom))] pl-[max(1.5rem,env(safe-area-inset-left))]"
+                className="flex min-h-0 flex-col gap-4 overflow-y-auto pt-4 pr-[max(1.5rem,env(safe-area-inset-right))] pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1.5rem,env(safe-area-inset-left))]"
             >
                 <p
                     data-camera-hint
@@ -344,8 +364,15 @@ function CameraView({
                 >
                     {t('snap_to_track.camera.hint')}
                 </p>
-                <div className="flex items-center justify-between gap-6">
-                    <span className="size-14 shrink-0" aria-hidden="true" />
+                <div
+                    data-camera-buttons
+                    className="grid grid-cols-3 items-center justify-items-center gap-4"
+                >
+                    <span
+                        data-camera-spacer
+                        className="size-14 shrink-0"
+                        aria-hidden="true"
+                    />
                     <Button
                         type="button"
                         variant="ghost"
@@ -390,7 +417,7 @@ export function CameraCaptureDialog({
                     event.preventDefault();
                     onCloseAutoFocus();
                 }}
-                className="camera-capture dark flex h-dvh w-full max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 p-0 sm:max-w-none lg:h-[48rem] lg:max-h-[90dvh] lg:max-w-lg lg:rounded-3xl"
+                className="camera-capture dark flex h-dvh w-full max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 p-0 sm:max-w-none lg:h-[48rem] lg:max-h-[90dvh] lg:max-w-lg lg:rounded-3xl lg:landscape:max-w-3xl"
             >
                 <DialogDescription className="sr-only">
                     {t('snap_to_track.camera.hint')}
