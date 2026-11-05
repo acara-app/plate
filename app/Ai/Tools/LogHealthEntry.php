@@ -143,10 +143,10 @@ final class LogHealthEntry implements Approvable, Tool
             'medication_dosage' => $schema->string()->required()->nullable()
                 ->description('Dosage of the medication (e.g., "500mg").'),
             'weight' => $schema->number()->required()->nullable()
-                ->description('Body weight in kg. Convert lbs to kg (/ 2.205).'),
+                ->description('Body weight exactly as the user stated it. Do not convert it yourself; set weight_unit instead.'),
             'weight_unit' => $schema->string()->required()->nullable()
                 ->enum(WeightUnit::class)
-                ->description('Unit for weight. Use "lb" for pounds or "kg" for kilograms.'),
+                ->description('Unit of the weight value: "lb" for pounds or "kg" for kilograms. Defaults to kg.'),
             'bp_systolic' => $schema->integer()->required()->nullable()
                 ->description('Systolic blood pressure reading.'),
             'bp_diastolic' => $schema->integer()->required()->nullable()

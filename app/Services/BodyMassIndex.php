@@ -12,6 +12,14 @@ final class BodyMassIndex
 
     public const float PLAUSIBLE_MAXIMUM = 45.0;
 
+    public const int MINIMUM_WEIGHT_KG = 20;
+
+    public const int MAXIMUM_WEIGHT_KG = 500;
+
+    public const int MINIMUM_HEIGHT_CM = 50;
+
+    public const int MAXIMUM_HEIGHT_CM = 300;
+
     public static function isPlausible(float $weightKg, float $heightCm): bool
     {
         if ($weightKg <= 0 || $heightCm <= 0) {
@@ -22,6 +30,16 @@ final class BodyMassIndex
         $bodyMassIndex = $weightKg / ($heightInMeters * $heightInMeters);
 
         return $bodyMassIndex >= self::PLAUSIBLE_MINIMUM && $bodyMassIndex < self::PLAUSIBLE_MAXIMUM;
+    }
+
+    public static function isWeightInRange(float $weightKg): bool
+    {
+        return $weightKg >= self::MINIMUM_WEIGHT_KG && $weightKg <= self::MAXIMUM_WEIGHT_KG;
+    }
+
+    public static function isHeightInRange(float $heightCm): bool
+    {
+        return $heightCm >= self::MINIMUM_HEIGHT_CM && $heightCm <= self::MAXIMUM_HEIGHT_CM;
     }
 
     public static function looksLikePounds(float $weightKg, float $heightCm): bool

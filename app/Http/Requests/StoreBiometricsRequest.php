@@ -154,8 +154,8 @@ final class StoreBiometricsRequest extends FormRequest
         }
 
         return [
-            'height' => ['required', 'numeric', 'min:50', 'max:300'],
-            'weight' => ['required', 'numeric', 'min:20', 'max:500'],
+            'height' => ['required', 'numeric', 'min:'.BodyMassIndex::MINIMUM_HEIGHT_CM, 'max:'.BodyMassIndex::MAXIMUM_HEIGHT_CM],
+            'weight' => ['required', 'numeric', 'min:'.BodyMassIndex::MINIMUM_WEIGHT_KG, 'max:'.BodyMassIndex::MAXIMUM_WEIGHT_KG],
         ];
     }
 }

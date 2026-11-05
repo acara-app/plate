@@ -30,7 +30,7 @@ it('has valid schema', function (): void {
     $result = $this->tool->schema($schema);
 
     expect($result)->toBeArray()
-        ->and($result)->toHaveKeys(['action', 'age', 'date_of_birth', 'height', 'weight', 'sex', 'blood_type', 'goal_choice', 'animal_product_choice', 'intensity_choice', 'target_weight', 'additional_goals']);
+        ->and($result)->toHaveKeys(['action', 'age', 'date_of_birth', 'height', 'height_unit', 'weight', 'weight_unit', 'sex', 'blood_type', 'goal_choice', 'animal_product_choice', 'intensity_choice', 'target_weight', 'confirm_measurements', 'additional_goals']);
 });
 
 it('returns error if user is not authenticated', function (): void {
@@ -273,3 +273,125 @@ it('recomputes the diet type and activity level when the goal changes in chat', 
         ->calculated_diet_type->toBe(DietType::Keto)
         ->derived_activity_multiplier->toBe(1.55);
 });
+
+it('converts pounds and inches from chat to the stored kilograms and centimeters', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 70]);
+    $this->actingAs($user);
+
+    $json = json_decode($this->tool->handle(new Request([
+        'action' => 'update',
+        'height' => 70,
+        'height_unit' => 'in',
+        'weight' => 200,
+        'weight_unit' => 'lb',
+        'target_weight' => 180,
+    ])), true);
+
+    expect($json)->success->toBeTrue()
+        ->and($user->profile()->firstOrFail())
+        ->height->toBe(177.8)
+        ->weight->toBe(90.72)
+        ->target_weight->toBe(81.65);
+});
+
+it('rejects measurements outside the accepted range without saving them', function (array $arguments, string $field): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 70, 'target_weight' => 65]);
+    $this->actingAs($user);
+
+    $json = json_decode($this->tool->handle(new Request(['action' => 'update', ...$arguments])), true);
+
+    expect($json)
+        ->requires_clarification->toBeTrue()
+        ->field->toBe($field)
+        ->and($user->profile()->firstOrFail())
+        ->height->toBe(175.0)
+        ->weight->toBe(70.0)
+        ->target_weight->toBe(65.0);
+})->with([
+    'weight above 500 kg' => [['weight' => 600], 'weight'],
+    'weight above 1,100 lb' => [['weight' => 1200, 'weight_unit' => 'lb'], 'weight'],
+    'height below 50 cm' => [['height' => 30], 'height'],
+    'height above 300 cm in inches' => [['height' => 200, 'height_unit' => 'in'], 'height'],
+    'target weight below 20 kg' => [['target_weight' => 10], 'target_weight'],
+]);
+
+it('rejects unknown units', function (array $arguments): void {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $json = json_decode($this->tool->handle(new Request(['action' => 'update', 'weight' => 70, ...$arguments])), true);
+
+    expect($json)->toHaveKey('error')
+        ->and($json)->not->toHaveKey('success');
+})->with([
+    'weight unit' => [['weight_unit' => 'stone']],
+    'height unit' => [['height_unit' => 'ft']],
+]);
+
+it('asks whether a chat weight was meant in pounds before saving it', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 87.54]);
+    $this->actingAs($user);
+
+    $json = json_decode($this->tool->handle(new Request(['action' => 'update', 'weight' => 193])), true);
+
+    expect($json)
+        ->requires_confirmation->toBeTrue()
+        ->suggested_weight_unit->toBe('lb')
+        ->message->toContain('193 lb')
+        ->and($user->profile()->firstOrFail()->weight)->toBe(87.54);
+
+    $json = json_decode($this->tool->handle(new Request(['action' => 'update', 'weight' => 193, 'weight_unit' => 'lb'])), true);
+
+    expect($json)->success->toBeTrue()
+        ->and($user->profile()->firstOrFail()->weight)->toBe(87.54);
+});
+
+it('asks to double-check measurements that pounds would not explain', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 80]);
+    $this->actingAs($user);
+
+    $json = json_decode($this->tool->handle(new Request(['action' => 'update', 'height' => 70])), true);
+
+    expect($json)
+        ->requires_confirmation->toBeTrue()
+        ->suggested_weight_unit->toBeNull()
+        ->and($user->profile()->firstOrFail()->height)->toBe(175.0);
+});
+
+it('saves unusual measurements once the user confirms them', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 87.54]);
+    $this->actingAs($user);
+
+    $json = json_decode($this->tool->handle(new Request([
+        'action' => 'update',
+        'weight' => 193,
+        'confirm_measurements' => true,
+    ])), true);
+
+    expect($json)->success->toBeTrue()
+        ->and($user->profile()->firstOrFail()->weight)->toBe(193.0);
+});
+
+it('clears the review request when height or weight is saved through chat', function (array $arguments, bool $needsReview): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create([
+        'height' => 175,
+        'weight' => 193,
+        'needs_re_onboarding' => true,
+    ]);
+    $this->actingAs($user);
+
+    $json = json_decode($this->tool->handle(new Request(['action' => 'update', ...$arguments])), true);
+
+    expect($json)->success->toBeTrue()
+        ->and($user->profile()->firstOrFail()->needs_re_onboarding)->toBe($needsReview);
+})->with([
+    'corrected weight' => [['weight' => 87.54], false],
+    'weight confirmed as it was' => [['weight' => 193, 'confirm_measurements' => true], false],
+    'unrelated update' => [['blood_type' => 'O+'], true],
+]);

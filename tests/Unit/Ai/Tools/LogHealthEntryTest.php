@@ -409,3 +409,30 @@ it('asks the model for a nutrition estimate instead of asking the user to approv
     expect($result)->toHaveKey('requires_estimate', true)
         ->and(HealthSyncSample::query()->count())->toBe(0);
 });
+
+it('asks the model for the stated weight and its unit instead of a converted number', function (): void {
+    $schema = resolve(LogHealthEntry::class)->schema(new TestJsonSchema);
+
+    expect($schema['weight']->toArray()['description'])
+        ->toContain('weight_unit')
+        ->not->toContain('2.205');
+});
+
+it('converts a weight given in pounds exactly once', function (): void {
+    $user = User::factory()->create();
+    Auth::login($user);
+
+    $result = json_decode(resolve(LogHealthEntry::class)->handle(new Request([
+        'log_type' => 'vitals',
+        'weight' => 200,
+        'weight_unit' => 'lb',
+    ])), true);
+
+    $sample = HealthSyncSample::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::Weight->value)
+        ->firstOrFail();
+
+    expect($result)->toHaveKey('success', true)
+        ->and(round((float) $sample->value, 2))->toBe(90.72);
+});

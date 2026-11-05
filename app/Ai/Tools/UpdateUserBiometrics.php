@@ -9,10 +9,13 @@ use App\Enums\AnimalProductChoice;
 use App\Enums\BloodType;
 use App\Enums\DataSensitivity;
 use App\Enums\GoalChoice;
+use App\Enums\HeightUnit;
 use App\Enums\IntensityChoice;
 use App\Enums\Sex;
+use App\Enums\WeightUnit;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Services\BodyMassIndex;
 use App\Services\DietMapper;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -31,7 +34,7 @@ final readonly class UpdateUserBiometrics implements Tool
 
     public function description(): string
     {
-        return 'Get or update user biometric profile fields: age, date_of_birth, height (cm), weight (kg), sex, blood_type, goal_choice, animal_product_choice, intensity_choice, target_weight, and additional_goals. Use "get" to retrieve current values and identify missing fields, or "update" to set new values. Auto-creates a profile if one does not exist.';
+        return 'Get or update user biometric profile fields: age, date_of_birth, height, weight, sex, blood_type, goal_choice, animal_product_choice, intensity_choice, target_weight, and additional_goals. Returned height is in cm and weights are in kg. When updating, pass height and weights exactly as the user stated them together with height_unit and weight_unit; the tool converts them. If the result has requires_confirmation, ask the user to confirm before calling the tool again. Use "get" to retrieve current values and identify missing fields, or "update" to set new values. Auto-creates a profile if one does not exist.';
     }
 
     public function handle(Request $request): string
@@ -71,9 +74,15 @@ final readonly class UpdateUserBiometrics implements Tool
             'date_of_birth' => $schema->string()->required()->nullable()
                 ->description('User date of birth in YYYY-MM-DD format.'),
             'height' => $schema->number()->required()->nullable()
-                ->description('User height in centimeters.'),
+                ->description('User height exactly as the user stated it, in height_unit. Do not convert it yourself.'),
+            'height_unit' => $schema->string()->required()->nullable()
+                ->enum(HeightUnit::class)
+                ->description('Unit of height: "cm" for centimeters or "in" for inches. Turn feet and inches into total inches first (5 ft 10 in = 70). Defaults to cm.'),
             'weight' => $schema->number()->required()->nullable()
-                ->description('User weight in kilograms.'),
+                ->description('User weight exactly as the user stated it, in weight_unit. Do not convert it yourself.'),
+            'weight_unit' => $schema->string()->required()->nullable()
+                ->enum(WeightUnit::class)
+                ->description('Unit of weight and target_weight: "kg" for kilograms or "lb" for pounds. Defaults to kg.'),
             'sex' => $schema->string()->required()->nullable()
                 ->enum(Sex::class)
                 ->description('Biological sex: male, female, or other.'),
@@ -90,7 +99,9 @@ final readonly class UpdateUserBiometrics implements Tool
                 ->enum(IntensityChoice::class)
                 ->description('Plan intensity: balanced or aggressive.'),
             'target_weight' => $schema->number()->required()->nullable()
-                ->description('Target weight in kilograms.'),
+                ->description('Target weight exactly as the user stated it, in weight_unit. Do not convert it yourself.'),
+            'confirm_measurements' => $schema->boolean()->required()->nullable()
+                ->description('Set to true only after the user has explicitly confirmed height and weight values that this tool flagged with requires_confirmation.'),
             'additional_goals' => $schema->string()->required()->nullable()
                 ->description('Free-text additional health or fitness goals.'),
         ];
@@ -130,16 +141,29 @@ final readonly class UpdateUserBiometrics implements Tool
             }
         }
 
-        if (isset($data['height']) && is_numeric($data['height'])) {
-            $updateData['height'] = (float) $data['height'];
+        $heightUnit = HeightUnit::tryFrom(is_string($data['height_unit'] ?? null) ? $data['height_unit'] : HeightUnit::Cm->value);
+        $weightUnit = WeightUnit::tryFrom(is_string($data['weight_unit'] ?? null) ? $data['weight_unit'] : WeightUnit::Kg->value);
+
+        if (! $heightUnit instanceof HeightUnit) {
+            return (string) json_encode(['error' => 'Invalid height_unit value. Use "cm" or "in".']);
         }
 
-        if (isset($data['weight']) && is_numeric($data['weight'])) {
-            $updateData['weight'] = (float) $data['weight'];
+        if (! $weightUnit instanceof WeightUnit) {
+            return (string) json_encode(['error' => 'Invalid weight_unit value. Use "kg" or "lb".']);
+        }
+
+        $statedWeight = isset($data['weight']) && is_numeric($data['weight']) ? (float) $data['weight'] : null;
+
+        if (isset($data['height']) && is_numeric($data['height'])) {
+            $updateData['height'] = round($heightUnit->toCentimeters((float) $data['height']), 2);
+        }
+
+        if ($statedWeight !== null) {
+            $updateData['weight'] = round($weightUnit->toKg($statedWeight), 2);
         }
 
         if (isset($data['target_weight']) && is_numeric($data['target_weight'])) {
-            $updateData['target_weight'] = (float) $data['target_weight'];
+            $updateData['target_weight'] = round($weightUnit->toKg((float) $data['target_weight']), 2);
         }
 
         if (isset($data['additional_goals']) && is_string($data['additional_goals'])) {
@@ -200,6 +224,16 @@ final readonly class UpdateUserBiometrics implements Tool
             return (string) json_encode(['error' => 'No valid fields provided to update.']);
         }
 
+        $measurementProblem = $this->measurementProblem($profile, $updateData, $statedWeight, $weightUnit, ($data['confirm_measurements'] ?? false) === true);
+
+        if ($measurementProblem !== null) {
+            return $measurementProblem;
+        }
+
+        if (array_key_exists('height', $updateData) || array_key_exists('weight', $updateData)) {
+            $updateData['needs_re_onboarding'] = false;
+        }
+
         $profile->fill($updateData);
 
         if ($profile->goal_choice instanceof GoalChoice && $profile->isDirty(['goal_choice', 'animal_product_choice', 'intensity_choice'])) {
@@ -218,6 +252,63 @@ final readonly class UpdateUserBiometrics implements Tool
             'message' => 'Biometrics updated successfully.',
             'biometrics' => $fields,
             'missing_fields' => $missing,
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $updateData
+     */
+    private function measurementProblem(UserProfile $profile, array $updateData, ?float $statedWeight, WeightUnit $weightUnit, bool $confirmed): ?string
+    {
+        $height = is_float($updateData['height'] ?? null) ? $updateData['height'] : null;
+        $weight = is_float($updateData['weight'] ?? null) ? $updateData['weight'] : null;
+        $targetWeight = is_float($updateData['target_weight'] ?? null) ? $updateData['target_weight'] : null;
+
+        if ($height !== null && ! BodyMassIndex::isHeightInRange($height)) {
+            return $this->clarification('height', sprintf('Height must be between %d and %d cm (about 1 ft 8 in to 9 ft 10 in).', BodyMassIndex::MINIMUM_HEIGHT_CM, BodyMassIndex::MAXIMUM_HEIGHT_CM));
+        }
+
+        if ($weight !== null && ! BodyMassIndex::isWeightInRange($weight)) {
+            return $this->clarification('weight', sprintf('Weight must be between %d and %d kg (about 44 to 1,100 lb).', BodyMassIndex::MINIMUM_WEIGHT_KG, BodyMassIndex::MAXIMUM_WEIGHT_KG));
+        }
+
+        if ($targetWeight !== null && ! BodyMassIndex::isWeightInRange($targetWeight)) {
+            return $this->clarification('target_weight', sprintf('Target weight must be between %d and %d kg (about 44 to 1,100 lb).', BodyMassIndex::MINIMUM_WEIGHT_KG, BodyMassIndex::MAXIMUM_WEIGHT_KG));
+        }
+
+        if ($confirmed || ($height === null && $weight === null)) {
+            return null;
+        }
+
+        $heightCm = $height ?? $profile->height;
+        $weightKg = $weight ?? $profile->weight;
+
+        if ($heightCm === null || $weightKg === null || BodyMassIndex::isPlausible($weightKg, $heightCm)) {
+            return null;
+        }
+
+        $suggestPounds = $statedWeight !== null
+            && $weightUnit === WeightUnit::Kg
+            && BodyMassIndex::looksLikePounds($weightKg, $heightCm);
+
+        return (string) json_encode([
+            'error' => 'These measurements look unusual, so nothing was saved yet.',
+            'requires_confirmation' => true,
+            'fields' => ['height', 'weight'],
+            'message' => $suggestPounds
+                ? sprintf('Just checking the units: did you mean %s lb?', $statedWeight)
+                : sprintf('Just checking: is a height of %s cm and a weight of %s kg correct?', $heightCm, $weightKg),
+            'suggested_weight_unit' => $suggestPounds ? WeightUnit::Lb->value : null,
+            'hint' => 'Ask the user to confirm before saving. If they meant pounds, call update_user_biometrics again with weight_unit "lb". If they confirm the values are correct, call it again with confirm_measurements true. Never set confirm_measurements without their explicit confirmation.',
+        ]);
+    }
+
+    private function clarification(string $field, string $message): string
+    {
+        return (string) json_encode([
+            'error' => $message,
+            'requires_clarification' => true,
+            'field' => $field,
         ]);
     }
 
