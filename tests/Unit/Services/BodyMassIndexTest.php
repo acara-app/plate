@@ -49,3 +49,16 @@ it('accepts heights from 50 to 300 cm', function (float $heightCm, bool $inRange
     'the maximum' => [300.0, true],
     'above the maximum' => [300.01, false],
 ]);
+
+it('recognises heights that only make sense when read as inches', function (float $weightKg, float $heightCm, bool $looksLikeInches): void {
+    expect(BodyMassIndex::looksLikeInches($weightKg, $heightCm))->toBe($looksLikeInches);
+})->with([
+    'inches typed as centimeters' => [80.0, 70.0, true],
+    'typical adult' => [70.0, 175.0, false],
+    'pounds typed as kilograms' => [193.0, 175.0, false],
+]);
+
+it('derives the accepted ranges in pounds and inches from the metric limits', function (): void {
+    expect(BodyMassIndex::weightRangeInPounds())->toBe(['min' => 45, 'max' => 1102])
+        ->and(BodyMassIndex::heightRangeInInches())->toBe(['min' => 20, 'max' => 118]);
+});

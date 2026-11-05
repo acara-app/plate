@@ -8,6 +8,7 @@ use App\Enums\HealthSyncType;
 use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
 use App\Models\User;
+use App\Models\UserProfile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Approvals\Approval;
@@ -410,14 +411,6 @@ it('asks the model for a nutrition estimate instead of asking the user to approv
         ->and(HealthSyncSample::query()->count())->toBe(0);
 });
 
-it('asks the model for the stated weight and its unit instead of a converted number', function (): void {
-    $schema = resolve(LogHealthEntry::class)->schema(new TestJsonSchema);
-
-    expect($schema['weight']->toArray()['description'])
-        ->toContain('weight_unit')
-        ->not->toContain('2.205');
-});
-
 it('converts a weight given in pounds exactly once', function (): void {
     $user = User::factory()->create();
     Auth::login($user);
@@ -436,3 +429,52 @@ it('converts a weight given in pounds exactly once', function (): void {
     expect($result)->toHaveKey('success', true)
         ->and(round((float) $sample->value, 2))->toBe(90.72);
 });
+
+it('accepts common spellings of the weight unit', function (): void {
+    $user = User::factory()->create();
+    Auth::login($user);
+
+    resolve(LogHealthEntry::class)->handle(new Request([
+        'log_type' => 'vitals',
+        'weight' => 200,
+        'weight_unit' => 'lbs',
+    ]));
+
+    $sample = HealthSyncSample::query()
+        ->where('user_id', $user->id)
+        ->where('type_identifier', HealthSyncType::Weight->value)
+        ->firstOrFail();
+
+    expect(round((float) $sample->value, 2))->toBe(90.72);
+});
+
+it('asks for the unit before logging a weight that reads like pounds', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => 175]);
+    Auth::login($user);
+    Context::add('chat.channel', 'web');
+
+    $tool = resolve(LogHealthEntry::class);
+    $request = new Request(['log_type' => 'vitals', 'weight' => 180]);
+
+    $result = json_decode($tool->handle($request), true);
+
+    expect($result)
+        ->requires_clarification->toBeTrue()
+        ->field->toBe('weight_unit')
+        ->and($tool->shouldRequestApproval($request))->toBeNull()
+        ->and(HealthSyncSample::query()->where('user_id', $user->id)->exists())->toBeFalse();
+});
+
+it('logs a weight without a unit as kilograms when it is plausible or there is no height to compare', function (?float $height): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => $height]);
+    Auth::login($user);
+
+    $result = json_decode(resolve(LogHealthEntry::class)->handle(new Request(['log_type' => 'vitals', 'weight' => 80])), true);
+
+    expect($result)->toHaveKey('success', true);
+})->with([
+    'plausible for the height' => [175.0],
+    'no height on file' => [null],
+]);

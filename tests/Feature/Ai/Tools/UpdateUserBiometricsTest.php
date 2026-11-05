@@ -17,7 +17,7 @@ use Tests\Helpers\TestJsonSchema;
 covers(UpdateUserBiometrics::class);
 
 beforeEach(function (): void {
-    $this->tool = new UpdateUserBiometrics;
+    $this->tool = resolve(UpdateUserBiometrics::class);
 });
 
 it('has correct name and description', function (): void {
@@ -30,7 +30,7 @@ it('has valid schema', function (): void {
     $result = $this->tool->schema($schema);
 
     expect($result)->toBeArray()
-        ->and($result)->toHaveKeys(['action', 'age', 'date_of_birth', 'height', 'height_unit', 'weight', 'weight_unit', 'sex', 'blood_type', 'goal_choice', 'animal_product_choice', 'intensity_choice', 'target_weight', 'confirm_measurements', 'additional_goals']);
+        ->and($result)->toHaveKeys(['action', 'age', 'date_of_birth', 'height', 'height_unit', 'weight', 'weight_unit', 'sex', 'blood_type', 'goal_choice', 'animal_product_choice', 'intensity_choice', 'target_weight', 'target_weight_unit', 'confirmation_token', 'additional_goals']);
 });
 
 it('returns error if user is not authenticated', function (): void {
@@ -274,108 +274,184 @@ it('recomputes the diet type and activity level when the goal changes in chat', 
         ->derived_activity_multiplier->toBe(1.55);
 });
 
-it('converts pounds and inches from chat to the stored kilograms and centimeters', function (): void {
-    $user = User::factory()->create();
-    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 70]);
-    $this->actingAs($user);
+function biometricsUpdate(UpdateUserBiometrics $tool, array $arguments): array
+{
+    return json_decode($tool->handle(new Request(['action' => 'update', ...$arguments])), true);
+}
 
-    $json = json_decode($this->tool->handle(new Request([
-        'action' => 'update',
-        'height' => 70,
-        'height_unit' => 'in',
-        'weight' => 200,
-        'weight_unit' => 'lb',
-        'target_weight' => 180,
-    ])), true);
-
-    expect($json)->success->toBeTrue()
-        ->and($user->profile()->firstOrFail())
-        ->height->toBe(177.8)
-        ->weight->toBe(90.72)
-        ->target_weight->toBe(81.65);
-});
-
-it('rejects measurements outside the accepted range without saving them', function (array $arguments, string $field): void {
+it('converts stated units from chat to the stored kilograms and centimeters', function (array $arguments, array $expected): void {
     $user = User::factory()->create();
     UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 70, 'target_weight' => 65]);
     $this->actingAs($user);
 
-    $json = json_decode($this->tool->handle(new Request(['action' => 'update', ...$arguments])), true);
+    expect(biometricsUpdate($this->tool, $arguments))->success->toBeTrue()
+        ->and($user->profile()->firstOrFail()->only(array_keys($expected)))->toEqual($expected);
+})->with([
+    'pounds and inches' => [['height' => 70, 'height_unit' => 'in', 'weight' => 200, 'weight_unit' => 'lb'], ['height' => 177.8, 'weight' => 90.72]],
+    'metres' => [['height' => 1.75, 'height_unit' => 'm'], ['height' => 175.0]],
+    'spelled-out units' => [['weight' => 200, 'weight_unit' => 'lbs', 'height' => 70, 'height_unit' => 'inches'], ['height' => 177.8, 'weight' => 90.72]],
+    'weight in pounds with a target in kilograms' => [['weight' => 193, 'weight_unit' => 'lb', 'target_weight' => 80, 'target_weight_unit' => 'kg'], ['weight' => 87.54, 'target_weight' => 80.0]],
+    'target in pounds' => [['target_weight' => 180, 'target_weight_unit' => 'lb'], ['target_weight' => 81.65]],
+]);
+
+it('rejects values outside the accepted range but still saves the rest', function (array $arguments, string $field): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 70, 'target_weight' => 65, 'age' => 30, 'blood_type' => null]);
+    $this->actingAs($user);
+
+    $json = biometricsUpdate($this->tool, [...$arguments, 'blood_type' => 'O+']);
 
     expect($json)
         ->requires_clarification->toBeTrue()
         ->field->toBe($field)
+        ->saved_fields->toBe(['blood_type'])
         ->and($user->profile()->firstOrFail())
+        ->blood_type->toBe(BloodType::OPositive)
         ->height->toBe(175.0)
         ->weight->toBe(70.0)
-        ->target_weight->toBe(65.0);
+        ->target_weight->toBe(65.0)
+        ->age->toBe(30);
 })->with([
     'weight above 500 kg' => [['weight' => 600], 'weight'],
-    'weight above 1,100 lb' => [['weight' => 1200, 'weight_unit' => 'lb'], 'weight'],
+    'weight above the pound limit' => [['weight' => 1200, 'weight_unit' => 'lb'], 'weight'],
     'height below 50 cm' => [['height' => 30], 'height'],
     'height above 300 cm in inches' => [['height' => 200, 'height_unit' => 'in'], 'height'],
     'target weight below 20 kg' => [['target_weight' => 10], 'target_weight'],
+    'unknown weight unit' => [['weight' => 70, 'weight_unit' => 'stone'], 'weight_unit'],
+    'age under 13' => [['age' => 5], 'age'],
+    'age over 120' => [['age' => 300], 'age'],
+    'birth date in the future' => [['date_of_birth' => '2999-01-01'], 'date_of_birth'],
+    'birth date under 13 years ago' => [['date_of_birth' => now()->subYears(10)->toDateString()], 'date_of_birth'],
 ]);
 
-it('rejects unknown units', function (array $arguments): void {
+it('ignores units when the matching value is not being updated', function (): void {
     $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 70]);
     $this->actingAs($user);
 
-    $json = json_decode($this->tool->handle(new Request(['action' => 'update', 'weight' => 70, ...$arguments])), true);
+    expect(biometricsUpdate($this->tool, ['blood_type' => 'O+', 'weight_unit' => 'stone', 'height_unit' => 'ft']))
+        ->success->toBeTrue()
+        ->and($user->profile()->firstOrFail()->blood_type)->toBe(BloodType::OPositive);
+});
 
-    expect($json)->toHaveKey('error')
-        ->and($json)->not->toHaveKey('success');
-})->with([
-    'weight unit' => [['weight_unit' => 'stone']],
-    'height unit' => [['height_unit' => 'ft']],
-]);
-
-it('asks whether a chat weight was meant in pounds before saving it', function (): void {
+it('asks whether a chat weight was meant in pounds and saves it once the unit is corrected', function (): void {
     $user = User::factory()->create();
-    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 87.54]);
+    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 70]);
     $this->actingAs($user);
 
-    $json = json_decode($this->tool->handle(new Request(['action' => 'update', 'weight' => 193])), true);
+    $json = biometricsUpdate($this->tool, ['weight' => 193]);
 
     expect($json)
         ->requires_confirmation->toBeTrue()
-        ->suggested_weight_unit->toBe('lb')
+        ->and($json['confirmations'][0])
+        ->fields->toBe(['weight'])
         ->message->toContain('193 lb')
-        ->and($user->profile()->firstOrFail()->weight)->toBe(87.54);
+        ->suggestion->toEqual(['weight' => 193, 'weight_unit' => 'lb'])
+        ->and($user->profile()->firstOrFail()->weight)->toBe(70.0);
 
-    $json = json_decode($this->tool->handle(new Request(['action' => 'update', 'weight' => 193, 'weight_unit' => 'lb'])), true);
-
-    expect($json)->success->toBeTrue()
+    expect(biometricsUpdate($this->tool, ['weight' => 193, 'weight_unit' => 'lb']))->success->toBeTrue()
         ->and($user->profile()->firstOrFail()->weight)->toBe(87.54);
 });
 
-it('asks to double-check measurements that pounds would not explain', function (): void {
+it('saves unusual measurements only with the confirmation token for those exact values', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 70]);
+    $this->actingAs($user);
+
+    $token = biometricsUpdate($this->tool, ['weight' => 193])['confirmation_token'];
+
+    expect(biometricsUpdate($this->tool, ['weight' => 193, 'confirmation_token' => 'not-the-token']))->requires_confirmation->toBeTrue()
+        ->and(biometricsUpdate($this->tool, ['weight' => 195, 'confirmation_token' => $token]))->requires_confirmation->toBeTrue()
+        ->and($user->profile()->firstOrFail()->weight)->toBe(70.0)
+        ->and(biometricsUpdate($this->tool, ['weight' => 193, 'confirmation_token' => $token]))->success->toBeTrue()
+        ->and($user->profile()->firstOrFail()->weight)->toBe(193.0);
+});
+
+it('saves the other fields while unusual measurements wait for confirmation', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 70, 'sex' => Sex::Male, 'goal_choice' => null]);
+    $this->actingAs($user);
+
+    $json = biometricsUpdate($this->tool, ['weight' => 193, 'sex' => 'female', 'goal_choice' => 'weight_loss']);
+
+    expect($json)
+        ->requires_confirmation->toBeTrue()
+        ->saved_fields->toEqualCanonicalizing(['sex', 'goal_choice'])
+        ->and($user->profile()->firstOrFail())
+        ->sex->toBe(Sex::Female)
+        ->goal_choice->toBe(GoalChoice::WeightLoss)
+        ->weight->toBe(70.0);
+});
+
+it('suggests pounds for a saved weight when only the height changes', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 193, 'needs_re_onboarding' => true]);
+    $this->actingAs($user);
+
+    $json = biometricsUpdate($this->tool, ['height' => 176]);
+
+    expect($json['confirmations'][0])
+        ->fields->toBe(['height'])
+        ->suggestion->toEqual(['weight' => 193, 'weight_unit' => 'lb'])
+        ->and(biometricsUpdate($this->tool, ['height' => 176, 'weight' => 193, 'weight_unit' => 'lb']))->success->toBeTrue()
+        ->and($user->profile()->firstOrFail())
+        ->height->toBe(176.0)
+        ->weight->toBe(87.54)
+        ->needs_re_onboarding->toBeFalse();
+});
+
+it('suggests inches when a height only makes sense in inches', function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 80]);
     $this->actingAs($user);
 
-    $json = json_decode($this->tool->handle(new Request(['action' => 'update', 'height' => 70])), true);
+    $json = biometricsUpdate($this->tool, ['height' => 70]);
 
-    expect($json)
-        ->requires_confirmation->toBeTrue()
-        ->suggested_weight_unit->toBeNull()
+    expect($json['confirmations'][0])
+        ->message->toContain('70 in (5 ft 10 in)')
+        ->suggestion->toEqual(['height' => 70, 'height_unit' => 'in'])
         ->and($user->profile()->firstOrFail()->height)->toBe(175.0);
 });
 
-it('saves unusual measurements once the user confirms them', function (): void {
+it('asks a plain double-check when no unit mix-up explains the measurements', function (array $arguments): void {
     $user = User::factory()->create();
-    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 87.54]);
+    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 70]);
     $this->actingAs($user);
 
-    $json = json_decode($this->tool->handle(new Request([
-        'action' => 'update',
-        'weight' => 193,
-        'confirm_measurements' => true,
-    ])), true);
+    $json = biometricsUpdate($this->tool, $arguments);
 
-    expect($json)->success->toBeTrue()
-        ->and($user->profile()->firstOrFail()->weight)->toBe(193.0);
+    expect($json['confirmations'][0])
+        ->message->toStartWith('Just checking: is a height of')
+        ->suggestion->toBeNull()
+        ->and($user->profile()->firstOrFail()->weight)->toBe(70.0);
+})->with([
+    'weight too low for the height' => [['weight' => 30]],
+    'pounds already stated' => [['weight' => 450, 'weight_unit' => 'lb', 'height' => 152]],
+]);
+
+it('asks about a target weight that only makes sense in pounds', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 70, 'target_weight' => 65]);
+    $this->actingAs($user);
+
+    $json = biometricsUpdate($this->tool, ['target_weight' => 180]);
+
+    expect($json['confirmations'][0])
+        ->fields->toBe(['target_weight'])
+        ->suggestion->toEqual(['target_weight' => 180, 'target_weight_unit' => 'lb'])
+        ->and($user->profile()->firstOrFail()->target_weight)->toBe(65.0);
 });
+
+it('does not ask again when confirmed measurements change only a little', function (bool $needsReview, bool $asks): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => 170, 'weight' => 135, 'needs_re_onboarding' => $needsReview]);
+    $this->actingAs($user);
+
+    expect(array_key_exists('requires_confirmation', biometricsUpdate($this->tool, ['weight' => 133])))->toBe($asks);
+})->with([
+    'confirmed earlier' => [false, false],
+    'still waiting for review' => [true, true],
+]);
 
 it('clears the review request when height or weight is saved through chat', function (array $arguments, bool $needsReview): void {
     $user = User::factory()->create();
@@ -386,12 +462,20 @@ it('clears the review request when height or weight is saved through chat', func
     ]);
     $this->actingAs($user);
 
-    $json = json_decode($this->tool->handle(new Request(['action' => 'update', ...$arguments])), true);
-
-    expect($json)->success->toBeTrue()
+    expect(biometricsUpdate($this->tool, $arguments))->success->toBeTrue()
         ->and($user->profile()->firstOrFail()->needs_re_onboarding)->toBe($needsReview);
 })->with([
     'corrected weight' => [['weight' => 87.54], false],
-    'weight confirmed as it was' => [['weight' => 193, 'confirm_measurements' => true], false],
     'unrelated update' => [['blood_type' => 'O+'], true],
 ]);
+
+it('clears the review request once the user confirms the flagged values', function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['height' => 175, 'weight' => 193, 'needs_re_onboarding' => true]);
+    $this->actingAs($user);
+
+    $token = biometricsUpdate($this->tool, ['weight' => 193])['confirmation_token'];
+
+    expect(biometricsUpdate($this->tool, ['weight' => 193, 'confirmation_token' => $token]))->success->toBeTrue()
+        ->and($user->profile()->firstOrFail()->needs_re_onboarding)->toBeFalse();
+});
