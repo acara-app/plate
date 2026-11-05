@@ -23,7 +23,10 @@ import {
     formatLocalDatetime,
     localDatetimeToIso,
 } from '@/lib/format-local-datetime';
-import { recallSnapPhotoFile } from '@/lib/snap-to-track-photo';
+import {
+    forgetSnapPhoto,
+    recallSnapPhotoFile,
+} from '@/lib/snap-to-track-photo';
 import {
     estimatedFields,
     needsNutritionUpdate,
@@ -335,6 +338,11 @@ export default function SnapToTrackReview({
                             ),
                             ...(photo ? { photo } : {}),
                         };
+                    }}
+                    onSuccess={() => {
+                        if (guestPhotoRequestId !== null) {
+                            forgetSnapPhoto();
+                        }
                     }}
                     disableWhileProcessing
                     className="flex flex-col gap-6"
