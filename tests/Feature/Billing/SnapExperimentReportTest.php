@@ -13,6 +13,7 @@ it('reports deduplicated paid conversion and net contribution without declaring 
     if (resolve(TracksPhotoConversion::class) instanceof NullPhotoConversion) {
         $this->markTestSkipped('Requires the optional photo conversion integration.');
     }
+
     config(['snap.experiment.starts_at' => now()->subDays(15)->toIso8601String()]);
     $user = User::factory()->create();
     $id = (string) Str::uuid();
@@ -43,6 +44,7 @@ it('does not approve a variant while a refund still needs payment reconciliation
     if (resolve(TracksPhotoConversion::class) instanceof NullPhotoConversion) {
         $this->markTestSkipped('Requires the optional photo conversion integration.');
     }
+
     config(['snap.experiment.starts_at' => now()->subDays(90)->toIso8601String()]);
     $user = User::factory()->create();
     DB::table('snap_experiment_assignments')->insert([
@@ -65,6 +67,7 @@ it('adopts the habit offer only after maturation with positive conversion eviden
     if (resolve(TracksPhotoConversion::class) instanceof NullPhotoConversion) {
         $this->markTestSkipped('Requires the optional photo conversion integration.');
     }
+
     config(['snap.experiment.starts_at' => now()->subDays(90)->toIso8601String()]);
     foreach (['A', 'B'] as $variant) {
         foreach (range(1, 20) as $participant) {
@@ -83,6 +86,7 @@ it('adopts the habit offer only after maturation with positive conversion eviden
             }
         }
     }
+
     Artisan::call('snap:experiment-report', ['--test' => true, '--json' => true]);
     $report = json_decode(Artisan::output(), true, flags: JSON_THROW_ON_ERROR);
     expect($report['mature'])->toBeTrue()
@@ -96,6 +100,7 @@ it('counts first payments rather than renewals or returning customers as convers
     if (resolve(TracksPhotoConversion::class) instanceof NullPhotoConversion) {
         $this->markTestSkipped('Requires the optional photo conversion integration.');
     }
+
     config(['snap.experiment.starts_at' => now()->subDays(15)->toIso8601String()]);
     $subject = 'user:'.User::factory()->create()->id;
     DB::table('snap_photo_accounts')->insert(['subject' => $subject, 'created_at' => now()->subDays(14)]);
@@ -114,6 +119,7 @@ it('counts first payments rather than renewals or returning customers as convers
             'fee' => 39, 'currency' => 'usd', 'live' => false, 'occurred_at' => now()->subDays(40),
         ]);
     }
+
     DB::table('snap_billing_events')->insert([
         'event_key' => 'recent', 'stripe_event_id' => 'recent', 'kind' => $history === 'renewal' ? 'renewal' : 'initial_payment',
         'customer_id' => 'fixture', 'subject' => $subject, 'amount' => 299,

@@ -111,6 +111,7 @@ it('freezes the resolved models when a chat turn is queued', function (): void {
 it('restores model ownership and profiles after a failed delegated run', function (): void {
     config()->set('ai.agent_profiles.'.NutritionSpecialist::class.'.standard', 'gemini-3.6-flash');
     config()->set('ai.agent_profiles.'.NutritionSpecialist::class.'.paid', 'gpt-6.1-sol');
+
     $user = User::factory()->create();
     $other = User::factory()->create();
     $context = resolve(AgentModelContext::class);

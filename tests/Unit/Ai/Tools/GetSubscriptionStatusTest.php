@@ -27,7 +27,7 @@ function subscriptionStatusFor(TierEntitlement $entitlement): array
 
     test()->actingAs(User::factory()->create());
 
-    return json_decode((new GetSubscriptionStatus($tiers))->handle(new Request), true);
+    return json_decode(new GetSubscriptionStatus($tiers)->handle(new Request), true);
 }
 
 beforeEach(function (): void {

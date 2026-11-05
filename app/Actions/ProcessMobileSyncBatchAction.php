@@ -96,26 +96,21 @@ final readonly class ProcessMobileSyncBatchAction
     /** @return array{response: array<string, mixed>, affected_utc_dates: list<string>} */
     private function readReceipt(stdClass $receipt): array
     {
-        if (! is_string($receipt->response) || ! is_string($receipt->affected_utc_dates)) {
-            throw new UnexpectedValueException('Invalid stored sync receipt.');
-        }
+        throw_if(! is_string($receipt->response) || ! is_string($receipt->affected_utc_dates), UnexpectedValueException::class, 'Invalid stored sync receipt.');
 
         $decoded = json_decode($receipt->response, true, 512, JSON_THROW_ON_ERROR);
         $dates = json_decode($receipt->affected_utc_dates, true, 512, JSON_THROW_ON_ERROR);
-        if (! is_array($decoded) || ! is_array($dates) || ! array_is_list($dates)) {
-            throw new UnexpectedValueException('Invalid stored sync receipt.');
-        }
+        throw_if(! is_array($decoded) || ! is_array($dates) || ! array_is_list($dates), UnexpectedValueException::class, 'Invalid stored sync receipt.');
+
         $response = [];
         foreach ($decoded as $key => $value) {
-            if (! is_string($key)) {
-                throw new UnexpectedValueException('Invalid stored sync response.');
-            }
+            throw_unless(is_string($key), UnexpectedValueException::class, 'Invalid stored sync response.');
+
             $response[$key] = $value;
         }
+
         $validDates = array_values(array_filter($dates, is_string(...)));
-        if (count($validDates) !== count($dates)) {
-            throw new UnexpectedValueException('Invalid stored sync dates.');
-        }
+        throw_if(count($validDates) !== count($dates), UnexpectedValueException::class, 'Invalid stored sync dates.');
 
         return ['response' => $response, 'affected_utc_dates' => $validDates];
     }

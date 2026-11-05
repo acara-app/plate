@@ -19,7 +19,7 @@ it('shows the configured scan and shared credit limits when choosing a photo pla
 
     $this->actingAs($user)->get(route('checkout.subscription'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->has('products', 2)
             ->where('products.0.name', $name)
             ->where('products.0.photo_limits.scans_per_hour', 42)

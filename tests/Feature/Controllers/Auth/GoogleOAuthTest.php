@@ -160,7 +160,7 @@ it('links Google to an existing verified account by email and redirects to chat'
         ->and(Auth::id())->toBe($existingUser->id);
 })->group('oauth');
 
-it('keeps a returning Google user\'s email and name unchanged and redirects to chat', function (): void {
+it("keeps a returning Google user's email and name unchanged and redirects to chat", function (): void {
     $existingUser = User::factory()->create([
         'google_id' => 'google789',
         'email' => 'oldmail@example.com',

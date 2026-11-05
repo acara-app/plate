@@ -6,6 +6,7 @@ use Rector\Caching\ValueObject\Storage\FileCacheStorage;
 use Rector\CodingStyle\Rector\ClassMethod\MakeInheritedMethodVisibilitySameAsParentRector;
 use Rector\CodingStyle\Rector\Use_\SeparateMultiUseImportsRector;
 use Rector\Config\RectorConfig;
+use Rector\DeadCode\Rector\ClassMethod\RemoveReturnTagIncompatibleWithNativeTypeRector;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
 use RectorLaravel\Rector\MethodCall\DateWhereClauseToShorthandRector;
 use RectorLaravel\Set\LaravelSetList;
@@ -46,6 +47,9 @@ return RectorConfig::configure()
         AddOverrideAttributeToOverriddenMethodsRector::class,
         SeparateMultiUseImportsRector::class,
         MakeInheritedMethodVisibilitySameAsParentRector::class,
+        RemoveReturnTagIncompatibleWithNativeTypeRector::class => [
+            __DIR__.'/app/Ai/Agents/SpecialistAgent.php',
+        ],
     ])
     ->withPreparedSets(
         deadCode: true,

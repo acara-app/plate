@@ -52,7 +52,7 @@ final class ReportSubscriberUsageCommand extends Command
                 $subscription->created_at?->toDateString() ?? '—',
                 $snapshot['rolling']['current'].' / '.$snapshot['rolling']['limit'],
                 $snapshot['weekly']['current'].' / '.$snapshot['weekly']['limit'],
-                $this->photoScans($user, now()->startOfDay()),
+                $this->photoScans($user, today()),
                 $this->photoScans($user, $since),
             ];
         }

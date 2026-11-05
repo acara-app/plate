@@ -113,13 +113,7 @@ final class ReviewedMealData extends Data
 
     private function hasAny(string $field): bool
     {
-        foreach ($this->items as $item) {
-            if (is_numeric($item[$field] ?? null)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->items, fn (array $item): bool => is_numeric($item[$field] ?? null));
     }
 
     /**

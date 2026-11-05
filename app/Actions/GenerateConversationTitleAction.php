@@ -41,7 +41,7 @@ final readonly class GenerateConversationTitleAction
         try {
             $title = mb_trim(resolve(AgentModelContext::class)->run(
                 $participant instanceof User ? $participant : null, [],
-                fn () => $this->agent->generate($firstMessage, $language, $languageCode),
+                fn (): string => $this->agent->generate($firstMessage, $language, $languageCode),
             ));
         } catch (Throwable) {
             return;

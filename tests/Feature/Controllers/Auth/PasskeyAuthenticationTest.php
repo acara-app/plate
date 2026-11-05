@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use ParagonIE\ConstantTime\Base64UrlSafe;
 use Tests\Fixtures\PasskeyAuthenticator;
 
 it('logs in directly with a verified passkey and respects remember me', function (bool $remember): void {
@@ -37,6 +38,7 @@ it('skips the two-factor challenge because a user-verified passkey is already mu
     ]);
     $authenticator = new PasskeyAuthenticator;
     $authenticator->store($user);
+
     $challenge = $this->getJson(route('passkey.login-options'))
         ->assertOk()
         ->assertJsonPath('options.userVerification', 'required')
@@ -73,8 +75,9 @@ it('rejects invalid passkey assertions', function (string $failure): void {
         userVerified: $failure !== 'user verification',
     );
     if ($failure === 'signature') {
-        $credential['response']['signature'] = ParagonIE\ConstantTime\Base64UrlSafe::encodeUnpadded(random_bytes(64));
+        $credential['response']['signature'] = Base64UrlSafe::encodeUnpadded(random_bytes(64));
     }
+
     if ($failure === 'removed') {
         $passkey->delete();
     }
@@ -92,6 +95,7 @@ it('confirms identity with an owned passkey and rejects replay', function (): vo
     $user = User::factory()->create();
     $authenticator = new PasskeyAuthenticator;
     $authenticator->store($user);
+
     $challenge = $this->actingAs($user)->withSession(['url.intended' => route('passkeys.edit')])
         ->getJson(route('passkey.confirm-options'))->assertOk()->json('options.challenge');
     $credential = $authenticator->assertion($challenge, $user);
@@ -109,6 +113,7 @@ it('rejects confirming identity with another accounts passkey', function (): voi
     $owner = User::factory()->create();
     $authenticator = new PasskeyAuthenticator;
     $authenticator->store($owner);
+
     $challenge = $this->actingAs(User::factory()->create())
         ->getJson(route('passkey.confirm-options'))->assertOk()->json('options.challenge');
 
@@ -133,6 +138,7 @@ it('throttles repeated passkey requests', function (bool $options): void {
     } else {
         $this->postJson(route('passkey.login'), ['credential' => ['id' => 'same-credential']])->assertTooManyRequests();
     }
+
     $this->assertGuest();
 })->with(['session and IP' => true, 'credential and IP' => false]);
 
