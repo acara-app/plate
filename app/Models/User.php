@@ -86,7 +86,9 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
      */
     public function prunable(): Builder
     {
-        return $this->whereNull('email_verified_at')->where('created_at', '<=', now()->subDays(30));
+        return $this->whereNull('email_verified_at')
+            ->whereNull('stripe_id')
+            ->where('created_at', '<=', now()->subDays(30));
     }
 
     /**
@@ -231,6 +233,15 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function hasActiveSubscription(): bool
     {
         return $this->subscriptions()->get()->contains(fn (Subscription $subscription): bool => $subscription->valid()); // @phpstan-ignore-line
+    }
+
+    public function canUseApp(): bool
+    {
+        if ($this->hasVerifiedEmail()) {
+            return true;
+        }
+
+        return $this->hasActiveSubscription();
     }
 
     public function activeSubscription(): ?Subscription

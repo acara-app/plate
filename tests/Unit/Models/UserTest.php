@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\UserChatPlatformLink;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Laravel\Cashier\Subscription;
 
 covers(User::class);
 
@@ -212,6 +213,29 @@ it('prunable filters out recent unverified users', function (): void {
         ->toHaveCount(1)
         ->first()->id->toBe($oldUser->id);
 });
+
+it('prunable never deletes unverified Stripe customers', function (): void {
+    User::factory()->unverified()->create([
+        'stripe_id' => 'cus_paying_customer',
+        'created_at' => now()->subDays(31),
+    ]);
+
+    expect(new User()->prunable()->get())->toBeEmpty();
+});
+
+it('lets verified users and paying subscribers use the app', function (bool $verified, bool $subscribed, bool $canUseApp): void {
+    $factory = $verified ? User::factory() : User::factory()->unverified();
+
+    if ($subscribed) {
+        $factory = $factory->has(Subscription::factory()->active(), 'subscriptions');
+    }
+
+    expect($factory->create()->canUseApp())->toBe($canUseApp);
+})->with([
+    'verified, no subscription' => [true, false, true],
+    'unverified subscriber' => [false, true, true],
+    'unverified, no subscription' => [false, false, false],
+]);
 
 it('has active subscription returns true when subscription is trialing', function (): void {
     $user = User::factory()->create();
