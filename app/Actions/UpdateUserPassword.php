@@ -6,6 +6,7 @@ namespace App\Actions;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use SensitiveParameter;
 
 final readonly class UpdateUserPassword
@@ -14,6 +15,7 @@ final readonly class UpdateUserPassword
     {
         $user->update([
             'password' => Hash::make($password),
+            'remember_token' => Str::random(60),
         ]);
     }
 }

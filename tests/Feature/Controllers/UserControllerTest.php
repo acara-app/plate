@@ -52,6 +52,20 @@ it('may register a new user', function (): void {
     Event::assertDispatched(Registered::class);
 });
 
+it('keeps a newly registered user signed in after their session expires', function (): void {
+    $response = $this->fromRoute('register')
+        ->post(route('register.store'), [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password1234',
+            'accepted_disclaimer' => '1',
+        ]);
+
+    revisitAfterSessionExpires($response)->assertOk();
+
+    $this->assertAuthenticatedAs(User::query()->where('email', 'test@example.com')->sole());
+});
+
 it('requires name', function (): void {
     $response = $this->fromRoute('register')
         ->post(route('register.store'), [
@@ -133,6 +147,28 @@ it('may delete user account', function (): void {
         'user_id' => $user->id,
         'email' => $user->email,
     ]);
+});
+
+it('signs remembered devices out when the account is deleted', function (): void {
+    Storage::fake(MealPhoto::DISK);
+
+    $registration = $this->fromRoute('register')
+        ->post(route('register.store'), [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password1234',
+            'accepted_disclaimer' => '1',
+        ]);
+
+    $this->fromRoute('user-profile.edit')
+        ->delete(route('user.destroy'), [
+            'password' => 'password1234',
+        ])
+        ->assertRedirectToRoute('home');
+
+    revisitAfterSessionExpires($registration)->assertRedirectToRoute('login');
+
+    $this->assertGuest();
 });
 
 it('cannot delete account with active subscription', function (): void {

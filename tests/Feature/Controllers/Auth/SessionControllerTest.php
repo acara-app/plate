@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\SessionController;
 use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 
@@ -41,12 +42,13 @@ it('may create a session', function (): void {
             'password' => 'password',
         ]);
 
-    $response->assertRedirectToRoute('dashboard');
+    $response->assertRedirectToRoute('dashboard')
+        ->assertCookieMissing(Auth::getRecallerName());
 
     $this->assertAuthenticatedAs($user);
 });
 
-it('may create a session with remember me', function (): void {
+it('keeps the user signed in after their session expires when they ask to be remembered', function (): void {
     $user = User::factory()->withoutTwoFactor()->create([
         'email' => 'test@example.com',
         'password' => Hash::make('password'),
@@ -60,6 +62,8 @@ it('may create a session with remember me', function (): void {
         ]);
 
     $response->assertRedirectToRoute('dashboard');
+
+    revisitAfterSessionExpires($response)->assertOk();
 
     $this->assertAuthenticatedAs($user);
 });
@@ -128,6 +132,26 @@ it('may destroy a session', function (): void {
     $response = $this->actingAs($user)
         ->fromRoute('dashboard')
         ->post(route('logout'));
+
+    $this->assertGuest();
+});
+
+it('signs remembered devices out when the user logs out', function (): void {
+    User::factory()->withoutTwoFactor()->create([
+        'email' => 'test@example.com',
+        'password' => Hash::make('password'),
+    ]);
+
+    $signIn = $this->fromRoute('login')
+        ->post(route('login.store'), [
+            'email' => 'test@example.com',
+            'password' => 'password',
+            'remember' => true,
+        ]);
+
+    $this->fromRoute('dashboard')->post(route('logout'));
+
+    revisitAfterSessionExpires($signIn)->assertRedirectToRoute('login');
 
     $this->assertGuest();
 });

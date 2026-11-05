@@ -11,6 +11,7 @@ covers(UpdateUserPassword::class);
 it('may update a user password', function (): void {
     $user = User::factory()->create([
         'password' => Hash::make('old-password'),
+        'remember_token' => 'old-remember-token',
     ]);
 
     $action = resolve(UpdateUserPassword::class);
@@ -18,5 +19,6 @@ it('may update a user password', function (): void {
     $action->handle($user, 'new-password');
 
     expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue()
-        ->and(Hash::check('old-password', $user->password))->toBeFalse();
+        ->and(Hash::check('old-password', $user->password))->toBeFalse()
+        ->and($user->remember_token)->not->toBe('old-remember-token');
 });
