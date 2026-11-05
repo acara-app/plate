@@ -9,6 +9,7 @@ use App\Actions\RestoreAnalysisDraftAction;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\AnalysisDraftResolutionData;
 use App\Data\Billing\PhotoAnalysisContext;
+use App\Enums\AnalysisDraftSource;
 use App\Enums\AnalysisDraftStatus;
 use App\Models\AnalysisDraft;
 use App\Models\User;
@@ -43,7 +44,24 @@ final readonly class ShowSnapToTrackReviewController
             'addedFatOptions' => $this->buildAddedFatOptions->handle($analysis),
             'draftToken' => $draft,
             'source' => $resolution->draft?->source->value,
+            'guestPhotoRequestId' => $this->guestPhotoRequestId($draft, $resolution),
         ]);
+    }
+
+    private function guestPhotoRequestId(string $draft, AnalysisDraftResolutionData $resolution): ?string
+    {
+        if ($resolution->draft?->source !== AnalysisDraftSource::PublicSnapToTrack) {
+            return null;
+        }
+
+        $guestToken = session('snap_to_track.result.draft');
+        $requestId = session('snap_to_track.result.request_id');
+
+        if (! is_string($guestToken) || ! hash_equals($guestToken, $draft) || ! is_string($requestId)) {
+            return null;
+        }
+
+        return $requestId;
     }
 
     private function renderUnavailable(AnalysisDraftResolutionData $resolution): Response
@@ -64,6 +82,7 @@ final readonly class ShowSnapToTrackReviewController
             'addedFatOptions' => [],
             'draftToken' => null,
             'source' => null,
+            'guestPhotoRequestId' => null,
         ]);
     }
 

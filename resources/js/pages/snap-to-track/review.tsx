@@ -23,6 +23,7 @@ import {
     formatLocalDatetime,
     localDatetimeToIso,
 } from '@/lib/format-local-datetime';
+import { recallSnapPhotoFile } from '@/lib/snap-to-track-photo';
 import {
     estimatedFields,
     needsNutritionUpdate,
@@ -92,6 +93,7 @@ interface SnapToTrackReviewProps {
     analysis: Analysis | null;
     addedFatOptions?: Record<number, AddedFatOption[]>;
     draftToken: string | null;
+    guestPhotoRequestId?: string | null;
 }
 
 const numericValue = (value: string): number => {
@@ -118,6 +120,7 @@ export default function SnapToTrackReview({
     addedFatOptions,
     draftToken,
     photoAllowance,
+    guestPhotoRequestId = null,
 }: SnapToTrackReviewProps) {
     const { t } = useTranslation('common');
 
@@ -322,12 +325,17 @@ export default function SnapToTrackReview({
 
                 <Form
                     {...StoreSnapToTrackMealController.form(draftToken)}
-                    transform={(data) => ({
-                        ...data,
-                        measured_at: localDatetimeToIso(
-                            String(data.measured_at ?? ''),
-                        ),
-                    })}
+                    transform={(data) => {
+                        const photo = recallSnapPhotoFile(guestPhotoRequestId);
+
+                        return {
+                            ...data,
+                            measured_at: localDatetimeToIso(
+                                String(data.measured_at ?? ''),
+                            ),
+                            ...(photo ? { photo } : {}),
+                        };
+                    }}
                     disableWhileProcessing
                     className="flex flex-col gap-6"
                 >
