@@ -49,6 +49,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Ai\Contracts\ConversationStore;
@@ -89,6 +90,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->bootVerificationDefaults();
         $this->bootCashierDefaults();
         $this->bootUrlDefaults();
+        $this->bootViteDefaults();
         $this->bootRateLimiters();
         $this->bootRouteBindings();
         $this->configureDates();
@@ -150,6 +152,11 @@ final class AppServiceProvider extends ServiceProvider
         if (app()->isProduction()) {
             URL::forceScheme('https');
         }
+    }
+
+    private function bootViteDefaults(): void
+    {
+        Vite::usePrefetchStrategy(null);
     }
 
     private function configureDates(): void
