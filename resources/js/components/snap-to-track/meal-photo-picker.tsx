@@ -88,7 +88,7 @@ export function MealPhotoPicker({
                         <img
                             src={previewUrl}
                             alt={t('snap_to_track.index.preview_alt')}
-                            className="aspect-4/3 max-h-96 w-full rounded-3xl bg-muted/50 object-contain"
+                            className="h-auto max-h-96 w-auto max-w-full self-center rounded-3xl bg-muted/50 object-contain"
                             onError={() => setPreviewFailed(true)}
                         />
                     )}
