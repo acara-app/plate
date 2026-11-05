@@ -31,7 +31,7 @@ type ChatMessage = { role: string; parts: ChatMessagePart[] };
 export default function Dashboard() {
     const { t } = useTranslation('common');
     const breadcrumbs = getBreadcrumbs(t);
-    const { currentUser } = useSharedProps();
+    const { currentUser, needsBiometricsReview } = useSharedProps();
 
     const form = useForm<{ messages: ChatMessage[] }>({ messages: [] });
 
@@ -61,7 +61,9 @@ export default function Dashboard() {
             <Head title={t('dashboard')} />
             <main className="flex min-h-[calc(100svh-8rem)] flex-1 flex-col overflow-x-hidden bg-background">
                 <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-                    {!currentUser?.is_onboarded && <OnboardingBanner />}
+                    {!currentUser?.is_onboarded && !needsBiometricsReview && (
+                        <OnboardingBanner />
+                    )}
 
                     <section className="flex flex-1 items-center justify-center py-4">
                         <div className="flex w-full max-w-2xl flex-col items-center space-y-6">

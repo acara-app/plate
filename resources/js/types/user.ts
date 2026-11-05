@@ -20,6 +20,8 @@ export interface Profile {
     goal_choice?: string;
     animal_product_choice?: string;
     intensity_choice?: string;
+    needs_re_onboarding?: boolean;
+    onboarding_completed?: boolean;
 }
 
 export interface Goal {

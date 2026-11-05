@@ -241,3 +241,25 @@ it('maps the onboarding choices to a diet type with defaults for missing ones', 
     'nothing chosen' => [['goal_choice' => null, 'animal_product_choice' => null, 'intensity_choice' => null], DietType::Balanced],
     'steady glucose, aggressive' => [['goal_choice' => GoalChoice::Spikes, 'animal_product_choice' => AnimalProductChoice::Omnivore, 'intensity_choice' => IntensityChoice::Aggressive], DietType::LowCarb],
 ]);
+
+it('uses the date of birth for the current age and falls back to the stored age', function (): void {
+    $fromDateOfBirth = UserProfile::factory()->create(['age' => 25, 'date_of_birth' => now()->subYears(30)->subDay()]);
+    $fromStoredAge = UserProfile::factory()->create(['age' => 25, 'date_of_birth' => null]);
+    $withoutAge = UserProfile::factory()->create(['age' => null, 'date_of_birth' => null]);
+
+    expect($fromDateOfBirth->refresh()->currentAge())->toBe(30)
+        ->and($fromStoredAge->refresh()->currentAge())->toBe(25)
+        ->and($withoutAge->refresh()->currentAge())->toBeNull();
+});
+
+it('knows when the stored weight only makes sense as pounds', function (?float $weight, ?float $height, bool $looksLikePounds): void {
+    $profile = UserProfile::factory()->create(['weight' => $weight, 'height' => $height]);
+
+    expect($profile->refresh()->weightLooksLikePounds())->toBe($looksLikePounds);
+})->with([
+    'pounds typed as kilograms' => [193.0, 175.0, true],
+    'typical adult' => [70.0, 175.0, false],
+    'height typed in inches' => [80.0, 70.0, false],
+    'missing weight' => [null, 175.0, false],
+    'missing height' => [193.0, null, false],
+]);
