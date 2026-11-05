@@ -17,6 +17,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Laravel\Ai\Prompts\AgentPrompt;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
@@ -143,6 +144,30 @@ it('asks for a JPG or PNG when an uploaded photo format cannot be analyzed', fun
     'HEIC' => ['meal.heic', 'image/heic'],
     'HEIF' => ['meal.heif', 'image/heif'],
 ]);
+
+it('shows a helpful HEIC error from the real temporary upload endpoint', function (): void {
+    fakeTurnstileForSnapToTrack();
+    Storage::fake(FileUploadConfiguration::disk());
+
+    $component = Livewire::test('pages::snap-to-track')
+        ->set('turnstileToken', Turnstile::dummy())
+        ->call('_startUpload', 'photo', [['name' => 'meal.heic', 'size' => filesize(base_path('tests/Fixtures/meal.heic')), 'type' => 'image/heic']], false);
+
+    $response = $this->post(URL::temporarySignedRoute('livewire.upload-file', now()->addMinutes(5)), [
+        'files' => [new UploadedFile(base_path('tests/Fixtures/meal.heic'), 'meal.heic', 'image/heic', test: true)],
+    ], ['Accept' => 'application/json']);
+
+    $response->assertUnprocessable()
+        ->assertInvalid(['files.0' => 'We can’t read this photo format. Please use a JPG or PNG photo.']);
+
+    $component->call('_uploadErrored', 'photo', $response->getContent(), false)
+        ->assertSet('photo', null)
+        ->assertHasErrors('photo')
+        ->assertSee('We can’t read this photo format. Please use a JPG or PNG photo.')
+        ->assertDontSee('The photo field must be a file of type:');
+
+    expect(FileUploadConfiguration::storage()->allFiles())->toBeEmpty();
+});
 
 it('asks for a JPG or PNG when a photo labelled as JPG is not really an image', function (): void {
     fakeTurnstileForSnapToTrack();
