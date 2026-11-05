@@ -28,19 +28,36 @@ it('renders biometrics page', function (): void {
         ->assertInertia(fn ($page) => $page
             ->component('onboarding/biometrics')
             ->has('profile')
+            ->where('currentAge', null)
             ->has('sexOptions')
             ->has('bloodTypeOptions'));
 });
 
-it('may store biometrics data with date_of_birth and blood_type', function (): void {
+it('pre-fills the age from a stored date of birth', function (): void {
     Date::setTestNow('2026-04-04 12:00:00');
 
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'age' => 25,
+        'date_of_birth' => '1996-04-04',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('onboarding.biometrics.show'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('onboarding/biometrics')
+            ->where('currentAge', 30));
+
+    Date::setTestNow();
+});
+
+it('may store biometrics data with blood_type', function (): void {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
         ->post(route('onboarding.biometrics.store'), [
             'age' => 30,
-            'date_of_birth' => '1996-04-04',
             'height' => 175,
             'weight' => 70,
             'sex' => Sex::Male->value,
@@ -52,14 +69,11 @@ it('may store biometrics data with date_of_birth and blood_type', function (): v
     $profile = $user->profile()->first();
 
     expect($profile)->not->toBeNull()
-        ->date_of_birth->format('Y-m-d')->toBe('1996-04-04')
         ->age->toBe(30)
         ->height->toBe(175.0)
         ->weight->toBe(70.0)
         ->sex->toBe(Sex::Male)
         ->blood_type->toBe(BloodType::APositive);
-
-    Date::setTestNow();
 });
 
 it('may store biometrics without date_of_birth and blood_type', function (): void {
@@ -148,36 +162,56 @@ it('requires age to be at most 120', function (): void {
     $response->assertSessionHasErrors('age');
 });
 
-it('rejects future date_of_birth', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->post(route('onboarding.biometrics.store'), [
-            'age' => 30,
-            'date_of_birth' => now()->addDay()->format('Y-m-d'),
-            'height' => 175,
-            'weight' => 70,
-            'sex' => Sex::Male->value,
-        ]);
-
-    $response->assertSessionHasErrors('date_of_birth');
-});
-
-it('overrides age from date_of_birth when both provided', function (): void {
+it('keeps a stored date of birth when the entered age still matches it', function (): void {
     Date::setTestNow('2026-04-04 12:00:00');
 
     $user = User::factory()->create();
+    $user->profile()->create([
+        'age' => 30,
+        'date_of_birth' => '1996-04-04',
+    ]);
 
     $this->actingAs($user)
         ->post(route('onboarding.biometrics.store'), [
-            'age' => 99,
-            'date_of_birth' => '1996-04-04',
+            'age' => 30,
             'height' => 175,
             'weight' => 70,
             'sex' => Sex::Male->value,
-        ]);
+        ])
+        ->assertSessionHasNoErrors();
 
-    expect($user->profile()->first()->age)->toBe(30);
+    expect($user->profile()->first())
+        ->age->toBe(30)
+        ->date_of_birth->format('Y-m-d')->toBe('1996-04-04');
+
+    Date::setTestNow();
+});
+
+it('uses the entered age instead of a stored date of birth that contradicts it', function (): void {
+    Date::setTestNow('2026-04-04 12:00:00');
+
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'age' => 30,
+        'date_of_birth' => '1996-04-04',
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'age' => 31,
+            'height' => 175,
+            'weight' => 70,
+            'sex' => Sex::Male->value,
+        ])
+        ->assertSessionHasNoErrors();
+
+    $profile = $user->profile()->first();
+
+    expect($profile)
+        ->age->toBe(31)
+        ->date_of_birth->toBeNull()
+        ->and($profile->currentAge())->toBe(31)
+        ->and($profile->bmr)->toBe(1643.75);
 
     Date::setTestNow();
 });

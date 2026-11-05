@@ -241,3 +241,13 @@ it('maps the onboarding choices to a diet type with defaults for missing ones', 
     'nothing chosen' => [['goal_choice' => null, 'animal_product_choice' => null, 'intensity_choice' => null], DietType::Balanced],
     'steady glucose, aggressive' => [['goal_choice' => GoalChoice::Spikes, 'animal_product_choice' => AnimalProductChoice::Omnivore, 'intensity_choice' => IntensityChoice::Aggressive], DietType::LowCarb],
 ]);
+
+it('uses the date of birth for the current age and falls back to the stored age', function (): void {
+    $fromDateOfBirth = UserProfile::factory()->create(['age' => 25, 'date_of_birth' => now()->subYears(30)->subDay()]);
+    $fromStoredAge = UserProfile::factory()->create(['age' => 25, 'date_of_birth' => null]);
+    $withoutAge = UserProfile::factory()->create(['age' => null, 'date_of_birth' => null]);
+
+    expect($fromDateOfBirth->refresh()->currentAge())->toBe(30)
+        ->and($fromStoredAge->refresh()->currentAge())->toBe(25)
+        ->and($withoutAge->refresh()->currentAge())->toBeNull();
+});

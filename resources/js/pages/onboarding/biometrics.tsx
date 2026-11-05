@@ -30,26 +30,6 @@ import { BloodTypeOption, Profile, SexOption } from '@/types/user';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-function calculateAge(dateOfBirth: string): number | null {
-    const birth = new Date(dateOfBirth);
-    if (isNaN(birth.getTime())) {
-        return null;
-    }
-
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-
-    if (
-        monthDiff < 0 ||
-        (monthDiff === 0 && today.getDate() < birth.getDate())
-    ) {
-        age--;
-    }
-
-    return age;
-}
-
 interface Measurements {
     weight: string;
     heightCm: string;
@@ -97,12 +77,14 @@ function isValidMeasurement(
 
 interface Props {
     profile: Profile | null;
+    currentAge: number | null;
     sexOptions: SexOption[];
     bloodTypeOptions: BloodTypeOption[];
 }
 
 export default function Biometrics({
     profile,
+    currentAge,
     sexOptions,
     bloodTypeOptions,
 }: Props) {
@@ -111,10 +93,7 @@ export default function Biometrics({
     const needsReview = profile?.needs_re_onboarding === true;
     const isCompletedReview =
         needsReview && profile.onboarding_completed === true;
-    const [dateOfBirth, setDateOfBirth] = useState(
-        profile?.date_of_birth ?? '',
-    );
-    const [age, setAge] = useState<string>(profile?.age?.toString() ?? '');
+    const [age, setAge] = useState<string>(currentAge?.toString() ?? '');
     const [bloodType, setBloodType] = useState<string>(
         profile?.blood_type ?? '',
     );
@@ -127,14 +106,6 @@ export default function Biometrics({
     );
     const confirmMeasurementsRef = useRef(false);
     const isImperial = measurementSystem === 'imperial';
-
-    const handleDateOfBirthChange = (value: string) => {
-        setDateOfBirth(value);
-        const computed = calculateAge(value);
-        if (computed !== null && computed >= 0) {
-            setAge(computed.toString());
-        }
-    };
 
     const heightInFeetAndInches = (heightCm: string) => {
         const { feet, inches } = centimetersToFeetAndInches(heightCm);
@@ -449,53 +420,39 @@ export default function Biometrics({
                                             <Label htmlFor="age">
                                                 {t('onboarding.biometrics.age')}
                                             </Label>
-                                            <Input
-                                                id="age"
-                                                type="number"
-                                                name="age"
-                                                value={age}
-                                                onChange={(e) =>
-                                                    setAge(e.target.value)
-                                                }
-                                                min="13"
-                                                max="120"
-                                                required
-                                                placeholder={t(
-                                                    'onboarding.biometrics.age_placeholder',
-                                                )}
-                                            />
+                                            <div className="relative">
+                                                <Input
+                                                    id="age"
+                                                    type="number"
+                                                    name="age"
+                                                    inputMode="numeric"
+                                                    value={age}
+                                                    onChange={(e) =>
+                                                        setAge(e.target.value)
+                                                    }
+                                                    step="1"
+                                                    min="13"
+                                                    max="120"
+                                                    required
+                                                    aria-describedby="age_help"
+                                                    placeholder={t(
+                                                        'onboarding.biometrics.age_placeholder',
+                                                    )}
+                                                    className="pr-16"
+                                                />
+                                                <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-muted-foreground">
+                                                    {t(
+                                                        'onboarding.biometrics.unit_years',
+                                                    )}
+                                                </span>
+                                            </div>
                                             <InputError message={errors.age} />
-                                        </div>
-
-                                        {/* Date of Birth (optional) */}
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="date_of_birth">
+                                            <p
+                                                id="age_help"
+                                                className="text-xs text-gray-500 dark:text-gray-400"
+                                            >
                                                 {t(
-                                                    'onboarding.biometrics.date_of_birth',
-                                                )}
-                                            </Label>
-                                            <Input
-                                                id="date_of_birth"
-                                                type="date"
-                                                name="date_of_birth"
-                                                value={dateOfBirth}
-                                                onChange={(e) =>
-                                                    handleDateOfBirthChange(
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                max={
-                                                    new Date()
-                                                        .toISOString()
-                                                        .split('T')[0]
-                                                }
-                                            />
-                                            <InputError
-                                                message={errors.date_of_birth}
-                                            />
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                {t(
-                                                    'onboarding.biometrics.date_of_birth_help',
+                                                    'onboarding.biometrics.age_help',
                                                 )}
                                             </p>
                                         </div>

@@ -104,6 +104,11 @@ final class UserProfile extends Model
         );
     }
 
+    public function currentAge(): ?int
+    {
+        return $this->date_of_birth instanceof CarbonInterface ? (int) $this->date_of_birth->age : $this->age;
+    }
+
     /**
      * @return BelongsTo<User, $this>
      */
@@ -167,7 +172,7 @@ final class UserProfile extends Model
     protected function bmr(): Attribute
     {
         return Attribute::get(function (): ?float {
-            $age = $this->date_of_birth instanceof CarbonInterface ? (int) $this->date_of_birth->age : $this->age;
+            $age = $this->currentAge();
 
             if (! $this->weight || ! $this->height || ! $age || ! $this->sex) {
                 return null;

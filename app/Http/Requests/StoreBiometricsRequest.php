@@ -24,7 +24,6 @@ final class StoreBiometricsRequest extends FormRequest
         return [
             'measurement_system' => ['nullable', Rule::enum(MeasurementSystem::class)],
             'age' => ['required', 'integer', 'min:13', 'max:120'],
-            'date_of_birth' => ['nullable', 'date', 'before:today', 'after:1900-01-01'],
             ...$this->measurementRules(),
             'sex' => ['required', Rule::enum(Sex::class)],
             'blood_type' => ['nullable', Rule::enum(BloodType::class)],
@@ -43,8 +42,6 @@ final class StoreBiometricsRequest extends FormRequest
             'age.required' => 'Please provide your age.',
             'age.min' => 'You must be at least 13 years old to use this service.',
             'age.max' => 'Please enter a valid age.',
-            'date_of_birth.before' => 'Date of birth must be in the past.',
-            'date_of_birth.after' => 'Please enter a valid date of birth.',
             'height.required' => 'Please provide your height.',
             'height.min' => 'Please enter a valid height in centimeters.',
             'height.max' => 'Please enter a valid height in centimeters.',
@@ -122,7 +119,8 @@ final class StoreBiometricsRequest extends FormRequest
     {
         /** @var array<string, mixed> $attributes */
         $attributes = [
-            ...$this->safe()->only(['age', 'date_of_birth', 'sex', 'blood_type']),
+            ...$this->safe()->only(['sex', 'blood_type']),
+            'age' => $this->integer('age'),
             ...$this->metricMeasurements(),
         ];
 
