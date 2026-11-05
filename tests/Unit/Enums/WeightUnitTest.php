@@ -15,3 +15,19 @@ it('converts lb to kg', function (): void {
 
     expect($result)->toBe(45.359237);
 });
+
+it('converts kilograms back to the unit', function (): void {
+    expect(WeightUnit::Kg->fromKg(90.0))->toBe(90.0)
+        ->and(WeightUnit::Lb->fromKg(45.359237))->toEqualWithDelta(100.0, 0.000001);
+});
+
+it('reads common spellings of weight units', function (mixed $input, ?WeightUnit $unit): void {
+    expect(WeightUnit::fromInput($input))->toBe($unit);
+})->with([
+    'kg' => ['kg', WeightUnit::Kg],
+    'kilograms' => [' Kilograms ', WeightUnit::Kg],
+    'lbs' => ['lbs', WeightUnit::Lb],
+    'pounds' => ['Pounds', WeightUnit::Lb],
+    'stone' => ['stone', null],
+    'not a string' => [12, null],
+]);
