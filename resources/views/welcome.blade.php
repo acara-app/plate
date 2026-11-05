@@ -119,15 +119,15 @@
                     </p>
                     <div class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap lg:justify-start">
                         <div class="flex flex-col items-stretch gap-3">
-                            <a href="{{ route(auth()->check() ? 'snap-to-track.index' : 'snap-to-track') }}"
-                               data-umami-event="snap_to_track_cta_click"
+                            <a href="{{ route($canUseApp ? 'snap-to-track.index' : 'snap-to-track') }}"
+                               data-umami-event="{{ $canUseApp ? 'snap_to_track_app_cta_click' : 'snap_to_track_cta_click' }}"
                                data-umami-event-location="home_hero"
                                class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#C94F35] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#FF6B4A]/15 transition hover:bg-[#AF402A] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C94F35] sm:text-base">
                                 <svg class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
                                     <circle cx="12" cy="12" r="4" />
                                 </svg>
-                                {{ auth()->check() ? 'Snap to Track' : 'Try Snap to Track' }}
+                                {{ $canUseApp ? 'Snap to Track' : 'Try Snap to Track' }}
                             </a>
                         </div>
                         <a href="{{ route(auth()->check() ? 'health-entries.index' : 'register') }}"
@@ -353,7 +353,7 @@
                             <p class="mt-2 text-sm text-slate-600">
                                 Estimate calories and macros from a photo, review the result, and save your meal to Logbook.
                             </p>
-                            <a href="{{ route('snap-to-track') }}"
+                            <a href="{{ route($canUseApp ? 'snap-to-track.index' : 'snap-to-track') }}"
                                class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700"
                                aria-label="Scan a meal (Snap to Track)">
                                 Scan a meal
