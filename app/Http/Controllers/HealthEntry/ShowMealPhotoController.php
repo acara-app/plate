@@ -20,9 +20,9 @@ final readonly class ShowMealPhotoController
             ->latest('id')
             ->firstOrFail();
 
-        abort_unless(Storage::disk($photo->disk)->exists($photo->path), 404);
+        abort_unless(Storage::disk('s3')->exists($photo->path), 404);
 
-        return Storage::disk($photo->disk)->response($photo->path, null, [
+        return Storage::disk('s3')->response($photo->path, null, [
             'Content-Type' => 'image/jpeg',
             'Cache-Control' => 'private, max-age=3600',
         ]);

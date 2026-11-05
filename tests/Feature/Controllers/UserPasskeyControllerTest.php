@@ -141,7 +141,7 @@ it('offers passkey confirmation only to accounts with an enrolled passkey', func
 it('deletes passkeys when the account is deleted', function (): void {
     $user = User::factory()->create();
     $passkey = (new PasskeyAuthenticator)->store($user);
-    Illuminate\Support\Facades\Storage::fake(App\Models\MealPhoto::DISK);
+    Illuminate\Support\Facades\Storage::fake('s3');
 
     app(App\Actions\DeleteUser::class)->handle($user);
 

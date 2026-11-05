@@ -20,7 +20,6 @@ final class MealPhotoFactory extends Factory
             'user_id' => User::factory(),
             'analysis_draft_id' => null,
             'health_group_id' => null,
-            'disk' => MealPhoto::DISK,
             'path' => MealPhoto::DIRECTORY.'/'.Str::uuid().'.jpg',
         ];
     }

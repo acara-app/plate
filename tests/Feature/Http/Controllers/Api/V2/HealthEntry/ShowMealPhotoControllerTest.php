@@ -12,11 +12,11 @@ use Laravel\Sanctum\Sanctum;
 covers(ShowMealPhotoController::class);
 
 beforeEach(function (): void {
-    Storage::fake(MealPhoto::DISK);
+    Storage::fake('s3');
     $this->user = User::factory()->create();
     $this->groupId = (string) Str::uuid();
     $this->photo = MealPhoto::factory()->create(['user_id' => $this->user->id, 'health_group_id' => $this->groupId]);
-    Storage::disk(MealPhoto::DISK)->put($this->photo->path, 'jpeg-bytes');
+    Storage::disk('s3')->put($this->photo->path, 'jpeg-bytes');
 });
 
 it('requires a bearer token', function (): void {
@@ -41,7 +41,7 @@ it('hides the photo from other people', function (): void {
 });
 
 it('returns not found when the photo file is gone', function (): void {
-    Storage::disk(MealPhoto::DISK)->delete($this->photo->path);
+    Storage::disk('s3')->delete($this->photo->path);
     Sanctum::actingAs($this->user, ['chat:converse']);
 
     $this->getJson(route('api.v2.health-entries.photo', ['group' => $this->groupId]))->assertNotFound();

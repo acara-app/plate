@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\UserController;
-use App\Models\MealPhoto;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\DB;
@@ -126,7 +125,7 @@ it('requires password', function (): void {
 });
 
 it('may delete user account', function (): void {
-    Storage::fake(MealPhoto::DISK);
+    Storage::fake('s3');
     $user = User::factory()->create([
         'password' => Hash::make('password'),
     ]);
@@ -150,7 +149,7 @@ it('may delete user account', function (): void {
 });
 
 it('signs remembered devices out when the account is deleted', function (): void {
-    Storage::fake(MealPhoto::DISK);
+    Storage::fake('s3');
 
     $registration = $this->fromRoute('register')
         ->post(route('register.store'), [

@@ -62,13 +62,13 @@ function storedMealPhoto(User $user, ?string $groupId = null, ?string $createdAt
         $photo->forceFill(['created_at' => $createdAt])->save();
     }
 
-    Storage::disk(MealPhoto::DISK)->put($photo->path, 'jpeg-bytes');
+    Storage::disk('s3')->put($photo->path, 'jpeg-bytes');
 
     return $photo;
 }
 
 beforeEach(function (): void {
-    Storage::fake(MealPhoto::DISK);
+    Storage::fake('s3');
     $this->user = User::factory()->create(['stripe_id' => null]);
     RateLimiter::clear('snap-to-track-analyze:'.$this->user->id);
 });
@@ -82,7 +82,7 @@ it('keeps a signed-in scan photo privately with the saved meal and only its owne
 
     $photo = MealPhoto::query()->sole();
     $draft = AnalysisDraft::query()->sole();
-    $stored = (string) Storage::disk(MealPhoto::DISK)->get($photo->path);
+    $stored = (string) Storage::disk('s3')->get($photo->path);
     $size = getimagesizefromstring($stored);
 
     expect($photo->user_id)->toBe($this->user->id)
@@ -113,7 +113,7 @@ it('keeps a signed-in scan photo privately with the saved meal and only its owne
         ->assertRedirect();
 
     expect(MealPhoto::query()->count())->toBe(0);
-    Storage::disk(MealPhoto::DISK)->assertMissing($photo->path);
+    Storage::disk('s3')->assertMissing($photo->path);
 });
 
 it('keeps no photo when the scan is blocked by the credit limit', function (): void {
@@ -134,7 +134,7 @@ it('keeps no photo when the scan is blocked by the credit limit', function (): v
     ])->assertRedirectToRoute('snap-to-track.index');
 
     expect(MealPhoto::query()->count())->toBe(0)
-        ->and(Storage::disk(MealPhoto::DISK)->allFiles())->toBe([]);
+        ->and(Storage::disk('s3')->allFiles())->toBe([]);
 });
 
 it('stores other image formats as a plain jpeg and rejects unreadable data', function (): void {
@@ -144,7 +144,7 @@ it('stores other image formats as a plain jpeg and rejects unreadable data', fun
 
     $photo = $action->handle($this->user, (string) UploadedFile::fake()->image('meal.png', 300, 200)->get(), $token);
 
-    expect(getimagesizefromstring((string) Storage::disk(MealPhoto::DISK)->get($photo->path))['mime'])->toBe('image/jpeg')
+    expect(getimagesizefromstring((string) Storage::disk('s3')->get($photo->path))['mime'])->toBe('image/jpeg')
         ->and(fn () => $action->handle($this->user, 'not an image', $token))->toThrow(RuntimeException::class);
 });
 
@@ -161,7 +161,7 @@ it('removes the photo when an edit turns the meal into a single entry', function
     ])->assertSessionHasNoErrors();
 
     expect(MealPhoto::query()->count())->toBe(0);
-    Storage::disk(MealPhoto::DISK)->assertMissing($photo->path);
+    Storage::disk('s3')->assertMissing($photo->path);
 });
 
 it('deletes every meal photo with the account', function (): void {
@@ -169,7 +169,7 @@ it('deletes every meal photo with the account', function (): void {
 
     resolve(DeleteUser::class)->handle($this->user);
 
-    Storage::disk(MealPhoto::DISK)->assertMissing($photo->path);
+    Storage::disk('s3')->assertMissing($photo->path);
     expect(MealPhoto::query()->count())->toBe(0);
 });
 
@@ -180,7 +180,7 @@ it('prunes photos of meals that were never saved after a day', function (): void
 
     $this->artisan('model:prune', ['--model' => [MealPhoto::class]])->assertSuccessful();
 
-    Storage::disk(MealPhoto::DISK)->assertMissing($abandoned->path);
-    Storage::disk(MealPhoto::DISK)->assertExists([$recent->path, $saved->path]);
+    Storage::disk('s3')->assertMissing($abandoned->path);
+    Storage::disk('s3')->assertExists([$recent->path, $saved->path]);
     expect(MealPhoto::query()->pluck('id')->all())->toEqualCanonicalizing([$recent->id, $saved->id]);
 });

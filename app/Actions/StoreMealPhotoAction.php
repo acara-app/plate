@@ -23,7 +23,7 @@ final readonly class StoreMealPhotoAction
         $path = MealPhoto::directoryFor($user).'/'.Str::uuid().'.jpg';
 
         throw_unless(
-            Storage::disk(MealPhoto::DISK)->put($path, $this->normalizedJpeg($imageBytes)),
+            Storage::disk('s3')->put($path, $this->normalizedJpeg($imageBytes)),
             RuntimeException::class,
             'Could not store the meal photo.',
         );
@@ -31,7 +31,6 @@ final readonly class StoreMealPhotoAction
         return MealPhoto::query()->create([
             'user_id' => $user->id,
             'analysis_draft_id' => AnalysisDraft::query()->where('token_hash', AnalysisDraft::hashToken($draftToken))->value('id'),
-            'disk' => MealPhoto::DISK,
             'path' => $path,
         ]);
     }

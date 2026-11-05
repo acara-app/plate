@@ -16,7 +16,7 @@ final readonly class DeleteUser
 {
     public function handle(User $user): void
     {
-        Storage::disk(MealPhoto::DISK)->deleteDirectory(MealPhoto::directoryFor($user));
+        Storage::disk('s3')->deleteDirectory(MealPhoto::directoryFor($user));
 
         DB::transaction(function () use ($user): void {
             DeletedUser::query()->create([

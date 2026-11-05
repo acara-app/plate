@@ -221,7 +221,7 @@ it('clears the photo and reloads verification for the next upload', function ():
 });
 
 it('sends a guest to the result page with their analysis kept in a guest draft', function (): void {
-    Storage::fake(MealPhoto::DISK);
+    Storage::fake('s3');
 
     $component = analyzePhotoForSnapToTrack([
         'items' => [
@@ -245,7 +245,7 @@ it('sends a guest to the result page with their analysis kept in a guest draft',
         ->and(AnalysisDraft::hashToken(session('snap_to_track.result.draft')))->toBe($draft->token_hash)
         ->and(session('snap_to_track.result.request_id'))->toBe($component->instance()->analysisRequestId)
         ->and(MealPhoto::query()->count())->toBe(0)
-        ->and(Storage::disk(MealPhoto::DISK)->allFiles())->toBe([]);
+        ->and(Storage::disk('s3')->allFiles())->toBe([]);
 });
 
 it('keeps every detected item in the guest draft', function (): void {
@@ -281,7 +281,7 @@ it('sends a signed-in member straight to the claimed draft review', function ():
 });
 
 it('keeps a signed-in member photo with the meal they log from the public tool', function (): void {
-    Storage::fake(MealPhoto::DISK);
+    Storage::fake('s3');
     $user = User::factory()->create();
     $this->actingAs($user);
 
@@ -292,7 +292,7 @@ it('keeps a signed-in member photo with the meal they log from the public tool',
 
     expect($photo->user_id)->toBe($user->id)
         ->and($photo->analysis_draft_id)->toBe($draft->id);
-    Storage::disk(MealPhoto::DISK)->assertExists($photo->path);
+    Storage::disk('s3')->assertExists($photo->path);
 
     $token = Str::afterLast($component->effects['redirect'], '/review/');
     $this->post(route('snap-to-track.review.store', ['draft' => $token]), [
