@@ -16,7 +16,11 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Laravel\Ai\Prompts\AgentPrompt;
+use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -51,6 +55,17 @@ function analyzePhotoForSnapToTrack(array $analysis, string $fileName = 'food.jp
         ->set('photo', UploadedFile::fake()->image($fileName))
         ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
         ->call('analyze');
+}
+
+function finishDirectUploadForSnapToTrack(Testable $component, UploadedFile $photo): string
+{
+    Storage::fake(FileUploadConfiguration::disk());
+
+    $path = (string) FileUploadConfiguration::storeTemporaryFile($photo, FileUploadConfiguration::disk());
+
+    $component->call('_finishUpload', 'photo', [TemporaryUploadedFile::signPath(basename($path))], false);
+
+    return $path;
 }
 
 beforeEach(function (): void {
@@ -90,6 +105,87 @@ it('validates photo max size', function (): void {
         ->set('turnstileToken', Turnstile::dummy())
         ->call('analyze')
         ->assertHasErrors(['photo']);
+});
+
+it('previews and analyzes JPG, PNG and WebP photos', function (string $fileName, string $mimeType): void {
+    fakeTurnstileForSnapToTrack();
+    FoodPhotoAnalyzerAgent::fake([saveMealAnalysisFixture()]);
+
+    Livewire::test('pages::snap-to-track')
+        ->set('photo', UploadedFile::fake()->image($fileName))
+        ->assertHasNoErrors('photo')
+        ->assertSee('Food photo preview')
+        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
+        ->call('analyze')
+        ->assertRedirect(route('snap-to-track.result'));
+
+    FoodPhotoAnalyzerAgent::assertPrompted(fn (AgentPrompt $prompt): bool => $prompt->attachments->sole()->mimeType() === $mimeType);
+})->with([
+    'JPG' => ['meal.jpg', 'image/jpeg'],
+    'PNG' => ['meal.png', 'image/png'],
+    'WebP' => ['meal.webp', 'image/webp'],
+]);
+
+it('asks for a JPG or PNG when an uploaded photo format cannot be analyzed', function (string $fileName, string $mimeType): void {
+    $component = Livewire::test('pages::snap-to-track');
+
+    $path = finishDirectUploadForSnapToTrack($component, UploadedFile::fake()->create($fileName, 120, $mimeType));
+
+    $component
+        ->assertOk()
+        ->assertSet('photo', null)
+        ->assertHasErrors(['photo' => 'mimes'])
+        ->assertSee('We can’t read this photo format. Please use a JPG or PNG photo.')
+        ->assertSee('Tap to take photo or upload');
+
+    expect(FileUploadConfiguration::storage()->exists($path))->toBeFalse();
+})->with([
+    'AVIF' => ['meal.avif', 'image/avif'],
+    'HEIC' => ['meal.heic', 'image/heic'],
+    'HEIF' => ['meal.heif', 'image/heif'],
+]);
+
+it('shows a helpful HEIC error from the real temporary upload endpoint', function (): void {
+    fakeTurnstileForSnapToTrack();
+    Storage::fake(FileUploadConfiguration::disk());
+
+    $component = Livewire::test('pages::snap-to-track')
+        ->set('turnstileToken', Turnstile::dummy())
+        ->call('_startUpload', 'photo', [['name' => 'meal.heic', 'size' => filesize(base_path('tests/Fixtures/meal.heic')), 'type' => 'image/heic']], false);
+
+    $response = $this->post(URL::temporarySignedRoute('livewire.upload-file', now()->addMinutes(5)), [
+        'files' => [new UploadedFile(base_path('tests/Fixtures/meal.heic'), 'meal.heic', 'image/heic', test: true)],
+    ], ['Accept' => 'application/json']);
+
+    $response->assertUnprocessable()
+        ->assertInvalid(['files.0' => 'We can’t read this photo format. Please use a JPG or PNG photo.']);
+
+    $component->call('_uploadErrored', 'photo', $response->getContent(), false)
+        ->assertSet('photo', null)
+        ->assertHasErrors('photo')
+        ->assertSee('We can’t read this photo format. Please use a JPG or PNG photo.')
+        ->assertDontSee('The photo field must be a file of type:');
+
+    expect(FileUploadConfiguration::storage()->allFiles())->toBeEmpty();
+});
+
+it('asks for a JPG or PNG when a photo labelled as JPG is not really an image', function (): void {
+    fakeTurnstileForSnapToTrack();
+    FoodPhotoAnalyzerAgent::fake([saveMealAnalysisFixture()]);
+
+    $component = Livewire::test('pages::snap-to-track');
+
+    finishDirectUploadForSnapToTrack($component, UploadedFile::fake()->createWithContent('meal.jpg', 'not a photo'));
+
+    $component
+        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
+        ->call('analyze')
+        ->assertHasErrors(['photo'])
+        ->assertSet('photo', null)
+        ->assertSee('We can’t read this photo format. Please use a JPG or PNG photo.')
+        ->assertNoRedirect();
+
+    FoodPhotoAnalyzerAgent::assertNeverPrompted();
 });
 
 it('shows analyze button after photo is uploaded', function (): void {
@@ -296,7 +392,9 @@ it('blocks temporary upload URL generation once the upload limit is exhausted', 
 
 it('configures Livewire temporary uploads for photo-only hourly throttling', function (): void {
     expect(config('livewire.temporary_file_upload.rules'))
-        ->toBe(['required', 'image', 'max:10240'])
+        ->toBe(['required', 'mimes:jpg,jpeg,png,webp', 'max:10240'])
+        ->and(config('livewire.temporary_file_upload.preview_mimes'))
+        ->toContain('jpg', 'jpeg', 'png', 'webp')
         ->and(config('livewire.temporary_file_upload.middleware'))
         ->toBe('throttle:5,60');
 });

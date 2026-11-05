@@ -5,6 +5,7 @@ import {
 import {
     forgetSnapPhoto,
     keepSnapPhoto,
+    prepareSnapPhoto,
     recallSnapPhoto,
     tagSnapPhoto,
 } from './lib/snap-to-track-photo';
@@ -40,6 +41,7 @@ window.acaraTrackOnce = (eventName, properties, key) => {
 };
 
 window.acaraKeepSnapPhoto = keepSnapPhoto;
+window.acaraPrepareSnapPhoto = prepareSnapPhoto;
 window.acaraTagSnapPhoto = tagSnapPhoto;
 window.acaraRecallSnapPhoto = recallSnapPhoto;
 window.acaraForgetSnapPhoto = forgetSnapPhoto;

@@ -159,6 +159,9 @@ return [
     'uuid' => 'The :attribute field must be a valid UUID.',
 
     'custom' => [
+        'files.*' => [
+            'mimes' => 'We can’t read this photo format. Please use a JPG or PNG photo.',
+        ],
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
