@@ -76,25 +76,6 @@ jobs:
       - name: Run Lint
         run: bun run test:lint
 
-      - name: Get Playwright version
-        id: playwright-version
-        run: echo "version=$(bun pm ls 2>/dev/null | grep playwright | head -1 | sed 's/.*@//')" >> $GITHUB_OUTPUT
-
-      - name: Cache Playwright Browsers
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
-
-      - name: Install Playwright Browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: bunx playwright install --with-deps
-
-      - name: Install Playwright System Dependencies
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps
-
       - name: Cache Rector
         uses: actions/cache@v4
         with:
@@ -111,10 +92,3 @@ jobs:
 
       - name: Tests
         run: composer test
-
-      - name: Store Artifacts
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: browser-screenshots
-          path: tests/Browser/Screenshots

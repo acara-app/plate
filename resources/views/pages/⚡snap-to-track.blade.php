@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\CreateAnalysisDraftAction;
 use App\Actions\PrepareSnapToTrackUpgrade;
+use App\Actions\StoreMealPhotoAction;
 use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Contracts\Billing\TracksPhotoConversion;
 use App\Data\Billing\PhotoAnalysisContext;
@@ -105,7 +106,7 @@ class extends Component
         }
     }
 
-    public function analyze(AnalyzeFoodPhotoAction $action, CreateAnalysisDraftAction $drafts): void
+    public function analyze(AnalyzeFoodPhotoAction $action, CreateAnalysisDraftAction $drafts, StoreMealPhotoAction $storeMealPhoto): void
     {
         $this->error = null;
         if ($this->photoAllowance->exhausted) {
@@ -171,6 +172,12 @@ class extends Component
             $token = $drafts->handle($analysis, AnalysisDraftSource::PublicSnapToTrack, auth()->id());
 
             if (auth()->check()) {
+                try {
+                    $storeMealPhoto->handle(auth()->user(), $imageContent, $token);
+                } catch (Throwable $e) {
+                    report($e);
+                }
+
                 $this->redirect(route('snap-to-track.review', ['draft' => $token]));
 
                 return;

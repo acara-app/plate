@@ -22,13 +22,13 @@ it('requires a bearer token', function (): void {
 
 it('deletes a whole meal with its photo and returns the local day it was on', function (): void {
     Queue::fake();
-    Storage::fake(MealPhoto::DISK);
+    Storage::fake('s3');
     $user = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
     $groupId = (string) Str::uuid();
     $sample = HealthSyncSample::factory()->carbohydrates()->create(['user_id' => $user->id, 'group_id' => $groupId, 'entry_source' => 'mobile', 'measured_at' => '2026-10-17 23:30:00']);
     HealthSyncSample::factory()->create(['user_id' => $user->id, 'group_id' => $groupId, 'type_identifier' => 'dietaryEnergy', 'value' => 300, 'unit' => 'kcal', 'entry_source' => 'mobile', 'measured_at' => '2026-10-17 23:30:00']);
     $photo = MealPhoto::factory()->create(['user_id' => $user->id, 'health_group_id' => $groupId]);
-    Storage::disk(MealPhoto::DISK)->put($photo->path, 'jpeg-bytes');
+    Storage::disk('s3')->put($photo->path, 'jpeg-bytes');
     Sanctum::actingAs($user, ['chat:converse']);
 
     $this->deleteJson(route('api.v2.health-entries.destroy', $sample))
@@ -37,7 +37,7 @@ it('deletes a whole meal with its photo and returns the local day it was on', fu
 
     expect(HealthSyncSample::query()->where('user_id', $user->id)->count())->toBe(0)
         ->and(MealPhoto::query()->count())->toBe(0);
-    Storage::disk(MealPhoto::DISK)->assertMissing($photo->path);
+    Storage::disk('s3')->assertMissing($photo->path);
     Queue::assertPushed(AggregateUserDayJob::class, fn (AggregateUserDayJob $job): bool => $job->uniqueId() === $user->id.':2026-10-17');
 });
 
