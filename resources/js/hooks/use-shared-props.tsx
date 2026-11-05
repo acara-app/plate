@@ -17,5 +17,6 @@ export default function useSharedProps() {
             string
         >,
         entitlement: page.props.entitlement as Entitlement | null,
+        needsBiometricsReview: page.props.needsBiometricsReview as boolean,
     };
 }

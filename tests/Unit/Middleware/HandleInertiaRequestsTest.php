@@ -240,3 +240,28 @@ it('marks the entitlement as unrestricted when premium upgrades are off', functi
         'payment_pending' => false,
     ]);
 });
+
+it('shares whether the user needs to review their biometrics', function (bool $needsReview): void {
+    $user = User::factory()->create();
+    $user->profile()->create(['needs_re_onboarding' => $needsReview]);
+
+    $middleware = new HandleInertiaRequests();
+
+    $request = Request::create('/', 'GET');
+    $request->setUserResolver(fn () => $user);
+
+    $shared = $middleware->share($request);
+
+    expect($shared['needsBiometricsReview']())->toBe($needsReview);
+})->with([
+    'flagged profile' => [true],
+    'confirmed profile' => [false],
+]);
+
+it('never asks guests to review biometrics', function (): void {
+    $middleware = new HandleInertiaRequests();
+
+    $shared = $middleware->share(Request::create('/', 'GET'));
+
+    expect($shared['needsBiometricsReview']())->toBeFalse();
+});

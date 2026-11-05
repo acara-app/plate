@@ -20,7 +20,6 @@ use App\Models\UserProfileAttribute;
 use App\Services\DietMapper;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -39,6 +38,8 @@ final readonly class OnboardingController
 
         return Inertia::render('onboarding/biometrics', [
             'profile' => $profile,
+            'currentAge' => $profile?->currentAge(),
+            'weightLooksLikePounds' => $profile?->weightLooksLikePounds() ?? false,
             'sexOptions' => collect(Sex::cases())->map(fn (Sex $sex): array => [
                 'value' => $sex->value,
                 'label' => ucfirst($sex->value),
@@ -54,16 +55,26 @@ final readonly class OnboardingController
     {
         $user = $this->user;
 
-        $data = $request->validated();
+        $data = $request->profileAttributes();
 
-        if (isset($data['date_of_birth']) && is_string($data['date_of_birth'])) {
-            $data['age'] = Date::parse($data['date_of_birth'])->age;
+        if ($user->profile?->currentAge() !== $data['age']) {
+            $data['date_of_birth'] = null;
         }
 
-        $user->profile()->updateOrCreate(
+        $isReconfirming = $user->needsBiometricsReview() && $user->is_onboarded;
+
+        $profile = $user->profile()->updateOrCreate(
             ['user_id' => $user->id],
-            $data,
+            [...$data, 'needs_re_onboarding' => false],
         );
+
+        $user->setRelation('profile', $profile);
+
+        if ($isReconfirming) {
+            toast(__('common.onboarding.biometrics.review_confirmed_toast'));
+
+            return to_route('dashboard');
+        }
 
         return to_route('onboarding.identity.show');
     }

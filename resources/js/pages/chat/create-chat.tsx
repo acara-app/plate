@@ -4,6 +4,7 @@ import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { CreditWarningBanner } from '@/components/billing/credit-warning-banner';
 import { LifecycleBanner } from '@/components/billing/lifecycle-banner';
+import { BiometricsReviewBanner } from '@/components/biometrics-review-banner';
 import { UsageLimitNotice } from '@/components/billing/usage-limit-notice';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
@@ -279,6 +280,7 @@ export default function CreateChat() {
                 className="h-svh overflow-hidden overflow-x-hidden"
             >
                 <LifecycleBanner className="mx-4 mt-4" />
+                <BiometricsReviewBanner className="mx-4 mt-4" />
                 <Head title="Chat" />
                 <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
                     <div
