@@ -80,6 +80,21 @@ function initialMeasurements(
 
 const MEASUREMENT_PROMPTS = ['weight_in_pounds', 'measurements'];
 
+function isValidMeasurement(
+    value: string,
+    minimum: number,
+    maximum: number,
+): boolean {
+    const measurement = Number(value);
+
+    return (
+        value.trim() !== '' &&
+        Number.isFinite(measurement) &&
+        measurement >= minimum &&
+        measurement <= maximum
+    );
+}
+
 interface Props {
     profile: Profile | null;
     sexOptions: SexOption[];
@@ -94,6 +109,8 @@ export default function Biometrics({
     const { t } = useTranslation('common');
     const { locale } = useSharedProps();
     const needsReview = profile?.needs_re_onboarding === true;
+    const isCompletedReview =
+        needsReview && profile.onboarding_completed === true;
     const [dateOfBirth, setDateOfBirth] = useState(
         profile?.date_of_birth ?? '',
     );
@@ -129,37 +146,85 @@ export default function Biometrics({
     const heightLabel = isImperial
         ? `${measurements.heightFeet || 0} ${t('onboarding.biometrics.unit_ft')} ${measurements.heightInches || 0} ${t('onboarding.biometrics.unit_in')}`
         : `${measurements.heightCm} ${t('onboarding.biometrics.unit_cm')}`;
+    const weightPreview = isValidMeasurement(
+        measurements.weight,
+        isImperial ? 45 : 20,
+        isImperial ? 1100 : 500,
+    )
+        ? `${isImperial ? poundsToKilograms(measurements.weight) : kilogramsToPounds(measurements.weight)} ${t(isImperial ? 'onboarding.biometrics.unit_kg' : 'onboarding.biometrics.unit_lb')}`
+        : null;
+    const metricHeightPreview = centimetersToFeetAndInches(
+        measurements.heightCm,
+    );
+    const hasValidImperialHeight =
+        isValidMeasurement(measurements.heightFeet, 2, 8) &&
+        Number.isInteger(Number(measurements.heightFeet)) &&
+        (measurements.heightInches.trim() === '' ||
+            isValidMeasurement(measurements.heightInches, 0, 11.9));
+    const heightPreview = isImperial
+        ? hasValidImperialHeight
+            ? `${feetAndInchesToCentimeters(measurements.heightFeet, measurements.heightInches)} ${t('onboarding.biometrics.unit_cm')}`
+            : null
+        : isValidMeasurement(measurements.heightCm, 50, 300)
+          ? `${metricHeightPreview.feet} ${t('onboarding.biometrics.unit_ft')} ${metricHeightPreview.inches} ${t('onboarding.biometrics.unit_in')}`
+          : null;
+    const heightConversionPreview = heightPreview && (
+        <p
+            id="height-conversion-preview"
+            className="text-sm text-muted-foreground"
+        >
+            {t('onboarding.biometrics.conversion_preview', {
+                measurement: heightPreview,
+            })}
+        </p>
+    );
 
     return (
         <>
-            <Head title={t('onboarding.biometrics.title')} />
+            <Head
+                title={t(
+                    isCompletedReview
+                        ? 'onboarding.biometrics.review_heading'
+                        : 'onboarding.biometrics.title',
+                )}
+            />
             <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900">
                 <div className="w-full max-w-md">
                     {/* Progress Bar */}
-                    <div className="mb-8">
-                        <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
-                            <span>
-                                {t('onboarding.biometrics.step', {
-                                    current: 1,
-                                    total: 3,
-                                })}
-                            </span>
-                            <span>33%</span>
-                        </div>
-                        <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                            <div className="relative h-2 w-[33%] overflow-hidden rounded-full bg-primary shadow-[0_0_12px_rgba(16,185,129,0.4)]">
-                                <div className="absolute inset-0 bg-linear-to-r from-white/30 via-transparent to-transparent"></div>
-                                <div className="absolute inset-0 bg-linear-to-l from-black/10 via-transparent to-white/10"></div>
+                    {!isCompletedReview && (
+                        <div className="mb-8">
+                            <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
+                                <span>
+                                    {t('onboarding.biometrics.step', {
+                                        current: 1,
+                                        total: 3,
+                                    })}
+                                </span>
+                                <span>33%</span>
+                            </div>
+                            <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                                <div className="relative h-2 w-[33%] overflow-hidden rounded-full bg-primary shadow-[0_0_12px_rgba(16,185,129,0.4)]">
+                                    <div className="absolute inset-0 bg-linear-to-r from-white/30 via-transparent to-transparent"></div>
+                                    <div className="absolute inset-0 bg-linear-to-l from-black/10 via-transparent to-white/10"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
-                    <div className="rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
+                    <div className="rounded-lg bg-white px-5 py-6 shadow-lg sm:p-8 dark:bg-gray-800">
                         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
-                            {t('onboarding.biometrics.heading')}
+                            {t(
+                                isCompletedReview
+                                    ? 'onboarding.biometrics.review_heading'
+                                    : 'onboarding.biometrics.heading',
+                            )}
                         </h1>
                         <p className="mb-6 text-gray-600 dark:text-gray-300">
-                            {t('onboarding.biometrics.description')}
+                            {t(
+                                isCompletedReview
+                                    ? 'onboarding.biometrics.review_body'
+                                    : 'onboarding.biometrics.description',
+                            )}
                         </p>
 
                         <Form
@@ -251,26 +316,28 @@ export default function Biometrics({
                                         {needsReview && (
                                             <Alert
                                                 role="status"
-                                                className="border-primary/30 bg-primary/5"
+                                                className="min-w-0 border-primary/30 bg-primary/5 has-[>svg]:grid-cols-[1rem_minmax(0,1fr)]"
                                             >
                                                 <Info className="text-primary" />
-                                                <AlertTitle className="line-clamp-none">
+                                                <AlertTitle className="line-clamp-none min-w-0 wrap-break-word">
                                                     {t(
                                                         'onboarding.biometrics.review_title',
                                                     )}
                                                 </AlertTitle>
-                                                <AlertDescription>
-                                                    <p>
-                                                        {t(
-                                                            'onboarding.biometrics.review_body',
-                                                        )}
-                                                    </p>
+                                                <AlertDescription className="min-w-0 wrap-break-word">
+                                                    {!isCompletedReview && (
+                                                        <p>
+                                                            {t(
+                                                                'onboarding.biometrics.review_body',
+                                                            )}
+                                                        </p>
+                                                    )}
                                                     {!isImperial && (
                                                         <Button
                                                             type="button"
                                                             size="sm"
                                                             variant="outline"
-                                                            className="mt-2"
+                                                            className="mt-2 h-auto min-h-11 w-full min-w-0 py-2 whitespace-normal"
                                                             onClick={
                                                                 treatWeightAsPounds
                                                             }
@@ -285,9 +352,9 @@ export default function Biometrics({
                                         )}
 
                                         {errors.weight_in_pounds && (
-                                            <Alert className="border-amber-300 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/40">
+                                            <Alert className="min-w-0 border-amber-300 bg-amber-50 has-[>svg]:grid-cols-[1rem_minmax(0,1fr)] dark:border-amber-900/50 dark:bg-amber-950/40">
                                                 <Scale className="text-amber-700 dark:text-amber-400" />
-                                                <AlertTitle className="line-clamp-none">
+                                                <AlertTitle className="line-clamp-none min-w-0 wrap-break-word">
                                                     {t(
                                                         'onboarding.biometrics.unit_check.pounds_title',
                                                         {
@@ -295,7 +362,7 @@ export default function Biometrics({
                                                         },
                                                     )}
                                                 </AlertTitle>
-                                                <AlertDescription>
+                                                <AlertDescription className="min-w-0 wrap-break-word">
                                                     <p>
                                                         {t(
                                                             'onboarding.biometrics.unit_check.pounds_body',
@@ -305,10 +372,11 @@ export default function Biometrics({
                                                             },
                                                         )}
                                                     </p>
-                                                    <div className="mt-2 flex flex-wrap gap-2">
+                                                    <div className="mt-2 flex w-full min-w-0 flex-col gap-2">
                                                         <Button
                                                             type="button"
                                                             size="sm"
+                                                            className="h-auto min-h-11 w-full min-w-0 py-2 whitespace-normal"
                                                             onClick={
                                                                 treatWeightAsPounds
                                                             }
@@ -324,6 +392,7 @@ export default function Biometrics({
                                                             type="button"
                                                             size="sm"
                                                             variant="outline"
+                                                            className="h-auto min-h-11 w-full min-w-0 py-2 whitespace-normal"
                                                             onClick={
                                                                 confirmMeasurements
                                                             }
@@ -341,14 +410,14 @@ export default function Biometrics({
                                         )}
 
                                         {errors.measurements && (
-                                            <Alert className="border-amber-300 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/40">
+                                            <Alert className="min-w-0 border-amber-300 bg-amber-50 has-[>svg]:grid-cols-[1rem_minmax(0,1fr)] dark:border-amber-900/50 dark:bg-amber-950/40">
                                                 <Scale className="text-amber-700 dark:text-amber-400" />
-                                                <AlertTitle className="line-clamp-none">
+                                                <AlertTitle className="line-clamp-none min-w-0 wrap-break-word">
                                                     {t(
                                                         'onboarding.biometrics.unit_check.measurements_title',
                                                     )}
                                                 </AlertTitle>
-                                                <AlertDescription>
+                                                <AlertDescription className="min-w-0 wrap-break-word">
                                                     <p>
                                                         {t(
                                                             'onboarding.biometrics.unit_check.measurements_body',
@@ -362,7 +431,7 @@ export default function Biometrics({
                                                         type="button"
                                                         size="sm"
                                                         variant="outline"
-                                                        className="mt-2"
+                                                        className="mt-2 h-auto min-h-11 w-full min-w-0 py-2 whitespace-normal"
                                                         onClick={
                                                             confirmMeasurements
                                                         }
@@ -463,7 +532,7 @@ export default function Biometrics({
                                             >
                                                 <ToggleGroupItem
                                                     value="metric"
-                                                    className="flex-1"
+                                                    className="h-auto min-h-11 flex-1 py-2 whitespace-normal"
                                                 >
                                                     {t(
                                                         'onboarding.biometrics.units_metric',
@@ -471,7 +540,7 @@ export default function Biometrics({
                                                 </ToggleGroupItem>
                                                 <ToggleGroupItem
                                                     value="imperial"
-                                                    className="flex-1"
+                                                    className="h-auto min-h-11 flex-1 py-2 whitespace-normal"
                                                 >
                                                     {t(
                                                         'onboarding.biometrics.units_imperial',
@@ -499,6 +568,11 @@ export default function Biometrics({
                                                             id="height_feet"
                                                             type="number"
                                                             name="height_feet"
+                                                            aria-describedby={
+                                                                heightPreview
+                                                                    ? 'height-conversion-preview'
+                                                                    : undefined
+                                                            }
                                                             value={
                                                                 measurements.heightFeet
                                                             }
@@ -532,6 +606,11 @@ export default function Biometrics({
                                                             id="height_inches"
                                                             type="number"
                                                             name="height_inches"
+                                                            aria-describedby={
+                                                                heightPreview
+                                                                    ? 'height-conversion-preview'
+                                                                    : undefined
+                                                            }
                                                             value={
                                                                 measurements.heightInches
                                                             }
@@ -560,6 +639,7 @@ export default function Biometrics({
                                                         </span>
                                                     </div>
                                                 </div>
+                                                {heightConversionPreview}
                                                 <InputError
                                                     message={errors.height_feet}
                                                 />
@@ -580,6 +660,11 @@ export default function Biometrics({
                                                     id="height"
                                                     type="number"
                                                     name="height"
+                                                    aria-describedby={
+                                                        heightPreview
+                                                            ? 'height-conversion-preview'
+                                                            : undefined
+                                                    }
                                                     value={
                                                         measurements.heightCm
                                                     }
@@ -597,6 +682,7 @@ export default function Biometrics({
                                                         'onboarding.biometrics.height_placeholder',
                                                     )}
                                                 />
+                                                {heightConversionPreview}
                                                 <InputError
                                                     message={errors.height}
                                                 />
@@ -616,6 +702,11 @@ export default function Biometrics({
                                                 id="weight"
                                                 type="number"
                                                 name="weight"
+                                                aria-describedby={
+                                                    weightPreview
+                                                        ? 'weight-conversion-preview'
+                                                        : undefined
+                                                }
                                                 value={measurements.weight}
                                                 onChange={(e) =>
                                                     changeMeasurement(
@@ -635,6 +726,20 @@ export default function Biometrics({
                                                         : 'onboarding.biometrics.weight_placeholder',
                                                 )}
                                             />
+                                            {weightPreview && (
+                                                <p
+                                                    id="weight-conversion-preview"
+                                                    className="text-sm text-muted-foreground"
+                                                >
+                                                    {t(
+                                                        'onboarding.biometrics.conversion_preview',
+                                                        {
+                                                            measurement:
+                                                                weightPreview,
+                                                        },
+                                                    )}
+                                                </p>
+                                            )}
                                             <InputError
                                                 message={errors.weight}
                                             />
@@ -751,13 +856,15 @@ export default function Biometrics({
                                             <Button
                                                 type="submit"
                                                 disabled={processing}
-                                                className="min-w-30"
+                                                className="h-auto min-h-11 max-w-full min-w-30 py-2 whitespace-normal"
                                             >
                                                 {processing && (
                                                     <LoaderCircle className="h-4 w-4 animate-spin" />
                                                 )}
                                                 {t(
-                                                    'onboarding.biometrics.continue',
+                                                    isCompletedReview
+                                                        ? 'onboarding.biometrics.review_save'
+                                                        : 'onboarding.biometrics.continue',
                                                 )}
                                             </Button>
 
