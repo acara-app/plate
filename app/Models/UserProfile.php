@@ -10,6 +10,7 @@ use App\Enums\DietType;
 use App\Enums\GlucoseUnit;
 use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
+use App\Enums\MeasurementSystem;
 use App\Enums\Sex;
 use App\Enums\UserProfileAttributeCategory;
 use App\Services\BodyMassIndex;
@@ -31,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read CarbonInterface|null $date_of_birth
  * @property-read float|null $height
  * @property-read float|null $weight
+ * @property-read MeasurementSystem|null $measurement_system
  * @property-read Sex|null $sex
  * @property-read BloodType|null $blood_type
  * @property-read GoalChoice|null $goal_choice
@@ -78,6 +80,7 @@ final class UserProfile extends Model
             'date_of_birth' => 'date',
             'height' => 'float',
             'weight' => 'float',
+            'measurement_system' => MeasurementSystem::class,
             'sex' => Sex::class,
             'blood_type' => BloodType::class,
             'goal_choice' => GoalChoice::class,

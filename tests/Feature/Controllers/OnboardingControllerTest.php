@@ -603,6 +603,36 @@ it('treats missing inches as zero', function (): void {
     expect($user->profile()->first()->height)->toBe(182.88);
 });
 
+it('remembers the chosen measurement system when returning to biometrics', function (MeasurementSystem $system, array $measurements, float $height, float $weight): void {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'measurement_system' => $system->value,
+            'age' => 30,
+            'sex' => Sex::Male->value,
+            ...$measurements,
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirectToRoute('onboarding.identity.show');
+
+    $this->assertDatabaseHas('user_profiles', [
+        'user_id' => $user->id,
+        'measurement_system' => $system->value,
+        'height' => $height,
+        'weight' => $weight,
+    ]);
+
+    $this->actingAs($user->fresh())
+        ->get(route('onboarding.biometrics.show'))
+        ->assertInertia(fn ($page) => $page
+            ->component('onboarding/biometrics')
+            ->where('profile.measurement_system', $system->value));
+})->with([
+    'metric' => [MeasurementSystem::Metric, ['height' => 175, 'weight' => 70], 175.0, 70.0],
+    'imperial' => [MeasurementSystem::Imperial, ['height_feet' => 5, 'height_inches' => 10, 'weight' => 200], 177.8, 90.72],
+]);
+
 it('gives imperial entries the same calorie and macro targets as the equivalent metric profile', function (): void {
     $user = User::factory()->create();
     $identity = [
