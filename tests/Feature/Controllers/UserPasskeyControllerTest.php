@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Actions\DeleteUser;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia;
 use Tests\Fixtures\PasskeyAuthenticator;
 
@@ -29,7 +31,7 @@ it('shows an empty passkey list after identity confirmation', function (): void 
         ->withSession(['auth.password_confirmed_at' => time()])
         ->get('/settings/passkeys')
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('user-passkeys/edit', false)
             ->where('canManagePasskeys', true)
             ->where('passkeys', []));
@@ -42,7 +44,7 @@ it('lists only the current users passkeys without exposing credentials', functio
 
     $this->actingAs($user)->withSession(['auth.password_confirmed_at' => time()])
         ->get(route('passkeys.edit'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->has('passkeys', 1)
             ->where('passkeys.0', [
                 'id' => $passkey->id,
@@ -112,7 +114,7 @@ it('advertises the passkey management page to password managers', function (): v
 
 it('hides passkey entry points when the feature is disabled', function (): void {
     config()->set('fortify.features', []);
-    $this->get(route('login'))->assertInertia(fn (AssertableInertia $page) => $page->where('canManagePasskeys', false));
+    $this->get(route('login'))->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('canManagePasskeys', false));
     $this->getJson(route('well-known.passkeys'))->assertNotFound();
     $this->actingAs(User::factory()->create())->withSession(['auth.password_confirmed_at' => time()])
         ->get(route('passkeys.edit'))->assertNotFound();
@@ -121,7 +123,7 @@ it('hides passkey entry points when the feature is disabled', function (): void 
 it('offers password setup to accounts without a password or passkey', function (): void {
     $this->actingAs(User::factory()->withoutTwoFactor()->create(['password' => null, 'google_id' => 'google-account']))
         ->get(route('password.confirm'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('hasPassword', false)
             ->where('canConfirmWithPasskey', false));
 });
@@ -133,7 +135,7 @@ it('offers passkey confirmation only to accounts with an enrolled passkey', func
     }
 
     $this->actingAs($user)->get(route('password.confirm'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('hasPassword', true)
             ->where('canConfirmWithPasskey', $enrolled));
 })->with([true, false]);
@@ -141,9 +143,9 @@ it('offers passkey confirmation only to accounts with an enrolled passkey', func
 it('deletes passkeys when the account is deleted', function (): void {
     $user = User::factory()->create();
     $passkey = (new PasskeyAuthenticator)->store($user);
-    Illuminate\Support\Facades\Storage::fake('s3');
+    Storage::fake('s3');
 
-    app(App\Actions\DeleteUser::class)->handle($user);
+    resolve(DeleteUser::class)->handle($user);
 
     $this->assertModelMissing($user);
     $this->assertModelMissing($passkey);
