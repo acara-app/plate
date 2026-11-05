@@ -39,7 +39,7 @@ final readonly class UserController
             $request->string('password')->value(),
         );
 
-        Auth::login($user);
+        Auth::login($user, remember: true);
 
         $request->session()->regenerate();
 

@@ -90,6 +90,31 @@ it('creates new user from Google OAuth callback with mocked provider', function 
         ->and(Auth::user()->email)->toBe('newuser@example.com');
 })->group('oauth');
 
+it('keeps people who continue with Google signed in after their session expires', function (bool $hasAccount): void {
+    if ($hasAccount) {
+        User::factory()->create([
+            'google_id' => 'google-remembered',
+            'email' => 'remembered@example.com',
+        ]);
+    }
+
+    $googleUser = new SocialiteUser();
+    $googleUser->setRaw(['email_verified' => true]);
+    $googleUser->id = 'google-remembered';
+    $googleUser->email = 'remembered@example.com';
+    $googleUser->name = 'Remembered User';
+
+    $this->provider->user = $googleUser;
+
+    $response = get(route('auth.google.callback'));
+
+    $response->assertRedirectToRoute('dashboard');
+
+    revisitAfterSessionExpires($response)->assertOk();
+
+    $this->assertAuthenticatedAs(User::query()->where('google_id', 'google-remembered')->sole());
+})->with(['new account' => false, 'existing account' => true])->group('oauth');
+
 it('marks email as verified when creating user from Google OAuth', function (): void {
     $googleUser = new SocialiteUser();
     $googleUser->setRaw(['email_verified' => true]);

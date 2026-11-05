@@ -9,6 +9,7 @@ use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Contracts\Billing\TracksPhotoConversion;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\AnalysisDraftSource;
+use App\Utilities\Base64Image;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
@@ -93,6 +94,17 @@ class extends Component
         $this->startLivewireUpload($name, $fileInfo, $isMultiple);
     }
 
+    public function updatedPhoto(): void
+    {
+        try {
+            $this->validateOnly('photo', $this->photoRules(), $this->photoMessages());
+        } catch (ValidationException $e) {
+            $this->deleteTemporaryPhoto(resetUploadChallenge: true);
+
+            throw $e;
+        }
+    }
+
     public function analyze(AnalyzeFoodPhotoAction $action, CreateAnalysisDraftAction $drafts): void
     {
         $this->error = null;
@@ -109,9 +121,7 @@ class extends Component
             return;
         }
 
-        $rules = [
-            'photo' => 'required|image|max:10240',
-        ];
+        $rules = $this->photoRules();
 
         if (app()->environment(['production', 'testing'])) {
             $rules['turnstileToken'] = ['required', 'string'];
@@ -120,7 +130,7 @@ class extends Component
         $this->loading = true;
 
         try {
-            $this->validate($rules);
+            $this->validate($rules, $this->photoMessages());
             $this->validateVerifiedUploadChallenge();
 
             if (! $this->photo instanceof TemporaryUploadedFile) {
@@ -129,23 +139,23 @@ class extends Component
                 return; // @codeCoverageIgnore
             }
 
-            RateLimiter::hit($this->analysisRateLimitKey(), 3600);
-
             $imageContent = $this->photo->get();
 
-            if ($imageContent === false) {
+            if ($imageContent === null) {
                 throw new RuntimeException('Failed to read uploaded file.'); // @codeCoverageIgnore
             }
 
             $base64 = base64_encode($imageContent);
-            $mimeType = $this->photo->getMimeType();
+            $image = Base64Image::decode($base64);
 
-            if ($mimeType === null) { // @phpstan-ignore-line
-                $mimeType = 'image/jpeg'; // @codeCoverageIgnore
+            if (! $image instanceof Base64Image) {
+                throw ValidationException::withMessages(['photo' => $this->photoMessages()['photo.mimes']]);
             }
 
+            RateLimiter::hit($this->analysisRateLimitKey(), 3600);
+
             $this->analysisRequestId ??= (string) \Illuminate\Support\Str::uuid();
-            $analysis = $action->handle($base64, $mimeType, context: new \App\Data\Billing\PhotoAnalysisContext(
+            $analysis = $action->handle($base64, $image->mimeType, context: new \App\Data\Billing\PhotoAnalysisContext(
                 auth()->user(), \App\Data\Billing\PhotoAnalysisContext::guestId(request()), $this->analysisRequestId,
                 'public_snap_to_track', hash('sha256', $base64),
             ));
@@ -223,6 +233,25 @@ class extends Component
         session()->put('snap_to_track.intent', $previewAvailable ? 'preview' : 'scan');
 
         $this->redirect(route($intent));
+    }
+
+    /**
+     * @return array<string, array<array-key, mixed>>
+     */
+    private function photoRules(): array
+    {
+        return ['photo' => config()->array('livewire.temporary_file_upload.rules')];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function photoMessages(): array
+    {
+        return [
+            'photo.mimes' => 'We can’t read this photo format. Please use a JPG or PNG photo.',
+            'photo.max' => 'This photo is over 10MB. Please choose a smaller one.',
+        ];
     }
 
     private function validateUploadChallenge(): void
@@ -424,12 +453,29 @@ class extends Component
                             fromCamera ? input.setAttribute('capture', 'environment') : input.removeAttribute('capture');
                             input.click();
                         },
+                        async sendPhoto(input) {
+                            const picked = input.files[0];
+                            input.value = '';
+                            if (! picked) {
+                                return;
+                            }
+                            this.fileName = picked.name;
+                            this.uploading = true;
+                            this.uploadFailed = false;
+                            this.progress = 0;
+                            window.acaraTrack?.('snap_to_track_upload_selected', { source: 'public_snap_to_track' });
+                            window.acaraKeepSnapPhoto?.(picked);
+                            const photo = (await window.acaraPrepareSnapPhoto?.(picked)) ?? picked;
+                            this.$wire.$upload(
+                                'photo',
+                                photo,
+                                () => { this.uploading = false; this.progress = 0; },
+                                () => { this.uploading = false; this.uploadFailed = true; this.progress = 0; },
+                                (event) => { this.progress = event.detail.progress; },
+                                () => { this.uploading = false; this.progress = 0; },
+                            );
+                        },
                     }"
-                    x-on:livewire-upload-start="uploading = true; uploadFailed = false; progress = 0"
-                    x-on:livewire-upload-progress="progress = $event.detail.progress"
-                    x-on:livewire-upload-finish="progress = 100"
-                    x-on:livewire-upload-cancel="uploading = false; progress = 0"
-                    x-on:livewire-upload-error="uploading = false; uploadFailed = true; progress = 0; $event.target.value = null"
                     x-bind:aria-busy="uploading"
                     class="border border-[#D9CFBC] bg-[#EBE2D0] p-6 sm:p-8"
                 >
@@ -472,18 +518,11 @@ class extends Component
                         <div class="relative border-t border-[#D9CFBC] pt-6 {{ App::environment(['production', 'testing']) && blank($turnstileToken) ? 'opacity-50' : '' }}">
                             <input
                                 type="file"
-                                wire:model="photo"
                                 accept="image/*"
                                 class="hidden"
                                 id="photo-upload"
                                 x-ref="photoUpload"
-                                x-on:change="
-                                    fileName = $event.target.files[0]?.name ?? '';
-                                    if ($event.target.files.length) {
-                                        window.acaraTrack?.('snap_to_track_upload_selected', { source: 'public_snap_to_track' });
-                                        window.acaraKeepSnapPhoto?.($event.target.files[0]);
-                                    }
-                                "
+                                x-on:change="sendPhoto($event.target)"
                                 @disabled($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))
                             >
                             <button

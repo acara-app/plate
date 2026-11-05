@@ -5,8 +5,10 @@ declare(strict_types=1);
 use App\Contracts\Billing\OffersSubscriptions;
 use App\Models\SubscriptionProduct;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Sleep;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 pest()->extend(TestCase::class)
@@ -22,6 +24,18 @@ pest()->extend(TestCase::class)
 expect()->extend('toBeOne', fn () => $this->toBe(1));
 
 function something(): void {}
+
+function revisitAfterSessionExpires(TestResponse $response): TestResponse
+{
+    $rememberCookie = $response->assertCookie(Auth::getRecallerName())->getCookie(Auth::getRecallerName());
+
+    test()->flushSession();
+    Auth::forgetGuards();
+
+    return test()
+        ->withCookie(Auth::getRecallerName(), $rememberCookie->getValue())
+        ->get(route('user-profile.edit'));
+}
 
 function offerAllSubscriptions(): void
 {

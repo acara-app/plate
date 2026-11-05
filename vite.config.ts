@@ -3,8 +3,38 @@ import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
-import { defineConfig } from 'vite';
+import { existsSync, readFileSync } from 'node:fs';
+import { defineConfig, type Manifest } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+
+function appShellUrls(entry: string): Set<string> {
+    const manifestPath = 'public/build/manifest.json';
+    const urls = new Set<string>();
+
+    if (!existsSync(manifestPath)) {
+        return urls;
+    }
+
+    const manifest = JSON.parse(
+        readFileSync(manifestPath, 'utf-8'),
+    ) as Manifest;
+
+    const collect = (key: string): void => {
+        const chunk = manifest[key];
+
+        if (!chunk || urls.has(`build/${chunk.file}`)) {
+            return;
+        }
+
+        urls.add(`build/${chunk.file}`);
+        chunk.css?.forEach((file) => urls.add(`build/${file}`));
+        chunk.imports?.forEach(collect);
+    };
+
+    collect(entry);
+
+    return urls;
+}
 
 export default defineConfig({
     resolve: {
@@ -34,6 +64,33 @@ export default defineConfig({
                 cleanupOutdatedCaches: true,
                 directoryIndex: null,
                 navigateFallback: null,
+                dontCacheBustURLsMatching: /^build\/assets\//,
+                manifestTransforms: [
+                    (entries) => {
+                        const appShell = appShellUrls('resources/js/app.tsx');
+
+                        return {
+                            manifest: entries.filter(({ url }) =>
+                                appShell.has(url),
+                            ),
+                        };
+                    },
+                ],
+                runtimeCaching: [
+                    {
+                        urlPattern: ({ sameOrigin, url }) =>
+                            sameOrigin &&
+                            url.pathname.startsWith('/build/assets/'),
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'build-assets',
+                            expiration: {
+                                maxEntries: 200,
+                                maxAgeSeconds: 60 * 60 * 24 * 30,
+                            },
+                        },
+                    },
+                ],
             },
             devOptions: {
                 enabled: true,

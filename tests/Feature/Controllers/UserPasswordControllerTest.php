@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\UserPasswordController;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -149,9 +150,39 @@ it('may update password', function (): void {
             'password_confirmation' => 'new-password',
         ]);
 
-    $response->assertRedirectToRoute('password.edit');
+    $response->assertRedirectToRoute('password.edit')
+        ->assertCookieMissing(Auth::getRecallerName());
 
     expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue();
+});
+
+it('signs other remembered devices out but keeps this device signed in after a password change', function (): void {
+    $user = User::factory()->withoutTwoFactor()->create([
+        'email' => 'test@example.com',
+        'password' => Hash::make('old-password'),
+    ]);
+
+    $signIn = $this->fromRoute('login')
+        ->post(route('login.store'), [
+            'email' => 'test@example.com',
+            'password' => 'old-password',
+            'remember' => true,
+        ]);
+
+    $passwordChange = $this->withCookie(Auth::getRecallerName(), $signIn->getCookie(Auth::getRecallerName())->getValue())
+        ->fromRoute('password.edit')
+        ->put(route('password.update'), [
+            'current_password' => 'old-password',
+            'password' => 'new-password',
+            'password_confirmation' => 'new-password',
+        ]);
+
+    $passwordChange->assertRedirectToRoute('password.edit');
+
+    revisitAfterSessionExpires($signIn)->assertRedirectToRoute('login');
+    revisitAfterSessionExpires($passwordChange)->assertOk();
+
+    $this->assertAuthenticatedAs($user);
 });
 
 it('requires current password to update', function (): void {
