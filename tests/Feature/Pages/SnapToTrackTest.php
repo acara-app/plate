@@ -144,6 +144,25 @@ it('asks for a JPG or PNG when an uploaded photo format cannot be analyzed', fun
     'HEIF' => ['meal.heif', 'image/heif'],
 ]);
 
+it('asks for a JPG or PNG when a photo labelled as JPG is not really an image', function (): void {
+    fakeTurnstileForSnapToTrack();
+    FoodPhotoAnalyzerAgent::fake([saveMealAnalysisFixture()]);
+
+    $component = Livewire::test('pages::snap-to-track');
+
+    finishDirectUploadForSnapToTrack($component, UploadedFile::fake()->createWithContent('meal.jpg', 'not a photo'));
+
+    $component
+        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
+        ->call('analyze')
+        ->assertHasErrors(['photo'])
+        ->assertSet('photo', null)
+        ->assertSee('We can’t read this photo format. Please use a JPG or PNG photo.')
+        ->assertNoRedirect();
+
+    FoodPhotoAnalyzerAgent::assertNeverPrompted();
+});
+
 it('shows analyze button after photo is uploaded', function (): void {
     $file = UploadedFile::fake()->image('food.jpg');
 

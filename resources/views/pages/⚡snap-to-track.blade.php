@@ -9,6 +9,7 @@ use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Contracts\Billing\TracksPhotoConversion;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\AnalysisDraftSource;
+use App\Utilities\Base64Image;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
@@ -138,23 +139,23 @@ class extends Component
                 return; // @codeCoverageIgnore
             }
 
-            RateLimiter::hit($this->analysisRateLimitKey(), 3600);
-
             $imageContent = $this->photo->get();
 
-            if ($imageContent === false) {
+            if ($imageContent === null) {
                 throw new RuntimeException('Failed to read uploaded file.'); // @codeCoverageIgnore
             }
 
             $base64 = base64_encode($imageContent);
-            $mimeType = $this->photo->getMimeType();
+            $image = Base64Image::decode($base64);
 
-            if ($mimeType === null) { // @phpstan-ignore-line
-                $mimeType = 'image/jpeg'; // @codeCoverageIgnore
+            if (! $image instanceof Base64Image) {
+                throw ValidationException::withMessages(['photo' => $this->photoMessages()['photo.mimes']]);
             }
 
+            RateLimiter::hit($this->analysisRateLimitKey(), 3600);
+
             $this->analysisRequestId ??= (string) \Illuminate\Support\Str::uuid();
-            $analysis = $action->handle($base64, $mimeType, context: new \App\Data\Billing\PhotoAnalysisContext(
+            $analysis = $action->handle($base64, $image->mimeType, context: new \App\Data\Billing\PhotoAnalysisContext(
                 auth()->user(), \App\Data\Billing\PhotoAnalysisContext::guestId(request()), $this->analysisRequestId,
                 'public_snap_to_track', hash('sha256', $base64),
             ));
