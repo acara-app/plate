@@ -9,10 +9,23 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class StoreSnapToTrackMealRequest extends FormRequest
 {
-    use ValidatesReviewedMeal;
+    use ValidatesReviewedMeal {
+        rules as reviewedMealRules;
+    }
 
     public function authorize(): bool
     {
         return true;
+    }
+
+    /**
+     * @return array<string, array<int, mixed>>
+     */
+    public function rules(): array
+    {
+        return [
+            ...$this->reviewedMealRules(),
+            'photo' => ['nullable', 'image', 'max:10240'],
+        ];
     }
 }
