@@ -119,7 +119,7 @@
                     </p>
                     <div class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap lg:justify-start">
                         <div class="flex flex-col items-stretch gap-3">
-                            <a href="{{ route('snap-to-track') }}"
+                            <a href="{{ route(auth()->check() ? 'snap-to-track.index' : 'snap-to-track') }}"
                                data-umami-event="snap_to_track_cta_click"
                                data-umami-event-location="home_hero"
                                class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#C94F35] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#FF6B4A]/15 transition hover:bg-[#AF402A] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C94F35] sm:text-base">
@@ -127,14 +127,14 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
                                     <circle cx="12" cy="12" r="4" />
                                 </svg>
-                                Try Snap to Track
+                                {{ auth()->check() ? 'Snap to Track' : 'Try Snap to Track' }}
                             </a>
                         </div>
-                        <a href="{{ route('register') }}"
-                           data-umami-event="signup_cta_click"
+                        <a href="{{ route(auth()->check() ? 'health-entries.index' : 'register') }}"
+                           data-umami-event="{{ auth()->check() ? 'health_log_cta_click' : 'signup_cta_click' }}"
                            data-umami-event-location="home_hero"
                            class="inline-flex min-h-12 items-center justify-center self-stretch rounded-full border border-[#D9CFC3] bg-white px-7 py-3.5 text-sm font-semibold text-slate-800 transition hover:border-[#C94F35] hover:bg-orange-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C94F35] sm:self-start sm:text-base">
-                            Create My Health Log
+                            {{ auth()->check() ? 'Open My Health Log' : 'Create My Health Log' }}
                         </a>
                     </div>
                     <div class="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-slate-500 sm:text-sm lg:justify-start">
