@@ -54,16 +54,26 @@ final readonly class OnboardingController
     {
         $user = $this->user;
 
-        $data = $request->validated();
+        $data = $request->profileAttributes();
 
         if (isset($data['date_of_birth']) && is_string($data['date_of_birth'])) {
             $data['age'] = Date::parse($data['date_of_birth'])->age;
         }
 
-        $user->profile()->updateOrCreate(
+        $isReconfirming = $user->needsBiometricsReview() && $user->is_onboarded;
+
+        $profile = $user->profile()->updateOrCreate(
             ['user_id' => $user->id],
-            $data,
+            [...$data, 'needs_re_onboarding' => false],
         );
+
+        $user->setRelation('profile', $profile);
+
+        if ($isReconfirming) {
+            toast(__('common.onboarding.biometrics.review_confirmed_toast'));
+
+            return to_route('dashboard');
+        }
 
         return to_route('onboarding.identity.show');
     }

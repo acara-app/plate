@@ -144,6 +144,11 @@ return [
         'dismiss' => 'Ignorer',
     ],
 
+    'biometrics_review_banner' => [
+        'text' => 'Petite vérification : confirmez votre taille et votre poids pour que vos objectifs caloriques soient justes.',
+        'action' => 'Vérifier',
+    ],
+
     'onboarding' => [
         'biometrics' => [
             'title' => 'Biométrie - Étape 1 sur 3',
@@ -167,6 +172,32 @@ return [
             'blood_type_clear' => 'Effacer le groupe sanguin',
             'exit' => 'Quitter',
             'continue' => 'Continuer',
+            'units' => 'Unités',
+            'units_metric' => 'kg, cm',
+            'units_imperial' => 'lb, pi, po',
+            'unit_kg' => 'kg',
+            'unit_cm' => 'cm',
+            'unit_lb' => 'lb',
+            'unit_ft' => 'pi',
+            'unit_in' => 'po',
+            'height_imperial' => 'Taille (pi, po)',
+            'feet_label' => 'Pieds',
+            'inches_label' => 'Pouces',
+            'weight_imperial' => 'Poids (lb)',
+            'weight_imperial_placeholder' => 'Entrez votre poids en livres',
+            'review_title' => 'Vérifiez votre taille et votre poids',
+            'review_body' => 'Vos objectifs de calories et de macros sont calculés à partir de ces chiffres : assurons-nous que les unités sont les bonnes.',
+            'review_use_pounds' => 'Mon poids est en livres',
+            'review_confirmed_toast' => 'Merci ! Votre taille et votre poids sont confirmés.',
+            'unit_check' => [
+                'pounds_title' => 'Vouliez-vous dire {{weight}} lb ?',
+                'pounds_body' => 'Vous avez saisi {{weight}} kg pour {{height}} cm. Si ce chiffre est en livres, nous passerons le formulaire en livres.',
+                'use_pounds' => 'Oui, {{weight}} lb',
+                'keep_kilograms' => 'Non, {{weight}} kg est correct',
+                'measurements_title' => 'Pouvez-vous vérifier ces valeurs ?',
+                'measurements_body' => 'Vous avez saisi {{weight}} pour {{height}}.',
+                'measurements_confirm' => 'Oui, c\'est correct',
+            ],
         ],
         'completion' => [
             'title' => 'Bienvenue à bord !',

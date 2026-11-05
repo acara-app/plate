@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Actions\CalculateDailyNutritionGoals;
 use App\Enums\AllergySeverity;
 use App\Enums\AnimalProductChoice;
 use App\Enums\BloodType;
 use App\Enums\DietType;
 use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
+use App\Enums\MeasurementSystem;
 use App\Enums\Sex;
 use App\Enums\UserProfileAttributeCategory;
 use App\Http\Controllers\OnboardingController;
@@ -527,4 +529,256 @@ it('redirects to biometrics if completion page accessed without completing onboa
         ->get(route('onboarding.completion.show'));
 
     $response->assertRedirectToRoute('onboarding.biometrics.show');
+});
+
+it('stores imperial measurements as kilograms and centimeters', function (): void {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'measurement_system' => MeasurementSystem::Imperial->value,
+            'age' => 30,
+            'height_feet' => 5,
+            'height_inches' => 10,
+            'weight' => 200,
+            'sex' => Sex::Male->value,
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirectToRoute('onboarding.identity.show');
+
+    expect($user->profile()->first())
+        ->weight->toBe(90.72)
+        ->height->toBe(177.8);
+});
+
+it('treats missing inches as zero', function (): void {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'measurement_system' => MeasurementSystem::Imperial->value,
+            'age' => 30,
+            'height_feet' => 6,
+            'height_inches' => '',
+            'weight' => 180,
+            'sex' => Sex::Male->value,
+        ])
+        ->assertSessionHasNoErrors();
+
+    expect($user->profile()->first()->height)->toBe(182.88);
+});
+
+it('gives imperial entries the same calorie and macro targets as the equivalent metric profile', function (): void {
+    $user = User::factory()->create();
+    $identity = [
+        'goal_choice' => GoalChoice::WeightLoss,
+        'animal_product_choice' => AnimalProductChoice::Omnivore,
+        'intensity_choice' => IntensityChoice::Balanced,
+        'derived_activity_multiplier' => 1.375,
+    ];
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'measurement_system' => MeasurementSystem::Imperial->value,
+            'age' => 40,
+            'height_feet' => 5,
+            'height_inches' => 10,
+            'weight' => 200,
+            'sex' => Sex::Female->value,
+        ])
+        ->assertSessionHasNoErrors();
+
+    $imperialProfile = tap($user->profile()->firstOrFail())->update($identity)->refresh();
+    $metricProfile = User::factory()->create()->profile()->create([
+        'age' => 40,
+        'height' => 177.8,
+        'weight' => 90.72,
+        'sex' => Sex::Female,
+        ...$identity,
+    ])->refresh();
+    $calculateGoals = resolve(CalculateDailyNutritionGoals::class);
+
+    expect($imperialProfile->weight)->toEqualWithDelta(90.7, 0.05)
+        ->and($imperialProfile->tdee)->toBe($metricProfile->tdee)
+        ->and($calculateGoals->handle($imperialProfile))->not->toBeNull()
+        ->toEqual($calculateGoals->handle($metricProfile));
+});
+
+it('validates imperial measurements', function (array $overrides, string $errorKey): void {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'measurement_system' => MeasurementSystem::Imperial->value,
+            'age' => 30,
+            'height_feet' => 5,
+            'height_inches' => 10,
+            'weight' => 180,
+            'sex' => Sex::Male->value,
+            ...$overrides,
+        ])
+        ->assertSessionHasErrors($errorKey);
+
+    expect($user->profile()->exists())->toBeFalse();
+})->with([
+    'missing feet' => [['height_feet' => null], 'height_feet'],
+    'feet below the range' => [['height_feet' => 1], 'height_feet'],
+    'feet above the range' => [['height_feet' => 9], 'height_feet'],
+    'twelve inches' => [['height_inches' => 12], 'height_inches'],
+    'negative inches' => [['height_inches' => -1], 'height_inches'],
+    'weight below the range' => [['weight' => 44], 'weight'],
+    'weight above the range' => [['weight' => 1101], 'weight'],
+]);
+
+it('rejects an unknown measurement system', function (mixed $measurementSystem): void {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'measurement_system' => $measurementSystem,
+            'age' => 30,
+            'height' => 175,
+            'weight' => 70,
+            'sex' => Sex::Male->value,
+        ])
+        ->assertSessionHasErrors('measurement_system');
+})->with([
+    'unknown value' => ['stones'],
+    'array value' => [[MeasurementSystem::Imperial->value]],
+]);
+
+it('asks whether a kilogram entry was meant as pounds before saving', function (): void {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'age' => 30,
+            'height' => 175,
+            'weight' => 193,
+            'sex' => Sex::Male->value,
+        ])
+        ->assertSessionHasErrors(['weight_in_pounds' => 'Did you mean 193 lb?'])
+        ->assertSessionDoesntHaveErrors('measurements');
+
+    expect($user->profile()->exists())->toBeFalse();
+});
+
+it('asks to double-check measurements that pounds would not explain', function (array $payload): void {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'age' => 30,
+            'sex' => Sex::Male->value,
+            ...$payload,
+        ])
+        ->assertSessionHasErrors(['measurements' => 'Please double-check your height and weight.'])
+        ->assertSessionDoesntHaveErrors('weight_in_pounds');
+
+    expect($user->profile()->exists())->toBeFalse();
+})->with([
+    'height typed in inches' => [['height' => 70, 'weight' => 80]],
+    'kilograms typed into the pounds field' => [[
+        'measurement_system' => MeasurementSystem::Imperial->value,
+        'height_feet' => 5,
+        'height_inches' => 10,
+        'weight' => 70,
+    ]],
+    'very high imperial entry' => [[
+        'measurement_system' => MeasurementSystem::Imperial->value,
+        'height_feet' => 5,
+        'height_inches' => 0,
+        'weight' => 450,
+    ]],
+]);
+
+it('saves the original measurements once the person confirms them', function (): void {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'age' => 30,
+            'height' => 175,
+            'weight' => 193,
+            'sex' => Sex::Male->value,
+            'confirm_measurements' => true,
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirectToRoute('onboarding.identity.show');
+
+    expect($user->profile()->first()->weight)->toBe(193.0);
+});
+
+it('only checks the measurements once the rest of the form is valid', function (): void {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'age' => 30,
+            'height' => 175,
+            'weight' => 193,
+        ])
+        ->assertSessionHasErrors('sex')
+        ->assertSessionDoesntHaveErrors(['weight_in_pounds', 'measurements']);
+});
+
+it('clears the review request and returns onboarded people to the dashboard', function (array $payload, float $weight): void {
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'age' => 30,
+        'height' => 175,
+        'weight' => 193,
+        'sex' => Sex::Male->value,
+        'needs_re_onboarding' => true,
+        'onboarding_completed' => true,
+        'onboarding_completed_at' => now(),
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'age' => 30,
+            'sex' => Sex::Male->value,
+            ...$payload,
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirectToRoute('dashboard')
+        ->assertInertiaFlash('toast', [
+            'message' => __('common.onboarding.biometrics.review_confirmed_toast'),
+            'type' => 'success',
+        ]);
+
+    expect($user->profile()->first())
+        ->needs_re_onboarding->toBeFalse()
+        ->weight->toBe($weight);
+})->with([
+    'corrected in kilograms' => [['height' => 175, 'weight' => 87.54], 87.54],
+    'switched to pounds' => [[
+        'measurement_system' => MeasurementSystem::Imperial->value,
+        'height_feet' => 5,
+        'height_inches' => 9,
+        'weight' => 193,
+    ], 87.54],
+    'confirmed as entered' => [['height' => 175, 'weight' => 193, 'confirm_measurements' => true], 193.0],
+]);
+
+it('clears the review request and continues onboarding for people who have not finished it', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'age' => 30,
+        'height' => 175,
+        'weight' => 193,
+        'sex' => Sex::Male->value,
+        'needs_re_onboarding' => true,
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'age' => 30,
+            'height' => 175,
+            'weight' => 87.54,
+            'sex' => Sex::Male->value,
+        ])
+        ->assertRedirectToRoute('onboarding.identity.show');
+
+    expect($user->profile()->first()->needs_re_onboarding)->toBeFalse();
 });

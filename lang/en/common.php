@@ -143,6 +143,11 @@ return [
         'dismiss' => 'Dismiss',
     ],
 
+    'biometrics_review_banner' => [
+        'text' => 'Quick check: please confirm your height and weight so your calorie targets are right.',
+        'action' => 'Review',
+    ],
+
     'onboarding' => [
         'biometrics' => [
             'title' => 'Biometrics - Step 1 of 3',
@@ -166,6 +171,32 @@ return [
             'blood_type_clear' => 'Clear blood type',
             'exit' => 'Exit',
             'continue' => 'Continue',
+            'units' => 'Units',
+            'units_metric' => 'kg, cm',
+            'units_imperial' => 'lb, ft, in',
+            'unit_kg' => 'kg',
+            'unit_cm' => 'cm',
+            'unit_lb' => 'lb',
+            'unit_ft' => 'ft',
+            'unit_in' => 'in',
+            'height_imperial' => 'Height (ft, in)',
+            'feet_label' => 'Feet',
+            'inches_label' => 'Inches',
+            'weight_imperial' => 'Weight (lb)',
+            'weight_imperial_placeholder' => 'Enter your weight in pounds',
+            'review_title' => 'Please double-check your height and weight',
+            'review_body' => 'Your calorie and macro targets are built from these numbers, so let\'s make sure the units are right.',
+            'review_use_pounds' => 'My weight is in pounds',
+            'review_confirmed_toast' => 'Thanks! Your height and weight are confirmed.',
+            'unit_check' => [
+                'pounds_title' => 'Did you mean {{weight}} lb?',
+                'pounds_body' => 'You entered {{weight}} kg at {{height}} cm. If that number is in pounds, we\'ll switch the form to pounds for you.',
+                'use_pounds' => 'Yes, {{weight}} lb',
+                'keep_kilograms' => 'No, {{weight}} kg is right',
+                'measurements_title' => 'Can you double-check these?',
+                'measurements_body' => 'You entered {{weight}} at {{height}}.',
+                'measurements_confirm' => 'Yes, that\'s right',
+            ],
         ],
         'completion' => [
             'title' => 'Welcome Aboard!',

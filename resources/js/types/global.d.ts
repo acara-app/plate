@@ -10,6 +10,7 @@ declare module '@inertiajs/core' {
             translations: Record<string, unknown>;
             enablePremiumUpgrades: boolean;
             canManagePasskeys: boolean;
+            needsBiometricsReview: boolean;
 
             [key: string]: unknown;
         };

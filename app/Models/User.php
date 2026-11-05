@@ -257,6 +257,11 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return $this->accepted_disclaimer_at === null;
     }
 
+    public function needsBiometricsReview(): bool
+    {
+        return $this->profile->needs_re_onboarding ?? false;
+    }
+
     public function wantsGlucoseMealInsights(): bool
     {
         return UserSettingsData::from($this->settings ?? [])->glucoseMealInsightsEnabled;

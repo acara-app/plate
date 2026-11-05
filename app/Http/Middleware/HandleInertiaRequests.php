@@ -64,6 +64,7 @@ final class HandleInertiaRequests extends Middleware
             'availableLanguages' => LanguageUtil::all(),
             'translations' => Inertia::once(fn (): array => LanguageUtil::translations($locale)),
             'entitlement' => $this->buildEntitlement($user),
+            'needsBiometricsReview' => fn (): bool => $user instanceof User && $user->needsBiometricsReview(),
         ];
     }
 

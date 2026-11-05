@@ -1,9 +1,10 @@
 import { dashboard } from '@/routes';
 import onboarding from '@/routes/onboarding';
 import { Form, Head, Link } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
+import { Info, LoaderCircle, Scale } from 'lucide-react';
 
 import InputError from '@/components/input-error';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,8 +15,19 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import useSharedProps from '@/hooks/use-shared-props';
+import {
+    centimetersToFeetAndInches,
+    defaultMeasurementSystem,
+    feetAndInchesToCentimeters,
+    isMeasurementSystem,
+    kilogramsToPounds,
+    type MeasurementSystem,
+    poundsToKilograms,
+} from '@/lib/body-measurements';
 import { BloodTypeOption, Profile, SexOption } from '@/types/user';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 function calculateAge(dateOfBirth: string): number | null {
@@ -38,8 +50,38 @@ function calculateAge(dateOfBirth: string): number | null {
     return age;
 }
 
+interface Measurements {
+    weight: string;
+    heightCm: string;
+    heightFeet: string;
+    heightInches: string;
+}
+
+function initialMeasurements(
+    profile: Profile | null,
+    measurementSystem: MeasurementSystem,
+): Measurements {
+    const weight = profile?.weight?.toString() ?? '';
+    const heightCm = profile?.height?.toString() ?? '';
+
+    if (measurementSystem === 'metric') {
+        return { weight, heightCm, heightFeet: '', heightInches: '' };
+    }
+
+    const { feet, inches } = centimetersToFeetAndInches(heightCm);
+
+    return {
+        weight: kilogramsToPounds(weight),
+        heightCm: '',
+        heightFeet: feet,
+        heightInches: inches,
+    };
+}
+
+const MEASUREMENT_PROMPTS = ['weight_in_pounds', 'measurements'];
+
 interface Props {
-    profile: Profile;
+    profile: Profile | null;
     sexOptions: SexOption[];
     bloodTypeOptions: BloodTypeOption[];
 }
@@ -50,6 +92,8 @@ export default function Biometrics({
     bloodTypeOptions,
 }: Props) {
     const { t } = useTranslation('common');
+    const { locale } = useSharedProps();
+    const needsReview = profile?.needs_re_onboarding === true;
     const [dateOfBirth, setDateOfBirth] = useState(
         profile?.date_of_birth ?? '',
     );
@@ -57,6 +101,15 @@ export default function Biometrics({
     const [bloodType, setBloodType] = useState<string>(
         profile?.blood_type ?? '',
     );
+    const [measurementSystem, setMeasurementSystem] =
+        useState<MeasurementSystem>(() =>
+            needsReview ? 'metric' : defaultMeasurementSystem(locale),
+        );
+    const [measurements, setMeasurements] = useState<Measurements>(() =>
+        initialMeasurements(profile, measurementSystem),
+    );
+    const confirmMeasurementsRef = useRef(false);
+    const isImperial = measurementSystem === 'imperial';
 
     const handleDateOfBirthChange = (value: string) => {
         setDateOfBirth(value);
@@ -65,6 +118,17 @@ export default function Biometrics({
             setAge(computed.toString());
         }
     };
+
+    const heightInFeetAndInches = (heightCm: string) => {
+        const { feet, inches } = centimetersToFeetAndInches(heightCm);
+
+        return { heightFeet: feet, heightInches: inches };
+    };
+
+    const weightLabel = `${measurements.weight} ${t(isImperial ? 'onboarding.biometrics.unit_lb' : 'onboarding.biometrics.unit_kg')}`;
+    const heightLabel = isImperial
+        ? `${measurements.heightFeet || 0} ${t('onboarding.biometrics.unit_ft')} ${measurements.heightInches || 0} ${t('onboarding.biometrics.unit_in')}`
+        : `${measurements.heightCm} ${t('onboarding.biometrics.unit_cm')}`;
 
     return (
         <>
@@ -100,228 +164,616 @@ export default function Biometrics({
 
                         <Form
                             {...onboarding.biometrics.store.form()}
+                            transform={(data) =>
+                                confirmMeasurementsRef.current
+                                    ? { ...data, confirm_measurements: true }
+                                    : data
+                            }
+                            onFinish={() => {
+                                confirmMeasurementsRef.current = false;
+                            }}
                             disableWhileProcessing
                             className="space-y-6"
                         >
-                            {({ processing, errors }) => (
-                                <>
-                                    {/* Age */}
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="age">
-                                            {t('onboarding.biometrics.age')}
-                                        </Label>
-                                        <Input
-                                            id="age"
-                                            type="number"
-                                            name="age"
-                                            value={age}
-                                            onChange={(e) =>
-                                                setAge(e.target.value)
-                                            }
-                                            min="13"
-                                            max="120"
-                                            required
-                                            placeholder={t(
-                                                'onboarding.biometrics.age_placeholder',
-                                            )}
-                                        />
-                                        <InputError message={errors.age} />
-                                    </div>
+                            {({ processing, errors, clearErrors, submit }) => {
+                                const clearMeasurementPrompts = () => {
+                                    if (
+                                        errors.weight_in_pounds ||
+                                        errors.measurements
+                                    ) {
+                                        clearErrors(...MEASUREMENT_PROMPTS);
+                                    }
+                                };
 
-                                    {/* Date of Birth (optional) */}
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="date_of_birth">
-                                            {t(
-                                                'onboarding.biometrics.date_of_birth',
-                                            )}
-                                        </Label>
-                                        <Input
-                                            id="date_of_birth"
-                                            type="date"
-                                            name="date_of_birth"
-                                            value={dateOfBirth}
-                                            onChange={(e) =>
-                                                handleDateOfBirthChange(
-                                                    e.target.value,
-                                                )
-                                            }
-                                            max={
-                                                new Date()
-                                                    .toISOString()
-                                                    .split('T')[0]
-                                            }
-                                        />
-                                        <InputError
-                                            message={errors.date_of_birth}
-                                        />
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                                            {t(
-                                                'onboarding.biometrics.date_of_birth_help',
-                                            )}
-                                        </p>
-                                    </div>
+                                const changeMeasurement = (
+                                    field: keyof Measurements,
+                                    value: string,
+                                ) => {
+                                    setMeasurements((current) => ({
+                                        ...current,
+                                        [field]: value,
+                                    }));
+                                    clearMeasurementPrompts();
+                                };
 
-                                    {/* Height */}
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="height">
-                                            {t('onboarding.biometrics.height')}
-                                        </Label>
-                                        <Input
-                                            id="height"
-                                            type="number"
-                                            name="height"
-                                            defaultValue={profile?.height || ''}
-                                            step="0.01"
-                                            min="50"
-                                            max="300"
-                                            required
-                                            placeholder={t(
-                                                'onboarding.biometrics.height_placeholder',
-                                            )}
-                                        />
-                                        <InputError message={errors.height} />
-                                    </div>
+                                const switchMeasurementSystem = (
+                                    next: MeasurementSystem,
+                                ) => {
+                                    if (next === measurementSystem) {
+                                        return;
+                                    }
 
-                                    {/* Weight */}
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="weight">
-                                            {t('onboarding.biometrics.weight')}
-                                        </Label>
-                                        <Input
-                                            id="weight"
-                                            type="number"
-                                            name="weight"
-                                            defaultValue={profile?.weight || ''}
-                                            step="0.01"
-                                            min="20"
-                                            max="500"
-                                            required
-                                            placeholder={t(
-                                                'onboarding.biometrics.weight_placeholder',
-                                            )}
-                                        />
-                                        <InputError message={errors.weight} />
-                                    </div>
+                                    setMeasurements((current) =>
+                                        next === 'imperial'
+                                            ? {
+                                                  ...current,
+                                                  weight: kilogramsToPounds(
+                                                      current.weight,
+                                                  ),
+                                                  ...heightInFeetAndInches(
+                                                      current.heightCm,
+                                                  ),
+                                              }
+                                            : {
+                                                  ...current,
+                                                  weight: poundsToKilograms(
+                                                      current.weight,
+                                                  ),
+                                                  heightCm:
+                                                      feetAndInchesToCentimeters(
+                                                          current.heightFeet,
+                                                          current.heightInches,
+                                                      ),
+                                              },
+                                    );
+                                    setMeasurementSystem(next);
+                                    clearMeasurementPrompts();
+                                };
 
-                                    {/* Sex */}
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="sex">
-                                            {t('onboarding.biometrics.sex')}
-                                        </Label>
-                                        <Select
-                                            name="sex"
-                                            defaultValue={profile?.sex || ''}
-                                            required
-                                        >
-                                            <SelectTrigger id="sex">
-                                                <SelectValue
-                                                    placeholder={t(
-                                                        'onboarding.biometrics.sex_placeholder',
+                                const treatWeightAsPounds = () => {
+                                    setMeasurements((current) => ({
+                                        ...current,
+                                        ...heightInFeetAndInches(
+                                            current.heightCm,
+                                        ),
+                                    }));
+                                    setMeasurementSystem('imperial');
+                                    clearMeasurementPrompts();
+                                };
+
+                                const confirmMeasurements = () => {
+                                    confirmMeasurementsRef.current = true;
+                                    submit();
+                                };
+
+                                return (
+                                    <>
+                                        {needsReview && (
+                                            <Alert
+                                                role="status"
+                                                className="border-primary/30 bg-primary/5"
+                                            >
+                                                <Info className="text-primary" />
+                                                <AlertTitle className="line-clamp-none">
+                                                    {t(
+                                                        'onboarding.biometrics.review_title',
                                                     )}
-                                                />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {sexOptions.map((option) => (
-                                                    <SelectItem
-                                                        key={option.value}
-                                                        value={option.value}
-                                                    >
-                                                        {option.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <InputError message={errors.sex} />
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                                            {t(
-                                                'onboarding.biometrics.sex_help',
-                                            )}
-                                        </p>
-                                    </div>
+                                                </AlertTitle>
+                                                <AlertDescription>
+                                                    <p>
+                                                        {t(
+                                                            'onboarding.biometrics.review_body',
+                                                        )}
+                                                    </p>
+                                                    {!isImperial && (
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="mt-2"
+                                                            onClick={
+                                                                treatWeightAsPounds
+                                                            }
+                                                        >
+                                                            {t(
+                                                                'onboarding.biometrics.review_use_pounds',
+                                                            )}
+                                                        </Button>
+                                                    )}
+                                                </AlertDescription>
+                                            </Alert>
+                                        )}
 
-                                    {/* Blood Type */}
-                                    <div className="grid gap-2">
-                                        <div className="flex items-center justify-between">
-                                            <Label htmlFor="blood_type">
+                                        {errors.weight_in_pounds && (
+                                            <Alert className="border-amber-300 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/40">
+                                                <Scale className="text-amber-700 dark:text-amber-400" />
+                                                <AlertTitle className="line-clamp-none">
+                                                    {t(
+                                                        'onboarding.biometrics.unit_check.pounds_title',
+                                                        {
+                                                            weight: measurements.weight,
+                                                        },
+                                                    )}
+                                                </AlertTitle>
+                                                <AlertDescription>
+                                                    <p>
+                                                        {t(
+                                                            'onboarding.biometrics.unit_check.pounds_body',
+                                                            {
+                                                                weight: measurements.weight,
+                                                                height: measurements.heightCm,
+                                                            },
+                                                        )}
+                                                    </p>
+                                                    <div className="mt-2 flex flex-wrap gap-2">
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            onClick={
+                                                                treatWeightAsPounds
+                                                            }
+                                                        >
+                                                            {t(
+                                                                'onboarding.biometrics.unit_check.use_pounds',
+                                                                {
+                                                                    weight: measurements.weight,
+                                                                },
+                                                            )}
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={
+                                                                confirmMeasurements
+                                                            }
+                                                        >
+                                                            {t(
+                                                                'onboarding.biometrics.unit_check.keep_kilograms',
+                                                                {
+                                                                    weight: measurements.weight,
+                                                                },
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                </AlertDescription>
+                                            </Alert>
+                                        )}
+
+                                        {errors.measurements && (
+                                            <Alert className="border-amber-300 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/40">
+                                                <Scale className="text-amber-700 dark:text-amber-400" />
+                                                <AlertTitle className="line-clamp-none">
+                                                    {t(
+                                                        'onboarding.biometrics.unit_check.measurements_title',
+                                                    )}
+                                                </AlertTitle>
+                                                <AlertDescription>
+                                                    <p>
+                                                        {t(
+                                                            'onboarding.biometrics.unit_check.measurements_body',
+                                                            {
+                                                                weight: weightLabel,
+                                                                height: heightLabel,
+                                                            },
+                                                        )}
+                                                    </p>
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="mt-2"
+                                                        onClick={
+                                                            confirmMeasurements
+                                                        }
+                                                    >
+                                                        {t(
+                                                            'onboarding.biometrics.unit_check.measurements_confirm',
+                                                        )}
+                                                    </Button>
+                                                </AlertDescription>
+                                            </Alert>
+                                        )}
+
+                                        {/* Age */}
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="age">
+                                                {t('onboarding.biometrics.age')}
+                                            </Label>
+                                            <Input
+                                                id="age"
+                                                type="number"
+                                                name="age"
+                                                value={age}
+                                                onChange={(e) =>
+                                                    setAge(e.target.value)
+                                                }
+                                                min="13"
+                                                max="120"
+                                                required
+                                                placeholder={t(
+                                                    'onboarding.biometrics.age_placeholder',
+                                                )}
+                                            />
+                                            <InputError message={errors.age} />
+                                        </div>
+
+                                        {/* Date of Birth (optional) */}
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="date_of_birth">
                                                 {t(
-                                                    'onboarding.biometrics.blood_type',
+                                                    'onboarding.biometrics.date_of_birth',
                                                 )}
                                             </Label>
-                                            {bloodType && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        setBloodType('')
+                                            <Input
+                                                id="date_of_birth"
+                                                type="date"
+                                                name="date_of_birth"
+                                                value={dateOfBirth}
+                                                onChange={(e) =>
+                                                    handleDateOfBirthChange(
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                max={
+                                                    new Date()
+                                                        .toISOString()
+                                                        .split('T')[0]
+                                                }
+                                            />
+                                            <InputError
+                                                message={errors.date_of_birth}
+                                            />
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                {t(
+                                                    'onboarding.biometrics.date_of_birth_help',
+                                                )}
+                                            </p>
+                                        </div>
+
+                                        <div className="grid gap-2">
+                                            <Label id="measurement_system_label">
+                                                {t(
+                                                    'onboarding.biometrics.units',
+                                                )}
+                                            </Label>
+                                            <input
+                                                type="hidden"
+                                                name="measurement_system"
+                                                value={measurementSystem}
+                                            />
+                                            <ToggleGroup
+                                                type="single"
+                                                variant="outline"
+                                                joined
+                                                value={measurementSystem}
+                                                onValueChange={(value) => {
+                                                    if (
+                                                        isMeasurementSystem(
+                                                            value,
+                                                        )
+                                                    ) {
+                                                        switchMeasurementSystem(
+                                                            value,
+                                                        );
                                                     }
-                                                    className="text-xs text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                                }}
+                                                aria-labelledby="measurement_system_label"
+                                                className="w-full"
+                                            >
+                                                <ToggleGroupItem
+                                                    value="metric"
+                                                    className="flex-1"
                                                 >
                                                     {t(
-                                                        'onboarding.biometrics.blood_type_clear',
+                                                        'onboarding.biometrics.units_metric',
                                                     )}
-                                                </button>
-                                            )}
+                                                </ToggleGroupItem>
+                                                <ToggleGroupItem
+                                                    value="imperial"
+                                                    className="flex-1"
+                                                >
+                                                    {t(
+                                                        'onboarding.biometrics.units_imperial',
+                                                    )}
+                                                </ToggleGroupItem>
+                                            </ToggleGroup>
+                                            <InputError
+                                                message={
+                                                    errors.measurement_system
+                                                }
+                                            />
                                         </div>
-                                        <Select
-                                            name="blood_type"
-                                            value={bloodType}
-                                            onValueChange={setBloodType}
-                                        >
-                                            <SelectTrigger id="blood_type">
-                                                <SelectValue
+
+                                        {/* Height */}
+                                        {isImperial ? (
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="height_feet">
+                                                    {t(
+                                                        'onboarding.biometrics.height_imperial',
+                                                    )}
+                                                </Label>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div className="relative">
+                                                        <Input
+                                                            id="height_feet"
+                                                            type="number"
+                                                            name="height_feet"
+                                                            value={
+                                                                measurements.heightFeet
+                                                            }
+                                                            onChange={(e) =>
+                                                                changeMeasurement(
+                                                                    'heightFeet',
+                                                                    e.target
+                                                                        .value,
+                                                                )
+                                                            }
+                                                            step="1"
+                                                            min="2"
+                                                            max="8"
+                                                            required
+                                                            aria-label={t(
+                                                                'onboarding.biometrics.feet_label',
+                                                            )}
+                                                            placeholder={t(
+                                                                'onboarding.biometrics.feet_label',
+                                                            )}
+                                                            className="pr-10"
+                                                        />
+                                                        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-muted-foreground">
+                                                            {t(
+                                                                'onboarding.biometrics.unit_ft',
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                    <div className="relative">
+                                                        <Input
+                                                            id="height_inches"
+                                                            type="number"
+                                                            name="height_inches"
+                                                            value={
+                                                                measurements.heightInches
+                                                            }
+                                                            onChange={(e) =>
+                                                                changeMeasurement(
+                                                                    'heightInches',
+                                                                    e.target
+                                                                        .value,
+                                                                )
+                                                            }
+                                                            step="0.1"
+                                                            min="0"
+                                                            max="11.9"
+                                                            aria-label={t(
+                                                                'onboarding.biometrics.inches_label',
+                                                            )}
+                                                            placeholder={t(
+                                                                'onboarding.biometrics.inches_label',
+                                                            )}
+                                                            className="pr-10"
+                                                        />
+                                                        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-muted-foreground">
+                                                            {t(
+                                                                'onboarding.biometrics.unit_in',
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <InputError
+                                                    message={errors.height_feet}
+                                                />
+                                                <InputError
+                                                    message={
+                                                        errors.height_inches
+                                                    }
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="height">
+                                                    {t(
+                                                        'onboarding.biometrics.height',
+                                                    )}
+                                                </Label>
+                                                <Input
+                                                    id="height"
+                                                    type="number"
+                                                    name="height"
+                                                    value={
+                                                        measurements.heightCm
+                                                    }
+                                                    onChange={(e) =>
+                                                        changeMeasurement(
+                                                            'heightCm',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    step="0.01"
+                                                    min="50"
+                                                    max="300"
+                                                    required
                                                     placeholder={t(
-                                                        'onboarding.biometrics.blood_type_placeholder',
+                                                        'onboarding.biometrics.height_placeholder',
                                                     )}
                                                 />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {bloodTypeOptions.map(
-                                                    (option) => (
-                                                        <SelectItem
-                                                            key={option.value}
-                                                            value={option.value}
-                                                        >
-                                                            {option.label}
-                                                        </SelectItem>
-                                                    ),
+                                                <InputError
+                                                    message={errors.height}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* Weight */}
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="weight">
+                                                {t(
+                                                    isImperial
+                                                        ? 'onboarding.biometrics.weight_imperial'
+                                                        : 'onboarding.biometrics.weight',
                                                 )}
-                                            </SelectContent>
-                                        </Select>
-                                        <InputError
-                                            message={errors.blood_type}
-                                        />
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                                            {t(
-                                                'onboarding.biometrics.blood_type_help',
-                                            )}
-                                        </p>
-                                    </div>
+                                            </Label>
+                                            <Input
+                                                id="weight"
+                                                type="number"
+                                                name="weight"
+                                                value={measurements.weight}
+                                                onChange={(e) =>
+                                                    changeMeasurement(
+                                                        'weight',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                step="0.01"
+                                                min={isImperial ? '45' : '20'}
+                                                max={
+                                                    isImperial ? '1100' : '500'
+                                                }
+                                                required
+                                                placeholder={t(
+                                                    isImperial
+                                                        ? 'onboarding.biometrics.weight_imperial_placeholder'
+                                                        : 'onboarding.biometrics.weight_placeholder',
+                                                )}
+                                            />
+                                            <InputError
+                                                message={errors.weight}
+                                            />
+                                        </div>
 
-                                    {/* Footer Section */}
-                                    <div className="flex flex-col items-center gap-4">
-                                        {/* Action Buttons */}
-                                        <Button
-                                            type="submit"
-                                            disabled={processing}
-                                            className="min-w-30"
-                                        >
-                                            {processing && (
-                                                <LoaderCircle className="h-4 w-4 animate-spin" />
-                                            )}
-                                            {t(
-                                                'onboarding.biometrics.continue',
-                                            )}
-                                        </Button>
+                                        {/* Sex */}
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="sex">
+                                                {t('onboarding.biometrics.sex')}
+                                            </Label>
+                                            <Select
+                                                name="sex"
+                                                defaultValue={
+                                                    profile?.sex || ''
+                                                }
+                                                required
+                                            >
+                                                <SelectTrigger id="sex">
+                                                    <SelectValue
+                                                        placeholder={t(
+                                                            'onboarding.biometrics.sex_placeholder',
+                                                        )}
+                                                    />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {sexOptions.map(
+                                                        (option) => (
+                                                            <SelectItem
+                                                                key={
+                                                                    option.value
+                                                                }
+                                                                value={
+                                                                    option.value
+                                                                }
+                                                            >
+                                                                {option.label}
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                            <InputError message={errors.sex} />
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                {t(
+                                                    'onboarding.biometrics.sex_help',
+                                                )}
+                                            </p>
+                                        </div>
 
-                                        {/* Exit Link - Centered Below */}
-                                        <Link
-                                            href={dashboard.url()}
-                                            className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
-                                        >
-                                            {t('onboarding.biometrics.exit')}
-                                        </Link>
-                                    </div>
-                                </>
-                            )}
+                                        {/* Blood Type */}
+                                        <div className="grid gap-2">
+                                            <div className="flex items-center justify-between">
+                                                <Label htmlFor="blood_type">
+                                                    {t(
+                                                        'onboarding.biometrics.blood_type',
+                                                    )}
+                                                </Label>
+                                                {bloodType && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setBloodType('')
+                                                        }
+                                                        className="text-xs text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                                    >
+                                                        {t(
+                                                            'onboarding.biometrics.blood_type_clear',
+                                                        )}
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <Select
+                                                name="blood_type"
+                                                value={bloodType}
+                                                onValueChange={setBloodType}
+                                            >
+                                                <SelectTrigger id="blood_type">
+                                                    <SelectValue
+                                                        placeholder={t(
+                                                            'onboarding.biometrics.blood_type_placeholder',
+                                                        )}
+                                                    />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {bloodTypeOptions.map(
+                                                        (option) => (
+                                                            <SelectItem
+                                                                key={
+                                                                    option.value
+                                                                }
+                                                                value={
+                                                                    option.value
+                                                                }
+                                                            >
+                                                                {option.label}
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                            <InputError
+                                                message={errors.blood_type}
+                                            />
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                {t(
+                                                    'onboarding.biometrics.blood_type_help',
+                                                )}
+                                            </p>
+                                        </div>
+
+                                        {/* Footer Section */}
+                                        <div className="flex flex-col items-center gap-4">
+                                            {/* Action Buttons */}
+                                            <Button
+                                                type="submit"
+                                                disabled={processing}
+                                                className="min-w-30"
+                                            >
+                                                {processing && (
+                                                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                                                )}
+                                                {t(
+                                                    'onboarding.biometrics.continue',
+                                                )}
+                                            </Button>
+
+                                            {/* Exit Link - Centered Below */}
+                                            <Link
+                                                href={dashboard.url()}
+                                                className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                            >
+                                                {t(
+                                                    'onboarding.biometrics.exit',
+                                                )}
+                                            </Link>
+                                        </div>
+                                    </>
+                                );
+                            }}
                         </Form>
                     </div>
                 </div>

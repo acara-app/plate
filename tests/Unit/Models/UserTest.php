@@ -320,3 +320,17 @@ it('paginatedConversations respects a custom page size', function (): void {
     expect($paginator->perPage())->toBe(5)
         ->and($paginator->items())->toHaveCount(5);
 });
+
+it('needs a biometrics review only when the profile is flagged', function (): void {
+    $user = User::factory()->create();
+
+    expect($user->needsBiometricsReview())->toBeFalse();
+
+    $user->profile()->create(['needs_re_onboarding' => false]);
+
+    expect($user->refresh()->needsBiometricsReview())->toBeFalse();
+
+    $user->profile()->update(['needs_re_onboarding' => true]);
+
+    expect($user->refresh()->needsBiometricsReview())->toBeTrue();
+});

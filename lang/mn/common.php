@@ -143,6 +143,11 @@ return [
         'dismiss' => 'Хаах',
     ],
 
+    'biometrics_review_banner' => [
+        'text' => 'Илчлэгийн зорилт тань зөв байхын тулд өндөр, жингээ баталгаажуулна уу.',
+        'action' => 'Шалгах',
+    ],
+
     'onboarding' => [
         'biometrics' => [
             'title' => 'Биеийн үзүүлэлт - 3 алхмын 1',
@@ -166,6 +171,32 @@ return [
             'blood_type_clear' => 'Цусны бүлгийг арилгах',
             'exit' => 'Гарах',
             'continue' => 'Үргэлжлүүлэх',
+            'units' => 'Хэмжих нэгж',
+            'units_metric' => 'кг, см',
+            'units_imperial' => 'фунт, фут, инч',
+            'unit_kg' => 'кг',
+            'unit_cm' => 'см',
+            'unit_lb' => 'фунт',
+            'unit_ft' => 'фут',
+            'unit_in' => 'инч',
+            'height_imperial' => 'Өндөр (фут, инч)',
+            'feet_label' => 'Фут',
+            'inches_label' => 'Инч',
+            'weight_imperial' => 'Жин (фунт)',
+            'weight_imperial_placeholder' => 'Жингээ фунтаар оруулна уу',
+            'review_title' => 'Өндөр, жингээ дахин шалгана уу',
+            'review_body' => 'Таны илчлэг, макро зорилтыг эдгээр тооноос тооцдог тул нэгжээ зөв оруулсан эсэхээ шалгаарай.',
+            'review_use_pounds' => 'Би жингээ фунтаар оруулсан',
+            'review_confirmed_toast' => 'Баярлалаа! Өндөр, жин тань баталгаажлаа.',
+            'unit_check' => [
+                'pounds_title' => '{{weight}} фунт гэсэн үү?',
+                'pounds_body' => 'Та {{height}} см өндөр, {{weight}} кг жин гэж оруулсан байна. Хэрэв энэ тоо фунтаар бол маягтыг фунт руу шилжүүлье.',
+                'use_pounds' => 'Тийм, {{weight}} фунт',
+                'keep_kilograms' => 'Үгүй, {{weight}} кг зөв',
+                'measurements_title' => 'Эдгээр тоог дахин шалгана уу',
+                'measurements_body' => 'Та {{height}} өндөр, {{weight}} жин гэж оруулсан байна.',
+                'measurements_confirm' => 'Тийм, зөв',
+            ],
         ],
         'completion' => [
             'title' => 'Тавтай морилно уу!',
