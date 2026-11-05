@@ -251,3 +251,15 @@ it('uses the date of birth for the current age and falls back to the stored age'
         ->and($fromStoredAge->refresh()->currentAge())->toBe(25)
         ->and($withoutAge->refresh()->currentAge())->toBeNull();
 });
+
+it('knows when the stored weight only makes sense as pounds', function (?float $weight, ?float $height, bool $looksLikePounds): void {
+    $profile = UserProfile::factory()->create(['weight' => $weight, 'height' => $height]);
+
+    expect($profile->refresh()->weightLooksLikePounds())->toBe($looksLikePounds);
+})->with([
+    'pounds typed as kilograms' => [193.0, 175.0, true],
+    'typical adult' => [70.0, 175.0, false],
+    'height typed in inches' => [80.0, 70.0, false],
+    'missing weight' => [null, 175.0, false],
+    'missing height' => [193.0, null, false],
+]);

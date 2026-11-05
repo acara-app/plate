@@ -35,7 +35,7 @@ it('asks whether a weight typed into the kilograms field was meant as pounds', f
 
     expect($user->profile()->first())
         ->weight->toBe(87.54)
-        ->height->toBe(175.01);
+        ->height->toBe(175.0);
 });
 
 it('previews the equivalent measurements while typing and clears previews with empty or invalid inputs', function (): void {
@@ -129,7 +129,32 @@ it('lets returning users correct their measurements through readable mobile prom
 
     expect($profile->refresh())
         ->weight->toBe(87.54)
-        ->height->toBe(175.01)
+        ->height->toBe(175.0)
         ->needs_re_onboarding->toBeFalse()
         ->onboarding_completed->toBeTrue();
 })->with(['English' => 'en', 'French' => 'fr', 'Mongolian' => 'mn']);
+
+it('keeps saved measurements exact when they are saved again in pounds, feet and inches', function (): void {
+    $user = User::factory()->create();
+    $profile = UserProfile::factory()->for($user)->create([
+        'age' => 30,
+        'date_of_birth' => null,
+        'height' => 175,
+        'weight' => 70,
+        'sex' => Sex::Male,
+    ]);
+    $this->actingAs($user);
+
+    visit(route('onboarding.biometrics.show', absolute: false))->withLocale('en-US')
+        ->assertSee('Weight (lb)')
+        ->assertValue('#weight', '154.3')
+        ->assertValue('#height_inches', '8.9')
+        ->assertSeeIn('#weight-conversion-preview', 'Approximately 70 kg')
+        ->press('Continue')
+        ->assertPathIs(route('onboarding.identity.show', absolute: false))
+        ->assertNoJavaScriptErrors();
+
+    expect($profile->refresh())
+        ->weight->toBe(70.0)
+        ->height->toBe(175.0);
+});

@@ -9,7 +9,7 @@ const KILOGRAMS_PER_POUND = 0.45359237;
 const CENTIMETERS_PER_INCH = 2.54;
 const INCHES_PER_FOOT = 12;
 
-function parseMeasurement(value: string): number | null {
+export function parseMeasurement(value: string): number | null {
     if (value.trim() === '') {
         return null;
     }
@@ -19,7 +19,7 @@ function parseMeasurement(value: string): number | null {
     return Number.isFinite(parsed) ? parsed : null;
 }
 
-function formatMeasurement(value: number, decimals: number): string {
+export function formatMeasurement(value: number, decimals: number): string {
     return String(Number(value.toFixed(decimals)));
 }
 
@@ -83,4 +83,18 @@ export function feetAndInchesToCentimeters(
     const totalInches = (feetValue ?? 0) * INCHES_PER_FOOT + (inchesValue ?? 0);
 
     return formatMeasurement(totalInches * CENTIMETERS_PER_INCH, 2);
+}
+
+export function exactPounds(kilograms: number): string {
+    return (kilograms / KILOGRAMS_PER_POUND).toFixed(6);
+}
+
+export function exactFeetAndInches(centimeters: number): FeetAndInches {
+    const totalInches = Number((centimeters / CENTIMETERS_PER_INCH).toFixed(6));
+    const feet = Math.floor(totalInches / INCHES_PER_FOOT);
+
+    return {
+        feet: String(feet),
+        inches: (totalInches - feet * INCHES_PER_FOOT).toFixed(6),
+    };
 }

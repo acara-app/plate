@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\WeightUnit;
+
 final class BodyMassIndex
 {
     public const float PLAUSIBLE_MINIMUM = 15.0;
@@ -20,5 +22,11 @@ final class BodyMassIndex
         $bodyMassIndex = $weightKg / ($heightInMeters * $heightInMeters);
 
         return $bodyMassIndex >= self::PLAUSIBLE_MINIMUM && $bodyMassIndex < self::PLAUSIBLE_MAXIMUM;
+    }
+
+    public static function looksLikePounds(float $weightKg, float $heightCm): bool
+    {
+        return ! self::isPlausible($weightKg, $heightCm)
+            && self::isPlausible(WeightUnit::Lb->toKg($weightKg), $heightCm);
     }
 }

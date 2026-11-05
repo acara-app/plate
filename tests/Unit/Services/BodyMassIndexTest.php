@@ -21,3 +21,13 @@ it('decides whether a weight and height make a plausible adult BMI', function (f
     'zero weight' => [0.0, 175.0, false],
     'negative weight' => [-70.0, 175.0, false],
 ]);
+
+it('recognises weights that only make sense when read as pounds', function (float $weightKg, float $heightCm, bool $looksLikePounds): void {
+    expect(BodyMassIndex::looksLikePounds($weightKg, $heightCm))->toBe($looksLikePounds);
+})->with([
+    'pounds typed as kilograms' => [193.0, 175.0, true],
+    'typical adult' => [70.0, 175.0, false],
+    'height typed in inches' => [80.0, 70.0, false],
+    'implausibly low weight' => [30.0, 175.0, false],
+    'too high even as pounds' => [450.0, 150.0, false],
+]);

@@ -39,6 +39,7 @@ final readonly class OnboardingController
         return Inertia::render('onboarding/biometrics', [
             'profile' => $profile,
             'currentAge' => $profile?->currentAge(),
+            'weightLooksLikePounds' => $profile?->weightLooksLikePounds() ?? false,
             'sexOptions' => collect(Sex::cases())->map(fn (Sex $sex): array => [
                 'value' => $sex->value,
                 'label' => ucfirst($sex->value),

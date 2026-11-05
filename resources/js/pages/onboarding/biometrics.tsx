@@ -20,10 +20,14 @@ import useSharedProps from '@/hooks/use-shared-props';
 import {
     centimetersToFeetAndInches,
     defaultMeasurementSystem,
+    exactFeetAndInches,
+    exactPounds,
     feetAndInchesToCentimeters,
+    formatMeasurement,
     isMeasurementSystem,
     kilogramsToPounds,
     type MeasurementSystem,
+    parseMeasurement,
     poundsToKilograms,
 } from '@/lib/body-measurements';
 import { BloodTypeOption, Profile, SexOption } from '@/types/user';
@@ -35,7 +39,11 @@ interface Measurements {
     heightCm: string;
     heightFeet: string;
     heightInches: string;
+    exactWeightKg: number | null;
+    exactHeightCm: number | null;
 }
+
+type MeasurementField = 'weight' | 'heightCm' | 'heightFeet' | 'heightInches';
 
 function initialMeasurements(
     profile: Profile | null,
@@ -45,7 +53,14 @@ function initialMeasurements(
     const heightCm = profile?.height?.toString() ?? '';
 
     if (measurementSystem === 'metric') {
-        return { weight, heightCm, heightFeet: '', heightInches: '' };
+        return {
+            weight,
+            heightCm,
+            heightFeet: '',
+            heightInches: '',
+            exactWeightKg: null,
+            exactHeightCm: null,
+        };
     }
 
     const { feet, inches } = centimetersToFeetAndInches(heightCm);
@@ -55,10 +70,48 @@ function initialMeasurements(
         heightCm: '',
         heightFeet: feet,
         heightInches: inches,
+        exactWeightKg: parseMeasurement(weight),
+        exactHeightCm: parseMeasurement(heightCm),
+    };
+}
+
+function heightInFeetAndInches(heightCm: number | null) {
+    if (heightCm === null) {
+        return { heightFeet: '', heightInches: '' };
+    }
+
+    const { feet, inches } = centimetersToFeetAndInches(String(heightCm));
+
+    return { heightFeet: feet, heightInches: inches };
+}
+
+function exactImperialSubmission(
+    measurements: Measurements,
+): Record<string, string> {
+    const height =
+        measurements.exactHeightCm === null
+            ? null
+            : exactFeetAndInches(measurements.exactHeightCm);
+
+    return {
+        ...(measurements.exactWeightKg === null
+            ? {}
+            : { weight: exactPounds(measurements.exactWeightKg) }),
+        ...(height === null
+            ? {}
+            : { height_feet: height.feet, height_inches: height.inches }),
     };
 }
 
 const MEASUREMENT_PROMPTS = ['weight_in_pounds', 'measurements'];
+
+const MEASUREMENT_ERRORS = [
+    ...MEASUREMENT_PROMPTS,
+    'weight',
+    'height',
+    'height_feet',
+    'height_inches',
+];
 
 function isValidMeasurement(
     value: string,
@@ -78,6 +131,7 @@ function isValidMeasurement(
 interface Props {
     profile: Profile | null;
     currentAge: number | null;
+    weightLooksLikePounds: boolean;
     sexOptions: SexOption[];
     bloodTypeOptions: BloodTypeOption[];
 }
@@ -85,6 +139,7 @@ interface Props {
 export default function Biometrics({
     profile,
     currentAge,
+    weightLooksLikePounds,
     sexOptions,
     bloodTypeOptions,
 }: Props) {
@@ -107,23 +162,20 @@ export default function Biometrics({
     const confirmMeasurementsRef = useRef(false);
     const isImperial = measurementSystem === 'imperial';
 
-    const heightInFeetAndInches = (heightCm: string) => {
-        const { feet, inches } = centimetersToFeetAndInches(heightCm);
-
-        return { heightFeet: feet, heightInches: inches };
-    };
-
     const weightLabel = `${measurements.weight} ${t(isImperial ? 'onboarding.biometrics.unit_lb' : 'onboarding.biometrics.unit_kg')}`;
     const heightLabel = isImperial
         ? `${measurements.heightFeet || 0} ${t('onboarding.biometrics.unit_ft')} ${measurements.heightInches || 0} ${t('onboarding.biometrics.unit_in')}`
         : `${measurements.heightCm} ${t('onboarding.biometrics.unit_cm')}`;
-    const weightPreview = isValidMeasurement(
-        measurements.weight,
-        isImperial ? 45 : 20,
-        isImperial ? 1100 : 500,
-    )
-        ? `${isImperial ? poundsToKilograms(measurements.weight) : kilogramsToPounds(measurements.weight)} ${t(isImperial ? 'onboarding.biometrics.unit_kg' : 'onboarding.biometrics.unit_lb')}`
-        : null;
+    const weightPreview =
+        isImperial && measurements.exactWeightKg !== null
+            ? `${formatMeasurement(measurements.exactWeightKg, 2)} ${t('onboarding.biometrics.unit_kg')}`
+            : isValidMeasurement(
+                    measurements.weight,
+                    isImperial ? 45 : 20,
+                    isImperial ? 1100 : 500,
+                )
+              ? `${isImperial ? poundsToKilograms(measurements.weight) : kilogramsToPounds(measurements.weight)} ${t(isImperial ? 'onboarding.biometrics.unit_kg' : 'onboarding.biometrics.unit_lb')}`
+              : null;
     const metricHeightPreview = centimetersToFeetAndInches(
         measurements.heightCm,
     );
@@ -133,9 +185,11 @@ export default function Biometrics({
         (measurements.heightInches.trim() === '' ||
             isValidMeasurement(measurements.heightInches, 0, 11.9));
     const heightPreview = isImperial
-        ? hasValidImperialHeight
-            ? `${feetAndInchesToCentimeters(measurements.heightFeet, measurements.heightInches)} ${t('onboarding.biometrics.unit_cm')}`
-            : null
+        ? measurements.exactHeightCm !== null
+            ? `${formatMeasurement(measurements.exactHeightCm, 2)} ${t('onboarding.biometrics.unit_cm')}`
+            : hasValidImperialHeight
+              ? `${feetAndInchesToCentimeters(measurements.heightFeet, measurements.heightInches)} ${t('onboarding.biometrics.unit_cm')}`
+              : null
         : isValidMeasurement(measurements.heightCm, 50, 300)
           ? `${metricHeightPreview.feet} ${t('onboarding.biometrics.unit_ft')} ${metricHeightPreview.inches} ${t('onboarding.biometrics.unit_in')}`
           : null;
@@ -200,11 +254,23 @@ export default function Biometrics({
 
                         <Form
                             {...onboarding.biometrics.store.form()}
-                            transform={(data) =>
-                                confirmMeasurementsRef.current
-                                    ? { ...data, confirm_measurements: true }
-                                    : data
-                            }
+                            transform={(data) => {
+                                const submitted = isImperial
+                                    ? {
+                                          ...data,
+                                          ...exactImperialSubmission(
+                                              measurements,
+                                          ),
+                                      }
+                                    : data;
+
+                                return confirmMeasurementsRef.current
+                                    ? {
+                                          ...submitted,
+                                          confirm_measurements: true,
+                                      }
+                                    : submitted;
+                            }}
                             onFinish={() => {
                                 confirmMeasurementsRef.current = false;
                             }}
@@ -221,13 +287,27 @@ export default function Biometrics({
                                     }
                                 };
 
+                                const clearMeasurementErrors = () => {
+                                    const present = MEASUREMENT_ERRORS.filter(
+                                        (key) =>
+                                            errors[key as keyof typeof errors],
+                                    );
+
+                                    if (present.length > 0) {
+                                        clearErrors(...present);
+                                    }
+                                };
+
                                 const changeMeasurement = (
-                                    field: keyof Measurements,
+                                    field: MeasurementField,
                                     value: string,
                                 ) => {
                                     setMeasurements((current) => ({
                                         ...current,
                                         [field]: value,
+                                        ...(field === 'weight'
+                                            ? { exactWeightKg: null }
+                                            : { exactHeightCm: null }),
                                     }));
                                     clearMeasurementPrompts();
                                 };
@@ -239,42 +319,75 @@ export default function Biometrics({
                                         return;
                                     }
 
-                                    setMeasurements((current) =>
-                                        next === 'imperial'
-                                            ? {
-                                                  ...current,
-                                                  weight: kilogramsToPounds(
-                                                      current.weight,
-                                                  ),
-                                                  ...heightInFeetAndInches(
-                                                      current.heightCm,
-                                                  ),
-                                              }
-                                            : {
-                                                  ...current,
-                                                  weight: poundsToKilograms(
-                                                      current.weight,
-                                                  ),
-                                                  heightCm:
-                                                      feetAndInchesToCentimeters(
+                                    setMeasurements((current) => {
+                                        if (next === 'imperial') {
+                                            const weightKg = parseMeasurement(
+                                                current.weight,
+                                            );
+                                            const heightCm = parseMeasurement(
+                                                current.heightCm,
+                                            );
+
+                                            return {
+                                                ...current,
+                                                weight:
+                                                    weightKg === null
+                                                        ? ''
+                                                        : kilogramsToPounds(
+                                                              String(weightKg),
+                                                          ),
+                                                ...heightInFeetAndInches(
+                                                    heightCm,
+                                                ),
+                                                exactWeightKg: weightKg,
+                                                exactHeightCm: heightCm,
+                                            };
+                                        }
+
+                                        return {
+                                            ...current,
+                                            weight:
+                                                current.exactWeightKg === null
+                                                    ? poundsToKilograms(
+                                                          current.weight,
+                                                      )
+                                                    : formatMeasurement(
+                                                          current.exactWeightKg,
+                                                          2,
+                                                      ),
+                                            heightCm:
+                                                current.exactHeightCm === null
+                                                    ? feetAndInchesToCentimeters(
                                                           current.heightFeet,
                                                           current.heightInches,
+                                                      )
+                                                    : formatMeasurement(
+                                                          current.exactHeightCm,
+                                                          2,
                                                       ),
-                                              },
-                                    );
+                                            exactWeightKg: null,
+                                            exactHeightCm: null,
+                                        };
+                                    });
                                     setMeasurementSystem(next);
-                                    clearMeasurementPrompts();
+                                    clearMeasurementErrors();
                                 };
 
                                 const treatWeightAsPounds = () => {
-                                    setMeasurements((current) => ({
-                                        ...current,
-                                        ...heightInFeetAndInches(
+                                    setMeasurements((current) => {
+                                        const heightCm = parseMeasurement(
                                             current.heightCm,
-                                        ),
-                                    }));
+                                        );
+
+                                        return {
+                                            ...current,
+                                            ...heightInFeetAndInches(heightCm),
+                                            exactWeightKg: null,
+                                            exactHeightCm: heightCm,
+                                        };
+                                    });
                                     setMeasurementSystem('imperial');
-                                    clearMeasurementPrompts();
+                                    clearMeasurementErrors();
                                 };
 
                                 const confirmMeasurements = () => {
@@ -303,21 +416,22 @@ export default function Biometrics({
                                                             )}
                                                         </p>
                                                     )}
-                                                    {!isImperial && (
-                                                        <Button
-                                                            type="button"
-                                                            size="sm"
-                                                            variant="outline"
-                                                            className="mt-2 h-auto min-h-11 w-full min-w-0 py-2 whitespace-normal"
-                                                            onClick={
-                                                                treatWeightAsPounds
-                                                            }
-                                                        >
-                                                            {t(
-                                                                'onboarding.biometrics.review_use_pounds',
-                                                            )}
-                                                        </Button>
-                                                    )}
+                                                    {!isImperial &&
+                                                        weightLooksLikePounds && (
+                                                            <Button
+                                                                type="button"
+                                                                size="sm"
+                                                                variant="outline"
+                                                                className="mt-2 h-auto min-h-11 w-full min-w-0 py-2 whitespace-normal"
+                                                                onClick={
+                                                                    treatWeightAsPounds
+                                                                }
+                                                            >
+                                                                {t(
+                                                                    'onboarding.biometrics.review_use_pounds',
+                                                                )}
+                                                            </Button>
+                                                        )}
                                                 </AlertDescription>
                                             </Alert>
                                         )}

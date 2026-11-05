@@ -12,6 +12,7 @@ use App\Enums\GoalChoice;
 use App\Enums\IntensityChoice;
 use App\Enums\Sex;
 use App\Enums\UserProfileAttributeCategory;
+use App\Services\BodyMassIndex;
 use App\Services\DietMapper;
 use Carbon\CarbonInterface;
 use Database\Factories\UserProfileFactory;
@@ -107,6 +108,13 @@ final class UserProfile extends Model
     public function currentAge(): ?int
     {
         return $this->date_of_birth instanceof CarbonInterface ? (int) $this->date_of_birth->age : $this->age;
+    }
+
+    public function weightLooksLikePounds(): bool
+    {
+        return $this->weight !== null
+            && $this->height !== null
+            && BodyMassIndex::looksLikePounds($this->weight, $this->height);
     }
 
     /**

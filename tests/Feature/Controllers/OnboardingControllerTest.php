@@ -29,6 +29,7 @@ it('renders biometrics page', function (): void {
             ->component('onboarding/biometrics')
             ->has('profile')
             ->where('currentAge', null)
+            ->where('weightLooksLikePounds', false)
             ->has('sexOptions')
             ->has('bloodTypeOptions'));
 });
@@ -816,3 +817,72 @@ it('clears the review request and continues onboarding for people who have not f
 
     expect($user->profile()->first()->needs_re_onboarding)->toBeFalse();
 });
+
+it('tells the review page whether the stored weight reads like pounds', function (float $weight, float $height, bool $looksLikePounds): void {
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'age' => 30,
+        'height' => $height,
+        'weight' => $weight,
+        'sex' => Sex::Male->value,
+        'needs_re_onboarding' => true,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('onboarding.biometrics.show'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('onboarding/biometrics')
+            ->where('weightLooksLikePounds', $looksLikePounds));
+})->with([
+    'pounds typed as kilograms' => [193.0, 175.0, true],
+    'height typed in inches' => [80.0, 70.0, false],
+    'implausibly low weight' => [30.0, 175.0, false],
+]);
+
+it('does not ask again when already saved measurements are submitted unchanged', function (): void {
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'age' => 30,
+        'height' => 175,
+        'weight' => 140,
+        'sex' => Sex::Male->value,
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'age' => 30,
+            'height' => 175,
+            'weight' => 140,
+            'sex' => Sex::Male->value,
+            'blood_type' => BloodType::OPositive->value,
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirectToRoute('onboarding.identity.show');
+
+    expect($user->profile()->first())
+        ->weight->toBe(140.0)
+        ->blood_type->toBe(BloodType::OPositive);
+});
+
+it('asks again when saved measurements change or are waiting for review', function (array $profile, float $weight): void {
+    $user = User::factory()->create();
+    $user->profile()->create([
+        'age' => 30,
+        'height' => 175,
+        'sex' => Sex::Male->value,
+        ...$profile,
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'age' => 30,
+            'height' => 175,
+            'weight' => $weight,
+            'sex' => Sex::Male->value,
+        ])
+        ->assertSessionHasErrors('weight_in_pounds');
+})->with([
+    'changed weight' => [['weight' => 140], 141.0],
+    'flagged for review' => [['weight' => 193, 'needs_re_onboarding' => true], 193.0],
+]);

@@ -7,7 +7,8 @@ namespace App\Http\Requests;
 use App\Enums\BloodType;
 use App\Enums\MeasurementSystem;
 use App\Enums\Sex;
-use App\Enums\WeightUnit;
+use App\Models\User;
+use App\Models\UserProfile;
 use App\Services\BodyMassIndex;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -49,8 +50,8 @@ final class StoreBiometricsRequest extends FormRequest
             'height_feet.integer' => 'Please enter your height in whole feet and inches.',
             'height_feet.min' => 'Please enter a valid height in feet and inches.',
             'height_feet.max' => 'Please enter a valid height in feet and inches.',
-            'height_inches.min' => 'Inches must be between 0 and 11.',
-            'height_inches.lt' => 'Inches must be between 0 and 11.',
+            'height_inches.min' => 'Inches must be at least 0 and less than 12.',
+            'height_inches.lt' => 'Inches must be at least 0 and less than 12.',
             'weight.required' => 'Please provide your current weight.',
             'weight.min' => "Please enter a valid weight in {$weightUnitName}.",
             'weight.max' => "Please enter a valid weight in {$weightUnitName}.",
@@ -67,11 +68,11 @@ final class StoreBiometricsRequest extends FormRequest
 
             ['height' => $height, 'weight' => $weight] = $this->metricMeasurements();
 
-            if (BodyMassIndex::isPlausible($weight, $height)) {
+            if (BodyMassIndex::isPlausible($weight, $height) || $this->repeatsSavedMeasurements($height, $weight)) {
                 return;
             }
 
-            if ($this->measurementSystem() === MeasurementSystem::Metric && BodyMassIndex::isPlausible(WeightUnit::Lb->toKg($weight), $height)) {
+            if ($this->measurementSystem() === MeasurementSystem::Metric && BodyMassIndex::looksLikePounds($weight, $height)) {
                 $validator->errors()->add(
                     'weight_in_pounds',
                     __('Did you mean :weight lb?', ['weight' => (string) $this->float('weight')]),
@@ -125,6 +126,18 @@ final class StoreBiometricsRequest extends FormRequest
         ];
 
         return $attributes;
+    }
+
+    private function repeatsSavedMeasurements(float $height, float $weight): bool
+    {
+        $user = $this->user();
+        $profile = $user instanceof User ? $user->profile : null;
+
+        if (! $profile instanceof UserProfile || $profile->needs_re_onboarding || $profile->height === null || $profile->weight === null) {
+            return false;
+        }
+
+        return abs($profile->height - $height) < 0.005 && abs($profile->weight - $weight) < 0.005;
     }
 
     /**
