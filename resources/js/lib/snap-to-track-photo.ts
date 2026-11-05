@@ -148,3 +148,23 @@ export function recallSnapPhoto(requestId: string | null): string | null {
 
     return requestId && photo.requestId === requestId ? photo.dataUrl : null;
 }
+
+export function recallSnapPhotoFile(requestId: string | null): File | null {
+    const dataUrl = recallSnapPhoto(requestId);
+    const base64 = dataUrl?.split(',')[1];
+
+    if (!base64) {
+        return null;
+    }
+
+    try {
+        const binary = window.atob(base64);
+        const bytes = Uint8Array.from(binary, (character) =>
+            character.charCodeAt(0),
+        );
+
+        return new File([bytes], 'meal.jpg', { type: 'image/jpeg' });
+    } catch {
+        return null;
+    }
+}

@@ -13,6 +13,8 @@ use App\Data\Billing\TierEntitlement;
 use App\Enums\SubscriptionTier;
 use App\Http\Controllers\HealthEntry\ShowMealPhotoController;
 use App\Http\Controllers\SnapToTrack\AnalyzeSnapToTrackPhotoController;
+use App\Http\Controllers\SnapToTrack\ShowSnapToTrackReviewController;
+use App\Http\Controllers\SnapToTrack\StoreSnapToTrackMealController;
 use App\Models\AnalysisDraft;
 use App\Models\HealthSyncSample;
 use App\Models\MealPhoto;
@@ -29,6 +31,8 @@ covers(
     MealPhoto::class,
     ShowMealPhotoController::class,
     AnalyzeSnapToTrackPhotoController::class,
+    ShowSnapToTrackReviewController::class,
+    StoreSnapToTrackMealController::class,
     LogReviewedMealAction::class,
     DeleteHealthSampleAction::class,
     UpdateHealthSampleAction::class,
@@ -114,6 +118,31 @@ it('keeps a signed-in scan photo privately with the saved meal and only its owne
 
     expect(MealPhoto::query()->count())->toBe(0);
     Storage::disk('s3')->assertMissing($photo->path);
+});
+
+it('keeps a guest scan photo when the visitor signs in and saves the meal', function (): void {
+    $token = Str::random(64);
+    $draft = AnalysisDraft::factory()->create(['token_hash' => AnalysisDraft::hashToken($token)]);
+    session()->put('snap_to_track.result', ['draft' => $token, 'request_id' => 'guest-scan-1']);
+
+    $this->actingAs($this->user)->get(route('snap-to-track.review', ['draft' => $token]))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('guestPhotoRequestId', 'guest-scan-1'));
+
+    $this->post(route('snap-to-track.review.store', ['draft' => $token]), [
+        'items' => [['name' => 'Salad', 'portion' => '1 bowl', 'calories' => 180, 'protein' => 3, 'carbs' => 14, 'fat' => 13, 'provenance' => 'model']],
+        'measured_at' => now()->toIso8601String(),
+        'photo' => UploadedFile::fake()->image('meal.jpg', 960, 720),
+    ])->assertRedirectToRoute('health-entries.index', ['date' => now()->toDateString()]);
+
+    $groupId = (string) $draft->refresh()->health_group_id;
+    $photo = MealPhoto::query()->sole();
+
+    expect($photo->user_id)->toBe($this->user->id)
+        ->and($photo->health_group_id)->toBe($groupId);
+    Storage::disk('s3')->assertExists($photo->path);
+
+    $this->get(route('health-entries.index'))->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+        ->where('entries.0.photo_url', route('health-entries.photo', ['group' => $groupId], absolute: false)));
 });
 
 it('keeps no photo when the scan is blocked by the credit limit', function (): void {
