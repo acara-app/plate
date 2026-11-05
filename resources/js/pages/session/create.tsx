@@ -32,7 +32,7 @@ export default function Login({
     snapIntent,
 }: LoginProps) {
     const { t } = useTranslation('auth');
-    const [remember, setRemember] = useState(false);
+    const [remember, setRemember] = useState(true);
     const [verifyingPasskey, setVerifyingPasskey] = useState(false);
 
     return (

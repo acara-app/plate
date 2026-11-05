@@ -34,7 +34,7 @@ final readonly class SocialiteController
 
             $user = $this->findOrCreateUser->handle($googleUser);
 
-            Auth::login($user);
+            Auth::login($user, remember: true);
 
             if ($user->wasRecentlyCreated) {
                 $tracking = resolve(TracksPhotoConversion::class);
