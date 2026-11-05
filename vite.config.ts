@@ -3,9 +3,22 @@ import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { defineConfig, type Manifest } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+
+const serviceWorkerFilename = `sw-${Date.now().toString(36)}.js`;
+
+function removeOutdatedServiceWorkers(): void {
+    for (const file of readdirSync('public')) {
+        if (
+            /^sw(-[a-z0-9]+)?\.js(\.map)?$/.test(file) &&
+            !file.startsWith(serviceWorkerFilename)
+        ) {
+            rmSync(`public/${file}`);
+        }
+    }
+}
 
 function appShellUrls(entry: string): Set<string> {
     const manifestPath = 'public/build/manifest.json';
@@ -55,9 +68,16 @@ export default defineConfig({
         wayfinder({
             formVariants: true,
         }),
+        {
+            name: 'remove-outdated-service-workers',
+            apply: (_, { command, isSsrBuild }) =>
+                command === 'build' && !isSsrBuild,
+            writeBundle: removeOutdatedServiceWorkers,
+        },
         VitePWA({
             registerType: 'autoUpdate',
             outDir: 'public',
+            filename: serviceWorkerFilename,
             buildBase: '/',
             scope: '/',
             workbox: {
