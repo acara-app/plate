@@ -69,11 +69,11 @@ it('acknowledges original rejection indexes and exposes accepted steps to both a
     expect($scenario['user']->sleepSessions()->count())->toBe(1);
     expect(DB::table('mobile_sync_receipts')->count())->toBe(1);
 
-    app(AggregateHealthDailySamplesAction::class)->handle($scenario['user'], CarbonImmutable::parse('2026-10-15', 'UTC'));
+    resolve(AggregateHealthDailySamplesAction::class)->handle($scenario['user'], CarbonImmutable::parse('2026-10-15', 'UTC'));
     $this->actingAs($scenario['user']);
     $query = new Request(['type' => 'steps', 'days' => 1, 'date' => '2026-10-15']);
-    $raw = json_decode(app(GetHealthData::class)->handle($query), true);
-    $summary = json_decode(app(GetHealthSummary::class)->handle($query), true);
+    $raw = json_decode(resolve(GetHealthData::class)->handle($query), true);
+    $summary = json_decode(resolve(GetHealthSummary::class)->handle($query), true);
     expect($raw['records'][0]['value'])->toBe(1234);
     expect($summary['summaries'][0]['primary_value'])->toBe(1234);
 });
@@ -109,12 +109,15 @@ it('rejects reused IDs with changed values order or timezone without additional 
     if ($change === 'value') {
         $scenario['payload']['entries'][1]['value']++;
     }
+
     if ($change === 'order') {
         $scenario['payload']['entries'] = array_reverse($scenario['payload']['entries']);
     }
+
     if ($change === 'timezone') {
         $request['timezone'] = 'Asia/Ulaanbaatar';
     }
+
     $this->postJson(route('api.v2.sync.health-entries'), [
         ...$request, 'encrypted_payload' => encryptAcknowledgementPayload($scenario['payload'], $scenario['device']->encryption_key),
     ])->assertConflict();
@@ -138,9 +141,11 @@ it('rejects malformed batch IDs and non-list entries before writing records', fu
     if ($problem === 'id') {
         $scenario['payload']['batch_id'] = 'not-a-uuid';
     }
+
     if ($problem === 'entries') {
         $scenario['payload']['entries'] = ['named' => $scenario['payload']['entries'][1]];
     }
+
     $this->withToken($scenario['token'])->postJson(route('api.v2.sync.health-entries'), [
         'device_identifier' => $scenario['device']->device_identifier,
         'encrypted_payload' => encryptAcknowledgementPayload($scenario['payload'], $scenario['device']->encryption_key),

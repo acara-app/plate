@@ -190,7 +190,11 @@ final readonly class UpdateUserBiometrics implements Tool
         }
 
         foreach (self::MEASUREMENT_FIELDS as $field => $unitField) {
-            if (! isset($data[$field]) || ! is_numeric($data[$field])) {
+            if (! isset($data[$field])) {
+                continue;
+            }
+
+            if (! is_numeric($data[$field])) {
                 continue;
             }
 
@@ -219,7 +223,11 @@ final readonly class UpdateUserBiometrics implements Tool
         }
 
         foreach (self::CHOICE_FIELDS as $field => $enumClass) {
-            if (! isset($data[$field]) || ! is_string($data[$field])) {
+            if (! isset($data[$field])) {
+                continue;
+            }
+
+            if (! is_string($data[$field])) {
                 continue;
             }
 

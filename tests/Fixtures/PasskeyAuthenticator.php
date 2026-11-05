@@ -17,7 +17,7 @@ use Webauthn\CredentialRecord;
 use Webauthn\TrustPath\EmptyTrustPath;
 use Webauthn\U2FPublicKey;
 
-final class PasskeyAuthenticator
+final readonly class PasskeyAuthenticator
 {
     private OpenSSLAsymmetricKey $key;
 

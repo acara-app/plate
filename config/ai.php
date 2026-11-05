@@ -2,6 +2,23 @@
 
 declare(strict_types=1);
 
+use App\Ai\Agents\AgentRunner;
+use App\Ai\Agents\CaffeineGuidanceAgent;
+use App\Ai\Agents\ConversationSummarizerAgent;
+use App\Ai\Agents\ConversationTitleGeneratorAgent;
+use App\Ai\Agents\EnrichAttributeMetadataAgent;
+use App\Ai\Agents\FitnessSpecialist;
+use App\Ai\Agents\FoodItemEstimatorAgent;
+use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Ai\Agents\GlucoseSpikeSpecialist;
+use App\Ai\Agents\GroceryListAgent;
+use App\Ai\Agents\HealthSpecialist;
+use App\Ai\Agents\MealPlanAgent;
+use App\Ai\Agents\MealPlanSpecialist;
+use App\Ai\Agents\NutritionSpecialist;
+use App\Ai\Agents\SingleMealAgent;
+use App\Ai\Agents\SpikePredictorAgent;
+
 return [
 
     /*
@@ -117,65 +134,65 @@ return [
     ],
 
     'agent_profiles' => [
-        App\Ai\Agents\AgentRunner::class => [
+        AgentRunner::class => [
             'standard' => env('AI_STANDARD_CHAT_MODEL', 'gpt-6-luna'),
             'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
-        App\Ai\Agents\FitnessSpecialist::class => [
+        FitnessSpecialist::class => [
             'standard' => env('AI_STANDARD_SPECIALIST_MODEL', 'gemini-3.6-flash'),
             'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
-        App\Ai\Agents\HealthSpecialist::class => [
+        HealthSpecialist::class => [
             'standard' => env('AI_STANDARD_SPECIALIST_MODEL', 'gemini-3.6-flash'),
             'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
-        App\Ai\Agents\NutritionSpecialist::class => [
+        NutritionSpecialist::class => [
             'standard' => env('AI_STANDARD_SPECIALIST_MODEL', 'gemini-3.6-flash'),
             'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
-        App\Ai\Agents\MealPlanSpecialist::class => [
+        MealPlanSpecialist::class => [
             'standard' => env('AI_STANDARD_SPECIALIST_MODEL', 'gemini-3.6-flash'),
             'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
-        App\Ai\Agents\GlucoseSpikeSpecialist::class => [
+        GlucoseSpikeSpecialist::class => [
             'standard' => env('AI_STANDARD_GLUCOSE_MODEL', 'gpt-6-sol'),
             'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
-        App\Ai\Agents\CaffeineGuidanceAgent::class => [
+        CaffeineGuidanceAgent::class => [
             'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
             'paid' => env('AI_PAID_TASK_MODEL', 'gemini-3.8-flash'),
         ],
-        App\Ai\Agents\GroceryListAgent::class => [
+        GroceryListAgent::class => [
             'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
             'paid' => env('AI_PAID_TASK_MODEL', 'gemini-3.8-flash'),
         ],
-        App\Ai\Agents\MealPlanAgent::class => [
+        MealPlanAgent::class => [
             'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
             'paid' => env('AI_PAID_TASK_MODEL', 'gemini-3.8-flash'),
         ],
-        App\Ai\Agents\SingleMealAgent::class => [
+        SingleMealAgent::class => [
             'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
             'paid' => env('AI_PAID_TASK_MODEL', 'gemini-3.8-flash'),
         ],
-        App\Ai\Agents\SpikePredictorAgent::class => [
+        SpikePredictorAgent::class => [
             'standard' => env('AI_STANDARD_GLUCOSE_MODEL', 'gpt-6-sol'),
             'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
-        App\Ai\Agents\FoodItemEstimatorAgent::class => [
+        FoodItemEstimatorAgent::class => [
             'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
             'paid' => env('AI_PAID_TASK_MODEL', 'gemini-3.8-flash'),
         ],
-        App\Ai\Agents\FoodPhotoAnalyzerAgent::class => [
+        FoodPhotoAnalyzerAgent::class => [
             'standard' => env('AI_STANDARD_PHOTO_MODEL', 'gemini-3.6-flash'),
             'paid' => env('AI_PAID_PHOTO_MODEL', 'gemini-3.8-flash'),
         ],
-        App\Ai\Agents\ConversationTitleGeneratorAgent::class => [
+        ConversationTitleGeneratorAgent::class => [
             'standard' => env('AI_BACKGROUND_TEXT_MODEL', 'gpt-5-nano'),
         ],
-        App\Ai\Agents\ConversationSummarizerAgent::class => [
+        ConversationSummarizerAgent::class => [
             'standard' => env('AI_BACKGROUND_TEXT_MODEL', 'gpt-5-nano'),
         ],
-        App\Ai\Agents\EnrichAttributeMetadataAgent::class => [
+        EnrichAttributeMetadataAgent::class => [
             'standard' => env('AI_BACKGROUND_METADATA_MODEL', 'gemini-3.6-flash'),
         ],
     ],

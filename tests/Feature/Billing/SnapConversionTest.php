@@ -2,9 +2,17 @@
 
 declare(strict_types=1);
 
+use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Contracts\Billing\TracksPhotoConversion;
+use App\Data\Billing\PhotoAnalysisContext;
+use App\Data\Billing\PhotoEntitlement;
+use App\Data\Billing\PhotoModel;
+use App\Data\Billing\PhotoPreview;
+use App\Data\FoodAnalysisData;
 use App\Models\User;
+use Livewire\Livewire;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 it('keeps community installations free of preview grants and commercial attribution', function (): void {
     $user = User::factory()->create();
@@ -13,7 +21,7 @@ it('keeps community installations free of preview grants and commercial attribut
     resolve(TracksPhotoConversion::class)->track($user, null, 'visit', 'visit');
 
     expect(fn () => resolve(ManagesPhotoPreview::class)->activate($user, null))
-        ->toThrow(Symfony\Component\HttpKernel\Exception\HttpException::class);
+        ->toThrow(HttpException::class);
 });
 
 it('explains the Snap destination on signup without losing the selected plan', function (): void {
@@ -31,25 +39,26 @@ it('requires a verified account before activating an offered preview', function 
     if ($signedIn) {
         $this->actingAs(User::factory()->unverified()->create());
     }
-    app()->instance(App\Contracts\Billing\ManagesPhotoAnalyses::class, new class implements App\Contracts\Billing\ManagesPhotoAnalyses
+
+    app()->instance(ManagesPhotoAnalyses::class, new class implements ManagesPhotoAnalyses
     {
         public function enabled(): bool
         {
             return true;
         }
 
-        public function entitlement(?User $user, ?string $guestId): App\Data\Billing\PhotoEntitlement
+        public function entitlement(?User $user, ?string $guestId): PhotoEntitlement
         {
-            return new App\Data\Billing\PhotoEntitlement(enabled: true, limit: 2, used: 2, preview: new App\Data\Billing\PhotoPreview('available'));
+            return new PhotoEntitlement(enabled: true, limit: 2, used: 2, preview: new PhotoPreview('available'));
         }
 
-        public function analyze(App\Data\Billing\PhotoAnalysisContext $context, Closure $analyze): App\Data\FoodAnalysisData
+        public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
         {
-            return $analyze(App\Data\Billing\PhotoModel::standard());
+            return $analyze(PhotoModel::standard());
         }
     });
 
-    Livewire\Livewire::test('pages::snap-to-track')->call('startPreview')
+    Livewire::test('pages::snap-to-track')->call('startPreview')
         ->assertRedirect(route($signedIn ? 'verification.notice' : 'register'));
 
     expect(session('url.intended'))->toBe(route('snap-to-track', absolute: false))
@@ -59,7 +68,7 @@ it('requires a verified account before activating an offered preview', function 
 it('retains a preview meal draft while a guest returns before completing signup', function (): void {
     session()->put('snap_to_track.preview_draft', 'pending-meal-token');
 
-    Livewire\Livewire::test('pages::snap-to-track');
+    Livewire::test('pages::snap-to-track');
 
     expect(session('snap_to_track.preview_draft'))->toBe('pending-meal-token');
 });

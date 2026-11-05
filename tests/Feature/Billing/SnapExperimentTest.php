@@ -7,16 +7,19 @@ use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Contracts\Billing\TracksPhotoConversion;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\FoodAnalysisData;
+use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use App\Services\Billing\NullPhotoConversion;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 beforeEach(function (): void {
     if (resolve(TracksPhotoConversion::class) instanceof NullPhotoConversion) {
         $this->markTestSkipped('Requires the optional photo conversion integration.');
     }
+
     config([
         'plate.enable_premium_upgrades' => true,
         'cashier.key' => 'pk_test_fake', 'cashier.secret' => 'sk_test_fake', 'cashier.webhook.secret' => 'whsec_test',
@@ -43,7 +46,7 @@ function completeSnapScan(?User $user, string $guest, ?string $requestId = null)
 {
     return resolve(ManagesPhotoAnalyses::class)->analyze(
         new PhotoAnalysisContext($user, $guest, $requestId ?? (string) Str::uuid(), 'public_snap_to_track', 'photo-fixture'),
-        fn () => FoodAnalysisData::from([
+        fn (): FoodAnalysisData => FoodAnalysisData::from([
             'items' => [['name' => 'Rice', 'calories' => 130, 'protein' => 3, 'carbs' => 28, 'fat' => 1, 'portion' => '100 g']],
             'total_calories' => 130, 'total_protein' => 3, 'total_carbs' => 28, 'total_fat' => 1, 'confidence' => 80,
         ]),
@@ -79,10 +82,11 @@ it('grants one preview scan per 24 hours without banking scans or resetting acti
     $preview = resolve(ManagesPhotoPreview::class);
 
     $preview->activate($user, $guest);
+
     $started = DB::table('snap_experiment_assignments')->sole()->preview_started_at;
     completeSnapScan($user, $guest);
     expect($access->entitlement($user, $guest)->remaining)->toBe(0);
-    expect(fn () => completeSnapScan($user, $guest))->toThrow(App\Exceptions\Billing\PhotoLimitExceeded::class);
+    expect(fn (): FoodAnalysisData => completeSnapScan($user, $guest))->toThrow(PhotoLimitExceeded::class);
     $this->travel(24)->hours();
     config(['snap.experiment.enabled' => false]);
     expect($access->entitlement($user, $guest)->remaining)->toBe(1);
@@ -127,8 +131,8 @@ it('does not spend another scan on failures or duplicate requests', function ():
     completeSnapScan(null, $guest, $context->requestId);
 
     expect($access->entitlement(null, $guest)->remaining)->toBe(1);
-    expect(fn () => $access->analyze(new PhotoAnalysisContext(null, $guest, $context->requestId, 'public_snap_to_track', 'different-photo'), fn () => null))
-        ->toThrow(Symfony\Component\HttpKernel\Exception\HttpException::class);
+    expect(fn () => $access->analyze(new PhotoAnalysisContext(null, $guest, $context->requestId, 'public_snap_to_track', 'different-photo'), fn (): null => null))
+        ->toThrow(HttpException::class);
 });
 
 it('reserves in-flight scans so overlapping requests cannot exceed two', function (): void {
@@ -138,7 +142,7 @@ it('reserves in-flight scans so overlapping requests cannot exceed two', functio
 
     $access->analyze($context, function () use ($guest): FoodAnalysisData {
         $second = completeSnapScan(null, $guest);
-        expect(fn () => completeSnapScan(null, $guest))->toThrow(App\Exceptions\Billing\PhotoLimitExceeded::class);
+        expect(fn (): FoodAnalysisData => completeSnapScan(null, $guest))->toThrow(PhotoLimitExceeded::class);
 
         return $second;
     });
@@ -169,6 +173,7 @@ it('uses the account assignment when a returning visitor brings a different gues
     $user = User::factory()->create();
     $access = resolve(ManagesPhotoAnalyses::class);
     $access->entitlement($user, $first);
+
     $accountAssignment = DB::table('snap_experiment_assignments')->sole()->id;
     $second = (string) Str::uuid();
     resolve(TracksPhotoConversion::class)->track(null, $second, 'visit', 'visit');

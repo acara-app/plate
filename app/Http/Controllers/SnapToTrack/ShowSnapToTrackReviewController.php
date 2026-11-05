@@ -10,6 +10,7 @@ use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\AnalysisDraftResolutionData;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\AnalysisDraftStatus;
+use App\Models\AnalysisDraft;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Inertia\Inertia;
@@ -49,7 +50,7 @@ final readonly class ShowSnapToTrackReviewController
     {
         session()->forget('snap_to_track.auth_path');
 
-        if ($resolution->status === AnalysisDraftStatus::Expired && $resolution->draft !== null) {
+        if ($resolution->status === AnalysisDraftStatus::Expired && $resolution->draft instanceof AnalysisDraft) {
             Inertia::flash('analytics', [
                 'name' => 'snap_to_track_draft_expired',
                 'properties' => ['draft_age_band' => $resolution->draft->ageBand()],
