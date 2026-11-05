@@ -146,6 +146,7 @@ final class StoreBiometricsRequest extends FormRequest
         $attributes = [
             ...$this->safe()->only(['sex', 'blood_type']),
             'age' => $this->integer('age'),
+            'measurement_system' => $this->measurementSystem(),
             ...$this->metricMeasurements(),
         ];
 

@@ -153,8 +153,10 @@ export default function Biometrics({
         profile?.blood_type ?? '',
     );
     const [measurementSystem, setMeasurementSystem] =
-        useState<MeasurementSystem>(() =>
-            needsReview ? 'metric' : defaultMeasurementSystem(locale),
+        useState<MeasurementSystem>(
+            () =>
+                profile?.measurement_system ??
+                (needsReview ? 'metric' : defaultMeasurementSystem(locale)),
         );
     const [measurements, setMeasurements] = useState<Measurements>(() =>
         initialMeasurements(profile, measurementSystem),

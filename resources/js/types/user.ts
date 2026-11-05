@@ -1,3 +1,5 @@
+import type { MeasurementSystem } from '@/lib/body-measurements';
+
 export interface SexOption {
     value: string;
     label: string;
@@ -13,6 +15,7 @@ export interface Profile {
     date_of_birth?: string;
     height?: number;
     weight?: number;
+    measurement_system?: MeasurementSystem | null;
     sex?: string;
     blood_type?: string;
     target_weight?: number;

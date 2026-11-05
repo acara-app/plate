@@ -17,7 +17,7 @@ let generation = 0;
 
 function readPhoto(): StoredPhoto | null {
     try {
-        const stored = window.sessionStorage.getItem(STORAGE_KEY);
+        const stored = window.localStorage.getItem(STORAGE_KEY);
 
         return stored ? (JSON.parse(stored) as StoredPhoto) : null;
     } catch {
@@ -28,9 +28,9 @@ function readPhoto(): StoredPhoto | null {
 function writePhoto(photo: StoredPhoto | null): boolean {
     try {
         if (photo === null) {
-            window.sessionStorage.removeItem(STORAGE_KEY);
+            window.localStorage.removeItem(STORAGE_KEY);
         } else {
-            window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(photo));
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(photo));
         }
 
         return true;
@@ -130,7 +130,7 @@ export function tagSnapPhoto(requestId: string | null | undefined): void {
     });
 }
 
-export function recallSnapPhoto(requestId: string | null): string | null {
+function readUnexpiredPhoto(): StoredPhoto | null {
     const photo = readPhoto();
 
     if (photo === null) {
@@ -143,6 +143,20 @@ export function recallSnapPhoto(requestId: string | null): string | null {
     ) {
         writePhoto(null);
 
+        return null;
+    }
+
+    return photo;
+}
+
+export function forgetExpiredSnapPhoto(): void {
+    readUnexpiredPhoto();
+}
+
+export function recallSnapPhoto(requestId: string | null): string | null {
+    const photo = readUnexpiredPhoto();
+
+    if (photo === null) {
         return null;
     }
 

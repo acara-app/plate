@@ -1,4 +1,6 @@
 /.phpunit.cache
+/tests/Browser/Screenshots
+/tests/Browser/Traces
 /bootstrap/ssr
 /node_modules
 /public/build
