@@ -64,6 +64,25 @@ it('analyzes an uploaded photo, logs the meal and opens it', function (): void {
         ]);
 });
 
+it('saves nothing when no food is found in the photo', function (): void {
+    FoodPhotoAnalyzerAgent::fake([[
+        'items' => [],
+        'total_calories' => 0,
+        'total_protein' => 0,
+        'total_carbs' => 0,
+        'total_fat' => 0,
+        'confidence' => 10,
+    ]]);
+
+    actingAs($this->user)->post(route('snap-to-track.analyze'), [
+        'photo' => UploadedFile::fake()->image('desk.jpg'),
+    ])->assertRedirect(route('snap-to-track.index'))
+        ->assertSessionHasErrors('photo');
+
+    expect(AnalysisDraft::query()->count())->toBe(0)
+        ->and(HealthSyncSample::query()->count())->toBe(0);
+});
+
 it('returns a photo error and stores nothing when the analysis fails', function (): void {
     FoodPhotoAnalyzerAgent::fake(function (): void {
         throw new Exception('AI analysis failed');

@@ -53,12 +53,6 @@ class extends Component
             return;
         }
 
-        if (auth()->check()) {
-            $this->redirect(route('snap-to-track.save', ['draft' => $token]));
-
-            return;
-        }
-
         $resolution = $restore->handle($token, null);
 
         if (in_array($resolution->status, [AnalysisDraftStatus::Expired, AnalysisDraftStatus::Consumed], true)) {
@@ -167,7 +161,7 @@ class extends Component
                 <span aria-hidden="true" class="flex size-8 items-center justify-center rounded-md bg-emerald-50 text-lg ring-1 ring-emerald-200">🍓</span>
                 <span class="text-sm font-semibold">Acara Plate</span>
             </a>
-            @if ($analysis !== null)
+            @if ($analysis !== null && ! auth()->check())
                 <button
                     type="button"
                     wire:click="save('login')"
@@ -395,16 +389,20 @@ class extends Component
                         >
                             Save this meal
                         </x-snap-result.button>
-                        <p class="text-sm text-muted-foreground">Saving is free. Create an account or log in and the meal goes straight into your food log, where you can adjust any portion.</p>
-                        <button
-                            type="button"
-                            wire:click="save('login')"
-                            wire:loading.attr="disabled"
-                            wire:target="save,upgrade"
-                            class="min-h-11 self-start rounded-md text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
-                        >
-                            Already have an account? Log in
-                        </button>
+                        @auth
+                            <p class="text-sm text-muted-foreground">Saving is free. The meal goes straight into your food log, where you can adjust any portion.</p>
+                        @else
+                            <p class="text-sm text-muted-foreground">Saving is free. Create an account or log in and the meal goes straight into your food log, where you can adjust any portion.</p>
+                            <button
+                                type="button"
+                                wire:click="save('login')"
+                                wire:loading.attr="disabled"
+                                wire:target="save,upgrade"
+                                class="min-h-11 self-start rounded-md text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
+                            >
+                                Already have an account? Log in
+                            </button>
+                        @endauth
                     </div>
                 </article>
             </section>

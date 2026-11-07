@@ -253,7 +253,7 @@ export default function CashierSubscription({
                                         href={meal.save_url}
                                         className="block text-sm underline"
                                     >
-                                        {t('photo_plans.checkout.back_meal')}
+                                        {t('photo_plans.checkout.save_meal')}
                                     </Link>
                                 ) : (
                                     <p className="text-sm text-muted-foreground">

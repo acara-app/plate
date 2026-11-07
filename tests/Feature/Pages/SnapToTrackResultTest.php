@@ -9,6 +9,7 @@ use App\Data\Billing\PhotoModel;
 use App\Data\Billing\PhotoOffer;
 use App\Data\FoodAnalysisData;
 use App\Models\AnalysisDraft;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -113,13 +114,19 @@ it('sends the visitor back to the tool when there is no meal to show', function 
     'meal claimed by another account' => [fn (): string => guestResultDraft(['user_id' => User::factory(), 'claimed_at' => now()])],
 ]);
 
-it('sends a signed-in member to save the meal', function (): void {
+it('lets a signed-in member save the meal only when they choose to', function (): void {
     $token = guestResultDraft();
 
     $this->actingAs(User::factory()->create());
 
     Livewire::test('pages::snap-to-track-result')
+        ->assertNoRedirect()
+        ->assertSee('Save this meal')
+        ->assertDontSee('Already have an account? Log in')
+        ->call('save', 'register')
         ->assertRedirect(route('snap-to-track.save', ['draft' => $token]));
+
+    expect(HealthSyncSample::query()->count())->toBe(0);
 });
 
 it('saves the meal once the visitor signs up or logs in', function (string $intent): void {

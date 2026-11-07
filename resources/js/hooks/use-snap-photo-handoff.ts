@@ -34,6 +34,7 @@ export function useSnapPhotoHandoff(): void {
             { photo },
             {
                 preserveScroll: true,
+                preserveState: true,
                 onSuccess: () => forgetSnapPhoto(),
             },
         );

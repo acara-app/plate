@@ -11,10 +11,12 @@ use App\Actions\StoreMealPhotoAction;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\AnalysisDraftSource;
 use App\Enums\ConfidenceBand;
+use App\Enums\PhotoAnalysisFailure;
 use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Http\Requests\SnapToTrack\AnalyzeSnapToTrackPhotoRequest;
 use App\Models\AnalysisDraft;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Utilities\LanguageUtil;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -75,6 +77,10 @@ final readonly class AnalyzeSnapToTrackPhotoController
             $this->deleteUploadedPhoto($photo);
         }
 
+        if ($analysis->items->count() === 0) {
+            return to_route('snap-to-track.index')->withErrors(['photo' => __(PhotoAnalysisFailure::NoFood->message())]);
+        }
+
         $token = $this->createAnalysisDraft->handle(
             $analysis,
             AnalysisDraftSource::AuthenticatedSnapToTrack,
@@ -111,7 +117,7 @@ final readonly class AnalyzeSnapToTrackPhotoController
         ]);
         Inertia::flash('toast', ['type' => 'success', 'message' => __('common.snap_to_track.saved')]);
 
-        return to_route('health-entries.show', $meal);
+        return $meal instanceof HealthSyncSample ? to_route('health-entries.show', $meal) : to_route('health-entries.index');
     }
 
     private function deleteUploadedPhoto(UploadedFile $photo): void

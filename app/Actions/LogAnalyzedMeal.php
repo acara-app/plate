@@ -20,7 +20,7 @@ final readonly class LogAnalyzedMeal
         private SnapFunnel $funnel,
     ) {}
 
-    public function handle(AnalysisDraft $draft, User $user): HealthSyncSample
+    public function handle(AnalysisDraft $draft, User $user): ?HealthSyncSample
     {
         $meal = new ReviewedMealData(
             items: ReviewedMealData::normalizeItems(FoodAnalysisData::from($draft->payload)->items->toArray()),
@@ -37,6 +37,6 @@ final readonly class LogAnalyzedMeal
             ->where('user_id', $user->id)
             ->where('group_id', $groupId)
             ->orderBy('id')
-            ->firstOrFail();
+            ->first();
     }
 }

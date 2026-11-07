@@ -61,6 +61,18 @@ it('opens the same meal without a duplicate when the save link is visited again'
     expect(HealthSyncSample::query()->count())->toBe($count);
 });
 
+it('opens the logbook when the saved meal was deleted', function (): void {
+    [$token] = savableDraft();
+
+    actingAs($this->user)->get(route('snap-to-track.save', ['draft' => $token]));
+    HealthSyncSample::query()->delete();
+
+    actingAs($this->user)->get(route('snap-to-track.save', ['draft' => $token]))
+        ->assertRedirectToRoute('health-entries.index');
+
+    expect(HealthSyncSample::query()->count())->toBe(0);
+});
+
 it('sends the user back to Snap to Track when the meal can no longer be saved', function (Closure $attributes, string $message): void {
     [$token] = savableDraft($attributes());
 

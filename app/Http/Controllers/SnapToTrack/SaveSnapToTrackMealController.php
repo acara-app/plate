@@ -10,6 +10,7 @@ use App\Data\AnalysisDraftResolutionData;
 use App\Enums\AnalysisDraftSource;
 use App\Enums\AnalysisDraftStatus;
 use App\Models\AnalysisDraft;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
@@ -37,7 +38,7 @@ final readonly class SaveSnapToTrackMealController
             $this->flashSaved($draftModel, $draft);
         }
 
-        return to_route('health-entries.show', $meal);
+        return $meal instanceof HealthSyncSample ? to_route('health-entries.show', $meal) : to_route('health-entries.index');
     }
 
     private function flashSaved(AnalysisDraft $draftModel, string $draft): void
