@@ -14,7 +14,10 @@ final readonly class PrepareSnapToTrackUpgrade
     public function handle(?PhotoOffer $offer): string
     {
         $this->session->put('snap_to_track.intent', 'upgrade');
-        $this->session->put('url.intended', route('checkout.subscription', absolute: false));
+
+        if (auth()->guest()) {
+            $this->session->put('url.intended', route('checkout.subscription', absolute: false));
+        }
 
         return $offer instanceof PhotoOffer
             ? route('checkout.start', ['product' => $offer->productId])

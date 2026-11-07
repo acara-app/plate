@@ -65,6 +65,7 @@ interface Props {
     isGuest: boolean;
     paymentPending: boolean;
     checkoutCancelled: boolean;
+    emailVerified: boolean;
     meal: PendingMeal | null;
     continueToMeal: boolean;
     selectedProductId: number | null;
@@ -91,6 +92,7 @@ export default function CashierSubscription({
     isGuest,
     paymentPending,
     checkoutCancelled,
+    emailVerified,
     meal,
     continueToMeal,
     selectedProductId,
@@ -241,20 +243,26 @@ export default function CashierSubscription({
                                     ? t('checkout_subscription.processing')
                                     : 'Continue to payment'}
                             </Button>
-                            {meal?.review_url && (
-                                <Link
-                                    href={meal.review_url}
-                                    className="block text-sm underline"
-                                >
-                                    Back to your meal
-                                </Link>
-                            )}
-                            {meal?.expired && (
-                                <p className="text-sm text-muted-foreground">
-                                    Your meal preview has expired. You can scan
-                                    it again after you subscribe.
-                                </p>
-                            )}
+                            {meal?.review_url &&
+                                (emailVerified ? (
+                                    <Link
+                                        href={meal.review_url}
+                                        className="block text-sm underline"
+                                    >
+                                        Back to your meal
+                                    </Link>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">
+                                        Not ready to pay?{' '}
+                                        <Link
+                                            href={meal.review_url}
+                                            className="underline"
+                                        >
+                                            Save your meal free
+                                        </Link>{' '}
+                                        after verifying your email.
+                                    </p>
+                                ))}
                         </section>
                     )}
                     {hasIncompletePayment && incompletePaymentUrl && (

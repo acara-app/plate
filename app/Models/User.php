@@ -237,11 +237,7 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 
     public function canUseApp(): bool
     {
-        if ($this->hasVerifiedEmail()) {
-            return true;
-        }
-
-        return $this->hasActiveSubscription();
+        return $this->hasVerifiedEmail() || $this->hasActiveSubscription();
     }
 
     public function activeSubscription(): ?Subscription

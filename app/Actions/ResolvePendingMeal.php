@@ -14,7 +14,7 @@ final readonly class ResolvePendingMeal
     {
         $draft = AnalysisDraft::query()->where('token_hash', AnalysisDraft::hashToken($draftToken))->first();
 
-        if (! $draft instanceof AnalysisDraft || $draft->isConsumed() || ($draft->user_id !== null && $draft->user_id !== $user->id)) {
+        if (! $draft instanceof AnalysisDraft || $draft->schema_version !== AnalysisDraft::SCHEMA_VERSION || $draft->isConsumed() || ($draft->user_id !== null && $draft->user_id !== $user->id)) {
             return null;
         }
 

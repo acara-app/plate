@@ -15,9 +15,14 @@ final readonly class StartPhotoSubscriptionController
     {
         abort_unless($offers->available($product) && filled($product->stripe_price_id) && $product->price > 0, 404);
         $request->session()->put('checkout.selected_product', $product->id);
-        $request->session()->put('checkout.selected_interval', $request->query('interval') === 'yearly' && filled($product->yearly_stripe_price_id) ? 'yearly' : 'monthly');
+        $request->session()->put('checkout.selected_interval', $request->query('interval') === 'yearly' && filled($product->yearly_stripe_lookup_key) ? 'yearly' : 'monthly');
+
+        if ($request->user() !== null) {
+            return to_route('checkout.subscription');
+        }
+
         $request->session()->put('url.intended', route('checkout.subscription', absolute: false));
 
-        return to_route($request->user() === null ? 'register' : 'checkout.subscription');
+        return to_route('register');
     }
 }

@@ -15,7 +15,7 @@ final class EnsureEmailIsVerifiedOrSubscribed
     /**
      * @param  Closure(Request): Response  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, ?string $redirectToRoute = null): Response
     {
         $user = $request->user();
 
@@ -25,6 +25,6 @@ final class EnsureEmailIsVerifiedOrSubscribed
 
         abort_if($request->expectsJson(), 403, 'Your email address is not verified.');
 
-        return Redirect::guest(route('verification.notice'));
+        return Redirect::guest(route($redirectToRoute ?? 'verification.notice'));
     }
 }

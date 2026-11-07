@@ -89,7 +89,9 @@ final readonly class CashierShowSubscriptionController
             $this->funnel->record(SnapFunnelStage::CheckoutReturned, $checkoutAttempt, ['entitlement' => $allowance->mode === 'premium' ? 'active' : 'pending']);
         }
 
-        if ($request->routeIs('checkout.cancel')) {
+        $checkoutCancelled = $request->routeIs('checkout.cancel');
+
+        if ($checkoutCancelled) {
             $this->funnel->record(SnapFunnelStage::CheckoutCancelled, $checkoutAttempt);
         }
 
@@ -101,13 +103,19 @@ final readonly class CashierShowSubscriptionController
         $paymentPending = $returningFromCheckout && $request->session()->has('checkout.started') && $premiumNotYetActive;
         $draftToken = $request->session()->get('snap_to_track.result.draft');
         $meal = $user !== null && is_string($draftToken) ? $this->resolvePendingMeal->handle($draftToken, $user) : null;
+        $meal = $meal?->expired === true && ! $returningFromCheckout ? null : $meal;
+
+        if (! $premiumNotYetActive) {
+            $request->session()->forget('checkout.open');
+        }
 
         return Inertia::render('checkout/show-subscription-product', [
             'products' => $availableProducts,
             'photoPlan' => $photoPlan,
             'isGuest' => $user === null,
             'paymentPending' => $paymentPending,
-            'checkoutCancelled' => $request->routeIs('checkout.cancel'),
+            'checkoutCancelled' => $checkoutCancelled,
+            'emailVerified' => $user?->hasVerifiedEmail() === true,
             'meal' => $meal?->toArray(),
             'continueToMeal' => $returningFromCheckout && ! $premiumNotYetActive && $meal?->reviewUrl !== null,
             'selectedProductId' => $request->session()->get('checkout.selected_product'),
