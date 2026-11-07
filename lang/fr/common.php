@@ -1099,7 +1099,7 @@ return [
         'starter' => [
             'description' => 'Intégrez le suivi photo à votre routine.',
             'features' => [
-                'Photographiez un repas, vérifiez ses calories et macros, puis enregistrez-le dans votre journal',
+                'Photographiez un repas et enregistrez ses calories et macros directement dans votre journal',
                 'Un quota IA quotidien pour les scans de repas, le chat et les plans de repas',
                 'Résiliez à tout moment depuis les paramètres de facturation',
             ],
@@ -1118,7 +1118,7 @@ return [
             'save_note' => 'Vous pouvez toujours enregistrer ce repas gratuitement.',
             'benefits' => [
                 'Estimez les calories et macros à partir d’une photo',
-                'Vérifiez les portions et enregistrez vos repas dans votre journal',
+                'Enregistrez vos repas dans votre journal et ajustez les portions à tout moment',
                 'Utilisez vos objectifs personnalisés de calories et de macros',
             ],
             'cta' => 'Continuer avec {{name}} — {{price}}/mois',
