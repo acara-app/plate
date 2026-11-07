@@ -97,25 +97,22 @@ function reportWithCarbError(float $absoluteError): array
 
     return new HarnessReport(
         analyzerVersion: 'gemini-3-flash-preview/p2',
-        referenceLookupEnabled: true,
         repeats: 5,
         skippedMeals: 0,
         paths: new DataCollection(PathMetrics::class, [
             new PathMetrics(path: AnalysisPath::Raw, failedRuns: 0, metrics: $metrics),
-            new PathMetrics(path: AnalysisPath::Enriched, failedRuns: 0, metrics: $metrics),
         ]),
     )->toArray();
 }
 
-it('benchmarks both production paths, reports per-path metrics, and persists the run', function (): void {
+it('benchmarks the production analyzer, reports its metrics, and persists the run', function (): void {
     config()->set('ai.agent_profiles.'.FoodPhotoAnalyzerAgent::class.'.standard', 'gemini-3.6-flash');
     seedGoldenPlate();
     FoodPhotoAnalyzerAgent::fake(fn (): array => perfectAnalysisPayload());
 
     $this->artisan('benchmark:run', ['--repeats' => 2, '--force' => true])
-        ->expectsOutputToContain('gemini-3.6-flash/p4')
+        ->expectsOutputToContain('gemini-3.6-flash/p5')
         ->expectsOutputToContain('Raw model')
-        ->expectsOutputToContain('With reference lookup')
         ->expectsOutputToContain('1 / 2 / 0')
         ->expectsOutputToContain('1.00 / 1.00 (1 meals)')
         ->expectsOutputToContain('Saved as benchmark run #1.')
@@ -123,11 +120,11 @@ it('benchmarks both production paths, reports per-path metrics, and persists the
 
     $run = BenchmarkRun::query()->sole();
 
-    expect($run->analyzer_version)->toBe('gemini-3.6-flash/p4')
+    expect($run->analyzer_version)->toBe('gemini-3.6-flash/p5')
         ->and($run->smoke)->toBeFalse()
         ->and($run->repeats)->toBe(2)
         ->and($run->meal_count)->toBe(1)
-        ->and($run->toHarnessReport()->paths)->toHaveCount(2)
+        ->and($run->toHarnessReport()->paths)->toHaveCount(1)
         ->and($run->toHarnessReport()->paths[0]->metrics->carbs->mae)->toBe(0.0);
 });
 
@@ -166,7 +163,7 @@ it('aborts without spending when the cost confirmation is declined', function ()
     FoodPhotoAnalyzerAgent::fake(fn (): array => perfectAnalysisPayload());
 
     $this->artisan('benchmark:run', ['--repeats' => 2])
-        ->expectsConfirmation('Run 4 analyses (~$0.02)?', 'no')
+        ->expectsConfirmation('Run 2 analyses (~$0.01)?', 'no')
         ->assertSuccessful();
 
     FoodPhotoAnalyzerAgent::assertNeverPrompted();
@@ -188,7 +185,7 @@ it('benchmarks an explicit premium model and refuses to treat unmetered calls as
 
     $report = BenchmarkRun::query()->sole()->toHarnessReport();
     expect($report->provider)->toBe('openai')
-        ->and($report->analyzerVersion)->toBe('gpt-5.6-terra/p4')
+        ->and($report->analyzerVersion)->toBe('gpt-5.6-terra/p5')
         ->and($report->maxTokens)->toBe(4096)
         ->and($report->datasetHash)->not->toBeNull()
         ->and($report->paths[0]->unmeteredRuns)->toBe(3)

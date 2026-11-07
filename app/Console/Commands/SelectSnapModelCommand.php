@@ -28,8 +28,8 @@ final class SelectSnapModelCommand extends Command
                 continue;
             }
 
-            $enriched = $report->paths[1];
-            $qualified[] = ['run' => $id, 'report' => $report, 'carbs' => $enriched->metrics->carbs->mae, 'cost' => $enriched->costPerHundred(), 'latency' => $enriched->p95LatencyMs];
+            $path = $report->paths[0];
+            $qualified[] = ['run' => $id, 'report' => $report, 'carbs' => $path->metrics->carbs->mae, 'cost' => $path->costPerHundred(), 'latency' => $path->p95LatencyMs];
         }
 
         usort($qualified, fn (array $a, array $b): int => [$a['carbs'], $a['cost'], $a['latency']] <=> [$b['carbs'], $b['cost'], $b['latency']]);
@@ -51,11 +51,10 @@ final class SelectSnapModelCommand extends Command
     private function qualifies(HarnessReport $report, HarnessReport $baseline): bool
     {
         if ($report->datasetHash === null || $report->datasetHash !== $baseline->datasetHash
-            || $report->referenceLookupEnabled !== $baseline->referenceLookupEnabled
             || $report->skippedMeals !== 0 || $baseline->skippedMeals !== 0
             || $report->repeats < 3 || $baseline->repeats < 3
             || $report->provider === null || $report->maxTokens === null
-            || $report->paths->count() !== 2 || $baseline->paths->count() !== 2) {
+            || $report->paths->count() !== 1 || $baseline->paths->count() !== 1) {
             return false;
         }
 
@@ -74,8 +73,7 @@ final class SelectSnapModelCommand extends Command
         $metrics = $path->metrics;
         $reference = $baseline->metrics;
 
-        return $path->path === $baseline->path
-            && $metrics->mealCount >= 30 && $metrics->mealCount === $reference->mealCount
+        return $metrics->mealCount >= 30 && $metrics->mealCount === $reference->mealCount
             && $path->costPerHundred() !== null && $path->costPerHundred() <= 3.0
             && $path->successRate() >= 0.98 && $path->p95LatencyMs !== null && $path->p95LatencyMs < 30_000
             && $metrics->carbs->mae !== null && $reference->carbs->mae !== null && $metrics->carbs->mae <= $reference->carbs->mae

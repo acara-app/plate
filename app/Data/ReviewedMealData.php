@@ -130,7 +130,7 @@ final class ReviewedMealData extends Data
             'carbs' => is_numeric($item['carbs'] ?? null) ? round((float) $item['carbs'], 1) : 0.0,
             'fat' => is_numeric($item['fat'] ?? null) ? round((float) $item['fat'], 1) : 0.0,
             'fiber' => is_numeric($item['fiber'] ?? null) ? round((float) $item['fiber'], 1) : null,
-            'provenance' => in_array($item['provenance'] ?? null, ['model', 'reference', 'user'], true) ? $item['provenance'] : 'user',
+            'provenance' => in_array($item['provenance'] ?? null, ['model', 'user'], true) ? $item['provenance'] : 'user',
         ], $this->items);
     }
 

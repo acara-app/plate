@@ -47,7 +47,7 @@ it('keeps the full reviewed meal available in the logbook after editing it', fun
     ]);
     $items = [
         ['name' => 'Banana', 'portion' => '1 medium', 'calories' => 105, 'protein' => 1.3, 'carbs' => 27, 'fat' => 0.3, 'provenance' => 'model'],
-        ['name' => 'Yogurt', 'portion' => '100g', 'calories' => 60, 'protein' => 4, 'carbs' => 5, 'fat' => 3, 'provenance' => 'reference'],
+        ['name' => 'Yogurt', 'portion' => '100g', 'calories' => 60, 'protein' => 4, 'carbs' => 5, 'fat' => 3, 'provenance' => 'model'],
     ];
 
     $this->actingAs($user)->post(route('snap-to-track.review.store', ['draft' => $token]), [

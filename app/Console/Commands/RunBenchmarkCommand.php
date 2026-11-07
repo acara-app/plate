@@ -23,7 +23,7 @@ use InvalidArgumentException;
 
 use function Laravel\Prompts\confirm;
 
-#[Description('Run the golden-plate validation benchmark through the production analyzer — raw model and reference-enriched paths side by side.')]
+#[Description('Run the golden-plate validation benchmark through the production photo analyzer.')]
 #[Signature('benchmark:run {--smoke : Analyze only the smoke subset (first 12 meals by code)} {--repeats=5 : Analyses per meal per path} {--force : Skip the cost confirmation} {--provider= : AI provider (defaults to the catalog provider for the model)} {--model= : Pinned vision model} {--max-tokens=35000 : Output token ceiling}')]
 final class RunBenchmarkCommand extends Command
 {
@@ -65,11 +65,11 @@ final class RunBenchmarkCommand extends Command
             return self::FAILURE;
         }
 
-        $analyses = $meals->count() * $repeats * 2;
+        $analyses = $meals->count() * $repeats;
         $estimatedCost = $this->estimateCost($analyses, $model);
 
         $this->info(sprintf(
-            'Benchmarking %d meals × %d repeats × 2 paths = %d analyses on %s (~$%.2f estimated).',
+            'Benchmarking %d meals × %d repeats = %d analyses on %s (~$%.2f estimated).',
             $meals->count(),
             $repeats,
             $analyses,
@@ -94,7 +94,6 @@ final class RunBenchmarkCommand extends Command
 
         $run = BenchmarkRun::query()->create([
             'analyzer_version' => $report->analyzerVersion,
-            'reference_lookup_enabled' => $report->referenceLookupEnabled,
             'smoke' => (bool) $this->option('smoke'),
             'repeats' => $report->repeats,
             'meal_count' => $meals->count(),
@@ -151,8 +150,7 @@ final class RunBenchmarkCommand extends Command
     private function render(HarnessReport $report): void
     {
         $this->components->twoColumnDetail('Analyzer version', $report->analyzerVersion);
-        $this->components->twoColumnDetail('Reference lookup', $report->referenceLookupEnabled ? 'enabled' : 'disabled');
-        $this->components->twoColumnDetail('Repeats per meal per path', (string) $report->repeats);
+        $this->components->twoColumnDetail('Repeats per meal', (string) $report->repeats);
 
         if ($report->skippedMeals > 0) {
             $this->warn(sprintf('%d meals skipped because their photo could not be loaded.', $report->skippedMeals)); // @codeCoverageIgnore

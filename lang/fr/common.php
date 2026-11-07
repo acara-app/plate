@@ -608,7 +608,6 @@ return [
             'carbs' => 'Glucides (g)',
             'fat' => 'Lipides (g)',
             'fiber' => 'Fibres (g)',
-            'reference_badge' => 'Comparé aux données de référence USDA',
             'rename' => [
                 'still_for' => 'Les valeurs nutritionnelles correspondent encore à « {{name}} ».',
                 'update' => 'Mettre à jour pour « {{name}} »',

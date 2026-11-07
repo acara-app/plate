@@ -7,7 +7,7 @@ namespace App\Actions;
 use App\Data\AddedFatOptionData;
 use App\Data\FoodAnalysisData;
 use App\Data\FoodItemData;
-use App\Models\ReferenceFood;
+use App\Utilities\FoodName;
 
 final readonly class BuildAddedFatOptionsAction
 {
@@ -58,7 +58,7 @@ final readonly class BuildAddedFatOptionsAction
             return false;
         }
 
-        $tokens = explode(' ', ReferenceFood::normalizeName($item->name.' '.$item->matchName));
+        $tokens = explode(' ', FoodName::normalize($item->name.' '.$item->matchName));
 
         return array_intersect($tokens, self::KEYWORDS) !== [];
     }

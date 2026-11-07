@@ -136,9 +136,7 @@ export default function SnapToTrackReview({
             carbs: String(item.carbs),
             fat: String(item.fat),
             fiber: item.fiber != null ? String(item.fiber) : '',
-            provenance: ['model', 'reference'].includes(item.provenance)
-                ? item.provenance
-                : 'user',
+            provenance: item.provenance === 'model' ? 'model' : 'user',
             fatOptions: addedFatOptions?.[index],
             fatChoice: addedFatOptions?.[index]?.find(
                 (option) => option.selected,
@@ -438,14 +436,6 @@ export default function SnapToTrackReview({
                                                         updateNutrition(index)
                                                     }
                                                 />
-                                            )}
-                                            {item.provenance ===
-                                                'reference' && (
-                                                <p className="text-xs text-muted-foreground">
-                                                    {t(
-                                                        'snap_to_track.review.reference_badge',
-                                                    )}
-                                                </p>
                                             )}
                                             {item.fatOptions &&
                                                 item.fatOptions.length > 0 && (

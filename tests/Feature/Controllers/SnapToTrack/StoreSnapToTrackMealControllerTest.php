@@ -28,7 +28,7 @@ function reviewedMealPayload(array $overrides = []): array
     return [
         'items' => [
             ['name' => 'Grilled chicken', 'portion' => '100g', 'grams' => 100, 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'provenance' => 'model'],
-            ['name' => 'Steamed rice', 'calories' => 210, 'protein' => 4, 'carbs' => 45, 'fat' => 0.5, 'provenance' => 'reference'],
+            ['name' => 'Steamed rice', 'calories' => 210, 'protein' => 4, 'carbs' => 45, 'fat' => 0.5, 'provenance' => 'model'],
         ],
         'measured_at' => '2026-10-16T11:57:00Z',
         'notes' => 'Lunch bowl',

@@ -34,12 +34,10 @@ function measuredPhotoModelRun(string $model, float $carbsError, float $costUsd 
     );
     $report = new HarnessReport(
         analyzerVersion: "{$model}/p".FoodPhotoAnalyzerAgent::PROMPT_VERSION,
-        referenceLookupEnabled: true,
         repeats: 3,
         skippedMeals: 0,
         paths: new DataCollection(PathMetrics::class, [
             new PathMetrics(path: AnalysisPath::Raw, failedRuns: 0, metrics: $metrics, costUsd: $costUsd, p95LatencyMs: 12_000.0),
-            new PathMetrics(path: AnalysisPath::Enriched, failedRuns: 0, metrics: $metrics, costUsd: $costUsd, p95LatencyMs: 12_000.0),
         ]),
         provider: 'gemini',
         maxTokens: 4096,

@@ -15,7 +15,7 @@ function reviewedMealForDraft(AnalysisDraft $draft): array
     $meal = ReviewedMealData::fromValidated([
         'items' => [
             ['name' => 'Grilled chicken', 'portion' => '100g', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'provenance' => 'model'],
-            ['name' => 'Steamed rice', 'calories' => 210, 'protein' => 4, 'carbs' => 45, 'fat' => 0.5, 'provenance' => 'reference'],
+            ['name' => 'Steamed rice', 'calories' => 210, 'protein' => 4, 'carbs' => 45, 'fat' => 0.5, 'provenance' => 'model'],
         ],
         'measured_at' => now()->subHour()->toDateTimeString(),
         'notes' => 'Lunch bowl',
@@ -56,7 +56,7 @@ it('records the reviewed meal as one grouped entry with per-item metadata and co
         ->and($metadata['draft_reference'])->toBe(mb_substr($draft->token_hash, 0, 12))
         ->and($metadata['items'])->toHaveCount(2)
         ->and($metadata['items'][0]['name'])->toBe('Grilled chicken')
-        ->and($metadata['items'][1]['provenance'])->toBe('reference');
+        ->and($metadata['items'][1]['provenance'])->toBe('model');
 
     expect($draft->refresh()->isConsumed())->toBeTrue()
         ->and($draft->health_group_id)->toBe($groupId);

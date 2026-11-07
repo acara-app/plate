@@ -79,13 +79,6 @@ it('shows the daily overview first, then the meal estimate with its Save action'
     expect(AnalysisDraft::query()->sole()->user_id)->toBeNull();
 });
 
-it('marks ingredients matched against USDA reference data', function (): void {
-    guestResultDraft();
-
-    Livewire::test('pages::snap-to-track-result')
-        ->assertSeeInOrder(['Steamed rice', 'USDA reference']);
-});
-
 it('explains why a meal preview is no longer available', function (array $attributes, string $explanation): void {
     guestResultDraft($attributes);
 

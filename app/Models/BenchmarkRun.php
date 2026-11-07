@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property int $id
  * @property string $analyzer_version
- * @property bool $reference_lookup_enabled
  * @property bool $smoke
  * @property int $repeats
  * @property int $meal_count
@@ -41,7 +40,6 @@ final class BenchmarkRun extends Model
     public function casts(): array
     {
         return [
-            'reference_lookup_enabled' => 'boolean',
             'smoke' => 'boolean',
             'repeats' => 'integer',
             'meal_count' => 'integer',

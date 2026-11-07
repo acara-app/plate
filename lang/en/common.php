@@ -607,7 +607,6 @@ return [
             'carbs' => 'Carbs (g)',
             'fat' => 'Fat (g)',
             'fiber' => 'Fiber (g)',
-            'reference_badge' => 'Matched against USDA reference data',
             'rename' => [
                 'still_for' => 'Nutrition is still for “{{name}}”.',
                 'update' => 'Update nutrition for “{{name}}”',
