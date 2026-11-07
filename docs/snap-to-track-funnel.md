@@ -60,6 +60,7 @@ A journey counts at a step only if it reached every earlier step of that path fi
 - Every event has a unique key built from its stage, its journey and the attempt it belongs to (an upload, an analysis request, a result, a checkout). Reloads, re-renders, double clicks and repeated success-page visits therefore write nothing new.
 - Funnel numbers count unique journeys. Raw event totals are listed separately and do include repeats, such as several uploads, a retried analysis or offers seen on two results.
 - First payments are counted once per Stripe subscription. Only signed `invoice.paid` and `invoice.payment_succeeded` webhooks count, and only for the invoice that created the subscription (`billing_reason` `subscription_create`) with `amount_paid` above zero. None of the following adds one: a renewal (including renewals of subscriptions that started before the ledger), a trial start, a failed or unpaid invoice, a webhook replay, a success-page visit or an entitlement change. A trial that converts later wouldn't be counted; no current plan has a trial.
+- Invoices for Stripe customers that don't belong to a Plate account are ignored.
 - While `STRIPE_WEBHOOK_SECRET` is unset, Cashier skips signature checks, so no payment is recorded at all.
 
 ## Errors and pending states

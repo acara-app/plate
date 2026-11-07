@@ -128,8 +128,10 @@ it('follows a guest from a selected photo to a payment confirmed after they leav
 
     Auth::logout();
     $this->flushSession();
+    $buyer = User::query()->sole();
+    $buyer->update(['stripe_id' => 'cus_snap']);
     DB::table('subscriptions')->insert([
-        'user_id' => User::query()->sole()->id, 'type' => 'starter', 'stripe_id' => 'sub_snap', 'stripe_status' => 'active',
+        'user_id' => $buyer->id, 'type' => 'starter', 'stripe_id' => 'sub_snap', 'stripe_status' => 'active',
         'stripe_price' => 'price_starter', 'quantity' => 1, 'created_at' => now(), 'updated_at' => now(),
     ]);
     $paidInvoice = ['id' => 'evt_first_payment', 'type' => 'invoice.paid', 'livemode' => true, 'data' => ['object' => [

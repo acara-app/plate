@@ -92,6 +92,12 @@ final readonly class SnapFunnel
             return;
         }
 
+        $customer = data_get($invoice, 'customer');
+
+        if (! is_string($customer) || ! User::query()->where('stripe_id', $customer)->exists()) {
+            return;
+        }
+
         $metadata = data_get($invoice, 'parent.subscription_details.metadata', data_get($invoice, 'subscription_details.metadata'));
         $metadata = is_array($metadata) ? $metadata : [];
 
