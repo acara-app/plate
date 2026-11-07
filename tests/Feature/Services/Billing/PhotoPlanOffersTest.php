@@ -68,26 +68,50 @@ it('does not offer a photo plan whose catalog entry was not prepared for sale', 
     expect(offeredPlanNames())->toBe(['Free', 'Snap Pro']);
 });
 
-it('presents the free plan as a trial with the configured number of scans', function (int $scans, string $description, string $feature): void {
+it('presents the configured total free scans without a timed trial', function (int $scans, string $description, string $feature): void {
     config(['snap.free_trial_scans' => $scans]);
     $free = SubscriptionProduct::query()->where('name', 'Free')->sole();
 
     $presented = resolve(OffersSubscriptions::class)->present($free);
 
-    expect($presented->name)->toBe('Free trial')
+    expect($presented->name)->toBe('Free scans')
         ->and($presented->description)->toBe($description)
         ->and($presented->features)->toContain($feature)
         ->and($free->name)->toBe('Free');
 })->with([
-    'one scan' => [1, 'Try 1 photo scan free. Choose a plan when you are ready.', '1 free photo scan, with no daily reset'],
-    'two scans' => [2, 'Try 2 photo scans free. Choose a plan when you are ready.', '2 free photo scans, with no daily reset'],
+    'one scan' => [1, 'Try photo tracking with 1 successful scan.', 'A total allowance, with no daily reset'],
+    'two scans' => [2, 'Try photo tracking with 2 successful scans.', 'A total allowance, with no daily reset'],
 ]);
 
-it('presents paid plans unchanged', function (): void {
-    $starter = createStarterPlan();
+it('replaces stale plan copy in each language without changing the product terms', function (string $locale, string $name, string $description): void {
+    app()->setLocale($locale);
+    $product = SubscriptionProduct::factory()->make([
+        'name' => $name,
+        'price' => 9,
+        'stripe_price_id' => 'price_existing',
+        'stripe_lookup_key' => 'existing-key',
+        'billing_interval' => 'monthly',
+        'description' => '100 scans each month',
+        'features' => ['100 scans each month'],
+    ]);
 
-    expect(resolve(OffersSubscriptions::class)->present($starter))->toBe($starter);
-});
+    $presented = resolve(OffersSubscriptions::class)->present($product);
+
+    expect($presented->description)->toBe($description)
+        ->and($presented->features)->not->toContain('100 scans each month')
+        ->and($presented->price)->toBe(9.0)
+        ->and($presented->stripe_price_id)->toBe('price_existing')
+        ->and($presented->stripe_lookup_key)->toBe('existing-key')
+        ->and($presented->billing_interval)->toBe('monthly');
+    expect($product->description)->toBe('100 scans each month');
+})->with([
+    'English Starter' => ['en', 'Starter', 'Make photo logging part of your routine.'],
+    'French Starter' => ['fr', 'Starter', 'Intégrez le suivi photo à votre routine.'],
+    'Mongolian Starter' => ['mn', 'Starter', 'Хоолоо зургаар бүртгэж хэвшээрэй.'],
+    'English Snap Pro' => ['en', 'Snap Pro', 'More room for meal tracking and AI help.'],
+    'French Snap Pro' => ['fr', 'Snap Pro', 'Plus de capacité pour suivre vos repas et utiliser l’IA.'],
+    'Mongolian Snap Pro' => ['mn', 'Snap Pro', 'Хоолоо бүртгэж, AI ашиглах илүү их эрх.'],
+]);
 
 it('presents the free plan unchanged while photo plans cannot be sold', function (): void {
     config(['cashier.secret' => null]);

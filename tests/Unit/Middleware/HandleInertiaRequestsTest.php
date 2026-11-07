@@ -104,9 +104,9 @@ it('defaults locale to en for guests', function (): void {
     expect($shared['locale'])->toBe('en');
 });
 
-it('uses user locale for portal', function (): void {
+it('uses the user language for both server and portal copy', function (string $locale, string $planName): void {
     $user = User::factory()->create([
-        'locale' => 'mn',
+        'locale' => $locale,
     ]);
 
     $middleware = new HandleInertiaRequests();
@@ -116,8 +116,13 @@ it('uses user locale for portal', function (): void {
 
     $shared = $middleware->share($request);
 
-    expect($shared['locale'])->toBe('mn');
-});
+    expect($shared['locale'])->toBe($locale)
+        ->and(__('common.photo_plans.free.name'))->toBe($planName);
+})->with([
+    'English' => ['en', 'Free scans'],
+    'French' => ['fr', 'Scans gratuits'],
+    'Mongolian' => ['mn', 'Үнэгүй зураг шинжилгээ'],
+]);
 
 it('defaults to en when user has no locale set', function (): void {
     $user = User::factory()->create([

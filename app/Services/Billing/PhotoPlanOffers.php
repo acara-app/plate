@@ -14,15 +14,29 @@ final readonly class PhotoPlanOffers implements OffersSubscriptions
 
     public function present(SubscriptionProduct $product): SubscriptionProduct
     {
-        if ($product->name !== 'Free' || ! $this->catalog->isSelling()) {
+        if (! $this->catalog->isSelling()) {
+            return $product;
+        }
+
+        $plan = PhotoPlan::fromProductName($product->name);
+        if ($product->name !== 'Free' && ! $plan instanceof PhotoPlan) {
             return $product;
         }
 
         $offer = clone $product;
+
+        if ($plan instanceof PhotoPlan) {
+            $offer->setAttribute('description', __('common.photo_plans.'.$plan->value.'.description'));
+            $offer->setAttribute('features', __('common.photo_plans.'.$plan->value.'.features'));
+
+            return $offer;
+        }
+
         $scans = config()->integer('snap.free_trial_scans', 2);
-        $offer->setAttribute('name', 'Free trial');
-        $offer->setAttribute('description', "Try {$scans} photo ".($scans === 1 ? 'scan' : 'scans').' free. Choose a plan when you are ready.');
-        $offer->setAttribute('features', ["{$scans} free photo ".($scans === 1 ? 'scan' : 'scans').', with no daily reset', 'Save scans to your food log', 'Small monthly allowance for other AI tools', 'No credit card required']);
+        $plural = $scans === 1 ? 'one' : 'other';
+        $offer->setAttribute('name', __('common.photo_plans.free.name'));
+        $offer->setAttribute('description', strtr(__('common.photo_plans.free.description_'.$plural), ['{{count}}' => (string) $scans]));
+        $offer->setAttribute('features', __('common.photo_plans.free.features'));
 
         return $offer;
     }

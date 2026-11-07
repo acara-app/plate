@@ -839,7 +839,7 @@ it('offers the photo plan beside the credit plans once it is purchasable', funct
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('photoPlan.name', 'Snap Pro')
-            ->where('photoPlan.formatted_price', '$9.00')
+            ->where('photoPlan.formatted_price', 'US$9.00')
             ->where('products', fn (Collection $products): bool => $products
                 ->pluck('name')
                 ->doesntContain('Snap Pro')));

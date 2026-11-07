@@ -18,11 +18,11 @@ export default function PhotoPlanLimitsDetails({
     if (!limits) return null;
 
     return (
-        <div className="mt-4 flex flex-col gap-2 text-sm">
-            <p className="font-medium">
+        <details className="mt-4 rounded-lg border p-3 text-sm">
+            <summary className="cursor-pointer font-medium">
                 {t('checkout_subscription.limits.heading')}
-            </p>
-            <ul className="flex flex-col gap-1">
+            </summary>
+            <ul className="mt-3 flex flex-col gap-2">
                 <li>
                     {t('checkout_subscription.limits.scans', {
                         count: limits.scans_per_hour,
@@ -41,12 +41,15 @@ export default function PhotoPlanLimitsDetails({
                     })}
                 </li>
             </ul>
-            <p className="text-xs text-muted-foreground">
+            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
                 {t('checkout_subscription.limits.shared')}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
                 {t('checkout_subscription.limits.reset')}
             </p>
-        </div>
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                {t('checkout_subscription.limits.blocked')}
+            </p>
+        </details>
     );
 }

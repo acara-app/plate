@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Data\Billing\PhotoPlanLimits;
+use App\Enums\PhotoPlan;
 use Carbon\CarbonInterface;
 use Database\Factories\SubscriptionProductFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
@@ -86,7 +87,7 @@ final class SubscriptionProduct extends Model
 
     protected function getFormattedPriceAttribute(): string
     {
-        return '$'.number_format($this->price, 2);
+        return (PhotoPlan::fromProductName($this->name) instanceof PhotoPlan ? 'US$' : '$').number_format($this->price, 2);
     }
 
     protected function getPhotoLimitsAttribute(): ?PhotoPlanLimits

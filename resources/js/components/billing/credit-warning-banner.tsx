@@ -29,23 +29,27 @@ export function CreditWarningBanner({
             <div className="flex-1 space-y-2">
                 <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
                     {warning.limit_type === 'monthly'
-                        ? 'Other AI tools: monthly allowance nearly used'
+                        ? t('photo_plans.monthly.warning')
                         : t('billing.warning.heading', {
                               percentage: warning.percentage,
                               limit: limitLabel,
                           })}
                 </p>
                 <p className="text-xs text-amber-800 dark:text-amber-200">
-                    {t('billing.warning.body', {
-                        current: warning.current_credits.toLocaleString(),
-                        total: warning.limit_credits.toLocaleString(),
-                        time: warning.resets_in,
-                    })}
+                    {t(
+                        warning.limit_type === 'monthly'
+                            ? 'photo_plans.monthly.body'
+                            : 'billing.warning.body',
+                        {
+                            current: warning.current_credits.toLocaleString(),
+                            total: warning.limit_credits.toLocaleString(),
+                            time: warning.resets_in,
+                        },
+                    )}
                 </p>
                 {warning.limit_type === 'monthly' && (
                     <p className="text-xs">
-                        Upgrade for higher daily and weekly limits across every
-                        feature.
+                        {t('photo_plans.monthly.upgrade')}
                     </p>
                 )}
                 {onUpgradeClick &&

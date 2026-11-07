@@ -71,7 +71,7 @@ it('prepares a photo plan catalog entry without touching Stripe', function (stri
         ->and($product->billing_interval)->toBe('monthly')
         ->and($product->yearly_price)->toBeNull()
         ->and($product->yearly_stripe_price_id)->toBeNull()
-        ->and($product->features)->toContain('Cancel anytime');
+        ->and($product->features)->toContain('Cancel anytime through Billing settings');
 })->with([
     'Starter' => ['starter', 'Starter', 2.99, 'acara-plate-starter-monthly-v1', true],
     'Snap Pro' => ['snap-pro', 'Snap Pro', 9.0, 'acara-plate-snap-pro-monthly-v1', false],

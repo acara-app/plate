@@ -217,7 +217,7 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
     private function meteredEntitlement(int $limit, int $used, ?string $resetsAt, string $mode): PhotoEntitlement
     {
         $product = $this->catalog->product();
-        $offer = $product instanceof SubscriptionProduct ? new PhotoOffer($product->id, $product->name, $product->formatted_price) : null;
+        $offer = $product instanceof SubscriptionProduct ? new PhotoOffer($product->id, $product->name, $product->formatted_price, $product->photo_limits) : null;
 
         return new PhotoEntitlement(true, $limit, $used, $resetsAt, $mode, $mode === 'trial' && $offer instanceof PhotoOffer, $offer);
     }

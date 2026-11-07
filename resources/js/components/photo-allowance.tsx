@@ -1,3 +1,7 @@
+import PhotoPlanLimitsDetails, {
+    type PhotoPlanLimits,
+} from '@/components/billing/photo-plan-limits';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import checkout from '@/routes/checkout';
@@ -28,6 +32,7 @@ export interface PhotoAllowance {
         product_id: number;
         name: string;
         formatted_price: string;
+        limits?: PhotoPlanLimits | null;
     } | null;
 }
 
@@ -40,6 +45,7 @@ export function PhotoAllowanceCard({
     showUpgrade?: boolean;
     variant?: 'card' | 'plain';
 }) {
+    const { t } = useTranslation('common');
     const offerRef = useRef<HTMLDivElement>(null);
     const showOffer = !!(
         showUpgrade &&
@@ -95,9 +101,14 @@ export function PhotoAllowanceCard({
                 >
                     {trial
                         ? remaining > 0
-                            ? `${remaining} free ${remaining === 1 ? 'scan' : 'scans'} remaining`
-                            : 'Your free scans are complete'
-                        : `${remaining} of ${allowance.limit} scans remaining`}
+                            ? t('photo_plans.free.remaining', {
+                                  count: remaining,
+                              })
+                            : t('photo_plans.free.used')
+                        : t('photo_plans.offer.remaining', {
+                              remaining,
+                              total: allowance.limit,
+                          })}
                 </CardTitle>
             </CardHeader>
             <CardContent
@@ -105,49 +116,58 @@ export function PhotoAllowanceCard({
             >
                 {trial && (
                     <p className="text-sm text-muted-foreground">
-                        {allowance.limit} successful scans, with no daily reset.
-                        Saved meals stay in your food log.
+                        {t('photo_plans.free.total', {
+                            count: allowance.limit,
+                        })}
                     </p>
                 )}
                 {allowance.resets_at && (
                     <p className="text-sm text-muted-foreground">
-                        Resets {new Date(allowance.resets_at).toLocaleString()}.
+                        {t('photo_plans.offer.resets', {
+                            time: new Date(
+                                allowance.resets_at,
+                            ).toLocaleString(),
+                        })}
                     </p>
                 )}
                 {allowance.preview?.status === 'available' && (
                     <Button asChild className="min-h-11">
                         <a href={snapToTrack().url}>
-                            Try one scan a day for three days
+                            {t('photo_plans.preview.try')}
                         </a>
                     </Button>
                 )}
                 {allowance.preview?.expires_at && (
                     <p className="text-sm text-muted-foreground">
-                        Preview ends{' '}
-                        {new Date(
-                            allowance.preview.expires_at,
-                        ).toLocaleString()}
-                        . No automatic subscription.
+                        {t('photo_plans.preview.ends', {
+                            time: new Date(
+                                allowance.preview.expires_at,
+                            ).toLocaleString(),
+                        })}
                     </p>
                 )}
                 {showOffer && offer && (
                     <div ref={offerRef} className="space-y-3">
                         <p>
-                            Track meals from photos and save them to your food
-                            log.
+                            {t('photo_plans.offer.body', { name: offer.name })}
                         </p>
-                        <Button asChild>
+                        <PhotoPlanLimitsDetails limits={offer.limits} />
+                        <Button
+                            asChild
+                            className="h-auto min-h-11 text-center whitespace-normal"
+                        >
                             <Link
                                 href={checkout.start(offer.product_id).url}
                                 data-umami-event="snap_to_track_upgrade_click"
                             >
-                                Continue scanning with {offer.name} —{' '}
-                                {offer.formatted_price}/month
+                                {t('photo_plans.offer.cta', {
+                                    name: offer.name,
+                                    price: offer.formatted_price,
+                                })}
                             </Link>
                         </Button>
                         <p className="text-xs text-muted-foreground">
-                            Daily and weekly AI limits apply. Renews monthly.
-                            Cancel anytime from billing settings.
+                            {t('photo_plans.offer.terms')}
                         </p>
                     </div>
                 )}

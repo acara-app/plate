@@ -474,7 +474,7 @@ class extends Component
                         x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} })"
                         class="min-h-10 rounded-md px-2 text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
                     >
-                        Or keep tracking with {{ $barOffer->name }} · {{ $barOffer->formattedPrice }}/month
+                        {!! e(strtr(__('common.photo_plans.offer.short_cta'), ['@{{name}}' => $barOffer->name, '@{{price}}' => $barOffer->formattedPrice])) !!}
                     </button>
                 @endif
             </div>
