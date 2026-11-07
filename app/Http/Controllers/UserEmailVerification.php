@@ -17,7 +17,7 @@ final readonly class UserEmailVerification
             $request->fulfill();
         }
 
-        $fallback = $request->session()->has('checkout.selected_product')
+        $fallback = $request->session()->has('checkout.selected_product') && ! $user->hasActiveSubscription()
             ? route('checkout.subscription', absolute: false)
             : route('dashboard', absolute: false).'?verified=1';
 

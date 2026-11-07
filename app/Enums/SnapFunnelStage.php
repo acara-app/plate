@@ -62,7 +62,7 @@ enum SnapFunnelStage: string
             self::AuthCompleted => "The journey's browser finished sign-up or log-in (method). Once per account.",
             self::MealSaved => 'A meal from the public Snap to Track result was saved to the food log. Once per meal.',
             self::CheckoutClicked => 'The plan page asked the server to open a Stripe checkout (plan, interval). Every request counts as a raw event.',
-            self::CheckoutStarted => 'Stripe created the checkout session and the browser was sent to it (plan, interval). Once per checkout request.',
+            self::CheckoutStarted => 'Stripe created the checkout session and the browser was sent to it (plan, interval). Once per checkout session; repeat clicks that reopen it add nothing.',
             self::CheckoutFailed => 'The checkout could not open (reason). Error state.',
             self::CheckoutReturned => 'The browser came back to the success page (entitlement). Not proof of payment, and not needed for one. Once per checkout.',
             self::CheckoutCancelled => 'The browser came back from Stripe through the cancel link. Once per checkout.',

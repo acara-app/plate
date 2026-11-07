@@ -108,6 +108,8 @@ final class AppServiceProvider extends ServiceProvider
             return Limit::perHour($burstCap->handle($user))
                 ->by(ResolveSnapBurstCap::keyFor($user, $request->ip()));
         });
+
+        RateLimiter::for('checkout', fn (Request $request): Limit => Limit::perMinute(10)->by($request->user()?->getAuthIdentifier() ?? $request->ip()));
     }
 
     private function bootRouteBindings(): void

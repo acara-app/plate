@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Checkout;
 
+use App\Actions\ResolvePendingMeal;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Services\StripeServiceContract;
@@ -20,7 +21,7 @@ use Laravel\Cashier\SubscriptionItem;
 
 final readonly class CashierShowSubscriptionController
 {
-    public function __construct(private StripeServiceContract $stripeService, private SnapFunnel $funnel) {}
+    public function __construct(private StripeServiceContract $stripeService, private SnapFunnel $funnel, private ResolvePendingMeal $resolvePendingMeal) {}
 
     public function __invoke(Request $request): Response
     {
@@ -88,7 +89,9 @@ final readonly class CashierShowSubscriptionController
             $this->funnel->record(SnapFunnelStage::CheckoutReturned, $checkoutAttempt, ['entitlement' => $allowance->mode === 'premium' ? 'active' : 'pending']);
         }
 
-        if ($request->routeIs('checkout.cancel')) {
+        $checkoutCancelled = $request->routeIs('checkout.cancel');
+
+        if ($checkoutCancelled) {
             $this->funnel->record(SnapFunnelStage::CheckoutCancelled, $checkoutAttempt);
         }
 
@@ -98,14 +101,25 @@ final readonly class CashierShowSubscriptionController
 
         $premiumNotYetActive = $allowance->enabled ? $allowance->mode !== 'premium' : $currentSubscription === null;
         $paymentPending = $returningFromCheckout && $request->session()->has('checkout.started') && $premiumNotYetActive;
+        $draftToken = $request->session()->get('snap_to_track.result.draft');
+        $meal = $user !== null && is_string($draftToken) ? $this->resolvePendingMeal->handle($draftToken, $user) : null;
+        $meal = $meal?->expired === true && ! $returningFromCheckout ? null : $meal;
+
+        if (! $premiumNotYetActive) {
+            $request->session()->forget('checkout.open');
+        }
 
         return Inertia::render('checkout/show-subscription-product', [
             'products' => $availableProducts,
             'photoPlan' => $photoPlan,
             'isGuest' => $user === null,
-            'requiresEmailVerification' => $user !== null && ! $user->hasVerifiedEmail(),
             'paymentPending' => $paymentPending,
+            'checkoutCancelled' => $checkoutCancelled,
+            'emailVerified' => $user?->hasVerifiedEmail() === true,
+            'meal' => $meal?->toArray(),
+            'continueToMeal' => $returningFromCheckout && ! $premiumNotYetActive && $meal?->reviewUrl !== null,
             'selectedProductId' => $request->session()->get('checkout.selected_product'),
+            'selectedInterval' => $request->session()->get('checkout.selected_interval') === 'yearly' ? 'yearly' : 'monthly',
             'photoAllowance' => $allowance->toArray(),
             'currentSubscription' => $currentSubscription ? [
                 'id' => $currentSubscription->id,

@@ -23,7 +23,7 @@ export default function VerifyEmail({
             title={t('email_verification.title')}
             description={
                 snapIntent
-                    ? 'Follow the link in your email, then continue with Snap to Track. Your meal and selected next step are saved for you.'
+                    ? 'Follow the link in your email, then continue with Snap to Track. We keep your selected next step, and meal previews stay available for 60 minutes after analysis.'
                     : t('email_verification.description')
             }
             snap={!!snapIntent}

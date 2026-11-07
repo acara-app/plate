@@ -3,7 +3,6 @@ import {
     type PhotoAllowance,
 } from '@/components/photo-allowance';
 import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackController';
-import UserEmailVerificationNotificationController from '@/actions/App/Http/Controllers/UserEmailVerificationNotificationController';
 import { PaymentConfirmation } from '@/components/billing/payment-confirmation';
 import PhotoPlanLimitsDetails, {
     type PhotoPlanLimits,
@@ -14,16 +13,11 @@ import { support, login, snapToTrack } from '@/routes';
 import billing from '@/routes/billing';
 import checkout from '@/routes/checkout';
 import { BreadcrumbItem } from '@/types';
-import { Form, Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { PhotoPlanBand } from '@/components/billing/photo-plan-band';
 import clsx from 'clsx';
-import {
-    CreditCardIcon,
-    MailIcon,
-    ReceiptIcon,
-    TriangleIcon,
-} from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { CreditCardIcon, ReceiptIcon, TriangleIcon } from 'lucide-react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface BillingProduct {
@@ -62,11 +56,20 @@ interface CashierSubscription {
     is_yearly: boolean;
 }
 
+interface PendingMeal {
+    expired: boolean;
+    review_url: string | null;
+}
+
 interface Props {
     isGuest: boolean;
-    requiresEmailVerification: boolean;
     paymentPending: boolean;
+    checkoutCancelled: boolean;
+    emailVerified: boolean;
+    meal: PendingMeal | null;
+    continueToMeal: boolean;
     selectedProductId: number | null;
+    selectedInterval: 'monthly' | 'yearly';
     photoAllowance?: PhotoAllowance;
     products: BillingProduct[];
     photoPlan: BillingProduct | null;
@@ -87,9 +90,13 @@ export default function CashierSubscription({
     products,
     photoPlan,
     isGuest,
-    requiresEmailVerification,
     paymentPending,
+    checkoutCancelled,
+    emailVerified,
+    meal,
+    continueToMeal,
     selectedProductId,
+    selectedInterval,
     photoAllowance,
     currentSubscription,
     billingPortalUrl,
@@ -99,10 +106,24 @@ export default function CashierSubscription({
     const [isSubscribing, setIsSubscribing] = useState(false);
     const [billingInterval, setBillingInterval] = useState<
         'monthly' | 'yearly'
-    >('monthly');
+    >(selectedInterval);
     const { t } = useTranslation('common');
 
     const Layout = isGuest ? GuestPricingLayout : AppLayout;
+    const planActive = !paymentPending && photoAllowance?.mode === 'premium';
+    const selectedPlan =
+        isGuest || paymentPending || planActive || currentSubscription
+            ? undefined
+            : [...products, ...(photoPlan ? [photoPlan] : [])].find(
+                  (product) =>
+                      product.id === selectedProductId && product.price > 0,
+              );
+
+    useEffect(() => {
+        if (continueToMeal && meal?.review_url) {
+            router.visit(meal.review_url, { replace: true });
+        }
+    }, [continueToMeal, meal?.review_url]);
 
     const formatSavings = (value: number) => `$${parseFloat(value.toFixed(2))}`;
 
@@ -115,7 +136,9 @@ export default function CashierSubscription({
         }
 
         if (isGuest) {
-            router.visit(checkout.start(productId).url);
+            router.visit(
+                checkout.start(productId, { query: { interval } }).url,
+            );
             return;
         }
         window.umami?.track('snap_to_track_checkout_click', {
@@ -143,67 +166,104 @@ export default function CashierSubscription({
 
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <div className="space-y-8">
-                    {paymentPending && <PaymentConfirmation />}
-                    {requiresEmailVerification && (
-                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/50 dark:bg-yellow-900/20">
-                            <div className="flex">
-                                <div className="shrink-0">
-                                    <MailIcon className="h-5 w-5 text-yellow-400 dark:text-yellow-500" />
-                                </div>
-                                <div className="ml-3 flex-1">
-                                    <h3 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
-                                        {t(
-                                            'checkout_subscription.verify_email.title',
-                                        )}
-                                    </h3>
-                                    <p className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
-                                        {t(
-                                            'checkout_subscription.verify_email.body',
-                                        )}
-                                    </p>
-                                    <Form
-                                        {...UserEmailVerificationNotificationController.store.form()}
-                                        options={{ preserveScroll: true }}
-                                        className="mt-4 flex flex-wrap items-center gap-3"
-                                    >
-                                        {({
-                                            processing,
-                                            recentlySuccessful,
-                                        }) => (
-                                            <>
-                                                <Button
-                                                    type="submit"
-                                                    variant="secondary"
-                                                    disabled={processing}
-                                                >
-                                                    {t(
-                                                        'checkout_subscription.verify_email.resend',
-                                                    )}
-                                                </Button>
-                                                {recentlySuccessful && (
-                                                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                                                        {t(
-                                                            'checkout_subscription.verify_email.sent',
-                                                        )}
-                                                    </p>
-                                                )}
-                                            </>
-                                        )}
-                                    </Form>
-                                </div>
-                            </div>
+                    {paymentPending && (
+                        <div className="space-y-2">
+                            <PaymentConfirmation />
+                            {meal?.review_url && (
+                                <p className="text-sm text-muted-foreground">
+                                    Your meal preview is kept. We’ll open it as
+                                    soon as your plan is active.
+                                </p>
+                            )}
                         </div>
                     )}
-                    {!paymentPending && photoAllowance?.mode === 'premium' && (
+                    {planActive && (
                         <div role="status" className="rounded-lg border p-4">
                             Your plan is active.{' '}
-                            <Link
-                                href={ShowSnapToTrackController()}
-                                className="underline"
-                            >
-                                Continue scanning
-                            </Link>
+                            {meal?.review_url ? (
+                                <Link
+                                    href={meal.review_url}
+                                    className="underline"
+                                >
+                                    Review and save your meal
+                                </Link>
+                            ) : (
+                                <>
+                                    {meal?.expired &&
+                                        'Meal previews last 60 minutes, and this one has expired. '}
+                                    <Link
+                                        href={ShowSnapToTrackController()}
+                                        className="underline"
+                                    >
+                                        {meal?.expired
+                                            ? 'Scan your meal again'
+                                            : 'Continue scanning'}
+                                    </Link>
+                                </>
+                            )}
                         </div>
+                    )}
+                    {selectedPlan && (
+                        <section
+                            aria-labelledby="selected-plan-heading"
+                            className="space-y-3 rounded-lg border border-primary/30 p-4 sm:p-6"
+                        >
+                            {checkoutCancelled && (
+                                <p className="text-sm text-muted-foreground">
+                                    Checkout was cancelled, so you haven’t been
+                                    charged.
+                                </p>
+                            )}
+                            <h2
+                                id="selected-plan-heading"
+                                className="text-lg font-semibold"
+                            >
+                                Continue with {selectedPlan.name}
+                            </h2>
+                            <p className="text-2xl font-bold">
+                                {selectedInterval === 'yearly'
+                                    ? `${selectedPlan.formatted_yearly_price}/year`
+                                    : `${selectedPlan.formatted_price}/month`}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                Pay securely with Stripe. Renews{' '}
+                                {selectedInterval}. Cancel anytime.
+                            </p>
+                            <Button
+                                onClick={() =>
+                                    handleSubscribe(
+                                        selectedPlan.id,
+                                        selectedInterval,
+                                    )
+                                }
+                                disabled={isSubscribing}
+                                className="w-full sm:w-auto"
+                            >
+                                {isSubscribing
+                                    ? t('checkout_subscription.processing')
+                                    : 'Continue to payment'}
+                            </Button>
+                            {meal?.review_url &&
+                                (emailVerified ? (
+                                    <Link
+                                        href={meal.review_url}
+                                        className="block text-sm underline"
+                                    >
+                                        Back to your meal
+                                    </Link>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">
+                                        Not ready to pay?{' '}
+                                        <Link
+                                            href={meal.review_url}
+                                            className="underline"
+                                        >
+                                            Save your meal free
+                                        </Link>{' '}
+                                        after verifying your email.
+                                    </p>
+                                ))}
+                        </section>
                     )}
                     {hasIncompletePayment && incompletePaymentUrl && (
                         <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/50 dark:bg-yellow-900/20">
