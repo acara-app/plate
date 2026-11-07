@@ -1098,7 +1098,7 @@ return [
         'starter' => [
             'description' => 'Make photo logging part of your routine.',
             'features' => [
-                'Scan a meal, review its calories and macros, and save it to your food log',
+                'Scan a meal and save its calories and macros straight to your food log',
                 'Daily AI allowance for meal scans, chat and meal plans',
                 'Cancel anytime through Billing settings',
             ],
@@ -1117,7 +1117,7 @@ return [
             'save_note' => 'This meal is still free to save.',
             'benefits' => [
                 'Estimate calories and macros from a meal photo',
-                'Review your portions and save meals to your food log',
+                'Save meals to your food log and adjust portions anytime',
                 'Use your personalised calorie and macro goals',
             ],
             'cta' => 'Keep tracking with {{name}} — {{price}}/month',
