@@ -220,6 +220,13 @@ return [
             'driver' => 'anthropic',
             'key' => env('ANTHROPIC_API_KEY'),
             'url' => env('ANTHROPIC_URL', 'https://api.anthropic.com/v1'),
+            'models' => [
+                'text' => [
+                    'default' => 'claude-sonnet-5',
+                    'cheapest' => 'claude-haiku-4-5-20251001',
+                    'smartest' => 'claude-opus-5-5',
+                ],
+            ],
         ],
 
         'cohere' => [
@@ -235,6 +242,13 @@ return [
         'gemini' => [
             'driver' => 'gemini',
             'key' => env('GEMINI_API_KEY'),
+            'models' => [
+                'text' => [
+                    'default' => 'gemini-3.6-flash',
+                    'cheapest' => 'gemini-3.1-flash-lite',
+                    'smartest' => 'gemini-3.6-flash',
+                ],
+            ],
         ],
 
         'groq' => [
@@ -252,6 +266,13 @@ return [
             'driver' => 'openai',
             'key' => env('OPENAI_API_KEY'),
             'url' => env('OPENAI_URL', 'https://api.openai.com/v1'),
+            'models' => [
+                'text' => [
+                    'default' => 'gpt-6-sol',
+                    'cheapest' => 'gpt-6-luna',
+                    'smartest' => 'gpt-6-astra',
+                ],
+            ],
         ],
 
         'openrouter' => [

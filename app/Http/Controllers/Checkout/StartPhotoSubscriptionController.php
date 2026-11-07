@@ -23,6 +23,6 @@ final readonly class StartPhotoSubscriptionController
 
         $request->session()->put('url.intended', route('checkout.subscription', absolute: false));
 
-        return to_route('register');
+        return to_route($request->boolean('returning') ? 'login' : 'register');
     }
 }
