@@ -28,30 +28,6 @@ return [
         'minimum_ios_version' => (string) env('HEALTH_SYNC_MIN_IOS_VERSION', '18.0'),
     ],
 
-    'food_photo_analyzer' => [
-        'reference_lookup' => [
-            'enabled' => (bool) env('FOOD_REFERENCE_LOOKUP_ENABLED', true),
-            'match_threshold' => (float) env('FOOD_REFERENCE_MATCH_THRESHOLD', 0.5),
-
-            'embeddings' => [
-                'enabled' => (bool) env('FOOD_REFERENCE_EMBEDDINGS_ENABLED', false),
-                'dimensions' => (int) env('FOOD_REFERENCE_EMBEDDINGS_DIMENSIONS', 1536),
-                'threshold' => (float) env('FOOD_REFERENCE_EMBEDDINGS_THRESHOLD', 0.8),
-            ],
-        ],
-    ],
-
-    'snap_to_track' => [
-        'burst_caps' => [
-            'default' => (int) env('SNAP_TO_TRACK_BURST_CAP_DEFAULT', 5),
-            'free' => (int) env('SNAP_TO_TRACK_BURST_CAP_FREE', 5),
-            'starter' => (int) env('SNAP_TO_TRACK_BURST_CAP_STARTER', 30),
-            'snap' => (int) env('SNAP_TO_TRACK_BURST_CAP_SNAP', 30),
-            'basic' => (int) env('SNAP_TO_TRACK_BURST_CAP_BASIC', 15),
-            'plus' => (int) env('SNAP_TO_TRACK_BURST_CAP_PLUS', 30),
-        ],
-    ],
-
     'tools' => [
         GetUserProfile::class,
         GetSubscriptionStatus::class,
@@ -84,34 +60,13 @@ return [
 
     'credit_multiplier' => 1_000,
 
-    'ai_usage_preflight' => [
-        'token_budget' => [
-            'input' => 2_000,
-            'output' => 1_000,
-        ],
-        'fallback_estimate' => 0.01,
-    ],
+    'ai_call_estimate_usd' => 0.02,
 
-    'tier_limits' => [
-        'free' => [
-            'rolling' => ['limit' => 0.40, 'period_hours' => 24],
-            'weekly' => ['limit' => 1.40, 'period_days' => 7],
-        ],
-        'starter' => [
-            'rolling' => ['limit' => 0.50, 'period_hours' => 24],
-            'weekly' => ['limit' => 1.50, 'period_days' => 7],
-        ],
-        'snap' => [
-            'rolling' => ['limit' => 1.50, 'period_hours' => 24],
-            'weekly' => ['limit' => 6.00, 'period_days' => 7],
-        ],
-        'basic' => [
-            'rolling' => ['limit' => 1.50, 'period_hours' => 24],
-            'weekly' => ['limit' => 6.00, 'period_days' => 7],
-        ],
-        'plus' => [
-            'rolling' => ['limit' => 3.00, 'period_hours' => 24],
-            'weekly' => ['limit' => 12.00, 'period_days' => 7],
-        ],
+    'ai_allowance' => [
+        'free' => ['usd' => 0.50, 'resets' => 'monthly'],
+        'starter' => ['usd' => 0.50, 'resets' => 'daily'],
+        'snap' => ['usd' => 5.00, 'resets' => 'daily'],
+        'basic' => ['usd' => 5.00, 'resets' => 'daily'],
+        'plus' => ['usd' => 5.00, 'resets' => 'daily'],
     ],
 ];

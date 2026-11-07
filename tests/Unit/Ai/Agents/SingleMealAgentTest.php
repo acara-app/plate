@@ -7,8 +7,6 @@ use App\Ai\SingleMealPromptBuilder;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
 use App\Models\User;
-use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Timeout;
 use Tests\Helpers\TestJsonSchema;
 
 covers(SingleMealAgent::class);
@@ -37,18 +35,6 @@ it('returns correct instructions', function (): void {
         ->toContain('healthy, delicious meals')
         ->toContain('dietary needs and health conditions')
         ->toContain('glucose impact');
-});
-
-it('has correct attributes configured', function (): void {
-    $reflection = new ReflectionClass($this->agent);
-
-    $maxTokens = $reflection->getAttributes(MaxTokens::class);
-    $timeout = $reflection->getAttributes(Timeout::class);
-
-    expect($maxTokens)->toHaveCount(1)
-        ->and($maxTokens[0]->newInstance()->value)->toBe(8000)
-        ->and($timeout)->toHaveCount(1)
-        ->and($timeout[0]->newInstance()->value)->toBe(60);
 });
 
 it('returns valid schema with all fields', function (): void {

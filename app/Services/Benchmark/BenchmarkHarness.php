@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Benchmark;
 
-use App\Actions\AnalyzeFoodPhotoAction;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Data\Benchmark\HarnessReport;
 use App\Data\Benchmark\MealEvaluation;
@@ -31,7 +30,6 @@ final readonly class BenchmarkHarness
 {
     public function __construct(
         private FoodPhotoAnalyzerAgent $agent,
-        private AnalyzeFoodPhotoAction $action,
         private ItemMatcher $itemMatcher,
         private MetricsCalculator $calculator,
     ) {}
@@ -77,7 +75,7 @@ final readonly class BenchmarkHarness
                     Context::add('photo_usage_group', $group);
                     $started = hrtime(true);
                     try {
-                        $analysis = $this->analyze($path, $imageBase64, $mimeType, $model);
+                        $analysis = $this->analyze($imageBase64, $mimeType, $model);
                         throw_if($analysis->items->count() === 0, RuntimeException::class, 'No food was detected.');
 
                         $runs[] = $this->toPredictedRun($analysis, $truthNames);
@@ -122,7 +120,6 @@ final readonly class BenchmarkHarness
 
         return new HarnessReport(
             analyzerVersion: FoodPhotoAnalyzerAgent::version($model->model),
-            referenceLookupEnabled: config()->boolean('plate.food_photo_analyzer.reference_lookup.enabled', false),
             repeats: $repeats,
             skippedMeals: $skippedMeals,
             paths: new DataCollection(PathMetrics::class, $paths),
@@ -132,11 +129,9 @@ final readonly class BenchmarkHarness
         );
     }
 
-    private function analyze(AnalysisPath $path, string $imageBase64, string $mimeType, PhotoModel $model): FoodAnalysisData
+    private function analyze(string $imageBase64, string $mimeType, PhotoModel $model): FoodAnalysisData
     {
-        return $path === AnalysisPath::Raw
-            ? $this->agent->usingModel($model)->analyze($imageBase64, $mimeType)
-            : $this->action->analyzeUsingModel($imageBase64, $mimeType, $model);
+        return $this->agent->usingModel($model)->analyze($imageBase64, $mimeType);
     }
 
     /** @param list<float> $values */

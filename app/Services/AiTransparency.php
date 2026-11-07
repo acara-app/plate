@@ -46,37 +46,11 @@ final class AiTransparency
      */
     public static function pipeline(): array
     {
-        if (self::usesReferenceLookup()) {
-            return [
-                'Your photo goes through Acara\'s multimodal AI pipeline — a single pass that combines image understanding with nutrition reasoning to read your meal.',
-                'In that one pass, the model identifies each distinct food item it can see, estimates its portion size and weight in grams, and proposes calories, protein, carbohydrate, fat, and fiber for every item.',
-                'Where the model confidently recognizes a food, we then replace its estimated calories, protein, carbohydrate, and fat with values computed from a reference database — USDA FoodData Central — scaled to the estimated weight. Those items are flagged as reference-derived; items we cannot confidently match keep the model\'s own estimate and are flagged as estimates, so a single meal can mix both.',
-                "Every analysis also returns a confidence score from 0 to 100, which is the model's own assessment of how clearly it could see and recognize the meal.",
-                'The same engine powers both the free Snap to Track tool and the full app. The difference: in the full app, you review and can edit every item and portion before anything is saved to your history.',
-            ];
-        }
-
         return [
             'Your photo goes through Acara\'s multimodal AI pipeline — a single pass that combines image understanding with nutrition reasoning to read your meal.',
             'In that one pass, the model identifies each distinct food item it can see, estimates the portion size visually, and generates calories, protein, carbohydrate, fat, and fiber for every item plus meal totals — values drawn from its training knowledge of standard nutrition references such as USDA FoodData Central, not retrieved from a database.',
             "Every analysis also returns a confidence score from 0 to 100, which is the model's own assessment of how clearly it could see and recognize the meal.",
             'The same engine powers both the free Snap to Track tool and the full app. The difference: in the full app, you review and can edit every item and portion before anything is saved to your history.',
-        ];
-    }
-
-    public static function usesReferenceLookup(): bool
-    {
-        return config()->boolean('plate.food_photo_analyzer.reference_lookup.enabled', false);
-    }
-
-    /**
-     * @return list<string>
-     */
-    public static function provenance(): array
-    {
-        return [
-            'When the database lookup is active, every item is tagged with where its numbers came from. "Reference-derived" means we matched the food to a USDA FoodData Central entry and computed its nutrients from that entry, scaled to the estimated weight — repeatable and citable. "Estimate" means the model\'s own value, used when no confident database match exists, such as composite dishes or regional foods.',
-            'The split is deliberate: it concentrates the remaining error where only the photo can answer — identifying the food and judging its weight — rather than in recalling nutrient tables. It does not make portion size any easier to judge, which stays the dominant source of error.',
         ];
     }
 
@@ -156,7 +130,7 @@ final class AiTransparency
     {
         return [
             'On the public Snap to Track tool, your photo is stored only as a temporary upload while the analysis runs and is deleted as soon as the result or error is returned.',
-            'The photo is processed by Google as an AI sub-processor to generate the analysis. It is not shared with anyone else and is never used to train AI models.',
+            'The photo is processed by OpenAI as an AI sub-processor to generate the analysis. It is not shared with anyone else and is never used to train AI models.',
             'Signed-in users can choose to save meals with photos to their personal history; on the public tool, no image is ever saved.',
         ];
     }
@@ -189,10 +163,6 @@ final class AiTransparency
 
     private static function photoAnalyzerFaqAnswer(): string
     {
-        if (self::usesReferenceLookup()) {
-            return "Upload a photo of your meal and our AI vision model identifies each food item, estimates its portion size and weight, and produces calories, protein, carbs, fat, and fiber for every item. For foods it can confidently match, calories and macros are computed from USDA FoodData Central reference data and flagged as reference-derived; the rest stay as the model's own estimate. Every analysis includes a confidence score.";
-        }
-
         return 'Upload a photo of your meal and our AI vision model identifies each food item, estimates portion size, and calculates calories, protein, carbs, fat, and fiber for every item plus the full meal. The values are generated directly by the AI model — informed by standard nutrition references such as USDA FoodData Central, not looked up in a live database — and every analysis includes a confidence score.';
     }
 }

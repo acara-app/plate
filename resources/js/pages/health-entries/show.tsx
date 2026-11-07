@@ -1,4 +1,5 @@
 import ListHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/ListHealthEntryController';
+import { useSnapPhotoHandoff } from '@/hooks/use-snap-photo-handoff';
 import AppLayout from '@/layouts/app-layout';
 import {
     entryTitle,
@@ -43,6 +44,7 @@ export default function HealthEntryShow({
     todaysMeals,
 }: Props) {
     const { t } = useTranslation('common');
+    useSnapPhotoHandoff();
     const [editOpen, setEditOpen] = useState(false);
     const [editType, setEditType] = useState<LogTypeValue>(() =>
         getPrimaryType(entry),

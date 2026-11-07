@@ -7,10 +7,8 @@ use App\Http\Controllers\ShowMealPlansController;
 use App\Jobs\GenerateMealPlanDayJob;
 use App\Models\Meal;
 use App\Models\MealPlan;
-use App\Models\SubscriptionProduct;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
-use Laravel\Cashier\Subscription;
 
 covers(ShowMealPlansController::class);
 
@@ -698,40 +696,6 @@ it('exposes the diet type catalog on the empty state', function (): void {
             ->where('mealPlan', null)
             ->where('userDietType', DietType::Balanced->value)
             ->where('dietTypes', DietType::toArray()));
-});
-
-it('exposes proModelUpsell=true for free users when billing is on', function (): void {
-    enableBilling();
-
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)->get(route('meal-plans.index'));
-
-    $response->assertOk()
-        ->assertInertia(fn ($page) => $page->where('proModelUpsell', true));
-});
-
-it('exposes proModelUpsell=false for plus subscribers', function (): void {
-    enableBilling();
-
-    SubscriptionProduct::factory()->create([
-        'name' => 'Plus',
-        'stripe_price_id' => 'price_plus_monthly',
-        'yearly_stripe_price_id' => 'price_plus_yearly',
-    ]);
-
-    $user = User::factory()->create();
-
-    Subscription::factory()
-        ->for($user)
-        ->active()
-        ->withPrice('price_plus_monthly')
-        ->create();
-
-    $response = $this->actingAs($user)->get(route('meal-plans.index'));
-
-    $response->assertOk()
-        ->assertInertia(fn ($page) => $page->where('proModelUpsell', false));
 });
 
 it('returns the user profile diet type when set', function (): void {

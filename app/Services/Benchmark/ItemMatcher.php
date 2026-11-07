@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Benchmark;
 
 use App\Data\Benchmark\ItemScore;
-use App\Models\ReferenceFood;
+use App\Utilities\FoodName;
 
 final class ItemMatcher
 {
@@ -69,7 +69,7 @@ final class ItemMatcher
      */
     private function tokens(string $name): array
     {
-        return array_values(array_unique(array_filter(explode(' ', ReferenceFood::normalizeName($name)))));
+        return array_values(array_unique(array_filter(explode(' ', FoodName::normalize($name)))));
     }
 
     /**

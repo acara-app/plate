@@ -16,7 +16,6 @@ use App\Jobs\ProcessPhotoAnalysis;
 use App\Models\AnalysisDraft;
 use App\Models\MealPhoto;
 use App\Models\PhotoAnalysisRequest;
-use App\Models\ReferenceFood;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -283,16 +282,16 @@ it('keeps every detected item in the guest draft', function (): void {
     expect(array_column(AnalysisDraft::query()->sole()->payload['items'], 'name'))->toBe(['Rice', 'Chicken']);
 });
 
-it('sends a signed-in member straight to the claimed draft review', function (): void {
+it('sends a signed-in member straight to saving the claimed draft', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
     $component = analyzePhotoForSnapToTrack(saveMealAnalysisFixture())->assertRedirect();
 
     $draft = AnalysisDraft::query()->sole();
-    $token = Str::afterLast($component->effects['redirect'], '/review/');
+    $token = Str::afterLast($component->effects['redirect'], '/save/');
 
-    expect($component->effects['redirect'])->toBe(route('snap-to-track.review', ['draft' => $token]))
+    expect($component->effects['redirect'])->toBe(route('snap-to-track.save', ['draft' => $token]))
         ->and(AnalysisDraft::hashToken($token))->toBe($draft->token_hash)
         ->and($draft->user_id)->toBe($user->id)
         ->and($draft->claimed_at)->not->toBeNull()
@@ -313,11 +312,7 @@ it('keeps a signed-in member photo with the meal they log from the public tool',
         ->and($photo->analysis_draft_id)->toBe($draft->id);
     Storage::disk('s3')->assertExists($photo->path);
 
-    $token = Str::afterLast($component->effects['redirect'], '/review/');
-    $this->post(route('snap-to-track.review.store', ['draft' => $token]), [
-        'items' => [['name' => 'Grilled Chicken', 'portion' => '100g', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'provenance' => 'model']],
-        'measured_at' => now()->toIso8601String(),
-    ])->assertRedirect();
+    $this->get($component->effects['redirect'])->assertRedirect();
 
     $groupId = (string) $draft->refresh()->health_group_id;
 
@@ -394,7 +389,8 @@ it('renders the seo definition block', function (): void {
 it('renders authority and freshness signals', function (): void {
     Livewire::test('pages::snap-to-track')
         ->assertSee('AI vision analysis')
-        ->assertSee('USDA-aligned nutrition references')
+        ->assertSee('Informed by standard nutrition references')
+        ->assertSee('These are AI estimates, not database lookups.')
         ->assertSee('Last updated:');
 });
 
@@ -432,7 +428,8 @@ it('validates turnstile token before generating a temporary upload URL', functio
     Livewire::test('pages::snap-to-track')
         ->set('turnstileToken', Turnstile::dummy())
         ->call('_startUpload', 'photo', [['name' => 'food.jpg', 'size' => 1024, 'type' => 'image/jpeg']], false)
-        ->assertHasErrors(['turnstileToken']);
+        ->assertHasErrors(['turnstileToken'])
+        ->assertDispatched('upload:errored', name: 'photo');
 });
 
 it('blocks temporary upload URL generation once the upload limit is exhausted', function (): void {
@@ -447,7 +444,8 @@ it('blocks temporary upload URL generation once the upload limit is exhausted', 
     Livewire::test('pages::snap-to-track')
         ->set('turnstileToken', Turnstile::dummy())
         ->call('_startUpload', 'photo', [['name' => 'food.jpg', 'size' => 1024, 'type' => 'image/jpeg']], false)
-        ->assertHasErrors(['photo']);
+        ->assertHasErrors(['photo'])
+        ->assertDispatched('upload:errored', name: 'photo');
 });
 
 it('configures Livewire temporary uploads for photo-only hourly throttling', function (): void {
@@ -520,32 +518,6 @@ it('shows the app shortcut instead of signup actions to a limited member', funct
         ->assertSee('Open Snap to Track')
         ->assertSee('pick up right where you left off')
         ->assertDontSee('Keep analyzing — free');
-});
-
-it('flags reference-derived items in the guest draft when the lookup is enabled', function (): void {
-    config()->set('plate.food_photo_analyzer.reference_lookup.enabled', true);
-
-    ReferenceFood::factory()->create([
-        'description' => 'Hummus, commercial',
-        'match_name' => ReferenceFood::normalizeName('Hummus, commercial'),
-        'calories_per_100g' => 166,
-        'protein_per_100g' => 7.9,
-        'carbs_per_100g' => 14.3,
-        'fat_per_100g' => 9.6,
-    ]);
-
-    analyzePhotoForSnapToTrack([
-        'items' => [
-            ['name' => 'Hummus', 'calories' => 200, 'protein' => 5, 'carbs' => 10, 'fat' => 15, 'portion' => '100g', 'grams' => 100, 'match_name' => 'hummus commercial'],
-        ],
-        'total_calories' => 200,
-        'total_protein' => 5,
-        'total_carbs' => 10,
-        'total_fat' => 15,
-        'confidence' => 80,
-    ])->assertRedirect(route('snap-to-track.result'));
-
-    expect(AnalysisDraft::query()->sole()->payload['items'][0]['provenance'])->toBe('reference');
 });
 
 it('shows how it works section', function (): void {
@@ -629,7 +601,7 @@ it('withholds the paid offer until a scan has proven the value', function (): vo
     stubSnapPhotoAllowance(used: 1);
 
     Livewire::test('pages::snap-to-track-result')
-        ->assertSee('1 free scan left')
+        ->assertSee('1 free scan remaining')
         ->assertSee('Keep tracking with Starter — $2.99/month')
         ->assertSee('Not now — save this meal free');
 
@@ -638,7 +610,7 @@ it('withholds the paid offer until a scan has proven the value', function (): vo
     Livewire::test('pages::snap-to-track')
         ->assertSee('Scan limit reached')
         ->assertSee('Your free scans are complete.')
-        ->assertSee('Continue scanning with Starter — $2.99/month')
+        ->assertSee('Keep tracking with Starter — $2.99/month')
         ->assertDontSee('Tap to take photo or upload');
 });
 
@@ -663,7 +635,7 @@ it('recovers an accepted scan after losing the response even when the last allow
     Livewire::test('pages::snap-to-track')
         ->assertSet('analysisRequestId', $requestId)
         ->assertSet('loading', true)
-        ->assertSee('Your photo is being analyzed')
+        ->assertSee('Analyzing your meal')
         ->assertDontSee('Your free scans are complete.')
         ->call('analyze');
 
@@ -671,6 +643,7 @@ it('recovers an accepted scan after losing the response even when the last allow
 
     Livewire::test('pages::snap-to-track')
         ->assertSet('hasRecoverableResult', true)
+        ->assertSee('Your last scan is ready')
         ->assertNoRedirect()
         ->call('refreshAnalysis')
         ->assertRedirect(route('snap-to-track.result'));
@@ -697,7 +670,7 @@ it('does not expose an account scan to another account sharing its guest identit
         ->assertSet('analysisRequestId', null)
         ->assertSet('loading', false)
         ->assertSet('hasRecoverableResult', false)
-        ->assertDontSee('Your photo is being analyzed');
+        ->assertDontSee('Analyzing your meal');
 });
 
 it('analyzes the selected photo when a different scan is pending in another tab', function (PhotoAnalysisStatus $pendingStatus): void {
@@ -746,7 +719,7 @@ it('does not offer an already saved draft as a recoverable analysis', function (
 
     Livewire::test('pages::snap-to-track')
         ->assertSet('hasRecoverableResult', false)
-        ->assertDontSee('Your previous analysis is ready.')
+        ->assertDontSee('Your last scan is ready')
         ->assertSee('Tap to take photo or upload');
 });
 

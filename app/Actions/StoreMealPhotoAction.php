@@ -18,7 +18,7 @@ final readonly class StoreMealPhotoAction
 
     private const int JPEG_QUALITY = 82;
 
-    public function handle(User $user, string $imageBytes, string $draftToken): MealPhoto
+    public function handle(User $user, string $imageBytes, string $draftToken, ?string $healthGroupId = null): MealPhoto
     {
         $path = MealPhoto::directoryFor($user).'/'.Str::uuid().'.jpg';
 
@@ -31,6 +31,7 @@ final readonly class StoreMealPhotoAction
         return MealPhoto::query()->create([
             'user_id' => $user->id,
             'analysis_draft_id' => AnalysisDraft::query()->where('token_hash', AnalysisDraft::hashToken($draftToken))->value('id'),
+            'health_group_id' => $healthGroupId,
             'path' => $path,
         ]);
     }

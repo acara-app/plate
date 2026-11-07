@@ -136,6 +136,7 @@ class extends Component
                 $this->hitUploadRateLimit();
             } catch (ValidationException $e) {
                 $this->funnel->record(SnapFunnelStage::UploadRejected, $this->analysisRequestId, ['reason' => $rejection]);
+                $this->dispatch('upload:errored', name: $name)->self();
 
                 throw $e;
             }
@@ -309,7 +310,7 @@ class extends Component
 
         if ($redirect && $this->hasRecoverableResult) {
             if ($analysis->user_id !== null) {
-                $this->redirect(route('snap-to-track.review', ['draft' => $analysis->draft_token]));
+                $this->redirect(route('snap-to-track.save', ['draft' => $analysis->draft_token]));
 
                 return;
             }
@@ -549,24 +550,163 @@ class extends Component
         {{-- Tool --}}
         <section class="mx-auto mt-6 max-w-3xl lg:px-8">
             @if ($error)
-                <p role="alert" class="mb-4 border border-[#B5482E] p-4 text-sm text-[#893E20]">{{ $error }}</p>
+                <div role="alert" class="mb-4 flex items-start gap-3 border border-[#B5482E] bg-[#B5482E]/5 p-4 text-sm leading-relaxed text-[#893E20]">
+                    <svg class="mt-0.5 size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 3.84L2.82 17a2 2 0 001.74 3h14.88a2 2 0 001.74-3L13.7 3.84a2 2 0 00-3.4 0z" />
+                    </svg>
+                    <p>{{ $error }}</p>
+                </div>
             @endif
             @if ($loading)
-                <div wire:poll.5s="refreshAnalysis" role="status" aria-live="polite" class="mb-6 border border-[#D9CFBC] bg-[#EBE2D0] p-6">
-                    <h2 class="text-xl font-semibold">Your photo is being analyzed</h2>
-                    <p class="mt-2 text-sm">You can refresh this page safely. We’ll recover this analysis without using another scan.</p>
-                    <p class="mt-2 text-sm">Most results arrive in 5–15 seconds. Some photos take longer. Keep this browser session to return to your result.</p>
-                    <button type="button" wire:click="refreshAnalysis" wire:loading.attr="disabled" class="mt-4 underline">Check progress</button>
+                <div
+                    wire:poll.2s="refreshAnalysis"
+                    x-data="{
+                        photo: null,
+                        startedAt: Date.now(),
+                        now: Date.now(),
+                        scanning: false,
+                        ticker: null,
+                        init() {
+                            this.photo = window.acaraRecallSnapPhoto?.(@js($analysisRequestId)) ?? null;
+                            setTimeout(() => this.scanning = true, 50);
+                            this.$nextTick(() => {
+                                if (this.$el.getBoundingClientRect().top < 0) {
+                                    this.$el.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+                                }
+                            });
+                            this.ticker = setInterval(() => {
+                                this.now = Date.now();
+                                this.scanning = ! this.scanning;
+                                if (! this.photo && this.seconds < 6) {
+                                    this.photo = window.acaraRecallSnapPhoto?.(@js($analysisRequestId)) ?? null;
+                                }
+                            }, 1800);
+                        },
+                        destroy() {
+                            clearInterval(this.ticker);
+                        },
+                        get seconds() {
+                            return (this.now - this.startedAt) / 1000;
+                        },
+                        get step() {
+                            return this.seconds < 3 ? 1 : (this.seconds < 7 ? 2 : 3);
+                        },
+                    }"
+                    class="mb-6 scroll-mt-24 border border-[#D9CFBC] bg-[#EBE2D0] p-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 sm:p-8"
+                >
+                    <div class="flex items-center justify-between gap-4 pb-5">
+                        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Step 2 · Analyzing</p>
+                        <span class="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
+                            <span class="size-1.5 rounded-full bg-[#C4623A]" aria-hidden="true"></span>
+                            Live
+                        </span>
+                    </div>
+
+                    <div class="grid gap-6 border-t border-[#D9CFBC] pt-6 sm:grid-cols-[13rem_1fr] sm:items-center">
+                        <div class="relative aspect-[16/10] overflow-hidden border border-[#D9CFBC] bg-[#F2EBDD] sm:aspect-square">
+                            <img x-show="photo" x-bind:src="photo" alt="Your meal photo" class="size-full object-cover" style="display: none;">
+                            <div x-show="! photo" class="flex size-full items-center justify-center text-[#6E665C]">
+                                <svg class="size-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <div x-show="photo" class="pointer-events-none absolute inset-0 bg-[#1A1814]/10" style="display: none;" aria-hidden="true">
+                                @foreach (['left-3 top-3 border-l-2 border-t-2', 'right-3 top-3 border-r-2 border-t-2', 'bottom-3 left-3 border-b-2 border-l-2', 'bottom-3 right-3 border-b-2 border-r-2'] as $corner)
+                                    <span wire:key="scan-corner-{{ $loop->index }}" class="absolute size-5 border-[#F2EBDD] {{ $corner }}"></span>
+                                @endforeach
+                            </div>
+                            <div
+                                x-bind:class="scanning ? 'translate-y-[calc(100%_-_2px)]' : 'translate-y-0'"
+                                class="pointer-events-none absolute inset-0 transition-transform duration-[1800ms] ease-in-out motion-reduce:hidden"
+                                aria-hidden="true"
+                            >
+                                <div class="h-0.5 w-full bg-[#C4623A] shadow-[0_0_18px_4px_rgba(196,98,58,0.55)]"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div role="status">
+                                <h2 class="text-2xl font-bold leading-tight tracking-[-0.02em] text-[#1A1814]">Analyzing your meal</h2>
+                                <p
+                                    x-text="seconds < 15 ? 'Most meals take 5–15 seconds.' : (seconds < 45 ? 'Taking a little longer than usual. Busy plates need a few extra seconds.' : 'Still working on it. You can leave this page — come back in this browser and your result will be waiting.')"
+                                    class="mt-2 text-sm leading-relaxed text-[#3D3833]"
+                                >Most meals take 5–15 seconds.</p>
+                            </div>
+                            <ol class="mt-5 grid gap-3">
+                                @foreach (['Photo received', 'Spotting each food', 'Estimating portion sizes', 'Calculating calories & macros'] as $stepLabel)
+                                    <li wire:key="analysis-step-{{ $loop->index }}" x-bind:aria-current="step === {{ $loop->index }} && 'step'" class="flex items-center gap-3 text-sm">
+                                        <span
+                                            x-bind:class="step > {{ $loop->index }} ? 'border-[#1A1814] bg-[#1A1814] text-[#F2EBDD]' : (step === {{ $loop->index }} ? 'border-[#C4623A] bg-[#C4623A] text-[#F2EBDD]' : 'border-[#D9CFBC]')"
+                                            class="flex size-5 shrink-0 items-center justify-center border transition-colors duration-300"
+                                            aria-hidden="true"
+                                        >
+                                            <svg x-show="step > {{ $loop->index }}" class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" style="display: none;">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <svg x-show="step === {{ $loop->index }}" class="size-3 motion-safe:animate-spin" fill="none" viewBox="0 0 24 24" style="display: none;">
+                                                <circle class="opacity-30" cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3"></circle>
+                                                <path d="M21 12a9 9 0 00-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+                                            </svg>
+                                        </span>
+                                        <span x-bind:class="step === {{ $loop->index }} ? 'font-semibold text-[#1A1814]' : 'text-[#3D3833]'">
+                                            <span x-show="step > {{ $loop->index }}" class="sr-only" style="display: none;">Done: </span>{{ $stepLabel }}
+                                        </span>
+                                    </li>
+                                @endforeach
+                            </ol>
+                        </div>
+                    </div>
+
+                    <p class="mt-6 text-balance border-t border-[#D9CFBC] pt-5 font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
+                        Safe to refresh · Won’t use another scan
+                    </p>
                 </div>
             @elseif ($hasRecoverableResult)
-                <div role="status" class="mb-6 border border-[#D9CFBC] p-6">
-                    <p>Your previous analysis is ready. Opening it does not use another scan.</p>
-                    <button type="button" wire:click="refreshAnalysis" class="mt-4 font-semibold underline">View result</button>
+                <div role="status" class="mb-6 flex flex-col gap-5 border border-[#D9CFBC] bg-[#EBE2D0] p-6 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+                    <div class="flex items-start gap-4">
+                        <span class="flex size-10 shrink-0 items-center justify-center bg-[#1A1814] text-[#F2EBDD]" aria-hidden="true">
+                            <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </span>
+                        <div>
+                            <h2 class="text-xl font-bold leading-tight tracking-[-0.01em] text-[#1A1814]">Your last scan is ready</h2>
+                            <p class="mt-1 text-sm leading-relaxed text-[#3D3833]">Opening it won’t use another scan.</p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        wire:click="refreshAnalysis"
+                        wire:loading.attr="disabled"
+                        wire:target="refreshAnalysis"
+                        class="inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 border border-[#1A1814] bg-[#1A1814] px-6 text-sm font-semibold text-[#F2EBDD] transition hover:bg-[#3D3833] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1A1814] disabled:cursor-wait disabled:opacity-60 sm:w-auto"
+                    >
+                        View result
+                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                    </button>
                 </div>
             @elseif ($canRetryAnalysis)
-                <div class="mb-6 border border-[#D9CFBC] p-6">
-                    <p class="text-sm">Your photo is available to retry for up to one hour after upload. You can try it again without uploading it.</p>
-                    <button type="button" wire:click="retryAnalysis" wire:loading.attr="disabled" class="mt-4 font-semibold underline">Try this photo again</button>
+                <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+                    <button
+                        type="button"
+                        wire:click="retryAnalysis"
+                        wire:loading.attr="disabled"
+                        wire:target="retryAnalysis"
+                        class="inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 border border-[#1A1814] bg-[#1A1814] px-6 text-sm font-semibold text-[#F2EBDD] transition hover:bg-[#3D3833] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1A1814] disabled:cursor-wait disabled:opacity-60 sm:w-auto"
+                    >
+                        <svg wire:loading.remove wire:target="retryAnalysis" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                        <svg wire:loading wire:target="retryAnalysis" class="size-4 motion-safe:animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Try this photo again
+                    </button>
+                    <p class="text-sm leading-relaxed text-[#3D3833]">No need to upload it again. Your photo stays available for an hour after upload.</p>
                 </div>
             @endif
             @php
@@ -679,7 +819,7 @@ class extends Component
                     </div>
 
                     @if ($photoAllowance->enabled && $photoAllowance->mode === 'trial')
-                        <p id="scan-terms" class="mb-4 text-center text-sm font-semibold text-[#3D3833]">{{ $photoAllowance->limit }} {{ $photoAllowance->limit === 1 ? 'free scan' : 'free scans' }} · No signup · No card</p>
+                        <p id="scan-terms" class="mb-4 text-center text-sm font-semibold text-[#3D3833]">{!! e(strtr(__('common.photo_plans.free.terms_'.($photoAllowance->limit === 1 ? 'one' : 'other')), ['@{{count}}' => (string) $photoAllowance->limit])) !!}</p>
                         @if ($photoAllowance->used > 0)
                             <p class="mb-4 text-center text-sm">{{ $photoAllowance->remaining }} free scan remaining</p>
                         @endif
@@ -895,7 +1035,7 @@ class extends Component
                 {{-- Authority footer --}}
                 <div class="flex flex-col gap-1 px-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
                     <p><strong class="font-bold text-[#3D3833]">Disclaimer:</strong> These are AI estimates. Actual nutrition depends on how the food was made.</p>
-                    <p>AI vision analysis · USDA-aligned nutrition references</p>
+                    <p>AI vision analysis · Informed by standard nutrition references</p>
                     <p><time datetime="{{ now()->toDateString() }}">Last updated: {{ now()->format('F Y') }}</time></p>
                 </div>
             </form>
@@ -940,7 +1080,7 @@ class extends Component
                     <div class="font-bold text-5xl italic leading-none text-[#C4623A]">B</div>
                     <h3 class="mt-4 font-bold text-xl leading-tight tracking-[-0.01em] text-[#1A1814]">AI identifies each food item</h3>
                     <p class="speakable-how-it-works mt-3 text-sm leading-relaxed text-[#3D3833]">
-                        Our vision model recognizes individual ingredients, estimates portion sizes, and cross-references USDA nutrition data.
+                        Our vision model recognizes individual ingredients, estimates portion sizes, and works out nutrition from standard references like USDA FoodData Central. These are AI estimates, not database lookups.
                     </p>
                 </article>
                 <article class="px-2 pt-8 pb-10 sm:px-7">

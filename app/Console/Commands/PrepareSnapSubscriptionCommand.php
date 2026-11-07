@@ -32,22 +32,19 @@ final class PrepareSnapSubscriptionCommand extends Command
             return self::FAILURE;
         }
 
-        $starter = $plan === PhotoPlan::Starter;
         $product = SubscriptionProduct::query()->updateOrCreate(['name' => $plan->productName()], [
             'price' => $plan->monthlyPriceCents() / 100,
-            'description' => $starter ? 'Make food tracking a simple daily habit.' : 'Higher limits for people who track every meal.',
-            'features' => $starter
-                ? ['Every Acara feature, including photo scans', 'Premium AI models', 'Generous daily and weekly limits', 'Cancel anytime']
-                : ['Everything in Starter', 'Higher daily and weekly limits', 'Built for heavy daily tracking', 'Cancel anytime'],
+            'description' => __('common.photo_plans.'.$plan->value.'.description', [], 'en'),
+            'features' => __('common.photo_plans.'.$plan->value.'.features', [], 'en'),
             'stripe_lookup_key' => $plan->lookupKey(), 'billing_interval' => 'monthly',
-            'product_group' => 'subscription', 'popular' => $starter, 'purchasable' => true,
+            'product_group' => 'subscription', 'popular' => $plan === PhotoPlan::Starter, 'purchasable' => true,
             'yearly_price' => null, 'yearly_stripe_price_id' => null, 'yearly_stripe_lookup_key' => null,
         ]);
         if ($priceId !== null) {
             $product->update(['stripe_price_id' => $priceId]);
         }
 
-        $this->info("{$plan->productName()} prepared. Sales require a valid paid photo model, Stripe configuration, and a purchasable product.");
+        $this->info("{$plan->productName()} prepared. Sales require Stripe configuration and a purchasable product.");
 
         return self::SUCCESS;
     }

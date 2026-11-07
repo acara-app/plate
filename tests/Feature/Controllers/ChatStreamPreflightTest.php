@@ -6,26 +6,21 @@ use App\Http\Controllers\BroadcastChatController;
 use App\Models\AiUsage;
 use App\Models\Conversation;
 use App\Models\User;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
 
 covers(BroadcastChatController::class);
 
 beforeEach(function (): void {
     enableBilling();
-    Config::set('plate.ai_usage_preflight', [
-        'token_budget' => ['input' => 2_000, 'output' => 1_000],
-        'fallback_estimate' => 0.01,
-    ]);
 });
 
-it('returns HTTP 402 with limit metadata when a Free user is over the rolling cap', function (): void {
+it('returns HTTP 402 with limit metadata when a Free user is out of free AI this month', function (): void {
     $user = User::factory()->create();
     $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.4,
+        'cost' => 0.5,
     ]);
 
     $countBefore = AiUsage::query()->count();
@@ -39,17 +34,9 @@ it('returns HTTP 402 with limit metadata when a Free user is over the rolling ca
     $response->assertStatus(402)
         ->assertJson([
             'error' => 'usage_limit_exceeded',
-            'limit_type' => 'rolling',
             'tier' => 'free',
-        ])
-        ->assertJsonStructure([
-            'error',
-            'limit_type',
-            'tier',
-            'tier_label',
-            'current_credits',
-            'limit_credits',
-            'resets_at',
+            'resets' => 'monthly',
+            'exhausted' => true,
         ]);
 
     expect(AiUsage::query()->count())->toBe($countBefore);

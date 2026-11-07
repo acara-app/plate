@@ -1,4 +1,4 @@
-import type { PaywallCapTrigger } from '@/types';
+import type { AiAllowance } from '@/types';
 import type {
     ApprovalCardData,
     ApprovalStatus,
@@ -21,7 +21,7 @@ export interface ChatState {
     messages: UIMessage[];
     status: ChatStatus;
     error: Error | undefined;
-    usageLimitTrigger: PaywallCapTrigger | null;
+    usageLimitTrigger: AiAllowance | null;
 }
 
 export type ChatAction =
@@ -68,7 +68,7 @@ export type ChatAction =
     | { type: 'RETRYING'; attempt: number; maxAttempts: number }
     | { type: 'FINISHED' }
     | { type: 'FAILED'; message: string }
-    | { type: 'USAGE_LIMIT'; trigger: PaywallCapTrigger }
+    | { type: 'USAGE_LIMIT'; trigger: AiAllowance }
     | { type: 'CLEAR_ERROR' }
     | { type: 'CLEAR_USAGE_LIMIT' };
 

@@ -1,7 +1,7 @@
 import { decide } from '@/routes/approvals';
 import { stream } from '@/routes/chat';
 import { stop as stopStream } from '@/routes/chat/stream';
-import type { PaywallCapTrigger, SubscriptionTier } from '@/types';
+import type { AiAllowance } from '@/types';
 import type { ApprovalDecisionsPayload, ChatStatus } from '@/types/chat';
 import type { FileUIPart, UIMessage } from 'ai';
 import { useCallback, useEffect, useReducer, useRef } from 'react';
@@ -34,20 +34,13 @@ interface UseChatStreamReturn {
     isStreaming: boolean;
     isSubmitting: boolean;
     isConnected: boolean;
-    usageLimitTrigger: PaywallCapTrigger | null;
+    usageLimitTrigger: AiAllowance | null;
     clearUsageLimitTrigger: () => void;
 }
 
-interface UsageLimitExceededPayload {
-    error: 'usage_limit_exceeded';
-    limit_type: 'rolling' | 'weekly';
-    tier: SubscriptionTier;
-    current_credits: number;
-    limit_credits: number;
-    resets_in: string;
-}
-
-function isUsageLimitPayload(body: unknown): body is UsageLimitExceededPayload {
+function isUsageLimitPayload(
+    body: unknown,
+): body is AiAllowance & { error: 'usage_limit_exceeded' } {
     return (
         typeof body === 'object' &&
         body !== null &&
@@ -146,17 +139,7 @@ export function useChatStream({
                         const body: unknown = await response.clone().json();
 
                         if (isUsageLimitPayload(body)) {
-                            dispatch({
-                                type: 'USAGE_LIMIT',
-                                trigger: {
-                                    kind: 'cap',
-                                    limitType: body.limit_type,
-                                    currentTier: body.tier,
-                                    currentCredits: body.current_credits,
-                                    limitCredits: body.limit_credits,
-                                    resetsIn: body.resets_in,
-                                },
-                            });
+                            dispatch({ type: 'USAGE_LIMIT', trigger: body });
 
                             return;
                         }

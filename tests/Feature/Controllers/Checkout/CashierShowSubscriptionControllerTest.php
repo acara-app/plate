@@ -2,13 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Services\StripeServiceContract;
 use App\Http\Controllers\Checkout\CashierShowSubscriptionController;
 use App\Models\AnalysisDraft;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia;
@@ -801,46 +799,4 @@ it('renders subscription page with trialing subscription', function (): void {
     expect($stripeMock->ensureStripeCustomerCalled)->toBeFalse()
         ->and($stripeMock->hasIncompletePaymentCalled)->toBeTrue()
         ->and($stripeMock->getBillingPortalUrlCalled)->toBeFalse();
-});
-
-it('keeps the photo plan out of the pricing grid until the scan quota is enforced', function (): void {
-    $user = User::factory()->create(['stripe_id' => null]);
-
-    actingAs($user)
-        ->get(route('checkout.subscription'))
-        ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-            ->where('photoPlan', null)
-            ->where('products', fn (Collection $products): bool => $products
-                ->pluck('name')
-                ->doesntContain('Snap Pro')));
-});
-
-it('offers the photo plan beside the credit plans once it is purchasable', function (): void {
-    $this->app->instance(OffersSubscriptions::class, new readonly class implements OffersSubscriptions
-    {
-        public function present(SubscriptionProduct $product): SubscriptionProduct
-        {
-            return $product;
-        }
-
-        public function available(SubscriptionProduct $product): bool
-        {
-            return true;
-        }
-    });
-
-    SubscriptionProduct::factory()->create(['name' => 'Supporter', 'price' => 9]);
-
-    $user = User::factory()->create(['stripe_id' => null]);
-
-    actingAs($user)
-        ->get(route('checkout.subscription'))
-        ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-            ->where('photoPlan.name', 'Snap Pro')
-            ->where('photoPlan.formatted_price', '$9.00')
-            ->where('products', fn (Collection $products): bool => $products
-                ->pluck('name')
-                ->doesntContain('Snap Pro')));
 });

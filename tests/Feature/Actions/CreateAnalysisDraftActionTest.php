@@ -13,7 +13,7 @@ function analysisForDraft(): FoodAnalysisData
 {
     return FoodAnalysisData::from([
         'items' => [
-            ['name' => 'Hummus', 'calories' => 166.0, 'protein' => 7.9, 'carbs' => 14.3, 'fat' => 9.6, 'portion' => '100g', 'grams' => 100.0, 'match_name' => 'hummus commercial', 'provenance' => 'reference'],
+            ['name' => 'Hummus', 'calories' => 166.0, 'protein' => 7.9, 'carbs' => 14.3, 'fat' => 9.6, 'portion' => '100g', 'grams' => 100.0, 'match_name' => 'hummus commercial', 'provenance' => 'model'],
             ['name' => 'Pita', 'calories' => 250.0, 'protein' => 8.0, 'carbs' => 50.0, 'fat' => 2.0, 'portion' => '80g'],
         ],
         'total_calories' => 416.0,
@@ -67,7 +67,7 @@ it('rehydrates the stored payload into the identical analysis result', function 
     $restored = FoodAnalysisData::from($draft->payload);
 
     expect($restored->toArray())->toBe($analysis->toArray())
-        ->and($restored->items->first()->provenance)->toBe(FoodValueProvenance::Reference)
+        ->and($restored->items->first()->provenance)->toBe(FoodValueProvenance::Model)
         ->and($restored->analyzerVersion)->toBe('gemini-3.5-flash/p3')
         ->and($restored->totalCalories)->toBe(416.0);
 });

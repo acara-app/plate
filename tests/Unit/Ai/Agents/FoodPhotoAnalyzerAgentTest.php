@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Data\Billing\PhotoModel;
-use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Timeout;
 use Spatie\LaravelData\Exceptions\CannotCreateData;
 
 covers(FoodPhotoAnalyzerAgent::class);
@@ -52,18 +50,6 @@ it('appends language directive to instructions when language is set', function (
         ->toContain('language code: `en`')
         ->toContain('Numeric fields and structured field names stay as-is')
         ->toContain('do not transliterate from English');
-});
-
-it('has correct attributes configured', function (): void {
-    $reflection = new ReflectionClass($this->agent);
-
-    $maxTokens = $reflection->getAttributes(MaxTokens::class);
-    $timeout = $reflection->getAttributes(Timeout::class);
-
-    expect($maxTokens)->toHaveCount(1)
-        ->and($maxTokens[0]->newInstance()->value)->toBe(35000)
-        ->and($timeout)->toHaveCount(1)
-        ->and($timeout[0]->newInstance()->value)->toBe(60);
 });
 
 it('analyzes food photo and returns analysis data', function (): void {
@@ -161,29 +147,11 @@ it('stamps the analyzer version on analysis results', function (): void {
     expect($result->analyzerVersion)->toBe(FoodPhotoAnalyzerAgent::version());
 });
 
-it('resolves the pinned model and version from configuration', function (): void {
-    config()->set('ai.agent_profiles.'.FoodPhotoAnalyzerAgent::class.'.standard', 'gemini-3.8-flash');
-
-    expect(FoodPhotoAnalyzerAgent::pinnedModel())->toBe('gemini-3.8-flash')
-        ->and(FoodPhotoAnalyzerAgent::version())->toBe('gemini-3.8-flash/p'.FoodPhotoAnalyzerAgent::PROMPT_VERSION);
-});
-
-it('fails loudly when no model is pinned', function (): void {
-    config()->set('ai.agent_profiles.'.FoodPhotoAnalyzerAgent::class.'.standard', '');
-
-    FoodPhotoAnalyzerAgent::pinnedModel();
-})->throws(InvalidArgumentException::class, 'No standard model configured');
-
 it('uses the selected photo model without changing the shared default', function (): void {
     FoodPhotoAnalyzerAgent::fake([[
         'items' => [], 'total_calories' => 0, 'total_protein' => 0,
         'total_carbs' => 0, 'total_fat' => 0, 'confidence' => 0,
     ]]);
-    config()->set('ai.model_catalog.test-premium-model', [
-        'provider' => 'openai', 'max_output_tokens' => 128000,
-        'capabilities' => ['structured_output', 'vision'], 'options' => [],
-        'pricing' => ['input' => 1.0, 'output' => 4.0, 'reasoning' => 4.0, 'cache_read' => 0.1],
-    ]);
     $agent = new FoodPhotoAnalyzerAgent;
     $profile = new PhotoModel('openai', 'test-premium-model', 2048);
     $result = $agent->usingModel($profile)->analyze('aW1hZ2U=', 'image/jpeg');

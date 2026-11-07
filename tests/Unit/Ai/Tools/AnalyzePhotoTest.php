@@ -5,10 +5,12 @@ declare(strict_types=1);
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Data\Billing\AiAllowance;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\Billing\PhotoEntitlement;
 use App\Data\Billing\PhotoOffer;
 use App\Data\FoodAnalysisData;
+use App\Enums\AiAllowanceReset;
 use App\Enums\SubscriptionTier;
 use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Exceptions\Billing\UsageLimitExceededException;
@@ -101,8 +103,8 @@ it('tells the model why a photo was not analyzed instead of failing the chat tur
         ['error' => 'Your free photo scans have been used. Choose a plan to analyze another photo.'],
     ],
     'AI usage limit reached' => [
-        fn (): UsageLimitExceededException => new UsageLimitExceededException('rolling', SubscriptionTier::Starter, 500, 500, CarbonImmutable::parse('2026-11-08 09:00:00', 'UTC')),
-        ['error' => 'Your AI usage limit is used up for now, so this photo was not analyzed. It resets at 2026-11-08T09:00:00+00:00.'],
+        fn (): UsageLimitExceededException => new UsageLimitExceededException(new AiAllowance(SubscriptionTier::Starter, AiAllowanceReset::Daily, 0.5, 0.5, CarbonImmutable::parse('2026-11-08 00:00:00', 'UTC'))),
+        ['error' => 'The AI allowance is used up for now, so this photo was not analyzed. It resets at 2026-11-08T00:00:00+00:00.'],
     ],
 ]);
 

@@ -26,7 +26,7 @@ final readonly class MediterraneanMealPlanSystemProvider implements SystemPrompt
                 'DIETITIAN ROLE: Optimize the "Nutrient Density Score." Prioritize Mediterranean superfoods and ingredients from the skill guidelines.',
                 'CHEF ROLE: Build meals around skill-recommended ingredients. Transform simple ingredients into culinary experiences (e.g., Grilled Artichoke with Lemon-Garlic Emulsion).',
                 'NUTRITIONIST ROLE: Balance the plate with '.$targets['carbs'].'% Carbs, '.$targets['protein'].'% Protein, '.$targets['fat'].'% Fat.',
-                'PANTRY RULE: Use skill guidelines as your Primary Pantry. Use the USDA database to fill in gaps (like spices, oils, or secondary ingredients).',
+                'PANTRY RULE: Use skill guidelines as your Primary Pantry. Use standard USDA reference values to fill in gaps (like spices, oils, or secondary ingredients).',
             ],
             context: $skillContent ? [$skillContent] : [],
             steps: [
@@ -34,7 +34,7 @@ final readonly class MediterraneanMealPlanSystemProvider implements SystemPrompt
                 '2. CHEF: Create a coherent dish using Mediterranean ingredients (e.g., Pan-Seared Scallops with Roasted Asparagus).',
                 '3. DIETITIAN: Use the get_diet_reference tool with {"diet_type": "mediterranean", "reference_name": "med-diet-nutrient-score-card"} to fetch detailed nutrient data for verification.',
                 '4. DIETITIAN: Verify that the fiber count is high using the nutrient score card data.',
-                '5. NUTRITIONIST: Use USDA data to calculate the olive oil and side ingredients to hit the '.$targets['fat'].'% Fat target.',
+                '5. NUTRITIONIST: Use standard nutrition reference values to calculate the olive oil and side ingredients to hit the '.$targets['fat'].'% Fat target.',
                 '6. TEAM: Generate the structured response using exact ingredient names.',
             ],
             output: [
@@ -44,10 +44,8 @@ final readonly class MediterraneanMealPlanSystemProvider implements SystemPrompt
                 'Keep ingredient entries as structured objects with name, quantity, specificity, and optional barcode.',
             ],
             toolsUsage: [
-                'Use the file_search tool to find USDA nutritional data for Mediterranean diet ingredients',
                 'Use the get_diet_reference tool to fetch detailed nutrient score cards and reference materials on-demand',
                 'Prioritize whole foods with minimal processing',
-                'Verify all nutritional values against USDA data',
             ],
         );
     }

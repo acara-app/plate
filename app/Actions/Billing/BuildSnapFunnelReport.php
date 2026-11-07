@@ -45,6 +45,8 @@ final readonly class BuildSnapFunnelReport
 
     /** @var list<string> */
     private const array HISTORY = [
+        '2026-11-07: the review page between sign-up and the food log was removed. A guest meal is saved as soon as the visitor signs up or logs in, and signed-in scans are saved right after analysis; people adjust the meal on its logbook page. Meal saved rates before and after this date are not comparable.',
+        '2026-11-07: plan-allowance-copy-v1 explains everyday use, total free scans and shared rolling allowances in English, French and Mongolian. Use the deployment timestamp for before/after cohorts; prices, allowances and funnel event meanings are unchanged. Compare device, source, placement and plan mix, and treat differences as observational.',
         '2026-11-07: buyers can pay before verifying their email. The chosen plan and billing interval survive sign-up and log-in, repeat checkout clicks reopen the same Stripe session, and a waiting meal opens once the plan is active.',
         '2026-11-07: the guest result page added a Save button to the meal card, and its mobile action bar now leads with saving, with the plan offer as a link beneath it. Umami save clicks carry a placement from this date.',
         '2026-11-04: guest results moved to /tools/snap-to-track/result, so Umami result and offer counts before and after this date come from different pages.',

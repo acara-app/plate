@@ -12,19 +12,17 @@ use App\Data\Benchmark\PathMetrics;
 use App\Data\Billing\PhotoModel;
 use App\Models\BenchmarkMeal;
 use App\Models\BenchmarkRun;
-use App\Services\Ai\ConfiguredAgentModels;
 use App\Services\Benchmark\BenchmarkHarness;
 use App\Services\Benchmark\RunComparator;
 use App\Services\ModelPricing;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
-use InvalidArgumentException;
 
 use function Laravel\Prompts\confirm;
 
-#[Description('Run the golden-plate validation benchmark through the production analyzer — raw model and reference-enriched paths side by side.')]
-#[Signature('benchmark:run {--smoke : Analyze only the smoke subset (first 12 meals by code)} {--repeats=5 : Analyses per meal per path} {--force : Skip the cost confirmation} {--provider= : AI provider (defaults to the catalog provider for the model)} {--model= : Pinned vision model} {--max-tokens=35000 : Output token ceiling}')]
+#[Description('Run the golden-plate validation benchmark through the production photo analyzer.')]
+#[Signature('benchmark:run {--smoke : Analyze only the smoke subset (first 12 meals by code)} {--repeats=5 : Analyses per meal per path} {--force : Skip the cost confirmation} {--provider= : AI provider (defaults to the app default provider)} {--model= : Vision model (defaults to the photo analyzer model)} {--max-tokens=35000 : Output token ceiling}')]
 final class RunBenchmarkCommand extends Command
 {
     private const int SMOKE_LIMIT = 12;
@@ -38,16 +36,11 @@ final class RunBenchmarkCommand extends Command
 
     public function handle(): int
     {
-        try {
-            $model = PhotoModel::fromAgentModel(
-                resolve(ConfiguredAgentModels::class)->forModel($this->option('model') ?: FoodPhotoAnalyzerAgent::pinnedModel(), $this->option('provider') ?: null),
-                max(1, (int) $this->option('max-tokens')),
-            );
-        } catch (InvalidArgumentException $invalidArgumentException) {
-            $this->error($invalidArgumentException->getMessage());
-
-            return self::FAILURE;
-        }
+        $model = new PhotoModel(
+            provider: $this->option('provider') ?: config()->string('ai.default'),
+            model: $this->option('model') ?: FoodPhotoAnalyzerAgent::pinnedModel(),
+            maxTokens: max(1, (int) $this->option('max-tokens')),
+        );
 
         $repeats = max(1, (int) $this->option('repeats'));
 
@@ -65,11 +58,11 @@ final class RunBenchmarkCommand extends Command
             return self::FAILURE;
         }
 
-        $analyses = $meals->count() * $repeats * 2;
+        $analyses = $meals->count() * $repeats;
         $estimatedCost = $this->estimateCost($analyses, $model);
 
         $this->info(sprintf(
-            'Benchmarking %d meals × %d repeats × 2 paths = %d analyses on %s (~$%.2f estimated).',
+            'Benchmarking %d meals × %d repeats = %d analyses on %s (~$%.2f estimated).',
             $meals->count(),
             $repeats,
             $analyses,
@@ -94,7 +87,6 @@ final class RunBenchmarkCommand extends Command
 
         $run = BenchmarkRun::query()->create([
             'analyzer_version' => $report->analyzerVersion,
-            'reference_lookup_enabled' => $report->referenceLookupEnabled,
             'smoke' => (bool) $this->option('smoke'),
             'repeats' => $report->repeats,
             'meal_count' => $meals->count(),
@@ -151,8 +143,7 @@ final class RunBenchmarkCommand extends Command
     private function render(HarnessReport $report): void
     {
         $this->components->twoColumnDetail('Analyzer version', $report->analyzerVersion);
-        $this->components->twoColumnDetail('Reference lookup', $report->referenceLookupEnabled ? 'enabled' : 'disabled');
-        $this->components->twoColumnDetail('Repeats per meal per path', (string) $report->repeats);
+        $this->components->twoColumnDetail('Repeats per meal', (string) $report->repeats);
 
         if ($report->skippedMeals > 0) {
             $this->warn(sprintf('%d meals skipped because their photo could not be loaded.', $report->skippedMeals)); // @codeCoverageIgnore
@@ -215,12 +206,9 @@ final class RunBenchmarkCommand extends Command
 
     private function estimateCost(int $analyses, PhotoModel $model): float
     {
-        $pricing = ModelPricing::forModel($model->model, $model->provider);
+        $pricing = ModelPricing::forModel($model->model);
 
-        /** @var array{input: int, output: int} $budget */
-        $budget = config()->array('plate.ai_usage_preflight.token_budget', ['input' => 2_000, 'output' => 1_000]);
-
-        return $analyses * ($budget['input'] * $pricing['input'] + $budget['output'] * $pricing['output']) / 1_000_000;
+        return $analyses * (2_000 * $pricing['input'] + 1_000 * $pricing['output']) / 1_000_000;
     }
 
     private function formatValue(?float $value, int $decimals = 2): string

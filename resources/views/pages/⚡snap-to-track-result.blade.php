@@ -53,12 +53,6 @@ class extends Component
             return;
         }
 
-        if (auth()->check()) {
-            $this->redirect(route('snap-to-track.review', ['draft' => $token]));
-
-            return;
-        }
-
         $resolution = $restore->handle($token, null);
 
         if (in_array($resolution->status, [AnalysisDraftStatus::Expired, AnalysisDraftStatus::Consumed], true)) {
@@ -104,15 +98,15 @@ class extends Component
 
         $funnel->record(SnapFunnelStage::SaveClicked, $this->resultKey(), ['auth_path' => $intent]);
 
-        $reviewUrl = route('snap-to-track.review', ['draft' => $this->draftToken], absolute: false);
+        $saveUrl = route('snap-to-track.save', ['draft' => $this->draftToken], absolute: false);
 
         if (auth()->check()) {
-            $this->redirect($reviewUrl);
+            $this->redirect($saveUrl);
 
             return;
         }
 
-        session()->put('url.intended', $reviewUrl);
+        session()->put('url.intended', $saveUrl);
         session()->put('snap_to_track.auth_path', $intent);
         session()->put('snap_to_track.intent', 'save');
 
@@ -167,7 +161,7 @@ class extends Component
                 <span aria-hidden="true" class="flex size-8 items-center justify-center rounded-md bg-emerald-50 text-lg ring-1 ring-emerald-200">🍓</span>
                 <span class="text-sm font-semibold">Acara Plate</span>
             </a>
-            @if ($analysis !== null)
+            @if ($analysis !== null && ! auth()->check())
                 <button
                     type="button"
                     wire:click="save('login')"
@@ -395,16 +389,20 @@ class extends Component
                         >
                             Save this meal
                         </x-snap-result.button>
-                        <p class="text-sm text-muted-foreground">Saving is free. You’ll create an account or log in next, then check the portions before the meal goes into your food log.</p>
-                        <button
-                            type="button"
-                            wire:click="save('login')"
-                            wire:loading.attr="disabled"
-                            wire:target="save,upgrade"
-                            class="min-h-11 self-start rounded-md text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
-                        >
-                            Already have an account? Log in
-                        </button>
+                        @auth
+                            <p class="text-sm text-muted-foreground">Saving is free. The meal goes straight into your food log, where you can adjust any portion.</p>
+                        @else
+                            <p class="text-sm text-muted-foreground">Saving is free. Create an account or log in and the meal goes straight into your food log, where you can adjust any portion.</p>
+                            <button
+                                type="button"
+                                wire:click="save('login')"
+                                wire:loading.attr="disabled"
+                                wire:target="save,upgrade"
+                                class="min-h-11 self-start rounded-md text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
+                            >
+                                Already have an account? Log in
+                            </button>
+                        @endauth
                     </div>
                 </article>
             </section>
@@ -423,15 +421,12 @@ class extends Component
                                     @endif
                                 </span>
                             </span>
-                            @if (($item['provenance'] ?? 'model') === 'reference')
-                                <p class="text-xs text-muted-foreground"><span class="text-primary" aria-hidden="true">◆</span> USDA reference</p>
-                            @endif
                         </li>
                     @endforeach
                 </ul>
                 <p class="flex items-start gap-2 text-xs text-muted-foreground">
                     <x-snap-result.icon name="sparkles" class="mt-0.5 size-3.5 shrink-0 text-primary" />
-                    <span>Snap to Track · AI confidence: {{ $analysis['confidence'] }}%. Nutrition values are estimates, and you can adjust any portion before saving.</span>
+                    <span>Snap to Track · AI confidence: {{ $analysis['confidence'] }}%. Nutrition values are estimates, and you can adjust any portion after saving.</span>
                 </p>
             </section>
 
@@ -474,7 +469,7 @@ class extends Component
                         x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} })"
                         class="min-h-10 rounded-md px-2 text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
                     >
-                        Or keep tracking with {{ $barOffer->name }} · {{ $barOffer->formattedPrice }}/month
+                        {!! e(strtr(__('common.photo_plans.offer.short_cta'), ['@{{name}}' => $barOffer->name, '@{{price}}' => $barOffer->formattedPrice])) !!}
                     </button>
                 @endif
             </div>

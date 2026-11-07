@@ -26,7 +26,7 @@ final readonly class BalancedMealPlanSystemProvider implements SystemPromptProvi
                 'DIETITIAN ROLE: Follow the "MyPlate" guidelines. Balance, variety, and moderation. No food is forbidden, but quality is key.',
                 'CHEF ROLE: Focus on "Comfort with Health." Make meals that feel familiar but use fresher, lighter ingredients.',
                 'NUTRITIONIST ROLE: Maintain the standard '.$targets['carbs'].'% Carb / '.$targets['protein'].'% Protein / '.$targets['fat'].'% Fat split.',
-                'PANTRY RULE: Use skill guidelines for Balanced diet principles. Use USDA data to enforce real portion sizes.',
+                'PANTRY RULE: Use skill guidelines for Balanced diet principles. Use standard reference portion sizes.',
             ],
             context: $skillContent ? [$skillContent] : [],
             steps: [
@@ -44,7 +44,6 @@ final readonly class BalancedMealPlanSystemProvider implements SystemPromptProvi
                 'Keep ingredient entries as structured objects with name, quantity, specificity, and optional barcode.',
             ],
             toolsUsage: [
-                'Use the file_search tool to find USDA nutritional data for ingredients',
                 'Use the get_diet_reference tool to fetch detailed reference materials and food lists on-demand',
             ],
         );

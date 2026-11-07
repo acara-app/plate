@@ -27,13 +27,6 @@
                     <p>{{ $paragraph }}</p>
                 @endforeach
 
-                @if (AiTransparency::usesReferenceLookup())
-                    <h2>Where each number comes from</h2>
-                    @foreach (AiTransparency::provenance() as $paragraph)
-                        <p>{{ $paragraph }}</p>
-                    @endforeach
-                @endif
-
                 <h2>How accurate is it, honestly?</h2>
                 @foreach (AiTransparency::accuracy() as $paragraph)
                     <p>{{ $paragraph }}</p>

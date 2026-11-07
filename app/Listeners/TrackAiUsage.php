@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
-use App\Contracts\Ai\UsesAgentModelProfiles;
+use App\Contracts\Ai\BillsUsageToUser;
 use App\Models\AiUsage;
 use App\Models\User;
 use App\Services\AiUsageService;
@@ -44,7 +44,7 @@ final readonly class TrackAiUsage
             'reasoning_tokens' => $usage->reasoningTokens ?? 0,
         ];
 
-        $cost = new AiUsageService()->calculateCost($model, $usageArray, $meta->provider);
+        $cost = new AiUsageService()->calculateCost($model, $usageArray);
 
         AiUsage::query()->firstOrCreate(['invocation_id' => $invocationId], [
             'usage_group' => Context::get('photo_usage_group'),
@@ -59,7 +59,7 @@ final readonly class TrackAiUsage
 
     private function getUserFromAgent(object $agent): ?User
     {
-        if ($agent instanceof UsesAgentModelProfiles && $agent->modelUser() instanceof User) {
+        if ($agent instanceof BillsUsageToUser && $agent->modelUser() instanceof User) {
             return $agent->modelUser();
         }
 

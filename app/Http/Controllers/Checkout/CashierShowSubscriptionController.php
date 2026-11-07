@@ -10,7 +10,6 @@ use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Services\StripeServiceContract;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\SnapFunnelStage;
-use App\Enums\SubscriptionTier;
 use App\Models\SubscriptionProduct;
 use App\Services\Billing\SnapFunnel;
 use Illuminate\Http\Request;
@@ -71,15 +70,6 @@ final readonly class CashierShowSubscriptionController
         $offers = resolve(OffersSubscriptions::class);
         $availableProducts = $products->filter($offers->available(...))->map($offers->present(...))->values();
 
-        $isPhotoPlan = fn (SubscriptionProduct $product): bool => in_array(SubscriptionTier::fromProductName($product->name), [SubscriptionTier::Starter, SubscriptionTier::Snap], true);
-        $otherProducts = $availableProducts->reject($isPhotoPlan)->values();
-        $photoPlan = null;
-
-        if ($otherProducts->contains(fn (SubscriptionProduct $product): bool => $product->price > 0)) {
-            $photoPlan = $availableProducts->first($isPhotoPlan);
-            $availableProducts = $otherProducts;
-        }
-
         $allowance = resolve(ManagesPhotoAnalyses::class)->entitlement($user, PhotoAnalysisContext::guestId($request));
         $returningFromCheckout = $request->routeIs('checkout.success');
         $checkoutAttempt = $request->session()->get('checkout.started');
@@ -111,13 +101,12 @@ final readonly class CashierShowSubscriptionController
 
         return Inertia::render('checkout/show-subscription-product', [
             'products' => $availableProducts,
-            'photoPlan' => $photoPlan,
             'isGuest' => $user === null,
             'paymentPending' => $paymentPending,
             'checkoutCancelled' => $checkoutCancelled,
             'emailVerified' => $user?->hasVerifiedEmail() === true,
             'meal' => $meal?->toArray(),
-            'continueToMeal' => $returningFromCheckout && ! $premiumNotYetActive && $meal?->reviewUrl !== null,
+            'continueToMeal' => $returningFromCheckout && ! $premiumNotYetActive && $meal?->saveUrl !== null,
             'selectedProductId' => $request->session()->get('checkout.selected_product'),
             'selectedInterval' => $request->session()->get('checkout.selected_interval') === 'yearly' ? 'yearly' : 'monthly',
             'photoAllowance' => $allowance->toArray(),

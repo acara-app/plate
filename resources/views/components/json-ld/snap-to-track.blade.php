@@ -80,7 +80,7 @@ $faqPage = [
     "@@context": "https://schema.org",
     "@@type": "WebApplication",
     "name": "Snap to Track - AI Food Photo Analyzer",
-    "description": "Free AI food photo analyzer. Upload a photo of any meal to instantly estimate calories, protein, carbs, and fat per ingredient using AI vision analysis and USDA-aligned nutrition references. No signup required.",
+    "description": "Free AI food photo analyzer. Upload a photo of any meal to instantly estimate calories, protein, carbs, and fat per ingredient using AI vision analysis informed by standard nutrition references. No signup required.",
     "url": "{{ $currentUrl }}",
     "applicationCategory": "HealthApplication",
     "applicationSubCategory": "NutritionTracking",
@@ -100,7 +100,7 @@ $faqPage = [
         "Per-ingredient calorie and macro breakdown",
         "Total calories, protein, carbs, and fat per meal",
         "Confidence score for each analysis",
-        "USDA-aligned nutrition values",
+        "Nutrition estimates informed by standard references",
         "No signup required to try"
     ],
     "creator": {

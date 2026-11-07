@@ -15,7 +15,6 @@ final class HarnessReport extends Data
      */
     public function __construct(
         public string $analyzerVersion,
-        public bool $referenceLookupEnabled,
         public int $repeats,
         public int $skippedMeals,
         #[DataCollectionOf(PathMetrics::class)]

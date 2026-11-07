@@ -25,7 +25,6 @@ final class FoodAnalysisData extends Data
         public float $totalFat,
         public int $confidence,
         public ?string $analyzerVersion = null,
-        public ?string $referenceRelease = null,
         public ?float $totalFiber = null,
     ) {}
 }

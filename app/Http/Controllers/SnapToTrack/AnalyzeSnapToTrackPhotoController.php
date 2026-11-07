@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace App\Http\Controllers\SnapToTrack;
 
 use App\Actions\AnalyzeFoodPhotoAction;
-use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\CreateAnalysisDraftAction;
+use App\Actions\LogAnalyzedMeal;
 use App\Actions\StoreMealPhotoAction;
-use App\Ai\Agents\FoodPhotoAnalyzerAgent;
-use App\Contracts\Ai\ResolvesAgentModel;
-use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\AnalysisDraftSource;
 use App\Enums\ConfidenceBand;
+use App\Enums\PhotoAnalysisFailure;
 use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Http\Requests\SnapToTrack\AnalyzeSnapToTrackPhotoRequest;
+use App\Models\AnalysisDraft;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Utilities\LanguageUtil;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -30,8 +30,8 @@ final readonly class AnalyzeSnapToTrackPhotoController
     public function __construct(
         private AnalyzeFoodPhotoAction $analyzeFoodPhoto,
         private CreateAnalysisDraftAction $createAnalysisDraft,
-        private EnforceAiUsageLimit $enforceAiUsageLimit,
         private StoreMealPhotoAction $storeMealPhoto,
+        private LogAnalyzedMeal $logAnalyzedMeal,
         #[CurrentUser()] private User $currentUser,
     ) {}
 
@@ -41,29 +41,6 @@ final readonly class AnalyzeSnapToTrackPhotoController
 
         if (! $photo instanceof UploadedFile) {
             return back()->withErrors(['photo' => __('Please select a photo to analyze.')]);
-        }
-
-        try {
-            if (! resolve(ManagesPhotoAnalyses::class)->entitlement($this->currentUser, null)->enabled) {
-                $this->enforceAiUsageLimit->handle(
-                    $this->currentUser,
-                    resolve(ResolvesAgentModel::class)->resolve(FoodPhotoAnalyzerAgent::class, $request->user()),
-                );
-            }
-        } catch (UsageLimitExceededException $usageLimitExceededException) {
-            $this->deleteUploadedPhoto($photo);
-
-            Inertia::flash('analytics', [
-                'name' => 'snap_to_track_limit_reached',
-                'properties' => [
-                    'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
-                    'gate' => 'credits',
-                    'tier' => $usageLimitExceededException->tier->value,
-                ],
-            ]);
-
-            return to_route('snap-to-track.index')
-                ->with('snap_to_track_credit_limit', $usageLimitExceededException->toPayload());
         }
 
         try {
@@ -81,12 +58,27 @@ final readonly class AnalyzeSnapToTrackPhotoController
             );
         } catch (PhotoLimitExceeded $exception) {
             return to_route('snap-to-track.index')->withErrors(['photo' => $exception->getMessage()]);
+        } catch (UsageLimitExceededException $exception) {
+            Inertia::flash('analytics', [
+                'name' => 'snap_to_track_limit_reached',
+                'properties' => [
+                    'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
+                    'gate' => 'credits',
+                    'tier' => $exception->allowance->tier->value,
+                ],
+            ]);
+
+            return to_route('snap-to-track.index')->withErrors(['photo' => $exception->userMessage()]);
         } catch (Throwable $throwable) {
             report($throwable);
 
             return back()->withErrors(['photo' => __('Something went wrong. Please try again.')]);
         } finally {
             $this->deleteUploadedPhoto($photo);
+        }
+
+        if ($analysis->items->count() === 0) {
+            return to_route('snap-to-track.index')->withErrors(['photo' => __(PhotoAnalysisFailure::NoFood->message())]);
         }
 
         $token = $this->createAnalysisDraft->handle(
@@ -101,16 +93,31 @@ final readonly class AnalyzeSnapToTrackPhotoController
             report($throwable);
         }
 
+        $meal = $this->logAnalyzedMeal->handle(
+            AnalysisDraft::query()->where('token_hash', AnalysisDraft::hashToken($token))->firstOrFail(),
+            $this->currentUser,
+        );
+
         Inertia::flash('analytics', [
-            'name' => 'snap_to_track_result_viewed',
-            'properties' => [
-                'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
-                'items_count' => $analysis->items->count(),
-                'confidence_band' => ConfidenceBand::fromScore($analysis->confidence)->value,
+            [
+                'name' => 'snap_to_track_result_viewed',
+                'properties' => [
+                    'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
+                    'items_count' => $analysis->items->count(),
+                    'confidence_band' => ConfidenceBand::fromScore($analysis->confidence)->value,
+                ],
+            ],
+            [
+                'name' => 'snap_to_track_meal_logged',
+                'properties' => [
+                    'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
+                    'items_count' => $analysis->items->count(),
+                ],
             ],
         ]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('common.snap_to_track.saved')]);
 
-        return to_route('snap-to-track.review', ['draft' => $token]);
+        return $meal instanceof HealthSyncSample ? to_route('health-entries.show', $meal) : to_route('health-entries.index');
     }
 
     private function deleteUploadedPhoto(UploadedFile $photo): void

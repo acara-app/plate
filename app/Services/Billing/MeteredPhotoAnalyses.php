@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Billing;
 
 use App\Actions\Billing\EnforceAiUsageLimit;
-use App\Ai\Agents\FoodPhotoAnalyzerAgent;
-use App\Contracts\Ai\ResolvesAgentModel;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Data\Billing\PhotoAnalysisContext;
@@ -66,12 +64,10 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
 
     public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
     {
-        if ($context->user instanceof User && $this->isPaying($context->user)) {
-            abort_if(! $this->catalog->hasReadyPaidModel(), 503, 'Premium analysis is temporarily unavailable.');
-            $model = resolve(ResolvesAgentModel::class)->resolve(FoodPhotoAnalyzerAgent::class, $context->user);
-            resolve(EnforceAiUsageLimit::class)->handle($context->user, $model);
+        if ($context->user instanceof User && (! $this->enabled() || $this->isPaying($context->user))) {
+            resolve(EnforceAiUsageLimit::class)->handle($context->user);
 
-            return $analyze(PhotoModel::fromAgentModel($model, config()->integer('snap.premium.max_tokens', 4096)));
+            return $analyze(PhotoModel::standard());
         }
 
         if (! $this->enabled()) {

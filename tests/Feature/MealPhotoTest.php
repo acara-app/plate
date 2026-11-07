@@ -13,15 +13,15 @@ use App\Data\Billing\TierEntitlement;
 use App\Enums\SubscriptionTier;
 use App\Http\Controllers\HealthEntry\ShowMealPhotoController;
 use App\Http\Controllers\SnapToTrack\AnalyzeSnapToTrackPhotoController;
-use App\Http\Controllers\SnapToTrack\ShowSnapToTrackReviewController;
-use App\Http\Controllers\SnapToTrack\StoreSnapToTrackMealController;
+use App\Http\Controllers\SnapToTrack\SaveSnapToTrackMealController;
+use App\Http\Controllers\SnapToTrack\StoreSnapToTrackPhotoController;
+use App\Http\Requests\SnapToTrack\StoreSnapToTrackPhotoRequest;
 use App\Models\AnalysisDraft;
 use App\Models\HealthSyncSample;
 use App\Models\MealPhoto;
 use App\Models\User;
 use App\Services\HealthEntryAssembler;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia;
@@ -31,8 +31,9 @@ covers(
     MealPhoto::class,
     ShowMealPhotoController::class,
     AnalyzeSnapToTrackPhotoController::class,
-    ShowSnapToTrackReviewController::class,
-    StoreSnapToTrackMealController::class,
+    SaveSnapToTrackMealController::class,
+    StoreSnapToTrackPhotoController::class,
+    StoreSnapToTrackPhotoRequest::class,
     LogReviewedMealAction::class,
     DeleteHealthSampleAction::class,
     UpdateHealthSampleAction::class,
@@ -74,36 +75,27 @@ function storedMealPhoto(User $user, ?string $groupId = null, ?string $createdAt
 beforeEach(function (): void {
     Storage::fake('s3');
     $this->user = User::factory()->create(['stripe_id' => null]);
-    RateLimiter::clear('snap-to-track-analyze:'.$this->user->id);
 });
 
 it('keeps a signed-in scan photo privately with the saved meal and only its owner can see it', function (): void {
     fakeMealPhotoAnalysis();
 
-    $response = $this->actingAs($this->user)->post(route('snap-to-track.analyze'), [
+    $this->actingAs($this->user)->post(route('snap-to-track.analyze'), [
         'photo' => UploadedFile::fake()->image('meal.jpg', 2000, 1500),
     ]);
 
     $photo = MealPhoto::query()->sole();
     $draft = AnalysisDraft::query()->sole();
+    $groupId = (string) $draft->health_group_id;
     $stored = (string) Storage::disk('s3')->get($photo->path);
     $size = getimagesizefromstring($stored);
 
     expect($photo->user_id)->toBe($this->user->id)
         ->and($photo->analysis_draft_id)->toBe($draft->id)
-        ->and($photo->health_group_id)->toBeNull()
+        ->and($photo->health_group_id)->toBe($groupId)
         ->and($photo->path)->toStartWith('meal-photos/'.$this->user->id.'/')
         ->and([$size[0], $size[1], $size['mime']])->toBe([1280, 960, 'image/jpeg'])
         ->and(str_contains($stored, "Exif\0\0"))->toBeFalse();
-
-    $token = Str::after((string) $response->headers->get('Location'), '/review/');
-    $this->post(route('snap-to-track.review.store', ['draft' => $token]), [
-        'items' => [['name' => 'Salad', 'portion' => '1 bowl', 'calories' => 180, 'protein' => 3, 'carbs' => 14, 'fat' => 13, 'provenance' => 'model']],
-        'measured_at' => now()->toIso8601String(),
-    ])->assertRedirectToRoute('health-entries.index', ['date' => now()->toDateString()]);
-
-    $groupId = (string) $draft->refresh()->health_group_id;
-    expect($photo->refresh()->health_group_id)->toBe($groupId);
 
     $photoUrl = route('health-entries.photo', ['group' => $groupId], absolute: false);
     $this->get(route('health-entries.index'))->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
@@ -120,19 +112,18 @@ it('keeps a signed-in scan photo privately with the saved meal and only its owne
     Storage::disk('s3')->assertMissing($photo->path);
 });
 
-it('keeps a guest scan photo when the visitor signs in and saves the meal', function (): void {
+it('attaches a guest scan photo once to the meal saved after signing in', function (): void {
     $token = Str::random(64);
     $draft = AnalysisDraft::factory()->create(['token_hash' => AnalysisDraft::hashToken($token)]);
-    session()->put('snap_to_track.result', ['draft' => $token, 'request_id' => 'guest-scan-1']);
+    $photoUrl = route('snap-to-track.save.photo', ['draft' => $token], absolute: false);
 
-    $this->actingAs($this->user)->get(route('snap-to-track.review', ['draft' => $token]))
-        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('guestPhotoRequestId', 'guest-scan-1'));
+    $this->actingAs($this->user)
+        ->withSession(['snap_to_track.result' => ['draft' => $token, 'request_id' => 'guest-scan-1']])
+        ->get(route('snap-to-track.save', ['draft' => $token]))
+        ->assertInertiaFlash('snap_to_track_photo', ['url' => $photoUrl, 'request_id' => 'guest-scan-1']);
 
-    $this->post(route('snap-to-track.review.store', ['draft' => $token]), [
-        'items' => [['name' => 'Salad', 'portion' => '1 bowl', 'calories' => 180, 'protein' => 3, 'carbs' => 14, 'fat' => 13, 'provenance' => 'model']],
-        'measured_at' => now()->toIso8601String(),
-        'photo' => UploadedFile::fake()->image('meal.jpg', 960, 720),
-    ])->assertRedirectToRoute('health-entries.index', ['date' => now()->toDateString()]);
+    $this->post($photoUrl, ['photo' => UploadedFile::fake()->image('meal.jpg', 960, 720)])->assertRedirect();
+    $this->post($photoUrl, ['photo' => UploadedFile::fake()->image('again.jpg', 960, 720)])->assertRedirect();
 
     $groupId = (string) $draft->refresh()->health_group_id;
     $photo = MealPhoto::query()->sole();
@@ -153,10 +144,7 @@ it('keeps no photo when the scan is blocked by the credit limit', function (): v
             return new TierEntitlement(tier: SubscriptionTier::Free);
         }
     });
-    config()->set('plate.tier_limits.free', [
-        'rolling' => ['limit' => 0.0, 'period_hours' => 24],
-        'weekly' => ['limit' => 0.0, 'period_days' => 7],
-    ]);
+    config()->set('plate.ai_allowance.free', ['usd' => 0.0, 'resets' => 'monthly']);
 
     $this->actingAs($this->user)->post(route('snap-to-track.analyze'), [
         'photo' => UploadedFile::fake()->image('meal.jpg'),

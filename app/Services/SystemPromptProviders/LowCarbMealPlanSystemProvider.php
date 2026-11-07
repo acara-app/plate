@@ -26,7 +26,7 @@ final readonly class LowCarbMealPlanSystemProvider implements SystemPromptProvid
                 'DIETITIAN ROLE: Strictly control blood glucose. Minimize insulin spikes using the "Net Carb" model.',
                 'CHEF ROLE: Create high-satiety meals. Use healthy fats (avocado, olive oil) and umami flavors to make low-carb feel luxurious, not restrictive.',
                 'NUTRITIONIST ROLE: Hit the macro targets ('.$targets['carbs'].'% Carbs, '.$targets['protein'].'% Protein, '.$targets['fat'].'% Fat) with mathematical precision.',
-                'PANTRY RULE: Use skill guidelines for Low Carb-approved foods. Use the USDA FoodData Central database for nutritional accuracy.',
+                'PANTRY RULE: Use skill guidelines for Low Carb-approved foods. Use standard USDA FoodData Central reference values for nutritional accuracy.',
             ],
             context: $skillContent ? [$skillContent] : [],
             steps: [
@@ -35,7 +35,7 @@ final readonly class LowCarbMealPlanSystemProvider implements SystemPromptProvid
                 '3. DIETITIAN: Verify that every vegetable selected has a low Glycemic Load (GL).',
                 '4. NUTRITIONIST: Calculate "Net Carbs" (Total Carbs - Fiber) to ensure the meal stays under the strict limit (<130g daily).',
                 '5. DIETITIAN: Use the get_diet_reference tool with {"diet_type": "low_carb", "reference_name": "REFERENCE_NAME"} to fetch any additional reference materials if available.',
-                '6. TEAM: Finalize the structured meal plan using exact 100g portions from the USDA database.',
+                '6. TEAM: Finalize the structured meal plan using exact 100g portions and standard USDA reference values.',
             ],
             output: [
                 'Return the structured response requested by the schema.',
@@ -44,7 +44,6 @@ final readonly class LowCarbMealPlanSystemProvider implements SystemPromptProvid
                 'Keep ingredient entries as structured objects with name, quantity, specificity, and optional barcode.',
             ],
             toolsUsage: [
-                'Use the file_search tool to find USDA nutritional data for ingredients',
                 'Use the get_diet_reference tool to fetch detailed reference materials and food lists on-demand',
             ],
         );

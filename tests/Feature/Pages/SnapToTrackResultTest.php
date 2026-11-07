@@ -9,6 +9,7 @@ use App\Data\Billing\PhotoModel;
 use App\Data\Billing\PhotoOffer;
 use App\Data\FoodAnalysisData;
 use App\Models\AnalysisDraft;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -79,13 +80,6 @@ it('shows the daily overview first, then the meal estimate with its Save action'
     expect(AnalysisDraft::query()->sole()->user_id)->toBeNull();
 });
 
-it('marks ingredients matched against USDA reference data', function (): void {
-    guestResultDraft();
-
-    Livewire::test('pages::snap-to-track-result')
-        ->assertSeeInOrder(['Steamed rice', 'USDA reference']);
-});
-
 it('explains why a meal preview is no longer available', function (array $attributes, string $explanation): void {
     guestResultDraft($attributes);
 
@@ -113,23 +107,29 @@ it('sends the visitor back to the tool when there is no meal to show', function 
     'meal claimed by another account' => [fn (): string => guestResultDraft(['user_id' => User::factory(), 'claimed_at' => now()])],
 ]);
 
-it('sends a signed-in member to the editable review', function (): void {
+it('lets a signed-in member save the meal only when they choose to', function (): void {
     $token = guestResultDraft();
 
     $this->actingAs(User::factory()->create());
 
     Livewire::test('pages::snap-to-track-result')
-        ->assertRedirect(route('snap-to-track.review', ['draft' => $token]));
+        ->assertNoRedirect()
+        ->assertSee('Save this meal')
+        ->assertDontSee('Already have an account? Log in')
+        ->call('save', 'register')
+        ->assertRedirect(route('snap-to-track.save', ['draft' => $token]));
+
+    expect(HealthSyncSample::query()->count())->toBe(0);
 });
 
-it('keeps the meal waiting in review while the visitor signs up or logs in', function (string $intent): void {
+it('saves the meal once the visitor signs up or logs in', function (string $intent): void {
     $token = guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')
         ->call('save', $intent)
         ->assertRedirect(route($intent));
 
-    expect(session('url.intended'))->toBe(route('snap-to-track.review', ['draft' => $token], absolute: false))
+    expect(session('url.intended'))->toBe(route('snap-to-track.save', ['draft' => $token], absolute: false))
         ->and(session('snap_to_track.auth_path'))->toBe($intent)
         ->and(session('snap_to_track.intent'))->toBe('save')
         ->and(AnalysisDraft::query()->count())->toBe(1);
@@ -145,7 +145,7 @@ it('saves the meal shown on the page even after another analysis replaces it', f
     $component->call('save', 'register')
         ->assertRedirect(route('register'));
 
-    expect(session('url.intended'))->toBe(route('snap-to-track.review', ['draft' => $shownToken], absolute: false));
+    expect(session('url.intended'))->toBe(route('snap-to-track.save', ['draft' => $shownToken], absolute: false));
 });
 
 it('shows an unknown fiber estimate as missing rather than zero', function (): void {
@@ -156,14 +156,18 @@ it('shows an unknown fiber estimate as missing rather than zero', function (): v
 });
 
 it('offers the plan and its price after the meal and its Save action', function (): void {
-    stubResultPhotoAllowance(trialResultAllowance(used: 1));
+    stubResultPhotoAllowance(trialResultAllowance(used: 1, offer: new PhotoOffer(
+        productId: 7,
+        name: 'Starter',
+        formattedPrice: 'US$2.99',
+    )));
     guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')
         ->assertSeeInOrder([
             'Save this meal',
             'Keep tracking with Starter — US$2.99/month',
-            'Renews monthly. Cancel anytime.',
+            'Renews monthly until cancelled. Cancel through Billing settings.',
             'Not now — save this meal free',
             'Or keep tracking with Starter · US$2.99/month',
         ]);
