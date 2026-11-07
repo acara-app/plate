@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\SnapFunnelStage;
 use App\Models\SnapAnalyticsEvent;
 use App\Models\SnapJourney;
+use App\Models\User;
 use Illuminate\Support\Str;
 
 beforeEach(function (): void {
@@ -29,7 +30,8 @@ function firstPayments(): array
     return SnapAnalyticsEvent::query()->where('name', SnapFunnelStage::FirstPayment->value)->orderBy('id')->pluck('journey_id', 'event_key')->all();
 }
 
-it('counts the first paid invoice of each subscription once', function (): void {
+it('counts the first paid invoice of each Plate subscription once', function (): void {
+    User::factory()->create(['stripe_id' => 'cus_first_payment']);
     $journey = SnapJourney::factory()->create();
     $subscription = ['parent' => ['subscription_details' => [
         'subscription' => 'sub_first_payment',
@@ -43,6 +45,7 @@ it('counts the first paid invoice of each subscription once', function (): void 
         snapInvoiceWebhook($subscription, 'invoice.payment_succeeded'),
         snapInvoiceWebhook([...$subscription, 'billing_reason' => 'subscription_cycle']),
         snapInvoiceWebhook(['parent' => ['subscription_details' => ['subscription' => 'sub_elsewhere', 'metadata' => []]]]),
+        snapInvoiceWebhook(['customer' => 'cus_another_app', 'parent' => ['subscription_details' => ['subscription' => 'sub_another_app', 'metadata' => []]]]),
     ] as $webhook) {
         sendSignedStripeWebhook($webhook)->assertSuccessful();
     }

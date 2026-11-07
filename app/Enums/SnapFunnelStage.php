@@ -66,7 +66,7 @@ enum SnapFunnelStage: string
             self::CheckoutFailed => 'The checkout could not open (reason). Error state.',
             self::CheckoutReturned => 'The browser came back to the success page (entitlement). Not proof of payment, and not needed for one. Once per checkout.',
             self::CheckoutCancelled => 'The browser came back from Stripe through the cancel link. Once per checkout.',
-            self::FirstPayment => 'A signed Stripe webhook confirmed the paid invoice that created a subscription (plan, amount, live). Once per subscription; replays, renewals, trial starts and unpaid invoices never add another.',
+            self::FirstPayment => "A signed Stripe webhook confirmed the paid invoice that created a Plate customer's subscription (plan, amount, live). Once per subscription; replays, renewals, trial starts and unpaid invoices never add another.",
         };
     }
 }
