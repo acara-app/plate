@@ -10,6 +10,7 @@ use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\ResolvesFailedPhotoAnalysis;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\Billing\PhotoEntitlement;
+use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
 use App\Enums\PhotoAnalysisFailure;
 use App\Enums\PhotoAnalysisStatus;
@@ -19,7 +20,6 @@ use App\Models\AnalysisDraft;
 use App\Models\MealPhoto;
 use App\Models\PhotoAnalysisRequest;
 use App\Models\User;
-use App\Services\Billing\NullPhotoAnalyses;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Queue\TimeoutExceededException;
 use Illuminate\Support\Facades\DB;
@@ -309,7 +309,7 @@ it('does not call the provider when the host analysis fails before the manager s
         {
             resolve(FailPhotoAnalysis::class)->handle($this->request, PhotoAnalysisFailure::Timeout);
 
-            return new NullPhotoAnalyses()->analyze($context, $analyze);
+            return $analyze(PhotoModel::standard());
         }
     });
 
