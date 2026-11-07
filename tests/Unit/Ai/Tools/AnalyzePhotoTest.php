@@ -9,8 +9,11 @@ use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\Billing\PhotoEntitlement;
 use App\Data\Billing\PhotoOffer;
 use App\Data\FoodAnalysisData;
+use App\Enums\SubscriptionTier;
 use App\Exceptions\Billing\PhotoLimitExceeded;
+use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
@@ -61,9 +64,11 @@ it('analyzes food photo and returns structured data', function (): void {
         ->and($result['items'])->toHaveCount(1);
 });
 
-it('tells the model the free scans are used up instead of failing the chat turn', function (): void {
-    app()->instance(ManagesPhotoAnalyses::class, new readonly class implements ManagesPhotoAnalyses
+it('tells the model why a photo was not analyzed instead of failing the chat turn', function (Throwable $limit, array $reply): void {
+    app()->instance(ManagesPhotoAnalyses::class, new readonly class($limit) implements ManagesPhotoAnalyses
     {
+        public function __construct(private Throwable $limit) {}
+
         public function enabled(): bool
         {
             return true;
@@ -76,17 +81,30 @@ it('tells the model the free scans are used up instead of failing the chat turn'
 
         public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
         {
-            throw new PhotoLimitExceeded(new PhotoEntitlement(enabled: true, limit: 2, used: 2, mode: 'trial', canUpgrade: true, offer: new PhotoOffer(productId: 7, name: 'Starter', formattedPrice: '$2.99')));
+            throw $this->limit;
         }
     });
 
     $tool = new AnalyzePhoto([new Base64Image(base64_encode('fake-image-data'), 'image/jpeg')]);
 
-    expect(json_decode($tool->handle(new Request(['query' => 'What is this?'])), true))->toBe([
-        'error' => 'Your free photo scans have been used. Choose a plan to analyze another photo.',
-        'upgrade' => ['plan' => 'Starter', 'price' => '$2.99/month', 'url' => route('checkout.start', ['product' => 7])],
-    ]);
-});
+    expect(json_decode($tool->handle(new Request(['query' => 'What is this?'])), true))->toBe($reply);
+})->with([
+    'free scans used up' => [
+        fn (): PhotoLimitExceeded => new PhotoLimitExceeded(new PhotoEntitlement(enabled: true, limit: 2, used: 2, mode: 'trial', canUpgrade: true, offer: new PhotoOffer(productId: 7, name: 'Starter', formattedPrice: '$2.99'))),
+        fn (): array => [
+            'error' => 'Your free photo scans have been used. Choose a plan to analyze another photo.',
+            'plan' => ['name' => 'Starter', 'price' => '$2.99 per month', 'url' => route('checkout.start', ['product' => 7, 'returning' => 1])],
+        ],
+    ],
+    'no plan on offer' => [
+        fn (): PhotoLimitExceeded => new PhotoLimitExceeded(new PhotoEntitlement(enabled: true, limit: 2, used: 2, mode: 'trial')),
+        ['error' => 'Your free photo scans have been used. Choose a plan to analyze another photo.'],
+    ],
+    'AI usage limit reached' => [
+        fn (): UsageLimitExceededException => new UsageLimitExceededException('rolling', SubscriptionTier::Starter, 500, 500, CarbonImmutable::parse('2026-11-08 09:00:00', 'UTC')),
+        ['error' => 'Your AI usage limit is used up for now, so this photo was not analyzed. It resets at 2026-11-08T09:00:00+00:00.'],
+    ],
+]);
 
 it('has a schema with query parameter', function (): void {
     $tool = new AnalyzePhoto([]);
