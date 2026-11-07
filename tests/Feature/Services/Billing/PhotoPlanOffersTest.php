@@ -87,3 +87,10 @@ it('presents paid plans unchanged', function (): void {
 
     expect(resolve(OffersSubscriptions::class)->present($starter))->toBe($starter);
 });
+
+it('presents the free plan unchanged while photo plans cannot be sold', function (): void {
+    config(['cashier.secret' => null]);
+    $free = SubscriptionProduct::query()->where('name', 'Free')->sole();
+
+    expect(resolve(OffersSubscriptions::class)->present($free))->toBe($free);
+});

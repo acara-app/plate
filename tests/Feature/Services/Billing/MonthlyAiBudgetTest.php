@@ -58,3 +58,9 @@ it('has no free allowance while paid photo plans cannot be sold', function (): v
 
     expect(resolve(ProvidesAiBudget::class)->forUser(User::factory()->create()))->toBeNull();
 });
+
+it('accepts a whole-dollar monthly allowance', function (): void {
+    config(['snap.other_ai_monthly_usd' => 1]);
+
+    expect(resolve(ProvidesAiBudget::class)->forUser(User::factory()->create())?->limit)->toBe(1.0);
+});

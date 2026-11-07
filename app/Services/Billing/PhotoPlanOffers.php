@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Billing;
 
 use App\Contracts\Billing\OffersSubscriptions;
+use App\Enums\PhotoPlan;
 use App\Models\SubscriptionProduct;
 
 final readonly class PhotoPlanOffers implements OffersSubscriptions
@@ -13,7 +14,7 @@ final readonly class PhotoPlanOffers implements OffersSubscriptions
 
     public function present(SubscriptionProduct $product): SubscriptionProduct
     {
-        if ($product->name !== 'Free') {
+        if ($product->name !== 'Free' || ! $this->photos->enabled()) {
             return $product;
         }
 
@@ -28,7 +29,7 @@ final readonly class PhotoPlanOffers implements OffersSubscriptions
 
     public function available(SubscriptionProduct $product): bool
     {
-        return $product->name === 'Free' || (in_array($product->name, ['Starter', 'Snap Pro'], true)
+        return $product->name === 'Free' || (PhotoPlan::fromProductName($product->name) instanceof PhotoPlan
             && $this->photos->enabled() && $this->photos->purchaseProduct($product->name)?->id === $product->id);
     }
 }

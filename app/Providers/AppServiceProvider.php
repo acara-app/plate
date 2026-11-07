@@ -67,6 +67,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->scoped(AgentModelContext::class);
         $this->app->bind(OffersSubscriptions::class, PhotoPlanOffers::class);
         $this->app->bind(ProvidesAiBudget::class, MonthlyAiBudget::class);
+        $this->app->scoped(MeteredPhotoAnalyses::class);
         $this->app->bind(ManagesPhotoAnalyses::class, MeteredPhotoAnalyses::class);
         $this->app->bind(ResolvesFailedPhotoAnalysis::class, DatabaseFailedPhotoAnalysisResolver::class);
         $this->app->bindIf(ManagesPhotoPreview::class, NullPhotoPreview::class);

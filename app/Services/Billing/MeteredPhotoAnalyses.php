@@ -14,16 +14,19 @@ use App\Data\Billing\PhotoEntitlement;
 use App\Data\Billing\PhotoModel;
 use App\Data\Billing\PhotoOffer;
 use App\Data\FoodAnalysisData;
-use App\Enums\SubscriptionTier;
+use App\Enums\PhotoPlan;
 use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Models\AiUsage;
+use App\Models\SnapAnalyticsEvent;
+use App\Models\SnapPhotoAccount;
+use App\Models\SnapPhotoPeriod;
+use App\Models\SnapPhotoRequest;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use App\Services\Ai\ConfiguredAgentModels;
 use Carbon\CarbonImmutable;
 use Closure;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -31,15 +34,18 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use RuntimeException;
-use stdClass;
 use Throwable;
-use UnexpectedValueException;
 
 final class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
 {
+    private ?bool $enabled = null;
+
+    /** @var array<string, SubscriptionProduct|null> */
+    private array $purchaseProducts = [];
+
     public function enabled(): bool
     {
-        return $this->premiumReady() && $this->purchaseProduct() instanceof SubscriptionProduct
+        return $this->enabled ??= $this->premiumReady() && $this->purchaseProduct() instanceof SubscriptionProduct
             && filled(config('cashier.key')) && filled(config('cashier.secret')) && filled(config('cashier.webhook.secret'));
     }
 
@@ -56,26 +62,31 @@ final class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
 
     public function purchaseProduct(?string $name = null): ?SubscriptionProduct
     {
-        return SubscriptionProduct::query()->where('purchasable', true)
-            ->where(fn (EloquentBuilder $query): EloquentBuilder => $query
-                ->where(fn (EloquentBuilder $starter): EloquentBuilder => $starter->where('name', 'Starter')
-                    ->where('price', 2.99)->where('stripe_lookup_key', 'acara-plate-starter-monthly-v1'))
-                ->orWhere(fn (EloquentBuilder $snap): EloquentBuilder => $snap->where('name', 'Snap Pro')
-                    ->where('price', 9)->where('stripe_lookup_key', 'acara-plate-snap-pro-monthly-v1')))
-            ->when($name !== null, fn (EloquentBuilder $query): EloquentBuilder => $query->where('name', $name))
-            ->whereNotNull('stripe_price_id')->where('stripe_price_id', '!=', '')->orderBy('price')->first();
+        $key = $name ?? '';
+
+        if (! array_key_exists($key, $this->purchaseProducts)) {
+            $this->purchaseProducts[$key] = SubscriptionProduct::query()->where('purchasable', true)
+                ->where(function (Builder $catalog): void {
+                    foreach (PhotoPlan::cases() as $plan) {
+                        $catalog->orWhere(fn (Builder $query): Builder => $query->where('name', $plan->productName())
+                            ->where('price', $plan->monthlyPriceCents() / 100)->where('stripe_lookup_key', $plan->lookupKey()));
+                    }
+                })
+                ->when($name !== null, fn (Builder $query): Builder => $query->where('name', $name))
+                ->whereNotNull('stripe_price_id')->where('stripe_price_id', '!=', '')->orderBy('price')->first();
+        }
+
+        return $this->purchaseProducts[$key];
     }
 
-    public function paid(User $user): bool
+    public function isPaying(User $user): bool
     {
-        $entitlement = resolve(ResolvesUserTier::class)->resolve($user);
-
-        return ! $entitlement->isUnrestricted() && ! $entitlement->isPaymentPending() && $entitlement->tier !== SubscriptionTier::Free;
+        return resolve(ResolvesUserTier::class)->resolve($user)->isPaying();
     }
 
     public function entitlement(?User $user, ?string $guestId = null): PhotoEntitlement
     {
-        if ($user instanceof User && $this->paid($user)) {
+        if ($user instanceof User && $this->isPaying($user)) {
             return new PhotoEntitlement(mode: 'premium');
         }
 
@@ -83,12 +94,16 @@ final class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
             return new PhotoEntitlement;
         }
 
+        if (! $user instanceof User && $guestId !== null && ! SnapPhotoAccount::query()->whereKey("guest:{$guestId}")->exists()) {
+            return $this->meteredEntitlement(config()->integer('snap.free_trial_scans', 2), 0, null, 'trial');
+        }
+
         return DB::transaction(fn (): PhotoEntitlement => $this->allowance($this->period($this->subject($user, $guestId))), 3);
     }
 
     public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
     {
-        if ($context->user instanceof User && $this->paid($context->user)) {
+        if ($context->user instanceof User && $this->isPaying($context->user)) {
             abort_if(! $this->premiumReady(), 503, 'Premium analysis is temporarily unavailable.');
             $model = resolve(ResolvesAgentModel::class)->resolve(FoodPhotoAnalyzerAgent::class, $context->user);
             resolve(EnforceAiUsageLimit::class)->handle($context->user, $model);
@@ -101,45 +116,43 @@ final class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
         }
 
         $attempt = (string) Str::uuid();
+        $mode = 'trial';
+
         try {
-            $reservation = DB::transaction(function () use ($context, $attempt): stdClass {
+            $reservation = DB::transaction(function () use ($context, $attempt, &$mode): SnapPhotoRequest {
                 $subject = $this->subject($context->user, $context->guestId);
                 $period = $this->period($subject);
+                $mode = $period->mode;
                 $identities = [$subject];
-                if ($context->guestId !== null && DB::table('snap_photo_accounts')->where('subject', 'guest:'.$context->guestId)->where('owner', $subject)->exists()) {
-                    $identities[] = 'guest:'.$context->guestId;
+                if ($context->guestId !== null && SnapPhotoAccount::query()->whereKey("guest:{$context->guestId}")->where('owner', $subject)->exists()) {
+                    $identities[] = "guest:{$context->guestId}";
                 }
 
-                $existing = DB::table('snap_photo_requests')->whereIn('subject', $identities)->where('request_key', $context->requestId)->first();
+                $existing = SnapPhotoRequest::query()->whereIn('subject', $identities)->where('request_key', $context->requestId)->first();
 
-                if ($existing !== null) {
-                    abort_unless(hash_equals($this->text($existing, 'fingerprint'), $context->fingerprint), 409, 'This request ID belongs to a different photo.');
+                if ($existing instanceof SnapPhotoRequest) {
+                    abort_unless(hash_equals($existing->fingerprint, $context->fingerprint), 409, 'This request ID belongs to a different photo.');
                     if ($existing->status === 'succeeded') {
-                        abort_if($existing->result === null || CarbonImmutable::parse($this->text($existing, 'created_at'))->addDay()->isPast(), 409, 'This result has expired. Please start a new scan.');
+                        abort_if($existing->result === null || $existing->created_at->addDay()->isPast(), 409, 'This result has expired. Please start a new scan.');
 
                         return $existing;
                     }
 
-                    abort_if($existing->status === 'pending' && CarbonImmutable::parse($this->text($existing, 'expires_at'))->isFuture(), 409, 'This photo is still being analyzed.');
+                    abort_if($existing->status === 'pending' && $existing->expires_at->isFuture(), 409, 'This photo is still being analyzed.');
                 }
 
                 $allowance = $this->allowance($period);
                 throw_if($allowance->exhausted(), PhotoLimitExceeded::class, $allowance);
 
-                $values = [
+                $reservation = $existing ?? new SnapPhotoRequest;
+                $reservation->fill([
                     'period_id' => $period->id, 'subject' => $subject, 'request_key' => $context->requestId,
                     'fingerprint' => $context->fingerprint, 'guest_id' => $context->guestId,
                     'status' => 'pending', 'source' => $context->source, 'result' => null,
                     'attempt' => $attempt, 'created_at' => now('UTC'), 'expires_at' => now('UTC')->addMinutes(15),
-                ];
-                if ($existing === null) {
-                    $id = DB::table('snap_photo_requests')->insertGetId($values);
-                } else {
-                    $id = $existing->id;
-                    DB::table('snap_photo_requests')->where('id', $id)->update($values);
-                }
+                ])->save();
 
-                return (object) ['id' => $id, 'status' => 'pending', 'mode' => $period->mode];
+                return $reservation;
             }, 3);
         } catch (PhotoLimitExceeded $photoLimitExceeded) {
             $this->record('limit:'.hash('sha256', ($context->user->id ?? $context->guestId).':'.$photoLimitExceeded->entitlement->resetsAt), 'snap_to_track_limit_hit', ['mode' => $photoLimitExceeded->entitlement->mode]);
@@ -147,130 +160,117 @@ final class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
         }
 
         if ($reservation->status === 'succeeded') {
-            return FoodAnalysisData::from(json_decode(Crypt::decryptString($this->text($reservation, 'result')), true, flags: JSON_THROW_ON_ERROR));
+            return FoodAnalysisData::from(json_decode($reservation->result ?? '', true, flags: JSON_THROW_ON_ERROR));
         }
 
-        $reservationId = $this->integer($reservation, 'id');
-        $mode = $this->text($reservation, 'mode');
         $previousGroup = Context::get('photo_usage_group');
-        Context::add('photo_usage_group', 'scan:'.$reservationId);
+        Context::add('photo_usage_group', "scan:{$reservation->id}");
         try {
             $result = $analyze(PhotoModel::standard());
             if ($result->items->count() === 0) {
-                $this->request($reservationId, $attempt)->update(['status' => 'failed']);
+                $this->pendingReservation($reservation, $attempt)->update(['status' => 'failed']);
 
                 return $result;
             }
 
-            $updated = $this->request($reservationId, $attempt)->update([
+            $updated = $this->pendingReservation($reservation, $attempt)->update([
                 'status' => 'succeeded', 'result' => Crypt::encryptString($result->toJson()),
             ]);
             throw_if($updated !== 1, RuntimeException::class, 'The analysis reservation expired. Please retry.');
 
-            $cost = (float) AiUsage::query()->where('usage_group', 'scan:'.$reservationId)->sum('cost');
-            if ($cost > config()->float('snap.cost_alert_usd', 0.03)) {
+            $cost = (float) AiUsage::query()->where('usage_group', "scan:{$reservation->id}")->sum('cost');
+            if ($cost > $this->costAlertThreshold()) {
                 Log::warning('snap_scan_cost_exceeded', ['mode' => $mode, 'cost_usd' => $cost]);
             }
 
-            $this->record('scan:'.$reservationId, 'snap_to_track_scan_completed', ['mode' => $mode, 'source' => $context->source]);
+            $this->record("scan:{$reservation->id}", 'snap_to_track_scan_completed', ['mode' => $mode, 'source' => $context->source]);
 
             return $result;
         } catch (Throwable $throwable) {
-            $this->request($reservationId, $attempt)->update(['status' => 'failed', 'result' => null]);
+            $this->pendingReservation($reservation, $attempt)->update(['status' => 'failed', 'result' => null]);
             throw $throwable;
         } finally {
             $previousGroup === null ? Context::forget('photo_usage_group') : Context::add('photo_usage_group', $previousGroup);
         }
     }
 
-    private function request(int $id, string $attempt): Builder
+    /** @return Builder<SnapPhotoRequest> */
+    private function pendingReservation(SnapPhotoRequest $reservation, string $attempt): Builder
     {
-        return DB::table('snap_photo_requests')->where('id', $id)->where('attempt', $attempt)->where('status', 'pending')->where('expires_at', '>', now('UTC'));
+        return SnapPhotoRequest::query()->whereKey($reservation->id)->where('attempt', $attempt)
+            ->where('status', 'pending')->where('expires_at', '>', now('UTC'));
     }
 
     private function subject(?User $user, ?string $guestId): string
     {
         abort_if(! $user instanceof User && $guestId === null, 422, 'A browser session or account is required.');
-        $guestSubject = $guestId === null ? null : 'guest:'.$guestId;
-        $userSubject = $user instanceof User ? 'user:'.$user->id : null;
+        $guestSubject = $guestId === null ? null : "guest:{$guestId}";
+        $userSubject = $user instanceof User ? "user:{$user->id}" : null;
         $subjects = array_filter([$guestSubject, $userSubject]);
         sort($subjects);
         foreach ($subjects as $subject) {
-            DB::table('snap_photo_accounts')->insertOrIgnore(['subject' => $subject]);
+            SnapPhotoAccount::query()->insertOrIgnore(['subject' => $subject]);
         }
 
-        $accounts = DB::table('snap_photo_accounts')->whereIn('subject', $subjects)->orderBy('subject')->lockForUpdate()->get()->keyBy('subject');
-        $owner = $guestSubject === null ? null : $this->nullableText($accounts->sole('subject', $guestSubject), 'owner');
+        $accounts = SnapPhotoAccount::query()->whereIn('subject', $subjects)->orderBy('subject')->lockForUpdate()->get()->keyBy('subject');
+        $owner = $guestSubject === null ? null : $accounts->get($guestSubject)?->owner;
         if ($userSubject !== null && $guestSubject !== null && $owner === null) {
-            DB::table('snap_photo_accounts')->where('subject', $guestSubject)->update(['owner' => $userSubject]);
+            SnapPhotoAccount::query()->whereKey($guestSubject)->update(['owner' => $userSubject]);
             $guestPeriod = $this->period($guestSubject);
             $userPeriod = $this->period($userSubject);
-            DB::table('snap_photo_requests')->where('period_id', $guestPeriod->id)->update(['period_id' => $userPeriod->id]);
+            SnapPhotoRequest::query()->where('period_id', $guestPeriod->id)->update(['period_id' => $userPeriod->id]);
             $owner = $userSubject;
         }
 
         $subject = $userSubject ?? $owner ?? $guestSubject;
         if (! $accounts->has($subject)) {
-            DB::table('snap_photo_accounts')->where('subject', $subject)->lockForUpdate()->first();
+            SnapPhotoAccount::query()->whereKey($subject)->lockForUpdate()->first();
         }
 
         return $subject;
     }
 
-    private function period(string $subject): stdClass
+    private function period(string $subject): SnapPhotoPeriod
     {
         $start = CarbonImmutable::create(2000, 1, 1, 0, 0, 0, 'UTC');
-        DB::table('snap_photo_periods')->insertOrIgnore([
+        SnapPhotoPeriod::query()->insertOrIgnore([
             'subject' => $subject, 'starts_at' => $start, 'ends_at' => null, 'mode' => 'trial',
             'allowance' => config()->integer('snap.free_trial_scans', 2),
         ]);
 
-        return DB::table('snap_photo_periods')->where('subject', $subject)->where('starts_at', $start)->where('mode', 'trial')->lockForUpdate()->sole();
+        return SnapPhotoPeriod::query()->where('subject', $subject)->where('starts_at', $start)->where('mode', 'trial')->lockForUpdate()->sole();
     }
 
-    private function allowance(stdClass $period): PhotoEntitlement
+    private function allowance(SnapPhotoPeriod $period): PhotoEntitlement
     {
-        $used = DB::table('snap_photo_requests')->where('period_id', $period->id)
+        $used = SnapPhotoRequest::query()->where('period_id', $period->id)
             ->where(fn (Builder $query): Builder => $query->where('status', 'succeeded')
-                ->orWhere(fn (Builder $pending): Builder => $pending->where('status', 'pending')->where('expires_at', '>', now('UTC'))))->count();
+                ->orWhere(fn (Builder $pending): Builder => $pending->where('status', 'pending')->where('expires_at', '>', now('UTC'))))
+            ->count();
 
-        $product = $this->enabled() ? $this->purchaseProduct() : null;
+        return $this->meteredEntitlement($period->allowance, $used, $period->ends_at?->toIso8601String(), $period->mode);
+    }
+
+    private function meteredEntitlement(int $limit, int $used, ?string $resetsAt, string $mode): PhotoEntitlement
+    {
+        $product = $this->purchaseProduct();
         $offer = $product instanceof SubscriptionProduct ? new PhotoOffer($product->id, $product->name, $product->formatted_price) : null;
 
-        $mode = $this->text($period, 'mode');
-        $endsAt = $this->nullableText($period, 'ends_at');
+        return new PhotoEntitlement(true, $limit, $used, $resetsAt, $mode, $mode === 'trial' && $offer instanceof PhotoOffer, $offer);
+    }
 
-        return new PhotoEntitlement(
-            true, $this->integer($period, 'allowance'), $used,
-            $endsAt === null ? null : CarbonImmutable::parse($endsAt, 'UTC')->toIso8601String(),
-            $mode, $mode === 'trial' && $offer instanceof PhotoOffer, $offer,
-        );
+    private function costAlertThreshold(): float
+    {
+        $threshold = config('snap.cost_alert_usd', 0.03);
+
+        return is_numeric($threshold) ? (float) $threshold : 0.03;
     }
 
     /** @param array<string, string> $properties */
     private function record(string $key, string $name, array $properties): void
     {
-        DB::table('snap_analytics_events')->insertOrIgnore([
+        SnapAnalyticsEvent::query()->insertOrIgnore([
             'event_key' => $key, 'name' => $name, 'properties' => json_encode($properties, JSON_THROW_ON_ERROR), 'created_at' => now('UTC'),
         ]);
-    }
-
-    private function text(stdClass $row, string $column): string
-    {
-        $value = $row->{$column};
-
-        return is_string($value) ? $value : throw new UnexpectedValueException("Expected the {$column} column to hold text.");
-    }
-
-    private function nullableText(stdClass $row, string $column): ?string
-    {
-        return $row->{$column} === null ? null : $this->text($row, $column);
-    }
-
-    private function integer(stdClass $row, string $column): int
-    {
-        $value = $row->{$column};
-
-        return is_int($value) ? $value : throw new UnexpectedValueException("Expected the {$column} column to hold an integer.");
     }
 }

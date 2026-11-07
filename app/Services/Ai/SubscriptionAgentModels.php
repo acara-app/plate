@@ -8,8 +8,8 @@ use App\Contracts\Ai\ResolvesAgentModel;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Data\Ai\AgentModelData;
 use App\Data\Billing\TierEntitlement;
-use App\Enums\SubscriptionTier;
 use App\Models\User;
+use InvalidArgumentException;
 
 final class SubscriptionAgentModels implements ResolvesAgentModel
 {
@@ -29,10 +29,15 @@ final class SubscriptionAgentModels implements ResolvesAgentModel
 
         $entitlement = $this->entitlements[$user->id] ??= $this->tiers->resolve($user);
         $profile = config()->array('ai.agent_profiles')[$agentClass] ?? null;
-        $paid = ! $entitlement->isUnrestricted() && ! $entitlement->isPaymentPending()
-            && $entitlement->tier !== SubscriptionTier::Free
-            && is_array($profile) && isset($profile['paid']);
 
-        return $this->models->forAgent($agentClass, $paid ? 'paid' : 'standard');
+        if ($entitlement->isPaying() && is_array($profile) && isset($profile['paid'])) {
+            try {
+                return $this->models->forAgent($agentClass, 'paid');
+            } catch (InvalidArgumentException $invalidArgumentException) {
+                report($invalidArgumentException);
+            }
+        }
+
+        return $this->models->forAgent($agentClass);
     }
 }

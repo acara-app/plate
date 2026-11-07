@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Console\Commands\PrepareSnapSubscriptionCommand;
 use App\Models\SubscriptionProduct;
+use Stripe\Exception\InvalidRequestException;
 use Stripe\Price;
 use Stripe\StripeClient;
 
@@ -20,22 +21,30 @@ function fakeStripePrice(array $attributes = []): void
         ...$attributes,
     ]);
 
-    app()->bind(StripeClient::class, fn (): StripeClient => new class($price) extends StripeClient
+    fakeStripePriceLookup(fn (): Price => $price);
+}
+
+/**
+ * @param  Closure(string): Price  $retrieve
+ */
+function fakeStripePriceLookup(Closure $retrieve): void
+{
+    app()->bind(StripeClient::class, fn (): StripeClient => new class($retrieve) extends StripeClient
     {
-        public function __construct(private readonly Price $price)
+        public function __construct(private readonly Closure $retrieve)
         {
             parent::__construct('sk_test_fake');
         }
 
-        public function getService($name): object
+        public function getService(mixed $name): object
         {
-            return new readonly class($this->price)
+            return new readonly class($this->retrieve)
             {
-                public function __construct(private Price $price) {}
+                public function __construct(private Closure $retrieve) {}
 
                 public function retrieve(string $id): Price
                 {
-                    return $this->price;
+                    return ($this->retrieve)($id);
                 }
             };
         }
@@ -105,3 +114,13 @@ it('rejects input that does not name a photo plan or Stripe price', function (ar
     'unknown plan' => [['--plan' => 'gold'], 'Choose --plan=starter or --plan=snap-pro.'],
     'not a price ID' => [['--plan' => 'starter', '--price-id' => 'prod_starter'], 'Supply a Stripe price ID beginning with price_.'],
 ]);
+
+it('explains a Stripe price that cannot be loaded instead of crashing', function (): void {
+    fakeStripePriceLookup(fn (string $id): Price => throw InvalidRequestException::factory("No such price: '{$id}'"));
+
+    $this->artisan('snap:prepare-subscription', ['--plan' => 'starter', '--price-id' => 'price_missing'])
+        ->expectsOutputToContain("Stripe could not load price_missing: No such price: 'price_missing'")
+        ->assertFailed();
+
+    expect(SubscriptionProduct::query()->where('name', 'Starter')->exists())->toBeFalse();
+});

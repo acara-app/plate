@@ -10,6 +10,7 @@ use App\Models\BenchmarkRun;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 #[Signature('snap:select-model {baseline : Baseline benchmark run ID} {candidates* : Candidate benchmark run IDs}')]
 #[Description('Rank measured premium candidates against accuracy, reliability, latency, and cost gates')]
@@ -41,7 +42,7 @@ final class SelectSnapModelCommand extends Command
         $winner = $qualified[0];
         $report = $winner['report'];
         $this->info('Selected benchmark run '.$winner['run'].'. Apply these settings after reviewing the dataset and provider billing:');
-        $this->line('AI_PAID_PHOTO_MODEL='.str_replace('/p3', '', $report->analyzerVersion));
+        $this->line('AI_PAID_PHOTO_MODEL='.Str::of($report->analyzerVersion)->replaceMatches('#/p\d+$#', '')->toString());
         $this->line('SNAP_PREMIUM_MAX_TOKENS='.$report->maxTokens);
         $this->line(sprintf('Measured cost per 100 successful scans: $%.4f', $winner['cost']));
 

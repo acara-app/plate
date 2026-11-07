@@ -17,7 +17,7 @@ final readonly class MonthlyAiBudget implements ProvidesAiBudget
 
     public function forUser(User $user): ?AiBudget
     {
-        if (! $this->photos->enabled() || $this->photos->paid($user)) {
+        if (! $this->photos->enabled() || $this->photos->isPaying($user)) {
             return null;
         }
 
@@ -25,6 +25,8 @@ final readonly class MonthlyAiBudget implements ProvidesAiBudget
         $used = (float) AiUsage::query()->forUser($user)->where('agent', '!=', FoodPhotoAnalyzerAgent::class)
             ->where('created_at', '>=', $start)->where('created_at', '<', $start->addMonth())->sum('cost');
 
-        return new AiBudget($used, config()->float('snap.other_ai_monthly_usd', 0.50), $start->addMonth());
+        $limit = config('snap.other_ai_monthly_usd', 0.50);
+
+        return new AiBudget($used, is_numeric($limit) ? (float) $limit : 0.50, $start->addMonth());
     }
 }

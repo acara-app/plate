@@ -9,6 +9,8 @@ use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Models\AiUsage;
+use App\Models\SnapPhotoAccount;
+use App\Models\SnapPhotoPeriod;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use App\Services\Billing\MeteredPhotoAnalyses;
@@ -99,4 +101,14 @@ it('does not use up a free scan when no food is found in the photo', function ()
 
     expect($result->items)->toHaveCount(0)
         ->and($access->entitlement(null, $guest)->remaining)->toBe(2);
+});
+
+it('shows a visitor their full allowance without storing anything until they scan', function (): void {
+    $entitlement = resolve(ManagesPhotoAnalyses::class)->entitlement(null, (string) Str::uuid());
+
+    expect($entitlement->remaining)->toBe(2)
+        ->and($entitlement->canUpgrade)->toBeTrue()
+        ->and($entitlement->offer?->name)->toBe('Starter')
+        ->and(SnapPhotoAccount::query()->count())->toBe(0)
+        ->and(SnapPhotoPeriod::query()->count())->toBe(0);
 });

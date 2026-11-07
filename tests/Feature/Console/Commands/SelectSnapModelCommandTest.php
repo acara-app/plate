@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Console\Commands\SelectSnapModelCommand;
 use App\Data\Benchmark\BenchmarkMetrics;
 use App\Data\Benchmark\HarnessReport;
@@ -32,7 +33,7 @@ function measuredPhotoModelRun(string $model, float $carbsError, float $costUsd 
         calibration: $empty->calibration,
     );
     $report = new HarnessReport(
-        analyzerVersion: "{$model}/p3",
+        analyzerVersion: "{$model}/p".FoodPhotoAnalyzerAgent::PROMPT_VERSION,
         referenceLookupEnabled: true,
         repeats: 3,
         skippedMeals: 0,
@@ -45,7 +46,7 @@ function measuredPhotoModelRun(string $model, float $carbsError, float $costUsd 
         datasetHash: $dataset,
     );
 
-    return BenchmarkRun::factory()->create(['analyzer_version' => "{$model}/p3", 'report' => $report->toArray()]);
+    return BenchmarkRun::factory()->create(['analyzer_version' => $report->analyzerVersion, 'report' => $report->toArray()]);
 }
 
 it('recommends the most accurate candidate that clears every release gate', function (): void {

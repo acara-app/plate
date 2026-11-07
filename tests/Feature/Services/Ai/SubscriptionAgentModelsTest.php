@@ -10,6 +10,7 @@ use App\Data\Billing\TierEntitlement;
 use App\Enums\SubscriptionTier;
 use App\Models\User;
 use App\Services\Ai\SubscriptionAgentModels;
+use Illuminate\Support\Facades\Exceptions;
 
 covers(SubscriptionAgentModels::class);
 
@@ -48,4 +49,12 @@ it('keeps everyone else on the standard model', function (TierEntitlement $entit
 
 it('uses the standard model when there is no member', function (): void {
     expect(resolve(ResolvesAgentModel::class)->resolve(NutritionSpecialist::class)->model)->toBe('gemini-3.6-flash');
+});
+
+it('keeps paying members on the standard model and reports it when the paid model is misconfigured', function (): void {
+    Exceptions::fake();
+    config()->set('ai.agent_profiles.'.NutritionSpecialist::class.'.paid', 'unregistered-model');
+
+    expect(modelResolvedFor(new TierEntitlement(SubscriptionTier::Starter), NutritionSpecialist::class))->toBe('gemini-3.6-flash');
+    Exceptions::assertReported(InvalidArgumentException::class);
 });
