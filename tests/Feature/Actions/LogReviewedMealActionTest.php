@@ -15,7 +15,7 @@ function reviewedMealForDraft(AnalysisDraft $draft): array
     $meal = ReviewedMealData::fromValidated([
         'items' => [
             ['name' => 'Grilled chicken', 'portion' => '100g', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'provenance' => 'model'],
-            ['name' => 'Steamed rice', 'calories' => 210, 'protein' => 4, 'carbs' => 45, 'fat' => 0.5, 'provenance' => 'model'],
+            ['name' => 'Steamed rice', 'calories' => 210, 'protein' => 4, 'carbs' => 45, 'fat' => 0.5, 'provenance' => 'reference'],
         ],
         'measured_at' => now()->subHour()->toDateTimeString(),
         'notes' => 'Lunch bowl',

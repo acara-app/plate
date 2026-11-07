@@ -136,7 +136,9 @@ export default function SnapToTrackReview({
             carbs: String(item.carbs),
             fat: String(item.fat),
             fiber: item.fiber != null ? String(item.fiber) : '',
-            provenance: item.provenance === 'model' ? 'model' : 'user',
+            provenance: ['model', 'reference'].includes(item.provenance)
+                ? 'model'
+                : 'user',
             fatOptions: addedFatOptions?.[index],
             fatChoice: addedFatOptions?.[index]?.find(
                 (option) => option.selected,

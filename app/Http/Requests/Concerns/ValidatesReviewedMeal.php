@@ -33,7 +33,7 @@ trait ValidatesReviewedMeal
             'items.*.carbs' => ['nullable', 'numeric', 'min:0', 'max:1000'],
             'items.*.fat' => ['nullable', 'numeric', 'min:0', 'max:500'],
             'items.*.fiber' => ['nullable', 'numeric', 'min:0', 'max:200'],
-            'items.*.provenance' => ['nullable', 'string', 'in:model,user'],
+            'items.*.provenance' => ['nullable', 'string', 'in:model,reference,user'],
             'measured_at' => ['required', 'date'],
             'notes' => ['nullable', 'string', 'max:500'],
             'meal_type' => ['nullable', Rule::enum(MealType::class)],

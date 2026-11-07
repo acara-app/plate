@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Data\Benchmark\HarnessReport;
+use App\Enums\Benchmark\AnalysisPath;
 use Carbon\CarbonInterface;
 use Database\Factories\BenchmarkRunFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -34,7 +35,14 @@ final class BenchmarkRun extends Model
 
     public function toHarnessReport(): HarnessReport
     {
-        return HarnessReport::from($this->report);
+        $report = $this->report;
+        $paths = is_array($report['paths'] ?? null) ? $report['paths'] : [];
+        $report['paths'] = array_values(array_filter(
+            $paths,
+            fn (mixed $path): bool => is_array($path) && is_string($path['path'] ?? null) && AnalysisPath::tryFrom($path['path']) instanceof AnalysisPath,
+        ));
+
+        return HarnessReport::from($report);
     }
 
     public function casts(): array
