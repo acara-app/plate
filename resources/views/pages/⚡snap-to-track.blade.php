@@ -135,13 +135,6 @@ class extends Component
             return;
         }
 
-        $pending = $this->ownedAnalyses()->whereIn('status', ['queued', 'processing'])->latest('id')->first();
-        if ($pending !== null) {
-            $this->showAnalysis($pending, redirect: true);
-
-            return;
-        }
-
         $this->error = null;
         if ($this->photoAllowance->exhausted) {
             $this->error = 'Your photo allowance is used up. Choose a plan below to continue.';

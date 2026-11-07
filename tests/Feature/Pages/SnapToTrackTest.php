@@ -699,6 +699,46 @@ it('does not expose an account scan to another account sharing its guest identit
         ->assertDontSee('Your photo is being analyzed');
 });
 
+it('analyzes the selected photo when a different scan is pending in another tab', function (PhotoAnalysisStatus $pendingStatus): void {
+    $this->freezeTime();
+    Queue::fake([ProcessPhotoAnalysis::class]);
+    FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
+    fakeTurnstileForSnapToTrack();
+    $newPhoto = UploadedFile::fake()->image('new-meal.jpg', 20, 20);
+    $newImage = base64_encode((string) file_get_contents($newPhoto->getRealPath()));
+
+    $firstTab = Livewire::test('pages::snap-to-track')
+        ->set('turnstileToken', Turnstile::dummy())
+        ->set('photo', UploadedFile::fake()->image('first-meal.jpg', 10, 10));
+    $secondTab = Livewire::test('pages::snap-to-track')
+        ->set('turnstileToken', Turnstile::dummy())
+        ->set('photo', $newPhoto);
+    $newRequestId = $secondTab->instance()->analysisRequestId;
+
+    $firstTab->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
+        ->call('analyze')->assertSet('loading', true);
+    $firstAnalysis = PhotoAnalysisRequest::query()->sole();
+    $firstAnalysis->update(['status' => $pendingStatus]);
+
+    $secondTab->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
+        ->call('analyze')
+        ->assertHasNoErrors()
+        ->assertSet('analysisRequestId', $newRequestId)
+        ->assertSet('loading', true)
+        ->assertNoRedirect()
+        ->call('analyze')
+        ->assertSet('analysisRequestId', $newRequestId);
+
+    $this->assertDatabaseCount('photo_analysis_requests', 2);
+    expect(PhotoAnalysisRequest::query()->where('request_id', $newRequestId)->sole()->image_base64)->toBe($newImage);
+    expect($firstAnalysis->refresh()->status)->toBe($pendingStatus);
+    Queue::assertPushed(ProcessPhotoAnalysis::class, 2);
+    FoodPhotoAnalyzerAgent::assertNeverPrompted();
+})->with([
+    'another scan is queued' => [PhotoAnalysisStatus::Queued],
+    'another scan is processing' => [PhotoAnalysisStatus::Processing],
+]);
+
 it('does not offer an already saved draft as a recoverable analysis', function (): void {
     analyzePhotoForSnapToTrack(saveMealAnalysisFixture())->assertRedirect();
     AnalysisDraft::query()->sole()->update(['consumed_at' => now()]);
