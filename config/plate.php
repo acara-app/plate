@@ -19,16 +19,6 @@ use App\Ai\Tools\UpdateUserProfileAttributes;
 use Laravel\Ai\Providers\Tools\WebSearch;
 
 return [
-    'enable_premium_upgrades' => (bool) env('PLATE_ENABLE_PREMIUM_UPGRADES', false),
-
-    'premium_rollout' => [
-        'allowlist' => array_values(array_filter(array_map(
-            trim(...),
-            explode(',', (string) env('PLATE_PREMIUM_ROLLOUT_ALLOWLIST', '')),
-        ))),
-        'percentage' => (int) env('PLATE_PREMIUM_ROLLOUT_PERCENTAGE', 0),
-    ],
-
     'chat' => [
         'temporary_retention_hours' => (int) env('CHAT_TEMPORARY_RETENTION_HOURS', 48),
     ],

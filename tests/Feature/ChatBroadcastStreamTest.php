@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Queue;
 use Laravel\Ai\Messages\MessageRole;
 
 beforeEach(function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+    enableBilling();
     Config::set('plate.ai_usage_preflight', [
         'token_budget' => ['input' => 2_000, 'output' => 1_000],
         'fallback_estimate' => 0.01,

@@ -14,7 +14,7 @@ it('leaves photo analysis ungated while the scan quota is unconfigured', functio
         ->and($access->entitlement(null, null)->limit)->toBeNull();
 });
 
-it('does not offer a photo-specific subscription without the photo access integration', function (): void {
+it('does not offer a photo plan until photo plans are configured', function (): void {
     $product = SubscriptionProduct::factory()->create(['name' => 'Snap Pro', 'price' => 9, 'stripe_price_id' => 'price_test', 'purchasable' => true]);
     expect(resolve(OffersSubscriptions::class)->available($product))->toBeFalse();
 });

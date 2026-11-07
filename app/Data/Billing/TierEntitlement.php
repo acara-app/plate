@@ -47,6 +47,11 @@ final readonly class TierEntitlement
         return $this->paymentPending;
     }
 
+    public function isPaying(): bool
+    {
+        return ! $this->isUnrestricted() && ! $this->paymentPending && $this->tier !== SubscriptionTier::Free;
+    }
+
     public function inGracePeriod(): bool
     {
         return $this->gracePeriodEndsAt instanceof CarbonInterface;

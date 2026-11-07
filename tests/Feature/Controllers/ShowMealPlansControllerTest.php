@@ -9,7 +9,6 @@ use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Cashier\Subscription;
 
@@ -701,8 +700,8 @@ it('exposes the diet type catalog on the empty state', function (): void {
             ->where('dietTypes', DietType::toArray()));
 });
 
-it('exposes proModelUpsell=true for free users when premium upgrades are on', function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+it('exposes proModelUpsell=true for free users when billing is on', function (): void {
+    enableBilling();
 
     $user = User::factory()->create();
 
@@ -713,7 +712,7 @@ it('exposes proModelUpsell=true for free users when premium upgrades are on', fu
 });
 
 it('exposes proModelUpsell=false for plus subscribers', function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+    enableBilling();
 
     SubscriptionProduct::factory()->create([
         'name' => 'Plus',

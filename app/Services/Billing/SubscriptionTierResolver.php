@@ -15,9 +15,11 @@ use Laravel\Cashier\Subscription;
 
 final readonly class SubscriptionTierResolver implements ResolvesUserTier
 {
+    public function __construct(private StripeBilling $stripe) {}
+
     public function resolve(User $user): TierEntitlement
     {
-        if (! enable_premium_upgrades_for($user)) {
+        if (! $this->stripe->isConfigured()) {
             return TierEntitlement::unrestricted();
         }
 

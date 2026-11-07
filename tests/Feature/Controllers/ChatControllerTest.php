@@ -10,7 +10,6 @@ use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;
 use App\Models\UserChatPlatformLink;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
 
 use function Pest\Laravel\actingAs;
@@ -219,7 +218,7 @@ it('prevents cross-user access on the stream endpoint', function (): void {
 });
 
 it('returns the credit warning derived from current usage when over 80%', function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+    enableBilling();
 
     $user = User::factory()->create();
     AiUsage::factory()->create([
@@ -241,7 +240,7 @@ it('returns the credit warning derived from current usage when over 80%', functi
 });
 
 it('returns a credit warning capped at 100% when usage is over the cap', function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+    enableBilling();
 
     $user = User::factory()->create();
     AiUsage::factory()->create([
@@ -262,7 +261,7 @@ it('returns a credit warning capped at 100% when usage is over the cap', functio
 });
 
 it('returns null creditWarning when usage is below 80%', function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+    enableBilling();
 
     $user = User::factory()->create();
     AiUsage::factory()->create([

@@ -21,7 +21,7 @@ function subscribeToPlan(User $user, string $price, int $daysAgo, bool $canceled
 }
 
 it('reports paid subscribers on their plan limits with daily and weekly usage and new subscriptions', function (): void {
-    config()->set('plate.enable_premium_upgrades', true);
+    enableBilling();
     SubscriptionProduct::factory()->create(['name' => 'Starter', 'price' => 2.99, 'stripe_price_id' => 'price_starter']);
     SubscriptionProduct::query()->where('name', 'Snap Pro')->update(['stripe_price_id' => 'price_snap_pro']);
 

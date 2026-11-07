@@ -10,6 +10,7 @@ use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Billing\ProvidesAiBudget;
+use App\Contracts\Billing\ResolvesFailedPhotoAnalysis;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Contracts\Billing\TracksPhotoConversion;
 use App\Contracts\Memory\DispatchesMemoryExtraction;
@@ -23,13 +24,15 @@ use App\Listeners\TrackAiUsage;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Services\Ai\AgentModelContext;
-use App\Services\Ai\ConfiguredAgentModels;
 use App\Services\Ai\PlateConversationStore;
-use App\Services\Billing\DefaultSubscriptionOffers;
-use App\Services\Billing\NullAiBudget;
-use App\Services\Billing\NullPhotoAnalyses;
+use App\Services\Ai\SubscriptionAgentModels;
+use App\Services\Billing\DatabaseFailedPhotoAnalysisResolver;
+use App\Services\Billing\MeteredPhotoAnalyses;
+use App\Services\Billing\MonthlyAiBudget;
 use App\Services\Billing\NullPhotoConversion;
 use App\Services\Billing\NullPhotoPreview;
+use App\Services\Billing\PhotoPlanCatalog;
+use App\Services\Billing\PhotoPlanOffers;
 use App\Services\Billing\SubscriptionTierResolver;
 use App\Services\IndexNowService;
 use App\Services\Memory\NullConversationHistoryPuller;
@@ -61,11 +64,13 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bindIf(ResolvesAgentModel::class, ConfiguredAgentModels::class);
+        $this->app->scoped(ResolvesAgentModel::class, SubscriptionAgentModels::class);
         $this->app->scoped(AgentModelContext::class);
-        $this->app->bindIf(OffersSubscriptions::class, DefaultSubscriptionOffers::class);
-        $this->app->bindIf(ProvidesAiBudget::class, NullAiBudget::class);
-        $this->app->bindIf(ManagesPhotoAnalyses::class, NullPhotoAnalyses::class);
+        $this->app->bind(OffersSubscriptions::class, PhotoPlanOffers::class);
+        $this->app->bind(ProvidesAiBudget::class, MonthlyAiBudget::class);
+        $this->app->scoped(PhotoPlanCatalog::class);
+        $this->app->bind(ManagesPhotoAnalyses::class, MeteredPhotoAnalyses::class);
+        $this->app->bind(ResolvesFailedPhotoAnalysis::class, DatabaseFailedPhotoAnalysisResolver::class);
         $this->app->bindIf(ManagesPhotoPreview::class, NullPhotoPreview::class);
         $this->app->bindIf(TracksPhotoConversion::class, NullPhotoConversion::class);
         $this->app->bind(StripeServiceContract::class, StripeService::class);

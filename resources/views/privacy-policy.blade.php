@@ -167,6 +167,13 @@
                     be retained indefinitely for analytics purposes.
                 </p>
                 <p>
+                    <strong>Scan recovery:</strong>
+                    The public photo analyzer temporarily keeps an encrypted copy of the uploaded photo so processing
+                    can continue after a connection interruption. The recovery copy is removed after a successful scan.
+                    Failed scans can be retried for up to one hour; expired recovery records are removed by scheduled
+                    cleanup. These temporary recovery copies are separate from photos saved with a meal.
+                </p>
+                <p>
                     <strong>Meal photos:</strong>
                     Photos you scan with Snap to Track while signed in are stored privately with your food log so you
                     can see them later. Before storing, we resize each photo and remove its location and other photo

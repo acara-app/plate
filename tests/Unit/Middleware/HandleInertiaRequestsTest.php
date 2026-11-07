@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
 use Inertia\OnceProp;
 
 covers(HandleInertiaRequests::class);
@@ -175,22 +174,6 @@ it('loads common translations', function (): void {
         ->and($translations['common'])->toBeArray();
 });
 
-it('shares enablePremiumUpgrades from config', function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
-    $middleware = new HandleInertiaRequests();
-    $request = Request::create('/', 'GET');
-    $shared = $middleware->share($request);
-    expect($shared)->toHaveKey('enablePremiumUpgrades')
-        ->and($shared['enablePremiumUpgrades'])->toBeTrue();
-
-    Config::set('plate.enable_premium_upgrades', false);
-    $middleware = new HandleInertiaRequests();
-    $request = Request::create('/', 'GET');
-    $shared = $middleware->share($request);
-    expect($shared)->toHaveKey('enablePremiumUpgrades')
-        ->and($shared['enablePremiumUpgrades'])->toBeFalse();
-});
-
 it('shares null entitlement when no user is authenticated', function (): void {
     $middleware = new HandleInertiaRequests();
 
@@ -201,7 +184,7 @@ it('shares null entitlement when no user is authenticated', function (): void {
 });
 
 it('shares the resolved entitlement for authenticated users', function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+    enableBilling();
 
     $user = User::factory()->create();
 
@@ -223,8 +206,8 @@ it('shares the resolved entitlement for authenticated users', function (): void 
         ]);
 });
 
-it('marks the entitlement as unrestricted when premium upgrades are off', function (): void {
-    Config::set('plate.enable_premium_upgrades', false);
+it('marks the entitlement as unrestricted when billing is off', function (): void {
+    disableBilling();
 
     $user = User::factory()->create();
 

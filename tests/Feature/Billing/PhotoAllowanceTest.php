@@ -8,17 +8,12 @@ use App\Data\FoodAnalysisData;
 use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
-use App\Services\Billing\NullPhotoAnalyses;
 use Illuminate\Support\Str;
 
 it('preserves two lifetime scans through retries, pending requests, and account registration', function (): void {
     $access = resolve(ManagesPhotoAnalyses::class);
-    if ($access instanceof NullPhotoAnalyses || (int) config('snap.free_trial_scans', 0) < 2) {
-        $this->markTestSkipped('Requires the two-scan photo allowance integration.');
-    }
 
     config([
-        'plate.enable_premium_upgrades' => true,
         'cashier.key' => 'pk_test_fake',
         'cashier.secret' => 'sk_test_fake',
         'cashier.webhook.secret' => 'whsec_test',
