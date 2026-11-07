@@ -2,18 +2,20 @@
 
 declare(strict_types=1);
 
+use App\Actions\FailPhotoAnalysis;
 use App\Actions\PrepareSnapToTrackUpgrade;
+use App\Actions\RetryPhotoAnalysis;
 use App\Actions\StartPhotoAnalysis;
 use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Contracts\Billing\TracksPhotoConversion;
 use App\Data\Billing\PhotoAnalysisContext;
-use App\Models\PhotoAnalysisRequest;
 use App\Models\AnalysisDraft;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
+use App\Models\PhotoAnalysisRequest;
 use App\Utilities\Base64Image;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -47,6 +49,13 @@ class extends Component
 
     #[\Livewire\Attributes\Locked]
     public bool $canRetryAnalysis = false;
+
+    protected FailPhotoAnalysis $failAnalysis;
+
+    public function boot(FailPhotoAnalysis $failAnalysis): void
+    {
+        $this->failAnalysis = $failAnalysis;
+    }
 
     public function mount(TracksPhotoConversion $tracking): void
     {
@@ -203,9 +212,9 @@ class extends Component
         $this->showAnalysis($analysis, redirect: true);
     }
 
-    public function retryAnalysis(StartPhotoAnalysis $start): void
+    public function retryAnalysis(RetryPhotoAnalysis $retryAnalysis): void
     {
-        $previous = $this->ownedAnalyses(includeImage: true)->where('request_id', $this->analysisRequestId)->first();
+        $previous = $this->ownedAnalyses()->where('request_id', $this->analysisRequestId)->first();
         if ($previous?->retry_request_id !== null) {
             $retry = $this->ownedAnalyses()->where('request_id', $previous->retry_request_id)->first();
             if ($retry !== null) {
@@ -230,7 +239,7 @@ class extends Component
         $this->error = null;
         try {
             RateLimiter::hit($this->analysisRateLimitKey(), 3600);
-            $analysis = $start->retry($previous, auth()->user(), $this->analysisGuestId());
+            $analysis = $retryAnalysis->handle($previous, auth()->user(), $this->analysisGuestId());
             $this->showAnalysis($analysis);
         } catch (Throwable $e) {
             $this->error = 'We could not restart the analysis. Please try again.';
@@ -249,7 +258,11 @@ class extends Component
 
     private function showAnalysis(PhotoAnalysisRequest $analysis, bool $redirect = false): void
     {
-        $analysis->recoverIfStale();
+        $failureCode = $analysis->staleFailureCode();
+        if ($failureCode !== null) {
+            $this->failAnalysis->handle($analysis, $failureCode, onlyIfStale: true);
+        }
+
         $this->analysisRequestId = $analysis->request_id;
         $this->loading = $analysis->isPending();
         $this->hasRecoverableResult = $analysis->draft_token !== null && ! $analysis->isExpired()
@@ -291,7 +304,7 @@ class extends Component
     }
 
     /** @return Builder<PhotoAnalysisRequest> */
-    private function ownedAnalyses(bool $includeImage = false): Builder
+    private function ownedAnalyses(): Builder
     {
         $guestId = $this->analysisGuestId();
         $query = PhotoAnalysisRequest::query()->where('expires_at', '>', now())
@@ -307,7 +320,7 @@ class extends Component
                 }
             });
 
-        return $includeImage ? $query : $query->metadata();
+        return $query->metadata();
     }
 
     public function clearPhoto(): void

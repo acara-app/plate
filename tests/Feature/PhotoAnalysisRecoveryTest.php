@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Actions\FailPhotoAnalysis;
+use App\Actions\RetryPhotoAnalysis;
 use App\Actions\StartPhotoAnalysis;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
@@ -105,8 +107,10 @@ it('reconciles stale processing or abandoned queued work without starting it aga
     $request = PhotoAnalysisRequest::factory()->create(['status' => $status, 'deadline_at' => now()->subSecond()]);
     FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
 
-    expect($request->recoverIfStale())->toBeTrue()
-        ->and($request->recoverIfStale())->toBeFalse();
+    expect($request->staleFailureCode())->toBe($code)
+        ->and(resolve(FailPhotoAnalysis::class)->handle($request, $code, onlyIfStale: true))->toBeTrue()
+        ->and($request->staleFailureCode())->toBeNull()
+        ->and(resolve(FailPhotoAnalysis::class)->handle($request, $code, onlyIfStale: true))->toBeFalse();
     app()->call([new ProcessPhotoAnalysis($request->id), 'handle']);
 
     expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Failed)
@@ -123,8 +127,8 @@ it('retries a failed photo once with a new immutable request id after a lost ret
     $previous = PhotoAnalysisRequest::factory()->create(['status' => PhotoAnalysisStatus::Failed, 'expires_at' => now()->addMinutes(12)]);
     $originalId = $previous->request_id;
 
-    $retry = resolve(StartPhotoAnalysis::class)->retry($previous, null, $previous->guest_id);
-    $again = resolve(StartPhotoAnalysis::class)->retry($previous, null, $previous->guest_id);
+    $retry = resolve(RetryPhotoAnalysis::class)->handle($previous, null, $previous->guest_id);
+    $again = resolve(RetryPhotoAnalysis::class)->handle($previous, null, $previous->guest_id);
 
     expect($retry->request_id)->not->toBe($originalId)
         ->and($again->id)->toBe($retry->id)
@@ -166,13 +170,13 @@ it('expires a stalled input and refuses retrying it past its recovery window', f
     Queue::fake();
     $request = PhotoAnalysisRequest::factory()->create(['deadline_at' => now()->subHour(), 'expires_at' => now()->subSecond()]);
 
-    expect($request->recoverIfStale())->toBeTrue()
+    expect(resolve(FailPhotoAnalysis::class)->handle($request, 'expired', onlyIfStale: true))->toBeTrue()
         ->and($request->image_base64)->toBeNull()
         ->and($request->canRetry())->toBeFalse()
         ->and(new PhotoAnalysisRequest()->prunable()->whereKey($request->id)->exists())->toBeTrue();
 
     try {
-        resolve(StartPhotoAnalysis::class)->retry($request, null, $request->guest_id);
+        resolve(RetryPhotoAnalysis::class)->handle($request, null, $request->guest_id);
         test()->fail('Expired input must not be retried.');
     } catch (HttpException $httpException) {
         expect($httpException->getStatusCode())->toBe(410);
@@ -253,7 +257,7 @@ it('keeps the retry child recoverable when queue dispatch fails after its outer 
     Queue::shouldReceive('connection')->with(null)->andReturn($queue);
     $previous = PhotoAnalysisRequest::factory()->create(['status' => PhotoAnalysisStatus::Failed]);
 
-    expect(fn () => resolve(StartPhotoAnalysis::class)->retry($previous, null, $previous->guest_id))
+    expect(fn () => resolve(RetryPhotoAnalysis::class)->handle($previous, null, $previous->guest_id))
         ->toThrow(RuntimeException::class, 'Retry queue unavailable');
 
     $retry = PhotoAnalysisRequest::query()->where('request_id', $previous->refresh()->retry_request_id)->sole();
@@ -281,7 +285,7 @@ it('does not call the provider when the host analysis fails before the manager s
 
         public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
         {
-            $this->request->markFailed('timeout');
+            resolve(FailPhotoAnalysis::class)->handle($this->request, 'timeout');
 
             return new NullPhotoAnalyses()->analyze($context, $analyze);
         }
@@ -290,6 +294,58 @@ it('does not call the provider when the host analysis fails before the manager s
     expect(fn () => app()->call([new ProcessPhotoAnalysis($request->id), 'handle']))
         ->toThrow(RuntimeException::class, 'This photo analysis is no longer processing.');
     expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Failed)
+        ->and(AnalysisDraft::query()->count())->toBe(0);
+    FoodPhotoAnalyzerAgent::assertNeverPrompted();
+});
+
+it('refuses retrying a failed photo without enough recovery time for a bounded attempt', function (): void {
+    $this->freezeTime();
+    Queue::fake();
+    $previous = PhotoAnalysisRequest::factory()->create(['status' => PhotoAnalysisStatus::Failed, 'expires_at' => now()->addSeconds(30)]);
+
+    expect($previous->canRetry())->toBeFalse();
+    try {
+        resolve(RetryPhotoAnalysis::class)->handle($previous, null, $previous->guest_id);
+        test()->fail('A retry must have time to finish within the recovery window.');
+    } catch (HttpException $httpException) {
+        expect($httpException->getStatusCode())->toBe(410);
+    }
+
+    $this->assertDatabaseCount('photo_analysis_requests', 1);
+    Queue::assertNothingPushed();
+});
+
+it('finishes an admitted analysis when its remaining window falls below the admission budget while processing', function (): void {
+    $this->freezeTime();
+    $request = PhotoAnalysisRequest::factory()->create(['expires_at' => now()->addSeconds(130)]);
+    $payload = AnalysisDraft::factory()->make()->payload;
+    FoodPhotoAnalyzerAgent::fake(function () use ($request, $payload): array {
+        test()->travel(30)->seconds();
+
+        expect($request->fresh()->staleFailureCode())->toBeNull();
+
+        return $payload;
+    });
+
+    app()->call([new ProcessPhotoAnalysis($request->id), 'handle']);
+
+    expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Succeeded)
+        ->and($request->draft_token)->not->toBeNull()
+        ->and(AnalysisDraft::query()->count())->toBe(1);
+    FoodPhotoAnalyzerAgent::assertPromptedTimes(1);
+});
+
+it('does not start nearly expired queued work after waiting for a worker', function (): void {
+    $this->freezeTime();
+    $request = PhotoAnalysisRequest::factory()->create(['expires_at' => now()->addSeconds(30)]);
+    FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
+
+    app()->call([new ProcessPhotoAnalysis($request->id), 'handle']);
+
+    expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Failed)
+        ->and($request->failure_code)->toBe('expired')
+        ->and($request->canRetry())->toBeFalse()
+        ->and($request->failureMessage())->toContain('Choose a photo to start a new scan.')
         ->and(AnalysisDraft::query()->count())->toBe(0);
     FoodPhotoAnalyzerAgent::assertNeverPrompted();
 });

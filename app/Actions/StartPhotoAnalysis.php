@@ -18,6 +18,8 @@ use Throwable;
 
 final readonly class StartPhotoAnalysis
 {
+    public function __construct(private FailPhotoAnalysis $failures) {}
+
     public function handle(string $requestId, string $base64, string $mimeType, PhotoAnalysisContext $context): PhotoAnalysisRequest
     {
         if (mb_strlen($base64, '8bit') > 4 * (int) ceil(10 * 1024 * 1024 / 3)) {
@@ -64,43 +66,9 @@ final readonly class StartPhotoAnalysis
                 return $request;
             });
         } catch (Throwable $throwable) {
-            if ($createdId !== null) {
-                PhotoAnalysisRequest::query()->find($createdId)?->markFailed('dispatch_failed');
-            }
-
-            throw $throwable;
-        }
-    }
-
-    public function retry(PhotoAnalysisRequest $previous, ?User $user, ?string $guestId): PhotoAnalysisRequest
-    {
-        $retryId = null;
-
-        try {
-            return DB::transaction(function () use ($previous, $user, $guestId, &$retryId): PhotoAnalysisRequest {
-                $previous = PhotoAnalysisRequest::query()->lockForUpdate()->findOrFail($previous->id);
-                abort_unless($previous->ownedBy($user, $guestId), 404);
-
-                if ($previous->retry_request_id !== null) {
-                    $retry = PhotoAnalysisRequest::query()->where('request_id', $previous->retry_request_id)->firstOrFail();
-                    abort_unless($retry->ownedBy($user, $guestId), 404);
-
-                    return $retry;
-                }
-
-                abort_unless($previous->canRetry() && $previous->image_base64 !== null, 410, 'This photo has expired or cannot be retried.');
-                $requestId = (string) Str::uuid();
-                $context = new PhotoAnalysisContext($user, $previous->guest_id, $requestId, $previous->source, $previous->fingerprint);
-                $retry = $this->handle($requestId, $previous->image_base64, $previous->mime_type, $context);
-                $retryId = $retry->id;
-                $retry->update(['expires_at' => $previous->expires_at, 'deadline_at' => min($retry->deadline_at, $previous->expires_at)]);
-                $previous->update(['retry_request_id' => $requestId, 'image_base64' => null]);
-
-                return $retry;
-            });
-        } catch (Throwable $throwable) {
-            if ($retryId !== null) {
-                PhotoAnalysisRequest::query()->find($retryId)?->markFailed('dispatch_failed');
+            $request = $createdId === null ? null : PhotoAnalysisRequest::query()->metadata()->find($createdId);
+            if ($request !== null) {
+                $this->failures->handle($request, 'dispatch_failed');
             }
 
             throw $throwable;

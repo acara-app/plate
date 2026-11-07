@@ -38,7 +38,7 @@ final readonly class AnalyzeFoodPhotoAction
                 if ($analysisRequestId !== null) {
                     $request = PhotoAnalysisRequest::query()->metadata()->whereKey($analysisRequestId)
                         ->where('request_id', $context->requestId)->where('fingerprint', $context->fingerprint)->where('source', $context->source)
-                        ->where('status', PhotoAnalysisStatus::Processing)->whereFuture('deadline_at')->whereFuture('expires_at')->first();
+                        ->where('status', PhotoAnalysisStatus::Processing)->whereFuture('deadline_at')->where('expires_at', '>', now()->addSeconds(PhotoAnalysisRequest::PROCESSING_BUDGET_SECONDS))->first();
 
                     throw_if(! $request instanceof PhotoAnalysisRequest || ! $request->ownedBy($context->user, $context->guestId), RuntimeException::class, 'This photo analysis is no longer processing.');
                 }

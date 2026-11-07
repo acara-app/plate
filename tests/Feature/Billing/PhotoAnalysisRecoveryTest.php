@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Actions\FailPhotoAnalysis;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\ResolvesFailedPhotoAnalysis;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\Billing\PhotoEntitlement;
+use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
 use App\Enums\PhotoAnalysisStatus;
 use App\Jobs\ProcessPhotoAnalysis;
@@ -141,7 +143,7 @@ it('releases a reservation created after the host request has already failed wit
 
         public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
         {
-            $this->request->markFailed('timeout');
+            resolve(FailPhotoAnalysis::class)->handle($this->request, 'timeout');
 
             return $this->access->analyze($context, $analyze);
         }
@@ -151,6 +153,91 @@ it('releases a reservation created after the host request has already failed wit
         ->toThrow(RuntimeException::class, 'This photo analysis is no longer processing.');
 
     expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Failed)
+        ->and(AnalysisDraft::query()->count())->toBe(0)
+        ->and($access->entitlement(null, $context->guestId)->remaining)->toBe(2);
+    FoodPhotoAnalyzerAgent::assertNeverPrompted();
+});
+
+it('preserves the allowance when queued work has too little recovery time remaining', function (): void {
+    $this->freezeTime();
+    $access = resolve(ManagesPhotoAnalyses::class);
+    if ($access instanceof NullPhotoAnalyses) {
+        $this->markTestSkipped('Requires the Cloud photo analysis recovery integration.');
+    }
+
+    FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
+    config([
+        'plate.enable_premium_upgrades' => true,
+        'cashier.key' => 'pk_test_fake',
+        'cashier.secret' => 'sk_test_fake',
+        'cashier.webhook.secret' => 'whsec_test',
+    ]);
+    SubscriptionProduct::factory()->create([
+        'name' => 'Starter', 'price' => 2.99, 'stripe_price_id' => 'price_starter',
+        'stripe_lookup_key' => 'acara-plate-starter-monthly-v1', 'purchasable' => true,
+    ]);
+    $request = PhotoAnalysisRequest::factory()->create(['expires_at' => now()->addSeconds(30)]);
+    $context = $request->context();
+
+    app()->call([new ProcessPhotoAnalysis($request->id), 'handle']);
+
+    expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Failed)
+        ->and($request->failure_code)->toBe('expired')
+        ->and(AnalysisDraft::query()->count())->toBe(0)
+        ->and($access->entitlement(null, $context->guestId)->remaining)->toBe(2);
+    FoodPhotoAnalyzerAgent::assertNeverPrompted();
+});
+
+it('releases the allowance when reservation delays leave too little time for provider work', function (): void {
+    $this->freezeTime();
+    $access = resolve(ManagesPhotoAnalyses::class);
+    if ($access instanceof NullPhotoAnalyses) {
+        $this->markTestSkipped('Requires the Cloud photo analysis recovery integration.');
+    }
+
+    FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
+    config([
+        'plate.enable_premium_upgrades' => true,
+        'cashier.key' => 'pk_test_fake',
+        'cashier.secret' => 'sk_test_fake',
+        'cashier.webhook.secret' => 'whsec_test',
+    ]);
+    SubscriptionProduct::factory()->create([
+        'name' => 'Starter', 'price' => 2.99, 'stripe_price_id' => 'price_starter',
+        'stripe_lookup_key' => 'acara-plate-starter-monthly-v1', 'purchasable' => true,
+    ]);
+    $request = PhotoAnalysisRequest::factory()->create(['expires_at' => now()->addSeconds(130)]);
+    $context = $request->context();
+
+    app()->instance(ManagesPhotoAnalyses::class, new readonly class($access) implements ManagesPhotoAnalyses
+    {
+        public function __construct(private ManagesPhotoAnalyses $access) {}
+
+        public function enabled(): bool
+        {
+            return $this->access->enabled();
+        }
+
+        public function entitlement(?User $user, ?string $guestId): PhotoEntitlement
+        {
+            return $this->access->entitlement($user, $guestId);
+        }
+
+        public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
+        {
+            return $this->access->analyze($context, function (PhotoModel $model) use ($analyze): FoodAnalysisData {
+                test()->travel(15)->seconds();
+
+                return $analyze($model);
+            });
+        }
+    });
+
+    expect(fn () => app()->call([new ProcessPhotoAnalysis($request->id), 'handle']))
+        ->toThrow(RuntimeException::class, 'This photo analysis is no longer processing.');
+
+    expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Failed)
+        ->and($request->failure_code)->toBe('expired')
         ->and(AnalysisDraft::query()->count())->toBe(0)
         ->and($access->entitlement(null, $context->guestId)->remaining)->toBe(2);
     FoodPhotoAnalyzerAgent::assertNeverPrompted();

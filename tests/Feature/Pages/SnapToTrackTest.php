@@ -734,3 +734,27 @@ it('resumes one retry after losing its response without requiring another upload
     expect(PhotoAnalysisRequest::query()->count())->toBe(2)
         ->and($failed->refresh()->retry_request_id)->toBe($first->instance()->analysisRequestId);
 });
+
+it('asks for a new photo when too little recovery time remains to retry safely', function (): void {
+    $this->freezeTime();
+    Queue::fake();
+    $guestId = (string) Str::uuid();
+    session()->put('snap_to_track.analysis_guest_id', $guestId);
+    PhotoAnalysisRequest::factory()->create([
+        'guest_id' => $guestId,
+        'guest_hash' => hash('sha256', $guestId),
+        'status' => PhotoAnalysisStatus::Failed,
+        'failure_code' => 'timeout',
+        'expires_at' => now()->addSeconds(30),
+    ]);
+
+    Livewire::test('pages::snap-to-track')
+        ->assertSet('canRetryAnalysis', false)
+        ->assertDontSee('Try this photo again')
+        ->assertSee('Choose a photo to start a new scan.')
+        ->call('retryAnalysis')
+        ->assertSet('loading', false);
+
+    $this->assertDatabaseCount('photo_analysis_requests', 1);
+    Queue::assertNothingPushed();
+});

@@ -6,6 +6,7 @@ namespace App\Jobs;
 
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\CreateAnalysisDraftAction;
+use App\Actions\FailPhotoAnalysis;
 use App\Actions\StoreMealPhotoAction;
 use App\Enums\AnalysisDraftSource;
 use App\Enums\PhotoAnalysisStatus;
@@ -32,17 +33,24 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
 
     public function __construct(public int $analysisRequestId) {}
 
-    public function handle(AnalyzeFoodPhotoAction $analyze, CreateAnalysisDraftAction $drafts, StoreMealPhotoAction $photos): void
+    public function handle(AnalyzeFoodPhotoAction $analyze, CreateAnalysisDraftAction $drafts, StoreMealPhotoAction $photos, FailPhotoAnalysis $failures): void
     {
-        $request = PhotoAnalysisRequest::query()->find($this->analysisRequestId);
+        $request = PhotoAnalysisRequest::query()->metadata()->find($this->analysisRequestId);
 
-        if ($request === null || $request->recoverIfStale()) {
+        if ($request === null) {
+            return;
+        }
+
+        $failureCode = $request->staleFailureCode();
+        if ($failureCode !== null) {
+            $failures->handle($request, $failureCode, onlyIfStale: true);
+
             return;
         }
 
         $claimed = PhotoAnalysisRequest::query()->whereKey($request->id)
-            ->where('status', PhotoAnalysisStatus::Queued)->whereFuture('deadline_at')->whereFuture('expires_at')
-            ->update(['status' => PhotoAnalysisStatus::Processing, 'started_at' => now(), 'deadline_at' => now()->addSeconds(120)]);
+            ->where('status', PhotoAnalysisStatus::Queued)->whereFuture('deadline_at')->where('expires_at', '>', now()->addSeconds(PhotoAnalysisRequest::PROCESSING_BUDGET_SECONDS))
+            ->update(['status' => PhotoAnalysisStatus::Processing, 'started_at' => now(), 'deadline_at' => now()->addSeconds(PhotoAnalysisRequest::PROCESSING_BUDGET_SECONDS)]);
 
         if ($claimed === 0) {
             return;
@@ -61,7 +69,7 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
             $image = Base64Image::decode($base64 ?? '');
 
             if ($base64 === null || ! $image instanceof Base64Image) {
-                $request->markFailed('invalid_photo');
+                $failures->handle($request, 'invalid_photo');
 
                 return;
             }
@@ -69,13 +77,13 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
             $result = $analyze->handle($base64, $request->mime_type, context: $context, analysisRequestId: $request->id);
 
             if ($result->items->count() === 0) {
-                $request->markFailed('no_food');
+                $failures->handle($request, 'no_food');
 
                 return;
             }
 
             $token = DB::transaction(function () use ($request, $drafts, $result, $context): ?string {
-                $current = PhotoAnalysisRequest::query()->lockForUpdate()->find($request->id);
+                $current = PhotoAnalysisRequest::query()->metadata()->lockForUpdate()->find($request->id);
 
                 if ($current === null || $current->status !== PhotoAnalysisStatus::Processing || $current->deadline_at->isPast() || $current->isExpired()) {
                     return null;
@@ -96,7 +104,12 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
                 }
             }
         } catch (Throwable $throwable) {
-            $request->markFailed($throwable instanceof PhotoLimitExceeded ? 'limit_reached' : 'provider_error');
+            $code = match (true) {
+                ! $request->hasProcessingBudget() => 'expired',
+                $throwable instanceof PhotoLimitExceeded => 'limit_reached',
+                default => 'provider_error',
+            };
+            $failures->handle($request, $code);
 
             throw $throwable;
         }
@@ -104,6 +117,9 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
 
     public function failed(?Throwable $exception): void
     {
-        PhotoAnalysisRequest::query()->find($this->analysisRequestId)?->markFailed($exception instanceof TimeoutExceededException ? 'timeout' : 'interrupted');
+        $request = PhotoAnalysisRequest::query()->metadata()->find($this->analysisRequestId);
+        if ($request !== null) {
+            resolve(FailPhotoAnalysis::class)->handle($request, $exception instanceof TimeoutExceededException ? 'timeout' : 'interrupted');
+        }
     }
 }

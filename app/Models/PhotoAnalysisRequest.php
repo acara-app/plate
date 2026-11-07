@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Actions\CreateAnalysisDraftAction;
-use App\Contracts\Billing\ResolvesFailedPhotoAnalysis;
 use App\Data\Billing\PhotoAnalysisContext;
-use App\Enums\AnalysisDraftSource;
 use App\Enums\PhotoAnalysisStatus;
 use Carbon\CarbonInterface;
 use Database\Factories\PhotoAnalysisRequestFactory;
@@ -17,7 +14,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -51,6 +47,8 @@ final class PhotoAnalysisRequest extends Model
 
     public const int TTL_MINUTES = 60;
 
+    public const int PROCESSING_BUDGET_SECONDS = 120;
+
     /** @var list<string> */
     protected $guarded = [];
 
@@ -80,11 +78,24 @@ final class PhotoAnalysisRequest extends Model
 
     public function canRetry(): bool
     {
-        return $this->hasFailed() && ! $this->isExpired();
+        return $this->hasFailed() && $this->hasProcessingBudget();
+    }
+
+    public function hasProcessingBudget(): bool
+    {
+        return $this->expires_at->isAfter(now()->addSeconds(self::PROCESSING_BUDGET_SECONDS));
     }
 
     public function failureMessage(): string
     {
+        if ($this->isExpired()) {
+            return 'This photo has expired. Choose a photo to start a new scan.';
+        }
+
+        if (! $this->hasProcessingBudget()) {
+            return 'This photo is too close to expiry to retry. Choose a photo to start a new scan.';
+        }
+
         return match ($this->failure_code) {
             'no_food' => 'No food items were detected. Try a clearer photo with better lighting.',
             'expired' => 'This photo has expired. Choose a photo to start a new scan.',
@@ -105,58 +116,21 @@ final class PhotoAnalysisRequest extends Model
         );
     }
 
-    public function markFailed(string $code, bool $onlyIfStale = false): bool
+    public function staleFailureCode(): ?string
     {
-        $updated = DB::transaction(function () use ($code, $onlyIfStale): bool {
-            $current = self::query()->lockForUpdate()->find($this->id);
-
-            if ($current === null || ! $current->isPending()) {
-                return false;
-            }
-
-            if ($onlyIfStale && ! $current->isExpired() && $current->deadline_at->isFuture()) {
-                return false;
-            }
-
-            $context = $current->context();
-            $result = resolve(ResolvesFailedPhotoAnalysis::class)->handle($context);
-
-            if ($result !== null && $result->items->count() > 0 && ! $current->isExpired()) {
-                $token = resolve(CreateAnalysisDraftAction::class)->handle($result, AnalysisDraftSource::PublicSnapToTrack, $context->user?->id);
-                $current->update(['status' => PhotoAnalysisStatus::Succeeded, 'draft_token' => $token, 'image_base64' => null, 'completed_at' => now()]);
-
-                return true;
-            }
-
-            $current->update([
-                'status' => PhotoAnalysisStatus::Failed,
-                'failure_code' => $code,
-                'failed_at' => now(),
-                ...$current->isExpired() ? ['image_base64' => null, 'draft_token' => null] : [],
-            ]);
-
-            return true;
-        });
-
-        if (! $updated) {
-            return false;
+        if (! $this->isPending()) {
+            return null;
         }
 
-        $this->refresh();
-        $this->recordOutcome();
-
-        return true;
-    }
-
-    public function recoverIfStale(): bool
-    {
-        if (! $this->isPending() || (! $this->isExpired() && $this->deadline_at->isFuture())) {
-            return false;
+        if ($this->isExpired() || ($this->status === PhotoAnalysisStatus::Queued && ! $this->hasProcessingBudget())) {
+            return 'expired';
         }
 
-        $code = $this->isExpired() ? 'expired' : ($this->status === PhotoAnalysisStatus::Queued ? 'queue_timeout' : 'timeout');
+        if ($this->deadline_at->isFuture()) {
+            return null;
+        }
 
-        return $this->markFailed($code, onlyIfStale: true);
+        return $this->status === PhotoAnalysisStatus::Queued ? 'queue_timeout' : 'timeout';
     }
 
     public function recordOutcome(): void
