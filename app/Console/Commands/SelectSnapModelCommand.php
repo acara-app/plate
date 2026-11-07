@@ -41,8 +41,8 @@ final class SelectSnapModelCommand extends Command
 
         $winner = $qualified[0];
         $report = $winner['report'];
-        $this->info('Selected benchmark run '.$winner['run'].'. After reviewing the dataset and provider billing, pin this model on FoodPhotoAnalyzerAgent:');
-        $this->line("#[Model('".Str::of($report->analyzerVersion)->replaceMatches('#/p\d+$#', '')->toString()."')]");
+        $this->info('Selected benchmark run '.$winner['run'].'. Review the dataset and provider billing before switching the photo analyzer to this model:');
+        $this->line(Str::of($report->analyzerVersion)->replaceMatches('#/p\d+$#', '')->toString());
         $this->line(sprintf('Measured cost per 100 successful scans: $%.4f', $winner['cost']));
 
         return self::SUCCESS;

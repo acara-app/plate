@@ -27,7 +27,7 @@ use Laravel\Ai\Responses\StructuredAgentResponse;
 use Spatie\LaravelData\DataCollection;
 
 #[UseCheapestModel]
-#[MaxTokens(67000)]
+#[MaxTokens(64000)]
 #[Timeout(120)]
 final class GroceryListAgent implements Agent, BillsUsageToUser, HasStructuredOutput
 {
