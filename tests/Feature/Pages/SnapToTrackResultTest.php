@@ -50,39 +50,27 @@ function stubResultPhotoAllowance(PhotoEntitlement $entitlement): void
     });
 }
 
-function exhaustedResultAllowance(?PhotoOffer $offer): PhotoEntitlement
+function trialResultAllowance(int $used, ?PhotoOffer $offer = new PhotoOffer(productId: 7, name: 'Starter', formattedPrice: 'US$2.99')): PhotoEntitlement
 {
-    return new PhotoEntitlement(enabled: true, limit: 2, used: 2, mode: 'trial', canUpgrade: true, offer: $offer);
+    return new PhotoEntitlement(enabled: true, limit: 2, used: $used, mode: 'trial', canUpgrade: true, offer: $offer);
 }
 
-it('shows the guest meal the way it looks in the food log', function (): void {
-    $token = Str::random(64);
-    AnalysisDraft::factory()->create(['token_hash' => AnalysisDraft::hashToken($token)]);
+it('shows the daily overview first, then the meal estimate with its Save action', function (): void {
+    guestResultDraft();
 
     $this->withoutVite()
-        ->withSession(['snap_to_track.result' => ['draft' => $token, 'request_id' => 'analysis-request-1']])
         ->get(route('snap-to-track.result'))
         ->assertOk()
         ->assertSeeInOrder([
-            'Preview · not saved yet',
-            'Daily calorie goal',
-            '490',
-            '/2,000 kcal',
-            'Goals are based on a 2,000 kcal reference day',
-            'Macronutrients',
-            'Today’s entries',
-            'Grilled chicken breast, Steamed rice',
-            'Ingredients',
-            'Grilled chicken breast',
-            '280 kcal',
+            'Daily calories',
+            'a general reference, not goals calculated for you',
+            'Your meal',
+            'AI estimate',
+            'Save this meal',
+            'Saving is free',
             '1 breast (170g)',
-            'AI confidence: 82%',
-            'Keep this meal in your food log',
-            'Save this meal free',
-            'Already have an account? Log in',
             'never dose insulin',
-            'Analyze another photo',
-        ], escape: false);
+        ]);
 
     expect(AnalysisDraft::query()->sole()->user_id)->toBeNull();
 });
@@ -102,7 +90,7 @@ it('explains why a meal preview is no longer available', function (array $attrib
         ->assertSee('This meal preview is no longer available')
         ->assertSee($explanation)
         ->assertSee('Analyze another photo')
-        ->assertDontSee('Save this meal free');
+        ->assertDontSee('Save this meal');
 })->with([
     'expired after an hour' => [['expires_at' => now()->subMinute()], 'Meal previews expire 60 minutes after analysis'],
     'already saved' => [['consumed_at' => now()], 'This meal has already been saved to a food log.'],
@@ -160,43 +148,33 @@ it('shows an unknown fiber estimate as missing rather than zero', function (): v
     guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')
-        ->assertSeeInOrder(['Fiber', '—', '/28 g', 'Today’s entries']);
+        ->assertSeeInOrder(['Fiber', '—', '/28 g', 'Your meal']);
 });
 
-it('offers the plan right after the first scan while keeping the free save as the way out', function (): void {
-    stubResultPhotoAllowance(new PhotoEntitlement(
-        enabled: true, limit: 2, used: 1, mode: 'trial', canUpgrade: true,
-        offer: new PhotoOffer(productId: 7, name: 'Starter', formattedPrice: 'US$2.99'),
-    ));
+it('offers the plan and its price after the meal and its Save action', function (): void {
+    stubResultPhotoAllowance(trialResultAllowance(used: 1));
     guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')
         ->assertSeeInOrder([
-            '1 free scan left',
-            'Track every meal this easily',
+            'Save this meal',
             'Keep tracking with Starter — US$2.99/month',
-            'Renews monthly. Cancel anytime. Daily and weekly AI limits apply.',
-            'Not now — save this meal free',
-            'Already have an account? Log in',
-            'Analyze another photo',
-            'Keep tracking · US$2.99/month',
-        ])
-        ->assertDontSee('Keep this meal in your food log');
+            'Or keep tracking with Starter · US$2.99/month',
+        ]);
 });
 
-it('keeps offering the plan once the free scans are used up', function (): void {
-    stubResultPhotoAllowance(exhaustedResultAllowance(new PhotoOffer(productId: 7, name: 'Starter', formattedPrice: 'US$2.99')));
+it('keeps saving free once the free scans are used up', function (): void {
+    stubResultPhotoAllowance(trialResultAllowance(used: 2));
     guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')
-        ->assertSee('Free scans used up')
+        ->assertSee('This meal is still free to save.')
         ->assertSee('Keep tracking with Starter — US$2.99/month')
-        ->assertSee('Not now — save this meal free')
         ->assertDontSee('Analyze another photo');
 });
 
 it('sends the visitor to checkout when they upgrade', function (?PhotoOffer $offer, string $destination, array $parameters): void {
-    stubResultPhotoAllowance(exhaustedResultAllowance($offer));
+    stubResultPhotoAllowance(trialResultAllowance(used: 2, offer: $offer));
     guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')

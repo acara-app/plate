@@ -14,6 +14,7 @@ use App\Enums\SnapFunnelStage;
 use App\Jobs\ProcessPhotoAnalysis;
 use App\Models\AnalysisDraft;
 use App\Models\PhotoAnalysisRequest;
+use App\Models\SnapAnalyticsEvent;
 use App\Models\SnapJourney;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
@@ -206,9 +207,11 @@ it('records the free save path from the guest result', function (): void {
     session()->put('snap_to_track.result', ['draft' => $draft, 'request_id' => (string) Str::uuid()]);
     offerStarterInSnapJourney($starter, used: 1);
 
-    Livewire::test('pages::snap-to-track-result')->call('save', 'register')->assertRedirect(route('register'));
+    Livewire::test('pages::snap-to-track-result')->call('save', 'register', 'result_bar')->assertRedirect(route('register'));
 
-    expect(snapFunnelSteps(snapFunnelReport(), 'save'))->toBe([1, 1, 0, 0]);
+    expect(snapFunnelSteps(snapFunnelReport(), 'save'))->toBe([1, 1, 0, 0])
+        ->and(SnapAnalyticsEvent::query()->where('name', SnapFunnelStage::SaveClicked->value)->sole()->properties)
+        ->toBe(['auth_path' => 'register', 'placement' => 'result_bar']);
 });
 
 it('leaves staff journeys out of the funnel unless asked', function (): void {

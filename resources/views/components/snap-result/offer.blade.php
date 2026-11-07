@@ -6,38 +6,13 @@
     $variant = $allowance->variant ?? 'baseline';
 @endphp
 
-@if ($offer === null)
-    <section aria-labelledby="result-offer-heading" class="flex flex-col gap-4 rounded-3xl bg-card p-5 shadow-xs ring-1 ring-primary/30 sm:p-6">
-        <h2 id="result-offer-heading" class="text-xl font-semibold tracking-tight">Keep this meal in your food log</h2>
-
-        <div class="flex flex-col gap-2">
-            <x-snap-result.button
-                wire:click="save('register')"
-                wire:loading.attr="disabled"
-                wire:target="save,upgrade"
-                x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track' })"
-            >
-                Save this meal free
-            </x-snap-result.button>
-            <p class="text-sm text-muted-foreground">Save the breakdown and correct anything the AI got wrong.</p>
-        </div>
-
-        <button
-            type="button"
-            wire:click="save('login')"
-            wire:loading.attr="disabled"
-            wire:target="save,upgrade"
-            class="min-h-11 self-start rounded-md text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
-        >
-            Already have an account? Log in
-        </button>
-    </section>
-@else
+@if ($offer !== null)
     <section
         aria-labelledby="result-offer-heading"
-        x-data
         x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: 'result', variant: @js($variant) }, @js('result:'.$allowance->mode.':'.$allowance->used.':'.$allowance->resetsAt)); $wire.offerViewed('result')"
-        class="flex flex-col gap-5 rounded-3xl bg-card p-5 shadow-xs ring-1 ring-primary/30 sm:p-6"
+        x-intersect:enter="actionsOnScreen.offer = true"
+        x-intersect:leave="actionsOnScreen.offer = false"
+        class="flex flex-col gap-5 rounded-3xl bg-card p-5 shadow-xs ring-1 ring-border/60 sm:p-6"
     >
         <div class="flex flex-col gap-2">
             @if ($allowance->exhausted)
@@ -46,7 +21,13 @@
                 <p class="self-start rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">{{ $freeScansLeft }} free {{ Str::plural('scan', $freeScansLeft) }} left</p>
             @endif
             <h2 id="result-offer-heading" class="text-2xl font-semibold tracking-tight">Track every meal this easily</h2>
-            <p class="text-sm text-muted-foreground">You got this breakdown from one photo. {{ $offer->name }} lets you do it for every meal, every day.</p>
+            <p class="text-sm text-muted-foreground">
+                @if ($allowance->exhausted)
+                    This meal is still free to save. To keep scanning, {{ $offer->name }} lets you snap every meal, every day.
+                @else
+                    You got this breakdown from one photo. {{ $offer->name }} lets you do it for every meal, every day.
+                @endif
+            </p>
         </div>
 
         <ul class="flex flex-col gap-3">
@@ -77,25 +58,16 @@
             <p class="text-center text-xs text-muted-foreground">Renews monthly. Cancel anytime. Daily and weekly AI limits apply.</p>
         </div>
 
-        <div class="flex flex-col items-center gap-1 border-t border-border/60 pt-4 text-sm">
+        <div class="flex justify-center border-t border-border/60 pt-4 text-sm">
             <button
                 type="button"
-                wire:click="save('register')"
+                wire:click="save('register', 'result')"
                 wire:loading.attr="disabled"
                 wire:target="save,upgrade"
-                x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track' })"
+                x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'result' })"
                 class="min-h-11 rounded-md px-2 font-medium underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
             >
                 Not now — save this meal free
-            </button>
-            <button
-                type="button"
-                wire:click="save('login')"
-                wire:loading.attr="disabled"
-                wire:target="save,upgrade"
-                class="min-h-11 rounded-md px-2 font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
-            >
-                Already have an account? Log in
             </button>
         </div>
     </section>

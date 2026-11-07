@@ -57,7 +57,7 @@ enum SnapFunnelStage: string
             self::AnalysisFailed => 'The analysis ended without a usable result (failure). Error state. Once per analysis request.',
             self::ResultViewed => 'The guest result page showed an unexpired, unsaved meal. Once per analysis; reloads do not repeat it.',
             self::OfferViewed => 'A paid plan offer was on screen (placement, plan); clicking it also counts as seeing it. Once per placement and result.',
-            self::SaveClicked => 'The guest chose to save the meal (auth_path): a Save button, or a Log in link that continues to saving. Recorded before the page navigates away. Once per result.',
+            self::SaveClicked => 'The guest chose to save the meal (auth_path, placement): a Save button, or a Log in link that continues to saving. Recorded before the page navigates away. Once per result.',
             self::UpgradeClicked => 'The guest chose a paid plan from an offer (placement, plan), recorded before the page navigates away. Once per placement and result.',
             self::AuthCompleted => "The journey's browser finished sign-up or log-in (method). Once per account.",
             self::MealSaved => 'A meal from the public Snap to Track result was saved to the food log. Once per meal.',

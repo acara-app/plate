@@ -34,7 +34,7 @@ Run it in production the same way as `billing:usage-report`. `--by` accepts `dev
 | Analysis failed | `snap_to_track_analysis_failed` | The analysis ended without a usable result (`no_food`, `timeout`, `provider_error`, `start_failed`, …). Error state. |
 | Result viewed | `snap_to_track_result_viewed` | The guest result page showed an unexpired, unsaved meal. |
 | Offer viewed | `snap_to_track_offer_viewed` | A paid plan offer was on screen: `result`, `result_bar` (mobile action bar) or `wall` (scan limit). Clicking it also counts as seeing it. |
-| Save clicked | `snap_to_track_save_click` | The guest chose to save the meal: a Save button (`auth_path` `register`) or a Log in link, which also continues to saving (`login`). Recorded before the page navigates away. |
+| Save clicked | `snap_to_track_save_click` | The guest chose to save the meal: a Save button (`auth_path` `register`) or a Log in link, which also continues to saving (`login`). `placement` is `meal` (the meal card), `result` (the plan offer), `result_bar` (mobile action bar) or `header`. Recorded before the page navigates away. |
 | Upgrade clicked | `snap_to_track_upgrade_click` | The guest chose a paid plan from an offer, recorded before the page navigates away. |
 | Signed up or logged in | `snap_to_track_auth_completed` | The journey's browser finished sign-up or log-in (`method`: `register` or `login`). |
 | Meal saved | `snap_to_track_meal_logged` | A meal from the public result was saved to the food log. |
@@ -94,4 +94,4 @@ Analytics properties never include email addresses, photos, meal or health value
 
 ## History notes
 
-The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes and the 2026-11-04 move of guest results to their own page. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.
+The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes, the 2026-11-04 move of guest results to their own page and the 2026-11-07 Save layout on that page. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.
