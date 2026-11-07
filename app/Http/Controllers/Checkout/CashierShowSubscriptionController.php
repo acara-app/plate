@@ -117,7 +117,7 @@ final readonly class CashierShowSubscriptionController
             'checkoutCancelled' => $checkoutCancelled,
             'emailVerified' => $user?->hasVerifiedEmail() === true,
             'meal' => $meal?->toArray(),
-            'continueToMeal' => $returningFromCheckout && ! $premiumNotYetActive && $meal?->reviewUrl !== null,
+            'continueToMeal' => $returningFromCheckout && ! $premiumNotYetActive && $meal?->saveUrl !== null,
             'selectedProductId' => $request->session()->get('checkout.selected_product'),
             'selectedInterval' => $request->session()->get('checkout.selected_interval') === 'yearly' ? 'yearly' : 'monthly',
             'photoAllowance' => $allowance->toArray(),

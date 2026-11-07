@@ -10,6 +10,7 @@ use App\Enums\SubscriptionTier;
 use App\Http\Controllers\SnapToTrack\AnalyzeSnapToTrackPhotoController;
 use App\Models\AiUsage;
 use App\Models\AnalysisDraft;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\RateLimiter;
@@ -60,7 +61,7 @@ beforeEach(function (): void {
     RateLimiter::clear('snap-to-track-analyze:'.$this->user->id);
 });
 
-it('analyzes an uploaded photo into a claimed draft and redirects to review', function (): void {
+it('analyzes an uploaded photo, logs the meal and opens it', function (): void {
     fakeAuthenticatedAnalysis();
 
     $response = actingAs($this->user)->post(route('snap-to-track.analyze'), [
@@ -68,19 +69,26 @@ it('analyzes an uploaded photo into a claimed draft and redirects to review', fu
     ]);
 
     $draft = AnalysisDraft::query()->sole();
+    $meal = HealthSyncSample::query()->where('user_id', $this->user->id)->orderBy('id')->first();
 
-    expect($draft->user_id)->toBe($this->user->id)
-        ->and($draft->claimed_at)->not->toBeNull()
-        ->and($draft->source->value)->toBe('authenticated_snap_to_track')
-        ->and($draft->payload['total_calories'])->toEqual(320);
+    expect($draft->source->value)->toBe('authenticated_snap_to_track')
+        ->and($draft->isConsumed())->toBeTrue()
+        ->and($meal->group_id)->toBe($draft->health_group_id)
+        ->and($meal->metadata['snap_to_track']['items'][0]['name'])->toBe('Avocado toast');
 
-    $response->assertRedirectContains('/app/snap-to-track/review/')
+    $response->assertRedirectToRoute('health-entries.show', $meal)
         ->assertInertiaFlash('analytics', [
-            'name' => 'snap_to_track_result_viewed',
-            'properties' => [
-                'source' => 'authenticated_snap_to_track',
-                'items_count' => 1,
-                'confidence_band' => 'medium',
+            [
+                'name' => 'snap_to_track_result_viewed',
+                'properties' => [
+                    'source' => 'authenticated_snap_to_track',
+                    'items_count' => 1,
+                    'confidence_band' => 'medium',
+                ],
+            ],
+            [
+                'name' => 'snap_to_track_meal_logged',
+                'properties' => ['source' => 'authenticated_snap_to_track', 'items_count' => 1],
             ],
         ]);
 });
@@ -192,7 +200,7 @@ it('scans past an exhausted budget when premium enforcement is inactive', functi
 
     actingAs($this->user)->post(route('snap-to-track.analyze'), [
         'photo' => UploadedFile::fake()->image('meal.jpg'),
-    ])->assertRedirectContains('/app/snap-to-track/review/');
+    ])->assertRedirectContains('/health-entries/');
 
     expect(AnalysisDraft::query()->count())->toBe(1);
 });
@@ -206,7 +214,7 @@ it('applies tier-aware burst caps to scanning', function (): void {
 
     actingAs($this->user)->post(route('snap-to-track.analyze'), [
         'photo' => UploadedFile::fake()->image('meal-1.jpg'),
-    ])->assertRedirectContains('/app/snap-to-track/review/');
+    ])->assertRedirectContains('/health-entries/');
 
     actingAs($this->user)
         ->from(route('snap-to-track.index'))
@@ -221,7 +229,7 @@ it('applies tier-aware burst caps to scanning', function (): void {
     foreach (range(1, 2) as $attempt) {
         actingAs($supporter)->post(route('snap-to-track.analyze'), [
             'photo' => UploadedFile::fake()->image("supporter-{$attempt}.jpg"),
-        ])->assertRedirectContains('/app/snap-to-track/review/');
+        ])->assertRedirectContains('/health-entries/');
     }
 
     actingAs($supporter)
@@ -249,7 +257,7 @@ it('keeps the default burst cap for unrestricted entitlements', function (): voi
 
     actingAs($this->user)->post(route('snap-to-track.analyze'), [
         'photo' => UploadedFile::fake()->image('meal-1.jpg'),
-    ])->assertRedirectContains('/app/snap-to-track/review/');
+    ])->assertRedirectContains('/health-entries/');
 
     actingAs($this->user)
         ->from(route('snap-to-track.index'))

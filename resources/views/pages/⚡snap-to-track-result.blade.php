@@ -54,7 +54,7 @@ class extends Component
         }
 
         if (auth()->check()) {
-            $this->redirect(route('snap-to-track.review', ['draft' => $token]));
+            $this->redirect(route('snap-to-track.save', ['draft' => $token]));
 
             return;
         }
@@ -104,15 +104,15 @@ class extends Component
 
         $funnel->record(SnapFunnelStage::SaveClicked, $this->resultKey(), ['auth_path' => $intent]);
 
-        $reviewUrl = route('snap-to-track.review', ['draft' => $this->draftToken], absolute: false);
+        $saveUrl = route('snap-to-track.save', ['draft' => $this->draftToken], absolute: false);
 
         if (auth()->check()) {
-            $this->redirect($reviewUrl);
+            $this->redirect($saveUrl);
 
             return;
         }
 
-        session()->put('url.intended', $reviewUrl);
+        session()->put('url.intended', $saveUrl);
         session()->put('snap_to_track.auth_path', $intent);
         session()->put('snap_to_track.intent', 'save');
 
@@ -395,7 +395,7 @@ class extends Component
                         >
                             Save this meal
                         </x-snap-result.button>
-                        <p class="text-sm text-muted-foreground">Saving is free. You’ll create an account or log in next, then check the portions before the meal goes into your food log.</p>
+                        <p class="text-sm text-muted-foreground">Saving is free. Create an account or log in and the meal goes straight into your food log, where you can adjust any portion.</p>
                         <button
                             type="button"
                             wire:click="save('login')"
@@ -431,7 +431,7 @@ class extends Component
                 </ul>
                 <p class="flex items-start gap-2 text-xs text-muted-foreground">
                     <x-snap-result.icon name="sparkles" class="mt-0.5 size-3.5 shrink-0 text-primary" />
-                    <span>Snap to Track · AI confidence: {{ $analysis['confidence'] }}%. Nutrition values are estimates, and you can adjust any portion before saving.</span>
+                    <span>Snap to Track · AI confidence: {{ $analysis['confidence'] }}%. Nutrition values are estimates, and you can adjust any portion after saving.</span>
                 </p>
             </section>
 

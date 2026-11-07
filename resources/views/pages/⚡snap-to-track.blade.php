@@ -309,7 +309,7 @@ class extends Component
 
         if ($redirect && $this->hasRecoverableResult) {
             if ($analysis->user_id !== null) {
-                $this->redirect(route('snap-to-track.review', ['draft' => $analysis->draft_token]));
+                $this->redirect(route('snap-to-track.save', ['draft' => $analysis->draft_token]));
 
                 return;
             }
