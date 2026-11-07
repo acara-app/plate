@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\Billing\PhotoModel;
@@ -24,7 +23,6 @@ beforeEach(function (): void {
         'cashier.key' => 'pk_test_fake',
         'cashier.secret' => 'sk_test_fake',
         'cashier.webhook.secret' => 'whsec_test',
-        'ai.agent_profiles.'.FoodPhotoAnalyzerAgent::class => ['standard' => 'gemini-3.8-flash'],
     ]);
     SubscriptionProduct::factory()->create([
         'name' => 'Starter', 'price' => 2.99, 'stripe_price_id' => 'price_starter',
@@ -64,7 +62,7 @@ it("runs a paying member's scans on the shared photo model without a scan allowa
         return mealAnalysisWithItems(1);
     });
 
-    expect($usedModel?->model)->toBe('gemini-3.8-flash')
+    expect($usedModel?->model)->toBe('gpt-6-sol')
         ->and($access->entitlement($member, null)->mode)->toBe('premium')
         ->and($access->entitlement($member, null)->limit)->toBeNull();
 });

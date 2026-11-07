@@ -15,7 +15,6 @@ use App\Models\AiUsage;
 use App\Models\Conversation;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
-use App\Services\Ai\ConfiguredAgentModels;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Ai\Files\Base64Image;
@@ -30,7 +29,7 @@ it('does not block AI invocations when billing is off, even for users far over t
         'cost' => 50.0,
     ]);
 
-    resolve(EnforceAiUsageLimit::class)->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
+    resolve(EnforceAiUsageLimit::class)->handle($user);
 
     expect(true)->toBeTrue();
 });

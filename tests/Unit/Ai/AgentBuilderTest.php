@@ -14,8 +14,8 @@ use App\Ai\Tools\GetCalorieLevelGuideline;
 use App\Ai\Tools\GetSubscriptionStatus;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
+use App\Data\Ai\AgentModelData;
 use App\Models\User;
-use App\Services\Ai\ConfiguredAgentModels;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Providers\Tools\WebSearch;
 
@@ -173,7 +173,7 @@ describe('tools', function (): void {
 
     it('excludes WebSearch when the toolset contains a Sensitive tool', function (): void {
         $user = User::factory()->create();
-        $request = new AgentRequest(message: 'Search for something', model: resolve(ConfiguredAgentModels::class)->forModel('gpt-5-mini'));
+        $request = new AgentRequest(message: 'Search for something', model: new AgentModelData('openai', 'gpt-5-mini'));
 
         $result = $this->builder->build($request, $user);
 
@@ -190,7 +190,7 @@ describe('tools', function (): void {
         config()->set('plate.tools', [GetCalorieLevelGuideline::class]);
 
         $user = User::factory()->create();
-        $request = new AgentRequest(message: 'What are calorie recommendations?', model: resolve(ConfiguredAgentModels::class)->forModel('gpt-5-mini'));
+        $request = new AgentRequest(message: 'What are calorie recommendations?', model: new AgentModelData('openai', 'gpt-5-mini'));
 
         $result = $this->builder->build($request, $user);
 
@@ -209,7 +209,7 @@ describe('tools', function (): void {
         config()->set('plate.sub_agents', []);
 
         $user = User::factory()->create();
-        $request = new AgentRequest(message: 'What are calorie recommendations?', model: resolve(ConfiguredAgentModels::class)->forModel('gpt-5-mini'));
+        $request = new AgentRequest(message: 'What are calorie recommendations?', model: new AgentModelData('openai', 'gpt-5-mini'));
 
         $result = $this->builder->build($request, $user);
 

@@ -6,11 +6,12 @@ namespace App\Ai\Agents;
 
 use App\Actions\AnalyzeGlucoseForNotificationAction;
 use App\Actions\CreateMealPlan;
-use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Ai\Concerns\HasUsageUser;
+use App\Ai\Concerns\ReasonsWithMediumEffort;
 use App\Ai\MealPlanPromptBuilder;
 use App\Ai\Tools\StartMealPlanGeneration;
+use App\Contracts\Ai\BillsUsageToUser;
 use App\Contracts\Ai\GeneratesMealPlans;
-use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Data\DayMealsData;
 use App\Data\GlucoseAnalysis\GlucoseAnalysisData;
 use App\Data\PreviousDayContext;
@@ -38,10 +39,11 @@ use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(64000)]
 #[Timeout(180)]
-final class MealPlanAgent implements Agent, GeneratesMealPlans, HasProviderOptions, HasStructuredOutput, HasTools, UsesAgentModelProfiles
+final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans, HasProviderOptions, HasStructuredOutput, HasTools
 {
+    use HasUsageUser;
     use Promptable;
-    use UsesConfiguredAgentModel;
+    use ReasonsWithMediumEffort;
 
     private ?DietType $dietType = null;
 

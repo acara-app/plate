@@ -4,42 +4,46 @@ declare(strict_types=1);
 
 namespace App\Data\Ai;
 
+use App\Ai\Agents\AgentRunner;
+use App\Models\History;
+use Laravel\Ai\AiManager;
 use Spatie\LaravelData\Data;
 
 final class AgentModelData extends Data
 {
-    /**
-     * @param  list<string>  $capabilities
-     * @param  array<string, mixed>  $options
-     * @param  array{input: float, output: float, reasoning: float, cache_read: float, cache_write?: float}  $pricing
-     */
     public function __construct(
         public string $provider,
         public string $model,
-        public int $maxOutputTokens = 65536,
-        public array $capabilities = [],
-        public array $options = [],
-        public array $pricing = ['input' => 0.0, 'output' => 0.0, 'reasoning' => 0.0, 'cache_read' => 0.0],
     ) {}
 
-    /** @return array<string, mixed> */
-    public function toSnapshot(): array
+    public static function current(): self
     {
-        return [
-            'provider' => $this->provider, 'model' => $this->model,
-            'maxOutputTokens' => $this->maxOutputTokens, 'capabilities' => $this->capabilities,
-            'options' => $this->options, 'pricing' => $this->pricing,
-        ];
+        $provider = config()->string('ai.default');
+
+        return new self($provider, resolve(AiManager::class)->textProvider($provider)->defaultTextModel());
+    }
+
+    public static function forTurn(?History $paused): self
+    {
+        $meta = $paused?->chatStreamMeta() ?? [];
+        $agentModels = $meta['agent_models'] ?? null;
+        $recorded = is_array($agentModels) ? ($agentModels[AgentRunner::class] ?? null) : null;
+
+        if (is_array($recorded) && is_string($recorded['provider'] ?? null) && is_string($recorded['model'] ?? null)) {
+            return new self($recorded['provider'], $recorded['model']);
+        }
+
+        $model = $meta['model'] ?? $paused?->meta['model'] ?? null;
+        $provider = $paused?->meta['provider'] ?? $meta['provider'] ?? null;
+
+        return is_string($model)
+            ? new self(is_string($provider) ? $provider : config()->string('ai.default'), $model)
+            : self::current();
     }
 
     /** @return array{provider: string, model: string} */
     public function toSelection(): array
     {
         return ['provider' => $this->provider, 'model' => $this->model];
-    }
-
-    public function supports(string $capability): bool
-    {
-        return in_array($capability, $this->capabilities, true);
     }
 }

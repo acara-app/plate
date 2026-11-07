@@ -130,7 +130,7 @@ final class AiTransparency
     {
         return [
             'On the public Snap to Track tool, your photo is stored only as a temporary upload while the analysis runs and is deleted as soon as the result or error is returned.',
-            'The photo is processed by Google as an AI sub-processor to generate the analysis. It is not shared with anyone else and is never used to train AI models.',
+            'The photo is processed by OpenAI as an AI sub-processor to generate the analysis. It is not shared with anyone else and is never used to train AI models.',
             'Signed-in users can choose to save meals with photos to their personal history; on the public tool, no image is ever saved.',
         ];
     }

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Ai\Concerns\HasUsageUser;
 use App\Ai\SystemPrompt;
-use App\Contracts\Ai\UsesAgentModelProfiles;
+use App\Contracts\Ai\BillsUsageToUser;
 use App\Data\CaffeineGuidanceData;
 use App\Data\CaffeineLimitData;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -15,18 +15,19 @@ use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
+use Laravel\Ai\Attributes\UseCheapestModel;
 use Laravel\Ai\Contracts\Agent;
-use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
-#[MaxTokens(2500)]
+#[UseCheapestModel]
+#[MaxTokens(8000)]
 #[Timeout(60)]
-final class CaffeineGuidanceAgent implements Agent, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
+final class CaffeineGuidanceAgent implements Agent, BillsUsageToUser, HasStructuredOutput
 {
+    use HasUsageUser;
     use Promptable;
-    use UsesConfiguredAgentModel;
 
     /**
      * @var array<int, string>

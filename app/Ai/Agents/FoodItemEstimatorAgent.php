@@ -4,27 +4,28 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Ai\Concerns\HasUsageUser;
 use App\Ai\SystemPrompt;
-use App\Contracts\Ai\UsesAgentModelProfiles;
+use App\Contracts\Ai\BillsUsageToUser;
 use App\Data\FoodItemEstimateData;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
+use Laravel\Ai\Attributes\UseCheapestModel;
 use Laravel\Ai\Contracts\Agent;
-use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
-#[MaxTokens(4000)]
+#[UseCheapestModel]
+#[MaxTokens(8000)]
 #[Timeout(30)]
-final class FoodItemEstimatorAgent implements Agent, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
+final class FoodItemEstimatorAgent implements Agent, BillsUsageToUser, HasStructuredOutput
 {
+    use HasUsageUser;
     use Promptable;
-    use UsesConfiguredAgentModel;
 
     private ?string $language = null;
 

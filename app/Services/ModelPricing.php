@@ -4,110 +4,64 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use InvalidArgumentException;
-
 final class ModelPricing
 {
-    /**
-     * @return array{input: float, output: float, reasoning: float, cache_read: float, cache_write?: float}
-     */
-    public static function forModel(string $model, ?string $provider = null): array
-    {
-        $models = [];
-        foreach (config()->array('ai.model_catalog') as $name => $definition) {
-            if (! is_string($name)) {
-                continue;
-            }
+    /** @var array<string, array<string, array{input: float, output: float, reasoning: float, cache_read: float}>> */
+    private const array PRICES = [
+        'gpt-6-sol' => [
+            '2000-01-01' => ['input' => 2.0, 'output' => 10.0, 'reasoning' => 10.0, 'cache_read' => 0.2],
+        ],
+        'gpt-6-luna' => [
+            '2000-01-01' => ['input' => 0.10, 'output' => 0.50, 'reasoning' => 0.50, 'cache_read' => 0.01],
+        ],
+        'gemini-3.6-flash' => [
+            '2000-01-01' => ['input' => 0.75, 'output' => 3.75, 'reasoning' => 3.75, 'cache_read' => 0.075],
+            '2027-01-01' => ['input' => 1.50, 'output' => 7.50, 'reasoning' => 7.50, 'cache_read' => 0.15],
+        ],
+        'gemini-3.8-flash' => [
+            '2000-01-01' => ['input' => 0.75, 'output' => 3.75, 'reasoning' => 3.75, 'cache_read' => 0.075],
+            '2027-01-01' => ['input' => 1.50, 'output' => 7.50, 'reasoning' => 7.50, 'cache_read' => 0.15],
+        ],
+    ];
 
-            if (! is_array($definition)) {
-                continue;
-            }
-
-            if (! is_array($definition['pricing'] ?? null)) {
-                continue;
-            }
-
-            if ($provider !== null && ($definition['provider'] ?? null) !== $provider) {
-                continue;
-            }
-
-            $models[$name] = $definition;
-        }
-
-        $match = $models[$model] ?? self::matchByBase($model, $models);
-
-        if ($match !== null) {
-            return self::currentRates($match);
-        }
-
-        return self::rates(config()->array('ai.default_model_pricing'));
-    }
+    private const string FALLBACK = 'gpt-6-sol';
 
     /**
-     * @param  array<array-key, mixed>  $definition
      * @return array{input: float, output: float, reasoning: float, cache_read: float, cache_write: float}
      */
-    private static function currentRates(array $definition): array
+    public static function forModel(string $model): array
     {
-        $pricing = is_array($definition['pricing'] ?? null) ? $definition['pricing'] : [];
-        $changes = $definition['pricing_changes'] ?? [];
-        if (is_array($changes)) {
-            ksort($changes);
-            foreach ($changes as $date => $changedPricing) {
-                if (is_string($date) && now()->toDateString() >= $date && is_array($changedPricing)) {
-                    $pricing = $changedPricing;
-                }
+        $current = null;
+
+        foreach (self::PRICES[self::baseModel($model)] as $date => $pricing) {
+            if (now()->toDateString() >= $date) {
+                $current = $pricing;
             }
         }
 
-        return self::rates($pricing);
-    }
-
-    /**
-     * @param  array<array-key, mixed>  $pricing
-     * @return array{input: float, output: float, reasoning: float, cache_read: float, cache_write: float}
-     */
-    private static function rates(array $pricing): array
-    {
-        $input = self::rate($pricing['input'] ?? null);
+        $current ??= self::PRICES[self::FALLBACK]['2000-01-01'];
 
         return [
-            'input' => $input,
-            'output' => self::rate($pricing['output'] ?? null),
-            'reasoning' => self::rate($pricing['reasoning'] ?? null),
-            'cache_read' => self::rate($pricing['cache_read'] ?? null),
-            'cache_write' => self::rate($pricing['cache_write'] ?? $input * 1.25),
+            'input' => $current['input'],
+            'output' => $current['output'],
+            'reasoning' => $current['reasoning'],
+            'cache_read' => $current['cache_read'],
+            'cache_write' => $current['input'] * 1.25,
         ];
     }
 
-    private static function rate(mixed $rate): float
+    private static function baseModel(string $model): string
     {
-        throw_if((! is_int($rate) && ! is_float($rate)) || $rate < 0, InvalidArgumentException::class, 'Model prices must be non-negative numbers.');
-
-        return (float) $rate;
-    }
-
-    /**
-     * @param  array<string, array<array-key, mixed>>  $models
-     * @return array<array-key, mixed>|null
-     */
-    private static function matchByBase(string $model, array $models): ?array
-    {
-        $bestKey = null;
-
-        foreach (array_keys($models) as $key) {
-            if (! str_starts_with($model, $key.'-')) {
-                continue;
-            }
-
-            // @codeCoverageIgnoreStart
-            if ($bestKey === null || mb_strlen($key) > mb_strlen($bestKey)) {
-                $bestKey = $key;
-            }
-
-            // @codeCoverageIgnoreEnd
+        if (array_key_exists($model, self::PRICES)) {
+            return $model;
         }
 
-        return $bestKey !== null ? $models[$bestKey] : null;
+        foreach (array_keys(self::PRICES) as $base) {
+            if (str_starts_with($model, $base.'-')) {
+                return $base;
+            }
+        }
+
+        return self::FALLBACK;
     }
 }

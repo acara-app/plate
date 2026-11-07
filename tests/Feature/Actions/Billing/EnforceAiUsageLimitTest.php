@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\Billing\ResolveAiAllowance;
-use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Enums\AiAllowanceReset;
 use App\Enums\SubscriptionTier;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Models\AiUsage;
 use App\Models\User;
-use App\Services\Ai\ConfiguredAgentModels;
 use Carbon\CarbonImmutable;
 use Laravel\Cashier\Subscription;
 
@@ -42,7 +40,7 @@ it('gives a Starter member a daily allowance that resets at midnight', function 
         ->and($allowance?->percentage)->toBe(0)
         ->and($allowance?->resetsAt->toIso8601String())->toBe('2026-11-08T00:00:00+00:00');
 
-    resolve(EnforceAiUsageLimit::class)->handle($user, resolve(ConfiguredAgentModels::class)->forAgent(FoodPhotoAnalyzerAgent::class));
+    resolve(EnforceAiUsageLimit::class)->handle($user);
 
     AiUsage::factory()->create(['user_id' => $user->id, 'cost' => 0.50]);
 

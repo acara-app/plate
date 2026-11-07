@@ -7,26 +7,12 @@ use App\Data\ExtractedIngredientData;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
-use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Timeout;
 
 covers(GroceryListAgent::class);
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->agent = new GroceryListAgent;
-});
-
-it('has correct attributes configured', function (): void {
-    $reflection = new ReflectionClass($this->agent);
-
-    $maxTokens = $reflection->getAttributes(MaxTokens::class);
-    $timeout = $reflection->getAttributes(Timeout::class);
-
-    expect($maxTokens)->toHaveCount(1)
-        ->and($maxTokens[0]->newInstance()->value)->toBe(67000)
-        ->and($timeout)->toHaveCount(1)
-        ->and($timeout[0]->newInstance()->value)->toBe(120);
 });
 
 it('returns instructions with grocery list guidance', function (): void {

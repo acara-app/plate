@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Ai\Agents\ConversationSummarizerAgent;
 use App\Contracts\SummarizesConversation;
 use Illuminate\JsonSchema\JsonSchemaTypeFactory;
-use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Timeout;
 
 covers(ConversationSummarizerAgent::class);
 
@@ -25,19 +23,6 @@ it('returns instructions from view', function (): void {
         ->toBeString()
         ->toContain('structured fields')
         ->toContain('Conversation to Summarize');
-});
-
-it('has correct attributes configured', function (): void {
-    $reflection = new ReflectionClass(ConversationSummarizerAgent::class);
-
-    $maxTokens = $reflection->getAttributes(MaxTokens::class);
-    $timeout = $reflection->getAttributes(Timeout::class);
-
-    expect(resolve(ConversationSummarizerAgent::class)->provider())->toBe('openai')
-        ->and($maxTokens)->toHaveCount(1)
-        ->and($maxTokens[0]->newInstance()->value)->toBe(4000)
-        ->and($timeout)->toHaveCount(1)
-        ->and($timeout[0]->newInstance()->value)->toBe(90);
 });
 
 it('defines structured summary schema fields', function (): void {

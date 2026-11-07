@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\Ai\UsesAgentModelProfiles;
+use App\Contracts\Ai\BillsUsageToUser;
 use App\Models\User;
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
@@ -67,7 +67,7 @@ final readonly class ToolRegistry
                 $agent = $this->container->make($class);
                 throw_unless($agent instanceof Agent, InvalidArgumentException::class, "{$class} must implement the AI agent contract.");
 
-                return $agent instanceof UsesAgentModelProfiles ? $agent->forModelUser($user) : $agent;
+                return $agent instanceof BillsUsageToUser ? $agent->forModelUser($user) : $agent;
             })
             ->all();
     }

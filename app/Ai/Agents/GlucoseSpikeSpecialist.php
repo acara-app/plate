@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Ai\Concerns\HasUsageUser;
+use App\Ai\Concerns\ReasonsWithMediumEffort;
 use App\Ai\SystemPrompt;
-use App\Contracts\Ai\UsesAgentModelProfiles;
+use App\Contracts\Ai\BillsUsageToUser;
 use App\Data\SpikePredictionData;
 use App\Models\User;
 use App\Utilities\LanguageUtil;
@@ -21,12 +22,13 @@ use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 
-#[MaxTokens(2000)]
+#[MaxTokens(16000)]
 #[Timeout(120)]
-final class GlucoseSpikeSpecialist implements Agent, CanActAsTool, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
+final class GlucoseSpikeSpecialist implements Agent, BillsUsageToUser, CanActAsTool, HasProviderOptions, HasStructuredOutput
 {
+    use HasUsageUser;
     use Promptable;
-    use UsesConfiguredAgentModel;
+    use ReasonsWithMediumEffort;
 
     public function name(): string
     {
