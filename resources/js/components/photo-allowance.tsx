@@ -1,6 +1,3 @@
-import PhotoPlanLimitsDetails, {
-    type PhotoPlanLimits,
-} from '@/components/billing/photo-plan-limits';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,7 +29,6 @@ export interface PhotoAllowance {
         product_id: number;
         name: string;
         formatted_price: string;
-        limits?: PhotoPlanLimits | null;
     } | null;
 }
 
@@ -151,7 +147,6 @@ export function PhotoAllowanceCard({
                         <p>
                             {t('photo_plans.offer.body', { name: offer.name })}
                         </p>
-                        <PhotoPlanLimitsDetails limits={offer.limits} />
                         <Button
                             asChild
                             className="h-auto min-h-11 text-center whitespace-normal"

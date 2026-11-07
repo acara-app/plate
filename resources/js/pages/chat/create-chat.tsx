@@ -2,10 +2,9 @@ import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrac
 import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
-import { CreditWarningBanner } from '@/components/billing/credit-warning-banner';
+import { AiAllowanceNotice } from '@/components/billing/ai-allowance';
 import { LifecycleBanner } from '@/components/billing/lifecycle-banner';
 import { BiometricsReviewBanner } from '@/components/biometrics-review-banner';
-import { UsageLimitNotice } from '@/components/billing/usage-limit-notice';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
 import {
@@ -24,8 +23,7 @@ import { useChatStream } from '@/hooks/use-chat-stream';
 import useSharedProps from '@/hooks/use-shared-props';
 import { cn, generateUUID } from '@/lib/utils';
 import chat from '@/routes/chat';
-import checkout from '@/routes/checkout';
-import type { CreditWarning } from '@/types';
+import type { AiAllowance } from '@/types';
 import type { ChatPageProps, UIMessage } from '@/types/chat';
 import { Head, router, usePage } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
@@ -69,7 +67,7 @@ function clearInitialPromptQuery() {
 
 export default function CreateChat() {
     const page = usePage<
-        ChatPageProps & { creditWarning?: CreditWarning | null }
+        ChatPageProps & { aiAllowance?: AiAllowance | null }
     >();
     const {
         conversationId: initialConversationId,
@@ -79,7 +77,7 @@ export default function CreateChat() {
         initialStreaming,
         isPinned,
         isKept,
-        creditWarning: sharedCreditWarning,
+        aiAllowance,
     } = page.props;
     const { currentUser } = useSharedProps();
     const { t } = useTranslation('common');
@@ -92,10 +90,9 @@ export default function CreateChat() {
     const [dismissedWarningAt, setDismissedWarningAt] = useState<string | null>(
         null,
     );
-    const visibleCreditWarning =
-        sharedCreditWarning &&
-        sharedCreditWarning.resets_at !== dismissedWarningAt
-            ? sharedCreditWarning
+    const visibleAllowance =
+        aiAllowance && aiAllowance.resets_at !== dismissedWarningAt
+            ? aiAllowance
             : null;
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -116,7 +113,7 @@ export default function CreateChat() {
         initialMessages.length === 0;
 
     const handleStreamFinish = useCallback(() => {
-        router.reload({ only: ['creditWarning'] });
+        router.reload({ only: ['aiAllowance'] });
     }, []);
 
     const togglePin = useCallback(() => {
@@ -414,8 +411,8 @@ export default function CreateChat() {
                             )}
                             {usageLimitTrigger && (
                                 <div className="mt-4">
-                                    <UsageLimitNotice
-                                        trigger={usageLimitTrigger}
+                                    <AiAllowanceNotice
+                                        allowance={usageLimitTrigger}
                                         onDismiss={() => {
                                             clearUsageLimitTrigger();
                                             clearError();
@@ -428,20 +425,15 @@ export default function CreateChat() {
                     </div>
 
                     <div className="mx-auto flex w-full max-w-3xl shrink-0 flex-col bg-background/80 backdrop-blur-md transition-colors duration-200 supports-[backdrop-filter]:bg-background/60">
-                        {visibleCreditWarning && (
-                            <div className="px-4 pt-2">
-                                <CreditWarningBanner
-                                    warning={visibleCreditWarning}
+                        {visibleAllowance && !usageLimitTrigger && (
+                            <div className="px-4 pt-2 empty:hidden">
+                                <AiAllowanceNotice
+                                    allowance={visibleAllowance}
                                     onDismiss={() =>
                                         setDismissedWarningAt(
-                                            visibleCreditWarning.resets_at,
+                                            visibleAllowance.resets_at,
                                         )
                                     }
-                                    onUpgradeClick={() => {
-                                        router.visit(
-                                            checkout.subscription().url,
-                                        );
-                                    }}
                                 />
                             </div>
                         )}

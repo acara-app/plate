@@ -7,7 +7,6 @@ use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\Billing\PhotoEntitlement;
 use App\Data\Billing\PhotoModel;
 use App\Data\Billing\PhotoOffer;
-use App\Data\Billing\PhotoPlanLimits;
 use App\Data\FoodAnalysisData;
 use App\Models\AnalysisDraft;
 use App\Models\User;
@@ -161,7 +160,6 @@ it('offers the plan and its price after the meal and its Save action', function 
         productId: 7,
         name: 'Starter',
         formattedPrice: 'US$2.99',
-        limits: new PhotoPlanLimits(30, 500, 24, 1500, 7),
     )));
     guestResultDraft();
 
@@ -170,9 +168,6 @@ it('offers the plan and its price after the meal and its Save action', function 
             'Save this meal',
             'Keep tracking with Starter — US$2.99/month',
             'Renews monthly until cancelled. Cancel through Billing settings.',
-            'Up to 30 scan attempts per hour',
-            '500 shared AI credits over the previous 24 hours',
-            '1,500 shared AI credits over the previous 7 days',
             'Not now — save this meal free',
             'Or keep tracking with Starter · US$2.99/month',
         ]);

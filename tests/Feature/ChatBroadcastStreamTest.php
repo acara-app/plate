@@ -70,7 +70,7 @@ it('keeps usage-limit preflight synchronous for web chat streams', function (): 
 
     AiUsage::factory()->create([
         'user_id' => $user->id,
-        'cost' => 0.4,
+        'cost' => 0.5,
     ]);
 
     $this->actingAs($user)
@@ -82,8 +82,8 @@ it('keeps usage-limit preflight synchronous for web chat streams', function (): 
         ->assertStatus(402)
         ->assertJson([
             'error' => 'usage_limit_exceeded',
-            'limit_type' => 'rolling',
             'tier' => 'free',
+            'exhausted' => true,
         ]);
 
     Queue::assertNotPushed(ProcessChatStream::class);

@@ -2,102 +2,41 @@
 
 declare(strict_types=1);
 
+use App\Data\Billing\AiAllowance;
+use App\Enums\AiAllowanceReset;
 use App\Enums\SubscriptionTier;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Utilities\StaticUrl;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 covers(UsageLimitExceededException::class);
 
-it('renders an HTTP 402 JSON response with the structured limit payload', function (): void {
-    $resetsAt = now()->addHours(4);
+function usedUpAllowance(SubscriptionTier $tier, AiAllowanceReset $resets): UsageLimitExceededException
+{
+    return new UsageLimitExceededException(new AiAllowance($tier, $resets, 0.5, 0.5, CarbonImmutable::parse('2026-12-01 00:00:00')));
+}
 
-    $exception = new UsageLimitExceededException(
-        limitType: 'rolling',
-        tier: SubscriptionTier::Free,
-        currentCredits: 100,
-        limitCredits: 100,
-        resetsAt: $resetsAt,
-    );
+it('renders a 402 with the allowance the chat and app need to show the notice', function (): void {
+    $response = usedUpAllowance(SubscriptionTier::Starter, AiAllowanceReset::Daily)->render(Request::create('/'));
 
-    $response = $exception->render(Request::create('/'));
-
-    expect($response->getStatusCode())->toBe(Response::HTTP_PAYMENT_REQUIRED);
-
-    /** @var array<string, mixed> $payload */
-    $payload = json_decode((string) $response->getContent(), true);
-
-    expect($payload['error'])->toBe('usage_limit_exceeded')
-        ->and($payload['limit_type'])->toBe('rolling')
-        ->and($payload['tier'])->toBe(SubscriptionTier::Free->value)
-        ->and($payload['tier_label'])->toBe('Free')
-        ->and($payload['current_credits'])->toBe(100)
-        ->and($payload['limit_credits'])->toBe(100)
-        ->and($payload['resets_at'])->toBe($resetsAt->toIso8601String())
-        ->and($payload['resets_in'])->toBeString()->not->toBe('');
+    expect($response->getStatusCode())->toBe(402)
+        ->and($response->getData(true))->toMatchArray([
+            'error' => 'usage_limit_exceeded',
+            'tier' => 'starter',
+            'resets' => 'daily',
+            'percentage' => 100,
+            'exhausted' => true,
+            'can_upgrade' => true,
+        ])->not->toHaveKeys(['used', 'limit']);
 });
 
-it('exposes structured fields directly on the exception for non-HTTP callers', function (): void {
-    $exception = new UsageLimitExceededException(
-        limitType: 'monthly',
-        tier: SubscriptionTier::Plus,
-        currentCredits: 9_500,
-        limitCredits: 10_000,
-        resetsAt: now()->addDays(2),
-    );
+it('tells the user when their AI comes back and offers plans only when they can upgrade', function (SubscriptionTier $tier, AiAllowanceReset $resets, string $message, bool $linksPlans): void {
+    $text = usedUpAllowance($tier, $resets)->userMessage();
 
-    $payload = $exception->toPayload();
-
-    expect($payload['limit_type'])->toBe('monthly')
-        ->and($payload['tier'])->toBe('plus')
-        ->and($payload['tier_label'])->toBe('Pro')
-        ->and($payload['current_credits'])->toBe(9_500)
-        ->and($payload['limit_credits'])->toBe(10_000);
-});
-
-it('builds a friendly daily message with an upgrade link for the free tier', function (): void {
-    $exception = new UsageLimitExceededException(
-        limitType: 'rolling',
-        tier: SubscriptionTier::Free,
-        currentCredits: 119,
-        limitCredits: 100,
-        resetsAt: now()->addHours(18)->addMinutes(45),
-    );
-
-    expect($exception->userMessage())
-        ->toContain('daily AI credits')
-        ->toContain('Free plan')
-        ->toContain('18 hours 45 minutes')
-        ->toContain(StaticUrl::checkoutUrl());
-});
-
-it('describes the weekly window when the weekly limit is exceeded', function (): void {
-    $exception = new UsageLimitExceededException(
-        limitType: 'weekly',
-        tier: SubscriptionTier::Basic,
-        currentCredits: 2_100,
-        limitCredits: 2_000,
-        resetsAt: now()->addDays(2),
-    );
-
-    expect($exception->userMessage())
-        ->toContain('weekly AI credits')
-        ->toContain('Supporter plan')
-        ->toContain(StaticUrl::checkoutUrl());
-});
-
-it('omits the upgrade link for the top tier', function (SubscriptionTier $tier): void {
-    $exception = new UsageLimitExceededException(
-        limitType: 'rolling',
-        tier: $tier,
-        currentCredits: 1_100,
-        limitCredits: 1_000,
-        resetsAt: now()->addHours(3),
-    );
-
-    expect($exception->userMessage())
-        ->toContain('reached your daily AI credit limit')
-        ->toContain($tier->label().' plan')
-        ->not->toContain(StaticUrl::checkoutUrl());
-})->with([SubscriptionTier::Snap, SubscriptionTier::Plus]);
+    expect($text)->toContain($message)
+        ->and(str_contains($text, StaticUrl::checkoutUrl()))->toBe($linksPlans);
+})->with([
+    'free account' => [SubscriptionTier::Free, AiAllowanceReset::Monthly, "This month's free AI is used up. It resets on December 1.", true],
+    'Snap Pro member' => [SubscriptionTier::Snap, AiAllowanceReset::Daily, "Today's AI allowance is used up. It resets at midnight.", false],
+]);

@@ -75,7 +75,7 @@ final readonly class AnalyzePhoto implements Tool
         } catch (PhotoLimitExceeded $photoLimitExceeded) {
             return $this->notAnalyzed($photoLimitExceeded->getMessage(), $photoLimitExceeded->entitlement);
         } catch (UsageLimitExceededException $usageLimitExceeded) {
-            return $this->notAnalyzed('Your AI usage limit is used up for now, so this photo was not analyzed. It resets at '.$usageLimitExceeded->resetsAt->toIso8601String().'.');
+            return $this->notAnalyzed('The AI allowance is used up for now, so this photo was not analyzed. It resets at '.$usageLimitExceeded->allowance->resetsAt->toIso8601String().'.');
         } catch (HttpExceptionInterface $unavailable) {
             return $this->notAnalyzed($unavailable->getMessage());
         }

@@ -15,6 +15,7 @@ use App\Enums\AnalysisDraftSource;
 use App\Enums\PhotoAnalysisFailure;
 use App\Enums\PhotoAnalysisStatus;
 use App\Exceptions\Billing\PhotoLimitExceeded;
+use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Exceptions\PhotoAnalysisNotProcessingException;
 use App\Models\PhotoAnalysisRequest;
 use App\Utilities\Base64Image;
@@ -114,7 +115,7 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
             }
         } catch (PhotoAnalysisNotProcessingException) {
             $failures->handle($request, $request->hasProcessingBudget() ? PhotoAnalysisFailure::Timeout : PhotoAnalysisFailure::Expired);
-        } catch (PhotoLimitExceeded) {
+        } catch (PhotoLimitExceeded|UsageLimitExceededException) {
             $failures->handle($request, $request->hasProcessingBudget() ? PhotoAnalysisFailure::LimitReached : PhotoAnalysisFailure::Expired);
         } catch (Throwable $throwable) {
             $failures->handle($request, $request->hasProcessingBudget() ? PhotoAnalysisFailure::ProviderError : PhotoAnalysisFailure::Expired);

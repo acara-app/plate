@@ -136,55 +136,42 @@ return [
     'agent_profiles' => [
         AgentRunner::class => [
             'standard' => env('AI_STANDARD_CHAT_MODEL', 'gpt-6-luna'),
-            'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
         FitnessSpecialist::class => [
             'standard' => env('AI_STANDARD_SPECIALIST_MODEL', 'gemini-3.6-flash'),
-            'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
         HealthSpecialist::class => [
             'standard' => env('AI_STANDARD_SPECIALIST_MODEL', 'gemini-3.6-flash'),
-            'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
         NutritionSpecialist::class => [
             'standard' => env('AI_STANDARD_SPECIALIST_MODEL', 'gemini-3.6-flash'),
-            'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
         MealPlanSpecialist::class => [
             'standard' => env('AI_STANDARD_SPECIALIST_MODEL', 'gemini-3.6-flash'),
-            'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
         GlucoseSpikeSpecialist::class => [
             'standard' => env('AI_STANDARD_GLUCOSE_MODEL', 'gpt-6-sol'),
-            'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
         CaffeineGuidanceAgent::class => [
             'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
-            'paid' => env('AI_PAID_TASK_MODEL', 'gemini-3.8-flash'),
         ],
         GroceryListAgent::class => [
             'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
-            'paid' => env('AI_PAID_TASK_MODEL', 'gemini-3.8-flash'),
         ],
         MealPlanAgent::class => [
             'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
-            'paid' => env('AI_PAID_TASK_MODEL', 'gemini-3.8-flash'),
         ],
         SingleMealAgent::class => [
             'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
-            'paid' => env('AI_PAID_TASK_MODEL', 'gemini-3.8-flash'),
         ],
         SpikePredictorAgent::class => [
             'standard' => env('AI_STANDARD_GLUCOSE_MODEL', 'gpt-6-sol'),
-            'paid' => env('AI_PAID_CHAT_MODEL', 'gpt-6.1-sol'),
         ],
         FoodItemEstimatorAgent::class => [
             'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
-            'paid' => env('AI_PAID_TASK_MODEL', 'gemini-3.8-flash'),
         ],
         FoodPhotoAnalyzerAgent::class => [
-            'standard' => env('AI_STANDARD_PHOTO_MODEL', 'gemini-3.6-flash'),
-            'paid' => env('AI_PAID_PHOTO_MODEL', 'gemini-3.8-flash'),
+            'standard' => env('AI_STANDARD_PHOTO_MODEL', 'gemini-3.8-flash'),
         ],
         ConversationTitleGeneratorAgent::class => [
             'standard' => env('AI_BACKGROUND_TEXT_MODEL', 'gpt-5-nano'),

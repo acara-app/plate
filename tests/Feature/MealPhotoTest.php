@@ -153,10 +153,7 @@ it('keeps no photo when the scan is blocked by the credit limit', function (): v
             return new TierEntitlement(tier: SubscriptionTier::Free);
         }
     });
-    config()->set('plate.tier_limits.free', [
-        'rolling' => ['limit' => 0.0, 'period_hours' => 24],
-        'weekly' => ['limit' => 0.0, 'period_days' => 7],
-    ]);
+    config()->set('plate.ai_allowance.free', ['usd' => 0.0, 'resets' => 'monthly']);
 
     $this->actingAs($this->user)->post(route('snap-to-track.analyze'), [
         'photo' => UploadedFile::fake()->image('meal.jpg'),

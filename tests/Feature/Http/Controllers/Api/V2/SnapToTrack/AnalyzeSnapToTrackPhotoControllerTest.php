@@ -3,9 +3,6 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
-use App\Contracts\Billing\ResolvesUserTier;
-use App\Data\Billing\TierEntitlement;
-use App\Enums\SubscriptionTier;
 use App\Http\Controllers\Api\V2\SnapToTrack\AnalyzeSnapToTrackPhotoController;
 use App\Models\AiUsage;
 use App\Models\AnalysisDraft;
@@ -13,9 +10,7 @@ use App\Models\MealPhoto;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Exceptions;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Sanctum\Sanctum;
 
 covers(AnalyzeSnapToTrackPhotoController::class);
 
@@ -45,33 +40,10 @@ function fakeApiSnapAnalysis(): void
     ]]);
 }
 
-function stubApiSnapTier(SubscriptionTier $tier): void
-{
-    app()->instance(ResolvesUserTier::class, new readonly class($tier) implements ResolvesUserTier
-    {
-        public function __construct(private SubscriptionTier $tier) {}
-
-        public function resolve(User $user): TierEntitlement
-        {
-            return new TierEntitlement(tier: $this->tier);
-        }
-    });
-}
-
-function zeroApiSnapCreditBudget(): void
-{
-    config()->set('plate.tier_limits.free', [
-        'rolling' => ['limit' => 0.0, 'period_hours' => 24],
-        'weekly' => ['limit' => 0.0, 'period_days' => 7],
-    ]);
-}
-
 beforeEach(function (): void {
     Storage::fake('s3');
     $this->user = User::factory()->create();
     $this->token = $this->user->createToken('mobile:test', ['chat:converse'])->plainTextToken;
-
-    RateLimiter::clear('snap-to-track-analyze:'.$this->user->id);
 });
 
 it('requires authentication', function (): void {
@@ -141,69 +113,20 @@ it('reports the failure and stores nothing when the analyzer throws', function (
     expect(AnalysisDraft::query()->count())->toBe(0);
 });
 
-it('returns 402 with the usage payload and spends nothing when the credit budget is exhausted', function (): void {
-    stubApiSnapTier(SubscriptionTier::Free);
-    zeroApiSnapCreditBudget();
-
+it('returns 402 with the allowance and stores nothing when the AI allowance is used up', function (): void {
+    enableBilling();
+    AiUsage::factory()->create(['user_id' => $this->user->id, 'cost' => 0.50]);
     FoodPhotoAnalyzerAgent::fake(function (): void {
-        throw new Exception('Analyzer must not run when the credit budget is exhausted');
+        throw new Exception('Analyzer must not run when the AI allowance is used up');
     });
-
-    $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
-        ->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => apiSnapPhotoDataUrl()]);
-
-    $response->assertStatus(402)
-        ->assertJsonPath('error', 'usage_limit_exceeded')
-        ->assertJsonPath('tier', 'free')
-        ->assertJsonPath('limit_credits', 0)
-        ->assertJsonStructure(['limit_type', 'tier_label', 'current_credits', 'resets_at', 'resets_in']);
-
-    expect(AnalysisDraft::query()->count())->toBe(0)
-        ->and(AiUsage::query()->count())->toBe(0);
-});
-
-it('returns a real 429 with Retry-After instead of the web redirect when the burst cap is hit', function (): void {
-    config()->set('plate.snap_to_track.burst_caps.default', 1);
-
-    fakeApiSnapAnalysis();
 
     $this->withHeader('Authorization', 'Bearer '.$this->token)
         ->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => apiSnapPhotoDataUrl()])
-        ->assertOk();
+        ->assertStatus(402)
+        ->assertJsonPath('error', 'usage_limit_exceeded')
+        ->assertJsonPath('exhausted', true);
 
-    $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
-        ->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => apiSnapPhotoDataUrl()]);
-
-    $response->assertStatus(429)
-        ->assertJsonPath('error', 'burst_limit_exceeded')
-        ->assertJsonPath('burstLimit.cap', 1)
-        ->assertJsonPath('burstLimit.tier', 'free')
-        ->assertJsonStructure(['burstLimit' => ['tier_label', 'retry_after_seconds', 'retry_after_minutes', 'resets_at']]);
-
-    expect($response->headers->get('Retry-After'))->not->toBeNull()
-        ->and(AnalysisDraft::query()->count())->toBe(1);
-});
-
-it('keys the burst limiter per user rather than per IP', function (): void {
-    config()->set('plate.snap_to_track.burst_caps.default', 1);
-
-    fakeApiSnapAnalysis();
-
-    Sanctum::actingAs($this->user, ['chat:converse']);
-
-    $this->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => apiSnapPhotoDataUrl()])
-        ->assertOk();
-
-    $this->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => apiSnapPhotoDataUrl()])
-        ->assertStatus(429);
-
-    $other = User::factory()->create();
-    Sanctum::actingAs($other, ['chat:converse']);
-
-    $this->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => apiSnapPhotoDataUrl()])
-        ->assertOk();
-
-    expect(AnalysisDraft::query()->count())->toBe(2);
+    expect(AnalysisDraft::query()->count())->toBe(0);
 });
 
 it('localizes the analysis using the Accept-Language header over the account locale', function (): void {

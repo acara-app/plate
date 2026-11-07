@@ -6,7 +6,6 @@ namespace App\Services\Billing;
 
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
-use App\Contracts\Ai\ResolvesAgentModel;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Data\Billing\PhotoAnalysisContext;
@@ -22,6 +21,7 @@ use App\Models\SnapPhotoPeriod;
 use App\Models\SnapPhotoRequest;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
+use App\Services\Ai\ConfiguredAgentModels;
 use Carbon\CarbonImmutable;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
@@ -66,12 +66,10 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
 
     public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
     {
-        if ($context->user instanceof User && $this->isPaying($context->user)) {
-            abort_if(! $this->catalog->hasReadyPaidModel(), 503, 'Premium analysis is temporarily unavailable.');
-            $model = resolve(ResolvesAgentModel::class)->resolve(FoodPhotoAnalyzerAgent::class, $context->user);
-            resolve(EnforceAiUsageLimit::class)->handle($context->user, $model);
+        if ($context->user instanceof User && (! $this->enabled() || $this->isPaying($context->user))) {
+            resolve(EnforceAiUsageLimit::class)->handle($context->user, resolve(ConfiguredAgentModels::class)->forAgent(FoodPhotoAnalyzerAgent::class));
 
-            return $analyze(PhotoModel::fromAgentModel($model, config()->integer('snap.premium.max_tokens', 4096)));
+            return $analyze(PhotoModel::standard());
         }
 
         if (! $this->enabled()) {
@@ -217,7 +215,7 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
     private function meteredEntitlement(int $limit, int $used, ?string $resetsAt, string $mode): PhotoEntitlement
     {
         $product = $this->catalog->product();
-        $offer = $product instanceof SubscriptionProduct ? new PhotoOffer($product->id, $product->name, $product->formatted_price, $product->photo_limits) : null;
+        $offer = $product instanceof SubscriptionProduct ? new PhotoOffer($product->id, $product->name, $product->formatted_price) : null;
 
         return new PhotoEntitlement(true, $limit, $used, $resetsAt, $mode, $mode === 'trial' && $offer instanceof PhotoOffer, $offer);
     }

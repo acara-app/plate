@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Billing;
 
-use App\Enums\SubscriptionTier;
+use App\Data\Billing\AiAllowance;
+use App\Enums\AiAllowanceReset;
 use App\Utilities\StaticUrl;
-use Carbon\CarbonInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
@@ -14,46 +14,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class UsageLimitExceededException extends RuntimeException
 {
-    public function __construct(
-        public readonly string $limitType,
-        public readonly SubscriptionTier $tier,
-        public readonly int $currentCredits,
-        public readonly int $limitCredits,
-        public readonly CarbonInterface $resetsAt,
-    ) {
-        parent::__construct(sprintf(
-            'Usage limit exceeded for %s window on %s tier (%d/%d credits).',
-            $this->limitType,
-            $this->tier->value,
-            $this->currentCredits,
-            $this->limitCredits,
-        ));
+    public function __construct(public readonly AiAllowance $allowance)
+    {
+        parent::__construct(sprintf('AI allowance used up on %s tier.', $this->allowance->tier->value));
     }
 
     /**
-     * @return array{
-     *     error: string,
-     *     limit_type: string,
-     *     tier: string,
-     *     tier_label: string,
-     *     current_credits: int,
-     *     limit_credits: int,
-     *     resets_at: string,
-     *     resets_in: string
-     * }
+     * @return array<mixed>
      */
     public function toPayload(): array
     {
-        return [
-            'error' => 'usage_limit_exceeded',
-            'limit_type' => $this->limitType,
-            'tier' => $this->tier->value,
-            'tier_label' => $this->tier->label(),
-            'current_credits' => $this->currentCredits,
-            'limit_credits' => $this->limitCredits,
-            'resets_at' => $this->resetsAt->toIso8601String(),
-            'resets_in' => $this->formatResetsIn(),
-        ];
+        return ['error' => 'usage_limit_exceeded', ...$this->allowance->toArray()];
     }
 
     public function render(Request $request): JsonResponse
@@ -63,46 +34,14 @@ final class UsageLimitExceededException extends RuntimeException
 
     public function userMessage(): string
     {
-        $resetsIn = $this->formatResetsIn();
+        $message = $this->allowance->resets === AiAllowanceReset::Daily
+            ? "⏳ Today's AI allowance is used up. It resets at midnight."
+            : "⏳ This month's free AI is used up. It resets on {$this->allowance->resetsAt->format('F j')}.";
 
-        if ($this->limitType === 'monthly') {
-            return "Your monthly AI allowance is used up. It refills in {$resetsIn}. Photo scans have a separate allowance.";
+        if (! $this->allowance->canUpgrade) {
+            return $message;
         }
 
-        $window = $this->limitType === 'weekly' ? 'weekly' : 'daily';
-
-        if (in_array($this->tier, [SubscriptionTier::Snap, SubscriptionTier::Plus], true)) {
-            return sprintf(
-                "⏳ You've reached your %s AI credit limit on the %s plan.\n\nThey'll refill in %s.",
-                $window,
-                $this->tier->label(),
-                $resetsIn,
-            );
-        }
-
-        return sprintf(
-            "⏳ You've used up your %s AI credits on the %s plan.\n\nThey'll refill in %s — "
-            .'or upgrade now for a bigger %s allowance:'."\n%s",
-            $window,
-            $this->tier->label(),
-            $resetsIn,
-            $window,
-            StaticUrl::checkoutUrl(),
-        );
-    }
-
-    private function formatResetsIn(): string
-    {
-        $diff = now()->diff($this->resetsAt);
-
-        if ($diff->d > 0) {
-            return $diff->d.' days '.$diff->h.' hours';
-        }
-
-        if ($diff->h > 0) {
-            return $diff->h.' hours '.$diff->i.' minutes';
-        }
-
-        return $diff->i.' minutes'; // @codeCoverageIgnore
+        return $message."\n\nNeed more? See plans:\n".StaticUrl::checkoutUrl();
     }
 }

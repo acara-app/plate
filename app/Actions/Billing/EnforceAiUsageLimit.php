@@ -4,76 +4,23 @@ declare(strict_types=1);
 
 namespace App\Actions\Billing;
 
-use App\Contracts\Billing\ProvidesAiBudget;
-use App\Contracts\Billing\ResolvesUserTier;
 use App\Data\Ai\AgentModelData;
-use App\Enums\SubscriptionTier;
+use App\Data\Billing\AiAllowance;
 use App\Exceptions\Billing\UsageLimitExceededException;
-use App\Models\AiUsage;
 use App\Models\User;
-use Carbon\CarbonImmutable;
 
 final readonly class EnforceAiUsageLimit
 {
-    public function __construct(
-        private ResolvesUserTier $resolveUserTier,
-    ) {}
+    public function __construct(private ResolveAiAllowance $resolveAiAllowance) {}
 
     /**
-     * @throws UsageLimitExceededException when the projected total cost would exceed any window.
+     * @throws UsageLimitExceededException when the call would go past the user's AI allowance.
      */
     public function handle(User $user, ?AgentModelData $model = null): void
     {
-        $budget = resolve(ProvidesAiBudget::class)->forUser($user);
-        if ($budget !== null) {
-            if ($budget->used + $this->estimateCallCost($model) > $budget->limit) {
-                throw new UsageLimitExceededException('monthly', $this->resolveUserTier->resolve($user)->tier,
-                    (int) round($budget->used * $this->multiplier()),
-                    (int) round($budget->limit * $this->multiplier()), $budget->resetsAt);
-            }
+        $allowance = $this->resolveAiAllowance->handle($user);
 
-            return;
-        }
-
-        $entitlement = $this->resolveUserTier->resolve($user);
-
-        if (! $entitlement->premiumEnforcementActive) {
-            return;
-        }
-
-        $limits = $this->limitsForTier($entitlement->tier);
-        $estimate = $this->estimateCallCost($model);
-        $now = CarbonImmutable::now();
-        $multiplier = $this->multiplier();
-
-        foreach (['rolling', 'weekly'] as $window) {
-            $windowConfig = $limits[$window];
-            $periodStart = $this->periodStart($now, $window, $windowConfig);
-            $periodEnd = $this->periodEnd($user, $now, $window, $windowConfig, $periodStart);
-            $current = $this->getCostForPeriod($user, $periodStart, $now);
-            $limit = (float) $windowConfig['limit'];
-
-            if ($current + $estimate > $limit) {
-                throw new UsageLimitExceededException(
-                    limitType: $window,
-                    tier: $entitlement->tier,
-                    currentCredits: (int) round($current * $multiplier),
-                    limitCredits: (int) round($limit * $multiplier),
-                    resetsAt: $periodEnd,
-                );
-            }
-        }
-    }
-
-    /**
-     * @return array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}}
-     */
-    private function limitsForTier(SubscriptionTier $tier): array
-    {
-        /** @var array<string, array{rolling: array{limit: float, period_hours: int}, weekly: array{limit: float, period_days: int}}> $tierLimits */
-        $tierLimits = config()->array('plate.tier_limits', []);
-
-        return $tierLimits[$tier->value] ?? $tierLimits[SubscriptionTier::Free->value];
+        throw_if($allowance instanceof AiAllowance && ! $allowance->allows($this->estimateCallCost($model)), UsageLimitExceededException::class, $allowance);
     }
 
     private function estimateCallCost(?AgentModelData $model): float
@@ -93,51 +40,5 @@ final readonly class EnforceAiUsageLimit
 
         return ((int) $tokens['input']) / 1_000_000 * $pricing['input']
             + ((int) $tokens['output']) / 1_000_000 * $pricing['output'];
-    }
-
-    /**
-     * @param  array<string, float|int>  $windowConfig
-     */
-    private function periodStart(CarbonImmutable $now, string $window, array $windowConfig): CarbonImmutable
-    {
-        return match ($window) {
-            'rolling' => $now->subHours((int) $windowConfig['period_hours']),
-            'weekly' => $now->subDays((int) $windowConfig['period_days']),
-            default => $now,
-        };
-    }
-
-    /**
-     * @param  array<string, float|int>  $windowConfig
-     */
-    private function periodEnd(User $user, CarbonImmutable $now, string $window, array $windowConfig, CarbonImmutable $periodStart): CarbonImmutable
-    {
-        $oldest = AiUsage::query()
-            ->forUser($user)
-            ->where('created_at', '>=', $periodStart)
-            ->where('created_at', '<=', $now)
-            ->min('created_at');
-
-        $oldestAt = is_string($oldest) ? CarbonImmutable::parse($oldest) : $now;
-
-        return match ($window) {
-            'rolling' => $oldestAt->addHours((int) $windowConfig['period_hours']),
-            'weekly' => $oldestAt->addDays((int) $windowConfig['period_days']),
-            default => $now,
-        };
-    }
-
-    private function getCostForPeriod(User $user, CarbonImmutable $start, CarbonImmutable $end): float
-    {
-        return (float) AiUsage::query()
-            ->forUser($user)
-            ->where('created_at', '>=', $start)
-            ->where('created_at', '<=', $end)
-            ->sum('cost');
-    }
-
-    private function multiplier(): int
-    {
-        return config()->integer('plate.credit_multiplier', 1);
     }
 }
