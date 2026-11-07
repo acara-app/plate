@@ -22,6 +22,6 @@ final readonly class ResolvePendingMeal
             return new PendingMealData(expired: true);
         }
 
-        return new PendingMealData(expired: false, reviewUrl: route('snap-to-track.review', ['draft' => $draftToken], absolute: false));
+        return new PendingMealData(expired: false, saveUrl: route('snap-to-track.save', ['draft' => $draftToken], absolute: false));
     }
 }

@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Actions\LogReviewedMealAction;
+use App\Data\ReviewedMealData;
 use App\Models\AnalysisDraft;
 use App\Models\HealthSyncSample;
 use App\Models\User;
-use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia;
 
 function snapHistoryMealSample(User $user): HealthSyncSample
@@ -13,48 +14,23 @@ function snapHistoryMealSample(User $user): HealthSyncSample
     return HealthSyncSample::query()->whereBelongsTo($user)->oldest('id')->firstOrFail();
 }
 
-it('stores a reviewed meal at the same instant regardless of its timezone offset', function (string $measuredAt): void {
-    $user = User::factory()->create();
-    $token = Str::random(64);
-    AnalysisDraft::factory()->claimed($user)->create([
-        'token_hash' => AnalysisDraft::hashToken($token),
-    ]);
+function logSnapHistoryMeal(User $user, array $items, ?string $notes = null): void
+{
+    $draft = AnalysisDraft::factory()->claimed($user)->create();
+    $meal = ReviewedMealData::fromValidated(['items' => $items, 'measured_at' => '2026-10-16T03:57:00Z', 'notes' => $notes]);
 
-    $this->actingAs($user)
-        ->post(route('snap-to-track.review.store', ['draft' => $token]), [
-            'items' => [['name' => 'Banana', 'calories' => 105, 'carbs' => 27]],
-            'measured_at' => $measuredAt,
-        ])
-        ->assertRedirectToRoute('health-entries.index', ['date' => '2026-10-16']);
-
-    $this->assertDatabaseHas('health_sync_samples', [
-        'user_id' => $user->id,
-        'type_identifier' => 'dietaryEnergy',
-        'value' => 105,
-        'measured_at' => '2026-10-16 03:57:00',
-    ]);
-})->with([
-    'Ulaanbaatar' => '2026-10-16T11:57:00+08:00',
-    'Los Angeles' => '2026-10-15T20:57:00-07:00',
-    'UTC' => '2026-10-16T03:57:00Z',
-]);
+    resolve(LogReviewedMealAction::class)->handle($draft, $meal->toHealthLogData($draft), $user);
+}
 
 it('keeps the full reviewed meal available in the logbook after editing it', function (): void {
     $user = User::factory()->create();
-    $token = Str::random(64);
-    AnalysisDraft::factory()->claimed($user)->create([
-        'token_hash' => AnalysisDraft::hashToken($token),
-    ]);
     $items = [
         ['name' => 'Banana', 'portion' => '1 medium', 'calories' => 105, 'protein' => 1.3, 'carbs' => 27, 'fat' => 0.3, 'provenance' => 'model'],
         ['name' => 'Yogurt', 'portion' => '100g', 'calories' => 60, 'protein' => 4, 'carbs' => 5, 'fat' => 3, 'provenance' => 'reference'],
     ];
 
-    $this->actingAs($user)->post(route('snap-to-track.review.store', ['draft' => $token]), [
-        'items' => $items,
-        'measured_at' => '2026-10-16T03:57:00Z',
-        'notes' => 'Breakfast',
-    ])->assertRedirectToRoute('health-entries.index', ['date' => '2026-10-16']);
+    logSnapHistoryMeal($user, $items, 'Breakfast');
+    $this->actingAs($user);
 
     $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
         ->has('entry.food_analysis.items', 2)
@@ -105,19 +81,13 @@ it('keeps the full reviewed meal available in the logbook after editing it', fun
 
 it('saves a renamed item with its updated nutrition, portion and weight from the logbook', function (): void {
     $user = User::factory()->create();
-    $token = Str::random(64);
-    AnalysisDraft::factory()->claimed($user)->create([
-        'token_hash' => AnalysisDraft::hashToken($token),
-    ]);
     $items = [
         ['name' => 'Black olives', 'portion' => '35 g (about 10 olives)', 'grams' => 35, 'calories' => 40, 'protein' => 0.3, 'carbs' => 2.2, 'fat' => 3.8, 'provenance' => 'model'],
         ['name' => 'Lettuce', 'portion' => '50g', 'calories' => 8, 'protein' => 0.6, 'carbs' => 1.5, 'fat' => 0.1, 'provenance' => 'model'],
     ];
 
-    $this->actingAs($user)->post(route('snap-to-track.review.store', ['draft' => $token]), [
-        'items' => $items,
-        'measured_at' => '2026-10-16T03:57:00Z',
-    ])->assertRedirectToRoute('health-entries.index', ['date' => '2026-10-16']);
+    logSnapHistoryMeal($user, $items);
+    $this->actingAs($user);
 
     $this->get(route('health-entries.show', snapHistoryMealSample($user)))->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
         ->where('entry.food_analysis.items.0.grams', 35)

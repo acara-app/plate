@@ -138,8 +138,8 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
             Route::post('analyze', Web\SnapToTrack\AnalyzeSnapToTrackPhotoController::class)
                 ->middleware('throttle:photo-scans')
                 ->name('analyze');
-            Route::get('review/{draft}', Web\SnapToTrack\ShowSnapToTrackReviewController::class)->name('review');
-            Route::post('review/{draft}', Web\SnapToTrack\StoreSnapToTrackMealController::class)->name('review.store');
+            Route::get('save/{draft}', Web\SnapToTrack\SaveSnapToTrackMealController::class)->name('save');
+            Route::post('save/{draft}/photo', Web\SnapToTrack\StoreSnapToTrackPhotoController::class)->name('save.photo');
             Route::post('estimate-item', Web\SnapToTrack\EstimateSnapToTrackItemController::class)
                 ->middleware('throttle:20,1')
                 ->name('estimate-item');

@@ -53,7 +53,7 @@ interface CashierSubscription {
 
 interface PendingMeal {
     expired: boolean;
-    review_url: string | null;
+    save_url: string | null;
 }
 
 interface Props {
@@ -113,10 +113,10 @@ export default function CashierSubscription({
               );
 
     useEffect(() => {
-        if (continueToMeal && meal?.review_url) {
-            router.visit(meal.review_url, { replace: true });
+        if (continueToMeal && meal?.save_url) {
+            router.visit(meal.save_url, { replace: true });
         }
-    }, [continueToMeal, meal?.review_url]);
+    }, [continueToMeal, meal?.save_url]);
 
     const formatSavings = (value: number) => `$${parseFloat(value.toFixed(2))}`;
 
@@ -162,7 +162,7 @@ export default function CashierSubscription({
                     {paymentPending && (
                         <div className="space-y-2">
                             <PaymentConfirmation />
-                            {meal?.review_url && (
+                            {meal?.save_url && (
                                 <p className="text-sm text-muted-foreground">
                                     {t('photo_plans.checkout.pending_meal')}
                                 </p>
@@ -172,9 +172,9 @@ export default function CashierSubscription({
                     {planActive && (
                         <div role="status" className="rounded-lg border p-4">
                             {t('photo_plans.checkout.active')}{' '}
-                            {meal?.review_url ? (
+                            {meal?.save_url ? (
                                 <Link
-                                    href={meal.review_url}
+                                    href={meal.save_url}
                                     className="underline"
                                 >
                                     {t('photo_plans.checkout.review')}
@@ -247,18 +247,18 @@ export default function CashierSubscription({
                                     ? t('checkout_subscription.processing')
                                     : t('photo_plans.checkout.pay')}
                             </Button>
-                            {meal?.review_url &&
+                            {meal?.save_url &&
                                 (emailVerified ? (
                                     <Link
-                                        href={meal.review_url}
+                                        href={meal.save_url}
                                         className="block text-sm underline"
                                     >
-                                        {t('photo_plans.checkout.back_meal')}
+                                        {t('photo_plans.checkout.save_meal')}
                                     </Link>
                                 ) : (
                                     <p className="text-sm text-muted-foreground">
                                         <Link
-                                            href={meal.review_url}
+                                            href={meal.save_url}
                                             className="underline"
                                         >
                                             {t(
