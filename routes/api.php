@@ -110,6 +110,7 @@ Route::prefix('v2/snap-to-track')
     ->middleware('auth:sanctum')
     ->group(function (): void {
         Route::post('analyze', ApiV2\SnapToTrack\AnalyzeSnapToTrackPhotoController::class)
+            ->middleware('throttle:photo-scans')
             ->name('api.v2.snap-to-track.analyze');
 
         Route::post('drafts/{draft}/meal', ApiV2\SnapToTrack\StoreSnapToTrackMealController::class)

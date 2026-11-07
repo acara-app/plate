@@ -888,6 +888,7 @@ return [
         ],
         'allowance' => [
             'daily_label' => 'Өдрийн AI эрх',
+            'monthly_label' => 'Сарын AI эрх',
             'used' => '{{percentage}}% ашигласан',
             'resets_midnight' => 'Шөнө 12 цагт шинэчлэгдэнэ',
             'resets_on' => '{{date}}-нд шинэчлэгдэнэ',

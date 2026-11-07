@@ -54,6 +54,15 @@ final readonly class AnalyzeSnapToTrackPhotoController
         } catch (PhotoLimitExceeded $exception) {
             return to_route('snap-to-track.index')->withErrors(['photo' => $exception->getMessage()]);
         } catch (UsageLimitExceededException $exception) {
+            Inertia::flash('analytics', [
+                'name' => 'snap_to_track_limit_reached',
+                'properties' => [
+                    'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
+                    'gate' => 'credits',
+                    'tier' => $exception->allowance->tier->value,
+                ],
+            ]);
+
             return to_route('snap-to-track.index')->withErrors(['photo' => $exception->userMessage()]);
         } catch (Throwable $throwable) {
             report($throwable);

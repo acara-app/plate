@@ -21,7 +21,6 @@ use App\Models\MealPhoto;
 use App\Models\User;
 use App\Services\HealthEntryAssembler;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia;
@@ -74,7 +73,6 @@ function storedMealPhoto(User $user, ?string $groupId = null, ?string $createdAt
 beforeEach(function (): void {
     Storage::fake('s3');
     $this->user = User::factory()->create(['stripe_id' => null]);
-    RateLimiter::clear('snap-to-track-analyze:'.$this->user->id);
 });
 
 it('keeps a signed-in scan photo privately with the saved meal and only its owner can see it', function (): void {

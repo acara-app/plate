@@ -881,6 +881,7 @@ return [
         ],
         'allowance' => [
             'daily_label' => 'Daily AI allowance',
+            'monthly_label' => 'Monthly AI allowance',
             'used' => '{{percentage}}% used',
             'resets_midnight' => 'Resets at midnight',
             'resets_on' => 'Resets {{date}}',

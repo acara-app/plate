@@ -91,7 +91,12 @@ it('blocks the scan and stores nothing when the AI allowance is used up', functi
 
     actingAs($this->user)->post(route('snap-to-track.analyze'), [
         'photo' => UploadedFile::fake()->image('meal.jpg'),
-    ])->assertRedirect(route('snap-to-track.index'))->assertSessionHasErrors('photo');
+    ])->assertRedirect(route('snap-to-track.index'))
+        ->assertSessionHasErrors('photo')
+        ->assertInertiaFlash('analytics', [
+            'name' => 'snap_to_track_limit_reached',
+            'properties' => ['source' => 'authenticated_snap_to_track', 'gate' => 'credits', 'tier' => 'free'],
+        ]);
 
     expect(AnalysisDraft::query()->count())->toBe(0);
 });

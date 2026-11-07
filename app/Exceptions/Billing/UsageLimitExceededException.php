@@ -7,6 +7,7 @@ namespace App\Exceptions\Billing;
 use App\Data\Billing\AiAllowance;
 use App\Enums\AiAllowanceReset;
 use App\Utilities\StaticUrl;
+use Carbon\CarbonInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
@@ -24,7 +25,13 @@ final class UsageLimitExceededException extends RuntimeException
      */
     public function toPayload(): array
     {
-        return ['error' => 'usage_limit_exceeded', ...$this->allowance->toArray()];
+        return [
+            'error' => 'usage_limit_exceeded',
+            ...$this->allowance->toArray(),
+            'limit_type' => $this->allowance->resets->value,
+            'tier_label' => $this->allowance->tier->label(),
+            'resets_in' => $this->allowance->resetsAt->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, parts: 2),
+        ];
     }
 
     public function render(Request $request): JsonResponse

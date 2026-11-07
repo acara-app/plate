@@ -28,7 +28,9 @@ it('renders a 402 with the allowance the chat and app need to show the notice', 
             'percentage' => 100,
             'exhausted' => true,
             'can_upgrade' => true,
-        ])->not->toHaveKeys(['used', 'limit']);
+            'limit_type' => 'daily',
+            'tier_label' => 'Starter',
+        ])->toHaveKey('resets_in')->not->toHaveKeys(['used', 'limit']);
 });
 
 it('tells the user when their AI comes back and offers plans only when they can upgrade', function (SubscriptionTier $tier, AiAllowanceReset $resets, string $message, bool $linksPlans): void {

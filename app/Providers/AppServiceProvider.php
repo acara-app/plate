@@ -97,6 +97,7 @@ final class AppServiceProvider extends ServiceProvider
 
     private function bootRateLimiters(): void
     {
+        RateLimiter::for('photo-scans', fn (Request $request): Limit => Limit::perMinute(20)->by($request->user()?->getAuthIdentifier() ?? $request->ip()));
         RateLimiter::for('checkout', fn (Request $request): Limit => Limit::perMinute(10)->by($request->user()?->getAuthIdentifier() ?? $request->ip()));
     }
 

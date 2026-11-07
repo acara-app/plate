@@ -882,6 +882,7 @@ return [
         ],
         'allowance' => [
             'daily_label' => 'Quota IA quotidien',
+            'monthly_label' => 'Quota IA mensuel',
             'used' => '{{percentage}} % utilisé',
             'resets_midnight' => 'Se renouvelle à minuit',
             'resets_on' => 'Se renouvelle le {{date}}',

@@ -67,9 +67,10 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
     public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
     {
         if ($context->user instanceof User && (! $this->enabled() || $this->isPaying($context->user))) {
-            resolve(EnforceAiUsageLimit::class)->handle($context->user, resolve(ConfiguredAgentModels::class)->forAgent(FoodPhotoAnalyzerAgent::class));
+            $model = resolve(ConfiguredAgentModels::class)->forAgent(FoodPhotoAnalyzerAgent::class);
+            resolve(EnforceAiUsageLimit::class)->handle($context->user, $model);
 
-            return $analyze(PhotoModel::standard());
+            return $analyze(PhotoModel::fromAgentModel($model));
         }
 
         if (! $this->enabled()) {

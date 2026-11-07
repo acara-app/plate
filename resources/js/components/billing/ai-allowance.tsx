@@ -29,7 +29,7 @@ export function AiAllowanceBar({ allowance }: { allowance: AiAllowance }) {
         <div className="space-y-3 rounded-lg border p-4">
             <div className="flex items-baseline justify-between gap-3">
                 <h3 className="text-sm font-medium">
-                    {t('billing.allowance.daily_label')}
+                    {t(`billing.allowance.${allowance.resets}_label`)}
                 </h3>
                 <span className="text-sm text-muted-foreground">
                     {t('billing.allowance.used', {
