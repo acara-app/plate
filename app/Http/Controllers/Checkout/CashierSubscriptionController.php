@@ -52,6 +52,14 @@ final readonly class CashierSubscriptionController
                 return to_route('checkout.subscription');
             }
 
+            $openCheckout = $request->session()->get('checkout.open');
+
+            if (is_array($openCheckout) && ($openCheckout['selection'] ?? null) === "{$product->id}:{$data['billing_interval']}" && ($openCheckout['expires_at'] ?? 0) > now()->getTimestamp() && is_string($openCheckout['url'] ?? null)) {
+                $request->session()->put('checkout.started', $openCheckout['attempt'] ?? $attempt);
+
+                return Inertia::location($openCheckout['url']);
+            }
+
             $billingInterval = $data['billing_interval'];
             $lookupKey = $billingInterval === 'yearly'
                 ? $product->yearly_stripe_lookup_key
@@ -84,6 +92,12 @@ final readonly class CashierSubscriptionController
             );
 
             $request->session()->put('checkout.started', $attempt);
+            $request->session()->put('checkout.open', [
+                'selection' => "{$product->id}:{$billingInterval}",
+                'url' => $checkoutUrl,
+                'attempt' => $attempt,
+                'expires_at' => now()->addHours(23)->getTimestamp(),
+            ]);
             $this->funnel->record(SnapFunnelStage::CheckoutStarted, $attempt, $checkout);
 
             return Inertia::location($checkoutUrl);

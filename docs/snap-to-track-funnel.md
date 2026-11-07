@@ -39,7 +39,7 @@ Run it in production the same way as `billing:usage-report`. `--by` accepts `dev
 | Signed up or logged in | `snap_to_track_auth_completed` | The journey's browser finished sign-up or log-in (`method`: `register` or `login`). |
 | Meal saved | `snap_to_track_meal_logged` | A meal from the public result was saved to the food log. |
 | Checkout clicked | `snap_to_track_checkout_click` | The plan page asked the server to open a Stripe checkout. |
-| Checkout opened | `snap_to_track_checkout_started` | Stripe created the checkout session and the browser was sent to it. |
+| Checkout opened | `snap_to_track_checkout_started` | Stripe created the checkout session and the browser was sent to it. A repeat click for the same plan and interval reopens that session instead of creating another. |
 | Checkout failed | `snap_to_track_checkout_failed` | The checkout could not open (`already_subscribed` or `error`). Error state. |
 | Returned from checkout | `snap_to_track_checkout_returned` | The browser came back to the success page. This is not proof of payment, and a payment doesn't need it. |
 | Checkout cancelled | `snap_to_track_checkout_cancelled` | The browser came back from Stripe through the cancel link. |
@@ -94,4 +94,4 @@ Analytics properties never include email addresses, photos, meal or health value
 
 ## History notes
 
-The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes, the 2026-11-04 move of guest results to their own page and the 2026-11-07 Save layout on that page. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.
+The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes, the 2026-11-04 move of guest results to their own page, the 2026-11-07 Save layout on that page and the 2026-11-07 change to paying before email verification. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.

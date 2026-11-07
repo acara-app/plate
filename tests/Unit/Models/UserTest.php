@@ -214,7 +214,7 @@ it('prunable filters out recent unverified users', function (): void {
         ->first()->id->toBe($oldUser->id);
 });
 
-it('prunable never deletes unverified Stripe customers', function (): void {
+it('never prunes Stripe customers, even when an email change leaves them unverified', function (): void {
     User::factory()->unverified()->create([
         'stripe_id' => 'cus_paying_customer',
         'created_at' => now()->subDays(31),

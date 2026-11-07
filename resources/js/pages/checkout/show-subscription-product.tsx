@@ -17,7 +17,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { PhotoPlanBand } from '@/components/billing/photo-plan-band';
 import clsx from 'clsx';
 import { CreditCardIcon, ReceiptIcon, TriangleIcon } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface BillingProduct {
@@ -56,10 +56,19 @@ interface CashierSubscription {
     is_yearly: boolean;
 }
 
+interface PendingMeal {
+    expired: boolean;
+    review_url: string | null;
+}
+
 interface Props {
     isGuest: boolean;
     paymentPending: boolean;
+    checkoutCancelled: boolean;
+    meal: PendingMeal | null;
+    continueToMeal: boolean;
     selectedProductId: number | null;
+    selectedInterval: 'monthly' | 'yearly';
     photoAllowance?: PhotoAllowance;
     products: BillingProduct[];
     photoPlan: BillingProduct | null;
@@ -81,7 +90,11 @@ export default function CashierSubscription({
     photoPlan,
     isGuest,
     paymentPending,
+    checkoutCancelled,
+    meal,
+    continueToMeal,
     selectedProductId,
+    selectedInterval,
     photoAllowance,
     currentSubscription,
     billingPortalUrl,
@@ -91,10 +104,24 @@ export default function CashierSubscription({
     const [isSubscribing, setIsSubscribing] = useState(false);
     const [billingInterval, setBillingInterval] = useState<
         'monthly' | 'yearly'
-    >('monthly');
+    >(selectedInterval);
     const { t } = useTranslation('common');
 
     const Layout = isGuest ? GuestPricingLayout : AppLayout;
+    const planActive = !paymentPending && photoAllowance?.mode === 'premium';
+    const selectedPlan =
+        isGuest || paymentPending || planActive || currentSubscription
+            ? undefined
+            : [...products, ...(photoPlan ? [photoPlan] : [])].find(
+                  (product) =>
+                      product.id === selectedProductId && product.price > 0,
+              );
+
+    useEffect(() => {
+        if (continueToMeal && meal?.review_url) {
+            router.visit(meal.review_url, { replace: true });
+        }
+    }, [continueToMeal, meal?.review_url]);
 
     const formatSavings = (value: number) => `$${parseFloat(value.toFixed(2))}`;
 
@@ -107,7 +134,9 @@ export default function CashierSubscription({
         }
 
         if (isGuest) {
-            router.visit(checkout.start(productId).url);
+            router.visit(
+                checkout.start(productId, { query: { interval } }).url,
+            );
             return;
         }
         window.umami?.track('snap_to_track_checkout_click', {
@@ -135,17 +164,98 @@ export default function CashierSubscription({
 
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <div className="space-y-8">
-                    {paymentPending && <PaymentConfirmation />}
-                    {!paymentPending && photoAllowance?.mode === 'premium' && (
+                    {paymentPending && (
+                        <div className="space-y-2">
+                            <PaymentConfirmation />
+                            {meal?.review_url && (
+                                <p className="text-sm text-muted-foreground">
+                                    Your meal preview is kept. We’ll open it as
+                                    soon as your plan is active.
+                                </p>
+                            )}
+                        </div>
+                    )}
+                    {planActive && (
                         <div role="status" className="rounded-lg border p-4">
                             Your plan is active.{' '}
-                            <Link
-                                href={ShowSnapToTrackController()}
-                                className="underline"
-                            >
-                                Continue scanning
-                            </Link>
+                            {meal?.review_url ? (
+                                <Link
+                                    href={meal.review_url}
+                                    className="underline"
+                                >
+                                    Review and save your meal
+                                </Link>
+                            ) : (
+                                <>
+                                    {meal?.expired &&
+                                        'Meal previews last 60 minutes, and this one has expired. '}
+                                    <Link
+                                        href={ShowSnapToTrackController()}
+                                        className="underline"
+                                    >
+                                        {meal?.expired
+                                            ? 'Scan your meal again'
+                                            : 'Continue scanning'}
+                                    </Link>
+                                </>
+                            )}
                         </div>
+                    )}
+                    {selectedPlan && (
+                        <section
+                            aria-labelledby="selected-plan-heading"
+                            className="space-y-3 rounded-lg border border-primary/30 p-4 sm:p-6"
+                        >
+                            {checkoutCancelled && (
+                                <p className="text-sm text-muted-foreground">
+                                    Checkout was cancelled, so you haven’t been
+                                    charged.
+                                </p>
+                            )}
+                            <h2
+                                id="selected-plan-heading"
+                                className="text-lg font-semibold"
+                            >
+                                Continue with {selectedPlan.name}
+                            </h2>
+                            <p className="text-2xl font-bold">
+                                {selectedInterval === 'yearly'
+                                    ? `${selectedPlan.formatted_yearly_price}/year`
+                                    : `${selectedPlan.formatted_price}/month`}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                Pay securely with Stripe. Renews{' '}
+                                {selectedInterval}. Cancel anytime.
+                            </p>
+                            <Button
+                                onClick={() =>
+                                    handleSubscribe(
+                                        selectedPlan.id,
+                                        selectedInterval,
+                                    )
+                                }
+                                disabled={isSubscribing}
+                                className="w-full sm:w-auto"
+                            >
+                                {isSubscribing
+                                    ? t('checkout_subscription.processing')
+                                    : 'Continue to payment'}
+                            </Button>
+                            {meal?.review_url && (
+                                <Link
+                                    href={meal.review_url}
+                                    className="block text-sm underline"
+                                >
+                                    Back to your meal
+                                </Link>
+                            )}
+                            {meal?.expired && (
+                                <p className="text-sm text-muted-foreground">
+                                    Your meal preview has expired. You can scan
+                                    it again after you subscribe.
+                                </p>
+                            )}
+                        </section>
                     )}
                     {hasIncompletePayment && incompletePaymentUrl && (
                         <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/50 dark:bg-yellow-900/20">

@@ -302,7 +302,7 @@ it('requires authentication', function (): void {
     $response->assertRedirect(route('login'));
 });
 
-it('lets unverified users go straight to Stripe checkout', function (): void {
+it('lets unverified users pay and sends repeat clicks back to the same Stripe checkout', function (): void {
     $user = User::factory()->unverified()->create();
     $product = SubscriptionProduct::factory()->create([
         'name' => 'Starter',
@@ -319,12 +319,13 @@ it('lets unverified users go straight to Stripe checkout', function (): void {
             ->andReturn('https://checkout.stripe.com/session_unverified');
     });
 
-    $this->actingAs($user)
-        ->post(route('checkout.subscription.store'), [
-            'product_id' => $product->id,
-            'billing_interval' => 'monthly',
-        ])
-        ->assertRedirect('https://checkout.stripe.com/session_unverified');
+    $subscribe = fn () => $this->actingAs($user)->post(route('checkout.subscription.store'), [
+        'product_id' => $product->id,
+        'billing_interval' => 'monthly',
+    ]);
+
+    $subscribe()->assertRedirect('https://checkout.stripe.com/session_unverified');
+    $subscribe()->assertRedirect('https://checkout.stripe.com/session_unverified');
 });
 
 it('handles missing yearly lookup key gracefully', function (): void {

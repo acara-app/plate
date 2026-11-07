@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\UserEmailVerification;
 use App\Models\User;
 use Illuminate\Support\Facades\URL;
+use Laravel\Cashier\Subscription;
 
 covers(UserEmailVerification::class);
 
@@ -28,8 +29,10 @@ it('may verify email', function (): void {
     $response->assertRedirect(route('dashboard', absolute: false).'?verified=1');
 });
 
-it('returns to checkout after verifying when a plan was chosen', function (): void {
-    $user = User::factory()->unverified()->create();
+it('returns to checkout after verifying only when the chosen plan is not paid for yet', function (bool $subscribed, string $destination): void {
+    $user = $subscribed
+        ? User::factory()->unverified()->has(Subscription::factory()->active(), 'subscriptions')->create()
+        : User::factory()->unverified()->create();
 
     $verificationUrl = URL::signedRoute(
         'verification.verify',
@@ -40,10 +43,13 @@ it('returns to checkout after verifying when a plan was chosen', function (): vo
     $this->actingAs($user)
         ->withSession(['checkout.selected_product' => 7])
         ->get($verificationUrl)
-        ->assertRedirect(route('checkout.subscription', absolute: false));
+        ->assertRedirect($destination);
 
     expect($user->refresh()->hasVerifiedEmail())->toBeTrue();
-});
+})->with([
+    'not paid yet' => [false, '/checkout/subscription'],
+    'already subscribed' => [true, '/dashboard?verified=1'],
+]);
 
 it('redirects to dashboard if already verified', function (): void {
     $user = User::factory()->create([
