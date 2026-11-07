@@ -82,7 +82,7 @@ These are listed beside the funnel, not inside it:
 
 ## What Umami still shows
 
-Umami keeps the raw browser events and acquisition analytics. Some of its event names match the stage names above, but its counts are raw browser events, not journeys, and can cover different buttons: its `snap_to_track_save_click` fires only from the Save buttons, not from the Log in links. Ad blockers can drop them. Signed-in scans in the app also send `snap_to_track_result_viewed`, with `source` set to `authenticated_snap_to_track`. The journey ledger sends nothing to Umami.
+Umami keeps the raw browser events and acquisition analytics. Some of its event names match the stage names above, but its counts are raw browser events, not journeys, and can cover different buttons: its `snap_to_track_save_click` fires only from the Save buttons, not from the Log in links, and names the button in `placement`: `meal` (the meal card), `result` (the plan offer) or `result_bar` (mobile action bar). Ad blockers can drop them. Signed-in scans in the app also send `snap_to_track_result_viewed`, with `source` set to `authenticated_snap_to_track`. The journey ledger sends nothing to Umami.
 
 ## Recording a change
 
@@ -94,4 +94,4 @@ Analytics properties never include email addresses, photos, meal or health value
 
 ## History notes
 
-The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes and the 2026-11-04 move of guest results to their own page. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.
+The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes, the 2026-11-04 move of guest results to their own page and the 2026-11-07 Save layout on that page. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.
