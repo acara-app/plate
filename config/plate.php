@@ -41,17 +41,6 @@ return [
         ],
     ],
 
-    'snap_to_track' => [
-        'burst_caps' => [
-            'default' => (int) env('SNAP_TO_TRACK_BURST_CAP_DEFAULT', 5),
-            'free' => (int) env('SNAP_TO_TRACK_BURST_CAP_FREE', 5),
-            'starter' => (int) env('SNAP_TO_TRACK_BURST_CAP_STARTER', 30),
-            'snap' => (int) env('SNAP_TO_TRACK_BURST_CAP_SNAP', 30),
-            'basic' => (int) env('SNAP_TO_TRACK_BURST_CAP_BASIC', 15),
-            'plus' => (int) env('SNAP_TO_TRACK_BURST_CAP_PLUS', 30),
-        ],
-    ],
-
     'tools' => [
         GetUserProfile::class,
         GetSubscriptionStatus::class,
@@ -92,26 +81,11 @@ return [
         'fallback_estimate' => 0.01,
     ],
 
-    'tier_limits' => [
-        'free' => [
-            'rolling' => ['limit' => 0.40, 'period_hours' => 24],
-            'weekly' => ['limit' => 1.40, 'period_days' => 7],
-        ],
-        'starter' => [
-            'rolling' => ['limit' => 0.50, 'period_hours' => 24],
-            'weekly' => ['limit' => 1.50, 'period_days' => 7],
-        ],
-        'snap' => [
-            'rolling' => ['limit' => 1.50, 'period_hours' => 24],
-            'weekly' => ['limit' => 6.00, 'period_days' => 7],
-        ],
-        'basic' => [
-            'rolling' => ['limit' => 1.50, 'period_hours' => 24],
-            'weekly' => ['limit' => 6.00, 'period_days' => 7],
-        ],
-        'plus' => [
-            'rolling' => ['limit' => 3.00, 'period_hours' => 24],
-            'weekly' => ['limit' => 12.00, 'period_days' => 7],
-        ],
+    'ai_allowance' => [
+        'free' => ['usd' => 0.50, 'resets' => 'monthly'],
+        'starter' => ['usd' => 0.50, 'resets' => 'daily'],
+        'snap' => ['usd' => 5.00, 'resets' => 'daily'],
+        'basic' => ['usd' => 5.00, 'resets' => 'daily'],
+        'plus' => ['usd' => 5.00, 'resets' => 'daily'],
     ],
 ];

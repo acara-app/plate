@@ -5,15 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V2\SnapToTrack;
 
 use App\Actions\AnalyzeFoodPhotoAction;
-use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\CreateAnalysisDraftAction;
 use App\Actions\StoreMealPhotoAction;
-use App\Ai\Agents\FoodPhotoAnalyzerAgent;
-use App\Contracts\Ai\ResolvesAgentModel;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\AnalysisDraftSource;
 use App\Exceptions\Billing\PhotoLimitExceeded;
+use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Http\Requests\Api\V2\SnapToTrack\AnalyzeSnapToTrackPhotoRequest;
 use App\Models\AnalysisDraft;
 use App\Models\User;
@@ -29,19 +27,11 @@ final readonly class AnalyzeSnapToTrackPhotoController
     public function __construct(
         private AnalyzeFoodPhotoAction $analyzeFoodPhoto,
         private CreateAnalysisDraftAction $createAnalysisDraft,
-        private EnforceAiUsageLimit $enforceAiUsageLimit,
         private StoreMealPhotoAction $storeMealPhoto,
     ) {}
 
     public function __invoke(AnalyzeSnapToTrackPhotoRequest $request, #[CurrentUser] User $user): JsonResponse
     {
-        if (! resolve(ManagesPhotoAnalyses::class)->entitlement($user, null)->enabled) {
-            $this->enforceAiUsageLimit->handle(
-                $user,
-                resolve(ResolvesAgentModel::class)->resolve(FoodPhotoAnalyzerAgent::class, $request->user()),
-            );
-        }
-
         $image = $request->decodedImage();
 
         ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve(
@@ -60,6 +50,8 @@ final readonly class AnalyzeSnapToTrackPhotoController
             );
         } catch (PhotoLimitExceeded $exception) {
             return $exception->render();
+        } catch (UsageLimitExceededException $exception) {
+            return $exception->render($request);
         } catch (HttpExceptionInterface $exception) {
             return response()->json(['error' => $exception->getMessage()], $exception->getStatusCode());
         } catch (ValidationException $exception) {

@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Contracts\Billing\OffersSubscriptions;
 use App\Models\SubscriptionProduct;
 use App\Services\Billing\PhotoPlanCatalog;
@@ -59,7 +58,6 @@ it('only offers the free plan while paid photo plans cannot be sold', function (
 })->with([
     'Stripe is not configured' => [['cashier.secret' => null]],
     'Stripe webhooks are not configured' => [['cashier.webhook.secret' => null]],
-    'the paid photo model is not registered' => [['ai.agent_profiles.'.FoodPhotoAnalyzerAgent::class.'.paid' => 'unregistered-model']],
 ]);
 
 it('does not offer a photo plan whose catalog entry was not prepared for sale', function (): void {
@@ -79,8 +77,8 @@ it('presents the configured total free scans without a timed trial', function (i
         ->and($presented->features)->toContain($feature)
         ->and($free->name)->toBe('Free');
 })->with([
-    'one scan' => [1, 'Try photo tracking with 1 successful scan.', 'A total allowance, with no daily reset'],
-    'two scans' => [2, 'Try photo tracking with 2 successful scans.', 'A total allowance, with no daily reset'],
+    'one scan' => [1, 'Try photo tracking with 1 successful scan.', 'AI chat and meal plans included'],
+    'two scans' => [2, 'Try photo tracking with 2 successful scans.', 'AI chat and meal plans included'],
 ]);
 
 it('replaces stale plan copy in each language without changing the product terms', function (string $locale, string $name, string $description): void {

@@ -22,12 +22,12 @@ final readonly class ConfiguredAgentModels implements ResolvesAgentModel
         return $this->forAgent($agentClass);
     }
 
-    public function forAgent(string $agentClass, string $profile = 'standard'): AgentModelData
+    public function forAgent(string $agentClass): AgentModelData
     {
         $profiles = config()->array('ai.agent_profiles');
         $agentProfiles = $profiles[$agentClass] ?? null;
-        $model = is_array($agentProfiles) ? ($agentProfiles[$profile] ?? null) : null;
-        throw_unless(is_string($model) && $model !== '', InvalidArgumentException::class, "No {$profile} model configured for {$agentClass}.");
+        $model = is_array($agentProfiles) ? ($agentProfiles['standard'] ?? null) : null;
+        throw_unless(is_string($model) && $model !== '', InvalidArgumentException::class, "No standard model configured for {$agentClass}.");
 
         $selected = $this->forModel($model);
         $required = [];

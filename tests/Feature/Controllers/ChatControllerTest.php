@@ -217,66 +217,19 @@ it('prevents cross-user access on the stream endpoint', function (): void {
         ->assertForbidden();
 });
 
-it('returns the credit warning derived from current usage when over 80%', function (): void {
+it("passes the user's AI allowance to the chat page", function (): void {
     enableBilling();
 
     $user = User::factory()->create();
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 0.34,
-    ]);
-
-    $conversationId = (string) fake()->uuid();
+    AiUsage::factory()->create(['user_id' => $user->id, 'cost' => 0.45]);
 
     actingAs($user)
-        ->get(route('chat.create', ['conversationId' => $conversationId]))
+        ->get(route('chat.create', ['conversationId' => (string) fake()->uuid()]))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->where('creditWarning.limit_type', 'rolling')
-            ->where('creditWarning.percentage', 85)
-            ->where('creditWarning.current_credits', 340)
-            ->where('creditWarning.limit_credits', 400)
-        );
-});
-
-it('returns a credit warning capped at 100% when usage is over the cap', function (): void {
-    enableBilling();
-
-    $user = User::factory()->create();
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 0.50,
-    ]);
-
-    $conversationId = (string) fake()->uuid();
-
-    actingAs($user)
-        ->get(route('chat.create', ['conversationId' => $conversationId]))
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->where('creditWarning.limit_type', 'rolling')
-            ->where('creditWarning.percentage', 100)
-            ->where('creditWarning.current_credits', 500)
-        );
-});
-
-it('returns null creditWarning when usage is below 80%', function (): void {
-    enableBilling();
-
-    $user = User::factory()->create();
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 0.05,
-    ]);
-
-    $conversationId = (string) fake()->uuid();
-
-    actingAs($user)
-        ->get(route('chat.create', ['conversationId' => $conversationId]))
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->where('creditWarning', null)
-        );
+            ->where('aiAllowance.resets', 'monthly')
+            ->where('aiAllowance.percentage', 90)
+            ->where('aiAllowance.exhausted', false));
 });
 
 it('includes image attachments in message parts when loading conversation', function (): void {

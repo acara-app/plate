@@ -58,18 +58,17 @@ it('recommends the most accurate candidate that clears every release gate', func
     $this->artisan('snap:select-model', ['baseline' => $baseline->id, 'candidates' => [$acceptable->id, $expensive->id, $accurate->id]])
         ->expectsOutputToContain("Run {$expensive->id} failed the release gates.")
         ->expectsOutputToContain("Selected benchmark run {$accurate->id}.")
-        ->expectsOutputToContain('AI_PAID_PHOTO_MODEL=gemini-3.8-flash')
-        ->expectsOutputToContain('SNAP_PREMIUM_MAX_TOKENS=4096')
+        ->expectsOutputToContain('AI_STANDARD_PHOTO_MODEL=gemini-3.8-flash')
         ->expectsOutputToContain('Measured cost per 100 successful scans: $1.0000')
         ->assertSuccessful();
 });
 
-it('keeps the current paid model when no candidate clears the release gates', function (int $carbsError, int $meals, string $dataset): void {
+it('keeps the current photo model when no candidate clears the release gates', function (int $carbsError, int $meals, string $dataset): void {
     $baseline = measuredPhotoModelRun('gemini-3.6-flash', carbsError: 6.0);
     $candidate = measuredPhotoModelRun('gemini-3.8-flash', carbsError: $carbsError, meals: $meals, dataset: $dataset);
 
     $this->artisan('snap:select-model', ['baseline' => $baseline->id, 'candidates' => [$candidate->id]])
-        ->expectsOutputToContain('No candidate qualifies. Keep using the current paid photo model.')
+        ->expectsOutputToContain('No candidate qualifies. Keep using the current photo model.')
         ->assertFailed();
 })->with([
     'less accurate than the current model' => [7, 30, 'golden-plate-v1'],

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Contracts\DownloadsTelegramPhoto;
 use App\Contracts\ProcessesAdvisorMessage;
+use App\Data\Billing\AiAllowance;
+use App\Enums\AiAllowanceReset;
 use App\Enums\ChatPlatform;
 use App\Enums\Sex;
 use App\Enums\SubscriptionTier;
@@ -16,6 +18,7 @@ use App\Models\UserChatPlatformLink;
 use App\Models\UserProfile;
 use App\Services\Telegram\TelegramWebhookHandler;
 use App\Utilities\StaticUrl;
+use Carbon\CarbonImmutable;
 use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Models\TelegraphChat;
@@ -496,13 +499,7 @@ describe('chat message handling', function (): void {
         {
             public function handle(User $user, string $message, ?string $conversationId = null, array $attachments = []): array
             {
-                throw new UsageLimitExceededException(
-                    limitType: 'rolling',
-                    tier: SubscriptionTier::Free,
-                    currentCredits: 119,
-                    limitCredits: 100,
-                    resetsAt: now()->addHours(18)->addMinutes(45),
-                );
+                throw new UsageLimitExceededException(new AiAllowance(SubscriptionTier::Free, AiAllowanceReset::Monthly, 0.5, 0.5, CarbonImmutable::now()->addWeek()));
             }
 
             public function resume(User $user, string $conversationId, Decisions $decisions): array
@@ -519,8 +516,7 @@ describe('chat message handling', function (): void {
 
         sendWebhook($this, 'What should I eat?');
 
-        Telegraph::assertSent('daily AI credits', false);
-        Telegraph::assertSent('Free plan', false);
+        Telegraph::assertSent("This month's free AI is used up", false);
         Telegraph::assertSent(StaticUrl::checkoutUrl(), false);
     });
 });

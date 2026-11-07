@@ -47,10 +47,7 @@ it('requires a food name', function (): void {
 });
 
 it('returns 402 without calling the AI when the credit budget is used up', function (): void {
-    config()->set('plate.tier_limits.free', [
-        'rolling' => ['limit' => 0.0, 'period_hours' => 24],
-        'weekly' => ['limit' => 0.0, 'period_days' => 7],
-    ]);
+    config()->set('plate.ai_allowance.free', ['usd' => 0.0, 'resets' => 'monthly']);
     FoodItemEstimatorAgent::fake(function (): void {
         throw new Exception('The estimator must not run when the credit budget is used up');
     });

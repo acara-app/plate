@@ -20,7 +20,7 @@ function subscribeToPlan(User $user, string $price, int $daysAgo, bool $canceled
     ]);
 }
 
-it('reports paid subscribers on their plan limits with daily and weekly usage and new subscriptions', function (): void {
+it('reports paid subscribers with their AI allowance usage, photo scans and new subscriptions', function (): void {
     enableBilling();
     SubscriptionProduct::factory()->create(['name' => 'Starter', 'price' => 2.99, 'stripe_price_id' => 'price_starter']);
     SubscriptionProduct::query()->where('name', 'Snap Pro')->update(['stripe_price_id' => 'price_snap_pro']);
@@ -39,10 +39,10 @@ it('reports paid subscribers on their plan limits with daily and weekly usage an
 
     $this->artisan('billing:usage-report')
         ->expectsTable(
-            ['User', 'Plan', 'Since', 'Daily credits (24h)', 'Weekly credits', 'Scans today', 'Scans 7d'],
+            ['User', 'Plan', 'Since', 'AI allowance used', 'Scans today', 'Scans 7d'],
             [
-                [$starter->id, 'Starter', now()->subDays(2)->toDateString(), '120 / 500', '140 / 1500', 2, 3],
-                [$snapPro->id, 'Snap Pro', now()->subDays(10)->toDateString(), '0 / 1500', '0 / 6000', 0, 0],
+                [$starter->id, 'Starter', now()->subDays(2)->toDateString(), '$0.12 / $0.50 (24%)', 2, 3],
+                [$snapPro->id, 'Snap Pro', now()->subDays(10)->toDateString(), '$0.00 / $5.00 (0%)', 0, 0],
             ],
         )
         ->expectsTable(

@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Actions\Billing\RenderSnapBurstLimit;
 use App\Http\Middleware\EnsureEmailIsVerifiedOrSubscribed;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -13,7 +12,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -70,8 +68,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
             return $request->expectsJson();
         });
-
-        $exceptions->render(fn (ThrottleRequestsException $e, Request $request) => resolve(RenderSnapBurstLimit::class)->handle($e, $request));
 
         $exceptions->report(function (RequestException $e): void {
             Log::error($e->getMessage(), [

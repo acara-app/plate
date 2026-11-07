@@ -4,28 +4,18 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\SnapToTrack;
 
-use App\Actions\Billing\BuildSnapBurstLimit;
-use App\Actions\Billing\EnforceAiUsageLimit;
-use App\Actions\Billing\ResolveSnapBurstCap;
-use App\Ai\Agents\FoodPhotoAnalyzerAgent;
-use App\Contracts\Ai\ResolvesAgentModel;
+use App\Actions\Billing\ResolveAiAllowance;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\Billing\PhotoAnalysisContext;
-use App\Exceptions\Billing\UsageLimitExceededException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
 final readonly class ShowSnapToTrackController
 {
-    public function __invoke(
-        Request $request,
-        EnforceAiUsageLimit $enforceAiUsageLimit,
-        ResolveSnapBurstCap $resolveSnapBurstCap,
-        BuildSnapBurstLimit $buildSnapBurstLimit,
-    ): Response {
+    public function __invoke(Request $request, ResolveAiAllowance $resolveAiAllowance): Response
+    {
         $authPath = session()->pull('snap_to_track.auth_path');
 
         if (is_string($authPath)) {
@@ -36,26 +26,14 @@ final readonly class ShowSnapToTrackController
         }
 
         $allowance = resolve(ManagesPhotoAnalyses::class)->entitlement($request->user(), PhotoAnalysisContext::guestId($request));
-        $request->session()->forget('snap_to_track_credit_limit');
-        $creditLimit = null;
-        if (! $allowance->enabled && $request->user() !== null) {
-            try {
-                $enforceAiUsageLimit->handle($request->user(), resolve(ResolvesAgentModel::class)->resolve(FoodPhotoAnalyzerAgent::class, $request->user()));
-            } catch (UsageLimitExceededException $exception) {
-                $creditLimit = $exception->toPayload();
-            }
-        }
-
-        $burstKey = ResolveSnapBurstCap::cacheKeyFor($request->user(), $request->ip());
-        $burstLimit = RateLimiter::tooManyAttempts($burstKey, $resolveSnapBurstCap->handle($request->user()))
-            ? $buildSnapBurstLimit->handle($request, RateLimiter::availableIn($burstKey))
+        $aiAllowance = ! $allowance->enabled && $request->user() !== null
+            ? $resolveAiAllowance->handle($request->user())
             : null;
 
         return Inertia::render('snap-to-track/index', [
             'photoAllowance' => $allowance->toArray(),
             'analysisRequestId' => (string) Str::uuid(),
-            'creditLimit' => $creditLimit,
-            'burstLimit' => $burstLimit?->toArray(),
+            'aiAllowance' => $aiAllowance?->toArray(),
         ]);
     }
 }

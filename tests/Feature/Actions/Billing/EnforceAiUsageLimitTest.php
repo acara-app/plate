@@ -3,230 +3,60 @@
 declare(strict_types=1);
 
 use App\Actions\Billing\EnforceAiUsageLimit;
+use App\Actions\Billing\ResolveAiAllowance;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Enums\AiAllowanceReset;
 use App\Enums\SubscriptionTier;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Models\AiUsage;
-use App\Models\SubscriptionProduct;
 use App\Models\User;
 use App\Services\Ai\ConfiguredAgentModels;
-use Illuminate\Support\Facades\Config;
+use Carbon\CarbonImmutable;
 use Laravel\Cashier\Subscription;
 
-covers(EnforceAiUsageLimit::class);
-
-function enforceUsage(): EnforceAiUsageLimit
-{
-    return resolve(EnforceAiUsageLimit::class);
-}
+covers(EnforceAiUsageLimit::class, ResolveAiAllowance::class);
 
 beforeEach(function (): void {
-    enableBilling();
-    Config::set('plate.ai_usage_preflight', [
-        'token_budget' => ['input' => 2_000, 'output' => 1_000],
-        'fallback_estimate' => 0.01,
-    ]);
-
-    SubscriptionProduct::factory()->create([
-        'name' => 'Basic',
-        'stripe_price_id' => 'price_basic_monthly',
-        'yearly_stripe_price_id' => 'price_basic_yearly',
-    ]);
-
-    SubscriptionProduct::factory()->create([
-        'name' => 'Plus',
-        'stripe_price_id' => 'price_plus_monthly',
-        'yearly_stripe_price_id' => 'price_plus_yearly',
-    ]);
+    sellPhotoPlans();
 });
 
-it('allows users who are well under their tier limits', function (): void {
+it("stops a free account once this month's free AI is used up", function (): void {
     $user = User::factory()->create();
+    AiUsage::factory()->create(['user_id' => $user->id, 'cost' => 0.50]);
 
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 0.005,
-    ]);
-
-    enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
-
-    expect(true)->toBeTrue();
+    expect(function () use ($user): void {
+        resolve(EnforceAiUsageLimit::class)->handle($user);
+    })->toThrow(UsageLimitExceededException::class);
 });
 
-it('throws when the rolling window cost plus estimate would exceed the cap', function (): void {
+it('gives a Starter member a daily allowance that resets at midnight', function (): void {
+    $this->travelTo(CarbonImmutable::parse('2026-11-07 15:00:00', 'UTC'));
     $user = User::factory()->create();
+    Subscription::factory()->for($user)->active()->withPrice('price_starter')->create();
+    AiUsage::factory()->create(['user_id' => $user->id, 'cost' => 0.50, 'created_at' => now()->subDay()]);
 
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 0.396,
-    ]);
+    $allowance = resolve(ResolveAiAllowance::class)->handle($user);
 
-    enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
-})
-    ->throws(UsageLimitExceededException::class)
-    ->expectExceptionMessageMatches('/rolling/');
+    expect($allowance?->tier)->toBe(SubscriptionTier::Starter)
+        ->and($allowance?->resets)->toBe(AiAllowanceReset::Daily)
+        ->and($allowance?->percentage)->toBe(0)
+        ->and($allowance?->resetsAt->toIso8601String())->toBe('2026-11-08T00:00:00+00:00');
 
-it('throws when the weekly window cost plus estimate would exceed the cap', function (): void {
-    $user = User::factory()->create();
+    resolve(EnforceAiUsageLimit::class)->handle($user, resolve(ConfiguredAgentModels::class)->forAgent(FoodPhotoAnalyzerAgent::class));
 
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 1.41,
-        'created_at' => now()->subDays(2),
-    ]);
+    AiUsage::factory()->create(['user_id' => $user->id, 'cost' => 0.50]);
 
-    expect(fn (): mixed => enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini')))
-        ->toThrow(UsageLimitExceededException::class);
+    expect(function () use ($user): void {
+        resolve(EnforceAiUsageLimit::class)->handle($user);
+    })->toThrow(UsageLimitExceededException::class);
 });
 
-it('throws at the 99% mark when the next call would push the user past 100', function (): void {
-    $user = User::factory()->create();
-
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 0.396,
-    ]);
-
-    try {
-        enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
-        expect(false)->toBeTrue('expected UsageLimitExceededException to be thrown');
-    } catch (UsageLimitExceededException $usageLimitExceededException) {
-        expect($usageLimitExceededException->limitType)->toBe('rolling')
-            ->and($usageLimitExceededException->tier)->toBe(SubscriptionTier::Free)
-            ->and($usageLimitExceededException->limitCredits)->toBe(400)
-            ->and($usageLimitExceededException->currentCredits)->toBe(396);
-    }
-});
-
-it('does not throw when billing is off, even for users far over their cap', function (): void {
+it('never limits a self-hosted install without billing', function (): void {
     disableBilling();
-
     $user = User::factory()->create();
+    AiUsage::factory()->create(['user_id' => $user->id, 'cost' => 100]);
 
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 5.0,
-    ]);
+    resolve(EnforceAiUsageLimit::class)->handle($user);
 
-    enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
-
-    expect(true)->toBeTrue();
-});
-
-it('does not write an AiUsage row when it rejects a request', function (): void {
-    $user = User::factory()->create();
-
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 0.396,
-    ]);
-
-    $countBefore = AiUsage::query()->count();
-
-    try {
-        enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
-    } catch (UsageLimitExceededException) {
-        //
-    }
-
-    expect(AiUsage::query()->count())->toBe($countBefore);
-});
-
-it('uses Plus-tier limits for an active Plus subscriber', function (): void {
-    $user = User::factory()->create();
-
-    Subscription::factory()
-        ->for($user)
-        ->active()
-        ->withPrice('price_plus_monthly')
-        ->create();
-
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 0.5,
-    ]);
-
-    enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
-
-    expect(true)->toBeTrue();
-});
-
-it('uses the configured fallback estimate when no model is provided', function (): void {
-    $user = User::factory()->create();
-
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 0.396,
-    ]);
-
-    expect(fn (): mixed => enforceUsage()->handle($user))
-        ->toThrow(UsageLimitExceededException::class);
-});
-
-it('exposes the resets_at timestamp on the exception for the breached window', function (): void {
-    $user = User::factory()->create();
-
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 0.396,
-    ]);
-
-    try {
-        enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
-        expect(false)->toBeTrue();
-    } catch (UsageLimitExceededException $usageLimitExceededException) {
-        expect(now()->diffInHours($usageLimitExceededException->resetsAt, true))->toBeGreaterThanOrEqual(23);
-    }
-});
-
-it('reports the rolling resets_at as the oldest in-window usage plus period_hours', function (): void {
-    $user = User::factory()->create();
-
-    $oldestAt = now()->subHours(6);
-
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 0.396,
-        'created_at' => $oldestAt,
-    ]);
-
-    try {
-        enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
-        expect(false)->toBeTrue('expected UsageLimitExceededException to be thrown');
-    } catch (UsageLimitExceededException $usageLimitExceededException) {
-        expect($usageLimitExceededException->limitType)->toBe('rolling');
-
-        $expectedResetsAt = $oldestAt->copy()->addHours(24);
-        expect($usageLimitExceededException->resetsAt->timestamp)
-            ->toBeGreaterThan(now()->addHours(17)->timestamp)
-            ->toBeLessThan(now()->addHours(19)->timestamp)
-            ->and(abs($usageLimitExceededException->resetsAt->timestamp - $expectedResetsAt->timestamp))->toBeLessThan(5);
-    }
-});
-
-it('falls back to now+period_hours for the rolling reset when no in-window usage exists', function (): void {
-    $user = User::factory()->create();
-
-    Config::set('plate.tier_limits.free.rolling.limit', 0.001);
-
-    try {
-        enforceUsage()->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini'));
-        expect(false)->toBeTrue('expected UsageLimitExceededException to be thrown');
-    } catch (UsageLimitExceededException $usageLimitExceededException) {
-        expect($usageLimitExceededException->limitType)->toBe('rolling')
-            ->and(now()->diffInHours($usageLimitExceededException->resetsAt, true))->toBeGreaterThanOrEqual(23);
-    }
-});
-
-it('keeps credit limits on when a misconfigured paid photo model pauses photo plans', function (): void {
-    SubscriptionProduct::factory()->create([
-        'name' => 'Starter', 'price' => 2.99, 'stripe_price_id' => 'price_starter',
-        'stripe_lookup_key' => 'acara-plate-starter-monthly-v1', 'purchasable' => true,
-    ]);
-    config(['ai.agent_profiles.'.FoodPhotoAnalyzerAgent::class.'.paid' => 'unregistered-model']);
-    $user = User::factory()->create();
-    AiUsage::factory()->for($user)->create(['cost' => 5.0]);
-
-    expect(fn () => resolve(EnforceAiUsageLimit::class)->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini')))
-        ->toThrow(UsageLimitExceededException::class);
+    expect(resolve(ResolveAiAllowance::class)->handle($user))->toBeNull();
 });

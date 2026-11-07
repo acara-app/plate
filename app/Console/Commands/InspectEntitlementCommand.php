@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Actions\GetAiUsageForBillingAction;
+use App\Actions\Billing\ResolveAiAllowance;
 use App\Contracts\Billing\ResolvesUserTier;
+use App\Data\Billing\AiAllowance;
 use App\Models\User;
 use App\Services\Billing\PhotoPlanCatalog;
 use App\Services\Billing\StripeBilling;
@@ -28,7 +29,7 @@ final class InspectEntitlementCommand extends Command
         ResolvesUserTier $resolver,
         StripeBilling $stripeBilling,
         PhotoPlanCatalog $photoPlans,
-        GetAiUsageForBillingAction $usage,
+        ResolveAiAllowance $allowances,
     ): int {
         $identifier = (string) $this->argument('user');
         $user = $this->findUser($identifier);
@@ -40,7 +41,7 @@ final class InspectEntitlementCommand extends Command
         }
 
         $entitlement = $resolver->resolve($user);
-        $usageSnapshot = $usage->handle($user);
+        $allowance = $allowances->handle($user);
         $subscriptionLine = $this->describeSubscription($user);
 
         if ($this->option('json')) {
@@ -61,10 +62,11 @@ final class InspectEntitlementCommand extends Command
                         : null,
                 ],
                 'subscription' => $subscriptionLine,
-                'usage' => [
-                    'rolling' => $usageSnapshot['rolling'],
-                    'weekly' => $usageSnapshot['weekly'],
-                ],
+                'ai_allowance' => $allowance instanceof AiAllowance ? [
+                    'used_usd' => $allowance->used,
+                    'limit_usd' => $allowance->limit,
+                    ...$allowance->toArray(),
+                ] : null,
             ], JSON_PRETTY_PRINT));
 
             return self::SUCCESS;
@@ -97,13 +99,17 @@ final class InspectEntitlementCommand extends Command
         $this->table(['Field', 'Value'], $subscriptionLine);
 
         $this->newLine();
-        $this->line('Current usage');
+        $this->line('AI allowance');
         $this->table(
-            ['Window', 'Used', 'Limit', '% of limit', 'Resets in', 'Over limit'],
-            [
-                ['rolling', $usageSnapshot['rolling']['current'], $usageSnapshot['rolling']['limit'], $usageSnapshot['rolling']['percentage'].'%', $usageSnapshot['rolling']['resets_in'], $usageSnapshot['rolling']['over_limit'] ? 'yes' : 'no'],
-                ['weekly', $usageSnapshot['weekly']['current'], $usageSnapshot['weekly']['limit'], $usageSnapshot['weekly']['percentage'].'%', $usageSnapshot['weekly']['resets_in'], $usageSnapshot['weekly']['over_limit'] ? 'yes' : 'no'],
-            ],
+            ['Resets', 'Used', 'Limit', '% used', 'Resets at', 'Used up'],
+            $allowance instanceof AiAllowance ? [[
+                $allowance->resets->value,
+                sprintf('$%.4f', $allowance->used),
+                sprintf('$%.2f', $allowance->limit),
+                $allowance->percentage.'%',
+                $allowance->resetsAt->toIso8601String(),
+                $allowance->exhausted ? 'yes' : 'no',
+            ]] : [['unrestricted', '—', '—', '—', '—', 'no']],
         );
 
         return self::SUCCESS;

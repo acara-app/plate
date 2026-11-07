@@ -14,11 +14,10 @@ final class SubscriptionProductSeeder extends Seeder
         $products = [
             [
                 'name' => 'Free',
-                'description' => 'Use every open Acara Cloud feature with a limited included AI credit budget.',
+                'description' => 'Use every open Acara Cloud feature with a small included AI allowance.',
                 'features' => [
                     'All open Acara Cloud features',
-                    '1,400 weekly AI credits',
-                    '400 rolling daily AI credits',
+                    'AI chat and meal plans included',
                     'No credit card required',
                 ],
                 'price' => 0.00,

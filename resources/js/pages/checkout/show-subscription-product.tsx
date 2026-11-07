@@ -4,9 +4,6 @@ import {
 } from '@/components/photo-allowance';
 import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackController';
 import { PaymentConfirmation } from '@/components/billing/payment-confirmation';
-import PhotoPlanLimitsDetails, {
-    type PhotoPlanLimits,
-} from '@/components/billing/photo-plan-limits';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { support, login, snapToTrack } from '@/routes';
@@ -14,7 +11,6 @@ import billing from '@/routes/billing';
 import checkout from '@/routes/checkout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { PhotoPlanBand } from '@/components/billing/photo-plan-band';
 import clsx from 'clsx';
 import { CreditCardIcon, ReceiptIcon, TriangleIcon } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -35,7 +31,6 @@ interface BillingProduct {
     yearly_savings: number;
     yearly_savings_percentage: number;
     coming_soon?: boolean;
-    photo_limits?: PhotoPlanLimits | null;
 }
 
 interface CashierSubscription {
@@ -72,7 +67,6 @@ interface Props {
     selectedInterval: 'monthly' | 'yearly';
     photoAllowance?: PhotoAllowance;
     products: BillingProduct[];
-    photoPlan: BillingProduct | null;
     currentSubscription: CashierSubscription | null;
     billingPortalUrl: string | null;
     hasIncompletePayment: boolean;
@@ -88,7 +82,6 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
 
 export default function CashierSubscription({
     products,
-    photoPlan,
     isGuest,
     paymentPending,
     checkoutCancelled,
@@ -114,7 +107,7 @@ export default function CashierSubscription({
     const selectedPlan =
         isGuest || paymentPending || planActive || currentSubscription
             ? undefined
-            : [...products, ...(photoPlan ? [photoPlan] : [])].find(
+            : products.find(
                   (product) =>
                       product.id === selectedProductId && product.price > 0,
               );
@@ -240,9 +233,6 @@ export default function CashierSubscription({
                                     },
                                 )}
                             </p>
-                            <PhotoPlanLimitsDetails
-                                limits={selectedPlan.photo_limits}
-                            />
                             <Button
                                 onClick={() =>
                                     handleSubscribe(
@@ -430,20 +420,6 @@ export default function CashierSubscription({
                         allowance={photoAllowance}
                         showUpgrade={false}
                     />
-                    {photoPlan && (
-                        <PhotoPlanBand
-                            plan={photoPlan}
-                            isGuest={isGuest}
-                            isSubscribing={isSubscribing}
-                            isCurrent={
-                                currentSubscription?.product_name ===
-                                photoPlan.name
-                            }
-                            onSubscribe={() =>
-                                handleSubscribe(photoPlan.id, 'monthly')
-                            }
-                        />
-                    )}
 
                     {/* Available Plans */}
                     <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
@@ -620,11 +596,6 @@ export default function CashierSubscription({
                                                         ),
                                                     )}
                                                 </ul>
-                                                <PhotoPlanLimitsDetails
-                                                    limits={
-                                                        product.photo_limits
-                                                    }
-                                                />
                                             </div>
 
                                             <div className="mt-auto">

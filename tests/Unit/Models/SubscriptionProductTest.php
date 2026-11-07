@@ -32,7 +32,6 @@ it('to array', function (): void {
             'formatted_yearly_price',
             'yearly_savings',
             'yearly_savings_percentage',
-            'photo_limits',
         ]);
 });
 
